@@ -1,0 +1,93 @@
+{
+  "contract": "maya.development.release-qualification-checkpoint/1",
+  "candidateSha": "7879f811b2c04d8fee7439e862cbd74b59c4cb3d",
+  "previousCheckpoint": "48773ca4028445e0391e7a1ac7fec38c16799a1a",
+  "runtimeSourceSha": "be7a4a5f08fe34369c11d548741724bae13a2618",
+  "status": "INCOMPLETE",
+  "certificateStatus": "NOT_ISSUED",
+  "governance": "single-operator",
+  "independentHumanReview": false,
+  "reviewerId": null,
+  "scheduleEditor": "NOT_USER_REACHABLE",
+  "schemaChanged": false,
+  "migrationBytesChanged": false,
+  "runtimeChanged": false,
+  "tests": {
+    "ar1Offline": {
+      "passed": 29,
+      "failed": 0
+    },
+    "ar1HttpAndProfileIsolation": {
+      "passed": 23,
+      "failed": 0,
+      "alsoRepeatedInFullHttp": true
+    },
+    "ar1TwoBinary": {
+      "passed": 1,
+      "failed": 0
+    },
+    "diagnosticBoundaryFocused": {
+      "passed": 59,
+      "failed": 0,
+      "skipped": 86
+    },
+    "fullHttp": {
+      "passedSuites": 54,
+      "failedSuites": 1,
+      "passedTests": 538,
+      "failedTests": 1,
+      "failure": "HAR-5: historical audit/inventory pin V1.3 b84b3e... differs from V1.4 contract 9bd33e..."
+    },
+    "fullBin": {
+      "cases": 21,
+      "failed": 0
+    },
+    "typecheckWidgetsLive": "PASS",
+    "changedFileLint": "PASS"
+  },
+  "mutation": {
+    "batteries": 47,
+    "jobs": 68,
+    "declarations": 545,
+    "dryRun": "FAIL_STALE_ANCHOR",
+    "firstFailure": "gate13.json#M13-2b: effect-router.service.ts COMMIT block anchor no longer matches schedule branch",
+    "fullCorpusExecuted": false
+  },
+  "fk": {
+    "catalog": "all three DELETE NO ACTION / UPDATE NO ACTION, condeferrable=false, condeferred=false, convalidated=true",
+    "counterexample": "18 TEMP-table observations across widths 1/2/3; both deny orphan deletion and permit child-first delete; only NO ACTION permits same-statement parent delete/reinsert with same key",
+    "persistentSchemaWrites": 0,
+    "decision": "PENDING: preserve NO ACTION and reconcile schema, or implement existing Prisma RESTRICT through one new forward migration; no applied migration edit"
+  },
+  "blockers": [
+    "Exact FK deletion-semantics owner decision",
+    "Fresh V1.4 audit with current evidence, without inherited green claims",
+    "Repair obsolete mutation anchors and execute full unfiltered current corpus with green controls before certification"
+  ],
+  "production": {
+    "actions": 0,
+    "realYclientsCalls": 0,
+    "realModelCalls": 0,
+    "realUnknownAttemptTouched": false,
+    "deploymentAuthorizedByThisCheckpoint": false
+  },
+  "cleanup": {
+    "ownedPgStopped": true,
+    "ownedHttpRunnersExited": true
+  },
+  "evidenceVerifier": {
+    "defaultHistoricalMapViolations": 9,
+    "approvedScopeMapViolations": 0,
+    "manifestLines": 35,
+    "claims": 33,
+    "freshClauseIds": 163,
+    "capturedMints": {
+      "HTTP": 274,
+      "BIN": 42
+    },
+    "recordsBeforeTeardown": 590,
+    "clausesPromotedByThisCheckpoint": 0,
+    "tool": "scripts/widgets-evidence-verify.mjs"
+  },
+  "fullCorpusReleaseCollectorPassed": false
+}

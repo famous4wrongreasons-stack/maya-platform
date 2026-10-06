@@ -1,0 +1,20 @@
+        current_database        | current_user | current_setting  | inet_server_port 
+--------------------------------+--------------+------------------+------------------
+ maya_widget_gate_proof_unified | maya_gate    | 16.14 (Homebrew) |            57463
+(1 row)
+
+                       conname                        |         child          |         parent         | confdeltype | confupdtype | condeferrable | condeferred | convalidated |                                                  definition                                                   
+------------------------------------------------------+------------------------+------------------------+-------------+-------------+---------------+-------------+--------------+---------------------------------------------------------------------------------------------------------------
+ PublicBookingAttempt_quoteId_sessionId_tenantId_fkey | "PublicBookingAttempt" | "PublicBookingQuote"   | a           | a           | f             | f           | t            | FOREIGN KEY ("quoteId", "sessionId", "tenantId") REFERENCES "PublicBookingQuote"(id, "sessionId", "tenantId")
+ PublicBookingQuote_sessionId_tenantId_fkey           | "PublicBookingQuote"   | "PublicBookingSession" | a           | a           | f             | f           | t            | FOREIGN KEY ("sessionId", "tenantId") REFERENCES "PublicBookingSession"(id, "tenantId")
+ PublicBookingSession_tenantId_fkey                   | "PublicBookingSession" | "Tenant"               | a           | a           | f             | f           | t            | FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id)
+(3 rows)
+
+                migration_name                 |                             checksum                             | applied | rolled_back 
+-----------------------------------------------+------------------------------------------------------------------+---------+-------------
+ 20261005160000_public_booking_guest           | e02cd1b34c3c1a70e2c038e77e800926776aaa5b837a78dfe646c59a52366a42 | t       | f
+ 20261005160100_public_booking_rejected_intent | 85ee849ad4bcbce80c582b8f0a3b562d4e48812c85f609e3c5a463f1bacb752a | t       | f
+ 20261005160200_public_booking_action_source   | 8c7fab5a9bef40d719d2c7bb164609bbfafb072402fbee046552f4bfa9cc6766 | t       | f
+ 20261005160300_public_booking_utc_clock       | 678d2accbbef88a17b3f766bd39aa41143fb872ae7d7d0d8d75beaa4d7edca52 | t       | f
+(4 rows)
+

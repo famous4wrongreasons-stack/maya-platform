@@ -1,0 +1,11 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-diagnostics/support/development-integration-fixture.ts
+  21:9  error  Replace `·bootHttp,·fixturesForHttp·` with `⏎··bootHttp,⏎··fixturesForHttp,⏎`  prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-diagnostics/support/service-price-browser-harness.ts
+  29:9  error  Replace `·bootFixtureContext,·type·FixtureContext·` with `⏎··bootFixtureContext,⏎··type·FixtureContext,⏎`            prettier/prettier
+  30:9  error  Replace `·bootHttp,·fixturesForHttp,·type·HttpHarness·` with `⏎··bootHttp,⏎··fixturesForHttp,⏎··type·HttpHarness,⏎`  prettier/prettier
+
+✖ 3 problems (3 errors, 0 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

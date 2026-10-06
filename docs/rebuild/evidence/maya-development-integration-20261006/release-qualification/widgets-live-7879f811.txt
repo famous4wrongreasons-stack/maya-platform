@@ -1,0 +1,327 @@
+widgets-live: proof database maya_widget_gate_proof_unified on 127.0.0.1:57463 (local)
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:44 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:44 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:45 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:45 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:46 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:46 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/principal.live-spec.ts
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:47 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:47 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+
+G8R-WORLD: slot-8-built — control answer {"outcome":"superseded","code":"handle_stale","stopped_at_gate":"9","gates_run":10}
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:47 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:47 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate8r-readback.live-spec.ts
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:48 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:48 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:48 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate6-authority.live-spec.ts
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:49 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:49 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28683  - [39m10/06/2026, 11:35:50 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate7-effect.live-spec.ts
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:53 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate8-input.live-spec.ts
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:53 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:53 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/chat-catalog-booking.live-spec.ts
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:56 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:56 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:56 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate12-data-fence.live-spec.ts
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:57 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:57 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:58 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:58 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:58 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:35:59 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate1-5.live-spec.ts
+[31m[Nest] 28776  - [39m10/06/2026, 11:36:01 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:36:03 PM [31m  ERROR[39m [38;5;3m[PhoneAuthDeliveryService] [39m[31mClient verification SMS transport failed[39m
+[31m[Nest] 28776  - [39m10/06/2026, 11:36:03 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/sb1-successor.live-spec.ts
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:04 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:04 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:28935) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/gate13-routing.live-spec.ts
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:05 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:05 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/e2-booking.live-spec.ts
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:06 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:06 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:07 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mDriverAdapterError: synthetic user turn correlation fault
+    at PgTransaction.onError [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/adapter-pg[24m/dist/index.js:678:11[90m)[39m
+    at PgTransaction.performIO [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/adapter-pg[24m/dist/index.js:673:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at PgTransaction.queryRaw [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/adapter-pg[24m/dist/index.js:604:30[90m)[39m
+    at e.interpretNode [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:186:26[90m)[39m
+    at e.interpretNode [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:213:41[90m)[39m
+    at e.interpretNode [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:272:41[90m)[39m
+    at e.run [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:94:23[90m)[39m
+    at execute [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/core/engines/client/LocalExecutor.ts:81:12[90m)[39m
+    at jt.request [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/core/engines/client/ClientEngine.ts:504:22[90m)[39m
+    at Object.singleLoader [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/RequestHandler.ts:112:26[90m)[39m {
+  cause: {
+    originalCode: [32m'P0001'[39m,
+    originalMessage: [32m'synthetic user turn correlation fault'[39m,
+    kind: [32m'postgres'[39m,
+    code: [32m'P0001'[39m,
+    severity: [32m'ERROR'[39m,
+    message: [32m'synthetic user turn correlation fault'[39m,
+    detail: [90mundefined[39m,
+    column: [90mundefined[39m,
+    hint: [90mundefined[39m
+  },
+  clientVersion: [32m'7.9.1'[39m
+}
+PASS test/widgets-live/user-turn-identity.live-spec.ts
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:08 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:08 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/h2-terminal-line-ownership.live-spec.ts
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:09 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:09 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:10 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate4-tenant.live-spec.ts
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:11 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:11 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28935  - [39m10/06/2026, 11:36:11 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/semantic-slot-captures.live-spec.ts
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:13 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:13 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:14 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mDriverAdapterError: B35_PROOF_CRASH_AFTER_INBOX_COMMIT
+    at PgTransaction.onError [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/adapter-pg[24m/dist/index.js:678:11[90m)[39m
+    at PgTransaction.performIO [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/adapter-pg[24m/dist/index.js:673:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at PgTransaction.executeRaw [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/adapter-pg[24m/dist/index.js:643:13[90m)[39m
+    at e.interpretNode [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:168:18[90m)[39m
+    at e.interpretNode [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:272:41[90m)[39m
+    at e.run [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client-engine-runtime[24m/src/interpreter/query-interpreter.ts:94:23[90m)[39m
+    at execute [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/core/engines/client/LocalExecutor.ts:81:12[90m)[39m
+    at jt.request [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/core/engines/client/ClientEngine.ts:504:22[90m)[39m
+    at Object.singleLoader [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/RequestHandler.ts:112:26[90m)[39m {
+  cause: {
+    originalCode: [32m'P0001'[39m,
+    originalMessage: [32m'B35_PROOF_CRASH_AFTER_INBOX_COMMIT'[39m,
+    kind: [32m'postgres'[39m,
+    code: [32m'P0001'[39m,
+    severity: [32m'ERROR'[39m,
+    message: [32m'B35_PROOF_CRASH_AFTER_INBOX_COMMIT'[39m,
+    detail: [90mundefined[39m,
+    column: [90mundefined[39m,
+    hint: [90mundefined[39m
+  },
+  clientVersion: [32m'7.9.1'[39m
+}
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:14 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/b35-campaign-restart.live-spec.ts
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:14 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:15 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:15 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/public-booking.live-spec.ts
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:15 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:16 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/admin-booking.live-spec.ts
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:17 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:17 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/owner-read-paths.live-spec.ts
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:19 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:19 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/e1-production-trigger.live-spec.ts
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:20 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:20 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29075  - [39m10/06/2026, 11:36:21 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic audit failure after insert
+    at AuditLogService.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/widget-release.live-spec.ts:229:15[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at prisma.$transaction.isolationLevel [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/entitlements/widget-release.service.ts:250:9[90m)[39m
+    at Proxy._transactionWithCallback [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/getPrismaClient.ts:810:18[90m)[39m
+PASS test/widgets-live/widget-release.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:25 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:25 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate11-nouns.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:26 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:26 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:27 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic audit failure after insert
+    at AuditLogService.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/widget-production.live-spec.ts:244:15[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at prisma.$transaction.isolationLevel [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/entitlements/widget-release.service.ts:250:9[90m)[39m
+    at Proxy._transactionWithCallback [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/getPrismaClient.ts:810:18[90m)[39m
+PASS test/widgets-live/widget-production.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:28 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:29 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:29 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate9-lowering.live-spec.ts
+PASS test/widgets-live/gate12-projector.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:30 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:30 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/erasure-ordering.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:31 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:31 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/f88-shape.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:31 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:31 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/mint.live-spec.ts
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:32 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29209  - [39m10/06/2026, 11:36:32 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/provider-unknown.live-spec.ts
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:34 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:34 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:35 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: L25 controlled post-audit failure
+    at SelectorObservationAuditAdapter.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/selector-lifecycle.live-spec.ts:241:17[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at [90m/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/rendering/selector-lifecycle.service.ts:145:7
+    at Proxy._transactionWithCallback [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/getPrismaClient.ts:810:18[90m)[39m
+    at WidgetsController.resolve [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/widgets.controller.ts:56:27[90m)[39m
+PASS test/widgets-live/selector-lifecycle.live-spec.ts
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/pipeline-order.live-spec.ts
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:37 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/gate10-divergence.live-spec.ts
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:37 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:37 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:29318) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/navigation-source-boundary.live-spec.ts
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:39 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:39 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/trigger-moment.live-spec.ts
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:40 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29318  - [39m10/06/2026, 11:36:40 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/availability-calendar.live-spec.ts
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:44 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:44 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/refusal-rendering.live-spec.ts
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:45 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:45 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/telegram-outcome.live-spec.ts
+PASS test/widgets-live/final-u-scope.live-spec.ts
+PASS test/widgets-live/closed-release-scope.live-spec.ts
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:45 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:45 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/i-mig3-source-capability.live-spec.ts
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:46 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:46 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/wr-release.live-spec.ts
+[33m[Nest] 29470  - [39m10/06/2026, 11:36:47 PM [33m   WARN[39m [38;5;3m[AppointmentsService] [39m[33mnew_appointment inbox failed: R06 exact canonical Appointment/Client/branch required[39m
+[33m[Nest] 29470  - [39m10/06/2026, 11:36:47 PM [33m   WARN[39m [38;5;3m[AppointmentsService] [39m[33mnew_appointment inbox failed: R06 exact canonical Appointment/Client/branch required[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:47 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:47 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/release-revocation.live-spec.ts
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:48 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29470  - [39m10/06/2026, 11:36:48 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/user-turn-canonical.live-spec.ts
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:49 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:49 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/personal-source.live-spec.ts
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:29542) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/navigation-source.live-spec.ts
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/http-listener.live-spec.ts
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29542  - [39m10/06/2026, 11:36:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/schedule-chat.live-spec.ts (19.534 s)
+[31m[Nest] 29542  - [39m10/06/2026, 11:37:11 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29542  - [39m10/06/2026, 11:37:11 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29542  - [39m10/06/2026, 11:37:12 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic audit failure after insert
+    at AuditLogService.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/widget-single-operator.live-spec.ts:264:15[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at prisma.$transaction.isolationLevel [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/entitlements/widget-release.service.ts:250:9[90m)[39m
+    at Proxy._transactionWithCallback [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/getPrismaClient.ts:810:18[90m)[39m
+PASS test/widgets-live/widget-single-operator.live-spec.ts (5.307 s)
+(node:29542) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+PASS test/widgets-live/service-price.live-spec.ts (5.757 s)
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:23 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:23 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:29883) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/profile-isolation.live-spec.ts
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:27 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:27 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:30 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:30 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/harness.live-spec.ts
+  ● widgets-live harness › gate audit check › HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "last": StringMatching /^GATE AUDIT CHECK: PASS \(schema \/2, 15 gates, 165 clause keys/,
+    -   "status": 0,
+    +   "last": "GATE AUDIT CHECK: FAIL (1 problem(s))",
+    +   "status": 1,
+      }
+
+      2266 |         status: plain.status,
+      2267 |         last: plain.stdout.trim().split('\n').pop(),
+    > 2268 |       }).toEqual({
+           |          ^
+      2269 |         status: 0,
+      2270 |         last: expect.stringMatching(
+      2271 |           /^GATE AUDIT CHECK: PASS \(schema \/2, 15 gates, 165 clause keys/,
+
+      at Object.<anonymous> (widgets-live/harness.live-spec.ts:2268:10)
+
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:31 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:31 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:32 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic source outage
+    at Object.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/c9-chat-reads.live-spec.ts:265:30[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+PASS test/widgets-live/c9-chat-reads.live-spec.ts
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:33 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:33 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/business-rules.live-spec.ts
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:35 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:35 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/development-integration.live-spec.ts
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 29883  - [39m10/06/2026, 11:37:37 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic interruption before reply
+    at Object.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/conversation-history.live-spec.ts:174:7[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+PASS test/widgets-live/conversation-history.live-spec.ts
+
+Summary of all failing tests
+FAIL widgets-live/harness.live-spec.ts
+  ● widgets-live harness › gate audit check › HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "last": StringMatching /^GATE AUDIT CHECK: PASS \(schema \/2, 15 gates, 165 clause keys/,
+    -   "status": 0,
+    +   "last": "GATE AUDIT CHECK: FAIL (1 problem(s))",
+    +   "status": 1,
+      }
+
+      2266 |         status: plain.status,
+      2267 |         last: plain.stdout.trim().split('\n').pop(),
+    > 2268 |       }).toEqual({
+           |          ^
+      2269 |         status: 0,
+      2270 |         last: expect.stringMatching(
+      2271 |           /^GATE AUDIT CHECK: PASS \(schema \/2, 15 gates, 165 clause keys/,
+
+      at Object.<anonymous> (widgets-live/harness.live-spec.ts:2268:10)
+
+
+Test Suites: 1 failed, 54 passed, 55 total
+Tests:       1 failed, 538 passed, 539 total
+Snapshots:   0 total
+Time:        114.087 s
+Ran all test suites.
+Test results written to: ../../../../../../../../tmp/maya-release-qualification-20261006/widgets-live-7879f811.json

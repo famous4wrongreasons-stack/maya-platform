@@ -1,5 +1,9 @@
 # MAYA development runtime checkpoint — 2026-10-06
 
+Последующий [локальный release qualification checkpoint](MAYA-DEVELOPMENT-RELEASE-QUALIFICATION-20261006.md)
+содержит свежий AR-1 rehearsal, проверенные HTTP/BIN claims и доказанный FK semantic blocker.
+Runtime и исходные evidence этого checkpoint сохранены.
+
 **Полезный результат:** в текущем React AChat один сохранённый диалог проходит обычный ответ → явный запрос «Проверь окна после отмен» → объяснение актуального окна с evidence и сохранённой версией C9 → отдельное подтверждение цены → корректный отказ недоступному редактору расписания. Occupancy не пишет бизнес-сущности и не отправляет сообщения. Цена меняется ровно один раз в synthetic CRM после отдельного явного подтверждения через существующий AE.
 
 Это квалифицированный development checkpoint. **C10 complete, real-model/provider acceptance и release certificate не заявлены.**

@@ -1,0 +1,2 @@
+test/widgets-diagnostics/support/development-integration-fixture.ts 50ms
+test/widgets-diagnostics/support/service-price-browser-harness.ts 23ms

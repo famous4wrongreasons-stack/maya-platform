@@ -1,0 +1,299 @@
+{
+  "contract": "maya.development.release-qualification-archive/1",
+  "candidateSha": "7879f811b2c04d8fee7439e862cbd74b59c4cb3d",
+  "rawDirectory": "/tmp/maya-release-qualification-20261006",
+  "files": [
+    {
+      "path": "ar1-binary-7879f811.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-binary-7879f811.json",
+      "bytes": 1479,
+      "sha256": "73c7158725056aca524e3599dadf5597e7df0f81066e6f1c938d6baa3c3090e8"
+    },
+    {
+      "path": "ar1-binary-7879f811.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-binary-7879f811.txt",
+      "bytes": 1368,
+      "sha256": "2b800546e88f41adeeb74dd325346918f338f214059e789c43504daa52fd4d0d"
+    },
+    {
+      "path": "ar1-binary.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-binary.json",
+      "bytes": 1479,
+      "sha256": "51452281fa2b0b3798a514ffcca07eef0f398ddad6ebf7b1eb3007d0c94b4f28"
+    },
+    {
+      "path": "ar1-binary.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-binary.txt",
+      "bytes": 1354,
+      "sha256": "a28b397abfaf45b07258af7f783056f6eaba549f4cfebf791f8f505d9776618b"
+    },
+    {
+      "path": "ar1-http.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-http.json",
+      "bytes": 14947,
+      "sha256": "5faf54e289ba0890801f78d0522a959dee3cb4527a2632c78a3574903b904ae7"
+    },
+    {
+      "path": "ar1-http.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-http.txt",
+      "bytes": 3099,
+      "sha256": "5e69541a9e52b9117e7435be3dc137883961dc42f7a052e5911118f0ac5d5737"
+    },
+    {
+      "path": "ar1-offline-7879f811.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-offline-7879f811.txt",
+      "bytes": 1926,
+      "sha256": "eab14f41fc2ab86a9ad75350bdcd9e4882f613ffc9134221e810bed8484c898f"
+    },
+    {
+      "path": "ar1-offline.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/ar1-offline.txt",
+      "bytes": 1943,
+      "sha256": "59187c9da08593a4736cb45f1a71a80a3b80c506bdd091d4d17408ecc74b905c"
+    },
+    {
+      "path": "candidate-artifacts.cjs",
+      "rawPath": "/tmp/maya-release-qualification-20261006/candidate-artifacts.cjs",
+      "bytes": 3013,
+      "sha256": "b286d1d03b2a0d7a6ed9f0385ae4ee33ede407f01e80e0c79d75f9772226cf8b"
+    },
+    {
+      "path": "candidate-artifacts.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/candidate-artifacts.json",
+      "bytes": 5282,
+      "sha256": "bd7e9bebdcf4779c612f55dfea50d443e9a9bbc4426c8e48cc7149606bd75f82"
+    },
+    {
+      "path": "candidate-coverage.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/candidate-coverage.json",
+      "bytes": 79641,
+      "sha256": "596efdf0db9c2b96c26b9361f542971048cf81ff5fb7febefca865b2471c1b05"
+    },
+    {
+      "path": "clauses-7879f811/database-before-teardown.jsonl",
+      "rawPath": "/tmp/maya-release-qualification-20261006/clauses-7879f811/database-before-teardown.jsonl",
+      "bytes": 91007,
+      "sha256": "40142baacebc6399e2b5baf977fcea679e14754edcdd7b1436ca9b661da83f12"
+    },
+    {
+      "path": "clauses-7879f811/evidence-manifest.jsonl",
+      "rawPath": "/tmp/maya-release-qualification-20261006/clauses-7879f811/evidence-manifest.jsonl",
+      "bytes": 16865,
+      "sha256": "e46d73c1be069692985e9929b66cb0e1e25df1189a0a74982cd83930e5aac6ab"
+    },
+    {
+      "path": "clauses-7879f811/mint-provenance.jsonl",
+      "rawPath": "/tmp/maya-release-qualification-20261006/clauses-7879f811/mint-provenance.jsonl",
+      "bytes": 139180,
+      "sha256": "a1fa3000e52a42346235e22c8aaf1feb445932dc14c44fbede3ed2f1b76b97f7"
+    },
+    {
+      "path": "collector-preflight-after.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/collector-preflight-after.txt",
+      "bytes": 708,
+      "sha256": "cfbee6971b1256b137f007c3fd69a5b5f646303ced175dda8c2afde5e0c793a9"
+    },
+    {
+      "path": "collector-preflight.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/collector-preflight.txt",
+      "bytes": 1865,
+      "sha256": "a9bb629a36c6ff8a08300c9798ae64b04366cccd903b1b9b697e0125ff9daed2"
+    },
+    {
+      "path": "diagnostic-boundary.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-boundary.json",
+      "bytes": 77382,
+      "sha256": "104b52f67a0440dcb0967b4f65ab0ccdec0a0b17d8fe53072390bd0b67208010"
+    },
+    {
+      "path": "diagnostic-boundary.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-boundary.txt",
+      "bytes": 3483,
+      "sha256": "6f626b16d5507bbb733e3586994b63ada9b9d0950d8f4cc0ecceec272a69b975"
+    },
+    {
+      "path": "diagnostic-fixture-format.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-fixture-format.txt",
+      "bytes": 144,
+      "sha256": "37cfcb81cc9e56be4bc02e948ee4e396b3ee3bfef7e82c2da988e97e484a1b95"
+    },
+    {
+      "path": "diagnostic-format-final.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-format-final.txt",
+      "bytes": 44,
+      "sha256": "d7f3b14f57c2c6470c7faed9d2870cdba4c639ec4f1cfeaa55b53649811b7a31"
+    },
+    {
+      "path": "diagnostic-format.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-format.txt",
+      "bytes": 92,
+      "sha256": "300ab172a181e51d1ad8778093ae22569f72210056001581b72c935621ed8e76"
+    },
+    {
+      "path": "diagnostic-lint-final.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-lint-final.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "diagnostic-lint.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-lint.txt",
+      "bytes": 913,
+      "sha256": "6cd3780c236adada66b2459706fafae4e8ce87edf4c72d025cf5dfc61575bcee"
+    },
+    {
+      "path": "diagnostic-typecheck.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/diagnostic-typecheck.txt",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019"
+    },
+    {
+      "path": "fk-catalog.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/fk-catalog.txt",
+      "bytes": 2440,
+      "sha256": "798b2022e34ed485f505b322ecdb4f4fba5c6aa0e6cfb413a2e361367cd4a083"
+    },
+    {
+      "path": "fk-semantics-attempt1.sql",
+      "rawPath": "/tmp/maya-release-qualification-20261006/fk-semantics-attempt1.sql",
+      "bytes": 2396,
+      "sha256": "85efa7bea3cedf9dcdbc98d2b3f57235733e45e246df3816bf6d6b6a0ae1b1c0"
+    },
+    {
+      "path": "fk-semantics-attempt2.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/fk-semantics-attempt2.txt",
+      "bytes": 1629,
+      "sha256": "ce0eab1dfd21523e31fe81dc0c020c5e21926804b20ed15d5283627cf84d1d54"
+    },
+    {
+      "path": "fk-semantics.sql",
+      "rawPath": "/tmp/maya-release-qualification-20261006/fk-semantics.sql",
+      "bytes": 2398,
+      "sha256": "e7acef5b5fe4b470cc07e5292765977d56d448e00058a11c7674c6de1fcb2636"
+    },
+    {
+      "path": "fk-semantics.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/fk-semantics.txt",
+      "bytes": 253,
+      "sha256": "8c2aa0394c75da85a5ff9026f3c6cd13c6934b9f095d815b1f0183ea49f044d5"
+    },
+    {
+      "path": "fk-user-triggers.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/fk-user-triggers.txt",
+      "bytes": 2743,
+      "sha256": "078912803f635c76ede457b84a299e17beaeb7638de3128007fc668c7cd1e8cd"
+    },
+    {
+      "path": "gate-audit-before.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/gate-audit-before.txt",
+      "bytes": 286,
+      "sha256": "b336d0e77fb3dbe1c10898f158fca18a4069870ed84b9ccabe13f5f1655bef35"
+    },
+    {
+      "path": "independent-review.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/independent-review.txt",
+      "bytes": 1108,
+      "sha256": "359ccd53c743850c013e0f33657cdbb973164eda277718f1c159ba52273761ae"
+    },
+    {
+      "path": "mutation-anchor-check.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/mutation-anchor-check.txt",
+      "bytes": 136,
+      "sha256": "fbe97a16dafb5909a82f7f550cab0855937c9b06a88d40ca3cabcfb025d3f60f"
+    },
+    {
+      "path": "mutation-plan.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/mutation-plan.txt",
+      "bytes": 3775,
+      "sha256": "e33aaa06729ffcc15cabf5c437b816c322fe136098ac8a383f09d45e7b841dd5"
+    },
+    {
+      "path": "pg-start.log",
+      "rawPath": "/tmp/maya-release-qualification-20261006/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "pg-stop.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/pg-stop.txt",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "preservation.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/preservation.json",
+      "bytes": 948,
+      "sha256": "8e64c0e7626af3c2b689b406445f6d8ac5b75fe7ccdf003542ba025d565870e0"
+    },
+    {
+      "path": "qualification-summary.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/qualification-summary.json",
+      "bytes": 3050,
+      "sha256": "4a355bfa01b5ed4f3baeade6787e06e48fcdaf5afad97042e959fee3255979b5"
+    },
+    {
+      "path": "strict-collector-7879f811.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/strict-collector-7879f811.txt",
+      "bytes": 1781,
+      "sha256": "bf270f198b25d3129d141ef36b5a20cd51d0d8a130a24c5b38ef054df8804e48"
+    },
+    {
+      "path": "strict-collector-approved-7879f811.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/strict-collector-approved-7879f811.txt",
+      "bytes": 781,
+      "sha256": "64d32bd1d3e51e81c3ed035292d67401722fe413ed53310d22bbfbac955f7fe6"
+    },
+    {
+      "path": "transitive-format.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/transitive-format.txt",
+      "bytes": 45,
+      "sha256": "732f97bda4669b69b7cf9d10efc178f69549558b5ad05441f339d7760dcfe75a"
+    },
+    {
+      "path": "transitive-guard.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/transitive-guard.json",
+      "bytes": 72345,
+      "sha256": "e4da36cd3027e0b8dedb9bff1e7928c5b7e319bef68784ffdb74a7f1531948ac"
+    },
+    {
+      "path": "transitive-guard.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/transitive-guard.txt",
+      "bytes": 14587,
+      "sha256": "94854d6f1804ae15c8b1a941a6f59abc5cfe13cccfa5432a478d5648816959e8"
+    },
+    {
+      "path": "transitive-lint.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/transitive-lint.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "transitive-typecheck.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/transitive-typecheck.txt",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019"
+    },
+    {
+      "path": "widgets-bin-7879f811.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/widgets-bin-7879f811.txt",
+      "bytes": 4022,
+      "sha256": "2cdd4b6071251fb8f57b934ef100da0dc771884db8bc3099a5eaad085814eb76"
+    },
+    {
+      "path": "widgets-live-7879f811.json",
+      "rawPath": "/tmp/maya-release-qualification-20261006/widgets-live-7879f811.json",
+      "bytes": 317813,
+      "sha256": "928fa8619adb04ad9f41bef2e1251e73849743731db7a800aa76a01646b826dd"
+    },
+    {
+      "path": "widgets-live-7879f811.txt",
+      "rawPath": "/tmp/maya-release-qualification-20261006/widgets-live-7879f811.txt",
+      "bytes": 58760,
+      "sha256": "a89ddd5d642a5ade862c2ff32268fb0fee9a9c2926c3cecff117c0e4555446b7"
+    }
+  ],
+  "omitted": [
+    "postgresql.log (routine owned-server runtime log; catalog, semantic proof and shutdown evidence retained)"
+  ],
+  "redactions": []
+}

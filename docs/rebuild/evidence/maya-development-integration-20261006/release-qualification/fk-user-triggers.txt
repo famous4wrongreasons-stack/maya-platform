@@ -1,0 +1,26 @@
+       relname        |             tgname             |                                                                         definition                                                                         
+----------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ PublicBookingAttempt | PublicBookingAttempt_immutable | CREATE TRIGGER "PublicBookingAttempt_immutable" BEFORE UPDATE ON public."PublicBookingAttempt" FOR EACH ROW EXECUTE FUNCTION public_booking_immutable_v1()
+ PublicBookingQuote   | PublicBookingQuote_immutable   | CREATE TRIGGER "PublicBookingQuote_immutable" BEFORE UPDATE ON public."PublicBookingQuote" FOR EACH ROW EXECUTE FUNCTION public_booking_immutable_v1()
+ PublicBookingSession | PublicBookingSession_immutable | CREATE TRIGGER "PublicBookingSession_immutable" BEFORE UPDATE ON public."PublicBookingSession" FOR EACH ROW EXECUTE FUNCTION public_booking_immutable_v1()
+(3 rows)
+
+                                          pg_get_functiondef                                           
+-------------------------------------------------------------------------------------------------------
+ CREATE OR REPLACE FUNCTION public.public_booking_immutable_v1()                                      +
+  RETURNS trigger                                                                                     +
+  LANGUAGE plpgsql                                                                                    +
+ AS $function$                                                                                        +
+ BEGIN                                                                                                +
+   IF TG_TABLE_NAME = 'PublicBookingAttempt' THEN                                                     +
+     IF (to_jsonb(OLD) - 'preDispatchFailure') IS DISTINCT FROM (to_jsonb(NEW) - 'preDispatchFailure')+
+       OR OLD."preDispatchFailure" THEN RAISE EXCEPTION 'immutable public booking attempt'; END IF;   +
+   ELSIF TG_TABLE_NAME = 'PublicBookingSession' THEN                                                  +
+     IF (to_jsonb(OLD) - 'revokedAt') IS DISTINCT FROM (to_jsonb(NEW) - 'revokedAt')                  +
+       OR OLD."revokedAt" IS NOT NULL THEN RAISE EXCEPTION 'immutable public booking session'; END IF;+
+   ELSE RAISE EXCEPTION 'immutable public booking quote'; END IF;                                     +
+   RETURN NEW;                                                                                        +
+ END $function$                                                                                       +
+ 
+(1 row)
+

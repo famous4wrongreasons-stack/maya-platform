@@ -1,0 +1,27 @@
+BEGIN
+DO
+CREATE TABLE
+DO
+ width |  action   |                     scenario                     | outcome 
+-------+-----------+--------------------------------------------------+---------
+     1 | NO ACTION | explicit child-first delete                      | ALLOWED
+     1 | RESTRICT  | explicit child-first delete                      | ALLOWED
+     1 | NO ACTION | referenced parent delete                         | 23503
+     1 | RESTRICT  | referenced parent delete                         | 23503
+     1 | NO ACTION | same-statement parent delete and key reinsertion | ALLOWED
+     1 | RESTRICT  | same-statement parent delete and key reinsertion | 23503
+     2 | NO ACTION | explicit child-first delete                      | ALLOWED
+     2 | RESTRICT  | explicit child-first delete                      | ALLOWED
+     2 | NO ACTION | referenced parent delete                         | 23503
+     2 | RESTRICT  | referenced parent delete                         | 23503
+     2 | NO ACTION | same-statement parent delete and key reinsertion | ALLOWED
+     2 | RESTRICT  | same-statement parent delete and key reinsertion | 23503
+     3 | NO ACTION | explicit child-first delete                      | ALLOWED
+     3 | RESTRICT  | explicit child-first delete                      | ALLOWED
+     3 | NO ACTION | referenced parent delete                         | 23503
+     3 | RESTRICT  | referenced parent delete                         | 23503
+     3 | NO ACTION | same-statement parent delete and key reinsertion | ALLOWED
+     3 | RESTRICT  | same-statement parent delete and key reinsertion | 23503
+(18 rows)
+
+ROLLBACK

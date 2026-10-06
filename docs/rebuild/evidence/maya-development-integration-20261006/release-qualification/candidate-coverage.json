@@ -1,0 +1,2920 @@
+{
+  "contract": "maya.development.release-qualification-coverage/1",
+  "candidateSha": "7879f811b2c04d8fee7439e862cbd74b59c4cb3d",
+  "globalDuties": 165,
+  "applicableDuties": 163,
+  "certificateStatus": "NOT_ISSUED",
+  "verifiedClaimLines": 33,
+  "clausesWithFreshClaimLines": 163,
+  "note": "Claim presence is not clause conformance. Mutation and final candidate audit duties are incomplete; no L/L-T/U promotions are made. Existing approved U scope provides basis only.",
+  "matrix": [
+    {
+      "id": "G1-a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-G1-SEAL",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "d1ed60678a9b6d8c283422f68f0b1bd8961cc1b356f427f0e1f627638143b84d"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G1-b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G1-c",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G1-d",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G1-e",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G1-f",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G1-g",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G2-a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G2-b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G2-c",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G3-a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G3-b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G3-c1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G3-c2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G3-d",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G3-e",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G3-f",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G4-a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G4-b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-G4-INDEP",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "fadf31cd88e370d472648dc0d208961643134b844b78dc69be726682091a8c5a"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G5-a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G5-b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G5-c",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G5-d",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G5-e",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-G5-FLOOR",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "ba9220bf37b4dda883b094b77d8b895c0f28d8d8c4ca4a927c80f5f806cdf85f"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G5-f",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G6-1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-6",
+      "qualification": "STOP",
+      "freshClaims": []
+    },
+    {
+      "id": "G6-7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G6-9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G6-10",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G6-11",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G6-12",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G6-13",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "AR-G6-REVOCATION",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "7cbd7407b1f6839c9208b5ea5cba114dc906af17f2da43712fd44c12b728a040"
+        },
+        {
+          "testId": "AR-G6-REVOCATION",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e7f6668355cbfa9b493b72a85765643d4dd031e624bb89a29b4b40f52213964d"
+        }
+      ]
+    },
+    {
+      "id": "G6-14",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-15",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-16",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-17",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-18",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-19",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-G6-TOOL",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "f07a6633c26e37015a64d69e5d8cc15576a462c37762bf75a81fd308505e2989"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-20",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G6-FR14",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G7-1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G7-2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G7-3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G7-4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G7-5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "8f18d2fed94774280191db7ce9aa3bf8296dcfb1ec9df5dfa841c9bcf7883f2b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "0f60abb1a3104000b40f4716c67ef2d733d8d4470efbce1dd09871773331224a"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "c0e17ec74596b3614d30464b2008dd026b1a8e072476649aa74d550f0fbbe0b4"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "a47677bc7d47b0cb265a1abe017bf61b5fa9abebf3a262c0a75c21ed7aa5d391"
+        }
+      ]
+    },
+    {
+      "id": "G7-6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G7-7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G7-8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G7-BOOK1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "8f18d2fed94774280191db7ce9aa3bf8296dcfb1ec9df5dfa841c9bcf7883f2b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "0f60abb1a3104000b40f4716c67ef2d733d8d4470efbce1dd09871773331224a"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "c0e17ec74596b3614d30464b2008dd026b1a8e072476649aa74d550f0fbbe0b4"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "a47677bc7d47b0cb265a1abe017bf61b5fa9abebf3a262c0a75c21ed7aa5d391"
+        }
+      ]
+    },
+    {
+      "id": "G7-FR6b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WF-PAIRING",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WF-PAIRING",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G7-FR6d",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "AR-FR6D-NONMONEY",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "AR-FR6D-NONMONEY",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G8-1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G8-4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G8-5t",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G8-5p",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G8-6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-SCHEMA",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-SHAPE",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-LABELS",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G8-DENY",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "R-0",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "R-1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "R-1a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WF-U-R1A",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        },
+        {
+          "testId": "WF-READBACK-DIVERGENCE",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WF-READBACK-POSITIVE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WF-READBACK-DIVERGENCE",
+          "entry": "BIN",
+          "claim": "L-T",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        },
+        {
+          "testId": "WF-READBACK-POSITIVE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "R-2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "R-3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "R-4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "R-5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "R-6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "R-7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "9.1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.1a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.1b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "TURN-CANONICAL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "9abe206a47a04afcd547612d2fe96c5b0f6124b76f717dca1c730a10683dfb16"
+        },
+        {
+          "testId": "TURN-CANONICAL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "26fb372f765a957c30edc89971b9b9555dbb98224ac8871dd00949fa92632b84"
+        }
+      ]
+    },
+    {
+      "id": "9.7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "9.10",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.10",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.11",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.R1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.R2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.R3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.R4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.R5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "10.R6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "10.R7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-R1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-R2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-R3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-R4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-R5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-I1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-I2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-I3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-I4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G11-I5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G11-I6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G11-I7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-I8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G11-I9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "8f18d2fed94774280191db7ce9aa3bf8296dcfb1ec9df5dfa841c9bcf7883f2b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "0f60abb1a3104000b40f4716c67ef2d733d8d4470efbce1dd09871773331224a"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "c0e17ec74596b3614d30464b2008dd026b1a8e072476649aa74d550f0fbbe0b4"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "a47677bc7d47b0cb265a1abe017bf61b5fa9abebf3a262c0a75c21ed7aa5d391"
+        }
+      ]
+    },
+    {
+      "id": "G11-I10",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G12-R1a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-R1b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "NS-SOURCE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "07d48d4e1ff575ae224d87523b8bc670d5b4bdcc245353cbeafb581218569ad3"
+        },
+        {
+          "testId": "NS-SOURCE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "248e1d9a329158f1e45a11927774c1a3fcbbde20d218a9d36415fa42d08f0840"
+        }
+      ]
+    },
+    {
+      "id": "G12-R2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-R3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-R4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-R5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-R6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I10",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G12-I11",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "NS-SOURCE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "07d48d4e1ff575ae224d87523b8bc670d5b4bdcc245353cbeafb581218569ad3"
+        },
+        {
+          "testId": "NS-SOURCE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "248e1d9a329158f1e45a11927774c1a3fcbbde20d218a9d36415fa42d08f0840"
+        }
+      ]
+    },
+    {
+      "id": "G13-R1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-R2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "NS-SOURCE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "07d48d4e1ff575ae224d87523b8bc670d5b4bdcc245353cbeafb581218569ad3"
+        },
+        {
+          "testId": "NS-SOURCE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "248e1d9a329158f1e45a11927774c1a3fcbbde20d218a9d36415fa42d08f0840"
+        }
+      ]
+    },
+    {
+      "id": "G13-R3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-R4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-R5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-R5b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-R6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-DRAFT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "105e7f0bc6541f6fde245da5fe348201a2a4ecbac9758e475fe87f6e09637fbf"
+        },
+        {
+          "testId": "WR-DRAFT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "179cc6414f26ef69db00aac4d8aff928f88981f368273c90f119150f36d502b3"
+        }
+      ]
+    },
+    {
+      "id": "G13-R7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G13-R8",
+      "qualification": "STOP",
+      "freshClaims": []
+    },
+    {
+      "id": "G13-R9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G13-R10",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-I1",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G13-I2",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null
+        }
+      ]
+    },
+    {
+      "id": "G13-I3",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "8f18d2fed94774280191db7ce9aa3bf8296dcfb1ec9df5dfa841c9bcf7883f2b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "0f60abb1a3104000b40f4716c67ef2d733d8d4470efbce1dd09871773331224a"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "c0e17ec74596b3614d30464b2008dd026b1a8e072476649aa74d550f0fbbe0b4"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "a47677bc7d47b0cb265a1abe017bf61b5fa9abebf3a262c0a75c21ed7aa5d391"
+        }
+      ]
+    },
+    {
+      "id": "G13-I4",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-I5",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-I6",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-I7",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-ACTION-BOUNDARY",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-ACTION-BOUNDARY",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G13-I8",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G13-I9",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "3a15de32950913a054a9017e17467ae740105f5ab59e0dd997ef008e699e0abe"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "f51165bdafb7715f8ea0adcd71fd8f19fd5c8d69796861a5ffa58f768f81dd0a"
+        }
+      ]
+    },
+    {
+      "id": "G14-a",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G14-b",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    },
+    {
+      "id": "G14-c",
+      "qualification": "UNQUALIFIED",
+      "freshClaims": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "1fabbb3d80d035b005a874d1f4f395c0ba35857f622ad8535c4b5cdbc5ba2e96"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "af5ec6ea8d58a682e4cedf44a9c3370cac01a0469855cb14ab5ae2d3fc61ea71"
+        }
+      ]
+    }
+  ]
+}

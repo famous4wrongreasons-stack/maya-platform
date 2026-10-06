@@ -1,0 +1,37 @@
+✔ compiled operator CLI validates both signatures, exact compiled bytes and bindings without granting authority (136.603833ms)
+✔ compiled operator CLI refuses missing execution signature (106.760833ms)
+✔ compiled operator CLI refuses forged certificate (107.059708ms)
+✔ compiled operator CLI refuses wrong candidate signed by owner (104.804542ms)
+✔ compiled operator CLI refuses wrong compiled build signed by owner (123.422459ms)
+✔ compiled operator CLI refuses expired authorization (100.793709ms)
+✔ compiled operator CLI refuses substituted platform operator (98.431042ms)
+✔ compiled single-operator CLI validates one execution signature and raw certificate; declares no independent review (719.821875ms)
+✔ operator preflight confirms narrow public provisioning and explicitly grants no authority/session (1.127ms)
+✔ missing NODE_ENV refuses (0.413709ms)
+✔ missing WIDGET_RELEASE_ENVIRONMENT refuses (0.096208ms)
+✔ missing WIDGET_RELEASE_CANDIDATE_SHA refuses (0.057792ms)
+✔ missing WIDGET_RELEASE_PRODUCTION_TENANTS_JSON refuses (0.182584ms)
+✔ missing WIDGET_RELEASE_PRODUCTION_TRUST_JSON refuses (0.077625ms)
+✔ staging refuses (0.450875ms)
+✔ wrong build refuses (0.096833ms)
+✔ wildcard tenant refuses (0.121167ms)
+✔ another tenant refuses (0.134958ms)
+✔ extra tenant refuses (0.095583ms)
+✔ duplicate tenant refuses (0.085125ms)
+✔ staging trust fallback refuses (0.062375ms)
+✔ same identity refuses (0.243417ms)
+✔ same key refuses (0.16825ms)
+✔ no reviewer refuses (0.075583ms)
+✔ extra trust key refuses (0.059041ms)
+✔ caller key metadata refuses (0.090709ms)
+✔ private key material refuses (0.058458ms)
+✔ invalid public key refuses (0.144583ms)
+✔ single-operator preflight accepts one real owner key and explicitly records absent independent review (0.225875ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1589.229042

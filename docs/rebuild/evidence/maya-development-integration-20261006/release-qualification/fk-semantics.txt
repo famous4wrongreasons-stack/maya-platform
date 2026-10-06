@@ -1,0 +1,6 @@
+BEGIN
+DO
+CREATE TABLE
+psql:/tmp/maya-release-qualification-20261006/fk-semantics.sql:41: ERROR:  syntax error at end of input
+LINE 25:    IF state <> CASE action WHEN 'NO ACTION' THEN 'ALLOWED' E...
+                                                    ^

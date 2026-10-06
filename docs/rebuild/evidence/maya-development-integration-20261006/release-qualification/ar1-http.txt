@@ -1,0 +1,21 @@
+widgets-live: proof database maya_widget_gate_proof_unified on 127.0.0.1:57463 (local)
+[31m[Nest] 23830  - [39m10/06/2026, 11:27:51 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23830  - [39m10/06/2026, 11:27:52 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23830  - [39m10/06/2026, 11:27:53 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic audit failure after insert
+    at AuditLogService.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/widget-single-operator.live-spec.ts:264:15[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at prisma.$transaction.isolationLevel [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/entitlements/widget-release.service.ts:250:9[90m)[39m
+    at Proxy._transactionWithCallback [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4m@prisma/client[24m/src/runtime/getPrismaClient.ts:810:18[90m)[39m
+PASS test/widgets-live/widget-single-operator.live-spec.ts (6.435 s)
+[31m[Nest] 23830  - [39m10/06/2026, 11:27:57 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23830  - [39m10/06/2026, 11:27:57 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:23830) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/profile-isolation.live-spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        10.786 s
+Ran all test suites within paths "test/widgets-live/widget-single-operator.live-spec.ts", "test/widgets-live/profile-isolation.live-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-release-qualification-20261006/ar1-http.json

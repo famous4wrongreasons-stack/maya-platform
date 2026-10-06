@@ -1,0 +1,4 @@
+
+> maya-saas-backend@0.0.1 typecheck:widgets-live
+> tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false
+
