@@ -5,6 +5,7 @@ import { releaseHash } from '../../entitlements/widget-release.contract';
 import { PrismaService } from '../../prisma/prisma.service';
 import { INTENT_TEMPLATE_REGISTRY } from '../emission/intent-template.registry';
 import { BOOKING_INTENT_TEMPLATE_REGISTRY } from '../booking/booking-intent-template.registry';
+import { SERVICE_PRICE_INTENT_TEMPLATE_REGISTRY } from '../pricing/service-price-intent-template.registry';
 import type {
   MintReleaseFacts,
   ReleaseIntentFacts,
@@ -21,6 +22,7 @@ export class WidgetReleaseAccessAdapter implements WidgetReleaseAccessPort {
     return releaseHash({
       general: INTENT_TEMPLATE_REGISTRY,
       booking: BOOKING_INTENT_TEMPLATE_REGISTRY,
+      servicePrice: SERVICE_PRICE_INTENT_TEMPLATE_REGISTRY,
     });
   }
   bindMint(

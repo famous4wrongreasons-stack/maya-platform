@@ -264,11 +264,22 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
             turnId: committed.turnId,
             conversationId: committed.conversationId,
           };
+    const priceReply =
+      matched.effect === 'COMMIT' &&
+      matched.capabilitySpace === 'AE' &&
+      matched.capabilityKey === 'crm.service.fixed-price.update.v1'
+        ? servicePriceDecisionReply(
+            result.verdict.outcome === 'terminate' &&
+              result.verdict.route?.receipt_outcome === 'ACCEPTED'
+              ? result.verdict.route.owner_decision
+              : null,
+          )
+        : null;
     return Object.freeze({
       ...(userTurn === undefined ? {} : { userTurn }),
       reply:
         code === null
-          ? 'Готово.'
+          ? (priceReply ?? 'Готово.')
           : 'Не удалось выполнить этот вариант. Откройте карточку и проверьте её состояние.',
       action: Object.freeze({
         status: result.verdict.outcome,
@@ -407,6 +418,34 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     });
   }
 }
+
+/** A gateway acknowledgement is not a provider write receipt. Only this named owner outcome
+ * contains the already-verified YCLIENTS readback; typed chat never derives a price result. */
+const servicePriceDecisionReply = (value: unknown): string => {
+  const record = (input: unknown): Record<string, unknown> =>
+    input !== null && typeof input === 'object' && !Array.isArray(input)
+      ? (input as Record<string, unknown>)
+      : {};
+  const decision = record(value);
+  const outcome = record(decision.outcome);
+  if (decision.state === 'REJECTED' && decision.status === 'rejected')
+    return 'Предложение изменить цену отклонено.';
+  if (
+    decision.state === 'SUCCEEDED' &&
+    decision.status === 'completed' &&
+    outcome.verified === true &&
+    outcome.source === 'yclients' &&
+    outcome.currency === 'RUB' &&
+    typeof outcome.action_execution_id === 'string' &&
+    outcome.action_execution_id.length > 0 &&
+    typeof outcome.revision === 'string' &&
+    outcome.revision.length > 0 &&
+    typeof outcome.price_rubles === 'number' &&
+    Number.isFinite(outcome.price_rubles)
+  )
+    return 'Цена услуги обновлена в YCLIENTS. Результат подтверждён.';
+  return 'Результат изменения цены пока не подтверждён. Не повторяйте действие до завершения проверки.';
+};
 
 const tokenForHash = (
   envelope: unknown,

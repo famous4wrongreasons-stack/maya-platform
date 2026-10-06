@@ -11,6 +11,10 @@ import path from 'node:path';
 
 import { ActionCapabilityRegistry } from '../action-engine/action-engine.registry';
 import { C9_CAPABILITIES } from '../orchestration/c9.registry';
+import {
+  SERVICE_PRICE_CAPABILITY,
+  SERVICE_PRICE_TOOL,
+} from '../crm/yclients-service-price.contract';
 import type { CapabilityRef } from './capability-ref';
 import type { EffectClass } from './intent';
 import type { OwnerClass, WidgetKind } from './kinds';
@@ -309,6 +313,14 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
         expected = AE.filter((a) => a.approvalRequirement === 'REQUIRED').map(
           (a) => `AE:${a.capability}`,
         );
+      else if (ownerClass === 'CANONICAL_APPROVAL')
+        expected = [
+          ...AE.filter((a) => a.approvalRequirement === 'REQUIRED').map(
+            (a) => `AE:${a.capability}`,
+          ),
+          `AE:${SERVICE_PRICE_CAPABILITY}`,
+          `C9:${SERVICE_PRICE_TOOL}`,
+        ];
       else if (ownerClass === 'SETTINGS_OWNER')
         expected = Object.values(F79_OWNER_CLASS_KEYS)
           .flat()
@@ -331,6 +343,31 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
     expect(REGISTERED_KEYS.size).toBe(
       C9_KEYS.length + AE.length + Object.keys(CONTROL_REGISTRY).length,
     );
+  });
+
+  it('YC-SP1 preserves the previous approval owner set and adds only the typed AiApprovalRequest subject', () => {
+    expect(KIND_OWNER_CLASS.APPROVAL).toBe('CANONICAL_APPROVAL');
+    expect(keySet(ownerClassKeys('APPROVAL'))).toEqual(
+      [
+        ...AE.filter((a) => a.approvalRequirement === 'REQUIRED').map(
+          (a) => `AE:${a.capability}`,
+        ),
+        `AE:${SERVICE_PRICE_CAPABILITY}`,
+        `C9:${SERVICE_PRICE_TOOL}`,
+      ].sort(),
+    );
+    expect([
+      ...allowedKinds({ space: 'AE', key: SERVICE_PRICE_CAPABILITY }),
+    ]).toEqual(['APPROVAL']);
+    expect(
+      allowedKinds({ space: 'C9', key: SERVICE_PRICE_CAPABILITY }).size,
+    ).toBe(0);
+    expect(
+      isOwnerClassKey('SETTINGS_DRAFT', {
+        space: 'AE',
+        key: SERVICE_PRICE_CAPABILITY,
+      }),
+    ).toBe(false);
   });
 
   // ── TAB-6 ───────────────────────────────────────────────────────────────────────────────────────

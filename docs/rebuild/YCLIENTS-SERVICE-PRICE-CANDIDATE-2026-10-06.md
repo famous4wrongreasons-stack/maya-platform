@@ -78,7 +78,13 @@ the amount. Percentages, relative increases, ranges, deferred/conditional change
 ambiguous titles and unresolved language require clarification. A script-driven
 model proves routing, not real model quality or every Russian expression.
 
-## Current React carrier: explicit remaining gate
+## Historical backend checkpoint: carrier gate at `fd702158`
+
+The following carrier assessment and 14-test evidence describe backend checkpoint
+`fd702158874e77198e97f50863acbff0452a7125` only. The owner subsequently approved
+YC-SP1-WIDGET-1; the separate [UI candidate and fresh evidence](YCLIENTS-SERVICE-PRICE-UI-CANDIDATE-2026-10-06.md)
+supersede this gate for the bounded local React/runtime qualification. Real provider,
+browser and release qualification remain separate.
 
 **The end-to-end user-reachable vertical is not complete.** The HTTP approval
 owner works; the current React carrier intentionally drops `action.approval`
@@ -114,7 +120,7 @@ Recommended next named decision **YC-SP1-WIDGET-1**:
 This document recommends that row and qualification work; it does not silently
 approve or implement the frozen carrier registration.
 
-## Evidence and independent review
+## Historical backend checkpoint evidence and independent review
 
 The [local evidence manifest](evidence/yc-service-pricing-20261006/manifest.json)
 records typecheck, 14/14 actual HTTP/PostgreSQL tests, 298/298 focused tests over

@@ -764,9 +764,19 @@ try {
     ],
     { cwd: BE, encoding: 'utf8' },
   ).trim();
+  const expected = {
+    current: { AE: 227, POLICY: 222, TOOL: 49, C9: 58 },
+    historical: { AE: 226, POLICY: 221, TOOL: 48, C9: 57 },
+    pricing: {
+      AE: ['crm.service.fixed-price.update.v1'],
+      POLICY: ['crm.service.fixed-price.update.v1'],
+      TOOL: ['catalog.service.price.update'],
+      C9: ['catalog.service.price.update'],
+    },
+  };
   chk(
     'the three registries load at their declared cardinalities',
-    got === '226/221/48/57',
+    got === JSON.stringify(expected),
     got,
     'EXECUTED',
   );
@@ -793,7 +803,7 @@ const PENDING = [
     'needs a live envelope; P-01, built by K3',
   ],
   [
-    'WIDGET_CAPABILITY_POLICY totality over C9-CAP’s 57 rows',
+    'WIDGET_CAPABILITY_POLICY totality over C9-CAP’s 58 rows',
     'the table is `declare const` until K2 fills it; P-10',
   ],
 ];

@@ -1,8 +1,8 @@
 // K4's exit, against the LIVE registries.
 //
 //   verificationFloor is total over every key in all four spaces; SENSITIVE_DEST is total over the
-//   four spaces and fail-closed; the floor-reduction count computed FROM CODE is 2, compared
-//   against §0.17 and failing on any difference.
+//   four spaces and fail-closed; the two historical repairs and the sole V1.4 pricing
+//   admission are distinguished explicitly, with every old census preserved.
 //
 // Every number in this file is executed. The registries are built by template functions called
 // several times, so a literal count and a computed count are different questions — and the first
@@ -13,6 +13,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
+import {
+  SERVICE_PRICE_CAPABILITY,
+  SERVICE_PRICE_TOOL,
+} from '../../crm/yclients-service-price.contract';
 import { LADDER, VERIFICATION_RANK, maxLevel } from './ladder';
 import {
   CONTROL_KEYS,
@@ -21,6 +25,7 @@ import {
   census,
   resolves,
   spaceOverlap,
+  type CapabilityRefLike,
 } from './registry-binding';
 import { subjectFloorFor } from './floor';
 // F48's predicate, not `floor.ts`'s hand-written `sensitiveDest` (GATES-PLAN-V11 U6-L1, R6-1b). The
@@ -29,14 +34,40 @@ import { subjectFloorFor } from './floor';
 // and the certified derivation ever diverge. Gate 6 evaluates SENSITIVE_DEST "in its HANDOFF
 // destination branch only" (C11:1836) and evaluates THIS one; the hand-written copy has no reader
 // left once R6-1b deletes it in U6-L1's merge commit, so this suite stopped importing it first.
-import { SENSITIVE_DEST } from './verification-floor.runtime';
+import {
+  AE_FAMILY_FLOOR,
+  aeFloor,
+  SENSITIVE_DEST,
+} from './verification-floor.runtime';
+import { AE_WIDGET_COMMIT_ALLOWLIST } from './ae-commit-allowlist.runtime';
+
+const isPricingRef = (ref: CapabilityRefLike): boolean =>
+  (ref.space === 'AE' && ref.key === SERVICE_PRICE_CAPABILITY) ||
+  ((ref.space === 'C9' || ref.space === 'TOOL') &&
+    ref.key === SERVICE_PRICE_TOOL);
+
+const historicalRefs = (): readonly CapabilityRefLike[] =>
+  allRefs().filter((ref) => !isPricingRef(ref));
 
 describe('K4 — the four key spaces, bound to the live registries', () => {
-  it('counts what the registries actually contain', () => {
+  it('preserves every historical census and adds exactly the three space-qualified pricing refs', () => {
     const c = census();
-    expect(c.C9).toBe(57);
-    expect(c.TOOL).toBe(48);
-    expect(c.AE).toBe(226);
+    expect(c.C9).toBe(58);
+    expect(c.TOOL).toBe(49);
+    expect(c.AE).toBe(227);
+    for (const [space, count] of [
+      ['C9', 57],
+      ['TOOL', 48],
+      ['AE', 226],
+    ] as const)
+      expect(
+        historicalRefs().filter((ref) => ref.space === space),
+      ).toHaveLength(count);
+    expect(allRefs().filter(isPricingRef).map(capKey).sort()).toEqual([
+      'AE:crm.service.fixed-price.update.v1',
+      'C9:catalog.service.price.update',
+      'TOOL:catalog.service.price.update',
+    ]);
     expect(c.CONTROL).toBe(CONTROL_KEYS.size);
     expect(c.registryHash).toMatch(/^[0-9a-f]{64}$/);
   });
@@ -73,7 +104,8 @@ describe('K4 — the four key spaces, bound to the live registries', () => {
 describe('K4 — verificationFloor is TOTAL over all four spaces', () => {
   it('returns a floor on the ladder for every key in every space, with no default branch', () => {
     const refs = allRefs();
-    expect(refs.length).toBe(57 + 48 + 226 + CONTROL_KEYS.size);
+    expect(historicalRefs()).toHaveLength(57 + 48 + 226 + CONTROL_KEYS.size);
+    expect(refs).toHaveLength(58 + 49 + 227 + CONTROL_KEYS.size);
     const offLadder: string[] = [];
     for (const ref of refs) {
       const floor = subjectFloorFor(ref);
@@ -163,7 +195,7 @@ describe('K4 — SENSITIVE_DEST is total and fail-closed', () => {
   });
 });
 
-describe('K4 — exactly two floor reductions, and the LOCAL row is unique', () => {
+describe('K4 — historical floor repairs, the bounded V1.4 admission, and the unique LOCAL row', () => {
   it('the C9 registry has exactly ONE LOCAL row', () => {
     // FLOOR_EXEMPT waives EFFECT_FLOOR, KIND_FLOOR and targetFloor but never a subject's OWN floor,
     // and the C9 LOCAL row is the case that keeps its own. If a second LOCAL row appeared, the
@@ -174,29 +206,45 @@ describe('K4 — exactly two floor reductions, and the LOCAL row is unique', () 
   });
 
   it('the resource classes partition the registry', () => {
-    const counts = C9_CAPABILITIES.reduce<Record<string, number>>((a, c) => {
+    const beforePricing = C9_CAPABILITIES.filter(
+      (c) => c.capabilityKey !== SERVICE_PRICE_TOOL,
+    );
+    const counts = beforePricing.reduce<Record<string, number>>((a, c) => {
       a[c.resourceClass] = (a[c.resourceClass] ?? 0) + 1;
       return a;
     }, {});
     expect(counts.LOCAL + counts.SOURCE_READ + counts.SOURCE_HANDOFF).toBe(57);
+    expect(C9_CAPABILITIES).toHaveLength(58);
+    expect(
+      C9_CAPABILITIES.filter((c) => c.capabilityKey === SERVICE_PRICE_TOOL),
+    ).toEqual([
+      expect.objectContaining({
+        capabilityKey: SERVICE_PRICE_TOOL,
+        resourceClass: 'SOURCE_HANDOFF',
+        mode: 'PROPOSE_ONLY',
+      }),
+    ]);
   });
 
-  it('BUILD VETO: no third floor reduction exists in code', () => {
-    // §0.17 enumerates two and says they live there and nowhere else. The veto is computed rather
-    // than asserted: the reductions are (1) the nine non-catalogue C9-CAP keys and (2) the five
-    // FLOOR_EXEMPT intents, and any OTHER path that lowers a floor is a third.
+  it('keeps the two historical repairs and names only the approved pricing family admission', () => {
+    // §0.17 preserves (1) the nine non-catalogue keys and (2) the FLOOR_EXEMPT intents.
+    // V1.4's separately approved third change is exactly the closed pricing subtype.
     const nonCatalogue = C9_CAPABILITIES.filter(
       (c) => !c.toolOrInterface || c.toolOrInterface === '',
     );
-    const c9 = new Set(C9_CAPABILITIES.map((c) => c.capabilityKey));
-    void c9;
     // Reduction 1 is a property of the registry, not of this package: K4 may not create or remove
     // one, only count it. The assertion is that the count is stable and small, so a drift in the
     // registry surfaces here rather than in a floor that quietly dropped.
     expect(nonCatalogue.length).toBeLessThanOrEqual(9);
-    // Reduction 2 is FLOOR_EXEMPT's own clause, tested in authority.spec.ts. Two, and no more.
-    const REDUCTIONS_DECLARED_IN_0_17 = 2;
-    expect(REDUCTIONS_DECLARED_IN_0_17).toBe(2);
+    // The other historical repair is FLOOR_EXEMPT's own clause, tested independently.
+    expect(
+      Object.entries(AE_WIDGET_COMMIT_ALLOWLIST)
+        .filter(([, row]) => row.family === 'catalogue_price_configuration')
+        .map(([key]) => key),
+    ).toEqual([SERVICE_PRICE_CAPABILITY]);
+    expect(aeFloor(SERVICE_PRICE_CAPABILITY)).toBe('SESSION_VERIFIED');
+    expect(AE_FAMILY_FLOOR.money).toBe('STEP_UP_VERIFIED');
+    expect(AE_FAMILY_FLOOR.marketing_fanout).toBe('STEP_UP_VERIFIED');
   });
 
   it('the combiner never returns lower than any term, over the whole ladder', () => {

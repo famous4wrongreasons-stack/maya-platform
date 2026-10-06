@@ -1,5 +1,7 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import request from 'supertest';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
@@ -18,6 +20,11 @@ import {
   type HttpHarness,
 } from './support/http-bootstrap';
 import type { Fixtures } from './support/fixtures';
+import type { ApprovalBody } from '../../src/widget-contract/kinds';
+import type { WidgetIntent } from '../../src/widget-contract/intent';
+import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
+import { openWidgetNounHandle } from '../../src/widgets/emission/seal.service';
+import { asHandle } from '../../src/widgets/noun-resolution/noun-handles';
 
 const PARTNER = 'synthetic-service-price-partner-only';
 const SERVICE_ID = '201';
@@ -75,6 +82,73 @@ type ToolResponse = {
   result?: unknown;
 };
 const body = (response: { body: unknown }) => response.body as ToolResponse;
+type ApprovalEnvelope = {
+  widget_id: string;
+  kind: 'APPROVAL';
+  body: ApprovalBody;
+  intents: WidgetIntent[];
+  integrity: {
+    body_hash: string;
+    envelope_seal: string;
+    principal_proof_hash: string;
+    approval_echo: unknown;
+  };
+};
+type ChatApproval = {
+  reply: string;
+  action: ToolResponse;
+  user_turn?: { conversationId: string };
+  resolution?: { receipt?: { envelope?: ApprovalEnvelope } };
+};
+type WidgetOutcome = {
+  outcome: string;
+  receipt_outcome: string | null;
+  refusal_code?: string | null;
+  owner_decision: {
+    decision: 'APPROVED' | 'REJECTED';
+    status: string;
+    outcome?: unknown;
+  } | null;
+};
+
+const carrierCases: Array<{
+  name: 'confirmed' | 'rejected' | 'unknown' | 'detail';
+  now_iso: string;
+  intent_ref: string;
+  envelope: ApprovalEnvelope;
+  response: unknown;
+  resolve_response?: unknown;
+}> = [];
+
+function carrierEvidenceDirectory(): string | null {
+  const requested = process.env.WIDGETS_EVIDENCE_DIR;
+  const owned = resolve(
+    __dirname,
+    '../../../..',
+    'pricing-evidence/ui-carrier',
+  );
+  return requested && resolve(requested) === owned ? owned : null;
+}
+
+/** Optional export of untouched synthetic HTTP payloads for the existing React carrier harness. */
+function exportCarrierCase(value: (typeof carrierCases)[number]): void {
+  const owned = carrierEvidenceDirectory();
+  if (!owned) return;
+  carrierCases.push(value);
+  mkdirSync(owned, { recursive: true });
+  writeFileSync(
+    resolve(owned, 'service-price-carrier.json'),
+    JSON.stringify(
+      {
+        contract: 'maya.service-price-carrier-evidence/1',
+        synthetic: true,
+        cases: carrierCases,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
+}
 
 /**
  * Actual HTTP/auth/approval/Action Engine/PostgreSQL and YclientsCRMAdapter.
@@ -316,6 +390,534 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
   async function actions(tenantId: string) {
     return db.prisma.actionExecution.findMany({ where: { tenantId } });
   }
+
+  /** The widget proof starts at the actual chat ingress, never a test minter. */
+  async function widgetSalon(label: string) {
+    const f = await salon(label);
+    await fx.grantFeature(f.tenant, 'widgets.runtime');
+    f.state.row.title = 'Стрижка';
+    jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation((input) => {
+        const latest =
+          input.messages.filter((message) => message.role === 'user').at(-1)
+            ?.content ?? '';
+        return Promise.resolve({
+          reply: 'Подготовлю изменение цены.',
+          toolCall: {
+            name: SERVICE_PRICE_TOOL,
+            arguments: {
+              service_id: SERVICE_ID,
+              price_rubles: latest.includes('2700') ? 2700 : 2500,
+            },
+          },
+          provider: 'openai',
+          model: 'scripted-service-price-widget-proof',
+          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+        });
+      });
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    let conversationId: string | undefined;
+    const chat = async (text = 'Поставь цену услуги «Стрижка» 2500 рублей') => {
+      messages.push({ role: 'user', content: text });
+      const response = await request(http.app.getHttpServer())
+        .post('/api/ai/chat')
+        .set('Authorization', `Bearer ${f.token}`)
+        .send({
+          surface: 'web',
+          audience: 'owner',
+          requestId: randomUUID(),
+          messages,
+          ...(conversationId ? { conversationId } : {}),
+        });
+      expect(response.status).toBe(201);
+      const value = response.body as ChatApproval;
+      const envelope = value.resolution?.receipt?.envelope;
+      if (
+        value.action?.status !== 'approval_required' ||
+        envelope?.kind !== 'APPROVAL'
+      )
+        throw new Error(
+          `Synthetic chat did not mint its approval: ${JSON.stringify(response.body)}`,
+        );
+      conversationId = value.user_turn?.conversationId ?? conversationId;
+      messages.push({ role: 'assistant', content: value.reply });
+      return { envelope, approval: value.action.approval };
+    };
+    return { ...f, chat };
+  }
+  function decisionIntent(
+    envelope: ApprovalEnvelope,
+    decision: 'approve' | 'reject',
+  ) {
+    const ref =
+      decision === 'approve'
+        ? envelope.body.approve_intent
+        : envelope.body.reject_intent;
+    const intent = envelope.intents.find(
+      (candidate) => candidate.intent_ref === ref,
+    );
+    if (!intent?.intent_token)
+      throw new Error(`Synthetic APPROVAL has no ${decision} token`);
+    expect(intent).toMatchObject({
+      effect: 'COMMIT',
+      capability: { space: 'AE', key: SERVICE_PRICE_CAPABILITY },
+      input_schema: null,
+    });
+    return intent;
+  }
+  async function observeApproval(token: string, envelope: ApprovalEnvelope) {
+    const response = await http.resolveWidgets(token, {
+      thread_page: { limit: 20 },
+    });
+    expect(response.status).toBe(200);
+    // The current carrier records rendered evidence only for selectors (L25).
+    // APPROVAL is resolved without inventing a new lifecycle observation.
+    const rows = response.body as {
+      widgets: Array<{ envelope: { widget_id: string } }>;
+    };
+    expect(
+      rows.widgets.some((row) => row.envelope.widget_id === envelope.widget_id),
+    ).toBe(true);
+  }
+  async function tapApproval(
+    token: string,
+    envelope: ApprovalEnvelope,
+    decision: 'approve' | 'reject',
+    nonce = randomUUID(),
+  ) {
+    const intent = decisionIntent(envelope, decision);
+    return http.postIntent(token, {
+      contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
+      widget_id: envelope.widget_id,
+      intent_token: intent.intent_token,
+      inputs: null,
+      client_nonce: nonce,
+      profile_id: 'pwa.default',
+    });
+  }
+  async function resolvedTerminalLines(token: string) {
+    const response = await http.resolveWidgets(token, {
+      thread_page: { limit: 20 },
+    });
+    expect(response.status).toBe(200);
+    const value = response.body as {
+      widgets: Array<{
+        terminal_lines?: Array<{
+          outcome: string;
+          action_receipt_ref: string | null;
+        }>;
+      }>;
+    };
+    return value.widgets.flatMap((widget) => widget.terminal_lines ?? []);
+  }
+
+  async function carrierResolve(token: string): Promise<unknown> {
+    if (!carrierEvidenceDirectory()) return undefined;
+    const response = await http.resolveWidgets(token, {
+      thread_page: { limit: 20 },
+    });
+    expect(response.status).toBe(200);
+    return response.body;
+  }
+
+  it('YC-SP1-WIDGET: chat mints an exact standard APPROVAL and gateway approval yields one durable CRM receipt', async () => {
+    const f = await widgetSalon('Price widget exact binding');
+    const { envelope, approval } = await f.chat();
+    const stored = await db.prisma.aiApprovalRequest.findUniqueOrThrow({
+      where: { id: approval.id },
+    });
+    expect(envelope.body).toMatchObject({
+      subject: { state: 'KNOWN', value: 'Стрижка' },
+      risk_tier: { state: 'KNOWN', value: 'high_write' },
+      reversible: { state: 'KNOWN', value: false },
+      state: { value: 'PENDING' },
+      requested_by_label: { value: 'Вы' },
+      expires_at: stored.expiresAt.toISOString(),
+    });
+    expect(envelope.body.approval_ref).toEqual(expect.any(String));
+    expect(envelope.body.approval_ref).toBe(approval.id);
+    expect(envelope.integrity.approval_echo).toEqual({
+      owner: 'ai_approval_request',
+      hash: approval.payload_hash,
+    });
+    const originAudit = await db.prisma.auditLog.findMany({
+      where: {
+        tenantId: f.tenant.id,
+        userId: f.user.id,
+        action: 'ai.service_price_chat_approval_bound',
+        entityType: 'AiApprovalRequest',
+        entityId: approval.id,
+      },
+    });
+    expect(originAudit).toHaveLength(1);
+    const origin = originAudit[0].metadataJson as Record<string, unknown>;
+    expect(origin).toMatchObject({
+      contract: 'maya.service-price-chat-approval/1',
+      approvalId: approval.id,
+      payloadHash: approval.payload_hash,
+      principalProofHash: envelope.integrity.principal_proof_hash,
+    });
+    const userTurnAudit = await db.prisma.auditLog.findMany({
+      where: {
+        tenantId: f.tenant.id,
+        userId: f.user.id,
+        action: 'chat.user_turn_bound',
+        entityType: 'WidgetTimelineTurn',
+        entityId: origin.userTurnId as string,
+      },
+    });
+    expect(userTurnAudit).toHaveLength(1);
+    expect(userTurnAudit[0].metadataJson).toMatchObject({
+      contract: 'maya.user-turn-binding/1',
+      turnId: origin.userTurnId,
+      conversationId: origin.conversationId,
+      principalProofHash: envelope.integrity.principal_proof_hash,
+      intentTokenHash: null,
+    });
+    const preview = Object.fromEntries(
+      envelope.body.effect_preview.map((item) => [
+        item.label.rendered,
+        item.value,
+      ]),
+    );
+    expect(preview['Компания YCLIENTS']).toMatchObject({
+      state: 'KNOWN',
+      value: String(f.state.row.company_id),
+    });
+    expect(preview['Услуга']).toMatchObject({
+      state: 'KNOWN',
+      value: SERVICE_ID,
+    });
+    expect(preview['Текущая цена']).toMatchObject({
+      state: 'KNOWN',
+      value: 2000,
+      unit: 'RUB',
+      currency: 'RUB',
+    });
+    expect(preview['Новая цена']).toMatchObject({
+      state: 'KNOWN',
+      value: 2500,
+      unit: 'RUB',
+      currency: 'RUB',
+    });
+    expect(
+      envelope.intents.filter((intent) => intent.effect === 'COMMIT'),
+    ).toHaveLength(2);
+    const detail = envelope.intents.find(
+      (intent) => intent.intent_ref === envelope.body.detail_intent,
+    );
+    expect(detail?.effect).toBe('NAVIGATE');
+    for (const decision of ['approve', 'reject'] as const) {
+      const intent = decisionIntent(envelope, decision);
+      const tokenHash = createHash('sha256')
+        .update(intent.intent_token!)
+        .digest('hex');
+      const record = await db.prisma.widgetIntentRecord.findUniqueOrThrow({
+        where: {
+          intentTokenHash_tenantId: {
+            intentTokenHash: tokenHash,
+            tenantId: f.tenant.id,
+          },
+        },
+      });
+      expect(record).toMatchObject({
+        widgetKind: 'APPROVAL',
+        capabilitySpace: 'AE',
+        capabilityKey: SERVICE_PRICE_CAPABILITY,
+        effect: 'COMMIT',
+        approvalDecision: decision,
+        confirmationOfKind: 'approval',
+        confirmationOfRef: approval.id,
+        producedByIntentTokenHash: null,
+        singleUse: true,
+      });
+      const nouns = record.frozenNounsJson as Record<string, unknown>;
+      expect(typeof nouns.approval).toBe('string');
+      const identity = openWidgetNounHandle(asHandle(nouns.approval as string));
+      expect(identity).toMatchObject({
+        tenantId: f.tenant.id,
+        noun: 'approval',
+      });
+      expect(identity?.ownerRef).toContain(approval.id);
+      expect(identity?.ownerRef).toContain(stored.payloadHash);
+    }
+    expect(
+      await db.prisma.widgetIntentRecord.count({
+        where: {
+          tenantId: f.tenant.id,
+          effect: 'REQUEST_APPROVAL',
+        },
+      }),
+    ).toBe(0);
+    expect(f.state.writes).toHaveLength(0);
+    expect(await actions(f.tenant.id)).toHaveLength(0);
+    await observeApproval(f.token, envelope);
+    const detailNow = new Date().toISOString();
+    const detailResult = await http.postIntent(f.token, {
+      contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
+      widget_id: envelope.widget_id,
+      intent_token: detail!.intent_token,
+      inputs: null,
+      client_nonce: randomUUID(),
+      profile_id: 'pwa.default',
+    });
+    expect(detailResult.status).toBe(200);
+    if (
+      (detailResult.body as { receipt_outcome: string }).receipt_outcome !==
+      'ACCEPTED'
+    )
+      throw new Error(
+        `Synthetic detail refused: ${JSON.stringify(detailResult.body)}`,
+      );
+    expect(detailResult.body).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      next_envelope: {
+        kind: 'APPROVAL',
+        body: { approval_ref: approval.id },
+        correlation: { parent_widget_id: envelope.widget_id },
+        presentation: {
+          density: 'SHEET',
+          fullscreen_detail: { route_key: 'fs.catalogue' },
+        },
+      },
+    });
+    expect(
+      (detailResult.body as { next_envelope: ApprovalEnvelope }).next_envelope
+        .widget_id,
+    ).not.toBe(envelope.widget_id);
+    exportCarrierCase({
+      name: 'detail',
+      now_iso: detailNow,
+      intent_ref: detail!.intent_ref,
+      envelope,
+      response: detailResult.body,
+      resolve_response: await carrierResolve(f.token),
+    });
+    expect(f.state.writes).toHaveLength(0);
+    const approveNow = new Date().toISOString();
+    const accepted = await tapApproval(f.token, envelope, 'approve');
+    expect(accepted.status).toBe(200);
+    expect(accepted.body).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: {
+        decision: 'APPROVED',
+        status: 'completed',
+      },
+    });
+    const receipts = await actions(f.tenant.id);
+    expect(receipts).toEqual([
+      expect.objectContaining({
+        capability: SERVICE_PRICE_CAPABILITY,
+        state: 'SUCCEEDED',
+      }),
+    ]);
+    expect(f.state.writes).toHaveLength(1);
+    expect(f.state.readsAfterWrite).toBeGreaterThan(0);
+    expect(f.state.row.price_min).toBe(2500);
+    const audit = await db.prisma.widgetIntentReceipt.findFirstOrThrow({
+      where: {
+        tenantId: f.tenant.id,
+        widgetId: envelope.widget_id,
+        outcome: 'ACCEPTED',
+        intentTokenHash: createHash('sha256')
+          .update(decisionIntent(envelope, 'approve').intent_token!)
+          .digest('hex'),
+      },
+    });
+    expect(audit.actionReceiptRef).toBe(receipts[0].id);
+    exportCarrierCase({
+      name: 'confirmed',
+      now_iso: approveNow,
+      intent_ref: envelope.body.approve_intent!,
+      envelope,
+      response: accepted.body,
+      resolve_response: await carrierResolve(f.token),
+    });
+    await http.close();
+    http = await bootHttp();
+    fx = fixturesForHttp(db, http);
+    const replay = await tapApproval(f.token, envelope, 'approve');
+    expect(replay.status).toBe(200);
+    expect(f.state.writes).toHaveLength(1);
+    expect(await actions(f.tenant.id)).toHaveLength(1);
+  });
+
+  it('YC-SP1-WIDGET: reject closes the exact pending proposal and its approve sibling without a CRM action', async () => {
+    const f = await widgetSalon('Price widget reject');
+    const { envelope, approval } = await f.chat();
+    await observeApproval(f.token, envelope);
+    const rejectNow = new Date().toISOString();
+    const rejected = await tapApproval(f.token, envelope, 'reject');
+    expect(rejected.status).toBe(200);
+    expect(rejected.body).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: {
+        decision: 'REJECTED',
+        status: 'rejected',
+      },
+    });
+    expect(
+      await db.prisma.aiApprovalRequest.findUniqueOrThrow({
+        where: { id: approval.id },
+      }),
+    ).toMatchObject({ status: 'rejected' });
+    expect(
+      (await tapApproval(f.token, envelope, 'approve')).body,
+    ).not.toMatchObject({ receipt_outcome: 'ACCEPTED' });
+    expect(await actions(f.tenant.id)).toHaveLength(0);
+    expect(f.state.writes).toHaveLength(0);
+    exportCarrierCase({
+      name: 'rejected',
+      now_iso: rejectNow,
+      intent_ref: envelope.body.reject_intent!,
+      envelope,
+      response: rejected.body,
+      resolve_response: await carrierResolve(f.token),
+    });
+  });
+
+  it('YC-SP1-WIDGET: a natural price correction supersedes the old card before any effect', async () => {
+    const f = await widgetSalon('Price widget correction');
+    const first = await f.chat();
+    await observeApproval(f.token, first.envelope);
+    const changed = await f.chat('Нет, 2700 рублей');
+    expect(changed.envelope.widget_id).not.toBe(first.envelope.widget_id);
+    expect(
+      (await tapApproval(f.token, first.envelope, 'approve')).body,
+    ).not.toMatchObject({ receipt_outcome: 'ACCEPTED' });
+    expect(f.state.writes).toHaveLength(0);
+    expect(
+      await db.prisma.aiApprovalRequest.findUniqueOrThrow({
+        where: { id: first.approval.id },
+      }),
+    ).toMatchObject({ status: 'rejected' });
+    await observeApproval(f.token, changed.envelope);
+    expect(
+      (await tapApproval(f.token, changed.envelope, 'approve')).body,
+    ).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: { status: 'completed' },
+    });
+    expect(f.state.writes).toHaveLength(1);
+    expect(f.state.row.price_min).toBe(2700);
+  });
+
+  it.each([
+    'provider_revision',
+    'membership',
+    'foreign',
+    'payload_hash',
+    'expiry',
+  ] as const)(
+    'YC-SP1-WIDGET: rechecks %s at the gateway and cannot confirm stale or foreign authority',
+    async (change) => {
+      const f = await widgetSalon(`Price widget refused ${change}`);
+      const { envelope, approval } = await f.chat();
+      await observeApproval(f.token, envelope);
+      let token = f.token;
+      if (change === 'provider_revision')
+        f.state.row.price_min = f.state.row.price_max = 2100;
+      if (change === 'membership')
+        await db.prisma.membership.update({
+          where: {
+            userId_tenantId: { userId: f.user.id, tenantId: f.tenant.id },
+          },
+          data: { status: 'suspended' },
+        });
+      if (change === 'foreign') {
+        const other = await salon('Price widget foreign tenant');
+        await fx.grantFeature(other.tenant, 'widgets.runtime');
+        token = other.token;
+      }
+      // Explicit synthetic corruption/expiry after a genuine production mint.
+      if (change === 'payload_hash')
+        await db.prisma.aiApprovalRequest.update({
+          where: { id: approval.id },
+          data: { payloadHash: 'f'.repeat(64) },
+        });
+      if (change === 'expiry')
+        await db.prisma.aiApprovalRequest.update({
+          where: { id: approval.id },
+          data: { expiresAt: new Date(Date.now() - 1000) },
+        });
+      const refused = await tapApproval(token, envelope, 'approve');
+      const outcome = refused.body as WidgetOutcome;
+      expect(
+        refused.status >= 400 ||
+          outcome.receipt_outcome !== 'ACCEPTED' ||
+          ['failed', 'not_executed'].includes(
+            outcome.owner_decision?.status ?? '',
+          ),
+      ).toBe(true);
+      expect(f.state.writes).toHaveLength(0);
+      expect(
+        [...salons.values()].every((state) => state.writes.length === 0),
+      ).toBe(true);
+      expect(
+        (await actions(f.tenant.id)).every(
+          (action) =>
+            action.state !== 'SUCCEEDED' && action.state !== 'UNKNOWN',
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it('YC-SP1-WIDGET: UNKNOWN is not a success receipt and a repeated tap after restart never resends PATCH', async () => {
+    const f = await widgetSalon('Price widget unknown restart');
+    const { envelope } = await f.chat();
+    await observeApproval(f.token, envelope);
+    f.state.loseReply = true;
+    f.state.unavailableAfterWrite = true;
+    const unknownNow = new Date().toISOString();
+    const uncertain = await tapApproval(f.token, envelope, 'approve');
+    expect(uncertain.status).toBe(200);
+    expect(uncertain.body).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: {
+        decision: 'APPROVED',
+        status: 'unknown',
+      },
+    });
+    expect(
+      (uncertain.body as WidgetOutcome).owner_decision?.outcome,
+    ).toBeUndefined();
+    expect(await actions(f.tenant.id)).toEqual([
+      expect.objectContaining({ state: 'UNKNOWN' }),
+    ]);
+    expect(
+      (await resolvedTerminalLines(f.token)).some(
+        (line) => line.outcome === 'CONFIRMED',
+      ),
+    ).toBe(false);
+    expect(f.state.writes).toHaveLength(1);
+    exportCarrierCase({
+      name: 'unknown',
+      now_iso: unknownNow,
+      intent_ref: envelope.body.approve_intent!,
+      envelope,
+      response: uncertain.body,
+      resolve_response: await carrierResolve(f.token),
+    });
+    await http.close();
+    http = await bootHttp();
+    fx = fixturesForHttp(db, http);
+    f.state.unavailableAfterWrite = false;
+    const repeated = await tapApproval(f.token, envelope, 'approve');
+    expect(repeated.status).toBe(200);
+    expect((repeated.body as WidgetOutcome).owner_decision?.status).not.toBe(
+      'completed',
+    );
+    expect(f.state.writes).toHaveLength(1);
+    expect(await actions(f.tenant.id)).toEqual([
+      expect.objectContaining({ state: 'UNKNOWN' }),
+    ]);
+    expect(
+      (await resolvedTerminalLines(f.token)).some(
+        (line) => line.outcome === 'CONFIRMED',
+      ),
+    ).toBe(false);
+  });
 
   it('lists the owner capability, shows source-backed diff, and sends one preserved PATCH only after exact approval', async () => {
     const f = await salon('Price exact approval');

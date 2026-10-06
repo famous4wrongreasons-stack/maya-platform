@@ -44,7 +44,7 @@ import type { C9Domain } from '../../widget-contract/ambient';
 
 export { subjectCapability };
 
-// --- section 0.8 (contract line 808) ---
+// --- section 0.8 (contract line 854) ---
 // The intent shape the floor derivation reads: §3's WidgetIntent with its two capability
 // members retyped per F21.
 export type MintedIntent = Omit<
@@ -71,7 +71,7 @@ export type FloorSubject = IntentSubject & {
 // which §0.2's map gives the subject capability and the consent fence. A signature here
 // and a body there is one declaration, not two; no third statement of either exists.
 
-// --- section 0.8 (contract line 843) ---
+// --- section 0.8 (contract line 889) ---
 // INPUTS: exactly i.effect, i.capability, i.handoff_capability_ref, i.target, i.priority,
 // and kind. No other value is read. There is no `audience` term.
 export function verificationFloor(
@@ -94,7 +94,7 @@ export function verificationFloor(
   );
 }
 
-// --- section 0.8 (contract line 897) ---
+// --- section 0.8 (contract line 943) ---
 export function subjectFloor(ref: CapabilityRef | null): VerificationLevel {
   if (ref === null) return 'ANONYMOUS'; // NONE; w/i/s/detail NAVIGATE
   switch (ref.space) {
@@ -109,7 +109,7 @@ export function subjectFloor(ref: CapabilityRef | null): VerificationLevel {
   }
 }
 
-// --- section 0.8 (contract line 911) ---
+// --- section 0.8 (contract line 957) ---
 // Total over all 57 C9-CAP keys; 72 once §0.7 F36a registers its set.
 export function c9Floor(ref: CapabilityRef): VerificationLevel {
   const cap = c9Registry.tryGet(ref.key); // pure lookup over C9_CAPABILITIES
@@ -159,7 +159,7 @@ export function C9_RESOURCE_FLOOR(rc: string): VerificationLevel {
   }
 }
 
-// --- section 0.8 (contract line 965) ---
+// --- section 0.8 (contract line 1011) ---
 export function aeFloor(key: string): VerificationLevel {
   const cap = actionCapabilityRegistry.tryGet(key);
   if (cap === undefined) return 'STEP_UP_VERIFIED'; // FAIL CLOSED — unregistered
@@ -204,6 +204,7 @@ export const AE_FAMILY_FLOOR: Readonly<
   booking: 'SESSION_VERIFIED',
   settings: 'SESSION_VERIFIED',
   operational: 'SESSION_VERIFIED',
+  catalogue_price_configuration: 'SESSION_VERIFIED',
   marketing_fanout: 'STEP_UP_VERIFIED',
   money: 'STEP_UP_VERIFIED',
   consent: 'STEP_UP_VERIFIED',
@@ -211,7 +212,7 @@ export const AE_FAMILY_FLOOR: Readonly<
   tenant_authority: 'STEP_UP_VERIFIED',
 };
 
-// --- section 0.8 (contract line 1012) ---
+// --- section 0.8 (contract line 1062) ---
 export function FLOOR_EXEMPT(i: FloorSubject): boolean {
   return (
     i.priority === 0 &&
@@ -255,7 +256,7 @@ export function SENSITIVE_DEST(r: CapabilityRef | null): boolean {
   }
 }
 
-// --- section 0.8 (contract line 1182) ---
+// --- section 0.8 (contract line 1232) ---
 // on IntentRecord — mint class D, AUDIT_RETAINED
 // [MEMBER FRAGMENT] c9_domain: C9Domain | null;   // the orchestrator's own published union
 // ('ADMIN' | 'CLIENT_LIFECYCLE' | 'OCCUPANCY' |

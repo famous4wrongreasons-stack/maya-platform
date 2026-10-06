@@ -297,7 +297,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   const newId = deps.newId ?? defaultId;
   // B4 is transport plumbing only. The late-bound sink exists because the conversation owns the
   // timeline and the existing widget store consumes it; it never interprets or repairs an envelope.
-  let ingestAuthorizedEnvelope: ((resolution: ChatWidgetResolution) => void) | null = null;
+  let ingestAuthorizedEnvelope: ((resolution: ChatWidgetResolution) => 'approval_presented' | void) | null = null;
   const conversation = createConversation({
     transport: deps.transport,
     session: deps.session,
@@ -321,6 +321,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   });
   ingestAuthorizedEnvelope = (resolution) => {
     widgets.ingest(resolution.receipt.envelope);
+    if (widgets.hasPresentedApproval(resolution.receipt.envelope)) return 'approval_presented';
   };
   const disconnect = shell.connect(widgets);
   const widgetPort: WidgetPort = {

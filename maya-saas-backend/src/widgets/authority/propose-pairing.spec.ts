@@ -98,7 +98,7 @@ describe('P-25 — AE_PROPOSE_PAIRING, the runtime rows of F38', () => {
 
   // ── PAIR-1 ──────────────────────────────────────────────────────────────────────────────────────
 
-  it('PAIR-1 the rows are F38, in its order, and no more', () => {
+  it('PAIR-1 preserves the original thirteen F38 rows and appends only the traced YC-SP1 pair', () => {
     expect(norm(CONTRACT)).toContain(
       norm('**F38 — the propose↔AE mapping, traced call site by call site.**'),
     );
@@ -111,10 +111,24 @@ describe('P-25 — AE_PROPOSE_PAIRING, the runtime rows of F38', () => {
       ),
     );
     const parsed = F38();
-    expect(parsed).toHaveLength(13);
+    expect(parsed).toHaveLength(14);
     // the parse and the hand transcription agree, so neither alone is the oracle
-    expect(parsed).toEqual(TRANSCRIBED.map((p) => [...p]));
+    expect(parsed.slice(0, 13)).toEqual(TRANSCRIBED.map((p) => [...p]));
+    expect(parsed.slice(13)).toEqual([
+      ['catalog.service.price.update', 'crm.service.fixed-price.update.v1'],
+    ]);
     expect(pairs(AE_PROPOSE_PAIRING)).toEqual(parsed);
+  });
+
+  it('YC-SP1 has exactly one separately pinned propose/AE pair', () => {
+    expect(pairingForAe('crm.service.fixed-price.update.v1')).toEqual({
+      propose: { space: 'C9', key: 'catalog.service.price.update' },
+      ae: { space: 'AE', key: 'crm.service.fixed-price.update.v1' },
+    });
+    expect(aeForPropose('catalog.service.price.update')).toEqual({
+      space: 'AE',
+      key: 'crm.service.fixed-price.update.v1',
+    });
   });
 
   it('PAIR-1 every row is `C9` ⇄ `AE`, frozen, and adds no field', () => {

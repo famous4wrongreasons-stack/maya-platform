@@ -46,6 +46,9 @@ import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
 import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
 import { C9CancelAdapter } from './c9-cancel.adapter';
+import { CanonicalApprovalAdapter } from './canonical-approval.adapter';
+import { ServicePriceApprovalAdapter } from './service-price-approval.adapter';
+import { SERVICE_PRICE_APPROVAL_OWNER } from '../di-tokens';
 import { ApprovalRequestAdapter } from './approval-request.adapter';
 import { CommitBookingAdapter } from './commit-booking.adapter';
 import { DraftOwnerRegistry } from './draft-owner.registry';
@@ -109,6 +112,12 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     C9CancelAdapter,
     { provide: C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
     ApprovalRequestAdapter,
+    ServicePriceApprovalAdapter,
+    CanonicalApprovalAdapter,
+    {
+      provide: SERVICE_PRICE_APPROVAL_OWNER,
+      useExisting: ServicePriceApprovalAdapter,
+    },
     CommitBookingAdapter,
     BookingPreviewAdapter,
     BookingSelectorAdapter,
@@ -122,7 +131,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     { provide: BOOKING_SELECTOR_OWNER, useExisting: BookingSelectorAdapter },
     {
       provide: APPROVAL_REQUEST_OWNER,
-      useExisting: ApprovalRequestAdapter,
+      useExisting: CanonicalApprovalAdapter,
     },
     { provide: COMMIT_BOOKING_OWNER, useExisting: CommitBookingAdapter },
     NounResolutionOwnersProvider,
@@ -137,6 +146,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    SERVICE_PRICE_APPROVAL_OWNER,
     CHAT_REPLY_CIPHER,
     SELECTOR_OBSERVATION_AUDIT,
     PERSONAL_SCHEDULE_SOURCE,

@@ -1,0 +1,12 @@
+
+> maya-saas-backend@0.0.1 test:widgets:live
+> jest --config ./test/jest-widgets-live.json --runInBand --runTestsByPath test/widgets-live/service-price.live-spec.ts
+
+widgets-live: proof database maya_widget_gate_proof_service_price_20261006 on 127.0.0.1:56347 (local)
+(node:1453) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        7.145 s
+Ran all test suites within paths "test/widgets-live/service-price.live-spec.ts".

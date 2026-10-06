@@ -1,0 +1,102 @@
+WIDGET CONTRACT CHECKS
+
+PASS  [STRUCTURAL] WidgetKind is closed at twenty-two
+        22 members
+PASS  [STRUCTURAL] no ERROR, FAILURE or RETRY kind exists
+        none
+PASS  [STRUCTURAL] EffectClass is closed at eight
+        NONE,NAVIGATE,REFINE,CONTROL,DRAFT,REQUEST_APPROVAL,COMMIT,HANDOFF
+PASS  [STRUCTURAL] no MUTATE and no EXECUTE effect class
+        none
+PASS  [STRUCTURAL] VerificationLevel is the five-rung ladder
+        ANONYMOUS < CHANNEL_IDENTITY < BOUND_CLIENT < SESSION_VERIFIED < STEP_UP_VERIFIED
+PASS  [STRUCTURAL] DraftClass is the five-member union, without expense or loyalty_adjustment
+        settings,notification_pref,task,schedule_rule,audience
+PASS  [EXECUTED] EFFECT_FLOOR is total over the eight effect classes
+        8 rows
+PASS  [EXECUTED] KIND_FLOOR is total over the twenty-two kinds
+        22 rows
+PASS  [EXECUTED] RISK_FLOOR is total over the five risk tiers
+        5 rows
+PASS  [EXECUTED] CONSENT_CLASS_FLOOR is total over the five consent classes
+        5 rows
+PASS  [EXECUTED] TARGET_FLOOR covers the five target classes and null
+        6 rows
+PASS  [EXECUTED] CONTROL_REGISTRY is closed at three keys
+        3 rows
+PASS  [EXECUTED] RISK_FLOOR['restricted'] is STEP_UP_VERIFIED
+        every restricted tier is withheld while P-12 is absent
+PASS  [EXECUTED] EFFECT_FLOOR['CONTROL'] is ANONYMOUS, with the fence in CONTROL_FLOOR
+        the effect class is not the fence; the control key is
+PASS  [STRUCTURAL] no forbidden key in F88's walked closure (32 shapes), F88.2's six locations applied
+        0 unexempted occurrences of 28 forbidden keys
+PASS  [STRUCTURAL] F88.2's table is exactly 6 locations and every one is live
+        Cell.state · Lifecycle.state · WidgetEnvelope.tenant_id · IntentRecord.tenant_id · WidgetIntent.role · RenderReceipt.intents_withheld[].role
+PASS  [STRUCTURAL] F88.2 conformance: no exemption is expressible by key name alone
+        every row is (shape, path, depth, type); EXEMPT compares all four; no `key:` field exists to widen
+PASS  [EXECUTED] F88.2 vectors execute the refusal (27 vectors, 5 of them the required negatives)
+        FAIL  owner role on the wire
+        FAIL  staff role on the wire
+        FAIL  client role on the wire
+        FAIL  __meRole
+        FAIL  is_owner
+        FAIL  is_staff
+        FAIL  undeclared nested role
+        FAIL  role on a shape that is not WidgetIntent
+        PASS  WidgetIntent.role, declared type, depth 0
+        FAIL  WidgetIntent.role with a ninth value
+        FAIL  NEG 1  nested arbitrary role
+        FAIL  NEG 2  nested owner/staff/client role
+        FAIL  NEG 3  nested arbitrary tenant_id
+        FAIL  NEG 4  receipt role OUTSIDE intents_withheld
+        FAIL  NEG 4b receipt role, right path wrong depth
+        FAIL  NEG 4c receipt role, right path wrong type
+        PASS  IntentRecord.tenant_id, the ruled location
+        PASS  RenderReceipt withheld role, the ruled one
+        PASS  tenant_id at the envelope root
+        FAIL  tenant_id nested in the envelope
+        FAIL  TYPE 1  Cell.state, not CellState
+        FAIL  TYPE 2  Lifecycle.state, not LifecycleState
+        FAIL  TYPE 3  envelope tenant_id, not string
+        FAIL  TYPE 4  IntentRecord tenant_id, not string
+        FAIL  TYPE 5  WidgetIntent.role, seven members
+        FAIL  TYPE 6  receipt role, expanded not aliased
+        FAIL  tenant_id on a third shape
+PASS  [STRUCTURAL] the walk follows type references: every exempted shape is reachable from a root
+        32 shapes reached from 5 roots; all 6 exempted shapes are inside
+PASS  [EXECUTED] the walk is unbounded in depth: forbidden keys at depths 2-4 are found and refused
+        a.role (depth 1) · b.c.tenant_id (depth 2) · d[].e.f.is_owner (depth 3) · i[].j.permissions (depth 2) · g.h.role (depth 2) - deepest member reached: depth 3
+PASS  [EXECUTED] NEG 5  IntentRecord.tenant_id is never read into an authority decision
+        0 property reads of .tenant_id in 19 modules - the stored binding is evidence about the past, and no declared function consults it; the current tenant is re-resolved server-side
+PASS  [EXECUTED] INVARIANCE  changing a presentation role cannot change an authority result
+        0 property reads of .role in 19 modules - no function reads it at either admitted location, so none can branch on it for identical authority inputs
+PASS  [STRUCTURAL] no generic exception exists: every exemption row names a shape, a path and a depth
+        6 shape / 6 path / 6 depth fields over 6 rows; the searched regions hold no assertion, so none can satisfy itself
+PASS  [STRUCTURAL] IntentProposal is outside the walk, so its role is not admitted by exception but by scope
+        a projector input is never serialized to a client; F88 does not name it
+PASS  [STRUCTURAL] no four_eyes member on any shape
+        absent
+PASS  [STRUCTURAL] WidgetIntentSubmission has no member able to carry an endpoint
+        none
+PASS  [STRUCTURAL] WidgetIntent has no member able to carry an endpoint
+        none
+PASS  [STRUCTURAL] IntentTarget has no member able to carry an endpoint
+        none
+PASS  [STRUCTURAL] IntentRecord has no member able to carry an endpoint
+        none
+PASS  [STRUCTURAL] every identifier is declared in exactly one module
+        281 identifiers, one admitted pair
+PASS  [EXECUTED] the three registries load at their declared cardinalities
+        {"current":{"AE":227,"POLICY":222,"TOOL":49,"C9":58},"historical":{"AE":226,"POLICY":221,"TOOL":48,"C9":57},"pricing":{"AE":["crm.service.fixed-price.update.v1"],"POLICY":["crm.service.fixed-price.update.v1"],"TOOL":["catalog.service.price.update"],"C9":["catalog.service.price.update"]}}
+
+NOT CHECKED YET, and why - each a named prerequisite, not an omission:
+  PENDING  KIND_REGISTRY totality over the 22 kinds
+           the table is `declare const` until K2 populates it against K1’s canon; P-10
+  PENDING  R1 portability, per kind per profile
+           needs the renderer conformance corpus; P-19, built by K5
+  PENDING  the forbidden-key WALK at every depth of a live envelope
+           needs a live envelope; P-01, built by K3
+  PENDING  WIDGET_CAPABILITY_POLICY totality over C9-CAP’s 58 rows
+           the table is `declare const` until K2 fills it; P-10
+
+31/31 checks pass, 4 pending on a later package

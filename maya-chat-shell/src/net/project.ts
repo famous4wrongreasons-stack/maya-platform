@@ -297,6 +297,10 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
   const next = own(body, 'next_envelope');
   const receipt = own(body, 'receipt_outcome');
   const resolved = own(body, 'resolved_widget');
+  const decision = own(body, 'owner_decision');
+  const decisionOutcome = own(decision, 'outcome');
+  const serviceId = own(decisionOutcome, 'service_id');
+  const price = own(decisionOutcome, 'price_rubles');
   if (typeof outcome !== 'string' || !INTENT_OUTCOMES.has(outcome)) return null;
   if (code !== null && typeof code !== 'string') return null;
   if (next !== null && !isIngestibleEnvelope(next)) return null;
@@ -314,6 +318,20 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
     next_envelope: next as WidgetIntentProjection['next_envelope'],
     resolved_widget: (isIngestibleEnvelope(resolved) ? resolved : null) as WidgetIntentProjection['resolved_widget'],
     receipt_outcome: receipt as WidgetIntentProjection['receipt_outcome'],
+    ...(isRecord(decision) ? { owner_decision: {
+      decision: text(own(decision, 'decision')),
+      status: text(own(decision, 'status')),
+      state: text(own(decision, 'state')),
+      outcome: isRecord(decisionOutcome) ? {
+        verified: own(decisionOutcome, 'verified') === true,
+        source: text(own(decisionOutcome, 'source')),
+        currency: text(own(decisionOutcome, 'currency')),
+        service_id: typeof serviceId === 'string' ? serviceId
+          : typeof serviceId === 'number' && Number.isSafeInteger(serviceId) && serviceId > 0 ? String(serviceId) : null,
+        price_rubles: typeof price === 'number' && Number.isFinite(price) && price >= 0 ? price : null,
+        action_execution_id: filled(own(decisionOutcome, 'action_execution_id')),
+      } : null,
+    } } : {}),
   };
 };
 

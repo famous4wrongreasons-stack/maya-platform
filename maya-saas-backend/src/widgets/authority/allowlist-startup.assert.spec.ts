@@ -19,6 +19,8 @@ import {
 } from './allowlist-startup.assert';
 import { AE_PROPOSE_PAIRING } from './propose-pairing';
 import { SERVICE_PRICE_CAPABILITY } from '../../crm/yclients-service-price.contract';
+import { createHash } from 'node:crypto';
+import { isCataloguePriceConfiguration } from '../pricing/service-price-widget.contract';
 
 const capabilities = new ActionCapabilityRegistry().list();
 const policies = new Set(
@@ -79,14 +81,22 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
   });
 
   it('AL-1: preserves the historical 226 capabilities as exactly 10 rows XOR 216 gaps', () => {
-    // The sole YC-SP1 candidate has its own exact no-button assertions. Never
+    // The sole YC-SP1 addition has its own exact typed-admission assertions. Never
     // exclude a prefix or loosen the old finite counts when comparing history.
     expect(
       capabilities.filter(
         (capability) => capability.capability !== SERVICE_PRICE_CAPABILITY,
       ),
     ).toHaveLength(226);
-    expect(Object.keys(AE_WIDGET_COMMIT_ALLOWLIST)).toHaveLength(10);
+    const historicalRows = Object.fromEntries(
+      Object.entries(AE_WIDGET_COMMIT_ALLOWLIST).filter(
+        ([key]) => key !== SERVICE_PRICE_CAPABILITY,
+      ),
+    );
+    expect(Object.keys(historicalRows)).toHaveLength(10);
+    expect(
+      createHash('sha256').update(JSON.stringify(historicalRows)).digest('hex'),
+    ).toBe('34481119f34d97ba619c5df7598bd3722f04df3df8b853c15b1139decd5b3867');
     expect(
       Object.keys(AE_CAPABILITY_GAP_LEDGER).filter(
         (key) => key !== SERVICE_PRICE_CAPABILITY,
@@ -175,7 +185,12 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
     const cases: Array<
       [string, (candidate: RegisteredActionCapabilityV1) => boolean, string]
     > = [
-      ['MONEY', MONEY, 'MONEY veto'],
+      [
+        'MONEY',
+        (candidate) =>
+          MONEY(candidate) && !isCataloguePriceConfiguration(candidate),
+        'MONEY veto',
+      ],
       ['CONSENT', CONSENT, 'CONSENT/IDENTITY veto'],
       ['IDENTITY', IDENTITY, 'CONSENT/IDENTITY veto'],
       ['TENANT_AUTHORITY', TENANT_AUTHORITY, 'TENANT_AUTHORITY veto'],
@@ -271,6 +286,39 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
       family: 'settings',
     };
     expectProblem(input, 'family is not derived');
+  });
+
+  it('YC-SP1 refuses a forged or widened financial subtype at startup', () => {
+    const input = base();
+    const key = SERVICE_PRICE_CAPABILITY;
+    delete (input.gaps as Record<string, string>)[key];
+    (input.allowlist as Record<string, AeCommitRuntimeRow>)[key] = {
+      confirmation_kind: 'APPROVAL',
+      family: 'catalogue_price_configuration',
+      min_verification: 'SESSION_VERIFIED',
+      requires_ae_approval: false,
+      propose: { space: 'C9', key: 'catalog.service.price.update' },
+    };
+    for (const change of [
+      { actionClass: 'take_payment' },
+      { targetKind: 'gift_certificate' },
+      { riskFacets: ['financial', 'one_target'] },
+    ])
+      expectProblem(withCapability(input, key, change), 'MONEY veto');
+    const row = input.allowlist[key];
+    for (const change of [
+      { confirmation_kind: 'SETTINGS_DRAFT' as const },
+      { family: 'settings' as const },
+      { requires_ae_approval: true },
+      { min_verification: 'ANONYMOUS' as const },
+      { propose: { space: 'C9' as const, key: 'expenses.create' } },
+    ]) {
+      (input.allowlist as Record<string, AeCommitRuntimeRow>)[key] = {
+        ...row,
+        ...change,
+      };
+      expectProblem(input, 'catalogue price typed admission veto');
+    }
   });
 });
 import fs from 'node:fs';

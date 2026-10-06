@@ -52,6 +52,23 @@ import {
 } from '../booking/booking-intent-template.registry';
 import { presentBookingSelector } from '../booking/booking-selector.presenter';
 import type { OwnerNounIdentity } from '../noun-resolution/noun-handle.codec';
+import {
+  SERVICE_PRICE_CAPABILITY,
+  SERVICE_PRICE_TOOL,
+} from '../../crm/yclients-service-price.contract';
+import {
+  SERVICE_PRICE_APPROVAL_NOUN_OWNER,
+  servicePriceApprovalRef,
+  parseServicePriceApprovalRef,
+} from '../pricing/service-price-approval.port';
+import {
+  SERVICE_PRICE_APPROVE_TEMPLATE,
+  SERVICE_PRICE_REJECT_TEMPLATE,
+  SERVICE_PRICE_DETAIL_TEMPLATE,
+  isServicePriceTemplate,
+  resolveServicePriceTemplate,
+} from '../pricing/service-price-intent-template.registry';
+import type { ServicePriceApprovalLinkage } from './record-writer';
 
 export const K3_EMITTABLE_KINDS = [
   'METRIC',
@@ -117,6 +134,7 @@ interface SuccessorEmissionContext {
 }
 
 export type BookingConfirmationEmissionContext = BookingConfirmationLinkage;
+export type ServicePriceApprovalEmissionContext = ServicePriceApprovalLinkage;
 
 @Injectable()
 export class WidgetEmitterService {
@@ -325,6 +343,126 @@ export class WidgetEmitterService {
     return this.emitInternal(request, now, null, linkage, supersedesWidgetId);
   }
 
+  /** Only the canonical chat approval owner can supply this source revalidation closure. */
+  async emitServicePriceApproval(
+    request: MintRequest,
+    linkage: ServicePriceApprovalEmissionContext,
+    now = new Date(),
+    supersedesWidgetId: string | null = null,
+  ): Promise<SealedEmission> {
+    return this.emitServicePrice(
+      request,
+      linkage,
+      now,
+      supersedesWidgetId,
+      null,
+    );
+  }
+
+  /** The detail child reuses only a freshly re-read approval and its still-live sealed parent. */
+  async emitServicePriceDetail(
+    request: MintRequest,
+    linkage: ServicePriceApprovalEmissionContext,
+    parentWidgetId: string,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      !parentWidgetId ||
+      request.composerInput.correlation_refs.parent_id !== parentWidgetId
+    )
+      throw new IntentTemplateRefusal('service_price_parent_source_mismatch');
+    return this.emitServicePrice(request, linkage, now, null, parentWidgetId);
+  }
+
+  private async emitServicePrice(
+    request: MintRequest,
+    linkage: ServicePriceApprovalEmissionContext,
+    now: Date,
+    supersedesWidgetId: string | null,
+    parentWidgetId: string | null,
+  ): Promise<SealedEmission> {
+    const source = request.composerInput.source;
+    const ref = servicePriceApprovalRef(
+      linkage.approvalId,
+      linkage.payloadHash,
+    );
+    const expiresAt = new Date(String(request.body.expires_at));
+    if (
+      request.kind !== 'APPROVAL' ||
+      request.composerInput.kind_proposal !== 'APPROVAL' ||
+      request.composerInput.capability !== SERVICE_PRICE_TOOL ||
+      source.from !== 'capability_envelope' ||
+      source.capability !== SERVICE_PRICE_TOOL ||
+      !parseServicePriceApprovalRef(ref) ||
+      typeof linkage.revalidate !== 'function' ||
+      !Number.isFinite(expiresAt.getTime()) ||
+      expiresAt.getTime() <= now.getTime()
+    )
+      throw new IntentTemplateRefusal('service_price_approval_source_required');
+    // Spoken COMMIT needs a separate server readback receipt. This lane currently serves rich chat.
+    if (profileFor(request.deliveryChannel)?.tier === 'SPOKEN')
+      throw new IntentTemplateRefusal(
+        'service_price_spoken_readback_unavailable',
+      );
+    await linkage.revalidate();
+    const handles = this.seals.mintNounHandles([
+      {
+        tenantId: request.tenantId,
+        noun: 'approval',
+        ownerKind: SERVICE_PRICE_APPROVAL_NOUN_OWNER,
+        ownerRef: ref,
+      },
+    ]);
+    return this.emitInternal(
+      {
+        ...request,
+        ttlSeconds: Math.ceil((expiresAt.getTime() - now.getTime()) / 1000),
+        body: {
+          ...request.body,
+          approval_ref: linkage.approvalId,
+          approve_intent: 'i1',
+          reject_intent: 'i2',
+          detail_intent: 'i3',
+        },
+        composerInput: {
+          ...request.composerInput,
+          intent_proposals: [
+            {
+              intent_template_key: SERVICE_PRICE_APPROVE_TEMPLATE,
+              role: 'primary',
+              capability: { space: 'AE', key: SERVICE_PRICE_CAPABILITY },
+              argument_handles: handles,
+            },
+            {
+              intent_template_key: SERVICE_PRICE_REJECT_TEMPLATE,
+              role: 'destructive',
+              capability: { space: 'AE', key: SERVICE_PRICE_CAPABILITY },
+              argument_handles: handles,
+            },
+            {
+              intent_template_key: SERVICE_PRICE_DETAIL_TEMPLATE,
+              role: 'secondary',
+              argument_handles: handles,
+            },
+            {
+              intent_template_key: 'control.dismiss@1',
+              role: 'escape',
+              capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+            },
+          ],
+        },
+      },
+      now,
+      null,
+      null,
+      supersedesWidgetId,
+      null,
+      null,
+      linkage,
+      parentWidgetId,
+    );
+  }
+
   private async emitInternal(
     request: MintRequest,
     now: Date,
@@ -333,8 +471,23 @@ export class WidgetEmitterService {
     supersedesWidgetId: string | null,
     journalParentWidgetId: string | null = null,
     personalSchedule: PersonalScheduleSource | null = null,
+    servicePrice: ServicePriceApprovalEmissionContext | null = null,
+    servicePriceParentWidgetId: string | null = null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
+    if (
+      (input.capability === SERVICE_PRICE_TOOL ||
+        input.intent_proposals.some(
+          (proposal) =>
+            isServicePriceTemplate(proposal.intent_template_key) ||
+            (proposal.capability?.space === 'AE' &&
+              proposal.capability.key === SERVICE_PRICE_CAPABILITY),
+        )) &&
+      servicePrice === null
+    )
+      throw new IntentTemplateRefusal(
+        'service_price_approval_context_required',
+      );
     if (
       input.capability === 'appointments.own.list' &&
       personalSchedule === null
@@ -364,6 +517,23 @@ export class WidgetEmitterService {
       throw new IntentTemplateRefusal('journal_navigation_source_required');
 
     const resolved = input.intent_proposals.map((proposal) => {
+      if (isServicePriceTemplate(proposal.intent_template_key)) {
+        if (servicePrice === null)
+          throw new IntentTemplateRefusal(
+            'service_price_approval_context_required',
+          );
+        return {
+          proposal,
+          resolved: {
+            kind: 'intent' as const,
+            row: resolveServicePriceTemplate({
+              proposal,
+              widgetKind: input.kind_proposal,
+              deliveryChannel: request.deliveryChannel,
+            }),
+          },
+        };
+      }
       const bookingKey =
         proposal.intent_template_key.startsWith('draft.booking.') ||
         proposal.intent_template_key.startsWith('refine.booking.') ||
@@ -424,7 +594,10 @@ export class WidgetEmitterService {
         }
       : request.body;
     const issuedAt = now;
-    const expiresAt = new Date(now.getTime() + request.ttlSeconds * 1000);
+    const expiresAt =
+      servicePrice === null
+        ? new Date(now.getTime() + request.ttlSeconds * 1000)
+        : new Date(String(request.body.expires_at));
     const widgetId = randomUUID();
     const materials: MintedIntentMaterial[] = a2Limited
       ? []
@@ -439,6 +612,7 @@ export class WidgetEmitterService {
             issuedAt,
             envelopeExpiresAt: expiresAt,
             slotless: request.piiClass === 'client_identified',
+            servicePriceLinkage: servicePrice,
           });
         });
 
@@ -463,6 +637,10 @@ export class WidgetEmitterService {
     const emittedIntents = materials.filter(
       (m) => m.token === null || emittedTokens.has(m.token),
     );
+    if (servicePrice !== null && emittedIntents.length !== materials.length)
+      throw new IntentTemplateRefusal(
+        'service_price_approval_controls_withheld',
+      );
     const profile = profileFor(request.deliveryChannel);
     if (!profile) throw new IntentTemplateRefusal('carrier_unknown');
     const unsignedEnvelope = buildEnvelopeWithoutSeal({
@@ -484,6 +662,11 @@ export class WidgetEmitterService {
       limitations: a2Limited ? [A2_GAP_REF] : input.limitation_codes,
       textEquivalentOverride: successor?.textEquivalent ?? null,
       supersedesWidgetId,
+      approvalEcho:
+        servicePrice === null
+          ? null
+          : { owner: 'ai_approval_request', hash: servicePrice.payloadHash },
+      detailSheet: servicePriceParentWidgetId !== null,
     });
     const bodyHash = envelopeBodyHash(unsignedEnvelope);
     const envelopeSeal = this.seals.seal({
@@ -534,9 +717,62 @@ export class WidgetEmitterService {
         revisionId: request.runWitness?.revisionId ?? null,
         c9Domain: request.runWitness?.c9Domain ?? null,
         bookingLinkage: booking,
+        servicePriceLinkage: servicePrice,
       }) as never,
     }));
     await this.prisma.$transaction(async (tx) => {
+      if (servicePriceParentWidgetId !== null) {
+        if (servicePrice === null)
+          throw new IntentTemplateRefusal(
+            'service_price_approval_context_required',
+          );
+        const parent = await tx.widgetEmission.findFirst({
+          where: {
+            tenantId: request.tenantId,
+            widgetId: servicePriceParentWidgetId,
+            kind: 'APPROVAL',
+            turnId: request.turnId,
+            erasedAt: null,
+            lifecycleState: { in: ['MINTED', 'DELIVERED', 'LIVE'] },
+            expiresAt: { gt: now },
+            retentionUntil: { gt: now },
+            turn: {
+              principalProofHash: principal.proofHash,
+              conversationId: request.conversationId,
+            },
+          },
+          select: {
+            intentRecords: {
+              where: {
+                capabilitySpace: 'AE',
+                capabilityKey: SERVICE_PRICE_CAPABILITY,
+                confirmationOfKind: 'approval',
+                confirmationOfRef: servicePrice.approvalId,
+              },
+              select: { frozenNounsJson: true },
+            },
+          },
+        });
+        const expectedNouns = materials[0]?.proposal.argument_handles;
+        if (
+          !parent ||
+          !parent.intentRecords.some(
+            (record) =>
+              stableActionJson(record.frozenNounsJson) ===
+              stableActionJson(expectedNouns),
+          ) ||
+          !(await this.verifySeal(
+            request.tenantId,
+            servicePriceParentWidgetId,
+          )) ||
+          !(await this.releaseAccess.canProject(
+            request.tenantId,
+            servicePriceParentWidgetId,
+            tx,
+          ))
+        )
+          throw new IntentTemplateRefusal('service_price_parent_unavailable');
+      }
       if (journalParentWidgetId !== null) {
         const parent = await tx.widgetEmission.findFirst({
           where: {
@@ -572,6 +808,7 @@ export class WidgetEmitterService {
           throw new IntentTemplateRefusal('journal_parent_unavailable');
       }
       if (personalSchedule !== null) await personalSchedule.revalidate();
+      if (servicePrice !== null) await servicePrice.revalidate();
       await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx);
       await tx.widgetEmission.create({
         data: {

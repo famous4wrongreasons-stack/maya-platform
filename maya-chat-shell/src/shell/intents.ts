@@ -21,7 +21,7 @@
 // sentence — silent outcomes are 0. The receipt consumer arrives with R7-E1 and B3, not here.
 
 import type { InteractiveRefKey, TerminalLine, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
-import { parseInstant, verify } from '../integrity/h7.ts';
+import { canonicalJson, parseInstant, verify } from '../integrity/h7.ts';
 import type { EnvelopeView, IntegrityVerdict, RenderNode, RenderResult } from '../renderer/nodes.ts';
 import { resolveTarget } from '../routes/registry.ts';
 import type { AbortHandle, TimelineWriter, WidgetItemView } from './conversation.ts';
@@ -118,12 +118,14 @@ export const createLiveSubmission = (
     if (sent.value.code === null && typeof resolved === 'object' && resolved !== null) {
       return { status: 'returned', envelope: resolved };
     }
+    const owner = sent.value.code === null && sent.value.owner_decision !== undefined
+      ? { ownerDecision: sent.value.owner_decision } : {};
     const page = await transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
-    if (!page.ok) return { status: 'accepted' };
+    if (!page.ok) return { status: 'accepted', ...owner };
     const current = page.value.widgets.find((widget) => widget.envelope.widget_id === submission.widget_id);
     return current !== undefined && current.terminal_lines.length > 0
-      ? { status: 'settled', lines: current.terminal_lines }
-      : { status: 'accepted' };
+      ? { status: 'settled', lines: current.terminal_lines, ...owner }
+      : { status: 'accepted', ...owner };
   },
 });
 
@@ -164,6 +166,8 @@ export interface WidgetsDeps {
 export interface Widgets extends DetailSource {
   rendered(itemId: string): void;
   ingest(envelope: WidgetEnvelope): IngestOutcome;
+  /** Presentation evidence only: H7 passed and the standard approval control is drawn live. */
+  hasPresentedApproval(envelope: WidgetEnvelope): boolean;
   /** Assignable to `WidgetPort.activate`; the outcome is for tests and the dev fixture host. */
   activate(itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome>;
   /** V6: the live envelopes, vault side (never the view). */
@@ -246,6 +250,46 @@ export const intentRefFor = (nodes: readonly RenderNode[], key: InteractiveRefKe
 };
 
 const isUsable = (intent: WidgetIntent): boolean => intent.enabled?.state === 'KNOWN' && intent.enabled.value === true;
+
+/** YC-SP1: wording only. The submitted envelope and owner readback must describe the same diff. */
+const servicePriceSentence = (
+  envelope: WidgetEnvelope,
+  intent: WidgetIntent,
+  outcome: SubmissionOutcome,
+): WidgetSentence | null => {
+  if (envelope.kind !== 'APPROVAL' || envelope.source.from !== 'capability_envelope'
+    || envelope.source.capability !== 'catalog.service.price.update'
+    || intent.effect !== 'COMMIT' || intent.capability?.space !== 'AE'
+    || intent.capability.key !== 'crm.service.fixed-price.update.v1'
+    || !('approve_intent' in envelope.body)) return null;
+  const body = envelope.body;
+  const approving = intent.intent_ref === body.approve_intent;
+  const rejecting = intent.intent_ref === body.reject_intent;
+  if (!approving && !rejecting) return null;
+  if (outcome.status !== 'accepted' && outcome.status !== 'settled') {
+    return ['no_connection', 'server_error', 'unexpected_response'].includes(outcome.status)
+      ? 'service_price_unconfirmed' : null;
+  }
+  const decision = outcome.ownerDecision;
+  if (rejecting && decision?.decision === 'REJECTED' && decision.status === 'rejected'
+    && decision.state === 'REJECTED') return 'service_price_rejected';
+  const result = decision?.outcome;
+  const serviceRows = body.effect_preview.filter(row => row.label.phrase_key === 'approval.service');
+  const priceRows = body.effect_preview.filter(row => row.label.phrase_key === 'approval.proposed_price');
+  const service = serviceRows.length === 1 ? serviceRows[0]?.value : undefined;
+  const price = priceRows.length === 1 ? priceRows[0]?.value : undefined;
+  if (approving && decision?.decision === 'APPROVED' && decision.status === 'completed'
+    && decision.state === 'SUCCEEDED' && result?.verified === true && result.source === 'yclients'
+    && result.currency === 'RUB' && typeof result.action_execution_id === 'string'
+    && result.action_execution_id.trim().length > 0
+    && service?.state === 'KNOWN' && typeof service.value === 'string' && service.value.length > 0
+    && service.value === result.service_id && price?.state === 'KNOWN' && typeof price.value === 'number'
+    && Number.isFinite(price.value) && price.value >= 0 && 'currency' in price && price.currency === 'RUB'
+    && 'unit' in price && price.unit === 'RUB' && price.value === result.price_rubles) {
+    return 'service_price_confirmed';
+  }
+  return 'service_price_unconfirmed';
+};
 
 /**
  * L27: which canonical terminal outcome a line IS — server-authored, never the sentence it carries.
@@ -508,6 +552,32 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     return { ingested: 'added', itemId, verdict: entry.verdict };
   };
 
+  const hasPresentedApproval = (envelope: WidgetEnvelope): boolean => {
+    const entry = [...entries.values()].find((item) => item.envelope.widget_id === envelope.widget_id && item.place === 'timeline');
+    if (entry === undefined || !deps.timeline.hasItem(entry.itemId) || entry.verdict !== 'valid' ||
+        entry.display !== 'live' || entry.pending !== null || entry.result.mode !== 'structured' ||
+        entry.envelope.kind !== 'APPROVAL' || !('approve_intent' in entry.envelope.body)) return false;
+    // A duplicate id alone proves nothing about this reply. Only the exact emission currently
+    // presented can suppress the notice; different body, lifecycle, seal or tokens cannot borrow it.
+    try {
+      if (envelope !== entry.envelope && canonicalJson(envelope) !== canonicalJson(entry.envelope)) return false;
+    } catch { return false; }
+    // Timers may be delayed in a background tab. Presentation evidence expires with the envelope,
+    // body and primary intent even before the scheduled collapse has run.
+    const body = entry.envelope.body;
+    const now = deps.scheduler.now();
+    const bodyExpiry = parseInstant(body.expires_at);
+    if (verdictOf(entry.envelope) !== 'valid' || body.state.state !== 'KNOWN' || body.state.value !== 'PENDING' ||
+        body.blocked_reason !== null || bodyExpiry === null || bodyExpiry <= now) return false;
+    const ref = body.approve_intent;
+    const intent = entry.envelope.intents.find((item) => item.intent_ref === ref);
+    if (intent === undefined || intent.role !== 'primary' || intent.effect !== 'COMMIT' || !isUsable(intent) ||
+        vault.get(entry.itemId, intent.intent_ref) === null) return false;
+    const intentExpiry = parseInstant(intent.expires_at);
+    return intentExpiry !== null && intentExpiry > now &&
+      entry.result.readingOrder.some((key) => intentRefFor(entry.result.nodes, key) === ref);
+  };
+
   /** detail item id → the timeline item whose control opened it. */
   const detailOpeners = new Map<string, string>();
 
@@ -715,6 +785,19 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     }
     entry.inflight = null;
     entry.pending = null;
+    const priceSentence = servicePriceSentence(entry.envelope, intent, outcome);
+    if (priceSentence !== null) {
+      if (outcome.status === 'accepted' || outcome.status === 'settled') {
+        // Keep the existing accepted display transition. Owner evidence words the card, not a new
+        // terminal journal line, and ACCEPTED alone can never say the provider changed its price.
+        entry.display = 'terminal';
+        entry.sentence = priceSentence;
+        publish(entry);
+        counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+        return { outcome: 'dismissed' };
+      }
+      return endInSentence(entry, priceSentence, true);
+    }
     if (route === 'opens_detail' && outcome.status === 'advanced') {
       // Only the accepted server-declared detail path resolves PROGRESS into OPEN. Keeping the
       // same chrome owner preserves its history entry and focus return; ordinary successors
@@ -806,6 +889,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
 
   return {
     ingest,
+    hasPresentedApproval,
     rendered,
     activate,
     openDetail,

@@ -45,6 +45,8 @@
 
 import { ActionCapabilityRegistry } from '../action-engine/action-engine.registry';
 import { C9_CAPABILITIES } from '../orchestration/c9.registry';
+import { isCataloguePriceConfiguration } from '../widgets/pricing/service-price-widget.contract';
+import { SERVICE_PRICE_TOOL } from '../crm/yclients-service-price.contract';
 import type { CapabilityRef, CapabilityRefKey } from './capability-ref';
 import type { OwnerClass, WidgetKind } from './kinds';
 import { CONTROL_REGISTRY, KIND_PERMITTED_EFFECTS } from './tables';
@@ -63,6 +65,7 @@ const OWNER_CLASS_MEMBERS: Readonly<Record<OwnerClass, true>> = Object.freeze({
   BULK_AUDIENCE_OWNER: true,
   ORCHESTRATION_RUN: true,
   ACTION_EXECUTION: true,
+  CANONICAL_APPROVAL: true,
   CONSENT_REGISTER: true,
   IDENTITY_BINDING_OWNER: true,
   COMMERCE_OWNER: true,
@@ -157,7 +160,7 @@ const OWNER_KEY_ROWS: Readonly<Record<WidgetKind, OwnerKeyRow>> = Object.freeze(
       'clients.dossier.read',
     ]),
     STRATEGY_OPTIONS: row('ORCHESTRATION_RUN', ['c9.no_action']),
-    APPROVAL: row('ACTION_EXECUTION', []),
+    APPROVAL: row('CANONICAL_APPROVAL', []),
     PROGRESS: row('ORCHESTRATION_RUN', ['owner_report.status']),
     LIMITATION: row('NONE', []),
     SOURCE_STATUS: row('INTEGRATION_STATUS', [
@@ -257,6 +260,17 @@ const resolveRow = (kind: WidgetKind): readonly CapabilityRef[] => {
     return AE_CAPABILITIES.filter(
       (c) => c.approvalRequirement === 'REQUIRED',
     ).map((c) => internRef('AE', c.capability));
+  if (r.ownerClass === 'CANONICAL_APPROVAL')
+    return [
+      ...AE_CAPABILITIES.filter(
+        (c) =>
+          c.approvalRequirement === 'REQUIRED' ||
+          isCataloguePriceConfiguration(c),
+      ).map((c) => internRef('AE', c.capability)),
+      ...(AE_CAPABILITIES.some(isCataloguePriceConfiguration)
+        ? [internRef('C9', SERVICE_PRICE_TOOL)]
+        : []),
+    ];
   return [...new Set(r.c9.flatMap(expandC9Pattern))].map((k) =>
     internRef('C9', k),
   );

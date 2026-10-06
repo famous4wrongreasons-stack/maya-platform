@@ -5,9 +5,10 @@
 // runtime statement of it. The rows are TRANSCRIBED from F38's table, not derived: F38 says a row
 // appears there "only where the trace from the AI-tool handler's dispatch through its service to a
 // literal AE-CAP key or a registered constant completed", so the table is the evidence and nothing
-// here may extend it. F37 is the other half of the same sentence: "A missing mapping is a GAP, and a
+// here may extend it without its recorded trace. F37 is the other half of the same sentence: "A missing mapping is a GAP, and a
 // GAP has no button. None may be filled by inference, by name similarity, or by a projector's choice
-// at runtime." A fourteenth row is therefore not an implementation decision.
+// at runtime." V1.4's fourteenth row is the explicitly approved YC-SP1-WIDGET-1 owner trace;
+// the original thirteen rows below remain unchanged.
 //
 // WHAT READS IT.
 //   FR-6b (C11:1786)  an allowlist row must be the `ae` side of EXACTLY ONE pairing row. Gate 7
@@ -62,7 +63,7 @@ const row = (proposeKey: string, aeKey: string): ProposePairingRow =>
   });
 
 /**
- * F38, C11:761-773, in the contract's own order. Thirteen rows.
+ * F38 in the contract's own order: unchanged thirteen rows plus V1.4's traced YC-SP1 row.
  *
  * Each pair is `<C9-CAP key> ⇄ <AE-CAP key>`; the trace between them is F38's middle column.
  */
@@ -89,6 +90,7 @@ export const AE_PROPOSE_PAIRING: readonly ProposePairingRow[] = Object.freeze([
     'package5.settings.appointment-notifications.execute.v1',
   ),
   row('b35.confirm', 'communication.bulk-campaign.admit.v2'),
+  row('catalog.service.price.update', 'crm.service.fixed-price.update.v1'),
 ]);
 
 // ── the two indexes ──────────────────────────────────────────────────────────────────────────────

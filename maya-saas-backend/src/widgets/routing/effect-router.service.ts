@@ -1,7 +1,13 @@
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import { presentJournalSchedule } from '../composition/journal-schedule.presenter';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  SERVICE_PRICE_APPROVAL_OWNER,
+  parseServicePriceApprovalRef,
+  type ServicePriceApprovalOwnerPort,
+} from '../pricing/service-price-approval.port';
+import { servicePriceApprovalMintRequest } from '../pricing/service-price-approval.presenter';
 
 import type { EffectClass } from '../../widget-contract/intent';
 import type {
@@ -116,6 +122,9 @@ export class EffectRouterService {
     private readonly threadPage: WidgetThreadPageService,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Optional()
+    @Inject(SERVICE_PRICE_APPROVAL_OWNER)
+    private readonly priceApprovals?: ServicePriceApprovalOwnerPort,
   ) {}
 
   async route(
@@ -195,7 +204,7 @@ export class EffectRouterService {
   ): Destination | null {
     switch (effect) {
       case 'NAVIGATE':
-        return this.navigate(ctx);
+        return this.navigate(ctx, resolvedNouns);
       case 'REFINE':
         return this.refine(ctx, resolvedNouns);
       case 'CONTROL':
@@ -213,7 +222,10 @@ export class EffectRouterService {
     }
   }
 
-  private navigate(ctx: GateContext): Destination | null {
+  private navigate(
+    ctx: GateContext,
+    resolvedNouns?: ResolvedNouns,
+  ): Destination | null {
     const input = routingInputOf(ctx);
     const principal = ctx.principal;
     if (input === null || principal === null) return null;
@@ -284,6 +296,90 @@ export class EffectRouterService {
             receiptOutcome: 'REFUSED',
             refusalCode: 'effect_not_admissible',
           });
+      }
+      // A detail is a separately sealed child of this exact card, not a copy of the parent
+      // returned as though it were a child. The canonical owner remains the source of the diff.
+      if (
+        input.record.sourceCapabilitySpace === 'C9' &&
+        input.record.sourceCapabilityKey === 'catalog.service.price.update'
+      ) {
+        const approvalRef = resolvedNouns?.values.get('approval');
+        const parsed =
+          typeof approvalRef === 'string'
+            ? parseServicePriceApprovalRef(approvalRef)
+            : null;
+        const owner = this.priceApprovals;
+        if (
+          input.record.widgetKind !== 'APPROVAL' ||
+          resolvedNouns?.values.size !== 1 ||
+          !parsed ||
+          !approvalRef ||
+          !owner ||
+          target.class !== 'detail' ||
+          target.ref !== 'fs.catalogue'
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+        const actor = { tenantId: input.tenantId, userId: ctx.actor.userId };
+        const snapshot = await owner.read(
+          actor,
+          approvalRef,
+          principal.proofHash,
+          true,
+        );
+        const ttlSeconds = Math.floor(
+          (snapshot.expiresAt.getTime() - input.now.getTime()) / 1000,
+        );
+        if (
+          snapshot.id !== parsed.id ||
+          snapshot.payloadHash !== parsed.hash ||
+          snapshot.origin.conversationId !== source.conversationId ||
+          snapshot.origin.principalProofHash !== principal.proofHash ||
+          ttlSeconds <= 0
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+        const request = servicePriceApprovalMintRequest(
+          snapshot,
+          principal,
+          source.turnId,
+          ttlSeconds,
+          input.answeringChannel,
+        );
+        request.composerInput = {
+          ...request.composerInput,
+          correlation_refs: {
+            ...request.composerInput.correlation_refs,
+            parent_id: input.record.widgetId,
+          },
+        };
+        const minted = await this.emitter.emitServicePriceDetail(
+          request,
+          {
+            approvalId: snapshot.id,
+            payloadHash: snapshot.payloadHash,
+            revalidate: async () => {
+              const current = await owner.read(
+                actor,
+                approvalRef,
+                principal.proofHash,
+                false,
+              );
+              if (
+                current.origin.conversationId !== source.conversationId ||
+                current.payloadHash !== snapshot.payloadHash
+              )
+                throw new Error('service_price_detail_source_changed');
+            },
+          },
+          input.record.widgetId,
+          input.now,
+        );
+        return admitted({ nextEnvelope: minted.envelope });
       }
       const projected = await this.projector.composeNavigate(
         projectionPlan(ctx, input.record),

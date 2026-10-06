@@ -68,6 +68,69 @@ const harness = (rows: readonly unknown[] = [candidate]) => {
 };
 
 describe('P-TYPED — the typed Step 0 carrier', () => {
+  it.each([
+    [
+      {
+        state: 'SUCCEEDED',
+        status: 'completed',
+        outcome: {
+          verified: true,
+          source: 'yclients',
+          currency: 'RUB',
+          price_rubles: 2500,
+          revision: 'a'.repeat(64),
+          action_execution_id: 'ae-receipt',
+        },
+      },
+      'Цена услуги обновлена в YCLIENTS. Результат подтверждён.',
+    ],
+    [
+      { state: 'REJECTED', status: 'rejected' },
+      'Предложение изменить цену отклонено.',
+    ],
+    [
+      { state: 'UNKNOWN', status: 'UNKNOWN' },
+      'Результат изменения цены пока не подтверждён. Не повторяйте действие до завершения проверки.',
+    ],
+    [
+      { state: 'SUCCEEDED', status: 'completed' },
+      'Результат изменения цены пока не подтверждён. Не повторяйте действие до завершения проверки.',
+    ],
+    [
+      null,
+      'Результат изменения цены пока не подтверждён. Не повторяйте действие до завершения проверки.',
+    ],
+  ])(
+    'uses pricing owner outcome rather than treating ACCEPTED as success: %j',
+    async (ownerDecision, reply) => {
+      const { service, submit } = harness([
+        {
+          ...candidate,
+          effect: 'COMMIT',
+          capabilitySpace: 'AE',
+          capabilityKey: 'crm.service.fixed-price.update.v1',
+        },
+      ]);
+      submit.mockResolvedValue({
+        verdict: {
+          outcome: 'terminate',
+          route: { receipt_outcome: 'ACCEPTED', owner_decision: ownerDecision },
+        },
+        stoppedAt: '13',
+        ran: 14,
+      });
+      await expect(
+        service.routeTypedUtterance({
+          actor,
+          surface: 'web',
+          utterance: 'Показать сегодня',
+          requestId: 'request_1234',
+        }),
+      ).resolves.toMatchObject({ reply });
+      expect(submit).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('routes an exact rendering as the same server-minted token through the one gateway', async () => {
     const { service, submit } = harness();
     await expect(

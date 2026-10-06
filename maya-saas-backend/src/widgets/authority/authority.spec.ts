@@ -1,8 +1,8 @@
 // K4's exit, where it can be proved without a live registry.
 //
 //   verificationFloor is total over every key in all four spaces; SECURE_SURFACE_ONLY emissions in
-//   chat = 0; floor-reduction count computed from code = 2, compared against §0.17 and failing on
-//   any difference.
+//   chat = 0; the historical floor repairs plus the explicitly approved V1.4 pricing admission are pinned
+//   in totality.spec.ts against §0.17.
 //
 //   The clause that used to stand here — "the five PII fences fire INDEPENDENTLY, 5/5" — is gone
 //   with the fences themselves (IR-K4K8-1, P-K4K8's merge, landed with U12a). F95 item 2
@@ -59,18 +59,17 @@ describe('K4 — the five-rung ladder', () => {
   });
 
   it('keeps STEP_UP_VERIFIED unreachable, as the frozen limitation states', () => {
-    // Enforced, not documented. Treating it as SESSION_VERIFIED would be a third floor reduction,
-    // and §0.17 says exactly two exist.
+    // Enforced, not documented. The approved pricing subtype does not make STEP_UP_VERIFIED
+    // reachable or lower the ordinary MONEY family floor.
     expect(isReachable('STEP_UP_VERIFIED')).toBe(false);
     expect(LADDER.filter(isReachable)).toHaveLength(4);
   });
 });
 
-describe('K4 — exactly two floor reductions exist', () => {
+describe('K4 — the arithmetic introduces no additional floor reduction', () => {
   it('the ladder itself introduces none', () => {
-    // §0.17 enumerates two reductions and says they live there and nowhere else. The ladder's job
-    // is arithmetic; if it ever returned something LOWER than a term it was given, that would be a
-    // third reduction hiding in a helper.
+    // §0.17 names every admitted change. The ladder is arithmetic; returning LOWER than a
+    // term would introduce an undeclared reduction hiding in a helper.
     const levels = LADDER;
     for (const a of levels)
       for (const b of levels) {

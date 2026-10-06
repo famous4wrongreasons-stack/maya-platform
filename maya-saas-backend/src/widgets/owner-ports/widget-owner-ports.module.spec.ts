@@ -55,6 +55,8 @@ import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read
 import { NounResolutionOwnersProvider } from './noun-resolution.owners.provider';
 import { WitnessC9RevisionAdapter } from './witness-c9-revision.adapter';
 import { C9CancelAdapter } from './c9-cancel.adapter';
+import { ServicePriceApprovalAdapter } from './service-price-approval.adapter';
+import { CanonicalApprovalAdapter } from './canonical-approval.adapter';
 import { ApprovalRequestAdapter } from './approval-request.adapter';
 import { CommitBookingAdapter } from './commit-booking.adapter';
 import { BookingPreviewAdapter } from './booking-preview.adapter';
@@ -140,6 +142,12 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       C9CancelAdapter,
       { provide: DI_TOKENS.C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
       ApprovalRequestAdapter,
+      ServicePriceApprovalAdapter,
+      CanonicalApprovalAdapter,
+      {
+        provide: DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
+        useExisting: ServicePriceApprovalAdapter,
+      },
       CommitBookingAdapter,
       BookingPreviewAdapter,
       BookingSelectorAdapter,
@@ -154,7 +162,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       },
       {
         provide: DI_TOKENS.APPROVAL_REQUEST_OWNER,
-        useExisting: ApprovalRequestAdapter,
+        useExisting: CanonicalApprovalAdapter,
       },
       {
         provide: DI_TOKENS.COMMIT_BOOKING_OWNER,
@@ -165,6 +173,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
+      DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
       DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
       PERSONAL_SCHEDULE_SOURCE,
@@ -214,6 +223,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
     // it: that is what keeps "unbound" from drifting into "nobody checked".
     const BOUND: readonly string[] = [
+      DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
       DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
       DI_TOKENS.PERSONAL_SCHEDULE_SOURCE,

@@ -449,6 +449,15 @@ describe('AiCoreService', () => {
       );
       const previewSummary =
         'Изменить цену услуги «Стрижка» в YCLIENTS: 1 700 ₽ → 1 900 ₽ (RUB). Требуется ваше подтверждение.';
+      const resolution = {
+        matched: true,
+        receipt: {
+          widget_id: 'source-fixture-approval',
+          envelope_seal: 'source-fixture-seal',
+          envelope: { kind: 'APPROVAL' },
+        },
+        dismiss_widget_id: null,
+      };
       mocks.runtime.execute.mockImplementation((_actor, name) =>
         Promise.resolve(
           name === 'catalog.services.read'
@@ -464,11 +473,13 @@ describe('AiCoreService', () => {
             : {
                 status: 'approval_required',
                 approval: { id: 'price-approval', summary: previewSummary },
+                resolution,
               },
         ),
       );
       const result = await mocks.service.chat(user, { ...dto, messages });
       expect(result.reply).toBe(previewSummary);
+      expect(result.resolution).toBe(resolution);
       expect(
         mocks.runtime.execute.mock.calls.find(
           (call) => call[1] === 'catalog.service.price.update',

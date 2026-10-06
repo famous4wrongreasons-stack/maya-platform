@@ -152,19 +152,23 @@ describe('catalog.service.price.update chat boundary', () => {
     );
   });
 
-  it('keeps the unpaired candidate behind the existing widget gap without adding a button', () => {
+  it('admits only the owner-approved v1.4 typed price confirmation pair', () => {
     expect(() => assertPolicyTotality()).not.toThrow();
     expect(WIDGET_CAPABILITY_POLICY[`C9:${SERVICE_PRICE_TOOL}`]).toMatchObject({
       min_verification: 'SESSION_VERIFIED',
       consent_class: 'none',
     });
-    expect(pairingForPropose(SERVICE_PRICE_TOOL)).toBeNull();
-    expect(
-      AE_WIDGET_COMMIT_ALLOWLIST[SERVICE_PRICE_CAPABILITY],
-    ).toBeUndefined();
-    expect(AE_CAPABILITY_GAP_LEDGER[SERVICE_PRICE_CAPABILITY]).toBe(
-      'GAP-SEPARATION-OF-DUTIES',
-    );
+    expect(pairingForPropose(SERVICE_PRICE_TOOL)).toEqual({
+      propose: { space: 'C9', key: SERVICE_PRICE_TOOL },
+      ae: { space: 'AE', key: SERVICE_PRICE_CAPABILITY },
+    });
+    expect(AE_WIDGET_COMMIT_ALLOWLIST[SERVICE_PRICE_CAPABILITY]).toMatchObject({
+      family: 'catalogue_price_configuration',
+      confirmation_kind: 'APPROVAL',
+      min_verification: 'SESSION_VERIFIED',
+      requires_ae_approval: false,
+    });
+    expect(AE_CAPABILITY_GAP_LEDGER[SERVICE_PRICE_CAPABILITY]).toBeUndefined();
   });
 
   it('exposes only exact service and requested price, with actor approval and no retry', () => {

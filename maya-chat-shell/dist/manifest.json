@@ -74,7 +74,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "bbcbad3aa9c2b6e6e7c26677bda99cccf3abd9ca3880995f55581f951e31abf7"
+        "sha256": "5ac7f5bda24ab4dc215d53de5ef2c8a0a2c558e30b6da3139e646c0d13454185"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -114,7 +114,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "59a39703387b0c65d4ef8719368fa4b5298813980721129e67798293b394bc14"
+        "sha256": "98c3040109550ba177bf6771868138d717cf396932b135d571c69fc73ba5b7b6"
       },
       {
         "path": "src/shell/shell.ts",

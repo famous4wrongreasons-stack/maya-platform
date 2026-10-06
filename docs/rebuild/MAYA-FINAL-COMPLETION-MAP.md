@@ -625,7 +625,7 @@ scoped ESLint 21 files PASS. Independent review findings were repaired. The owne
 synthetic PostgreSQL cluster is stopped. These are targeted results, not a new
 aggregate census or React/provider/model qualification.
 
-**The current React end-to-end path remains incomplete.** F37/F38 deliberately
+**At backend checkpoint `fd702158`, the current React path was incomplete.** F37/F38 deliberately
 leaves this capability without a pairing/button; the current carrier cannot
 consume this `AiApprovalRequest`. The next specific owner decision is
 **YC-SP1-WIDGET-1**, followed by typed approval owner/minter and current-carrier
@@ -636,3 +636,30 @@ production config/database, phone, push, merge or deployment was used.
 
 See [implementation, boundaries and exact proposed carrier decision](YCLIENTS-SERVICE-PRICE-CANDIDATE-2026-10-06.md)
 and [machine-readable evidence](evidence/yc-service-pricing-20261006/manifest.json).
+
+## YCLIENTS fixed service price — approved local UI candidate, 2026-10-06 UTC
+
+The owner approved YC-SP1-WIDGET-1 at 16:09 UTC: an exact fixed-price change for one
+existing own service, explicitly confirmed in chat, on the test branch. V1.4 transfers
+that single named exception while retaining MONEY, ordinary money floors, historical
+F38/allowlist rows, B35 and AE lifecycle. The standard APPROVAL now binds the actual
+canonical `AiApprovalRequest`, payload hash and durable authenticated original chat
+turn. Current principal and entitlement checks remain server-side; only AE mutates CRM.
+
+The preceding carrier gap is superseded for this local candidate. Fresh synthetic
+HTTP/auth/AE/owned Postgres tests pass 23/23. Untouched HTTP evidence passes the current
+React renderer and headless runtime in four cases plus wrapper (5/5): confirmed,
+rejected, UNKNOWN and detail through `fs.catalogue`. There was no browser run. Backend
+and React typechecks pass; architecture boundaries 68/68, K3 10/10, floor copy and
+contract checks 31/31 pass. Four historical later-package contract prerequisites
+remain pending. Focused backend tests pass 559/559, shell tests 62/62; scoped ESLint
+has zero errors and three generated-file warnings. Commands and hashes are in the
+evidence manifest.
+
+Owned Postgres is stopped. Independent read-only review found no remaining material
+code blocker for the bounded local candidate. Real provider/model/browser acceptance,
+aggregate census and V1.4 release/profile certification remain unperformed. Broader
+create/edit/archive and richer provider contracts remain separate dependencies. No
+existing stand, production config/database, phone, real provider/model, push, merge
+or deployment was touched. See [UI candidate and limits](YCLIENTS-SERVICE-PRICE-UI-CANDIDATE-2026-10-06.md)
+and [fresh UI evidence](evidence/yc-service-pricing-ui-20261006/manifest.json).

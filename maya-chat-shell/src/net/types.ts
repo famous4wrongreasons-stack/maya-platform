@@ -227,6 +227,21 @@ export interface TranscribeProjection {
   readonly transcript: string;
 }
 
+/** Display evidence from the existing canonical owner response; never client authority. */
+export interface WidgetOwnerDecisionProjection {
+  readonly decision: string | null;
+  readonly status: string | null;
+  readonly state: string | null;
+  readonly outcome: {
+    readonly verified: boolean;
+    readonly source: string | null;
+    readonly currency: string | null;
+    readonly service_id: string | null;
+    readonly price_rubles: number | null;
+    readonly action_execution_id: string | null;
+  } | null;
+}
+
 export interface WidgetIntentProjection {
   readonly outcome: 'terminate' | 'refuse' | 'expired' | 'superseded';
   readonly code: string | null;
@@ -238,6 +253,7 @@ export interface WidgetIntentProjection {
    */
   readonly resolved_widget: WidgetEnvelope | null;
   readonly receipt_outcome: 'ACCEPTED' | 'REFUSED' | 'NEEDS_CONFIRMATION' | 'NEEDS_VERIFICATION' | null;
+  readonly owner_decision?: WidgetOwnerDecisionProjection;
 }
 
 export interface WidgetResolveProjection {
