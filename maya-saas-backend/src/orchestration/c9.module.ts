@@ -1,3 +1,7 @@
+import { C9OccupancySource } from './c9.occupancy-source';
+import { AiToolPolicyService } from '../ai-tools/ai-tool-policy.service';
+import { AiToolRegistryService } from '../ai-tools/ai-tool-registry.service';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { C9WorkService } from './c9.work';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -23,6 +27,7 @@ import { C9PolicyService } from './c9.policy.service';
 @Module({
   imports: [
     PrismaModule,
+    EntitlementsModule,
     TenancyModule,
     CrmModule,
     MeasurementModule,
@@ -31,6 +36,9 @@ import { C9PolicyService } from './c9.policy.service';
   ],
   controllers: [C9Controller],
   providers: [
+    C9OccupancySource,
+    AiToolPolicyService,
+    AiToolRegistryService,
     C9Agents,
     C9Allowance,
     C9ContextService,

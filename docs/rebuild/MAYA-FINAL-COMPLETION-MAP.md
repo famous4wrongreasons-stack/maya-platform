@@ -606,3 +606,9 @@ profile remains V1.3 `eaddcf2b69dfd890688ace7d25552609b8ec8923c3419f844c416b4d6f
 This does not qualify Linux, Safari, a real model or provider, or production release.
 No paid/provider/production/phone action, push or merge. Next: parent review and
 separately authorized actual-target inventory/certification and external acceptance.
+
+## 2026-10-06 explicit Occupancy development checkpoint
+
+The explicit owner web-chat request “Проверь окна после отмен” now connects the existing C9 owner to a saved C5 Opportunity/current assignment, current CRM schedule/availability, the Occupancy agent and a saved C9 proposal version. The existing semantic task contract also routes paraphrases; proof uses scripted planning, not a real model. The response is bounded to one candidate, source-qualified and read/recommend only. No booking/contact/price mutation, background initiator, new schema or retention policy was added.
+
+**Executed:** 16 targeted suites / 245 tests PASS, serial backend typecheck, changed-source ESLint and diff hygiene. Independent review findings were fixed. **Not executed:** new combined HTTP/PostgreSQL path, actual provider/model/device acceptance or aggregate gates. Restart/race proof uses an in-memory storage adapter. This advances the explicit L0/L1 part of P2/P8 and does not complete C10. See [scope, code/evidence checkpoint and limits](MAYA-EXPLICIT-OCCUPANCY-CHECKPOINT-20261006.md).

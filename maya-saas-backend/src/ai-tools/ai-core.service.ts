@@ -1,3 +1,4 @@
+import { isExplicitCancellationWindowRequest } from '../orchestration/c9.occupancy-presentation';
 import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
 import {
   buildCommonPersonNameForms,
@@ -194,6 +195,7 @@ type GroundingReport = {
 };
 
 type AiCoreCompletion = {
+  occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
   reply: string;
   source: 'deepseek' | 'openai' | 'safe_fallback';
   action: Record<string, unknown> | null;
@@ -594,6 +596,24 @@ export class AiCoreService {
       this.contextualUserText(sanitized.messages),
       dto.audience ?? null,
     );
+    if (
+      !clientAudience &&
+      dto.surface === 'web' &&
+      [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        toolUser.role,
+      ) &&
+      isExplicitCancellationWindowRequest(this.latestUserText(dto.messages))
+    ) {
+      const turn = this.readTurns.get(dto);
+      if (!turn) this.modelFailure('conversation_history_unavailable');
+      const occupancy = await this.orchestrator.checkCancellationWindows(turn);
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply: occupancy.reply,
+        source: 'safe_fallback',
+        action: null,
+        occupancy,
+      });
+    }
     const memoryCommand = this.memory
       ? await this.memory.handleExplicitCommand(
           tenantId,
@@ -939,6 +959,62 @@ export class AiCoreService {
             requiredToolNames = [];
             requirementSatisfied = true;
           }
+        }
+        // Consume the existing validated semantic task contract; paraphrases need
+        // no second planner/model call and never become generic unscoped reads.
+        const occupancyTask = activeSemanticPlan?.tasks.find(
+          (task) => task.intent === 'schedule.review_cancellation_windows',
+        );
+        if (
+          occupancyTask &&
+          !clientAudience &&
+          dto.surface === 'web' &&
+          [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+            toolUser.role,
+          ) &&
+          occupancyTask.permission.status === 'allowed'
+        ) {
+          if (
+            step !== 0 ||
+            toolsUsed.length > 0 ||
+            activeSemanticPlan!.tasks.length !== 1 ||
+            occupancyTask.requires_clarification ||
+            Object.keys(occupancyTask.entities).length > 0 ||
+            occupancyTask.tool.status !== 'ready'
+          ) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Сейчас эта проверка разбирает одну сохранённую возможность после отмены. Для отдельного периода, филиала, специалиста или нескольких задач нужен уточнённый сценарий. Проверить первую доступную сохранённую возможность?',
+                source: 'safe_fallback',
+                action: null,
+              },
+            );
+          }
+          const turn = this.readTurns.get(dto);
+          if (!turn) this.modelFailure('conversation_history_unavailable');
+          const occupancy =
+            await this.orchestrator.checkCancellationWindows(turn);
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: occupancy.reply,
+              source: 'safe_fallback',
+              action: null,
+              occupancy,
+            },
+          );
         }
         // Only after the semantic owner selected a Client booking capability do we
         // read its catalogs. Catalog membership resolves nouns, not Client authority.
@@ -2029,13 +2105,17 @@ export class AiCoreService {
     toolResults: AiCoreToolResult[] = [],
   ) {
     const readTurn = this.readTurns.get(dto);
-    const coordination = readTurn
-      ? await this.orchestrator.finishConversationReads(readTurn).catch(() => ({
-          run_id: readTurn.runId ?? null,
-          scope: 'deterministic_reads' as const,
-          state: 'UNCONFIRMED',
-        }))
-      : null;
+    const coordination =
+      response.occupancy?.coordination ??
+      (readTurn
+        ? await this.orchestrator
+            .finishConversationReads(readTurn)
+            .catch(() => ({
+              run_id: readTurn.runId ?? null,
+              scope: 'deterministic_reads' as const,
+              state: 'UNCONFIRMED',
+            }))
+        : null);
     const grounding =
       response.grounding ?? this.groundingReport(null, 'not_required', []);
     const usage = decisions.reduce(
@@ -2086,6 +2166,9 @@ export class AiCoreService {
       .find((tool) => tool.resolution !== undefined)?.resolution;
     const completion = {
       request_id: dto.requestId,
+      ...(response.occupancy
+        ? { recommendation: response.occupancy.recommendation }
+        : {}),
       ...(coordination ? { coordination } : {}),
       ...(this.persistedUserTurns.has(dto)
         ? { user_turn: this.persistedUserTurns.get(dto) }

@@ -56,7 +56,7 @@ export interface OpportunityLifecycleRunResult {
   externalSideEffects: 0;
 }
 
-type AppointmentRead = Pick<
+export type AppointmentRead = Pick<
   Appointment,
   | 'id'
   | 'tenantId'
@@ -426,101 +426,12 @@ export class OpportunityLifecycleRunner {
     };
   }
 
-  private async currentCapacity(input: {
+  private currentCapacity(input: {
     tenantId: string;
     timezone: string;
     appointment: AppointmentRead;
-  }): Promise<NonNullable<OpportunityShadowAppointmentV1['currentCapacity']>> {
-    const localStart = localDateTime(
-      input.appointment.blockedStartAt,
-      input.timezone,
-    );
-    const localEnd = localDateTime(
-      input.appointment.blockedEndAt,
-      input.timezone,
-    );
-    if (localStart.date !== localEnd.date) {
-      return {
-        availability: 'unknown',
-        completeness: 'unknown',
-        scheduleRef: null,
-        basis: 'cross_day_capacity_not_supported',
-      };
-    }
-
-    const serviceIds = stringArray(input.appointment.serviceIds);
-    if (serviceIds.length === 0) {
-      return {
-        availability: 'unknown',
-        completeness: 'unknown',
-        scheduleRef: null,
-        basis: 'appointment_service_identity_incomplete',
-      };
-    }
-
-    const [schedule, availableSlots] = await Promise.all([
-      this.crm.getStaffScheduleDay(input.tenantId, {
-        staffId: input.appointment.staffExternalId,
-        date: localStart.date,
-      }),
-      this.crm.getAvailableSlots(input.tenantId, {
-        date: localStart.date,
-        staffId: input.appointment.staffExternalId,
-        serviceIds,
-        ...(input.appointment.branchId
-          ? { branchId: input.appointment.branchId }
-          : {}),
-      }),
-    ]);
-    if (
-      schedule.staff_id !== input.appointment.staffExternalId ||
-      schedule.date !== localStart.date
-    ) {
-      return {
-        availability: 'unknown',
-        completeness: 'unknown',
-        scheduleRef: null,
-        basis: 'provider_schedule_identity_mismatch',
-      };
-    }
-
-    const scheduleRef = opportunityShadowScheduleRef({
-      tenantId: input.tenantId,
-      staffExternalId: input.appointment.staffExternalId,
-      localDate: localStart.date,
-      scheduleFingerprint: schedule.revision,
-    });
-    const insideWorkingSchedule =
-      schedule.is_working &&
-      scheduleSlotsContain(
-        schedule.slots,
-        localStart.minutes,
-        localEnd.minutes,
-      );
-    const providerSlotAvailable = availableSlots.some((slot) => {
-      const start = new Date(slot.start);
-      const end = new Date(slot.end);
-      return (
-        !Number.isNaN(start.getTime()) &&
-        !Number.isNaN(end.getTime()) &&
-        slot.staff_id === input.appointment.staffExternalId &&
-        start.getTime() <= input.appointment.blockedStartAt.getTime() &&
-        end.getTime() >= input.appointment.blockedEndAt.getTime()
-      );
-    });
-
-    return {
-      availability:
-        insideWorkingSchedule && providerSlotAvailable
-          ? 'available'
-          : 'unavailable',
-      completeness: 'complete',
-      scheduleRef,
-      basis:
-        insideWorkingSchedule && providerSlotAvailable
-          ? 'provider_schedule_and_available_slot_confirmed'
-          : 'provider_schedule_or_available_slot_absent',
-    };
+  }) {
+    return readOpportunityCurrentCapacity(this.crm, input);
   }
 
   private isEnabled(): boolean {
@@ -666,4 +577,103 @@ function assertInstant(value: Date, label: string): void {
   if (!Number.isFinite(value.getTime())) {
     throw new Error(`${label} must be a valid instant.`);
   }
+}
+
+export async function readOpportunityCurrentCapacity(
+  crm: CrmService,
+  input: {
+    tenantId: string;
+    timezone: string;
+    appointment: AppointmentRead;
+  },
+): Promise<NonNullable<OpportunityShadowAppointmentV1['currentCapacity']>> {
+  const localStart = localDateTime(
+    input.appointment.blockedStartAt,
+    input.timezone,
+  );
+  const localEnd = localDateTime(
+    input.appointment.blockedEndAt,
+    input.timezone,
+  );
+  if (localStart.date !== localEnd.date) {
+    return {
+      availability: 'unknown',
+      completeness: 'unknown',
+      scheduleRef: null,
+      basis: 'cross_day_capacity_not_supported',
+    };
+  }
+
+  const serviceIds = stringArray(input.appointment.serviceIds);
+  if (serviceIds.length === 0) {
+    return {
+      availability: 'unknown',
+      completeness: 'unknown',
+      scheduleRef: null,
+      basis: 'appointment_service_identity_incomplete',
+    };
+  }
+
+  const [schedule, availableSlots] = await Promise.all([
+    crm.getStaffScheduleDay(input.tenantId, {
+      staffId: input.appointment.staffExternalId,
+      date: localStart.date,
+    }),
+    crm.getAvailableSlots(input.tenantId, {
+      date: localStart.date,
+      staffId: input.appointment.staffExternalId,
+      serviceIds,
+      ...(input.appointment.branchId
+        ? { branchId: input.appointment.branchId }
+        : {}),
+    }),
+  ]);
+  if (
+    schedule.staff_id !== input.appointment.staffExternalId ||
+    schedule.date !== localStart.date
+  ) {
+    return {
+      availability: 'unknown',
+      completeness: 'unknown',
+      scheduleRef: null,
+      basis: 'provider_schedule_identity_mismatch',
+    };
+  }
+
+  const scheduleRef = opportunityShadowScheduleRef({
+    tenantId: input.tenantId,
+    staffExternalId: input.appointment.staffExternalId,
+    localDate: localStart.date,
+    scheduleFingerprint: schedule.revision,
+  });
+  const insideWorkingSchedule =
+    schedule.is_working &&
+    scheduleSlotsContain(schedule.slots, localStart.minutes, localEnd.minutes);
+  const providerSlotAvailable = availableSlots.some((slot) => {
+    const start = new Date(slot.start);
+    const end = new Date(slot.end);
+    return (
+      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(end.getTime()) &&
+      slot.staff_id === input.appointment.staffExternalId &&
+      (!input.appointment.branchId ||
+        !slot.branch_id ||
+        slot.branch_id === input.appointment.branchId) &&
+      start.getTime() <= input.appointment.blockedStartAt.getTime() &&
+      end.getTime() >= input.appointment.blockedEndAt.getTime()
+    );
+  });
+
+  return {
+    availability:
+      insideWorkingSchedule && providerSlotAvailable
+        ? 'available'
+        : 'unavailable',
+    completeness: 'complete',
+    scheduleRef,
+    basis:
+      insideWorkingSchedule && providerSlotAvailable
+        ? 'provider_schedule_and_available_slot_confirmed'
+        : 'provider_schedule_or_available_slot_absent',
+  };
 }

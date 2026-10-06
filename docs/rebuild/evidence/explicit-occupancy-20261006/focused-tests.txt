@@ -1,0 +1,6 @@
+
+Test Suites: 16 passed, 16 total
+Tests:       245 passed, 245 total
+Snapshots:   0 total
+Time:        1.352 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/crm/opportunity-lifecycle.runner.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts", "src/orchestration/c9.occupancy.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/orchestration/c9.consumers.architecture.spec.ts", "src/orchestration/c9.source-boundaries.architecture.spec.ts", "src/orchestration/c9.identity.spec.ts", "src/orchestration/c9.policy-and-sources.spec.ts", "src/orchestration/c9.resume.spec.ts", "src/orchestration/c9.retention.spec.ts", "src/orchestration/c9.limited-data-and-strategy.spec.ts", "src/widgets/rendering/denial-projection.ratchet.spec.ts", "src/widgets/authority/business-rules-admission.spec.ts".

@@ -279,6 +279,33 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       },
     ),
     intent(
+      'schedule.review_cancellation_windows',
+      'schedule',
+      'Review a saved cancellation Opportunity against current CRM availability and recommend bounded read-only next steps.',
+      {
+        action: 'analyze',
+        dataClass: 'D',
+        roles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+        permission: 'schedule.team.read',
+        tools: ['booking.availability.read'],
+        readiness: 'partial',
+        readinessNote:
+          'Explicit owner web request only: one saved Opportunity, current CRM schedule and availability, C9 recommendation. No background checks, bookings, discounts, customer lists or messaging. Named dates/branches/employees and compound tasks require clarification in this slice.',
+        optionalSlots: ['date_or_period', 'employee', 'branch'],
+        responseRule:
+          'Delegate this explicit request through C9 cancellation-window review. Do not call generic availability with an invented date. Current CRM and Opportunity owners supply scope; no absence or probability may be inferred.',
+        synonyms: [
+          'окна после отмен',
+          'освободилось после отмены',
+          'возможности заполнить отменённые записи',
+        ],
+        examples: [
+          'Проверь окна после отмен',
+          'Посмотри, что освободилось из-за отменённых визитов',
+        ],
+      },
+    ),
+    intent(
       'schedule.find_free_employee',
       'schedule',
       'Find employees with capacity.',

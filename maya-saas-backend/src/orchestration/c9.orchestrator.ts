@@ -1,5 +1,14 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import {
+  C9OccupancySource,
+  type OccupancyProjection,
+} from './c9.occupancy-source';
+import { C9Strategy } from './c9.strategy';
+import {
+  occupancyStatement,
+  occupancyLocalDate,
+} from './c9.occupancy-presentation';
 import { C9Agents } from './c9.agents';
 import { C9Allowance } from './c9.allowance';
 import { C9ContextService } from './c9.context';
@@ -72,6 +81,8 @@ export class C9Orchestrator {
     private readonly agents: C9Agents,
     private readonly allowance: C9Allowance,
     @Optional() private readonly moduleRef?: ModuleRef,
+    @Optional() private readonly occupancy?: C9OccupancySource,
+    @Optional() private readonly strategy?: C9Strategy,
   ) {}
   requestIdentity(channelProof?: string) {
     return this.store.event(channelProof);
@@ -208,6 +219,205 @@ export class C9Orchestrator {
       turn.failed = true;
       throw error;
     }
+  }
+
+  /** One explicit web turn, one finite source read, one derived strategy version. */
+  async checkCancellationWindows(turn: C9ConversationReads) {
+    if (!this.occupancy || !this.strategy)
+      c9Deny('context_fact_source_unavailable');
+    const root = await this.store.conversationReadRun(
+      turn.turn,
+      turn.intentHash,
+      'occupancy',
+    );
+    await this.occupancy.authorize(root.id);
+    const cap = c9Capability('booking.availability.read', 'OCCUPANCY');
+    const receipt = await this.work.reserve(root.id, {
+      callKey: 'explicit-cancellation-window',
+      domain: 'OCCUPANCY',
+      kind: 'TOOL_READ',
+      taskKey: cap.capabilityKey,
+      inputHash: c9Hash('occupancy-request/1', [turn.intentHash]),
+      evidenceRefs: [],
+      reservation: {
+        contract: 'maya.c9-reservation/1',
+        toolCalls: 1,
+        modelCalls: 0,
+        domain: 'OCCUPANCY',
+        inputTokens: 0,
+        outputTokens: 0,
+        costMicros: '0',
+        priceHash: null,
+        zeroCostEvidenceRef: `local:${cap.toolOrInterface}:no-provider-charge`,
+        stepRef: null,
+      },
+    });
+    const replayed = receipt.state === 'SETTLED';
+    let projection: OccupancyProjection;
+    if (replayed) {
+      projection = receipt.resultJson as unknown as OccupancyProjection;
+      if (projection.contract !== 'maya.c9-occupancy-read/1')
+        c9Deny('source_read_receipt');
+    } else {
+      if (receipt.state !== 'RESERVED')
+        c9Deny('read_work_in_progress_or_unknown');
+      const lease = await this.work.claim(root.id, receipt.id);
+      if (!lease) c9Deny('read_work_in_progress_or_unknown');
+      try {
+        projection = await this.occupancy.read(root.id);
+        // Save the exact proposal before settlement. SETTLED therefore always
+        // has one immutable version; a concurrent replay cannot win a different
+        // no-action proposal. Interrupted DISPATCHED work stays held, never retried.
+        await this.saveOccupancyProposal(root, projection);
+        await this.work.settle(
+          lease,
+          {
+            ...projection,
+            window: null,
+            sourceDigest: c9Hash('occupancy-source/1', [projection]),
+          },
+          {
+            contract: 'maya.c9-usage/1',
+            usageReceiptRef: lease.workId,
+            verifiedAt: projection.asOf,
+            inputTokens: 0,
+            outputTokens: 0,
+            costMicros: '0',
+            priceHash: null,
+            completionKind: 'CONFIRMED',
+          },
+        );
+      } catch (error) {
+        await this.work.hold(lease).catch(() => undefined);
+        throw error;
+      }
+    }
+    // Restart never redispatches a settled read or turns its historical evidence
+    // into current availability. A new user turn is required for another check.
+    const snapshot = await this.store.snapshot(root.id);
+    const revision = snapshot.revisions.at(-1);
+    if (!revision) c9Deny('source_read_receipt');
+    await this.occupancy.authorize(root.id);
+    const handle =
+      'h_' + c9Hash('occupancy-evidence/1', [root.id, receipt.id, projection]);
+    const answer = this.agents.answer(
+      'OCCUPANCY',
+      'c9.cancellation_windows',
+      {
+        trusted: { domain: 'OCCUPANCY', scopeHash: root.authorityHash },
+        facts: [
+          {
+            kind: 'cancellation_window',
+            capability: cap.capabilityKey,
+            evidenceHandle: handle,
+            asOf: projection.asOf,
+            completeness:
+              replayed ||
+              projection.hasMore ||
+              !['AVAILABLE', 'OCCUPIED', 'EXPIRED', 'CLOSED'].includes(
+                projection.outcome,
+              )
+                ? 'PARTIAL'
+                : 'COMPLETE',
+            qualification: 'VERIFIED',
+            available: projection.outcome !== 'UNAVAILABLE',
+            reasons: [
+              projection.reason,
+              ...(projection.hasMore ? ['candidate_scan_bounded'] : []),
+              ...(replayed ? ['historical_read_not_revalidated'] : []),
+            ],
+            occupancy: projection,
+            historical: replayed,
+          },
+        ],
+      },
+      new Set([cap.capabilityKey]),
+      new Set([handle]),
+    );
+    const alternatives = revision.alternativesJson as unknown as C9Object[];
+    return {
+      reply: [
+        occupancyStatement(projection, replayed),
+        projection.hasMore
+          ? 'Это ограниченная проверка одного окна; другие сохранённые возможности не проверены.'
+          : '',
+        'Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались.',
+        'Варианты: ' +
+          alternatives.map((a) => String(a.title)).join('; ') +
+          '.',
+        `Предложение сохранено, версия ${revision.revision}. Записи и цены не менялись, сообщения клиентам не отправлялись.`,
+      ]
+        .filter(Boolean)
+        .join(' '),
+      coordination: {
+        run_id: root.id,
+        scope: 'explicit_occupancy' as const,
+        state: 'PROPOSED',
+        revision_id: revision.id,
+        revision: revision.revision,
+        replayed,
+        current: !replayed && projection.outcome === 'AVAILABLE',
+      },
+      recommendation: {
+        contract: 'maya.c9-occupancy-response/1',
+        outcome: projection.outcome,
+        agent: answer.result,
+        evidence: {
+          workReceiptId: receipt.id,
+          asOf: projection.asOf,
+          opportunityRefs: projection.evidenceRefs,
+          scheduleRef: projection.scheduleRef,
+        },
+        options: alternatives.map((a) => ({ key: a.key, title: a.title })),
+        noSideEffects: true,
+        executionAuthority: false,
+        reasoning: 'deterministic',
+      },
+    };
+  }
+
+  private saveOccupancyProposal(
+    root: { id: string; budgetManifestHash: string; validUntil: Date },
+    projection: OccupancyProjection,
+  ) {
+    const available = projection.outcome === 'AVAILABLE';
+    const proposal = this.strategy!.propose({
+      objectiveKey: 'c9.cancellation_windows',
+      safeDescription: 'Проверка окна после отмены по явному запросу владельца',
+      budgetManifestHash: root.budgetManifestHash,
+      validUntil: new Date(
+        Math.min(
+          root.validUntil.getTime(),
+          projection.window ? Date.parse(projection.window.start) : Infinity,
+        ),
+      ).toISOString(),
+      unknowns: [
+        'Причина и автор отмены не установлены.',
+        'Спрос, вероятность заполнения и доход не оценивались.',
+        'Перед любым действием требуется новая проверка доступности.',
+      ],
+      options:
+        available && projection.window
+          ? [
+              {
+                optionKey: 'check_date',
+                title:
+                  'По новому запросу проверить доступное время на эту дату',
+                domain: 'OCCUPANCY',
+                capability: 'booking.availability.read',
+                intentContract: 'booking.availability.read:input/1',
+                intent: { date: occupancyLocalDate(projection.window) },
+                evidenceRefs: projection.evidenceRefs,
+              },
+            ]
+          : [],
+      recommendedOptionKey: available ? 'check_date' : null,
+    });
+    return this.store.revision(
+      root.id,
+      'explicit-cancellation-proposal',
+      proposal,
+    );
   }
 
   conversationDigest(value: unknown) {

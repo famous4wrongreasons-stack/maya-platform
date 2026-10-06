@@ -12,6 +12,7 @@ import {
 } from '@prisma/client';
 
 import {
+  OPPORTUNITY_TYPE,
   type AgentDomain,
   type AgentTaskV1,
   type OpportunityEvidenceV1,
@@ -379,6 +380,27 @@ export class OpportunityLifecycleRepository {
         await expireOpportunity(tx, opportunity, input.asOf);
       }
       return due.length;
+    });
+  }
+
+  /** Finite explicit-request projection; no lifecycle transition or task dispatch. */
+  async readCancellationCandidates(tenantId: string, asOf: Date) {
+    const where = {
+      tenantId,
+      type: OPPORTUNITY_TYPE.appointmentCancellationRecovery,
+    };
+    const active = await this.prisma.opportunity.findMany({
+      where: { ...where, status: 'active', expiresAt: { gt: asOf } },
+      include: { agentTasks: true },
+      orderBy: [{ expiresAt: 'asc' }, { id: 'asc' }],
+      take: 2,
+    });
+    if (active.length) return active;
+    return this.prisma.opportunity.findMany({
+      where,
+      include: { agentTasks: true },
+      orderBy: [{ lastValidatedAt: 'desc' }, { id: 'asc' }],
+      take: 2,
     });
   }
 

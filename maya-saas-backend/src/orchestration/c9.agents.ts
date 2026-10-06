@@ -1,3 +1,5 @@
+import { occupancyStatement } from './c9.occupancy-presentation';
+import type { OccupancyProjection } from './c9.occupancy-source';
 import { Injectable } from '@nestjs/common';
 import {
   C9Domain,
@@ -152,7 +154,13 @@ export class C9Agents {
       }
       // A finding restates what the source already qualified. It adds no arithmetic.
       findings.push({
-        statement: `${factLabel(fact)}: ${status} as of ${String(fact.asOf)}`,
+        statement:
+          fact.kind === 'cancellation_window'
+            ? occupancyStatement(
+                fact.occupancy as OccupancyProjection,
+                fact.historical === true,
+              )
+            : `${factLabel(fact)}: ${status} as of ${String(fact.asOf)}`,
         evidence_refs: [handle],
       });
     }
