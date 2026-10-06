@@ -1,0 +1,30 @@
+{
+  "contract": "maya.development-heavy-preparation/1",
+  "base": "75936a2b612b675e530a9834b2274fad5587ae27",
+  "execution": "NOT_RUN",
+  "validation": {
+    "bashBlocksSyntaxOnly": 14,
+    "embeddedNodeSyntaxOnly": "PASS"
+  },
+  "profileId": "closed-input.no-handoff@1",
+  "oldRegistryDigest": "21ffeb2426d9629e8e9110bbecdbdc7b45c0869e70f9395024e0fa728418a49a",
+  "sources": {
+    "maya-saas-backend/scripts/widget-contract/README.md": "fe4a6f96c46eed11155362011587e6f4ce80b20949e348c82f135d01dc46eb2a",
+    "maya-saas-backend/src/entitlements/widget-release-profile.contract.ts": "3600e46a7cc32c7cabb9058b37d74e13df8b68f27a3e1453c7cdc99951896e2c",
+    "maya-saas-backend/src/entitlements/widget-release-profile.contract.spec.ts": "fb5157a53326134cc2d020a5f9231faab5dcc9b27d812e075d4df8c496e7e922",
+    "maya-saas-backend/src/entitlements/widget-release-profile.registry.ts": "d2387c1ec866ae373edc9d50be0ead9004ffd1998aba025f0e04b48f62f7053d",
+    "maya-saas-backend/src/widgets/owner-ports/release-access.adapter.ts": "150acddbefaaa74882ea90d7327cf2d5287d333d40aa066e9fd3954947a73f19",
+    "maya-saas-backend/src/widgets/emission/schedule-intent-template.ts": "41fe3dae9e3b5b770f3116733162a15c974b2eb3b8033a384b24cff52c002bcb",
+    "maya-saas-backend/src/widgets/emission/schedule-confirmation-minter.service.ts": "5b3852c3f5d2ae20f4115bd4fb195206f41fc6b4eab19f2c696ce793b01a0703",
+    "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md": "9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769"
+  },
+  "blockers": [
+    "PARENT_HEAVY_SLOT",
+    "COMBINED_HTTP_BROWSER_SOURCE_MISSING",
+    "COMPLETE_REGISTRY_AND_V14_PROFILE_RECONCILIATION",
+    "SETTINGS_4_MANDATORY_HANDOFF_EXCLUDES_SCHEDULE_FROM_RESTRICTED_PROFILE",
+    "FRESH_CERTIFICATE_EVIDENCE_NOT_YET_COLLECTED"
+  ],
+  "productionSourceChanged": false,
+  "profilePinChanged": false
+}

@@ -109,9 +109,12 @@ Remaining qualification work:
 2. **Existing restricted-profile release blocker.** Pricing adds `servicePrice`
    to `WidgetReleaseAccessAdapter.registryDigest()`, while
    `WidgetReleaseAccessService.bindMint` / `admits` require the pinned
-   `PROFILE_REGISTRY_DIGEST` for `booking_chat_no_handoff_v1`. That pin is unchanged.
+   `PROFILE_REGISTRY_DIGEST` for `closed-input.no-handoff@1`. That pin is unchanged.
    Restricted scopes remain fail-closed pending separate release/profile
    qualification; this integration neither recertifies that profile nor updates
    a pin merely to pass. Full-scope development tests do not discharge it.
 3. Real-model acceptance, live YCLIENTS outcomes, general background autonomy,
    production readiness and C10 completion remain unclaimed.
+
+
+The next execution sequence is prepared in [MAYA-DEVELOPMENT-HEAVY-GATE-PLAN-20261006.md](MAYA-DEVELOPMENT-HEAVY-GATE-PLAN-20261006.md). It has not run. That source review also identifies the exact SETTINGS.4 mandatory-HANDOFF blocker for schedule in the no-HANDOFF restricted profile; digest reconciliation alone cannot admit that card.
