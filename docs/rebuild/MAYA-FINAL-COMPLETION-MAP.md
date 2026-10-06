@@ -585,3 +585,24 @@ notifications/payments, phone actions, deployment, push or merge. Next is parent
 review of this exact local candidate, then separately authorized website/provider or
 frozen real-model acceptance; Telegram installation and inbound lifecycle decisions
 remain unresolved. Any release using the changed profile requires matching certification.
+
+## Private-context fix and local compiled package — 2026-10-06 UTC
+
+Code `00b8d6b3e245fa56fe61a8b10e2d46394e8b0c98` closes the reviewed semantic-context
+model-boundary leak using the existing projection owner and request-local aliases.
+Serialized model-request regressions include resumed encrypted context, corrections,
+rare full names and private references; canonical booking resolution remains local.
+The deploy script gains truly read-only INSPECT_ONLY while PREPARE_ONLY retains its
+explicit migration semantics. The user release runbook records revoke/profile/rollback
+ordering and preserves UNKNOWN recovery. See
+[qualification and remaining gates](PRIVACY-RELEASE-QUALIFICATION-20261006.md).
+
+Fresh backend census 5855/5855 over 601 suites; HTTP 492/492 over 52 suites;
+shell 430 PASS / 7 explicit local API skips; React 93/93; release 18/18.
+An independent clean compiled export passed 115 targeted and four binary tests.
+Local artifact manifest: `../release-artifacts/00b8d6b3-local/manifest.json` from the
+checkout root. Build digest `061159bb2f9ae13e71912223fc4996b864917ab2e9b4fbe0d839f552a6b49221`;
+profile remains V1.3 `eaddcf2b69dfd890688ace7d25552609b8ec8923c3419f844c416b4d6f0cae45`.
+This does not qualify Linux, Safari, a real model or provider, or production release.
+No paid/provider/production/phone action, push or merge. Next: parent review and
+separately authorized actual-target inventory/certification and external acceptance.
