@@ -1,0 +1,159 @@
+{
+  "contract": "maya.v14-qualification-preparation-checkpoint/1",
+  "candidateHead": "3a93408f202006c3b8699b9ab043bfa61f00152b",
+  "runtimeSourceHead": "be7a4a5f08fe34369c11d548741724bae13a2618",
+  "worktreeCleanBeforeChecks": true,
+  "steps": [
+    {
+      "name": "audit-reproduction",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration",
+      "command": [
+        "node",
+        "docs/rebuild/widget-release-programme/development-v14/prepare-audit.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-10-06T21:10:09.255020+00:00",
+      "seconds": 0.045,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "audit-preparation-tests",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration",
+      "command": [
+        "node",
+        "--test",
+        "docs/rebuild/widget-release-programme/development-v14/prepare-audit.test.mjs"
+      ],
+      "startedAt": "2026-10-06T21:10:09.300416+00:00",
+      "seconds": 0.135,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "audit-check",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration",
+      "command": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs"
+      ],
+      "startedAt": "2026-10-06T21:10:09.435530+00:00",
+      "seconds": 0.027,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "audit-self-test",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration",
+      "command": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs",
+        "--self-test"
+      ],
+      "startedAt": "2026-10-06T21:10:09.462086+00:00",
+      "seconds": 0.039,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "mutation-dry-run",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--dry-run",
+        "--out",
+        "/tmp/maya-v14-qualification-20261006/checkpoint/mutation-dry-run.json"
+      ],
+      "startedAt": "2026-10-06T21:10:09.500996+00:00",
+      "seconds": 0.14,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "mutation-plan",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-ci.mjs",
+        "plan"
+      ],
+      "startedAt": "2026-10-06T21:10:09.640795+00:00",
+      "seconds": 0.03,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "mutation-admission-selected-tests",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": [
+        "node",
+        "--test",
+        "--test-name-pattern=47 batteries|runner dry-run|invalid partition|gate:|assembly accepts|explicit manual",
+        "scripts/widgets-mutation-ci.test.mjs"
+      ],
+      "startedAt": "2026-10-06T21:10:09.670687+00:00",
+      "seconds": 2.251,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "evidence-lineage-tests",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": [
+        "node",
+        "--test",
+        "scripts/widgets-evidence-lineage.test.mjs"
+      ],
+      "startedAt": "2026-10-06T21:10:11.921744+00:00",
+      "seconds": 0.06,
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "name": "historical-claims-rejected",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": [
+        "node",
+        "scripts/widgets-evidence-verify.mjs",
+        "--dir",
+        "/tmp/maya-release-qualification-20261006/clauses-7879f811"
+      ],
+      "startedAt": "2026-10-06T21:10:11.981549+00:00",
+      "seconds": 0.04,
+      "exitCode": 1,
+      "expectedExitCode": 1
+    }
+  ],
+  "audit": {
+    "applicableUnqualified": 163,
+    "handoffStop": 2,
+    "certificate": "NOT_ISSUED"
+  },
+  "mutation": {
+    "declarations": 545,
+    "batteries": 47,
+    "plannedJobs": 68,
+    "actualMutationKillsMeasured": 0,
+    "dryRunOnly": true
+  },
+  "review": {
+    "type": "independent-agent-preparation-review",
+    "humanReview": false,
+    "findingsClosed": true
+  },
+  "remaining": [
+    "parent heavy-slot coordination",
+    "fresh unrestricted baseline HTTP/BIN evidence",
+    "complete serial mutation qualification",
+    "fresh substantive V1.4 clause qualification",
+    "owner three-relation FK decision before schema/migration edits"
+  ],
+  "boundaries": {
+    "runtimeSchemaMigrationsUnchanged": true,
+    "scheduleEditor": "NOT_USER_REACHABLE",
+    "production": "NOT_AUTHORIZED",
+    "realModelAcceptance": false,
+    "servicesStarted": false
+  }
+}

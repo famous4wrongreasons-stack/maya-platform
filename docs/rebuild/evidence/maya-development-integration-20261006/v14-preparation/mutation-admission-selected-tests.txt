@@ -1,0 +1,17 @@
+✔ 47 batteries, 68 jobs: AR1 single-operator governance covers 545 declarations (8.321208ms)
+✔ assembly accepts the mandatory plain live reference of a neutralised-only live battery (0.719834ms)
+✔ runner dry-run independently executes the same disjoint partition selection (2043.535458ms)
+✔ invalid partition/gate requests fail before execution (25.239916ms)
+✔ explicit manual subset remains a subset, never a whole-programme receipt (1.117584ms)
+✔ gate: a baseline control is red on a non-zero step exit, a failed assertion, or a missing report (3.217042ms)
+✔ gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch (0.132584ms)
+✔ gate: the refusal names the control, the steps and every failing baseline test (0.126541ms)
+✔ gate: the assembly refuses the exact P-f88 part, AS-DECLARED and mismatch-free as it was written (0.728833ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2224.426208

@@ -51,6 +51,15 @@ node docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs --self-test
 `--write` regenerates the unqualified current audit/inventory and two candidate
 proof maps. It is not a promotion or certificate writer.
 
+At clean candidate `3a93408f202006c3b8699b9ab043bfa61f00152b`, the
+[11-file evidence archive](../../evidence/maya-development-integration-20261006/v14-preparation/manifest.json)
+records four preparation tests, nine selected offline mutation-admission tests,
+12 lineage tests, audit consistency/self-test and the full 545-anchor dry-run.
+Every command exited as expected. Rechecking the historical manifest under the
+current map produced the expected 12 `V-U-PROOF` violations for its six obsolete
+approval U claims. The independent agent reviewed preparation only; findings
+were corrected and the three historical gzip files are tracked in Git.
+
 From `maya-saas-backend`, the unchanged full mutation declaration set is
 47 batteries / 68 planned jobs / 545 mutants. Eight anchors in six batteries
 were reconciled with current code without changing IDs, killers, expected

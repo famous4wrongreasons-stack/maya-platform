@@ -1,0 +1,20 @@
+✔ accepts a persisted two-hop chain to a production trigger (0.398333ms)
+✔ refuses missing parent (0.04825ms)
+✔ refuses foreign process (0.374917ms)
+✔ refuses non-production root (0.049958ms)
+✔ refuses cycle (0.062084ms)
+✔ refuses duplicate capture (0.066083ms)
+✔ refuses parent not durable (0.039292ms)
+✔ refuses child not durable (0.032042ms)
+✔ refuses missing trace (0.055625ms)
+✔ refuses missing predecessor (0.0785ms)
+✔ refuses self predecessor (0.042708ms)
+✔ refuses root masquerades as successor (0.037416ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35.537042

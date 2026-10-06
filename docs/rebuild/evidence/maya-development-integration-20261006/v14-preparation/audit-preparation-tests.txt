@@ -1,0 +1,12 @@
+✔ historical receipts still validate only with their historical contract (24.291791ms)
+✔ V1.4 preserves every obligation ID and updates the nine reviewed summaries only (21.125416ms)
+✔ fresh baseline inherits no conformance, evidence, mutation result or release authority (11.785833ms)
+✔ reachable F74a approval cannot inherit a whole-clause absence claim (14.372042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.9545

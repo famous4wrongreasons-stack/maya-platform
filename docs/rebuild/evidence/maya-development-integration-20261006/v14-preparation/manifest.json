@@ -1,0 +1,74 @@
+{
+  "contract": "maya.development-v14-preparation-archive/1",
+  "candidateHead": "3a93408f202006c3b8699b9ab043bfa61f00152b",
+  "preparationOnly": true,
+  "fullQualification": false,
+  "files": [
+    {
+      "path": "audit-check.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/audit-check.txt",
+      "bytes": 129,
+      "sha256": "48653dda174b0284b29aeb752fa7cf6a08b6c86ff77ec35961af06e35ff74a10"
+    },
+    {
+      "path": "audit-preparation-tests.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/audit-preparation-tests.txt",
+      "bytes": 491,
+      "sha256": "b85f5bf26f17b92a908795b235bfc3c8bc4b2288de14c3204eb41f857a413046"
+    },
+    {
+      "path": "audit-reproduction.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/audit-reproduction.txt",
+      "bytes": 81,
+      "sha256": "de4b1d45bfea5459720346936686b3bfd7b68c3dda3980f87431aae28dbf77e0"
+    },
+    {
+      "path": "audit-self-test.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/audit-self-test.txt",
+      "bytes": 1481,
+      "sha256": "79bc1871bfe1450765327b3a9be06451f0d1ca30ee26a1be6b2884b95bf3b718"
+    },
+    {
+      "path": "evidence-lineage-tests.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/evidence-lineage-tests.txt",
+      "bytes": 656,
+      "sha256": "d2c1f47e0be73bd1b49d99d47945a5be6707747957432f0c6e0bc6ea8c122202"
+    },
+    {
+      "path": "historical-claims-rejected.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/historical-claims-rejected.txt",
+      "bytes": 2204,
+      "sha256": "20cf59c2f213bbccbe8139138768e0d00e2471448ccf45483f61a18f0ec9e7d0"
+    },
+    {
+      "path": "mutation-admission-selected-tests.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/mutation-admission-selected-tests.txt",
+      "bytes": 1010,
+      "sha256": "375ae379b214b1c48629740349ca3d4eac012931f49bc3fe3fe728461908f68a"
+    },
+    {
+      "path": "mutation-dry-run.json",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/mutation-dry-run.json",
+      "bytes": 210336,
+      "sha256": "30b9e6c3e0e539f2936c21d92ceb112069d8e72d3d8033b7d9808300e01395fa"
+    },
+    {
+      "path": "mutation-dry-run.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/mutation-dry-run.txt",
+      "bytes": 65536,
+      "sha256": "5cc476ccb849ec85a469bc117f435c71857bc40283475e98a5ea94d8c7505ed9"
+    },
+    {
+      "path": "mutation-plan.txt",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/mutation-plan.txt",
+      "bytes": 3775,
+      "sha256": "e33aaa06729ffcc15cabf5c437b816c322fe136098ac8a383f09d45e7b841dd5"
+    },
+    {
+      "path": "summary.json",
+      "originalPath": "/tmp/maya-v14-qualification-20261006/checkpoint/summary.json",
+      "bytes": 5103,
+      "sha256": "971ba67cea399136be6c95add58c9ccb576302dea4f154a7112241eae86ee6b9"
+    }
+  ]
+}
