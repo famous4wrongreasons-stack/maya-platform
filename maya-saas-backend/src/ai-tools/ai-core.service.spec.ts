@@ -1,5 +1,8 @@
 import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
-import { ServiceUnavailableException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -211,7 +214,7 @@ describe('AiCoreService', () => {
     'Хочу на стрижку в пятницу вечером',
     'Давай вместо завтра послезавтра',
   ])(
-    'plans the complete booking dialogue before heuristic data preloads: %s',
+    'plans user booking turns before heuristic data preloads without exporting assistant history: %s',
     async (text) => {
       const toolNames = ['analytics.business.query', 'catalog.services.read'];
       const mocks = createService(toolNames);
@@ -256,7 +259,7 @@ describe('AiCoreService', () => {
             'Стасу',
           ),
         })),
-      ).toEqual(messages);
+      ).toEqual(messages.filter((message) => message.role === 'user'));
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
       expect(result.reply).toContain('подтверждённый клиентский доступ');
     },
@@ -1436,6 +1439,59 @@ describe('AiCoreService', () => {
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.model.decide.mock.calls[0][0].toolResults).toEqual([]);
     });
+    it.each(['same conversation', 'restored conversation'])(
+      'does not export a prior personal reply through %s model input',
+      async (mode) => {
+        const mocks = fixture({
+          appointments: [
+            appointment({
+              branch: {
+                name: 'PRIVATE_BRANCH_MARKER',
+                timezone: 'Asia/Novosibirsk',
+              },
+              services: [{ name: 'PRIVATE_VISIT_SERVICE_MARKER' }],
+            }),
+          ],
+        });
+        const first = await ask(mocks);
+        expect(first.reply).toContain('PRIVATE_VISIT_SERVICE_MARKER');
+        const followUp = {
+          ...dto,
+          requestId: 'personal-followup-1234',
+          messages: [
+            { role: 'user' as const, content: 'Когда я записан?' },
+            { role: 'assistant' as const, content: first.reply },
+            { role: 'user' as const, content: 'А теперь?' },
+          ],
+        };
+        // A new server instance has no in-memory knowledge of the prior reply.
+        const receiver =
+          mode === 'restored conversation'
+            ? fixture({ appointments: [] })
+            : mocks;
+        await receiver.service.chat(client, followUp);
+        const input = JSON.stringify(
+          receiver.model.decide.mock.calls.at(-1)?.[0],
+        );
+        expect(input).not.toMatch(
+          /PRIVATE_VISIT_SERVICE_MARKER|PRIVATE_BRANCH_MARKER|Asia\/Novosibirsk|16:00|Предстоящих: 1/,
+        );
+        expect(input).toContain('А теперь?');
+        await receiver.service.chat(client, {
+          ...followUp,
+          requestId: 'personal-followup-5678',
+          messages: [
+            { role: 'assistant', content: first.reply.slice(25, 170) },
+            { role: 'user', content: 'Проверь ещё раз' },
+          ],
+        });
+        expect(
+          JSON.stringify(receiver.model.decide.mock.calls.at(-1)?.[0]),
+        ).not.toMatch(
+          /PRIVATE_VISIT_SERVICE_MARKER|PRIVATE_BRANCH_MARKER|16:00|Предстоящих: 1/,
+        );
+      },
+    );
     it('counts the complete raw list and displays only three earliest upcoming appointments', async () => {
       const rows = Array.from({ length: 45 }, (_, i) =>
         appointment({
@@ -1450,6 +1506,106 @@ describe('AiCoreService', () => {
       expect(reply.reply).toContain('09.10.2026');
       expect(reply.reply).not.toContain('10.10.2026');
       expect(reply.reply).not.toContain('В вашей истории 40');
+    });
+    it('withholds private history in the actual serialized next model request, including a refused personal reread', async () => {
+      const mocks = fixture({
+        appointments: [
+          appointment({ services: [{ name: 'PRIVATE_SERIALIZED_VISIT' }] }),
+        ],
+      });
+      const wire: string[] = [];
+      const realModel = new AiCoreModelService(
+        new ConfigService({
+          AI_CORE_PROVIDER: 'openai',
+          OPENAI_API_KEY: 'synthetic-transport-no-credential',
+        }),
+      );
+      const transport = jest
+        .spyOn(globalThis, 'fetch')
+        .mockImplementation((url, init) => {
+          expect(url).toBe('https://api.openai.com/v1/responses');
+          expect(init?.method).toBe('POST');
+          if (typeof init?.body !== 'string')
+            throw new Error('Expected serialized provider request body');
+          const serialized = init.body;
+          wire.push(serialized);
+          // The real provider serializer runs; no socket/provider is used.
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                output: [
+                  {
+                    content: [
+                      {
+                        type: 'output_text',
+                        text: JSON.stringify({
+                          semantic_plan: {
+                            parent_request: 'Покажи мои записи',
+                            language: 'ru',
+                            dialogue_act: 'question',
+                            tasks: [
+                              {
+                                id: 'own',
+                                intent: 'booking.list_own',
+                                entities_json: '{}',
+                                depends_on: [],
+                                confidence: 1,
+                                requires_clarification: false,
+                                clarification_question: null,
+                              },
+                            ],
+                            context: {
+                              carried_slots: [],
+                              replaced_slots: [],
+                              unresolved_references: [],
+                            },
+                          },
+                          tool_call: {
+                            name: 'appointments.own.list',
+                            arguments_json: '{}',
+                          },
+                        }),
+                      },
+                    ],
+                  },
+                ],
+                usage: {},
+              }),
+              { status: 200 },
+            ),
+          );
+        });
+      mocks.model.decide.mockImplementation((input) => realModel.decide(input));
+      try {
+        const first = await ask(mocks);
+        expect(first.reply).toContain('PRIVATE_SERIALIZED_VISIT');
+        for (const denied of [false, true]) {
+          if (denied)
+            mocks.runtime.execute.mockRejectedValueOnce(
+              new ForbiddenException('synthetic revoked personal link'),
+            );
+          const next = mocks.service.chat(client, {
+            ...dto,
+            requestId: denied ? 'wire-revoked-1234' : 'wire-followup-1234',
+            messages: [
+              { role: 'user', content: 'Когда я записан?' },
+              { role: 'assistant', content: first.reply },
+              { role: 'user', content: 'Покажи мои записи' },
+            ],
+          });
+          if (denied)
+            await expect(next).rejects.toBeInstanceOf(ForbiddenException);
+          else await next;
+          expect(wire.at(-1)).not.toMatch(
+            /PRIVATE_SERIALIZED_VISIT|Asia\/Novosibirsk|16:00|Предстоящих: 1/,
+          );
+          const body = JSON.parse(wire.at(-1)!) as { input: string };
+          expect(body.input).toContain('Покажи мои записи');
+        }
+        expect(wire).toHaveLength(3);
+      } finally {
+        transport.mockRestore();
+      }
     });
     it('does not offer a canceled future appointment as the next visit', async () => {
       const reply = await ask(
@@ -3894,11 +4050,14 @@ describe('AiCoreService', () => {
           { role: 'user', content: 'Что сейчас требует моего внимания?' },
         ],
       });
-      // Keep conversational continuity; only its authority changes.
-      expect(mocks.model.decide.mock.calls[1]?.[0].messages).toContainEqual({
-        role: 'assistant',
-        content: earlierAssistant,
-      });
+      // User preferences remain context; unclassified assistant prose cannot
+      // become external model context or a substitute for current source facts.
+      expect(mocks.model.decide.mock.calls[1]?.[0].messages).not.toContainEqual(
+        {
+          role: 'assistant',
+          content: earlierAssistant,
+        },
+      );
       expect(mocks.model.decide).toHaveBeenCalledTimes(
         explicitUserScenario ? 2 : 3,
       );

@@ -918,7 +918,13 @@ export class AiCoreService {
           surface: dto.surface,
           persona: brain.persona,
           principalRole: toolUser.role,
-          messages: sanitized.project(sanitized.messages),
+          // Caller-carried assistant prose has no trusted source classification.
+          // It can include a private server-composed visit/loyalty reply, including
+          // after reload or truncation. Keep UI/local dialogue intact; external
+          // planning uses sanitized user turns and the existing semantic owner.
+          messages: sanitized.project(
+            sanitized.messages.filter((message) => message.role === 'user'),
+          ),
           tools,
           toolResults: modelToolResults,
           // После подтверждённого результата CRM отдельный этап планирования
