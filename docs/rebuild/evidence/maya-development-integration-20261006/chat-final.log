@@ -1,0 +1,25 @@
+FAIL src/ai-tools/ai-core.development-integration.spec.ts
+  ● unified development candidate: routes and authority stay isolated › does not treat the new request График Антона as the missing staff name
+
+    expect(jest.fn()).toHaveBeenCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+      182 |         ]),
+      183 |       );
+    > 184 |       expect(f.model.decide).toHaveBeenCalled();
+          |                              ^
+      185 |       expect(f.runtime.execute).not.toHaveBeenCalled();
+      186 |       expect(f.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+      187 |       expect(f.scheduleWidget.mint).not.toHaveBeenCalled();
+
+      at ai-tools/ai-core.development-integration.spec.ts:184:30
+
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 132 passed, 133 total
+Snapshots:   0 total
+Time:        0.858 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/chat-final.json

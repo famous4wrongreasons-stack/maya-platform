@@ -1,0 +1,20 @@
+{
+  "occupancy": {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-explicit-occupancy",
+    "head": "f9976ab601f0438676cf59a5d108bd719c2acd0e",
+    "clean": true,
+    "ancestorOfCandidate": true
+  },
+  "pricing": {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task/service-pricing",
+    "head": "4c8141e0d29e41df74fc7adfbfae9438d735d626",
+    "clean": true,
+    "ancestorOfCandidate": true
+  },
+  "schedule": {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-10/maya-platform-dev",
+    "head": "7b9d0ff5e556fa262d83f204a7a6892848dd8732",
+    "clean": true,
+    "ancestorOfCandidate": true
+  }
+}

@@ -1,0 +1,77 @@
+FAIL src/widgets/emission/emitter.spec.ts
+  ● K3 emission — mint, compose, fit, seal › persists separate schedule and pricing owner identities in one emitter, with no generic mint authority
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  2
+    + Received  + 43
+
+      Array [
+    -   ObjectContaining {
+    +   Object {
+    +     "approvalDecision": null,
+    +     "approvalOfIntentRef": null,
+    +     "bodyHash": "fc67324da19cc546f36cf6300047c9a5a04bb3a1930a3cb551e36cb92f7c6e24",
+    +     "c9Domain": null,
+          "capabilityKey": "package5.wave3.update-staff-schedule-day.execute.v1",
+    -     "confirmationIdempotencyKey": "schedule-approval",
+    +     "capabilitySpace": "AE",
+    +     "confirmationJson": Object {
+    +       "idempotency_key": "schedule-approval",
+    +       "readback_ref": null,
+    +       "requires_readback": false,
+    +     },
+          "confirmationOfKind": "draft",
+          "confirmationOfRef": "schedule-approval",
+    +     "confirmationSubject": null,
+    +     "effect": "COMMIT",
+    +     "expiresAt": 2035-05-10T09:10:00.000Z,
+    +     "frozenNounsJson": Object {
+    +       "approval": "opaque-approval",
+    +       "payload": "opaque-payload",
+    +     },
+    +     "handoffKey": null,
+    +     "handoffSpace": null,
+    +     "inputSchemaHash": null,
+    +     "intentTokenHash": "0a46cba4d7c823639d136ca4b7059e66581fe1ebe8bbcf0b2b50b92cab00ad3a",
+    +     "issuedAt": 2035-05-10T09:00:00.000Z,
+    +     "principalProofHash": "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+    +     "priority": 1,
+    +     "producedByIntentTokenHash": null,
+    +     "renderedUtterance": null,
+    +     "requestedScopeHash": "de295d4a6595b2dd450eed3dbbe781b4dfe44ef135e07145185f7f46ebb7fe67",
+    +     "retainedLocalBusinessDate": null,
+    +     "revisionId": null,
+    +     "runId": null,
+    +     "selectedLabels": Array [],
+    +     "selectionDomain": "{}",
+    +     "selectionDomainLabelsJson": Object {},
+    +     "singleUse": true,
+    +     "sourceCapabilityKey": null,
+    +     "sourceCapabilitySpace": null,
+    +     "spokenTranscript": null,
+    +     "targetJson": null,
+    +     "tenantId": "t1",
+    +     "utteranceTemplate": "Подтвердить изменение графика",
+    +     "verificationFloor": "SESSION_VERIFIED",
+    +     "widgetId": "2ad2cbc1-13f4-43eb-a0ab-c23029abf2c5",
+          "widgetKind": "SETTINGS_DRAFT",
+        },
+      ]
+
+      183 |       producedByIntentTokenHash: null, idempotencyKey: 'schedule-approval', requiresReadback: false, readbackRef: null,
+      184 |     }, now);
+    > 185 |     expect(prisma.records.filter(record => record.effect === 'COMMIT')).toEqual([
+          |                                                                         ^
+      186 |       expect.objectContaining({ widgetKind: 'SETTINGS_DRAFT', capabilityKey: SCHEDULE_AE,
+      187 |         confirmationOfKind: 'draft', confirmationOfRef: 'schedule-approval', confirmationIdempotencyKey: 'schedule-approval' }),
+      188 |     ]);
+
+      at Object.<anonymous> (widgets/emission/emitter.spec.ts:185:73)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 24 passed, 25 total
+Snapshots:   0 total
+Time:        0.647 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/widgets/emission/emitter.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/crossfeature-unit.json

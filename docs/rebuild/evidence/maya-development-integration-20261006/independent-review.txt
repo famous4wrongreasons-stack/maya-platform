@@ -1,0 +1,14 @@
+Independent read-only reviewer: /root/independent_review
+Reviewed code checkpoint: ca9dc8a5d99e371e3b6d132b911eb44d3d0e8985
+
+Findings closed:
+1. Direct purpose switch after schedule date clarification incorrectly carried old draft into pricing.
+2. Staff-name clarification accepted mixed read/greeting phrases (График Антона, Добрый день).
+
+Reviewer final outcome (verbatim):
+Независимый review checkpoint ca9dc8a5d99e371e3b6d132b911eb44d3d0e8985 закрыт: оба P2 исправлены, новых блокеров не обнаружил.
+Подтверждён chat-final-rerun.json: 3 suites / 133 tests PASS. Финальный повтор 16 suites ещё не оценён.
+Это code-review checkpoint. Объединённый HTTP/PG/browser acceptance и restricted-profile qualification не подтверждены; тяжёлые проверки reviewer не запускал.
+
+Root follow-up evidence, not attributed to reviewer:
+qualified-targeted-unit.json subsequently completed: 16 suites / 339 tests PASS.

@@ -1,0 +1,7 @@
+
+Test Suites: 16 passed, 16 total
+Tests:       339 passed, 339 total
+Snapshots:   0 total
+Time:        22.919 s, estimated 24 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/widgets/emission/schedule-intent-template.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts", "src/widgets/owner-ports/noun-resolution.owners.provider.spec.ts", "src/widgets/owner-ports/service-price-approval.adapter.spec.ts", "src/widgets/owner-ports/schedule-approval.adapter.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/composition/typed-step0.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts", "src/widgets/pricing/service-price-widget.contract.spec.ts", "src/orchestration/c9.occupancy.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/qualified-targeted-unit.json

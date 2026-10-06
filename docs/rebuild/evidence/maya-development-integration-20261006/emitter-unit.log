@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.376 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/emitter-unit.json

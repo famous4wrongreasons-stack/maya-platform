@@ -1,0 +1,44 @@
+{
+  "approved_v14_contract": {
+    "path": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+    "source": "4c8141e0d29e41df74fc7adfbfae9438d735d626",
+    "sourceObject": "74a15396bb6fa508d0023c61a3dfee892417035b",
+    "candidateObject": "74a15396bb6fa508d0023c61a3dfee892417035b",
+    "identical": true
+  },
+  "v13_owner_decision": {
+    "path": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.3-DECISION-RECORD.md",
+    "source": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+    "sourceObject": "11f54a1dfa109d0929230ed770788fd3500957a1",
+    "candidateObject": "11f54a1dfa109d0929230ed770788fd3500957a1",
+    "identical": true
+  },
+  "pricing_ae_floors": {
+    "path": "maya-saas-backend/src/widgets/authority/verification-floor.runtime.ts",
+    "source": "4c8141e0d29e41df74fc7adfbfae9438d735d626",
+    "sourceObject": "bc3c676fb5d5a0386b59c2875ac4281a33a1c90f",
+    "candidateObject": "bc3c676fb5d5a0386b59c2875ac4281a33a1c90f",
+    "identical": true
+  },
+  "pricing_ae_families": {
+    "path": "maya-saas-backend/src/widgets/authority/ae-commit-allowlist.runtime.ts",
+    "source": "4c8141e0d29e41df74fc7adfbfae9438d735d626",
+    "sourceObject": "9d255151d9421efdb8b259cba6787984d2abe621",
+    "candidateObject": "9d255151d9421efdb8b259cba6787984d2abe621",
+    "identical": true
+  },
+  "release_profile_pins": {
+    "path": "maya-saas-backend/src/entitlements/widget-release-profile.registry.ts",
+    "source": "f9976ab601f0438676cf59a5d108bd719c2acd0e",
+    "sourceObject": "134f0cc57fcf6f7c7d70ff0108d4f3570a9b806b",
+    "candidateObject": "134f0cc57fcf6f7c7d70ff0108d4f3570a9b806b",
+    "identical": true
+  },
+  "schema_and_migrations": {
+    "path": "maya-saas-backend/prisma",
+    "source": "f9976ab601f0438676cf59a5d108bd719c2acd0e",
+    "sourceObject": "508191c08b108bda616b9a7ff8e63ac5e7f352f9",
+    "candidateObject": "508191c08b108bda616b9a7ff8e63ac5e7f352f9",
+    "identical": true
+  }
+}

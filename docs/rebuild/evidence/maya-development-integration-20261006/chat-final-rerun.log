@@ -1,0 +1,7 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       133 passed, 133 total
+Snapshots:   0 total
+Time:        0.858 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/chat-final-rerun.json

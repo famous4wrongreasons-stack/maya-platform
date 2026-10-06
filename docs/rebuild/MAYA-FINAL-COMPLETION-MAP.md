@@ -709,3 +709,8 @@ model, browser CRM read recovery, mobile/Safari and release/aggregate certificat
 remain unqualified; the NS1 history-traffic census failure is reproduced on baseline.
 See [final browser proof](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md) and
 [repair evidence](evidence/yc-service-pricing-uxfix-20261006/manifest.json).
+
+
+### 2026-10-06 — local development integration checkpoint
+
+Occupancy `f9976ab6`, approved pricing `4c8141e0`, and schedule `7b9d0ff5` are joined in the isolated local branch `codex/maya-development-integration-20261006`. Code checkpoint `ca9dc8a5` preserves both owner routes and closes schedule clarification purpose-switch defects; 16 targeted backend suites / 339 tests and 144 shell tests pass. See [MAYA-DEVELOPMENT-INTEGRATION-20261006.md](MAYA-DEVELOPMENT-INTEGRATION-20261006.md) for exact provenance, preservation evidence and independent review. Heavy combined runtime gates and restricted-profile certification are deferred; no background authority or C10 completion is claimed.

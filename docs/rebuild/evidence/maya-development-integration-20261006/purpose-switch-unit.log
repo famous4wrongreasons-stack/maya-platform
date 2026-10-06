@@ -1,0 +1,25 @@
+FAIL src/ai-tools/ai-core.development-integration.spec.ts
+  ● unified development candidate: routes and authority stay isolated › leaves an unfinished schedule clarification for the new request: Установи цену Стрижка 1900 рублей на 2035-05-10
+
+    expect(received).toMatchObject(expected)
+
+    Matcher error: received value must be a non-null object
+
+    Received has value: null
+
+      174 |     expect(f.crm.getStaff).not.toHaveBeenCalled();
+      175 |     expect(f.runtime.execute.mock.calls.some(call => call[1] === 'staff.schedule.update')).toBe(false);
+    > 176 |     if (lane === 'pricing') expect(result.action).toMatchObject({ approval: { id: 'price-approval' } });
+          |                                                   ^
+      177 |     if (lane === 'occupancy') expect(f.c9.checkCancellationWindows).toHaveBeenCalledTimes(1);
+      178 |     if (lane === 'general') expect(f.model.decide).toHaveBeenCalledTimes(1);
+      179 |   });
+
+      at ai-tools/ai-core.development-integration.spec.ts:176:51
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 39 passed, 40 total
+Snapshots:   0 total
+Time:        0.675 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/purpose-switch-unit.json

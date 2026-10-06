@@ -1,0 +1,25 @@
+FAIL src/ai-tools/ai-core.development-integration.spec.ts
+  ● unified development candidate: routes and authority stay isolated › uses one conversation across general chat, Occupancy, pricing and schedule without leaking a previous purpose
+
+    expect(received).toMatchObject(expected)
+
+    Matcher error: received value must be a non-null object
+
+    Received has value: null
+
+      107 |     }, ''));
+      108 |     const price = await turn('Установи цену Стрижка 1900 рублей');
+    > 109 |     expect(price.action).toMatchObject({ status: 'approval_required', approval: { id: 'price-approval' } });
+          |                          ^
+      110 |     expect(f.runtime.execute).toHaveBeenLastCalledWith(actor, 'catalog.service.price.update',
+      111 |       expect.objectContaining({ arguments: { service_id: 'service-a', price_rubles: 1900 } }), expect.anything());
+      112 |     expect(f.scheduleWidget.mint).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (ai-tools/ai-core.development-integration.spec.ts:109:26)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 91 passed, 92 total
+Snapshots:   0 total
+Time:        0.832 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/chat-unit.json

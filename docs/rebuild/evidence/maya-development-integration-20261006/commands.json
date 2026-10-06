@@ -1,0 +1,44 @@
+{
+  "backend": {
+    "cwd": "maya-saas-backend",
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=1536"
+    },
+    "argv": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/widgets/widget-import-graph.architecture.spec.ts",
+      "src/ai-tools/ai-core.development-integration.spec.ts",
+      "src/widgets/owner-ports/widget-owner-ports.module.spec.ts",
+      "src/ai-tools/ai-core.service.spec.ts",
+      "src/ai-tools/ai-core.occupancy.spec.ts",
+      "src/orchestration/c9.occupancy-source.spec.ts",
+      "src/widgets/owner-ports/schedule-approval.adapter.spec.ts",
+      "src/orchestration/c9.occupancy.spec.ts",
+      "src/widgets/routing/effect-router.service.spec.ts",
+      "src/widgets/owner-ports/noun-resolution.owners.provider.spec.ts",
+      "src/widgets/owner-ports/service-price-approval.adapter.spec.ts",
+      "src/widgets/composition/typed-step0.spec.ts",
+      "src/widgets/emission/emitter.spec.ts",
+      "src/widgets/pricing/service-price-widget.contract.spec.ts",
+      "src/ai-tools/staff-schedule-command.service.spec.ts",
+      "src/widgets/emission/schedule-intent-template.spec.ts",
+      "--json",
+      "--outputFile=../docs/rebuild/evidence/maya-development-integration-20261006/qualified-targeted-unit.json"
+    ]
+  },
+  "shell": {
+    "cwd": "maya-chat-shell",
+    "argv": [
+      "node",
+      "--test",
+      "test/development-integration.test.mjs",
+      "test/intents.test.mjs",
+      "test/net.test.mjs"
+    ]
+  },
+  "dependencies": "Existing local node_modules symlinked read-only for use; no installation or generation",
+  "heavyGatesRun": false
+}

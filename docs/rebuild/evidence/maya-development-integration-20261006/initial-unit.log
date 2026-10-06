@@ -1,0 +1,7 @@
+
+Test Suites: 4 passed, 4 total
+Tests:       56 passed, 56 total
+Snapshots:   0 total
+Time:        4.366 s
+Ran all test suites within paths "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts", "src/widgets/emission/emitter.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/initial-unit.json

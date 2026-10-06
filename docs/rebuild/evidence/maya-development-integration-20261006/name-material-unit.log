@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       44 passed, 44 total
+Snapshots:   0 total
+Time:        0.673 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-development-integration-20261006/name-material-unit.json

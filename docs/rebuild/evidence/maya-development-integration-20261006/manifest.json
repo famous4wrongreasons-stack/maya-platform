@@ -1,0 +1,59 @@
+{
+  "contract": "maya.development-integration-evidence/1",
+  "codeCommit": "ca9dc8a5d99e371e3b6d132b911eb44d3d0e8985",
+  "branch": "codex/maya-development-integration-20261006",
+  "sourceHeads": {
+    "occupancy": "f9976ab601f0438676cf59a5d108bd719c2acd0e",
+    "pricing": "4c8141e0d29e41df74fc7adfbfae9438d735d626",
+    "schedule": "7b9d0ff5e556fa262d83f204a7a6892848dd8732"
+  },
+  "backend": {
+    "numPassedTestSuites": 16,
+    "numPassedTests": 339,
+    "numFailedTests": 0
+  },
+  "shell": {
+    "passed": 144,
+    "failed": 0,
+    "suites": [
+      "development-integration.test.mjs",
+      "intents.test.mjs",
+      "net.test.mjs"
+    ]
+  },
+  "realModelAcceptance": false,
+  "providerCalls": false,
+  "businessMutations": false,
+  "runtimeAcceptance": false,
+  "heavyGates": "DEFERRED: parent holds heavy slot",
+  "newSchema": false,
+  "profileRecertified": false,
+  "artifacts": {
+    "chat-final-rerun.json": "32a07c3fc91b307c70364b42011bc5b294fd5ac94ef2a33864d782b88e4a877b",
+    "chat-final-rerun.log": "b09ee4450fbf04b290a28a925f5792f495ff376d496598526e983d1003bb6a9d",
+    "chat-final.json": "c669d79ec05cc4c79fc7c76724fb68df5783df8eaed2a77ca62972cbe75883b2",
+    "chat-final.log": "cb3366a9785f0325316336d5987828a672c0b3032f1d55a112482cb4aec9bf43",
+    "chat-unit.json": "8dc17a3a39bc2ca1d9adc730c7b35dbb843dcb98bd5ee693f2ce99acea260fc9",
+    "chat-unit.log": "8325118b966e0b908f54d60e9dd53fdfde8e0542bee9ee9f6b6e102dc65c05cf",
+    "commands.json": "ba495eed66d8502a7d6db3adef2856cbd95da13ad9fd2ca093ee09adb5d3cf09",
+    "crossfeature-unit.json": "a407d7245d603870696cc8a4897af7d9a5279415af404a2352ad02997c74725a",
+    "crossfeature-unit.log": "95458456361fd768d2d78f61c070de178b9a93c0129bb855323420dee1040cae",
+    "emitter-unit.json": "c84a3821594dcf0d363f49837b5936d3880c6044340c7bffc51e6699203834e7",
+    "emitter-unit.log": "4b8df5ec4309e9fab0e09382470de272175941734ba0f16c18dbd7d14b158568",
+    "independent-review.txt": "c62bb3fa73bce407e5916f549e47bf8452a5dcde251228daf379fdd211604bdc",
+    "initial-unit.json": "0e479ce13374d4c18d1d18be42742b5e0f80cbcbbb20d0e01e029a73f733f33c",
+    "initial-unit.log": "59255dc168e5d82c2f9f646aefe20b1fdd3efdb8c232012e685422beb2ca9211",
+    "name-material-unit.json": "3c25a8ab403f0de7e8fed5ca917573061fc4f64480e50da2127459068aabb95e",
+    "name-material-unit.log": "42b2b08a2e45b4bee936d684541f6555fb066116ad1d1add57e2007ac8c89977",
+    "preservation.json": "f6a2f04700370b79245b169d35bf6da9ae8a66fa90d938b2bc18b91055f65a53",
+    "provenance.json": "b8b7b5737f8f39ad48c263e3231d29ea14d8c4d2b5e585d4d17c1bc1da759d9c",
+    "purpose-switch-unit.json": "0886c466ee1ebce051564c944a64d9b72e1814abb1d777851ce143dbe81afb95",
+    "purpose-switch-unit.log": "c28e885f61673c58f78dd0aa8ae9221d212653994fa2e197e63526582e8700b5",
+    "qualified-targeted-unit.json": "d0a811468382009c6abd87f62622144de35858c751706b1e61203442c05e0bca",
+    "qualified-targeted-unit.log": "71532ada817fbd52a2283f1cb2ad51cea7238b9faf2a84f8cb8f9f62cb2f29bd",
+    "shell-unit.log": "5f6ccc1e7dac01dffa24ec7324e8b35a625aee58ce011dfe308058137d420b92",
+    "sources-preserved.json": "0eb08490680a4fcb717685cb430b21093bf8ffafd05948c618e50d1c9ab94d30",
+    "targeted-unit-final.json": "f2009585782280ee5c8bc55de587239487d79ba430785d9401fc5dedc60fc9e8",
+    "targeted-unit-final.log": "a1c98a805ed97e5947ec2e295f996b859f980007f9bffd718e01e7177d9e0764"
+  }
+}
