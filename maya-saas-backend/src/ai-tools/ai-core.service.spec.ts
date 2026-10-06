@@ -1467,6 +1467,205 @@ describe('AiCoreService', () => {
   );
 
   // Scripted tool selection and source fixtures: no model/provider acceptance.
+  describe('public company profile consultation', () => {
+    const tool = 'company.business-hours.read';
+    const profile = {
+      verified: true,
+      source: 'external_crm',
+      title: 'Synthetic salon',
+      address: 'Тестовая улица, 7',
+      timezone: 'Europe/Moscow',
+      schedule: 'Пн–Пт 10:00–20:00; Сб–Вс 11:00–18:00',
+      schedule_available: true,
+    };
+    const client = { ...user, role: UserRole.CLIENT };
+    function fixture(result: unknown) {
+      const mocks = createService([tool]);
+      mocks.model.decide
+        .mockResolvedValue(
+          decision({
+            reply: 'MODEL: Мы открыты сейчас и есть свободное место.',
+            toolCall: null,
+          }),
+        )
+        .mockResolvedValueOnce(
+          decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
+        );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'profile-read',
+        result,
+      });
+      return mocks;
+    }
+    it('answers the client address and hours from the public CRM profile without another model call', async () => {
+      const mocks = fixture(profile);
+      const result = await mocks.service.chat(client, {
+        ...dto,
+        messages: [
+          {
+            role: 'user',
+            content: 'Где вы находитесь и во сколько открываетесь?',
+          },
+        ],
+      });
+      expect(result.reply).toContain(profile.address);
+      expect(result.reply).toContain(profile.schedule);
+      expect(result.reply).toContain('Europe/Moscow');
+      expect(result.reply).toContain('Источник: CRM салона');
+      expect(result.reply).not.toMatch(/MODEL|открыты сейчас|свободное место/);
+      expect(result).toMatchObject({
+        source: 'safe_fallback',
+        action: null,
+        grounding: {
+          status: 'verified',
+          domain: 'company_profile',
+          evidence_tools: [tool],
+        },
+      });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    });
+    it('preserves an address when discovery has no hours instead of inventing them', async () => {
+      const mocks = fixture({
+        ...profile,
+        schedule: null,
+        timezone: null,
+        schedule_available: false,
+      });
+      const result = await mocks.service.chat(client, {
+        ...dto,
+        messages: [
+          { role: 'user', content: 'Какой у вас график работы и адрес?' },
+        ],
+      });
+      expect(result.reply).toContain(profile.address);
+      expect(result.reply).toContain('График работы не указан');
+      expect(result.reply).not.toMatch(/10:00|20:00|MODEL|открыты сейчас/);
+      expect(result.grounding.status).toBe('blocked');
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    });
+    it.each([
+      ['unverified', { verified: false }],
+      ['wrong source', { source: 'model' }],
+      ['stale', { stale: true }],
+      ['contradictory availability', { schedule_available: false }],
+      ['missing hours', { schedule: undefined }],
+      ['unbounded hours', { schedule: 'x'.repeat(1500) }],
+    ])(
+      'does not claim company profile facts from %s',
+      async (_label, changes) => {
+        const mocks = fixture({ ...profile, ...changes });
+        const result = await mocks.service.chat(client, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Во сколько вы открываетесь?' }],
+        });
+        expect(result.grounding.status).toBe('blocked');
+        expect(result.reply).toContain('Не удалось подтвердить');
+        expect(result.reply).not.toMatch(/10:00|20:00|MODEL/);
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('keeps known hours but marks a missing address instead of substituting the salon name', async () => {
+      const mocks = fixture({ ...profile, address: null });
+      const result = await mocks.service.chat(client, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Как к вам добраться?' }],
+      });
+      expect(result.reply).toContain('Адрес не указан в CRM');
+      expect(result.reply).toContain(profile.schedule);
+      expect(result.reply).not.toContain('Synthetic salon');
+      expect(result.grounding.status).toBe('blocked');
+    });
+    it('rereads current public facts for a short address follow-up without carrying old hours', async () => {
+      const mocks = fixture(profile);
+      const first = await mocks.service.chat(client, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Во сколько вы открываетесь?' }],
+      });
+      mocks.model.decide.mockResolvedValueOnce(
+        decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
+      );
+      mocks.runtime.execute.mockResolvedValueOnce({
+        status: 'completed',
+        execution_id: 'profile-read-2',
+        result: {
+          ...profile,
+          address: 'Новая улица, 8',
+          schedule: null,
+          schedule_available: false,
+        },
+      });
+      const second = await mocks.service.chat(client, {
+        ...dto,
+        requestId: 'profile_followup_123',
+        messages: [
+          { role: 'user', content: 'Во сколько вы открываетесь?' },
+          { role: 'assistant', content: first.reply },
+          { role: 'user', content: 'А адрес?' },
+        ],
+      });
+      expect(second.reply).toContain('Новая улица, 8');
+      expect(second.reply).toContain('График работы не указан');
+      expect(second.reply).not.toContain(profile.schedule);
+      expect(second.reply).not.toContain(profile.address);
+      expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(2);
+    });
+    it('refuses a model-only public address answer before a current source read', async () => {
+      const mocks = createService([tool]);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: 'Мы на Выдуманной улице, 99, работаем круглосуточно.',
+          toolCall: null,
+        }),
+      );
+      const result = await mocks.service.chat(client, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Где вы находитесь?' }],
+      });
+      expect(result.grounding.status).toBe('blocked');
+      expect(result.reply).not.toContain('Выдуманной');
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    });
+    it.each([
+      'Как изменить email-адрес?',
+      'Что такое IP-адрес?',
+      'Какой у вас адрес электронной почты?',
+      'Какой ваш адрес сайта?',
+      'Где находится настройка уведомлений?',
+      'Когда открывается запись на ноябрь?',
+    ])(
+      'does not require the salon profile for another domain: %s',
+      async (content) => {
+        const mocks = createService([tool, 'catalog.services.read']);
+        mocks.model.decide.mockResolvedValue(
+          decision({ reply: 'Уточните вопрос.', toolCall: null }),
+        );
+        const result = await mocks.service.chat(client, {
+          ...dto,
+          messages: [{ role: 'user', content }],
+        });
+        expect(result.grounding.required_tools).not.toEqual([tool]);
+        expect(result.grounding.domain).not.toBe('company_profile');
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+    it('keeps a client dossier address question in the existing dossier domain', async () => {
+      const mocks = createService([tool, 'clients.dossier.read']);
+      mocks.model.decide.mockResolvedValue(
+        decision({ reply: 'Уточните гостя.', toolCall: null }),
+      );
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        messages: [
+          { role: 'user', content: 'Покажи досье клиента и его адрес' },
+        ],
+      });
+      expect(result.grounding.required_tools).toEqual(['clients.dossier.read']);
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    });
+  });
+
   describe('own schedule', () => {
     beforeEach(() =>
       jest.useFakeTimers().setSystemTime(new Date('2026-10-06T12:00:00Z')),

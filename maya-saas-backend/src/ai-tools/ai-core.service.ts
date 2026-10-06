@@ -337,6 +337,8 @@ const LOYALTY_HINT_PATTERN =
 /** Подсказка: спрашивают про СВОИ записи. */
 const OWN_APPOINTMENTS_HINT_PATTERN =
   /(мои\s+запис[а-яёa-z]*|(?:какие|сколько)\s+у\s+меня\s+запис[а-яёa-z]*|когда\s+я\s+записан[а-яёa-z]*|истори[а-яёa-z]*\s+(?:моих\s+)?запис[а-яёa-z]*)/i;
+const COMPANY_PROFILE_READ_HINT_PATTERN =
+  /(?:^(?:(?:а|и)\s+)?(?:ваш\s+)?адрес[?.!]*$|(?:ваш|какой\s+у\s+вас)\s+адрес\s*[?.!]*$|адрес\s+(?:(?:вашего|нашего|этого)\s+)?(?:салона|филиала)|где\s+(?:вы\s+(?:находитесь|расположены)|(?:находится|расположен)\s+(?:ваш\s+)?(?:салон|филиал)|(?:ваш\s+)?(?:салон|филиал))|как\s+(?:вас\s+найти|к\s+вам\s+(?:добраться|пройти|проехать))|(?:во\s+сколько|когда)\s+(?:вы\s+)?(?:открываетесь|закрываетесь)|(?:во\s+сколько|когда)\s+(?:открывается|закрывается)\s+(?:ваш\s+)?(?:салон|филиал)|(?:часы|режим|график)\s+работы\s+(?:салона|филиала|у\s+вас)|(?:ваш|у\s+вас)\s+(?:график|режим|часы)\s+работы|вы\s+(?:сейчас\s+)?открыты)/i;
 /** Точный рабочий график команды на дату — отдельный факт YClients. */
 const STAFF_SCHEDULE_READ_HINT_PATTERN =
   /(?:расписан[а-яёa-z]*|график[а-яёa-z]*|рабоч[а-яёa-z]*\s+(?:час|смен)[а-яёa-z]*|кто\s+(?:из\s+команды\s+)?работ[а-яёa-z]*|когда\s+[^?.,!]{0,50}работ[а-яёa-z]*|работает\s+ли|выходн[а-яёa-z]*)/i;
@@ -418,6 +420,7 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'clients.dossier.read': 'client_dossier',
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
+  'company.business-hours.read': 'company_profile',
   'staff.schedule.read': 'staff_schedule',
   // 🔴 Свой график мастера обязан быть ИСТОЧНИКОМ ДАННЫХ наравне с командным.
   // Его тут не было, поэтому инструмент, выданный мастеру каталогом, не мог
@@ -468,6 +471,7 @@ const PII_SENSITIVE_TOOLS = new Set([
  * когорт и границы периодов, а свободный пересказ не должен менять цифры.
  */
 const SERVER_COMPOSED_REPLY_TOOLS = new Set([
+  'company.business-hours.read',
   // Quoted internal guidance is data. Keep free-form rules out of model
   // instructions and preserve the confirmed wording for authorized staff.
   'business.rules.read',
@@ -490,6 +494,7 @@ const SERVER_COMPOSED_REPLY_TOOLS = new Set([
  * который нельзя честно восстановить из общей аналитики.
  */
 const STRICT_GROUNDING_HINT_TOOLS = new Set([
+  'company.business-hours.read',
   'staff.schedule.read',
   // Свой график — та же семья и та же чувствительность: месячной сводкой
   // конкретный день не подменяют.
@@ -1760,26 +1765,31 @@ export class AiCoreService {
             this.contextualUserText(sanitized.messages),
           )
         ) {
-          const ownSchedule =
+          const sourceReply =
             decision.toolCall.name === 'staff.schedule.own.read'
               ? this.deterministicOwnStaffScheduleReply(
                   execution.result,
                   hardenedArguments.date,
                   execution.stale === true,
                 )
-              : null;
+              : decision.toolCall.name === 'company.business-hours.read'
+                ? this.deterministicCompanyProfileReply(
+                    execution.result,
+                    execution.stale === true,
+                  )
+                : null;
           const deterministicReply =
-            ownSchedule?.reply ??
+            sourceReply?.reply ??
             this.deterministicGroundedReply(
               toolResults,
               this.contextualUserText(sanitized.messages),
             );
           // A short follow-up can lack a heuristic data hint. The completed
           // current read still supplies its own domain and evidence identity.
-          const replyRequirement: GroundingRequirement | null = ownSchedule
+          const replyRequirement: GroundingRequirement | null = sourceReply
             ? {
-                evidenceToolNames: ['staff.schedule.own.read'],
-                fallbackDomain: 'staff_schedule',
+                evidenceToolNames: [decision.toolCall.name],
+                fallbackDomain: DATA_TOOL_DOMAINS[decision.toolCall.name],
                 closedForAccess: false,
                 strictNumbers: true,
               }
@@ -1800,7 +1810,7 @@ export class AiCoreService {
                   action: null,
                   grounding: this.groundingReport(
                     replyRequirement,
-                    ownSchedule?.status ?? 'verified',
+                    sourceReply?.status ?? 'verified',
                     toolResults,
                   ),
                 }
@@ -2841,6 +2851,8 @@ export class AiCoreService {
    * личную аналитику, без отдельной ветки на каждую роль.
    */
   private toolHint(text: string, brain?: MayaBrainRoute): string[] | null {
+    if (COMPANY_PROFILE_READ_HINT_PATTERN.test(text))
+      return ['company.business-hours.read'];
     // Полный реестр проверяем раньше клиентского баланса и любой периодной
     // аналитики: «лояльные клиенты» — не «мои бонусы» и не гости месяца.
     if (
@@ -3331,6 +3343,58 @@ export class AiCoreService {
       default:
         return null;
     }
+  }
+
+  private deterministicCompanyProfileReply(
+    result: unknown,
+    stale: boolean,
+  ): { reply: string; status: 'verified' | 'blocked' } {
+    const data = this.record(result);
+    const unavailable = {
+      reply:
+        'Не удалось подтвердить адрес и часы работы по CRM. Попробуйте повторить запрос позже.',
+      status: 'blocked' as const,
+    };
+    const field = (value: unknown, limit: number): value is string | null =>
+      value === null ||
+      (typeof value === 'string' &&
+        value.trim().length > 0 &&
+        value.length <= limit);
+    if (
+      stale ||
+      data.stale === true ||
+      data.verified !== true ||
+      data.source !== 'external_crm' ||
+      !field(data.address, 500) ||
+      !field(data.schedule, 1000) ||
+      !field(data.timezone, 100) ||
+      typeof data.schedule_available !== 'boolean' ||
+      data.schedule_available !== (data.schedule !== null)
+    )
+      return unavailable;
+    if (data.timezone) {
+      try {
+        new Intl.DateTimeFormat('ru-RU', { timeZone: data.timezone });
+      } catch {
+        return unavailable;
+      }
+    }
+    const lines = [
+      data.address
+        ? `Адрес по CRM: ${data.address.trim()}.`
+        : 'Адрес не указан в CRM.',
+      data.schedule
+        ? `График работы по CRM: ${data.schedule.trim()}.`
+        : 'График работы не указан в CRM.',
+      ...(data.schedule && data.timezone
+        ? [`Часовой пояс: ${data.timezone}.`]
+        : []),
+      'Источник: CRM салона.',
+    ];
+    return {
+      reply: lines.join('\n'),
+      status: data.address && data.schedule ? 'verified' : 'blocked',
+    };
   }
 
   private deterministicOwnStaffScheduleReply(

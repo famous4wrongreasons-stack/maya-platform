@@ -740,6 +740,132 @@ describe('YclientsCRMAdapter', () => {
     );
   });
 
+  it('keeps a city-only company profile address unavailable', async () => {
+    global.fetch = jest.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            id: 123,
+            title: 'Synthetic salon',
+            address: null,
+            city: 'Москва',
+            schedule: 'Ежедневно 10:00–20:00',
+            timezone: null,
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+    await expect(adapter.getCompanyProfile()).resolves.toMatchObject({
+      address: null,
+      timezone: null,
+      schedule: 'Ежедневно 10:00–20:00',
+    });
+  });
+
+  it('keeps a city-only discovery address unavailable in the profile fallback', async () => {
+    global.fetch = jest
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response('{}', { status: 404 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 123,
+                title: 'Synthetic salon',
+                address: null,
+                city: 'Москва',
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+    await expect(adapter.getCompanyProfile()).resolves.toMatchObject({
+      address: null,
+      timezone: null,
+      schedule: null,
+    });
+  });
+
+  it.each([
+    [null, null],
+    ['', null],
+    [false, null],
+    [5.5, null],
+    ['5.5', null],
+    [0, 'UTC'],
+    ['0', 'UTC'],
+    [3, 'Etc/GMT-3'],
+    ['-7', 'Etc/GMT+7'],
+  ])(
+    'preserves qualified company profile offset %s as %s',
+    async (timezone, expected) => {
+      global.fetch = jest.fn<typeof fetch>().mockResolvedValue(
+        new Response(JSON.stringify({ data: { id: 123, timezone } }), {
+          status: 200,
+        }),
+      );
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'user-token',
+        settings: { companyId: 123 },
+      });
+      await expect(adapter.getCompanyProfile()).resolves.toMatchObject({
+        timezone: expected,
+      });
+    },
+  );
+
+  it('does not expose another company profile from a mismatched provider response', async () => {
+    const fetchMock = jest.fn<typeof fetch>((input) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: String(input).includes('/company/123')
+              ? {
+                  id: 999,
+                  title: 'Foreign salon',
+                  address: 'Foreign address',
+                  schedule: '24/7',
+                }
+              : [
+                  {
+                    id: 123,
+                    title: 'Current salon',
+                    address: 'Current address',
+                  },
+                ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+    global.fetch = fetchMock;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'user-token',
+      settings: { companyId: 123 },
+    });
+    await expect(adapter.getCompanyProfile()).resolves.toMatchObject({
+      id: '123',
+      address: 'Current address',
+      schedule: null,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('uses the discovered company when the optional profile route is unavailable', async () => {
     global.fetch = jest.fn<typeof fetch>((input) => {
       const url = String(input);

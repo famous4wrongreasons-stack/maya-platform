@@ -346,7 +346,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           company.title?.trim() ||
           company.public_title?.trim() ||
           `Филиал ${id}`;
-        const address = company.address?.trim() || company.city?.trim() || null;
+        const address = company.address?.trim() || null;
 
         return { id, title, address };
       });
@@ -366,18 +366,27 @@ export class YclientsCRMAdapter implements CRMAdapter {
   private toIanaTimezone(company: YclientsCompanyApiItem): string | null {
     const name = String(company.timezone_name || '').trim();
 
-    if (/^[A-Za-z]+\/[A-Za-z_+\-/]+$/.test(name)) {
-      return name;
+    if (/^[A-Za-z]+\/[A-Za-z_+\-/]+$/.test(name) || name === 'UTC') {
+      try {
+        new Intl.DateTimeFormat('ru-RU', { timeZone: name });
+        return name;
+      } catch {
+        // Invalid provider timezone names are not verified timezone facts.
+      }
     }
 
-    const offset = Number(company.timezone);
-
-    if (Number.isFinite(offset) && offset >= -12 && offset <= 14) {
-      const rounded = Math.trunc(offset);
-      if (rounded === 0) return 'UTC';
-      return rounded > 0
-        ? `Etc/GMT-${rounded}`
-        : `Etc/GMT+${Math.abs(rounded)}`;
+    const raw = company.timezone;
+    if (
+      typeof raw !== 'number' &&
+      !(typeof raw === 'string' && /^[+-]?\d+(?:\.\d+)?$/.test(raw.trim()))
+    )
+      return null;
+    const offset = Number(raw);
+    // Etc/GMT represents whole hours. Do not round a fractional source offset
+    // or turn an absent/empty/Boolean field into a claimed UTC timezone.
+    if (Number.isInteger(offset) && offset >= -12 && offset <= 14) {
+      if (offset === 0) return 'UTC';
+      return offset > 0 ? `Etc/GMT-${offset}` : `Etc/GMT+${Math.abs(offset)}`;
     }
 
     return null;
@@ -392,7 +401,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       );
       const company = response.data;
 
-      if (company?.id) {
+      if (company?.id && String(company.id) === String(companyId)) {
         const id = String(company.id);
         return {
           id,
@@ -400,7 +409,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
             company.title?.trim() ||
             company.public_title?.trim() ||
             `Филиал ${id}`,
-          address: company.address?.trim() || company.city?.trim() || null,
+          address: company.address?.trim() || null,
           logo_url: company.logo?.trim() || null,
           timezone: this.toIanaTimezone(company),
           schedule: company.schedule?.trim() || null,
