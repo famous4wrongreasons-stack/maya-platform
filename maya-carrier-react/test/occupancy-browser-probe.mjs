@@ -49,9 +49,9 @@ async function clickNamed(page, name) {
   assert.equal(await page.click(`Q.all('button').find(el => Q.visible(el) && Q.name(el) === ${JSON.stringify(name)})`), true);
 }
 async function login(page, email) {
-  assert.ok(await page.waitFor('Q.byName("button", /^Войти по email$/)'));
+  assert.ok(await page.waitFor('!!Q.byName("button", /^Войти по email$/)'));
   await clickNamed(page, 'Войти по email');
-  assert.ok(await page.waitFor('Q.email()'));
+  assert.ok(await page.waitFor('!!Q.email()'));
   await snapshot(page);
   assert.equal(await page.fill('Q.email()', email), true);
   const before = page.apiRequests('/auth/email/start').length;
@@ -61,11 +61,11 @@ async function login(page, email) {
   const response = JSON.parse(await page.responseBody(start.requestId));
   assert.equal(response.delivery, 'debug');
   assert.match(response.debug_code, /^\d{4,8}$/);
-  assert.ok(await page.waitFor('Q.code()'));
+  assert.ok(await page.waitFor('!!Q.code()'));
   await snapshot(page);
   assert.equal(await page.fill('Q.code()', response.debug_code), true);
   await clickNamed(page, 'Войти');
-  assert.ok(await page.waitFor('Q.composer()'), 'Real UI sign-in must complete');
+  assert.ok(await page.waitFor('!!Q.composer()'), 'Real UI sign-in must complete');
   // Do not publish auth bodies, code, email, tokens, console or request postData.
   delete response.debug_code;
   assert.equal(response.retry_after_seconds, 60, 'Existing local profile cooldown changed; review acceptance timing');
@@ -132,6 +132,8 @@ async function main() {
   process.once('SIGTERM', terminate);
   process.once('disconnect', terminate);
   async function capture(page, name) {
+    // DOM completion precedes compositor paint; preserve real pixels after two frames.
+    await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
     report.snapshots[name] = await snapshot(page);
     const { data } = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     fs.writeFileSync(path.join(output, name + '.png'), Buffer.from(data, 'base64'), { flag: 'wx', mode: 0o600 });
@@ -192,7 +194,7 @@ async function main() {
 
     await page.reload();
     // The approved runtime is memory-only: reload honestly requires UI login.
-    assert.ok(await page.waitFor('Q.byName("button", /^Войти по email$/)'));
+    assert.ok(await page.waitFor('!!Q.byName("button", /^Войти по email$/)'));
     assert.equal(await page.eval('!!Q.composer()'), false);
     // Honor the real tenant/email 60-second rate limit; no bucket reset or clock mock.
     while (Date.now() < nextLoginAt) await pause(Math.min(1000, nextLoginAt - Date.now()));
@@ -206,7 +208,7 @@ async function main() {
     await page.send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     const beforeOffline = page.apiRequests('/ai/chat').length;
     await sendOwnerRequest(page);
-    assert.ok(await page.waitFor('Q.log()?.innerText.includes("Нет связи") && Q.byName("button", /^повторить$/i)'));
+    assert.ok(await page.waitFor('Q.log()?.innerText.includes("Нет связи") && !!Q.byName("button", /^Повторить отправку$/)'));
     const failed = await until(() => page.apiRequests('/ai/chat').slice(beforeOffline).find((r) => r.failed), 'offline request failure');
     const failedRequestId = JSON.parse(await page.postData(failed)).requestId;
     assert.equal(typeof failedRequestId, 'string');
@@ -214,7 +216,7 @@ async function main() {
     await checkpoint('offline');
     await page.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     const beforeRetry = page.apiRequests('/ai/chat').length;
-    await clickNamed(page, 'повторить');
+    await clickNamed(page, 'Повторить отправку');
     const reconnected = await answer(page, beforeRetry, 'AVAILABLE', 2);
     assert.equal(reconnected.request_id, failedRequestId, 'Reconnect retries the same owner request');
     assert.notEqual(reconnected.coordination.run_id, fresh.coordination.run_id);
@@ -226,7 +228,7 @@ async function main() {
 
     const beforeRevoked = page.apiRequests('/ai/chat').length;
     await sendOwnerRequest(page);
-    assert.ok(await page.waitFor('Q.byName("button", /^Войти по email$/) && document.body.innerText.includes("Сессия завершена")'));
+    assert.ok(await page.waitFor('!!Q.byName("button", /^Войти по email$/) && document.body.innerText.includes("Сессия завершена")'));
     assert.equal(await page.eval('!!Q.composer()'), false);
     assert.ok(page.apiRequests('/ai/chat').slice(beforeRevoked).some((r) => [401, 403].includes(r.status)));
     assert.ok(page.apiRequests('/ai/chat').length - beforeRevoked <= 2, 'At most one auth retry');
@@ -246,6 +248,9 @@ async function main() {
     report.status = 'passed';
   } catch (error) {
     report.status = 'failed'; report.failure = error.message;
+    if (pages.length) {
+      try { await capture(pages.at(-1), 'failure'); } catch { report.failureCapture = 'unavailable'; }
+    }
     throw error;
   } finally {
     report.network = pages.flatMap((p) => [...p.requests.values()].map((r) => ({ method: r.method, path: new URL(r.url).pathname, status: r.status ?? null, failed: r.failed ?? null })));
