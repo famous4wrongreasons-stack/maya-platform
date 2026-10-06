@@ -1,0 +1,29 @@
+widgets-live: proof database maya_widget_gate_proof_companyprofile_a67a55d20a9f on 127.0.0.1:56726 (local)
+FAIL test/widgets-live/company-profile-restart.probe-spec.ts
+  company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ executes the owned stage and preserves canonical source/history boundaries (528 ms)
+
+  ● company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CRM] › executes the owned stage and preserves canonical source/history boundaries
+
+    TypeError: Cannot read properties of null (reading 'startsWith')
+
+      10 |   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+      11 | };
+    > 12 | export const isChatReply = (text: string): boolean => text.startsWith(PREFIX);
+         |                                                            ^
+      13 | export const encodeChatReply = (
+      14 |   encryption: ChatReplyCipher,
+      15 |   text: string,
+
+      at isChatReply (../src/widgets/stores/chat-reply-codec.ts:12:60)
+      at decodeChatReply (../src/widgets/stores/chat-reply-codec.ts:62:19)
+      at widgets-live/company-profile-restart.probe-spec.ts:375:24
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (widgets-live/company-profile-restart.probe-spec.ts:374:29)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        4.402 s
+Ran all test suites within paths "test/widgets-live/company-profile-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-company-profile-http-react-20261006-r2/prepare-jest.json

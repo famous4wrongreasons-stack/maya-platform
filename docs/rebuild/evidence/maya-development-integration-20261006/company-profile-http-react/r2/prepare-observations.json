@@ -1,0 +1,243 @@
+{
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "firstStatus": {
+    "status": 201,
+    "body": {
+      "request_id": "bae13dc1-164a-4b00-a646-f81b21635531",
+      "coordination": {
+        "run_id": "e24f8315-340d-4e04-9e56-f8f87854a65a",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "2de8531b-faaf-4e6c-ae02-4663f3baeb3a",
+        "conversationId": "86e973fe-9333-4f8b-8b65-d70d50fbfbd2"
+      },
+      "reply": "Адрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxaqh5q000hewc9qttwm8fo"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "552c56af-4fb0-448c-9a13-89ecab8df31b",
+          "envelope_seal": "adedc58ff8b3f9185d8862c97ecd8a63436603b5decce02a8e7d740ecf8c5e62",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "552c56af-4fb0-448c-9a13-89ecab8df31b",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxaqgwc0000ewc9r50s1c4t",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "7a51da71-4fbd-4bb3-ac80-89761205ae53",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxaqh5q000hewc9qttwm8fo",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "5e6aed9d7e03e98851b7b4de84012285"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "verified": true,
+              "source": "external_crm",
+              "title": "Synthetic public salon",
+              "address": "Тестовая улица, 7",
+              "timezone": "Europe/Moscow",
+              "schedule": "Пн–Вс 10:00–20:00",
+              "schedule_available": true
+            },
+            "intents": [],
+            "provenance": {
+              "source_capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "company.business-hours.read@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "company.business-hours.read",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:14:55.464Z",
+                  "evidence_refs": [
+                    "h_6650ec8524823519e9c79fcfa6389c0fc88cee8093729b6fc06623d9edcf7597"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "6650ec8524823519e9c79fcfa6389c0fc88cee8093729b6fc06623d9edcf7597",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "4a3847756db8e0e5be2a360f96cd12961644174caf933ac50c5a283900f9a271",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "6650ec8524823519e9c79fcfa6389c0fc88cee8093729b6fc06623d9edcf7597",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "399a0b17ea35e706c230e2f650077577fff0d902ce894bcbacc19867d0b43b6e",
+              "evidence_refs": [
+                {
+                  "ref": "h_6650ec8524823519e9c79fcfa6389c0fc88cee8093729b6fc06623d9edcf7597",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:14:55.464Z",
+              "expires_at": "2026-10-06T23:24:55.464Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:552c56af-4fb0-448c-9a13-89ecab8df31b",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "client",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "SCHEDULE",
+                "body": "{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "itemized": [],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "SCHEDULE",
+                "description": "{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "reading_order": [],
+                "live_region": "off",
+                "accessible_names": {}
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 0,
+              "intents_emitted": 0,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:14:55.464Z"
+            },
+            "integrity": {
+              "body_hash": "08958a378578b90a94630f499c0e88a1c4841d01ce713fbf9e2b4d433edf0de5",
+              "cell_index_digest": "de5372f1ee4253176651a2c6557f22a1fb0b0674ed547e65e962997a154fb07d",
+              "envelope_seal": "adedc58ff8b3f9185d8862c97ecd8a63436603b5decce02a8e7d740ecf8c5e62",
+              "seal_key_version": 1,
+              "principal_proof_hash": "698778a1a55723eda9bb5030e322ec45f8868ac817901abe7bee64340a3a53f9",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    }
+  },
+  "reads": [
+    {
+      "company": "99201",
+      "mode": "full"
+    },
+    {
+      "company": "99201",
+      "mode": "changed"
+    },
+    {
+      "company": "99202",
+      "mode": "changed"
+    }
+  ],
+  "modelCalls": 4,
+  "unexpected": []
+}

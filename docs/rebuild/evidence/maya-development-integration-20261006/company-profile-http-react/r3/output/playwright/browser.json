@@ -1,0 +1,1142 @@
+{
+  "contract": "maya.company-profile-browser/1",
+  "status": "passed",
+  "syntheticCrmFetch": true,
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "history": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "profile": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "changed": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "missing": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nКакой у вас график работы?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы не указан в CRM.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "city": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nКакой у вас график работы?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы не указан в CRM.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nКак к вам добраться?\nMAYA:\nАдрес не указан в CRM.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nИсточник: CRM салона.\n{\"address\":null,\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":null,\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":null,\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":null,\"title\":\"Synthetic public salon\",\"verified\":true}\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unavailable": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\nВы:\nГде вы находитесь и во сколько открываетесь?\nMAYA:\nАдрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nА адрес?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nКакой у вас график работы?\nMAYA:\nАдрес по CRM: Новая улица, 8.\nГрафик работы не указан в CRM.\nИсточник: CRM салона.\n{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nКак к вам добраться?\nMAYA:\nАдрес не указан в CRM.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nИсточник: CRM салона.\n{\"address\":null,\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":null,\"title\":\"Synthetic public salon\",\"verified\":true}\nSCHEDULE\n\n{\"address\":null,\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":null,\"title\":\"Synthetic public salon\",\"verified\":true}\n\nВы:\nГде находится ваш салон?\nMAYA:\nНе удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked": {
+      "text": "MAYA\nВход в MAYA\n\nНайдите свой салон и продолжите через Telegram.\n\nНазвание салона\nНайти салон\nВойти по email\n\nСессия завершена — войдите снова.",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Название салона"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Найти салон"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Войти по email"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "profile": {
+      "request_id": "60073524-8e96-4d0c-87c4-ab10a3b34b33",
+      "coordination": {
+        "run_id": "6aa8fec0-bfb8-4af4-a981-59d8942b5c44",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "187c96e4-0e0a-4c92-adef-437b3d895f3d",
+        "conversationId": "ceadfca4-40ee-4080-85ba-d5f2b888d485"
+      },
+      "reply": "Адрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxari460002u2c93sce1pc7"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "472d3ef7-0359-4c64-8477-7e122d3ff10c",
+          "envelope_seal": "ad748177d56506cdcbeb358bc96854a4789a2cf1a6b4eaf8b912368611832927",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "472d3ef7-0359-4c64-8477-7e122d3ff10c",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxarcve0000snc9omzvsuay",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "793e1bd9-1c8d-4f58-abcc-72246c5141b2",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxari460002u2c93sce1pc7",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "89ff9a644f9865ea1270c8ce58a1996f"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "verified": true,
+              "source": "external_crm",
+              "title": "Synthetic public salon",
+              "address": "Тестовая улица, 7",
+              "timezone": "Europe/Moscow",
+              "schedule": "Пн–Вс 10:00–20:00",
+              "schedule_available": true
+            },
+            "intents": [],
+            "provenance": {
+              "source_capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "company.business-hours.read@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "company.business-hours.read",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:15:43.360Z",
+                  "evidence_refs": [
+                    "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "cae7658de951be5aea100a7aca3e4badb22b32745936351d0d143a4df6b9621f",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "cfd4f80cb8db7a7b429106b6d77610e2d3f924fcc8c54b5a958335c29e977c28",
+              "evidence_refs": [
+                {
+                  "ref": "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:15:43.360Z",
+              "expires_at": "2026-10-06T23:25:43.360Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:472d3ef7-0359-4c64-8477-7e122d3ff10c",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "client",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "SCHEDULE",
+                "body": "{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "itemized": [],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "SCHEDULE",
+                "description": "{\"address\":\"Тестовая улица, 7\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "reading_order": [],
+                "live_region": "off",
+                "accessible_names": {}
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 0,
+              "intents_emitted": 0,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:15:43.360Z"
+            },
+            "integrity": {
+              "body_hash": "ec94cf2ba8802fc10ede617d33b8ba7041d0ea135735ba64e349f9a0c4f75081",
+              "cell_index_digest": "de5372f1ee4253176651a2c6557f22a1fb0b0674ed547e65e962997a154fb07d",
+              "envelope_seal": "ad748177d56506cdcbeb358bc96854a4789a2cf1a6b4eaf8b912368611832927",
+              "seal_key_version": 1,
+              "principal_proof_hash": "e375a4f62567d24eb06bd2ccfaa39d2123246ce9f595102575bf2c97d681fe31",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "changed": {
+      "request_id": "b0893e0c-dfac-4dd8-84ef-051a0fc6ee80",
+      "coordination": {
+        "run_id": "3b1b65b9-c57e-42cb-8e57-760ef6d9fffe",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "65003a86-b17d-4fe7-ac23-063329958355",
+        "conversationId": "ceadfca4-40ee-4080-85ba-d5f2b888d485"
+      },
+      "reply": "Адрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxaria10007u2c9vcovgebp"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "da2d3082-4223-42db-a248-f55666f736f0",
+          "envelope_seal": "aa856b5d3708b28e73467d4eec3ec69e42321b37243034ac6e1761dd5da2fee3",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "da2d3082-4223-42db-a248-f55666f736f0",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxarcve0000snc9omzvsuay",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "66782592-87cf-4c03-ac6c-60ed68ad74f5",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxaria10007u2c9vcovgebp",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "781e3eaded4e6135b6296bbcfebf8087"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "verified": true,
+              "source": "external_crm",
+              "title": "Synthetic public salon",
+              "address": "Новая улица, 8",
+              "timezone": "Europe/Moscow",
+              "schedule": "Пн–Вс 10:00–20:00",
+              "schedule_available": true
+            },
+            "intents": [],
+            "provenance": {
+              "source_capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "company.business-hours.read@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "company.business-hours.read",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:15:43.567Z",
+                  "evidence_refs": [
+                    "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "8659e5794bbdf0d359f11ec46b04926b270484de38fd7e29ab2fbfc5babf0da8",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "cfd4f80cb8db7a7b429106b6d77610e2d3f924fcc8c54b5a958335c29e977c28",
+              "evidence_refs": [
+                {
+                  "ref": "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:15:43.567Z",
+              "expires_at": "2026-10-06T23:25:43.567Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:da2d3082-4223-42db-a248-f55666f736f0",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "client",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "SCHEDULE",
+                "body": "{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "itemized": [],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "SCHEDULE",
+                "description": "{\"address\":\"Новая улица, 8\",\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "reading_order": [],
+                "live_region": "off",
+                "accessible_names": {}
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 0,
+              "intents_emitted": 0,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:15:43.567Z"
+            },
+            "integrity": {
+              "body_hash": "acf6f70e563a0caa7ab76a2ce564aa800ebc638d91ffdfd3f66aafe0ede1491f",
+              "cell_index_digest": "de5372f1ee4253176651a2c6557f22a1fb0b0674ed547e65e962997a154fb07d",
+              "envelope_seal": "aa856b5d3708b28e73467d4eec3ec69e42321b37243034ac6e1761dd5da2fee3",
+              "seal_key_version": 1,
+              "principal_proof_hash": "e375a4f62567d24eb06bd2ccfaa39d2123246ce9f595102575bf2c97d681fe31",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "missing": {
+      "request_id": "264af2b9-a60b-4ce8-a838-263023dea6e7",
+      "coordination": {
+        "run_id": "cdda431d-77cc-437e-b48a-bce26a93ca00",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "bdc26553-9e3d-4c7a-a864-8287d03d9f2d",
+        "conversationId": "ceadfca4-40ee-4080-85ba-d5f2b888d485"
+      },
+      "reply": "Адрес по CRM: Новая улица, 8.\nГрафик работы не указан в CRM.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxarigb000cu2c9riqynibs"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "a36b50a3-b7bf-4542-bf21-9f4876586bc2",
+          "envelope_seal": "e2ec259d080e210ebd3be18eeedb1e8948cb7588625b7c26919b3306b2042c16",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "a36b50a3-b7bf-4542-bf21-9f4876586bc2",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxarcve0000snc9omzvsuay",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "ddd76dec-b964-405f-a4b4-36a7ba186404",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxarigb000cu2c9riqynibs",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "1e8de5b5667501be4e4458fd74ab802d"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "verified": true,
+              "source": "external_crm",
+              "title": "Synthetic public salon",
+              "address": "Новая улица, 8",
+              "timezone": "Europe/Moscow",
+              "schedule": null,
+              "schedule_available": false
+            },
+            "intents": [],
+            "provenance": {
+              "source_capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "company.business-hours.read@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "company.business-hours.read",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:15:43.793Z",
+                  "evidence_refs": [
+                    "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "c0a98748da7e25bffe4960fe84ec241b6e8f23e59633fe5dfbdb1be7179d5f66",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "cfd4f80cb8db7a7b429106b6d77610e2d3f924fcc8c54b5a958335c29e977c28",
+              "evidence_refs": [
+                {
+                  "ref": "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:15:43.793Z",
+              "expires_at": "2026-10-06T23:25:43.793Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:a36b50a3-b7bf-4542-bf21-9f4876586bc2",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "client",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "SCHEDULE",
+                "body": "{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "itemized": [],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "SCHEDULE",
+                "description": "{\"address\":\"Новая улица, 8\",\"schedule\":null,\"schedule_available\":false,\"source\":\"external_crm\",\"timezone\":\"Europe/Moscow\",\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "reading_order": [],
+                "live_region": "off",
+                "accessible_names": {}
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 0,
+              "intents_emitted": 0,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:15:43.793Z"
+            },
+            "integrity": {
+              "body_hash": "2e088891e3fb28f330ffd80ae10d9cb769f59455899b7f07f7e3704856555322",
+              "cell_index_digest": "de5372f1ee4253176651a2c6557f22a1fb0b0674ed547e65e962997a154fb07d",
+              "envelope_seal": "e2ec259d080e210ebd3be18eeedb1e8948cb7588625b7c26919b3306b2042c16",
+              "seal_key_version": 1,
+              "principal_proof_hash": "e375a4f62567d24eb06bd2ccfaa39d2123246ce9f595102575bf2c97d681fe31",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "blocked",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "city": {
+      "request_id": "83c8a3ba-201c-4d4e-800a-6dfdf1d4bd4a",
+      "coordination": {
+        "run_id": "7e134c2d-9f57-4b72-b809-56a6d729f215",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "c099207b-f69e-47fd-a070-8c457621318f",
+        "conversationId": "ceadfca4-40ee-4080-85ba-d5f2b888d485"
+      },
+      "reply": "Адрес не указан в CRM.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxarimq000hu2c9qnlro6f2"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "1ee36e09-3061-4a8b-be59-6106a63465ab",
+          "envelope_seal": "5bb86a8b6732f472df5b068a0020afa946792eed7493b775a54725d997107a7b",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "1ee36e09-3061-4a8b-be59-6106a63465ab",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxarcve0000snc9omzvsuay",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "1b641886-3709-4597-a930-d4d14bc85da0",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxarimq000hu2c9qnlro6f2",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "275af60929764f5262caedfd29caf8ad"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "verified": true,
+              "source": "external_crm",
+              "title": "Synthetic public salon",
+              "address": null,
+              "timezone": null,
+              "schedule": "Пн–Вс 10:00–20:00",
+              "schedule_available": true
+            },
+            "intents": [],
+            "provenance": {
+              "source_capability": "company.business-hours.read",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "company.business-hours.read@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "company.business-hours.read",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:15:44.026Z",
+                  "evidence_refs": [
+                    "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "5ef8aa95c4c2de5ddcc5cebcf8fa62ed1084d471fe3a77dc00cec48477f01e54",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "cfd4f80cb8db7a7b429106b6d77610e2d3f924fcc8c54b5a958335c29e977c28",
+              "evidence_refs": [
+                {
+                  "ref": "h_7bfe88bee0ff530713ee64055963b0467cb75b18b4224744d38e891caa709801",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:15:44.026Z",
+              "expires_at": "2026-10-06T23:25:44.026Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:1ee36e09-3061-4a8b-be59-6106a63465ab",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "client",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "SCHEDULE",
+                "body": "{\"address\":null,\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":null,\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "itemized": [],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "SCHEDULE",
+                "description": "{\"address\":null,\"schedule\":\"Пн–Вс 10:00–20:00\",\"schedule_available\":true,\"source\":\"external_crm\",\"timezone\":null,\"title\":\"Synthetic public salon\",\"verified\":true}",
+                "reading_order": [],
+                "live_region": "off",
+                "accessible_names": {}
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 0,
+              "intents_emitted": 0,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:15:44.026Z"
+            },
+            "integrity": {
+              "body_hash": "6ceff698e182dd93a60135faae1a3f88372303006cc7d923bc8d855f8a997197",
+              "cell_index_digest": "de5372f1ee4253176651a2c6557f22a1fb0b0674ed547e65e962997a154fb07d",
+              "envelope_seal": "5bb86a8b6732f472df5b068a0020afa946792eed7493b775a54725d997107a7b",
+              "seal_key_version": 1,
+              "principal_proof_hash": "e375a4f62567d24eb06bd2ccfaa39d2123246ce9f595102575bf2c97d681fe31",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "blocked",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "unavailable": {
+      "status": 201,
+      "body": {
+        "request_id": "3555098e-0d4e-4150-b385-c4b8ea24d887",
+        "coordination": {
+          "run_id": "1579622b-6fb7-40bb-8b36-3e3b6470ef7b",
+          "scope": "deterministic_reads",
+          "state": "INCOMPLETE"
+        },
+        "user_turn": {
+          "turnId": "4cd04d72-9817-468e-af36-ee95eb82104e",
+          "conversationId": "ceadfca4-40ee-4080-85ba-d5f2b888d485"
+        },
+        "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "blocked",
+          "domain": "company_profile",
+          "required_tools": [
+            "company.business-hours.read"
+          ],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      }
+    },
+    "revoked": {
+      "status": 401
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:56843",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/6PD6C2U7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 401,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

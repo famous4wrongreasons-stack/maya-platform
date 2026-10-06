@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_companyprofile_e114a43ce02f on 127.0.0.1:56812 (local)
+PASS test/widgets-live/company-profile-restart.probe-spec.ts
+  company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ executes the owned stage and preserves canonical source/history boundaries (532 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        1.322 s, estimated 5 s
+Ran all test suites within paths "test/widgets-live/company-profile-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-company-profile-http-react-20261006-r3/prepare-jest.json

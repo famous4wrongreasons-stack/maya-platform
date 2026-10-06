@@ -760,3 +760,13 @@ independent read-only review have no blockers. New actual HTTP regressions are
 prepared, not run; types and runtime proof await the heavy slot. No carrier role
 mode, personal booking activation or identity writer was introduced. See [the
 existing-path finding and checkpoint](MAYA-PERSONAL-READ-CONTEXT-20261006.md).
+
+The later public-profile proof at application HEAD `9d1baa9f` passes actual HTTP/
+auth/C9, fresh PG/application restart and seven current React browser checkpoints.
+Production-only types also pass with 4096 MB heap; earlier full-project OOM remains
+unqualified. Independent review confirms the functional result, with existing raw
+SCHEDULE JSON cards and one mid-reveal screenshot explicitly outside visual
+acceptance. All owned services stopped; heavy slot released. See the extended
+[public-profile checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md).
+The production typecheck also covers the committed personal READ runtime change;
+its newly prepared personal-specific HTTP cases were not selected in this proof.

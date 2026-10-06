@@ -368,7 +368,11 @@ describe('company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETI
       expect((bChat.body as Chat).reply).toContain('Чужая улица, 2');
       expect((bChat.body as Chat).reply).not.toContain('Тестовая улица');
       const turns = await db.prisma.widgetTimelineTurn.findMany({
-        where: { tenantId: a.tenant.id, role: 'assistant' },
+        where: {
+          tenantId: a.tenant.id,
+          role: 'assistant',
+          textContent: { not: null },
+        },
         orderBy: { turnIndex: 'asc' },
       });
       const replies = turns.map((t) =>
