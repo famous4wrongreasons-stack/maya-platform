@@ -1,0 +1,94 @@
+{
+  "kind": "personal-appointment-chat-details-unit-checkpoint",
+  "codeHead": "41f9ae79",
+  "qualification": "NOT_ISSUED",
+  "realModelAcceptance": false,
+  "actualHttpPgReactAcceptance": false,
+  "semanticTypes": "Pending for this increment; earlier production pass at9d1baa9f does not cover it",
+  "cohort": "304/304 six suites; earlier overlapping cohorts not additive",
+  "lint": "0errors2pre-existing warnings",
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "905d38e40d0c4d1d306e2598ff6ea945e9f19e47a3b3bc76bc561f1d013de324"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "sha256": "b493a940a6d89c5e848ab7ebfd77b277c59efaedfdfdf067e1c9967f7bb0c84c"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "2223b0fccb856ae369a3c4cefce0332807efeb838118196ba505b72a53c66dc1"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+      "sha256": "4f6fd575f2268a1267ecb34efc459d55c8d48f9653e92a3ebb4a9b5957d995de"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts",
+      "sha256": "99279faf451d09e4664f9d6af70003864983b073a79ea60b90df56d5fa10860f"
+    }
+  ],
+  "files": [
+    {
+      "path": "cohort1.json",
+      "bytes": 81266,
+      "sha256": "49ea4c169915e775828640787c6c83fe266c582dab4d6c832dd2e1461dc5b94b"
+    },
+    {
+      "path": "cohort1.txt",
+      "bytes": 425,
+      "sha256": "3394ba15f3c03223ccba4a0532e3a963990de34b228c58bd4766fd7d1f8df13e"
+    },
+    {
+      "path": "cohort2.json",
+      "bytes": 143416,
+      "sha256": "46716800e96eaf81a4e3bc0e7fbd3430390a943929efe442a347f7a0cb059bf5"
+    },
+    {
+      "path": "cohort2.txt",
+      "bytes": 841,
+      "sha256": "59f1a796d7f9506d396cd6eabaf363d8881dd7197538296d3767e33ef717c3f8"
+    },
+    {
+      "path": "cohort3.json",
+      "bytes": 143952,
+      "sha256": "a1acefdbffdb8a4b492111c0f0c280f9b1ceef8246214b02454f0fa6686595bd"
+    },
+    {
+      "path": "cohort3.txt",
+      "bytes": 841,
+      "sha256": "f2059eab2afa4fe7eaf5a2f007ef7479ac4fff8ede01714032569b488e5cbebf"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 611,
+      "sha256": "e30806ea85321b762acc01b420f72623171333ead09ad2f50dd186ea48999ad8"
+    },
+    {
+      "path": "lint.txt",
+      "bytes": 605,
+      "sha256": "1dd7fdc197f4fd9765af2733f94104d0d4857b190602a0ded66ca2d616110222"
+    },
+    {
+      "path": "lint2.txt",
+      "bytes": 459,
+      "sha256": "b1dbcc0b2df404c229d33a1d62210c24c240778d5fbf35edada263aff0a917c4"
+    },
+    {
+      "path": "lint3.txt",
+      "bytes": 459,
+      "sha256": "b1dbcc0b2df404c229d33a1d62210c24c240778d5fbf35edada263aff0a917c4"
+    },
+    {
+      "path": "red.json",
+      "bytes": 75271,
+      "sha256": "d86f1245908bedb480fbf03caaad24df34c6ab03ad1052539e36791a614b5f2b"
+    },
+    {
+      "path": "red.txt",
+      "bytes": 20390,
+      "sha256": "f85cd1a02f5fff4e81c18b45f8b73b374b88e9c10ee1d9d8d9dc95ef9c35f26a"
+    }
+  ]
+}

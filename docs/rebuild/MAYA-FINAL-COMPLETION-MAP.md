@@ -770,3 +770,13 @@ acceptance. All owned services stopped; heavy slot released. See the extended
 [public-profile checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md).
 The production typecheck also covers the committed personal READ runtime change;
 its newly prepared personal-specific HTTP cases were not selected in this proof.
+
+### Personal appointment dates in chat — local READ development, 2026-10-06
+
+Code `41f9ae79` answers the next personal appointment directly from the verified
+existing source, in its branch timezone, with at most three upcoming visits. Full
+available-list counts avoid sanitizer truncation; malformed/stale data stay blocked
+and empty-list wording respects hidden history. Six targeted suites pass304/304;
+scoped lint and independent review have no blockers. No new authority or personal
+data sent to a second model call. This new version has no semantic-types or actual
+HTTP/PG/React acceptance yet; see [checkpoint and evidence](MAYA-PERSONAL-READ-CONTEXT-20261006.md).

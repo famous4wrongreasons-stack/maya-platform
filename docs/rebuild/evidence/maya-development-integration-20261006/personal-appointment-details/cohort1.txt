@@ -1,0 +1,9 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       183 passed, 183 total
+Snapshots:   0 total
+Time:        0.986 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-personal-details-cohort1.json

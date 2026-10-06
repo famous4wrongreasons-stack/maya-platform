@@ -70,3 +70,35 @@ under current verified authority. No stored row is rewritten or backfilled.
 No CRM mutation, outgoing notification, new schema, retention policy or autonomy
 authority. Model/provider acceptance and C10 completion remain unclaimed;
 qualification stays `NOT_ISSUED`.
+
+The later production-only typecheck at application HEAD `9d1baa9f` passed with
+4096 MB heap in 5.52 seconds. It covers the committed canonical personal context
+correction, but the public-profile HTTP/browser proof did not select the new
+personal-specific HTTP cases. Their actual execution remains pending.
+
+Code `41f9ae79` makes the existing personal READ useful for “Когда я записан?”:
+AiCore composes up to three earliest upcoming visits, date/time in each appointment
+branch's timezone, optional public branch/service labels and full available-list
+counts. It consumes the actual runtime result before the generic 40-item display
+truncation. The canonical reader's existing history setting remains authoritative;
+empty available lists no longer imply that no past records exist. The source is
+identified as personal records in MAYA, not a freshly reconciled live CRM snapshot.
+
+The handler forwards only the branch timezone already selected by the existing
+reader. It does not add Client identity, phone/name/contact or provider payload.
+Stale or malformed results, absent/invalid upcoming dates and unknown branch
+timezones produce an explicit blocked answer. UTC ISO strings are round-trip
+validated; JavaScript date rollover and machine-local timezone parsing cannot
+invent a visit time. A cached upcoming flag is ignored once its instant has passed.
+Cancelled visits are not presented as upcoming. No second model call receives the
+personal history, and no READ grant, context owner, mutation, schema, retention or
+background authority changes.
+
+Six targeted suites pass 304/304; lint has zero errors and two existing test-helper
+warnings. Independent review has no remaining blocker. The previous RED showed
+8 failures/1 pass and is retained. The changed personal HTTP expectation is prepared,
+not executed. Types and HTTP/PG/current React proof for this newest increment are
+pending; prior public-profile proof cannot qualify the new runtime. Heavy slot was
+released before this light work. `NOT_ISSUED`; no real model/provider or C10 completion.
+
+[Personal appointment details: hashed RED/green/lint/review evidence](evidence/maya-development-integration-20261006/personal-appointment-details/manifest.json).
