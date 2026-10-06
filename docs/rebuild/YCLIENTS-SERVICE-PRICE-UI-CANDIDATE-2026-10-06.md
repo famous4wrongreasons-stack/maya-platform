@@ -59,7 +59,7 @@ to an owned synthetic loopback CRM server and a scripted model.
 - Current React and headless runtime: **5/5 PASS** (four cases plus wrapper), consuming
   untouched HTTP-exported envelopes and outcomes for confirmed, rejected, UNKNOWN
   and detail. Standard controls, sealed child, exact reading order and hidden tokens
-  are checked. **No browser was exercised.**
+  are checked. **At this UI checkpoint no browser was exercised.**
 - Backend and current React typechecks pass; React runtime import gate has zero refusals.
 - Focused backend tests: **559/559 PASS** over 23 suites; focused shell tests:
   **62/62 PASS**. Scoped ESLint: 48 files, zero errors and three generated-file warnings.
@@ -84,6 +84,8 @@ exact-title/fixed-amount language coverage is bounded; no real-model quality is 
 Create, broader edit/archive, staff/chain settings and whole-API completeness remain
 outside this candidate and need their preserved-state contracts in dependency order.
 
-Browser qualification, fresh aggregate census and V1.4 release/profile certification
-are still required for any later release decision. No real YCLIENTS/DeepSeek call,
+The later [actual browser checkpoint](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md)
+qualifies three local functional flows but exposes blocking card-state and typography
+defects. Their repair and fresh browser acceptance, aggregate census and V1.4
+release/profile certification are still required for any later release decision. No real YCLIENTS/DeepSeek call,
 production DB/config, existing HTTPS stand, phone, push, merge or deployment was used.

@@ -1,0 +1,138 @@
+{
+  "contract": "maya.service-price-browser-state/1",
+  "synthetic": true,
+  "browser_verdict": "NOT_ASSESSED",
+  "observed_at": "2026-10-06T17:37:00.460Z",
+  "reason": "unknown_before_approval",
+  "model": {
+    "scripted": true,
+    "calls": 3
+  },
+  "cases": [
+    {
+      "name": "confirmed",
+      "tenant_id": "cmuwy9tlr0000pac9de3frftz",
+      "user_id": "cmuwy9tng0001pac9c9duwnf6",
+      "provider": {
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "current_price_rubles": 2500,
+        "max_price_rubles": 2500,
+        "non_price_preservation_checks": [
+          true
+        ],
+        "readback_recovered": false
+      },
+      "actions": [
+        {
+          "id": "781637f5-f2f9-4f12-8c4d-da16d6174882",
+          "capability": "crm.service.fixed-price.update.v1",
+          "state": "SUCCEEDED",
+          "executionAttemptCount": 1,
+          "finalOutcomeCode": "provider_applied",
+          "safeResultSummaryJson": {
+            "source": "yclients",
+            "currency": "RUB",
+            "revision": "b5ecc981bd75dbc542b97b0fbe417368c2da57b987d7d56a9c77351c1f27c8c2",
+            "verified": true,
+            "service_id": "201",
+            "price_rubles": 2500,
+            "service_name": "Стрижка"
+          },
+          "finalizedAt": "2026-10-06T17:30:07.951Z"
+        }
+      ],
+      "approvals": [
+        {
+          "id": "cmuwyd7v5000wpac9m3ppc5j5",
+          "toolName": "catalog.service.price.update",
+          "status": "completed",
+          "payloadHash": "74ec16ab3002f7792448b25c7b7a83e8788abc799f4e5a60998cb4b2dec7334d",
+          "expiresAt": "2026-10-06T17:38:41.487Z",
+          "errorCode": null
+        }
+      ],
+      "receipts": [
+        {
+          "id": "9cc131fa-6a4c-4562-89d3-8f14fcc09c7c",
+          "widgetId": "32ce5006-dc42-4781-81fb-48fd94ba2993",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": null,
+          "submittedAt": "2026-10-06T17:29:08.623Z"
+        },
+        {
+          "id": "4634ed9d-9087-48b5-bac4-f0a83b2a0568",
+          "widgetId": "32ce5006-dc42-4781-81fb-48fd94ba2993",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": "781637f5-f2f9-4f12-8c4d-da16d6174882",
+          "submittedAt": "2026-10-06T17:30:07.861Z"
+        }
+      ],
+      "session_count": 1
+    },
+    {
+      "name": "rejected",
+      "tenant_id": "cmuwy9to10009pac9q33x64ag",
+      "user_id": "cmuwy9tpe000apac9z6hb0d59",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [
+        {
+          "id": "cmuwyj6m5001apac9t1jn3dvq",
+          "toolName": "catalog.service.price.update",
+          "status": "rejected",
+          "payloadHash": "91662a85e7a9c2721859ff5fbe7fd0781e11176667ab9cd9ac7bd13e3b6787b9",
+          "expiresAt": "2026-10-06T17:43:19.805Z",
+          "errorCode": null
+        }
+      ],
+      "receipts": [
+        {
+          "id": "0e369fd8-0395-4eb2-a8c9-b9ace7f299aa",
+          "widgetId": "31463a04-4e70-47cb-802f-9b791ca51bf4",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": null,
+          "submittedAt": "2026-10-06T17:33:53.604Z"
+        }
+      ],
+      "session_count": 1
+    },
+    {
+      "name": "unknown",
+      "tenant_id": "cmuwy9tpm000ipac9uwtw9n6h",
+      "user_id": "cmuwy9tqy000jpac9rp2n1aec",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [
+        {
+          "id": "cmuwynrns001lpac9mrkapq0o",
+          "toolName": "catalog.service.price.update",
+          "status": "pending",
+          "payloadHash": "1e8fe8e72cb4533cfe2d9820ffe14bf29716ed87292ad544d29727dc726f22f5",
+          "expiresAt": "2026-10-06T17:46:53.704Z",
+          "errorCode": null
+        }
+      ],
+      "receipts": [],
+      "session_count": 1
+    }
+  ],
+  "unexpected_requests": []
+}

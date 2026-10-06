@@ -1,0 +1,202 @@
+{
+  "source": "Actual Chromium trace network JSONL, response resources; no headers/auth bodies/codes copied",
+  "origin": "http://127.0.0.1:56541",
+  "cases": {
+    "confirmed": [
+      {
+        "method": "POST",
+        "path": "/api/auth/email/start",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/email/verify",
+        "status": 201
+      },
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/ai/chat",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/intent",
+        "status": 200,
+        "response": {
+          "outcome": "terminate",
+          "code": null,
+          "reason_text": null,
+          "owner_decision": null,
+          "receipt_outcome": "ACCEPTED"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/intent",
+        "status": 200,
+        "response": {
+          "outcome": "terminate",
+          "code": null,
+          "reason_text": null,
+          "owner_decision": {
+            "decision": "APPROVED",
+            "status": "completed",
+            "state": "SUCCEEDED",
+            "outcome": {
+              "source": "yclients",
+              "currency": "RUB",
+              "revision": "b5ecc981bd75dbc542b97b0fbe417368c2da57b987d7d56a9c77351c1f27c8c2",
+              "verified": true,
+              "service_id": "201",
+              "price_rubles": 2500,
+              "service_name": "Стрижка",
+              "action_execution_id": "781637f5-f2f9-4f12-8c4d-da16d6174882"
+            }
+          },
+          "receipt_outcome": "ACCEPTED"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/resolve",
+        "status": 200
+      }
+    ],
+    "rejected": [
+      {
+        "method": "POST",
+        "path": "/api/auth/email/start",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/email/verify",
+        "status": 201
+      },
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/ai/chat",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/intent",
+        "status": 200,
+        "response": {
+          "outcome": "terminate",
+          "code": null,
+          "reason_text": null,
+          "owner_decision": {
+            "decision": "REJECTED",
+            "status": "rejected",
+            "state": "REJECTED"
+          },
+          "receipt_outcome": "ACCEPTED"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/resolve",
+        "status": 200
+      }
+    ],
+    "unknown": [
+      {
+        "method": "POST",
+        "path": "/api/auth/email/start",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/email/verify",
+        "status": 201
+      },
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/ai/chat",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/intent",
+        "status": 200,
+        "response": {
+          "outcome": "terminate",
+          "code": null,
+          "reason_text": null,
+          "owner_decision": {
+            "decision": "APPROVED",
+            "status": "unknown",
+            "state": "UNKNOWN"
+          },
+          "receipt_outcome": "ACCEPTED"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/resolve",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/widgets/intent",
+        "status": 200,
+        "response": {
+          "outcome": "expired",
+          "code": null,
+          "reason_text": {
+            "phrase_key": "widget.refusal.expired",
+            "rendered": "Срок действия этой карточки истёк. Откройте актуальную версию."
+          },
+          "owner_decision": null,
+          "receipt_outcome": null
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/styles.css",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/m/47NMSAEC/main.js",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/email/start",
+        "status": 201
+      },
+      {
+        "method": "POST",
+        "path": "/api/auth/email/verify",
+        "status": 201
+      },
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation",
+        "status": 200
+      }
+    ]
+  }
+}

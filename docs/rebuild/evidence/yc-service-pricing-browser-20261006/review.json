@@ -1,0 +1,17 @@
+{
+  "reviewer": "independent pricing_review agent",
+  "mode": "read-only, no tests rerun",
+  "result": "bounded functional three-flow evidence supported; overall UI acceptance blocked",
+  "inspected": [
+    "11 state snapshots",
+    "provider events",
+    "cleanup",
+    "3 Chromium trace/network inventories",
+    "confirmed/rejected/UNKNOWN/repeat/relogin screenshots",
+    "full non-price equality and GET recovery harness"
+  ],
+  "limits": [
+    "Provider GET availability recovered but reads_after_patch did not increase; no canonical recovery read exercised",
+    "Terminal pending actions, UNKNOWN sentence overwritten on repeat, spacing/font defects remain blocking UX issues"
+  ]
+}

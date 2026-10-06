@@ -1,0 +1,65 @@
+{
+  "contract": "maya.service-price-browser-state/1",
+  "synthetic": true,
+  "browser_verdict": "NOT_ASSESSED",
+  "observed_at": "2026-10-06T17:26:03.242Z",
+  "reason": "ready_before_browser",
+  "model": {
+    "scripted": true,
+    "calls": 0
+  },
+  "cases": [
+    {
+      "name": "confirmed",
+      "tenant_id": "cmuwy9tlr0000pac9de3frftz",
+      "user_id": "cmuwy9tng0001pac9c9duwnf6",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [],
+      "receipts": [],
+      "session_count": 0
+    },
+    {
+      "name": "rejected",
+      "tenant_id": "cmuwy9to10009pac9q33x64ag",
+      "user_id": "cmuwy9tpe000apac9z6hb0d59",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [],
+      "receipts": [],
+      "session_count": 0
+    },
+    {
+      "name": "unknown",
+      "tenant_id": "cmuwy9tpm000ipac9uwtw9n6h",
+      "user_id": "cmuwy9tqy000jpac9rp2n1aec",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [],
+      "receipts": [],
+      "session_count": 0
+    }
+  ],
+  "unexpected_requests": []
+}

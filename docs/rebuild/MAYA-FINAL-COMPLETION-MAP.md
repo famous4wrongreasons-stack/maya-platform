@@ -663,3 +663,21 @@ create/edit/archive and richer provider contracts remain separate dependencies. 
 existing stand, production config/database, phone, real provider/model, push, merge
 or deployment was touched. See [UI candidate and limits](YCLIENTS-SERVICE-PRICE-UI-CANDIDATE-2026-10-06.md)
 and [fresh UI evidence](evidence/yc-service-pricing-ui-20261006/manifest.json).
+
+## YCLIENTS pricing — actual local browser checkpoint, 2026-10-06 UTC
+
+Actual Chromium controls exercised UI email login, natural price proposal, detail,
+approve, reject, UNKNOWN repeat/reload and fresh login against real local HTTP/auth,
+AE and owned Postgres. Three bounded functional flows pass: one confirmed PATCH with
+linked SUCCEEDED receipt, zero writes on reject, one lost-response PATCH remaining
+UNKNOWN with no false Done or redispatch. The model/email delivery/CRM alone are
+synthetic. All owned services are stopped and evidence retained.
+
+This is **not UI acceptance**: terminal cards remain visually pending/actionable,
+repeat click overwrites the UNKNOWN explanation, and metadata spacing/font are broken.
+The parent requested their repair plus regressions and another actual browser run;
+preparation is allowed while the main work owns the heavy slot. No new lifecycle or
+frozen authority contract is introduced. GET fixture recovery was available but not
+read by the application after reload, so no read-recovery browser claim is made.
+See [browser findings and procedure](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md)
+and [evidence manifest](evidence/yc-service-pricing-browser-20261006/manifest.json).
