@@ -32,9 +32,9 @@ Independent read-only review identified the local-date error, proposal/settlemen
 
 ## Qualification and remaining work
 
-This is code plus local synthetic evidence. Run/version/receipt writes use the existing persistent C9 owners, but the new combined vertical's restart/race proof uses an in-memory storage adapter. **Fresh HTTP/PostgreSQL proof was not run**, respecting the parent's shared-Mac scheduling restriction. Existing SQL contracts were inspected; physical persistence, endpoint/DI behavior and current-carrier presentation still need the isolated HTTP/PG gate before integration acceptance.
+The original `480d61dc` checkpoint used local synthetic/in-memory restart and race evidence. After parent assigned the heavy slot, the combined vertical passed a genuine two-process HTTP/PostgreSQL restart gate using the existing persistent owners, including current text-carrier projection/React SSR. The gate exposed and fixed the native C5 fingerprint versus C9 hash boundary. [Actual result and all retained attempts](MAYA-EXPLICIT-OCCUPANCY-HTTP-PG-RESULT-20261006.md) supersede the earlier physical-persistence gap. Browser/device/provider/model acceptance remains pending.
 
-Follow-up preparation: [two-process HTTP/PostgreSQL + current text-carrier gate](MAYA-EXPLICIT-OCCUPANCY-HTTP-PG-PREP-20261006.md) now has code, fixtures, a dedicated-cluster driver and passing light tests. Heavy execution remains pending the parent's slot; no persistence or HTTP acceptance is claimed from the preparation.
+The [preparation record](MAYA-EXPLICIT-OCCUPANCY-HTTP-PG-PREP-20261006.md) is retained separately from executed acceptance; the [integration file list](MAYA-EXPLICIT-OCCUPANCY-INTEGRATION-20261006.md) describes shared-owner seams and exact existing C5 source compatibility.
 
 This first vertical handles one saved C5 opportunity for a tenant-wide owner in the ordinary web chat. It does not detect cancellations when the existing C5 lifecycle has produced none; it does not implement user-selected date/branch/staff filters, all-window pagination, native/voice ingress, model reasoning, C7 outcome measurement or automatic refresh. The continuation option is deliberately a read, not a prepared booking/contact action. Actual YCLIENTS permissions, provider completeness, latency/quotas and owner usability are not certified by synthetic readers.
 

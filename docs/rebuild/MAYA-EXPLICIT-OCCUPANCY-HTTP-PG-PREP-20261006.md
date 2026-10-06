@@ -1,5 +1,7 @@
 # Explicit occupancy: HTTP/PostgreSQL and current carrier gate — prepared
 
+Follow-up status: the parent subsequently assigned the slot and the actual two-process gate passed after a narrow C5 fingerprint boundary fix. See [executed result, all attempts and limitations](MAYA-EXPLICIT-OCCUPANCY-HTTP-PG-RESULT-20261006.md). The following records preparation at `13abc008`; its pending statements describe that earlier checkpoint.
+
 2026-10-06. Preserves code checkpoint `480d61dc84e6b23bfb50e7bd53f04c011e4340be` on the isolated `codex/maya-explicit-occupancy-20261006` branch. **The HTTP/PostgreSQL gate has not run.** This checkpoint adds fixtures, a two-process driver, and light tests only. Parent assigns the heavy slot before execution. No production source, migration, schema, retention decision, background C10 initiator, or multiple-opportunity behavior changes.
 
 ## Prepared proof

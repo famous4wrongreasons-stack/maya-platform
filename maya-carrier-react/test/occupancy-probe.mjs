@@ -9,29 +9,34 @@ import { findAll, parse, textOf } from './html.mjs';
 
 export async function observeOccupancy({ requestId, exchange, mode = 'chat' }) {
   const exchanges = [];
+  let transportError = null;
+  const diagnose = async (work) => {
+    try { return await work(); }
+    catch (error) { transportError = error; throw error; }
+  };
   const perform = async (method, route, body) => {
     const response = await exchange(method, route, body);
     exchanges.push({ method, route, ...response });
-    assert.ok([200, 201].includes(response.status), `carrier HTTP ${response.status}`);
+    assert.ok([200, 201].includes(response.status), `carrier HTTP ${response.status}: ${JSON.stringify(response.body, (key, value) => /token|password|authorization/i.test(key) ? '[redacted]' : value)}`);
     return response.body;
   };
   const conversation = createConversation({
     transport: {
-      chat: async (body) => {
+      chat: (body) => diagnose(async () => {
         const raw = await perform('POST', '/api/ai/chat', body);
         const value = projectChat(raw, body.requestId);
         assert.ok(value, 'production chat projector accepts response');
         assert.equal(value.resolution, null, 'no executable widget');
         assert.equal(value.action_status, null, 'no action authority');
         return { ok: true, value };
-      },
+      }),
       ...(mode === 'history' ? {
-        conversation: async () => {
+        conversation: () => diagnose(async () => {
           const raw = await perform('GET', '/api/ai/conversation');
           const value = projectConversationHistory(raw);
           assert.ok(value, 'production history projector accepts response');
           return { ok: true, value };
-        },
+        }),
       } : {}),
     },
     session: { view: () => ({ signedIn: true, display: { userName: 'Synthetic owner', tenantName: 'Synthetic salon' } }), subscribe: () => () => {} },
@@ -52,6 +57,7 @@ export async function observeOccupancy({ requestId, exchange, mode = 'chat' }) {
       const off = conversation.subscribe(settled);
       settled();
     });
+    if (transportError) throw transportError;
     const items = conversation.view().items;
     assert.equal(items.some((item) => item.kind === 'widget'), false);
     const replies = items.filter((item) => item.kind === 'assistant').map((item) => item.text);

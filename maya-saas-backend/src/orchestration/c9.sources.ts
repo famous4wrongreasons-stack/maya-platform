@@ -28,6 +28,19 @@ const identityFields: Record<
   C8ResultRevision: ['identityHash', 'intentHash'],
   ClientBookingConfirmation: [null, 'intentHash'],
 };
+
+/** C5 owns namespaced fingerprints; C9's existing wire carries 64-hex hashes.
+ * Hash the complete native value (including its namespace), never change C5 or
+ * strip the prefix and pretend it was the same source identity.
+ */
+export function c9C5Fingerprint(value: unknown): string {
+  if (
+    typeof value !== 'string' ||
+    !/^(identity|evidence|task)_[a-f0-9]{64}$/.test(value)
+  )
+    c9Deny('source_qualification');
+  return c9Hash('c5-source-fingerprint/1', [value]);
+}
 /** Live qualified references. No FK/cleanup or write into independent source owners. */
 @Injectable()
 export class C9Sources {
@@ -124,10 +137,18 @@ export class C9Sources {
     if (!row) c9Deny('source_missing');
     const s = row.data as C9Object,
       [identity, input] = identityFields[type];
-    const expectedIdentity = identity
+    let expectedIdentity = identity
       ? s[identity]
       : c9Hash('source-identity/1', [type, p.tenantId, ref.id]);
-    if (expectedIdentity !== ref.identityHash || s[input] !== ref.inputHash)
+    let expectedInput = s[input];
+    if (type === 'Opportunity' || type === 'AgentTask') {
+      expectedIdentity = c9C5Fingerprint(expectedIdentity);
+      expectedInput = c9C5Fingerprint(expectedInput);
+    }
+    if (
+      expectedIdentity !== ref.identityHash ||
+      expectedInput !== ref.inputHash
+    )
       c9Deny('source_changed');
     const expiry = s.expiresAt ?? s.validUntil ?? s.intentExpiresAt;
     if (typeof expiry === 'string' && Date.parse(expiry) <= now.getTime())

@@ -616,7 +616,8 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
       const foreign = await request(http.app.getHttpServer())
         .get(`/api/orchestration/runs/${replay.coordination.run_id}`)
         .set('authorization', `Bearer ${expiredToken}`);
-      expect([403, 404]).toContain(foreign.status);
+      expect(foreign.status).toBe(400);
+      expect(foreign.body).toMatchObject({ message: 'c9_run_authority' });
       expect(JSON.stringify(foreign.body)).not.toContain(salon.appointmentId);
       const runsBefore = await db.prisma.c9Run.count({
         where: { tenantId: salon.tenant.id },

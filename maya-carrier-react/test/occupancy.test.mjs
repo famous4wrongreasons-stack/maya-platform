@@ -32,3 +32,7 @@ test('probe refuses external, redirected and credential-bearing targets before f
   assert.equal(assertOwnedLoopback('http://127.0.0.1:45678'), 'http://127.0.0.1:45678');
   for (const target of ['https://127.0.0.1:443', 'http://localhost:1234', 'http://example.test:1234', 'http://127.0.0.1', 'http://user:secret@127.0.0.1:1234', 'http://127.0.0.1:1234/elsewhere']) assert.throws(() => assertOwnedLoopback(target));
 });
+
+test('failed HTTP response survives runtime rejection as a redacted diagnostic', async () => {
+  await assert.rejects(observeOccupancy({ requestId: randomUUID(), exchange: async () => ({ status: 403, body: { error: 'test_denial', token: 'do-not-print' } }) }), (error) => error.message.includes('carrier HTTP 403') && error.message.includes('test_denial') && !error.message.includes('do-not-print'));
+});

@@ -1,5 +1,6 @@
 import { C9OccupancySource } from './c9.occupancy-source';
 import { C9Store } from './c9.store';
+import { c9C5Fingerprint } from './c9.sources';
 import { OpportunityLifecycleRepository } from '../opportunities/opportunity.lifecycle';
 import { CrmService } from '../crm/crm.service';
 import { AiToolPolicyService } from '../ai-tools/ai-tool-policy.service';
@@ -35,7 +36,7 @@ function fixture() {
   };
   const task = {
     id: 'task',
-    taskFingerprint: 'c'.repeat(64),
+    taskFingerprint: 'task_' + 'c'.repeat(64),
     tenantId: p.tenantId,
     opportunityId: 'op',
     status: 'current',
@@ -68,8 +69,8 @@ function fixture() {
       ],
     },
     lastValidatedAt: now,
-    evidenceFingerprint: 'a'.repeat(64),
-    identityFingerprint: 'b'.repeat(64),
+    evidenceFingerprint: 'evidence_' + 'a'.repeat(64),
+    identityFingerprint: 'identity_' + 'b'.repeat(64),
   };
   const tx = {
     membership: {
@@ -153,7 +154,7 @@ describe('explicit Occupancy current-source projection (synthetic CRM, no model)
     expect(result.evidenceRefs[0]).toMatchObject({
       sourceType: 'Opportunity',
       tenantId: 'tenant-1',
-      inputHash: f.op.evidenceFingerprint,
+      inputHash: c9C5Fingerprint(f.op.evidenceFingerprint),
     });
     expect(f.crm.getAvailableSlots).toHaveBeenCalledWith('tenant-1', {
       date: '2035-05-10',

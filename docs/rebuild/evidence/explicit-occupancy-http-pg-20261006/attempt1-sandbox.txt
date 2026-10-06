@@ -1,0 +1,17 @@
+Transcript-derived failure record, 2026-10-06. No synthetic result or successful stage is inferred.
+
+Command (default sandbox):
+node scripts/c9-occupancy-proof.mjs --run --output=/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/c9-occupancy-http-pg-evidence --pg-bin=/opt/homebrew/opt/postgresql@16/bin
+
+Observed exit code: 1
+Error: listen EPERM: operation not permitted 127.0.0.1
+    at Server.setupListenHandle [as _listen2] (node:net:1986:21)
+    at listenInCluster (node:net:2065:12)
+    at node:net:2274:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+code: EPERM; errno: -1; syscall: listen; address: 127.0.0.1
+Node.js v24.15.0
+
+The output directory was created but no manifest/initdb/PG/HTTP stage was reached.
+That original directory was retained. The next invocation requested escalated
+loopback permission for the already-authorized gate and used a new output path.

@@ -1,0 +1,37 @@
+{
+  "verifiedAt": "2026-10-06T16:28:34.016672+00:00",
+  "clusters": [
+    {
+      "attempt": 2,
+      "database": "maya_widget_gate_proof_c9occ_8c9eb98efbb8",
+      "port": 59702,
+      "status": "failed",
+      "stopLogConfirmed": true,
+      "postmasterPidFilePresent": false
+    },
+    {
+      "attempt": 3,
+      "database": "maya_widget_gate_proof_c9occ_312f7de848a2",
+      "port": 59946,
+      "status": "failed",
+      "stopLogConfirmed": true,
+      "postmasterPidFilePresent": false
+    },
+    {
+      "attempt": 4,
+      "database": "maya_widget_gate_proof_c9occ_ebf999c593dc",
+      "port": 60453,
+      "status": "failed",
+      "stopLogConfirmed": true,
+      "postmasterPidFilePresent": false
+    },
+    {
+      "attempt": 5,
+      "database": "maya_widget_gate_proof_c9occ_900923d55065",
+      "port": 60612,
+      "status": "passed",
+      "stopLogConfirmed": true,
+      "postmasterPidFilePresent": false
+    }
+  ]
+}

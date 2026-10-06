@@ -1,0 +1,334 @@
+{
+  "contract": "maya.explicit-occupancy-http-pg-proof/1",
+  "stage": "prepare",
+  "pid": 79127,
+  "postgresStarted": "2026-10-06 16:20:53.696504+00",
+  "database": "maya_widget_gate_proof_c9occ_ebf999c593dc",
+  "syntheticCrmAdapter": true,
+  "externalProviderAcceptance": false,
+  "modelCalls": 0,
+  "browserAcceptance": false,
+  "observations": {
+    "fc6d52bc-b69b-4b61-8823-fc65af79b6ab:0": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "После снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "fc6d52bc-b69b-4b61-8823-fc65af79b6ab",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "После снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки.",
+                    "evidence_refs": [
+                      "h_43e058c129159405bb6af80601094481f9ecf29fbc0d1edc4f2f6cbcd498e9cd"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured",
+                    "as_of": "2026-10-06T16:20:56.336Z",
+                    "evidence_refs": [
+                      "h_43e058c129159405bb6af80601094481f9ecf29fbc0d1edc4f2f6cbcd498e9cd"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "48c25861f76844a34755db7c76cfb88832ef2dc89dfcede1bbf0200efd29977f",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "high",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "48c25861f76844a34755db7c76cfb88832ef2dc89dfcede1bbf0200efd29977f",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_43e058c129159405bb6af80601094481f9ecf29fbc0d1edc4f2f6cbcd498e9cd"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "b0449975-5bde-4172-8654-006d68a8d2b5",
+                "asOf": "2026-10-06T16:20:56.336Z",
+                "opportunityRefs": [
+                  {
+                    "sourceType": "Opportunity",
+                    "id": "206b7282-6bef-4826-8823-eee2bc01c6e2",
+                    "tenantId": "cmuwvy2w200001zc98d4qpdbg",
+                    "subjectKind": "appointment",
+                    "subjectRef": "appointment_2ccbbbc97494bb08d9ff456037cf8212",
+                    "contractVersion": 1,
+                    "identityHash": "c4520d05582bbb917549792a1d6101bf359ab4dc969b4126824567e3a1210d1e",
+                    "inputHash": "570993ce65bf82ded662cc254b5cbfdfbb08a6f0b728e4682c1ec5c0e6fa587a",
+                    "observedAt": "2026-10-06T16:20:56.336Z",
+                    "validUntil": "2026-10-08T10:00:00.000Z",
+                    "retentionUntil": null,
+                    "status": "VERIFIED",
+                    "completeness": "COMPLETE",
+                    "unavailableReason": null
+                  },
+                  {
+                    "sourceType": "AgentTask",
+                    "id": "7b5d914f-6d2f-4a75-a992-ac90e60f2578",
+                    "tenantId": "cmuwvy2w200001zc98d4qpdbg",
+                    "subjectKind": "assignment",
+                    "subjectRef": "7b5d914f-6d2f-4a75-a992-ac90e60f2578",
+                    "contractVersion": 1,
+                    "identityHash": "100690096e4f83175a742d42e5ffecbe9dc7c1462449ef382edca6078d56f6c7",
+                    "inputHash": "100690096e4f83175a742d42e5ffecbe9dc7c1462449ef382edca6078d56f6c7",
+                    "observedAt": "2026-10-06T16:20:56.336Z",
+                    "validUntil": "2026-10-08T10:00:00.000Z",
+                    "retentionUntil": null,
+                    "status": "VERIFIED",
+                    "completeness": "COMPLETE",
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_d00ed90de7863638d24eeca29fb2ea03"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "97a82015-c89b-4159-b6bf-42a61f6f1b6b",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "fded5eb0-8b33-4f38-8e32-d9c3de3f5e7d",
+              "revision": 1,
+              "replayed": false,
+              "current": true
+            },
+            "user_turn": {
+              "turnId": "640e5d19-d4cd-4582-ade8-cb02ff7f4ada",
+              "conversationId": "5b73488d-b72d-4ffa-b702-1a5213586ac4"
+            },
+            "reply": "После снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "fc6d52bc-b69b-4b61-8823-fc65af79b6ab:1": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "fc6d52bc-b69b-4b61-8823-fc65af79b6ab",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен».",
+                    "evidence_refs": [
+                      "h_ece0e5aede17070df4cb64ecb1b383bef14c8f59234bae771929178a8c769200"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured_incomplete",
+                    "as_of": "2026-10-06T16:20:56.336Z",
+                    "evidence_refs": [
+                      "h_ece0e5aede17070df4cb64ecb1b383bef14c8f59234bae771929178a8c769200"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "fa4286c906abb187fded79d16308041c3036abe651f0190b7bd67fbd887ef770",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed",
+                        "historical_read_not_revalidated"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "low",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed",
+                  "historical_read_not_revalidated"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "fa4286c906abb187fded79d16308041c3036abe651f0190b7bd67fbd887ef770",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed",
+                    "historical_read_not_revalidated"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_ece0e5aede17070df4cb64ecb1b383bef14c8f59234bae771929178a8c769200"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "b0449975-5bde-4172-8654-006d68a8d2b5",
+                "asOf": "2026-10-06T16:20:56.336Z",
+                "opportunityRefs": [
+                  {
+                    "id": "206b7282-6bef-4826-8823-eee2bc01c6e2",
+                    "status": "VERIFIED",
+                    "tenantId": "cmuwvy2w200001zc98d4qpdbg",
+                    "inputHash": "570993ce65bf82ded662cc254b5cbfdfbb08a6f0b728e4682c1ec5c0e6fa587a",
+                    "observedAt": "2026-10-06T16:20:56.336Z",
+                    "sourceType": "Opportunity",
+                    "subjectRef": "appointment_2ccbbbc97494bb08d9ff456037cf8212",
+                    "validUntil": "2026-10-08T10:00:00.000Z",
+                    "subjectKind": "appointment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "c4520d05582bbb917549792a1d6101bf359ab4dc969b4126824567e3a1210d1e",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  },
+                  {
+                    "id": "7b5d914f-6d2f-4a75-a992-ac90e60f2578",
+                    "status": "VERIFIED",
+                    "tenantId": "cmuwvy2w200001zc98d4qpdbg",
+                    "inputHash": "100690096e4f83175a742d42e5ffecbe9dc7c1462449ef382edca6078d56f6c7",
+                    "observedAt": "2026-10-06T16:20:56.336Z",
+                    "sourceType": "AgentTask",
+                    "subjectRef": "7b5d914f-6d2f-4a75-a992-ac90e60f2578",
+                    "validUntil": "2026-10-08T10:00:00.000Z",
+                    "subjectKind": "assignment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "100690096e4f83175a742d42e5ffecbe9dc7c1462449ef382edca6078d56f6c7",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_d00ed90de7863638d24eeca29fb2ea03"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "97a82015-c89b-4159-b6bf-42a61f6f1b6b",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "fded5eb0-8b33-4f38-8e32-d9c3de3f5e7d",
+              "revision": 1,
+              "replayed": true,
+              "current": false
+            },
+            "user_turn": {
+              "turnId": "640e5d19-d4cd-4582-ade8-cb02ff7f4ada",
+              "conversationId": "5b73488d-b72d-4ffa-b702-1a5213586ac4"
+            },
+            "reply": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    }
+  }
+}

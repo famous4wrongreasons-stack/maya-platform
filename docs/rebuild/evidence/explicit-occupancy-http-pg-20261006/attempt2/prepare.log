@@ -1,0 +1,40 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_8c9eb98efbb8 on 127.0.0.1:59702 (local)
+[31m[Nest] 75383  - [39m10/06/2026, 4:15:02 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 75383  - [39m10/06/2026, 4:15:02 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/c9-occupancy-restart.probe-spec.ts
+  explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synthetic CRM adapter only, zero model]
+    ✕ persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority (407 ms)
+
+  ● explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synthetic CRM adapter only, zero model] › persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority
+
+    Current carrier probe failed: node:internal/modules/run_main:107
+        triggerUncaughtException(
+        ^
+
+    AssertionError [ERR_ASSERTION]: assistant response is visible
+
+      59 |       ? [exchanges[0].body.reply]
+      60 |       : exchanges[0].body.turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text);
+    > 61 |     assert.ok(replies.length > 0, 'assistant response is visible');
+         |            ^
+      62 |     assert.deepEqual(replies, expected, 'runtime preserves exact server text');
+      63 |     if (mode === 'chat') assert.equal(replies.length, 1, 'one coherent response');
+      64 |     for (const reply of replies) {
+
+      at observeOccupancy (../file:/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-explicit-occupancy/maya-carrier-react/test/occupancy-probe.mjs:61:12)
+      at ../async file:/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-explicit-occupancy/maya-carrier-react/test/occupancy-probe.mjs:88:18 {
+        generatedMessage: false,
+        code: 'ERR_ASSERTION',
+        actual: false,
+        expected: true,
+        operator: '==',
+        diff: 'simple'
+      }
+      Node.js v24.15.0
+      at ChildProcess.<anonymous> (widgets-live/c9-occupancy-restart.probe-spec.ts:409:25)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        4.802 s
+Ran all test suites within paths "test/widgets-live/c9-occupancy-restart.probe-spec.ts".

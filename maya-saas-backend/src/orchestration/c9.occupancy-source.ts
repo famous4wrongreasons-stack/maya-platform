@@ -11,6 +11,7 @@ import {
   opportunityShadowIntervalRef,
 } from '../opportunities/opportunity.shadow';
 import { C9Store } from './c9.store';
+import { c9C5Fingerprint } from './c9.sources';
 import { C9Object, C9Principal, c9Deny, c9Hash, c9Object } from './c9.contract';
 
 export type OccupancyOutcome =
@@ -368,8 +369,8 @@ export class C9OccupancySource {
                 subjectKind: 'assignment',
                 subjectRef: task.id,
                 contractVersion: 1,
-                identityHash: task.taskFingerprint,
-                inputHash: task.taskFingerprint,
+                identityHash: c9C5Fingerprint(task.taskFingerprint),
+                inputHash: c9C5Fingerprint(task.taskFingerprint),
                 observedAt: now.toISOString(),
                 validUntil: task.expiresAt.toISOString(),
                 retentionUntil: null,
@@ -402,8 +403,8 @@ function opRef(
     subjectKind: 'appointment',
     subjectRef: op.affectedEntityRef,
     contractVersion: 1,
-    identityHash: op.identityFingerprint,
-    inputHash: op.evidenceFingerprint,
+    identityHash: c9C5Fingerprint(op.identityFingerprint),
+    inputHash: c9C5Fingerprint(op.evidenceFingerprint),
     observedAt: now.toISOString(),
     validUntil: op.expiresAt.toISOString(),
     retentionUntil: null,
