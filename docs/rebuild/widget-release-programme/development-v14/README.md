@@ -1,6 +1,9 @@
 # Fresh V1.4 development qualification preparation
 
 This is a reproducible, **unqualified baseline**, not a release certificate.
+**Parked by parent instruction:** website/booking release has priority. No further
+heavy work until this lane is explicitly resumed or given a separate resource.
+The exact deferred commands and resource budget are in [PARKED-RESUME.md](PARKED-RESUME.md).
 The current contract is V1.4 SHA-256
 `9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769`.
 The exact hash is enforced by `prepare-audit.mjs`; use that constant as the
@@ -74,7 +77,7 @@ node scripts/widgets-mutation-ci.mjs plan
 
 ## Next execution boundary
 
-Wait for parent’s heavy-slot coordination; then run fresh unrestricted baseline
+After parent explicitly resumes this parked lane and assigns its resource, run fresh unrestricted baseline
 checks on the owned disposable PG, followed by the complete serial mutation
 plan. Wait for every child to exit before starting the next command. Preserve
 each job’s exact candidate HEAD and complete controls; no suite filters, reduced
