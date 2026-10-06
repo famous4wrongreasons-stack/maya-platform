@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_ownschedule_dd59c9e3b7e8 on 127.0.0.1:53115 (local)
+PASS test/widgets-live/own-schedule-restart.probe-spec.ts (16.488 s)
+  own schedule actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ executes the owned stage and preserves canonical source/history boundaries (15661 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        16.506 s
+Ran all test suites within paths "test/widgets-live/own-schedule-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-own-schedule-http-react-20261006-r2/resume-jest.json

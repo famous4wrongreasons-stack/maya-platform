@@ -1,0 +1,12 @@
+Read-only review by /root/independent_review. Code, reports and all seven screenshots inspected. No tests or services started by reviewer.
+
+Блокирующих замечаний к четырём proof-файлам и r2 не нашёл. Production HEAD подтверждён: cc3c436bd522225bec889ec6e9747b4041f07bd0.
+
+Проверены код, manifest, HTTP-наблюдения, browser.json и все семь скриншотов:
+- Два HTTP-этапа PASS; процессы приложения и PostgreSQL сменились, сохранённые C9Run/C9WorkReceipt совпали.
+- Реальный email auth восстановил историю без вызова модели или schedule reader.
+- Рабочий день, выходной, уточнение даты, INCOMPLETE, отсутствие привязки и UI 401 видимы и соответствуют HTTP.
+- Foreign tenant получает 400 c9_run_authority; собственный источник возвращает другие часы.
+- Проверки бизнес-записей и запрещённого fetch проходят. PostgreSQL остановлен: stop log подтверждает завершение, postmaster.pid отсутствует.
+
+Границы доказательства: повтор того же request ID проверен до restart; после restart проверены сохранность и восстановление истории при новом входе. Это не отдельный reconnect существующей вкладки. Модель scripted, ответы CRM synthetic; реальный YClients/model, C10 и сертификат не квалифицированы.

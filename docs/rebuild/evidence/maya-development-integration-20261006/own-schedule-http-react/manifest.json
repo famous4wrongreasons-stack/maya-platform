@@ -1,0 +1,159 @@
+{
+  "kind": "qualified-local-own-schedule-http-react-checkpoint",
+  "applicationHeadAtExecution": "cc3c436bd522225bec889ec6e9747b4041f07bd0",
+  "runtimeCodeHead": "4a05b45ac132d0d867b9b15c955f68573e010657",
+  "proofHarnessHead": "884828fb484f77350431a426f98dbe0d7aefc25c",
+  "qualification": "NOT_ISSUED",
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "actualHttpAuthC9Postgres": true,
+  "actualReactChromium": true,
+  "applicationAndPostgresRestart": true,
+  "requestIdReplay": "before restart",
+  "postRestart": "immutable graph plus actual UI fresh login/history, no source reread",
+  "proofCleanup": "After r2 only type assertions, formatting and equivalent URL extraction in fixture fetch were cleaned for lint; no application runtime changed before harness commit.",
+  "r1": "Fixture failed before model due missing canonical Staff identity; entire cluster stopped. Added existing Staff/StaffProviderLink and synthetic auth staff-catalog GET; no authority bypass.",
+  "r2": "PASS: two stages and seven browser checkpoints; business write recorder and effect counters unchanged; no unadmitted fetch; all owned services stopped.",
+  "files": [
+    {
+      "path": "createdb.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 1764,
+      "sha256": "008fc89408e1b1655ef53ad480010a0728f1256f6a8379cb1e8aa13ffd897277"
+    },
+    {
+      "path": "initdb.txt",
+      "bytes": 946,
+      "sha256": "8a8fa47d34ab6537dc2d316834e7277869b7bea651b7b3018b67d07139b20dad"
+    },
+    {
+      "path": "migrations.txt",
+      "bytes": 14726,
+      "sha256": "2e554beae2c3dc21eef7d58733918e9ce6ff942dccded08a78a526da7b04ab4c"
+    },
+    {
+      "path": "output/playwright/after.png",
+      "bytes": 81747,
+      "sha256": "899cbdb8f8a16eff99c30bdff37b306481791b65e180316f4a790a76105e8084"
+    },
+    {
+      "path": "output/playwright/ambiguous.png",
+      "bytes": 95261,
+      "sha256": "d0589a472a0e206b96ceb9d63fa6c505f90272a63b92479deaf3707d6116bf1c"
+    },
+    {
+      "path": "output/playwright/browser.json",
+      "bytes": 17862,
+      "sha256": "6dabb7ff967a4e3fccffd7a9a3200f6a50d1ad237f636e5df0d86d73440c5673"
+    },
+    {
+      "path": "output/playwright/history.png",
+      "bytes": 60599,
+      "sha256": "7af6786a3f7f9adc528619f44bf95aff81cfdcf4654727b98487c76348a76fbb"
+    },
+    {
+      "path": "output/playwright/incomplete.png",
+      "bytes": 106870,
+      "sha256": "68c01b4d94c2c5917dc32fc5c4fbd19624be11c5e8dd8ac3e615f5cd33dd424c"
+    },
+    {
+      "path": "output/playwright/revoked.png",
+      "bytes": 27025,
+      "sha256": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab"
+    },
+    {
+      "path": "output/playwright/tomorrow.png",
+      "bytes": 71557,
+      "sha256": "7612013f44a9efa7945305dd2a7443935bdef3315ac76b9e86ead44a0657b905"
+    },
+    {
+      "path": "output/playwright/unlinked.png",
+      "bytes": 121309,
+      "sha256": "bf9e4e33b4b85ee6d318bbe42977f1d6a4915131bf447fc7c150aa9f254eb982"
+    },
+    {
+      "path": "pg-restart.txt",
+      "bytes": 1346,
+      "sha256": "0e0043645ac5af9bd429df5959f785839456f76b5ed632566704455ed4962a51"
+    },
+    {
+      "path": "pg-start.txt",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "pg-stop.txt",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "postgres.txt",
+      "bytes": 1246,
+      "sha256": "d1f7cf3ceae60a7c46e158526d26731a78084d4a64638125ff25fa40c126df51"
+    },
+    {
+      "path": "prepare-jest.json",
+      "bytes": 1365,
+      "sha256": "0639c641aa7dc7374876b162741fee7da99ba0c6e78dcae65cda9ad656996b43"
+    },
+    {
+      "path": "prepare-observations.json",
+      "bytes": 6972,
+      "sha256": "3522b880fad8f5120abc0f901a2887b0a04dcc86b9242315a0abc7c82873ff80"
+    },
+    {
+      "path": "prepare.txt",
+      "bytes": 651,
+      "sha256": "8c54b043e90cd8c4884e3d1627c568cc94dbca2b6a3430d4893da8e76575f959"
+    },
+    {
+      "path": "proof-lint.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1-fixture-failure-manifest.json",
+      "bytes": 630,
+      "sha256": "18d63a65e42359b007595b9668b7217826fa8c2e9effc264ec0ef12542a8ed42"
+    },
+    {
+      "path": "r1-fixture-failure-prepare-observations.json",
+      "bytes": 285,
+      "sha256": "1c0e761948cd45301b900245561f840335c80ecec4ae6f23ab736b0641baf5e8"
+    },
+    {
+      "path": "r1-fixture-failure-prepare.txt",
+      "bytes": 2396,
+      "sha256": "ccc39cf70286ef70d02571b0aa5b8e472a426ebd00270f7762620956f61199a4"
+    },
+    {
+      "path": "react-web-build.txt",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "resume-jest.json",
+      "bytes": 1368,
+      "sha256": "aa0c1208326276c566461af6628ae02e57bcd5dd0828373e74a95cffedf0a1b0"
+    },
+    {
+      "path": "resume-observations.json",
+      "bytes": 3670,
+      "sha256": "0b3c78946f6050eed52944da5663d811722461bce404d3c025798ebe4b88f9c7"
+    },
+    {
+      "path": "resume.txt",
+      "bytes": 649,
+      "sha256": "bc4b171d227711a932ee1d486526e9ff62569c148297f4eb0f3d120d136418f3"
+    },
+    {
+      "path": "run-manifest.json",
+      "bytes": 677,
+      "sha256": "b97b0a13b7db606cca195a3880f7e305fae4165822c7ce76ca6d936c5e13292b"
+    }
+  ]
+}

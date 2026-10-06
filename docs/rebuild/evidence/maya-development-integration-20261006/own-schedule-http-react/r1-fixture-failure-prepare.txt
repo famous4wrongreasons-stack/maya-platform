@@ -1,0 +1,32 @@
+widgets-live: proof database maya_widget_gate_proof_ownschedule_119d5607bdde on 127.0.0.1:52860 (local)
+[31m[Nest] 97695  - [39m10/06/2026, 10:32:24 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 97695  - [39m10/06/2026, 10:32:24 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[33m[Nest] 97695  - [39m10/06/2026, 10:32:25 PM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM team access synchronization deferred tenant=cmux97t6b0000drc9svouh8hu: unavailable[39m
+[33m[Nest] 97695  - [39m10/06/2026, 10:32:25 PM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM team access synchronization deferred tenant=cmux97t8x000adrc9fjlsttn7: unavailable[39m
+FAIL test/widgets-live/own-schedule-restart.probe-spec.ts
+  own schedule actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ executes the owned stage and preserves canonical source/history boundaries (362 ms)
+
+  ● own schedule actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CRM] › executes the owned stage and preserves canonical source/history boundaries
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 403
+
+      324 |       const requestId = randomUUID();
+      325 |       const first = await chat(token, PROMPTS.tomorrow, requestId);
+    > 326 |       expect(first.status).toBe(201);
+          |                            ^
+      327 |       expect(first.body).toMatchObject({
+      328 |         action: null,
+      329 |         grounding: { status: 'verified' },
+
+      at Object.<anonymous> (widgets-live/own-schedule-restart.probe-spec.ts:326:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        4.909 s
+Ran all test suites within paths "test/widgets-live/own-schedule-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-own-schedule-http-react-20261006-r1/prepare-jest.json

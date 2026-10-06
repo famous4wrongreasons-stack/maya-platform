@@ -1,0 +1,26 @@
+{
+  "kind": "own-schedule-http-react-local-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-own-schedule-n5QULx/pg",
+  "database": "maya_widget_gate_proof_ownschedule_119d5607bdde",
+  "port": 52860,
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "pg-stop"
+  ],
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 1
+  },
+  "clusterStopped": true
+}

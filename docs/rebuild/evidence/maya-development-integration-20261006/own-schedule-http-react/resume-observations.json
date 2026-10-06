@@ -1,0 +1,113 @@
+{
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "64a045a1847867c80db2d851b8a5149f2a3bf7ce0c490dc058bc38bbdd5a3ff3"
+  },
+  "browserCheckpoints": [
+    "history",
+    "tomorrow",
+    "after",
+    "ambiguous",
+    "incomplete",
+    "unlinked",
+    "revoked"
+  ],
+  "receipts": [
+    {
+      "id": "40cc058a-4cab-4d1f-951e-9a9bf544409a",
+      "runId": "47061dc9-d7f8-4b11-bd00-59d18547ca35",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "5bea180336b0e78b4eb200232f57c9e7b9b3d8479dcc96a0dd57396ad9147221",
+        "capability": "staff.schedule.own.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T22:34:41.348Z",
+        "executionId": "cmux9aqf4000pjuc9vdi02xjc",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "ca420800-9c8e-4b9a-8fca-054b9c86f855",
+      "runId": "52a09072-91b1-443b-883b-d0314f874fc8",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "7b0473f45f3cdc99a50f8edaf251f5556ef73e309597f5dd30b3a4a70d20ba3a",
+        "capability": "staff.schedule.own.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T22:34:41.445Z",
+        "executionId": "cmux9aqhv000vjuc9futoblll",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "fc9167ee-330e-4a20-b818-6223e1efd2af",
+      "runId": "d18eec99-6d01-4d90-a303-31d3d70a1a04",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "5bea180336b0e78b4eb200232f57c9e7b9b3d8479dcc96a0dd57396ad9147221",
+        "capability": "staff.schedule.own.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T22:34:44.132Z",
+        "executionId": "cmux9askh0002l7c9nl5na9ee",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "a108cdfa-36b0-45d1-bd44-1572d992b036",
+      "runId": "bfc24e8e-7d53-4602-86df-6161933c36e7",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "7b0473f45f3cdc99a50f8edaf251f5556ef73e309597f5dd30b3a4a70d20ba3a",
+        "capability": "staff.schedule.own.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T22:34:44.324Z",
+        "executionId": "cmux9aspu0007l7c91umlthfx",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "81ab0064-b9ca-4c3a-a75a-877289a33161",
+      "runId": "0f116375-f480-4491-8e91-9849e519e5c3",
+      "state": "HELD_UNKNOWN",
+      "result": null
+    },
+    {
+      "id": "f9974286-e924-4868-8a17-c1d4e91c5d6b",
+      "runId": "cb7998b9-e997-4cbd-9065-d47347be3048",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e5bdc8816faf9bc5ec7abd584cd5d14db708516f6f675f5eccfc3d58857379b5",
+        "capability": "staff.schedule.own.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T22:34:44.944Z",
+        "executionId": "cmux9at73000jl7c90pnqqrov",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    }
+  ],
+  "reads": [
+    {
+      "company": "99101",
+      "date": "2026-10-08"
+    },
+    {
+      "company": "99101",
+      "date": "2026-10-09"
+    },
+    {
+      "company": "99101",
+      "date": "2026-10-07"
+    }
+  ],
+  "modelCalls": 5,
+  "unexpected": []
+}

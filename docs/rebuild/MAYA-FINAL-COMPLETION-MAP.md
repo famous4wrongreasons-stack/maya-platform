@@ -727,3 +727,13 @@ selection and CRM responses in these proofs are synthetic. No real-model/provide
 acceptance, HTTP/PG replay or full C10 completion is claimed; V1.4 qualification
 stays parked and `NOT_ISSUED`. Website/booking, MONEY/FK/HANDOFF and background
 authority are unchanged.
+
+The subsequent parent-authorized narrow run adds actual AppModule HTTP/auth/C9,
+fresh PostgreSQL restart and current React/Chromium evidence for this own-schedule
+path. Both process stages and seven browser checkpoints pass, including history,
+follow-up, ambiguity, incomplete source, missing linkage and revoked access;
+foreign tenant run/history isolation is checked over HTTP. The model and CRM
+responses are synthetic, while the YClients adapter is real. All owned processes
+are stopped and the heavy slot is released. See the extended
+[checkpoint and limits](MAYA-OWN-SCHEDULE-READ-20261006.md) and
+[evidence archive](evidence/maya-development-integration-20261006/own-schedule-http-react/manifest.json).

@@ -1,0 +1,401 @@
+{
+  "contract": "maya.own-schedule-browser/1",
+  "status": "passed",
+  "syntheticCrmFetch": true,
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "history": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "tomorrow": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "after": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "ambiguous": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "incomplete": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nКакой у меня график сегодня?\nMAYA:\nНе удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unlinked": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nЯ завтра работаю?\nMAYA:\nВаш график на 08.10.2026: 09:00–18:00. Источник: YClients.\nВы:\nА послезавтра?\nMAYA:\nПо графику на 09.10.2026 у вас выходной. Источник: YClients.\nВы:\nМой график не завтра, а в пятницу\nMAYA:\nНа какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».\nВы:\nКакой у меня график сегодня?\nMAYA:\nНе удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.\nВы:\nПокажи мой график завтра\nMAYA:\nВаш график пока недоступен: не найдена активная привязка вашего аккаунта к мастеру в CRM. Попросите администратора проверить привязку.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked": {
+      "text": "MAYA\nВход в MAYA\n\nНайдите свой салон и продолжите через Telegram.\n\nНазвание салона\nНайти салон\nВойти по email\n\nСессия завершена — войдите снова.",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Название салона"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Найти салон"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Войти по email"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "tomorrow": {
+      "request_id": "e6f7a140-cbd7-4034-9e94-dfbc63736da8",
+      "coordination": {
+        "run_id": "d18eec99-6d01-4d90-a303-31d3d70a1a04",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "0333570a-0832-4e3e-a7af-d0ed3959589a",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "Ваш график на 08.10.2026: 09:00–18:00. Источник: YClients.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9askh0002l7c9nl5na9ee"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "after": {
+      "request_id": "5588a8ff-e28b-435c-aa33-b8296a7669e2",
+      "coordination": {
+        "run_id": "bfc24e8e-7d53-4602-86df-6161933c36e7",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "0b9a2750-93be-4b5b-a1f7-7238b7dad2b5",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "По графику на 09.10.2026 у вас выходной. Источник: YClients.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9aspu0007l7c91umlthfx"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "ambiguous": {
+      "request_id": "0771586a-14d2-4ecc-90b0-549bba418e9d",
+      "user_turn": {
+        "turnId": "10dc3c1d-59c5-43dc-a38b-ce50546d860b",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "На какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "blocked",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "incomplete": {
+      "status": 201,
+      "body": {
+        "request_id": "d7a72425-e050-4538-80ee-cfb62ff18515",
+        "coordination": {
+          "run_id": "0f116375-f480-4491-8e91-9849e519e5c3",
+          "scope": "deterministic_reads",
+          "state": "INCOMPLETE"
+        },
+        "user_turn": {
+          "turnId": "c5145306-88a6-4803-a251-133db0a974da",
+          "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+        },
+        "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+        "source": "safe_fallback",
+        "redacted_input": true,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "blocked",
+          "domain": "staff_schedule",
+          "required_tools": [
+            "staff.schedule.own.read"
+          ],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "general"
+        }
+      }
+    },
+    "unlinked": {
+      "request_id": "7af691ac-0b07-4b1b-a76a-b1d50caf24f8",
+      "coordination": {
+        "run_id": "cb7998b9-e997-4cbd-9065-d47347be3048",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "dbc21ee7-a2f8-41c2-a005-5f16f9edb88c",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "Ваш график пока недоступен: не найдена активная привязка вашего аккаунта к мастеру в CRM. Попросите администратора проверить привязку.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9at73000jl7c90pnqqrov"
+        }
+      ],
+      "grounding": {
+        "status": "blocked",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "revoked": {
+      "status": 401
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:53145",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/6PD6C2U7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 401,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

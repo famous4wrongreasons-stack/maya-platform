@@ -1,0 +1,15 @@
+{
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "reads": [],
+  "modelCalls": 0,
+  "unexpected": [
+    "unexpected_fetch",
+    "unexpected_fetch",
+    "unexpected_fetch",
+    "unexpected_fetch",
+    "unexpected_fetch",
+    "unexpected_fetch"
+  ]
+}

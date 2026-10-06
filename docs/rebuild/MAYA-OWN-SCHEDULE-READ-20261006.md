@@ -84,7 +84,7 @@ node ../docs/rebuild/widget-release-programme/development-v14/parked-local-launc
 node ../docs/rebuild/widget-release-programme/development-v14/parked-local-launch.cjs node node_modules/typescript/bin/tsc --noEmit --project tsconfig.build.json --incremental false
 ```
 
-## Remaining qualification
+## Qualification at the initial code checkpoint
 
 The model still selects the approved tool. The scripted two-turn proof does not
 establish natural-language generalization or real-model acceptance. Real model,
@@ -98,3 +98,61 @@ original code pins; this checkpoint does not promote it. Certificate stays
 background authority and production authorization remain unchanged. Further
 HTTP/PG/browser/build gates require the parent's resource coordination; there is
 no remaining blocker to this bounded local code checkpoint.
+
+## Subsequent actual HTTP/PG/React proof
+
+The parent authorized one narrow local heavy run. On application HEAD `cc3c436b`
+(runtime code `4a05b45a`), the owned launcher created a new PostgreSQL 16 cluster,
+applied the existing migrations, built current React, ran HTTP prepare, restarted
+PostgreSQL, and ran a new application process plus headless Chromium. Both stages
+passed. The existing AppModule, guards, email/password auth, C9, tool runtime,
+CRM service, YClients adapter and timeline were real; only model decisions and
+finite CRM `fetch` responses were synthetic. No browser response fixtures or
+injected access tokens were used.
+
+[Archived evidence](evidence/maya-development-integration-20261006/own-schedule-http-react/manifest.json)
+contains both reports, seven screenshots, network statuses, restart/graph hashes,
+command logs and independent review. [Working-day follow-up](evidence/maya-development-integration-20261006/own-schedule-http-react/output/playwright/after.png)
+and [incomplete source](evidence/maya-development-integration-20261006/own-schedule-http-react/output/playwright/incomplete.png)
+show the actual current carrier.
+
+- HTTP proves tomorrow → day after, same-request replay without another schedule
+  GET, date clarification without a source read, another tenant's different
+  schedule, foreign C9 run denial (`400 c9_run_authority`) and isolated history.
+- Application PID and PostgreSQL start time change. The C9Run/C9WorkReceipt graph
+  is unchanged. A fresh actual browser email login restores prior encrypted
+  history without model calls or schedule reads. Same-request replay was tested
+  before restart; no separate post-restart replay or existing-tab reconnect is
+  claimed.
+- Seven browser checkpoints pass: history, tomorrow, day after, ambiguous date,
+  incomplete source, missing CRM account binding, revoked membership. A real
+  incomplete provider interval produces HTTP 201, C9 `INCOMPLETE`, blocked
+  grounding and an honest no-confirmed-answer message. Removed binding produces
+  the explanation; membership suspension produces HTTP 401 and visible sign-out.
+- Source receipt IDs point to current tenant/account `AiToolExecution` records.
+  Read-only business state and write-recorder assertions pass; no provider write,
+  ActionExecution, appointment, Inbox item or marketing delivery is created.
+
+The first attempt failed before the model because the test fixture lacked the
+existing canonical Staff identity. The corrected fixture creates Staff and its
+provider link and supplies the staff-catalog GET required by real auth. No rights
+or principal checks were changed. Both first and successful clusters were stopped.
+
+Successful owned PG port: `53115`; React relay port: `53145`. One Jest worker,
+Node heap ceiling 3072 MB, PostgreSQL shared buffers 64 MB and one Chromium were
+used sequentially. Application/relay/browser cleanup completed; PostgreSQL stop
+log and absent `postmaster.pid` were independently inspected. **Heavy slot
+released.** The proof harness is committed separately at `884828fb`; subsequent
+fixture cleanup was type/formatting and equivalent URL extraction only.
+
+Reproduction requires another parent-assigned heavy slot, a new output and new
+cluster. From `maya-saas-backend`:
+
+```sh
+node scripts/own-schedule-proof.mjs --run --output=/absolute/new/output-directory
+```
+
+This extends local user-path evidence only. Real model/YClients, production,
+phone, full mutation qualification, C10 and certification remain unqualified.
+MONEY/FK/HANDOFF and schedule editing authority are unchanged. Independent
+development continues; website work is not a dependency.

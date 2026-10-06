@@ -1,0 +1,232 @@
+{
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "firstStatus": {
+    "status": 201,
+    "body": {
+      "request_id": "cbf8ec8c-6fde-446f-8cbe-7a4bdb598a41",
+      "coordination": {
+        "run_id": "47061dc9-d7f8-4b11-bd00-59d18547ca35",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "a1de5610-2d50-4a44-a543-65cec3a1ad8a",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "Ваш график на 08.10.2026: 09:00–18:00. Источник: YClients.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9aqf4000pjuc9vdi02xjc"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "http": {
+    "first": {
+      "request_id": "cbf8ec8c-6fde-446f-8cbe-7a4bdb598a41",
+      "coordination": {
+        "run_id": "47061dc9-d7f8-4b11-bd00-59d18547ca35",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "a1de5610-2d50-4a44-a543-65cec3a1ad8a",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "Ваш график на 08.10.2026: 09:00–18:00. Источник: YClients.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9aqf4000pjuc9vdi02xjc"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "replay": {
+      "request_id": "cbf8ec8c-6fde-446f-8cbe-7a4bdb598a41",
+      "coordination": {
+        "run_id": "47061dc9-d7f8-4b11-bd00-59d18547ca35",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "a1de5610-2d50-4a44-a543-65cec3a1ad8a",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "Ваш график на 08.10.2026: 09:00–18:00. Источник: YClients.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9aqf4000pjuc9vdi02xjc"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "followUp": {
+      "request_id": "fe492230-9357-4626-b974-8a748355c52c",
+      "coordination": {
+        "run_id": "52a09072-91b1-443b-883b-d0314f874fc8",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "1369d0d9-17c8-4624-a4e5-24f00deef768",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "По графику на 09.10.2026 у вас выходной. Источник: YClients.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "staff.schedule.own.read",
+          "status": "completed",
+          "execution_id": "cmux9aqhv000vjuc9futoblll"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": [
+          "staff.schedule.own.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "ambiguous": {
+      "request_id": "3ee8e0f0-e43c-498b-a40b-c5252146aeb7",
+      "user_turn": {
+        "turnId": "ddbca2e8-7511-42d0-add3-4cad06c69905",
+        "conversationId": "b98f0729-bccf-4446-b1fc-08acdf688ae7"
+      },
+      "reply": "На какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "blocked",
+        "domain": "staff_schedule",
+        "required_tools": [
+          "staff.schedule.own.read"
+        ],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "foreignRun": 400,
+    "foreignHistory": 200,
+    "otherTenantReply": "Ваш график на 08.10.2026: 11:00–18:00. Источник: YClients.",
+    "receipts": [
+      {
+        "id": "40cc058a-4cab-4d1f-951e-9a9bf544409a",
+        "runId": "47061dc9-d7f8-4b11-bd00-59d18547ca35",
+        "state": "SETTLED",
+        "result": {
+          "contract": "maya.c9-conversation-read-receipt/1",
+          "inputHash": "5bea180336b0e78b4eb200232f57c9e7b9b3d8479dcc96a0dd57396ad9147221",
+          "capability": "staff.schedule.own.read",
+          "sourceType": "AiToolExecution",
+          "completedAt": "2026-10-06T22:34:41.348Z",
+          "executionId": "cmux9aqf4000pjuc9vdi02xjc",
+          "businessQualification": "SOURCE_DEFINED"
+        }
+      },
+      {
+        "id": "ca420800-9c8e-4b9a-8fca-054b9c86f855",
+        "runId": "52a09072-91b1-443b-883b-d0314f874fc8",
+        "state": "SETTLED",
+        "result": {
+          "contract": "maya.c9-conversation-read-receipt/1",
+          "inputHash": "7b0473f45f3cdc99a50f8edaf251f5556ef73e309597f5dd30b3a4a70d20ba3a",
+          "capability": "staff.schedule.own.read",
+          "sourceType": "AiToolExecution",
+          "completedAt": "2026-10-06T22:34:41.445Z",
+          "executionId": "cmux9aqhv000vjuc9futoblll",
+          "businessQualification": "SOURCE_DEFINED"
+        }
+      }
+    ],
+    "encryptedHistory": true
+  },
+  "reads": [
+    {
+      "company": "99101",
+      "date": "2026-10-08"
+    },
+    {
+      "company": "99101",
+      "date": "2026-10-09"
+    },
+    {
+      "company": "99102",
+      "date": "2026-10-08"
+    }
+  ],
+  "modelCalls": 5,
+  "unexpected": []
+}
