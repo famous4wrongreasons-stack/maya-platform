@@ -150,13 +150,24 @@ export class C9Sources {
       expectedInput !== ref.inputHash
     )
       c9Deny('source_changed');
-    const expiry = s.expiresAt ?? s.validUntil ?? s.intentExpiresAt;
-    if (typeof expiry === 'string' && Date.parse(expiry) <= now.getTime())
-      c9Deny('source_expired');
+    const rawExpiry = s.expiresAt ?? s.validUntil ?? s.intentExpiresAt;
+    // Prisma DateTime columns are UTC timestamp WITHOUT time zone. PostgreSQL
+    // to_jsonb omits the zone; Date.parse must not interpret that value in the
+    // host's local timezone and shorten/extend the source's actual validity.
+    let expiry: number | null = null;
+    if (rawExpiry !== undefined && rawExpiry !== null) {
+      if (typeof rawExpiry !== 'string') c9Deny('source_qualification');
+      expiry = Date.parse(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?$/.test(rawExpiry)
+          ? `${rawExpiry}Z`
+          : rawExpiry,
+      );
+      if (!Number.isFinite(expiry)) c9Deny('source_qualification');
+    }
+    if (expiry !== null && expiry <= now.getTime()) c9Deny('source_expired');
     if (
-      expiry &&
-      (!ref.validUntil ||
-        Date.parse(ref.validUntil as string) > Date.parse(expiry as string))
+      expiry !== null &&
+      (!ref.validUntil || Date.parse(ref.validUntil as string) > expiry)
     )
       c9Deny('source_validity_expanded');
     if (type === 'MeasurementRevision' || type === 'C8ResultRevision') {

@@ -54,6 +54,13 @@ describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]',
           conversationId,
           messages: history,
         });
+      if (response.status !== 201)
+        throw new Error(
+          JSON.stringify({
+            status: response.status,
+            body: response.body as unknown,
+          }),
+        );
       expect(response.status).toBe(201);
       const body = response.body as ChatReply;
       if (conversationId)
@@ -109,7 +116,8 @@ describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]',
     const foreignRead = await request(f.http.app.getHttpServer())
       .get(`/api/orchestration/runs/${occupancy.coordination.run_id}`)
       .set('Authorization', `Bearer ${foreignToken}`);
-    expect([403, 404]).toContain(foreignRead.status);
+    expect(foreignRead.status).toBe(400);
+    expect(foreignRead.body).toMatchObject({ message: 'c9_run_authority' });
     expect(f.businessWrites(occupancyMark)).toEqual([]);
     const pricingMark = f.http.recorder.mark();
     const price = await turn(INTEGRATION_PROMPTS.price);

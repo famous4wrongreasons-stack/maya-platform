@@ -66,7 +66,7 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "7dd27b239c9f394f15490122e38d8d5c1d21eb5a213193f922c3b667b76125ca"
+        "sha256": "2d84a3e7f6ef40e1b6e3b8d7938a5374159fe343294cb8a4a0cfa5031e139560"
       },
       {
         "path": "src/net/session.ts",
@@ -74,7 +74,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "5ac7f5bda24ab4dc215d53de5ef2c8a0a2c558e30b6da3139e646c0d13454185"
+        "sha256": "01e91d39709ea5435f8a8b11c4addd79c19c1e59aea0aa90e6dddc40ae8edc48"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -110,7 +110,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "cad1746b5b394bc3c5a8578bfed46cdb36722015c150d835c969e4fc440426e2"
+        "sha256": "1743b3622afde9d59016f28bf8110250c57e919ea3b041399c867903d201475a"
       },
       {
         "path": "src/shell/ports.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 476762,
-  "digest": "b445052822fc94765972ea620b6a1474c5c9f6b1b6d48750502617088a2c7613",
+  "bytes": 477399,
+  "digest": "80dd0a239c2667efa281082665995cd6c47c6db61df036dfa7a70e9eaabb511b",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "0257835246ee8ecbd8e87c55c20dac7cd6fe5a386d788a7bc82d48acb7607e85",
-    "modulePath": "m/0257835246ee8ecb/",
+    "digest": "2334e477d10c668c64027e2cded891dc2f0fefb4ace4ff3beca0c30ec9c4c8fe",
+    "modulePath": "m/2334e477d10c668c/",
     "files": [
       {
         "path": "entry/main.js",
@@ -204,8 +204,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "a9394688b28f826d9479218e26852e4e8d20a9e6aff15cafb621ced55082f8f4",
-        "bytes": 13681
+        "sha256": "a56a63931761fc658deeb21ee5814ba333303de59339adcc295302df83ef7da1",
+        "bytes": 14057
       },
       {
         "path": "src/net/session.js",
@@ -264,8 +264,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "b148acf954da2f6129c5dde1360fbc0aa70f46d728adc169a1d35576ad146d92",
-        "bytes": 33673
+        "sha256": "a98a86bb1cca72a4c11343ef4addf4da89e26edddf04f9f50a4b308ef99adfdd",
+        "bytes": 33915
       },
       {
         "path": "src/shell/ports.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "74fc313edfa9d858d0cdc30a24d52e2311efa4ebd21f67617f1da8759688868e",
+      "sha256": "b20e90d4f9e802977e6ef5f6f9a10418460cddd6953ef62e371513fc700b07f2",
       "bytes": 1344
     },
     "assets": [

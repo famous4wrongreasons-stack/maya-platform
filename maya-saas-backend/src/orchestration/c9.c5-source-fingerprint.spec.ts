@@ -78,6 +78,21 @@ function fixture(type: 'Opportunity' | 'AgentTask') {
   return { row, ref, tx, check };
 }
 describe('native C5 fingerprints at the existing C9 evidence boundary', () => {
+  it.each(['2035-01-02T00:00:00.000', '2035-01-02T03:00:00.000+03:00'])(
+    'compares the database instant %s without host-local interpretation',
+    async (expiry) => {
+      const f = fixture('Opportunity');
+      f.row.expiresAt = expiry;
+      await expect(f.check()).resolves.toBe(f.row);
+      await expect(
+        f.check({ ...f.ref, validUntil: '2035-01-02T00:00:00.001Z' }),
+      ).rejects.toThrow('c9_source_validity_expanded');
+      f.row.expiresAt = '2034-12-31T23:59:59.999';
+      await expect(f.check()).rejects.toThrow('c9_source_expired');
+      f.row.expiresAt = 'not-an-instant';
+      await expect(f.check()).rejects.toThrow('c9_source_qualification');
+    },
+  );
   it.each(['Opportunity', 'AgentTask'] as const)(
     'accepts real %s namespace through the unchanged 64-hex wire and current source reader',
     async (type) => {

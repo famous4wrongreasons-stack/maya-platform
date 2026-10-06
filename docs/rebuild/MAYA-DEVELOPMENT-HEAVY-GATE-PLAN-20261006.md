@@ -173,12 +173,13 @@ cd "$MAYA_GATE_ROOT/maya-chat-shell"
 npm run typecheck
 npm run self-test
 npm test
+node build.mjs
 cd "$MAYA_GATE_ROOT/maya-carrier-react"
 npm run typecheck
 npm test
-npm run test:release
 node tools/release.mjs build
 node tools/release.mjs verify
+npm run test:release
 cd "$MAYA_GATE_ROOT/maya-saas-backend"
 npm test -- --runInBand --json --outputFile="$MAYA_GATE_DIR/backend-full.json"
 npm run test:e2e -- --runInBand

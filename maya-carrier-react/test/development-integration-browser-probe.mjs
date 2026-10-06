@@ -191,8 +191,9 @@ async function main() {
     assert.equal(price.resolution.receipt.envelope.kind, 'APPROVAL');
     const beforeDecision = page.apiRequests('/widgets/intent').length;
     await clickNamed(page, 'Подтвердить цену');
-    await until(() => page.apiRequests('/widgets/intent').slice(beforeDecision).some(r => r.finishedAt && r.status === 200), 'canonical pricing intent');
-    assert.ok(await page.waitFor('document.body.innerText.includes("Цена услуги") && document.body.innerText.includes("обновлена")'));
+    const decision = await until(() => page.apiRequests('/widgets/intent').slice(beforeDecision).find(r => r.finishedAt && r.status === 200), 'canonical pricing intent');
+    report.observations.approved = JSON.parse(await page.responseBody(decision.requestId));
+    assert.ok(await page.waitFor('document.body.innerText.includes("Цена подтверждена в YCLIENTS")'));
     await capture(page, 'approved');
     await checkpoint('approved');
     const schedule = await turn('schedule');
