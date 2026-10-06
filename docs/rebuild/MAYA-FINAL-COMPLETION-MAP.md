@@ -748,3 +748,15 @@ pass 289/289, scoped lint has zero errors, and independent review has no remaini
 blocker. Full tsc exhausted the 3072 MB cap; semantic typecheck and actual HTTP/PG/
 React proof for this increment remain pending. See [the qualified checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md).
 No provider/model acceptance, new authority or C10 completion is claimed.
+
+### Personal verified Client READ — canonical replay correction, 2026-10-06
+
+Code `e2d11388` retains the existing personal reader/context owners and corrects
+cache/replay identity from legacy `Client.userId` to the current verified Client
+episode. Original actor/role stays unchanged; current context is checked before
+replay and after source/widget projection. Final targeted units pass 162/162; an
+earlier overlapping 114-test cohort includes the widget import graph. Lint and
+independent read-only review have no blockers. New actual HTTP regressions are
+prepared, not run; types and runtime proof await the heavy slot. No carrier role
+mode, personal booking activation or identity writer was introduced. See [the
+existing-path finding and checkpoint](MAYA-PERSONAL-READ-CONTEXT-20261006.md).

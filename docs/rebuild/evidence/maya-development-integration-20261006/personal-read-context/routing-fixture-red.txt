@@ -1,0 +1,130 @@
+FAIL src/ai-tools/routing-regression.acceptance.spec.ts
+  КОРПУС: живые формулировки владельца барбершопа
+    ✓ advise-return-clients (12 ms)
+    ✓ who-in-drawdown (10 ms)
+    ✓ why-drawdown-yoy (4 ms)
+    ✓ what-to-do-load (1 ms)
+    ✓ weak-spots-full-review
+    ✓ max-slice-follow-up (1 ms)
+    ✓ records-today (3 ms)
+    ✓ cash-today-slang (1 ms)
+    ✓ compare-today-vs-last-week (1 ms)
+    ✓ how-we-doing-today (1 ms)
+    ✓ report-aug-7 (1 ms)
+    ✓ only-aug-7
+    ✓ followup-day-7 (1 ms)
+    ✓ cash-dotted-day (1 ms)
+    ✓ range-1-7
+    ✓ first-week-august (1 ms)
+    ✓ yesterday-cash
+    ✓ last-week (1 ms)
+    ✓ last-7-days
+    ✓ profit-july (1 ms)
+    ✓ profit-august-followup
+    ✓ net-july (1 ms)
+    ✓ am-i-in-plus (1 ms)
+    ✓ acquisition-cost
+    ✓ acquisition-cost-alt
+    ✓ client-price-economy (1 ms)
+    ✓ haircut-price
+    ✓ beard-price (1 ms)
+    ✓ price-list
+    ✓ spend-structure (1 ms)
+    ✓ consumables-spend
+    ✓ where-money-goes
+    ✓ who-are-barbers-named (1 ms)
+    ✓ load-how
+    ✓ cancellations (1 ms)
+    ✓ average-check
+    ✓ haircut-not-ticket
+    ✓ today-records-not-month-cash (1 ms)
+    ✓ revenue-july
+    ✓ money-slang (1 ms)
+    ✓ inherit-today-records
+    ✓ followup-day-after-month (1 ms)
+    ✓ new-vs-returning
+    ✓ staff-breakdown-ask (1 ms)
+    ✓ month-to-date-default
+    ✓ команда «Запиши аренду 60 тысяч» — карточка расхода, а не отчёт (1 ms)
+    ✓ «сколько всего клиентов в базе» — полный CRM-реестр, не гости месяца (1 ms)
+    ✓ «не ходят больше двух месяцев» — точный готовый порог
+    ✓ «сколько лояльных» — пожизненные визиты карточки CRM (1 ms)
+    ✓ пересекает лояльность и срок отсутствия, а не берёт всю базу
+    ✓ удерживает retention-сегмент в реплике «как их вернуть» (1 ms)
+    ✓ «сколько визитов у клиента» — точное обезличенное CRM-досье (1 ms)
+    ✓ «сколько бонусов у клиента» — не баланс самого владельца (1 ms)
+    ✓ «какие услуги покупает клиент» — привычки из последних визитов (1 ms)
+    ✓ уточнение «что он обычно берёт» сохраняет клиента из прошлого хода (1 ms)
+  КОРПУС: роли остались на своих данных
+    ✓ клиент: «какие у вас мастера» — справочник мастеров (1 ms)
+    ✕ клиент: «мои записи» — своя история, и она не уходит в модель (1 ms)
+    ✕ клиент: «сколько у меня баллов» — баланс, собранный сервером (2 ms)
+    ✓ клиент: «свободные окна завтра» — реальные слоты (1 ms)
+    ✓ мастер: «сколько у меня записей» — личная аналитика, а не отказ (1 ms)
+    ✓ мастер: «мои повторные клиенты» — личная аналитика (1 ms)
+    ✓ мастер: «что за клиент Иван» — CRM-досье
+    ✓ владелец: «ты видишь базу клиентов?» — честный доступ, без отказа (1 ms)
+  КОРПУС: audience=staff — поверхность мастера, а не кабинета
+    ✓ владелец в режиме мастера: «сколько я заработал» — личная аналитика, не касса салона
+    ✓ владелец в режиме мастера: «моя статистика» — личный масштаб (1 ms)
+    ✓ владелец в режиме мастера: досье клиента остаётся доступным
+    ✓ владелец в режиме мастера: команда графика уходит с ролью мастера (1 ms)
+    ✓ клиент с audience=staff НЕ повышается: деньги салона — отказ
+    ✓ настоящий мастер с audience=staff работает как раньше (1 ms)
+    ✓ мастер: вопрос о технике — свободный ответ, без принудительного заземления
+  КОРПУС: промах подсказки больше не отказ
+    ✓ модель взяла НЕ подсказанный инструмент — ответ доходит, а не отказ (1 ms)
+    ✕ перехват ПД идёт по вызванному инструменту, а не по угаданной теме
+    ✓ ни одного инструмента данных для роли — прежний честный отказ
+
+  ● КОРПУС: роли остались на своих данных › клиент: «мои записи» — своя история, и она не уходит в модель
+
+    TypeError: this.auditLog.tryLog is not a function
+
+      1946 |       // наружу ушёл бы другой класс сбоя, а настоящая причина деградации
+      1947 |       // потерялась бы. Отказ базы аудита и отказ хода модели приходят вместе.
+    > 1948 |       await this.auditLog.tryLog({
+           |                           ^
+      1949 |         tenantId,
+      1950 |         userId: user.userId,
+      1951 |         action: 'ai.core_turn_failed',
+
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1948:27)
+      at Object.<anonymous> (ai-tools/routing-regression.acceptance.spec.ts:596:20)
+
+  ● КОРПУС: роли остались на своих данных › клиент: «сколько у меня баллов» — баланс, собранный сервером
+
+    TypeError: this.auditLog.tryLog is not a function
+
+      1946 |       // наружу ушёл бы другой класс сбоя, а настоящая причина деградации
+      1947 |       // потерялась бы. Отказ базы аудита и отказ хода модели приходят вместе.
+    > 1948 |       await this.auditLog.tryLog({
+           |                           ^
+      1949 |         tenantId,
+      1950 |         userId: user.userId,
+      1951 |         action: 'ai.core_turn_failed',
+
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1948:27)
+      at Object.<anonymous> (ai-tools/routing-regression.acceptance.spec.ts:610:20)
+
+  ● КОРПУС: промах подсказки больше не отказ › перехват ПД идёт по вызванному инструменту, а не по угаданной теме
+
+    TypeError: this.auditLog.tryLog is not a function
+
+      1946 |       // наружу ушёл бы другой класс сбоя, а настоящая причина деградации
+      1947 |       // потерялась бы. Отказ базы аудита и отказ хода модели приходят вместе.
+    > 1948 |       await this.auditLog.tryLog({
+           |                           ^
+      1949 |         tenantId,
+      1950 |         userId: user.userId,
+      1951 |         action: 'ai.core_turn_failed',
+
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1948:27)
+      at Object.<anonymous> (ai-tools/routing-regression.acceptance.spec.ts:810:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 70 passed, 73 total
+Snapshots:   0 total
+Time:        0.581 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/routing-regression.acceptance.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-personal-read-routing.json

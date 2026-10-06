@@ -1,0 +1,90 @@
+{
+  "kind": "qualified-local-verified-personal-read-context",
+  "codeHead": "e2d11388c68f8962d498ea9b69e4dc2c41de3a35",
+  "qualification": "NOT_ISSUED",
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "httpRegressionStatus": "PREPARED_NOT_RUN",
+  "fullTypecheck": "UNVERIFIED; prior all-project check OOM under3072MB; serial scoped check awaits main heavy slot",
+  "tests": {
+    "finalSuites": 7,
+    "finalPassed": 162,
+    "finalFailed": 0,
+    "priorContextAndWidgetArchitectureSuites": 6,
+    "priorPassed": 114,
+    "cohortsOverlap": true
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "files": [
+    {
+      "path": "context-and-widget-architecture.json",
+      "bytes": 63304,
+      "sha256": "15293af86bfa52f4d6a632ae5848ced31190e05bce70835985cc7c967a28d136"
+    },
+    {
+      "path": "context-and-widget-architecture.txt",
+      "bytes": 910,
+      "sha256": "9837607f2a23421e0205728b7b9e131af34cbdbe4ff44d037d089a72e2d55789"
+    },
+    {
+      "path": "final-unit.json",
+      "bytes": 80981,
+      "sha256": "1a07a392c187536ac878752feccd61d384a3c24ec4233642a960ebfa3df51b66"
+    },
+    {
+      "path": "final-unit.txt",
+      "bytes": 1014,
+      "sha256": "5e2d720d9d3715da1f576d803bdf3744011cf06d6f79569e9398ba5784610188"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 800,
+      "sha256": "d2d2ec7f5f671913093e5cf7fca00c825908b96cb0e00849c19cbd9b19b82b55"
+    },
+    {
+      "path": "lint.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "red.json",
+      "bytes": 19908,
+      "sha256": "f1b633d8ee0e63efd8706d0d98bd25ec2a101b25f0fc87b491dbed99677879fc"
+    },
+    {
+      "path": "red.txt",
+      "bytes": 6613,
+      "sha256": "423cacf356ee79c6ff69cd7fef4aba6f20944aa1869d1560ae3c50ea5380ed70"
+    },
+    {
+      "path": "routing-fixture-red.txt",
+      "bytes": 8175,
+      "sha256": "12d53e19286d900847ae96fee3d4b33084321bde3996a8a39b1b97cbc93a0bd8"
+    }
+  ],
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "bytes": 68483,
+      "sha256": "fb3b7ed6f20657019aa0927929d591e0c59288f620000be88a1088f5637639fd"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "bytes": 26676,
+      "sha256": "ab378c0520dbd9dd46f62e010d58031fa6c07845fa58df5de6e275c23967ddca"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/routing-regression.acceptance.spec.ts",
+      "bytes": 34295,
+      "sha256": "1a73347f71e962c0a003b2827442ae8789a6c3907c3ff5081726741ec9ff7f3b"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts",
+      "bytes": 22625,
+      "sha256": "578ea47d404411024f4d733cb499837843f978969db5dbcd67c857a1f2a75d7c"
+    }
+  ]
+}
