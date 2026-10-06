@@ -13,5 +13,13 @@
   ],
   "normativeEdits": false,
   "statusChanges": false,
-  "newCertificate": false
+  "newCertificate": false,
+  "fencedModulesCommentLineReconciliationOnly": [
+    "capability-ref.ts",
+    "confirmation-guard.ts",
+    "envelope-roots.ts",
+    "envelope.ts",
+    "intent.ts",
+    "lifecycle.ts"
+  ]
 }

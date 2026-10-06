@@ -91,7 +91,7 @@ ownership receipt before work. Validate both assigned ports are unused; reject P
 to make local database guards accept another database.
 
 Materialize only owned dependency paths before generation. Resolve the existing
-symlink target, `rsync -aL` into a new private directory, rename the **owned symlink**
+symlink target, `rsync -a` (trailing slash on the source; preserve internal `.bin` symlinks) into a new private directory, rename the **owned symlink**
 to an evidence-side reference and move the copy into the worktree; verify package
 locks and `.prisma` provenance. No install/download or write to the source tree.
 If local dependencies are insufficient, stop this step with the exact missing item.

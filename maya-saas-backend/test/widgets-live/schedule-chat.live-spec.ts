@@ -19,6 +19,21 @@ import {
 } from './support/http-bootstrap';
 import type { Fixtures } from './support/fixtures';
 
+type ScheduleEnvelope = {
+  widget_id: string;
+  intents: Array<{ effect: string; intent_token: string }>;
+};
+type ScheduleChat = {
+  action: unknown;
+  reply: string;
+  user_turn: { conversationId: string };
+  resolution?: { receipt?: { widget_id: string } };
+};
+type SchedulePage = { widgets?: Array<{ envelope: ScheduleEnvelope }> };
+type CarrierObservation = {
+  status: string;
+  lines: Array<{ outcome: string; text?: string }>;
+};
 describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]', () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
   let hold: Promise<void> | null = null;
@@ -58,22 +73,23 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
         if (provider !== CrmProvider.MOCK)
           throw new Error('external provider forbidden');
         return Object.assign(new MockCRMAdapter(config), {
-          getStaff: async () => [{ id: '7', name: 'Антон Соколов' }],
-          getStaffScheduleDay: async (p: { staffId: string; date: string }) =>
-            day(p.staffId, p.date),
-          previewStaffScheduleDayChange: async (p: {
+          getStaff: () => Promise.resolve([{ id: '7', name: 'Антон Соколов' }]),
+          getStaffScheduleDay: (p: { staffId: string; date: string }) =>
+            Promise.resolve(day(p.staffId, p.date)),
+          previewStaffScheduleDayChange: (p: {
             staffId: string;
             date: string;
             slots: typeof slots;
-          }) => ({
-            current: day(p.staffId, p.date),
-            proposed: {
-              ...day(p.staffId, p.date),
-              slots: p.slots,
-              is_working: p.slots.length > 0,
-            },
-            conflict_times: conflict ? ['15:00'] : [],
-          }),
+          }) =>
+            Promise.resolve({
+              current: day(p.staffId, p.date),
+              proposed: {
+                ...day(p.staffId, p.date),
+                slots: p.slots,
+                is_working: p.slots.length > 0,
+              },
+              conflict_times: conflict ? ['15:00'] : [],
+            }),
           applyStaffScheduleDayChange: writes,
         });
       });
@@ -128,7 +144,7 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
     token: string,
     submission: Record<string, unknown>,
     chatResponse?: unknown,
-  ): Promise<any> {
+  ): Promise<CarrierObservation> {
     const baseUrl = await http.listenLoopback();
     return new Promise((resolve, reject) => {
       const child = spawn(
@@ -142,7 +158,9 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
       child.stderr.on('data', (c) => (err += String(c)));
       child.on('error', reject);
       child.on('close', (code) =>
-        code === 0 ? resolve(JSON.parse(out)) : reject(new Error(err)),
+        code === 0
+          ? resolve(JSON.parse(out) as CarrierObservation)
+          : reject(new Error(err)),
       );
       child.stdin.end(
         JSON.stringify({ baseUrl, token, submission, chatResponse }),
@@ -174,13 +192,16 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
     const page = await http.resolveWidgets(token, {
       thread_page: { limit: 20 },
     });
-    const widgets = (page.body as any).widgets;
+    const widgets = (page.body as SchedulePage).widgets;
     if (!widgets?.length)
       throw new Error(
-        JSON.stringify({ preview: preview.body, page: page.body }),
+        JSON.stringify({ preview: preview.body as unknown, page: page.body }),
       );
     const envelope = widgets[0].envelope;
-    const intent = envelope.intents.find((i: any) => i.effect === 'COMMIT');
+    const intent = envelope.intents.find(
+      (i: ScheduleEnvelope['intents'][number]) => i.effect === 'COMMIT',
+    );
+    if (!intent) throw new Error('Schedule COMMIT missing');
     const submit = {
       contract: 'maya.widget.intent.submission/1',
       widget_id: envelope.widget_id,
@@ -224,7 +245,7 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
         messages: messages ?? [{ role: 'user', content }],
       });
     if (r.status !== 201) throw new Error(JSON.stringify(r.body));
-    return r.body;
+    return r.body as ScheduleChat;
   }
   async function prepare(
     token: string,
@@ -237,10 +258,13 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
     const page = await http.resolveWidgets(token, {
       thread_page: { limit: 20 },
     });
-    const envelope = (page.body as any).widgets?.[0]?.envelope;
+    const envelope = (page.body as SchedulePage).widgets?.[0]?.envelope;
     if (!envelope)
       throw new Error(JSON.stringify({ response, page: page.body }));
-    const intent = envelope.intents.find((i: any) => i.effect === 'COMMIT');
+    const intent = envelope.intents.find(
+      (i: ScheduleEnvelope['intents'][number]) => i.effect === 'COMMIT',
+    );
+    if (!intent) throw new Error('Schedule COMMIT missing');
     return {
       response,
       envelope,
@@ -272,7 +296,7 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
     'supports %s free schedule wording through carrier',
     async (surface, text, expected) => {
       const f = await salon();
-      const p = await prepare(f.token, text as string, surface as string);
+      const p = await prepare(f.token, text, surface);
       expect(writes).not.toHaveBeenCalled();
       const outcome = await carrier(f.token, p.submit);
       expect(outcome).toMatchObject({
@@ -327,7 +351,9 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
       client = await salon(UserRole.CLIENT);
     const p = await prepare(f.token);
     const denied = await http.postIntent(other.token, p.submit);
-    expect((denied.body as any).receipt_outcome).not.toBe('ACCEPTED');
+    expect(
+      (denied.body as { receipt_outcome: string }).receipt_outcome,
+    ).not.toBe('ACCEPTED');
     const reply = await chat(client.token, 'Сделай Антону завтра выходной');
     expect(reply.reply).toContain('владелец');
     expect(writes).not.toHaveBeenCalled();

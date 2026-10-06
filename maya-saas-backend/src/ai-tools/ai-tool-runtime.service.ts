@@ -715,7 +715,7 @@ export class AiToolRuntimeService {
       principal,
       toolName: execution.toolName,
       inputHash: execution.inputHash,
-      idempotencyKey: execution.idempotencyKey!,
+      idempotencyKey: execution.idempotencyKey,
     };
     const existing = await this.receipts.inspect(invocation);
     return this.receipts.project(

@@ -95,6 +95,17 @@ describe('combined current React carrier [SCRIPTED SYNTHETIC]', () => {
               );
               if (['general', 'occupancy', 'price'].includes(message.name))
                 expect(await f.businessState(salon)).toEqual(before);
+              if (message.name === 'approved') {
+                const actions = await f.db.prisma.actionExecution.findMany({
+                  where: { tenantId: salon.tenant.id },
+                });
+                expect(actions).toHaveLength(1);
+                expect(actions[0]).toMatchObject({
+                  capability: 'crm.service.fixed-price.update.v1',
+                  state: 'SUCCEEDED',
+                  executionAttemptCount: 1,
+                });
+              }
               if (message.name === 'occupancy' || message.name === 'retry') {
                 const run = await f.db.prisma.c9Run.findUniqueOrThrow({
                   where: { id: message.body!.coordination!.run_id },

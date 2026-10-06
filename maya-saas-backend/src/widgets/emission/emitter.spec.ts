@@ -235,7 +235,7 @@ describe('K3 emission — mint, compose, fit, seal', () => {
         confirmationOfRef: 'schedule-approval',
         confirmationJson: expect.objectContaining({
           idempotency_key: 'schedule-approval',
-        }),
+        }) as unknown,
       }),
     ]);
     const snapshot = {

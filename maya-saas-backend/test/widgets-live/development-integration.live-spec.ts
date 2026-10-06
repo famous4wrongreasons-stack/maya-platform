@@ -5,6 +5,25 @@ import {
   INTEGRATION_PROMPTS,
 } from './support/development-integration-fixture';
 
+type ChatReply = {
+  reply: string;
+  action: unknown;
+  user_turn: { conversationId: string };
+  coordination: { run_id: string; revision_id: string };
+  recommendation: {
+    evidence: { workReceiptId: string; opportunityRefs: unknown[] };
+  };
+  resolution?: {
+    receipt?: {
+      envelope?: {
+        kind: string;
+        widget_id: string;
+        body: { approve_intent: string };
+        intents: Array<{ intent_ref: string; intent_token: string }>;
+      };
+    };
+  };
+};
 // Prepared heavy fixture. Scripted model + synthetic CRM edge; never real-model
 // acceptance, a profile certificate, or a substitute for the 165 release duties.
 describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]', () => {
@@ -36,11 +55,12 @@ describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]',
           messages: history,
         });
       expect(response.status).toBe(201);
+      const body = response.body as ChatReply;
       if (conversationId)
-        expect(response.body.user_turn.conversationId).toBe(conversationId);
-      conversationId = response.body.user_turn.conversationId;
-      history.push({ role: 'assistant', content: response.body.reply });
-      return response.body;
+        expect(body.user_turn.conversationId).toBe(conversationId);
+      conversationId = body.user_turn.conversationId;
+      history.push({ role: 'assistant', content: body.reply });
+      return body;
     }
     const general = await turn(INTEGRATION_PROMPTS.general);
     expect(general.action).toBeNull();
@@ -80,23 +100,28 @@ describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]',
         messages: history.slice(0, -1),
       });
     expect(replay.status).toBe(201);
-    expect(replay.body.coordination.run_id).toBe(occupancy.coordination.run_id);
-    expect(replay.body.coordination.revision_id).toBe(
+    expect((replay.body as ChatReply).coordination.run_id).toBe(
+      occupancy.coordination.run_id,
+    );
+    expect((replay.body as ChatReply).coordination.revision_id).toBe(
       occupancy.coordination.revision_id,
     );
     const foreignRead = await request(f.http.app.getHttpServer())
       .get(`/api/orchestration/runs/${occupancy.coordination.run_id}`)
       .set('Authorization', `Bearer ${foreignToken}`);
     expect([403, 404]).toContain(foreignRead.status);
+    expect(f.businessWrites(occupancyMark)).toEqual([]);
     const pricingMark = f.http.recorder.mark();
     const price = await turn(INTEGRATION_PROMPTS.price);
     const envelope = price.resolution?.receipt?.envelope;
     expect(envelope?.kind).toBe('APPROVAL');
+    if (!envelope) throw new Error('Pricing approval envelope missing');
     expect(salon.state.priceWrites).toBe(0);
     const intent = envelope.intents.find(
       (row: { intent_ref: string }) =>
         row.intent_ref === envelope.body.approve_intent,
     );
+    if (!intent) throw new Error('Pricing approve intent missing');
     const submission = {
       contract: 'maya.widget.intent.submission/1',
       widget_id: envelope.widget_id,
@@ -172,6 +197,8 @@ describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]',
         messages: [{ role: 'user', content: INTEGRATION_PROMPTS.occupancy }],
       });
     expect([401, 403]).toContain(revoked.status);
+    expect(f.businessWrites(scheduleMark)).toEqual([]);
+    expect(await f.businessState(salon, false)).toEqual(untouched);
     expect(salon.state.priceWrites).toBe(1);
     expect(salon.state.scheduleWrites).toBe(0);
   });

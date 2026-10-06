@@ -66,7 +66,7 @@ export async function developmentIntegrationFixture() {
   });
   jest
     .spyOn(http.app.get(AiCoreModelService), 'decide')
-    .mockImplementation(async (input) => {
+    .mockImplementation((input) => {
       modelCalls++;
       const text = input.messages
         .filter((message) => message.role === 'user')
@@ -81,7 +81,7 @@ export async function developmentIntegrationFixture() {
           'Only exact general/pricing turns may use the scripted model',
         );
       }
-      return {
+      return Promise.resolve({
         reply:
           text === INTEGRATION_PROMPTS.general
             ? 'Здравствуйте. Чем помочь?'
@@ -93,7 +93,7 @@ export async function developmentIntegrationFixture() {
         provider: 'openai',
         model: 'SCRIPTED_SYNTHETIC_COMBINED',
         usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-      };
+      });
     });
   jest
     .spyOn(http.app.get(CrmAdapterFactory), 'create')
@@ -159,9 +159,9 @@ export async function developmentIntegrationFixture() {
         | 'applyStaffScheduleDayChange'
         | 'getAvailableSlots'
       > = {
-        getServices: async (requested) => {
+        getServices: (requested) => {
           bound(requested);
-          return [
+          return Promise.resolve([
             {
               id: '201',
               name: 'Стрижка',
@@ -169,19 +169,19 @@ export async function developmentIntegrationFixture() {
               duration_minutes: 30,
               currency: 'RUB',
             },
-          ];
+          ]);
         },
-        getStaff: async (requested) => {
+        getStaff: (requested) => {
           bound(requested);
-          return [{ id: '71', name: 'Антон Соколов' }];
+          return Promise.resolve([{ id: '71', name: 'Антон Соколов' }]);
         },
-        getServicePriceSnapshot: async (serviceId) => {
+        getServicePriceSnapshot: (serviceId) => {
           if (serviceId !== '201') throw new Error('Foreign service');
           if (state.priceUnknown && state.priceWrites)
             throw new Error('Synthetic readback unavailable');
-          return snapshot();
+          return Promise.resolve(snapshot());
         },
-        updateServiceFixedPrice: async (input) => {
+        updateServiceFixedPrice: (input) => {
           if (
             input.serviceId !== '201' ||
             input.expectedRevision !== snapshot().revision
@@ -191,16 +191,16 @@ export async function developmentIntegrationFixture() {
           state.price = input.priceMinor / 100;
           if (state.priceUnknown)
             throw new Error('Synthetic response lost after dispatch');
-          return snapshot();
+          return Promise.resolve(snapshot());
         },
-        getStaffScheduleDay: async (input) => {
+        getStaffScheduleDay: (input) => {
           bound(input.tenantId);
-          return day(input.staffId, input.date);
+          return Promise.resolve(day(input.staffId, input.date));
         },
-        previewStaffScheduleDayChange: async (input) => {
+        previewStaffScheduleDayChange: (input) => {
           bound(input.tenantId);
           const current = day(input.staffId, input.date);
-          return {
+          return Promise.resolve({
             current,
             proposed: {
               ...current,
@@ -208,9 +208,9 @@ export async function developmentIntegrationFixture() {
               is_working: input.slots.length > 0,
             },
             conflict_times: [],
-          };
+          });
         },
-        applyStaffScheduleDayChange: async (input) => {
+        applyStaffScheduleDayChange: (input) => {
           bound(input.tenantId);
           if (
             input.expectedRevision !== day(input.staffId, input.date).revision
@@ -218,13 +218,13 @@ export async function developmentIntegrationFixture() {
             throw new Error('Stale schedule');
           state.scheduleWrites++;
           state.slots = input.slots;
-          return {
+          return Promise.resolve({
             ...day(input.staffId, input.date),
             verified: true,
             existing_appointments_preserved: true,
-          };
+          });
         },
-        getAvailableSlots: async (input) => {
+        getAvailableSlots: (input) => {
           bound(input.tenantId);
           if (
             input.staffId !== '71' ||
@@ -232,16 +232,18 @@ export async function developmentIntegrationFixture() {
             input.serviceIds?.join(',') !== '201'
           )
             throw new Error('Availability source scope mismatch');
-          return state.occupied
-            ? []
-            : [
-                {
-                  staff_id: '71',
-                  branch_id: state.branchId,
-                  start: state.start.toISOString(),
-                  end: state.end.toISOString(),
-                },
-              ];
+          return Promise.resolve(
+            state.occupied
+              ? []
+              : [
+                  {
+                    staff_id: '71',
+                    branch_id: state.branchId,
+                    start: state.start.toISOString(),
+                    end: state.end.toISOString(),
+                  },
+                ],
+          );
         },
       };
       return occupancyFixtureEdge(edge as CRMAdapter, (key) =>
@@ -389,7 +391,7 @@ export async function developmentIntegrationFixture() {
       .post('/api/auth/login')
       .send({ email: operator.email, password: operator.password });
     expect(login.status).toBe(201);
-    const token = login.body.access_token as string;
+    const token = (login.body as { access_token: string }).access_token;
     const proof = releaseProof(process.env.DATABASE_URL!, operator.id);
     for (const key of [
       'WIDGET_RELEASE_ENVIRONMENT',
@@ -405,7 +407,13 @@ export async function developmentIntegrationFixture() {
     const result = await request(http.app.getHttpServer())
       .post(base + '/grant')
       .set('Authorization', `Bearer ${token}`)
-      .send(profileCommand(proof, s.tenant.id, status.body.version));
+      .send(
+        profileCommand(
+          proof,
+          s.tenant.id,
+          (status.body as { version: string }).version,
+        ),
+      );
     expect(result.status).toBe(201);
   }
   const login = (s: Salon) =>

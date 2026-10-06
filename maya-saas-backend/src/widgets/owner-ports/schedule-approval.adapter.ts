@@ -76,11 +76,7 @@ export class ScheduleApprovalAdapter {
   ): Promise<TerminalLine[]> {
     let result: Record<string, unknown>;
     try {
-      result = (await this.runtime.observeScheduleApproval(
-        user,
-        id,
-        hash,
-      )) as Record<string, unknown>;
+      result = await this.runtime.observeScheduleApproval(user, id, hash);
     } catch {
       return [
         {
@@ -152,18 +148,14 @@ export class ScheduleApprovalAdapter {
     // Runtime re-resolves live membership/role and the exact stored args before dispatch.
     let result: Record<string, unknown>;
     try {
-      result = (await this.runtime.approve(user, id, {
+      result = await this.runtime.approve(user, id, {
         payloadHash: hash,
-      })) as Record<string, unknown>;
+      });
     } catch (error) {
       // Only an explicit pre-dispatch refusal is a denial. A transport/store
       // fault can outlive dispatch; retain the durable approval for observation.
       try {
-        result = (await this.runtime.observeScheduleApproval(
-          user,
-          id,
-          hash,
-        )) as Record<string, unknown>;
+        result = await this.runtime.observeScheduleApproval(user, id, hash);
       } catch {
         result = { status: 'unknown' };
       }

@@ -103,7 +103,7 @@ describe('AiCoreService', () => {
             staff_id: 'synthetic-staff',
             current_revision: current.revision,
             slots: [],
-          }),
+          }) as unknown,
         }),
       );
       expect(mocks.model.decide).not.toHaveBeenCalled();

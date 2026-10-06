@@ -126,7 +126,7 @@ describe('fixed no-handoff certificate threshold', () => {
     );
     expect(
       Object.values(PROFILE_REGISTRY.tuples).every(
-        (row) => !(row.kinds as string[]).includes('SETTINGS_DRAFT'),
+        (row) => !row.kinds.includes('SETTINGS_DRAFT'),
       ),
     ).toBe(true);
     expect(() =>

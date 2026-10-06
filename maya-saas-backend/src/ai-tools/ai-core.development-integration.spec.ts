@@ -68,31 +68,35 @@ function fixture() {
         input_schema: {},
       })),
     }),
-    execute: jest.fn(async (_actor: unknown, name: string) =>
-      name === 'catalog.services.read'
-        ? {
-            status: 'completed',
-            result: { services: [{ id: '42', name: 'Стрижка' }] },
-          }
-        : {
-            status: 'approval_required',
-            approval: {
-              id:
-                name === 'staff.schedule.update'
-                  ? 'schedule-approval'
-                  : 'price-approval',
-              payload_hash: 'f'.repeat(64),
-              summary: 'SYNTHETIC: требуется подтверждение цены.',
+    execute: jest.fn((_actor: unknown, name: string) =>
+      Promise.resolve(
+        name === 'catalog.services.read'
+          ? {
+              status: 'completed',
+              result: { services: [{ id: '42', name: 'Стрижка' }] },
+            }
+          : {
+              status: 'approval_required',
+              approval: {
+                id:
+                  name === 'staff.schedule.update'
+                    ? 'schedule-approval'
+                    : 'price-approval',
+                payload_hash: 'f'.repeat(64),
+                summary: 'SYNTHETIC: требуется подтверждение цены.',
+              },
             },
-          },
+      ),
     ),
   };
   const timeline = {
     routeTypedUtterance: jest.fn().mockResolvedValue(null),
-    persistTypedTurn: jest.fn(async () => ({
-      turnId: `turn-${++serial}`,
-      conversationId: 'same-conversation',
-    })),
+    persistTypedTurn: jest.fn(() =>
+      Promise.resolve({
+        turnId: `turn-${++serial}`,
+        conversationId: 'same-conversation',
+      }),
+    ),
     persistAssistantReply: jest.fn().mockResolvedValue(undefined),
   };
   const scheduleWidget = {
@@ -171,7 +175,7 @@ function fixture() {
 describe('unified development candidate: routes and authority stay isolated', () => {
   it('does not expose a fallback approval when the schedule editor card is unavailable', async () => {
     const f = fixture();
-    f.scheduleWidget.mint.mockResolvedValue(null as never);
+    f.scheduleWidget.mint.mockResolvedValue(null);
     const result = await f.service.chat(
       actor,
       f.dto('Сделай Антону 2035-05-10 выходной'),
@@ -263,7 +267,7 @@ describe('unified development candidate: routes and authority stay isolated', ()
           staff_id: 'staff-a',
           slots: [],
           date: '2035-05-10',
-        }),
+        }) as unknown,
       }),
     );
     expect(f.scheduleWidget.mint).toHaveBeenCalledWith(
