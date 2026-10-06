@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { developmentIntegrationFixture } from './support/development-integration-fixture';
+import { developmentIntegrationFixture } from '../widgets-diagnostics/support/development-integration-fixture';
 import { assertProofDatabase } from './support/proof-db-guard';
 
 // Explicit browser entry, outside the default live regex. Actual DOM assertions

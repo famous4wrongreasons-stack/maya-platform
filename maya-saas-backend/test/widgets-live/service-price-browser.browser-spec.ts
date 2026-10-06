@@ -1,4 +1,4 @@
-import { runServicePriceBrowserHarness } from './support/service-price-browser-harness';
+import { runServicePriceBrowserHarness } from '../widgets-diagnostics/support/service-price-browser-harness';
 
 // Explicit --testRegex only: excluded from the ordinary *.live-spec.ts suite.
 // A green runner result means the local harness closed, never that browser proof passed.

@@ -3,7 +3,7 @@ import request from 'supertest';
 import {
   developmentIntegrationFixture,
   INTEGRATION_PROMPTS,
-} from './support/development-integration-fixture';
+} from '../widgets-diagnostics/support/development-integration-fixture';
 
 type ChatReply = {
   reply: string;

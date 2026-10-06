@@ -17,11 +17,14 @@ import { servicePriceSnapshot } from '../../../src/crm/yclients-service-price.co
 import { OpportunityLifecycleRunner } from '../../../src/crm/opportunity-lifecycle.runner';
 import { DOMAIN_EVENT_TYPE } from '../../../src/domain';
 import { TenantContextService } from '../../../src/tenancy/tenant-context.service';
-import { bootFixtureContext } from './bootstrap';
-import { bootHttp, fixturesForHttp } from './http-bootstrap';
-import { occupancyFixtureEdge } from './c9-occupancy-fixture-edge';
-import { releaseProof } from './widget-release-proof';
-import { profileCommand } from './widget-profile-proof';
+import { bootFixtureContext } from '../../widgets-live/support/bootstrap';
+import {
+  bootHttp,
+  fixturesForHttp,
+} from '../../widgets-live/support/http-bootstrap';
+import { occupancyFixtureEdge } from '../../widgets-live/support/c9-occupancy-fixture-edge';
+import { releaseProof } from '../../widgets-live/support/widget-release-proof';
+import { profileCommand } from '../../widgets-live/support/widget-profile-proof';
 
 export const INTEGRATION_PROMPTS = Object.freeze({
   general: 'Здравствуйте',

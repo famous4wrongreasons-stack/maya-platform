@@ -5,5 +5,5 @@
     "incremental": false,
     "types": ["jest", "node"]
   },
-  "include": ["widgets-live/**/*.ts"]
+  "include": ["widgets-live/**/*.ts", "widgets-diagnostics/**/*.ts"]
 }

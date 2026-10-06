@@ -24,10 +24,17 @@ import {
 } from '../../../src/common/domain.enums';
 import { EmailAuthDeliveryService } from '../../../src/auth/email-auth-delivery.service';
 import { AiCoreModelService } from '../../../src/ai-tools/ai-core-model.service';
-import { assertNoEnvFiles } from './environment';
-import { assertProofDatabase } from './proof-db-guard';
-import { bootFixtureContext, type FixtureContext } from './bootstrap';
-import { bootHttp, fixturesForHttp, type HttpHarness } from './http-bootstrap';
+import { assertNoEnvFiles } from '../../widgets-live/support/environment';
+import { assertProofDatabase } from '../../widgets-live/support/proof-db-guard';
+import {
+  bootFixtureContext,
+  type FixtureContext,
+} from '../../widgets-live/support/bootstrap';
+import {
+  bootHttp,
+  fixturesForHttp,
+  type HttpHarness,
+} from '../../widgets-live/support/http-bootstrap';
 
 const DATABASE = 'maya_widget_gate_proof_service_price_browser_20261006';
 const PORT = '56347';

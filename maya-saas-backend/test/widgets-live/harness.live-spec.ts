@@ -34,6 +34,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import vm from 'node:vm';
+import ts from 'typescript';
 
 import { ConsoleLogger, Logger, type LoggerService } from '@nestjs/common';
 import request from 'supertest';
@@ -1413,6 +1414,50 @@ describe('widgets-live harness', () => {
       }
     });
 
+    it('diagnostic fixtures cannot enter production or canonical evidence support through named, side-effect or dynamic imports', () => {
+      const diagnosticRoot =
+        path.join(BACKEND, 'test/widgets-diagnostics') + path.sep;
+      const diagnosticImports = (file: string, text: string) =>
+        ts
+          .preProcessFile(text, true, true)
+          .importedFiles.filter((ref) =>
+            path
+              .resolve(path.dirname(file), ref.fileName)
+              .startsWith(diagnosticRoot),
+          )
+          .map((ref) => ref.fileName);
+      const collect = (dir: string): string[] =>
+        fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+          const file = path.join(dir, entry.name);
+          return entry.isDirectory()
+            ? collect(file)
+            : entry.name.endsWith('.ts')
+              ? [file]
+              : [];
+        });
+      const files = [
+        ...collect(path.join(BACKEND, 'src')),
+        ...collect(SUPPORT),
+        path.join(BACKEND, 'scripts/widgets-intent-http-proof.ts'),
+      ];
+      expect(
+        files.flatMap((file) =>
+          diagnosticImports(file, fs.readFileSync(file, 'utf8')).map((ref) => ({
+            file,
+            ref,
+          })),
+        ),
+      ).toEqual([]);
+      const wrapper = path.join(SUPPORT, 'forbidden-wrapper.ts');
+      for (const code of [
+        "export { boot } from '../../widgets-diagnostics/support/probe';",
+        "import '../../widgets-diagnostics/support/probe';",
+        "const boot = import('../../widgets-diagnostics/support/probe');",
+        "const boot = require('../../widgets-diagnostics/support/probe');",
+      ])
+        expect(diagnosticImports(wrapper, code)).toHaveLength(1);
+    });
+
     it('rejects nothing on an empty evidence directory, and passes the real harness support files through its override allowlist', () => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'widgets-verify-'));
       try {
@@ -1535,6 +1580,41 @@ describe('widgets-live harness', () => {
     const spec = (sc: Scenario, body: string) => {
       sc.files[SPEC] = `${CLEAN_SPEC}${body}\n`;
     };
+
+    it.each(['direct', 'nested'])(
+      'HAR-13 refuses the actual synthetic diagnostic helper through a %s clause import',
+      (mode) => {
+        expect(verifyScenario(cleanPair()).status).toBe(0);
+        const scenario = cleanPair();
+        const diagnostic =
+          'test/widgets-diagnostics/support/development-integration-fixture.ts';
+        scenario.files[diagnostic] = fs.readFileSync(
+          path.join(BACKEND, diagnostic),
+          'utf8',
+        );
+        if (mode === 'direct') {
+          spec(
+            scenario,
+            "import { developmentIntegrationFixture } from '../widgets-diagnostics/support/development-integration-fixture';",
+          );
+        } else {
+          spec(scenario, "import { boot } from './helpers/diagnostic';");
+          scenario.files['test/widgets-live/helpers/diagnostic.ts'] =
+            "export { developmentIntegrationFixture as boot } from '../../widgets-diagnostics/support/development-integration-fixture';";
+        }
+        const verified = verifyScenario(scenario);
+        expect(verified.status).toBe(1);
+        expect(verified.report.violations).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              test_id: 'P-1',
+              rule: 'V-OVERRIDE',
+              reason: expect.stringContaining(diagnostic) as string,
+            }),
+          ]),
+        );
+      },
+    );
 
     it('HAR-13 admits a clean L pair: an HTTP half and a BIN half, each with its own production-minted record, trace and process', () => {
       const verified = verifyScenario(cleanPair());
@@ -1853,6 +1933,32 @@ describe('widgets-live harness', () => {
             spec(sc, "import { mint } from './helpers/mint';\nawait mint();");
             sc.files['test/widgets-live/helpers/mint.ts'] =
               'export const mint = () => fx.widget(input);\n';
+          },
+          'P-1',
+        ],
+        [
+          'V-MODEL-STUB',
+          'a synthetic diagnostic model helper imported by a clause claimant',
+          (sc) => {
+            spec(
+              sc,
+              "import { boot } from '../widgets-diagnostics/support/probe';\nboot();",
+            );
+            sc.files['test/widgets-diagnostics/support/probe.ts'] =
+              'export const boot = () => module.overrideProvider(AiCoreModelService).useValue(stub);\n';
+          },
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a synthetic diagnostic transport helper imported by a clause claimant',
+          (sc) => {
+            spec(
+              sc,
+              "import { boot } from '../widgets-diagnostics/support/probe';\nboot();",
+            );
+            sc.files['test/widgets-diagnostics/support/probe.ts'] =
+              "export const boot = () => jest.spyOn(globalThis, 'fetch').mockImplementation(stub);\n";
           },
           'P-1',
         ],
