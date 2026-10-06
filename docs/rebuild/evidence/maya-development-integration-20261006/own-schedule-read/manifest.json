@@ -1,0 +1,108 @@
+{
+  "kind": "local-own-staff-schedule-read-checkpoint",
+  "baseHead": "a1721df6d67da3da3f3d7e972287bb3069ad0d12",
+  "codeHead": "4a05b45ac132d0d867b9b15c955f68573e010657",
+  "qualification": "NOT_ISSUED",
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "providerAcceptance": false,
+  "httpPostgresProof": false,
+  "backgroundAuthority": false,
+  "productionChanges": false,
+  "results": {
+    "red": {
+      "tests": 12,
+      "failed": 12,
+      "skipped": 87,
+      "scope": "initial focused reproductions only"
+    },
+    "cohort": {
+      "suites": 6,
+      "tests": 279,
+      "passed": 279,
+      "failed": 0,
+      "skipped": 0
+    },
+    "typecheck": {
+      "exitCode": 0
+    },
+    "lint": {
+      "exitCode": 0,
+      "errors": 0,
+      "preExistingWarnings": 2
+    }
+  },
+  "testTiming": "Final cohort executed on the code changes before commit. Subsequent ESLint fix changed test formatting only; runtime bytes are unchanged.",
+  "files": [
+    {
+      "path": "cohort.json",
+      "bytes": 121912,
+      "sha256": "d6e4e6edc3e380b3c01f620aca7ec4b7fe5dcef7f2bd7fbe5dbe75ca2a9a8af9"
+    },
+    {
+      "path": "cohort.log",
+      "bytes": 833,
+      "sha256": "9742fc29d93506e533230be8d38102bc60791a73874115c11b3eb71a14f25d2c"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 1466,
+      "sha256": "1803b78f459a86f7d72201cdfe368928fa9eb14a379966f1d2ea48ac09b05c76"
+    },
+    {
+      "path": "lint.log",
+      "bytes": 459,
+      "sha256": "b1dbcc0b2df404c229d33a1d62210c24c240778d5fbf35edada263aff0a917c4"
+    },
+    {
+      "path": "red.json",
+      "bytes": 66443,
+      "sha256": "cf70514bcc8d08ba99bf4ff8b0cba63bab178d383ba72e1fba1cbbc9cf5a0668"
+    },
+    {
+      "path": "red.log",
+      "bytes": 22057,
+      "sha256": "25d8fd2ce968a76b0babe4e45ae0fbe4cedffce183ca4c5d9a3f66f31d72b3b2"
+    },
+    {
+      "path": "typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "sha256": "71aab2fd0a05e4ec8c77ce4cb333043a8a34e2f9360567d610cd7569b31fe5b0"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "fb2e5f21d99d34af3d17ef58b2813a7107cc02b7db83625e6d4af166c4cf4740"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+      "sha256": "ad35f17c1b593b88b8840cd76a0db14976f36a03a31da2074a3dd6a5ccdd9345"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-policy.service.spec.ts",
+      "sha256": "0ffe6afaa3b2f947c8533cbd9213ef22a18fd127e4a09ca85064f9a2c09e3e3f"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/staff-schedule-command.service.ts",
+      "sha256": "094280e4757f88bb9344a2fe4272b68489019141d3c614d11c972cea765dffb0"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts",
+      "sha256": "457dc9440b69b37779e03af1282a9ee51d5e813066455418b4d99fdfa4e4cdc1"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "sha256": "3ec734249774a337e25d5542815fff699df3d4e3128a0dfc0e858409bffbc044"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.conversation-reads.spec.ts",
+      "sha256": "3a7ab29035b335cf41ee8d48fcca4aa6e6f307dcde76264e1ccc0b60c518cb9a"
+    }
+  ]
+}

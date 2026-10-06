@@ -1,0 +1,14 @@
+Independent read-only review checkpoint — /root/independent_review
+Review method: source inspection only; reviewer did not run tests.
+
+Initial findings: provider missing/incomplete schedule was normalized to a day off;
+date was bound only to model arguments; sanitizer could truncate slots silently.
+Follow-up findings: corrected/range dates and malformed three-digit years could
+be misread. All findings were corrected and covered by local regressions.
+
+Final reviewer response (verbatim):
+Оба date-замечания закрыты в текущем коде: исправления/диапазоны отклоняются, а трёхзначный год больше не принимается через частичное совпадение. Финальная пунктуация после корректной даты сохранена.
+
+Raw-реплика используется локально для привязки даты; внешний модельный ввод этим изменением не расширяется. Проверки неполного CRM-ответа и исходного количества слотов также сохранены.
+
+Новых blockers в проверенном diff не нашёл. Тесты не запускал; итог cohort остаётся за parent. Это code-review checkpoint, без заявления о provider/model acceptance или завершении C10.

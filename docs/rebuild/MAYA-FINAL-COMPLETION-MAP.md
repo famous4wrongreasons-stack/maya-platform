@@ -714,3 +714,16 @@ See [final browser proof](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md) an
 ### 2026-10-06 — local development integration checkpoint
 
 Occupancy `f9976ab6`, approved pricing `4c8141e0`, and schedule `7b9d0ff5` are joined in the isolated local branch `codex/maya-development-integration-20261006`. Code checkpoint `ca9dc8a5` preserves both owner routes and closes schedule clarification purpose-switch defects; 16 targeted backend suites / 339 tests and 144 shell tests pass. See [MAYA-DEVELOPMENT-INTEGRATION-20261006.md](MAYA-DEVELOPMENT-INTEGRATION-20261006.md) for exact provenance, preservation evidence and independent review. Heavy combined runtime gates and restricted-profile certification are deferred; no background authority or C10 completion is claimed.
+
+### Own staff schedule — resumed functional development, 2026-10-06
+
+From clean `a1721df6`, code `4a05b45a` closes the existing own-schedule READ reply
+gap: an employee's current shift/day off and short next-day follow-up are composed
+from current CRM evidence, with local date binding and fail-closed incomplete
+source handling. Existing C9/runtime/CRM owners are reused. Six local targeted
+suites pass 279/279 tests; types, scoped lint and independent review pass with the
+limits in [the functional checkpoint](MAYA-OWN-SCHEDULE-READ-20261006.md). Model
+selection and CRM responses in these proofs are synthetic. No real-model/provider
+acceptance, HTTP/PG replay or full C10 completion is claimed; V1.4 qualification
+stays parked and `NOT_ISSUED`. Website/booking, MONEY/FK/HANDOFF and background
+authority are unchanged.

@@ -4,6 +4,10 @@ This is a reproducible, **unqualified baseline**, not a release certificate.
 **Parked by parent instruction:** website/booking release has priority. No further
 heavy work until this lane is explicitly resumed or given a separate resource.
 The exact deferred commands and resource budget are in [PARKED-RESUME.md](PARKED-RESUME.md).
+Functional development has separately resumed from `a1721df6`: the
+[own staff schedule READ checkpoint](../../MAYA-OWN-SCHEDULE-READ-20261006.md)
+is local code/test work, not a resumption or promotion of this qualification
+campaign. Preserve the historical evidence pins when resuming the heavy gates.
 The current contract is V1.4 SHA-256
 `9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769`.
 The exact hash is enforced by `prepare-audit.mjs`; use that constant as the
