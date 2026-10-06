@@ -42,6 +42,11 @@ export function markupOf(item: unknown, dark = true): string {
 
 export { project, verify, render };
 
+// Explicit occupancy proof: the current conversation owner and wire projectors,
+// not a replacement timeline. These exports are test-only.
+export { createConversation } from '../../maya-chat-shell/src/shell/conversation.ts';
+export { projectChat, projectConversationHistory } from '../../maya-chat-shell/src/net/project.ts';
+
 // The carrier's sole href owner, and the shell's original, side by side. The test compares them.
 export { isReplyHref, replySegments } from '../src/reply-link.tsx';
 import { ReplyText as ReplyTextLocal } from '../src/reply-link.tsx';
