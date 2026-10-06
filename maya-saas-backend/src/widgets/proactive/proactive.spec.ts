@@ -427,14 +427,13 @@ describe('K13 — no C10 autonomy', () => {
     const openers = rows.filter(
       (c) => c.mode === 'PROPOSE_ONLY' || c.mode === 'OWNER_HANDOFF',
     );
-    // The contract states the membership: "15 of the 57 registered keys (13 PROPOSE_ONLY +
-    // 2 OWNER_HANDOFF), verified by enumerating the live registry." Enumerated here, it
-    // reproduces — 57 keys, 42 READ, 13 + 2.
-    expect(rows).toHaveLength(57);
+    // V1.4 YC-SP1 adds exactly one PROPOSE_ONLY price key to the prior 57.
+    // READ membership and the two OWNER_HANDOFF keys are unchanged.
+    expect(rows).toHaveLength(58);
     expect(reads).toHaveLength(42);
-    expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(13);
+    expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(14);
     expect(rows.filter((c) => c.mode === 'OWNER_HANDOFF')).toHaveLength(2);
-    expect(openers).toHaveLength(15);
+    expect(openers).toHaveLength(16);
     for (const r of reads)
       expect(isRunOpening({ space: 'C9', key: r.capabilityKey })).toBe(false);
     for (const o of openers)

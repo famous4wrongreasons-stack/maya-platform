@@ -11,6 +11,7 @@ import { UserRole } from '../../common/domain.enums';
 import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
 import { TimelineStore } from '../stores/timeline.store';
 import { ServicePriceApprovalTriggerService } from './service-price-approval-trigger.service';
+import type { UserTurnAuditPort } from '../owner-ports/user-turn-audit.port';
 
 const actor = {
   userId: 'owner-a',
@@ -168,6 +169,20 @@ describe('YC-SP1 approval trigger: local owner/store doubles, no provider author
           };
         }),
     };
+    const turnAudit = {
+      read: jest
+        .fn<
+          ReturnType<UserTurnAuditPort['read']>,
+          Parameters<UserTurnAuditPort['read']>
+        >()
+        .mockResolvedValue([]),
+      append: jest
+        .fn<
+          ReturnType<UserTurnAuditPort['append']>,
+          Parameters<UserTurnAuditPort['append']>
+        >()
+        .mockResolvedValue(undefined),
+    };
     const service = new ServicePriceApprovalTriggerService(
       prisma as never,
       emitter as never,
@@ -175,9 +190,11 @@ describe('YC-SP1 approval trigger: local owner/store doubles, no provider author
       principals,
       gate6 as never,
       releaseAccess as never,
+      turnAudit,
     );
     return {
       service,
+      turnAudit,
       ensureTurn,
       lock,
       tx,
@@ -192,6 +209,56 @@ describe('YC-SP1 approval trigger: local owner/store doubles, no provider author
     };
   };
   afterEach(() => jest.restoreAllMocks());
+
+  it('reads only one closed durable user-turn proof through its existing audit owner and transaction', async () => {
+    const h = harness();
+    const proof = {
+      contract: 'maya.user-turn-binding/1',
+      turnId: input.userTurn.turnId,
+      conversationId: input.userTurn.conversationId,
+      principalProofHash: principal.proofHash,
+      intentTokenHash: null,
+    };
+    const request = {
+      tenantId: actor.tenantId,
+      userId: actor.userId,
+      ...input.userTurn,
+      principalProofHash: principal.proofHash,
+    };
+    h.turnAudit.read.mockResolvedValue([proof]);
+    await expect(
+      h.service.readServicePriceUserTurnBinding(request, h.tx as never),
+    ).resolves.toEqual({
+      turnId: proof.turnId,
+      conversationId: proof.conversationId,
+      principalProofHash: proof.principalProofHash,
+    });
+    expect(h.turnAudit.read).toHaveBeenLastCalledWith(
+      actor.tenantId,
+      actor.userId,
+      proof.turnId,
+      h.tx,
+    );
+    for (const invalid of [
+      [],
+      [proof, proof],
+      [{ ...proof, contract: 'other' }],
+      [{ ...proof, turnId: 'foreign' }],
+      [{ ...proof, conversationId: 'foreign' }],
+      [{ ...proof, principalProofHash: 'f'.repeat(64) }],
+      [{ ...proof, intentTokenHash: 'a'.repeat(64) }],
+      [{ ...proof, text: 'must never enter canonical proof' }],
+    ]) {
+      h.turnAudit.read.mockResolvedValue(invalid);
+      await expect(
+        h.service.readServicePriceUserTurnBinding(request, h.tx as never),
+      ).resolves.toBeNull();
+    }
+    expect(h.turnAudit.append).not.toHaveBeenCalled();
+    expect(h.source.read).not.toHaveBeenCalled();
+    expect(h.emitter.emitServicePriceApproval).not.toHaveBeenCalled();
+    expect(h.principals.resolve).not.toHaveBeenCalled();
+  });
 
   it('uses canonical source, original chat turn, exact source facts and standard persisted envelope', async () => {
     const h = harness();

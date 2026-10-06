@@ -91,7 +91,7 @@ function harness() {
 describe('catalog.service.price.update chat boundary', () => {
   const registry = new AiToolRegistryService();
 
-  it('pins exactly one local C9/AE candidate without adding a released carrier successor', () => {
+  it('pins exactly one C9/AE candidate and its reviewed restricted-profile successor', () => {
     const candidates = C9_CAPABILITIES.filter(
       (row) => row.capabilityKey === SERVICE_PRICE_TOOL,
     );
@@ -147,7 +147,7 @@ describe('catalog.service.price.update chat boundary', () => {
       },
       reconciliation: { retryAfterProvenNonExecution: false },
     });
-    expect(PROFILE_REGISTRY.successorCapabilities).not.toContain(
+    expect(PROFILE_REGISTRY.successorCapabilities).toContain(
       SERVICE_PRICE_TOOL,
     );
   });

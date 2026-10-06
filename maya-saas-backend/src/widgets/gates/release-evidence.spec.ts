@@ -83,11 +83,20 @@ describe('Final release evidence scope', () => {
   });
 });
 
-// Programme §4.5 Money: negative evidence may be mutation-only. No financial effects.
-it('AR-FR6D-SCOPE pins every allowlisted capability outside MONEY and the payment emission gap', () => {
+// Current V1.4 candidate: the exact catalogue-price subtype is the sole MONEY
+// addition. This structural check does not issue new §4.5 release evidence.
+it('AR-FR6D-SCOPE pins only YC-SP1 inside MONEY and retains the payment emission gap', () => {
   const registry = new ActionCapabilityRegistry();
-  expect(Object.keys(RUNTIME_ALLOWLIST)).toHaveLength(10);
-  for (const key of Object.keys(RUNTIME_ALLOWLIST))
-    expect(MONEY(registry.get(key))).toBe(false);
+  expect(Object.keys(RUNTIME_ALLOWLIST)).toHaveLength(11);
+  const money = Object.keys(RUNTIME_ALLOWLIST).filter((key) =>
+    MONEY(registry.get(key)),
+  );
+  expect(money).toEqual(['crm.service.fixed-price.update.v1']);
+  expect(RUNTIME_ALLOWLIST[money[0]]).toMatchObject({
+    family: 'catalogue_price_configuration',
+    confirmation_kind: 'APPROVAL',
+    min_verification: 'SESSION_VERIFIED',
+    propose: { space: 'C9', key: 'catalog.service.price.update' },
+  });
   expect(emittable('PAYMENT_HANDOFF')).toBe(false);
 });

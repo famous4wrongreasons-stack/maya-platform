@@ -164,6 +164,8 @@ const OTHER_TYPED_FACT_CONTAINERS: Readonly<Record<string, string>> =
       'WidgetComposerInput evidence array, never pipeline gate facts',
     'emission/booking-confirmation-minter.service.ts':
       'WidgetComposerInput fact copied from the canonical booking owner preview',
+    'pricing/service-price-approval.presenter.ts':
+      'WidgetComposerInput evidence array copied from the canonical price approval snapshot; never pipeline AdmissionFacts',
     'emission/envelope.factory.ts':
       'WidgetEnvelope facts and facts_origin written after projection',
   });

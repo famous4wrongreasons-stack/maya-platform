@@ -425,27 +425,16 @@ export class AiToolRuntimeService {
       if (existing.length) return existing.length === 1;
       // A later retry cannot attach a standalone or unrelated historical approval to a new chat.
       if (pending.replayed !== false) return false;
-      const source = await this.auditLog.entityEvents(
+      const binding = await trigger.readServicePriceUserTurnBinding(
         {
           tenantId: actor.tenantId!,
           userId: actor.userId,
-          action: 'chat.user_turn_bound',
-          entityType: 'WidgetTimelineTurn',
-          entityId: internal.userTurn!.turnId,
+          turnId: internal.userTurn!.turnId,
+          conversationId: internal.userTurn!.conversationId,
         },
         tx,
       );
-      const binding = source[0]?.metadataJson as
-        Record<string, unknown> | undefined;
-      if (
-        source.length !== 1 ||
-        binding?.contract !== 'maya.user-turn-binding/1' ||
-        binding.turnId !== internal.userTurn!.turnId ||
-        binding.conversationId !== internal.userTurn!.conversationId ||
-        binding.intentTokenHash !== null ||
-        typeof binding.principalProofHash !== 'string'
-      )
-        return false;
+      if (!binding) return false;
       const origin: ServicePriceChatOrigin = {
         contract: 'maya.service-price-chat-approval/1',
         approvalId: id,
@@ -536,23 +525,24 @@ export class AiToolRuntimeService {
       typeof origin.principalProofHash !== 'string'
     )
       this.approvalConflict('service_price_chat_origin_missing');
-    const turns = await this.auditLog.entityEvents({
+    let trigger: AiApprovalWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiApprovalWidgetTriggerPort>(
+        AI_APPROVAL_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      /* Missing presentation proof owner fails closed below. */
+    }
+    if (!trigger) this.approvalConflict('service_price_chat_origin_missing');
+    const proof = await trigger.readServicePriceUserTurnBinding({
       tenantId: principal.tenantId,
       userId: principal.userId,
-      action: 'chat.user_turn_bound',
-      entityType: 'WidgetTimelineTurn',
-      entityId: origin.userTurnId,
+      turnId: origin.userTurnId,
+      conversationId: origin.conversationId,
+      principalProofHash: origin.principalProofHash,
     });
-    const proof = turns[0]?.metadataJson as Record<string, unknown> | undefined;
-    if (
-      turns.length !== 1 ||
-      proof?.contract !== 'maya.user-turn-binding/1' ||
-      proof.turnId !== origin.userTurnId ||
-      proof.conversationId !== origin.conversationId ||
-      proof.principalProofHash !== origin.principalProofHash ||
-      proof.intentTokenHash !== null
-    )
-      this.approvalConflict('service_price_chat_origin_missing');
+    if (!proof) this.approvalConflict('service_price_chat_origin_missing');
     return {
       id: row.id,
       payloadHash: row.payloadHash,

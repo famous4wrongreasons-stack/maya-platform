@@ -14,6 +14,7 @@ import { UserRole } from '../../common/domain.enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SERVICE_PRICE_CAPABILITY } from '../../crm/yclients-service-price.contract';
 import { openWidgetNounHandle } from '../emission/seal.service';
+import { TimelineStore } from '../stores/timeline.store';
 import type {
   NounActor,
   NounResolverInput,
@@ -115,19 +116,16 @@ export class ServicePriceApprovalAdapter implements ServicePriceApprovalOwnerPor
     );
     if (source.origin.principalProofHash !== principalProofHash)
       throw new ForbiddenException('Service price chat principal changed');
-    const turn = await this.prisma.widgetTimelineTurn.findFirst({
-      where: {
+    const turn = await TimelineStore.readActiveUserTurnIdentity(
+      this.prisma,
+      {
         id: source.origin.userTurnId,
         tenantId: actor.tenantId!,
         conversationId: source.origin.conversationId,
         principalProofHash,
-        role: 'user',
-        channel: 'pwa',
-        erasedAt: null,
-        retentionUntil: { gt: new Date() },
       },
-      select: { id: true },
-    });
+      new Date(),
+    );
     if (!turn)
       throw new ConflictException('service_price_chat_origin_unavailable');
     return source;

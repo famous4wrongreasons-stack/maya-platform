@@ -8,10 +8,12 @@ import {
   GATE6_OWNERS,
   PRINCIPAL_RESOLVER,
   WIDGET_RELEASE_ACCESS,
+  USER_TURN_AUDIT,
 } from '../di-tokens';
 import { WidgetEmitterService } from '../emission/emitter.service';
 import type { Gate6Owners } from '../owner-ports/gate6.owners.provider';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
+import type { UserTurnAuditPort } from '../owner-ports/user-turn-audit.port';
 import { TimelineStore } from '../stores/timeline.store';
 import {
   SERVICE_PRICE_APPROVAL_OWNER,
@@ -45,7 +47,47 @@ export class ServicePriceApprovalTriggerService implements AiApprovalWidgetTrigg
     @Inject(GATE6_OWNERS) private readonly gate6: Gate6Owners,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Inject(USER_TURN_AUDIT) private readonly turnAudit: UserTurnAuditPort,
   ) {}
+
+  async readServicePriceUserTurnBinding(
+    input: Parameters<
+      AiApprovalWidgetTriggerPort['readServicePriceUserTurnBinding']
+    >[0],
+    tx?: Parameters<
+      AiApprovalWidgetTriggerPort['readServicePriceUserTurnBinding']
+    >[1],
+  ) {
+    const read = async (transaction: NonNullable<typeof tx>) => {
+      const rows = await this.turnAudit.read(
+        input.tenantId,
+        input.userId,
+        input.turnId,
+        transaction,
+      );
+      if (rows.length !== 1 || !isRecord(rows[0])) return null;
+      const proof = rows[0];
+      if (
+        Object.keys(proof).sort().join('|') !==
+          'contract|conversationId|intentTokenHash|principalProofHash|turnId' ||
+        proof.contract !== 'maya.user-turn-binding/1' ||
+        proof.turnId !== input.turnId ||
+        proof.conversationId !== input.conversationId ||
+        proof.intentTokenHash !== null ||
+        typeof proof.principalProofHash !== 'string' ||
+        !/^[a-f0-9]{64}$/.test(proof.principalProofHash) ||
+        (input.principalProofHash !== undefined &&
+          proof.principalProofHash !== input.principalProofHash)
+      )
+        return null;
+      return {
+        turnId: input.turnId,
+        conversationId: input.conversationId,
+        principalProofHash: proof.principalProofHash,
+      };
+    };
+    return tx ? read(tx) : this.prisma.$transaction(read);
+  }
 
   async afterPendingServicePriceApproval(
     input: Parameters<

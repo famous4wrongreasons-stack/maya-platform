@@ -1292,6 +1292,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
       'SERVICE_PRICE_APPROVAL_OWNER',
+      'SCHEDULE_APPROVAL_OWNER',
       'CHAT_REPLY_CIPHER',
       'PERSONAL_SCHEDULE_SOURCE',
       'USER_TURN_AUDIT',

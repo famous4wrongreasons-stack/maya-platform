@@ -1,11 +1,27 @@
 import { ActionPolicyDecision } from '@prisma/client';
 import { ActionContractError } from './action-engine.errors';
 import type { RegisteredActionCapabilityV1 } from './action-engine.contract';
-import {
-  SERVICE_PRICE_CAPABILITY,
-  priceMinor,
-  ycId,
-} from '../crm/yclients-service-price.contract';
+export const SERVICE_PRICE_CAPABILITY = 'crm.service.fixed-price.update.v1';
+
+// AE validates its closed normalized input independently of the CRM/provider owner.
+function serviceId(value: unknown): string {
+  const id = String(value);
+  if (!/^[1-9]\d{0,14}$/.test(id))
+    throw new ActionContractError('Invalid service price target ID');
+  return id;
+}
+function exactRubles(value: unknown): number {
+  if (typeof value !== 'number' && typeof value !== 'string')
+    throw new ActionContractError('Invalid service price amount');
+  const text = String(value);
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(text))
+    throw new ActionContractError('Invalid service price amount');
+  const [whole, fraction = ''] = text.split('.');
+  const minor = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  if (!Number.isSafeInteger(minor) || minor > 100_000_000_000)
+    throw new ActionContractError('Invalid service price amount');
+  return minor / 100;
+}
 
 export function normalizeServicePriceInput(
   value: unknown,
@@ -43,10 +59,10 @@ export function normalizeServicePriceInput(
     throw new ActionContractError('Invalid service price approval');
   return {
     ...input,
-    service_id: ycId(input.service_id),
-    company_id: ycId(input.company_id),
-    current_price_rubles: priceMinor(input.current_price_rubles) / 100,
-    price_rubles: priceMinor(input.price_rubles) / 100,
+    service_id: serviceId(input.service_id),
+    company_id: serviceId(input.company_id),
+    current_price_rubles: exactRubles(input.current_price_rubles),
+    price_rubles: exactRubles(input.price_rubles),
   };
 }
 

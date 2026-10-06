@@ -87,6 +87,8 @@ export const resolveServicePriceTemplate = (args: {
   deliveryChannel: string;
 }): IntentTemplateRow => {
   if (
+    (Object.getPrototypeOf(args.proposal) !== Object.prototype &&
+      Object.getPrototypeOf(args.proposal) !== null) ||
     Object.keys(args.proposal).some(
       (key) =>
         ![
@@ -109,7 +111,6 @@ export const resolveServicePriceTemplate = (args: {
   if (!candidate.roles.includes(args.proposal.role))
     throw new IntentTemplateRefusal('role_mismatch');
   if (
-    args.proposal.handoff_capability_ref !== undefined ||
     args.proposal.capability?.space !== candidate.subject?.space ||
     args.proposal.capability?.key !== candidate.subject?.key
   )

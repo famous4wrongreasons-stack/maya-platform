@@ -3,7 +3,7 @@ import { ConflictException } from '@nestjs/common';
 import { stableActionJson } from '../action-engine/action-engine.identity';
 
 /** Handwritten contract from the official 2026-10-05 snapshot. Not a generic HTTP tool. */
-export const SERVICE_PRICE_CAPABILITY = 'crm.service.fixed-price.update.v1';
+export { SERVICE_PRICE_CAPABILITY } from '../action-engine/service-price.contract';
 export const SERVICE_PRICE_TOOL = 'catalog.service.price.update';
 export const SERVICE_PRICE_REQUIRED_FIELDS = [
   'title',

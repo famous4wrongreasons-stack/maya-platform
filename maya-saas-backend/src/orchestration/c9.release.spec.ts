@@ -8,6 +8,7 @@
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import ts from 'typescript';
 
 import { C9Agents } from './c9.agents';
 import {
@@ -42,8 +43,148 @@ const specs = readdirSync(dir).filter((n) => n.endsWith('.spec.ts'));
 const strip = (text: string) =>
   text.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
 const read = (name: string) => readFileSync(join(dir, name), 'utf8');
+const compact = (node: ts.Node, source: ts.SourceFile) =>
+  strip(node.getText(source)).replace(/\s/g, '');
+// Request-local timeout is not an initiator (mapping §14). Admit only the
+// existing rejecting Promise branch, with literal budget and finally cleanup.
+function rejectingReadDeadline(node: ts.CallExpression, source: ts.SourceFile) {
+  if (
+    !ts.isIdentifier(node.expression) ||
+    node.expression.text !== 'setTimeout' ||
+    node.arguments.length !== 2
+  )
+    return false;
+  const [callback, delay] = node.arguments;
+  if (
+    !ts.isArrowFunction(callback) ||
+    callback.parameters.length !== 0 ||
+    callback.modifiers?.length ||
+    !ts.isNumericLiteral(delay) ||
+    delay.text !== '6000'
+  )
+    return false;
+  const rejection = callback.body;
+  if (
+    !ts.isCallExpression(rejection) ||
+    !ts.isIdentifier(rejection.expression) ||
+    rejection.expression.text !== 'reject' ||
+    rejection.arguments.length !== 1
+  )
+    return false;
+  const error = rejection.arguments[0];
+  if (
+    !ts.isNewExpression(error) ||
+    !ts.isIdentifier(error.expression) ||
+    error.expression.text !== 'Error' ||
+    error.arguments?.length !== 1 ||
+    !ts.isStringLiteral(error.arguments[0]) ||
+    error.arguments[0].text !== 'occupancy_read_timeout'
+  )
+    return false;
+  const assignment = node.parent;
+  if (
+    !ts.isBinaryExpression(assignment) ||
+    assignment.operatorToken.kind !== ts.SyntaxKind.EqualsToken ||
+    compact(assignment.left, source) !== 'timeout'
+  )
+    return false;
+  const statement = assignment.parent;
+  const block = statement.parent;
+  if (
+    !ts.isExpressionStatement(statement) ||
+    !ts.isBlock(block) ||
+    block.statements.length !== 1
+  )
+    return false;
+  const executor = block.parent;
+  if (
+    !ts.isArrowFunction(executor) ||
+    executor.parameters.map((p) => p.name.getText(source)).join(',') !==
+      '_resolve,reject'
+  )
+    return false;
+  const promise = executor.parent;
+  if (
+    !ts.isNewExpression(promise) ||
+    promise.expression.getText(source) !== 'Promise'
+  )
+    return false;
+  const array = promise.parent;
+  if (
+    !ts.isArrayLiteralExpression(array) ||
+    !ts.isCallExpression(array.parent) ||
+    array.parent.expression.getText(source) !== 'Promise.race'
+  )
+    return false;
+  let ancestor: ts.Node | undefined = array;
+  while (ancestor && !ts.isTryStatement(ancestor)) ancestor = ancestor.parent;
+  if (
+    !ancestor?.finallyBlock ||
+    compact(ancestor.finallyBlock, source) !==
+      '{if(timeout)clearTimeout(timeout);}'
+  )
+    return false;
+  while (ancestor && !ts.isMethodDeclaration(ancestor))
+    ancestor = ancestor.parent;
+  return (
+    !!ancestor &&
+    ancestor.name?.getText(source) === 'read' &&
+    ts.isClassDeclaration(ancestor.parent) &&
+    ancestor.parent.name?.text === 'C9OccupancySource'
+  );
+}
 
 describe('c9 release gate', () => {
+  test.each([
+    ['budget expansion', (s: string) => s.replace('6000,', '6001,')],
+    [
+      'side-effect factory disguised as Error',
+      (s: string) =>
+        s.replace(
+          "new Error('occupancy_read_timeout')",
+          "newError('occupancy_read_timeout')",
+        ),
+    ],
+    [
+      'initiator callback',
+      (s: string) =>
+        s.replace(
+          "reject(new Error('occupancy_read_timeout'))",
+          'this.read(runId)',
+        ),
+    ],
+    [
+      'missing cleanup',
+      (s: string) => s.replace('clearTimeout(timeout)', 'void timeout'),
+    ],
+    [
+      'automatic constructor deadline',
+      (s: string) =>
+        s.replace(
+          'async read(runId: string)',
+          'async constructor(runId: string)',
+        ),
+    ],
+  ])('deadline fence rejects %s', (_label, mutate) => {
+    const source = ts.createSourceFile(
+      'counterfactual.ts',
+      mutate(read('c9.occupancy-source.ts')),
+      ts.ScriptTarget.Latest,
+      true,
+    );
+    const calls: ts.CallExpression[] = [];
+    const visit = (node: ts.Node) => {
+      if (
+        ts.isCallExpression(node) &&
+        node.expression.getText(source) === 'setTimeout'
+      )
+        calls.push(node);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(calls).toHaveLength(1);
+    expect(rejectingReadDeadline(calls[0], source)).toBe(false);
+  });
   test('the frozen manifest still matches the released code', () => {
     expect(manifest.counts).toMatchObject({
       requirements: 30,
@@ -181,22 +322,42 @@ describe('c9 release gate', () => {
   });
 
   test('C9 never initiates itself, schedules itself or trains online', () => {
+    let deadlines = 0;
     for (const name of production) {
       const code = strip(read(name));
-      // No scheduler, no timer, no recurring orchestration anywhere in the package.
+      // No scheduler or recurring orchestration; a request may only reject on its deadline.
       expect({
         name,
         recurring:
-          /@Cron|setInterval\s*\(|setTimeout\s*\(|CronExpression|@Interval|@Timeout/.test(
-            code,
-          ),
+          /@Cron|setInterval\s*\(|CronExpression|@Interval|@Timeout/.test(code),
       }).toEqual({ name, recurring: false });
+      const source = ts.createSourceFile(
+        name,
+        read(name),
+        ts.ScriptTarget.Latest,
+        true,
+      );
+      const visit = (node: ts.Node) => {
+        if (
+          ts.isCallExpression(node) &&
+          /\bsetTimeout$/.test(node.expression.getText(source))
+        ) {
+          expect({
+            name,
+            boundedReject: rejectingReadDeadline(node, source),
+          }).toEqual({ name, boundedReject: true });
+          deadlines++;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(source);
       // No training, no fine-tuning, no promotion from production outcomes.
       expect({
         name,
         training: /\btrain\w*\s*\(|fineTun|reinforc|onlineLearn/i.test(code),
       }).toEqual({ name, training: false });
     }
+    expect(deadlines).toBe(1);
     // Every run begins from an explicit, signed, expiring user request event.
     expect(read('c9.identity.ts')).toContain("purpose: 'c9_request_v1'");
     expect(read('c9.store.ts')).toContain(

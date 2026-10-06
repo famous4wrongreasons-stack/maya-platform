@@ -1251,7 +1251,8 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     // The registry's reviewed hash. A Gate 12 change never moves it; a unit that legitimately
     // changes the C9 canon moves this line in its own commit, with the reason in the message.
     expect(C9_REGISTRY_HASH).toBe(
-      'd88986622d4226015298ba8b2255994ec7684bcbb5bde79883fdd2dd13732918',
+      // YC-SP1 adds exactly catalog.service.price.update as PROPOSE_ONLY.
+      '029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce',
     );
     const contract = parse(
       'action-engine/action-engine.contract.ts',

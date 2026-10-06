@@ -198,7 +198,7 @@ describe('COMMIT OUTSIDE CONFIRMATION: IMPOSSIBLE', () => {
   });
 });
 
-describe('MONEY KEYS GAP-KEYED: 92/92', () => {
+describe('Legacy booking owner admits none of the 93 current MONEY keys', () => {
   const rows = () => {
     const r = new ActionCapabilityRegistry() as unknown as Record<
       string,
@@ -213,30 +213,33 @@ describe('MONEY KEYS GAP-KEYED: 92/92', () => {
     )();
   };
 
-  it('the contract predicate selects 92 of 226', () => {
-    // The figure the contract states. It reproduces exactly — and so does the near-miss it warns
-    // about, which is what makes this a check and not a coincidence.
+  it('the predicate selects the prior 92 MONEY keys plus exact YC-SP1 from 227', () => {
+    // Preserve the historical census after removing only the exact YC-SP1 addition.
     const money = rows().filter(isMoney);
-    expect(money).toHaveLength(92);
-    expect(rows()).toHaveLength(226);
+    expect(money).toHaveLength(93);
+    expect(rows()).toHaveLength(227);
+    expect(
+      money.filter(
+        (row) => row.capability !== 'crm.service.fixed-price.update.v1',
+      ),
+    ).toHaveLength(92);
   });
 
   it('reproduces the contract’s documented WRONG answer for the bare token', () => {
-    // "92 capabilities against 12 for the bare `financial` token". A generator once hard-coded five
-    // plausible money words here and matched exactly those 12. Both numbers are asserted so that
-    // regression is caught by its own signature.
+    // Historical 92 vs 12 plus one financial YC-SP1 row: the incomplete bare-token
+    // predicate must still select only 13 of the current 93 MONEY capabilities.
     expect(
       rows().filter((c) => (c.riskFacets ?? []).includes('financial')),
-    ).toHaveLength(12);
+    ).toHaveLength(13);
     expect(MONEY_FACETS).toHaveLength(16);
     expect(MONEY_TARGET_KINDS).toHaveLength(27);
   });
 
-  it('all 92 are gap-keyed: none is on the COMMIT allowlist', () => {
+  it('no MONEY key is on this separate three-row booking COMMIT allowlist', () => {
     const money = rows().filter(isMoney);
     const admitted = money.filter((c) => isAllowlisted(c.capability));
     expect(admitted).toEqual([]);
-    expect(money.length).toBe(92);
+    expect(money.length).toBe(93);
   });
 
   it('crm.visit.payment.v1 is money and is not mintable', () => {

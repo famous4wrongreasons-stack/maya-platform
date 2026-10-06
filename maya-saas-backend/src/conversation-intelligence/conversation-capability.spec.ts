@@ -18,7 +18,7 @@ describe('conversation capability contract', () => {
     }
   });
 
-  it('keeps the public MAYA OS conversation contract fully routable', () => {
+  it('keeps only the explicit cancellation-window development slice partial', () => {
     const incomplete = MAYA_CONVERSATION_TAXONOMY.filter(
       (intent) => intent.readiness !== 'ready',
     ).map((intent) => ({
@@ -27,7 +27,13 @@ describe('conversation capability contract', () => {
       note: intent.readinessNote,
     }));
 
-    expect(incomplete).toEqual([]);
+    expect(incomplete).toEqual([
+      {
+        intent: 'schedule.review_cancellation_windows',
+        readiness: 'partial',
+        note: 'Explicit owner web request only: one saved Opportunity, current CRM schedule and availability, C9 recommendation. No background checks, bookings, discounts, customer lists or messaging. Named dates/branches/employees and compound tasks require clarification in this slice.',
+      },
+    ]);
   });
 
   it('does not advertise an intent role unsupported by all candidate tools', () => {

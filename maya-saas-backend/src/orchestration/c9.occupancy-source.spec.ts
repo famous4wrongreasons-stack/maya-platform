@@ -270,6 +270,7 @@ describe('explicit Occupancy current-source projection (synthetic CRM, no model)
     jest.useFakeTimers();
     try {
       const f = fixture();
+      expect(jest.getTimerCount()).toBe(0);
       f.crm.getAvailableSlots.mockImplementation(
         () => new Promise(() => undefined),
       );
@@ -277,6 +278,7 @@ describe('explicit Occupancy current-source projection (synthetic CRM, no model)
       await jest.advanceTimersByTimeAsync(6001);
       expect(await read).toMatchObject({ outcome: 'UNAVAILABLE' });
       expect(f.crm.getAvailableSlots).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
     } finally {
       jest.useRealTimers();
     }
