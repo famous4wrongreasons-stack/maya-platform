@@ -1,5 +1,7 @@
 # Explicit owner Occupancy — local browser acceptance preparation
 
+Historical preparation below. The parent later assigned the slot; see [executed browser result](MAYA-EXPLICIT-OCCUPANCY-BROWSER-RESULT-20261006.md) for PASS, all attempts and cleanup.
+
 Status: **PREPARED; BROWSER ACCEPTANCE NOT RUN**. Parent accepted the HTTP/PG
 checkpoint at `4b14da33f96bdd43788b2d1c63dda01054f33c3b` and requested this narrow
 finishing check. Heavy slot remains with main, then pricing. No backend, PostgreSQL,

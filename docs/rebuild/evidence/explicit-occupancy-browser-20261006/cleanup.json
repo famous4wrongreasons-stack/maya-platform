@@ -1,0 +1,33 @@
+{
+  "ownedChromePids": [],
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "failed",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-c9occ-iemr5B/pg",
+      "postmasterPidAbsent": true,
+      "pgStopConfirmed": true
+    },
+    {
+      "attempt": 2,
+      "status": "failed",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-c9occ-aUSKnB/pg",
+      "postmasterPidAbsent": true,
+      "pgStopConfirmed": true
+    },
+    {
+      "attempt": 3,
+      "status": "passed",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-c9occ-lt8XUS/pg",
+      "postmasterPidAbsent": true,
+      "pgStopConfirmed": true
+    },
+    {
+      "attempt": 4,
+      "status": "passed",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-c9occ-fj1WkV/pg",
+      "postmasterPidAbsent": true,
+      "pgStopConfirmed": true
+    }
+  ]
+}

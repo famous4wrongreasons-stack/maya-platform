@@ -1,0 +1,16 @@
+{
+  "contract": "maya.c9-occupancy-owned-cluster/1",
+  "database": "maya_widget_gate_proof_c9occ_3958d066814d",
+  "port": 50427,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-c9occ-fj1WkV/pg",
+  "mode": "browser",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "browser"
+  ]
+}

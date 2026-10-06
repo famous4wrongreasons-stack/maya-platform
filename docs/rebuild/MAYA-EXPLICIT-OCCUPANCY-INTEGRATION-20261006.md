@@ -26,12 +26,13 @@ New production files: `orchestration/c9.occupancy-source.ts`, `orchestration/c9.
 - Existing `src/conversation-intelligence/conversation-intelligence.service.spec.ts`: exact taxonomy census plus new intent assertion; reconcile its census if another lane independently adds intents, do not loosen the assertion.
 - New dedicated HTTP entry: `test/widgets-live/c9-occupancy-restart.probe-spec.ts` and support `c9-occupancy-fixture-edge.ts`. Explicit probe stays outside ordinary widgets-live discovery. Existing AppModule/bootstrap/guards are reused unchanged.
 - New backend `scripts/c9-occupancy-proof.mjs` and `.test.mjs`: owned cluster plus serial two-process driver; keeps every attempt and stops only its cluster.
-- Current carrier test-only files: new `maya-carrier-react/test/occupancy-probe.mjs`, `occupancy.test.mjs`; existing `test/pipeline.tsx` gains exports of current conversation/projector functions. No shipped carrier or website code changes. Browser acceptance remains pending.
+- Current carrier test-only files: new `maya-carrier-react/test/occupancy-probe.mjs`, `occupancy.test.mjs`; existing `test/pipeline.tsx` gains exports of current conversation/projector functions. No shipped carrier or website code changes. Browser follow-up adds test-only `occupancy-browser-probe.mjs`, `occupancy-browser-guard.mjs` and `.test.mjs`; the same owned driver supports explicit `--browser`. Local desktop acceptance passed; see the executed browser result.
 
 ## Documentation/evidence
 
 - Existing shared `docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md`: append-only slice status; preserve parallel lane updates.
 - New explicit occupancy checkpoint, HTTP preparation, HTTP result and this integration list under `docs/rebuild/`.
+- Browser preparation/result and `explicit-occupancy-browser-20261006/` evidence add the actual UI qualification, with all attempts and original PNGs.
 - Evidence under `docs/rebuild/evidence/explicit-occupancy-20261006/` and `explicit-occupancy-http-pg-20261006/`, including every failed attempt and successful actual HTTP/PG/SSR observations. Synthetic credentials/private restart files are excluded.
 
 ## Boundaries for receiving lanes
@@ -40,4 +41,4 @@ Prisma schema/migrations, C9 registry/contract/budget/work implementation, price
 
 Take the C5 fingerprint producer and verifier changes together. [Exact source compatibility](MAYA-EXPLICIT-OCCUPANCY-HTTP-PG-RESULT-20261006.md#actual-code-correction-and-source-compatibility): old C5 native prefixes/bytes remain unchanged; fresh C9 references use domain-separated 64-hex digests; raw fallback, schema widening, re-stamping old authority and C7 fabrication are prohibited. Prior failed runs retain existing held/replay rules and are not rewritten.
 
-The targeted gate has passed on this isolated candidate. Full receiving-branch aggregate/typecheck, integration with concurrent lanes and actual browser/provider/model acceptance are separate work, not implied by this checkpoint. No further heavy run is authorized in this lane while main owns the slot.
+The targeted gate has passed on this isolated candidate. Full receiving-branch aggregate/typecheck, integration with concurrent lanes and actual provider/model acceptance are separate work, not implied by this checkpoint. The subsequently assigned browser slot was used and returned; [local browser result](MAYA-EXPLICIT-OCCUPANCY-BROWSER-RESULT-20261006.md) records its scope, test-only fixes and all attempts. No further heavy work is running in this lane.

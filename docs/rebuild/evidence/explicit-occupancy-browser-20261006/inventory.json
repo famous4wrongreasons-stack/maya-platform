@@ -1,0 +1,292 @@
+{
+  "contract": "maya.explicit-occupancy-browser-evidence-inventory/1",
+  "byteExactAttemptFiles": [
+    {
+      "path": "attempt1/browser.log",
+      "sha256": "9f8e8ec9a7dbab621db22c9c9ca59036ac8e37ce08af06169b957a85b22fe57e",
+      "bytes": 2012
+    },
+    {
+      "path": "attempt1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "attempt1/initdb.log",
+      "sha256": "c7615fd98fee63be8a3a7e529d1304a9435c697174be7b7ea8d9db1036111f37",
+      "bytes": 932
+    },
+    {
+      "path": "attempt1/manifest.json",
+      "sha256": "41ddd7a39857582e5af4a13748527858ef20cdb04ad49ab90ecbc274036fdf19",
+      "bytes": 367
+    },
+    {
+      "path": "attempt1/migrations.log",
+      "sha256": "d0078bd8f68b5e31d42e247bb00fee40fa91b27e1b2839793d549c83fd46a8da",
+      "bytes": 14720
+    },
+    {
+      "path": "attempt1/output/playwright/browser.json",
+      "sha256": "726d9a09d03510b3bd3615e6d81c482080b69a891a0f3832a4cc89b0bb776762",
+      "bytes": 1587
+    },
+    {
+      "path": "attempt1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "attempt1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "attempt1/postgres.log",
+      "sha256": "adbba04f6988577b0250a67246a86bc27cbcbaaff3b4bed420e649b3e404e8a6",
+      "bytes": 1234
+    },
+    {
+      "path": "attempt1/react-web-build.log",
+      "sha256": "68ce9d5bd8a9eda4c4f8b14521476762c861347fbb0e869f95685f813ad68f41",
+      "bytes": 185
+    },
+    {
+      "path": "attempt2/browser.log",
+      "sha256": "852664b09a75bb513ccc4b29e4c13ccfddf6b09b91a044f3c69d17f6836a712c",
+      "bytes": 2065
+    },
+    {
+      "path": "attempt2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "attempt2/initdb.log",
+      "sha256": "39fb3f3c5a7ae42a84562e2e8fda64e352f3c05fa0bdbe2c52e52eb56a7030ea",
+      "bytes": 932
+    },
+    {
+      "path": "attempt2/manifest.json",
+      "sha256": "e776841f5d28ffd8d3cd236b160bb367eddd4e2ac30c7c7a81087329a1304493",
+      "bytes": 367
+    },
+    {
+      "path": "attempt2/migrations.log",
+      "sha256": "ad16eb9611120e3212a9e9c77a44e8752ce167dde5f6a1645e9994392ffaa78a",
+      "bytes": 14720
+    },
+    {
+      "path": "attempt2/output/playwright/available.png",
+      "sha256": "34740616ea875530b44b7092d317289913874d25b3f2bd6218a9c5f58e205ea6",
+      "bytes": 60412
+    },
+    {
+      "path": "attempt2/output/playwright/browser.json",
+      "sha256": "b47bc59ab6ff4e6cd63aa782d65e70549078076fef9946fd6bbeb90378f45a75",
+      "bytes": 14056
+    },
+    {
+      "path": "attempt2/output/playwright/failure.png",
+      "sha256": "f9ae15437a620857931793d593249d7017b9fd6347dc437e8f86f9dd76123229",
+      "bytes": 73452
+    },
+    {
+      "path": "attempt2/output/playwright/history-after-relogin.png",
+      "sha256": "399f8da7c346a9483cc1dd986c5e2a2ebc1c86e8af0cb81451024d777376f9ae",
+      "bytes": 67115
+    },
+    {
+      "path": "attempt2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "attempt2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "attempt2/postgres.log",
+      "sha256": "1b46ae5722cec67333447fb74554ff69de752c31e1767ae8bff245f587cfe746",
+      "bytes": 1246
+    },
+    {
+      "path": "attempt2/react-web-build.log",
+      "sha256": "68ce9d5bd8a9eda4c4f8b14521476762c861347fbb0e869f95685f813ad68f41",
+      "bytes": 185
+    },
+    {
+      "path": "attempt3/browser.json",
+      "sha256": "cdaf42e1f4e9ea040fa8226a9feb872ac3574da46cc25ee00e802d4ad7509904",
+      "bytes": 17234
+    },
+    {
+      "path": "attempt3/browser.log",
+      "sha256": "e25a441ddb2ea1489f09b11857b62ccb812413463dc8f7237ed9d02dd4a9b695",
+      "bytes": 1266
+    },
+    {
+      "path": "attempt3/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "attempt3/initdb.log",
+      "sha256": "48a6a700884b5dfff87f48819c63403db5fe885f4fa918b48cabd16635e7b418",
+      "bytes": 932
+    },
+    {
+      "path": "attempt3/manifest.json",
+      "sha256": "acae9dd85e81b70f9589a1518d58a4526b61bfe19ed992d428035ef800b399ef",
+      "bytes": 382
+    },
+    {
+      "path": "attempt3/migrations.log",
+      "sha256": "547562adbc7f344a6d5c7947262e2c59d9a66b45237cebecb914ba3ecd48846c",
+      "bytes": 14720
+    },
+    {
+      "path": "attempt3/output/playwright/available.png",
+      "sha256": "34740616ea875530b44b7092d317289913874d25b3f2bd6218a9c5f58e205ea6",
+      "bytes": 60412
+    },
+    {
+      "path": "attempt3/output/playwright/browser.json",
+      "sha256": "2033611694007a2e95525c780bb84d5457c81196e459becad79fb02cae4fbda0",
+      "bytes": 29836
+    },
+    {
+      "path": "attempt3/output/playwright/expired.png",
+      "sha256": "a703e7a5b522cb04f0317452c75f827f7a607ee270bd36dc300ac4c4502e0cde",
+      "bytes": 48512
+    },
+    {
+      "path": "attempt3/output/playwright/history-after-relogin.png",
+      "sha256": "399f8da7c346a9483cc1dd986c5e2a2ebc1c86e8af0cb81451024d777376f9ae",
+      "bytes": 67115
+    },
+    {
+      "path": "attempt3/output/playwright/offline.png",
+      "sha256": "5440949f13dc31c505433584dbf22b6bcc96bc69585c6289171d0020b5f02784",
+      "bytes": 73493
+    },
+    {
+      "path": "attempt3/output/playwright/reconnected.png",
+      "sha256": "19203676414cc7b3fb549b7ef63b096263a35864f0b6826996d2a18cbf283c2c",
+      "bytes": 107391
+    },
+    {
+      "path": "attempt3/output/playwright/revoked.png",
+      "sha256": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab",
+      "bytes": 27025
+    },
+    {
+      "path": "attempt3/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "attempt3/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "attempt3/postgres.log",
+      "sha256": "c027e5e2b6767ec56216f319b77b7e252d4fb3406f5c8770cb4eda58455c31d7",
+      "bytes": 1246
+    },
+    {
+      "path": "attempt3/react-web-build.log",
+      "sha256": "68ce9d5bd8a9eda4c4f8b14521476762c861347fbb0e869f95685f813ad68f41",
+      "bytes": 185
+    },
+    {
+      "path": "attempt4/browser.json",
+      "sha256": "2e2c8b1df8a539d3a1751ac3086a6f70d9bf6a220191c3aa9be43a41b34fddd2",
+      "bytes": 17234
+    },
+    {
+      "path": "attempt4/browser.log",
+      "sha256": "e951385fee830785856e2337fd1d3bae26d8230b7c6294f3f80971b5bfee32d6",
+      "bytes": 1282
+    },
+    {
+      "path": "attempt4/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "attempt4/initdb.log",
+      "sha256": "bcc1350d71ce60c8598e03ad7386150465ee3d4c611c292184cf6a5b7208bf3d",
+      "bytes": 932
+    },
+    {
+      "path": "attempt4/manifest.json",
+      "sha256": "3f0c080c159b2264c500b9240d062532d31ee7325d9d7ee029eeb3e779e025ea",
+      "bytes": 382
+    },
+    {
+      "path": "attempt4/migrations.log",
+      "sha256": "b3a17506bc1f99c75eede741eb42a6013b5b8c413abdf218cdeb2fb4eaf8a7b6",
+      "bytes": 14720
+    },
+    {
+      "path": "attempt4/output/playwright/available.png",
+      "sha256": "c4e0b3979f8afd33e5cd47f132da5954ee4a6577ebd3cc6f0da16112bbff5a77",
+      "bytes": 60432
+    },
+    {
+      "path": "attempt4/output/playwright/browser.json",
+      "sha256": "1bb609fd7a1fc6b9834fcbde5bc07ba938aa53bf6296610b33ad7adbdd0a399a",
+      "bytes": 29836
+    },
+    {
+      "path": "attempt4/output/playwright/expired.png",
+      "sha256": "81c7f0209da78ef9943735f72f5f4099eedcb2754be93e2e5b35f1cd79ac3511",
+      "bytes": 48465
+    },
+    {
+      "path": "attempt4/output/playwright/history-after-relogin.png",
+      "sha256": "399f8da7c346a9483cc1dd986c5e2a2ebc1c86e8af0cb81451024d777376f9ae",
+      "bytes": 67115
+    },
+    {
+      "path": "attempt4/output/playwright/offline.png",
+      "sha256": "b51ab32ae81a0222bd9ca94fe1408b25fb29d64b29ba055968aadf914ca823cc",
+      "bytes": 73448
+    },
+    {
+      "path": "attempt4/output/playwright/reconnected.png",
+      "sha256": "2693542677b2ccd45803f03b3fdba5fea23fe8413b751f7640f789807ed8dc05",
+      "bytes": 107416
+    },
+    {
+      "path": "attempt4/output/playwright/revoked.png",
+      "sha256": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab",
+      "bytes": 27025
+    },
+    {
+      "path": "attempt4/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "attempt4/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "attempt4/postgres.log",
+      "sha256": "03892c193b4094055433f97cfb4600c9b7d2f72795fa14d84a9f34e42a8f2381",
+      "bytes": 1246
+    },
+    {
+      "path": "attempt4/react-web-build.log",
+      "sha256": "68ce9d5bd8a9eda4c4f8b14521476762c861347fbb0e869f95685f813ad68f41",
+      "bytes": 185
+    }
+  ],
+  "authCredentialFieldScan": "no credential fields found",
+  "privateRestartFilesCopied": false
+}
