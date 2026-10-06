@@ -409,6 +409,132 @@ describe('AiCoreService', () => {
     expect(executeCall?.[2].idempotencyKey).toMatch(/^ai-chat-[a-f0-9]{64}$/);
   });
 
+  it.each([
+    [
+      {
+        role: 'user' as const,
+        content: 'Установи цену услуги Стрижка 1900 рублей',
+      },
+    ],
+    [
+      {
+        role: 'user' as const,
+        content: 'Установи цену услуги Стрижка 1800 рублей',
+      },
+      {
+        role: 'assistant' as const,
+        content: 'Модель предлагает Борода 9999 рублей',
+      },
+      { role: 'user' as const, content: 'Нет, 1900 рублей' },
+    ],
+  ])(
+    'binds a pricing proposal to user text and catalog instead of model numbers',
+    async (...messages) => {
+      const mocks = createService([
+        'catalog.services.read',
+        'catalog.service.price.update',
+      ]);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: '',
+          toolCall: {
+            name: 'catalog.service.price.update',
+            arguments: {
+              service_id: '43',
+              price_rubles: 9999,
+              company_id: 'foreign',
+            },
+          },
+        }),
+      );
+      const previewSummary =
+        'Изменить цену услуги «Стрижка» в YCLIENTS: 1 700 ₽ → 1 900 ₽ (RUB). Требуется ваше подтверждение.';
+      mocks.runtime.execute.mockImplementation((_actor, name) =>
+        Promise.resolve(
+          name === 'catalog.services.read'
+            ? {
+                status: 'completed',
+                result: {
+                  services: [
+                    { id: '42', name: 'Стрижка' },
+                    { id: '43', name: 'Борода' },
+                  ],
+                },
+              }
+            : {
+                status: 'approval_required',
+                approval: { id: 'price-approval', summary: previewSummary },
+              },
+        ),
+      );
+      const result = await mocks.service.chat(user, { ...dto, messages });
+      expect(result.reply).toBe(previewSummary);
+      expect(
+        mocks.runtime.execute.mock.calls.find(
+          (call) => call[1] === 'catalog.service.price.update',
+        )?.[2].arguments,
+      ).toEqual({ service_id: '42', price_rubles: 1900 });
+      expect(result).toMatchObject({
+        action: {
+          status: 'approval_required',
+          approval: { id: 'price-approval' },
+        },
+      });
+    },
+  );
+
+  it.each([
+    ['Установи цену Стрижка на 10%', false],
+    ['Установи цену Массаж 1900', false],
+    ['Установи цену Стрижка 1900', true],
+  ] as const)(
+    'does not prepare pricing from ambiguous intent or stale catalog: %s',
+    async (content, stale) => {
+      const mocks = createService([
+        'catalog.services.read',
+        'catalog.service.price.update',
+      ]);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: '',
+          toolCall: {
+            name: 'catalog.service.price.update',
+            arguments: { service_id: '42', price_rubles: 1900 },
+          },
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        stale,
+        result: { services: [{ id: '42', name: 'Стрижка' }] },
+      });
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content }],
+      });
+      expect(
+        mocks.runtime.execute.mock.calls.some(
+          (call) => call[1] === 'catalog.service.price.update',
+        ),
+      ).toBe(false);
+      expect(result.action).toBeNull();
+    },
+  );
+
+  it('withholds owner pricing from the client audience even if the owner is signed in', async () => {
+    const mocks = createService(['catalog.service.price.update']);
+    mocks.model.decide.mockResolvedValue(
+      decision({ reply: 'Уточните услугу.', toolCall: null }),
+    );
+    await mocks.service.chat(user, {
+      ...dto,
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Привет' }],
+    });
+    expect(mocks.model.decide.mock.calls[0]?.[0].tools).toEqual([]);
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
   it('redacts standalone likely names before the external model boundary', async () => {
     const mocks = createService();
     mocks.runtime.execute.mockResolvedValue({

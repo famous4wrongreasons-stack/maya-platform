@@ -9,6 +9,10 @@ import {
 import { ModuleRef } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
+import {
+  SERVICE_PRICE_TOOL,
+  priceMinor,
+} from '../crm/yclients-service-price.contract';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -135,6 +139,37 @@ export class AiToolRuntimeService {
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
     await this.bindPersonalReadScope(principal, definition);
+    // A retry carries the same user proposal, not a newly observed before-state.
+    // Never regenerate an already approved mutation from today's provider price.
+    if (toolName === SERVICE_PRICE_TOOL && dto.idempotencyKey) {
+      const saved = await this.prisma.aiApprovalRequest.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: principal.tenantId,
+            idempotencyKey: dto.idempotencyKey,
+          },
+        },
+      });
+      if (saved) {
+        const savedArgs = this.registry.validateArguments(
+          toolName,
+          this.parseJson(this.encryption.decrypt(saved.encryptedArguments)),
+        );
+        if (
+          savedArgs.service_id !== validated.service_id ||
+          priceMinor(savedArgs.price_rubles) !==
+            priceMinor(validated.price_rubles)
+        )
+          this.approvalConflict('ai_approval_idempotency_conflict');
+        return this.requestApproval(
+          principal,
+          definition,
+          savedArgs,
+          this.inputHash(toolName, savedArgs, principal),
+          dto.idempotencyKey,
+        );
+      }
+    }
     // 🔴 Доводка ДО подписи: то, что подписано и показано человеку, обязано
     // совпадать с тем, что будет исполнено. Разрешение «сегодня» в местную
     // дату происходит здесь — при повторной проверке уже сохранённых
@@ -686,6 +721,13 @@ export class AiToolRuntimeService {
     });
     if (existing) {
       this.assertSameApproval(existing, definition, principal, inputHash);
+      if (
+        definition.name === SERVICE_PRICE_TOOL &&
+        (existing.status === APPROVAL_STATUS.REJECTED ||
+          existing.status === APPROVAL_STATUS.EXPIRED ||
+          existing.status === APPROVAL_STATUS.FAILED)
+      )
+        this.approvalConflict('service_price_proposal_no_longer_pending');
       if (existing.status === APPROVAL_STATUS.COMPLETED) {
         return this.replayCompletedApproval(existing);
       }
@@ -704,16 +746,41 @@ export class AiToolRuntimeService {
     const now = new Date();
     let approval: ApprovalRecord;
     try {
-      approval = await this.prisma.aiApprovalRequest.create({
-        data: await this.approvalData(
-          principal,
-          definition,
-          args,
-          inputHash,
-          idempotencyKey,
-          now,
-        ),
-      });
+      const data = await this.approvalData(
+        principal,
+        definition,
+        args,
+        inputHash,
+        idempotencyKey,
+        now,
+      );
+      approval =
+        definition.name === SERVICE_PRICE_TOOL
+          ? await this.prisma.$transaction(async (tx) => {
+              await tx.$executeRaw(
+                Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:service-price-proposal:${principal.userId}:${String(args.service_id)}`}, 0))`,
+              );
+              // Only pending proposals for this exact actor/service are superseded.
+              // Approved or dispatched actions retain their durable AE outcome.
+              await tx.aiApprovalRequest.updateMany({
+                where: {
+                  tenantId: principal.tenantId,
+                  requestedByUserId: principal.userId,
+                  toolName: SERVICE_PRICE_TOOL,
+                  status: APPROVAL_STATUS.PENDING,
+                  payloadPreviewJson: {
+                    path: ['service_id'],
+                    equals: String(args.service_id),
+                  },
+                },
+                data: {
+                  status: APPROVAL_STATUS.REJECTED,
+                  errorCode: 'service_price_proposal_superseded',
+                },
+              });
+              return tx.aiApprovalRequest.create({ data });
+            })
+          : await this.prisma.aiApprovalRequest.create({ data });
     } catch (error) {
       if (!this.isUniqueConstraintError(error)) {
         throw error;

@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "candidate": "YC-SP1",
+  "date_utc": "2026-10-06",
+  "branch": "codex/maya-yc-service-pricing-20261006",
+  "base_commit": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+  "base_parent": "158a9a413aaa1f529f2fcd6bb54d9f2e33055b8a",
+  "source_initial_status": "clean",
+  "isolated_worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task/service-pricing",
+  "official_catalog_sha256": "6a42e3714f7b6fdf3cb7a5fab74736b02ce69f62957344726dacabd8ffa57b93",
+  "claims": {
+    "backend_local_candidate": true,
+    "actual_http_auth_ae_postgres": true,
+    "synthetic_provider_only": true,
+    "full_aggregate_rerun": false,
+    "current_react_approval_reachable": false,
+    "real_yclients_qualified": false,
+    "real_model_qualified": false,
+    "production_ready": false,
+    "deployed": false
+  },
+  "verification": [
+    {
+      "name": "backend_typecheck",
+      "result": "PASS",
+      "command": "npm run typecheck",
+      "cwd": "maya-saas-backend",
+      "log": "typecheck.log"
+    },
+    {
+      "name": "targeted_actual_http_postgres",
+      "result": "PASS",
+      "suites": 1,
+      "tests": 14,
+      "seconds": 4.521,
+      "command": "env -i PATH=\"$PATH\" HOME=\"$HOME\" NODE_OPTIONS=--max-old-space-size=3072 DATABASE_URL=postgresql://pricing_proof@127.0.0.1:56347/maya_widget_gate_proof_service_price_20261006 node node_modules/jest/bin/jest.js --config test/jest-widgets-live.json --runInBand --runTestsByPath test/widgets-live/service-price.live-spec.ts",
+      "cwd": "maya-saas-backend",
+      "log": "service-price-http.log"
+    },
+    {
+      "name": "focused_contracts_and_historical_pins",
+      "result": "PASS",
+      "suites": 10,
+      "tests": 298,
+      "seconds": 1.14,
+      "command": "node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/crm/adapters/yclients-service-price.spec.ts src/crm/adapters/yclients-crm.adapter.spec.ts src/action-engine/action-engine.registry.spec.ts src/ai-tools/ai-tool-service-price.spec.ts src/ai-tools/service-price-chat-binding.spec.ts src/ai-tools/ai-core.service.spec.ts src/widgets/authority/business-rules-admission.spec.ts src/widgets/authority/allowlist-startup.assert.spec.ts src/widgets/authority/propose-pairing.spec.ts src/orchestration/c9.registry.architecture.spec.ts",
+      "cwd": "maya-saas-backend",
+      "log": "focused-final.log"
+    },
+    {
+      "name": "scoped_eslint",
+      "result": "PASS",
+      "files": 21,
+      "note": "ESLint exited 0 over all modified/new TypeScript files; empty log is successful silence. Three unnecessary test type assertions were removed by lint after the final test run; runtime behavior is unchanged.",
+      "log": "lint-final.log"
+    },
+    {
+      "name": "git_diff_check",
+      "result": "PASS",
+      "command": "git diff --check"
+    }
+  ],
+  "isolated_postgres": {
+    "database": "maya_widget_gate_proof_service_price_20261006",
+    "host": "127.0.0.1",
+    "port": 56347,
+    "user": "pricing_proof",
+    "owned_data_directory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task/pricing-proof-pg",
+    "shared_buffers": "16MB",
+    "max_connections": 24,
+    "stopped_after_tests": true,
+    "log": "pg-isolation.txt"
+  },
+  "independent_review": {
+    "agent": "pricing_review",
+    "mode": "read-only independent review",
+    "outcome": "No remaining material blocker for the local backend candidate after repairs; carrier/provider gates remain. Reviewer did not independently execute tests.",
+    "repaired_findings": [
+      "Lossy non-price numeric conversion",
+      "False UNKNOWN for proven pre-PATCH refusal",
+      "Provider call budget exceeding unchanged AE lease",
+      "Deferred or negated history incorrectly becoming a price-only follow-up anchor",
+      "Terminal failed proposal falsely presented as pending on same-key replay"
+    ]
+  },
+  "remaining_gates": [
+    "YC-SP1-WIDGET-1: exact frozen F38 pairing and typed approval owner/minter registration, followed by current React carrier proof",
+    "Actual provider GET/PATCH preservation and authoritative receipt qualification; sparse source payloads fail closed",
+    "External editor race has no documented provider compare-and-swap",
+    "Broader create/edit/archive and richer staff/chain contracts remain outside this candidate",
+    "Deterministic exact-title/fixed-amount language coverage is bounded; no real-model qualification"
+  ],
+  "code_sha256": {
+    "maya-saas-backend/src/action-engine/action-engine.policy-registry.ts": "a6c5f9890e717ce3b0603fb011f7de972f938a6ee852642ddcbd530ee535b1ab",
+    "maya-saas-backend/src/action-engine/action-engine.registry.ts": "1af3d354d3189ca51902565b6b161e2cc64748cb4cfaa75456e14dd3980ae726",
+    "maya-saas-backend/src/action-engine/service-price.contract.ts": "7e65747071c5bc23c8c689f5659f2632d510cf3f1c969463d7a4c0e1641af12f",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "dbe3b782d0b0a66b224540c284c1cd2bac95cba25c62588420e205ca6131b7a8",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "ca525d534941159ac977be03dc87a1b3c7740ef73b4557f09346c5523e31d24b",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "1278e87fadcbb4d4cac22c8edc1e83c885eeba9f9248a60d43af521d3a7d0c84",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "96a11b52250597c0297b39c22e272b95130a187993a707de8bd4d82cab979879",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "7b49b90af10fe4d3a69a42a94e9b5a4b37dcce86551de6d44759e075b0c43712",
+    "maya-saas-backend/src/ai-tools/ai-tool-service-price.spec.ts": "7fe61a5d83d9d959f4da8f48ed6e55d2fa5e6e86c82bb3df71c599f07e2a2a79",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "ade0ebf385cb00ab61fd0b823197f412af8c9aa442a12bb8031c3f6e38f357d8",
+    "maya-saas-backend/src/ai-tools/service-price-chat-binding.spec.ts": "9981698f23162f2dfdbb65be61b67d8e721db24b3741ea012e2a2b39f8e1b17c",
+    "maya-saas-backend/src/ai-tools/service-price-chat-binding.ts": "b1fd48408a87cb6466439bc05313ba051be0c9a47a561847a94db859e033054f",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "12f32bc06f899a61cc38b2e2e2764bf5cbf5ecb2b4ee315a8b837e3b74dd850e",
+    "maya-saas-backend/src/crm/adapters/yclients-service-price.spec.ts": "8e9866cb8d2c7d246969581b171a58549468c18e096f347be3318c5ff5034c17",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "45c80fcdda6e6a471d25f23f477ab9d1831ddb6fee5aae28d0af9f28b701f6dc",
+    "maya-saas-backend/src/crm/crm.service.ts": "58585a5f5138e9d07261a3b7c05d51dbb8891bdfcf3303d088ef917a9317a99a",
+    "maya-saas-backend/src/crm/yclients-service-price.contract.ts": "24590443791a768909669065c8a5fe572c022a844a7747c2098af0d502e505fd",
+    "maya-saas-backend/src/orchestration/c9.registry.ts": "7754d97d8f56d6afc7f2d9d37898a0e7e208a1ab3b688f302b658e2197fa6c57",
+    "maya-saas-backend/src/widgets/authority/allowlist-startup.assert.spec.ts": "51050abfe3c5db895bac4e405903adea265f40d9e8352eab316c3bc9788feceb",
+    "maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts": "f95b75198346841fdbc9ca335c760535c4f0f4a9e9d4920dcd277b881616dc8e",
+    "maya-saas-backend/test/widgets-live/service-price.live-spec.ts": "5d1f9f6eae606874d873d5f6f08a047df94826c6d8f204ce2402c83d18af9e8e"
+  },
+  "artifacts_sha256": {
+    "focused-final.log": "e88bcd377ddc21b3d78b1d277e6d1d98302cc9bdf824a9a85beb9da4f3f3e339",
+    "lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pg-isolation.txt": "7e6ae6b817549d6c666247eca7bbec0a991af0d232b27d502a2193e77110c081",
+    "service-price-http.log": "f27ad0b94107899aa9c52788111a995d27748f01b50dd2710090ee373610f97e",
+    "source-inventory.json": "0216d172c387a3a428899cd3f1bcff47dd26e0f3351f237d27cd2b722497412c",
+    "typecheck.log": "4e3c5cfe91d4d4aea93954da8746bfe7d55d33a8b5a27fc27624a13ca793bcd4"
+  },
+  "artifact_note": "The typecheck log has its final extra blank line trimmed for git diff --check; command output is otherwise unchanged. Original raw logs remain outside the checkout."
+}

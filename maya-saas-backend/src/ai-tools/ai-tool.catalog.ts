@@ -178,6 +178,41 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'catalog.service.price.update',
+    description:
+      'Prepare an explicitly requested fixed price for one existing YCLIENTS service. First read catalog.services.read to resolve the exact service_id; never invent an ID, current price or requested amount. price_rubles must be the exact fixed price stated by the owner, not a percentage or calculated amount. This only prepares a price diff; the requesting owner must explicitly approve it before any write.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['service_id', 'price_rubles'],
+      properties: {
+        service_id: {
+          type: 'string',
+          pattern: '^[1-9]\\d{0,14}$',
+          description:
+            'Exact existing YCLIENTS service ID from the current catalog.',
+        },
+        price_rubles: {
+          type: 'number',
+          minimum: 0,
+          maximum: 1_000_000_000,
+          multipleOf: 0.01,
+          description:
+            'Exact fixed price in RUB explicitly requested by the owner.',
+        },
+      },
+    },
+    allowedRoles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['crm.integration'],
+    riskTier: 'high_write',
+    approvalPolicy: 'actor',
+    idempotency: 'required',
+    timeoutMs: 15_000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'booking.availability.read',
     description: 'Read available appointment slots without customer PII.',
     inputSchema: {

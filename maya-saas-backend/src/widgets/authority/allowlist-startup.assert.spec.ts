@@ -18,6 +18,7 @@ import {
   type AllowlistAssertionInput,
 } from './allowlist-startup.assert';
 import { AE_PROPOSE_PAIRING } from './propose-pairing';
+import { SERVICE_PRICE_CAPABILITY } from '../../crm/yclients-service-price.contract';
 
 const capabilities = new ActionCapabilityRegistry().list();
 const policies = new Set(
@@ -77,10 +78,20 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
     );
   });
 
-  it('AL-1: classifies all 226 capabilities as exactly 10 rows XOR 216 gaps', () => {
-    expect(capabilities).toHaveLength(226);
+  it('AL-1: preserves the historical 226 capabilities as exactly 10 rows XOR 216 gaps', () => {
+    // The sole YC-SP1 candidate has its own exact no-button assertions. Never
+    // exclude a prefix or loosen the old finite counts when comparing history.
+    expect(
+      capabilities.filter(
+        (capability) => capability.capability !== SERVICE_PRICE_CAPABILITY,
+      ),
+    ).toHaveLength(226);
     expect(Object.keys(AE_WIDGET_COMMIT_ALLOWLIST)).toHaveLength(10);
-    expect(Object.keys(AE_CAPABILITY_GAP_LEDGER)).toHaveLength(216);
+    expect(
+      Object.keys(AE_CAPABILITY_GAP_LEDGER).filter(
+        (key) => key !== SERVICE_PRICE_CAPABILITY,
+      ),
+    ).toHaveLength(216);
     expect(allowlistStartupProblems()).toEqual([]);
     expect(() => assertAllowlistAtRegistryLoad()).not.toThrow();
 

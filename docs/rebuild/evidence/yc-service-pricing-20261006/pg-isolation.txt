@@ -1,0 +1,1 @@
+maya_widget_gate_proof_service_price_20261006|pricing_proof|127.0.0.1|56347|/Users/stanislavmosin/Documents/Codex/2026-10-06/task/pricing-proof-pg|16MB|24

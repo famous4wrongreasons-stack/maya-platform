@@ -1,0 +1,6 @@
+
+Test Suites: 10 passed, 10 total
+Tests:       298 passed, 298 total
+Snapshots:   0 total
+Time:        1.14 s, estimated 2 s
+Ran all test suites within paths "src/crm/adapters/yclients-service-price.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/action-engine/action-engine.registry.spec.ts", "src/ai-tools/ai-tool-service-price.spec.ts", "src/ai-tools/service-price-chat-binding.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/widgets/authority/business-rules-admission.spec.ts", "src/widgets/authority/allowlist-startup.assert.spec.ts", "src/widgets/authority/propose-pairing.spec.ts", "src/orchestration/c9.registry.architecture.spec.ts".

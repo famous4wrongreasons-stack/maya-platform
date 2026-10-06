@@ -1,5 +1,15 @@
 import { resolveAvailabilityCalendar } from './availability-calendar.service';
 import { createHash } from 'node:crypto';
+import {
+  SERVICE_PRICE_CAPABILITY,
+  SERVICE_PRICE_TOOL,
+  priceMinor,
+  priceUnavailable,
+  servicePriceHash,
+  ycId,
+  ServicePricePreDispatchError,
+  type ServicePriceSnapshot,
+} from './yclients-service-price.contract';
 import { clientPrincipalEvidence } from '../action-engine/client-action-principal.contract';
 
 import {
@@ -875,6 +885,249 @@ export class CrmService {
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getServices(scopedTenantId);
+  }
+
+  /** The existing CRM owner binds the company's service to current tenant authority. */
+  private async servicePriceContext(tenantId: string, userId: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    if (this.tenantContext.get()?.userId !== userId)
+      throw new ForbiddenException('Service price principal mismatch');
+    const membership = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { userId, tenantId } },
+      include: { user: true },
+    });
+    if (
+      !membership ||
+      membership.status !== 'active' ||
+      membership.user.status !== 'active' ||
+      membership.branchId ||
+      ![UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        membership.role as UserRole,
+      )
+    )
+      throw new ForbiddenException(
+        'Service price changes require the current tenant owner',
+      );
+    await this.assertExternalSource(tenantId);
+    const integration = await this.getStoredIntegration(tenantId);
+    if (
+      (integration.provider as CrmProvider) !== CrmProvider.YCLIENTS ||
+      integration.status !== 'active'
+    )
+      priceUnavailable('service_price_yclients_integration_required');
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (!adapter.getServicePriceSnapshot || !adapter.updateServiceFixedPrice)
+      priceUnavailable('service_price_provider_not_implemented');
+    const revision = servicePriceHash({
+      tenantId,
+      id: integration.id,
+      provider: integration.provider,
+      settings: integration.settingsJson,
+      baseUrl: integration.baseUrl,
+      credential: this.encryptionService.opaqueReference(
+        'service-price-integration',
+        integration.encryptedApiToken,
+      ),
+    });
+    return {
+      adapter: adapter as CRMAdapter &
+        Required<
+          Pick<
+            CRMAdapter,
+            'getServicePriceSnapshot' | 'updateServiceFixedPrice'
+          >
+        >,
+      revision,
+    };
+  }
+
+  async prepareServicePriceChange(
+    tenantId: string,
+    userId: string,
+    proposal: { service_id: unknown; price_rubles: unknown },
+  ): Promise<Record<string, unknown>> {
+    const amount = priceMinor(proposal.price_rubles);
+    const serviceId = ycId(proposal.service_id);
+    const { adapter, revision } = await this.servicePriceContext(
+      tenantId,
+      userId,
+    );
+    const current = await adapter.getServicePriceSnapshot(serviceId);
+    if (current.priceMinor === amount)
+      priceUnavailable('service_price_already_current');
+    return {
+      service_id: current.serviceId,
+      price_rubles: amount / 100,
+      company_id: current.companyId,
+      integration_revision: revision,
+      current_revision: current.revision,
+      current_price_rubles: current.priceMinor / 100,
+      service_name: current.name,
+      currency: current.currency,
+    };
+  }
+
+  async applyServicePriceChange(
+    tenantId: string,
+    userId: string,
+    args: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<Record<string, unknown>> {
+    const context = await this.servicePriceContext(tenantId, userId);
+    const approval = await this.prisma.aiApprovalRequest.findUnique({
+      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+    });
+    const authorize = async (beforeDispatch = false) => {
+      const currentContext = await this.servicePriceContext(tenantId, userId);
+      const current =
+        approval &&
+        (await this.prisma.aiApprovalRequest.findUnique({
+          where: { id_tenantId: { id: approval.id, tenantId } },
+        }));
+      if (
+        !current ||
+        current.toolName !== SERVICE_PRICE_TOOL ||
+        current.requestedByUserId !== userId ||
+        current.requestedByTenantId !== tenantId ||
+        current.decidedByUserId !== userId ||
+        current.decidedByTenantId !== tenantId ||
+        !current.decidedAt ||
+        current.decidedAt > current.expiresAt ||
+        !['approved', 'executing', 'completed'].includes(current.status) ||
+        (beforeDispatch && current.expiresAt <= new Date()) ||
+        stableActionJson(
+          JSON.parse(
+            this.encryptionService.decrypt(current.encryptedArguments),
+          ),
+        ) !== stableActionJson(args)
+      )
+        throw new ForbiddenException(
+          'Exact approved service price proposal required',
+        );
+      if (currentContext.revision !== args.integration_revision)
+        priceUnavailable('service_price_integration_changed');
+    };
+    await authorize();
+    if (!approval)
+      throw new ForbiddenException('Service price approval required');
+    const serviceId = ycId(args.service_id),
+      companyId = ycId(args.company_id);
+    const amount = priceMinor(args.price_rubles);
+    const targetRef = `yclients-service/${companyId}/${serviceId}`;
+    let deadlineAt = 0;
+    const safe = (snapshot: ServicePriceSnapshot) => ({
+      verified: true,
+      source: 'yclients',
+      service_id: snapshot.serviceId,
+      service_name: snapshot.name,
+      price_rubles: snapshot.priceMinor / 100,
+      currency: snapshot.currency,
+      revision: snapshot.revision,
+    });
+    // Existing PostgreSQL advisory-lock pattern. The lease protects competing
+    // MAYA commands, not edits performed concurrently by an external YC editor.
+    const receipt = await this.prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw(
+          Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:service-price:${targetRef}`}, 0))`,
+        );
+        await authorize();
+        const unresolved = await tx.actionExecution.findFirst({
+          where: {
+            tenantId,
+            capability: SERVICE_PRICE_CAPABILITY,
+            targetRef,
+            sourceRef: { not: approval.id },
+            state: { in: ['READY', 'EXECUTING', 'UNKNOWN'] },
+          },
+          select: { id: true },
+        });
+        if (unresolved)
+          priceUnavailable('service_price_previous_outcome_unresolved');
+        return this.actionEngineRuntime.executeWithReceipt(
+          {
+            contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+            tenantId,
+            capability: SERVICE_PRICE_CAPABILITY,
+            source: {
+              type: 'authenticated_request',
+              occurrenceScope: 'crm-service-price-v1',
+              sourceRef: approval.id,
+              actorUserId: userId,
+            },
+            targetRef,
+            input: { ...args, approval_id: approval.id },
+            evidenceRefs: [],
+            callerIdempotency: {
+              scope: 'crm-service-price-v1',
+              key: idempotencyKey,
+            },
+          },
+          {
+            prepare: async () => {
+              // Leave ten seconds of the unchanged 30s AE lease for DB settlement.
+              deadlineAt = Date.now() + 20_000;
+              await authorize(true);
+              const current = await context.adapter.getServicePriceSnapshot(
+                serviceId,
+                deadlineAt,
+              );
+              if (
+                current.companyId !== companyId ||
+                current.revision !== args.current_revision ||
+                current.priceMinor !== priceMinor(args.current_price_rubles)
+              )
+                priceUnavailable('service_price_preview_stale');
+              return {
+                beforeRevision: current.revision,
+                nonPriceHash: current.nonPriceHash,
+              };
+            },
+            dispatch: async () => {
+              await authorize(true).catch(() =>
+                priceUnavailable('service_price_prepatch_authority_changed'),
+              );
+              const after = await context.adapter.updateServiceFixedPrice({
+                serviceId,
+                expectedRevision: String(args.current_revision),
+                priceMinor: amount,
+                deadlineAt,
+              });
+              const value = safe(after);
+              return { value, safeResult: value };
+            },
+            reconcile: async () => {
+              // Read-only observation never attributes an unacknowledged PATCH.
+              // The API exposes no immutable mutation/correlation receipt to prove it.
+              await context.adapter
+                .getServicePriceSnapshot(serviceId)
+                .catch(() => null);
+              return { outcome: 'STILL_UNKNOWN' };
+            },
+            restore: (result) => result,
+            classifyError: (error, phase) => ({
+              kind:
+                phase === 'dispatch' &&
+                !(error instanceof ServicePricePreDispatchError)
+                  ? 'unknown'
+                  : 'definitive',
+              outcomeCode:
+                phase === 'dispatch' &&
+                !(error instanceof ServicePricePreDispatchError)
+                  ? 'service_price_outcome_unknown'
+                  : 'service_price_predispatch_refused',
+              errorClass:
+                error instanceof Error ? error.constructor.name : 'Error',
+            }),
+          },
+        );
+      },
+      { maxWait: 1000, timeout: 120000 },
+    );
+    return {
+      ...receipt.value,
+      action_execution_id: receipt.execution.executionId,
+    };
   }
 
   async getPublicBookingServices(tenantId: string, staffId: string) {

@@ -100,6 +100,8 @@ function requiredFeatures(capability: string): readonly MayaFeatureKey[] {
 }
 
 function allowedActorRoles(capability: string): readonly UserRole[] {
+  if (capability === 'crm.service.fixed-price.update.v1')
+    return [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER];
   if (capability.startsWith('team.'))
     return [
       UserRole.TENANT_OWNER,

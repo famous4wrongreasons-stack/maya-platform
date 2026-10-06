@@ -1,4 +1,5 @@
 import { CrmProvider } from '../common/domain.enums';
+import type { ServicePriceSnapshot } from './yclients-service-price.contract';
 import type {
   FetchCompleteness,
   FetchTruncationReason,
@@ -497,6 +498,18 @@ export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
+  /** Exact management read; the public booking catalog cannot authorize pricing. */
+  getServicePriceSnapshot?(
+    serviceId: string,
+    deadlineAt?: number,
+  ): Promise<ServicePriceSnapshot>;
+  /** Called only by the registered CRM service price Action Engine owner. */
+  updateServiceFixedPrice?(params: {
+    serviceId: string;
+    expectedRevision: string;
+    priceMinor: number;
+    deadlineAt?: number;
+  }): Promise<ServicePriceSnapshot>;
   findPublicBookingByRequestId?(params: {
     tenantId: string;
     requestId: string;

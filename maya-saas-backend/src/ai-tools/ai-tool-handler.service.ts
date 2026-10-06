@@ -227,6 +227,13 @@ export class AiToolHandlerService {
     idempotencyKey: string,
   ): Promise<unknown> {
     switch (toolName) {
+      case 'catalog.service.price.update':
+        return this.crmService.applyServicePriceChange(
+          principal.tenantId,
+          principal.userId,
+          args,
+          idempotencyKey,
+        );
       case 'catalog.staff.read':
         return this.readStaff(principal.tenantId);
       case 'customers.count':
@@ -2248,6 +2255,16 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ): Promise<ValidatedAiToolArguments> {
+    if (toolName === 'catalog.service.price.update') {
+      return this.crmService.prepareServicePriceChange(
+        principal.tenantId,
+        principal.userId,
+        {
+          service_id: args.service_id,
+          price_rubles: args.price_rubles,
+        },
+      );
+    }
     if (
       toolName !== 'expenses.create' ||
       typeof args.occurred_on === 'string'

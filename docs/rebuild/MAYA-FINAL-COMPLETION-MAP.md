@@ -606,3 +606,33 @@ profile remains V1.3 `eaddcf2b69dfd890688ace7d25552609b8ec8923c3419f844c416b4d6f
 This does not qualify Linux, Safari, a real model or provider, or production release.
 No paid/provider/production/phone action, push or merge. Next: parent review and
 separately authorized actual-target inventory/certification and external acceptance.
+
+
+## YCLIENTS fixed service price — isolated local backend candidate, 2026-10-06 UTC
+
+YC-SP1 adds the named owner-only `catalog.service.price.update` proposal and
+`crm.service.fixed-price.update.v1` Action Engine capability from committed base
+`c6a35e5c61975e9d101326e7b3970331f3c905d8`. An explicit fixed RUB amount and exact
+authoritative service produce a price diff; the existing approval owner binds
+the tenant, actor, provider and immutable payload. Only the existing AE dispatches
+the typed PATCH, preserving required source fields. Exact provider receipt plus
+fresh readback confirms success. Uncertain writes stay UNKNOWN without retry.
+No internal A28 mutation is presented as a YCLIENTS write.
+
+Fresh bounded checks: backend typecheck PASS; actual HTTP/auth/AE/isolated PostgreSQL
+14/14; focused contracts and historical registry pins 298/298 over ten suites;
+scoped ESLint 21 files PASS. Independent review findings were repaired. The owned
+synthetic PostgreSQL cluster is stopped. These are targeted results, not a new
+aggregate census or React/provider/model qualification.
+
+**The current React end-to-end path remains incomplete.** F37/F38 deliberately
+leaves this capability without a pairing/button; the current carrier cannot
+consume this `AiApprovalRequest`. The next specific owner decision is
+**YC-SP1-WIDGET-1**, followed by typed approval owner/minter and current-carrier
+proof. Provider preservation/receipt qualification, external-editor races, and
+broader create/edit/archive dependencies also remain. Frozen website booking and
+AE lifecycle semantics are unchanged. No real provider/model call, existing stand,
+production config/database, phone, push, merge or deployment was used.
+
+See [implementation, boundaries and exact proposed carrier decision](YCLIENTS-SERVICE-PRICE-CANDIDATE-2026-10-06.md)
+and [machine-readable evidence](evidence/yc-service-pricing-20261006/manifest.json).
