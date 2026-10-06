@@ -1,0 +1,11 @@
+PASS src/entitlements/widget-release-profile.contract.spec.ts
+PASS src/entitlements/widget-release-access.spec.ts
+PASS src/ai-tools/ai-core.development-integration.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       98 passed, 98 total
+Snapshots:   0 total
+Time:        4.545 s
+Ran all test suites within paths "src/entitlements/widget-release-profile.contract.spec.ts", "src/entitlements/widget-release-access.spec.ts", "src/ai-tools/ai-core.development-integration.spec.ts", "src/widgets/emission/emitter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/targeted-attempt1.json

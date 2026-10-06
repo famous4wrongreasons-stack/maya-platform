@@ -1,0 +1,3 @@
+contract: #contract -> 270 declarations in os.tmpdir(); 201 exports (+1 pending name) in the collision set
+baseline: 0 live entries (build-baseline/routes.json absent, build-baseline/renderer.json absent); 0 refused sites admitted by it
+typecheck: PASS

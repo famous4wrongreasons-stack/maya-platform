@@ -1,0 +1,7 @@
+initdb
+pg-start
+createdb
+migrations
+react-web-build
+browser
+Local React browser proof passed. Evidence: /tmp/maya-unified-gate-20261006/c9-browser-final

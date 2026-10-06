@@ -1,0 +1,30 @@
+PASS src/widgets/widget-import-graph.architecture.spec.ts (17.972 s)
+PASS src/widgets/lowering/gate9-lowering.architecture.spec.ts
+PASS src/widgets/projection/projector-fences.architecture.spec.ts
+PASS src/action-engine/appointment-action-boundary.spec.ts
+PASS src/widgets/gates/facts.architecture.spec.ts
+PASS src/widgets/gates/gate7.pipeline.spec.ts
+PASS src/widgets/gates/release-evidence.spec.ts
+
+DERIVED 12/12 — cardinality reproduced, not assumed; 3/3 named moments present.
+PASS src/widgets/proactive/proactive.spec.ts
+PASS src/widgets/gates/r353-readers.source.spec.ts
+PASS src/ai-tools/ai-tool-service-price.spec.ts
+PASS src/orchestration/c9.release.spec.ts
+PASS src/widgets/booking/booking.spec.ts
+PASS src/widgets/consent/consent.spec.ts
+PASS src/widgets/gates/gate6.spec.ts
+PASS src/conversation-intelligence/conversation-capability.spec.ts
+PASS src/action-engine/service-price.contract.spec.ts
+PASS src/widgets/pricing/service-price-widget.contract.spec.ts
+PASS src/widgets/owner-ports/service-price-approval.adapter.spec.ts
+PASS src/orchestration/c9.occupancy-source.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/widgets/pricing/service-price-approval-trigger.service.spec.ts
+
+Test Suites: 21 passed, 21 total
+Tests:       514 passed, 514 total
+Snapshots:   0 total
+Time:        26.188 s, estimated 29 s
+Ran all test suites within paths "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/lowering/gate9-lowering.architecture.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/proactive/proactive.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/gates/gate6.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/consent/consent.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/gates/facts.architecture.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/gates/gate7.pipeline.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-tool-service-price.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/gates/r353-readers.source.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/booking/booking.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/action-engine/appointment-action-boundary.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.release.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/conversation-intelligence/conversation-capability.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/gates/release-evidence.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/widget-import-graph.architecture.spec.ts", "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/projection/projector-fences.architecture.spec.ts", "src/action-engine/service-price.contract.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/widgets/pricing/service-price-approval-trigger.service.spec.ts", "src/widgets/pricing/service-price-widget.contract.spec.ts", "src/widgets/owner-ports/service-price-approval.adapter.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/census-regression-attempt1.json

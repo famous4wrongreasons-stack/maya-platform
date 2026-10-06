@@ -1,0 +1,120 @@
+{
+  "sourceSha": "be7a4a5f08fe34369c11d548741724bae13a2618",
+  "releaseStatus": "BLOCKED_SCHEMA_DRIFT_AND_CERTIFICATE_NOT_ISSUED",
+  "C10Complete": false,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "gates": {
+    "backend-full-final-attempt2": {
+      "success": true,
+      "numPassedTestSuites": 615,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 6184,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "backend-e2e-final": {
+      "success": true,
+      "numPassedTestSuites": 1,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "http-cohort-final": {
+      "success": true,
+      "numPassedTestSuites": 7,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 64,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "combined-browser-final-jest": {
+      "success": true,
+      "numPassedTestSuites": 1,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "events": {
+      "success": true,
+      "numPassedTestSuites": 1,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "census-regression-attempt1": {
+      "success": true,
+      "numPassedTestSuites": 21,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 514,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "closing-c9": {
+      "success": true,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 38,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "final-c9-nonutc": {
+      "success": true,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 35,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "c9-restart-final": {
+      "status": "passed",
+      "completed": [
+        "initdb",
+        "pg-start",
+        "createdb",
+        "migrations",
+        "carrier-bundle",
+        "prepare",
+        "pg-restart",
+        "resume"
+      ],
+      "clusterStopped": true
+    },
+    "c9-browser-final": {
+      "status": "passed",
+      "completed": [
+        "initdb",
+        "pg-start",
+        "createdb",
+        "migrations",
+        "react-web-build",
+        "browser"
+      ],
+      "clusterStopped": true
+    },
+    "http-smoke": {
+      "status": "PASS"
+    },
+    "schema-drift": {
+      "status": "FAIL",
+      "changedFromBase": false,
+      "blocker": "Three PublicBooking foreign keys: migration ON DELETE NO ACTION versus schema RESTRICT; website lane not edited."
+    },
+    "profile-certificate": {
+      "status": "NOT_ISSUED",
+      "registryDigest": "7cd61f802cc7f021842a70f9bdd126108f50769543868d60bff950d2ccbf2122",
+      "SETTINGS_DRAFT": "NOT_USER_REACHABLE"
+    },
+    "owned-cluster-cleanup": {
+      "contract": "maya.owned-cluster-cleanup/1",
+      "cluster": "/tmp/maya-unified-gate-20261006/pgdata",
+      "port": 57463,
+      "statusCommandExitCode": 3,
+      "statusOutput": "pg_ctl: no server running",
+      "postmasterPidExists": false
+    }
+  }
+}

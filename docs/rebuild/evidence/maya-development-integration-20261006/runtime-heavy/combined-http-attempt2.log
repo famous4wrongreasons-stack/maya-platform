@@ -1,0 +1,28 @@
+widgets-live: proof database maya_widget_gate_proof_unified on 127.0.0.1:57463 (local)
+[31m[Nest] 87810  - [39m10/06/2026, 10:24:33 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 87810  - [39m10/06/2026, 10:24:33 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/development-integration.live-spec.ts
+  combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]
+    ✕ persists one conversation: general → C9 evidence → exact pricing approval → unavailable schedule editor (733 ms)
+
+  ● combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC] › persists one conversation: general → C9 evidence → exact pricing approval → unavailable schedule editor
+
+    {"status":400,"body":{"message":"c9_source_validity_expanded","error":"Bad Request","statusCode":400}}
+
+      56 |         });
+      57 |       if (response.status !== 201)
+    > 58 |         throw new Error(
+         |               ^
+      59 |           JSON.stringify({
+      60 |             status: response.status,
+      61 |             body: response.body as unknown,
+
+      at turn (widgets-live/development-integration.live-spec.ts:58:15)
+      at Object.<anonymous> (widgets-live/development-integration.live-spec.ts:79:23)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.654 s
+Ran all test suites within paths "test/widgets-live/development-integration.live-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/combined-http-attempt2.json

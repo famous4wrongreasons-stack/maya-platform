@@ -1,0 +1,30 @@
+
+> maya-carrier-react@0.0.0 test:release
+> node --test test/release.test.mjs
+
+✔ RPK positive: complete real React PWA and native payload parity (2.512041ms)
+✔ RPK explicit development API preserves production default and refuses unsafe shapes (0.877583ms)
+✔ RPK old/alternate native payload refused: ../maya-chat-shell/dist/capacitor (0.099167ms)
+✔ RPK old/alternate native payload refused: ../maya-chat-shell/dist/web (0.067042ms)
+✔ RPK old/alternate native payload refused: www (0.427667ms)
+✔ RPK old/alternate native payload refused: ../maya-carrier-react/dist/web (0.08925ms)
+✔ RPK remote server override refuses (0.222375ms)
+✔ RPK legacy shell replacing native www refuses even if supplied with an inventory (1.980042ms)
+✔ RPK missing manifest refuses (0.112583ms)
+✔ RPK altered icon refuses (0.102083ms)
+✔ RPK extra script refuses (0.120916ms)
+✔ RPK altered main refuses (0.404167ms)
+✔ RPK only empty generated bridge placeholders admitted (0.288625ms)
+✔ RPK endpoint/CSS/identity divergence refuses (5.821042ms)
+✔ RPK symlink payload refuses (1.742125ms)
+✔ RPK Xcode and sync are bound to the same refusing release entry (0.665375ms)
+✔ RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not repair it (25073.363208ms)
+✔ RPK refuses keyboard-overlay and outer-scroll regressions (0.289833ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25129.482459

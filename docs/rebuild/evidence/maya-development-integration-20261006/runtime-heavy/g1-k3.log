@@ -1,0 +1,22 @@
+PASS  the gate pipeline is a single ordered array
+        one array literal
+PASS  all 15 gates of §3.9 are present, in the contract's order
+        1 2 3 4 5 6 7 8 8-R 9 10 11 12 13 14
+PASS  the runner walks every gate and stops only on a verdict
+        one for-of over the handed slice; two contiguous slices of this.gates covering it; no continue, no index; stops at the first non-pass
+PASS  no gate can pass silently: no slot is a constant pass except a proven one, and a pending() helper refuses
+        15 slots read; proven constant passes: 12 (Projector pointer, D-7); Projector exception (D-7): admitted for 12: ARCH-12-9 and ARCH-12-10 passed (projector-fences.architecture.spec.ts); no pending() helper; refusing seam stubs (slots carrying pendingOn): none
+PASS  the submission shape has no member able to carry an endpoint
+        members: contract, widget_id, intent_token, inputs, client_nonce, profile_id, spoken_transcript, client_emitted_at, readback_ack
+PASS  the tenant comes from the authenticated principal, never from the body
+        controller submits intentSubmitArgs(dto, actor) (1 submit call); intentSubmitArgs sets the tenant 1 time(s), from actor.tenantId; the DTO has no tenant field to read; the controller's intentSubmitArgs is the one imported from './intent-submit-args', which declares and exports it once
+PASS  the two widget routes, and no more
+        POST /widgets/resolve, POST /widgets/intent; controllers under src/widgets: widgets.controller.ts#WidgetsController
+PASS  the runtime is dark: gated by widgets.runtime, which no plan and no trial grants
+        controller requires widgets.runtime; in no plan; readiness planned: true; trial expansion excludes planned: true
+FAIL  the widget layer reaches an owner only through the owner-ports boundary (D-6)
+        BOUNDARY: owner-ports/widget-owner-ports.module.ts:97: the owner-ports module provides provide: SCHEDULE_APPROVAL_OWNER, not an enumerated port token of di-tokens.ts; owner-ports/widget-owner-ports.module.ts:155: the owner-ports module exports SCHEDULE_APPROVAL_OWNER, not an enumerated port token
+PASS  widgets.runtime has one certified writer plus the existing guarded proof fixture; no ad-hoc writer
+        certified writer src/entitlements/widget-release.service.ts, production still refused; guarded fixture test/widgets-live/support/fixtures.ts, reached from test/widgets-live/**, scripts/widgets-http-proof/** and scripts/widgets-intent-http-proof.ts
+
+9/10 — K3 structural checks

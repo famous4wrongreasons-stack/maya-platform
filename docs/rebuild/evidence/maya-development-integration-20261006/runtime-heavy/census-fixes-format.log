@@ -1,0 +1,22 @@
+src/action-engine/service-price.contract.ts 27ms (unchanged)
+src/ai-tools/ai-approval-widget-trigger.port.ts 4ms
+src/ai-tools/ai-tool-runtime.service.ts 69ms
+src/ai-tools/ai-tool-service-price.spec.ts 12ms (unchanged)
+src/conversation-intelligence/conversation-capability.spec.ts 5ms
+src/crm/yclients-service-price.contract.ts 7ms (unchanged)
+src/orchestration/c9.occupancy-source.spec.ts 10ms (unchanged)
+src/orchestration/c9.release.spec.ts 11ms
+src/widgets/authority/confirmation-guard.runtime.ts 1ms (unchanged)
+src/widgets/booking/booking.spec.ts 10ms
+src/widgets/consent/consent.spec.ts 14ms (unchanged)
+src/widgets/gates/facts.architecture.spec.ts 13ms (unchanged)
+src/widgets/gates/gate6.spec.ts 18ms (unchanged)
+src/widgets/gates/release-evidence.spec.ts 3ms
+src/widgets/owner-ports/service-price-approval.adapter.ts 5ms (unchanged)
+src/widgets/pricing/service-price-approval-trigger.service.spec.ts 11ms
+src/widgets/pricing/service-price-approval-trigger.service.ts 6ms
+src/widgets/pricing/service-price-intent-template.registry.ts 3ms (unchanged)
+src/widgets/proactive/proactive.spec.ts 13ms (unchanged)
+src/widgets/projection/projector-fences.architecture.spec.ts 37ms (unchanged)
+src/widgets/widget-import-graph.architecture.spec.ts 39ms (unchanged)
+src/action-engine/service-price.contract.spec.ts 1ms

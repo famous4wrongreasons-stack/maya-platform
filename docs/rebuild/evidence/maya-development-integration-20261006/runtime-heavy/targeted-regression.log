@@ -1,0 +1,13 @@
+PASS src/ai-tools/ai-core.development-integration.spec.ts
+PASS src/entitlements/widget-release-profile.contract.spec.ts
+PASS src/entitlements/widget-release-access.spec.ts
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/widgets/owner-ports/schedule-approval.adapter.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       191 passed, 191 total
+Snapshots:   0 total
+Time:        2.765 s, estimated 5 s
+Ran all test suites within paths "src/entitlements/widget-release-profile.contract.spec.ts", "src/entitlements/widget-release-access.spec.ts", "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/widgets/owner-ports/schedule-approval.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/targeted-regression.json

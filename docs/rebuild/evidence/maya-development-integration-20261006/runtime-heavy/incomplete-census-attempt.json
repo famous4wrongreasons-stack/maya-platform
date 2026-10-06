@@ -1,0 +1,13 @@
+{
+  "contract": "maya.development-gate-attempt/1",
+  "sourceSha": "be7a4a5f08fe34369c11d548741724bae13a2618",
+  "command": "node launch.cjs node node_modules/jest/bin/jest.js --runInBand --json --outputFile=backend-full-final.json",
+  "status": "INCOMPLETE_NOT_PASS",
+  "launcherExitCode": 1,
+  "aggregateJsonProduced": false,
+  "suitesWithPassLines": 394,
+  "suitesWithFailLines": 0,
+  "cause": "Unconfirmed. The first launcher version mapped a missing child exit status to 1 without recording child.signal; the log has no aggregate summary, fatal heap message or test failure. Do not infer a successful census or claim a proven OOM.",
+  "nextAttempt": "Same unfiltered catalogue, exactly one Jest worker, workerIdleMemoryLimit=768MB, heap usage reporting. Only execution resource management changes; runtime source and test selection are unchanged.",
+  "signalObservationAddedToLauncher": true
+}

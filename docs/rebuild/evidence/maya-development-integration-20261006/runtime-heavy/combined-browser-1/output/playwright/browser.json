@@ -1,0 +1,980 @@
+{
+  "contract": "maya.development-integration-browser/1",
+  "status": "failed",
+  "syntheticCrmAdapter": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "general": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nЗдравствуйте\nMAYA:\nЗдравствуйте. Чем помочь?\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "occupancy": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nЗдравствуйте\nMAYA:\nЗдравствуйте. Чем помочь?\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "price": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nЗдравствуйте\nMAYA:\nЗдравствуйте. Чем помочь?\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\nВы:\nПоставь цену услуги «Стрижка» 2500 рублей\nMAYA:\nИзменить цену услуги «Стрижка» в YCLIENTS: 2 000 ₽ → 2 500 ₽ (RUB). Требуется ваше подтверждение.\nКомпания YCLIENTS: 99101. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 2500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-06T19:41:46.270Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Dismiss\nИзменение цены · Стрижка\n\nСтрижка\n\nКомпания YCLIENTS\n\n99101\n\nУслуга\n\n201\n\nТекущая цена\n\n2000 RUB YCLIENTS\n\nНовая цена\n\n2500 RUB YCLIENTS\n\nИсточник\n\nYCLIENTS\n\nИзменение цены в YCLIENTS\nДля обратного изменения потребуется новое подтверждение\nОжидает вашего подтверждения\nВы\n\nПОДТВЕРДИТЬ ЦЕНУ\nОТКЛОНИТЬ ИЗМЕНЕНИЕ\nПОДРОБНОСТИ ИЗМЕНЕНИЯ\nDISMISS\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить цену"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отклонить изменение"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Подробности изменения"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "failure": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nЗдравствуйте\nMAYA:\nЗдравствуйте. Чем помочь?\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\nВы:\nПоставь цену услуги «Стрижка» 2500 рублей\nMAYA:\nИзменить цену услуги «Стрижка» в YCLIENTS: 2 000 ₽ → 2 500 ₽ (RUB). Требуется ваше подтверждение.\nИзменение цены · Стрижка\n\nСтрижка\n\nКомпания YCLIENTS\n\n99101\n\nУслуга\n\n201\n\nТекущая цена\n\n2000 RUB YCLIENTS\n\nНовая цена\n\n2500 RUB YCLIENTS\n\nИсточник\n\nYCLIENTS\n\nИзменение цены в YCLIENTS\nДля обратного изменения потребуется новое подтверждение\nВы\n\nЦена подтверждена в YCLIENTS\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "general": {
+      "request_id": "02968b92-d718-4d19-9f75-62d1392d37ec",
+      "user_turn": {
+        "turnId": "8d3072de-4d74-4324-a053-6ee625d6a400",
+        "conversationId": "e430e84e-886f-4d87-8427-ceec39143f6d"
+      },
+      "reply": "Здравствуйте. Чем помочь?",
+      "source": "openai",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "occupancy": {
+      "request_id": "3f77398c-961c-43f6-8fbe-5801c8f90797",
+      "recommendation": {
+        "contract": "maya.c9-occupancy-response/1",
+        "outcome": "AVAILABLE",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "OCCUPANCY",
+          "intent": "c9.cancellation_windows",
+          "findings": [
+            {
+              "statement": "После снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки.",
+              "evidence_refs": [
+                "h_b051c91ae0d27986b5cf93ee80761fffd05695db707965b44b5659a79406a611"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "booking.availability.read",
+              "status": "measured",
+              "as_of": "2026-10-06T19:31:45.989Z",
+              "evidence_refs": [
+                "h_b051c91ae0d27986b5cf93ee80761fffd05695db707965b44b5659a79406a611"
+              ],
+              "completeness": {
+                "status": "COMPLETE",
+                "requestedScopeHash": "e30d8ccae0e47c4db391895ca114755069cfd063d94acf11a8492da5fa4c5b4e",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "provider_schedule_and_available_slot_confirmed"
+                ]
+              }
+            }
+          ],
+          "confidence": "high",
+          "limitations": [
+            "provider_schedule_and_available_slot_confirmed"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "COMPLETE",
+            "requestedScopeHash": "e30d8ccae0e47c4db391895ca114755069cfd063d94acf11a8492da5fa4c5b4e",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "provider_schedule_and_available_slot_confirmed"
+            ]
+          },
+          "evidence_refs": [
+            "h_b051c91ae0d27986b5cf93ee80761fffd05695db707965b44b5659a79406a611"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "d971f034-4955-4e6c-98b7-237e931e1122",
+          "asOf": "2026-10-06T19:31:45.989Z",
+          "opportunityRefs": [
+            {
+              "sourceType": "Opportunity",
+              "id": "03bbfeaf-de96-4ced-8cb4-cd33d9d1806d",
+              "tenantId": "cmux2rd5b0000pkc9hrommobw",
+              "subjectKind": "appointment",
+              "subjectRef": "appointment_c40caf845c521b40f73e231e42074001",
+              "contractVersion": 1,
+              "identityHash": "658881a7af616aae1be8471b80d191bab9f611214c2093330e1cf83dbb403009",
+              "inputHash": "0bf86866e0326064dc82fb5bfd9a77feb222b052c8563cd2e6f3d1d13f4bff16",
+              "observedAt": "2026-10-06T19:31:45.989Z",
+              "validUntil": "2026-10-08T10:00:00.000Z",
+              "retentionUntil": null,
+              "status": "VERIFIED",
+              "completeness": "COMPLETE",
+              "unavailableReason": null
+            },
+            {
+              "sourceType": "AgentTask",
+              "id": "e5ff9997-2ede-4f6f-8ca0-ddc05084a8af",
+              "tenantId": "cmux2rd5b0000pkc9hrommobw",
+              "subjectKind": "assignment",
+              "subjectRef": "e5ff9997-2ede-4f6f-8ca0-ddc05084a8af",
+              "contractVersion": 1,
+              "identityHash": "cf2df557ba2cc611a561316d4eb3c909cd571481002778697e3ed3a17a7e5905",
+              "inputHash": "cf2df557ba2cc611a561316d4eb3c909cd571481002778697e3ed3a17a7e5905",
+              "observedAt": "2026-10-06T19:31:45.989Z",
+              "validUntil": "2026-10-08T10:00:00.000Z",
+              "retentionUntil": null,
+              "status": "VERIFIED",
+              "completeness": "COMPLETE",
+              "unavailableReason": null
+            }
+          ],
+          "scheduleRef": "schedule_b70a88f73489e917126b90edd3ee961b"
+        },
+        "options": [
+          {
+            "key": "check_date",
+            "title": "По новому запросу проверить доступное время на эту дату"
+          },
+          {
+            "key": "c9.no_action",
+            "title": "Ничего не делать"
+          }
+        ],
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "74b000e3-f302-453f-ad37-a63054cfd388",
+        "scope": "explicit_occupancy",
+        "state": "PROPOSED",
+        "revision_id": "c699b941-8018-4b94-86c3-01372b11bc1e",
+        "revision": 1,
+        "replayed": false,
+        "current": true
+      },
+      "user_turn": {
+        "turnId": "bb57945f-6dca-473a-a374-d3604b440a4c",
+        "conversationId": "e430e84e-886f-4d87-8427-ceec39143f6d"
+      },
+      "reply": "После снятия записи сохранилось окно 08.10.2026, 12:00 — 08.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "business_analytics"
+      }
+    },
+    "price": {
+      "request_id": "e5e159b7-7169-46b0-a316-a11074c35dcb",
+      "coordination": {
+        "run_id": "c25b46ef-786c-4cc2-a520-7f6c8851e1b0",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "e094bf48-19c4-4b5a-ada9-b73a0d57614c",
+        "conversationId": "e430e84e-886f-4d87-8427-ceec39143f6d"
+      },
+      "reply": "Изменить цену услуги «Стрижка» в YCLIENTS: 2 000 ₽ → 2 500 ₽ (RUB). Требуется ваше подтверждение.",
+      "source": "openai",
+      "redacted_input": true,
+      "action": {
+        "status": "approval_required",
+        "approval": {
+          "id": "cmux2ri01000qpkc9glqkn18a",
+          "tool_name": "catalog.service.price.update",
+          "surface": "web",
+          "risk_tier": "high_write",
+          "approval_policy": "actor",
+          "status": "pending",
+          "summary": "Изменить цену услуги «Стрижка» в YCLIENTS: 2 000 ₽ → 2 500 ₽ (RUB). Требуется ваше подтверждение.",
+          "payload_hash": "ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04",
+          "payload_preview": {
+            "after": "2 500 ₽",
+            "before": "2 000 ₽",
+            "source": "YCLIENTS",
+            "service": "Стрижка",
+            "approval": "Требуется ваше подтверждение",
+            "currency": "RUB",
+            "service_id": "201",
+            "current_price_rubles": 2000,
+            "proposed_price_rubles": 2500
+          },
+          "expires_at": "2026-10-06T19:41:46.270Z",
+          "decided_at": null,
+          "executed_at": null,
+          "error_code": null,
+          "created_at": "2026-10-06T19:31:46.270Z",
+          "updated_at": "2026-10-06T19:31:46.273Z"
+        }
+      },
+      "tools_used": [
+        {
+          "name": "catalog.services.read",
+          "status": "completed",
+          "execution_id": "cmux2rhzb000npkc9v2ugzu87"
+        },
+        {
+          "name": "catalog.service.price.update",
+          "status": "approval_required",
+          "execution_id": null
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "b918b51e-0497-46ba-87ce-d9a39b9976d2",
+          "envelope_seal": "55d922512923ab5737509d3528ba3498dbd93b0a30433d9a660155ee054033f6",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "b918b51e-0497-46ba-87ce-d9a39b9976d2",
+            "kind": "APPROVAL",
+            "body_version": 1,
+            "tenant_id": "cmux2rd5b0000pkc9hrommobw",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "6d5199d1-a58a-4698-a375-57b7063671b8",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": null,
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "e14abf2fb72eaa560f6212dddcfd0339"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "catalog.service.price.update",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "user_turn",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "approval_ref": "cmux2ri01000qpkc9glqkn18a",
+              "subject": {
+                "state": "KNOWN",
+                "value": "Стрижка",
+                "label": "Стрижка",
+                "reason_code": null,
+                "fact_ref": 0,
+                "as_of": "2026-10-06T19:31:46.270Z",
+                "evidence_refs": [],
+                "next_intent_ref": null
+              },
+              "effect_preview": [
+                {
+                  "label": {
+                    "phrase_key": "approval.company",
+                    "rendered": "Компания YCLIENTS"
+                  },
+                  "value": {
+                    "state": "KNOWN",
+                    "value": "99101",
+                    "label": "99101",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": "2026-10-06T19:31:46.270Z",
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  }
+                },
+                {
+                  "label": {
+                    "phrase_key": "approval.service",
+                    "rendered": "Услуга"
+                  },
+                  "value": {
+                    "state": "KNOWN",
+                    "value": "201",
+                    "label": "201",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": "2026-10-06T19:31:46.270Z",
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  }
+                },
+                {
+                  "label": {
+                    "phrase_key": "approval.current_price",
+                    "rendered": "Текущая цена"
+                  },
+                  "value": {
+                    "state": "KNOWN",
+                    "value": 2000,
+                    "label": "2000 RUB",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": "2026-10-06T19:31:46.270Z",
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "service.price.current",
+                    "unit": "RUB",
+                    "basis_key": null,
+                    "basis": "YCLIENTS",
+                    "currency": "RUB",
+                    "formatted": "2000 RUB",
+                    "comparison": null
+                  }
+                },
+                {
+                  "label": {
+                    "phrase_key": "approval.proposed_price",
+                    "rendered": "Новая цена"
+                  },
+                  "value": {
+                    "state": "KNOWN",
+                    "value": 2500,
+                    "label": "2500 RUB",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": "2026-10-06T19:31:46.270Z",
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "service.price.proposed",
+                    "unit": "RUB",
+                    "basis_key": null,
+                    "basis": "YCLIENTS",
+                    "currency": "RUB",
+                    "formatted": "2500 RUB",
+                    "comparison": null
+                  }
+                },
+                {
+                  "label": {
+                    "phrase_key": "approval.provider",
+                    "rendered": "Источник"
+                  },
+                  "value": {
+                    "state": "KNOWN",
+                    "value": "YCLIENTS",
+                    "label": "YCLIENTS",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": "2026-10-06T19:31:46.270Z",
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  }
+                }
+              ],
+              "audience_size": null,
+              "risk_tier": {
+                "state": "KNOWN",
+                "value": "high_write",
+                "label": "Изменение цены в YCLIENTS",
+                "reason_code": null,
+                "fact_ref": 0,
+                "as_of": "2026-10-06T19:31:46.270Z",
+                "evidence_refs": [],
+                "next_intent_ref": null
+              },
+              "reversible": {
+                "state": "KNOWN",
+                "value": false,
+                "label": "Для обратного изменения потребуется новое подтверждение",
+                "reason_code": null,
+                "fact_ref": 0,
+                "as_of": "2026-10-06T19:31:46.270Z",
+                "evidence_refs": [],
+                "next_intent_ref": null
+              },
+              "state": {
+                "state": "KNOWN",
+                "value": "PENDING",
+                "label": "Ожидает вашего подтверждения",
+                "reason_code": null,
+                "fact_ref": 0,
+                "as_of": "2026-10-06T19:31:46.270Z",
+                "evidence_refs": [],
+                "next_intent_ref": null
+              },
+              "requested_by_label": {
+                "state": "KNOWN",
+                "value": "Вы",
+                "label": "Вы",
+                "reason_code": null,
+                "fact_ref": 0,
+                "as_of": "2026-10-06T19:31:46.270Z",
+                "evidence_refs": [],
+                "next_intent_ref": null
+              },
+              "expires_at": "2026-10-06T19:41:46.270Z",
+              "approve_intent": "i1",
+              "reject_intent": "i2",
+              "blocked_reason": null,
+              "detail_intent": "i3"
+            },
+            "intents": [
+              {
+                "intent_ref": "i1",
+                "intent_token": "[REDACTED synthetic authority value; SHA256 cf3bc85257451b9ec50e830972c37c889b5e08d5047f3db27ebbd9bb77d257a5]",
+                "role": "primary",
+                "label": "Подтвердить цену",
+                "utterance_preview": "Подтвердить цену",
+                "speech_aliases": [
+                  "Подтвердить цену"
+                ],
+                "ordinal": 1,
+                "priority": 1,
+                "effect": "COMMIT",
+                "capability": {
+                  "space": "AE",
+                  "key": "crm.service.fixed-price.update.v1"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": {
+                  "risk_tier": "high_write",
+                  "reversible": {
+                    "state": "KNOWN",
+                    "value": false,
+                    "label": "Для обратного изменения потребуется новое подтверждение",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "audience_size": null,
+                  "requires_explicit_confirm_step": true,
+                  "requires_readback": false,
+                  "readback_ref": null,
+                  "readback_text": null,
+                  "idempotency_key": "service-price:cmux2ri01000qpkc9glqkn18a:ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04:approve",
+                  "approval_policy": "actor"
+                },
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Подтвердить цену",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T19:41:46.270Z",
+                "single_use": true
+              },
+              {
+                "intent_ref": "i2",
+                "intent_token": "[REDACTED synthetic authority value; SHA256 7bbcbe23c9f91403e2de911def8b03c2b605a628fcdfd23da67e27fd4aca7765]",
+                "role": "destructive",
+                "label": "Отклонить изменение",
+                "utterance_preview": "Отклонить изменение",
+                "speech_aliases": [
+                  "Отклонить изменение"
+                ],
+                "ordinal": 2,
+                "priority": 1,
+                "effect": "COMMIT",
+                "capability": {
+                  "space": "AE",
+                  "key": "crm.service.fixed-price.update.v1"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": {
+                  "risk_tier": "high_write",
+                  "reversible": {
+                    "state": "KNOWN",
+                    "value": false,
+                    "label": "Для обратного изменения потребуется новое подтверждение",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "audience_size": null,
+                  "requires_explicit_confirm_step": true,
+                  "requires_readback": false,
+                  "readback_ref": null,
+                  "readback_text": null,
+                  "idempotency_key": "service-price:cmux2ri01000qpkc9glqkn18a:ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04:reject",
+                  "approval_policy": "actor"
+                },
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Отклонить изменение",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T19:41:46.270Z",
+                "single_use": true
+              },
+              {
+                "intent_ref": "i3",
+                "intent_token": "[REDACTED synthetic authority value; SHA256 cac8f1d3c5790dd2cc8666ce4e506f9e91987a56d59ec62bd587dbba131a6b7b]",
+                "role": "secondary",
+                "label": "Подробности изменения",
+                "utterance_preview": "Подробности изменения",
+                "speech_aliases": [
+                  "Подробности изменения"
+                ],
+                "ordinal": 3,
+                "priority": 1,
+                "effect": "NAVIGATE",
+                "capability": null,
+                "handoff_capability_ref": null,
+                "target": {
+                  "class": "detail",
+                  "ref": "fs.catalogue"
+                },
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Подробности изменения",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T19:41:46.270Z",
+                "single_use": false
+              },
+              {
+                "intent_ref": "i4",
+                "intent_token": "[REDACTED synthetic authority value; SHA256 79f849cc2f44c08d67f8307bb49f708bc070ce0a2cda97a833a5b0e99be61cc8]",
+                "role": "escape",
+                "label": "Dismiss",
+                "utterance_preview": "Dismiss",
+                "speech_aliases": [
+                  "dismiss",
+                  "close"
+                ],
+                "ordinal": 4,
+                "priority": 0,
+                "effect": "CONTROL",
+                "capability": {
+                  "space": "CONTROL",
+                  "key": "control.widget.dismiss"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "ANONYMOUS",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "muted",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Dismiss",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T19:41:46.270Z",
+                "single_use": true
+              }
+            ],
+            "provenance": {
+              "source_capability": "catalog.service.price.update",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "catalog.service.price.update@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "catalog.service.price.update",
+                  "status": "measured",
+                  "as_of": "2026-10-06T19:31:46.270Z",
+                  "evidence_refs": [
+                    "h_ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04"
+                  ],
+                  "completeness": {
+                    "status": "COMPLETE",
+                    "requestedScopeHash": "ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04",
+                    "returnedCount": 1,
+                    "totalCount": 1,
+                    "hasMore": false,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": []
+                  }
+                }
+              ],
+              "facts_origin": [
+                "copied"
+              ],
+              "facts_digest": "23db716e2b6ed6fe5ec7ea7465cedfafe54e171a55fe063d96c78573094fccc7",
+              "completeness": {
+                "status": "COMPLETE",
+                "requestedScopeHash": "ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": []
+              },
+              "completeness_envelope_hash": "bd0780c5abdc1fbed6e6e755f12393c42653147cddeb85b70bb8df8e289f3a5f",
+              "evidence_refs": [
+                {
+                  "ref": "h_ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "high",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "scenario",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T19:31:46.291Z",
+              "expires_at": "2026-10-06T19:41:46.270Z",
+              "flow_ttl_s": 600,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "APPROVAL:b918b51e-0497-46ba-87ce-d9a39b9976d2",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Изменение цены · Стрижка",
+                "body": "Компания YCLIENTS: 99101. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 2500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-06T19:41:46.270Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Dismiss",
+                "itemized": [
+                  "Компания YCLIENTS: 99101",
+                  "Услуга: 201",
+                  "Текущая цена: 2000 RUB",
+                  "Новая цена: 2500 RUB",
+                  "Источник: YCLIENTS",
+                  "Риск: Изменение цены в YCLIENTS",
+                  "Обратимость: Для обратного изменения потребуется новое подтверждение",
+                  "Состояние: Ожидает вашего подтверждения",
+                  "Запрошено: Вы",
+                  "Подтверждение доступно до: 2026-10-06T19:41:46.270Z",
+                  "Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Dismiss"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "region",
+                "label": "Изменение цены · Стрижка",
+                "description": "Компания YCLIENTS: 99101. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 2500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-06T19:41:46.270Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Dismiss",
+                "reading_order": [
+                  {
+                    "k": "intent",
+                    "id": "i1"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i3"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i4"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "intent:i1": "Подтвердить цену",
+                  "intent:i2": "Отклонить изменение",
+                  "intent:i3": "Подробности изменения",
+                  "intent:i4": "Dismiss"
+                }
+              },
+              "fullscreen_detail": {
+                "route_key": "fs.catalogue",
+                "reason": "audit"
+              }
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 4,
+              "intents_emitted": 4,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T19:31:46.291Z"
+            },
+            "integrity": {
+              "body_hash": "53cdf5049b30d2faafa8b3e46544405bb774c39ac6060257e93b03e642b6238d",
+              "cell_index_digest": "796c5c81846bbedece35bdc057446b030f2d645c1f68a40309f72190d119d96e",
+              "envelope_seal": "55d922512923ab5737509d3528ba3498dbd93b0a30433d9a660155ee054033f6",
+              "seal_key_version": 1,
+              "principal_proof_hash": "94d4646c726901872f1981e7a2adb8f9884620b138b6dddd13c71d1562eb7013",
+              "approval_echo": {
+                "owner": "ai_approval_request",
+                "hash": "ae6eb5c07e038c249758c3c14791025ee59753421ba1f0f65ad7093c15604b04"
+              },
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "service_catalog",
+        "required_tools": [
+          "catalog.services.read",
+          "booking.availability.read",
+          "appointments.own.list",
+          "catalog.staff.read",
+          "clients.dossier.read",
+          "staff.schedule.read",
+          "staff.schedule.own.read",
+          "operations.journal.read"
+        ],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "catalog"
+      }
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:64961",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "failure": "The expression evaluated to a falsy value:\n\n  assert.ok(await page.waitFor('document.body.innerText.includes(\"Цена услуги\") && document.body.innerText.includes(\"обновлена\")'))\n",
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/6PD6C2U7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

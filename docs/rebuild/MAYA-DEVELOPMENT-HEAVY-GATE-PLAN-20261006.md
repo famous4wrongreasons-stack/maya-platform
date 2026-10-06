@@ -1,6 +1,11 @@
 # Unified MAYA development candidate: heavy-gate execution plan
 
-**PREPARED, NOT RUN.** Parent accepted `75936a2b612b675e530a9834b2274fad5587ae27`
+Historical preparation record. Parent subsequently assigned the local heavy slot;
+the executed gates, source fixes, preserved failures and remaining release blockers
+are in [the runtime checkpoint](MAYA-DEVELOPMENT-RUNTIME-CHECKPOINT-20261006.md).
+The pre-execution findings below are retained as the original plan, not current status.
+
+**Original status: PREPARED, NOT RUN.** Parent accepted `75936a2b612b675e530a9834b2274fad5587ae27`
 as the light-qualified integration candidate. The heavy slot remains with parent
 until explicitly assigned. This preparation starts no PG, AppModule, browser,
 build, generator, aggregate test or provider. Stable website/provider-once work is

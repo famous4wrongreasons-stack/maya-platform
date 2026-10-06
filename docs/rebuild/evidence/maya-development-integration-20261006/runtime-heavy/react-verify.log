@@ -1,0 +1,8 @@
+gate: PASS (21 source files, 0 refusals)
+typecheck: PASS (21 carrier files + 20 runtime modules, contract 201 exports, 5.9.3)
+verified React AChat -> dist/web/m/6PD6C2U7/main.js (8 files)
+gate: PASS (21 source files, 0 refusals)
+typecheck: PASS (21 carrier files + 20 runtime modules, contract 201 exports, 5.9.3)
+capacitor proof: PASS (one endpoint string differs; index.html differs only in digest path and connect-src; styles.css identical; no other origin in the artefact)
+verified React AChat -> dist/capacitor/m/028116d74e0a3dc0/main.js (8 files)
+{"status":"PASS","owner":"React AChat","mode":"verify","files":8,"apiMode":"production","apiBase":"https://mayaos.ru/api","profileAuthority":"server only","nativeVerified":false}

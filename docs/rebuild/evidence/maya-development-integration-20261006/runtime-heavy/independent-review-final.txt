@@ -1,0 +1,17 @@
+Engineering agent review only. Not a second human, governance signature, release certificate or C10 acceptance.
+
+Reviewer: existing /root/independent_review; read-only review, no heavy gates or source edits.
+Final reviewed source was committed as be7a4a5f08fe34369c11d548741724bae13a2618.
+
+Findings closed:
+- Restriction belongs to the entire SETTINGS_DRAFT envelope, including zero-intent/all-NONE cards; required envelope kind reaches the existing release owner inside the mint transaction.
+- HTTP checks include business-write/state comparisons after replay, foreign tenant read and revocation; browser requires exactly one price AE capability, SUCCEEDED, executionAttemptCount=1.
+- PostgreSQL UTC timestamp-without-zone needs explicit Z at the to_jsonb seam. Existing expiry/validity-extension guards remain active. Explicit TZ=Europe/Moscow regression passed.
+- Pricing adapter uses existing TimelineStore.readActiveUserTurnIdentity instead of a direct table read.
+- AiToolRuntime obtains exactly-one, closed durable user-turn proof through its existing approval widget port and existing UserTurnAuditPort. Initial bind keeps the same transaction; no transcript/principal/CRM/minter owner is consulted by the proof method.
+- AE validates its own exact normalized service-price input and no longer imports a CRM owner contract.
+- C9's six-second timer only rejects an in-flight READ. AST fence allows this exact bounded Promise.race rejection and finally cleanup, while recurring/scheduler bans remain. Reviewer found compact-text ambiguity between new Error(...) and newError(...); corrected to explicit NewExpression AST and added negative counterfactual.
+- Catalogue count/hash assertions reconcile the already approved YC-SP1/SCHEDULE candidate. Runtime authority allowlists were not expanded by these regression fixes.
+
+Final reviewer conclusion: no remaining blocking finding in reviewed diff; git diff --check clean. Reruns still required independently of code review. Final runtime/census reports are recorded separately.
+Normative references used by reviewer: Widget Contract F74a, RT3(b)/AMB-39, C9 mapping §14 and permanent release ratchet. No new owner decision was inferred.

@@ -1,0 +1,23 @@
+
+> maya-saas-backend@0.0.1 prisma:seed
+> ts-node --transpile-only prisma/seed.ts
+
+{
+  "platform_owner": {
+    "user_id": "cmux481b80027tsc95i7nzzcc",
+    "email": "owner@maya.local",
+    "credentials_source": "SEED_PLATFORM_OWNER_PASSWORD"
+  },
+  "default_tenant": {
+    "tenant_id": "tenant_maya_default",
+    "slug": "malesthetic"
+  },
+  "demo_tenant": {
+    "tenant_id": "cmux481ay0023tsc9xwmo6m1v",
+    "slug": "demo-business",
+    "tenant_admin_user_id": "cmux481bb0028tsc928nsrqky",
+    "tenant_admin_email": "admin@demo-business.local",
+    "credentials_source": "SEED_DEMO_TENANT_ADMIN_PASSWORD",
+    "branch_id": "cmux481b20025tsc9z022r58o"
+  }
+}

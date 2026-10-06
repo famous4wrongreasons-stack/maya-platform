@@ -1,0 +1,181 @@
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core.development-integration.spec.ts
+   71:60  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+   92:40  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+  174:45  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  262:9   error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core.service.spec.ts
+   76:27  warning  Unsafe argument of type `any` assigned to a parameter of type `AuthenticatedUser`  @typescript-eslint/no-unsafe-argument
+   76:34  warning  Unsafe argument of type `any` assigned to a parameter of type `AiCoreChatDto`      @typescript-eslint/no-unsafe-argument
+  102:11  error    Unsafe assignment of an `any` value                                                @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts
+  718:23  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/entitlements/widget-release-profile.contract.spec.ts
+  129:20  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/capability-ref.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/confirmation-guard.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/envelope-roots.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/envelope.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/intent.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/kinds.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/lifecycle.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/registries.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widget-contract/verification-floor.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/emission/emitter.spec.ts
+  236:9  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/owner-ports/schedule-approval.adapter.ts
+   79:16  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  155:16  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  162:18  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/development-integration.live-spec.ts
+   40:30  error  Unsafe member access .user_turn on an `any` value       @typescript-eslint/no-unsafe-member-access
+   41:7   error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   41:38  error  Unsafe member access .user_turn on an `any` value       @typescript-eslint/no-unsafe-member-access
+   42:41  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   42:64  error  Unsafe member access .reply on an `any` value           @typescript-eslint/no-unsafe-member-access
+   43:7   error  Unsafe return of a value of type `any`                  @typescript-eslint/no-unsafe-return
+   45:11  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   46:20  error  Unsafe member access .action on an `any` value          @typescript-eslint/no-unsafe-member-access
+   52:11  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   53:22  error  Unsafe member access .recommendation on an `any` value  @typescript-eslint/no-unsafe-member-access
+   59:22  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+   63:22  error  Unsafe member access .recommendation on an `any` value  @typescript-eslint/no-unsafe-member-access
+   67:17  error  Unsafe member access .recommendation on an `any` value  @typescript-eslint/no-unsafe-member-access
+   83:24  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+   83:60  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+   84:24  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+   85:17  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+   88:49  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+   92:11  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   93:11  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   93:28  error  Unsafe member access .resolution on an `any` value      @typescript-eslint/no-unsafe-member-access
+   94:22  error  Unsafe member access .kind on an `any` value            @typescript-eslint/no-unsafe-member-access
+   96:11  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+   96:20  error  Unsafe call of an `any` typed value                     @typescript-eslint/no-unsafe-call
+   96:29  error  Unsafe member access .intents on an `any` value         @typescript-eslint/no-unsafe-member-access
+   98:37  error  Unsafe member access .body on an `any` value            @typescript-eslint/no-unsafe-member-access
+  102:7   error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+  102:27  error  Unsafe member access .widget_id on an `any` value       @typescript-eslint/no-unsafe-member-access
+  103:7   error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+  103:28  error  Unsafe member access .intent_token on an `any` value    @typescript-eslint/no-unsafe-member-access
+  136:11  error  Unsafe assignment of an `any` value                     @typescript-eslint/no-unsafe-assignment
+  137:21  error  Unsafe member access .action on an `any` value          @typescript-eslint/no-unsafe-member-access
+  138:21  error  Unsafe member access .resolution on an `any` value      @typescript-eslint/no-unsafe-member-access
+  139:21  error  Unsafe member access .reply on an `any` value           @typescript-eslint/no-unsafe-member-access
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/schedule-chat.live-spec.ts
+   61:11  error    Async method 'getStaff' has no 'await' expression                                   @typescript-eslint/require-await
+   62:11  error    Async method 'getStaffScheduleDay' has no 'await' expression                        @typescript-eslint/require-await
+   64:11  error    Async method 'previewStaffScheduleDayChange' has no 'await' expression              @typescript-eslint/require-await
+  177:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  177:40  error    Unsafe member access .widgets on an `any` value                                     @typescript-eslint/no-unsafe-member-access
+  178:19  error    Unsafe member access .length on an `any` value                                      @typescript-eslint/no-unsafe-member-access
+  180:26  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  182:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  182:30  error    Unsafe member access [0] on an `any` value                                          @typescript-eslint/no-unsafe-member-access
+  183:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  183:20  error    Unsafe call of an `any` typed value                                                 @typescript-eslint/no-unsafe-call
+  183:29  error    Unsafe member access .intents on an `any` value                                     @typescript-eslint/no-unsafe-member-access
+  183:56  error    Unsafe member access .effect on an `any` value                                      @typescript-eslint/no-unsafe-member-access
+  186:7   error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  186:27  error    Unsafe member access .widget_id on an `any` value                                   @typescript-eslint/no-unsafe-member-access
+  187:7   error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  187:28  error    Unsafe member access .intent_token on an `any` value                                @typescript-eslint/no-unsafe-member-access
+  192:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  193:22  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  199:40  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  199:61  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  227:5   error    Unsafe return of a value of type `any`                                              @typescript-eslint/no-unsafe-return
+  234:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  235:21  error    Unsafe member access .action on an `any` value                                      @typescript-eslint/no-unsafe-member-access
+  236:21  error    Unsafe member access .resolution on an `any` value                                  @typescript-eslint/no-unsafe-member-access
+  240:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  240:41  error    Unsafe member access .widgets on an `any` value                                     @typescript-eslint/no-unsafe-member-access
+  242:40  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  243:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  243:20  error    Unsafe call of an `any` typed value                                                 @typescript-eslint/no-unsafe-call
+  243:29  error    Unsafe member access .intents on an `any` value                                     @typescript-eslint/no-unsafe-member-access
+  243:56  error    Unsafe member access .effect on an `any` value                                      @typescript-eslint/no-unsafe-member-access
+  245:7   error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  246:7   error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  249:9   error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  249:29  error    Unsafe member access .widget_id on an `any` value                                   @typescript-eslint/no-unsafe-member-access
+  250:9   error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  250:30  error    Unsafe member access .intent_token on an `any` value                                @typescript-eslint/no-unsafe-member-access
+  275:40  error    This assertion is unnecessary since it does not change the type of the expression   @typescript-eslint/no-unnecessary-type-assertion
+  275:56  error    This assertion is unnecessary since it does not change the type of the expression   @typescript-eslint/no-unnecessary-type-assertion
+  277:13  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  288:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  289:18  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  291:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  297:30  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  297:45  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  300:7   warning  Unsafe argument of type `any` assigned to a parameter of type `string | undefined`  @typescript-eslint/no-unsafe-argument
+  300:13  error    Unsafe member access .user_turn on an `any` value                                   @typescript-eslint/no-unsafe-member-access
+  302:19  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  303:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  309:30  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  309:45  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  311:30  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  311:46  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  314:7   warning  Unsafe argument of type `any` assigned to a parameter of type `string | undefined`  @typescript-eslint/no-unsafe-argument
+  314:13  error    Unsafe member access .user_turn on an `any` value                                   @typescript-eslint/no-unsafe-member-access
+  316:18  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  330:33  error    Unsafe member access .receipt_outcome on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  331:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  332:18  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  338:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  339:18  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+  351:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  374:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  413:11  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  486:13  error    Unsafe assignment of an `any` value                                                 @typescript-eslint/no-unsafe-assignment
+  491:9   warning  Unsafe argument of type `any` assigned to a parameter of type `string | undefined`  @typescript-eslint/no-unsafe-argument
+  491:20  error    Unsafe member access .user_turn on an `any` value                                   @typescript-eslint/no-unsafe-member-access
+  493:21  error    Unsafe member access .reply on an `any` value                                       @typescript-eslint/no-unsafe-member-access
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/support/development-integration-fixture.ts
+   69:39  error    Async arrow function has no 'await' expression                          @typescript-eslint/require-await
+  162:9   error    Async method 'getServices' has no 'await' expression                    @typescript-eslint/require-await
+  174:9   error    Async method 'getStaff' has no 'await' expression                       @typescript-eslint/require-await
+  178:9   error    Async method 'getServicePriceSnapshot' has no 'await' expression        @typescript-eslint/require-await
+  184:9   error    Async method 'updateServiceFixedPrice' has no 'await' expression        @typescript-eslint/require-await
+  196:9   error    Async method 'getStaffScheduleDay' has no 'await' expression            @typescript-eslint/require-await
+  200:9   error    Async method 'previewStaffScheduleDayChange' has no 'await' expression  @typescript-eslint/require-await
+  213:9   error    Async method 'applyStaffScheduleDayChange' has no 'await' expression    @typescript-eslint/require-await
+  227:9   error    Async method 'getAvailableSlots' has no 'await' expression              @typescript-eslint/require-await
+  392:30  error    Unsafe member access .access_token on an `any` value                    @typescript-eslint/no-unsafe-member-access
+  408:48  warning  Unsafe argument of type `any` assigned to a parameter of type `string`  @typescript-eslint/no-unsafe-argument
+  408:60  error    Unsafe member access .version on an `any` value                         @typescript-eslint/no-unsafe-member-access
+
+✖ 137 problems (122 errors, 15 warnings)
+  8 errors and 9 warnings potentially fixable with the `--fix` option.
+

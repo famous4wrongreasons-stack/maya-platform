@@ -1,0 +1,2 @@
+F92 MECHANISM_GAP_LEDGER 39 rows (P-01..P-39) | [ABSENT] 29 | [EXISTS] 8 | [PARTIAL] 1 | [UNENFORCEABLE-TODAY] 1
+P-07 CAPABILITY_GAP_LEDGER 30 keys | of the eight 8 | owner none 25 | registered_elsewhere 4 | unreachable 1 | withdrawn 0

@@ -1,0 +1,101 @@
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+<--- Last few GCs --->
+
+[77650:0xa78000000]    35087 ms: Scavenge 3041.6 (3078.7) -> 3035.8 (3094.9) MB, pooled: 0 MB, 2.21 / 0.00 ms  (average mu = 0.368, current mu = 0.380) allocation failure; 
+[77650:0xa78000000]    35461 ms: Mark-Compact (reduce) 3051.5 (3095.2) -> 3025.2 (3056.9) MB, pooled: 0 MB, 348.00 / 0.00 ms  (+ 1.5 ms in 223 steps since start of marking, biggest step 0.8 ms, walltime since start of marking 374 ms) (average mu = 0.336, 
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x1045fdaec node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/usr/local/bin/node]
+ 2: 0x104850314 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/usr/local/bin/node]
+ 3: 0x104aaf700 v8::internal::Heap::stack() [/usr/local/bin/node]
+ 4: 0x104ab2ad4 v8::internal::Heap::HasLowYoungGenerationAllocationRate() [/usr/local/bin/node]
+ 5: 0x104ac3cc8 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags)::$_1::operator()() const [/usr/local/bin/node]
+ 6: 0x104ac359c void heap::base::Stack::SetMarkerAndCallbackImpl<v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags)::$_1>(heap::base::Stack*, void*, void const*) [/usr/local/bin/node]
+ 7: 0x105479bf4 PushAllRegistersAndIterateStack [/usr/local/bin/node]
+ 8: 0x104aad404 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/usr/local/bin/node]
+ 9: 0x104aa2110 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/local/bin/node]
+10: 0x104a6dbac v8::internal::FactoryBase<v8::internal::Factory>::NewFixedArrayWithFiller(v8::internal::DirectHandle<v8::internal::Map>, int, v8::internal::DirectHandle<v8::internal::HeapObject>, v8::internal::AllocationType) [/usr/local/bin/node]
+11: 0x104dd04a8 v8::internal::Handle<v8::internal::EphemeronHashTable> v8::internal::HashTable<v8::internal::EphemeronHashTable, v8::internal::EphemeronHashTableShape>::EnsureCapacity<v8::internal::Isolate, v8::internal::Handle>(v8::internal::Isolate*, v8::internal::Handle<v8::internal::EphemeronHashTable>, int, v8::internal::AllocationType) [/usr/local/bin/node]
+12: 0x104dd103c v8::internal::ObjectHashTableBase<v8::internal::EphemeronHashTable, v8::internal::EphemeronHashTableShape>::Put(v8::internal::Isolate*, v8::internal::Handle<v8::internal::EphemeronHashTable>, v8::internal::DirectHandle<v8::internal::Object>, v8::internal::DirectHandle<v8::internal::Object>, int) [/usr/local/bin/node]
+13: 0x104def50c v8::internal::JSWeakCollection::Set(v8::internal::DirectHandle<v8::internal::JSWeakCollection>, v8::internal::DirectHandle<v8::internal::Object>, v8::internal::DirectHandle<v8::internal::Object>, int) [/usr/local/bin/node]
+14: 0x104f0a718 v8::internal::Runtime_WeakCollectionSet(int, unsigned long*, v8::internal::Isolate*) [/usr/local/bin/node]
+15: 0x10556a234 Builtins_CEntry_Return1_ArgvOnStack_NoBuiltinExit [/usr/local/bin/node]
+16: 0x105565704 Builtins_WeakCollectionSet [/usr/local/bin/node]
+17: 0x105563e80 Builtins_WeakMapPrototypeSet [/usr/local/bin/node]
+18: 0x129b183fc 
+19: 0x128e03f00 
+20: 0x128e47d9c 
+21: 0x128e0a5c8 
+22: 0x129280cb0 
+23: 0x105599e60 Builtins_ArrayMap [/usr/local/bin/node]
+24: 0x129008e80 
+25: 0x128e09b78 
+26: 0x129280cb0 
+27: 0x105599e60 Builtins_ArrayMap [/usr/local/bin/node]
+28: 0x129008e80 
+29: 0x128e1b140 
+30: 0x128e47d9c 
+31: 0x128e1b9e0 
+32: 0x128e47d9c 
+33: 0x128e07684 
+34: 0x129280cb0 
+35: 0x105599e60 Builtins_ArrayMap [/usr/local/bin/node]
+36: 0x129008e80 
+37: 0x128e07ac8 
+38: 0x128e47d9c 
+39: 0x12975e488 
+40: 0x105599e60 Builtins_ArrayMap [/usr/local/bin/node]
+41: 0x1291bb0c8 
+42: 0x128e03b10 
+43: 0x128e47d9c 
+44: 0x128e0bd80 
+45: 0x129280cb0 
+46: 0x105599e60 Builtins_ArrayMap [/usr/local/bin/node]
+47: 0x129008e80 
+48: 0x128e14a84 
+49: 0x128e47d9c 
+50: 0x12975e488 
+51: 0x105599e60 Builtins_ArrayMap [/usr/local/bin/node]
+52: 0x1291bb0c8 
+53: 0x128e03874 
+54: 0x128e901cc 
+55: 0x12965e80c 
+56: 0x12965f250 
+57: 0x1296606f8 
+58: 0x129664bb4 
+59: 0x1292aa538 
+60: 0x12954fef0 
+61: 0x12964bc10 
+62: 0x128820544 
+63: 0x12880a370 
+64: 0x12891dc50 
+65: 0x12926c488 
+66: 0x1290ec020 
+67: 0x128e5329c 
+68: 0x10550b7e8 Builtins_AsyncFunctionAwaitResolveClosure [/usr/local/bin/node]
+69: 0x1055e0e58 Builtins_PromiseFulfillReactionJob [/usr/local/bin/node]
+70: 0x1054fabd0 Builtins_RunMicrotasks [/usr/local/bin/node]
+71: 0x1054ca7b0 Builtins_JSRunMicrotasksEntry [/usr/local/bin/node]
+72: 0x1049f38a8 v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/usr/local/bin/node]
+73: 0x1049f411c v8::internal::(anonymous namespace)::InvokeWithTryCatch(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/usr/local/bin/node]
+74: 0x1049f4258 v8::internal::Execution::TryRunMicrotasks(v8::internal::Isolate*, v8::internal::MicrotaskQueue*) [/usr/local/bin/node]
+75: 0x104a2302c v8::internal::MicrotaskQueue::RunMicrotasks(v8::internal::Isolate*) [/usr/local/bin/node]
+76: 0x104a2398c v8::internal::MicrotaskQueue::PerformCheckpoint(v8::Isolate*) [/usr/local/bin/node]
+77: 0x1044df0b8 node::InternalCallbackScope::Close() [/usr/local/bin/node]
+78: 0x1044dea90 node::InternalCallbackScope::~InternalCallbackScope() [/usr/local/bin/node]
+79: 0x104603000 node::fs::FileHandle::CloseReq::Resolve() [/usr/local/bin/node]
+80: 0x10461e6a8 node::fs::FileHandle::ClosePromise()::$_0::__invoke(uv_fs_s*) [/usr/local/bin/node]
+81: 0x1045f3550 node::MakeLibuvRequestCallback<uv_fs_s, void (*)(uv_fs_s*)>::Wrapper(uv_fs_s*) [/usr/local/bin/node]
+82: 0x1054a5394 uv__work_done [/usr/local/bin/node]
+83: 0x1054a90c4 uv__async_io [/usr/local/bin/node]
+84: 0x1054bd45c uv__io_poll [/usr/local/bin/node]
+85: 0x1054a962c uv_run [/usr/local/bin/node]
+86: 0x1044e06a8 node::SpinEventLoopInternal(node::Environment*) [/usr/local/bin/node]
+87: 0x1046569c4 node::NodeMainInstance::Run() [/usr/local/bin/node]
+88: 0x1045aabb4 node::Start(int, char**) [/usr/local/bin/node]
+89: 0x18e68fe00 start [/usr/lib/dyld]

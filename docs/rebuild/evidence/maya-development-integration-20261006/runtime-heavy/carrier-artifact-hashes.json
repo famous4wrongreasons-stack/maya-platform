@@ -1,0 +1,26 @@
+{
+  "sourceSha": "be7a4a5f08fe34369c11d548741724bae13a2618",
+  "nativeVerified": false,
+  "payloads": {
+    "web": {
+      "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+      "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+      "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+      "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+      "index.html": "7b0255a1ad11f30a32e5a7ccfa2205762f5c11016518a5ac8617a1682c025b40",
+      "m/6PD6C2U7/main.js": "55a2ce878b565af8568cb810add1f5affcb3f650c11a08ff68cb5585b8b98cd5",
+      "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+      "styles.css": "4bbeeccd8e2457798e336b04c6446b9dfe23e640ec8cc736db00b708f15c89cb"
+    },
+    "capacitor": {
+      "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+      "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+      "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+      "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+      "index.html": "8cef3db3aed7cdcbf32f2073cee918fa80460ed447431c08740b962b233b2e4c",
+      "m/028116d74e0a3dc0/main.js": "028116d74e0a3dc07f3cff5dfc235dd1e03986d7998bbb635e76b478c3040694",
+      "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+      "styles.css": "4bbeeccd8e2457798e336b04c6446b9dfe23e640ec8cc736db00b708f15c89cb"
+    }
+  }
+}

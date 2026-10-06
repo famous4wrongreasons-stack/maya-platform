@@ -1,0 +1,9 @@
+PASS src/orchestration/c9.release.spec.ts
+PASS src/orchestration/c9.occupancy-source.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       38 passed, 38 total
+Snapshots:   0 total
+Time:        0.584 s, estimated 1 s
+Ran all test suites within paths "src/orchestration/c9.release.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/closing-c9.json

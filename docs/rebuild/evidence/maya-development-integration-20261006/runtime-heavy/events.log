@@ -1,0 +1,17 @@
+
+> maya-saas-backend@0.0.1 test:events:live
+> jest --config ./test/jest-events-live.json --runInBand --json --outputFile=/tmp/maya-unified-gate-20261006/events.json
+
+PASS test/events-live/domain-event-append.live-spec.ts
+  приём факта внутри чужой транзакции (живой PostgreSQL)
+    ✓ 🔴 повтор не отравляет транзакцию: следующее событие пишется, зеркало коммитится (16 ms)
+    ✓ 🔴 записанная строка совпадает со входом поле в поле (3 ms)
+    ✓ 🔴 повтор не плодит строк (2 ms)
+    ✓ контроль: прежняя реализация на этом же сценарии разворачивает транзакцию (45 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        0.587 s
+Ran all test suites.
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/events.json

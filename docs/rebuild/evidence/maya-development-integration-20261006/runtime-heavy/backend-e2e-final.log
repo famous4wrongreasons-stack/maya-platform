@@ -1,0 +1,14 @@
+
+> maya-saas-backend@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json --runInBand --json --outputFile=/tmp/maya-unified-gate-20261006/backend-e2e-final.json
+
+PASS test/app.e2e-spec.ts
+  AppController (e2e)
+    ✓ /api/health (GET) (36 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        0.377 s
+Ran all test suites.
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/backend-e2e-final.json

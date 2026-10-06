@@ -1,0 +1,54 @@
+widgets-live: proof database maya_widget_gate_proof_unified on 127.0.0.1:57463 (local)
+(node:86909) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/service-price.live-spec.ts (11.814 s)
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:06 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:06 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:86909) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+PASS test/widgets-live/profile-isolation.live-spec.ts
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:10 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:11 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:12 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic source outage
+    at Object.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/c9-chat-reads.live-spec.ts:265:30[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+PASS test/widgets-live/c9-chat-reads.live-spec.ts
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:13 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:13 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/schedule-chat.live-spec.ts (19.977 s)
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:33 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:33 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/business-rules.live-spec.ts
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:35 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:35 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/development-integration.live-spec.ts
+  ● combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC] › persists one conversation: general → C9 evidence → exact pricing approval → unavailable schedule editor
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+      55 |           messages: history,
+      56 |         });
+    > 57 |       expect(response.status).toBe(201);
+         |                               ^
+      58 |       const body = response.body as ChatReply;
+      59 |       if (conversationId)
+      60 |         expect(body.user_turn.conversationId).toBe(conversationId);
+
+      at turn (widgets-live/development-integration.live-spec.ts:57:31)
+      at Object.<anonymous> (widgets-live/development-integration.live-spec.ts:72:23)
+
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:36 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 86909  - [39m10/06/2026, 10:23:37 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic interruption before reply
+    at Object.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/conversation-history.live-spec.ts:174:7[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+PASS test/widgets-live/conversation-history.live-spec.ts
+
+Test Suites: 1 failed, 6 passed, 7 total
+Tests:       1 failed, 63 passed, 64 total
+Snapshots:   0 total
+Time:        43.049 s
+Ran all test suites within paths "test/widgets-live/service-price.live-spec.ts", "test/widgets-live/schedule-chat.live-spec.ts", "test/widgets-live/c9-chat-reads.live-spec.ts", "test/widgets-live/conversation-history.live-spec.ts", "test/widgets-live/business-rules.live-spec.ts", "test/widgets-live/profile-isolation.live-spec.ts", "test/widgets-live/development-integration.live-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/http-cohort-attempt1.json

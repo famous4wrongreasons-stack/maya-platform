@@ -1,0 +1,9 @@
+PASS src/orchestration/c9.c5-source-fingerprint.spec.ts
+PASS src/orchestration/c9.occupancy-source.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       35 passed, 35 total
+Snapshots:   0 total
+Time:        0.573 s, estimated 1 s
+Ran all test suites within paths "src/orchestration/c9.c5-source-fingerprint.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-unified-gate-20261006/c9-source-utc-unit.json

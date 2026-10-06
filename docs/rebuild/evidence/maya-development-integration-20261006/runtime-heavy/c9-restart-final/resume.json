@@ -1,0 +1,463 @@
+{
+  "contract": "maya.explicit-occupancy-http-pg-proof/1",
+  "stage": "resume",
+  "pid": 6825,
+  "postgresStarted": "2026-10-06 19:57:00.466513+00",
+  "database": "maya_widget_gate_proof_c9occ_bed351b1398b",
+  "syntheticCrmAdapter": true,
+  "externalProviderAcceptance": false,
+  "modelCalls": 0,
+  "browserAcceptance": false,
+  "observations": {
+    "c87a2689-197d-4959-a9e8-8e90c1376a0c:0": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "c87a2689-197d-4959-a9e8-8e90c1376a0c",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен».",
+                    "evidence_refs": [
+                      "h_86ea502af91cc5fd7b3c611179598aec7d63567a4a12763b4a9cc1db3e7e7773"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured_incomplete",
+                    "as_of": "2026-10-06T19:57:00.061Z",
+                    "evidence_refs": [
+                      "h_86ea502af91cc5fd7b3c611179598aec7d63567a4a12763b4a9cc1db3e7e7773"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "3c97df217c2d794eb6d805d09809a34be538b9f3c5a823efc8191c2b8f3cecb6",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed",
+                        "historical_read_not_revalidated"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "low",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed",
+                  "historical_read_not_revalidated"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "3c97df217c2d794eb6d805d09809a34be538b9f3c5a823efc8191c2b8f3cecb6",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed",
+                    "historical_read_not_revalidated"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_86ea502af91cc5fd7b3c611179598aec7d63567a4a12763b4a9cc1db3e7e7773"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "f2348163-bf97-4f54-b637-12ff78394ec9",
+                "asOf": "2026-10-06T19:57:00.061Z",
+                "opportunityRefs": [
+                  {
+                    "id": "e656066a-ee27-4126-a32b-31866c8cb7c0",
+                    "status": "VERIFIED",
+                    "tenantId": "cmux3nxsg00007kc9wtlvx3ae",
+                    "inputHash": "2d48391d8df53e232b26ca0812434a1cbab9c34deb3e09f0f425235dfdba6ceb",
+                    "observedAt": "2026-10-06T19:57:00.061Z",
+                    "sourceType": "Opportunity",
+                    "subjectRef": "appointment_312f0dd809eb981c6b5c4b83beb6579b",
+                    "validUntil": "2026-10-08T10:00:00.000Z",
+                    "subjectKind": "appointment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "9b4f793929df27900b5f287224cdff0d99d680ad5d3f75b4f83806d3f9b1918f",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  },
+                  {
+                    "id": "aced5a8c-d9d8-480e-8c7e-325803b022c5",
+                    "status": "VERIFIED",
+                    "tenantId": "cmux3nxsg00007kc9wtlvx3ae",
+                    "inputHash": "7b7d9edb2f5f84f0d758c2e68e3eaed17c5cd7647feb556738838f4d605e829f",
+                    "observedAt": "2026-10-06T19:57:00.061Z",
+                    "sourceType": "AgentTask",
+                    "subjectRef": "aced5a8c-d9d8-480e-8c7e-325803b022c5",
+                    "validUntil": "2026-10-08T10:00:00.000Z",
+                    "subjectKind": "assignment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "7b7d9edb2f5f84f0d758c2e68e3eaed17c5cd7647feb556738838f4d605e829f",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_83a3ca45d4464976103f46d1ce953ffe"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "e7627163-5fdb-4439-9c56-3c9a8268ed05",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "15cf78fc-2800-458a-88f2-598263fdc11f",
+              "revision": 1,
+              "replayed": true,
+              "current": false
+            },
+            "user_turn": {
+              "turnId": "6ebb231e-3915-44a6-a06c-00cb95bd2bad",
+              "conversationId": "6bfd42ef-1fc1-475b-b05a-918190c1f4d8"
+            },
+            "reply": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "persistedHistory": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "history",
+      "replies": [
+        "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "GET",
+          "route": "/api/ai/conversation",
+          "status": 200,
+          "body": {
+            "contract": "maya.conversation-history/1",
+            "conversationId": "6bfd42ef-1fc1-475b-b05a-918190c1f4d8",
+            "truncated": false,
+            "interrupted": false,
+            "turns": [
+              {
+                "id": "6ebb231e-3915-44a6-a06c-00cb95bd2bad",
+                "role": "user",
+                "text": "Проверь окна после отмен",
+                "createdAt": "2026-10-06T19:57:00.002Z",
+                "completed": true
+              },
+              {
+                "id": "2976ac39-b6f9-4064-a482-1f533e95d892",
+                "role": "assistant",
+                "text": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+                "createdAt": "2026-10-06T19:57:00.196Z",
+                "completed": true
+              }
+            ]
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "a64e5430-eeb7-423c-ba4f-86946a0790e2:2": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "Сохранённое окно больше не подтверждается текущим графиком или доступностью CRM. Предлагать его для записи сейчас нельзя. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "a64e5430-eeb7-423c-ba4f-86946a0790e2",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "OCCUPIED",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "Сохранённое окно больше не подтверждается текущим графиком или доступностью CRM. Предлагать его для записи сейчас нельзя.",
+                    "evidence_refs": [
+                      "h_4e6add4db240b9dd7ab46fa5503088721714ed8778ab55e29305277244cc6c49"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured",
+                    "as_of": "2026-10-06T19:57:01.930Z",
+                    "evidence_refs": [
+                      "h_4e6add4db240b9dd7ab46fa5503088721714ed8778ab55e29305277244cc6c49"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "03bf2f70206e616de71e2582cbd55abcdbc4dada077078bd50a56df4f1bbb05c",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_or_available_slot_absent"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "high",
+                "limitations": [
+                  "provider_schedule_or_available_slot_absent"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "03bf2f70206e616de71e2582cbd55abcdbc4dada077078bd50a56df4f1bbb05c",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_or_available_slot_absent"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_4e6add4db240b9dd7ab46fa5503088721714ed8778ab55e29305277244cc6c49"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "e96c8924-f0fa-4dc0-9c83-c5291779363f",
+                "asOf": "2026-10-06T19:57:01.930Z",
+                "opportunityRefs": [],
+                "scheduleRef": "schedule_83a3ca45d4464976103f46d1ce953ffe"
+              },
+              "options": [
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "6cf3516e-fc46-42b8-a0b2-adaa3b45a93d",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "70a71998-d808-46c4-8cb2-36c1833983ea",
+              "revision": 1,
+              "replayed": false,
+              "current": false
+            },
+            "user_turn": {
+              "turnId": "0df67900-129d-4780-aae8-a1a13a558ad7",
+              "conversationId": "df9ce9bb-1dba-4fa4-96ca-e9624ea735c7"
+            },
+            "reply": "Сохранённое окно больше не подтверждается текущим графиком или доступностью CRM. Предлагать его для записи сейчас нельзя. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "2d30435f-17e1-4088-9df0-0c09b70d532e:3": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "Сохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "2d30435f-17e1-4088-9df0-0c09b70d532e",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "EXPIRED",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "Сохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна.",
+                    "evidence_refs": [
+                      "h_1236c46aa6a014a4aee4045c73a5c577e457def689b1518cf4e2f6657d24be7b"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured",
+                    "as_of": "2026-10-06T19:57:02.200Z",
+                    "evidence_refs": [
+                      "h_1236c46aa6a014a4aee4045c73a5c577e457def689b1518cf4e2f6657d24be7b"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "659784dbf5ed169923a9d337141317305408d3203371e4a9cdbdb79f94da6d08",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "opportunity_expired"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "high",
+                "limitations": [
+                  "opportunity_expired"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "659784dbf5ed169923a9d337141317305408d3203371e4a9cdbdb79f94da6d08",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "opportunity_expired"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_1236c46aa6a014a4aee4045c73a5c577e457def689b1518cf4e2f6657d24be7b"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "2793a7b9-7a04-47cc-8cc7-b42f55ddf2a2",
+                "asOf": "2026-10-06T19:57:02.200Z",
+                "opportunityRefs": [],
+                "scheduleRef": null
+              },
+              "options": [
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "295de89c-6025-4b3f-aa37-9c8467164607",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "d294b58b-c09a-46b9-8846-163afb2a84d0",
+              "revision": 1,
+              "replayed": false,
+              "current": false
+            },
+            "user_turn": {
+              "turnId": "b3be4313-d0a5-4e50-af0b-ab381a0704a9",
+              "conversationId": "94cd1d90-553e-4698-94dc-860f6ac7c2bb"
+            },
+            "reply": "Сохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "refusals": {
+      "foreignTenant": 400,
+      "revokedChat": 401,
+      "revokedRun": 401
+    }
+  }
+}

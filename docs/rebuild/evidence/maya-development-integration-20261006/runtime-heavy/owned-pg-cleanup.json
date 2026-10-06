@@ -1,0 +1,8 @@
+{
+  "contract": "maya.owned-cluster-cleanup/1",
+  "cluster": "/tmp/maya-unified-gate-20261006/pgdata",
+  "port": 57463,
+  "statusCommandExitCode": 3,
+  "statusOutput": "pg_ctl: no server running",
+  "postmasterPidExists": false
+}

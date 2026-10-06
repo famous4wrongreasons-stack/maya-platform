@@ -1,0 +1,105 @@
+{
+  "sourceSha": "ac324e4c239249a89f4181a44c61148dc881fee4",
+  "result": "FAILED_PRESERVED",
+  "suitesPassed": 599,
+  "suitesFailed": 15,
+  "testsPassed": 6147,
+  "testsFailed": 20,
+  "failures": [
+    {
+      "suite": "src/widgets/lowering/gate9-lowering.architecture.spec.ts",
+      "tests": [
+        "T-ARCH-WRITER — who may write a conversation turn (9.5, 9.13) T-ARCH-WRITER-4 no file outside the store writes the turn table through raw SQL",
+        "T-ARCH-READERS — who may read a conversation turn (E10, C11:5314) T-ARCH-READERS the turn table is queried only inside the timeline store",
+        "T-ARCH-READERS — who may read a conversation turn (E10, C11:5314) T-ARCH-READERS-3 no canonical module names the turn table at all (RT3(b))"
+      ]
+    },
+    {
+      "suite": "src/widgets/proactive/proactive.spec.ts",
+      "tests": [
+        "K13 — no C10 autonomy PR2 — READ keys are provenance and are admissible; PROPOSE_ONLY and OWNER_HANDOFF are not"
+      ]
+    },
+    {
+      "suite": "src/widgets/gates/gate6.spec.ts",
+      "tests": [
+        "Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4) S-B / S-C positive: each allowlisted key is carried PAST (a), (b) and (c) to the held (d)"
+      ]
+    },
+    {
+      "suite": "src/widgets/consent/consent.spec.ts",
+      "tests": [
+        "K12 — the widget layer cannot confer consent CONSENT(cap) selects exactly 3 of 226, and IDENTITY(cap) exactly 6",
+        "K12 — both kinds are blocked on capability registration no consent, identity or privacy READ key is registered"
+      ]
+    },
+    {
+      "suite": "src/widgets/gates/facts.architecture.spec.ts",
+      "tests": [
+        "T-ARCH-FACTS — who may produce and who may read each fact no slot reads a fact outside its reader set, and no slot produces a fact it does not own"
+      ]
+    },
+    {
+      "suite": "src/widgets/gates/gate7.pipeline.spec.ts",
+      "tests": [
+        "S-G7-F72 [BUILD] — one statement of F72, and one comparison of it S-G7-F72-DRIFT: the runtime copy has not drifted from the certified §0.13 lookup"
+      ]
+    },
+    {
+      "suite": "src/ai-tools/ai-tool-service-price.spec.ts",
+      "tests": [
+        "catalog.service.price.update chat boundary pins exactly one local C9/AE candidate without adding a released carrier successor"
+      ]
+    },
+    {
+      "suite": "src/widgets/gates/r353-readers.source.spec.ts",
+      "tests": [
+        "R353-READERS [BUILD] — handoff_capability_ref has a closed reader set (R3.5.3, AMB-09) R353-READERS: every direct member access to the field stands in an allowlisted reader"
+      ]
+    },
+    {
+      "suite": "src/widgets/booking/booking.spec.ts",
+      "tests": [
+        "MONEY KEYS GAP-KEYED: 92/92 the contract predicate selects 92 of 226",
+        "MONEY KEYS GAP-KEYED: 92/92 reproduces the contract’s documented WRONG answer for the bare token",
+        "MONEY KEYS GAP-KEYED: 92/92 all 92 are gap-keyed: none is on the COMMIT allowlist"
+      ]
+    },
+    {
+      "suite": "src/action-engine/appointment-action-boundary.spec.ts",
+      "tests": [
+        "appointment action execution boundary keeps the generic Action Engine free of side-effect owners"
+      ]
+    },
+    {
+      "suite": "src/orchestration/c9.release.spec.ts",
+      "tests": [
+        "c9 release gate C9 never initiates itself, schedules itself or trains online"
+      ]
+    },
+    {
+      "suite": "src/conversation-intelligence/conversation-capability.spec.ts",
+      "tests": [
+        "conversation capability contract keeps the public MAYA OS conversation contract fully routable"
+      ]
+    },
+    {
+      "suite": "src/widgets/gates/release-evidence.spec.ts",
+      "tests": [
+        "AR-FR6D-SCOPE pins every allowlisted capability outside MONEY and the payment emission gap"
+      ]
+    },
+    {
+      "suite": "src/widgets/widget-import-graph.architecture.spec.ts",
+      "tests": [
+        "D-6 — the union import-graph test: owners only through the owner-ports boundary the enumerations are the ones k3 check 9 reads"
+      ]
+    },
+    {
+      "suite": "src/widgets/projection/projector-fences.architecture.spec.ts",
+      "tests": [
+        "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-11 [BUILD] F3/FR-16: this change adds no capability, no capability field and no column to a non-Widget table"
+      ]
+    }
+  ]
+}
