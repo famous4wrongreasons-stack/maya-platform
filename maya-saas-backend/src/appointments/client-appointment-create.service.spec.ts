@@ -158,6 +158,11 @@ function setup() {
     getExternalProviderKey: jest.fn().mockResolvedValue('yclients'),
     getAdapterForTenant: jest.fn().mockResolvedValue(provider),
     getServices: jest.fn().mockResolvedValue(services),
+    getStaff: jest
+      .fn()
+      .mockResolvedValue([
+        { id: 'staff-1', name: '  Александр  ', phone: 'not-for-the-preview' },
+      ]),
     getAvailableSlots: jest.fn().mockResolvedValue(slots),
     resolveStaffIdForBooking: jest.fn().mockResolvedValue('maya-staff-1'),
   });
@@ -526,6 +531,8 @@ describe('U-OWN read-only create quote', () => {
       previous: null,
     });
     expect(quoted.services).toHaveLength(1);
+    expect(quoted.staff).toEqual({ id: 'staff-1', name: 'Александр' });
+    expect(h.crm.getStaff).toHaveBeenCalledWith('tenant-1');
     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
     expect(h.provider.createAppointment).not.toHaveBeenCalled();
     expect(h.rows).toHaveLength(0);
@@ -542,6 +549,67 @@ describe('U-OWN read-only create quote', () => {
     expect(created.services).toEqual(quoted.services);
     expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
     expect(h.rows).toHaveLength(1);
+    expect(h.crm.getStaff).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [],
+    [null],
+    [{ id: 'staff-1', name: 123 }],
+    [{ id: 'staff-1', name: { value: 'Untrusted object' } }],
+    [{ id: 'foreign-staff', name: 'Other salon' }],
+    [{ id: 'staff-1', name: ' ' }],
+    [{ id: 'staff-1', name: 'x'.repeat(161) }],
+    [
+      { id: 'staff-1', name: 'First' },
+      { id: 'staff-1', name: 'Second' },
+    ],
+  ])(
+    'keeps incomplete or ambiguous staff labels outside the quote projection (%j)',
+    async (...members) => {
+      const h = setup();
+      (h.crm.getStaff as jest.Mock).mockResolvedValue(members);
+      expect((await quote(h)).staff).toBeNull();
+      expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      expect(h.rows).toHaveLength(0);
+    },
+  );
+
+  it('treats a malformed catalogue root as missing presentation data', async () => {
+    const h = setup();
+    (h.crm.getStaff as jest.Mock).mockResolvedValue({ staff: [] });
+    expect((await quote(h)).staff).toBeNull();
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+  });
+
+  it('treats staff catalogue failure only as missing presentation data, preserving the execution owner', async () => {
+    const h = setup();
+    (h.crm.getStaff as jest.Mock).mockRejectedValue(
+      new Error('catalogue down'),
+    );
+    expect((await quote(h)).staff).toBeNull();
+    await h.run();
+    expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+    expect(h.rows).toHaveLength(1);
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.crm.getStaff).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a foreign tenant or actor before reading public staff', async () => {
+    const h = setup();
+    for (const [tenantId, userId] of [
+      ['foreign-tenant', 'user-1'],
+      ['tenant-1', 'foreign-user'],
+    ]) {
+      await expect(
+        h.context.runAsAuthPrincipal(
+          { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+          () => h.service.quoteForAccount(tenantId, userId, h.dto),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    }
+    expect(h.crm.getStaff).not.toHaveBeenCalled();
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
   });
 
   it('refuses invalid services with the owner code and no execution', async () => {
@@ -572,6 +640,7 @@ describe('U-OWN read-only create quote', () => {
 
     await expect(quote(h)).rejects.toBeInstanceOf(ForbiddenException);
     expect(h.prisma.client.findUnique).not.toHaveBeenCalled();
+    expect(h.crm.getStaff).not.toHaveBeenCalled();
     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
   });
 });

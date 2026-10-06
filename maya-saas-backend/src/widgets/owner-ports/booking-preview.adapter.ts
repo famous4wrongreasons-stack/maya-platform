@@ -117,7 +117,8 @@ export class BookingPreviewAdapter
       const service = quoted.services.find(
         (candidate) => candidate.id === serviceId,
       );
-      if (!service) return refused();
+      if (!service || !quoted.staff || quoted.staff.id !== staffId)
+        return refused();
       const draftRef = randomUUID();
       return accepted({
         subject: 'create',
@@ -135,7 +136,7 @@ export class BookingPreviewAdapter
           }).format(new Date(quoted.start)) + ` (${quoted.timezone})`,
         whenPrevious: null,
         serviceLabel: service.name,
-        staffLabel: staffId,
+        staffLabel: quoted.staff.name,
         durationMinutes: service.duration_minutes,
         priceKopecks: Math.round(service.price * 100),
         currency: service.currency,
@@ -200,7 +201,8 @@ export class BookingPreviewAdapter
       const service = quoted.services.find(
         (candidate) => candidate.id === serviceId,
       );
-      if (!service) return { outcome: refused(), values: new Map() };
+      if (!service || !quoted.staff || quoted.staff.id !== staffId)
+        return { outcome: refused(), values: new Map() };
       const draftRef = randomUUID();
       return {
         outcome: accepted({
@@ -219,7 +221,7 @@ export class BookingPreviewAdapter
             }).format(new Date(quoted.start)) + ` (${quoted.timezone})`,
           whenPrevious: null,
           serviceLabel: service.name,
-          staffLabel: staffId,
+          staffLabel: quoted.staff.name,
           durationMinutes: service.duration_minutes,
           priceKopecks: Math.round(service.price * 100),
           currency: service.currency,

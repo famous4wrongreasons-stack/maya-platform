@@ -134,12 +134,29 @@ export class ClientAppointmentCreateService {
     invocation: AppointmentActionInvocation = {},
   ) {
     try {
-      return await this.quoteVerifiedLink(
+      const quoted = await this.quoteVerifiedLink(
         tenantId,
         () => this.resolveSelectedAccount(tenantId, userId, invocation),
         dto,
         invocation,
       );
+      // Public catalogue prose is only presentation evidence. Missing labels
+      // must not prevent Gate 11 from reaching a durable execution/UNKNOWN.
+      // The shared mutation quote and its idempotency descriptor stay unchanged.
+      const staff = await this.crm
+        .getStaff(tenantId)
+        .then((members) => {
+          if (!Array.isArray(members)) return null;
+          const matching = members.filter(
+            (member) =>
+              member && typeof member === 'object' && member.id === dto.staffId,
+          );
+          const rawName = matching.length === 1 ? matching[0].name : null;
+          const name = typeof rawName === 'string' ? rawName.trim() : null;
+          return name && name.length <= 160 ? { id: dto.staffId, name } : null;
+        })
+        .catch(() => null);
+      return { ...quoted, staff };
     } catch (error) {
       if (error instanceof ActionConflictError)
         throw new ConflictException({

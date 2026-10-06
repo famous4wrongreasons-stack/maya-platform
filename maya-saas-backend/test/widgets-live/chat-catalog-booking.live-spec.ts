@@ -372,6 +372,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
           tenantName: 'Synthetic catalog',
           envelope,
           selectedStart,
+          expectedStaffLabel: 'Александр',
         }),
       );
     });

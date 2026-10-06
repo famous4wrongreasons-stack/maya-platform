@@ -181,6 +181,11 @@ try {
   const confirmation = current('booking confirmation');
   if (confirmation.kind !== 'BOOKING_CONFIRMATION')
     throw new Error('confirmation successor kind mismatch');
+  if (input.expectedStaffLabel) {
+    const staffLabel = object(object(confirmation.body, 'confirmation body').staff_label, 'staff label');
+    if (staffLabel.state !== 'KNOWN' || staffLabel.value !== input.expectedStaffLabel)
+      throw new Error('Confirmation must show the current selected public staff name before COMMIT');
+  }
   const commit = confirmation.intents.find(
     (candidate) => candidate.effect === 'COMMIT',
   );

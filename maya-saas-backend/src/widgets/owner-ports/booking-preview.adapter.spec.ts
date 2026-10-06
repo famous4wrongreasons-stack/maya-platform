@@ -45,23 +45,26 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
     ])[noun];
 
   const harness = () => {
+    const quoted = {
+      start: '2026-10-02T10:00:00.000Z',
+      timezone: 'UTC',
+      staff: { id: 'staff-1', name: 'Александр' },
+      services: [
+        {
+          id: 'service-1',
+          name: 'Haircut',
+          duration_minutes: 60,
+          price: 1500,
+          currency: 'RUB',
+        },
+      ],
+    };
     const create = {
-      quoteForAccount: jest.fn().mockResolvedValue({
-        start: '2026-10-02T10:00:00.000Z',
-        timezone: 'UTC',
-        services: [
-          {
-            id: 'service-1',
-            name: 'Haircut',
-            duration_minutes: 60,
-            price: 1500,
-            currency: 'RUB',
-          },
-        ],
-      }),
+      quoteForAccount: jest.fn().mockResolvedValue(quoted),
     };
     return {
       create,
+      quoted,
       adapter: new BookingPreviewAdapter(
         create as never,
         {} as never,
@@ -112,11 +115,60 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
           frozenArgumentHandles: input.handles,
           when: '2026-10-02T10:00:00.000Z',
           serviceLabel: 'Haircut',
-          staffLabel: 'staff-1',
+          staffLabel: 'Александр',
         },
       },
     });
   });
+
+  const draftRequest = () => {
+    const input = request();
+    return {
+      ...input,
+      routing: {
+        tenantId: TENANT,
+        now: new Date('2026-10-01T09:00:00.000Z'),
+        record: {
+          capabilitySpace: 'C9',
+          capabilityKey: 'appointments.own.create',
+          requestedScopeHash: 'scope-hash',
+          frozenNounsJson: input.handles,
+        },
+      },
+      resolvedNouns: {
+        values: new Map([
+          ['service', 'service-1'],
+          ['staff', 'staff-1'],
+          ['slot', '2026-10-02T10:00:00.000Z'],
+        ]),
+      },
+    } as never;
+  };
+
+  it('also renders the current canonical public staff label in the draft path', async () => {
+    const { adapter } = harness();
+    expect(await adapter.draft(draftRequest())).toMatchObject({
+      receiptOutcome: 'ACCEPTED',
+      ownerDecision: {
+        preview: { staffLabel: 'Александр', serviceLabel: 'Haircut' },
+      },
+    });
+  });
+
+  it.each([null, { id: 'foreign-staff', name: 'Foreign' }])(
+    'refuses both new confirmation paths without the exact current staff projection (%j)',
+    async (staff) => {
+      const { adapter, create, quoted } = harness();
+      create.quoteForAccount.mockResolvedValue({ ...quoted, staff });
+      expect(await adapter.proposeCreateSelection(request())).toMatchObject({
+        outcome: { receiptOutcome: 'REFUSED' },
+        values: new Map(),
+      });
+      expect(await adapter.draft(draftRequest())).toMatchObject({
+        receiptOutcome: 'REFUSED',
+      });
+    },
+  );
 
   it('rejects raw or foreign handles before asking the booking owner', async () => {
     const { adapter, create } = harness();
