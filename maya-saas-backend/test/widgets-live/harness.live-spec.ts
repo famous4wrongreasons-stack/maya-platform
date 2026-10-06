@@ -1414,18 +1414,40 @@ describe('widgets-live harness', () => {
       }
     });
 
-    it('diagnostic fixtures cannot enter production or canonical evidence support through named, side-effect or dynamic imports', () => {
+    it('diagnostic fixtures cannot enter production or canonical evidence support through transitive imports', () => {
       const diagnosticRoot =
         path.join(BACKEND, 'test/widgets-diagnostics') + path.sep;
-      const diagnosticImports = (file: string, text: string) =>
-        ts
-          .preProcessFile(text, true, true)
-          .importedFiles.filter((ref) =>
-            path
-              .resolve(path.dirname(file), ref.fileName)
-              .startsWith(diagnosticRoot),
-          )
-          .map((ref) => ref.fileName);
+      const diagnosticImports = (
+        roots: string[],
+        source: (file: string) => string | null,
+      ) => {
+        const seen = new Set<string>(),
+          found: string[] = [],
+          queue = [...roots];
+        while (queue.length) {
+          const file = queue.pop()!;
+          if (seen.has(file)) continue;
+          seen.add(file);
+          const text = source(file);
+          if (text === null) continue;
+          for (const ref of ts.preProcessFile(text, true, true).importedFiles) {
+            if (!ref.fileName.startsWith('.')) continue;
+            const target = path.resolve(path.dirname(file), ref.fileName);
+            if (!target.startsWith(BACKEND + path.sep)) continue;
+            if (target.startsWith(diagnosticRoot)) {
+              found.push(target);
+              continue;
+            }
+            const resolved = [
+              target,
+              target + '.ts',
+              path.join(target, 'index.ts'),
+            ].find((candidate) => source(candidate) !== null);
+            if (resolved) queue.push(resolved);
+          }
+        }
+        return found;
+      };
       const collect = (dir: string): string[] =>
         fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
           const file = path.join(dir, entry.name);
@@ -1440,14 +1462,18 @@ describe('widgets-live harness', () => {
         ...collect(SUPPORT),
         path.join(BACKEND, 'scripts/widgets-intent-http-proof.ts'),
       ];
-      expect(
-        files.flatMap((file) =>
-          diagnosticImports(file, fs.readFileSync(file, 'utf8')).map((ref) => ({
+      const cache = new Map<string, string | null>();
+      const read = (file: string) => {
+        if (!cache.has(file))
+          cache.set(
             file,
-            ref,
-          })),
-        ),
-      ).toEqual([]);
+            fs.existsSync(file) && fs.statSync(file).isFile()
+              ? fs.readFileSync(file, 'utf8')
+              : null,
+          );
+        return cache.get(file)!;
+      };
+      expect(diagnosticImports(files, read)).toEqual([]);
       const wrapper = path.join(SUPPORT, 'forbidden-wrapper.ts');
       for (const code of [
         "export { boot } from '../../widgets-diagnostics/support/probe';",
@@ -1455,7 +1481,22 @@ describe('widgets-live harness', () => {
         "const boot = import('../../widgets-diagnostics/support/probe');",
         "const boot = require('../../widgets-diagnostics/support/probe');",
       ])
-        expect(diagnosticImports(wrapper, code)).toHaveLength(1);
+        expect(
+          diagnosticImports([wrapper], (file) =>
+            file === wrapper ? code : null,
+          ),
+        ).toHaveLength(1);
+      const bridge = path.join(BACKEND, 'test/shared/bridge/index.ts');
+      const virtual = new Map([
+        [wrapper, "export { boot } from '../../shared/bridge';"],
+        [
+          bridge,
+          "import '../../widgets-diagnostics/support/probe'; import '../../widgets-live/support/forbidden-wrapper';",
+        ],
+      ]);
+      expect(
+        diagnosticImports([wrapper], (file) => virtual.get(file) ?? null),
+      ).toHaveLength(1);
     });
 
     it('rejects nothing on an empty evidence directory, and passes the real harness support files through its override allowlist', () => {
