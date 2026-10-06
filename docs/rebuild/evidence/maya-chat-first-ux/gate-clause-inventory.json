@@ -3,11 +3,11 @@
   "source": "GATES-PLAN-V11 §3.1 (plan lines 1388-1564); the 10.R1…10.R7 bullet expanded to one key per row of «Gate 10 in full», with the texts of the /2 audit",
   "against": {
     "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
-    "version": "1.3",
-    "sha256": "b84b3e7303e1a655bf47c436075089ce51d79e315128e8cafb9325c64f19c36c",
-    "lines": 7508
+    "version": "1.4",
+    "sha256": "9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769",
+    "lines": 7606
   },
-  "note": "The key set of gate-conformance-audit.json must equal this inventory, gate by gate and in order, with identical clause texts; gate-audit-check.mjs enforces it. The inventory changes only with the contract (C-V12) or a re-audit commit that records why.",
+  "note": "Fresh V1.4 clause inventory. Exactly 165 historical clause IDs remain. Nine clause summaries reflect the approved F74a/F32a rules; no new exclusion or authority. C11 locators remain historical, not current line numbers. Original inventory/audit/contract bytes are archived under widget-release-programme/development-v14/history.",
   "gates": [
     {
       "n": "1",
@@ -265,7 +265,7 @@
         },
         {
           "key": "G7-5",
-          "text": "kind ≠ draft → non-null `produced_by_intent_token_hash` satisfying §3.10.2"
+          "text": "kind ≠ draft → consumed producing record satisfying §3.10.2, except the exact F32a canonical-chat approval provenance of F74a; no caller-supplied origin or bare approval ID"
         },
         {
           "key": "G7-6",
@@ -289,7 +289,7 @@
         },
         {
           "key": "G7-FR6d",
-          "text": "no MONEY actuation; `PAYMENT_HANDOFF` gap-blocked; F80 (C11:1788, 1524)"
+          "text": "MONEY actuation refused except the exact OWNER-bound F32a single-service fixed-RUB APPROVAL; all other MONEY and PAYMENT_HANDOFF remain gap-blocked; F80"
         }
       ]
     },
@@ -573,15 +573,15 @@
         },
         {
           "key": "G11-I4",
-          "text": "R3.11.1 approval decision reads nouns from the decision record"
+          "text": "Gate 11 resolves nouns from the retained decision record and original lineage: the existing consumed-record path or the exact F74a canonical-chat approval source; the noun is not exposed to the client"
         },
         {
           "key": "G11-I5",
-          "text": "R3.11.3 reject and re-mint"
+          "text": "changed approval noun rejects and re-mints on the existing consumed-record path; F74a refuses without dispatch and requires a new canonical proposal"
         },
         {
           "key": "G11-I6",
-          "text": "R3.11.4 both checks in order"
+          "text": "existing AE branch: policy binding and fresh noun read; exact F74a branch: approval ID, payloadHash and authenticated user-turn binding, with a source re-read before decision and dispatch"
         },
         {
           "key": "G11-I7",
@@ -733,15 +733,15 @@
         },
         {
           "key": "G13-I1",
-          "text": "`approval_decision` routing"
+          "text": "approval_decision routes to the existing AE owner or the exact F32a typed AiApprovalRequest owner, never from WidgetIntent.role"
         },
         {
           "key": "G13-I2",
-          "text": "R3.11.3"
+          "text": "R3.11.3 requirements hold on both the existing AE approval path and the exact F32a/F74a path"
         },
         {
           "key": "G13-I3",
-          "text": "F74/F75 consumption"
+          "text": "F74 or exact F74a provenance and F75 paired consumption apply; neither client-supplied origin nor a bare approval ID confers authority"
         },
         {
           "key": "G13-I4",
@@ -765,7 +765,7 @@
         },
         {
           "key": "G13-I9",
-          "text": "R3.11.6 approver test / P-27"
+          "text": "existing AE approver policy and P27 remain; F32a requires a live local OWNER, original requester, tenant, approval ID/payloadHash and active integration binding"
         }
       ]
     },

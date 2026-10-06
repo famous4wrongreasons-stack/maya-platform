@@ -95,6 +95,9 @@ const JEST_CACHE = path.join(os.tmpdir(), `widgets-mutation-jest-cache-${KEY}`);
 // resolves an absolute output path, and no report may share the tree that the harness recreates.
 const UNIT_REPORT = path.join(os.tmpdir(), `widgets-mutation-unit-${KEY}.json`);
 const LIVE_REPORT = path.join(os.tmpdir(), `widgets-mutation-live-${KEY}.json`);
+// Full suites remain serial. Recycle the sole worker between files so source-
+// scanning suites do not accumulate the entire corpus in one in-band heap.
+const JEST_EXECUTION = ['--maxWorkers=1', '--workerIdleMemoryLimit=768MB'];
 
 const usage = (message) => {
   process.stderr.write(`widgets-mutation-battery: ${message}\n`);
@@ -547,7 +550,7 @@ const runSteps = (edits, steps) => {
   const forceExit = '--forceExit';
   const outcome = {};
   if (steps.includes('unit'))
-    outcome.unit = run(backend, 'npx', ['jest', '--runInBand', forceExit, cache, '--json', `--outputFile=${unitJson}`, ...(unitFilter ? ['-t', unitFilter] : []), ...(unitTests ? [unitTests] : [])]);
+    outcome.unit = run(backend, 'npx', ['jest', ...JEST_EXECUTION, forceExit, cache, '--json', `--outputFile=${unitJson}`, ...(unitFilter ? ['-t', unitFilter] : []), ...(unitTests ? [unitTests] : [])]);
   if (steps.includes('typecheck')) outcome.typecheck = run(backend, 'npm', ['run', '-s', 'typecheck:widgets-live']);
   if (steps.includes('k3')) outcome.k3 = run(backend, process.execPath, ['scripts/k3-gateway-check.mjs']);
   if (steps.includes('live'))
@@ -555,7 +558,7 @@ const runSteps = (edits, steps) => {
       'jest',
       '--config',
       './test/jest-widgets-live.json',
-      '--runInBand',
+      ...JEST_EXECUTION,
       forceExit,
       cache,
       '--json',

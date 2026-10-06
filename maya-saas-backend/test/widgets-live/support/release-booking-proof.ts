@@ -312,12 +312,13 @@ export async function releaseBookingProof(
     clauses: ['G13-I7'],
   });
   proofs.push({ ...commitProof, testId: 'WF-PAIRING', clauses: ['G7-FR6b'] });
-  // Programme §4.5 Money expressly permits mutation-only negative evidence.
-  // This is its non-MONEY production positive, never a financial actuation claim.
+  // Keep the observed non-MONEY positive. V1.4 also requires the exact F32a
+  // admission branch, so this observation cannot claim the whole G7-FR6d duty.
   proofs.push({
     ...commitProof,
     testId: 'AR-FR6D-NONMONEY',
-    clauses: ['G7-FR6d'],
+    clauses: [],
+    claim: null,
   });
   proofs.push({
     ...commitProof,

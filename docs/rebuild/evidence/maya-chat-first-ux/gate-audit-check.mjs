@@ -272,9 +272,8 @@ function selfTest() {
     },
     {
       id: 'N11 a false clause that claims to conform',
-      // G2-a becomes live at A-W5.  DEV-1 keeps this clause false until discharge and
-      // therefore gives the self-test a stable nonconforming witness.
-      mutate: (x) => (x.audit.gates.find((g) => g.n === '12').clauses['G12-R1b'].conforms = true),
+      // A negative must not depend on a historical/current audit's legitimate state.
+      mutate: (x) => Object.assign(x.audit.gates.find((g) => g.n === '12').clauses['G12-R1b'], { state: 'false', conforms: true }),
       expect: ['STATE'],
     },
     {
@@ -296,8 +295,9 @@ function selfTest() {
       id: 'N15 an L state without an HTTP/BIN pair',
       mutate: (x) => {
         const clause = x.audit.gates.find((g) => g.n === '1').clauses['G1-b'];
-        // G1-b is already L at A-W5; remove its evidence rather than restating the same
-        // valid state, so the counterfactual remains load-bearing after promotion.
+        // Explicitly claim L without evidence; this also bites a fresh all-false audit.
+        clause.state = 'L';
+        clause.conforms = true;
         clause.evidence = [];
       },
       expect: ['EVIDENCE'],

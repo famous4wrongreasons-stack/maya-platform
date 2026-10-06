@@ -3,7 +3,7 @@
     "id": "AL-M1",
     "description": "drop the MONEY startup veto so an injected financial capability can acquire a widget commit row",
     "file": "src/widgets/authority/allowlist-startup.assert.ts",
-    "find": "    if (MONEY(cap)) problems.push(`AL-2 ${cap.capability}: MONEY veto`);\n",
+    "find": "    if (MONEY(cap) && !cataloguePrice)\n      problems.push(`AL-2 ${cap.capability}: MONEY veto`);\n",
     "replace": "",
     "killers": ["AL-2"],
     "expect": "build-killed"

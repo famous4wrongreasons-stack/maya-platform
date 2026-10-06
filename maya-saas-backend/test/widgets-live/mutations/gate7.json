@@ -217,19 +217,19 @@
   },
   {
     "id": "M7-24",
-    "description": "C9a is deleted: a money-mutating capability becomes actuatable from a widget the moment one reaches the allowlist. FR-6d's fence is that no such key is on the allowlist AT ALL (C11:1788); the gate's own predicate is the second half of it.",
+    "description": "C9a is deleted for MONEY outside the sole exact F32a catalogue-price exception: an unrelated financial capability becomes actuatable when it reaches the allowlist.",
     "file": "src/widgets/gates/gate7.ts",
-    "find": "  if (MONEY(cap)) return no('C9a', `${ae.key} is MONEY (§3.10)`);",
-    "replace": "  const isMoney: boolean = MONEY(cap) && false;\n  if (isMoney) return no('C9a', `${ae.key} is MONEY (§3.10)`);",
+    "find": "  if (MONEY(cap) && !cataloguePrice)\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
+    "replace": "  const isMoney: boolean = MONEY(cap) && !cataloguePrice && false;\n  if (isMoney) return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
     "killers": ["G7-N9a"],
     "expect": "build-killed"
   },
   {
     "id": "M7-25",
-    "description": "C9a is implemented as F31's VETO (`MONEY ⇒ confirmation_kind === 'PAYMENT_HANDOFF'`) instead of FR-6d's predicate. F31 ADMITS a money row on `PAYMENT_HANDOFF` — as F82 routes `loyalty.internal-adjust.execute.v1` — so the mutant lets exactly the key the fence is named for through C9a.",
+    "description": "C9a regresses to a historical F31-shaped faulty predicate that admits MONEY on PAYMENT_HANDOFF. The exact current F32a catalogue-price exception stays intact; the mutant wrongly admits the unrelated loyalty.internal-adjust.execute.v1 key through C9a despite V1.4's closed PAYMENT_HANDOFF fence.",
     "file": "src/widgets/gates/gate7.ts",
-    "find": "  if (MONEY(cap)) return no('C9a', `${ae.key} is MONEY (§3.10)`);",
-    "replace": "  if (MONEY(cap) && r.widgetKind !== 'PAYMENT_HANDOFF')\n    return no('C9a', `${ae.key} is MONEY (§3.10)`);",
+    "find": "  if (MONEY(cap) && !cataloguePrice)\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
+    "replace": "  if (MONEY(cap) && !cataloguePrice && r.widgetKind !== 'PAYMENT_HANDOFF')\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
     "killers": ["G7-N9b"],
     "expect": "build-killed"
   },

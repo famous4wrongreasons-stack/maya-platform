@@ -1,0 +1,28 @@
+{
+  "contract": "maya.widget-v13-audit-archive/1",
+  "archivedFromCheckpoint": "f877d2401ff3d91ffea6bd8e80b971ac21977439",
+  "historicalOnly": true,
+  "files": [
+    {
+      "path": "v13-audit.json.gz",
+      "sourcePath": "docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json",
+      "uncompressedBytes": 2722247,
+      "uncompressedSha256": "68b0d6998a18bfe872653546e515013c0538808e1db635a4a1f54924403c89e1",
+      "archiveSha256": "3e0ae6bbe2ca8ea4fec11baf371ea2de56d0d2134531f6873a2ceba3a8c75818"
+    },
+    {
+      "path": "v13-inventory.json.gz",
+      "sourcePath": "docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+      "uncompressedBytes": 21821,
+      "uncompressedSha256": "d6af830d7bfd24db128400ad836cd993005225dedafca49ffeb3725dda9dcae8",
+      "archiveSha256": "559821bb75ebed22928123e1546c583ecb17d00262a3e32f44ff9355a2f1eb90"
+    },
+    {
+      "path": "v13-contract.md.gz",
+      "sourcePath": "c6a35e5c61975e9d101326e7b3970331f3c905d8:docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+      "uncompressedBytes": 730772,
+      "uncompressedSha256": "b84b3e7303e1a655bf47c436075089ce51d79e315128e8cafb9325c64f19c36c",
+      "archiveSha256": "927584a3b25be7e9d955f19398c1fc04f83b14a8fa5fd7da29f5f9dd9266a216"
+    }
+  ]
+}

@@ -22,7 +22,7 @@ type UProof = Readonly<{
 const repositoryRoot = resolve(process.cwd(), '..');
 const proofMapFile = resolve(
   repositoryRoot,
-  'docs/rebuild/evidence/maya-chat-first-ux/wave5/e1-u-proofs.json',
+  'docs/rebuild/widget-release-programme/development-v14/e1-u-proofs.json',
 );
 const auditFile = resolve(
   repositoryRoot,

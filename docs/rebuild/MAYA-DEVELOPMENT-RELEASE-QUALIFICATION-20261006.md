@@ -1,7 +1,14 @@
 # Local release qualification checkpoint — 2026-10-06
 
-**AR-1 single-operator rehearsal passed. The existing evidence verifier accepts fresh HTTP/BIN evidence:
-33 claims covering all 163 applicable clause IDs. Certificate: NOT_ISSUED.**
+**Historical AR-1 single-operator rehearsal passed its mechanics. The verifier at
+that checkpoint accepted 33 HTTP/BIN claims covering 163 IDs using the prior scope
+map. This is not current V1.4 conformance. Certificate: NOT_ISSUED.**
+
+The subsequent [V1.4 preparation review](widget-release-programme/development-v14/README.md)
+withdraws obsolete whole-approval U grounds and two broader L claims. The current
+verifier correctly rejects the old manifest's six approval U claims. The artifacts
+below retain their original bytes and results as historical evidence; none is
+promoted to the new audit.
 
 Candidate `7879f811b2c04d8fee7439e862cbd74b59c4cb3d` follows checkpoint
 `48773ca4028445e0391e7a1ac7fec38c16799a1a`. Runtime source remains

@@ -57,8 +57,8 @@
     "id": "TURN-M7",
     "description": "changed principal may acquire prior USER identity",
     "file": "src/widgets/stores/timeline.store.ts",
-    "find": "existing.principalProofHash !== input.principalProofHash ||",
-    "replace": "false ||",
+    "find": "existing.conversationId !== input.conversationId ||\n          existing.principalProofHash !== input.principalProofHash ||",
+    "replace": "existing.conversationId !== input.conversationId ||\n          false ||",
     "killers": ["TURN-REPLAY-REFUSE"],
     "expect": "build-killed"
   },

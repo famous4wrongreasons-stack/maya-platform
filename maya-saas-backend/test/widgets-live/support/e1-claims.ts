@@ -1,4 +1,4 @@
-/** Frozen Wave-5 E1 target set from GATES-PLAN-V11. */
+/** Wave-5 targets reconciled with V1.4; F74a approval absence is no longer a U claim. */
 export const E1_L_CLAUSES = Object.freeze([
   // L-T clauses also need the clean HTTP/BIN positive pair required by §0.5.
   'G1-a',
@@ -117,7 +117,6 @@ export const E1_L_CLAUSES = Object.freeze([
   'G13-I5',
   'G13-I6',
   'G13-I8',
-  'G13-I9',
 ] as const);
 
 export const E1_U_CLAUSES = Object.freeze([
@@ -131,13 +130,7 @@ export const E1_U_CLAUSES = Object.freeze([
   'R-5',
   'R-7',
   '10.R5',
-  'G11-I4',
-  'G11-I5',
-  'G11-I6',
-  'G11-I10',
   'G13-R7',
-  'G13-I1',
-  'G13-I2',
 ] as const);
 
 export const E1_LT_CLAUSES = Object.freeze([

@@ -112,10 +112,10 @@
   },
   {
     "id": "MINT-M11",
-    "description": "persist an invented readback text on every record",
+    "description": "persist an invented readback text on records outside booking and price confirmations",
     "file": "src/widgets/emission/record-writer.ts",
-    "find": "          idempotency_key: booking.idempotencyKey,\n        }\n      : null,",
-    "replace": "          idempotency_key: booking.idempotencyKey,\n        }\n      : { readback_text: 'invented' },",
+    "find": "      : priceDecision === null\n        ? null\n        : {\n            requires_readback: false,",
+    "replace": "      : priceDecision === null\n        ? { readback_text: 'invented' }\n        : {\n            requires_readback: false,",
     "killers": [
       "MINT-1"
     ],

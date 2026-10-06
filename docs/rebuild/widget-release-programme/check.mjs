@@ -5,13 +5,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { check, load, recomputeHeadline } from '../evidence/maya-chat-first-ux/gate-audit-check.mjs';
+import { check, recomputeHeadline } from '../evidence/maya-chat-first-ux/gate-audit-check.mjs';
+import { loadV13Audit } from './development-v14/prepare-audit.mjs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../../..');
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const baseline = JSON.parse(read('docs/rebuild/widget-release-programme/baseline.json'));
-const state = load();
+// This programme's 31-false baseline is historical. Do not impose its states on a fresh candidate.
+const state = loadV13Audit();
 assert.deepEqual(check(state), []);
 const falseKeys = state.audit.gates.flatMap(g => Object.entries(g.clauses).filter(([, c]) => c.state === 'false').map(([k]) => k));
 assert.deepEqual(baseline.clauses.map(c => c.id), falseKeys);

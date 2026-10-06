@@ -109,7 +109,7 @@ const auditFile = path.resolve(
   option('--audit') ?? path.join(REPO, 'docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json'),
 );
 const uProofFile = path.resolve(
-  option('--u-proofs') ?? path.join(REPO, 'docs/rebuild/evidence/maya-chat-first-ux/wave5/e1-u-proofs.json'),
+  option('--u-proofs') ?? path.join(REPO, 'docs/rebuild/widget-release-programme/development-v14/u-proofs.json'),
 );
 
 // ── the closed allowlists (§3.2) ──────────────────────────────────────────────────────────────────────────────
