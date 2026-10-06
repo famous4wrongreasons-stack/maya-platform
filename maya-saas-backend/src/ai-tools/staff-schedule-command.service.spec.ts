@@ -261,6 +261,62 @@ describe('StaffScheduleCommandService', () => {
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
+  it.each([
+    'На какую дату изменить график?',
+    'Какому мастеру изменить график?',
+    'Уточните мастера: Антон, Максим',
+    'Укажите время перерыва, например 14:00–15:00.',
+    'До какого времени сократить рабочий день?',
+  ])('does not capture a new request after %s', async (prompt) => {
+    for (const content of [
+      'Установи цену Стрижка 1900 рублей на завтра',
+      'Проверь окна после отмен',
+      'Здравствуйте',
+      'Сколько записей завтра?',
+    ]) {
+      const mocks = createService();
+      await expect(
+        mocks.service.tryHandle(user, {
+          surface: 'web',
+          requestId: 'purpose-switch-1234',
+          messages: [
+            { role: 'user', content: 'Сделай Антону выходной' },
+            { role: 'assistant', content: prompt },
+            { role: 'user', content },
+          ],
+        }),
+      ).resolves.toBeNull();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      expect(mocks.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+    }
+  });
+
+  it.each([
+    'График Антона',
+    'Добрый день',
+    'Покажи Антона',
+    'Антона пожалуйста',
+  ])(
+    'requires the whole staff clarification to be a current catalogue name: %s',
+    async (content) => {
+      const mocks = createService();
+      await expect(
+        mocks.service.tryHandle(user, {
+          surface: 'web',
+          requestId: 'name-purpose-switch-1234',
+          messages: [
+            { role: 'user', content: 'Сделай завтра выходной' },
+            { role: 'assistant', content: 'Какому мастеру изменить график?' },
+            { role: 'user', content },
+          ],
+        }),
+      ).resolves.toBeNull();
+      expect(mocks.crm.getStaff).toHaveBeenCalledWith(user.tenantId);
+      expect(mocks.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    },
+  );
+
   it.each([UserRole.CLIENT, UserRole.STAFF, UserRole.CUSTOMER])(
     'denies %s before CRM reads',
     async (role) => {

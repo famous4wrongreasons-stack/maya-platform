@@ -2,6 +2,7 @@ import type { NavigateWidgetMinterPort } from './effect-router.ports';
 import type { GateContext, PrincipalView } from '../gate.types';
 import { ctx, rec } from '../gates/gate-fixtures.spec-helper.spec';
 import { EffectRouterService, ROUTABLE_EFFECTS } from './effect-router.service';
+import { SCHEDULE_AE } from '../emission/schedule-intent-template';
 
 const PRINCIPAL: PrincipalView = {
   authority: {
@@ -79,6 +80,16 @@ const fixture = () => {
       nextEnvelope: null,
       resolvedWidget: null,
       ownerDecision: { state: 'SUCCEEDED' },
+    }),
+  };
+  const schedule = {
+    commit: jest.fn().mockResolvedValue({
+      receiptOutcome: 'ACCEPTED',
+      refusalCode: null,
+      actionReceiptRef: 'schedule-execution',
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: { domain: 'staff_schedule', state: 'SUCCEEDED' },
     }),
   };
   const metric = { increment: jest.fn(), value: jest.fn() };
@@ -175,6 +186,7 @@ const fixture = () => {
     projector,
     emitter,
     priceApprovals,
+    schedule,
     threadPage,
     bookingPropose,
     bookingSelectors,
@@ -201,6 +213,7 @@ const fixture = () => {
         canProject: () => Promise.resolve(true),
       },
       priceApprovals,
+      schedule as never,
     ),
   };
 };
@@ -216,6 +229,46 @@ const routeEffect = (router: EffectRouterService, input: GateContext) =>
   router.route(input, input.facts.resolvedNouns);
 
 describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
+  it.each([
+    ['SETTINGS_DRAFT', SCHEDULE_AE, 'schedule'],
+    ['APPROVAL', 'crm.service.fixed-price.update.v1', 'pricing'],
+    ['BOOKING_CONFIRMATION', 'crm.appointment.create.v1', 'booking'],
+  ] as const)(
+    'keeps %s commit isolated after installing every owner',
+    async (kind, capability, lane) => {
+      const f = fixture();
+      const result = await f.router.route(
+        ctx(
+          rec({
+            effect: 'COMMIT',
+            widgetKind: kind,
+            capabilitySpace: 'AE',
+            capabilityKey: capability,
+            confirmationOfKind: kind === 'APPROVAL' ? 'approval' : 'draft',
+            confirmationOfRef: 'source-approval',
+            confirmationIdempotencyKey: 'source-key',
+            approvalDecision: kind === 'APPROVAL' ? 'approve' : null,
+          }),
+          { principal: PRINCIPAL },
+        ),
+        RESOLVED,
+      );
+      expect(result).toMatchObject({
+        outcome: 'terminate',
+        route: { receipt_outcome: 'ACCEPTED' },
+      });
+      expect(f.schedule.commit).toHaveBeenCalledTimes(
+        lane === 'schedule' ? 1 : 0,
+      );
+      expect(f.approvals.decide).toHaveBeenCalledTimes(
+        lane === 'pricing' ? 1 : 0,
+      );
+      expect(f.commits.commit).toHaveBeenCalledTimes(
+        lane === 'booking' ? 1 : 0,
+      );
+      expect(f.priceApprovals.read).not.toHaveBeenCalled();
+    },
+  );
   it('G13-R10 exposes exactly the seven routable effects, with no NONE', () => {
     expect(ROUTABLE_EFFECTS).toEqual([
       'NAVIGATE',

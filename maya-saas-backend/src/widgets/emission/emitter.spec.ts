@@ -11,6 +11,8 @@ import type { WidgetComposerInput } from '../../widget-contract/envelope';
 import type { WidgetKind } from '../../widget-contract/kinds';
 import type { PrincipalView } from '../gate.types';
 import { envelopeBodyHash } from './envelope.factory';
+import { SCHEDULE_AE, SCHEDULE_TEMPLATE } from './schedule-intent-template';
+import { servicePriceApprovalMintRequest } from '../pricing/service-price-approval.presenter';
 
 class FakePrisma {
   public emissions: Record<string, unknown>[] = [];
@@ -152,6 +154,149 @@ const composer = (
   composerFor('METRIC', 'c7.measurement.read', intentProposals);
 
 describe('K3 emission — mint, compose, fit, seal', () => {
+  it('persists separate schedule and pricing owner identities in one emitter, with no generic mint authority', async () => {
+    const { emitter, prisma } = make();
+    const now = new Date('2035-05-10T09:00:00Z');
+    const cell = (value: string | boolean) => ({
+      state: 'KNOWN',
+      value,
+      label: String(value),
+      reason_code: null,
+      fact_ref: null,
+      as_of: null,
+      evidence_refs: [],
+      next_intent_ref: null,
+    });
+    const scheduleRequest = {
+      ...req(),
+      kind: 'SETTINGS_DRAFT' as const,
+      body: {
+        draft_ref: 'schedule-approval',
+        draft_class: 'schedule_rule',
+        scope_label: cell('Антон: 2035-05-10'),
+        diff: [
+          {
+            path: 'schedule.day',
+            label: { phrase_key: 'day', rendered: 'День' },
+            from: cell('10:00–20:00'),
+            to: cell('Выходной'),
+            reversible: cell(false),
+            effect_text: {
+              phrase_key: 'effect',
+              rendered: 'После подтверждения',
+            },
+            bound_ref: null,
+          },
+        ],
+        apply_intent: 'i1',
+        discard_intent: 'i2',
+        editor_handoff_intent: null,
+      },
+      composerInput: composerFor('SETTINGS_DRAFT', 'staff.schedule.update', [
+        {
+          intent_template_key: SCHEDULE_TEMPLATE,
+          capability: { space: 'AE', key: SCHEDULE_AE },
+          argument_handles: {
+            approval: 'opaque-approval',
+            payload: 'opaque-payload',
+          },
+          role: 'primary',
+        },
+        {
+          intent_template_key: 'control.dismiss@1',
+          capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+          role: 'escape',
+        },
+      ]),
+    };
+    await expect(emitter.emit(scheduleRequest, now)).rejects.toThrow(
+      'schedule_confirmation_context_required',
+    );
+    await emitter.emitScheduleConfirmation(
+      scheduleRequest,
+      {
+        commitIntentIndex: 0,
+        confirmationOfKind: 'draft',
+        confirmationOfRef: 'schedule-approval',
+        producedByIntentTokenHash: null,
+        idempotencyKey: 'schedule-approval',
+        requiresReadback: false,
+        readbackRef: null,
+      },
+      now,
+    );
+    expect(
+      prisma.records.filter((record) => record.effect === 'COMMIT'),
+    ).toEqual([
+      expect.objectContaining({
+        widgetKind: 'SETTINGS_DRAFT',
+        capabilityKey: SCHEDULE_AE,
+        confirmationOfKind: 'draft',
+        confirmationOfRef: 'schedule-approval',
+        confirmationJson: expect.objectContaining({
+          idempotency_key: 'schedule-approval',
+        }),
+      }),
+    ]);
+    const snapshot = {
+      id: 'price-approval',
+      payloadHash: 'f'.repeat(64),
+      createdAt: now,
+      expiresAt: new Date(now.getTime() + 600_000),
+      summary: 'Цена: требуется подтверждение',
+      serviceId: '42',
+      serviceName: 'Стрижка',
+      companyId: 'company',
+      currentPrice: 1700,
+      proposedPrice: 1900,
+      origin: {
+        contract: 'maya.service-price-chat-approval/1' as const,
+        approvalId: 'price-approval',
+        payloadHash: 'f'.repeat(64),
+        userTurnId: 'user-turn',
+        conversationId: 'c1',
+        principalProofHash: 'p'.repeat(64),
+      },
+    };
+    const priceRequest = servicePriceApprovalMintRequest(
+      snapshot,
+      principal(),
+      'price-turn',
+      600,
+    );
+    const revalidate = jest.fn().mockResolvedValue(undefined);
+    await expect(emitter.emit(priceRequest, now)).rejects.toThrow(
+      'service_price_approval_context_required',
+    );
+    await emitter.emitServicePriceApproval(
+      priceRequest,
+      {
+        approvalId: snapshot.id,
+        payloadHash: snapshot.payloadHash,
+        revalidate,
+      },
+      now,
+    );
+    const priceRecords = prisma.records.filter(
+      (record) => record.capabilityKey === 'crm.service.fixed-price.update.v1',
+    );
+    expect(priceRecords).toHaveLength(2);
+    expect(priceRecords).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          widgetKind: 'APPROVAL',
+          confirmationOfRef: 'price-approval',
+        }),
+      ]),
+    );
+    expect(
+      priceRecords.every(
+        (record) => record.confirmationOfRef !== 'schedule-approval',
+      ),
+    ).toBe(true);
+    expect(revalidate).toHaveBeenCalledTimes(2);
+  });
+
   it('FBE2E-2 mints a strict service selector and a closed server-owned transition domain', async () => {
     const { prisma, emitter } = make();
     const minted = await emitter.emitBookingSelector(

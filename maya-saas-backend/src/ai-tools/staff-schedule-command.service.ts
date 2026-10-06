@@ -139,8 +139,8 @@ export class StaffScheduleCommandService {
     if (dto.surface !== 'native' && dto.surface !== 'web') {
       return null;
     }
-    const rawText = this.commandText(dto);
-    const normalizedText = this.normalizeText(rawText);
+    const command = this.commandText(dto);
+    const normalizedText = this.normalizeText(command.text);
     const operation = this.detectOperation(normalizedText);
     // 🔴 Здесь остались ТОЛЬКО команды. Читающие ветки (журнал записей и
     // график команды) убраны намеренно: они отвечали на ВОПРОС заготовкой,
@@ -170,6 +170,18 @@ export class StaffScheduleCommandService {
       );
     }
 
+    const clarificationStaff =
+      command.staffAnswers.length > 0
+        ? await this.crmService.getStaff(user.tenantId)
+        : null;
+    if (
+      clarificationStaff &&
+      command.staffAnswers.some(
+        (answer) => !this.isStaffNameMaterial(answer, clarificationStaff),
+      )
+    )
+      return null;
+
     const timezone = await this.tenantTimezone(user.tenantId);
     const parsed: ParsedScheduleIntent = {
       operation,
@@ -181,7 +193,8 @@ export class StaffScheduleCommandService {
       return this.replyOnly('На какую дату изменить график?');
     }
 
-    const staff = await this.crmService.getStaff(user.tenantId);
+    const staff =
+      clarificationStaff ?? (await this.crmService.getStaff(user.tenantId));
     const match = this.resolveStaff(normalizedText, staff);
     if (match.kind === 'missing') {
       return this.replyOnly('Какому мастеру изменить график?');
@@ -924,16 +937,21 @@ export class StaffScheduleCommandService {
   // approval, cancellation or unrelated assistant turn ends that exchange.
   // This is draft input, never authority: current staff/day and approval are
   // resolved again by the same tenant-scoped owner on every turn.
-  private commandText(dto: AiCoreChatDto): string {
+  private commandText(dto: AiCoreChatDto): {
+    text: string;
+    staffAnswers: string[];
+  } {
+    const plain = (text: string) => ({ text, staffAnswers: [] as string[] });
     const messages = dto.messages;
     let index = messages.length - 1;
     while (index >= 0 && messages[index].role !== 'user') index -= 1;
-    if (index < 0) return '';
+    if (index < 0) return plain('');
     const latest = messages[index].content;
-    if (this.detectOperation(this.normalizeText(latest))) return latest;
+    if (this.detectOperation(this.normalizeText(latest))) return plain(latest);
     if (/^(?:нет|отмена|отмени|не надо|стоп)(?:[\s.!]|$)/i.test(latest))
-      return '';
+      return plain('');
     const parts = [latest];
+    const staffAnswers: string[] = [];
     while (
       index >= 2 &&
       messages[index - 1].role === 'assistant' &&
@@ -942,13 +960,76 @@ export class StaffScheduleCommandService {
       ) &&
       messages[index - 2].role === 'user'
     ) {
+      if (
+        !this.isClarificationMaterial(
+          messages[index - 1].content,
+          messages[index].content,
+        )
+      )
+        return plain(latest);
+      if (
+        /^(?:Какому мастеру|Уточните мастера)/.test(messages[index - 1].content)
+      )
+        staffAnswers.push(messages[index].content);
       index -= 2;
       const text = messages[index].content;
       parts.unshift(text);
       if (this.detectOperation(this.normalizeText(text)))
-        return parts.join(' ');
+        return { text: parts.join(' '), staffAnswers };
     }
-    return latest;
+    return plain(latest);
+  }
+
+  private isClarificationMaterial(prompt: string, answer: string): boolean {
+    const text = this.normalizeText(answer)
+      .trim()
+      .replace(/[.!]+$/, '')
+      .trim();
+    // A new request must reach the ordinary chat router. A date embedded in a
+    // pricing/booking/analytics request is not an answer to this schedule draft.
+    if (prompt.startsWith('На какую дату')) {
+      const date = text.replace(/^(?:на|в|во)\s+/, '');
+      return (
+        /^(?:сегодня|завтра|послезавтра|\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?)$/.test(
+          date,
+        ) ||
+        WEEKDAYS.has(date) ||
+        new RegExp(
+          `^\\d{1,2}\\s+(?:${[...MONTHS.keys()].join('|')})(?:\\s+\\d{4})?$`,
+        ).test(date)
+      );
+    }
+    if (
+      prompt.startsWith('Укажите время') ||
+      prompt.startsWith('До какого времени')
+    )
+      return /^(?:(?:с|до)\s+)?\d{1,2}(?::[0-5]\d)?(?:\s*(?:[-–—]|до)\s*\d{1,2}(?::[0-5]\d)?)?$/.test(
+        text,
+      );
+    // Shape is only a cheap candidate check; every word must also belong to
+    // one current tenant staff name before any carried command is interpreted.
+    return /^[а-яё]+(?:[ -][а-яё]+){0,2}$/.test(text);
+  }
+
+  private isStaffNameMaterial(answer: string, staff: StaffMember[]): boolean {
+    const words = this.words(answer);
+    return (
+      words.length > 0 &&
+      staff.some((member) => {
+        const names = this.words(member.name);
+        const aliases = [...GIVEN_NAME_ALIASES.entries()]
+          .filter(([, canonical]) =>
+            canonical.some((name) => names.includes(name)),
+          )
+          .map(([alias]) => alias);
+        const forms = new Set(
+          [...names, ...aliases].flatMap((name) => [
+            ...this.nameWordForms(name),
+          ]),
+        );
+        return words.every((word) => forms.has(word));
+      })
+    );
   }
 
   private latestUserText(dto: AiCoreChatDto): string {
