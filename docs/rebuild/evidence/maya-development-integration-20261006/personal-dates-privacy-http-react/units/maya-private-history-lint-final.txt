@@ -1,0 +1,12 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core.service.spec.ts
+    79:27  warning  Unsafe argument of type `any` assigned to a parameter of type `AuthenticatedUser`                  @typescript-eslint/no-unsafe-argument
+    79:34  warning  Unsafe argument of type `any` assigned to a parameter of type `AiCoreChatDto`                      @typescript-eslint/no-unsafe-argument
+  1528:37  error    'init?.body' may use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/personal-dates-restart.probe-spec.ts
+  584:76  error  Replace `m.name` with `⏎················m.name,⏎··············`  prettier/prettier
+
+✖ 4 problems (2 errors, 2 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

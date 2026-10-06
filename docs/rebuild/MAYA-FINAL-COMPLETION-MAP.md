@@ -787,3 +787,20 @@ reads. C9/source/policy and reply persistence remain unchanged. Four targeted
 suites pass198/198; lint/review have no blockers. Updated HTTP/browser assertions
 are prepared, not executed; prior r3 is not acceptance of this newest increment.
 See [public-profile checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md).
+
+### Qualified local READ follow-ups — 2026-10-06
+
+Public-profile r4 at `29412d8f` passes actual HTTP/auth/C9, PG/application restart
+and seven current React checkpoints with the redundant raw-JSON card suppressed.
+Personal dates r2 at `02fb2e7b` passes two selected canonical-context HTTP
+regressions, restart and seven React states including real Client-link revocation.
+The same code closes next-turn forwarding of private assistant history: the actual
+carrier submits prior private prose, but nine complete serialized model requests
+exclude it. Revoked link yields a distinct model request without source dispatch;
+revoked membership yields 401 without another model call. Final units pass 273/273,
+production-only types and scoped lint pass, and independent review finds no privacy
+blocker. Owned services are stopped. Existing personal SCHEDULE cards remain a UX
+limitation. Synthetic model/CRM/identity fixtures do not establish external
+acceptance, full-project types, carrier personal-booking activation or C10 completion.
+See the extended [personal checkpoint](MAYA-PERSONAL-READ-CONTEXT-20261006.md) and
+[public-profile checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md). `NOT_ISSUED`.

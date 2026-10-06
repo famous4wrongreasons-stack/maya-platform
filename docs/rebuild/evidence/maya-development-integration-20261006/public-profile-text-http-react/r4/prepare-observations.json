@@ -1,0 +1,208 @@
+{
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "firstStatus": {
+    "status": 201,
+    "body": {
+      "request_id": "560ed7e4-5b65-42d3-9b60-3eb410970262",
+      "coordination": {
+        "run_id": "ce39bd1d-97fc-4fbf-abb0-674332a3a0fc",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "658ba7ea-3c07-4be9-ad8c-dbd593384604",
+        "conversationId": "2ae47ceb-026f-48b2-81d0-b81963eb0345"
+      },
+      "reply": "Адрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxbax2u000h62c9l40a3r2u"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    }
+  },
+  "http": {
+    "first": {
+      "request_id": "560ed7e4-5b65-42d3-9b60-3eb410970262",
+      "coordination": {
+        "run_id": "ce39bd1d-97fc-4fbf-abb0-674332a3a0fc",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "658ba7ea-3c07-4be9-ad8c-dbd593384604",
+        "conversationId": "2ae47ceb-026f-48b2-81d0-b81963eb0345"
+      },
+      "reply": "Адрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxbax2u000h62c9l40a3r2u"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "replay": {
+      "request_id": "560ed7e4-5b65-42d3-9b60-3eb410970262",
+      "coordination": {
+        "run_id": "ce39bd1d-97fc-4fbf-abb0-674332a3a0fc",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "658ba7ea-3c07-4be9-ad8c-dbd593384604",
+        "conversationId": "2ae47ceb-026f-48b2-81d0-b81963eb0345"
+      },
+      "reply": "Адрес по CRM: Тестовая улица, 7.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxbax2u000h62c9l40a3r2u"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "followUp": {
+      "request_id": "fbe3c230-7f04-49c4-940d-07275003cfe4",
+      "coordination": {
+        "run_id": "dd7d88a8-aee0-4739-8c4d-f5c5dd4a9c1e",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "47c8dd68-d141-4da7-a2ac-40178bd2ec40",
+        "conversationId": "2ae47ceb-026f-48b2-81d0-b81963eb0345"
+      },
+      "reply": "Адрес по CRM: Новая улица, 8.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "company.business-hours.read",
+          "status": "completed",
+          "execution_id": "cmuxbax4x000n62c9pabwge4n"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "company_profile",
+        "required_tools": [
+          "company.business-hours.read"
+        ],
+        "evidence_tools": [
+          "company.business-hours.read"
+        ]
+      },
+      "brain": {
+        "persona": "admin",
+        "intent": "general"
+      }
+    },
+    "foreignRun": 400,
+    "foreignHistory": 200,
+    "otherTenantReply": "Адрес по CRM: Чужая улица, 2.\nГрафик работы по CRM: Пн–Вс 10:00–20:00.\nЧасовой пояс: Europe/Moscow.\nИсточник: CRM салона.",
+    "receipts": [
+      {
+        "id": "b34e6ea2-8ed3-48de-8dd8-9d5755272ec3",
+        "runId": "ce39bd1d-97fc-4fbf-abb0-674332a3a0fc",
+        "state": "SETTLED",
+        "result": {
+          "contract": "maya.c9-conversation-read-receipt/1",
+          "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+          "capability": "company.business-hours.read",
+          "sourceType": "AiToolExecution",
+          "completedAt": "2026-10-06T23:30:49.209Z",
+          "executionId": "cmuxbax2u000h62c9l40a3r2u",
+          "businessQualification": "SOURCE_DEFINED"
+        }
+      },
+      {
+        "id": "69e32165-5834-4f45-96f5-18ff5241eec6",
+        "runId": "dd7d88a8-aee0-4739-8c4d-f5c5dd4a9c1e",
+        "state": "SETTLED",
+        "result": {
+          "contract": "maya.c9-conversation-read-receipt/1",
+          "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+          "capability": "company.business-hours.read",
+          "sourceType": "AiToolExecution",
+          "completedAt": "2026-10-06T23:30:49.282Z",
+          "executionId": "cmuxbax4x000n62c9pabwge4n",
+          "businessQualification": "SOURCE_DEFINED"
+        }
+      }
+    ],
+    "encryptedHistory": true
+  },
+  "reads": [
+    {
+      "company": "99201",
+      "mode": "full"
+    },
+    {
+      "company": "99201",
+      "mode": "changed"
+    },
+    {
+      "company": "99202",
+      "mode": "changed"
+    }
+  ],
+  "modelCalls": 4,
+  "unexpected": []
+}

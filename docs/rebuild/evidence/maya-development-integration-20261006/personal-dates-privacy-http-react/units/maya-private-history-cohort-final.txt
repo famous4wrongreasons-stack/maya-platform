@@ -1,0 +1,13 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/routing-regression.acceptance.spec.ts
+PASS src/ai-tools/ai-core-model.semantic-slots.spec.ts
+PASS src/conversation-intelligence/semantic-slot-normalization.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/conversation-intelligence/conversation-capability.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       273 passed, 273 total
+Snapshots:   0 total
+Time:        0.898 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/conversation-intelligence/conversation-capability.spec.ts", "src/conversation-intelligence/semantic-slot-normalization.spec.ts", "src/ai-tools/ai-core-model.semantic-slots.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-private-history-cohort-final.json

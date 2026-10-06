@@ -93,3 +93,15 @@ for this newest change also remain pending; earlier r3 remains evidence for the
 previous version and the presentation issue it exposed. Heavy slot stays free.
 
 [Text-only public-profile checkpoint evidence](evidence/maya-development-integration-20261006/public-profile-text/manifest.json).
+
+The upgraded actual r4 proof now **passes** at `29412d8f`: fresh/replayed/follow-up
+HTTP responses have no generic widget resolution, and all seven current React
+checkpoints have no raw SCHEDULE card. Screenshots wait for completed text reveal;
+the changed-profile screenshot shows the complete sourced answer. Application and
+PostgreSQL restart, tenant isolation, revoked access and zero business effects pass.
+All owned services stopped. The later production-only 4096 MB typecheck also passes
+for this runtime plus the personal-history privacy correction; the earlier full
+project OOM remains unqualified. Scripted model and synthetic CRM only; no real
+model/provider or complete C10 acceptance.
+
+[Public-profile r4 logs, screenshots and hashed source evidence](evidence/maya-development-integration-20261006/public-profile-text-http-react/manifest.json).

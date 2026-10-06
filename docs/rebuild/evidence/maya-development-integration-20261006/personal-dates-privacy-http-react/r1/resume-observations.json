@@ -1,0 +1,121 @@
+{
+  "syntheticModel": true,
+  "syntheticCanonicalAppointments": true,
+  "syntheticA18Verifier": true,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "b4842da93e3de8dcde569ec05d21b6d2d2ad9e3832fc48c4d2e74623514907e6"
+  },
+  "browserCheckpoints": [
+    "history",
+    "upcoming",
+    "changed",
+    "incomplete",
+    "cancelled",
+    "unlinked",
+    "revoked"
+  ],
+  "receipts": [
+    {
+      "id": "7232b38a-52ad-4ed9-89ea-36a0cc968cb9",
+      "runId": "57ebc759-bc41-4156-b1ed-8ca75984baa2",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:42:03.346Z",
+        "executionId": "cmuxbpd8n000vvhc9cujducf1",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "5ce443f3-b14c-4c31-b441-5221ca00b680",
+      "runId": "e30671c0-3f3e-4362-b00b-d366af9758b8",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:42:03.580Z",
+        "executionId": "cmuxbpdfb0011vhc9wl9ouxwu",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "79ce8804-b295-4198-b3d4-b62e6eb2cfbb",
+      "runId": "d2ddaf58-9ff8-4190-9a06-d8fc0aa52cab",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:42:06.136Z",
+        "executionId": "cmuxbpfe60002xtc9dn0dhlja",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "316e17cc-77cf-40fb-9c06-63820ad10432",
+      "runId": "c13e4d07-64a5-49aa-9ea9-40b5b5d6a65d",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:42:06.458Z",
+        "executionId": "cmuxbpfn90007xtc94legspjf",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "3de5d222-279a-4fc7-a3ba-e06a6a81486e",
+      "runId": "42b97d84-c2c2-4b91-86b9-52bc13be695c",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:42:06.724Z",
+        "executionId": "cmuxbpfuo000cxtc99nrd0pl6",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "2ee541e1-8a60-4f74-ab82-9a6d82cbb73f",
+      "runId": "7fbf46e0-7eee-4e10-9fc7-8ab04a00cba8",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:42:06.958Z",
+        "executionId": "cmuxbpg16000hxtc9qouba450",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "9dcca163-5e7c-4aaa-9278-50cc163dd682",
+      "runId": "da04113b-508c-4db9-8e6c-6ba6cfbeb852",
+      "state": "HELD_UNKNOWN",
+      "result": null
+    }
+  ],
+  "reads": [
+    "appointments.own.list",
+    "appointments.own.list",
+    "appointments.own.list",
+    "appointments.own.list"
+  ],
+  "modelCalls": 5,
+  "unexpected": []
+}

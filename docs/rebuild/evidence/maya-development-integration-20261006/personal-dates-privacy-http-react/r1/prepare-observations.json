@@ -1,0 +1,1529 @@
+{
+  "syntheticModel": true,
+  "syntheticCanonicalAppointments": true,
+  "syntheticA18Verifier": true,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "firstStatus": {
+    "status": 201,
+    "body": {
+      "request_id": "3e4a2b03-4f47-47f9-a3c1-dfa7797ff27b",
+      "coordination": {
+        "run_id": "57ebc759-bc41-4156-b1ed-8ca75984baa2",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "5b5d819e-e5e0-414f-a9d6-9c3f4ebefb88",
+        "conversationId": "3b1d6740-481a-4e7e-8370-deca877c1f49"
+      },
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n20.07.2099, 16:17 (Asia/Novosibirsk) — PRIVATE_BRANCH_99201 — PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2\nИсточник: ваши записи в MAYA.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "appointments.own.list",
+          "status": "completed",
+          "execution_id": "cmuxbpd8n000vvhc9cujducf1"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+          "envelope_seal": "1baba2976a8eb39c3a4f73df3c9eb2c0dd3df5a21ccf43bf5bd38b4e6ecfb2e3",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxbpcyg0000vhc9e41pmxa5",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "e66c6ecb-1284-43a0-a11c-e45948a195e1",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxbpd8n000vvhc9cujducf1",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "f06b3e0ad29ffd4ffbabd6d007d18d46"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "client_identified",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "range": {
+                "from": "2099-07-20T09:17:23.000Z",
+                "to": "2099-07-20T10:23:00.000Z"
+              },
+              "timezone": "UTC",
+              "lanes": [
+                {
+                  "lane_id": "personal",
+                  "label": {
+                    "state": "KNOWN",
+                    "value": "Моя запись",
+                    "label": "Моя запись",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "staff_ref": null
+                }
+              ],
+              "buckets": [
+                {
+                  "bucket_id": "current",
+                  "start": "2099-07-20T09:17:23.000Z",
+                  "end": "2099-07-20T10:23:00.000Z"
+                }
+              ],
+              "entries": [
+                {
+                  "entry_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9",
+                  "lane_id": "personal",
+                  "bucket_span": [
+                    "current",
+                    "current"
+                  ],
+                  "title": {
+                    "state": "KNOWN",
+                    "value": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "label": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "subtitle": null,
+                  "state": {
+                    "state": "KNOWN",
+                    "value": "BOOKED",
+                    "label": "BOOKED",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "pii_masked": false,
+                  "detail_intent": "i1",
+                  "move_intent": null,
+                  "move_targets": null
+                }
+              ],
+              "gaps": [],
+              "detail_intent": "i1"
+            },
+            "intents": [
+              {
+                "intent_ref": "i1",
+                "intent_token": "f6n_BOgGXm5xO2iOGUXltb1bcJAf2GjV",
+                "role": "primary",
+                "label": "Review cancellation",
+                "utterance_preview": "Review cancellation",
+                "speech_aliases": [
+                  "review cancellation"
+                ],
+                "ordinal": 1,
+                "priority": 1,
+                "effect": "REFINE",
+                "capability": {
+                  "space": "C9",
+                  "key": "appointments.own.cancel"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Review cancellation",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T23:52:03.365Z",
+                "single_use": true
+              },
+              {
+                "intent_ref": "i2",
+                "intent_token": "fEj10zSz9LoX8RHisrA_b4n5TgApzNSK",
+                "role": "escape",
+                "label": "Dismiss",
+                "utterance_preview": "Dismiss",
+                "speech_aliases": [
+                  "dismiss",
+                  "close"
+                ],
+                "ordinal": 2,
+                "priority": 0,
+                "effect": "CONTROL",
+                "capability": {
+                  "space": "CONTROL",
+                  "key": "control.widget.dismiss"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "ANONYMOUS",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "muted",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Dismiss",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T23:52:03.365Z",
+                "single_use": true
+              }
+            ],
+            "provenance": {
+              "source_capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "appointments.own.list@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "appointments.own.list",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:42:03.355Z",
+                  "evidence_refs": [
+                    "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "ffbb77b58a9075e88f2ea783c32636da60d3e062a40f054418074b6a3cb047a3",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "48a324218219fa9df95ed696e28a10fe0d79685a6ed146c3f0101b2d18ef6c4c",
+              "evidence_refs": [
+                {
+                  "ref": "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:42:03.365Z",
+              "expires_at": "2026-10-06T23:52:03.365Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "itemized": [
+                  "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "Расписание · 1 мастер",
+                "description": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "reading_order": [
+                  {
+                    "k": "entry",
+                    "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                  "intent:i2": "Dismiss"
+                }
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 2,
+              "intents_emitted": 2,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:42:03.365Z"
+            },
+            "integrity": {
+              "body_hash": "3bee70a80641cc84686f824373f5ce2ef99bdf02df571048a3dc38ea42e0f857",
+              "cell_index_digest": "a6200f142158cfd9e9ad4ae3cf63f643214cb3275585c45eda3f546df5f16491",
+              "envelope_seal": "1baba2976a8eb39c3a4f73df3c9eb2c0dd3df5a21ccf43bf5bd38b4e6ecfb2e3",
+              "seal_key_version": 1,
+              "principal_proof_hash": "d1c02a0628917e786e6ae2d1f2532a3e7aff5c3f9ab719204811c55c71380248",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "client_appointments",
+        "required_tools": [
+          "appointments.own.list"
+        ],
+        "evidence_tools": [
+          "appointments.own.list"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "http": {
+    "first": {
+      "request_id": "3e4a2b03-4f47-47f9-a3c1-dfa7797ff27b",
+      "coordination": {
+        "run_id": "57ebc759-bc41-4156-b1ed-8ca75984baa2",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "5b5d819e-e5e0-414f-a9d6-9c3f4ebefb88",
+        "conversationId": "3b1d6740-481a-4e7e-8370-deca877c1f49"
+      },
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n20.07.2099, 16:17 (Asia/Novosibirsk) — PRIVATE_BRANCH_99201 — PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2\nИсточник: ваши записи в MAYA.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "appointments.own.list",
+          "status": "completed",
+          "execution_id": "cmuxbpd8n000vvhc9cujducf1"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+          "envelope_seal": "1baba2976a8eb39c3a4f73df3c9eb2c0dd3df5a21ccf43bf5bd38b4e6ecfb2e3",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxbpcyg0000vhc9e41pmxa5",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "e66c6ecb-1284-43a0-a11c-e45948a195e1",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxbpd8n000vvhc9cujducf1",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "f06b3e0ad29ffd4ffbabd6d007d18d46"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "client_identified",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "range": {
+                "from": "2099-07-20T09:17:23.000Z",
+                "to": "2099-07-20T10:23:00.000Z"
+              },
+              "timezone": "UTC",
+              "lanes": [
+                {
+                  "lane_id": "personal",
+                  "label": {
+                    "state": "KNOWN",
+                    "value": "Моя запись",
+                    "label": "Моя запись",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "staff_ref": null
+                }
+              ],
+              "buckets": [
+                {
+                  "bucket_id": "current",
+                  "start": "2099-07-20T09:17:23.000Z",
+                  "end": "2099-07-20T10:23:00.000Z"
+                }
+              ],
+              "entries": [
+                {
+                  "entry_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9",
+                  "lane_id": "personal",
+                  "bucket_span": [
+                    "current",
+                    "current"
+                  ],
+                  "title": {
+                    "state": "KNOWN",
+                    "value": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "label": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "subtitle": null,
+                  "state": {
+                    "state": "KNOWN",
+                    "value": "BOOKED",
+                    "label": "BOOKED",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "pii_masked": false,
+                  "detail_intent": "i1",
+                  "move_intent": null,
+                  "move_targets": null
+                }
+              ],
+              "gaps": [],
+              "detail_intent": "i1"
+            },
+            "intents": [
+              {
+                "intent_ref": "i1",
+                "intent_token": "f6n_BOgGXm5xO2iOGUXltb1bcJAf2GjV",
+                "role": "primary",
+                "label": "Review cancellation",
+                "utterance_preview": "Review cancellation",
+                "speech_aliases": [
+                  "review cancellation"
+                ],
+                "ordinal": 1,
+                "priority": 1,
+                "effect": "REFINE",
+                "capability": {
+                  "space": "C9",
+                  "key": "appointments.own.cancel"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Review cancellation",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T23:52:03.365Z",
+                "single_use": true
+              },
+              {
+                "intent_ref": "i2",
+                "intent_token": "fEj10zSz9LoX8RHisrA_b4n5TgApzNSK",
+                "role": "escape",
+                "label": "Dismiss",
+                "utterance_preview": "Dismiss",
+                "speech_aliases": [
+                  "dismiss",
+                  "close"
+                ],
+                "ordinal": 2,
+                "priority": 0,
+                "effect": "CONTROL",
+                "capability": {
+                  "space": "CONTROL",
+                  "key": "control.widget.dismiss"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "ANONYMOUS",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "muted",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Dismiss",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T23:52:03.365Z",
+                "single_use": true
+              }
+            ],
+            "provenance": {
+              "source_capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "appointments.own.list@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "appointments.own.list",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:42:03.355Z",
+                  "evidence_refs": [
+                    "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "ffbb77b58a9075e88f2ea783c32636da60d3e062a40f054418074b6a3cb047a3",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "48a324218219fa9df95ed696e28a10fe0d79685a6ed146c3f0101b2d18ef6c4c",
+              "evidence_refs": [
+                {
+                  "ref": "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:42:03.365Z",
+              "expires_at": "2026-10-06T23:52:03.365Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "itemized": [
+                  "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "Расписание · 1 мастер",
+                "description": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "reading_order": [
+                  {
+                    "k": "entry",
+                    "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                  "intent:i2": "Dismiss"
+                }
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 2,
+              "intents_emitted": 2,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:42:03.365Z"
+            },
+            "integrity": {
+              "body_hash": "3bee70a80641cc84686f824373f5ce2ef99bdf02df571048a3dc38ea42e0f857",
+              "cell_index_digest": "a6200f142158cfd9e9ad4ae3cf63f643214cb3275585c45eda3f546df5f16491",
+              "envelope_seal": "1baba2976a8eb39c3a4f73df3c9eb2c0dd3df5a21ccf43bf5bd38b4e6ecfb2e3",
+              "seal_key_version": 1,
+              "principal_proof_hash": "d1c02a0628917e786e6ae2d1f2532a3e7aff5c3f9ab719204811c55c71380248",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "client_appointments",
+        "required_tools": [
+          "appointments.own.list"
+        ],
+        "evidence_tools": [
+          "appointments.own.list"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "replay": {
+      "request_id": "3e4a2b03-4f47-47f9-a3c1-dfa7797ff27b",
+      "coordination": {
+        "run_id": "57ebc759-bc41-4156-b1ed-8ca75984baa2",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "5b5d819e-e5e0-414f-a9d6-9c3f4ebefb88",
+        "conversationId": "3b1d6740-481a-4e7e-8370-deca877c1f49"
+      },
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n20.07.2099, 16:17 (Asia/Novosibirsk) — PRIVATE_BRANCH_99201 — PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2\nИсточник: ваши записи в MAYA.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "appointments.own.list",
+          "status": "completed",
+          "execution_id": "cmuxbpd8n000vvhc9cujducf1"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+          "envelope_seal": "1baba2976a8eb39c3a4f73df3c9eb2c0dd3df5a21ccf43bf5bd38b4e6ecfb2e3",
+          "envelope": {
+            "body": {
+              "gaps": [],
+              "lanes": [
+                {
+                  "label": {
+                    "as_of": null,
+                    "label": "Моя запись",
+                    "state": "KNOWN",
+                    "value": "Моя запись",
+                    "fact_ref": 0,
+                    "reason_code": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "lane_id": "personal",
+                  "staff_ref": null
+                }
+              ],
+              "range": {
+                "to": "2099-07-20T10:23:00.000Z",
+                "from": "2099-07-20T09:17:23.000Z"
+              },
+              "buckets": [
+                {
+                  "end": "2099-07-20T10:23:00.000Z",
+                  "start": "2099-07-20T09:17:23.000Z",
+                  "bucket_id": "current"
+                }
+              ],
+              "entries": [
+                {
+                  "state": {
+                    "as_of": null,
+                    "label": "BOOKED",
+                    "state": "KNOWN",
+                    "value": "BOOKED",
+                    "fact_ref": 0,
+                    "reason_code": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "title": {
+                    "as_of": null,
+                    "label": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "state": "KNOWN",
+                    "value": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "fact_ref": 0,
+                    "reason_code": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "lane_id": "personal",
+                  "subtitle": null,
+                  "entry_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9",
+                  "pii_masked": false,
+                  "bucket_span": [
+                    "current",
+                    "current"
+                  ],
+                  "move_intent": null,
+                  "move_targets": null,
+                  "detail_intent": "i1"
+                }
+              ],
+              "timezone": "UTC",
+              "detail_intent": "i1"
+            },
+            "kind": "SCHEDULE",
+            "origin": {
+              "emitter": "capability_read",
+              "trigger": "system_reply",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "escalation": null,
+              "profile_id": "pwa/1",
+              "degraded_at": "2026-10-06T23:42:03.365Z",
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 2,
+              "body_reductions": [],
+              "intents_emitted": 2,
+              "profile_version": 1,
+              "intents_withheld": [],
+              "text_equivalent_is_canonical": false
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "appointments.own.list",
+              "fact_index": 0,
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce"
+            },
+            "intents": [
+              {
+                "role": "primary",
+                "label": "Review cancellation",
+                "effect": "REFINE",
+                "target": null,
+                "enabled": {
+                  "as_of": null,
+                  "label": "Review cancellation",
+                  "state": "KNOWN",
+                  "value": true,
+                  "fact_ref": null,
+                  "reason_code": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "ordinal": 1,
+                "priority": 1,
+                "capability": {
+                  "key": "appointments.own.cancel",
+                  "space": "C9"
+                },
+                "expires_at": "2026-10-06T23:52:03.365Z",
+                "intent_ref": "i1",
+                "single_use": true,
+                "confirmation": null,
+                "input_schema": null,
+                "intent_token": "f6n_BOgGXm5xO2iOGUXltb1bcJAf2GjV",
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "speech_aliases": [
+                  "review cancellation"
+                ],
+                "utterance_preview": "Review cancellation",
+                "verification_floor": "SESSION_VERIFIED",
+                "handoff_capability_ref": null
+              },
+              {
+                "role": "escape",
+                "label": "Dismiss",
+                "effect": "CONTROL",
+                "target": null,
+                "enabled": {
+                  "as_of": null,
+                  "label": "Dismiss",
+                  "state": "KNOWN",
+                  "value": true,
+                  "fact_ref": null,
+                  "reason_code": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "ordinal": 2,
+                "priority": 0,
+                "capability": {
+                  "key": "control.widget.dismiss",
+                  "space": "CONTROL"
+                },
+                "expires_at": "2026-10-06T23:52:03.365Z",
+                "intent_ref": "i2",
+                "single_use": true,
+                "confirmation": null,
+                "input_schema": null,
+                "intent_token": "fEj10zSz9LoX8RHisrA_b4n5TgApzNSK",
+                "authority_hint": {
+                  "emphasis": "muted",
+                  "disabled_because": null
+                },
+                "speech_aliases": [
+                  "dismiss",
+                  "close"
+                ],
+                "utterance_preview": "Dismiss",
+                "verification_floor": "ANONYMOUS",
+                "handoff_capability_ref": null
+              }
+            ],
+            "contract": "maya.widget.envelope/1",
+            "authority": {
+              "pii_class": "client_identified",
+              "data_scope": {
+                "masked_fields": []
+              },
+              "verification_level": "SESSION_VERIFIED"
+            },
+            "integrity": {
+              "body_hash": "3bee70a80641cc84686f824373f5ce2ef99bdf02df571048a3dc38ea42e0f857",
+              "approval_echo": null,
+              "envelope_seal": "1baba2976a8eb39c3a4f73df3c9eb2c0dd3df5a21ccf43bf5bd38b4e6ecfb2e3",
+              "seal_key_version": 1,
+              "cell_index_digest": "a6200f142158cfd9e9ad4ae3cf63f643214cb3275585c45eda3f546df5f16491",
+              "policy_context_echo": null,
+              "principal_proof_hash": "d1c02a0628917e786e6ae2d1f2532a3e7aff5c3f9ab719204811c55c71380248"
+            },
+            "lifecycle": {
+              "state": "MINTED",
+              "delivery": {
+                "answered_at": null,
+                "delivery_state": "live",
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "issued_at": "2026-10-06T23:42:03.365Z",
+              "on_expiry": "collapse_to_summary",
+              "dedupe_key": "SCHEDULE:ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+              "expires_at": "2026-10-06T23:52:03.365Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "retention_sec": 600,
+              "freshness_class": "live",
+              "historised_form": "summary_bubble",
+              "delivery_channel": "pwa",
+              "timeline_placement": "chronological",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null
+            },
+            "tenant_id": "cmuxbpcyg0000vhc9e41pmxa5",
+            "widget_id": "ea6f2542-85b8-464e-a85b-5c96f823f3f9",
+            "provenance": {
+              "authorship": {
+                "narrative": "none",
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "model_contribution": "none",
+                "narrative_template_id": null,
+                "model_contribution_ref": null,
+                "narrative_template_version": null
+              },
+              "confidence": "medium",
+              "facts_used": [
+                {
+                  "as_of": "2026-10-06T23:42:03.355Z",
+                  "status": "measured",
+                  "capability": "appointments.own.list",
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "totalCount": null,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ],
+                    "returnedCount": 1,
+                    "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708"
+                  },
+                  "evidence_refs": [
+                    "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708"
+                  ]
+                }
+              ],
+              "source_kind": "capability_read",
+              "completeness": {
+                "status": "PARTIAL",
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "totalCount": null,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ],
+                "returnedCount": 1,
+                "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708"
+              },
+              "facts_digest": "ffbb77b58a9075e88f2ea783c32636da60d3e062a40f054418074b6a3cb047a3",
+              "facts_origin": [
+                "synthesised"
+              ],
+              "projector_id": "appointments.own.list@1",
+              "evidence_refs": [
+                {
+                  "ref": "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "source_capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "completeness_envelope_hash": "48a324218219fa9df95ed696e28a10fe0d79685a6ed146c3f0101b2d18ef6c4c"
+            },
+            "correlation": {
+              "run_id": null,
+              "turn_id": "e66c6ecb-1284-43a0-a11c-e45948a195e1",
+              "agent_id": null,
+              "trace_id": "f06b3e0ad29ffd4ffbabd6d007d18d46",
+              "message_id": null,
+              "step_index": null,
+              "step_total": null,
+              "parent_widget_id": "cmuxbpd8n000vvhc9cujducf1"
+            },
+            "limitations": [],
+            "body_version": 1,
+            "presentation": {
+              "a11y": {
+                "label": "Расписание · 1 мастер",
+                "role_hint": "grid",
+                "description": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "live_region": "off",
+                "reading_order": [
+                  {
+                    "k": "entry",
+                    "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  }
+                ],
+                "accessible_names": {
+                  "intent:i2": "Dismiss",
+                  "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2"
+                }
+              },
+              "speech": null,
+              "density": "CARD",
+              "text_equivalent": {
+                "body": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "headline": "Расписание · 1 мастер",
+                "itemized": [
+                  "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2"
+                ],
+                "unknowns_sentence": null,
+                "completeness_sentence": null
+              },
+              "fullscreen_detail": null,
+              "presentation_mode": "owner"
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "client_appointments",
+        "required_tools": [
+          "appointments.own.list"
+        ],
+        "evidence_tools": [
+          "appointments.own.list"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "followUp": {
+      "request_id": "34dec7e2-179c-4d48-a977-4c12adc744e6",
+      "coordination": {
+        "run_id": "e30671c0-3f3e-4362-b00b-d366af9758b8",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "1aefbcb6-f6b2-4981-a468-16fadbafc4c8",
+        "conversationId": "3b1d6740-481a-4e7e-8370-deca877c1f49"
+      },
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n20.07.2099, 17:23 (Asia/Novosibirsk) — PRIVATE_BRANCH_99201 — PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2\nИсточник: ваши записи в MAYA.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "appointments.own.list",
+          "status": "completed",
+          "execution_id": "cmuxbpdfb0011vhc9wl9ouxwu"
+        }
+      ],
+      "resolution": {
+        "matched": true,
+        "receipt": {
+          "widget_id": "284033cb-116d-4442-bfee-9b3b0c390d9e",
+          "envelope_seal": "43aa56883263351cec99e9ebe4a16316b51a469e7067f010867d00991561251c",
+          "envelope": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "284033cb-116d-4442-bfee-9b3b0c390d9e",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuxbpcyg0000vhc9e41pmxa5",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "75e90006-05ae-4df6-a475-a108711c7702",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuxbpdfb0011vhc9wl9ouxwu",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "d7a8178661f92da4ec8bfb2d47d42792"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "client_identified",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "range": {
+                "from": "2099-07-20T10:23:00.000Z",
+                "to": "2099-07-20T11:23:00.000Z"
+              },
+              "timezone": "UTC",
+              "lanes": [
+                {
+                  "lane_id": "personal",
+                  "label": {
+                    "state": "KNOWN",
+                    "value": "Моя запись",
+                    "label": "Моя запись",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "staff_ref": null
+                }
+              ],
+              "buckets": [
+                {
+                  "bucket_id": "current",
+                  "start": "2099-07-20T10:23:00.000Z",
+                  "end": "2099-07-20T11:23:00.000Z"
+                }
+              ],
+              "entries": [
+                {
+                  "entry_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9",
+                  "lane_id": "personal",
+                  "bucket_span": [
+                    "current",
+                    "current"
+                  ],
+                  "title": {
+                    "state": "KNOWN",
+                    "value": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "label": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "subtitle": null,
+                  "state": {
+                    "state": "KNOWN",
+                    "value": "BOOKED",
+                    "label": "BOOKED",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "pii_masked": false,
+                  "detail_intent": "i1",
+                  "move_intent": null,
+                  "move_targets": null
+                }
+              ],
+              "gaps": [],
+              "detail_intent": "i1"
+            },
+            "intents": [
+              {
+                "intent_ref": "i1",
+                "intent_token": "IOmtnU5h8xvXdwq4sUtG0EBkSazJ2QRa",
+                "role": "primary",
+                "label": "Review cancellation",
+                "utterance_preview": "Review cancellation",
+                "speech_aliases": [
+                  "review cancellation"
+                ],
+                "ordinal": 1,
+                "priority": 1,
+                "effect": "REFINE",
+                "capability": {
+                  "space": "C9",
+                  "key": "appointments.own.cancel"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Review cancellation",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T23:52:03.597Z",
+                "single_use": true
+              },
+              {
+                "intent_ref": "i2",
+                "intent_token": "zvAKMFFeGwPKSUfNTYF2DQQrwqmmElfx",
+                "role": "escape",
+                "label": "Dismiss",
+                "utterance_preview": "Dismiss",
+                "speech_aliases": [
+                  "dismiss",
+                  "close"
+                ],
+                "ordinal": 2,
+                "priority": 0,
+                "effect": "CONTROL",
+                "capability": {
+                  "space": "CONTROL",
+                  "key": "control.widget.dismiss"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "ANONYMOUS",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "muted",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Dismiss",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-06T23:52:03.597Z",
+                "single_use": true
+              }
+            ],
+            "provenance": {
+              "source_capability": "appointments.own.list",
+              "capability_version": "029c480b853c5a12b945294cb82856721f60a110b152281b547c9cf6e6e8f9ce",
+              "projector_id": "appointments.own.list@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "appointments.own.list",
+                  "status": "measured",
+                  "as_of": "2026-10-06T23:42:03.588Z",
+                  "evidence_refs": [
+                    "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "1c6cd40b14a7abb5e1989cd485283d92baa950e6ee7142d182b04b25f40332be",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "48a324218219fa9df95ed696e28a10fe0d79685a6ed146c3f0101b2d18ef6c4c",
+              "evidence_refs": [
+                {
+                  "ref": "h_84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-10-06T23:42:03.597Z",
+              "expires_at": "2026-10-06T23:52:03.597Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:284033cb-116d-4442-bfee-9b3b0c390d9e",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "itemized": [
+                  "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "Расписание · 1 мастер",
+                "description": "Моя запись: PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                "reading_order": [
+                  {
+                    "k": "entry",
+                    "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdXhicGN5ZzAwMDB2aGM5ZTQxcG14YTUiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY211eGJwZDEzMDAwZXZoYzl4amNyNmNpaiJ9.1f44b0bd39fbecd3314db8c1b691836c36fda32cd19ed96180c0398b49eaf1d9": "PRIVATE_VISIT_99201_1, PRIVATE_VISIT_99201_2",
+                  "intent:i2": "Dismiss"
+                }
+              },
+              "fullscreen_detail": null
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 2,
+              "intents_emitted": 2,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-10-06T23:42:03.597Z"
+            },
+            "integrity": {
+              "body_hash": "846040680697aa1c18fb15d41566f65ffcb467277e6465083e71ee6eec389ee1",
+              "cell_index_digest": "a6200f142158cfd9e9ad4ae3cf63f643214cb3275585c45eda3f546df5f16491",
+              "envelope_seal": "43aa56883263351cec99e9ebe4a16316b51a469e7067f010867d00991561251c",
+              "seal_key_version": 1,
+              "principal_proof_hash": "d1c02a0628917e786e6ae2d1f2532a3e7aff5c3f9ab719204811c55c71380248",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "dismiss_widget_id": null
+      },
+      "grounding": {
+        "status": "verified",
+        "domain": "client_appointments",
+        "required_tools": [
+          "appointments.own.list"
+        ],
+        "evidence_tools": [
+          "appointments.own.list"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "foreignRun": 400,
+    "foreignHistory": 200,
+    "otherTenantReply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n20.07.2099, 16:17 (Asia/Novosibirsk) — PRIVATE_BRANCH_99202 — PRIVATE_VISIT_99202_1, PRIVATE_VISIT_99202_2\nИсточник: ваши записи в MAYA.",
+    "receipts": [
+      {
+        "id": "7232b38a-52ad-4ed9-89ea-36a0cc968cb9",
+        "runId": "57ebc759-bc41-4156-b1ed-8ca75984baa2",
+        "state": "SETTLED",
+        "result": {
+          "contract": "maya.c9-conversation-read-receipt/1",
+          "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+          "capability": "appointments.own.list",
+          "sourceType": "AiToolExecution",
+          "completedAt": "2026-10-06T23:42:03.346Z",
+          "executionId": "cmuxbpd8n000vvhc9cujducf1",
+          "businessQualification": "SOURCE_DEFINED"
+        }
+      },
+      {
+        "id": "5ce443f3-b14c-4c31-b441-5221ca00b680",
+        "runId": "e30671c0-3f3e-4362-b00b-d366af9758b8",
+        "state": "SETTLED",
+        "result": {
+          "contract": "maya.c9-conversation-read-receipt/1",
+          "inputHash": "84649123beea38b26f64ee151726dcf1ad4a7e5a5a65dbf3a8d7547354d2b708",
+          "capability": "appointments.own.list",
+          "sourceType": "AiToolExecution",
+          "completedAt": "2026-10-06T23:42:03.580Z",
+          "executionId": "cmuxbpdfb0011vhc9wl9ouxwu",
+          "businessQualification": "SOURCE_DEFINED"
+        }
+      }
+    ],
+    "encryptedHistory": true
+  },
+  "reads": [
+    "appointments.own.list",
+    "appointments.own.list",
+    "appointments.own.list"
+  ],
+  "modelCalls": 4,
+  "unexpected": []
+}

@@ -102,3 +102,46 @@ pending; prior public-profile proof cannot qualify the new runtime. Heavy slot w
 released before this light work. `NOT_ISSUED`; no real model/provider or C10 completion.
 
 [Personal appointment details: hashed RED/green/lint/review evidence](evidence/maya-development-integration-20261006/personal-appointment-details/manifest.json).
+
+## Actual runtime proof and cross-turn privacy correction
+
+Code `02fb2e7b` closes a confirmed cross-turn boundary gap: although the personal
+READ reply is composed on the server, the carrier sends prior assistant prose in
+the next chat request. Generic name/phone/ID redaction does not remove a personal
+visit's service, time or count. No real model was called during this finding; it is
+not evidence that a live external disclosure occurred.
+
+Immediately before model planning, AiCore now forwards only sanitized user turns
+and the existing server-owned semantic context. Client-supplied assistant prose
+has no trusted source classification and is excluded, including after history
+restore or truncation. UI, encrypted transcript and local deterministic handlers
+retain their history. No second memory store, carrier authority, schema or
+retention policy is introduced. Public assistant prose is also excluded from the
+model input; scripted tests do not establish real-model dialogue quality.
+
+Final targeted units pass **273/273** in six suites, including the real provider
+request serializer intercepted before network. Both input-level and serialized
+RED regressions, intermediate test failures and final results are retained. Scoped
+lint has zero errors and two existing warnings. Production-only semantic types
+pass at 4096 MB in 5.52 seconds; test/script semantic types and the prior full-project
+3072 MB OOM are not promoted to a full pass.
+
+Actual r1 and strengthened r2 pass AppModule HTTP/auth/C9, two selected personal
+context HTTP regressions, fresh PostgreSQL/application restart and seven current
+React checkpoints: restored history, current visit, changed time, missing timezone,
+cancelled visit, revoked Client link and revoked membership. r2 runs at committed
+`02fb2e7b`. Its browser proves that both the restored-history request and request
+after Client-link revocation contain prior private service/time in assistant prose.
+All nine complete serialized model request bodies exclude those facts. The revoked
+link adds exactly one model request (resume index 4) and no source execution;
+membership revocation returns 401 without another model request. No business
+mutation or outgoing notification occurs. Both owned clusters and browsers stopped.
+
+Independent review found no remaining privacy/runtime blocker. Synthetic model
+transport, appointment source and A18 verifier are explicit. Existing personal
+SCHEDULE cards and duplicated labels remain a presentation limitation; polished
+UX and suppression of all incomplete-source cards are not accepted. This proof
+does not activate owner-to-personal booking in the carrier. Real model/provider
+acceptance and C10 completion remain unclaimed; `NOT_ISSUED`.
+
+[Hashed runtime proof, full synthetic serialized requests, screenshots, RED/green and review](evidence/maya-development-integration-20261006/personal-dates-privacy-http-react/manifest.json).

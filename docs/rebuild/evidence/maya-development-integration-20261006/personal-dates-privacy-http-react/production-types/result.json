@@ -1,0 +1,20 @@
+{
+  "command": [
+    "node",
+    "/tmp/maya-unified-gate-20261006/launch.cjs",
+    "node",
+    "--max-old-space-size=4096",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--incremental",
+    "false",
+    "--project",
+    "tsconfig.build.json"
+  ],
+  "status": "passed",
+  "exitCode": 0,
+  "seconds": 5.52,
+  "heapMb": 4096,
+  "scope": "production tsconfig.build.json excludes tests/scripts",
+  "qualification": "NOT_ISSUED"
+}

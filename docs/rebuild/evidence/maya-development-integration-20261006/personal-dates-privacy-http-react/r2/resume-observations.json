@@ -1,0 +1,172 @@
+{
+  "syntheticModel": true,
+  "syntheticCanonicalAppointments": true,
+  "syntheticA18Verifier": true,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "30400f947dd4a56f752da7a123d2a401508d60ffa1cf3b1db6f8605bfde06874"
+  },
+  "wireCheckpoints": [
+    {
+      "checkpoint": "history",
+      "requestCount": 0,
+      "addedRequests": 0,
+      "requestIndex": null,
+      "prompt": null
+    },
+    {
+      "checkpoint": "upcoming",
+      "requestCount": 1,
+      "addedRequests": 1,
+      "requestIndex": 0,
+      "prompt": "Когда моя ближайшая личная запись?"
+    },
+    {
+      "checkpoint": "changed",
+      "requestCount": 2,
+      "addedRequests": 1,
+      "requestIndex": 1,
+      "prompt": "Проверь мои личные записи ещё раз"
+    },
+    {
+      "checkpoint": "incomplete",
+      "requestCount": 3,
+      "addedRequests": 1,
+      "requestIndex": 2,
+      "prompt": "Какое время у моей личной записи?"
+    },
+    {
+      "checkpoint": "cancelled",
+      "requestCount": 4,
+      "addedRequests": 1,
+      "requestIndex": 3,
+      "prompt": "Остались ли у меня личные записи?"
+    },
+    {
+      "checkpoint": "unlinked",
+      "requestCount": 5,
+      "addedRequests": 1,
+      "requestIndex": 4,
+      "prompt": "Покажи мои личные записи как клиента"
+    },
+    {
+      "checkpoint": "revoked",
+      "requestCount": 5,
+      "addedRequests": 0,
+      "requestIndex": null,
+      "prompt": null
+    }
+  ],
+  "browserCheckpoints": [
+    "history",
+    "upcoming",
+    "changed",
+    "incomplete",
+    "cancelled",
+    "unlinked",
+    "revoked"
+  ],
+  "receipts": [
+    {
+      "id": "0166e7a4-9e73-487b-a934-02b2701b89cf",
+      "runId": "036dbdb8-c5ab-4d77-95c5-b1c0a221585f",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "d2be1317b08679104ec4f64a0fd17143e552cb61a2cdf1df82c23121023619d7",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:48:27.634Z",
+        "executionId": "cmuxbxlrb000vozc93dxngmfo",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "84b3ce01-cb6d-449f-bdd8-d35088e552e3",
+      "runId": "f4288b3b-ab6e-42db-a7f5-2c82a8bc3396",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "d2be1317b08679104ec4f64a0fd17143e552cb61a2cdf1df82c23121023619d7",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:48:27.843Z",
+        "executionId": "cmuxbxlxa0011ozc93h090g76",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "a4a533cb-267e-446a-a4df-1fbd327b7431",
+      "runId": "6106c697-7ae3-4bc5-8926-0ba200f134b7",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "d2be1317b08679104ec4f64a0fd17143e552cb61a2cdf1df82c23121023619d7",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:48:30.343Z",
+        "executionId": "cmuxbxnul0002qgc926ahn40m",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "71cd43f9-9586-4c49-9420-79d7cbdff8ab",
+      "runId": "a3126798-0c87-4cf7-8f8e-34b8d85dea8c",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "d2be1317b08679104ec4f64a0fd17143e552cb61a2cdf1df82c23121023619d7",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:48:30.660Z",
+        "executionId": "cmuxbxo3k0007qgc9gdj4tqyg",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "2d0bd719-480f-4ed3-b1a3-b5333c46f295",
+      "runId": "07bec9ef-5954-46b6-925f-8d08413241bb",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "d2be1317b08679104ec4f64a0fd17143e552cb61a2cdf1df82c23121023619d7",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:48:30.883Z",
+        "executionId": "cmuxbxo9r000cqgc9g0dmw3tt",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "d836a062-278b-48ba-802c-b90a147817ae",
+      "runId": "0f1c0197-4afb-428c-9687-8179647daaec",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "d2be1317b08679104ec4f64a0fd17143e552cb61a2cdf1df82c23121023619d7",
+        "capability": "appointments.own.list",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:48:31.115Z",
+        "executionId": "cmuxbxog6000hqgc9rbgbjfr9",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "d81f18bf-9bda-4ee5-918b-07c2a5f1aed1",
+      "runId": "aef7880b-aa06-49dd-a98b-8421ebfb87d7",
+      "state": "HELD_UNKNOWN",
+      "result": null
+    }
+  ],
+  "reads": [
+    "appointments.own.list",
+    "appointments.own.list",
+    "appointments.own.list",
+    "appointments.own.list"
+  ],
+  "modelCalls": 5,
+  "unexpected": []
+}

@@ -1,0 +1,139 @@
+{
+  "syntheticModel": true,
+  "syntheticCrm": true,
+  "realModelAcceptance": false,
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "2610d91f4c50a59f4bbe16b66ca7bc7359f5334db920b9436249ecd738cfaad1"
+  },
+  "browserCheckpoints": [
+    "history",
+    "profile",
+    "changed",
+    "missing",
+    "city",
+    "unavailable",
+    "revoked"
+  ],
+  "receipts": [
+    {
+      "id": "b34e6ea2-8ed3-48de-8dd8-9d5755272ec3",
+      "runId": "ce39bd1d-97fc-4fbf-abb0-674332a3a0fc",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+        "capability": "company.business-hours.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:30:49.209Z",
+        "executionId": "cmuxbax2u000h62c9l40a3r2u",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "69e32165-5834-4f45-96f5-18ff5241eec6",
+      "runId": "dd7d88a8-aee0-4739-8c4d-f5c5dd4a9c1e",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+        "capability": "company.business-hours.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:30:49.282Z",
+        "executionId": "cmuxbax4x000n62c9pabwge4n",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "0be59f64-e552-4849-9879-4c6c843bc948",
+      "runId": "8c53b544-73af-4ada-8dc2-ee7fe93c6620",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+        "capability": "company.business-hours.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:30:51.719Z",
+        "executionId": "cmuxbaz0k00027qc9prvkb3in",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "0c2d3a1a-1436-480f-b63c-184737db5df7",
+      "runId": "a956a605-0b14-4518-8d3c-dd94a556bd70",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+        "capability": "company.business-hours.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:30:51.923Z",
+        "executionId": "cmuxbaz6a00077qc910ia31vm",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "a1fc5bdd-2e93-4cab-8bfa-b55c4daeb25f",
+      "runId": "29bb2b5b-b074-481e-b90d-8307cad18180",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+        "capability": "company.business-hours.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:30:52.154Z",
+        "executionId": "cmuxbazcp000c7qc9h44l96u5",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "80d2feba-fb8f-4087-96e9-8fba88d7b514",
+      "runId": "ecade820-5361-41c7-ba14-b38f95a9da1a",
+      "state": "SETTLED",
+      "result": {
+        "contract": "maya.c9-conversation-read-receipt/1",
+        "inputHash": "e22b08b8d24b64d5178bba2922ad7d6486466fdd818ad53005b17e02cdbc52f1",
+        "capability": "company.business-hours.read",
+        "sourceType": "AiToolExecution",
+        "completedAt": "2026-10-06T23:30:52.352Z",
+        "executionId": "cmuxbazi6000h7qc9c7v9yi37",
+        "businessQualification": "SOURCE_DEFINED"
+      }
+    },
+    {
+      "id": "ef2af0c3-c9f5-45d5-ac78-716417064526",
+      "runId": "873d0f8f-02ed-4984-b2ff-2aa8998b6f9b",
+      "state": "HELD_UNKNOWN",
+      "result": null
+    }
+  ],
+  "reads": [
+    {
+      "company": "99201",
+      "mode": "full"
+    },
+    {
+      "company": "99201",
+      "mode": "changed"
+    },
+    {
+      "company": "99201",
+      "mode": "missing"
+    },
+    {
+      "company": "99201",
+      "mode": "city"
+    },
+    {
+      "company": "99201",
+      "mode": "unavailable"
+    },
+    {
+      "company": "discovery",
+      "mode": "unavailable"
+    }
+  ],
+  "modelCalls": 5,
+  "unexpected": []
+}

@@ -1,0 +1,172 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › plans the complete booking dialogue before heuristic data preloads: На сегодня на 16:30 к Стасу
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 0
+
+    @@ -2,13 +2,9 @@
+        Object {
+          "content": "Я хочу записаться как клиент",
+          "role": "user",
+        },
+        Object {
+    -     "content": "На какой день и время?",
+    -     "role": "assistant",
+    -   },
+    -   Object {
+          "content": "На сегодня на 16:30 к Стасу",
+          "role": "user",
+        },
+      ]
+
+      257 |           ),
+      258 |         })),
+    > 259 |       ).toEqual(messages);
+          |         ^
+      260 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      261 |       expect(result.reply).toContain('подтверждённый клиентский доступ');
+      262 |     },
+
+      at ai-tools/ai-core.service.spec.ts:259:9
+
+  ● AiCoreService › plans the complete booking dialogue before heuristic data preloads: Нет, лучше завтра к другому мастеру
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 0
+
+    @@ -2,13 +2,9 @@
+        Object {
+          "content": "Я хочу записаться как клиент",
+          "role": "user",
+        },
+        Object {
+    -     "content": "На какой день и время?",
+    -     "role": "assistant",
+    -   },
+    -   Object {
+          "content": "Нет, лучше завтра к другому мастеру",
+          "role": "user",
+        },
+      ]
+
+      257 |           ),
+      258 |         })),
+    > 259 |       ).toEqual(messages);
+          |         ^
+      260 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      261 |       expect(result.reply).toContain('подтверждённый клиентский доступ');
+      262 |     },
+
+      at ai-tools/ai-core.service.spec.ts:259:9
+
+  ● AiCoreService › plans the complete booking dialogue before heuristic data preloads: Хочу на стрижку в пятницу вечером
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 0
+
+    @@ -2,13 +2,9 @@
+        Object {
+          "content": "Я хочу записаться как клиент",
+          "role": "user",
+        },
+        Object {
+    -     "content": "На какой день и время?",
+    -     "role": "assistant",
+    -   },
+    -   Object {
+          "content": "Хочу на стрижку в пятницу вечером",
+          "role": "user",
+        },
+      ]
+
+      257 |           ),
+      258 |         })),
+    > 259 |       ).toEqual(messages);
+          |         ^
+      260 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      261 |       expect(result.reply).toContain('подтверждённый клиентский доступ');
+      262 |     },
+
+      at ai-tools/ai-core.service.spec.ts:259:9
+
+  ● AiCoreService › plans the complete booking dialogue before heuristic data preloads: Давай вместо завтра послезавтра
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 4
+    + Received  + 0
+
+    @@ -2,13 +2,9 @@
+        Object {
+          "content": "Я хочу записаться как клиент",
+          "role": "user",
+        },
+        Object {
+    -     "content": "На какой день и время?",
+    -     "role": "assistant",
+    -   },
+    -   Object {
+          "content": "Давай вместо завтра послезавтра",
+          "role": "user",
+        },
+      ]
+
+      257 |           ),
+      258 |         })),
+    > 259 |       ).toEqual(messages);
+          |         ^
+      260 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      261 |       expect(result.reply).toContain('подтверждённый клиентский доступ');
+      262 |     },
+
+      at ai-tools/ai-core.service.spec.ts:259:9
+
+  ● AiCoreService › treats conversation as context, with explicit user scenario=false, not assistant numeric evidence
+
+    expect(received).toContainEqual(expected) // deep equality
+
+    Expected value: {"content": "Ранее выручка составила 999999 ₽.", "role": "assistant"}
+    Received array: [{"content": "Покажи выручку.", "role": "user"}, {"content": "Что сейчас требует моего внимания?", "role": "user"}]
+
+      3949 |       });
+      3950 |       // Keep conversational continuity; only its authority changes.
+    > 3951 |       expect(mocks.model.decide.mock.calls[1]?.[0].messages).toContainEqual({
+           |                                                              ^
+      3952 |         role: 'assistant',
+      3953 |         content: earlierAssistant,
+      3954 |       });
+
+      at ai-tools/ai-core.service.spec.ts:3951:62
+
+  ● AiCoreService › treats conversation as context, with explicit user scenario=true, not assistant numeric evidence
+
+    expect(received).toContainEqual(expected) // deep equality
+
+    Expected value: {"content": "Ранее выручка составила 999999 ₽.", "role": "assistant"}
+    Received array: [{"content": "Если мой план 999999 ₽, что проверить?", "role": "user"}, {"content": "Что сейчас требует моего внимания?", "role": "user"}]
+
+      3949 |       });
+      3950 |       // Keep conversational continuity; only its authority changes.
+    > 3951 |       expect(mocks.model.decide.mock.calls[1]?.[0].messages).toContainEqual({
+           |                                                              ^
+      3952 |         role: 'assistant',
+      3953 |         content: earlierAssistant,
+      3954 |       });
+
+      at ai-tools/ai-core.service.spec.ts:3951:62
+
+PASS src/ai-tools/routing-regression.acceptance.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       6 failed, 244 passed, 250 total
+Snapshots:   0 total
+Time:        0.969 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-private-history-cohort1.json

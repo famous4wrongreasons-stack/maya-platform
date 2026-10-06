@@ -1,0 +1,13 @@
+widgets-live: proof database maya_widget_gate_proof_personaldates_d7ea3676a15b on 127.0.0.1:59190 (local)
+[31m[Nest] 40013  - [39m10/06/2026, 11:42:02 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 40013  - [39m10/06/2026, 11:42:02 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/personal-dates-restart.probe-spec.ts
+  personal appointment dates actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC CANONICAL APPOINTMENTS/A18]
+    ✓ executes the owned stage and preserves canonical source/history boundaries (775 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        4.491 s
+Ran all test suites within paths "test/widgets-live/personal-dates-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-personal-dates-http-react-20261006-r1/prepare-jest.json

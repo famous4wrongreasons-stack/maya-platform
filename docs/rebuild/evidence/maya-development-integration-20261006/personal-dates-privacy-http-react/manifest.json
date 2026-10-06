@@ -1,0 +1,445 @@
+{
+  "kind": "qualified-local-personal-dates-privacy-http-react",
+  "runtimeAndHarnessHead": "02fb2e7b0957140518a09b1dc6775796392dd3c6",
+  "qualification": "NOT_ISSUED",
+  "actualHttpAuthC9Postgres": true,
+  "actualReactChromium": true,
+  "applicationAndPostgresRestart": true,
+  "servicesStopped": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "actualProviderRequestSerializer": true,
+  "externalNetworkCalls": 0,
+  "syntheticModelTransport": true,
+  "r2SerializedRequestCounts": {
+    "prepare": 4,
+    "resume": 5,
+    "unlinkedAdds": 1,
+    "membershipRevokedAdds": 0
+  },
+  "targetedUnits": 273,
+  "targetedHttpContextRegressions": 2,
+  "presentationLimitation": "Existing personal SCHEDULE cards and duplicate labels remain; no complete visual acceptance",
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "6b05040fb65a27dc76065809c4a414078c0fb424236899095d14f8aac25d257a"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "sha256": "90fb1fdd4f08c41f374e9535dfb4aa3801315bf5ce2aefc1b6297367b3e1c3fc"
+    },
+    {
+      "path": "maya-saas-backend/scripts/personal-dates-proof.mjs",
+      "sha256": "d56dc2caa858dd902029ce2547d6a092ad38dc0ba00ce97fcf153cc0b25bd45e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/personal-dates-restart.probe-spec.ts",
+      "sha256": "6d843baecad7c947bc837caae56876407229c3505c96d97fa48d26d7a0994418"
+    },
+    {
+      "path": "maya-carrier-react/test/personal-dates-browser-probe.mjs",
+      "sha256": "acad9ec3c6f4b376e405dad9d3e218bffa4c1d985708659859f98b617d965dcd"
+    },
+    {
+      "path": "maya-carrier-react/test/personal-dates-browser-guard.mjs",
+      "sha256": "32c96cfb48931e12737a5a42c30e41347568e220df36fe0d977a7534497ab7c0"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts",
+      "sha256": "99279faf451d09e4664f9d6af70003864983b073a79ea60b90df56d5fa10860f"
+    }
+  ],
+  "files": [
+    {
+      "path": "execution-notes.txt",
+      "bytes": 1159,
+      "sha256": "b6f0bcaa7d0cddcfec332037c7de21ee5763d324b1e371cbf919a508c0050aa8"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 1095,
+      "sha256": "8884b82f1a1e7b4fe7d7e3bdb58fd81ebe27a73a8bf35cc87fb96bab6597ad46"
+    },
+    {
+      "path": "production-types/result.json",
+      "bytes": 439,
+      "sha256": "613c96a92389dff2766b8058f10211293b69e63b0e2f40e614153d2f0c1f5806"
+    },
+    {
+      "path": "production-types/types.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1/context-regressions-jest.json",
+      "bytes": 6342,
+      "sha256": "be56fa5f7293e33dc27e69ee950d1c3326b4ba85e00cf90c32d1ccf65ad750c1"
+    },
+    {
+      "path": "r1/context-regressions.txt",
+      "bytes": 2227,
+      "sha256": "155ba9859aa919f19d7ca75ca55c9bc497568694c9d7ee66898b0f76e3c7e673"
+    },
+    {
+      "path": "r1/createdb.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1/initdb.txt",
+      "bytes": 950,
+      "sha256": "8d8e43690a9654eba265ef401d059c5a999b01349c01a06f8a5691418d550722"
+    },
+    {
+      "path": "r1/manifest.json",
+      "bytes": 767,
+      "sha256": "146c416dc2f0055b62440dc8fd26f450f3933f715fb9822b7e7d9e99f96f5f4c"
+    },
+    {
+      "path": "r1/migrations.txt",
+      "bytes": 14728,
+      "sha256": "7c2c2a7758736f97dcd431b32ad6c5ae1a5691f87ab931c20d27d8b24301d2d5"
+    },
+    {
+      "path": "r1/output/playwright/browser.json",
+      "bytes": 69005,
+      "sha256": "8bf2d2410fa2075d269f584cbdb70c802bb35535fcfd4cbf931249ee020bb8c4"
+    },
+    {
+      "path": "r1/output/playwright/cancelled.png",
+      "bytes": 88310,
+      "sha256": "90fdee0bc23807d12c3ef0342fa34937a203db89df2136777cac2e7a42350c5d"
+    },
+    {
+      "path": "r1/output/playwright/changed.png",
+      "bytes": 92930,
+      "sha256": "fc1367a914e1bf03a24f4624099d52743e1db2b8328112ca339377e965ec5152"
+    },
+    {
+      "path": "r1/output/playwright/history.png",
+      "bytes": 81354,
+      "sha256": "6831315fe042a9c0bfec41278e4edcee4cddc6f6dbecf54594e0d0cb67c853aa"
+    },
+    {
+      "path": "r1/output/playwright/incomplete.png",
+      "bytes": 97540,
+      "sha256": "427399534d324089a27a812f1534f68c11e0e39e87006b2697e3aa374decc8c3"
+    },
+    {
+      "path": "r1/output/playwright/revoked.png",
+      "bytes": 27025,
+      "sha256": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab"
+    },
+    {
+      "path": "r1/output/playwright/unlinked.png",
+      "bytes": 88797,
+      "sha256": "f5fd63c6831ce08a815355b1c8576ac9c1a59143bafb7dcdd303f0be5ac9a2b2"
+    },
+    {
+      "path": "r1/output/playwright/upcoming.png",
+      "bytes": 126290,
+      "sha256": "d4340a0b17cfd2512709c4a0030152334815e4bbe6b7b606e27477a2745b5b8f"
+    },
+    {
+      "path": "r1/pg-restart.txt",
+      "bytes": 1347,
+      "sha256": "0f75a189dbbca577c1cdf6dd8a64be328022d6e487623b0215d3ad26a3ec5b7a"
+    },
+    {
+      "path": "r1/pg-start.txt",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r1/pg-stop.txt",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r1/postgres.txt",
+      "bytes": 1246,
+      "sha256": "2d221cdaba1094dfd6896d4e864a263ec56b222abef50665e3bf7196a2f57156"
+    },
+    {
+      "path": "r1/prepare-jest.json",
+      "bytes": 1441,
+      "sha256": "b542bc157081c9498a112ad512f203f72014335658aa6af1f9f3855735bab924"
+    },
+    {
+      "path": "r1/prepare-observations.json",
+      "bytes": 61321,
+      "sha256": "9873cd1de163f81de16d025519228bd22d0592404af5e8457d4ca2fe5da8c2f3"
+    },
+    {
+      "path": "r1/prepare-serialized-model-requests.json",
+      "bytes": 552668,
+      "sha256": "aa027ac107c68ceb5e9c1155d32eecd5364ea5dd89fd3c211e1f1d55a880ee92"
+    },
+    {
+      "path": "r1/prepare.txt",
+      "bytes": 1351,
+      "sha256": "2972b23b87f59bcd1c654697bf026a033a4bc0db38454ecb752eaafad9f0faae"
+    },
+    {
+      "path": "r1/react-web-build.txt",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r1/resume-jest.json",
+      "bytes": 1444,
+      "sha256": "b62961543063ace623407dc7c220fd403f97d4d6aa7667eb1077f3eda5d5d2e0"
+    },
+    {
+      "path": "r1/resume-observations.json",
+      "bytes": 4230,
+      "sha256": "47162d49e5d283e7bc5da8f9cce2ff5b42c86a9f75e8290c3c5ffe0e7f7c74ea"
+    },
+    {
+      "path": "r1/resume-serialized-model-requests.json",
+      "bytes": 700796,
+      "sha256": "8e4b5a3c1ad5617a6a366bb6cf67a4e23d0511f4031d0cf5fd05ec6c5f1261cf"
+    },
+    {
+      "path": "r1/resume.txt",
+      "bytes": 1364,
+      "sha256": "c9f17625b035cc764b67c71d63cbb9e362e82866d6ad7ab4e10e35be62607899"
+    },
+    {
+      "path": "r2/context-regressions-jest.json",
+      "bytes": 6342,
+      "sha256": "7d961137f3f946ae4a56354aebc0546c839719293d0d6aede3ec97e9a98c2e2c"
+    },
+    {
+      "path": "r2/context-regressions.txt",
+      "bytes": 2227,
+      "sha256": "936f06ec2026c2972bc8575ef7bcb612271f8d13104eb7d42b545e77302acc54"
+    },
+    {
+      "path": "r2/createdb.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r2/initdb.txt",
+      "bytes": 950,
+      "sha256": "1ea37a2b1004fbd085f2ee7a7c3a02d421ee36f083f752786c4d0a0477fb8042"
+    },
+    {
+      "path": "r2/manifest.json",
+      "bytes": 767,
+      "sha256": "9974bf65f6242e33931dac005f3c525599edd259d097b7cfcb1699bffa4c5329"
+    },
+    {
+      "path": "r2/migrations.txt",
+      "bytes": 14728,
+      "sha256": "94d5e7d7dc983b5b40c23f154cfaf03be1b48b9c60be8009792e5a9396580ef5"
+    },
+    {
+      "path": "r2/output/playwright/browser.json",
+      "bytes": 69241,
+      "sha256": "cf67fff96b4c78cda0c96ebbe2074924a4eb32e59026e7aefab8407b482b32a5"
+    },
+    {
+      "path": "r2/output/playwright/cancelled.png",
+      "bytes": 88259,
+      "sha256": "38bf3387c9d93defa194b7ef5a4a82713ee5b24a891b382493ce61b769054c55"
+    },
+    {
+      "path": "r2/output/playwright/changed.png",
+      "bytes": 92928,
+      "sha256": "083cbe4a9abd5b38946128d9eaa987920d35c99293fb8777d73d77e1156ba3d0"
+    },
+    {
+      "path": "r2/output/playwright/history.png",
+      "bytes": 81354,
+      "sha256": "6831315fe042a9c0bfec41278e4edcee4cddc6f6dbecf54594e0d0cb67c853aa"
+    },
+    {
+      "path": "r2/output/playwright/incomplete.png",
+      "bytes": 97654,
+      "sha256": "70cd99f55061af7ecd50eca6959f502098650705dd944cb3aef971ecc2f9ca6b"
+    },
+    {
+      "path": "r2/output/playwright/revoked.png",
+      "bytes": 27025,
+      "sha256": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab"
+    },
+    {
+      "path": "r2/output/playwright/unlinked.png",
+      "bytes": 88797,
+      "sha256": "f5fd63c6831ce08a815355b1c8576ac9c1a59143bafb7dcdd303f0be5ac9a2b2"
+    },
+    {
+      "path": "r2/output/playwright/upcoming.png",
+      "bytes": 126290,
+      "sha256": "d4340a0b17cfd2512709c4a0030152334815e4bbe6b7b606e27477a2745b5b8f"
+    },
+    {
+      "path": "r2/pg-restart.txt",
+      "bytes": 1347,
+      "sha256": "7418a5a5e30f7e711b2dfb61e9537881152f720d6594ee8f59fea6b5b7fe6a05"
+    },
+    {
+      "path": "r2/pg-start.txt",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r2/pg-stop.txt",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r2/postgres.txt",
+      "bytes": 1246,
+      "sha256": "3bfdaa5f03f31d5b0a8c3ab723dbd6c06cf5c0111b129cf9ae06a114668b7d15"
+    },
+    {
+      "path": "r2/prepare-jest.json",
+      "bytes": 1441,
+      "sha256": "9a5f3b087a485ea49f3276eea3c9811b45b118ac2d939b84624bd672c463fc1d"
+    },
+    {
+      "path": "r2/prepare-observations.json",
+      "bytes": 61321,
+      "sha256": "9eddca2f35db44053427d56b949a4b8df81ef6ef766c86cc7436b06f667a76f3"
+    },
+    {
+      "path": "r2/prepare-serialized-model-requests.json",
+      "bytes": 552668,
+      "sha256": "b8c53d20dbc2c98db34a1db05e9d8ee7e434f7c77c0552140c59cbf53be36653"
+    },
+    {
+      "path": "r2/prepare.txt",
+      "bytes": 1367,
+      "sha256": "9d89d58f8be7e5a25bbbdd44182462390142a0e875f8b17471bcefe483983a73"
+    },
+    {
+      "path": "r2/react-web-build.txt",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r2/resume-jest.json",
+      "bytes": 1444,
+      "sha256": "edf2126e1bbc3f6d5d791302dabc251919e564a5603d7e05aa457bf1889f9a10"
+    },
+    {
+      "path": "r2/resume-observations.json",
+      "bytes": 5558,
+      "sha256": "5e57c9ea145953e85cb95f5123db49f7357143263139f28d9e4e6380c6f5801e"
+    },
+    {
+      "path": "r2/resume-serialized-model-requests.json",
+      "bytes": 700796,
+      "sha256": "7b89dac0d5dced6e274cd0dbd8b3632ae6a6324b74cf99ae30fd9cd66f77bf54"
+    },
+    {
+      "path": "r2/resume.txt",
+      "bytes": 1362,
+      "sha256": "dcc821f63190089106e35159e2d55d3f9564b049195782c9781539de0511c7a4"
+    },
+    {
+      "path": "units/maya-private-history-cohort-final.json",
+      "bytes": 128617,
+      "sha256": "efdf843126d536656e4ad97ff8c8737bc0aacf3c3821f2d7c1efef0442464776"
+    },
+    {
+      "path": "units/maya-private-history-cohort-final.txt",
+      "bytes": 973,
+      "sha256": "e91fe529441e551cad28c9f4aabc4bec98672cc79522d668ca9c63e91ecae0cd"
+    },
+    {
+      "path": "units/maya-private-history-cohort-final2.json",
+      "bytes": 128616,
+      "sha256": "fee47d3dca8c6f1a73c44243643daac8d20bfb7c39254a07c4bd1677cec97b16"
+    },
+    {
+      "path": "units/maya-private-history-cohort-final2.txt",
+      "bytes": 974,
+      "sha256": "398bcae49bab277a2e291ee82a34706adb52733c620934f18d894d08bebec289"
+    },
+    {
+      "path": "units/maya-private-history-cohort1.json",
+      "bytes": 131262,
+      "sha256": "b8ec6dc0b67e9791836991b2eabb97e4b65ac181dc8850f502cb04ea65dd804f"
+    },
+    {
+      "path": "units/maya-private-history-cohort1.txt",
+      "bytes": 6618,
+      "sha256": "cae4388229c6df2563bc51c35c395367411334fe2768806c7dfd4a794f51349f"
+    },
+    {
+      "path": "units/maya-private-history-cohort2.json",
+      "bytes": 128041,
+      "sha256": "7e53bbafa7b24086383a178ce772549b4fb96e0642e0ce986420333466f06450"
+    },
+    {
+      "path": "units/maya-private-history-cohort2.txt",
+      "bytes": 968,
+      "sha256": "2ac0b45debf3d35ef5c34a203129452c1fc35920616f9a7b10f0b3d388f531fe"
+    },
+    {
+      "path": "units/maya-private-history-lint-final.txt",
+      "bytes": 1014,
+      "sha256": "ee72db95d8d55e4cc7187d28cf1dbfe4429b603abac573bfe9b18d06b19d51ea"
+    },
+    {
+      "path": "units/maya-private-history-lint-green.txt",
+      "bytes": 459,
+      "sha256": "ec5112afed49f29f526489c5ccf1d8d9f3513e75697851bf12c4a091f007b0f3"
+    },
+    {
+      "path": "units/maya-private-history-red.json",
+      "bytes": 79726,
+      "sha256": "11144f76969b19c55bb3e3d8b6a29e56be8ec8ac4a6e2befe63151d7c11a0d58"
+    },
+    {
+      "path": "units/maya-private-history-red.txt",
+      "bytes": 18811,
+      "sha256": "48eedd40b53a5688a46097b8067af2eef3d32abc4aa2fa3da8c59611bb4074ff"
+    },
+    {
+      "path": "units/maya-private-history-wire-green1.json",
+      "bytes": 71804,
+      "sha256": "284447299b2bfae94aaedd43a03a374e2abc57e75540719a9688ac890386c7ec"
+    },
+    {
+      "path": "units/maya-private-history-wire-green1.txt",
+      "bytes": 16050,
+      "sha256": "92e6807b46f700f4e50a60a5f4bd356beec60bf43c4350d70411a5faed02c7c8"
+    },
+    {
+      "path": "units/maya-private-history-wire-green2.json",
+      "bytes": 72041,
+      "sha256": "1084920dd4a9dd21c2b285c4de254cc49bd39f2e6b67ab325f0cc4e9b6e5bb47"
+    },
+    {
+      "path": "units/maya-private-history-wire-green2.txt",
+      "bytes": 16081,
+      "sha256": "581f5f53d470ef6e991d8aaf4e671abd699cc30dcc1e91de378a4afe8e1c6d90"
+    },
+    {
+      "path": "units/maya-private-history-wire-green3.json",
+      "bytes": 70951,
+      "sha256": "de7344b050ee0d70edb0d99993a63fa40b8f475c7d19b837c4543dd29a492e4b"
+    },
+    {
+      "path": "units/maya-private-history-wire-green3.txt",
+      "bytes": 15427,
+      "sha256": "03f70427267089087b76e8ea381f00f2abca7a4f1488858bc9c608d8534206ab"
+    },
+    {
+      "path": "units/maya-private-history-wire-red.json",
+      "bytes": 435735,
+      "sha256": "2d068304e4b0ab13397f477296a32dcf7d5cfa685a2e5e51e17e17561850c1fb"
+    },
+    {
+      "path": "units/maya-private-history-wire-red.txt",
+      "bytes": 112248,
+      "sha256": "51d0a7a70239be0ff397a1e9d622c939fd85c991f2f285b4d7efff3686ff9393"
+    }
+  ]
+}
