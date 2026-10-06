@@ -12,6 +12,8 @@ import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
+import { AiCoreController } from './ai-core.controller';
+import { staffScheduleRevision } from '../crm/staff-schedule.utils';
 import { AiMemoryService } from './ai-memory.service';
 import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
@@ -33,6 +35,99 @@ describe('AiCoreService', () => {
     requestId: 'request_12345678',
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
+
+  it.each(['native', 'web'] as const)(
+    'routes a %s conversation through the real schedule preview owner',
+    async (surface) => {
+      const mocks = createService(['staff.schedule.update']);
+      const current = {
+        staff_id: 'synthetic-staff',
+        date: '2026-10-06',
+        is_working: true,
+        slots: [{ from: '10:00', to: '20:00' }],
+        revision: staffScheduleRevision('synthetic-staff', '2026-10-06', [
+          { from: '10:00', to: '20:00' },
+        ]),
+      };
+      const crm = {
+        getStaff: jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'synthetic-staff', name: 'Антон Тестовый' },
+          ]),
+        getStaffScheduleDay: jest.fn().mockResolvedValue(current),
+        previewStaffScheduleDayChange: jest.fn().mockResolvedValue({
+          current,
+          proposed: { ...current, slots: [], is_working: false },
+          conflict_times: [],
+        }),
+      };
+      const command = new StaffScheduleCommandService(
+        { get: () => undefined } as never,
+        crm as never,
+        {
+          tenant: {
+            findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+          },
+        } as never,
+        mocks.runtime as never,
+      );
+      mocks.staffScheduleCommand.tryHandle.mockImplementation((actor, input) =>
+        command.tryHandle(actor, input),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'approval_required',
+        approval: { id: 'approval-synthetic', payload_hash: 'f'.repeat(64) },
+      });
+      const controller = new AiCoreController(mocks.service, {} as never);
+      const result = await controller.chat(user, {
+        surface,
+        requestId: 'schedule-route-1234',
+        messages: [
+          { role: 'user', content: 'Сделай Антону 2026-10-06 выходной' },
+        ],
+      });
+      expect(result).toMatchObject({
+        action: {
+          status: 'approval_required',
+          approval: { id: 'approval-synthetic' },
+        },
+      });
+      expect(crm.getStaff).toHaveBeenCalledWith(user.tenantId);
+      expect(mocks.runtime.execute).toHaveBeenCalledWith(
+        user,
+        'staff.schedule.update',
+        expect.objectContaining({
+          surface,
+          arguments: expect.objectContaining({
+            staff_id: 'synthetic-staff',
+            current_revision: current.revision,
+            slots: [],
+          }),
+        }),
+      );
+      expect(mocks.model.decide).not.toHaveBeenCalled();
+    },
+  );
+
+  it('uses client authority for schedule commands in a client audience even for the owner', async () => {
+    const mocks = createService();
+    mocks.staffScheduleCommand.tryHandle.mockResolvedValue({
+      reply: 'denied',
+      action: null,
+      toolUsage: null,
+    });
+    await mocks.service.chat(user, {
+      ...dto,
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Закрой Антону завтра' }],
+    });
+    expect(mocks.staffScheduleCommand.tryHandle).toHaveBeenCalledWith(
+      expect.objectContaining({ role: UserRole.CLIENT }),
+      expect.anything(),
+    );
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
 
   it('renders canonical dormancy signals without legacy contacts or inferred activity', () => {
     const { service } = createService();
@@ -4081,7 +4176,9 @@ describe('AiCoreService', () => {
       ),
     };
     const staffScheduleCommand = {
-      tryHandle: jest.fn().mockResolvedValue(null),
+      tryHandle: jest
+        .fn<StaffScheduleCommandService['tryHandle']>()
+        .mockResolvedValue(null),
     };
     const memory = {
       handleExplicitCommand: jest.fn().mockResolvedValue(null),

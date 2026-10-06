@@ -1,3 +1,8 @@
+import { WidgetReleaseAccessAdapter } from '../widgets/owner-ports/release-access.adapter';
+import {
+  SCHEDULE_AE,
+  SCHEDULE_TEMPLATE,
+} from '../widgets/emission/schedule-intent-template';
 import {
   WidgetReleaseAccessService,
   type ReleaseIntentFacts,
@@ -67,6 +72,36 @@ const fixture = () => {
 };
 
 describe('profile current admission and immutable emission binding', () => {
+  it('schedule bridge preserves restricted registry digest and refuses its new template without breaking existing bindings', async () => {
+    const f = fixture();
+    const adapter = new WidgetReleaseAccessAdapter(f.owner, {} as never);
+    await adapter.bindMint(
+      'tenant',
+      [{ template: 'navigate.schedule@1', record: f.facts }],
+      f.tx as never,
+    );
+    expect(await adapter.admits('tenant', f.facts, f.tx as never)).toBe(true);
+    await expect(
+      adapter.bindMint(
+        'tenant',
+        [
+          {
+            template: SCHEDULE_TEMPLATE,
+            record: {
+              ...f.facts,
+              effect: 'COMMIT',
+              widgetKind: 'SETTINGS_DRAFT',
+              capabilitySpace: 'AE',
+              capabilityKey: SCHEDULE_AE,
+              targetJson: null,
+            },
+          },
+        ],
+        f.tx as never,
+      ),
+    ).rejects.toThrow('widget_release_profile_unavailable');
+    expect(await adapter.admits('tenant', f.facts, f.tx as never)).toBe(true);
+  });
   it('binds a signed profile to the exact grant and facts in the caller transaction', async () => {
     const f = fixture();
     expect(await f.admit()).toBe(false);

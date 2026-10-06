@@ -20,6 +20,10 @@ import {
   mutationReceiptStatus,
 } from './mutation-response';
 import {
+  AI_SCHEDULE_WIDGET,
+  type AiScheduleWidgetPort,
+} from './ai-schedule-widget.port';
+import {
   measurementText,
   type MeasurementPresentation,
 } from '../measurement/measurement.presentation';
@@ -633,21 +637,49 @@ export class AiCoreService {
       });
     }
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
-      toolUser,
+      clientAudience ? { ...user, role: UserRole.CLIENT } : toolUser,
       dto,
     );
     if (scheduleCommand) {
+      const approval = scheduleCommand.action?.approval as
+        { id?: string; payload_hash?: string } | undefined;
+      const userTurn = this.persistedUserTurns.get(dto);
+      const bridge = this.moduleRef?.get<AiScheduleWidgetPort>(
+        AI_SCHEDULE_WIDGET,
+        { strict: false },
+      );
+      const resolution =
+        approval?.id && approval.payload_hash && userTurn && bridge
+          ? await bridge.mint({
+              actor: toolUser,
+              surface: dto.surface,
+              approvalId: approval.id,
+              payloadHash: approval.payload_hash,
+              reply: scheduleCommand.reply,
+              userTurn,
+            })
+          : null;
       return this.complete(
         user,
         dto,
         brain,
         false,
-        scheduleCommand.toolUsage ? [scheduleCommand.toolUsage] : [],
+        scheduleCommand.toolUsage
+          ? [
+              {
+                ...scheduleCommand.toolUsage,
+                ...(resolution ? { resolution } : {}),
+              },
+            ]
+          : [],
         [],
         {
-          reply: scheduleCommand.reply,
+          reply:
+            approval && bridge && !resolution
+              ? `${scheduleCommand.reply}\nПодтверждение изменения графика недоступно в текущем профиле чата. Изменение не выполнено.`
+              : scheduleCommand.reply,
           source: 'safe_fallback',
-          action: scheduleCommand.action,
+          action: resolution ? null : scheduleCommand.action,
         },
       );
     }
@@ -1913,7 +1945,11 @@ export class AiCoreService {
     user: AuthenticatedUser,
     dto: AiCoreChatDto,
   ): Promise<void> {
-    if (dto.surface !== 'web' || this.moduleRef === undefined) return;
+    if (
+      !['web', 'native'].includes(dto.surface) ||
+      this.moduleRef === undefined
+    )
+      return;
     const trigger = this.moduleRef.get<AiTypedWidgetTriggerPort>(
       AI_TYPED_WIDGET_TRIGGER,
       { strict: false },

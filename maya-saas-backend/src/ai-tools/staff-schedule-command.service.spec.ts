@@ -35,33 +35,36 @@ describe('StaffScheduleCommandService', () => {
     jest.useRealTimers();
   });
 
-  it('prepares a native-only day closure for the named master', async () => {
-    const mocks = createService();
-    const result = await mocks.service.tryHandle(
-      user,
-      chat('native', 'Закрой Антону завтра'),
-    );
+  it.each(['native', 'web'] as const)(
+    'prepares a day closure on %s for the named master',
+    async (surface) => {
+      const mocks = createService();
+      const result = await mocks.service.tryHandle(
+        user,
+        chat(surface, 'Закрой Антону завтра'),
+      );
 
-    expect(result?.reply).toContain('Антон Соколов, 06.08.2026');
-    expect(result?.reply).toContain('день закрыт');
-    expect(result?.action).toEqual({
-      status: 'approval_required',
-      approval: { id: 'approval-a' },
-    });
-    expect(mocks.runtime.execute).toHaveBeenCalledWith(
-      user,
-      'staff.schedule.update',
-      expect.objectContaining({
-        surface: 'native',
-        arguments: objectContaining({
-          staff_id: '7',
-          date: '2026-08-06',
-          operation: 'close_day',
-          slots: [],
+      expect(result?.reply).toContain('Антон Соколов, 06.08.2026');
+      expect(result?.reply).toContain('день закрыт');
+      expect(result?.action).toEqual({
+        status: 'approval_required',
+        approval: { id: 'approval-a' },
+      });
+      expect(mocks.runtime.execute).toHaveBeenCalledWith(
+        user,
+        'staff.schedule.update',
+        expect.objectContaining({
+          surface,
+          arguments: objectContaining({
+            staff_id: '7',
+            date: '2026-08-06',
+            operation: 'close_day',
+            slots: [],
+          }),
         }),
-      }),
-    );
-  });
+      );
+    },
+  );
 
   it('splits a shift around a requested break', async () => {
     const mocks = createService();
@@ -168,12 +171,121 @@ describe('StaffScheduleCommandService', () => {
     },
   );
 
-  it('does not intercept the production web surface', async () => {
+  it.each(['web', 'native'] as const)(
+    'carries only a contiguous material clarification on %s',
+    async (surface) => {
+      const mocks = createService();
+      const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+        { role: 'user', content: 'Поставь перерыв' },
+      ];
+      const turn = () =>
+        mocks.service.tryHandle(user, {
+          surface,
+          requestId: 'clarification-123456',
+          messages,
+        });
+      expect((await turn())?.reply).toBe('На какую дату изменить график?');
+      messages.push(
+        { role: 'assistant', content: 'На какую дату изменить график?' },
+        { role: 'user', content: 'Завтра' },
+      );
+      expect((await turn())?.reply).toBe('Какому мастеру изменить график?');
+      messages.push(
+        { role: 'assistant', content: 'Какому мастеру изменить график?' },
+        { role: 'user', content: 'Антону' },
+      );
+      expect((await turn())?.reply).toContain('Укажите время перерыва');
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      messages.push(
+        {
+          role: 'assistant',
+          content: 'Укажите время перерыва, например 14:00–15:00.',
+        },
+        { role: 'user', content: 'С 14 до 15' },
+      );
+      expect((await turn())?.action?.status).toBe('approval_required');
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute.mock.calls[0][2].arguments).toMatchObject({
+        staff_id: '7',
+        date: '2026-08-06',
+        slots: [
+          { from: '10:00', to: '14:00' },
+          { from: '15:00', to: '20:00' },
+        ],
+      });
+    },
+  );
+
+  it.each([
+    'Сделай Антону завтра выходной',
+    'Можно поставить Антону завтра перерыв с 14 до 15?',
+    'Антон завтра работает с 10 до 18',
+  ])('previews a free formulation: %s', async (content) => {
     const mocks = createService();
-    await expect(
-      mocks.service.tryHandle(user, chat('web', 'Закрой Антону завтра')),
-    ).resolves.toBeNull();
-    expect(mocks.crm.getStaff).not.toHaveBeenCalled();
+    expect(
+      (await mocks.service.tryHandle(user, chat('web', content)))?.action
+        ?.status,
+    ).toBe('approval_required');
+  });
+
+  it.each([
+    'Когда у Антона завтра перерыв?',
+    'Антон завтра работает до 18?',
+    'Какой перерыв у Антона?',
+  ])('leaves questions on the ordinary path: %s', async (content) => {
+    const mocks = createService();
+    expect(
+      await mocks.service.tryHandle(user, chat('web', content)),
+    ).toBeNull();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
+  it('does not reuse a finished draft or cancellation as material', async () => {
+    const mocks = createService();
+    for (const [reply, answer] of [
+      ['Подтвердите изменение.', 'До 18'],
+      ['На какую дату изменить график?', 'Отмена'],
+    ]) {
+      expect(
+        await mocks.service.tryHandle(user, {
+          surface: 'web',
+          requestId: 'cancel-draft-1234',
+          messages: [
+            { role: 'user', content: 'Закрой Антону завтра' },
+            { role: 'assistant', content: reply },
+            { role: 'user', content: answer },
+          ],
+        }),
+      ).toBeNull();
+    }
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([UserRole.CLIENT, UserRole.STAFF, UserRole.CUSTOMER])(
+    'denies %s before CRM reads',
+    async (role) => {
+      const mocks = createService();
+      expect(
+        (
+          await mocks.service.tryHandle(
+            { ...user, role },
+            chat('web', 'Закрой Антону завтра'),
+          )
+        )?.action,
+      ).toBeNull();
+      expect(mocks.crm.getStaff).not.toHaveBeenCalled();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it('never invents an absent staff identity', async () => {
+    const mocks = createService();
+    expect(
+      (await mocks.service.tryHandle(user, chat('web', 'Закрой завтра')))
+        ?.reply,
+    ).toBe('Какому мастеру изменить график?');
+    expect(mocks.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
   function createService(

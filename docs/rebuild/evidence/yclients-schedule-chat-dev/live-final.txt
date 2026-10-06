@@ -1,0 +1,8 @@
+widgets-live: proof database maya_widget_gate_proof_schedule_chat on 127.0.0.1:55627 (local)
+[Nest] 67325  - 10/05/2026, 9:05:38 PM   ERROR [CrmAdapterFactory] YCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.
+[Nest] 67325  - 10/05/2026, 9:05:38 PM   ERROR [CrmAdapterFactory] YCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.
+Test Suites: 1 passed, 1 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        21.154 s, estimated 22 s
+Ran all test suites within paths "test/widgets-live/schedule-chat.live-spec.ts".

@@ -1,0 +1,6 @@
+Source SHA: dcba8c8f4d230de31fb93f3d613f7524c3310df9
+Source git status --short: empty at entry and completion
+Backend tsc --noEmit --project tsconfig.build.json --incremental false: exit 0
+Model calls: none
+Production provider calls: none
+New full conversation-to-provider write test: NOT IMPLEMENTED; carrier confirmation gate missing

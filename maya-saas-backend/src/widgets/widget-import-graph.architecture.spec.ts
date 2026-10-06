@@ -166,6 +166,13 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     why: 'P-MT2a narrow completion-hook token and transport-neutral port types',
     only: ['composition/chat-read.trigger.ts', 'widgets.module.ts'],
   },
+  'ai-tools/ai-schedule-widget.port.ts': {
+    why: 'Bounded schedule presentation bridge to existing immutable approval owner',
+    only: [
+      'emission/emission.module.ts',
+      'emission/schedule-confirmation-minter.service.ts',
+    ],
+  },
   'ai-tools/ai-typed-widget-trigger.port.ts': {
     why: 'P-TYPED narrow pre-LLM carrier token and transport-neutral port types',
     only: ['composition/typed-step0.ts', 'widgets.module.ts'],
@@ -255,6 +262,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/booking-selector.adapter.ts',
       'owner-ports/personal-schedule.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
+      'owner-ports/schedule-approval.adapter.ts',
     ],
   },
   'measurement/measurement.module.ts': {

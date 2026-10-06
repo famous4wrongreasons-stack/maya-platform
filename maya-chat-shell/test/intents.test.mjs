@@ -1609,3 +1609,13 @@ test('L25: refused render evidence never opens selector submission and can be re
   assert.equal(s.submissions.length, 0);
   s.runtime.dispose();
 });
+
+test('schedule owner failure reads its canonical terminal line without treating it as authority denial', async () => {
+  const source = envelope('kind-schedule');
+  const lines = [{outcome:'NOT_CONFIRMED',text:'Изменение графика не подтверждено. Проверьте актуальное расписание.',action_receipt_ref:null}];
+  const port = createLiveSubmission({
+    widgetIntent: async () => ({ok:true,value:{outcome:'terminate',code:'effect_not_admissible',next_envelope:null,resolved_widget:null,receipt_outcome:'REFUSED',schedule_outcome:'FAILED'}}),
+    resolveWidgets: async () => ({ok:true,value:{tenant_bound:true,widgets:[{envelope:source,terminal_lines:lines,reread_intent:null}]}}),
+  });
+  assert.deepEqual(await port.submit({widget_id:source.widget_id},new AbortController().signal),{status:'settled',lines});
+});

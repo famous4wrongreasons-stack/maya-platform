@@ -1,5 +1,6 @@
 import { EncryptionModule } from '../../encryption/encryption.module';
 import { ChatReplyCipherAdapter } from './chat-reply-cipher.adapter';
+import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
 import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
 import { AppointmentsModule } from '../../appointments/appointments.module';
 import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
@@ -112,6 +113,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       TenancyModule,
     ]);
     expect(meta(MODULE_METADATA.PROVIDERS, WidgetOwnerPortsModule)).toEqual([
+      ScheduleApprovalAdapter,
+      {
+        provide: DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
+        useExisting: ScheduleApprovalAdapter,
+      },
       {
         provide: DI_TOKENS.CHAT_REPLY_CIPHER,
         useClass: ChatReplyCipherAdapter,
@@ -175,6 +181,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
       DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
+      DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
       DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
       PERSONAL_SCHEDULE_SOURCE,
       DI_TOKENS.USER_TURN_AUDIT,
@@ -225,6 +232,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     const BOUND: readonly string[] = [
       DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
+      DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
       DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
       DI_TOKENS.PERSONAL_SCHEDULE_SOURCE,
       DI_TOKENS.USER_TURN_AUDIT,

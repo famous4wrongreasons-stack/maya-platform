@@ -99,3 +99,4 @@ export const CHAT_REPLY_CIPHER = 'CHAT_REPLY_CIPHER';
 
 /** YC-SP1 typed AI approval read/decision owner; no generic action ingress. */
 export const SERVICE_PRICE_APPROVAL_OWNER = 'SERVICE_PRICE_APPROVAL_OWNER';
+export const SCHEDULE_APPROVAL_OWNER = 'SCHEDULE_APPROVAL_OWNER';

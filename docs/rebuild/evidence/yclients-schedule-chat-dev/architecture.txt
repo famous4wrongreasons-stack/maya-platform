@@ -1,0 +1,6 @@
+
+Test Suites: 4 passed, 4 total
+Tests:       102 passed, 102 total
+Snapshots:   0 total
+Time:        1.827 s, estimated 2 s
+Ran all test suites within paths "src/widgets/gates/r353-readers.source.spec.ts", "src/widgets/gates/facts.architecture.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts", "src/entitlements/widget-release-access.spec.ts".

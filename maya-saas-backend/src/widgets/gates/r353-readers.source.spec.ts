@@ -46,6 +46,11 @@ interface Reader {
 /** I-CTX's allowlist: `subjectCapability`, `subjectOf`, F43 `recomputeFloor`, the mint validator. */
 const READERS: readonly Reader[] = [
   {
+    reader: 'Exact schedule template rejects HANDOFF substitution',
+    file: 'widgets/emission/schedule-intent-template.ts',
+    declaration: 'scheduleTemplate',
+  },
+  {
     reader: 'subjectCapability (§3.5, the runtime body)',
     file: 'widgets/authority/contract-bindings.ts',
     declaration: 'subjectCapability',

@@ -1,0 +1,183 @@
+PASS  refuse/audience/audience-literal.ts  expected {audience} got {audience}
+FAIL  refuse/audience/client-body  expected {audience} got {audience, fetch-shape}
+        audience           src/net/client.ts:21  object-literal key "audience" (D4, N-2)
+        fetch-shape        src/net/client.ts:3  const PATHS must be an object literal whose values are exactly: /auth/email/start, /auth/email/verify, /auth/login, /auth/refresh, /auth/logout, /auth/oauth/telegram/start, /auth/oauth/telegram/complete, /ai/chat, /ai/conversation, /ai/transcribe, /mobile/pwa/search, /widgets/intent, /widgets/resolve (N-1)
+PASS  refuse/baseline/foreign-file  expected {baseline} got {baseline}
+PASS  refuse/baseline/stale-entry  expected {baseline} got {baseline}
+PASS  refuse/baseline/unlisted-token  expected {property-ban} got {property-ban}
+PASS  refuse/bypass/eight-probes.ts  expected {identifier-ban, k5-text, layer-global, type-assertion} got {identifier-ban, k5-text, layer-global, type-assertion}; probes 8/8 refused, 0 refusals off probe lines
+PASS  refuse/comments/role-mode-word.ts  expected {comment-lint} got {comment-lint}
+PASS  refuse/comments/storage-word.ts  expected {comment-lint} got {comment-lint}
+PASS  refuse/contract-collision/export-alias.ts  expected {contract-collision} got {contract-collision}
+PASS  refuse/contract-collision/intent-receipt-interface.ts  expected {contract-collision} got {contract-collision}
+PASS  refuse/contract-collision/kind-floor-const.ts  expected {contract-collision} got {contract-collision}
+PASS  refuse/contract-collision/ref-key-const.ts  expected {contract-collision} got {contract-collision}
+PASS  refuse/contract-collision/widget-envelope-type.ts  expected {contract-collision} got {contract-collision}
+PASS  refuse/dom-network/computed-owner-document.ts  expected {layer-global} got {layer-global}
+PASS  refuse/dom-network/document-cookie.ts  expected {identifier-ban, k5-text, layer-global} got {identifier-ban, k5-text, layer-global}
+PASS  refuse/dom-network/dynamic-import.ts  expected {import-allowlist} got {import-allowlist}
+PASS  refuse/dom-network/event-view.ts  expected {layer-global, type-assertion} got {layer-global, type-assertion}
+PASS  refuse/dom-network/fetch.ts  expected {fetch-shape, layer-global} got {fetch-shape, layer-global}
+PASS  refuse/dom-network/image-src.ts  expected {dom-sink, layer-global} got {dom-sink, layer-global}
+PASS  refuse/dom-network/new-function.ts  expected {layer-global} got {layer-global}
+PASS  refuse/dom-network/owner-document-fetch.ts  expected {layer-global} got {layer-global}
+PASS  refuse/dom-network/send-beacon.ts  expected {identifier-ban, layer-global} got {identifier-ban, layer-global}
+PASS  refuse/dom-sinks/anchor-href.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/button-click.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/create-computed-tag.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/create-img.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/form-submit.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/href-outside-reply-link.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/inner-html.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/set-attribute-src.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/dom-sinks/style-background.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/entry/second-document-reference.ts  expected {layer-global} got {layer-global}
+PASS  refuse/fetch-shape/query-concatenated  expected {fetch-shape} got {fetch-shape}
+PASS  refuse/fetch-shape/query-raw-interpolation  expected {fetch-shape} got {fetch-shape}
+PASS  refuse/fetch-shape/second-call-site  expected {fetch-shape} got {fetch-shape}
+PASS  refuse/fetch-shape/string-path  expected {fetch-shape} got {fetch-shape}
+PASS  refuse/fetch-shape/widgets-path-added  expected {fetch-shape} got {fetch-shape}
+PASS  refuse/pure-typecheck/dom-global-in-renderer.ts  expected {layer-global, pure-typecheck} got {layer-global, pure-typecheck}
+PASS  refuse/reflection/composed-path.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/define-property-entry.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/descriptor-setter.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/destructuring-href.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/reflection/entry-image-src.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/reflection/lookup-setter.ts  expected {identifier-ban} got {identifier-ban}
+PASS  refuse/reflection/object-assign-inner-html.ts  expected {dom-sink} got {dom-sink}
+PASS  refuse/reflection/reflect-chain-fetch.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/reflect-cookie-entry.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/reflect-in-net.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/reflect-local-storage-entry.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/reflect-set-folded-href.ts  expected {layer-global} got {layer-global}
+PASS  refuse/reflection/reflect-set-inner-html.ts  expected {layer-global} got {layer-global}
+PASS  refuse/renderer/date-now.ts  expected {layer-global} got {layer-global}
+PASS  refuse/renderer/fetch.ts  expected {fetch-shape, layer-global} got {fetch-shape, layer-global}
+PASS  refuse/renderer/global-this-computed.ts  expected {layer-global} got {layer-global}
+PASS  refuse/renderer/intent-token-property.ts  expected {property-ban} got {property-ban}
+PASS  refuse/renderer/math-random.ts  expected {layer-global} got {layer-global}
+PASS  refuse/renderer/token-property.ts  expected {property-ban} got {property-ban}
+PASS  refuse/retired-paths/ai-tools-concat.ts  expected {literal-ban} got {literal-ban}
+PASS  refuse/retired-paths/realtime-host.ts  expected {literal-ban} got {literal-ban}
+PASS  refuse/retired-paths/realtime-template.ts  expected {literal-ban} got {literal-ban}
+PASS  refuse/routes-import/contract-value-import.ts  expected {import-allowlist} got {import-allowlist}
+PASS  refuse/routes-import/extensionless.ts  expected {import-allowlist} got {import-allowlist}
+PASS  refuse/routes-import/net-client-value.ts  expected {import-allowlist} got {import-allowlist}
+PASS  refuse/surface/surface-variable.ts  expected {surface} got {surface}
+PASS  refuse/surface/surface-voice.ts  expected {surface} got {surface}
+PASS  refuse/voice/capture-without-gesture.ts  expected {voice-capture} got {voice-capture}
+PASS  refuse/voice/shell-get-user-media.ts  expected {layer-global, voice-capture} got {layer-global, voice-capture}
+PASS  refuse/voice/wav-get-user-media.ts  expected {voice-capture} got {voice-capture}
+PASS  admit/audience/kinds-suffix-pointer.ts  0 refusals
+PASS  admit/audience/renderer-audience-size.ts  0 refusals
+PASS  admit/baseline/eight-sites  0 refusals
+PASS  admit/comments/storage-none.ts  0 refusals
+PASS  admit/contract-collision/import-type.ts  0 refusals
+PASS  admit/contract-collision/kind-a11y-floor.ts  0 refusals
+PASS  admit/dom-network/factory-create.ts  0 refusals
+PASS  admit/dom-network/scheduler-after.ts  0 refusals
+PASS  admit/dom-sinks/class-list.ts  0 refusals
+PASS  admit/dom-sinks/create-input-password.ts  0 refusals
+PASS  admit/dom-sinks/reply-link-href.ts  0 refusals
+PASS  admit/entry/single-document-reference.ts  0 refusals
+FAIL  admit/fetch-shape/declared-query  1 refusals
+        fetch-shape        src/net/client.ts:3  const PATHS must be an object literal whose values are exactly: /auth/email/start, /auth/email/verify, /auth/login, /auth/refresh, /auth/logout, /auth/oauth/telegram/start, /auth/oauth/telegram/complete, /ai/chat, /ai/conversation, /ai/transcribe, /mobile/pwa/search, /widgets/intent, /widgets/resolve (N-1)
+FAIL  admit/fetch-shape/keyed-single-site  1 refusals
+        fetch-shape        src/net/client.ts:3  const PATHS must be an object literal whose values are exactly: /auth/email/start, /auth/email/verify, /auth/login, /auth/refresh, /auth/logout, /auth/oauth/telegram/start, /auth/oauth/telegram/complete, /ai/chat, /ai/conversation, /ai/transcribe, /mobile/pwa/search, /widgets/intent, /widgets/resolve (N-1)
+PASS  admit/pure-typecheck/es-only.ts  0 refusals
+PASS  admit/reflection/dom-object-keys.ts  0 refusals
+PASS  admit/reflection/entry-location-read.ts  0 refusals
+PASS  admit/reflection/shell-own-descriptor.ts  0 refusals
+PASS  admit/renderer/es-intrinsics.ts  0 refusals
+PASS  admit/renderer/role-hint-and-intent-ref.ts  0 refusals
+FAIL  admit/retired-paths/api-base-plus-paths  1 refusals
+        fetch-shape        src/net/client.ts:3  const PATHS must be an object literal whose values are exactly: /auth/email/start, /auth/email/verify, /auth/login, /auth/refresh, /auth/logout, /auth/oauth/telegram/start, /auth/oauth/telegram/complete, /ai/chat, /ai/conversation, /ai/transcribe, /mobile/pwa/search, /widgets/intent, /widgets/resolve (N-1)
+PASS  admit/routes-import/intent-target-type.ts  0 refusals
+PASS  admit/surface/surface-web.ts  0 refusals
+PASS  admit/voice/capture-with-gesture.ts  0 refusals
+PASS  coverage: refuse/retired-paths
+PASS  coverage: admit/retired-paths
+PASS  coverage: refuse/surface
+PASS  coverage: admit/surface
+PASS  coverage: refuse/audience
+PASS  coverage: admit/audience
+PASS  coverage: refuse/dom-network
+PASS  coverage: admit/dom-network
+PASS  coverage: refuse/renderer
+PASS  coverage: admit/renderer
+PASS  coverage: refuse/voice
+PASS  coverage: admit/voice
+PASS  coverage: refuse/entry
+PASS  coverage: admit/entry
+PASS  coverage: refuse/contract-collision
+PASS  coverage: admit/contract-collision
+PASS  coverage: refuse/routes-import
+PASS  coverage: admit/routes-import
+PASS  coverage: refuse/dom-sinks
+PASS  coverage: admit/dom-sinks
+PASS  coverage: refuse/baseline
+PASS  coverage: admit/baseline
+PASS  coverage: refuse/comments
+PASS  coverage: admit/comments
+PASS  coverage: refuse/fetch-shape
+PASS  coverage: admit/fetch-shape
+PASS  coverage: refuse/pure-typecheck
+PASS  coverage: admit/pure-typecheck
+PASS  coverage: refuse/reflection
+PASS  coverage: admit/reflection
+PASS  coverage: refuse/bypass
+PASS  write guard: a direct write outside outDir is refused, one inside is kept
+PASS  write guard: a tsc emit that resolves outside outDir is refused (virtual/b/x.js)
+PASS  pwa: the committed manifest, head and icons are admitted
+PASS  pwa: an id equal to the retired install is refused
+PASS  pwa: an id under the retired install is refused
+PASS  pwa: a relative id is refused
+PASS  pwa: a start_url with a fragment is refused
+PASS  pwa: a start_url outside the shell directory is refused
+PASS  pwa: a scope other than ./ is refused
+PASS  pwa: display browser is refused
+PASS  pwa: a free orientation is refused
+PASS  pwa: the wrong lang is refused
+PASS  pwa: an empty short_name is refused
+PASS  pwa: a theme_color that is not the stylesheet token is refused
+PASS  pwa: a background_color that is not the stylesheet token is refused
+PASS  pwa: a missing icon row is refused
+PASS  pwa: an icon row of the wrong size is refused
+PASS  pwa: a manifest that names a service worker is refused
+PASS  pwa: a manifest that is not in canonical form is refused
+PASS  pwa: no manifest at all is refused
+PASS  pwa: a head without the manifest link is refused
+PASS  pwa: a head without the apple-touch icon is refused
+PASS  pwa: a head without apple-mobile-web-app-capable is refused
+PASS  pwa: an unknown status bar style is refused
+PASS  pwa: a single unscoped theme-color is refused
+PASS  pwa: a theme-color that is not the dark token is refused
+PASS  pwa: a page that registers a service worker is refused
+PASS  pwa: a SECOND manifest link, differently spelled, placed BEFORE the canonical one is refused (the browser uses the first)
+PASS  pwa: a manifest link with its attributes reordered is refused (one spelling, so the emitted bytes are predictable)
+PASS  pwa: a second apple-touch-icon link before the canonical one is refused
+PASS  pwa: an apple-touch-icon-precomposed link is refused (iOS prefers it over the checked one)
+PASS  pwa: a THIRD theme-color meta, differently spelled, is refused
+PASS  pwa: a second apple-mobile-web-app-capable meta is refused
+PASS  pwa: a theme-color scoped to something other than a colour scheme is refused
+PASS  pwa: a meta CSP that has lost base-uri 'none' is refused (measured: the same planted <base> goes from inert to honoured, and Page.getAppId becomes the retired install's id)
+PASS  pwa: a planted <base href="/app/"> is refused (measured: honoured DESPITE the meta token, because a meta policy governs only what follows it)
+PASS  pwa: a viewport meta without viewport-fit=cover is refused (every env(safe-area-inset-*) would be 0px)
+PASS  pwa: a SECOND viewport meta, differently spelled, placed BEFORE the canonical one is refused (the browser uses the first)
+PASS  pwa: display_override is refused by name — a browser takes it INSTEAD of display
+PASS  pwa: an unknown member (share_target) is refused
+PASS  pwa: an unknown member (scope_extensions) is refused
+PASS  pwa: an unknown member (protocol_handlers) is refused
+PASS  pwa: an unknown member (launch_handler) is refused
+PASS  pwa: an unknown member (file_handlers) is refused
+PASS  pwa: an unknown member (prefer_related_applications) is refused
+PASS  pwa: an unknown member (shortcuts) is refused
+PASS  pwa: a manifest missing an admitted member is refused
+PASS  pwa: an icon at the wrong pixel size is refused
+PASS  pwa: a truncated icon is refused
+PASS  pwa: an icon whose deflate stream is corrupted is refused
+PASS  pwa: a missing icon is refused
+PASS  pwa: a stylesheet with no --bg token is refused
+PASS  pwa: a SECOND --bg appended to :root is read as CSS paints it — the last — so the manifest and meta colours no longer match
+self-test: refuse 67/68 refused with the named rule, admit 21/24 admitted, coverage 31/31, write guard 2/2, pwa contract 51/51, bypass; probes 8/8 refused, 0 refusals off probe lines
+self-test: FAIL

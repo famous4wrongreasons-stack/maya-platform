@@ -1,0 +1,6 @@
+
+Test Suites: 9 passed, 9 total
+Tests:       254 passed, 254 total
+Snapshots:   0 total
+Time:        1.174 s, estimated 4 s
+Ran all test suites within paths "src/ai-tools/staff-schedule-command.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/ai-tool-policy.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-canonical-receipt.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts".

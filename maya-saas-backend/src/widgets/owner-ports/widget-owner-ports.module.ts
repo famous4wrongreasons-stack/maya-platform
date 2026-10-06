@@ -1,6 +1,8 @@
 import { EncryptionModule } from '../../encryption/encryption.module';
 import { ChatReplyCipherAdapter } from './chat-reply-cipher.adapter';
 import { CHAT_REPLY_CIPHER } from '../di-tokens';
+import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
+import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
 import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
 import { SELECTOR_OBSERVATION_AUDIT } from '../di-tokens';
 import { AppointmentsModule } from '../../appointments/appointments.module';
@@ -91,6 +93,8 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    ScheduleApprovalAdapter,
+    { provide: SCHEDULE_APPROVAL_OWNER, useExisting: ScheduleApprovalAdapter },
     { provide: CHAT_REPLY_CIPHER, useClass: ChatReplyCipherAdapter },
     {
       provide: SELECTOR_OBSERVATION_AUDIT,
@@ -148,6 +152,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
   exports: [
     SERVICE_PRICE_APPROVAL_OWNER,
     CHAT_REPLY_CIPHER,
+    SCHEDULE_APPROVAL_OWNER,
     SELECTOR_OBSERVATION_AUDIT,
     PERSONAL_SCHEDULE_SOURCE,
     USER_TURN_AUDIT,

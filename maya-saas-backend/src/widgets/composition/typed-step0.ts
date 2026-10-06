@@ -137,7 +137,8 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     input: Parameters<AiTypedWidgetTriggerPort['routeTypedUtterance']>[0],
   ) {
     const tenantId = input.actor.tenantId;
-    if (tenantId === null || input.surface !== 'web') return null;
+    if (tenantId === null || !['web', 'native'].includes(input.surface))
+      return null;
     const routed = await this.prisma.$transaction(async (tx) => {
       const principal = await this.principals.resolve(tx);
       if (
@@ -234,6 +235,19 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
       },
     });
     const code = 'code' in result.verdict ? result.verdict.code : null;
+    const ownerDecision =
+      result.verdict.outcome === 'terminate'
+        ? (result.verdict.route?.owner_decision as
+            { domain?: string; state?: string } | undefined)
+        : undefined;
+    const scheduleReply =
+      ownerDecision?.domain === 'staff_schedule'
+        ? ownerDecision.state === 'SUCCEEDED'
+          ? 'График обновлён.'
+          : ownerDecision.state === 'FAILED'
+            ? 'Изменение графика не подтверждено. Проверьте актуальное расписание.'
+            : 'Результат изменения графика пока не подтверждён. Повторная запись не выполнялась.'
+        : null;
     // The response reads the committed correlation through its owner. Gate facts remain
     // internal to their declared readers; no new consumer of loweredTurn is introduced.
     const committed = await this.prisma.$transaction(async (tx) => {
@@ -278,9 +292,10 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     return Object.freeze({
       ...(userTurn === undefined ? {} : { userTurn }),
       reply:
-        code === null
+        scheduleReply ??
+        (code === null
           ? (priceReply ?? 'Готово.')
-          : 'Не удалось выполнить этот вариант. Откройте карточку и проверьте её состояние.',
+          : 'Не удалось выполнить этот вариант. Откройте карточку и проверьте её состояние.'),
       action: Object.freeze({
         status: result.verdict.outcome,
         code,
@@ -293,7 +308,8 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     input: Parameters<AiTypedWidgetTriggerPort['persistTypedTurn']>[0],
   ): Promise<UserTurnReference | null> {
     const tenantId = input.actor.tenantId;
-    if (tenantId === null || input.surface !== 'web') return null;
+    if (tenantId === null || !['web', 'native'].includes(input.surface))
+      return null;
     return this.prisma.$transaction(async (tx) => {
       const principal = await this.principals.resolve(tx);
       if (

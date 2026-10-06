@@ -102,7 +102,8 @@ export const createLiveSubmission = (
       envelope: sent.value.next_envelope,
       accepted: sent.value.outcome === 'terminate' && sent.value.code === null && sent.value.receipt_outcome === 'ACCEPTED',
     };
-    if (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED') {
+    const scheduleFailure = sent.value.outcome === 'terminate' && sent.value.receipt_outcome === 'REFUSED' && sent.value.schedule_outcome === 'FAILED';
+    if (!scheduleFailure && (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED')) {
       return { status: 'forbidden' };
     }
     // NS-1: an ACCEPTED reply that carries a re-resolved widget is a RETURN, not a plain
@@ -121,11 +122,11 @@ export const createLiveSubmission = (
     const owner = sent.value.code === null && sent.value.owner_decision !== undefined
       ? { ownerDecision: sent.value.owner_decision } : {};
     const page = await transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
-    if (!page.ok) return { status: 'accepted', ...owner };
+    if (!page.ok) return { status: scheduleFailure ? 'forbidden' : 'accepted', ...owner };
     const current = page.value.widgets.find((widget) => widget.envelope.widget_id === submission.widget_id);
     return current !== undefined && current.terminal_lines.length > 0
       ? { status: 'settled', lines: current.terminal_lines, ...owner }
-      : { status: 'accepted', ...owner };
+      : { status: scheduleFailure ? 'forbidden' : 'accepted', ...owner };
   },
 });
 

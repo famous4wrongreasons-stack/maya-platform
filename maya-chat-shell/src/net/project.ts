@@ -332,6 +332,12 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
         action_execution_id: filled(own(decisionOutcome, 'action_execution_id')),
       } : null,
     } } : {}),
+    ...(() => {
+      const decision = own(body, 'owner_decision');
+      if (!isRecord(decision) || own(decision, 'domain') !== 'staff_schedule') return {};
+      const state = own(decision, 'state');
+      return state === 'SUCCEEDED' || state === 'FAILED' || state === 'UNKNOWN' ? {schedule_outcome: state} : {};
+    })(),
   };
 };
 
