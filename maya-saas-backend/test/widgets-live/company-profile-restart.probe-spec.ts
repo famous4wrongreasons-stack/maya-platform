@@ -328,10 +328,12 @@ describe('company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETI
         action: null,
         grounding: { status: 'verified' },
       });
+      expect(first.body).not.toHaveProperty('resolution');
       expect((first.body as Chat).reply).toContain('Тестовая улица, 7');
       const beforeReplay = reads.length;
       const replay = await chat(token, PROMPTS.profile, requestId);
       expect(replay.status).toBe(201);
+      expect(replay.body).not.toHaveProperty('resolution');
       expect((replay.body as Chat).reply).toBe((first.body as Chat).reply);
       expect(reads).toHaveLength(beforeReplay);
       mode = 'changed';
@@ -346,6 +348,7 @@ describe('company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETI
         (first.body as Chat).user_turn.conversationId,
       );
       expect(second.status).toBe(201);
+      expect(second.body).not.toHaveProperty('resolution');
       expect((second.body as Chat).reply).toContain('Новая улица, 8');
       expect((second.body as Chat).reply).not.toContain('Тестовая улица');
       const work = await sourceReceipt(a);

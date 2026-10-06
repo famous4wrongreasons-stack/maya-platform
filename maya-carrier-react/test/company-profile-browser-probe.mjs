@@ -116,6 +116,10 @@ async function main() {
   process.once('SIGTERM', terminate);
   process.once('disconnect', terminate);
   async function capture(page, name) {
+    // textContent includes the accessibility copy before the visible typewriter
+    // finishes. Wait for actual reveal, then frame the latest text for pixels.
+    assert.ok(await page.waitFor('!document.querySelector(".maya-typewriter-caret")'));
+    await page.eval('Q.all(\'[data-chat-message="maya"]\').at(-1)?.scrollIntoView({ block: "nearest" })');
     // DOM completion precedes compositor paint; preserve real pixels after two frames.
     await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
     report.snapshots[name] = await snapshot(page);
@@ -181,6 +185,8 @@ async function main() {
       if (conversationId) assert.equal(body.user_turn.conversationId, conversationId);
       conversationId = body.user_turn.conversationId;
       assert.equal(body.action, null);
+      assert.equal(body.resolution, undefined, 'Public profile uses the coherent text reply');
+      assert.equal(await page.eval('document.querySelectorAll("article.widget").length'), 0, 'No raw SCHEDULE card beside public profile');
       report.observations[key] = body;
       await capture(page, key); await checkpoint(key, { body }); return body;
     }

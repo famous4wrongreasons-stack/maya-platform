@@ -1672,6 +1672,12 @@ describe('AiCoreService', () => {
         },
       });
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      // Public hours are not a timed SCHEDULE body. The actual browser proof
+      // exposed its raw JSON fallback beside the complete server answer.
+      expect(mocks.runtime.execute.mock.calls[0]?.[3]).toMatchObject({
+        suppressWidgetTrigger: true,
+        widgetTrigger: 'T-2a',
+      });
     });
     it('preserves an address when discovery has no hours instead of inventing them', async () => {
       const mocks = fixture({

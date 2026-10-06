@@ -1974,7 +1974,13 @@ export class AiCoreService {
   ): ReturnType<AiToolRuntimeService['execute']> {
     const turn = this.readTurns.get(chat);
     const [user, name, dto] = args;
-    const read = () => this.runtime.execute(...args);
+    // A public profile is prose, not the timed SCHEDULE contract. Its complete
+    // server reply retains the source receipt without a raw-JSON widget beside it.
+    const internal =
+      name === 'company.business-hours.read'
+        ? { ...args[3], suppressWidgetTrigger: true }
+        : args[3];
+    const read = () => this.runtime.execute(user, name, dto, internal);
     const capability = C9_CAPABILITIES.find((c) => c.capabilityKey === name);
     // Persisted web ingress currently supplies the canonical age. Other surfaces
     // retain their existing source path until their turn identity is connected.
@@ -1992,7 +1998,13 @@ export class AiCoreService {
       ]),
       read,
       (executionId) =>
-        this.runtime.replayCompletedRead(user, name, dto, executionId, args[3]),
+        this.runtime.replayCompletedRead(
+          user,
+          name,
+          dto,
+          executionId,
+          internal,
+        ),
     );
   }
 
