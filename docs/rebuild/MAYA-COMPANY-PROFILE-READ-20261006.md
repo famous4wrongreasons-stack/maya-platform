@@ -74,3 +74,22 @@ node /tmp/maya-unified-gate-20261006/launch.cjs node --max-old-space-size=4096 n
 ```
 
 [Actual proof, screenshots, failed run, bounded types and review](evidence/maya-development-integration-20261006/company-profile-http-react/manifest.json).
+
+Code `3040c2c2` addresses the observed raw-JSON card for **chat** requests.
+`executeChatTool` uses the existing internal widget-suppression option only for
+`company.business-hours.read`, consistently on fresh execution and C9 replay. The
+public profile has no certified timed ScheduleBody; the complete sourced text reply
+remains coherent without a second generic SCHEDULE fallback. The policy check,
+source read, C9 receipt, grounding and encrypted reply persistence stay unchanged.
+No carrier authority or generic widget framework changed. Direct standalone tool
+execution remains outside this chat-specific presentation increment.
+
+Four targeted suites pass198/198, lint has no errors and two existing warnings, and
+independent review reports no blocker. One RED regression is retained. The HTTP
+proof now requires no widget resolution on fresh/replay/follow-up; the browser
+requires no raw widget and waits for visible typewriter completion before pixels.
+These upgraded HTTP/browser assertions are prepared, **not run**. Production types
+for this newest change also remain pending; earlier r3 remains evidence for the
+previous version and the presentation issue it exposed. Heavy slot stays free.
+
+[Text-only public-profile checkpoint evidence](evidence/maya-development-integration-20261006/public-profile-text/manifest.json).

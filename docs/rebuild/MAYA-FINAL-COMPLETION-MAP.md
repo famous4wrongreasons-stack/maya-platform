@@ -780,3 +780,10 @@ and empty-list wording respects hidden history. Six targeted suites pass304/304;
 scoped lint and independent review have no blockers. No new authority or personal
 data sent to a second model call. This new version has no semantic-types or actual
 HTTP/PG/React acceptance yet; see [checkpoint and evidence](MAYA-PERSONAL-READ-CONTEXT-20261006.md).
+
+Public-profile chat presentation follow-up `3040c2c2` suppresses only its invalid
+generic SCHEDULE card through the existing internal option, for fresh/replayed
+reads. C9/source/policy and reply persistence remain unchanged. Four targeted
+suites pass198/198; lint/review have no blockers. Updated HTTP/browser assertions
+are prepared, not executed; prior r3 is not acceptance of this newest increment.
+See [public-profile checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md).

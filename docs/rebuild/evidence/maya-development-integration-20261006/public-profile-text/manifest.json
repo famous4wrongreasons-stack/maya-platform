@@ -1,0 +1,60 @@
+{
+  "kind": "public-profile-text-only-chat-unit-checkpoint",
+  "codeHead": "3040c2c2f18dd76928430c2c8b792e6830eee019",
+  "qualification": "NOT_ISSUED",
+  "realModelAcceptance": false,
+  "actualBrowserAcceptance": false,
+  "types": "New increment not yet checked semantically; previous production pass is older code",
+  "cohort": "198/198 four suites",
+  "lint": "0errors2pre-existing warnings",
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "3df656a34acdb24e6fd2a72c41910a9cafc5d0608853bcef43f68fad7a89d8f1"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "sha256": "6a456d4a1085eb0affd32213f221e74e046b380f377a8a5f25bf1836d06bbc66"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/company-profile-restart.probe-spec.ts",
+      "sha256": "fd6085b471bacbddc684eabd2a8442c5c4cb661cfe7ba90cbb5775de0c2aae2d"
+    },
+    {
+      "path": "maya-carrier-react/test/company-profile-browser-probe.mjs",
+      "sha256": "b66b0d09dbb4bcb6e2f8cb88982c07f46b6bb8860cef78db6d720417c5c8d0e4"
+    }
+  ],
+  "files": [
+    {
+      "path": "cohort.json",
+      "bytes": 90733,
+      "sha256": "79052b110494ac43943fe61a34e72ffddfdae652f2a0130baebdd7a4b554c7e3"
+    },
+    {
+      "path": "cohort.txt",
+      "bytes": 2155,
+      "sha256": "416251be9af893c70d14a0afd9be62618424aea5a8fa14cc3dd46cf806a3c73e"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 612,
+      "sha256": "f2a71bad25ee4075e058528066a0d5d76a48c485df3f1730677a89a0ca3ea8b2"
+    },
+    {
+      "path": "lint.txt",
+      "bytes": 459,
+      "sha256": "b1dbcc0b2df404c229d33a1d62210c24c240778d5fbf35edada263aff0a917c4"
+    },
+    {
+      "path": "red.json",
+      "bytes": 70574,
+      "sha256": "2f10a7064fd3120c3f62f101f4a0c971904b024af90d42629162dd5f9f4c0e75"
+    },
+    {
+      "path": "red.txt",
+      "bytes": 15865,
+      "sha256": "bfca1fe6c2ed9e3cbe61d950baa7464f1cd81fc7511931dbd16d88f46d82a91c"
+    }
+  ]
+}

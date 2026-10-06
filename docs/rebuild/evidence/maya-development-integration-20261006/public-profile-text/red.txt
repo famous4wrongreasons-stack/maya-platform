@@ -1,0 +1,188 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  AiCoreService
+    ○ skipped routes a native conversation through the real schedule preview owner
+    ○ skipped routes a web conversation through the real schedule preview owner
+    ○ skipped uses client authority for schedule commands in a client audience even for the owner
+    ○ skipped renders canonical dormancy signals without legacy contacts or inferred activity
+    ○ skipped returns C8 unavailability through chat after the selected dormancy read when model continuation fails
+    ○ skipped plans the complete booking dialogue before heuristic data preloads: На сегодня на 16:30 к Стасу
+    ○ skipped plans the complete booking dialogue before heuristic data preloads: Нет, лучше завтра к другому мастеру
+    ○ skipped plans the complete booking dialogue before heuristic data preloads: Хочу на стрижку в пятницу вечером
+    ○ skipped plans the complete booking dialogue before heuristic data preloads: Давай вместо завтра послезавтра
+    ○ skipped does not substitute a heuristic analytics read when semantic planning is unavailable
+    ○ skipped persists an explicit REMEMBER command without invoking the model
+    ○ skipped passes tenant-scoped remembered notes to the model
+    ○ skipped introduces MAYA and lists personal analytics settings without calling a model
+    ○ skipped enables a named analytics capability directly from chat
+    ○ skipped returns a safe fallback without calling tools when no model is configured
+    ○ skipped redacts PII, executes an allowed read tool and lets the model answer from its result
+    ○ skipped stops at the immutable approval instead of letting the model write
+    ○ skipped binds a pricing proposal to user text and catalog instead of model numbers
+    ○ skipped binds a pricing proposal to user text and catalog instead of model numbers
+    ○ skipped does not prepare pricing from ambiguous intent or stale catalog: Установи цену Стрижка на 10%
+    ○ skipped does not prepare pricing from ambiguous intent or stale catalog: Установи цену Массаж 1900
+    ○ skipped does not prepare pricing from ambiguous intent or stale catalog: Установи цену Стрижка 1900
+    ○ skipped withholds owner pricing from the client audience even if the owner is signed in
+    ○ skipped redacts standalone likely names before the external model boundary
+    ○ skipped preserves an ISO booking date while redacting a phone number
+    ○ skipped lets the model describe only the slots the availability tool returned
+    ○ skipped keeps ordinary capitalized words so the model can understand the request
+    ○ skipped retries once and blocks a factual reply when the model skips its tool
+    ○ skipped accepts financial figures only when the server tool returned them
+    ○ skipped blocks a figure that differs from the completed tool result
+    ○ skipped never substitutes business analytics for an unavailable staff schedule
+    ○ skipped не требует источник, когда смысловой план назвал ход болтовнёй
+    ○ skipped routes an unseen owner paraphrase through semantic planning instead of a monthly-summary default
+    ○ skipped asks one semantic clarification and executes no tool when meaning is uncertain
+    ○ skipped keeps owner in client audience on salon story without business analytics
+    ○ skipped 🔴 баланс чужого журнала произносится с оговоркой, а не как факт Maya
+    ○ skipped grounds a customer loyalty balance in the authenticated customer tool
+    ○ skipped grounds a request to spend bonuses before suggesting a service
+    ○ skipped grounds the authenticated customer appointment history
+    ○ skipped explains access denial without pretending the protected source is offline
+    ○ skipped names the plan when the assistant is not part of it at all
+    ○ skipped не отказывает мастеру в его собственных данных: Сколько у меня ещё записей сегодня
+    ○ skipped не отказывает мастеру в его собственных данных: Какой у меня график завтра
+    ○ skipped uses employee analytics rather than business totals for staff
+    ○ skipped loads verified CRM context for an open-ended owner business question
+    ○ skipped does not load a CRM report for a simple owner greeting
+    ○ skipped blocks a repeated client upsell after the client asks for only a haircut
+    ○ skipped does not let a client upsell bypass the verified service catalog
+    ○ skipped allows one client upsell after the service catalog is verified
+    ○ skipped lets the native model explain a weakest-service query from verified data
+    ○ skipped answers from verified business data when the model is temporarily unavailable
+    ○ skipped keeps a weak-spots follow-up comprehensive when the model is unavailable
+    ○ skipped answers a compound year comparison without bypassing canonical opportunities
+    ○ skipped does not invent an action when an owner asks what to do about a revenue decline
+    ○ skipped explains the strongest verified factor when an owner asks why business declined
+    ○ skipped distinguishes a CRM outage from a Maya reasoning failure
+    ○ skipped uses only the current employee query to give a master performance advice
+    ○ skipped refuses to label operating data as gross profit
+    ○ skipped returns only the verified CRM payroll aggregate for salary questions
+    ○ skipped returns verified payroll by master when the model is unavailable
+    ○ skipped never substitutes payroll for money brought in by each master
+    ○ skipped does not turn unavailable CRM revenue into zero
+    ○ skipped answers exact appointment statuses without asking the model to recalculate
+    ○ skipped answers a daily breakdown from exact CRM status buckets
+    ○ skipped answers a year-over-year question from the universal business query
+    ○ skipped names last year revenue in the deterministic year-over-year summary
+    ○ skipped keeps a customer-count follow-up inside the same year-over-year window
+    ○ skipped recognizes a direct customer decline comparison with the previous year
+    ○ skipped fails closed when the model requests a tool unavailable to the role
+    ○ skipped asks the model to rewrite an unsourced number and ships the corrected answer
+    ○ skipped treats conversation as context, with explicit user scenario=false, not assistant numeric evidence
+    ○ skipped treats conversation as context, with explicit user scenario=true, not assistant numeric evidence
+    ○ skipped falls back to the deterministic text when the model repeats an unsourced number
+    ○ skipped lets the model say a decline in words while the server keeps the minus sign
+    ○ skipped does not mistake decline wording next to an absolute figure for an error
+    ○ skipped catches a decline described as growth even though the figure itself is real
+    ○ skipped lets the model name a money change in roubles when the server counted it in kopecks
+    ○ skipped still rejects a money figure that is not in the data at any scale
+    ○ skipped does not treat an hour inside a timestamp as a confirmed metric
+    ○ skipped lets a per-master service drop through the number guard by name
+    ○ skipped projects actual serialized model requests through read, correction and server label presentation
+    ○ skipped keeps nonnumeric catalog service IDs out of serialized resumed semantic context
+    ○ skipped lets a salon-wide sentence without any master name through untouched
+    ○ skipped keeps a full three-part answer with per-master detail intact
+    ○ skipped leaves the model answer byte-for-byte alone instead of rewriting master labels
+    ○ skipped trims a long conversation instead of refusing to answer it
+    ○ skipped gives the model the server time instead of letting it guess the calendar
+    personal appointment details in the canonical chat
+      ○ skipped describes an empty available list without denying history hidden by the source setting
+      ○ skipped answers the next appointment at its branch time without exposing history to another model call
+      ○ skipped counts the complete raw list and displays only three earliest upcoming appointments
+      ○ skipped does not offer a canceled future appointment as the next visit
+      ○ skipped does not offer a cached upcoming flag after its actual instant has passed
+      ○ skipped accepts canonical reader/persisted instant 2026-10-07T09:00:00.000Z
+      ○ skipped accepts canonical reader/persisted instant 2026-10-07T09:00:00Z
+      ○ skipped accepts canonical reader/persisted instant 2026-10-07T09:00:00.1Z
+      ○ skipped does not turn missing list into a verified empty history or invented date
+      ○ skipped does not turn null list into a verified empty history or invented date
+      ○ skipped does not turn malformed entry into a verified empty history or invented date
+      ○ skipped does not turn missing upcoming time into a verified empty history or invented date
+      ○ skipped does not turn normalized invalid calendar date into a verified empty history or invented date
+      ○ skipped does not turn timezone-free datetime into a verified empty history or invented date
+      ○ skipped does not turn missing branch timezone into a verified empty history or invented date
+      ○ skipped does not turn unknown status into a verified empty history or invented date
+      ○ skipped does not turn invalid timezone into a verified empty history or invented date
+      ○ skipped refuses stale appointment times instead of claiming the snapshot is current
+    public company profile consultation
+      ✕ answers the client address and hours from the public CRM profile without another model call (9 ms)
+      ○ skipped preserves an address when discovery has no hours instead of inventing them
+      ○ skipped does not claim company profile facts from unverified
+      ○ skipped does not claim company profile facts from wrong source
+      ○ skipped does not claim company profile facts from stale
+      ○ skipped does not claim company profile facts from contradictory availability
+      ○ skipped does not claim company profile facts from missing hours
+      ○ skipped does not claim company profile facts from unbounded hours
+      ○ skipped keeps known hours but marks a missing address instead of substituting the salon name
+      ○ skipped rereads current public facts for a short address follow-up without carrying old hours
+      ○ skipped refuses a model-only public address answer before a current source read
+      ○ skipped does not require the salon profile for another domain: Как изменить email-адрес?
+      ○ skipped does not require the salon profile for another domain: Что такое IP-адрес?
+      ○ skipped does not require the salon profile for another domain: Какой у вас адрес электронной почты?
+      ○ skipped does not require the salon profile for another domain: Какой ваш адрес сайта?
+      ○ skipped does not require the salon profile for another domain: Где находится настройка уведомлений?
+      ○ skipped does not require the salon profile for another domain: Когда открывается запись на ноябрь?
+      ○ skipped keeps a client dossier address question in the existing dossier domain
+    own schedule
+      ○ skipped composes own schedule from the current source: true
+      ○ skipped composes own schedule from the current source: false
+      ○ skipped refuses to invent an own schedule when unlinked
+      ○ skipped refuses to invent an own schedule when working without intervals
+      ○ skipped refuses to invent an own schedule when missing work status
+      ○ skipped refuses to invent an own schedule when unverified
+      ○ skipped refuses to invent an own schedule when stale
+      ○ skipped refuses to invent an own schedule when wrong source
+      ○ skipped refuses to invent an own schedule when wrong date
+      ○ skipped refuses to invent an own schedule when broken interval
+      ○ skipped refuses to invent an own schedule when contradictory day off
+      ○ skipped binds own schedule date to the current request: Завтра я работаю?
+      ○ skipped binds own schedule date to the current request: А послезавтра?
+      ○ skipped binds own schedule date to the current request: Сегодня я работаю?
+      ○ skipped binds own schedule date to the current request: Мой график 2026-10-02
+      ○ skipped binds own schedule date to the current request: Мой график 02.10.2026
+      ○ skipped binds own schedule date to the current request: Мой график 02.10.26.
+      ○ skipped binds own schedule tomorrow across local midnight in Europe/Moscow
+      ○ skipped binds own schedule tomorrow across local midnight in America/Los_Angeles
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график
+      ○ skipped clarifies an own schedule date without trusting model args: Сегодня или завтра?
+      ○ skipped clarifies an own schedule date without trusting model args: На 31.02.2026
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график 07.10.026
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график 07.10.326
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график не завтра, а в пятницу
+      ○ skipped clarifies an own schedule date without trusting model args: С 07.10 до пятницы
+      ○ skipped clarifies an own schedule date without trusting model args: Не на завтра, а на следующий день
+      ○ skipped clarifies an own schedule date without trusting model args: Завтра и в пятницу
+      ○ skipped refuses an own schedule that would be truncated by result sanitization
+      ○ skipped does not expose the staff own schedule in an owner client audience
+      ○ skipped rereads the own schedule for a short next-day follow-up instead of reusing the prior shift
+
+  ● AiCoreService › public company profile consultation › answers the client address and hours from the public CRM profile without another model call
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 0
+
+      Object {
+    -   "suppressWidgetTrigger": true,
+        "widgetTrigger": "T-2a",
+      }
+
+      1675 |       // Public hours are not a timed SCHEDULE body. The actual browser proof
+      1676 |       // exposed its raw JSON fallback beside the complete server answer.
+    > 1677 |       expect(mocks.runtime.execute.mock.calls[0]?.[3]).toMatchObject({
+           |                                                        ^
+      1678 |         suppressWidgetTrigger: true,
+      1679 |         widgetTrigger: 'T-2a',
+      1680 |       });
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:1677:56)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 153 skipped, 154 total
+Snapshots:   0 total
+Time:        0.594 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-public-profile-text-red.json

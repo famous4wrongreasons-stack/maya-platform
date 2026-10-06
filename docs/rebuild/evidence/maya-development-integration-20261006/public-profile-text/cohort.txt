@@ -1,0 +1,15 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/widgets/composition/chat-read.trigger.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+[32m[Nest] 31616  - [39m10/07/2026, 2:26:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 31616  - [39m10/07/2026, 2:26:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 31616  - [39m10/07/2026, 2:26:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 31616  - [39m10/07/2026, 2:26:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+PASS src/orchestration/c9.conversation-reads.spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       198 passed, 198 total
+Snapshots:   0 total
+Time:        0.926 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-public-profile-text-cohort.json
