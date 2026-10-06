@@ -842,13 +842,17 @@ export class AiCoreService {
             activeSemanticPlan,
             toolResults.map((result) => result.name),
           );
+        // Register current private catalog/context values before projecting prose,
+        // so resumed assistant text, notes and corrections share the same aliases.
+        const modelToolResults = sanitized.project(toolResults, true);
+        const modelPlan = sanitized.project(activeSemanticPlan);
         const decision = await this.model.decide({
           surface: dto.surface,
           persona: brain.persona,
           principalRole: toolUser.role,
-          messages: sanitized.messages,
+          messages: sanitized.project(sanitized.messages),
           tools,
-          toolResults: sanitized.project(toolResults, true),
+          toolResults: modelToolResults,
           // После подтверждённого результата CRM отдельный этап планирования
           // больше не нужен: он мог выбрать несуществующий инструмент и
           // уничтожить уже готовые данные. Следующий вызов сразу формулирует
@@ -865,7 +869,7 @@ export class AiCoreService {
           businessTimezone,
           memoryFacts: sanitized.project(memoryFacts),
           corrections: sanitized.project(pendingCorrections),
-          conversationPlan: sanitized.project(activeSemanticPlan),
+          conversationPlan: modelPlan,
         });
         if (!decision) {
           const deterministicReply = this.deterministicGroundedReply(
@@ -5113,18 +5117,62 @@ export class AiCoreService {
         if (typeof raw === 'string' && value === raw) return token;
       for (const [token, raw] of nameReferences)
         if (value === raw) return token;
-      // Do not redact the random digits of an existing opaque mention as a phone.
-      return value
+      // Known current private values may also occur inside resumed prose. Prefer
+      // full names over their parts, use Unicode boundaries, and never globally
+      // replace numeric IDs ("40" may be a legitimate aggregate count).
+      const known = new Map<string, Set<string>>();
+      const remember = (raw: string, token: string) => {
+        if (raw.length < 2 || /^\d+$/.test(raw) || raw.startsWith('[')) return;
+        const key = raw.toLocaleLowerCase('ru-RU');
+        const tokens = known.get(key) ?? new Set<string>();
+        tokens.add(token);
+        known.set(key, tokens);
+      };
+      for (const [token, raw] of nameReferences) {
+        remember(raw, token);
+        // Legacy text redaction may already have removed only the given name.
+        // Known surname fragments must not survive in notes/transcript prose.
+        for (const part of raw.split(/\s+/u)) remember(part, token);
+      }
+      for (const [token, raw] of references)
+        if (typeof raw === 'string') remember(raw, token);
+      const alternatives = [...known.keys()]
+        .sort((a, b) => b.length - a.length)
+        .map((raw) => raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const pattern = alternatives.length
+        ? new RegExp(
+            `(?<![\\p{L}\\p{N}_])(?:${alternatives.join('|')})(?![\\p{L}\\p{N}_])`,
+            'giu',
+          )
+        : null;
+      const protectedText = value
         .split(/(\[(?:name|reference) removed\]@[a-f0-9]{32}_\d+)/g)
-        .map((part) =>
-          /^\[(?:name|reference) removed\]@/.test(part)
-            ? part
-            : this.redactLikelyProperNames(
-                this.redactSensitiveText(part, (name) => alias(name, true))
-                  .content,
-                (name) => alias(name, true),
-              ).content,
-        )
+        .map((part) => {
+          if (!pattern || /^\[(?:name|reference) removed\]@/.test(part))
+            return part;
+          return part.replace(pattern, (match) => {
+            const tokens = known.get(match.toLocaleLowerCase('ru-RU'))!;
+            // Ambiguous name fragments hide identity and cannot select a master.
+            return tokens.size === 1 ? [...tokens][0] : '[name removed]';
+          });
+        })
+        .join('');
+      // Do not redact the random digits of an existing opaque mention as a phone.
+      return protectedText
+        .split(/(\[(?:name|reference) removed\]@[a-f0-9]{32}_\d+)/g)
+        .map((part) => {
+          if (/^\[(?:name|reference) removed\]@/.test(part) || !part.trim())
+            return part;
+          return (
+            (part.match(/^\s*/)?.[0] ?? '') +
+            this.redactLikelyProperNames(
+              this.redactSensitiveText(part, (name) => alias(name, true))
+                .content,
+              (name) => alias(name, true),
+            ).content +
+            (part.match(/\s*$/)?.[0] ?? '')
+          );
+        })
         .join('');
     };
     const walk = (

@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
+import { AiMemoryService } from '../../src/ai-tools/ai-memory.service';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import { AiToolHandlerService } from '../../src/ai-tools/ai-tool-handler.service';
 import captured from '../../src/ai-tools/fixtures/deepseek-v4-pro-bounded-recheck.json';
@@ -412,6 +413,131 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       ),
     ).toBe(true);
   });
+  it('projects a known uncommon name inside a full resumed assistant transcript before serialization', async () => {
+    const tenant = await fx.tenant(
+      'Synthetic transcript privacy',
+      CalendarSource.INTERNAL,
+    );
+    const user = await fx.user(tenant, UserRole.CLIENT);
+    const source = await fx.bookingSource(tenant, user, true);
+    await db.prisma.internalService.update({
+      where: { id: source.serviceId },
+      data: { name: 'Моделирование бороды' },
+    });
+    await db.prisma.internalProvider.update({
+      where: { id: source.staffId },
+      data: { displayName: 'Рустам Ахметов' },
+    });
+    for (const feature of [
+      'ai.consultant',
+      'widgets.runtime',
+      'booking',
+      'booking.customer_app',
+      'crm.integration',
+    ] as const)
+      await fx.grantFeature(tenant, feature);
+    const token = await http.login(tenant.slug, user.email, user.password);
+    const provider = new AiCoreModelService(
+      new ConfigService({
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'offline-placeholder',
+      }),
+    );
+    jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation((input) => provider.decide(input));
+    const bodies: string[] = [];
+    jest.spyOn(global, 'fetch').mockImplementation((_url, init) => {
+      if (typeof init?.body !== 'string')
+        throw new Error('Expected serialized body');
+      bodies.push(init.body);
+      const output = JSON.parse(captured[0].content) as {
+        semantic_plan: { tasks: { entities_json: string }[] };
+        tool_call: { arguments_json: string } | null;
+      };
+      // The scripted first selection establishes real encrypted server context;
+      // it is not evidence that an actual model can infer an unseen staff name.
+      output.semantic_plan.tasks[0].entities_json = JSON.stringify(
+        bodies.length === 1
+          ? { employee: 'Рустам Ахметов' }
+          : { services: ['Моделирование бороды'], date_or_period: 'tomorrow' },
+      );
+      output.tool_call =
+        bodies.length === 1
+          ? null
+          : {
+              arguments_json: JSON.stringify({
+                staff_id: '[name removed]',
+                service_ids: ['Моделирование бороды'],
+              }),
+            };
+      if (output.tool_call)
+        Object.assign(output.tool_call, { name: 'booking.availability.read' });
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            choices: [
+              {
+                finish_reason: 'stop',
+                message: { content: JSON.stringify(output) },
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+    });
+    const first = await request(http.app.getHttpServer())
+      .post('/api/ai/chat')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        surface: 'web',
+        requestId: randomUUID(),
+        messages: [{ role: 'user', content: 'Хочу к этому мастеру' }],
+      });
+    expect(first.status).toBe(201);
+    const conversationId = (
+      first.body as { user_turn: { conversationId: string } }
+    ).user_turn.conversationId;
+    jest
+      .spyOn(http.app.get(AiMemoryService), 'listForModel')
+      .mockResolvedValue(['Мастер Рустам Ахметов предпочитает утро']);
+    const second = await request(http.app.getHttpServer())
+      .post('/api/ai/chat')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        surface: 'web',
+        requestId: randomUUID(),
+        conversationId,
+        messages: [
+          {
+            role: 'assistant',
+            content: 'Рустам Ахметов: выберем услугу и время.',
+          },
+          { role: 'user', content: 'Борода завтра' },
+        ],
+      });
+    expect(second.status).toBe(201);
+    expect(bodies.length).toBe(2);
+    for (const body of bodies) expect(/Рустам|Ахметов/.test(body)).toBe(false);
+    const payload = JSON.parse(bodies[1]) as {
+      messages: { content: string }[];
+    };
+    const data = JSON.parse(payload.messages.at(-1)!.content) as {
+      conversation: { content: string }[];
+    };
+    expect(data.conversation[0].content).toMatch(
+      /^\[name removed\]@[a-f0-9]{32}_\d+: выберем/,
+    );
+    expect(
+      (
+        second.body as {
+          resolution?: { receipt: { envelope: { kind: string } } };
+        }
+      ).resolution?.receipt.envelope.kind,
+    ).toBe('TIME_SLOT_SELECTOR');
+  });
+
   it.each([
     'foreign_staff',
     'foreign_service',
