@@ -62,7 +62,13 @@ const fixture = () => {
     template = 'navigate.schedule@1',
     registry = PROFILE_REGISTRY_DIGEST,
   ) =>
-    owner.bindMint('tenant', [{ template, record: r }], registry, tx as never);
+    owner.bindMint(
+      'tenant',
+      [{ template, record: r }],
+      registry,
+      tx as never,
+      r.widgetKind,
+    );
   const admit = (
     r = facts,
     tenant = 'tenant',
@@ -72,13 +78,14 @@ const fixture = () => {
 };
 
 describe('profile current admission and immutable emission binding', () => {
-  it('schedule bridge preserves restricted registry digest and refuses its new template without breaking existing bindings', async () => {
+  it('complete candidate digest admits read-only schedule but refuses its editor template', async () => {
     const f = fixture();
     const adapter = new WidgetReleaseAccessAdapter(f.owner, {} as never);
     await adapter.bindMint(
       'tenant',
       [{ template: 'navigate.schedule@1', record: f.facts }],
       f.tx as never,
+      'SCHEDULE',
     );
     expect(await adapter.admits('tenant', f.facts, f.tx as never)).toBe(true);
     await expect(
@@ -98,10 +105,24 @@ describe('profile current admission and immutable emission binding', () => {
           },
         ],
         f.tx as never,
+        'SETTINGS_DRAFT',
       ),
     ).rejects.toThrow('widget_release_profile_unavailable');
     expect(await adapter.admits('tenant', f.facts, f.tx as never)).toBe(true);
   });
+  it.each(['none.passive@1', 'navigate.account@1', 'control.dismiss@1'])(
+    'refuses even partial SETTINGS_DRAFT through %s without implicit HANDOFF',
+    async (template) => {
+      const f = fixture();
+      await expect(
+        f.mint({ ...f.facts, widgetKind: 'SETTINGS_DRAFT' }, template),
+      ).rejects.toThrow('widget_release_profile_unavailable');
+      expect(f.log).not.toHaveBeenCalled();
+      expect(await f.admit({ ...f.facts, widgetKind: 'SETTINGS_DRAFT' })).toBe(
+        false,
+      );
+    },
+  );
   it('binds a signed profile to the exact grant and facts in the caller transaction', async () => {
     const f = fixture();
     expect(await f.admit()).toBe(false);

@@ -316,6 +316,7 @@ describe('AR-1 production execution contract with ephemeral test keys [HTTP] [Po
           ],
           PROFILE_REGISTRY_DIGEST,
           tx,
+          'SETTINGS_DRAFT',
         ),
       ),
     ).rejects.toThrow('profile_unavailable');

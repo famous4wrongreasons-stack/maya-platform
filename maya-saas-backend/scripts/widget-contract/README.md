@@ -36,3 +36,19 @@ rather than inferred:
 Two kinds of contract text are preserved as comments rather than emitted as code, because they
 are specification and not TypeScript: `// [SPEC, not code]` for set-notation derivations, and
 `// [MEMBER FRAGMENT]` for members quoted from a shape declared elsewhere.
+
+The same registry probe has a finite release-snapshot mode. It enumerates all
+four canonical recipe families (general, booking, service-price, schedule),
+checks duplicate keys, and derives the fixed no-HANDOFF profile. SETTINGS.4
+makes the entire SETTINGS_DRAFT unavailable there; read-only SCHEDULE and the
+approved pricing APPROVAL tuples are independent. Regeneration changes the
+candidate identity, never issues a certificate or grants access:
+
+```sh
+node -r ts-node/register/transpile-only scripts/widget-contract/registry-probe.js --release-snapshot > /tmp/maya-registry-candidate.json
+node -r ts-node/register/transpile-only scripts/widget-contract/registry-probe.js --release-snapshot --write
+node -r ts-node/register/transpile-only scripts/widget-contract/registry-probe.js --release-snapshot --check
+```
+
+Review the generated diff and preserve the previous manifest/pin before `--write`.
+A fresh evidence-bound candidate certificate is mandatory; old bindings refuse.

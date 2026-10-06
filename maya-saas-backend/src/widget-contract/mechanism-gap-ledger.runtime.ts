@@ -319,7 +319,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The controlledFixtureMode === false build assertion',
     status: '[ABSENT]',
     package: 'K3',
-    blocking_rules: ['NP-048cb92576ace3ff'],
+    blocking_rules: ['NP-4efaff2d0cd2bc28'],
   },
   {
     gap_key: 'MG-P-28',
@@ -406,10 +406,6 @@ export const MECHANISM_GAP_STATUS_COUNTS: Readonly<
 /** F35 (2)/(3)'s clause→row side, derived from the contract Status sentences. */
 export const NORMATIVE_PENDING_BINDINGS = Object.freeze([
   Object.freeze({
-    clause_id: 'NP-048cb92576ace3ff',
-    p_refs: Object.freeze(['P-27']),
-  }),
-  Object.freeze({
     clause_id: 'NP-2ded496dfa94a8a9',
     p_refs: Object.freeze(['P-24']),
   }),
@@ -420,6 +416,10 @@ export const NORMATIVE_PENDING_BINDINGS = Object.freeze([
   Object.freeze({
     clause_id: 'NP-3ae73cc7e9297d87',
     p_refs: Object.freeze(['P-24']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-4efaff2d0cd2bc28',
+    p_refs: Object.freeze(['P-27']),
   }),
   Object.freeze({
     clause_id: 'NP-60285de7e4a83ec3',

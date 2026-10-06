@@ -679,7 +679,12 @@ export class AiCoreService {
               ? `${scheduleCommand.reply}\nПодтверждение изменения графика недоступно в текущем профиле чата. Изменение не выполнено.`
               : scheduleCommand.reply,
           source: 'safe_fallback',
-          action: resolution ? null : scheduleCommand.action,
+          // A declined canonical card must not become a legacy approval control.
+          // Other surfaces keep their separately authorized approval path.
+          action:
+            approval && bridge && ['web', 'native'].includes(dto.surface)
+              ? null
+              : scheduleCommand.action,
         },
       );
     }

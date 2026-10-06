@@ -1,3 +1,4 @@
+import { INTENT_TEMPLATE_INVENTORY } from '../widgets/emission/intent-template.inventory';
 import { PROFILE_REGISTRY } from './widget-release-profile.registry';
 import { C9_CAPABILITIES } from '../orchestration/c9.registry';
 import { bookingTemplateAsIntentRow } from '../widgets/booking/booking-intent-template.registry';
@@ -51,14 +52,12 @@ describe('fixed no-handoff certificate threshold', () => {
     expect(() => certificate(c)).toThrow();
   });
   it('pins the actual complete server registries; adding or changing a row needs review', () => {
+    expect(releaseHash(INTENT_TEMPLATE_INVENTORY)).toBe(
+      PROFILE_REGISTRY_DIGEST,
+    );
     expect(
       releaseHash({
-        general: INTENT_TEMPLATE_REGISTRY,
-        booking: BOOKING_INTENT_TEMPLATE_REGISTRY,
-      }),
-    ).toBe(PROFILE_REGISTRY_DIGEST);
-    expect(
-      releaseHash({
+        ...INTENT_TEMPLATE_INVENTORY,
         general: {
           ...INTENT_TEMPLATE_REGISTRY,
           extra: INTENT_TEMPLATE_REGISTRY['navigate.account@1'],
@@ -74,7 +73,20 @@ describe('fixed no-handoff certificate threshold', () => {
         ...Object.entries(BOOKING_INTENT_TEMPLATE_REGISTRY).map(
           ([key, row]) => [key, bookingTemplateAsIntentRow(row)] as const,
         ),
+        ...Object.entries(INTENT_TEMPLATE_INVENTORY.servicePrice),
+        ...Object.entries(INTENT_TEMPLATE_INVENTORY.schedule),
       ]
+        .map(
+          ([key, row]) =>
+            [
+              key,
+              {
+                ...row,
+                kinds: row.kinds.filter((kind) => kind !== 'SETTINGS_DRAFT'),
+              },
+            ] as const,
+        )
+        .filter(([, row]) => row.kinds.length > 0)
         .filter(([, row]) => row.effect !== 'HANDOFF')
         .map(([key, row]) => {
           const schema =
@@ -99,6 +111,41 @@ describe('fixed no-handoff certificate threshold', () => {
     expect(PROFILE_REGISTRY.successorCapabilities).toEqual(
       C9_CAPABILITIES.map((row) => row.capabilityKey).sort(),
     );
+  });
+  it('refuses the preserved previous pin and excludes the complete settings editor card', () => {
+    expect(PROFILE_MANIFEST.unavailableKinds).toEqual(['SETTINGS_DRAFT']);
+    expect(PROFILE_MANIFEST.templates).not.toContain('commit.schedule.day@1');
+    expect(PROFILE_MANIFEST.templates).not.toContain('handoff.settings@1');
+    expect(PROFILE_MANIFEST.templates).toEqual(
+      expect.arrayContaining([
+        'navigate.schedule@1',
+        'commit.service-price.approve@1',
+        'commit.service-price.reject@1',
+        'navigate.service-price.detail@1',
+      ]),
+    );
+    expect(
+      Object.values(PROFILE_REGISTRY.tuples).every(
+        (row) => !(row.kinds as string[]).includes('SETTINGS_DRAFT'),
+      ),
+    ).toBe(true);
+    expect(() =>
+      profileCertificate({
+        ...fixture(),
+        registryDigest:
+          '21ffeb2426d9629e8e9110bbecdbdc7b45c0869e70f9395024e0fa728418a49a',
+      }),
+    ).toThrow();
+    for (const family of [
+      'general',
+      'booking',
+      'servicePrice',
+      'schedule',
+    ] as const) {
+      const partial = { ...INTENT_TEMPLATE_INVENTORY };
+      delete (partial as Partial<typeof partial>)[family];
+      expect(releaseHash(partial)).not.toBe(PROFILE_REGISTRY_DIGEST);
+    }
   });
   it('requires a new profile digest after the one owner-approved successor admission', () => {
     const previousProfileDigest = releaseHash({

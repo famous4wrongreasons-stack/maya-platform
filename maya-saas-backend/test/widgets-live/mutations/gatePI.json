@@ -22,7 +22,7 @@
   {
     "id": "PI-M03",
     "file": "src/widgets/emission/emitter.service.ts",
-    "find": "await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx);",
+    "find": "await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx, kind);",
     "replace": "void recordFacts;",
     "killers": [
       "PROFILE-EGRESS"

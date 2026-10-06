@@ -87,15 +87,20 @@ export class WidgetReleaseAccessService {
     rows: readonly MintReleaseFacts[],
     registryDigest: string,
     tx: Prisma.TransactionClient,
+    widgetKind: string,
   ): Promise<void> {
     const view = await this.current(tenantId, tx);
     if (view === null) releaseDeny('admission');
     if (view.scope !== NO_HANDOFF_PROFILE) return;
     if (registryDigest !== PROFILE_REGISTRY_DIGEST)
       releaseDeny('registry_binding');
+    // Envelope-level refusal also covers zero/all-NONE intents (no records).
+    if (PROFILE_MANIFEST.unavailableKinds.includes(widgetKind))
+      releaseDeny('profile_unavailable');
     for (const row of rows) {
       if (
         row.record.tenantId !== tenantId ||
+        row.record.widgetKind !== widgetKind ||
         !this.allowed(row.template, row.record)
       )
         releaseDeny('profile_unavailable');
@@ -128,7 +133,8 @@ export class WidgetReleaseAccessService {
     if (view.scope !== NO_HANDOFF_PROFILE) return true;
     if (
       registryDigest !== PROFILE_REGISTRY_DIGEST ||
-      record.effect === 'HANDOFF'
+      record.effect === 'HANDOFF' ||
+      PROFILE_MANIFEST.unavailableKinds.includes(record.widgetKind)
     )
       return false;
     const rows = await tx.auditLog.findMany({
@@ -163,7 +169,8 @@ export class WidgetReleaseAccessService {
   private allowed(template: string, record: ReleaseIntentFacts): boolean {
     if (
       !PROFILE_MANIFEST.templates.includes(template) ||
-      record.effect === 'HANDOFF'
+      record.effect === 'HANDOFF' ||
+      PROFILE_MANIFEST.unavailableKinds.includes(record.widgetKind)
     )
       return false;
     const tuple =

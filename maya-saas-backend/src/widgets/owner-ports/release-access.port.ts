@@ -15,6 +15,7 @@ export interface WidgetReleaseAccessPort {
     tenantId: string,
     rows: readonly MintReleaseFacts[],
     tx: RequestTx,
+    widgetKind: string,
   ): Promise<void>;
   admits(
     tenantId: string,

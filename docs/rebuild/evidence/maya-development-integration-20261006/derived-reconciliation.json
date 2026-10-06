@@ -1,0 +1,17 @@
+{
+  "contractSha256": "9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769",
+  "changes": [
+    {
+      "pRef": "P-27",
+      "previous": [
+        "NP-048cb92576ace3ff"
+      ],
+      "current": [
+        "NP-4efaff2d0cd2bc28"
+      ]
+    }
+  ],
+  "normativeEdits": false,
+  "statusChanges": false,
+  "newCertificate": false
+}

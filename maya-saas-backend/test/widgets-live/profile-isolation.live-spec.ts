@@ -112,7 +112,11 @@ describe('PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]',
         });
     const emitter = http.app.get(WidgetEmitterService);
     const stores = http.app.get(WidgetStoresService);
-    const mint = async (handoff = false, mixed = false) =>
+    const mint = async (
+      handoff = false,
+      mixed = false,
+      partial?: 'empty' | 'none',
+    ) =>
       scoped(async () => {
         const conversationId = randomUUID();
         const turn = await stores.appendTurn({
@@ -146,38 +150,51 @@ describe('PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]',
             ...input,
             kind_proposal: kind,
             capability: handoff ? 'settings.read' : 'staff.schedule.read',
-            intent_proposals: [
-              ...(handoff
-                ? [
-                    ...(mixed
-                      ? [
-                          {
-                            intent_template_key: 'navigate.account@1',
-                            role: 'remedy' as const,
-                          },
-                        ]
-                      : []),
-                    {
-                      intent_template_key: 'handoff.settings@1',
-                      handoff_capability_ref: {
-                        space: 'C9' as const,
-                        key: 'settings.read',
+            intent_proposals:
+              partial === 'empty'
+                ? []
+                : partial === 'none'
+                  ? [
+                      {
+                        intent_template_key: 'none.passive@1',
+                        role: 'secondary',
                       },
-                      role: 'handoff' as const,
-                    },
-                  ]
-                : [
-                    {
-                      intent_template_key: 'navigate.schedule@1',
-                      role: 'primary' as const,
-                    },
-                  ]),
-              {
-                intent_template_key: 'control.dismiss@1',
-                capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
-                role: 'escape',
-              },
-            ],
+                    ]
+                  : [
+                      ...(handoff
+                        ? [
+                            ...(mixed
+                              ? [
+                                  {
+                                    intent_template_key: 'navigate.account@1',
+                                    role: 'remedy' as const,
+                                  },
+                                ]
+                              : []),
+                            {
+                              intent_template_key: 'handoff.settings@1',
+                              handoff_capability_ref: {
+                                space: 'C9' as const,
+                                key: 'settings.read',
+                              },
+                              role: 'handoff' as const,
+                            },
+                          ]
+                        : [
+                            {
+                              intent_template_key: 'navigate.schedule@1',
+                              role: 'primary' as const,
+                            },
+                          ]),
+                      {
+                        intent_template_key: 'control.dismiss@1',
+                        capability: {
+                          space: 'CONTROL',
+                          key: 'control.widget.dismiss',
+                        },
+                        role: 'escape',
+                      },
+                    ],
           },
         });
       });
@@ -230,6 +247,25 @@ describe('PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]',
     client_nonce: randomUUID(),
     profile_id: 'pwa.default',
   });
+
+  it.each(['empty', 'none'] as const)(
+    'PROFILE-SETTINGS rejects the complete card with %s tokened records through the real emitter',
+    async (partial) => {
+      const f = await fixture();
+      await f.grant();
+      const before = await db.prisma.widgetEmission.count({
+        where: { tenantId: f.tenant.id },
+      });
+      await expect(f.mint(true, false, partial)).rejects.toThrow(
+        'widget_release_profile_unavailable',
+      );
+      expect(
+        await db.prisma.widgetEmission.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(before);
+    },
+  );
 
   it('PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect', async () => {
     const f = await fixture();

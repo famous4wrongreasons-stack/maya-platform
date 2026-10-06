@@ -861,7 +861,12 @@ export class WidgetEmitterService {
       }
       if (personalSchedule !== null) await personalSchedule.revalidate();
       if (servicePrice !== null) await servicePrice.revalidate();
-      await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx);
+      await this.releaseAccess.bindMint(
+        request.tenantId,
+        recordFacts,
+        tx,
+        kind,
+      );
       await tx.widgetEmission.create({
         data: {
           tenantId: request.tenantId,

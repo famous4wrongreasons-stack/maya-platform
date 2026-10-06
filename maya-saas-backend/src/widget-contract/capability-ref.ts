@@ -14,7 +14,7 @@ import type { RegisteredActionCapabilityV1 } from '../action-engine/action-engin
 import type { AiToolDefinition } from '../ai-tools/ai-tool.types';
 import type { C9Capability } from '../orchestration/c9.registry';
 
-// --- section 0.6 (contract line 329) ---
+// --- section 0.6 (contract line 328) ---
 export type CapabilitySpace = 'C9' | 'TOOL' | 'AE' | 'CONTROL';
 
 export type CapabilityRef =
@@ -26,13 +26,13 @@ export type CapabilityRef =
 export type ControlKey =
   'control.run.cancel' | 'control.widget.dismiss' | 'control.delivery.resolve';
 
-// --- section 0.6 (contract line 361) ---
+// --- section 0.6 (contract line 360) ---
 export type CapabilityRefKey = `${CapabilityRef['space']}:${string}`; // e.g. 'C9:b35.preview'
 export declare function capKey(ref: CapabilityRef): CapabilityRefKey; // `${ref.space}:${ref.key}`
 // total over the four spaces, and injective because `space` is one of four fixed tokens
 // and ':' is the only separator, so no two refs collide.
 
-// --- section 0.6 (contract line 380) ---
+// --- section 0.6 (contract line 379) ---
 // DECLARED BY THIS CONTRACT. Pure, total, non-throwing, derived once at module load from
 // frozen released arrays. None adds a field, a row, or a registry entry.
 export const C9_CAP_BY_KEY: ReadonlyMap<string, C9Capability> = new Map(

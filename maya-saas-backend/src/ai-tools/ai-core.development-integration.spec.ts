@@ -169,6 +169,20 @@ function fixture() {
 }
 
 describe('unified development candidate: routes and authority stay isolated', () => {
+  it('does not expose a fallback approval when the schedule editor card is unavailable', async () => {
+    const f = fixture();
+    f.scheduleWidget.mint.mockResolvedValue(null as never);
+    const result = await f.service.chat(
+      actor,
+      f.dto('Сделай Антону 2035-05-10 выходной'),
+    );
+    expect(result.action).toBeNull();
+    expect(result.resolution).toBeUndefined();
+    expect(result.reply).toContain(
+      'Подтверждение изменения графика недоступно',
+    );
+    expect(result.reply).toContain('Изменение не выполнено');
+  });
   it.each(['График Антона', 'Добрый день'])(
     'does not treat the new request %s as the missing staff name',
     async (content) => {

@@ -3,9 +3,7 @@ import type { RequestTx } from '../authority/principal-view';
 import { WidgetReleaseAccessService } from '../../entitlements/widget-release-access.service';
 import { releaseHash } from '../../entitlements/widget-release.contract';
 import { PrismaService } from '../../prisma/prisma.service';
-import { INTENT_TEMPLATE_REGISTRY } from '../emission/intent-template.registry';
-import { BOOKING_INTENT_TEMPLATE_REGISTRY } from '../booking/booking-intent-template.registry';
-import { SERVICE_PRICE_INTENT_TEMPLATE_REGISTRY } from '../pricing/service-price-intent-template.registry';
+import { INTENT_TEMPLATE_INVENTORY } from '../emission/intent-template.inventory';
 import type {
   MintReleaseFacts,
   ReleaseIntentFacts,
@@ -19,18 +17,21 @@ export class WidgetReleaseAccessAdapter implements WidgetReleaseAccessPort {
     private readonly prisma: PrismaService,
   ) {}
   private registryDigest(): string {
-    return releaseHash({
-      general: INTENT_TEMPLATE_REGISTRY,
-      booking: BOOKING_INTENT_TEMPLATE_REGISTRY,
-      servicePrice: SERVICE_PRICE_INTENT_TEMPLATE_REGISTRY,
-    });
+    return releaseHash(INTENT_TEMPLATE_INVENTORY);
   }
   bindMint(
     tenantId: string,
     rows: readonly MintReleaseFacts[],
     tx: RequestTx,
+    widgetKind: string,
   ): Promise<void> {
-    return this.owner.bindMint(tenantId, rows, this.registryDigest(), tx);
+    return this.owner.bindMint(
+      tenantId,
+      rows,
+      this.registryDigest(),
+      tx,
+      widgetKind,
+    );
   }
   async canProject(
     tenantId: string,

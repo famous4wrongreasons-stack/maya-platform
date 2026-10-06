@@ -425,7 +425,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
   async function checkedChat(
     salon: Salon,
     accessToken: string,
-    requestId = randomUUID(),
+    requestId: string = randomUUID(),
   ) {
     const before = await businessState(salon.tenant.id),
       mark = http.recorder.mark();

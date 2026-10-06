@@ -336,6 +336,7 @@ describe('AR-1 single-operator production execution contract with ephemeral test
           ],
           PROFILE_REGISTRY_DIGEST,
           tx,
+          'SETTINGS_DRAFT',
         ),
       ),
     ).rejects.toThrow('profile_unavailable');
