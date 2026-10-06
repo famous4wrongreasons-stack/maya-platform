@@ -1,0 +1,38 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+FAIL src/crm/adapters/yclients-crm.adapter.spec.ts
+  ● YclientsCRMAdapter › keeps a city-only discovery address unavailable in the profile fallback
+
+    expect(received).resolves.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "address": null,
+    +   "address": "Москва",
+        "schedule": null,
+        "timezone": null,
+      }
+
+      795 |       settings: { companyId: 123 },
+      796 |     });
+    > 797 |     await expect(adapter.getCompanyProfile()).resolves.toMatchObject({
+          |                                                        ^
+      798 |       address: null,
+      799 |       timezone: null,
+      800 |       schedule: null,
+
+      at Object.toMatchObject (../node_modules/expect/build/index.js:2140:20)
+      at Object.<anonymous> (crm/adapters/yclients-crm.adapter.spec.ts:797:56)
+
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/ai-tool-extended-capabilities.spec.ts
+PASS src/orchestration/c9.conversation-reads.spec.ts
+PASS src/ai-tools/ai-tool-policy.service.spec.ts
+
+Test Suites: 1 failed, 5 passed, 6 total
+Tests:       1 failed, 281 passed, 282 total
+Snapshots:   0 total
+Time:        1.209 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-policy.service.spec.ts", "src/ai-tools/ai-tool-extended-capabilities.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-company-profile-cohort2.json

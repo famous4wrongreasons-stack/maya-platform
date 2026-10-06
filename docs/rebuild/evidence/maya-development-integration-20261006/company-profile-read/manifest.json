@@ -1,0 +1,83 @@
+{
+  "kind": "qualified-local-company-profile-read-unit-checkpoint",
+  "codeHead": "b62a80997d8412b7e6b56aab3dfa5985b14e8bd7",
+  "qualification": "NOT_ISSUED",
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "actualHttpBrowserProof": false,
+  "tests": {
+    "suites": 6,
+    "passed": 289,
+    "failed": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 2,
+    "preexistingWarnings": "AiCore spec line 76 unsafe arguments"
+  },
+  "types": "Full project tsc --noEmit failed with heap OOM at 3072 MB; no semantic pass claimed. Retry deferred while main owns heavy slot.",
+  "files": [
+    {
+      "path": "cohort.json",
+      "bytes": 125296,
+      "sha256": "952c7ffa9276701e6a2c8736ca513f34b443d2210e5db639ea2d1cc0c8683538"
+    },
+    {
+      "path": "cohort.txt",
+      "bytes": 834,
+      "sha256": "f319d0a2008c15d8d0000c03a20f02979107c96f2125b72d0783e8c72daaf548"
+    },
+    {
+      "path": "fallback-regression-red.txt",
+      "bytes": 1668,
+      "sha256": "90dc497b1c2c3067dc927e9545cdf071f4c7571df150cac7a13dc7e6f986c58c"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 613,
+      "sha256": "46e91ef2b06bcd4a9c2f943a887d8fea739ff126400e146f2a51f6ed15397af3"
+    },
+    {
+      "path": "lint.txt",
+      "bytes": 459,
+      "sha256": "b1dbcc0b2df404c229d33a1d62210c24c240778d5fbf35edada263aff0a917c4"
+    },
+    {
+      "path": "red.json",
+      "bytes": 68547,
+      "sha256": "d84286b6a34e43de86d641a96df19938709dcc3b7b49ced28934520b7dbe4260"
+    },
+    {
+      "path": "red.txt",
+      "bytes": 20705,
+      "sha256": "7f96784af293467b9a4a3b53f66c9d92fd5bbbbcbdc9cfce43f9c5938542e7b4"
+    },
+    {
+      "path": "types-oom.txt",
+      "bytes": 6496,
+      "sha256": "edaa1ae99f82beb2c1e9f03107eaec51c680c11d8356adf7a87ad9773708bf6f"
+    }
+  ],
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "bytes": 287214,
+      "sha256": "867b5294afa8366e040dc4deb838735128c64fc43c39c1692c4b7c03d9121216"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "bytes": 178714,
+      "sha256": "02b6872f3d2ec5e67ce3364e172f3d830f9e5914b16f372121a321aff6eb9870"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "bytes": 149562,
+      "sha256": "3a32e88b9bbec33ea9d9aa3c86f0aed7f72a15ba33ebdd103e30dbd1d5d0dbfb"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts",
+      "bytes": 108042,
+      "sha256": "a6368380e0d816a81a2f14f94226fc8434608516523a514a60c9980ef86ee945"
+    }
+  ]
+}

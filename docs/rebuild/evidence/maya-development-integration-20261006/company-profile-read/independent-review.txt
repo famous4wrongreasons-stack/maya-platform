@@ -1,0 +1,5 @@
+Independent read-only review, agent /root/independent_review.
+Final review: no blocking finding in the four-file runtime/test diff.
+Closed: city substituted as address in direct/discovery; absent/Boolean/fraction timezone coerced to UTC/whole hour; public profile hint intercepted dossier, IP/email, settings, booking-opening and email/site address questions.
+Reviewer inspected code without running tests. Parent observed 289/289 in six unit suites.
+Qualified code/unit checkpoint only. Full tsc unconfirmed after 3072 MB OOM. HTTP/browser, real model/provider and C10 acceptance not established for this slice.

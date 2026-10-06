@@ -737,3 +737,14 @@ responses are synthetic, while the YClients adapter is real. All owned processes
 are stopped and the heavy slot is released. See the extended
 [checkpoint and limits](MAYA-OWN-SCHEDULE-READ-20261006.md) and
 [evidence archive](evidence/maya-development-integration-20261006/own-schedule-http-react/manifest.json).
+
+### Public salon address and hours — local READ development, 2026-10-06
+
+Code `b62a8099` composes public salon address and hours from the current existing
+`company.business-hours.read` source. Missing source fields remain explicit; city
+and timezone defaults are no longer substituted for unavailable facts. Source
+identity and cross-domain grounding regressions are covered. Six targeted suites
+pass 289/289, scoped lint has zero errors, and independent review has no remaining
+blocker. Full tsc exhausted the 3072 MB cap; semantic typecheck and actual HTTP/PG/
+React proof for this increment remain pending. See [the qualified checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md).
+No provider/model acceptance, new authority or C10 completion is claimed.
