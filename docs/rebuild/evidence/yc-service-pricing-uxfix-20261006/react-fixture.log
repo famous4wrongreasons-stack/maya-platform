@@ -1,0 +1,18 @@
+▶ actual synthetic HTTP approvals and outcomes survive the current shell and React drawer
+  ✔ confirmed (19.701834ms)
+  ℹ Actual chat envelope + gateway response + bounded resolve response
+  ✔ rejected (3.598417ms)
+  ℹ Actual chat envelope + gateway response + bounded resolve response
+  ✔ unknown (3.727458ms)
+  ℹ Actual chat envelope + gateway response + bounded resolve response
+  ✔ detail (5.697042ms)
+  ℹ Actual chat root + gateway child through standard fs.catalogue and generic DetailSheet markup; no browser proof
+✔ actual synthetic HTTP approvals and outcomes survive the current shell and React drawer (50.2905ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 125.228708

@@ -1,0 +1,55 @@
+src/contract.ts(101,8): error TS2307: Cannot find module '#contract' or its corresponding type declarations.
+src/integrity/h7.ts(187,34): error TS7006: Parameter 'intent' implicitly has an 'any' type.
+src/renderer/kinds.ts(326,14): error TS2322: Type 'true' is not assignable to type 'false'.
+src/renderer/kinds.ts(334,61): error TS7053: Element implicitly has an 'any' type because expression of type 'WidgetKind' can't be used to index type '{ readonly CHOICE: { readonly branch: "structured"; readonly keyboardModel: "roving_options"; readonly focus: "none"; readonly textAlternative: "itemized_and_options"; readonly liveRegion: LiveRegionRow; readonly nonColourState: readonly [...]; readonly accessibleNameSuffix: {}; }; ... 20 more ...; readonly ARTIFACT...'.
+src/renderer/kinds.ts(337,65): error TS7053: Element implicitly has an 'any' type because expression of type 'WidgetKind' can't be used to index type '{ readonly CHOICE: { readonly branch: "structured"; readonly keyboardModel: "roving_options"; readonly focus: "none"; readonly textAlternative: "itemized_and_options"; readonly liveRegion: LiveRegionRow; readonly nonColourState: readonly [...]; readonly accessibleNameSuffix: {}; }; ... 20 more ...; readonly ARTIFACT...'.
+src/renderer/kinds.ts(340,59): error TS7053: Element implicitly has an 'any' type because expression of type 'WidgetKind' can't be used to index type '{ readonly CHOICE: { readonly branch: "structured"; readonly keyboardModel: "roving_options"; readonly focus: "none"; readonly textAlternative: "itemized_and_options"; readonly liveRegion: LiveRegionRow; readonly nonColourState: readonly [...]; readonly accessibleNameSuffix: {}; }; ... 20 more ...; readonly ARTIFACT...'.
+src/renderer/render.ts(187,50): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/renderer/render.ts(202,37): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/renderer/render.ts(227,34): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/renderer/render.ts(238,26): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/renderer/render.ts(247,36): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/renderer/render.ts(255,36): error TS7006: Parameter 'g' implicitly has an 'any' type.
+src/renderer/render.ts(258,24): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(280,27): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/renderer/render.ts(296,34): error TS7006: Parameter 'lane' implicitly has an 'any' type.
+src/renderer/render.ts(302,24): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/renderer/render.ts(303,21): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/renderer/render.ts(319,58): error TS7006: Parameter 'g' implicitly has an 'any' type.
+src/renderer/render.ts(329,36): error TS7006: Parameter 'bulk' implicitly has an 'any' type.
+src/renderer/render.ts(334,40): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/renderer/render.ts(336,55): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/renderer/render.ts(352,72): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/renderer/render.ts(355,32): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(359,66): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/renderer/render.ts(365,48): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/render.ts(394,36): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/renderer/render.ts(413,27): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(425,26): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(439,26): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/renderer/render.ts(446,33): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/renderer/render.ts(446,36): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/renderer/render.ts(472,30): error TS2345: Argument of type 'WidgetKind' is not assignable to parameter of type 'never'.
+src/renderer/render.ts(494,68): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(495,52): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(527,43): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/renderer/render.ts(533,42): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/renderer/render.ts(544,37): error TS7006: Parameter 'g' implicitly has an 'any' type.
+src/renderer/render.ts(544,58): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/renderer/render.ts(549,35): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/renderer/render.ts(557,37): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/render.ts(562,36): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/renderer/render.ts(563,42): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/renderer/render.ts(571,36): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/renderer/render.ts(629,14): error TS7006: Parameter 'ref' implicitly has an 'any' type.
+src/renderer/render.ts(630,15): error TS7006: Parameter 'ref' implicitly has an 'any' type.
+src/renderer/render.ts(650,41): error TS7053: Element implicitly has an 'any' type because expression of type 'WidgetKind' can't be used to index type '{ readonly CHOICE: { readonly branch: "structured"; readonly keyboardModel: "roving_options"; readonly focus: "none"; readonly textAlternative: "itemized_and_options"; readonly liveRegion: LiveRegionRow; readonly nonColourState: readonly [...]; readonly accessibleNameSuffix: {}; }; ... 20 more ...; readonly ARTIFACT...'.
+src/renderer/tables.ts(25,40): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/renderer/tables.ts(43,56): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/renderer/tables.ts(52,58): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/renderer/tables.ts(56,39): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/shell/intents.ts(279,50): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/shell/intents.ts(280,48): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/shell/intents.ts(315,41): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/shell/intents.ts(610,49): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/shell/intents.ts(763,82): error TS7006: Parameter 'i' implicitly has an 'any' type.

@@ -26,6 +26,16 @@ export interface NavigateWidgetMinterPort {
     parentWidgetId: string,
     now?: Date,
   ): Promise<SealedEmission>;
+  emitServicePriceDetail(
+    request: MintRequest,
+    linkage: {
+      approvalId: string;
+      payloadHash: string;
+      revalidate: () => Promise<void>;
+    },
+    parentWidgetId: string,
+    now?: Date,
+  ): Promise<SealedEmission>;
 }
 
 export interface EffectRouteAuditPort {

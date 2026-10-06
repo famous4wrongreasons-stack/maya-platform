@@ -1,0 +1,23 @@
+widgets-live: proof database maya_widget_gate_proof_service_price_20261006 on 127.0.0.1:56347 (local)
+PASS test/widgets-live/service-price.live-spec.ts
+  Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]
+    ✓ lists the owner capability, shows source-backed diff, and sends one preserved PATCH only after exact approval (363 ms)
+    ✓ carries an owner price correction through natural chat and excludes the tool from client audience (343 ms)
+    ✓ rejects a stored price payload tampered after preview before Action Engine admission (138 ms)
+    ✓ rejects clients and foreign approvals without a provider write or Action Engine admission (381 ms)
+    ✓ supersedes a pending proposal when the owner changes the price and refuses the old approval (185 ms)
+    ✓ serializes concurrent approval, persists the receipt across app restart, and never repeats PATCH (349 ms)
+    ✓ serializes distinct owner approvals for one service and refuses the second stale proposal (370 ms)
+    ✓ keeps a lost provider reply UNKNOWN after restart and read recovery, without blind retry (322 ms)
+    ✓ refuses a new proposed price while a previous outcome for the service remains UNKNOWN (229 ms)
+    ✓ does not present a terminal failed proposal as pending on same-key replay (173 ms)
+    ✓ rechecks price authority at approval and refuses a stale proposal before PATCH (163 ms)
+    ✓ rechecks non-price authority at approval and refuses a stale proposal before PATCH (161 ms)
+    ✓ rechecks permission authority at approval and refuses a stale proposal before PATCH (160 ms)
+    ✓ rechecks membership authority at approval and refuses a stale proposal before PATCH (133 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        4.521 s, estimated 5 s
+Ran all test suites within paths "test/widgets-live/service-price.live-spec.ts".

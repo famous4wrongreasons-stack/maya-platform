@@ -1,5 +1,13 @@
 import { Logger } from '@nestjs/common';
 import {
+  priceUnavailable,
+  priceMinor,
+  ycId,
+  ycObject,
+  servicePriceSnapshot,
+  type ServicePriceSnapshot,
+} from '../yclients-service-price.contract';
+import {
   BadRequestException,
   ConflictException,
   InternalServerErrorException,
@@ -448,6 +456,118 @@ export class YclientsCRMAdapter implements CRMAdapter {
           ? categoryTitlesById.get(service.category_id) || undefined
           : undefined),
     }));
+  }
+
+  /** Uncached management read. Provider permissions are a separate authoritative read. */
+  async getServicePriceSnapshot(
+    serviceId: string,
+    deadlineAt = Date.now() + 20_000,
+  ): Promise<ServicePriceSnapshot> {
+    const remaining = () => {
+      const timeoutMs = deadlineAt - Date.now();
+      if (timeoutMs <= 0) priceUnavailable('service_price_deadline_elapsed');
+      return timeoutMs;
+    };
+    const companyId = ycId(this.settings.companyId);
+    const id = ycId(serviceId);
+    const permissions = await this.request<unknown>(
+      `user/permissions/${companyId}`,
+      { timeoutMs: remaining() },
+    );
+    const settings = ycObject(ycObject(permissions.data).settings);
+    if (
+      permissions.success !== true ||
+      settings.settings_services_access !== true ||
+      settings.services_edit !== true ||
+      settings.settings_services_edit_price_access !== true
+    )
+      priceUnavailable('service_price_provider_permission_denied');
+    const response = await this.request<unknown>(
+      `company/${companyId}/services/${id}`,
+      { timeoutMs: remaining() },
+    );
+    if (response.success !== true)
+      priceUnavailable('service_price_unverified_read');
+    const rows = Array.isArray(response.data) ? response.data : [response.data];
+    if (rows.length !== 1) priceUnavailable('service_price_ambiguous_service');
+    return servicePriceSnapshot(
+      rows[0],
+      companyId,
+      id,
+      this.settings.currency ?? '',
+    );
+  }
+
+  async updateServiceFixedPrice(params: {
+    serviceId: string;
+    expectedRevision: string;
+    priceMinor: number;
+    deadlineAt?: number;
+  }): Promise<ServicePriceSnapshot> {
+    if (!Number.isSafeInteger(params.priceMinor) || params.priceMinor < 0)
+      priceUnavailable('service_price_invalid_amount');
+    const deadlineAt = params.deadlineAt ?? Date.now() + 20_000;
+    const before = await this.getServicePriceSnapshot(
+      params.serviceId,
+      deadlineAt,
+    ).catch(() => priceUnavailable('service_price_prepatch_read_unavailable'));
+    if (before.revision !== params.expectedRevision)
+      priceUnavailable('service_price_preview_stale');
+    const price = params.priceMinor / 100;
+    if (priceMinor(price) !== params.priceMinor)
+      priceUnavailable('service_price_invalid_amount');
+    const timeoutMs = deadlineAt - Date.now();
+    if (timeoutMs <= 0) priceUnavailable('service_price_deadline_elapsed');
+    // A lost reply can still mean a changed catalog. Never reuse a pre-write
+    // cached price after the dispatch boundary, including UNKNOWN outcomes.
+    this.serviceCatalogPromise = null;
+    try {
+      const response = await this.request<unknown>(
+        `company/${before.companyId}/services/${before.serviceId}`,
+        {
+          method: 'PATCH',
+          timeoutMs,
+          body: JSON.stringify({
+            ...before.patchBody,
+            price_min: price,
+            price_max: price,
+          }),
+        },
+      );
+      const receipt = ycObject(response.data);
+      if (
+        response.success !== true ||
+        ycId(receipt.id) !== before.serviceId ||
+        (receipt.company_id !== undefined &&
+          ycId(receipt.company_id) !== before.companyId) ||
+        priceMinor(receipt.price_min) !== params.priceMinor ||
+        priceMinor(receipt.price_max) !== params.priceMinor
+      )
+        throw new CrmOutcomeUnknownError(
+          'YCLIENTS did not return an exact service-price receipt.',
+        );
+      const after = await this.getServicePriceSnapshot(
+        params.serviceId,
+        deadlineAt,
+      );
+      if (
+        after.priceMinor !== params.priceMinor ||
+        after.nonPriceHash !== before.nonPriceHash
+      )
+        throw new CrmOutcomeUnknownError(
+          'YCLIENTS service-price readback did not match the approved change.',
+        );
+      this.serviceCatalogPromise = null;
+      return after;
+    } catch (error) {
+      // Once PATCH may have crossed the boundary, neither HTTP errors nor read
+      // equality prove nonexecution. There is no alternate PUT/POST or retry.
+      if (error instanceof CrmOutcomeUnknownError) throw error;
+      throw new CrmOutcomeUnknownError(
+        'YCLIENTS service-price outcome is unknown.',
+        error,
+      );
+    }
   }
 
   /** Official staff-specific online booking catalog. No guessed duration or range price. */
@@ -3700,9 +3820,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
   private async request<TData>(
     path: string,
     init?: {
-      method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+      method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
       body?: string;
       query?: URLSearchParams;
+      timeoutMs?: number;
     },
   ): Promise<YclientsResponse<TData>> {
     const url = new URL(`${this.baseUrl}/${path}`);
@@ -3729,7 +3850,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
           'Content-Type': 'application/json',
         },
         body: init?.body,
-        signal: AbortSignal.timeout(CRM_REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.timeout(
+          Math.max(
+            1,
+            Math.min(
+              CRM_REQUEST_TIMEOUT_MS,
+              init?.timeoutMs ?? CRM_REQUEST_TIMEOUT_MS,
+            ),
+          ),
+        ),
       });
     } catch (error) {
       if (isUnknownOutcomeCause(error)) {

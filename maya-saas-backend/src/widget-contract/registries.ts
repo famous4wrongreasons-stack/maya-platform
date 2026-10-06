@@ -8,7 +8,7 @@ import type { C9Capability } from '../orchestration/c9.registry';
 import { CapabilityRef } from './capability-ref';
 import { VerificationLevel } from './envelope';
 
-// --- section 0.7 (contract line 459) ---
+// --- section 0.7 (contract line 458) ---
 export interface AeCommitRow {
   ae_key: string; // must resolve in ActionCapabilityRegistry
   confirmation_kind:
@@ -21,7 +21,8 @@ export interface AeCommitRow {
     | 'identity'
     | 'tenant_authority'
     | 'settings'
-    | 'operational';
+    | 'operational'
+    | 'catalogue_price_configuration';
   min_verification: VerificationLevel; // ≥ SESSION_VERIFIED for every row
   requires_ae_approval: boolean; // MUST equal registry.approvalRequirement === 'REQUIRED'
   propose: CapabilityRef; // the C9 propose key; never null
@@ -38,7 +39,7 @@ export declare const AE_PROPOSE_PAIRING: readonly {
   ae: CapabilityRef;
 }[];
 
-// --- section 0.7 (contract line 590) ---
+// --- section 0.7 (contract line 625) ---
 export interface MechanismGap {
   gap_key: `MG-${string}`; // one per prerequisite row: MG-P01 … MG-P39
   p_ref: string; // 'P-01' … 'P-39'
@@ -51,7 +52,7 @@ export declare const MECHANISM_GAP_LEDGER: Readonly<
   Record<string, MechanismGap>
 >;
 
-// --- section 0.7 (contract line 635) ---
+// --- section 0.7 (contract line 670) ---
 // The R-01 read set. Every row is a C9Capability whose members are the READ defaults of
 // c9.registry.ts's entry() except those named in the row.
 export type R01ReadRow = {

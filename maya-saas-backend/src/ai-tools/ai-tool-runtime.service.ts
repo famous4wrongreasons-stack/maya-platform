@@ -9,6 +9,10 @@ import {
 import { ModuleRef } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
+import {
+  SERVICE_PRICE_TOOL,
+  priceMinor,
+} from '../crm/yclients-service-price.contract';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -36,6 +40,13 @@ import {
   AI_READ_WIDGET_TRIGGER,
   type AiReadWidgetTriggerPort,
 } from './ai-read-widget-trigger.port';
+
+import {
+  AI_APPROVAL_WIDGET_TRIGGER,
+  type AiApprovalWidgetTriggerPort,
+  type ServicePriceChatOrigin,
+  type ServicePriceApprovalSnapshot,
+} from './ai-approval-widget-trigger.port';
 
 const APPROVAL_TTL_MS = 10 * 60 * 1000;
 const MAX_CANONICAL_INPUT_BYTES = 8 * 1024;
@@ -135,6 +146,43 @@ export class AiToolRuntimeService {
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
     await this.bindPersonalReadScope(principal, definition);
+    // A retry carries the same user proposal, not a newly observed before-state.
+    // Never regenerate an already approved mutation from today's provider price.
+    if (toolName === SERVICE_PRICE_TOOL && dto.idempotencyKey) {
+      const saved = await this.prisma.aiApprovalRequest.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: principal.tenantId,
+            idempotencyKey: dto.idempotencyKey,
+          },
+        },
+      });
+      if (saved) {
+        const savedArgs = this.registry.validateArguments(
+          toolName,
+          this.parseJson(this.encryption.decrypt(saved.encryptedArguments)),
+        );
+        if (
+          savedArgs.service_id !== validated.service_id ||
+          priceMinor(savedArgs.price_rubles) !==
+            priceMinor(validated.price_rubles)
+        )
+          this.approvalConflict('ai_approval_idempotency_conflict');
+        const pending = await this.requestApproval(
+          principal,
+          definition,
+          savedArgs,
+          this.inputHash(toolName, savedArgs, principal),
+          dto.idempotencyKey,
+        );
+        return this.attachServicePriceApprovalWidget(
+          user,
+          definition,
+          pending,
+          internal,
+        );
+      }
+    }
     // 🔴 Доводка ДО подписи: то, что подписано и показано человеку, обязано
     // совпадать с тем, что будет исполнено. Разрешение «сегодня» в местную
     // дату происходит здесь — при повторной проверке уже сохранённых
@@ -148,12 +196,18 @@ export class AiToolRuntimeService {
 
     if (definition.approvalPolicy !== 'none') {
       const idempotencyKey = this.requireIdempotencyKey(dto.idempotencyKey);
-      return this.requestApproval(
+      const pending = await this.requestApproval(
         principal,
         definition,
         args,
         inputHash,
         idempotencyKey,
+      );
+      return this.attachServicePriceApprovalWidget(
+        user,
+        definition,
+        pending,
+        internal,
       );
     }
 
@@ -315,6 +369,241 @@ export class AiToolRuntimeService {
     return resolution === null ? completed : { ...value, resolution };
   }
 
+  /** YC-SP1-WIDGET-1: durable owner binding to the actual authenticated chat admission.
+   * No widget gesture or ActionExecution identity is manufactured. */
+  private async attachServicePriceApprovalWidget(
+    actor: AuthenticatedUser,
+    definition: AiToolDefinition,
+    result: unknown,
+    internal: Parameters<AiToolRuntimeService['execute']>[3],
+  ): Promise<unknown> {
+    if (
+      definition.name !== SERVICE_PRICE_TOOL ||
+      internal?.suppressWidgetTrigger ||
+      internal?.widgetTrigger !== 'T-2a' ||
+      !internal.userTurn ||
+      !actor.tenantId ||
+      !result ||
+      typeof result !== 'object'
+    )
+      return result;
+    const pending = result as Record<string, unknown>;
+    const approval = pending.approval as
+      { id?: unknown; payload_hash?: unknown } | undefined;
+    if (
+      pending.status !== 'approval_required' ||
+      typeof approval?.id !== 'string' ||
+      typeof approval.payload_hash !== 'string'
+    )
+      return result;
+    let trigger: AiApprovalWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiApprovalWidgetTriggerPort>(
+        AI_APPROVAL_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      return result;
+    }
+    if (!trigger) return result;
+    const id = approval.id,
+      payloadHash = approval.payload_hash;
+    const bound = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw(
+        Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`service-price-chat-origin:${actor.tenantId}:${id}`}, 0))`,
+      );
+      const existing = await this.auditLog.entityEvents(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'ai.service_price_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: id,
+        },
+        tx,
+      );
+      if (existing.length) return existing.length === 1;
+      // A later retry cannot attach a standalone or unrelated historical approval to a new chat.
+      if (pending.replayed !== false) return false;
+      const source = await this.auditLog.entityEvents(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'chat.user_turn_bound',
+          entityType: 'WidgetTimelineTurn',
+          entityId: internal.userTurn!.turnId,
+        },
+        tx,
+      );
+      const binding = source[0]?.metadataJson as
+        Record<string, unknown> | undefined;
+      if (
+        source.length !== 1 ||
+        binding?.contract !== 'maya.user-turn-binding/1' ||
+        binding.turnId !== internal.userTurn!.turnId ||
+        binding.conversationId !== internal.userTurn!.conversationId ||
+        binding.intentTokenHash !== null ||
+        typeof binding.principalProofHash !== 'string'
+      )
+        return false;
+      const origin: ServicePriceChatOrigin = {
+        contract: 'maya.service-price-chat-approval/1',
+        approvalId: id,
+        payloadHash,
+        userTurnId: internal.userTurn!.turnId,
+        conversationId: internal.userTurn!.conversationId,
+        principalProofHash: binding.principalProofHash,
+      };
+      await this.auditLog.log(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'ai.service_price_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: id,
+          metadata: { ...origin },
+        },
+        tx,
+      );
+      return true;
+    });
+    if (!bound) return result;
+    const resolution = await trigger.afterPendingServicePriceApproval({
+      actor,
+      approvalId: id,
+      payloadHash,
+      userTurn: internal.userTurn,
+    });
+    return resolution ? { ...pending, resolution } : result;
+  }
+
+  /** Canonical AI approval owner read. The widget sees a bounded snapshot, not encrypted args. */
+  async readServicePriceWidgetApproval(
+    actor: AuthenticatedUser,
+    approvalId: string,
+    payloadHash: string,
+    revalidateSource = false,
+  ): Promise<ServicePriceApprovalSnapshot> {
+    const row = await this.findApproval(actor, approvalId);
+    const principal = this.principal(actor, this.assertSurface(row.surface));
+    const definition = this.registry.get(SERVICE_PRICE_TOOL);
+    if (
+      row.toolName !== SERVICE_PRICE_TOOL ||
+      row.surface !== 'web' ||
+      row.requestedByUserId !== actor.userId
+    )
+      throw new ForbiddenException(
+        'Exact owner service price approval required',
+      );
+    await this.policy.assertCanExecute(principal, definition);
+    this.policy.assertCanDecide(definition, row.requestedByUserId, principal);
+    this.assertPayloadHash(row, payloadHash);
+    this.assertPendingApproval(row);
+    if (row.expiresAt.getTime() <= Date.now())
+      this.approvalConflict('ai_approval_expired');
+    const args = this.registry.validateArguments(
+      SERVICE_PRICE_TOOL,
+      this.parseJson(this.encryption.decrypt(row.encryptedArguments)),
+    );
+    if (this.inputHash(SERVICE_PRICE_TOOL, args, principal) !== payloadHash)
+      this.approvalConflict('ai_approval_payload_mismatch');
+    if (revalidateSource) {
+      const fresh = await this.handler.normalizeArguments(
+        SERVICE_PRICE_TOOL,
+        principal,
+        args,
+      );
+      if (this.inputHash(SERVICE_PRICE_TOOL, fresh, principal) !== payloadHash)
+        this.approvalConflict('service_price_proposal_stale');
+    }
+    const events = await this.auditLog.entityEvents({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      action: 'ai.service_price_chat_approval_bound',
+      entityType: 'AiApprovalRequest',
+      entityId: row.id,
+    });
+    const origin = events[0]?.metadataJson as unknown as
+      ServicePriceChatOrigin | undefined;
+    if (
+      events.length !== 1 ||
+      !origin ||
+      origin.contract !== 'maya.service-price-chat-approval/1' ||
+      origin.approvalId !== row.id ||
+      origin.payloadHash !== row.payloadHash ||
+      typeof origin.userTurnId !== 'string' ||
+      typeof origin.conversationId !== 'string' ||
+      typeof origin.principalProofHash !== 'string'
+    )
+      this.approvalConflict('service_price_chat_origin_missing');
+    const turns = await this.auditLog.entityEvents({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      action: 'chat.user_turn_bound',
+      entityType: 'WidgetTimelineTurn',
+      entityId: origin.userTurnId,
+    });
+    const proof = turns[0]?.metadataJson as Record<string, unknown> | undefined;
+    if (
+      turns.length !== 1 ||
+      proof?.contract !== 'maya.user-turn-binding/1' ||
+      proof.turnId !== origin.userTurnId ||
+      proof.conversationId !== origin.conversationId ||
+      proof.principalProofHash !== origin.principalProofHash ||
+      proof.intentTokenHash !== null
+    )
+      this.approvalConflict('service_price_chat_origin_missing');
+    return {
+      id: row.id,
+      payloadHash: row.payloadHash,
+      expiresAt: row.expiresAt,
+      createdAt: row.createdAt,
+      summary: row.summary,
+      serviceId: String(args.service_id),
+      serviceName: String(args.service_name),
+      companyId: String(args.company_id),
+      currentPrice: Number(args.current_price_rubles),
+      proposedPrice: Number(args.price_rubles),
+      origin,
+    };
+  }
+
+  /** Presentation supersession only: compare canonical prepared identities, including a
+   * rejected prior proposal. This does not reactivate it or authorize any decision. */
+  async sameServicePriceApproval(
+    actor: AuthenticatedUser,
+    previousId: string,
+    currentId: string,
+  ): Promise<boolean> {
+    const rows = await Promise.all([
+      this.findApproval(actor, previousId),
+      this.findApproval(actor, currentId),
+    ]);
+    const principal = this.principal(actor, 'web');
+    const identities = rows.map((row) => {
+      if (
+        row.toolName !== SERVICE_PRICE_TOOL ||
+        row.surface !== 'web' ||
+        row.requestedByUserId !== actor.userId
+      )
+        return null;
+      const args = this.registry.validateArguments(
+        SERVICE_PRICE_TOOL,
+        this.parseJson(this.encryption.decrypt(row.encryptedArguments)),
+      );
+      return this.inputHash(SERVICE_PRICE_TOOL, args, principal) ===
+        row.payloadHash
+        ? { companyId: args.company_id, serviceId: args.service_id }
+        : null;
+    });
+    return (
+      identities[0] !== null &&
+      identities[1] !== null &&
+      identities[0].companyId === identities[1].companyId &&
+      identities[0].serviceId === identities[1].serviceId
+    );
+  }
+
   async listApprovals(user: AuthenticatedUser, surface: AiToolSurface) {
     const principal = this.principal(user, surface);
     await this.expireDueApprovals(principal.tenantId);
@@ -356,6 +645,9 @@ export class AiToolRuntimeService {
     user: AuthenticatedUser,
     approvalId: string,
     dto: ApprovalDecisionDto,
+    internal?: {
+      admissionGuard: (transaction: Prisma.TransactionClient) => Promise<void>;
+    },
   ) {
     const approval = await this.findApproval(user, approvalId);
     const principal = this.principal(
@@ -377,7 +669,7 @@ export class AiToolRuntimeService {
       approval.status === APPROVAL_STATUS.APPROVED ||
       approval.status === APPROVAL_STATUS.EXECUTING
     )
-      return this.executeApproved(approval);
+      return this.executeApproved(approval, internal?.admissionGuard);
     this.assertPendingApproval(approval);
 
     const now = new Date();
@@ -413,7 +705,7 @@ export class AiToolRuntimeService {
           decided.status === APPROVAL_STATUS.APPROVED ||
           decided.status === APPROVAL_STATUS.EXECUTING
         )
-          return this.executeApproved(decided);
+          return this.executeApproved(decided, internal?.admissionGuard);
       }
       this.approvalConflict('ai_approval_already_decided');
     }
@@ -437,7 +729,7 @@ export class AiToolRuntimeService {
         id_tenantId: { id: approval.id, tenantId: approval.tenantId },
       },
     });
-    return this.executeApproved(approved);
+    return this.executeApproved(approved, internal?.admissionGuard);
   }
 
   async reject(
@@ -686,6 +978,13 @@ export class AiToolRuntimeService {
     });
     if (existing) {
       this.assertSameApproval(existing, definition, principal, inputHash);
+      if (
+        definition.name === SERVICE_PRICE_TOOL &&
+        (existing.status === APPROVAL_STATUS.REJECTED ||
+          existing.status === APPROVAL_STATUS.EXPIRED ||
+          existing.status === APPROVAL_STATUS.FAILED)
+      )
+        this.approvalConflict('service_price_proposal_no_longer_pending');
       if (existing.status === APPROVAL_STATUS.COMPLETED) {
         return this.replayCompletedApproval(existing);
       }
@@ -704,16 +1003,41 @@ export class AiToolRuntimeService {
     const now = new Date();
     let approval: ApprovalRecord;
     try {
-      approval = await this.prisma.aiApprovalRequest.create({
-        data: await this.approvalData(
-          principal,
-          definition,
-          args,
-          inputHash,
-          idempotencyKey,
-          now,
-        ),
-      });
+      const data = await this.approvalData(
+        principal,
+        definition,
+        args,
+        inputHash,
+        idempotencyKey,
+        now,
+      );
+      approval =
+        definition.name === SERVICE_PRICE_TOOL
+          ? await this.prisma.$transaction(async (tx) => {
+              await tx.$executeRaw(
+                Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:service-price-proposal:${principal.userId}:${String(args.service_id)}`}, 0))`,
+              );
+              // Only pending proposals for this exact actor/service are superseded.
+              // Approved or dispatched actions retain their durable AE outcome.
+              await tx.aiApprovalRequest.updateMany({
+                where: {
+                  tenantId: principal.tenantId,
+                  requestedByUserId: principal.userId,
+                  toolName: SERVICE_PRICE_TOOL,
+                  status: APPROVAL_STATUS.PENDING,
+                  payloadPreviewJson: {
+                    path: ['service_id'],
+                    equals: String(args.service_id),
+                  },
+                },
+                data: {
+                  status: APPROVAL_STATUS.REJECTED,
+                  errorCode: 'service_price_proposal_superseded',
+                },
+              });
+              return tx.aiApprovalRequest.create({ data });
+            })
+          : await this.prisma.aiApprovalRequest.create({ data });
     } catch (error) {
       if (!this.isUniqueConstraintError(error)) {
         throw error;
@@ -754,7 +1078,10 @@ export class AiToolRuntimeService {
     };
   }
 
-  private async executeApproved(approval: ApprovalRecord) {
+  private async executeApproved(
+    approval: ApprovalRecord,
+    admissionGuard?: (transaction: Prisma.TransactionClient) => Promise<void>,
+  ) {
     if (!approval.requestedByUserId) {
       this.approvalConflict('ai_approval_requester_unavailable');
     }
@@ -804,6 +1131,7 @@ export class AiToolRuntimeService {
       args,
       inputHash,
       idempotencyKey: approval.idempotencyKey,
+      admissionGuard,
       approval,
     });
   }
@@ -815,6 +1143,7 @@ export class AiToolRuntimeService {
     inputHash: string;
     idempotencyKey: string;
     approval: ApprovalRecord | null;
+    admissionGuard?: (transaction: Prisma.TransactionClient) => Promise<void>;
   }) {
     if (params.definition.riskTier !== 'read')
       return this.executeCanonicalTool(params);
@@ -1046,6 +1375,7 @@ export class AiToolRuntimeService {
     inputHash: string;
     idempotencyKey: string;
     approval: ApprovalRecord | null;
+    admissionGuard?: (transaction: Prisma.TransactionClient) => Promise<void>;
   }) {
     const key = {
       tenantId: params.principal.tenantId,
@@ -1142,13 +1472,16 @@ export class AiToolRuntimeService {
         this.approvalConflict('ai_approval_transition_conflict');
     }
     const operation = this.receipts
-      .run(invocation, (args) =>
-        this.handler.execute(
-          params.definition.name,
-          params.principal,
-          args,
-          params.idempotencyKey,
-        ),
+      .run(
+        invocation,
+        (args) =>
+          this.handler.execute(
+            params.definition.name,
+            params.principal,
+            args,
+            params.idempotencyKey,
+          ),
+        params.admissionGuard,
       )
       .then(
         (result) =>

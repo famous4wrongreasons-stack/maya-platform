@@ -20,8 +20,8 @@
 // again, and an opened detail closes. Every activation of a drawn control ends in a state change or a
 // sentence — silent outcomes are 0. The receipt consumer arrives with R7-E1 and B3, not here.
 
-import type { InteractiveRefKey, TerminalLine, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
-import { parseInstant, verify } from '../integrity/h7.ts';
+import type { Cell, Measure, InteractiveRefKey, TerminalLine, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
+import { canonicalJson, parseInstant, verify } from '../integrity/h7.ts';
 import type { EnvelopeView, IntegrityVerdict, RenderNode, RenderResult } from '../renderer/nodes.ts';
 import { resolveTarget } from '../routes/registry.ts';
 import type { AbortHandle, TimelineWriter, WidgetItemView } from './conversation.ts';
@@ -118,12 +118,14 @@ export const createLiveSubmission = (
     if (sent.value.code === null && typeof resolved === 'object' && resolved !== null) {
       return { status: 'returned', envelope: resolved };
     }
+    const owner = sent.value.code === null && sent.value.owner_decision !== undefined
+      ? { ownerDecision: sent.value.owner_decision } : {};
     const page = await transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
-    if (!page.ok) return { status: 'accepted' };
+    if (!page.ok) return { status: 'accepted', ...owner };
     const current = page.value.widgets.find((widget) => widget.envelope.widget_id === submission.widget_id);
     return current !== undefined && current.terminal_lines.length > 0
-      ? { status: 'settled', lines: current.terminal_lines }
-      : { status: 'accepted' };
+      ? { status: 'settled', lines: current.terminal_lines, ...owner }
+      : { status: 'accepted', ...owner };
   },
 });
 
@@ -164,6 +166,8 @@ export interface WidgetsDeps {
 export interface Widgets extends DetailSource {
   rendered(itemId: string): void;
   ingest(envelope: WidgetEnvelope): IngestOutcome;
+  /** Presentation evidence only: H7 passed and the standard approval control is drawn live. */
+  hasPresentedApproval(envelope: WidgetEnvelope): boolean;
   /** Assignable to `WidgetPort.activate`; the outcome is for tests and the dev fixture host. */
   activate(itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome>;
   /** V6: the live envelopes, vault side (never the view). */
@@ -184,6 +188,8 @@ interface Entry {
   display: Display;
   pending: InteractiveRefKey | null;
   sentence: WidgetSentence | null;
+  /** Presentation receipt only; never rewrites the sealed envelope or its lifecycle. */
+  priceReceipt: WidgetSentence | null;
   inflight: AbortHandle | null;
   expiry: Cancel | null;
   /** Bumped whenever the entry's emission changes, so a late outcome for a predecessor is ignored. */
@@ -246,6 +252,79 @@ export const intentRefFor = (nodes: readonly RenderNode[], key: InteractiveRefKe
 };
 
 const isUsable = (intent: WidgetIntent): boolean => intent.enabled?.state === 'KNOWN' && intent.enabled.value === true;
+
+/** YC-SP1: wording only. The submitted envelope and owner readback must describe the same diff. */
+const servicePriceSentence = (
+  envelope: WidgetEnvelope,
+  intent: WidgetIntent,
+  outcome: SubmissionOutcome,
+): WidgetSentence | null => {
+  if (envelope.kind !== 'APPROVAL' || envelope.source.from !== 'capability_envelope'
+    || envelope.source.capability !== 'catalog.service.price.update'
+    || intent.effect !== 'COMMIT' || intent.capability?.space !== 'AE'
+    || intent.capability.key !== 'crm.service.fixed-price.update.v1'
+    || !('approve_intent' in envelope.body)) return null;
+  const body = envelope.body;
+  const approving = intent.intent_ref === body.approve_intent;
+  const rejecting = intent.intent_ref === body.reject_intent;
+  if (!approving && !rejecting) return null;
+  if (outcome.status !== 'accepted' && outcome.status !== 'settled') {
+    return ['no_connection', 'server_error', 'unexpected_response'].includes(outcome.status)
+      ? 'service_price_unconfirmed' : null;
+  }
+  const decision = outcome.ownerDecision;
+  if (rejecting && decision?.decision === 'REJECTED' && decision.status === 'rejected'
+    && decision.state === 'REJECTED') return 'service_price_rejected';
+  const result = decision?.outcome;
+  const serviceRows = body.effect_preview.filter(row => row.label.phrase_key === 'approval.service');
+  const priceRows = body.effect_preview.filter(row => row.label.phrase_key === 'approval.proposed_price');
+  const service = serviceRows.length === 1 ? serviceRows[0]?.value : undefined;
+  const price = priceRows.length === 1 ? priceRows[0]?.value : undefined;
+  if (approving && decision?.decision === 'APPROVED' && decision.status === 'completed'
+    && decision.state === 'SUCCEEDED' && result?.verified === true && result.source === 'yclients'
+    && result.currency === 'RUB' && typeof result.action_execution_id === 'string'
+    && result.action_execution_id.trim().length > 0
+    && service?.state === 'KNOWN' && typeof service.value === 'string' && service.value.length > 0
+    && service.value === result.service_id && price?.state === 'KNOWN' && typeof price.value === 'number'
+    && Number.isFinite(price.value) && price.value >= 0 && 'currency' in price && price.currency === 'RUB'
+    && 'unit' in price && price.unit === 'RUB' && price.value === result.price_rubles) {
+    return 'service_price_confirmed';
+  }
+  return 'service_price_unconfirmed';
+};
+
+/** A submitted pricing proposal is a static preview plus the separate owner-result sentence.
+ * Drop obsolete approval prompts and every control without editing sealed body/lifecycle facts.
+ * No text is composed here: retained facts come from the verified projected body.
+ */
+const servicePriceReceiptResult = (result: RenderResult, view: EnvelopeView): RenderResult => {
+  if (view.kind !== 'APPROVAL' || !('approval_ref' in view.body)) return result;
+  const body = view.body;
+  // Select named source fields, never remove text by value: a service may itself be called
+  // "PENDING" or have the same name as a button. This also preserves the exact diff when the
+  // original renderer used prose and its nodes no longer carry field identities.
+  const leaf = (value: Cell<unknown> | Measure): RenderNode => ({
+    t: 'leaf', source: 'formatted' in value ? 'measure' : 'cell', state: value.state,
+    text: 'formatted' in value && value.state === 'KNOWN' ? value.formatted : value.label,
+    detail: 'basis' in value ? value.basis : null,
+  });
+  const nodes: RenderNode[] = [
+    ...result.nodes.filter(node => node.t === 'heading'),
+    leaf(body.subject),
+    { t: 'block', block: 'list', roleHint: null, label: null,
+      children: body.effect_preview.map(row => ({ t: 'block', block: 'item', roleHint: null, label: null,
+        children: [{ t: 'leaf', source: 'phrase', state: null, text: row.label.rendered, detail: null }, leaf(row.value)],
+      })),
+    },
+    { t: 'block', block: 'paragraph', roleHint: null, label: null, children: [
+      ...(body.audience_size === null ? [] : [leaf(body.audience_size)]),
+      leaf(body.risk_tier), leaf(body.reversible), leaf(body.requested_by_label),
+    ] },
+    ...result.nodes.filter(node => node.t === 'limitation'),
+  ];
+  return { ...result, nodes, mode: 'frozen_prose', readingOrder: [], accessibleNames: {},
+    description: '', liveRegion: 'off', focus: 'none' };
+};
 
 /**
  * L27: which canonical terminal outcome a line IS — server-authored, never the sentence it carries.
@@ -477,6 +556,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
         result: next.result,
         display: next.display,
         sentence: next.sentence,
+        priceReceipt: null,
         emission: predecessor.emission + 1,
       });
       if (predecessor.display === 'collapsed') vault.drop(predecessor.itemId);
@@ -497,6 +577,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       display: next.display,
       pending: null,
       sentence: next.sentence,
+      priceReceipt: null,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -506,6 +587,32 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     scheduleExpiry(entry);
     deps.timeline.appendWidget(itemView(entry));
     return { ingested: 'added', itemId, verdict: entry.verdict };
+  };
+
+  const hasPresentedApproval = (envelope: WidgetEnvelope): boolean => {
+    const entry = [...entries.values()].find((item) => item.envelope.widget_id === envelope.widget_id && item.place === 'timeline');
+    if (entry === undefined || !deps.timeline.hasItem(entry.itemId) || entry.verdict !== 'valid' ||
+        entry.display !== 'live' || entry.pending !== null || entry.result.mode !== 'structured' ||
+        entry.envelope.kind !== 'APPROVAL' || !('approve_intent' in entry.envelope.body)) return false;
+    // A duplicate id alone proves nothing about this reply. Only the exact emission currently
+    // presented can suppress the notice; different body, lifecycle, seal or tokens cannot borrow it.
+    try {
+      if (envelope !== entry.envelope && canonicalJson(envelope) !== canonicalJson(entry.envelope)) return false;
+    } catch { return false; }
+    // Timers may be delayed in a background tab. Presentation evidence expires with the envelope,
+    // body and primary intent even before the scheduled collapse has run.
+    const body = entry.envelope.body;
+    const now = deps.scheduler.now();
+    const bodyExpiry = parseInstant(body.expires_at);
+    if (verdictOf(entry.envelope) !== 'valid' || body.state.state !== 'KNOWN' || body.state.value !== 'PENDING' ||
+        body.blocked_reason !== null || bodyExpiry === null || bodyExpiry <= now) return false;
+    const ref = body.approve_intent;
+    const intent = entry.envelope.intents.find((item) => item.intent_ref === ref);
+    if (intent === undefined || intent.role !== 'primary' || intent.effect !== 'COMMIT' || !isUsable(intent) ||
+        vault.get(entry.itemId, intent.intent_ref) === null) return false;
+    const intentExpiry = parseInstant(intent.expires_at);
+    return intentExpiry !== null && intentExpiry > now &&
+      entry.result.readingOrder.some((key) => intentRefFor(entry.result.nodes, key) === ref);
   };
 
   /** detail item id → the timeline item whose control opened it. */
@@ -524,6 +631,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       display: next.display,
       pending: null,
       sentence: next.sentence,
+      priceReceipt: null,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -633,6 +741,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       result: next.result,
       display: next.display,
       sentence: next.sentence,
+      priceReceipt: null,
       emission: opener.emission + 1,
     });
     if (opener.display === 'collapsed') vault.drop(opener.itemId);
@@ -643,6 +752,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
     const entry = entries.get(itemId);
     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
+    if (entry.priceReceipt !== null) return { outcome: 'ignored', reason: 'not_drawn' };
     const drawn = entry.display === 'collapsed' ? [] : entry.result.readingOrder;
     if (!drawn.includes(ref)) return { outcome: 'ignored', reason: 'not_drawn' };
     // One activation in flight per item; the busy control is already drawn as pending.
@@ -715,6 +825,33 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     }
     entry.inflight = null;
     entry.pending = null;
+    const priceSentence = servicePriceSentence(entry.envelope, intent, outcome);
+    if (priceSentence !== null) {
+      // A response loss is also a submitted mutation with an unresolved outcome, never an ordinary
+      // retry. Freeze only presentation, keep the exact diff, and forget spendable tokens. The
+      // receipt sentence is the sole result claim; UNKNOWN gets no invented completed lifecycle.
+      const finish = (item: Entry): void => {
+        cancelWork(item);
+        vault.drop(item.itemId);
+        item.display = 'terminal';
+        item.priceReceipt = priceSentence;
+        item.sentence = priceSentence;
+        item.result = servicePriceReceiptResult(item.result, item.view);
+        publish(item);
+      };
+      finish(entry);
+      if (entry.place === 'detail') {
+        const opener = entries.get(detailOpeners.get(entry.itemId) ?? '');
+        // A detail decision applies only to the exact approval whose sealed parent opened it.
+        // A different proposal now occupying the timeline item cannot inherit this receipt.
+        if (opener !== undefined && opener.envelope.widget_id === entry.envelope.correlation.parent_widget_id
+          && 'approval_ref' in opener.envelope.body && 'approval_ref' in entry.envelope.body
+          && opener.envelope.body.approval_ref === entry.envelope.body.approval_ref) finish(opener);
+        deps.chrome.closeDetail();
+      }
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
     if (route === 'opens_detail' && outcome.status === 'advanced') {
       // Only the accepted server-declared detail path resolves PROGRESS into OPEN. Keeping the
       // same chrome owner preserves its history entry and focus return; ordinary successors
@@ -789,7 +926,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
 
   const offEnvironment = deps.environment.onA11yChange(() => {
     for (const entry of entries.values()) {
-      entry.result = renderEntry(entry.view, entry.verdict, entry.place);
+      const result = renderEntry(entry.view, entry.verdict, entry.place);
+      entry.result = entry.priceReceipt === null ? result : servicePriceReceiptResult(result, entry.view);
       publish(entry);
     }
   });
@@ -806,6 +944,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
 
   return {
     ingest,
+    hasPresentedApproval,
     rendered,
     activate,
     openDetail,

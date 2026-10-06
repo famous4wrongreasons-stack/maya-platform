@@ -1,0 +1,6 @@
+
+Test Suites: 23 passed, 23 total
+Tests:       559 passed, 559 total
+Snapshots:   0 total
+Time:        3.323 s, estimated 5 s
+Ran all test suites within paths "src/action-engine/action-engine.registry.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-service-price.spec.ts", "src/ai-tools/service-price-chat-binding.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/crm/adapters/yclients-service-price.spec.ts", "src/orchestration/c9.registry.architecture.spec.ts", "src/widget-contract/owner-classes.spec.ts", "src/widgets/authority/allowlist-startup.assert.spec.ts", "src/widgets/authority/authority.spec.ts", "src/widgets/authority/bindings.spec.ts", "src/widgets/authority/business-rules-admission.spec.ts", "src/widgets/authority/propose-pairing.spec.ts", "src/widgets/authority/totality.spec.ts", "src/widgets/composition/typed-step0.spec.ts", "src/widgets/emission/record-writer.spec.ts", "src/widgets/gates/gate7.pipeline.spec.ts", "src/widgets/gates/gate7.spec.ts", "src/widgets/owner-ports/service-price-approval.adapter.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts", "src/widgets/pricing/service-price-approval-trigger.service.spec.ts", "src/widgets/pricing/service-price-widget.contract.spec.ts", "src/widgets/routing/effect-router.service.spec.ts".

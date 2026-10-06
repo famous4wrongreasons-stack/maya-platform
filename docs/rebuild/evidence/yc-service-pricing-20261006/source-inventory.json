@@ -1,0 +1,7 @@
+{
+  "source": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/client-readiness",
+  "head": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+  "parents": "158a9a413aaa1f529f2fcd6bb54d9f2e33055b8a",
+  "source_status": "",
+  "worktrees": "worktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task/maya-platform\nHEAD 4ec18c130820ce3a8b63566a475d625d6602835f\nbranch refs/heads/codex/maya-final-completion-20261005\n\nworktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/aggregate/baseline\nHEAD dcba8c8f4d230de31fb93f3d613f7524c3310df9\ndetached\n\nworktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/aggregate/candidate\nHEAD 15b88f52bf39a544ba2448970731f3c3b6d528fa\ndetached\n\nworktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/client-readiness\nHEAD c6a35e5c61975e9d101326e7b3970331f3c905d8\nbranch refs/heads/codex/maya-client-readiness-20261005\n\nworktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/exact-attempt-isolation\nHEAD c6a35e5c61975e9d101326e7b3970331f3c905d8\nbranch refs/heads/codex/exact-attempt-isolation-20261006\n\nworktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform\nHEAD 98dc6121b714c51bedb70e396f5ad35cd0f9c346\nbranch refs/heads/codex/maya-chat-semantic-contract-20261005\n\nworktree /Users/stanislavmosin/Documents/Codex/2026-10-05/task-7/maya-website\nHEAD 04834fba63233c9a5cf02006056b053e22979c72\nbranch refs/heads/codex/website-booking-entry-20261005\n\n"
+}

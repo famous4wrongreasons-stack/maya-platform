@@ -1,0 +1,361 @@
+{
+  "contract": "maya.service-price-uxfix-evidence/1",
+  "baseline": "d950c04551660dbecd15406b02c23782870e23f5",
+  "status": "BOUNDED_LOCAL_BROWSER_UI_PASS",
+  "checks": [
+    {
+      "name": "pricing and approval regressions",
+      "command": "node --test test/service-price-outcome.test.mjs test/approval-presentation.test.mjs",
+      "cwd": "maya-chat-shell",
+      "pass": 74,
+      "fail": 0,
+      "log": "ui-uxfix-focused.log"
+    },
+    {
+      "name": "supported shell typecheck",
+      "command": "node build.mjs --typecheck",
+      "cwd": "maya-chat-shell",
+      "result": "PASS",
+      "log": "ui-uxfix-shell-typecheck-supported.log"
+    },
+    {
+      "name": "L27",
+      "result": "PASS",
+      "log": "ui-uxfix-shell.log"
+    },
+    {
+      "name": "NS1 historical census",
+      "result": "FAIL_SAME_ON_BASELINE",
+      "note": "15 other assertions pass; history request counted as extra non-widget traffic. Reproduced unchanged with HEAD intents.ts; no unrelated repair.",
+      "logs": [
+        "ui-uxfix-shell.log",
+        "ui-uxfix-ns1-baseline.log"
+      ]
+    },
+    {
+      "name": "unsupported bare tsc diagnostic",
+      "result": "MISSING_CONTRACT_ALIAS",
+      "note": "Direct tsc does not run the required declaration emitter or #contract mapping. Retained diagnostic; supported build --typecheck passes.",
+      "log": "ui-uxfix-shell-typecheck.log"
+    },
+    {
+      "name": "refusing shell build",
+      "result": "PASS",
+      "command": "node build.mjs",
+      "cwd": "maya-chat-shell",
+      "log": "shell-build.log"
+    },
+    {
+      "name": "refusing current React build",
+      "result": "PASS",
+      "command": "node build.mjs --target=web",
+      "cwd": "maya-carrier-react",
+      "log": "react-build.log"
+    },
+    {
+      "name": "current React regression with unchanged prior actual HTTP envelope evidence",
+      "result": "PASS",
+      "tests": 5,
+      "log": "react-fixture.log"
+    },
+    {
+      "name": "actual Chromium flows",
+      "result": "PASS",
+      "flows": 3,
+      "detail": "Confirmed via actual detail approval, reject, UNKNOWN/reload/UI reauthentication; controls absent after all decisions; no post-fix actual repeat click because no control exists",
+      "network": "network-sanitized.json",
+      "state": "state.json"
+    },
+    {
+      "name": "Jest proof host lifecycle",
+      "result": "PASS",
+      "tests": 1,
+      "note": "Host test is not three automated browser assertions",
+      "log": "harness.log"
+    }
+  ],
+  "independent_review": {
+    "agent": "pricing_review",
+    "result": "No material code blocker; EP-FIT/TEXT_ONLY, source-field copy, sealed immutability, repeat callbacks, a11y/detail/supersession checked; no tests run",
+    "browser_required": false,
+    "browser_evidence_status": "PASS_BOUNDED_UI_BLOCKERS_CLOSED",
+    "browser_inspected": [
+      "10 numbered states",
+      "3 Chromium trace/network inventories",
+      "preview/detail and four result/relogin screenshots",
+      "build and fixture logs",
+      "cleanup"
+    ]
+  },
+  "pending": [],
+  "code_sha256": {
+    "maya-chat-shell/src/shell/intents.ts": "cad1746b5b394bc3c5a8578bfed46cdb36722015c150d835c969e4fc440426e2",
+    "maya-chat-shell/test/service-price-outcome.test.mjs": "eeabb0a1b8188147c21e2fb0279ad30aba4431a2d6f36470f70c9ae6324f9ef3",
+    "maya-carrier-react/src/widgets/WidgetCard.tsx": "65cbe9e968510d20c9edf3b51931af5b0446526aab93e0227508b438a31db69c",
+    "maya-carrier-react/src/widgets/nodes.tsx": "45b56bb1211c1608337890dc77fb9f0d0218b889e2f52ca9f801aba72f0d23ae",
+    "maya-carrier-react/test/service-price-http-fixture.test.mjs": "66a1fbd19eab9c63c53f64f4d950018f33f21377fd2af955e6027f6a03d78368",
+    "maya-chat-shell/dist/manifest.json": "b9ca45018e2682fe313ccd1afdaf074e969d1523ecb1d76fda167714c6c87bb9"
+  },
+  "completed_at": "2026-10-06T18:06:59.267Z",
+  "fixes": [
+    "Static exact diff retains existing truthful owner-result sentence; no stale pending state or active controls",
+    "Repeated callback cannot replace UNKNOWN sentence or dispatch again (unit and React regression)",
+    "Detail decision closes sheet and updates exact parent",
+    "Existing reading font and metadata wrapping/gap restore visible typography"
+  ],
+  "limits": [
+    "Real YCLIENTS and real model remain unqualified",
+    "Provider GET recovery flag true but no subsequent app CRM read; no browser read-recovery claim",
+    "Reload restores history warnings after fresh auth, not a restored outcome card",
+    "No mobile/Safari or aggregate V1.4 release qualification",
+    "Historical NS1 history-request census still fails equally on baseline"
+  ],
+  "tooling_diagnostics": [
+    "Sandbox shared-memory denial before PG startup; authorized escalated own cluster start succeeded",
+    "First long-named Playwright session lost before login; its PID absent, restarted using known short owned session name",
+    "One stale pre-reload CLI reference rejected before action; continued with actual fresh f1e22 reference"
+  ],
+  "model_scripted": true,
+  "real_email_delivery": false,
+  "response_interception": false,
+  "token_injection": false,
+  "console_errors": 0,
+  "console_warnings": 0,
+  "files": [
+    {
+      "path": "browser-login-propose.py",
+      "bytes": 1840,
+      "sha256": "5df38af59553da1488308e254752517ce951bddbb91a1bd186d9a149dd3eb491"
+    },
+    {
+      "path": "carrier-ready.json",
+      "bytes": 1363,
+      "sha256": "464c170e83f1a4b5f6ead81d0be1d43222729b57aada3a4679e7ccfec3c919b5"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 665,
+      "sha256": "fb9d4e6a2492e8d00c269438088d6e065e571ecc0f26025978cb18fbac2aa9a4"
+    },
+    {
+      "path": "confirmed-console.txt",
+      "bytes": 234,
+      "sha256": "57e2641f866df3d77267fa913a5613e4d610a90f7a11b97fec1cc20ca92e73d5"
+    },
+    {
+      "path": "confirmed-detail.png",
+      "bytes": 123464,
+      "sha256": "a3a43e97ccbf16df815f6da2a037d1e57afd97a223eb1d39a024daaf89f5ab81"
+    },
+    {
+      "path": "confirmed-detail.yml",
+      "bytes": 6323,
+      "sha256": "c4806a9b869d0cb9cbea75e5b896ca85c753a8cddf0f4609b95ef3a15f23565f"
+    },
+    {
+      "path": "confirmed-preview.png",
+      "bytes": 118017,
+      "sha256": "539cdf86eb0a51eca1abaf995de9d5e36ad193dbcad702cdff58794ebd25b78a"
+    },
+    {
+      "path": "confirmed-preview.yml",
+      "bytes": 3565,
+      "sha256": "a3c45c0773eb01c421b0860a79d548eaaac42986056a6969d858692c93dc0ae9"
+    },
+    {
+      "path": "confirmed-result.png",
+      "bytes": 107033,
+      "sha256": "ae0ca0932181acab288eab371c05b26ec3f59077801dd86293120e3b03763267"
+    },
+    {
+      "path": "confirmed-result.yml",
+      "bytes": 2643,
+      "sha256": "d36a600ec059460ff412f0ff070d9a7fbf21279ba42bbaf1f0ccbc2e4438287a"
+    },
+    {
+      "path": "final-validation.json",
+      "bytes": 289,
+      "sha256": "4695e267b00e8b8b9cd4b05b41e13a6b2c6f4453ac1000eb7aca7bffad6b5901"
+    },
+    {
+      "path": "harness.log",
+      "bytes": 943,
+      "sha256": "85c642b37b4de277ea2d9ca212723e3006d6c62354c40aaafb802da073162efb"
+    },
+    {
+      "path": "network-sanitized.json",
+      "bytes": 4391,
+      "sha256": "9db2f7716cd440dcd96f1c365eeacaef3784578fec1d3ed7fcac4d404b9e53b1"
+    },
+    {
+      "path": "provider-events.jsonl",
+      "bytes": 1608,
+      "sha256": "59298acf2f6ad328392998d284495fe014764d8227003aae1f4817f15612fe43"
+    },
+    {
+      "path": "raw-artifact-hashes.json",
+      "bytes": 9467,
+      "sha256": "40c420512a40ecdb02471d81eea0b38814be8283c0178a35540953b4c27b9ac0"
+    },
+    {
+      "path": "react-build.log",
+      "bytes": 185,
+      "sha256": "18ec2bb6c6f6d69ac7608d225dc62d15abfb7a59d32d6d902532227bfba308e2"
+    },
+    {
+      "path": "react-fixture.log",
+      "bytes": 759,
+      "sha256": "4a9ca585d99ff360e7244a80668c4a172dfca30684b99df267d37481372d86cf"
+    },
+    {
+      "path": "rejected-console.txt",
+      "bytes": 234,
+      "sha256": "57e2641f866df3d77267fa913a5613e4d610a90f7a11b97fec1cc20ca92e73d5"
+    },
+    {
+      "path": "rejected-result.png",
+      "bytes": 106212,
+      "sha256": "318396a3b6492e147dff68f9fae8b992e24db39ea384cd818bd9385826583f2f"
+    },
+    {
+      "path": "rejected-result.yml",
+      "bytes": 2724,
+      "sha256": "fa9dfa88f174f21d678d00e986918045a1d5b551e55b41e09421df3315b973ba"
+    },
+    {
+      "path": "review.json",
+      "bytes": 804,
+      "sha256": "4bf7a3e828d4c3b67a2154f28abf2bf366febb06569bb34c311ef4138a260150"
+    },
+    {
+      "path": "shell-build.log",
+      "bytes": 1010,
+      "sha256": "651bf811af76c66a3519b77189fb814b5ca2975009ea9ca4f1f04c9459616498"
+    },
+    {
+      "path": "state-001.json",
+      "bytes": 1687,
+      "sha256": "c26ddab907ee5cf0a5ee413e0468d3005fa08b62804074c0b20a5d5542f727d8"
+    },
+    {
+      "path": "state-002.json",
+      "bytes": 2013,
+      "sha256": "b76f898c83627e65d5079ad57260f429ac0c7f6543129568cddf870196194b60"
+    },
+    {
+      "path": "state-003.json",
+      "bytes": 3326,
+      "sha256": "2890957eda062c82f22ef1de0107e077ddad4f090cdf0848bd582794a93ce5b2"
+    },
+    {
+      "path": "state-004.json",
+      "bytes": 3655,
+      "sha256": "8a9983c9fca0d7899895e2378bc6e110e98a494273be3f505d3306abe784dbef"
+    },
+    {
+      "path": "state-005.json",
+      "bytes": 3953,
+      "sha256": "3b1b7f68ff903671394ae358c9d7489814c79ee9567837eefa9c4692866bf597"
+    },
+    {
+      "path": "state-006.json",
+      "bytes": 4282,
+      "sha256": "da81b4c05c5de3b0ce6e9c9d337025e6d0727eadafcb7aa4ff86ab65054b3806"
+    },
+    {
+      "path": "state-007.json",
+      "bytes": 4945,
+      "sha256": "ffb06ce93206d377959eaef6ab5a46f65ebe275a850be3cc795133ad09290fa0"
+    },
+    {
+      "path": "state-008.json",
+      "bytes": 4978,
+      "sha256": "50d032dcb779dcfc53d2feb9795c09c2489540c55a4ab56393b67aab98ed735b"
+    },
+    {
+      "path": "state-009.json",
+      "bytes": 4944,
+      "sha256": "02ee80ba55615359712d0f7b5daf87b816410aac7ca4939f74897e0dc8f976f3"
+    },
+    {
+      "path": "state-010.json",
+      "bytes": 4940,
+      "sha256": "07ea036857027da14dd063f53d3ff4c5e8bbeaa2030366dec69ece62146f8c67"
+    },
+    {
+      "path": "state-progression.json",
+      "bytes": 7300,
+      "sha256": "4d133196b514b6166f262f7a03eca90666437a22d2392cce6775591a4d57630d"
+    },
+    {
+      "path": "state.json",
+      "bytes": 4940,
+      "sha256": "07ea036857027da14dd063f53d3ff4c5e8bbeaa2030366dec69ece62146f8c67"
+    },
+    {
+      "path": "stopped.json",
+      "bytes": 191,
+      "sha256": "93cd321511906357412b40898deca7f9cad2568cfd2bce66b0e0a38e7119d105"
+    },
+    {
+      "path": "ui-uxfix-focused.log",
+      "bytes": 6429,
+      "sha256": "f9ad70bf70f56d96e790ac57af4f1c7d93fdd0814b3d2c29f8e346744f713689"
+    },
+    {
+      "path": "ui-uxfix-ns1-baseline.log",
+      "bytes": 1160,
+      "sha256": "030cb80dbd35ffceb4e3269238840e1e399f1f30f1eb7d4dffdf232f2002901f"
+    },
+    {
+      "path": "ui-uxfix-shell-typecheck-supported.log",
+      "bytes": 253,
+      "sha256": "4b37875a7f6ff341fd2cd61b10b109de528977c7d32a530a37ed86a9b4cb671d"
+    },
+    {
+      "path": "ui-uxfix-shell-typecheck.log",
+      "bytes": 6549,
+      "sha256": "a46ec5ffcf45391418c21e42a023679b4cb8813df0ca8167dc3c83984f74a4d3"
+    },
+    {
+      "path": "ui-uxfix-shell.log",
+      "bytes": 9356,
+      "sha256": "11faf209022a3f31173d981c44e9f21cc9b3c8d7c51685b24e206ab11520b3f0"
+    },
+    {
+      "path": "unexpected-requests.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "unknown-after-relogin.png",
+      "bytes": 89888,
+      "sha256": "6cf1e07a0c13922f208dca4b6cac8ff95f1132132a664bb530122ee49fc9a1d0"
+    },
+    {
+      "path": "unknown-after-relogin.yml",
+      "bytes": 1853,
+      "sha256": "75992ba340a329ce93573f1f84b45a8c0725bfff53859e5c62206fe480c61913"
+    },
+    {
+      "path": "unknown-console.txt",
+      "bytes": 234,
+      "sha256": "57e2641f866df3d77267fa913a5613e4d610a90f7a11b97fec1cc20ca92e73d5"
+    },
+    {
+      "path": "unknown-reload.yml",
+      "bytes": 687,
+      "sha256": "589fb2128651b59ea45867156b55f3df57d8bf7542765be18335cc8abbefa3e7"
+    },
+    {
+      "path": "unknown-result.png",
+      "bytes": 108329,
+      "sha256": "d839db816875e60b330ae934f11340e75fec4f23b26cf4b24d74ca5a8be9ec78"
+    },
+    {
+      "path": "unknown-result.yml",
+      "bytes": 2788,
+      "sha256": "62d14d3467828013ee4c05bdecb77c146bdc43c108b0940ff1095a46f0b15ce3"
+    }
+  ]
+}

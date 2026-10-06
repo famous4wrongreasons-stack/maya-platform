@@ -1,0 +1,131 @@
+✔ chat preserves the standard resolution and never reads legacy action.approval (0.84475ms)
+✔ a live standard approval suppresses only the legacy notice, including an exact duplicate (15.451667ms)
+✔ body mismatch keeps the approval notice (1.105ms)
+✔ expired envelope keeps the approval notice (0.9975ms)
+✔ stale lifecycle keeps the approval notice (1.004416ms)
+✔ completed approval keeps the approval notice (1.622125ms)
+✔ unknown approval state keeps the approval notice (1.311958ms)
+✔ blocked approval keeps the approval notice (1.612708ms)
+✔ expired approval body keeps the approval notice (1.814959ms)
+✔ expired primary intent keeps the approval notice (1.818541ms)
+✔ disabled primary intent keeps the approval notice (1.645333ms)
+✔ unknown primary availability keeps the approval notice (0.964375ms)
+✔ missing primary reference keeps the approval notice (2.251792ms)
+✔ missing token keeps the approval notice (0.851208ms)
+✔ not primary keeps the approval notice (0.78525ms)
+✔ not COMMIT keeps the approval notice (0.823458ms)
+✔ not drawn keeps the approval notice (0.562875ms)
+✔ withheld primary keeps the approval notice (0.603542ms)
+✔ a duplicate id with body mismatch cannot borrow the current card's presentation (1.551333ms)
+✔ a duplicate id with expired envelope cannot borrow the current card's presentation (0.889416ms)
+✔ a duplicate id with stale lifecycle cannot borrow the current card's presentation (0.952708ms)
+✔ a duplicate id with completed approval cannot borrow the current card's presentation (1.388167ms)
+✔ a duplicate id with blocked approval cannot borrow the current card's presentation (0.998709ms)
+✔ a duplicate id with changed sealed body cannot borrow the current card's presentation (0.846709ms)
+✔ a duplicate id with changed seal cannot borrow the current card's presentation (0.982375ms)
+✔ a duplicate id with changed token cannot borrow the current card's presentation (1.261667ms)
+✔ current envelope expiry is checked even when background timers have not fired (0.931166ms)
+✔ current body expiry is checked even when background timers have not fired (0.912208ms)
+✔ current intent expiry is checked even when background timers have not fired (0.846ms)
+✔ a superseded envelope cannot borrow its successor presentation or restore old controls (1.760375ms)
+✔ no resolution or an unrelated widget keeps the legacy notice (0.615292ms)
+✔ standard i1 activation uses the existing gateway once; a lost response claims no success (0.659292ms)
+✔ standard i2 activation uses the existing gateway once; a lost response claims no success (0.453667ms)
+L27 PROBE — COMMIT → CONFIRMED → DISMISS, one canonical outcome
+
+  COMMIT activation ..................................... "dismissed"  PASS
+  after COMMIT: visible terminal outcomes ............... 1  PASS
+  after COMMIT: display ................................. "terminal"  PASS
+  DISMISS activation .................................... "dismissed"  PASS
+  DISMISS still moves lifecycle (stateChanges) .......... 1  PASS
+  DISMISS still submits ................................. 1  PASS
+  DISMISS leaves no silent outcome (sentences) .......... 0  PASS
+  after DISMISS: display ................................ "terminal"  PASS
+  after DISMISS: assistant lines ........................ ["Запись подтверждена."]  PASS
+  after DISMISS: visible terminal outcome count ......... 1  PASS
+  repeated DISMISS: visible terminal outcome count ...... 1  PASS
+  repeated DISMISS: still dismissed ..................... "dismissed"  PASS
+  BUSINESS EFFECT COUNT (booking records) ............... 1  PASS
+  RECEIPT COUNT (canonical, with a reference) ........... 1  PASS
+  receipt rows in order ................................. [{"outcome":"ACCEPTED","action_receipt_ref":"483ed7f8-6c1a-4f52-9b3d-70e2a5c81d94"},{"outcome":"ACCEPTED","action_receipt_ref":null},{"outcome":"ACCEPTED","action_receipt_ref":null}]  PASS
+  durable terminal lines (terminalLinesJson) ............ 1  PASS
+  no contradictory line reached the conversation ........ true  PASS
+
+L27: PASS
+✔ maya-chat-shell/test/l27-terminal-outcome-probe.mjs (96.201916ms)
+NS-1 ROUNDTRIP PROBE — detail → canonical parent return
+
+  journal parent ingested ......................... valid  PASS
+  1. NAVIGATE parent → detail ..................... dismissed  PASS
+  2. fullscreen opens ............................. open  PASS
+  3. detail → parent: backend HTTP ................ 200  PASS
+  4. backend result ............................... ACCEPTED  PASS
+  5. resolved_widget parent ....................... PRESENT  PASS
+  6. runtime projection ........................... PRESERVES resolved_widget  PASS
+  7. parent restored through the return path ...... RETURNED  PASS
+  8. fullscreen detail after return ............... CLOSED  PASS
+  9. timeline parent is the server result ......... SERVER resolved_widget  PASS
+  10. timeline widget items ....................... 1  PASS
+  11. detail entry released ....................... unknown_item  PASS
+  12. focus owner released ........................ null  PASS
+  13. history: one push, one back ................. 1/1  PASS
+  14. submissions sent ............................ 2  PASS
+  15. no chat or reread traffic ................... 1  FAIL
+
+NS-1 ROUNDTRIP: FAIL (1 of 16)
+✖ maya-chat-shell/test/ns1-roundtrip-probe.mjs (95.89125ms)
+✔ allowlisted owner projection copies only own data properties, never accessors or extra payload (0.930708ms)
+✔ exact approved diff plus verified owner readback shows confirmation through the standard gateway (11.261833ms)
+✔ UNKNOWN never confirms an ACCEPTED pricing button (1.330833ms)
+✔ incomplete status never confirms an ACCEPTED pricing button (0.865334ms)
+✔ wrong decision never confirms an ACCEPTED pricing button (0.808583ms)
+✔ unverified never confirms an ACCEPTED pricing button (1.14175ms)
+✔ truthy verification never confirms an ACCEPTED pricing button (0.839917ms)
+✔ different provider never confirms an ACCEPTED pricing button (0.749042ms)
+✔ different currency never confirms an ACCEPTED pricing button (0.700125ms)
+✔ different service never confirms an ACCEPTED pricing button (0.986833ms)
+✔ different price never confirms an ACCEPTED pricing button (0.703334ms)
+✔ string price never confirms an ACCEPTED pricing button (0.610667ms)
+✔ nonfinite price never confirms an ACCEPTED pricing button (0.767875ms)
+✔ missing AE receipt never confirms an ACCEPTED pricing button (0.69125ms)
+✔ empty AE receipt never confirms an ACCEPTED pricing button (0.594666ms)
+✔ blank AE receipt never confirms an ACCEPTED pricing button (0.604541ms)
+✔ missing outcome never confirms an ACCEPTED pricing button (0.715417ms)
+✔ missing service row cannot borrow a different diff's owner receipt (0.776167ms)
+✔ duplicate service rows cannot borrow a different diff's owner receipt (0.88575ms)
+✔ different proposed amount cannot borrow a different diff's owner receipt (1.161166ms)
+✔ different proposed currency cannot borrow a different diff's owner receipt (0.531958ms)
+✔ ACCEPTED alone and even an unrelated terminal line cannot claim a provider price change (0.454583ms)
+✔ canonical rejected decision is shown only for the rejection control (0.9065ms)
+✔ successful owner data on a refused gateway response is never confirmation (0.427583ms)
+✔ lost response says unconfirmed and never automatically sends a second mutation (4.563584ms)
+✔ a late result cannot confirm a superseding price proposal (1.117334ms)
+✔ unrelated APPROVAL retains its existing ACCEPTED behavior (0.307875ms)
+✔ a different WidgetSource cannot borrow pricing wording from an extra capability property (0.543708ms)
+✔ React and DOM carriers use the same honest pricing sentences (0.049875ms)
+✔ confirmed becomes a static diff; repeated callbacks and accessibility redraw preserve its receipt (0.713ms)
+✔ rejected becomes a static diff; repeated callbacks and accessibility redraw preserve its receipt (0.5995ms)
+✔ UNKNOWN becomes a static diff; repeated callbacks and accessibility redraw preserve its receipt (0.549875ms)
+✔ lost mutation response freezes the preview and explicit repeated click cannot resend or replace UNKNOWN (0.491791ms)
+✔ a newly loaded runtime carries no old pricing result or enabled confirmation from history alone (2.624917ms)
+✔ receipt preserves colliding exact service labels (PENDING, textOnly=false) (0.785458ms)
+✔ receipt preserves colliding exact service labels (Подтвердить цену, textOnly=false) (0.464084ms)
+✔ receipt preserves colliding exact service labels (PENDING, textOnly=true) (0.761708ms)
+✔ receipt preserves colliding exact service labels (Подтвердить цену, textOnly=true) (0.475542ms)
+✔ a corrected proposal supersedes a frozen UNKNOWN card and needs its own authoritative receipt (0.877166ms)
+✔ a SUCCEEDED decision from detail freezes its exact parent preview (1.554917ms)
+✔ a UNKNOWN decision from detail freezes its exact parent preview (0.947542ms)
+ℹ tests 76
+ℹ suites 0
+ℹ pass 75
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 136.734084
+
+✖ failing tests:
+
+test at maya-chat-shell/test/ns1-roundtrip-probe.mjs:1:1
+✖ maya-chat-shell/test/ns1-roundtrip-probe.mjs (95.89125ms)
+  'test failed'

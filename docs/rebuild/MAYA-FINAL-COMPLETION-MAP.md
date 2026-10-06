@@ -616,3 +616,96 @@ The explicit owner web-chat request “Проверь окна после отм
 Follow-up, parent-authorized slot: the actual serial HTTP/AppModule/PostgreSQL prepare → process/PG restart → resume gate **passed**, including same run/version/evidence, zero reread replay, current carrier text, fill/expiry and tenant/revocation refusals. Its narrow C5 fingerprint→C9 hash correction preserves source bytes and schemas. All failed attempts are retained, every owned cluster stopped and slot released. [Executed evidence and qualifications](MAYA-EXPLICIT-OCCUPANCY-HTTP-PG-RESULT-20261006.md); [integration file list and compatibility](MAYA-EXPLICIT-OCCUPANCY-INTEGRATION-20261006.md). Carrier proof is current runtime/React SSR; actual browser/provider/model and receiving-branch aggregate remain pending. This supersedes only the prior HTTP/PG gap, not C10 status or autonomy boundaries.
 
 Follow-up local browser acceptance: the parent-authorized actual React → HTTP/AppModule → owned PostgreSQL proof **passed** for the exact explicit owner request, with real debug UI login, coherent complete answer, reload/relogin/history warning, offline/same-request reconnect, membership revocation and EXPIRED/no-action. Model calls and business writes are zero. All attempts and screenshots are retained; all own PG/backend/Chrome processes stopped and heavy slot returned. [Executed browser evidence and qualifications](MAYA-EXPLICIT-OCCUPANCY-BROWSER-RESULT-20261006.md). This closes only the desktop local browser gap with synthetic CRM; actual provider/model, receiving-branch aggregate and C10 remain unqualified.
+
+## YCLIENTS fixed service price — isolated local backend candidate, 2026-10-06 UTC
+
+YC-SP1 adds the named owner-only `catalog.service.price.update` proposal and
+`crm.service.fixed-price.update.v1` Action Engine capability from committed base
+`c6a35e5c61975e9d101326e7b3970331f3c905d8`. An explicit fixed RUB amount and exact
+authoritative service produce a price diff; the existing approval owner binds
+the tenant, actor, provider and immutable payload. Only the existing AE dispatches
+the typed PATCH, preserving required source fields. Exact provider receipt plus
+fresh readback confirms success. Uncertain writes stay UNKNOWN without retry.
+No internal A28 mutation is presented as a YCLIENTS write.
+
+Fresh bounded checks: backend typecheck PASS; actual HTTP/auth/AE/isolated PostgreSQL
+14/14; focused contracts and historical registry pins 298/298 over ten suites;
+scoped ESLint 21 files PASS. Independent review findings were repaired. The owned
+synthetic PostgreSQL cluster is stopped. These are targeted results, not a new
+aggregate census or React/provider/model qualification.
+
+**At backend checkpoint `fd702158`, the current React path was incomplete.** F37/F38 deliberately
+leaves this capability without a pairing/button; the current carrier cannot
+consume this `AiApprovalRequest`. The next specific owner decision is
+**YC-SP1-WIDGET-1**, followed by typed approval owner/minter and current-carrier
+proof. Provider preservation/receipt qualification, external-editor races, and
+broader create/edit/archive dependencies also remain. Frozen website booking and
+AE lifecycle semantics are unchanged. No real provider/model call, existing stand,
+production config/database, phone, push, merge or deployment was used.
+
+See [implementation, boundaries and exact proposed carrier decision](YCLIENTS-SERVICE-PRICE-CANDIDATE-2026-10-06.md)
+and [machine-readable evidence](evidence/yc-service-pricing-20261006/manifest.json).
+
+## YCLIENTS fixed service price — approved local UI candidate, 2026-10-06 UTC
+
+The owner approved YC-SP1-WIDGET-1 at 16:09 UTC: an exact fixed-price change for one
+existing own service, explicitly confirmed in chat, on the test branch. V1.4 transfers
+that single named exception while retaining MONEY, ordinary money floors, historical
+F38/allowlist rows, B35 and AE lifecycle. The standard APPROVAL now binds the actual
+canonical `AiApprovalRequest`, payload hash and durable authenticated original chat
+turn. Current principal and entitlement checks remain server-side; only AE mutates CRM.
+
+The preceding carrier gap is superseded for this local candidate. Fresh synthetic
+HTTP/auth/AE/owned Postgres tests pass 23/23. Untouched HTTP evidence passes the current
+React renderer and headless runtime in four cases plus wrapper (5/5): confirmed,
+rejected, UNKNOWN and detail through `fs.catalogue`. There was no browser run. Backend
+and React typechecks pass; architecture boundaries 68/68, K3 10/10, floor copy and
+contract checks 31/31 pass. Four historical later-package contract prerequisites
+remain pending. Focused backend tests pass 559/559, shell tests 62/62; scoped ESLint
+has zero errors and three generated-file warnings. Commands and hashes are in the
+evidence manifest.
+
+Owned Postgres is stopped. Independent read-only review found no remaining material
+code blocker for the bounded local candidate. Real provider/model/browser acceptance,
+aggregate census and V1.4 release/profile certification remain unperformed. Broader
+create/edit/archive and richer provider contracts remain separate dependencies. No
+existing stand, production config/database, phone, real provider/model, push, merge
+or deployment was touched. See [UI candidate and limits](YCLIENTS-SERVICE-PRICE-UI-CANDIDATE-2026-10-06.md)
+and [fresh UI evidence](evidence/yc-service-pricing-ui-20261006/manifest.json).
+
+## YCLIENTS pricing — pre-fix local browser checkpoint, 2026-10-06 17:41 UTC
+
+Actual Chromium controls exercised UI email login, natural price proposal, detail,
+approve, reject, UNKNOWN repeat/reload and fresh login against real local HTTP/auth,
+AE and owned Postgres. Three bounded functional flows pass: one confirmed PATCH with
+linked SUCCEEDED receipt, zero writes on reject, one lost-response PATCH remaining
+UNKNOWN with no false Done or redispatch. The model/email delivery/CRM alone are
+synthetic. All owned services are stopped and evidence retained.
+
+This is **not UI acceptance**: terminal cards remain visually pending/actionable,
+repeat click overwrites the UNKNOWN explanation, and metadata spacing/font are broken.
+The parent requested their repair plus regressions and another actual browser run;
+preparation is allowed while the main work owns the heavy slot. No new lifecycle or
+frozen authority contract is introduced. GET fixture recovery was available but not
+read by the application after reload, so no read-recovery browser claim is made.
+See [browser findings and procedure](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md)
+and [evidence manifest](evidence/yc-service-pricing-browser-20261006/manifest.json).
+
+## YCLIENTS pricing — repaired local browser UI, 2026-10-06 18:07 UTC
+
+The observed pre-fix UI blockers above are closed by the existing runtime/card-style
+repair and a fresh actual Chromium run. Confirming from actual detail closes the
+sheet and freezes its exact parent with the original diff and confirmed receipt;
+reject and UNKNOWN show their distinct outcomes with zero approval/retry controls.
+Font and paragraph gaps are corrected. Server outcomes remain 1 PATCH/SUCCEEDED,
+0 PATCH/rejected and 1 PATCH/UNKNOWN after reload and new actual UI authentication.
+No post-fix browser repeat was possible because its control is absent; 74/74 unit
+regressions cover repeated stale callbacks, redraw and restoration. Refusing shell/
+React builds and 5/5 current React HTTP-fixture continuation pass.
+
+Independent read-only review confirms bounded UI blocker closure from screenshots,
+three traces and ten state snapshots. All owned services are stopped. Real provider/
+model, browser CRM read recovery, mobile/Safari and release/aggregate certification
+remain unqualified; the NS1 history-traffic census failure is reproduced on baseline.
+See [final browser proof](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md) and
+[repair evidence](evidence/yc-service-pricing-uxfix-20261006/manifest.json).

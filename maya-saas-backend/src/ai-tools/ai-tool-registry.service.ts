@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 
 import type { StaffScheduleSlot } from '../crm/crm-adapter.interface';
+import { priceMinor } from '../crm/yclients-service-price.contract';
 import {
   normalizeScheduleSlots,
   staffScheduleRevision,
@@ -105,6 +106,52 @@ export class AiToolRegistryService {
           this.invalidArguments('enabled must be a boolean');
         }
         return { capability, enabled: args.enabled };
+      }
+      case 'catalog.service.price.update': {
+        // Only service_id and price_rubles are model-facing. Prepared fields
+        // are accepted for encrypted approval replay and always overwritten
+        // from the authoritative CRM owner before a new card is signed.
+        const preparedKeys = [
+          'company_id',
+          'integration_revision',
+          'current_revision',
+          'current_price_rubles',
+          'service_name',
+          'currency',
+        ];
+        this.assertAllowedKeys(args, [
+          'service_id',
+          'price_rubles',
+          ...preparedKeys,
+        ]);
+        const requested = {
+          service_id: this.assertYclientsId(args.service_id, 'service_id'),
+          price_rubles: this.assertServicePriceRubles(
+            args.price_rubles,
+            'price_rubles',
+          ),
+        };
+        if (!preparedKeys.some((key) => args[key] !== undefined))
+          return requested;
+        // Partial metadata must not survive a replay as a signed proposal.
+        return {
+          ...requested,
+          company_id: this.assertYclientsId(args.company_id, 'company_id'),
+          integration_revision: this.assertServicePriceRevision(
+            args.integration_revision,
+            'integration_revision',
+          ),
+          current_revision: this.assertServicePriceRevision(
+            args.current_revision,
+            'current_revision',
+          ),
+          current_price_rubles: this.assertServicePriceRubles(
+            args.current_price_rubles,
+            'current_price_rubles',
+          ),
+          service_name: this.assertServicePriceName(args.service_name),
+          currency: this.assertEnum(args.currency, 'currency', ['RUB']),
+        };
       }
       case 'tasks.list': {
         this.assertAllowedKeys(args, ['status', 'period']);
@@ -538,6 +585,30 @@ export class AiToolRegistryService {
         },
       };
     }
+    if (toolName === 'catalog.service.price.update') {
+      const prepared = this.validateArguments(toolName, args);
+      if (typeof prepared.current_price_rubles !== 'number') {
+        this.invalidArguments(
+          'authoritative service price preparation is required',
+        );
+      }
+      const before = this.formatRubles(prepared.current_price_rubles);
+      const after = this.formatRubles(prepared.price_rubles as number);
+      return {
+        summary: `Изменить цену услуги «${String(prepared.service_name)}» в YCLIENTS: ${before} → ${after} (RUB). Требуется ваше подтверждение.`,
+        payload: {
+          after,
+          before,
+          source: 'YCLIENTS',
+          service: prepared.service_name,
+          currency: prepared.currency,
+          approval: 'Требуется ваше подтверждение',
+          service_id: prepared.service_id,
+          current_price_rubles: prepared.current_price_rubles,
+          proposed_price_rubles: prepared.price_rubles,
+        },
+      };
+    }
     if (toolName === 'expenses.create') {
       const category = findExpenseCategory(args.category);
       const amountRubles =
@@ -919,6 +990,52 @@ export class AiToolRegistryService {
     if (typeof value !== 'string' || !EXTERNAL_ID_PATTERN.test(value)) {
       this.invalidArguments(`${field} is invalid`);
     }
+    return value;
+  }
+
+  private assertYclientsId(value: unknown, field: string): string {
+    if (typeof value !== 'string' || !/^[1-9]\d{0,14}$/.test(value)) {
+      this.invalidArguments(`${field} must be an exact YCLIENTS identifier`);
+    }
+    return value;
+  }
+
+  private assertServicePriceRubles(value: unknown, field: string): number {
+    if (
+      typeof value !== 'number' ||
+      !Number.isFinite(value) ||
+      value > 1_000_000_000
+    ) {
+      this.invalidArguments(
+        `${field} must be an exact nonnegative price in rubles`,
+      );
+    }
+    try {
+      priceMinor(value);
+    } catch {
+      this.invalidArguments(`${field} must have at most two decimals`);
+    }
+    return value;
+  }
+
+  private assertServicePriceRevision(value: unknown, field: string): string {
+    if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
+      this.invalidArguments(`${field} is invalid`);
+    }
+    return value;
+  }
+
+  private assertServicePriceName(value: unknown): string {
+    if (
+      typeof value !== 'string' ||
+      !value.trim() ||
+      value.length > 240 ||
+      Array.from(value).some((character) => character.charCodeAt(0) < 32)
+    ) {
+      this.invalidArguments('service_name is invalid');
+    }
+    // Preserve the authoritative title exactly so saved-argument replay does
+    // not change the signed payload (including leading/trailing spaces).
     return value;
   }
 

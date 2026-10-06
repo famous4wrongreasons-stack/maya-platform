@@ -14,6 +14,7 @@ import { AE_WIDGET_COMMIT_ALLOWLIST } from './contract-bindings';
 import { AE_WIDGET_COMMIT_ALLOWLIST as P23_RUNTIME } from './ae-commit-allowlist.runtime';
 import { pairingForAe } from './propose-pairing';
 import { CONTROL_KEYS, allRefs, census, resolves } from './registry-binding';
+import { SERVICE_PRICE_CAPABILITY } from '../../crm/yclients-service-price.contract';
 
 describe('D-14 — the CONTROL arm is F27’s table, read once', () => {
   it('the CONTROL space is exactly the keys of CONTROL_REGISTRY', () => {
@@ -58,7 +59,18 @@ describe('the runtime allowlist binding carries confirmation_kind', () => {
       expect(row.confirmation_kind).toBe('BOOKING_CONFIRMATION');
       expect(row.propose.key).toBe(pairingForAe(ae)?.propose.key);
     }
-    expect(Object.keys(AE_WIDGET_COMMIT_ALLOWLIST)).toHaveLength(10);
+    expect(
+      Object.keys(AE_WIDGET_COMMIT_ALLOWLIST).filter(
+        (key) => key !== SERVICE_PRICE_CAPABILITY,
+      ),
+    ).toHaveLength(10);
+    expect(AE_WIDGET_COMMIT_ALLOWLIST[SERVICE_PRICE_CAPABILITY]).toEqual({
+      confirmation_kind: 'APPROVAL',
+      family: 'catalogue_price_configuration',
+      min_verification: 'SESSION_VERIFIED',
+      requires_ae_approval: false,
+      propose: { space: 'C9', key: 'catalog.service.price.update' },
+    });
   });
 
   it('the other row values are unchanged', () => {

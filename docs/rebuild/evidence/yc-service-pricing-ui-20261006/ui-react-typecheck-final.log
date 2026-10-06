@@ -1,0 +1,6 @@
+
+> maya-carrier-react@0.0.0 typecheck
+> node build.mjs --typecheck
+
+gate: PASS (21 source files, 0 refusals)
+typecheck: PASS (21 carrier files + 20 runtime modules, contract 201 exports, 5.9.3)

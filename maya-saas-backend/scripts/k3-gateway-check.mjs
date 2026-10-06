@@ -706,6 +706,7 @@ const OWNER_MODULES = [
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
 const BOUND_PORT_TOKENS = [
+  'SERVICE_PRICE_APPROVAL_OWNER', // YC-SP1 canonical typed AI owner.
   'CHAT_REPLY_CIPHER', // RT6 encrypted erasable text, no key material.
   'PERSONAL_SCHEDULE_SOURCE', // BS-1 canonical personal source only.
   'USER_TURN_AUDIT', // 9.6 opaque correlation only; canonical owner remains AuditLogService.

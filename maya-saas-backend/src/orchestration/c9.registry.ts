@@ -2,6 +2,7 @@ import { MAYA_AI_TOOL_CATALOG } from '../ai-tools/ai-tool.catalog';
 import { C9Domain, C9Principal, c9Deny, c9Hash } from './c9.contract';
 const domains: Record<string, readonly C9Domain[]> = {
   'catalog.services.read': ['OCCUPANCY', 'ADMIN'],
+  'catalog.service.price.update': ['ADMIN'],
   'booking.availability.read': ['OCCUPANCY'],
   'booking.group-availability.read': ['OCCUPANCY'],
   'appointments.own.list': ['ADMIN'],

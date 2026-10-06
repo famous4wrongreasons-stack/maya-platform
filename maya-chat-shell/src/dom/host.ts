@@ -427,6 +427,12 @@ export const widgetSentence = (sentence: NonNullable<WidgetItem['sentence']>): s
       return 'Этот переход здесь недоступен';
     case 'expired_not_resolved':
       return 'Карточка устарела — показана сводка';
+    case 'service_price_confirmed':
+      return 'Цена подтверждена в YCLIENTS';
+    case 'service_price_unconfirmed':
+      return 'Результат пока не подтверждён. Не отправляйте повторно';
+    case 'service_price_rejected':
+      return 'Изменение отклонено';
   }
 };
 

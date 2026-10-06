@@ -1,0 +1,249 @@
+{
+  "directory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task/service-pricing/output/playwright/service-price-live-20261006T172031Z-attempt2",
+  "note": "Raw auth bodies/headers/codes intentionally not published; hashes only. mailbox.json intentionally omitted. Raw output remains local ignored.",
+  "files": [
+    {
+      "path": ".playwright-cli/traces/trace-1791307613394.network",
+      "bytes": 23138,
+      "sha256": "850250e477792bc678caf7ccebf56610212f992de48f3b11f5b60480ca1724d5"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791307613394.stacks",
+      "bytes": 24,
+      "sha256": "1a6c79f0b6e01f4658a123b81943eb070dc29edee733ec96c983a47673b4e34b"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791307613394.trace",
+      "bytes": 291148,
+      "sha256": "fc9ace394bcc265115c8c3905394c499266891a4a665fb21bc075a99ed9ebfbe"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791307915507.network",
+      "bytes": 19641,
+      "sha256": "4671b9d7c101680b5519e7ec773f15cf4ca43018b5751dc4ebdd69adfefd51cc"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791307915507.stacks",
+      "bytes": 24,
+      "sha256": "1a6c79f0b6e01f4658a123b81943eb070dc29edee733ec96c983a47673b4e34b"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791307915507.trace",
+      "bytes": 213596,
+      "sha256": "9a2cb2b6b409c776b7f7984cda314c4a7b5fd86c0676651b397105b1a29fafc5"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791308099140.network",
+      "bytes": 39744,
+      "sha256": "b614039d82a989d2c973f38ea5cbf4135715f82691213267d88a4f81d34864a0"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791308099140.stacks",
+      "bytes": 24,
+      "sha256": "1a6c79f0b6e01f4658a123b81943eb070dc29edee733ec96c983a47673b4e34b"
+    },
+    {
+      "path": ".playwright-cli/traces/trace-1791308099140.trace",
+      "bytes": 375215,
+      "sha256": "2f38c6b2087686fd8fdbf38e9ee648526b3bd2d1bd141105567a1bac358763af"
+    },
+    {
+      "path": "STOP",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "carrier-ready.json",
+      "bytes": 1363,
+      "sha256": "be680d08f1ca1589a1cf141f261ab5f6b5e6d72145075ba5b4d10116f578134c"
+    },
+    {
+      "path": "carrier.log",
+      "bytes": 91,
+      "sha256": "33ecb172f8120c9110707ee02bec906ced81f0c32ccdca28d72f5d5cc3db57d6"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 622,
+      "sha256": "e42cdbca81f847e51190ae8364c6698cc4c604afd93376e9290e09561d5cadde"
+    },
+    {
+      "path": "confirmed-detail.png",
+      "bytes": 122172,
+      "sha256": "e73dfe0799e7a5db58c78f628d169d0433668288c04ed74c558209d23b404141"
+    },
+    {
+      "path": "confirmed-login.png",
+      "bytes": 60863,
+      "sha256": "2f2e53daa2b55c05ed5aaf8358517e4ac86746e0df11595ee11b07fff6703447"
+    },
+    {
+      "path": "confirmed-preview.png",
+      "bytes": 116933,
+      "sha256": "aabbba40e08810e67f71e8d72188cadd18113ceeb7b270239bbb1ff33ea3d664"
+    },
+    {
+      "path": "confirmed-result.png",
+      "bytes": 120364,
+      "sha256": "ed79d45bb85ab5f578362aefd724e38b31f65c339f782469d00c23de1487aad1"
+    },
+    {
+      "path": "harness.log",
+      "bytes": 929,
+      "sha256": "d7941b7234f5919212f60817eebdb4581c67c4fedd2f7fab8755d5bbacc6eaec"
+    },
+    {
+      "path": "inputs.json",
+      "bytes": 698,
+      "sha256": "8115cf7e5d98833aa1dfd8710f415a6ae0ef3ca707a88e30e20092ec88ffd81d"
+    },
+    {
+      "path": "playwright-cli.json",
+      "bytes": 390,
+      "sha256": "8c5926ded630c092a2019dbbb8c1b9240defae8cf645e8716c6cedbb69d7c40f"
+    },
+    {
+      "path": "provider-events.jsonl",
+      "bytes": 1608,
+      "sha256": "8e80ba07a8ab77bf2ca24e96a3182d2ecd0ce1a6e0f37b1934215933cbc90307"
+    },
+    {
+      "path": "ready.json",
+      "bytes": 1602,
+      "sha256": "80623d605b11c88f58521cba19e4fe9e0293ddec71e8dde8f57796741afc519a"
+    },
+    {
+      "path": "rejected-console.txt",
+      "bytes": 94,
+      "sha256": "36e2ac76128d5f4aec65449ba343d7cb683069bdd7c5d18592f6e813384de0f2"
+    },
+    {
+      "path": "rejected-preview.png",
+      "bytes": 117023,
+      "sha256": "97550a05216b49c55624afadf8b75fb2f4699af951c9ca066a9f35f388e5b28e"
+    },
+    {
+      "path": "rejected-requests.txt",
+      "bytes": 483,
+      "sha256": "60893721e8384a66fd6488249d0ee95b18fe64c598a82c9d0cf11fcdef4bcbc7"
+    },
+    {
+      "path": "rejected-result.png",
+      "bytes": 119232,
+      "sha256": "708e6c3c578c0ae399018d4b8b114dea321b0072b2ebf85bf1d7fb5c114be517"
+    },
+    {
+      "path": "relay.log",
+      "bytes": 1939,
+      "sha256": "60f52a86fd7048174619358cb66ef4bef136c380980ab76ac012dd4b02450974"
+    },
+    {
+      "path": "state-001.json",
+      "bytes": 1687,
+      "sha256": "cae4b5906092b6371db5c6f165c0010ba0ff799b90ce152f8c52051163cf2f40"
+    },
+    {
+      "path": "state-002.json",
+      "bytes": 2021,
+      "sha256": "efb4b26c776ac020229526e9a4231ae73e31e98893baabe106ca27401b1e5594"
+    },
+    {
+      "path": "state-003.json",
+      "bytes": 3333,
+      "sha256": "a79e6b97381880c3c1f150c1d9c526ee4afdd3ac121e948a84b06c1fa8203b8c"
+    },
+    {
+      "path": "state-004.json",
+      "bytes": 3959,
+      "sha256": "d71a31ccf79b1ccdd553e27d00a754cb7787cdcfbd95c40b6e23bcbe934ca770"
+    },
+    {
+      "path": "state-005.json",
+      "bytes": 4288,
+      "sha256": "bb3f59c34a1f47b22776f04e463fcd70fab866117803877493f752b519931ed0"
+    },
+    {
+      "path": "state-006.json",
+      "bytes": 4955,
+      "sha256": "f3eaccb9c481616d4783f4e4acad85c938fbb747b0441e1d971167816464ef1f"
+    },
+    {
+      "path": "state-007.json",
+      "bytes": 4978,
+      "sha256": "2388e09bee893809a05d7c6ba77a599e662a654a2ad2601704c8275a6f1241c9"
+    },
+    {
+      "path": "state-008.json",
+      "bytes": 4960,
+      "sha256": "406d731b0f13bdd220aef875c1a77c6667ec284d555c9501850666d240a2f099"
+    },
+    {
+      "path": "state-009.json",
+      "bytes": 4959,
+      "sha256": "ddc689eff7b7d952b13eb617b927a1ff46070b6ae19675d860cf2ff63f8dc9ae"
+    },
+    {
+      "path": "state-010.json",
+      "bytes": 4971,
+      "sha256": "d9d27e0f2d51327628f6dd6d4c430d5d86700cde10bd75a9cb5583511ae3bbf3"
+    },
+    {
+      "path": "state-011.json",
+      "bytes": 4940,
+      "sha256": "b2829210f61d628d8f14c8afd951641462d6a577df85d14400a6235afe1fd6ef"
+    },
+    {
+      "path": "state.json",
+      "bytes": 4940,
+      "sha256": "b2829210f61d628d8f14c8afd951641462d6a577df85d14400a6235afe1fd6ef"
+    },
+    {
+      "path": "stopped.json",
+      "bytes": 191,
+      "sha256": "dc2fa6c6c458fde150f052cc2e0093b5f039720050a0cd5b125d99f196c3a588"
+    },
+    {
+      "path": "unexpected-requests.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "unknown-after-relogin.png",
+      "bytes": 89888,
+      "sha256": "6cf1e07a0c13922f208dca4b6cac8ff95f1132132a664bb530122ee49fc9a1d0"
+    },
+    {
+      "path": "unknown-console.txt",
+      "bytes": 94,
+      "sha256": "36e2ac76128d5f4aec65449ba343d7cb683069bdd7c5d18592f6e813384de0f2"
+    },
+    {
+      "path": "unknown-preview.png",
+      "bytes": 117038,
+      "sha256": "29f7debe6bba724486634bac3d2293e3a1b8326e096d278a9011213bbc88e1cd"
+    },
+    {
+      "path": "unknown-reload-signed-out.png",
+      "bytes": 54860,
+      "sha256": "129b36e297f6aa8b9bc03eb715cd7b935e274298b2f71d0792be5c6e2d0ef12f"
+    },
+    {
+      "path": "unknown-repeat-refused.png",
+      "bytes": 120325,
+      "sha256": "79d937b9f4355eb1294d4564df56e4ab5c92d3495d7c0d43c2616489614173a4"
+    },
+    {
+      "path": "unknown-requests.txt",
+      "bytes": 758,
+      "sha256": "560110ea0460a6328153537f53ec73a94b9d81639cef8c5f0e2a6a235d8f7c6c"
+    },
+    {
+      "path": "unknown-result.png",
+      "bytes": 121529,
+      "sha256": "3c6b4a99ff740e2e1ecf571d24b3f3391bd9a081e746bf0abf5bcd0b99e92c1f"
+    }
+  ],
+  "raw_tree_file_count": 1352,
+  "raw_tree_index_sha256": "3620ee39a4894cc2c49459c206bbc9bf97e1f0a8851216c6cbd5fb3ee7f0c90e",
+  "raw_tree_index_algorithm": "SHA256 of sorted path array, JSON sorted keys, compact separators, UTF-8"
+}

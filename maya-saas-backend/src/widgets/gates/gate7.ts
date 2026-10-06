@@ -80,6 +80,8 @@ import { resolves } from '../authority/registry-binding';
 import { carrierAdmits } from '../carriers/channel-profile';
 import type { GateContext, GateVerdict, IntentRecordRow } from '../gate.types';
 import { subjectOf } from './subject';
+import { isCataloguePriceConfiguration } from '../pricing/service-price-widget.contract';
+import { SERVICE_PRICE_TOOL } from '../../crm/yclients-service-price.contract';
 import { pass, refuse } from './verdict';
 
 export type { ProducingRecordLoader } from '../authority/commit-guard';
@@ -279,7 +281,9 @@ export const gate7 = async (
   // it refuses rather than being treated as not-money.
   const cap = actionCapabilityRegistry.tryGet(ae.key);
   if (!cap) return no('C9a', `${ae.key} is not a registered AE capability`);
-  if (MONEY(cap)) return no('C9a', `${ae.key} is MONEY (§3.10)`);
+  const cataloguePrice = isCataloguePriceConfiguration(cap);
+  if (MONEY(cap) && !cataloguePrice)
+    return no('C9a', `${ae.key} is MONEY (§3.10)`);
 
   try {
     // C6 — F72's SECOND evaluation point (C11:4726), read from the live allowlist in this process.
@@ -303,8 +307,30 @@ export const gate7 = async (
 
     // C5a and C5b — F74's bypass guard and its identity. The ONE store read this gate performs, and
     // only for a non-draft COMMIT.
-    const producing = await producingRecordProblem(commit, loadProducingRecord);
-    if (producing) return unconfirmed(producing.clause, producing.message);
+    // F74a is the typed canonical chat approval branch. The HMAC identity, pending
+    // owner hash and durable authenticated chat provenance are re-read at Gate 11.
+    if (cataloguePrice) {
+      const nouns = r.frozenNounsJson;
+      if (
+        r.widgetKind !== 'APPROVAL' ||
+        r.producedByIntentTokenHash !== null ||
+        r.approvalOfIntentRef !== null ||
+        !['approve', 'reject'].includes(r.approvalDecision ?? '') ||
+        !nouns ||
+        typeof nouns !== 'object' ||
+        Array.isArray(nouns) ||
+        Object.keys(nouns).length !== 1 ||
+        typeof (nouns as Record<string, unknown>).approval !== 'string' ||
+        (nouns as Record<string, unknown>).approval === ''
+      )
+        return unconfirmed('C5a', 'canonical chat approval linkage required');
+    } else {
+      const producing = await producingRecordProblem(
+        commit,
+        loadProducingRecord,
+      );
+      if (producing) return unconfirmed(producing.clause, producing.message);
+    }
 
     // C8b — FR-6b's pairing half: the `ae` side of EXACTLY ONE `AE_PROPOSE_PAIRING` row. Authority
     // for a COMMIT is resolved through the C9 propose key, so a key with two propose sides — or none
@@ -314,6 +340,15 @@ export const gate7 = async (
         'C8b',
         `${ae.key} is BOOKING and is the ae side of no single pairing row`,
       );
+    if (cataloguePrice) {
+      const pairing = pairingForAe(ae.key);
+      if (
+        !pairing ||
+        pairing.propose.space !== 'C9' ||
+        pairing.propose.key !== SERVICE_PRICE_TOOL
+      )
+        return unconfirmed('C8b', 'canonical chat approval pairing required');
+    }
 
     // C6a — F80 (C11:1524-1531): a `SETTINGS_DRAFT` COMMIT is admitted only when its C9 propose key's
     // policy row carries `consent_class ∈ {none, communication}`. A missing row refuses (R3.11.5).

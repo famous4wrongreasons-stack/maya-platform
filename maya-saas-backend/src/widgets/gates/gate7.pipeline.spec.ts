@@ -110,10 +110,10 @@ const spacesIn = (cell: string): string[] =>
   SPACES.filter((s) => new RegExp('`' + s + '`').test(cell));
 
 describe('S-G7-F69 [BUILD] — the two halves of F69 are the contract’s own (C11:1358-1367)', () => {
-  it('S-G7-F69-SHA: the contract this suite reads is the owner-approved V1.3 build', () => {
+  it('S-G7-F69-SHA: the contract this suite reads is the owner-approved V1.4 contract', () => {
     expect(
       createHash('sha256').update(fs.readFileSync(CONTRACT)).digest('hex'),
-    ).toBe('b84b3e7303e1a655bf47c436075089ce51d79e315128e8cafb9325c64f19c36c');
+    ).toBe('9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769');
   });
 
   it('S-G7-F69-ROWS: F69 has one row per effect class, and the rows are the eight `EffectClass` members', () => {
@@ -224,6 +224,39 @@ describe('S-G7-PAIR [BUILD] — the pairing is `AE_PROPOSE_PAIRING`, never the a
 
   it('S-G7-PAIR-P25: the commit guard reaches the pairing through P-25’s lookups', () => {
     expect(codeOf(read('authority/commit-guard.ts'))).toContain('pairingForAe');
+  });
+});
+
+describe('S-G7-F74a [BUILD] — the additional origin is a closed semantic subtype', () => {
+  it('keeps the MONEY veto and derives the sole exception from the registered descriptor', () => {
+    const source = codeOf(read(GATE7));
+    expect(source).toContain('isCataloguePriceConfiguration(cap)');
+    expect(source).toMatch(/MONEY\(cap\)\s*&&\s*!cataloguePrice/);
+    expect(source).not.toContain(
+      "cap.capability === 'crm.service.fixed-price.update.v1'",
+    );
+    expect(gate7Closure()).toContain(
+      'pricing/service-price-widget.contract.ts',
+    );
+  });
+
+  it('checks retained source shape and preserves the previous consumed-record path', () => {
+    const source = codeOf(read(GATE7));
+    for (const predicate of [
+      "r.widgetKind !== 'APPROVAL'",
+      'r.producedByIntentTokenHash !== null',
+      'r.approvalOfIntentRef !== null',
+      'Object.keys(nouns).length !== 1',
+      'pairingForAe(ae.key)',
+      'pairing.propose.key !== SERVICE_PRICE_TOOL',
+    ])
+      expect(source).toContain(predicate);
+    expect(source).toMatch(
+      /producingRecordProblem\(\s*commit\s*,\s*loadProducingRecord/,
+    );
+    expect(source).toMatch(
+      /if \(cataloguePrice\)[\s\S]*?else\s*\{\s*const producing = await producingRecordProblem/,
+    );
   });
 });
 

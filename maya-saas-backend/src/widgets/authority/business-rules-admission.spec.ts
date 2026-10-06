@@ -1,9 +1,7 @@
 import { createHash } from 'node:crypto';
 import { MAYA_AI_TOOL_CATALOG } from '../../ai-tools/ai-tool.catalog';
-import {
-  C9_CAPABILITIES,
-  C9_REGISTRY_HASH,
-} from '../../orchestration/c9.registry';
+import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
+import { SERVICE_PRICE_TOOL } from '../../crm/yclients-service-price.contract';
 import { c9Hash } from '../../orchestration/c9.contract';
 import { PROFILE_REGISTRY } from '../../entitlements/widget-release-profile.registry';
 import {
@@ -30,13 +28,18 @@ const reasons = [
 
 describe('F36b/P10 — owner decision 2026-10-05; no expanded authority or public outcome', () => {
   it('admits only the existing C9 row and preserves every previous registry object', () => {
-    expect(C9_REGISTRY_HASH).toBe(
+    // YC-SP1 is independently pinned as a local candidate; this historical
+    // F36b admission must continue to prove the unchanged pre-pricing registry.
+    const beforePricing = C9_CAPABILITIES.filter(
+      (row) => row.capabilityKey !== SERVICE_PRICE_TOOL,
+    );
+    expect(c9Hash('registry/1', beforePricing)).toBe(
       'd88986622d4226015298ba8b2255994ec7684bcbb5bde79883fdd2dd13732918',
     );
     expect(
       c9Hash(
         'registry/1',
-        C9_CAPABILITIES.filter((row) => row.capabilityKey !== admitted),
+        beforePricing.filter((row) => row.capabilityKey !== admitted),
       ),
     ).toBe('4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63');
     expect(

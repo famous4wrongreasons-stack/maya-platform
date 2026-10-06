@@ -16,6 +16,7 @@ import type { PrincipalView } from '../gate.types';
 import { sha256Hex } from '../token.util';
 import type { FitResult } from '../carriers/fitter';
 import type { F88NestedShape } from '../validation/f88-walk';
+import { SERVICE_PRICE_TOOL } from '../../crm/yclients-service-price.contract';
 
 const CELL_PATHS_BY_KIND: Readonly<
   Record<
@@ -27,7 +28,8 @@ const CELL_PATHS_BY_KIND: Readonly<
     | 'SOURCE_STATUS'
     | 'PROGRESS'
     | 'LIMITATION'
-    | 'BOOKING_CONFIRMATION',
+    | 'BOOKING_CONFIRMATION'
+    | 'APPROVAL',
     readonly string[]
   >
 > = Object.freeze({
@@ -86,6 +88,17 @@ const CELL_PATHS_BY_KIND: Readonly<
     'body.price_delta',
     'body.refund_preview',
     'body.loyalty_applied',
+  ]),
+  APPROVAL: Object.freeze([
+    'body.subject',
+    'body.effect_preview[].value',
+    'body.audience_size',
+    'body.risk_tier',
+    'body.reversible',
+    'body.state',
+    'body.requested_by_label',
+    'confirmation.reversible',
+    'confirmation.audience_size',
   ]),
 });
 
@@ -150,6 +163,8 @@ const roleHint = (kind: WidgetKind) => {
       return 'table' as const;
     case 'PROGRESS':
       return 'progressbar' as const;
+    case 'APPROVAL':
+      return 'region' as const;
     case 'FORM':
     case 'SETTINGS_DRAFT':
       return 'form' as const;
@@ -172,7 +187,41 @@ const textEquivalent = (
   kind: WidgetKind,
   body: Readonly<Record<string, unknown>>,
   fitted: string,
+  sourceCapability: string,
+  intents: readonly WidgetIntent[],
 ) => {
+  if (
+    kind === 'APPROVAL' &&
+    sourceCapability === SERVICE_PRICE_TOOL &&
+    Array.isArray(body.effect_preview)
+  ) {
+    const itemized = (
+      body.effect_preview as Array<Record<string, unknown>>
+    ).map((entry) => {
+      const label = entry.label as Record<string, unknown> | undefined;
+      const value = entry.value as Record<string, unknown> | undefined;
+      const rendered =
+        typeof value?.formatted === 'string'
+          ? value.formatted
+          : cellLabel(value);
+      return `${typeof label?.rendered === 'string' ? label.rendered : ''}: ${rendered ?? 'Нет данных'}`;
+    });
+    itemized.push(
+      `Риск: ${cellLabel(body.risk_tier) ?? 'Нет данных'}`,
+      `Обратимость: ${cellLabel(body.reversible) ?? 'Нет данных'}`,
+      `Состояние: ${cellLabel(body.state) ?? 'Нет данных'}`,
+      `Запрошено: ${cellLabel(body.requested_by_label) ?? 'Нет данных'}`,
+      `Подтверждение доступно до: ${typeof body.expires_at === 'string' ? body.expires_at : 'Нет данных'}`,
+      `Действия: ${intents.map((intent) => intent.label).join('; ')}`,
+    );
+    return {
+      headline: `Изменение цены · ${cellLabel(body.subject) ?? 'Услуга'}`,
+      body: itemized.join('. '),
+      itemized,
+      completeness_sentence: null,
+      unknowns_sentence: null,
+    };
+  }
   if (kind === 'SCHEDULE' && Array.isArray(body.lanes)) {
     const lanes = body.lanes as Array<Record<string, unknown>>;
     const entries = Array.isArray(body.entries)
@@ -356,6 +405,11 @@ export const buildEnvelopeWithoutSeal = (args: {
   limitations: readonly string[];
   textEquivalentOverride?: Readonly<Record<string, unknown>> | null;
   supersedesWidgetId?: string | null;
+  approvalEcho?: {
+    readonly owner: 'ai_approval_request';
+    readonly hash: string;
+  } | null;
+  detailSheet?: boolean;
 }) => {
   const completeness =
     args.input.facts[0]?.completeness ??
@@ -367,7 +421,13 @@ export const buildEnvelopeWithoutSeal = (args: {
   ];
   const text =
     args.textEquivalentOverride ??
-    textEquivalent(args.kind, args.body, args.fitting.textEquivalent);
+    textEquivalent(
+      args.kind,
+      args.body,
+      args.fitting.textEquivalent,
+      args.input.capability,
+      args.intents,
+    );
   const textRecord = text as Record<string, unknown>;
   const headline =
     typeof textRecord.headline === 'string' ? textRecord.headline : args.kind;
@@ -476,10 +536,12 @@ export const buildEnvelopeWithoutSeal = (args: {
     presentation: {
       presentation_mode: args.principal.presentationMode,
       density:
-        args.fitting.tier === 'RICH_INTERACTIVE' ||
-        args.fitting.tier === 'RICH_CONSTRAINED'
-          ? 'CARD'
-          : 'INLINE',
+        args.detailSheet === true
+          ? 'SHEET'
+          : args.fitting.tier === 'RICH_INTERACTIVE' ||
+              args.fitting.tier === 'RICH_CONSTRAINED'
+            ? 'CARD'
+            : 'INLINE',
       text_equivalent: {
         headline,
         body: bodyText,
@@ -503,16 +565,24 @@ export const buildEnvelopeWithoutSeal = (args: {
         accessible_names: interactive.names,
       },
       fullscreen_detail:
-        args.kind === 'SCHEDULE' &&
-        args.input.capability === 'operations.journal.read' &&
+        args.kind === 'APPROVAL' &&
         args.intents.some(
           (intent) =>
             intent.effect === 'NAVIGATE' &&
             intent.target?.class === 'detail' &&
-            intent.target.ref === 'fs.calendar',
+            intent.target.ref === 'fs.catalogue',
         )
-          ? { route_key: 'fs.calendar', reason: 'exceeds_chat_density' }
-          : null,
+          ? { route_key: 'fs.catalogue', reason: 'audit' }
+          : args.kind === 'SCHEDULE' &&
+              args.input.capability === 'operations.journal.read' &&
+              args.intents.some(
+                (intent) =>
+                  intent.effect === 'NAVIGATE' &&
+                  intent.target?.class === 'detail' &&
+                  intent.target.ref === 'fs.calendar',
+              )
+            ? { route_key: 'fs.calendar', reason: 'exceeds_chat_density' }
+            : null,
     },
     render: {
       contract: 'maya.render.receipt/1',
@@ -541,7 +611,7 @@ export const buildEnvelopeWithoutSeal = (args: {
       envelope_seal: '',
       seal_key_version: 1,
       principal_proof_hash: args.principal.proofHash,
-      approval_echo: null,
+      approval_echo: args.approvalEcho ?? null,
       policy_context_echo: null,
     },
   };

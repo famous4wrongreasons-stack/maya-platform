@@ -9,6 +9,10 @@ import {
   bookingPreferenceDate,
   MULTI_SERVICE_LIMITATION,
 } from './booking-catalog-binding';
+import {
+  bindServicePriceChat,
+  servicePriceClarification,
+} from './service-price-chat-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import {
   mutationClarification,
@@ -1462,7 +1466,7 @@ export class AiCoreService {
         // 🔴 Период всегда с сервера. Модель могла попросить named_month на
         // «7 августа» — и владелец видел 244к вместо 41.5к. Hardening
         // перебивает period/day/month до подписи и до execute.
-        const hardenedArguments = ReportingPeriodResolver.hardenToolArguments(
+        let hardenedArguments = ReportingPeriodResolver.hardenToolArguments(
           decision.toolCall.name,
           requirement?.presetToolCall?.name === decision.toolCall.name
             ? {
@@ -1475,6 +1479,67 @@ export class AiCoreService {
           new Date(),
           businessTimezone,
         );
+        if (decision.toolCall.name === 'catalog.service.price.update') {
+          // A proposed price/service from the model is never business intent.
+          // Bind the exact owner utterance to a current catalog before preparing
+          // the signed diff; the CRM owner still resolves tenant/provider authority.
+          const catalog = allowedNames.has('catalog.services.read')
+            ? this.record(
+                await this.executeChatTool(
+                  dto,
+                  toolUser,
+                  'catalog.services.read',
+                  {
+                    surface: dto.surface,
+                    arguments: {},
+                    idempotencyKey: this.toolIdempotencyKey(
+                      tenantId,
+                      user.userId,
+                      dto.requestId,
+                      step,
+                      'catalog.services.read',
+                    ),
+                  },
+                  { suppressWidgetTrigger: true },
+                ),
+              )
+            : null;
+          if (catalog)
+            toolsUsed.push({
+              name: 'catalog.services.read',
+              status:
+                typeof catalog.status === 'string' ? catalog.status : 'unknown',
+              execution_id:
+                typeof catalog.execution_id === 'string'
+                  ? catalog.execution_id
+                  : null,
+            });
+          const bound = bindServicePriceChat({
+            userMessages: dto.messages
+              .filter((message) => message.role === 'user')
+              .map((message) => message.content),
+            serviceSource:
+              catalog?.status === 'completed' && catalog.stale !== true
+                ? catalog.result
+                : null,
+          });
+          if (bound.kind === 'clarify')
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: servicePriceClarification(bound.reason),
+                source: 'safe_fallback',
+                action: null,
+              },
+              toolResults,
+            );
+          hardenedArguments = bound.arguments;
+        }
         const signature = this.toolSignature(
           decision.toolCall.name,
           hardenedArguments,
@@ -1532,6 +1597,7 @@ export class AiCoreService {
           ...this.widgetResolution(execution),
         });
         if (status === 'approval_required') {
+          const approval = this.record(execution.approval);
           return this.complete(
             user,
             dto,
@@ -1540,7 +1606,11 @@ export class AiCoreService {
             toolsUsed,
             decisions,
             {
-              reply: 'Действие подготовлено и ждёт вашего подтверждения.',
+              reply:
+                decision.toolCall.name === 'catalog.service.price.update' &&
+                typeof approval.summary === 'string'
+                  ? approval.summary
+                  : 'Действие подготовлено и ждёт вашего подтверждения.',
               source: decision.provider,
               action: {
                 status: 'approval_required',
@@ -5604,6 +5674,7 @@ export class AiCoreService {
     return (
       toolName.startsWith('analytics.') ||
       toolName.startsWith('expenses.') ||
+      toolName === 'catalog.service.price.update' ||
       toolName === 'customers.count' ||
       toolName === 'clients.retention.scan' ||
       toolName === 'clients.dossier.read' ||

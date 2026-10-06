@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-06T17:41:14.367Z",
+  "reason": "operator_stop",
+  "browser_verdict": "NOT_ASSESSED",
+  "receipts_retained": true,
+  "unexpected_request_count": 0,
+  "cleanup_errors": []
+}

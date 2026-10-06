@@ -1,0 +1,12 @@
+widgets-live: proof database maya_widget_gate_proof_service_price_browser_20261006 on 127.0.0.1:56347 (local)
+Service-price browser harness ready: /Users/stanislavmosin/Documents/Codex/2026-10-06/task/service-pricing/output/playwright/service-price-live-20261006T172031Z-attempt2/ready.json
+(node:20350) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/service-price-browser.browser-spec.ts (915.069 s)
+  ✓ serves the owned service-price browser session until STOP (911523 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        915.089 s
+Ran all test suites within paths "test/widgets-live/service-price-browser.browser-spec.ts".

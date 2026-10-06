@@ -1,0 +1,8 @@
+{
+  "source": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/client-readiness",
+  "head": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+  "status": "",
+  "initial_inventory": "../yc-service-pricing-20261006/source-inventory.json",
+  "own_pg_stopped": true,
+  "react_dependency_symlink_removed": true
+}

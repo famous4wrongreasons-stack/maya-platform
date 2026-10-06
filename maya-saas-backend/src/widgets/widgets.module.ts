@@ -36,6 +36,8 @@ import { WidgetsController } from './widgets.controller';
 import { WidgetThreadPageService } from './resolve/thread-page.service';
 import { ChatReadTriggerService } from './composition/chat-read.trigger';
 import { AI_READ_WIDGET_TRIGGER } from '../ai-tools/ai-read-widget-trigger.port';
+import { AI_APPROVAL_WIDGET_TRIGGER } from '../ai-tools/ai-approval-widget-trigger.port';
+import { ServicePriceApprovalTriggerService } from './pricing/service-price-approval-trigger.service';
 import { AI_TYPED_WIDGET_TRIGGER } from '../ai-tools/ai-typed-widget-trigger.port';
 import { TypedStep0Service } from './composition/typed-step0';
 import { C9_WIDGET_TRIGGER } from '../orchestration/c9-widget-trigger.port';
@@ -100,6 +102,11 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
     WidgetThreadPageService,
     ChatReadTriggerService,
     { provide: AI_READ_WIDGET_TRIGGER, useExisting: ChatReadTriggerService },
+    ServicePriceApprovalTriggerService,
+    {
+      provide: AI_APPROVAL_WIDGET_TRIGGER,
+      useExisting: ServicePriceApprovalTriggerService,
+    },
     TypedStep0Service,
     { provide: AI_TYPED_WIDGET_TRIGGER, useExisting: TypedStep0Service },
     C9ComposeTriggerService,

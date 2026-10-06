@@ -87,6 +87,7 @@ export class AiToolReceiptService {
   async run<T>(
     invocation: AiReceiptInvocation,
     work: (args: ValidatedAiToolArguments) => Promise<T>,
+    admissionGuard?: (transaction: Prisma.TransactionClient) => Promise<void>,
   ): Promise<T> {
     const row = await this.row(invocation, this.prisma);
     const envelope = this.requireEnvelope(row, invocation);
@@ -101,6 +102,7 @@ export class AiToolReceiptService {
             const current = await this.locked(invocation, tx);
             const receipt = this.requireEnvelope(current, invocation);
             this.assertRequestPrincipal(invocation, request);
+            await admissionGuard?.(tx);
             const routeKey = this.routeKey(request);
             const binding = receipt.bindings.find(
               (item) => item.routeKey === routeKey,

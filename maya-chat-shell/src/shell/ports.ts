@@ -36,6 +36,7 @@ import type {
   TranscribeRequest,
   WidgetFailure,
   WidgetIntentProjection,
+  WidgetOwnerDecisionProjection,
   WidgetResolveProjection,
   WidgetResolveRequest,
 } from '../net/types.ts';
@@ -174,8 +175,8 @@ export type SubmissionOutcome =
   | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope; readonly accepted: boolean }
   /** NS-1: an accepted re-resolve. The envelope is the server's `resolved_widget`, nothing else. */
   | { readonly status: 'returned'; readonly envelope: WidgetEnvelope }
-  | { readonly status: 'settled'; readonly lines: readonly TerminalLine[] }
-  | { readonly status: 'accepted' }
+  | { readonly status: 'settled'; readonly lines: readonly TerminalLine[]; readonly ownerDecision?: WidgetOwnerDecisionProjection }
+  | { readonly status: 'accepted'; readonly ownerDecision?: WidgetOwnerDecisionProjection }
   | { readonly status: 'unavailable' }
   | { readonly status: 'forbidden' }
   | { readonly status: 'no_connection' }
@@ -221,7 +222,10 @@ export type WidgetSentence =
   | 'activation_forbidden'
   | 'no_connection'
   | 'route_refused'
-  | 'expired_not_resolved';
+  | 'expired_not_resolved'
+  | 'service_price_confirmed'
+  | 'service_price_unconfirmed'
+  | 'service_price_rejected';
 
 export type TimelineItemView =
   | {

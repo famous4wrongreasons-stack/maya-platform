@@ -1,0 +1,41 @@
+{
+  "contract": "maya.service-price-browser-carrier/1",
+  "origin": "http://127.0.0.1:56541",
+  "api_origin": "http://127.0.0.1:51557",
+  "mock_responses": false,
+  "static_root": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task/service-pricing/maya-carrier-react/dist/web",
+  "served_files": [
+    {
+      "path": "icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "index.html",
+      "sha256": "7856d64a46e43b5df9a84566c605da09eb9d0914eaa92f8cc56627bf50410542"
+    },
+    {
+      "path": "m/47NMSAEC/main.js",
+      "sha256": "9cf37393fcce714d9291f8ded021eee757b35e14b8cbd556c0860a37032cdf25"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "styles.css",
+      "sha256": "4bbeeccd8e2457798e336b04c6446b9dfe23e640ec8cc736db00b708f15c89cb"
+    }
+  ]
+}

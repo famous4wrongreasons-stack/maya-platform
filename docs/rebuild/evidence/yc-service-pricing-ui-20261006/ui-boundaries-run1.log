@@ -1,0 +1,6 @@
+
+Test Suites: 4 passed, 4 total
+Tests:       68 passed, 68 total
+Snapshots:   0 total
+Time:        20.386 s
+Ran all test suites within paths "src/widgets/widget-import-graph.architecture.spec.ts", "src/widgets/noun-resolution/gate11.architecture.spec.ts", "src/widgets/noun-resolution/erasure-reachability.gate11.spec.ts", "src/widgets/routing/effect-router.architecture.spec.ts".

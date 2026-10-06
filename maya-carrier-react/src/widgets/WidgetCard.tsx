@@ -14,6 +14,8 @@ import type { Tokens } from '../identity/tokens.ts';
 import { widgetSentence } from '../runtime/copy.ts';
 import { drawNode } from './nodes.tsx';
 
+const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
+
 export interface WidgetItemView {
   readonly id: string;
   readonly result: RenderResult;
@@ -120,7 +122,7 @@ export function WidgetCard({
   }, [result, item.display]);
 
   return (
-    <div style={{ marginTop: variant === 'sheet' ? 0 : 10, maxWidth: variant === 'sheet' ? 'none' : 420 }}>
+    <div style={{ fontFamily: READING, marginTop: variant === 'sheet' ? 0 : 10, maxWidth: variant === 'sheet' ? 'none' : 420 }}>
       <article
         ref={cardRef}
         className={

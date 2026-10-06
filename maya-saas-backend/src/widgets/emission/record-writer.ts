@@ -15,6 +15,7 @@ import { encodeSelectionDomain } from '../input-schema/codec';
 import { inputSchemaHash } from '../input-schema/input-schema-hash';
 import { parseInputSchema } from '../input-schema/parse-input-schema';
 import { sha256Hex } from '../token.util';
+import { servicePriceDecision } from '../pricing/service-price-intent-template.registry';
 import {
   IntentTemplateRefusal,
   type ResolvedIntentTemplate,
@@ -41,6 +42,12 @@ export interface BookingConfirmationLinkage {
   readonly idempotencyKey: string;
   readonly requiresReadback: boolean;
   readonly readbackRef: string | null;
+}
+
+export interface ServicePriceApprovalLinkage {
+  readonly approvalId: string;
+  readonly payloadHash: string;
+  readonly revalidate: () => Promise<void>;
 }
 
 const cellTrue = (label: string): WidgetIntent['enabled'] => ({
@@ -72,6 +79,7 @@ export const mintIntentMaterial = (args: {
   readonly issuedAt: Date;
   readonly envelopeExpiresAt: Date;
   readonly slotless: boolean;
+  readonly servicePriceLinkage?: ServicePriceApprovalLinkage | null;
 }): MintedIntentMaterial => {
   const { row } = args.resolved;
   const subjects = subjectFields(args.resolved);
@@ -96,6 +104,9 @@ export const mintIntentMaterial = (args: {
     throw new IntentTemplateRefusal('registered_selection_domain_invalid');
 
   const utteranceTemplate = args.slotless ? row.label : row.utteranceTemplate;
+  const priceDecision = servicePriceDecision(args.proposal.intent_template_key);
+  if (priceDecision !== null && !args.servicePriceLinkage)
+    throw new IntentTemplateRefusal('service_price_approval_context_required');
   const intent: WidgetIntent = {
     intent_ref: `i${args.intentIndex + 1}`,
     intent_token: token,
@@ -120,7 +131,25 @@ export const mintIntentMaterial = (args: {
       },
       args.input.kind_proposal,
     ),
-    confirmation: null,
+    confirmation:
+      priceDecision === null
+        ? null
+        : {
+            risk_tier: 'high_write',
+            reversible: {
+              ...cellTrue(
+                'Для обратного изменения потребуется новое подтверждение',
+              ),
+              value: false,
+            },
+            audience_size: null,
+            requires_explicit_confirm_step: true,
+            requires_readback: false,
+            readback_ref: null,
+            readback_text: null,
+            idempotency_key: `service-price:${args.servicePriceLinkage!.approvalId}:${args.servicePriceLinkage!.payloadHash}:${priceDecision}`,
+            approval_policy: 'actor',
+          },
     authority_hint: {
       emphasis: row.priority === 0 ? 'muted' : 'secondary',
       disabled_because: null,
@@ -172,6 +201,7 @@ export const intentRecordData = (args: {
   readonly revisionId?: string | null;
   readonly c9Domain?: C9Domain | null;
   readonly bookingLinkage?: BookingConfirmationLinkage | null;
+  readonly servicePriceLinkage?: ServicePriceApprovalLinkage | null;
 }): Record<string, unknown> => {
   const { intent } = args.material;
   if (args.material.tokenHash === null)
@@ -195,6 +225,14 @@ export const intentRecordData = (args: {
     args.material.intent.ordinal === booking.commitIntentIndex + 1;
   if (isBookingCommit && intent.effect !== 'COMMIT')
     throw new IntentTemplateRefusal('booking_linkage_not_commit');
+  const priceDecision = servicePriceDecision(
+    args.material.proposal.intent_template_key,
+  );
+  if (
+    priceDecision !== null &&
+    (!args.servicePriceLinkage || intent.effect !== 'COMMIT')
+  )
+    throw new IntentTemplateRefusal('service_price_approval_context_required');
   return {
     tenantId: args.tenantId,
     intentTokenHash: args.material.tokenHash,
@@ -217,9 +255,15 @@ export const intentRecordData = (args: {
           readback_ref: booking.readbackRef,
           idempotency_key: booking.idempotencyKey,
         }
-      : null,
+      : priceDecision === null
+        ? null
+        : {
+            requires_readback: false,
+            readback_ref: null,
+            idempotency_key: intent.confirmation!.idempotency_key,
+          },
     confirmationSubject,
-    approvalDecision: null,
+    approvalDecision: priceDecision,
     inputSchemaHash: args.material.inputSchemaHash,
     requestedScopeHash: requestedScopeHash({
       input: args.input,
@@ -232,8 +276,16 @@ export const intentRecordData = (args: {
     runId,
     revisionId: args.revisionId ?? null,
     approvalOfIntentRef: null,
-    confirmationOfKind: isBookingCommit ? booking.confirmationOfKind : null,
-    confirmationOfRef: isBookingCommit ? booking.confirmationOfRef : null,
+    confirmationOfKind: isBookingCommit
+      ? booking.confirmationOfKind
+      : priceDecision === null
+        ? null
+        : 'approval',
+    confirmationOfRef: isBookingCommit
+      ? booking.confirmationOfRef
+      : priceDecision === null
+        ? null
+        : args.servicePriceLinkage!.approvalId,
     producedByIntentTokenHash: isBookingCommit
       ? booking.producedByIntentTokenHash
       : null,

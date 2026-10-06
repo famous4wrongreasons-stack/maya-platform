@@ -1,0 +1,373 @@
+[
+  {
+    "file": "state-001.json",
+    "reason": "ready_before_browser",
+    "observed_at": "2026-10-06T17:26:03.242Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      },
+      {
+        "name": "unknown",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      }
+    ]
+  },
+  {
+    "file": "state-002.json",
+    "reason": "confirmed_before_approval",
+    "observed_at": "2026-10-06T17:29:03.848Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      },
+      {
+        "name": "unknown",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      }
+    ]
+  },
+  {
+    "file": "state-003.json",
+    "reason": "confirmed_after_approval",
+    "observed_at": "2026-10-06T17:30:15.600Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      },
+      {
+        "name": "unknown",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      }
+    ]
+  },
+  {
+    "file": "state-004.json",
+    "reason": "rejected_after_ui_click",
+    "observed_at": "2026-10-06T17:34:00.362Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 0
+      }
+    ]
+  },
+  {
+    "file": "state-005.json",
+    "reason": "unknown_before_approval",
+    "observed_at": "2026-10-06T17:37:00.460Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 0,
+        "session_count": 1
+      }
+    ]
+  },
+  {
+    "file": "state-006.json",
+    "reason": "unknown_after_lost_response",
+    "observed_at": "2026-10-06T17:37:28.568Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "UNKNOWN"
+        ],
+        "receipt_count": 1,
+        "session_count": 1
+      }
+    ]
+  },
+  {
+    "file": "state-007.json",
+    "reason": "synthetic_provider_reads_recovered_without_dispatch",
+    "observed_at": "2026-10-06T17:37:58.678Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "UNKNOWN"
+        ],
+        "receipt_count": 1,
+        "session_count": 1
+      }
+    ]
+  },
+  {
+    "file": "state-008.json",
+    "reason": "unknown_after_repeat_and_recovery",
+    "observed_at": "2026-10-06T17:38:13.733Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "UNKNOWN"
+        ],
+        "receipt_count": 1,
+        "session_count": 1
+      }
+    ]
+  },
+  {
+    "file": "state-009.json",
+    "reason": "unknown_immediately_after_reload",
+    "observed_at": "2026-10-06T17:38:50.875Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "UNKNOWN"
+        ],
+        "receipt_count": 1,
+        "session_count": 1
+      }
+    ]
+  },
+  {
+    "file": "state-010.json",
+    "reason": "unknown_after_reload_and_ui_reauthentication",
+    "observed_at": "2026-10-06T17:40:04.619Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "UNKNOWN"
+        ],
+        "receipt_count": 1,
+        "session_count": 2
+      }
+    ]
+  },
+  {
+    "file": "state-011.json",
+    "reason": "operator_stop",
+    "observed_at": "2026-10-06T17:41:14.351Z",
+    "cases": [
+      {
+        "name": "confirmed",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "SUCCEEDED"
+        ],
+        "receipt_count": 2,
+        "session_count": 1
+      },
+      {
+        "name": "rejected",
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "ae_states": [],
+        "receipt_count": 1,
+        "session_count": 1
+      },
+      {
+        "name": "unknown",
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "ae_states": [
+          "UNKNOWN"
+        ],
+        "receipt_count": 1,
+        "session_count": 2
+      }
+    ]
+  }
+]

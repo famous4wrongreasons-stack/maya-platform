@@ -1,4 +1,5 @@
 import { nativeFeedbackCapabilities } from '../native-feedback/native-feedback.contract';
+import { servicePriceCapability } from './service-price.contract';
 import {
   teamCapabilities,
   TEAM_DELIVERY,
@@ -3447,6 +3448,7 @@ function provenCommunicationCapability(input: {
 }
 
 const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
+  servicePriceCapability,
   {
     ...provenCommunicationCapability({
       capability: BULK_ROOT_CAPABILITY,

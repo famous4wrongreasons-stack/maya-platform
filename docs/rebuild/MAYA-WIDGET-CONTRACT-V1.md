@@ -1,6 +1,6 @@
-# MAYA WIDGET CONTRACT v1.3
+# MAYA WIDGET CONTRACT v1.4
 
-*Canonical. Normative. Version 1.3. Version 1.2 is this file at commit `ec350790b737c2a57e112ef72ca39500fed36df2` (SHA-256 `d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271`). Version 1.1 is this file at commit `17b5dc0b` (SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`), consolidated 2026-09-25 on branch `codex/maya-identity-consent-20260913`. The owner decisions carried by Versions 1.1, 1.2 and 1.3 are recorded in Annexes C, D and E, which state no rule.*
+*Canonical. Normative. Version 1.4. Version 1.3 is this file at backend checkpoint `fd702158874e77198e97f50863acbff0452a7125`. Version 1.2 is this file at commit `ec350790b737c2a57e112ef72ca39500fed36df2` (SHA-256 `d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271`). Version 1.1 is this file at commit `17b5dc0b` (SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`), consolidated 2026-09-25 on branch `codex/maya-identity-consent-20260913`. The owner decisions carried by Versions 1.1, 1.2, 1.3 and 1.4 are recorded in Annexes C, D, E and F, which state no rule.*
 
 **One document, one place per rule.** This contract has no errata layer and no precedence
 chain. Every rule is stated once, where it belongs, in its final form. A reader never needs to
@@ -24,8 +24,7 @@ capability and no registry field. It adds exactly the fifteen C9 read keys of **
 owner ruling R-01, and admits the existing staff-only read of **§0.7 F36b** under the 2026-10-05 owner decision; when the R-01 set registers, `C9_REGISTRY_HASH` changes to the value F36a pins. Under
 owner ruling R-04 it adds one staff-revoke branch to the actor policy and the executable input
 contract of the existing consent capability, stated in **§3.5 R3.5.5 (j)**; no other C6–C9 canonical
-business contract is modified. It introduces exactly **two** deliberate
-floor reductions, both disclosed in **§0.17** with their compensating fences. Exactly **three** new
+business contract is modified. The two historical deliberate floor reductions remain unchanged. Version 1.4 additionally admits the one existing fixed-price capability through F32a, with the explicit MONEY exception and floor change disclosed in **§0.17**; no other financial action is admitted. Exactly **three** new
 routes exist in the chat-first widget programme, all declared in **§A1.1 P-01**: the two widget routes
 `POST /api/widgets/resolve` and `POST /api/widgets/intent`, and one internal service-to-service
 ingress for Telegram command delivery, which is not a widget route, is built under **§A1.1 P-33**
@@ -462,7 +461,8 @@ interface AeCommitRow {
   confirmation_kind: 'BOOKING_CONFIRMATION' | 'SETTINGS_DRAFT'
                    | 'PAYMENT_HANDOFF' | 'APPROVAL';        // the four COMMIT-bearing kinds
   family: 'booking' | 'marketing_fanout' | 'money' | 'consent'
-        | 'identity' | 'tenant_authority' | 'settings' | 'operational';
+        | 'identity' | 'tenant_authority' | 'settings' | 'operational'
+        | 'catalogue_price_configuration';
   min_verification: VerificationLevel;             // ≥ SESSION_VERIFIED for every row
   requires_ae_approval: boolean;                   // MUST equal registry.approvalRequirement === 'REQUIRED'
   propose: CapabilityRef;                          // the C9 propose key; never null
@@ -473,7 +473,7 @@ const AE_CAPABILITY_GAP_LEDGER:   Readonly<Record<string, string /* gap key */>>
 const AE_PROPOSE_PAIRING: readonly { propose: CapabilityRef; ae: CapabilityRef }[];
 ```
 
-**F31 — the start-up assertion set. All 226 AE-CAP rows must be classified; an unclassified row
+**F31 — the start-up assertion set. All registered AE-CAP rows (227 in Version 1.4) must be classified; an unclassified row
 stops the process.** At `EP-REGISTRY-LOAD`, over `new ActionCapabilityRegistry().list()`:
 
 ```
@@ -484,7 +484,11 @@ row ⟹ cap.allowedSourceTypes.includes('authenticated_request')       else fail
 row ⟹ row.requires_ae_approval === (cap.approvalRequirement === 'REQUIRED')  else fail
 row ⟹ canonicalProductionPolicyDefinitions() contains cap.capability else fail
 row ⟹ cap.capability is the `ae` side of exactly one AE_PROPOSE_PAIRING row  else fail
-row ⟹ MONEY(cap)            ⟹ row.confirmation_kind === 'PAYMENT_HANDOFF'    else fail   // veto
+row ⟹ MONEY(cap) ∧ ¬CATALOGUE_PRICE_CONFIGURATION(cap) ⟹ fail                // veto
+row ⟹ CATALOGUE_PRICE_CONFIGURATION(cap) ⟹ row.family === 'catalogue_price_configuration'
+       and row.confirmation_kind === 'APPROVAL' and row.min_verification === 'SESSION_VERIFIED'
+       and row.requires_ae_approval === false
+       and row.propose === {space: 'C9', key: 'catalog.service.price.update'}     else fail
 row ⟹ BOOKING(cap)          ⟹ row.confirmation_kind === 'BOOKING_CONFIRMATION' else fail // veto
 row ⟹ BOOKING(cap)          ⟹ cap.capability is the `ae` side of exactly one pairing row else fail
 row ⟹ MARKETING_FANOUT(cap) ⟹ row.family === 'marketing_fanout'              else fail   // veto
@@ -508,6 +512,10 @@ The consent, identity and tenant-authority vetoes admit no exemption in this con
 *Evaluation point:* `EP-REGISTRY-LOAD`. *Status:* `[EXISTS]`.
 
 **F32 — the family predicates, each stated once, each verified exhaustively by enumeration.**
+
+The numerical census in F32/F33 and the autonomy census in F47 record the unchanged Version 1.3
+226-capability baseline. Version 1.4 adds one authenticated ALLOW capability satisfying MONEY,
+with L2_CONFIRMED_REQUEST autonomy; its sole explicit admission is F32a.
 
 ```
 BOOKING(cap)          := cap.targetKind === 'appointment'                                   // 13 of 226, 7 ALLOW
@@ -554,6 +562,30 @@ settles the polarity: `ALLOW`, widget-reachable, and carrying **no** money token
 (`['local','one_target','confirmed_observation','immutable_history']`) — only a positive
 allowlist catches it.
 
+**F32a — YC-SP1-WIDGET-1, the closed financial configuration subtype.**
+`CATALOGUE_PRICE_CONFIGURATION(cap)` is true only for the exact registered Version 1
+`crm.service.fixed-price.update.v1` contract: `actionClass: update_crm_service_fixed_price`,
+`targetKind: crm_service`, `normalizedInputContract: maya.crm-service-fixed-price/1`, its
+registered exact-input normalizer, `policyKey: production.crm-service-price.confirmed-request`
+Version 1 with `ALLOW`, `autonomyLevel: L2_CONFIRMED_REQUEST`, and solely
+`authenticated_request`. Its risk facets are exactly `ac2`, `external`, `one_target`,
+`financial`, `explicit_actor_approval`; `MONEY(cap)` remains **true**. Its identity/risk/transport
+and executor versions remain 1, executor `crm.service.fixed-price`, approval requirement
+`NONE`, no AE approval TTL, because the existing `AiApprovalRequest` owner decides before AE ingress. Its retry
+policy is `crm-service-price.no-redispatch` Version 1: one execution attempt, no retryable
+errors or backoff. Reconciliation remains `crm-service-price.unattributed-readback-hold`
+Version 1, one inconclusive attempt, no retry after proven non-execution. A changed descriptor
+fails this predicate; matching only a key or renaming an input never grants admission.
+
+This explicit subtype changes **only** the widget admission and family floor for one existing
+individual fixed-RUB service owned by the current tenant. Current `TENANT_OWNER` or
+`BUSINESS_OWNER`, active integration/provider permissions, exact immutable approval ID and
+payload hash, expiry and unchanged authoritative before-state are required at decision and
+dispatch. No payment, payout, discount, loyalty/value instrument, batch, foreign tenant,
+Client principal, new service or service lifecycle operation is included. The owner preserves
+unmodified service data and requires authoritative receipt/readback before success; UNKNOWN
+holds the target and never enables redispatch. `SETTINGS_DRAFT` remains prohibited.
+
 **F33 — the two AE-CAP properties that already bite today.** Both are `[EXISTS]`, both are
 total over AE-CAP, both are enforced inside `CanonicalActionPolicyResolver.resolve()` before any
 effect:
@@ -577,9 +609,12 @@ positively. *Status:* `[EXISTS]`; the widget-side source-type discipline is
 `.reschedule.v1` and `.cancel.v1` (`kind: 'record'`, with the guard of §0.13). Exactly one
 `MARKETING_FANOUT` row — `communication.bulk-campaign.admit.v2`, `family: 'marketing_fanout'`,
 `confirmation_kind: 'APPROVAL'`, `requires_ae_approval: true`, `min_verification:
-SESSION_VERIFIED`. **Zero rows satisfying `MONEY`, `CONSENT`, `IDENTITY` or
-`TENANT_AUTHORITY`.** Every remaining row is drawn from `AE_PROPOSE_PAIRING` and must survive
-every veto of F31.
+SESSION_VERIFIED`. Version 1.4 adds exactly one `APPROVAL` row of the explicit
+`catalogue_price_configuration` subtype (F32a), with `requires_ae_approval: false`,
+`min_verification: SESSION_VERIFIED`. It continues to satisfy MONEY. **Zero other MONEY rows,
+and zero CONSENT, IDENTITY or TENANT_AUTHORITY rows.** All ten previous allowlist rows remain
+unchanged. Every row is drawn from `AE_PROPOSE_PAIRING` and must survive every applicable F31
+veto; the new row becomes eligible only after its F38 trace is registered.
 
 **F35 — a mechanism gap is not a capability gap, and the two ledgers are disjoint by key
 shape.** A **capability gap** is "this act has no canonical owner": it belongs to
@@ -781,8 +816,19 @@ registered constant completed.
 | `support.contact-admin.request` | → wave 1 `request_admin_contact` | `package5.work-item.admin-contact.execute.v1` |
 | `notifications.appointments.update` | → `AppointmentNotificationsService.updateSettings` → wave 1 | `package5.settings.appointment-notifications.execute.v1` |
 | `b35.confirm` | `CanonicalBulkService.request()` | `communication.bulk-campaign.admit.v2` |
+| `catalog.service.price.update` | `AiToolHandlerService` → `CrmService.applyServicePriceChange` → existing Action Engine runtime; outer typed `AiApprovalRequest` approval through F74a | `crm.service.fixed-price.update.v1` |
 
 *Status:* `AE_PROPOSE_PAIRING` is `[EXISTS]`.
+
+The Version 1.4 added row is supported by the completed source trace: chat runtime creates
+and binds the pending proposal → `AI_APPROVAL_WIDGET_TRIGGER` →
+`ServicePriceApprovalTriggerService` → canonical owner read →
+`WidgetEmitterService.emitServicePriceApproval` → stored decision record → Gates 7/10/11 →
+`EffectRouterService` APPROVAL branch → `CanonicalApprovalAdapter` →
+`ServicePriceApprovalAdapter.decide` → existing `AiToolRuntimeService.approve/reject`.
+Approval then reaches the handler/service/AE row above. These are implemented call sites;
+this trace does not claim a current-carrier, real-provider or production test result. The
+preceding thirteen F38 rows and their order remain unchanged.
 
 ### 0.8 The verification ladder and the floor
 
@@ -995,6 +1041,7 @@ function AE_AUTONOMY_FLOOR(level: string): VerificationLevel {
 
 const AE_FAMILY_FLOOR: Readonly<Record<AeCommitRow['family'], VerificationLevel>> = {
   booking: 'SESSION_VERIFIED',  settings: 'SESSION_VERIFIED',  operational: 'SESSION_VERIFIED',
+  catalogue_price_configuration: 'SESSION_VERIFIED',
   marketing_fanout: 'STEP_UP_VERIFIED', money: 'STEP_UP_VERIFIED',
   consent: 'STEP_UP_VERIFIED',  identity: 'STEP_UP_VERIFIED',  tenant_authority: 'STEP_UP_VERIFIED',
 };
@@ -1006,6 +1053,9 @@ The seven observed `autonomyLevel` values were obtained by enumeration —
 exists precisely because the field's type cannot forbid an eighth. `AE_FAMILY_FLOOR`'s five
 `STEP_UP_VERIFIED` rows mean what they say: while step-up is unreachable, those five families are
 permanently withheld — the same outcome the allowlist already produces, reached independently.
+Version 1.4 explicitly adds `catalogue_price_configuration: SESSION_VERIFIED` for F32a's
+closed approved subtype; this is a disclosed floor change for that action only. `money` and
+`marketing_fanout` retain STEP_UP_VERIFIED. Its financial classification is not erased.
 
 **F48 — the floor-exempt set is derived from declared members, never from a list of names.**
 
@@ -1433,7 +1483,8 @@ produced_by_intent_token_hash: string | null;   // AUDIT_RETAINED
 `APPROVAL` decision (the `approval_ref`). Without this generalisation cancel, reschedule and
 both approval decisions are structurally unmintable.
 
-> A `COMMIT` whose `confirmation_of_ref.kind !== 'draft'` is mintable **only** when
+> Except for the closed canonical-chat branch F74a below, a `COMMIT` whose
+> `confirmation_of_ref.kind !== 'draft'` is mintable **only** when
 > `produced_by_intent_token_hash` is non-null and names a **consumed record**, as follows — the
 > producing effect class and the identity compared are fixed **together**, because the two cases
 > live in different key spaces:
@@ -1449,13 +1500,43 @@ carry a C9 ref while only `COMMIT` and `REQUEST_APPROVAL` may carry an AE ref as
 nothing invokes), and the two spaces share no spelling: "equal to the propose key" can never hold for the approval case, so requiring
 it would refuse every APPROVAL decision unconditionally.
 
-**What the guard holds, in full, in both rows:** a `COMMIT` may not be minted from a bare
+**What the consumed-record branch holds, in full, in both rows:** a `COMMIT` may not be minted from a bare
 reference the caller supplies. It must name a record the gateway itself consumed, whose
 capability is the one being actuated or the canonical owner's own propose key for it, whose
 confirmation body was returned by that owner in response to a gateway submission. Populating
 `confirmation_of_ref` with a bare `appointment_ref` or `approval_ref` does not satisfy it.
 *Mechanism:* the mint function's two-part refusal; Gate 7 re-checks both. *Evaluation points:*
 `EP-MINT`, `EP-INGRESS` Gate 7. *Status:* `[EXISTS]`.
+
+**F74a — canonical-chat approval provenance for F32a alone.** This is a distinct typed
+origin, `canonical_chat_approval`, not a synthetic `REQUEST_APPROVAL` and not an exception
+based on an approval ID alone. The registered F32a capability, one `APPROVAL` object and the
+existing `AiApprovalRequest` lifecycle are mandatory. At the first creation of the pending
+proposal, the owner durably binds it through existing `AuditLog` action
+`ai.service_price_chat_approval_bound`, `entityType: AiApprovalRequest`, `entityId` equal to
+the real approval ID. Metadata is `ServicePriceChatOrigin` with
+`contract: maya.service-price-chat-approval/1`, `approvalId`, `payloadHash`, `userTurnId`,
+`conversationId`, and `principalProofHash`. The user turn must already have a real canonical
+`chat.user_turn_bound` proof for the authenticated requester and tenant, with no widget intent
+token. An idempotency retry cannot rebind a historical approval to a newer turn.
+
+The minter verifies both durable audit bindings, the existing owner's recomputed payload hash,
+and the current unerased user turn and principal. The sealed decision record contains exactly
+one approval HMAC noun with `ownerKind: ai_service_price_approval` and
+`ownerRef: v1:<approvalId>:<payloadHash>`, and `confirmation_of_ref` names that real approval.
+It carries `approval_decision: approve | reject`, `produced_by_intent_token_hash: null` and
+`approval_of_intent_ref: null`. The handle carries no price, raw text or actor identity. It is
+sealed authority provenance; accepting caller-supplied IDs, hashes or an origin label is
+forbidden. `integrity.approval_echo.owner` is `ai_approval_request` and its hash is the
+owner's actual `AiApprovalRequest.payloadHash`, never an ActionExecution identifier.
+
+At Gate 7 the closed registered semantic subtype, exactly one F38 pairing to its named C9 propose key, and exact one-noun source shape are required.
+Gate 11 unwraps that canonical noun and re-verifies the approval, both audit bindings, live
+requester/tenant, source expiry and authoritative before-state before either consumption or
+decision. No other capability, approval origin, MONEY action or widget receives this branch;
+all retain F74's consumed-record rule. These existing retained record fields carry the origin;
+no new approval state machine or fake producing record is created. *Evaluation points:*
+`EP-MINT`, `EP-INGRESS` Gates 7 and 11, and the canonical owner's decision/dispatch checks.
 
 **F75 — an `APPROVAL` body carries both decisions, and they are one actuating subject.** An
 `APPROVAL` body mints **both** `approve_intent` and `reject_intent`; they are two mutually
@@ -1564,8 +1645,8 @@ propose key in any space at all. `expenses.read` remains a read.
 > **This is a capability reduction, not a design win.** Expense recording is a real, wanted,
 > already-shipped AI-tool capability with no widget button in this contract version. It follows
 > mechanically from two independent decisions made elsewhere: the Action Engine's decision to tag
-> expense creation `financial`, and this contract's decision that every financial capability
-> routes to a gap-blocked `PAYMENT_HANDOFF`. **The resolution is a single owner decision:** either
+> expense creation `financial`, and this contract's decision that financial capabilities outside the explicitly approved F32a subtype
+> route to a gap-blocked `PAYMENT_HANDOFF`. **The resolution is a single owner decision:** either
 > the Action Engine retags expense recording — it moves no money, and `MAX_EXPENSE_RUBLES`
 > already bounds it at `expense-category.ts`, with the `value <= 0 || value > MAX_EXPENSE_RUBLES`
 > rejection — or `PAYMENT_HANDOFF` ships and expenses reach a button through it. Until one
@@ -1604,8 +1685,7 @@ render, imply, narrate or speak separation of duties.
 **F86 — an `APPROVAL` decision intent may be null only for a server fact at compose time.**
 `approve_intent` / `reject_intent` may be null, with a non-null `blocked_reason`, only when
 `state !== 'PENDING'`, the approval's TTL has passed, or the live principal cannot decide under
-the AE-CAP approver policy — probed through the **AE-CAP** path, never through
-`AiToolPolicyService.canDecide`, which cannot be called for an AE key. It may **never** be null
+the relevant canonical approval owner's policy. The ActionExecution branch is probed through the **AE-CAP** path, never through `AiToolPolicyService.canDecide`, which cannot be called for an AE key. F32a instead probes the existing typed `AiApprovalRequest` owner, which checks its actual tool policy and live owner context; its AE key is never passed as a tool name. It may **never** be null
 because the approver equals the initiator. *Mechanism:* the composer calls the probe and has no
 rule of its own; a fixture test asserts no other branch nulls a decision intent. *Evaluation
 points:* `EP-COMPOSE`, `EP-BUILD`.
@@ -1794,9 +1874,9 @@ running fence.
 | **FR-6a** | No widget kind confers **consent** | **AE-CAP** | `CONSENT(cap)` ⟹ excluded from `AE_WIDGET_COMMIT_ALLOWLIST`, asserted at start-up; the only widget affordance is a `HANDOFF` of class `s` to `shell.privacy` at `≥ SESSION_VERIFIED`. Backed at the engine by `actorPolicy: 'VERIFIED_CLIENT_CHANNEL'` + `assertConsentChannelBinding` against a live, unrevoked `ClientChannelLink`, with one exception that no widget path reaches — the staff marketing-revoke branch of §3.5 R3.5.5 (j) — and by `allowedSourceTypes: ['legacy_bridge']` for the invalidation capability | `EP-REGISTRY-LOAD` (exclusion), `EP-MINT` (refusal), `EP-CANONICAL` (engine fence) | exclusion `[ABSENT]`; engine fence `[EXISTS]` — holds; its §3.5 R3.5.5 (j) exception `NORMATIVE-PENDING` on **P-34** |
 | **FR-6b** | No widget kind confers **booking authority** | **AE-CAP** | `BOOKING(cap)` (§0.7 F32); an allowlist row must be `BOOKING_CONFIRMATION` and the `ae` side of exactly one pairing row; plus F74's `confirmation_of_ref` + `produced_by_intent_token_hash` guard | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — holds fail-closed |
 | **FR-6c** | No widget kind confers **marketing permission** | **AE-CAP** | `communication.bulk-campaign.admit.v2` is the **only** `MARKETING_FANOUT` capability on the allowlist, asserted by cardinality at start-up; its own `approvalRequirement: 'REQUIRED'` + `approverPolicyKey: 'tenant-owner'` + `allowedActorRoles: [TENANT_OWNER, BUSINESS_OWNER]` + `actorPolicy: 'REQUIRED'` are the fence. The other three are `GAP-BULK-SEND-DIRECT` | `EP-CANONICAL` (the fence); `EP-REGISTRY-LOAD` (the cardinality assertion) | AE fence `[EXISTS]` and running; cardinality assertion `[ABSENT]` — holds |
-| **FR-6d** | No widget kind confers **finance permission** | **AE-CAP** | `MONEY(cap)` (facet ∪ targetKind — **92 of 226**, against 12 for the `'financial'` token) is a build-time **veto**; the fence is that **no money-mutating capability is on the allowlist at all**, all 92 being gap-keyed, and `PAYMENT_HANDOFF` is gap-blocked with a null `commit_intent` and no button | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — **holds today by absence: no money-mutating capability has a button** |
+| **FR-6d** | No widget kind confers **finance permission** beyond the explicit F32a catalogue-price configuration grant | **AE-CAP** | `MONEY(cap)` remains the same facet ∪ targetKind predicate. All MONEY capabilities except the exact F32a descriptor are vetoed; that descriptor admits only an OWNER-bound single-service fixed-RUB `APPROVAL`. Payments, payouts, discounts and other financial controls remain gap-blocked. `PAYMENT_HANDOFF` remains gap-blocked with no button. | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 and canonical owner | Version 1.4 typed admission; actual current-carrier proof is required separately |
 | **FR-6e** | No widget kind confers **tenant authority** | tenant id, plus AE-CAP for the tenant object | `TenantContextService.assertTenantId` over the record's tenant and the live principal's; reinforced by `evaluateTenantAccessState` at the resolver and by `assertNoCallerAuthority`. Separately, `TENANT_AUTHORITY(cap) ⟹ fail` is a start-up veto, so no tenant-object capability is ever allowlisted (`GAP-TENANT-ADMIN`), and `IDENTITY(cap)` likewise (`GAP-IDENTITY-SESSION`) | `EP-INGRESS` Gate 4; `EP-REGISTRY-LOAD`; `EP-CANONICAL` | cross-tenant half `[EXISTS]`; the veto `[ABSENT]` — holds |
-| **FR-6f** | No widget kind confers **approval** | **AE-CAP** | `ActionEngineKernel.decideApproval()` → `canonicalApproverRoles()` → `CANONICAL_APPROVER_POLICY_ROLES[approverPolicyKey]` against a live `Membership`; an unregistered key throws `CANONICAL_APPROVER_POLICY_INVALID` | `EP-CANONICAL` | `[EXISTS]` — holds, and see F90(4) and F96(1) for what it does not do |
+| **FR-6f** | No widget kind confers **approval** | **AE-CAP** | F32a/F74a uses existing `AiApprovalRequest` exact hash/requester and current owner-role checks through its typed port; the original AE approval path remains `ActionEngineKernel.decideApproval()` → `canonicalApproverRoles()` → `CANONICAL_APPROVER_POLICY_ROLES[approverPolicyKey]` against a live `Membership`; an unregistered key throws `CANONICAL_APPROVER_POLICY_INVALID` | `EP-CANONICAL` | `[EXISTS]` — holds, and see F90(4) and F96(1) for what it does not do |
 | **FR-7** | **Only a final canonical confirmation may cause a booking effect** | — | The mint-time non-existence of a booking `COMMIT` token before the canonical owner has returned a confirmation body (F74) | `EP-MINT` | `[ABSENT]` — holds fail-closed |
 | **FR-8** | **No `BUTTON → PROVIDER`** | — | `IntentTarget` has no member able to hold a URL, host, origin or query string (F71), and the provider owner is called by the Action Engine alone | `EP-MINT` | shape `[ABSENT]`; boundary `[EXISTS]` |
 | **FR-9** | **No `BUTTON → DATABASE BUSINESS MUTATION`** | — | `EffectClass` has no `MUTATE`/`EXECUTE` member; the only road to a business row is Gate 14, and `CONTROL` has no Action Engine edge | `EP-MINT` (closed union) | `[ABSENT]` — holds fail-closed |
@@ -1832,18 +1912,19 @@ them.**
    while `controlledFixtureMode === false` in production; a build test asserting that is
    `[ABSENT]` (**P-27**), and until it exists the guarantee is `[NON-NORMATIVE]`.
 
-### 0.17 The two disclosed floor reductions
+### 0.17 The two historical floor repairs and the approved pricing admission
 
-**F91 — no repair in this contract admits a capability, widens an allowlist, or relaxes a veto.
-Two repairs lower a floor, deliberately, and each names its compensating fence. There are
-exactly two, and this table is where a reader auditing the contract finds both.** `[NON-NORMATIVE]`
-The one admission this contract makes is not a repair: the enumerated read set of §0.7 F36a is
-admitted by owner ruling R-01 and lowers no existing floor.
+**F91 — the two historical repairs lower a floor deliberately and remain unchanged.
+Version 1.4 adds one explicitly approved pricing admission with its own floor change; it is not
+a reinterpretation of a repair. The table below names all three changes and their remaining
+fences.** `[NON-NORMATIVE]` The read admission in §0.7 F36a under owner ruling R-01 lowers no
+existing floor. The financial pricing admission is the separate owner-approved F32a scope.
 
 | Reduction | What it lowers | Why, and what still holds |
 |---|---|---|
 | **the nine non-catalogue C9-CAP keys** (F46) | from a raise (the borrowed TOOL-DEF term applied to a key the catalogue does not carry) or `STEP_UP_VERIFIED` to: **three** `SOURCE_HANDOFF` keys (`b35.preview`, `b35.confirm`, `a22.configuration`) → `SESSION_VERIFIED`; **five** `SOURCE_READ` keys (`c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status`, `owner_report.download`) → whatever their own `WIDGET_CAPABILITY_POLICY` row and consent class require; and `c9.no_action` → `ANONYMOUS` | `STEP_UP_VERIFIED` is **unreachable**, so the prior value was not a fence but a permanent withholding that made `STRATEGY_OPTIONS`, `CLIENT_LIST`, `METRIC`, `CHART`, `PROGRESS` and `ARTIFACT` unemittable — `c9.no_action` is `STRATEGY_OPTIONS`'s mandatory "do nothing" option, and a contract that makes declining harder than proceeding is inverted. What still fences these nine: their `WIDGET_CAPABILITY_POLICY` row and `CONSENT_CLASS_FLOOR`, carried through `c9Floor` at Gate 5 on **every** path — and, **on the run-bearing path only AND only where the intent's effect is not `HANDOFF`**, Gate 6's second C9 branch with `c9Capability`'s own admission (F54 scopes Gate 6 by effect, and F55 withdraws that admission on both run-less mint paths). **`resourceClass` does not determine effect class**: the same key may be the subject of a `REFINE` or a `DRAFT`, so no effect may be inferred from it. The residual fence splits by exemption rather than conjoining terms that never all hold at once: **for a `HANDOFF` that is not `FLOOR_EXEMPT`** it is `C9_MODE_FLOOR`/`C9_RESOURCE_FLOOR` of `SESSION_VERIFIED` at Gate 5 **together with** `targetFloor('s')`; **for a `FLOOR_EXEMPT` class-`s` `HANDOFF`** both are waived and the fence is `SENSITIVE_DEST` plus the landing surface's own ingress. Within `verificationFloor`, `SENSITIVE_DEST` participates in exactly one place — `FLOOR_EXEMPT`'s fourth clause — so there and only there it and the two floors are alternatives rather than a conjunction. It is evaluated **again**, independently, at the emission validator's INV-8′ — under R3.5.1's `BOOKING_OWNER_PROPOSAL` exception, which exempts no intent from `SENSITIVE_DEST` itself — and at Gate 6, in its `HANDOFF` destination branch only (§3.9 «Gate 6 in full»); those evaluations are unaffected by this reduction. The bulk-send path additionally keeps `AE_FAMILY_FLOOR['marketing_fanout'] = STEP_UP_VERIFIED` and `communication.bulk-campaign.admit.v2`'s owner-only, approval-bound AE fence, which is `[EXISTS]` and running today: **the proposal becomes visible; the send does not**. The fifteen `SOURCE_READ` keys of §0.7 F36a, once registered, take the same `c9Floor` branch; none had a prior floor, so none is a reduction, and each takes what its own F36a policy row and consent class require |
 | **the five `FLOOR_EXEMPT` intents** (F48–F49) | `EFFECT_FLOOR`, `KIND_FLOOR` and `targetFloor` waived for all five; `subjectFloor` waived for the **two class-`s` `HANDOFF`s only**, which floor at `ANONYMOUS`. The escape verb, `discard_intent` and the no-action option keep their own `subjectFloor` | The set is derived, not listed, and its build vetoes make an actuating intent unconstructible: `COMMIT` and `DRAFT` excluded by effect; `REQUEST_APPROVAL` and `REFINE` excluded over AE and C9 respectively by the capability clause, which admits only a `CONTROL` ref or the unique `resourceClass: 'LOCAL'` C9 row; and a `priority: 0` `CONTROL` may only be `control.widget.dismiss`. `control.run.cancel` retains `CONTROL_FLOOR: BOUND_CLIENT` even at `priority: 0`, and `SENSITIVE_DEST` excludes consent and identity destinations outright. The residual is `targetFloor('s')` on a handoff, and it is tolerable for a stated reason: a `HANDOFF` never invokes its destination capability, and the shell routes re-check the principal proof at `EP-FETCH` |
+| **the sole F32a catalogue-price configuration subtype** (Version 1.4, YC-SP1-WIDGET-1) | The existing `crm.service.fixed-price.update.v1` key moves from gap-withheld `STEP_UP_VERIFIED` to `SESSION_VERIFIED` through its explicit `catalogue_price_configuration` family | MONEY and financial remain true; the exact registered descriptor, fixed RUB price of one existing own service, live OWNER, immutable approval ID/hash, authenticated-turn provenance, authoritative before-state/readback, and UNKNOWN no-redispatch remain required. The ordinary money and marketing family floors stay `STEP_UP_VERIFIED`. No other capability, payment, payout or discount receives this admission. |
 
 **A floor raise is a defect too, and one was removed.** The first formulation of the C9 branch
 set `C9_RESOURCE_FLOOR['SOURCE_READ']` to `SESSION_VERIFIED`, which would have raised the floor of
@@ -2853,6 +2934,7 @@ type OwnerClass =
   | 'MEASUREMENT_READ' | 'RESULT_READ' | 'ANALYTICS_READ' | 'INTEGRATION_STATUS'
   // act owners
   | 'BOOKING_OWNER' | 'BULK_AUDIENCE_OWNER' | 'ORCHESTRATION_RUN' | 'ACTION_EXECUTION'
+  | 'CANONICAL_APPROVAL'
   | 'CONSENT_REGISTER' | 'IDENTITY_BINDING_OWNER' | 'COMMERCE_OWNER'
   | 'MEDIA_GENERATION_OWNER' | 'ARTIFACT_OWNER'
   // the six SETTINGS_DRAFT draft owners, declared with their keys in §0.14 F79
@@ -2896,7 +2978,7 @@ and is its inverse; nothing else populates it. *Mechanism:* the derivation over 
 | 9 | `CHART` | NONE, NAVIGATE, REFINE, CONTROL (**REFINE**) | `RESULT_READ` → `c8.result.read`, `c7.measurement.read` | REQUIRED | `img` (→ `table` when degraded) | full | business_aggregate | 5 series / 120 points |
 | 10 | `REPORT` | NONE, NAVIGATE, REFINE, CONTROL (**REFINE**) | `ANALYTICS_READ` → `analytics.business.{query,profit}`, `analytics.revenue.forecast`, `analytics.branches.compare`, `reports.recovered`, `expenses.read`, `clients.dossier.read` | REQUIRED | `document` | full | client_identified | 6 sections |
 | 11 | `STRATEGY_OPTIONS` | NONE, NAVIGATE, REFINE, CONTROL, REQUEST_APPROVAL (**REQUEST_APPROVAL**) | `ORCHESTRATION_RUN` → C9 revisions + `c9.no_action` | OPTIONAL | `radiogroup` | full | business_aggregate | 3 alternatives |
-| 12 | `APPROVAL` | NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF (**COMMIT**) | `ACTION_EXECUTION` → the Action Engine approval path | REQUIRED | `region` | full | business_aggregate | — |
+| 12 | `APPROVAL` | NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF (**COMMIT**) | `CANONICAL_APPROVAL` → the existing Action Engine approval path plus the typed F32a `AiApprovalRequest` owner | REQUIRED | `region` | full | business_aggregate | — |
 | 13 | `PROGRESS` | NONE, NAVIGATE, REFINE, CONTROL (**REFINE**) | `ORCHESTRATION_RUN` → resolved at `EP-REGISTRY-LOAD` to the existence of the run, plus `owner_report.status` (F36); cancellation is `control.run.cancel` | FORBIDDEN | `progressbar` | full | none | 12 steps |
 | 14 | `LIMITATION` | NONE, NAVIGATE, CONTROL, HANDOFF (**NAVIGATE**) | `NONE` — cites the emitter's `Limitation[]` and the gap ledger | OPTIONAL | `status` | full | none | — |
 | 15 | `SOURCE_STATUS` | NONE, NAVIGATE, CONTROL, HANDOFF (**NAVIGATE**) | `INTEGRATION_STATUS` → `support.integration-status.read`, `support.contact-admin.request` | OPTIONAL | `status` | full | none | 8 sources |
@@ -3318,7 +3400,7 @@ interface ApprovalBody {
 }
 ```
 
-**Ceiling** COMMIT — the approval *decision* only; the approved effect is executed by the Action Engine, never by this envelope. **Owner** `ACTION_EXECUTION` → the Action Engine's own approval path on that execution. `integrity.approval_echo` is echoed and re-derived, never accepted as input; for an AI-tool approval its `hash` is `AiApprovalRequest.payloadHash`, verified by `assertPayloadHash` (`ai-tool-runtime.service.ts:209,301,1197`). **Fullscreen** REQUIRED (`audit` — the effect detail). **`role_hint`** `region`. **Interactive paths** `approve_intent`, `reject_intent`, `detail_intent`. **Text** headline = `subject`; order `lead → items → audience → risk_reversibility → expiry → options`; parity `full`. **Expiry ceiling** `source_bound` — the approval object's own TTL.
+**Ceiling** COMMIT — the approval *decision* only; the approved effect is executed by the Action Engine, never by this envelope. **Owner** `CANONICAL_APPROVAL` → the existing Action Engine approval path on its execution, or F32a's existing typed `AiApprovalRequest` owner. The latter's ID is never an ActionExecution ID. At registry load this owner class resolves to the unchanged set of AE capabilities with `approvalRequirement: REQUIRED`, plus only the exact F32a descriptor in AE space and its named `C9:catalog.service.price.update` propose ref. This explicit C9 membership lets Gate 10 resolve the same typed owner through the F38 pair; `allowedKinds` is derived from that set. `integrity.approval_echo` is echoed and re-derived, never accepted as input; for an AI-tool approval its `hash` is `AiApprovalRequest.payloadHash`, verified by `assertPayloadHash` (`ai-tool-runtime.service.ts:209,301,1197`). **Fullscreen** REQUIRED (`audit` — the effect detail). **`role_hint`** `region`. **Interactive paths** `approve_intent`, `reject_intent`, `detail_intent`. **Text** headline = `subject`; order `lead → items → audience → risk_reversibility → expiry → options`; parity `full`. **Expiry ceiling** `source_bound` — the approval object's own TTL.
 
 - **APPROVAL.1 — the maths precede the verb.** `sentence_order` places `audience` and `risk_reversibility` before `options`; a CI test asserts the index ordering for every fixture. *Evaluated at:* MINT/VALIDATE and CI.
 - **APPROVAL.2 — a blocked decision is a server fact.** Where the approval state machine reports that no decision may be taken by this principal, both decision intents are null and `blocked_reason` explains why. *Mechanism:* the Action Engine's approval state machine supplies the flag; the composer has no rule of its own, and the CANONICAL ACTION gate enforces the same constraint regardless of what was rendered. *Evaluated at:* MINT/COMPOSE and the CANONICAL ACTION gate.
@@ -4748,7 +4830,7 @@ the internal ingress of §3.12 R3.12.7.
 | 4 | **Tenant scope** | `TenantContextService.assertTenantId` over the record's tenant and the live principal's | `REFUSED / tenant_mismatch` | TenantResolver | [EXISTS] |
 | 5 | **Verification floor** | `verificationFloor(record, record.widget_kind)` re-derived from the live registry and policy tables (R3.4.2); compared to the server-derived `verification_level`, capped by `profile.max_verification_level`; branch per effect class (R3.4.5). **Any** difference between the stored and the recomputed floor refuses | `NEEDS_SECOND_CHANNEL` / `HANDOFF_REQUIRED` + deep link; `SUPERSEDED / policy_floor_changed` + the R3.9.4 successor, or the code alone | ChannelProfileRegistry + AuthorityResolver | [TO BUILD] |
 | 6 | **Authority, computed from scratch** | dispatched on `subjectCapability(record)` and scoped by effect — the four branches below. `authority_hint` is **not read**. A widget that should never have been rendered still cannot act | `REFUSED / insufficient_authority` | AuthorityResolver | policy [EXISTS] — `ai-tool-policy.service.ts`, `action-engine.policy-resolver.ts`; wiring [TO BUILD] |
-| 7 | **Effect admissibility** | `effect` is within the kind's declared ceiling, checked over `IntentRecord.widget_kind`; the capability's key space matches the effect (R3.2.2); `CONTROL` keys are in the control registry; a `COMMIT` record carries a non-null `confirmation_of_ref` and, where its `kind !== 'draft'`, a non-null `produced_by_intent_token_hash` satisfying §3.10.2; **for a `COMMIT`, `requiredConfirmationKind(subjectCapability(record)) === record.widget_kind`, re-read from the live allowlist (§0.13 F72) — this is F72's second evaluation point, and a key whose allowlist row was withdrawn between mint and submission refuses here**; the delivering tier was permitted to carry this effect (§3.12) | `REFUSED / effect_not_admissible`, `REFUSED / booking_confirmation_required` | IntentGateway | [TO BUILD] |
+| 7 | **Effect admissibility** | `effect` is within the kind's declared ceiling, checked over `IntentRecord.widget_kind`; the capability's key space matches the effect (R3.2.2); `CONTROL` keys are in the control registry; a `COMMIT` record carries a non-null `confirmation_of_ref` and, where its `kind !== 'draft'`, a non-null `produced_by_intent_token_hash` satisfying §3.10.2, or the exact F74a canonical-chat approval source branch with its typed sealed noun; **for a `COMMIT`, `requiredConfirmationKind(subjectCapability(record)) === record.widget_kind`, re-read from the live allowlist (§0.13 F72) — this is F72's second evaluation point, and a key whose allowlist row was withdrawn between mint and submission refuses here**; the delivering tier was permitted to carry this effect (§3.12) | `REFUSED / effect_not_admissible`, `REFUSED / booking_confirmation_required` | IntentGateway | [TO BUILD] |
 | 8 | **Input validation** | closed-domain membership for `enum`/`ref`; cardinality in `[selection_min, selection_max]`; **bounds re-read from `bounds_source` and the value validated against the fresh bound**; normalizers applied; `c9SafeText` over every `text`/`phone` value; `max_total_bytes` enforced by refusal, never truncation; a submission carrying `inputs` for a null schema is refused | `REFUSED / selection_out_of_domain`, `REFUSED / bound_violation`, `REFUSED / use_secure_surface`, `REFUSED / oversize_submission` | IntentGateway | shape [TO BUILD]; `c9SafeText` [EXISTS] |
 | **8-R** | **Readback** | applies exactly when `record.confirmation?.requires_readback === true`. Refuses unless **all four** hold: `readback_ack` is present; `readback_ack.readback_ref === record.confirmation.readback_ref`; `readback_ack.body_hash === record.body_hash`; `readback_ack.affirmation` is an exact member of the server-published closed affirmation vocabulary for the envelope's locale. A submission carrying `readback_ack` whose record does **not** satisfy `confirmation?.requires_readback === true` — including one whose `confirmation` is null — is **also** refused. Refuses, never repairs | `REFUSED / readback_missing`, `REFUSED / readback_mismatch` | IntentGateway | [TO BUILD] |
 | 9 | **Lowering** | `rendered_utterance = render(utterance_template, server-resolved canonical labels)` is appended to the conversation as a **USER turn with authority NONE**. **This is the first durable write of the whole sequence.** From here the path is byte-identical to a typed message | — | chat ingress | [TO BUILD] |
@@ -5012,7 +5094,8 @@ every `SETTINGS_DRAFT` and every `PAYMENT_HANDOFF`; `'record'` for `reschedule` 
 moment a `TIME_SLOT_SELECTOR` is rendered, **no `COMMIT` token for that booking exists anywhere
 in the system.**
 
-A `COMMIT` whose `confirmation_of_ref.kind !== 'draft'` is mintable **only** when
+Except for the exact canonical-chat approval branch of F74a, a `COMMIT` whose
+`confirmation_of_ref.kind !== 'draft'` is mintable **only** when
 `produced_by_intent_token_hash` is non-null and names a **consumed record**, with the producing
 effect class and the identity compared fixed together, because the two cases live in different
 key spaces:
@@ -5023,7 +5106,7 @@ The two-row table fixing the producing effect class **together with** the identi
 different key spaces, and a single identity rule would refuse every `APPROVAL` decision
 unconditionally.
 
-The confirmation body must have been *returned by the canonical owner in response to a gateway
+For the consumed-record branch, the confirmation body must have been *returned by the canonical owner in response to a gateway
 submission*, so booking-intent normalisation, Client-principal verification and confirmation
 identity all run before any commit token exists. Populating the field with a bare
 `appointment_ref` or `approval_ref` does not satisfy it. *Mechanism:* the mint function's
@@ -5084,7 +5167,7 @@ carrying `crm.appointment.reschedule.v1`, is minted onto that body alone.
 
 **R3.11.1 — an approval decision is itself a gateway submission and passes Gate 11.** The
 `APPROVAL` envelope's decide intents carry `approval_of_intent_ref` pointing at the
-requesting `IntentRecord`, and inherit its `frozen_nouns`. Gate 11's fresh read therefore
+requesting `IntentRecord`, and inherit its `frozen_nouns`, except the explicit F74a canonical-chat branch: there those two lineage references remain null and the canonical owner mints the one retained approval noun from the durable authenticated-turn binding. Gate 11's fresh read therefore
 runs **at decision time**, not only at request time. *Mechanism:* the mint path copies
 `frozen_nouns` along the `approval_of_intent_ref` edge; Gate 11 reads them from the decision
 record. *Evaluated at:* `EP-INGRESS` Gate 11 on the decision submission. *Status:* [TO BUILD].
@@ -5103,12 +5186,12 @@ exclusive decisions on **one** approval object, not two commits on two subjects.
 *Status:* [TO BUILD].
 
 Gate 13 routes an admitted `COMMIT` whose `record.widget_kind === 'APPROVAL'` to the approval owner's decision route,
-`ActionEngineKernel.decideApproval()`, with the decision `record.approval_decision` names, and reads no
+`ActionEngineKernel.decideApproval()` for the existing ActionExecution path, or `AiToolRuntimeService.approve/reject` through the typed `AiApprovalRequest` owner port for F32a/F74a, with the decision `record.approval_decision` names, and reads no
 `WidgetIntent.role` to choose it. *Mechanism:* the effect router's `APPROVAL` branch keyed on the `AUDIT_RETAINED`
 member. *Evaluated at:* `EP-INGRESS` Gate 13. *Status:* `[EXISTS]`.
-[NON-NORMATIVE] Unreachable this cycle: no approval-requiring key is allowlisted for emission yet.
+[NON-NORMATIVE] The existing B35 path and AE approval lifecycle are unchanged. F32a uses an existing outer approval owner and does not set AE approvalRequirement to REQUIRED.
 
-**R3.11.3 — divergence at decision time does not execute.** If any noun has diverged since
+**R3.11.3 — divergence at decision time does not execute.** For F74a, stale, replaced, expired, revoked or foreign proposals refuse without dispatch; a corrected price requires a new canonical proposal and exact approval. The former pending proposal is superseded through the existing owner. For the consumed requesting-record path, if any noun has diverged since
 the approval was requested, the gateway does **not** call the owner's approve route. It
 returns `SUPERSEDED` with the rendered diff, rejects the standing approval through the
 owner's existing reject path, and mints a fresh `APPROVAL` envelope carrying the new values.
@@ -5118,7 +5201,7 @@ decision, which transitions the execution's approval to `REJECTED` only while it
 durable canonical policy binding (§0.15 F85). *Evaluated at:* `EP-INGRESS` Gate 11 → Gate 13. *Status:* owner reject
 path [EXISTS]; the ordering [TO BUILD].
 
-**R3.11.4 — the approval binding and the fresh read are complementary and both are required.** The execution's durable
+**R3.11.4 — the approval binding and the fresh read are complementary and both are required.** F74a pins the existing AiApprovalRequest ID, exact payloadHash and durable authenticated-turn origin, then re-reads the authoritative source before the owner decision and again at dispatch. It does not substitute those fields for an ActionExecution policy binding. For the existing ActionExecution path, the execution's durable
 canonical policy binding — `policyContextHash`, `policyEvidenceJson`, `policyEvaluatedAt`, `policyValidUntil` and
 `approvalBindingHash`, which `ActionEngineKernel.decideApproval()` requires non-null while accepting no caller-supplied
 approval flag or hash (§0.15 F85) — pins **what was approved**; Gate 11 pins **the world it was approved against**.
@@ -5153,7 +5236,7 @@ direct commit because Gate 11 sits immediately before Gate 14. Across an approva
 is true only if someone re-reads on the far side — so this contract makes the gateway re-read
 at the decision, and refuses to mint at all for owners whose dispatch it cannot reach.
 
-**R3.11.6 — who may decide is a role test, not a separation of duties.** The approver set is
+**R3.11.6 — who may decide is a role test, not a separation of duties.** For F32a, the existing AiToolRuntime and CrmService owners require current TENANT_OWNER/BUSINESS_OWNER membership and the original authenticated requester in the same tenant, exact approval ID/hash and an active provider integration; widget admission itself grants no role. For the existing AE approval path, the approver set is
 `CANONICAL_APPROVER_POLICY_ROLES[approverPolicyKey]` compared against a live `Membership`
 inside the deciding request; an unregistered key throws `CANONICAL_APPROVER_POLICY_INVALID`
 and the composer nulls the decision intent with a `blocked_reason`. **An owner who initiates
@@ -5364,9 +5447,9 @@ cannot be built; every other row names a check.
 > whose "one enforcing mechanism and one evaluation point" is recorded in two tables has two
 > records of the one mechanism, which is the condition the rules exist to forbid.
 
-What §3 owns is the consequence for this section: **no repair this contract makes admits a
-capability, widens an allowlist, or relaxes a veto. It makes exactly two floor reductions, and
-both are enumerated in §0.17.** Every mechanism §0.16 F89 names for a rule whose subject is an
+What §3 owns is the consequence for this section: **the two historical repairs and the sole
+owner-approved Version 1.4 pricing admission are enumerated together in §0.17. No further
+capability, allowlist or veto relaxation may be inferred from a repair.** Every mechanism §0.16 F89 names for a rule whose subject is an
 intent, a gate or a forbidden edge is built by the gateway of §3.9 and evaluated at the
 evaluation point F89's row states.
 
@@ -5443,8 +5526,8 @@ second rule.
    twenty-four once §0.7 F36a registers its set) for an equivalent of `assertCanExecute`; their role
    and risk fences are the policy row and the consent class, carried at Gate 5, and for the fifteen
    of §0.7 F36a also the owner's own fence inside the owner read.
-8. **Two floor reductions exist in this contract and both are in §0.17.** A reader auditing
-   this section should be able to find every one of them by reading that rule. There are two.
+8. **The two historical floor repairs and the sole approved pricing floor change are in §0.17.**
+   A reader auditing this section can find all three and their compensating fences there.
 ---
 
 ## 4. Lifecycle, channels, accessibility, history
@@ -6714,7 +6797,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 
 | # | Component | Depends on it | Status | Package |
 |---|---|---|---|---|
-| **P-18** | **`produced_by_intent_token_hash: string \| null`** on `IntentRecord`, classified `AUDIT_RETAINED` | §0.13 F74's **guard against the obvious bypass** — a `COMMIT` whose `confirmation_of_ref.kind !== 'draft'` is mintable only when this field is non-null and names a consumed `REFINE`/`DRAFT` record whose capability is the canonical owner's own propose key. Without it, populating `confirmation_of_ref` with a bare `appointment_ref` mints a cancel or reschedule `COMMIT` with no canonical confirmation behind it. **FR-6b and FR-7 both name it.** Also §0.4 F15's noun-resolver input set and §0.4 F16's classification | `[EXISTS]` — `WidgetIntentRecord.producedByIntentTokenHash`, the record writer derivation and Gate 7 lineage re-check | **K3** (the field, wave 2) + **K7** (the static-analysis proof that no other minting path exists, wave 3) |
+| **P-18** | **`produced_by_intent_token_hash: string \| null`** on `IntentRecord`, classified `AUDIT_RETAINED` | §0.13 F74's **guard against the obvious bypass** — outside the exact F74a canonical-chat approval branch, a `COMMIT` whose `confirmation_of_ref.kind !== 'draft'` is mintable only when this field is non-null and names a consumed `REFINE`/`DRAFT` record whose capability is the canonical owner's own propose key. Without it, populating `confirmation_of_ref` with a bare `appointment_ref` mints a cancel or reschedule `COMMIT` with no canonical confirmation behind it. **FR-6b and FR-7 both name it.** Also §0.4 F15's noun-resolver input set and §0.4 F16's classification | `[EXISTS]` — `WidgetIntentRecord.producedByIntentTokenHash`, the record writer derivation and Gate 7 lineage re-check | **K3** (the field, wave 2) + **K7** (the static-analysis proof that no other minting path exists, wave 3) |
 
 ### A1.5 Unenforceable today — no substrate for the mechanism
 
@@ -6761,7 +6844,7 @@ Each row states its current status explicitly; a row changes only with the A2.7 
 
 | # | Component | Depends on it | Status | Package |
 |---|---|---|---|---|
-| **P-23** | **`AE_WIDGET_COMMIT_ALLOWLIST` + `AE_CAPABILITY_GAP_LEDGER`, with the start-up assertion set** — `row XOR gap` total over the 226 AE-CAP rows, the `BOOKING`/`CONSENT`/`IDENTITY`/`MONEY` vetoes, and the pairing check | §0.7 F29–F37; §0.13 F72's lookup; §3.10's disposition table; FR-6a, FR-6b, FR-6d | `[EXISTS]` — closed allowlist/gap tables and registry-load assertions in `src/widget-contract/ae-capability.ts` and `src/widgets/authority/` | **K2** (tables) + **K4** (assertions) |
+| **P-23** | **`AE_WIDGET_COMMIT_ALLOWLIST` + `AE_CAPABILITY_GAP_LEDGER`, with the start-up assertion set** — `row XOR gap` total over the registered AE-CAP rows, the `BOOKING`/`CONSENT`/`IDENTITY`/`MONEY` vetoes with only the explicit F32a financial subtype, and the pairing check | §0.7 F29–F37; §0.13 F72's lookup; §3.10's disposition table; FR-6a, FR-6b, FR-6d | `[EXISTS]` — closed allowlist/gap tables and registry-load assertions in `src/widget-contract/ae-capability.ts` and `src/widgets/authority/` | **K2** (tables) + **K4** (assertions) |
 | **P-24** | **`CapabilityRef` and the per-effect key-space rule** — the discriminated union, `capKey(ref)`, and F21's source test over the members it enumerates | §0.6 F21; §0.12; §3.2 R3.2.2; every `subjectFloor` dispatch | `[ABSENT]` — the row remains whole only after its outstanding contract clauses are proven | **K2** (wave 1) |
 | **P-25** | **`AE_PROPOSE_PAIRING`** — the `ae` ⇄ `propose` pairing rows the COMMIT guard compares against | §0.7 F31; §0.13 F74's two-row table; §3.10.2 | `[EXISTS]` — `AE_PROPOSE_PAIRING` plus exact booking create/reschedule/cancel rows and Gate 7 pairing checks | **K2** (table) + **K7** (booking rows) |
 | **P-26** | **Gate 6's key-space dispatch** — the four-branch dispatch on `subjectCapability(record).space`, scoped by effect | §0.8 F54; §3.9 «Gate 6 in full»; FR-6a … FR-6f | `[EXISTS]` — Gate 6 dispatch is live over C9, AE, CONTROL and HANDOFF subjects | **K4** (wave 2) |
@@ -7506,3 +7589,18 @@ spoken readiness. The full decision wording is preserved in `MAYA-WIDGET-CONTRAC
 | Nine existing denial reasons, unchanged public outcome | Approved 2026-10-05 22:38 UTC | P10 registers all nine as the existing neutral outcome; the seven proposed display changes are not approved |
 
 The exact request and answer, message identifiers and baseline hash are recorded in `MAYA-WIDGET-CONTRACT-V1.3-DECISION-RECORD.md`. Release, production, paid calls and server restart were not authorized by these decisions.
+
+# Annex F — Version 1.4 YC-SP1-WIDGET-1 owner decision record
+
+**Non-normative provenance only.** The owner approved the following narrow change on
+2026-10-06 at 16:09 UTC with «Да», answering the 15:56 UTC proposal to permit in chat an
+owner's fixed-price change for one existing service in their own YCLIENTS salon, showing
+company, service and old/new RUB price and binding confirmation to that exact proposal.
+The proposal explicitly kept payments, payouts, discounts and other monetary operations
+closed and limited implementation to the test branch; working prices were not authorized.
+
+The normative transfer is F30/F31/F32a/F34, F47, FR-6d, the CANONICAL_APPROVAL owner mapping,
+and the typed canonical-chat provenance guard in F74/§3.11. MONEY remains true. Old thirteen
+F38 rows, B35 and Action Engine lifecycle are unchanged. The additional F38 row is recorded
+only after the real handler→owner→AE call trace exists. This decision is not evidence of
+current-carrier qualification, real-provider qualification, production acceptance or deployment.

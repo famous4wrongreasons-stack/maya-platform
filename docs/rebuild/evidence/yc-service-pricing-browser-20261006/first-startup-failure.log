@@ -1,0 +1,24 @@
+widgets-live: proof database maya_widget_gate_proof_service_price_browser_20261006 on 127.0.0.1:56347 (local)
+FAIL test/widgets-live/service-price-browser.browser-spec.ts
+  ✕ serves the owned service-price browser session until STOP (4 ms)
+
+  ● serves the owned service-price browser session until STOP
+
+    TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+
+      389 |       { EmailAuthDeliveryService },
+      390 |       { AiCoreModelService },
+    > 391 |     ] = await Promise.all([
+          |                       ^
+      392 |       import('./bootstrap') as Promise<typeof import('./bootstrap')>,
+      393 |       import('./http-bootstrap') as Promise<typeof import('./http-bootstrap')>,
+      394 |       import('../../../src/common/domain.enums') as Promise<
+
+      at runServicePriceBrowserHarness (widgets-live/support/service-price-browser-harness.ts:391:23)
+      at Object.<anonymous> (widgets-live/service-price-browser.browser-spec.ts:7:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        0.092 s
+Ran all test suites within paths "test/widgets-live/service-price-browser.browser-spec.ts".

@@ -110,6 +110,13 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     why: "the store client's module",
     only: ['widgets.module.ts'],
   },
+  'common/domain.enums.ts': {
+    why: 'YC-SP1 uses the canonical role enum for its exact fresh owner membership check',
+    only: [
+      'owner-ports/service-price-approval.adapter.ts',
+      'pricing/service-price-approval-trigger.service.ts',
+    ],
+  },
   'common/authenticated-user.interface.ts': {
     why: 'the type of the JWT-validated actor (D-9)',
   },
@@ -129,6 +136,32 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   },
   'ai-tools/ai-tool.catalog.ts': { why: 'the frozen AI tool catalogue' },
   'ai-tools/ai-tool.types.ts': { why: 'AI tool definition types' },
+  'ai-tools/ai-approval-widget-trigger.port.ts': {
+    why: 'YC-SP1 narrow canonical pending-approval hook and bounded owner snapshot types',
+    only: [
+      'pricing/service-price-approval-trigger.service.ts',
+      'pricing/service-price-approval.presenter.ts',
+      'pricing/service-price-approval.port.ts',
+      'widgets.module.ts',
+    ],
+  },
+  'action-engine/service-price.contract.ts': {
+    why: 'YC-SP1 strict descriptor compares the canonical pure input normalizer by identity',
+    only: ['pricing/service-price-widget.contract.ts'],
+  },
+  'crm/yclients-service-price.contract.ts': {
+    why: 'YC-SP1 canonical named constants and pure fixed-price validation; no provider or service access',
+    only: [
+      'pricing/service-price-widget.contract.ts',
+      'pricing/service-price-intent-template.registry.ts',
+      'authority/allowlist-startup.assert.ts',
+      'gates/gate7.ts',
+      'emission/emitter.service.ts',
+      'emission/envelope.factory.ts',
+      'owner-ports/service-price-approval.adapter.ts',
+      'owner-ports/noun-resolution.owners.provider.ts',
+    ],
+  },
   'ai-tools/ai-read-widget-trigger.port.ts': {
     why: 'P-MT2a narrow completion-hook token and transport-neutral port types',
     only: ['composition/chat-read.trigger.ts', 'widgets.module.ts'],
@@ -221,6 +254,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/canonical-read.provider.ts',
       'owner-ports/booking-selector.adapter.ts',
       'owner-ports/personal-schedule.adapter.ts',
+      'owner-ports/service-price-approval.adapter.ts',
     ],
   },
   'measurement/measurement.module.ts': {
@@ -294,6 +328,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: [
       'owner-ports/gate6.owners.provider.ts',
       'owner-ports/commit-booking.adapter.ts',
+      'owner-ports/service-price-approval.adapter.ts',
     ],
   },
   'ai-tools/ai-tool-policy.module.ts': {
@@ -1248,6 +1283,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'SERVICE_PRICE_APPROVAL_OWNER',
       'CHAT_REPLY_CIPHER',
       'PERSONAL_SCHEDULE_SOURCE',
       'USER_TURN_AUDIT',

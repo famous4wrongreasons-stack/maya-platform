@@ -3,8 +3,16 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Inject,
+  Optional,
   NotFoundException,
 } from '@nestjs/common';
+import { SERVICE_PRICE_CAPABILITY } from '../../crm/yclients-service-price.contract';
+import {
+  SERVICE_PRICE_APPROVAL_OWNER,
+  SERVICE_PRICE_APPROVAL_NOUN_OWNER,
+  type ServicePriceApprovalOwnerPort,
+} from '../pricing/service-price-approval.port';
 import { openWidgetNounHandle } from '../emission/seal.service';
 import type {
   NounActor,
@@ -30,6 +38,9 @@ export class NounResolutionOwnersProvider implements NounReadPort {
     private readonly cancel: BookingCancelNounAdapter,
     private readonly reschedule: BookingRescheduleNounAdapter,
     private readonly readOwner: ClientAppointmentReadNounAdapter,
+    @Optional()
+    @Inject(SERVICE_PRICE_APPROVAL_OWNER)
+    private readonly price?: ServicePriceApprovalOwnerPort,
   ) {}
 
   async read(
@@ -38,6 +49,27 @@ export class NounResolutionOwnersProvider implements NounReadPort {
   ): Promise<NounReadResult> {
     if (actor.tenantId === null || actor.tenantId !== input.tenantId)
       return { kind: 'policy_deferred' };
+    if (
+      input.capability?.key === SERVICE_PRICE_CAPABILITY ||
+      input.capability?.key === 'catalog.service.price.update'
+    )
+      return this.price
+        ? this.price.readNoun(input, actor)
+        : { kind: 'policy_deferred' };
+    // A class-detail NAVIGATE has no capability member (F69); its one sealed
+    // canonical approval noun still owes a fresh owner read through F15's seven fields.
+    const detailApproval =
+      input.capability === null && input.frozenNouns.size === 1
+        ? input.frozenNouns.get('approval')
+        : undefined;
+    if (
+      detailApproval &&
+      openWidgetNounHandle(detailApproval)?.ownerKind ===
+        SERVICE_PRICE_APPROVAL_NOUN_OWNER
+    )
+      return this.price
+        ? this.price.readNoun(input, actor)
+        : { kind: 'policy_deferred' };
     const values = new Map<string, string>();
     for (const [noun, handle] of input.frozenNouns) {
       const opened = openWidgetNounHandle(handle);

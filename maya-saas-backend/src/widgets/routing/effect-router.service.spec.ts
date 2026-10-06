@@ -1,3 +1,4 @@
+import type { NavigateWidgetMinterPort } from './effect-router.ports';
 import type { GateContext, PrincipalView } from '../gate.types';
 import { ctx, rec } from '../gates/gate-fixtures.spec-helper.spec';
 import { EffectRouterService, ROUTABLE_EFFECTS } from './effect-router.service';
@@ -121,6 +122,37 @@ const fixture = () => {
     emit: jest.fn().mockResolvedValue({
       envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w-nav' },
     }),
+    emitJournalDetail: jest.fn(),
+    emitServicePriceDetail: jest
+      .fn<
+        ReturnType<NavigateWidgetMinterPort['emitServicePriceDetail']>,
+        Parameters<NavigateWidgetMinterPort['emitServicePriceDetail']>
+      >()
+      .mockImplementation(async (_request, linkage) => {
+        await linkage.revalidate();
+        return {
+          widgetId: 'price-child',
+          bodyHash: 'b'.repeat(64),
+          envelopeSeal: 'c'.repeat(64),
+          issuedAt: new Date(0),
+          expiresAt: new Date(600_000),
+          intentToken: null,
+          intentTokenHash: null,
+          intentTokens: [],
+          intentTokenHashes: [],
+          kind: 'APPROVAL',
+          a2Limited: false,
+          envelope: {
+            contract: 'maya.widget.envelope/1',
+            widget_id: 'price-child',
+          },
+        };
+      }),
+  };
+  const priceApprovals = {
+    read: jest.fn(),
+    readNoun: jest.fn(),
+    sameServiceApproval: jest.fn(),
   };
   const threadPage = {
     resolveForNavigate: jest.fn().mockResolvedValue({
@@ -142,6 +174,7 @@ const fixture = () => {
     metric,
     projector,
     emitter,
+    priceApprovals,
     threadPage,
     bookingPropose,
     bookingSelectors,
@@ -167,6 +200,7 @@ const fixture = () => {
         bindMint: () => Promise.resolve(),
         canProject: () => Promise.resolve(true),
       },
+      priceApprovals,
     ),
   };
 };
@@ -412,6 +446,109 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     expect(projector.composeNavigate).not.toHaveBeenCalled();
     expect(emitter.emit).not.toHaveBeenCalled();
   });
+
+  it('pricing detail re-reads its one owner noun and mints a bound child through the named seam', async () => {
+    const h = fixture();
+    const record = rec({
+      effect: 'NAVIGATE',
+      widgetKind: 'APPROVAL',
+      sourceCapabilitySpace: 'C9',
+      sourceCapabilityKey: 'catalog.service.price.update',
+      targetJson: { class: 'detail', ref: 'fs.catalogue' },
+    });
+    const context = ctx(record, { principal: PRINCIPAL });
+    const payloadHash = 'b'.repeat(64);
+    const ref = `v1:approval-a:${payloadHash}`;
+    h.priceApprovals.read.mockResolvedValue({
+      id: 'approval-a',
+      payloadHash,
+      createdAt: context.now,
+      expiresAt: new Date(context.now.getTime() + 600_000),
+      summary: '',
+      serviceId: '201',
+      serviceName: 'Стрижка',
+      companyId: '101',
+      currentPrice: 2000,
+      proposedPrice: 2500,
+      origin: {
+        userTurnId: 'original',
+        conversationId: '00000000-0000-4000-8000-000000000010',
+        principalProofHash: PRINCIPAL.proofHash,
+      },
+    });
+    const result = await h.router.route(context, {
+      ...RESOLVED,
+      values: new Map([['approval', ref]]),
+    });
+    expect(result).toMatchObject({
+      outcome: 'terminate',
+      route: {
+        receipt_outcome: 'ACCEPTED',
+        next_envelope: { widget_id: 'price-child' },
+        resolved_widget: null,
+      },
+    });
+    expect(h.priceApprovals.read).toHaveBeenNthCalledWith(
+      1,
+      { tenantId: 't1', userId: 'u1' },
+      ref,
+      PRINCIPAL.proofHash,
+      true,
+    );
+    expect(h.priceApprovals.read).toHaveBeenNthCalledWith(
+      2,
+      { tenantId: 't1', userId: 'u1' },
+      ref,
+      PRINCIPAL.proofHash,
+      false,
+    );
+    expect(h.emitter.emitServicePriceDetail).toHaveBeenCalledTimes(1);
+    const [request, linkage, parentWidgetId, now] =
+      h.emitter.emitServicePriceDetail.mock.calls[0];
+    expect(request).toMatchObject({
+      kind: 'APPROVAL',
+      turnId: '00000000-0000-4000-8000-000000000011',
+      composerInput: {
+        correlation_refs: {
+          turn_id: '00000000-0000-4000-8000-000000000011',
+          parent_id: record.widgetId,
+        },
+      },
+    });
+    expect(linkage).toMatchObject({ approvalId: 'approval-a', payloadHash });
+    expect(parentWidgetId).toBe(record.widgetId);
+    expect(now).toBe(context.now);
+    expect(h.emitter.emit).not.toHaveBeenCalled();
+    expect(h.projector.composeNavigate).not.toHaveBeenCalled();
+  });
+
+  it.each(['fs.audit', 'fs.calendar'])(
+    'pricing detail refuses the unpaired target %s without owner reads',
+    async (target) => {
+      const h = fixture();
+      const result = await h.router.route(
+        ctx(
+          rec({
+            effect: 'NAVIGATE',
+            widgetKind: 'APPROVAL',
+            sourceCapabilitySpace: 'C9',
+            sourceCapabilityKey: 'catalog.service.price.update',
+            targetJson: { class: 'detail', ref: target },
+          }),
+          { principal: PRINCIPAL },
+        ),
+        {
+          ...RESOLVED,
+          values: new Map([['approval', `v1:approval-a:${'b'.repeat(64)}`]]),
+        },
+      );
+      expect(result).toMatchObject({
+        route: { receipt_outcome: 'REFUSED', next_envelope: null },
+      });
+      expect(h.priceApprovals.read).not.toHaveBeenCalled();
+      expect(h.emitter.emitServicePriceDetail).not.toHaveBeenCalled();
+    },
+  );
 
   it('G13-P03 REFINE mints one successor for the same live principal', async () => {
     const { router, successors } = fixture();

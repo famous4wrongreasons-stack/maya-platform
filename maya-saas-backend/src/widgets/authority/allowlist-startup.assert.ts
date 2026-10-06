@@ -7,6 +7,11 @@ import { CAPABILITY_GAP_LEDGER_RUNTIME } from '../../widget-contract/capability-
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import { VERIFICATION_RANK } from './ladder';
 import {
+  CATALOGUE_PRICE_CONFIGURATION,
+  isCataloguePriceConfiguration,
+} from '../pricing/service-price-widget.contract';
+import { SERVICE_PRICE_TOOL } from '../../crm/yclients-service-price.contract';
+import {
   AE_WIDGET_COMMIT_ALLOWLIST,
   BOOKING,
   CONSENT,
@@ -89,7 +94,21 @@ export const allowlistStartupProblems = (
         `AL-3 ${cap.capability}: row propose does not equal traced pairing`,
       );
 
-    if (MONEY(cap)) problems.push(`AL-2 ${cap.capability}: MONEY veto`);
+    const cataloguePrice = isCataloguePriceConfiguration(cap);
+    if (MONEY(cap) && !cataloguePrice)
+      problems.push(`AL-2 ${cap.capability}: MONEY veto`);
+    if (
+      cataloguePrice &&
+      (row.family !== CATALOGUE_PRICE_CONFIGURATION ||
+        row.confirmation_kind !== 'APPROVAL' ||
+        row.min_verification !== 'SESSION_VERIFIED' ||
+        row.requires_ae_approval !== false ||
+        row.propose.space !== 'C9' ||
+        row.propose.key !== SERVICE_PRICE_TOOL)
+    )
+      problems.push(
+        `AL-2 ${cap.capability}: catalogue price typed admission veto`,
+      );
     if (BOOKING(cap) && row.confirmation_kind !== 'BOOKING_CONFIRMATION')
       problems.push(`AL-2 ${cap.capability}: BOOKING kind veto`);
     if (MARKETING_FANOUT(cap) && row.family !== 'marketing_fanout')

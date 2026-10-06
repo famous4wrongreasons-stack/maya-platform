@@ -8,7 +8,7 @@ import { DraftClass } from './confirmation-guard';
 import { Cell, Measure, Narrative, Phrase } from './envelope';
 import { EffectClass } from './intent';
 
-// --- section 2.1 (contract line 2669) ---
+// --- section 2.1 (contract line 2750) ---
 export type WidgetKind =
   // the seventeen named in the approved brief
   | 'CHOICE'
@@ -35,7 +35,7 @@ export type WidgetKind =
   | 'MEDIA_PREVIEW'
   | 'ARTIFACT';
 
-// --- section 2.2 (contract line 2695) ---
+// --- section 2.2 (contract line 2776) ---
 export interface KindRule {
   kind: WidgetKind;
   body_schema_ref: string; // JSON-Schema id for the body in §2.6
@@ -74,7 +74,7 @@ export type FullscreenReason =
   | 'non_textual_medium'
   | 'file_delivery';
 
-// --- section 2.3.3 (contract line 2773) ---
+// --- section 2.3.3 (contract line 2854) ---
 export type IntentRef = string; // envelope-local ('i1'); structural; never rendered
 
 export interface OptionItem {
@@ -115,7 +115,7 @@ export interface FieldBound {
   basis: Phrase; // why the bound is what it is
 }
 
-// --- section 2.3.5 (contract line 2820) ---
+// --- section 2.3.5 (contract line 2901) ---
 export interface KindTextShape {
   headline_path: string; // body path minted into text_equivalent.headline
   itemized_path: string | null; // body array minted into text_equivalent.itemized, in body order
@@ -143,7 +143,7 @@ export type TextSentence =
   | 'options'
   | 'handoff';
 
-// --- section 2.4 (contract line 2849) ---
+// --- section 2.4 (contract line 2930) ---
 export type OwnerClass =
   // read owners
   | 'CATALOG_READ'
@@ -159,6 +159,7 @@ export type OwnerClass =
   | 'BULK_AUDIENCE_OWNER'
   | 'ORCHESTRATION_RUN'
   | 'ACTION_EXECUTION'
+  | 'CANONICAL_APPROVAL'
   | 'CONSENT_REGISTER'
   | 'IDENTITY_BINDING_OWNER'
   | 'COMMERCE_OWNER'
@@ -188,7 +189,7 @@ export declare function allowedKinds(
 // the inverse of ownerClassKeys: { kind ∈ WidgetKind : capability ∈ ownerClassKeys(kind) },
 // derived at EP-REGISTRY-LOAD.
 
-// --- section 2.5 (contract line 2946) ---
+// --- section 2.5 (contract line 3028) ---
 export type RoleHint =
   | 'group'
   | 'radiogroup'
@@ -208,7 +209,7 @@ export type RoleHintRule = {
   map: Record<string, RoleHint>;
 };
 
-// --- section 2.6.1 (contract line 2994) ---
+// --- section 2.6.1 (contract line 3076) ---
 export interface ChoiceBody {
   prompt: Phrase | Narrative;
   select: 'single' | 'multi';
@@ -220,7 +221,7 @@ export interface ChoiceBody {
   more_intent: IntentRef | null; // REFINE
 }
 
-// --- section 2.6.2 (contract line 3014) ---
+// --- section 2.6.2 (contract line 3096) ---
 export interface ServiceSelectorBody {
   prompt: Phrase;
   category_path: Phrase[];
@@ -240,7 +241,7 @@ export interface ServiceSelectorBody {
   more_intent: IntentRef | null; // REFINE
 }
 
-// --- section 2.6.3 (contract line 3041) ---
+// --- section 2.6.3 (contract line 3123) ---
 export interface StaffSelectorBody {
   prompt: Phrase;
   for_service_refs: string[];
@@ -258,7 +259,7 @@ export interface StaffSelectorBody {
   more_intent: IntentRef | null;
 }
 
-// --- section 2.6.4 (contract line 3065) ---
+// --- section 2.6.4 (contract line 3147) ---
 export interface TimeSlotSelectorBody {
   prompt: Phrase;
   timezone: string; // IANA
@@ -284,7 +285,7 @@ export interface TimeSlotSelectorBody {
   none_fit_intent: IntentRef; // REFINE — always present, never droppable
 }
 
-// --- section 2.6.5 (contract line 3097) ---
+// --- section 2.6.5 (contract line 3179) ---
 export interface BookingConfirmationBody {
   confirmation_subject: 'create' | 'reschedule' | 'cancel';
   draft_ref: string | null; // non-null iff subject === 'create'
@@ -304,7 +305,7 @@ export interface BookingConfirmationBody {
   dismiss_intent: IntentRef; // escape, priority 0 — abandons this confirmation, never the appointment
 }
 
-// --- section 2.6.6 (contract line 3134) ---
+// --- section 2.6.6 (contract line 3216) ---
 export interface ScheduleBody {
   range: { from: string; to: string };
   timezone: string;
@@ -334,7 +335,7 @@ export interface ScheduleBody {
   detail_intent: IntentRef;
 }
 
-// --- section 2.6.7 (contract line 3170) ---
+// --- section 2.6.7 (contract line 3252) ---
 export interface ClientListBody {
   segment_label: Phrase;
   segment_ref: string;
@@ -348,7 +349,7 @@ export interface ClientListBody {
   page: { cursor_ref: string | null; has_more: boolean };
 }
 
-// --- section 2.6.8 (contract line 3191) ---
+// --- section 2.6.8 (contract line 3273) ---
 export interface MetricBody {
   period_label: Phrase;
   metrics: Measure[]; // 1..5
@@ -357,7 +358,7 @@ export interface MetricBody {
   drill_intent: IntentRef | null; // REFINE / NAVIGATE
 }
 
-// --- section 2.6.9 (contract line 3212) ---
+// --- section 2.6.9 (contract line 3294) ---
 export interface ChartBody {
   chart_kind: 'line' | 'bar' | 'stacked_bar' | 'area' | 'scatter';
   dataset_ref: string; // canonical C7/C8 handle
@@ -383,7 +384,7 @@ export interface ChartBody {
   export_intent: IntentRef | null; // REFINE → returns an ARTIFACT
 }
 
-// --- section 2.6.10 (contract line 3249) ---
+// --- section 2.6.10 (contract line 3331) ---
 export interface ReportBody {
   title: Phrase;
   period_label: Phrase;
@@ -400,7 +401,7 @@ export interface ReportBody {
   export_intent: IntentRef | null; // REFINE → returns an ARTIFACT
 }
 
-// --- section 2.6.11 (contract line 3273) ---
+// --- section 2.6.11 (contract line 3355) ---
 export interface StrategyOptionsBody {
   revision_ref: string;
   question: Narrative;
@@ -425,7 +426,7 @@ export interface StrategyOptionsBody {
   review_disclaimer: Phrase;
 }
 
-// --- section 2.6.12 (contract line 3303) ---
+// --- section 2.6.12 (contract line 3385) ---
 export interface ApprovalBody {
   approval_ref: string;
   subject: Cell<string>;
@@ -444,7 +445,7 @@ export interface ApprovalBody {
   detail_intent: IntentRef; // NAVIGATE to the effect detail
 }
 
-// --- section 2.6.13 (contract line 3332) ---
+// --- section 2.6.13 (contract line 3414) ---
 export interface ProgressBody {
   run_ref: string;
   headline: Cell<string>;
@@ -464,7 +465,7 @@ export interface ProgressBody {
   cancel_intent: IntentRef | null; // CONTROL, capability 'control.run.cancel'
 }
 
-// --- section 2.6.14 (contract line 3361) ---
+// --- section 2.6.14 (contract line 3443) ---
 export interface LimitationBody {
   severity: 'info' | 'limitation' | 'risk' | 'blocking';
   headline: Phrase;
@@ -474,7 +475,7 @@ export interface LimitationBody {
   remedy_intents: IntentRef[]; // MUST be empty when capability_gap_ref !== null
 }
 
-// --- section 2.6.15 (contract line 3382) ---
+// --- section 2.6.15 (contract line 3464) ---
 export interface SourceStatusBody {
   sources: Array<{
     source_id: string;
@@ -487,7 +488,7 @@ export interface SourceStatusBody {
   overall: Cell<'OK' | 'PARTIAL' | 'BLOCKED'>;
 }
 
-// --- section 2.6.16 (contract line 3403) ---
+// --- section 2.6.16 (contract line 3485) ---
 export interface SettingsDraftBody {
   draft_ref: string; // server-owned; minted by the canonical draft owner
   draft_class: DraftClass; // the five-member union declared in §0.14 F79.
@@ -509,7 +510,7 @@ export interface SettingsDraftBody {
   editor_handoff_intent: IntentRef; // REQUIRED, never droppable
 }
 
-// --- section 2.6.17 (contract line 3437) ---
+// --- section 2.6.17 (contract line 3519) ---
 export interface FormBody {
   form_ref: string;
   justification: FormJustification;
@@ -543,7 +544,7 @@ export interface FormField {
   sensitivity: 'public' | 'internal' | 'pii' | 'SECURE_SURFACE_ONLY';
 }
 
-// --- section 2.6.18 (contract line 3485) ---
+// --- section 2.6.18 (contract line 3567) ---
 export interface ConsentStateBody {
   consent_kind:
     'PD_BASE' | 'MARKETING' | 'CHANNEL_DELIVERY' | 'HISTORY_RETENTION';
@@ -558,7 +559,7 @@ export interface ConsentStateBody {
   capability_gap_ref: string | null; // when set, change_handoff_intent MUST be null
 }
 
-// --- section 2.6.19 (contract line 3515) ---
+// --- section 2.6.19 (contract line 3597) ---
 export interface IdentityBindingBody {
   subject_label: Cell<string>;
   bindings: Array<{
@@ -574,7 +575,7 @@ export interface IdentityBindingBody {
   capability_gap_ref: string | null;
 }
 
-// --- section 2.6.20 (contract line 3539) ---
+// --- section 2.6.20 (contract line 3621) ---
 export interface PaymentHandoffBody {
   order_ref: string | null; // server-owned draft handle; null in gap state
   subject:
@@ -600,7 +601,7 @@ export interface PaymentHandoffBody {
   capability_gap_ref: string | null; // when set: commit_intent AND continue_intent MUST be null
 }
 
-// --- section 2.6.21 (contract line 3571) ---
+// --- section 2.6.21 (contract line 3653) ---
 export interface MediaPreviewBody {
   media_ref: string; // opaque; resolves only through a signed first-party asset route
   alt: Phrase; // server-authored, non-empty
@@ -616,7 +617,7 @@ export interface MediaPreviewBody {
   fullscreen_intent: IntentRef; // REQUIRED — NAVIGATE
 }
 
-// --- section 2.6.22 (contract line 3597) ---
+// --- section 2.6.22 (contract line 3679) ---
 export interface ArtifactBody {
   artifact_ref: string; // opaque; resolves only through a signed first-party delivery route
   filename: Cell<string>;

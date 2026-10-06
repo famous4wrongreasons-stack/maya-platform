@@ -76,8 +76,9 @@ export interface ConversationDeps {
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly scheduler: Pick<Scheduler, 'now'>;
   readonly newAbort: () => AbortHandle;
-  /** B4: pass one server-authorized envelope to the existing widget owner after the turn settles. */
-  readonly ingestResolution?: (resolution: ChatWidgetResolution) => void;
+  /** B4: pass one server-authorized envelope to the existing widget owner after the turn settles.
+   * The optional receipt describes presentation only; it grants no approval authority. */
+  readonly ingestResolution?: (resolution: ChatWidgetResolution) => 'approval_presented' | void;
   /** `crypto.randomUUID()` by default: 36 chars of `[0-9a-f-]`, inside the DTO's `^[A-Za-z0-9_-]{8,128}$`. */
   readonly newRequestId?: () => string;
 }
@@ -303,10 +304,13 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
       item.failure = null;
       item.retry = NO_RETRY;
       append({ kind: 'assistant', id: nextId('a'), text: outcome.value.reply });
-      if (outcome.value.resolution !== null) deps.ingestResolution?.(outcome.value.resolution);
+      const presentation = outcome.value.resolution == null
+        ? undefined
+        : deps.ingestResolution?.(outcome.value.resolution);
       // V2-5, SH-06: an approval-gated action is drawn as the server's reply plus a neutral notice
-      // kept outside history. No control, no link, no route: the shell cannot approve here.
-      if (outcome.value.action_status === 'approval_required') append({ kind: 'notice', id: nextId('n'), notice: 'approval_not_here' });
+      // kept outside history when no standard approval was actually presented. A verified
+      // APPROVAL envelope already uses the widget gateway, so the legacy notice would be false.
+      if (outcome.value.action_status === 'approval_required' && presentation !== 'approval_presented') append({ kind: 'notice', id: nextId('n'), notice: 'approval_not_here' });
     } else {
       const failure = outcome.failure;
       item.state = 'failed';

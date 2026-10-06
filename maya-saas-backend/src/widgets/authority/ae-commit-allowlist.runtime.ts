@@ -15,6 +15,10 @@ import {
   isIdentityCapability,
 } from '../consent/data-subject-acts';
 import { AE_PROPOSE_PAIRING } from './propose-pairing';
+import {
+  CATALOGUE_PRICE_CONFIGURATION,
+  isCataloguePriceConfiguration,
+} from '../pricing/service-price-widget.contract';
 
 export type AeCommitFamily = AeCommitRow['family'];
 
@@ -82,6 +86,7 @@ export const deriveAeFamily = (
 ): AeCommitFamily => {
   if (BOOKING(cap)) return 'booking';
   if (MARKETING_FANOUT(cap)) return 'marketing_fanout';
+  if (isCataloguePriceConfiguration(cap)) return CATALOGUE_PRICE_CONFIGURATION;
   if (MONEY(cap)) return 'money';
   if (CONSENT(cap)) return 'consent';
   if (IDENTITY(cap)) return 'identity';
@@ -95,6 +100,7 @@ export const confirmationKindFor = (
 ): AeCommitRow['confirmation_kind'] => {
   if (family === 'booking') return 'BOOKING_CONFIRMATION';
   if (family === 'marketing_fanout') return 'APPROVAL';
+  if (family === CATALOGUE_PRICE_CONFIGURATION) return 'APPROVAL';
   if (family === 'money') return 'PAYMENT_HANDOFF';
   return 'SETTINGS_DRAFT';
 };
@@ -111,7 +117,7 @@ const admittedPairingRows = AE_PROPOSE_PAIRING.flatMap((pair) => {
   if (
     cap.policyDecision !== 'ALLOW' ||
     !cap.allowedSourceTypes.includes('authenticated_request') ||
-    MONEY(cap) ||
+    (MONEY(cap) && !isCataloguePriceConfiguration(cap)) ||
     CONSENT(cap) ||
     IDENTITY(cap) ||
     TENANT_AUTHORITY(cap)
