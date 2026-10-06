@@ -3,6 +3,7 @@ import request from 'supertest';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import { AiToolHandlerService } from '../../src/ai-tools/ai-tool-handler.service';
+import { ClientChannelLinkService } from '../../src/crm/client-channel-link.service';
 import { C9WorkService } from '../../src/orchestration/c9.work';
 import { C9Store } from '../../src/orchestration/c9.store';
 import { C9Authority } from '../../src/orchestration/c9.authority';
@@ -98,6 +99,75 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
         }),
       );
   }
+
+  async function revokeSyntheticPersonalLink(tenantId: string, linkId: string) {
+    const link = await db.prisma.clientChannelLink.findUniqueOrThrow({
+      where: { id: linkId },
+    });
+    const token = randomUUID();
+    // Test-only A18 verifier; the real immutable link owner performs revocation.
+    const owner = new ClientChannelLinkService(db.prisma, db.tenantContext, {
+      verifyLink: () =>
+        Promise.reject(new Error('Link creation not admitted here')),
+      verifyRevocation: (provided) =>
+        provided === token
+          ? Promise.resolve({
+              tenantId,
+              provider: 'maya_user',
+              providerSubjectHash: link.providerSubjectHash,
+              linkId,
+              revocationIdentityHash: 'c'.repeat(64),
+              actorProofHash: 'd'.repeat(64),
+              reason: 'synthetic-personal-read-revocation',
+              validUntil: new Date(Date.now() + 600_000),
+            })
+          : Promise.reject(new Error('Unknown synthetic proof')),
+    });
+    await db.tenantContext.runAsSystemTenant(tenantId, () =>
+      owner.revoke({ proof: token }),
+    );
+  }
+
+  it('a personal chat read uses the verified Client and refuses replay after its link is revoked without changing the owner role', async () => {
+    const f = await fixture(
+      'Personal verified read',
+      1500,
+      UserRole.TENANT_OWNER,
+    );
+    const client = await fx.client(f.tenant, f.user);
+    await db.prisma.client.update({
+      where: { id: client.clientId },
+      data: { userId: null },
+    });
+    jest.spyOn(http.app.get(AiCoreModelService), 'decide').mockResolvedValue({
+      reply: null,
+      toolCall: { name: 'appointments.own.list', arguments: {} },
+      provider: 'openai',
+      model: 'SCRIPTED_SYNTHETIC_PERSONAL_READ',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    });
+    const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+    const requestId = randomUUID();
+    const text = 'Покажи мои личные записи как клиента';
+    const first = await f.chat(requestId, text);
+    expect(first.status).toBe(201);
+    expect(first.body.reply).toBe('У вас пока нет записей.');
+    expect((await f.chat(requestId, text)).body.reply).toBe(first.body.reply);
+    expect(source).toHaveBeenCalledTimes(1);
+    await revokeSyntheticPersonalLink(f.tenant.id, client.linkId);
+    const revoked = await f.chat(requestId, text);
+    expect(revoked.status).toBe(201);
+    expect(revoked.body.coordination.state).toBe('INCOMPLETE');
+    expect(revoked.body.reply).not.toBe(first.body.reply);
+    expect(source).toHaveBeenCalledTimes(1);
+    expect(
+      await db.prisma.membership.findUniqueOrThrow({
+        where: {
+          userId_tenantId: { userId: f.user.id, tenantId: f.tenant.id },
+        },
+      }),
+    ).toMatchObject({ role: UserRole.TENANT_OWNER, status: 'active' });
+  });
 
   it('routes current source results through C9, replays once and isolates a second tenant', async () => {
     const first = await fixture('First salon service', 1500);
@@ -343,22 +413,22 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
       (await read('staff.schedule.own.read', staffKey, { date: '2026-10-06' }))
         .status,
     ).toBe(409);
-    const client = await db.prisma.client.create({
-      data: { tenantId: f.tenant.id, userId: f.user.id },
-    });
+    const client = await fx.client(f.tenant, f.user);
     const clientKey = randomUUID();
     expect((await read('appointments.own.list', clientKey, {})).status).toBe(
       201,
     );
     await db.prisma.client.update({
-      where: { id: client.id },
+      where: { id: client.clientId },
       data: { userId: null },
     });
-    await db.prisma.client.create({
-      data: { tenantId: f.tenant.id, userId: f.user.id },
-    });
+    // Removing the optional legacy association does not revoke a verified episode.
     expect((await read('appointments.own.list', clientKey, {})).status).toBe(
-      409,
+      201,
+    );
+    await revokeSyntheticPersonalLink(f.tenant.id, client.linkId);
+    expect((await read('appointments.own.list', clientKey, {})).status).toBe(
+      403,
     );
     expect(source).toHaveBeenCalledTimes(2);
   });

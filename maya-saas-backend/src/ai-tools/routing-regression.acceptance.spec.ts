@@ -25,6 +25,7 @@ import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
+import { PersonalClientContextService } from '../appointments/personal-client-context.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
 import { OWNER_ROUTING_CORPUS } from './owner-routing.corpus';
 
@@ -291,6 +292,18 @@ function createHarness(
     handler,
     encryption,
     auditLog,
+    undefined,
+    undefined,
+    // This routing corpus already uses synthetic source payloads. Current
+    // personal authority is a matching fixture port, not production identity proof.
+    {
+      select: jest.fn().mockResolvedValue({
+        clientId: 'synthetic-verified-client',
+        linkId: 'synthetic-verified-link',
+        verificationEvidenceHash: 'a'.repeat(64),
+        revalidate: jest.fn().mockResolvedValue(undefined),
+      }),
+    } as unknown as PersonalClientContextService,
   );
 
   const decide = jest.fn<

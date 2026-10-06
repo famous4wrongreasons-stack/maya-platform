@@ -11,6 +11,7 @@ import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
+import { PersonalClientContextService } from '../appointments/personal-client-context.service';
 import type { AiReadWidgetTriggerPort } from './ai-read-widget-trigger.port';
 
 const IDEMPOTENCY_KEY = '59f04d18-c04a-4f1d-a529-345fe6f2a65d';
@@ -26,6 +27,145 @@ describe('AiToolRuntimeService', () => {
     membershipId: 'membership-a',
     membershipStatus: 'active',
   };
+
+  describe.each(['appointments.own.list', 'loyalty.own.read'])(
+    'current verified personal READ context: %s',
+    (toolName) => {
+      function personalHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
+        const harness = createHarness(widgetTrigger);
+        let saved: Record<string, unknown> | null = null;
+        harness.executionFindUnique.mockImplementation(() =>
+          Promise.resolve(saved),
+        );
+        harness.executionCreate.mockImplementation((input: unknown) => {
+          saved = { ...record(record(input).data), id: 'personal-execution' };
+          return Promise.resolve(saved);
+        });
+        harness.executionUpdate.mockImplementation((input: unknown) => {
+          saved = { ...saved, ...record(record(input).data) };
+          return Promise.resolve(saved);
+        });
+        harness.handlerExecute.mockResolvedValue({
+          appointments: [{ id: 'private-appointment' }],
+        });
+        const dto = {
+          surface: 'web' as const,
+          arguments: {},
+          idempotencyKey: IDEMPOTENCY_KEY,
+        };
+        const actor = { ...customer, role: UserRole.TENANT_OWNER };
+        const run = (replay = false, suppressWidgetTrigger = true) =>
+          harness.tenantContext.runAsSystemTenant('tenant-a', () =>
+            replay
+              ? harness.runtime.replayCompletedRead(
+                  actor,
+                  toolName,
+                  dto,
+                  'personal-execution',
+                  { suppressWidgetTrigger },
+                )
+              : harness.runtime.execute(actor, toolName, dto, {
+                  suppressWidgetTrigger,
+                }),
+          );
+        return { ...harness, actor, run };
+      }
+      it.each([false, true])(
+        'refuses revoked verified linkage before cached payload on replay=%s even without Client.userId',
+        async (replay) => {
+          const h = personalHarness();
+          await expect(h.run()).resolves.toMatchObject({ status: 'completed' });
+          h.personalSelect.mockRejectedValue(
+            new ForbiddenException('new_verified_maya_user_binding_required'),
+          );
+          await expect(h.run(replay)).rejects.toThrow(
+            'new_verified_maya_user_binding_required',
+          );
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+          expect(h.personalSelect).toHaveBeenCalledWith(
+            h.actor,
+            'personal_client',
+          );
+        },
+      );
+      it('keeps the business actor and binds the read to the server-selected Client', async () => {
+        const h = personalHarness();
+        await expect(h.run()).resolves.toMatchObject({ status: 'completed' });
+        expect(h.personalSelect).toHaveBeenCalledWith(
+          h.actor,
+          'personal_client',
+        );
+        expect(h.clientFindMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { tenantId: 'tenant-a', id: 'verified-client' },
+          }),
+        );
+        expect(h.handlerExecute).toHaveBeenCalledWith(
+          toolName,
+          expect.objectContaining({
+            role: UserRole.TENANT_OWNER,
+            userId: h.actor.userId,
+          }),
+          {},
+          IDEMPOTENCY_KEY,
+        );
+        expect(h.personalRevalidate).toHaveBeenCalledTimes(1);
+      });
+      it('refuses a changed verified Client episode instead of replaying the previous personal result', async () => {
+        const h = personalHarness();
+        await h.run();
+        h.personalSelect.mockResolvedValue({
+          ...h.personal,
+          linkId: 'successor-link',
+          clientId: 'other-verified-client',
+        });
+        await expect(h.run(true)).rejects.toBeInstanceOf(ConflictException);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      });
+      it.each([false, true])(
+        'withholds personal data when linkage changes in flight, replay=%s',
+        async (replay) => {
+          const h = personalHarness();
+          if (replay) await h.run();
+          h.personalRevalidate.mockRejectedValue(
+            new ForbiddenException('personal_client_context_changed'),
+          );
+          await expect(h.run(replay)).rejects.toThrow(
+            'personal_client_context_changed',
+          );
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        },
+      );
+      it('fails closed if the verified personal context owner is not wired', async () => {
+        const h = createHarness(undefined, false);
+        await expect(
+          h.tenantContext.runAsSystemTenant('tenant-a', () =>
+            h.runtime.execute(customer, toolName, {
+              surface: 'web',
+              arguments: {},
+            }),
+          ),
+        ).rejects.toThrow('verified_personal_read_context_required');
+        expect(h.handlerExecute).not.toHaveBeenCalled();
+        expect(h.executionFindUnique).not.toHaveBeenCalled();
+      });
+      it('revalidates again after asynchronous widget projection before returning personal data', async () => {
+        const afterCompletedRead = jest.fn().mockResolvedValue(null);
+        const h = personalHarness({ afterCompletedRead });
+        afterCompletedRead.mockImplementation(() => {
+          h.personalRevalidate.mockRejectedValue(
+            new ForbiddenException('personal_client_context_changed'),
+          );
+          return Promise.resolve(null);
+        });
+        await expect(h.run(false, false)).rejects.toThrow(
+          'personal_client_context_changed',
+        );
+        expect(afterCompletedRead).toHaveBeenCalledTimes(1);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      });
+    },
+  );
 
   it('executes read-only tools directly and stores only encrypted results', async () => {
     const harness = createHarness();
@@ -394,7 +534,10 @@ describe('AiToolRuntimeService', () => {
   });
 });
 
-function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
+function createHarness(
+  widgetTrigger?: AiReadWidgetTriggerPort,
+  withPersonalContext = true,
+) {
   const approvalFindUnique = jest.fn();
   const approvalCreate =
     jest.fn<(input: unknown) => Promise<Record<string, unknown>>>();
@@ -418,6 +561,16 @@ function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
     return Promise.resolve({});
   });
   const membershipFindUnique = jest.fn();
+  const clientFindMany = jest.fn().mockResolvedValue([]);
+  const personalRevalidate = jest.fn().mockResolvedValue(undefined);
+  const personal = {
+    kind: 'personal_client',
+    clientId: 'verified-client',
+    linkId: 'verified-link',
+    verificationEvidenceHash: 'a'.repeat(64),
+    revalidate: personalRevalidate,
+  };
+  const personalSelect = jest.fn().mockResolvedValue(personal);
   const prisma = {
     aiApprovalRequest: {
       findUnique: approvalFindUnique,
@@ -436,7 +589,7 @@ function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
     membership: { findUnique: membershipFindUnique },
     staff: { findMany: jest.fn().mockResolvedValue([]) },
     crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
-    client: { findMany: jest.fn().mockResolvedValue([]) },
+    client: { findMany: clientFindMany },
     $transaction: jest.fn((operations: Array<Promise<unknown>>) =>
       Promise.all(operations),
     ),
@@ -509,6 +662,11 @@ function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
       widgetTrigger === undefined
         ? undefined
         : ({ get: jest.fn().mockReturnValue(widgetTrigger) } as never),
+      withPersonalContext
+        ? ({
+            select: personalSelect,
+          } as unknown as PersonalClientContextService)
+        : undefined,
     ),
     tenantContext,
     approvalFindUnique,
@@ -521,6 +679,10 @@ function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
     executionCreate,
     executionUpdate,
     membershipFindUnique,
+    clientFindMany,
+    personalSelect,
+    personalRevalidate,
+    personal,
     handlerExecute,
     policyAssertCanExecute,
     policyAssertCanDecide,

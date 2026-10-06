@@ -7,6 +7,10 @@ import {
   Optional,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import {
+  PersonalClientContextService,
+  type PersonalClientContext,
+} from '../appointments/personal-client-context.service';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import {
@@ -103,6 +107,8 @@ export class AiToolRuntimeService {
       encryption,
     ),
     @Optional() private readonly moduleRef?: ModuleRef,
+    @Optional()
+    private readonly personalContexts?: PersonalClientContextService,
   ) {}
 
   async listTools(user: AuthenticatedUser, surface: AiToolSurface) {
@@ -145,7 +151,11 @@ export class AiToolRuntimeService {
     const definition = this.registry.get(toolName);
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
-    await this.bindPersonalReadScope(principal, definition);
+    const personal = await this.bindPersonalReadScope(
+      user,
+      principal,
+      definition,
+    );
     // A retry carries the same user proposal, not a newly observed before-state.
     // Never regenerate an already approved mutation from today's provider price.
     if (toolName === SERVICE_PRICE_TOOL && dto.idempotencyKey) {
@@ -222,8 +232,9 @@ export class AiToolRuntimeService {
           : (dto.idempotencyKey ?? randomUUID()),
       approval: null,
     });
+    await personal?.revalidate();
     if (internal.suppressWidgetTrigger === true) return completed;
-    return this.attachReadWidget(
+    const output = await this.attachReadWidget(
       user,
       definition,
       args,
@@ -234,6 +245,8 @@ export class AiToolRuntimeService {
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
     );
+    await personal?.revalidate();
+    return output;
   }
 
   /** Replay only: missing/expired source evidence can never dispatch a new read. */
@@ -250,7 +263,11 @@ export class AiToolRuntimeService {
       this.executionConflict('ai_tool_read_replay_only');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
-    await this.bindPersonalReadScope(principal, definition);
+    const personal = await this.bindPersonalReadScope(
+      user,
+      principal,
+      definition,
+    );
     const args = await this.handler.normalizeArguments(
       toolName,
       principal,
@@ -300,8 +317,9 @@ export class AiToolRuntimeService {
           ),
           replayed: true,
         };
+    await personal?.revalidate();
     if (internal.suppressWidgetTrigger === true) return completed;
-    return this.attachReadWidget(
+    const output = await this.attachReadWidget(
       user,
       definition,
       args,
@@ -312,6 +330,8 @@ export class AiToolRuntimeService {
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
     );
+    await personal?.revalidate();
+    return output;
   }
 
   private async attachReadWidget(
@@ -1853,12 +1873,14 @@ export class AiToolRuntimeService {
 
   /** Personal cache results must follow the current source identity mapping. */
   private async bindPersonalReadScope(
+    user: AuthenticatedUser,
     principal: AiToolPrincipal,
     definition: AiToolDefinition,
-  ): Promise<void> {
+  ): Promise<PersonalClientContext | undefined> {
     if (definition.riskTier !== 'read') return;
     const where = { tenantId: principal.tenantId, userId: principal.userId };
     let scope: unknown;
+    let personal: PersonalClientContext | undefined;
     if (
       ['analytics.employee.query', 'staff.schedule.own.read'].includes(
         definition.name,
@@ -1898,8 +1920,14 @@ export class AiToolRuntimeService {
     } else if (
       ['appointments.own.list', 'loyalty.own.read'].includes(definition.name)
     ) {
-      scope = await this.prisma.client.findMany({
-        where,
+      // The optional legacy Client.userId is not the source's identity owner.
+      // Resolve the same verified maya_user episode as personal reads and retain
+      // the actual business actor. No UI mode or caller-selected Client is used.
+      if (!this.personalContexts)
+        throw new ForbiddenException('verified_personal_read_context_required');
+      personal = await this.personalContexts.select(user, 'personal_client');
+      const clients = await this.prisma.client.findMany({
+        where: { tenantId: principal.tenantId, id: personal.clientId },
         orderBy: { id: 'asc' },
         select: {
           id: true,
@@ -1919,6 +1947,13 @@ export class AiToolRuntimeService {
           },
         },
       });
+      scope = {
+        contract: 'verified-client-read/1',
+        clientId: personal.clientId,
+        linkId: personal.linkId,
+        verificationEvidenceHash: personal.verificationEvidenceHash,
+        clients,
+      };
     } else return;
     principal.readAuthority = {
       membershipId: principal.readAuthority?.membershipId ?? null,
@@ -1928,6 +1963,7 @@ export class AiToolRuntimeService {
         .update(JSON.stringify(scope))
         .digest('hex'),
     };
+    return personal;
   }
 
   /**
