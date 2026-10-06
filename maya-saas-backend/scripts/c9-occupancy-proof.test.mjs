@@ -34,3 +34,12 @@ test('plan has sequential fresh processes around PG restart and a private restar
   assert.ok(plan[5].args.includes('--testRegex'));
   assert.ok(plan[1].args.includes('-h 127.0.0.1 -p 45678 -k \'\''));
 });
+test('browser plan builds the actual web carrier, reuses owned HTTP/PG probe and omits old SSR/restart stages', () => {
+  const plan = proofCommands({ pgBin: '/owned/bin', cluster: '/tmp/owned/pg', log: '/tmp/evidence/pg.log', port: 45678, database: 'maya_widget_gate_proof_c9occ_abcdef', receipt: '/tmp/private/receipt.json', output: '/tmp/evidence', browser: true });
+  assert.deepEqual(plan.map((step) => step.name), ['initdb', 'pg-start', 'createdb', 'migrations', 'react-web-build', 'browser']);
+  assert.deepEqual(plan[4].args, ['build.mjs', '--target=web']);
+  assert.ok(plan[4].cwd.endsWith('/maya-carrier-react'));
+  assert.equal(plan[5].env.JEST_C9_OCCUPANCY_STAGE, 'browser');
+  assert.ok(plan[5].args.includes('--runInBand'));
+  assert.ok(plan[5].args.includes('test/widgets-live/c9-occupancy-restart.probe-spec.ts'));
+});

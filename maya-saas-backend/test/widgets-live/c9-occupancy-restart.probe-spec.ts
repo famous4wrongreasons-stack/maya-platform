@@ -31,7 +31,11 @@ import { occupancyFixtureEdge } from './support/c9-occupancy-fixture-edge';
 const stage = process.env.JEST_C9_OCCUPANCY_STAGE;
 const receiptPath = process.env.JEST_C9_OCCUPANCY_RECEIPT;
 const reportPath = process.env.JEST_C9_OCCUPANCY_REPORT;
-if (!['prepare', 'resume'].includes(stage ?? '') || !receiptPath || !reportPath)
+if (
+  !['prepare', 'resume', 'browser'].includes(stage ?? '') ||
+  !receiptPath ||
+  !reportPath
+)
   throw new Error(
     'Use scripts/c9-occupancy-proof.mjs: explicit stage, private receipt and report required',
   );
@@ -189,7 +193,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
     jest.restoreAllMocks();
     // Retain synthetic rows for readback, as C9 has independent RESTRICT/retention
     // ownership. The driver stops only its cluster; it never truncates another DB.
-    if (stage === 'resume')
+    if (stage === 'resume' || stage === 'browser')
       for (const tenantId of touchedTenants)
         await db.prisma.tenant.update({
           where: { id: tenantId },
@@ -458,7 +462,193 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
     observations[`${requestId}:${Object.keys(observations).length}`] = observed;
     return body;
   }
+  async function browserAcceptance() {
+    const config = http.app.get(ConfigService);
+    config.set('EMAIL_LOGIN_ENABLED', 'true');
+    config.set('EMAIL_AUTH_PROVIDER', 'debug');
+    const salon = await makeSalon(),
+      expired = await makeSalon(true);
+    const before = await businessState(salon.tenant.id);
+    const expiredBefore = await businessState(expired.tenant.id);
+    const mark = http.recorder.mark();
+    reads.length = 0;
+    let first: ChatBody | undefined, firstGraph: string | undefined;
+    const expected = [
+      'available',
+      'history',
+      'offline',
+      'reconnected',
+      'revoked',
+      'expired',
+    ];
+    const completed: string[] = [];
+    const backendOrigin = await http.listenLoopback();
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(
+        process.execPath,
+        [
+          path.resolve(
+            '../maya-carrier-react/test/occupancy-browser-probe.mjs',
+          ),
+        ],
+        {
+          stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
+        },
+      );
+      let stderr = '',
+        failure: Error | undefined;
+      let pending = Promise.resolve();
+      const fail = (error: unknown) => {
+        failure ??= error instanceof Error ? error : new Error(String(error));
+        child.kill('SIGTERM');
+      };
+      const timer = setTimeout(
+        () => fail(new Error('Owned browser acceptance timed out')),
+        180_000,
+      );
+      child.stderr!.on('data', (chunk: Buffer) => {
+        stderr += chunk.toString();
+      });
+      child.on('message', (raw: unknown) => {
+        pending = pending
+          .then(async () => {
+            const message = raw as {
+              type: string;
+              name: string;
+              body?: ChatBody;
+            };
+            if (message.type === 'ready') {
+              child.send({
+                type: 'start',
+                backendOrigin,
+                ownerEmail: salon.owner.email,
+                expiredEmail: expired.owner.email,
+                output: path.dirname(reportPath!),
+              });
+              return;
+            }
+            expect(message.type).toBe('checkpoint');
+            expect(message.name).toBe(expected[completed.length]);
+            expect(await businessState(salon.tenant.id)).toBe(before);
+            expect(await businessState(expired.tenant.id)).toBe(expiredBefore);
+            expect(unexpectedEdges).toEqual([]);
+            expect(model).not.toHaveBeenCalled();
+            const body = message.body;
+            if (body) {
+              const currentSalon = message.name === 'expired' ? expired : salon;
+              const root = await db.prisma.c9Run.findUniqueOrThrow({
+                where: { id: body.coordination.run_id },
+              });
+              expect(root).toMatchObject({
+                tenantId: currentSalon.tenant.id,
+                principalJson: { userId: currentSalon.owner.id },
+                currentRevision: 1,
+              });
+              expect(
+                body.recommendation.evidence.opportunityRefs.map(
+                  (ref) => ref.id,
+                ),
+              ).toEqual(
+                message.name === 'expired'
+                  ? []
+                  : [currentSalon.opportunityId, currentSalon.taskId],
+              );
+              const persisted = await graph(currentSalon.tenant.id, root.id);
+              if (message.name === 'available') {
+                first = body;
+                firstGraph = persisted;
+              }
+              observations[message.name] = body;
+            }
+            expect(first).toBeDefined();
+            expect(
+              await graph(salon.tenant.id, first!.coordination.run_id),
+            ).toBe(firstGraph);
+            const runCount = await db.prisma.c9Run.count({
+              where: { tenantId: salon.tenant.id },
+            });
+            expect(runCount).toBe(
+              ['available', 'history', 'offline'].includes(message.name)
+                ? 1
+                : 2,
+            );
+            expect(reads).toHaveLength(
+              ['available', 'history', 'offline'].includes(message.name)
+                ? 2
+                : 4,
+            );
+            expect(reads.every((read) => read.endsWith(salon.tenant.id))).toBe(
+              true,
+            );
+            if (message.name === 'reconnected') {
+              expect(body!.coordination.run_id).not.toBe(
+                first!.coordination.run_id,
+              );
+              await db.prisma.membership.updateMany({
+                where: { tenantId: salon.tenant.id, userId: salon.owner.id },
+                data: { status: 'suspended' },
+              });
+            }
+            completed.push(message.name);
+            child.send({ type: 'continue:' + message.name });
+          })
+          .catch(fail);
+      });
+      child.once('error', fail);
+      child.once('close', (code) => {
+        clearTimeout(timer);
+        void pending.then(() => {
+          if (failure) reject(failure);
+          else if (code !== 0)
+            reject(new Error(`Browser child exited ${code}: ${stderr}`));
+          else resolve();
+        });
+      });
+    });
+    expect(completed).toEqual(expected);
+    const writes = http.recorder
+      .since(mark)
+      .filter(
+        (op) =>
+          op.write &&
+          (op.model
+            ? /^(Appointment|Opportunity|AgentTask|DomainEvent|Action|Inbox|Notification|Delivery|Outbox|Marketing|Team|OperationalAlert|ExpenseReminder)/.test(
+                op.model,
+              )
+            : /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+"?(?:Appointment|Opportunity|AgentTask|DomainEvent|Action|Inbox|Notification|Delivery|Outbox|Marketing|Team|OperationalAlert|ExpenseReminder)/i.test(
+                op.sql ?? '',
+              )),
+      );
+    expect(writes).toEqual([]);
+    writeFileSync(
+      reportPath!,
+      JSON.stringify(
+        {
+          contract: 'maya.explicit-occupancy-browser-http-pg-proof/1',
+          stage,
+          pid: process.pid,
+          postgresStarted: await postgresStarted(),
+          database: database.database,
+          syntheticCrmAdapter: true,
+          externalProviderAcceptance: false,
+          realModelAcceptance: false,
+          modelCalls: model.mock.calls.length,
+          businessWrites: writes.length,
+          browserAcceptance: true,
+          completed,
+          observations,
+        },
+        null,
+        2,
+      ) + '\n',
+      { mode: 0o600, flag: 'wx' },
+    );
+  }
   it('persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority', async () => {
+    if (stage === 'browser') {
+      await browserAcceptance();
+      return;
+    }
     if (stage === 'prepare') {
       const salon = await makeSalon(),
         accessToken = await login(salon),

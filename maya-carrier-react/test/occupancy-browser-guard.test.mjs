@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { admitted, installGuard, localOrigin, OWNER_REQUEST } from './occupancy-browser-guard.mjs';
+
+const origin = 'http://127.0.0.1:45678';
+const chat = { url: origin + '/api/ai/chat', method: 'POST', postData: JSON.stringify({ surface: 'web', messages: [{ role: 'user', content: OWNER_REQUEST }] }) };
+test('guard permits actual login/history/exact explicit chat and bundle reads only', () => {
+  assert.equal(admitted(chat, origin), true);
+  for (const pathname of ['/', '/m/ABCDEFG1/main.js', '/styles.css', '/api/ai/conversation'])
+    assert.equal(admitted({ url: origin + pathname, method: 'GET' }, origin), true);
+  for (const pathname of ['/api/auth/email/start', '/api/auth/email/verify', '/api/auth/refresh'])
+    assert.equal(admitted({ url: origin + pathname, method: 'POST' }, origin), true);
+});
+test('guard refuses outside origins, mutation/voice/provider routes, unexpected requests and credentials', () => {
+  for (const url of ['https://mayaos.ru/api/ai/chat', 'http://127.0.0.1:45679/api/ai/chat', 'http://localhost:45678/api/ai/chat', origin + '/api/widgets/intent', origin + '/api/ai/transcribe', origin + '/__dev/scenario', origin + '/api/ai/chat?fixture=1', 'http://user:pass@127.0.0.1:45678/api/ai/chat'])
+    assert.equal(admitted({ ...chat, url }, origin), false);
+  assert.equal(admitted({ ...chat, postData: '{}' }, origin), false);
+  assert.equal(admitted({ ...chat, postData: chat.postData.replace(OWNER_REQUEST, 'Запиши клиента') }, origin), false);
+  assert.equal(admitted({ ...chat, method: 'DELETE' }, origin), false);
+  for (const bad of ['https://127.0.0.1:45678', 'http://127.0.0.1:5432', 'http://127.0.0.1:55611', origin + '/api', origin + '?token=x']) assert.throws(() => localOrigin(bad));
+});
+test('request-stage guard continues admitted HTTP, blocks forbidden HTTP, never fulfills a response', async () => {
+  const calls = [], listeners = new Set();
+  const page = { sessionId: 'owned', browser: { listeners }, send: async (...args) => { calls.push(args); } };
+  const guard = await installGuard(page, origin);
+  const notify = [...listeners][0];
+  notify({ sessionId: 'owned', method: 'Fetch.requestPaused', params: { requestId: '1', request: chat } });
+  notify({ sessionId: 'owned', method: 'Fetch.requestPaused', params: { requestId: '2', request: { ...chat, url: 'https://foreign.example/x?secret=hidden' } } });
+  assert.deepEqual(guard.blocked, [{ method: 'POST', path: '/x' }]);
+  assert.deepEqual(guard.errors, []);
+  assert.deepEqual(calls.map(([method]) => method), ['Network.setBypassServiceWorker', 'Network.setBlockedURLs', 'Fetch.enable', 'Fetch.continueRequest', 'Fetch.failRequest']);
+  assert.equal(calls[2][1].patterns[0].requestStage, 'Request');
+});
