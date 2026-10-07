@@ -1,0 +1,10 @@
+{
+  "serializer1": "Stopped after9Clientturns due probe-only undefined ADMIN enum; fixed to ADMINISTRATOR. Not product/model failure.",
+  "serializer2": "Confirmed body-limit blocker, missing attempted/admitted distinction.",
+  "serializer3": "Added exact124386byte blocked request; predates early-wakeup guard.",
+  "serializer4": "Final current-source negative proof; no cap/prompt/descriptor narrowing.",
+  "lint": "Three source-style/type assertion findings fixed before final PASS.",
+  "finalNodeTests": 33,
+  "finalNewTests": 19,
+  "existingTests": 14
+}

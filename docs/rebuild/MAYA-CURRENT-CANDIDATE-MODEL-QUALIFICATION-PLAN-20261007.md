@@ -2,6 +2,8 @@
 
 Status: **PLAN ONLY / NOT AUTHORIZED / NOT EXECUTED**. One future candidate, one immutable corpus/fixture/rubric manifest, one budget ledger. The old paid pilot is closed; its permit, counters, fixtures and TTL are not reused. This plan does not establish that the owner's app, YCLIENTS integration, OCR or current model work in real use.
 
+Offline continuation: [the new bounded harness and corpus are implemented](MAYA-CURRENT-CANDIDATE-OFFLINE-CHECKPOINT-20261007.md). Actual serializer probing found a 124,386-byte Admin planner body against the proposed 98,304-byte cap with role-only/all-features descriptors. HTTP fixture bindings and exact feature filtering are still pending. This negative prerequisite result does not admit a paid batch or justify silently raising its limit.
+
 ## Reusable evidence and actual gaps
 
 The existing [qualification folder](../../maya-saas-backend/scripts/conversation-qualification/README.md) provides useful infrastructure. `budget-gate.mjs` reserves and fsyncs before every upstream attempt, includes retries, uses concurrency one, does not refund unknown usage, and fails closed on unsafe restart. `replay.mjs` feeds only user turns and actual previous responses into the authenticated chat route. It is explicitly `pilot_calibration_not_qualification`; its `not_evaluated` outcome is not a language grader. `http-live-pilot.ts` pins the old database/port and six Client cases. Enabling it again is not a new candidate run.

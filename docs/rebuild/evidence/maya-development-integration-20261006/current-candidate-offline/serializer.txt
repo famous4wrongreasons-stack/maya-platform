@@ -1,0 +1,3 @@
+[Nest] 79560  - 10/07/2026, 12:47:45 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:candidate_body_limit (попытка 1)
+[Nest] 79560  - 10/07/2026, 12:47:45 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:candidate_body_limit
+{"status":"SERIALIZER_PROBE_STOPPED_REMAINING_UNEXECUTED","attemptedSerializerCalls":19,"transportCalls":18,"maxAdmittedBodyBytes":87611,"maxAttemptedBodyBytes":124386,"admissionFailure":{"caseId":"current-admin-ordinary","stage":"planner","bytes":124386,"code":"candidate_body_limit"},"observedTurns":9,"actualPaidCalls":0}

@@ -1,0 +1,289 @@
+{
+  "mode": "OFFLINE_TRANSPORT_REPLAY_MECHANICS_ONLY",
+  "status": "replayed_ungraded",
+  "outcomes": [
+    {
+      "caseId": "current-booking-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-booking-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-booking-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-personal-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-personal-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-admin-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-admin-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-bi-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-bi-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-goods-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "current-goods-negative",
+      "outcome": "replayed_ungraded"
+    }
+  ],
+  "qualification": "not_evaluated",
+  "manifestSha256": "8e9d45d47ca089c34fecb70fdc2c2292ae495a96805a331c7b6a3f0d8c2ccb76",
+  "sourceCandidate": "899f27b2c72a3faa35d3da0364de0bb98035bb3f",
+  "stats": {
+    "dialogs": 24,
+    "turns": 33,
+    "attempts": 33,
+    "inputTokens": 142986,
+    "outputTokens": 67584,
+    "reservedNanoUsd": 456374160,
+    "halted": false
+  },
+  "injectedTransportCalls": 33,
+  "blockedNetworkCalls": 0,
+  "actualPaidCalls": 0,
+  "actualHttpCalls": 0,
+  "actualCrmEffects": 0,
+  "httpFixtureBindings": "NOT_IMPLEMENTED_FOR_THIS_MANIFEST",
+  "actualModelSerializer": "NOT_EXERCISED",
+  "modelQuality": "NOT_EVALUATED",
+  "records": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-admin-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "outcome": "response"
+    },
+    {
+      "caseId": "current-goods-negative",
+      "turn": 1,
+      "outcome": "response"
+    }
+  ]
+}

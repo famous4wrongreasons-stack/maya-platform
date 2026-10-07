@@ -1,0 +1,203 @@
+{
+  "mode": "ACTUAL_MODEL_SERIALIZER_CANNED_TRANSPORT_ONLY",
+  "status": "SERIALIZER_PROBE_STOPPED_REMAINING_UNEXECUTED",
+  "candidate": "899f27b2c72a3faa35d3da0364de0bb98035bb3f",
+  "manifestSha256": "8e9d45d47ca089c34fecb70fdc2c2292ae495a96805a331c7b6a3f0d8c2ccb76",
+  "attemptedSerializerCalls": 19,
+  "transportCalls": 18,
+  "maxAdmittedBodyBytes": 87611,
+  "maxAttemptedBodyBytes": 124386,
+  "requestSizes": [
+    {
+      "caseId": "current-booking-ordinary",
+      "stage": "planner",
+      "bytes": 87429
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "stage": "final",
+      "bytes": 13915
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "stage": "planner",
+      "bytes": 87594
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "stage": "final",
+      "bytes": 14080
+    },
+    {
+      "caseId": "current-booking-correction",
+      "stage": "planner",
+      "bytes": 87429
+    },
+    {
+      "caseId": "current-booking-correction",
+      "stage": "final",
+      "bytes": 13915
+    },
+    {
+      "caseId": "current-booking-correction",
+      "stage": "planner",
+      "bytes": 87611
+    },
+    {
+      "caseId": "current-booking-correction",
+      "stage": "final",
+      "bytes": 14097
+    },
+    {
+      "caseId": "current-booking-negative",
+      "stage": "planner",
+      "bytes": 87443
+    },
+    {
+      "caseId": "current-booking-negative",
+      "stage": "final",
+      "bytes": 13929
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "stage": "planner",
+      "bytes": 87397
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "stage": "final",
+      "bytes": 13883
+    },
+    {
+      "caseId": "current-personal-correction",
+      "stage": "planner",
+      "bytes": 87400
+    },
+    {
+      "caseId": "current-personal-correction",
+      "stage": "final",
+      "bytes": 13886
+    },
+    {
+      "caseId": "current-personal-correction",
+      "stage": "planner",
+      "bytes": 87607
+    },
+    {
+      "caseId": "current-personal-correction",
+      "stage": "final",
+      "bytes": 14093
+    },
+    {
+      "caseId": "current-personal-negative",
+      "stage": "planner",
+      "bytes": 87397
+    },
+    {
+      "caseId": "current-personal-negative",
+      "stage": "final",
+      "bytes": 13883
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "stage": "planner",
+      "bytes": 124386
+    }
+  ],
+  "admissionFailure": {
+    "caseId": "current-admin-ordinary",
+    "stage": "planner",
+    "bytes": 124386,
+    "code": "candidate_body_limit"
+  },
+  "stats": {
+    "dialogs": 7,
+    "turns": 10,
+    "attempts": 18,
+    "inputTokens": 986716,
+    "outputTokens": 29232,
+    "reservedNanoUsd": 1418223840,
+    "halted": false
+  },
+  "observations": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 2,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "role": "client",
+      "tools": 14,
+      "serializer": "planner_and_final",
+      "status": "CANNED_PARSER_PASS"
+    }
+  ],
+  "modelQuality": "NOT_EVALUATED",
+  "actualPaidCalls": 0,
+  "actualHttpCalls": 0,
+  "actualCrmEffects": 0,
+  "authDomainPiiPipeline": "NOT_EXERCISED",
+  "fixtureBindings": "NOT_IMPLEMENTED_FOR_THIS_MANIFEST",
+  "registryScope": "CURRENT_ROLE_ALLOWED_WEB_DESCRIPTORS_ALL_FEATURES_ASSUMED_NO_TOOL_EXECUTION"
+}
