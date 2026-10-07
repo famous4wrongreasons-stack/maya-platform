@@ -1,0 +1,52 @@
+{
+  "contract": "maya.crm-branch-binding-http-pg-proof/1",
+  "stage": "prepare",
+  "candidateCommit": "d1e42074400a9d706ab5ddbac8b4daf3af137346",
+  "sourceHashes": {
+    "src/ai-tools/ai-tool-handler.service.ts": "18b15b1491f102f636720687f04e1873101e3230a5033d78fd035303cec78249",
+    "src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+    "src/crm/crm-adapter.interface.ts": "785b6722e055901e11f017f68ec02523a782cb79cc9e91fc7b138178b4e85eee",
+    "src/crm/adapters/yclients-crm.adapter.ts": "a113f5f1bfffed97a476a5fa8ebdcc67ccad527e48c35a066c1f6e514d02d1bb",
+    "src/crm/crm.service.ts": "09449a14e647f0fb95e44fc86b6448cc2a46881afc18116d78bc555334916832",
+    "src/crm/client-appointment-reschedule.service.ts": "1415f600552ae79ab0ec3393e3be499312411ccfe59ed2fb5a3c8e6dd6fb2e89",
+    "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "9dbadc9d9e1d0e64191daed95e2c89b371dc1f9016fc77e7f4846e4d38848779",
+    "src/package5-wave3/package5-wave3.service.ts": "2573ede2b1fb9327bd7ee20dc409c8bd4d60244ad36c582e33f778edaf47664c",
+    "src/action-engine/action-engine.kernel.ts": "2a21a5200d5558c36555318ecdea79d7a5d0cf20682767418d8259a3a1878f46",
+    "src/action-engine/action-engine.runtime.ts": "7c035d4c12fb17329907cfc450fce6e81d2233ce78baa87be4ed489c663b9c3d",
+    "src/ai-tools/ai-tool-runtime.service.ts": "1c7c3ba0f7691057002df93043d2d326231500b36ddf11d66ec3f179a3808ef0",
+    "src/appointments/appointments.service.ts": "c6e2ef4b4bfb0fd6de8c6f8deac6a4afbf7cb51e25f0e35aa9c6d5799178af9b",
+    "scripts/c9-occupancy-proof.mjs": "3851f3dbc2b3079cecb9e0e32b88e268c6e0a2e789606d4aad7d43d10cbb2371",
+    "test/widgets-live/crm-branch-binding-restart.probe-spec.ts": "3e2c741923672373340b34d427f4e5feacfc640c9bc585ae32e5430b8a62ff40"
+  },
+  "checkpoints": [
+    "foreign binding refused before provider read",
+    "A17 HTTP install persists exact pending binding",
+    "A17 activation and native branch availability at branch timezone",
+    "actual PG bounded immutable origin lookup succeeds and refuses absent source"
+  ],
+  "branchBindingHash": "31201bd0a936bd062c394de538bf7fb3dc90e757db940825f83be87c85ad7ad2",
+  "actions": [
+    {
+      "capability": "package5.wave3.install-crm-credentials.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.activate-crm-integration.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.confirm-crm-import.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "crm.appointment.create.v1",
+      "state": "SUCCEEDED"
+    }
+  ],
+  "providerReadCount": 34,
+  "providerWrites": 0,
+  "modelCalls": 0,
+  "externalCalls": 0,
+  "forbidden": [],
+  "qualification": "LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; canonical origin fixture is not a provider booking; no live acceptance"
+}

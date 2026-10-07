@@ -1,0 +1,40 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_358ce4633b0f on 127.0.0.1:51992 (local)
+[31m[Nest] 47029  - [39m10/07/2026, 6:35:22 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 47029  - [39m10/07/2026, 6:35:22 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/crm-branch-binding-restart.probe-spec.ts
+  native explicit branch binding across HTTP/application/PG restart
+    ✕ stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL (405 ms)
+
+  ● native explicit branch binding across HTTP/application/PG restart › stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL
+
+    DriverAdapterError: ActionExecution counters/revision cannot move backwards
+
+      369 |       });
+      370 |       saved.originExecutionId = execution.id;
+    > 371 |       await db.prisma.actionExecution.update({
+          |       ^
+      372 |         where: { id: execution.id },
+      373 |         data: {
+      374 |           state: 'SUCCEEDED',
+
+      at PrismaPgAdapter.onError (../node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PrismaPgAdapter.performIO (../node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PrismaPgAdapter.queryRaw (../node_modules/@prisma/adapter-pg/dist/index.js:604:30)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:26)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:213:41)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:128:29)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.run (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at Object.<anonymous> (widgets-live/crm-branch-binding-restart.probe-spec.ts:371:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.309 s, estimated 2 s
+Ran all test suites within paths "test/widgets-live/crm-branch-binding-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-branch-binding-http-20261007-03/prepare-jest.json

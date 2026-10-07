@@ -1,0 +1,36 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_c5292282eea8 on 127.0.0.1:51698 (local)
+FAIL test/widgets-live/crm-branch-binding-restart.probe-spec.ts
+  native explicit branch binding across HTTP/application/PG restart
+    ✕ stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL (1 ms)
+
+  ● native explicit branch binding across HTTP/application/PG restart › stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL
+
+    TypeError: Cannot read properties of undefined (reading 'provide')
+
+      202 | export async function bootFixtureContext(): Promise<FixtureContext> {
+      203 |   assertProofDatabase(process.env);
+    > 204 |   const moduleRef = await Test.createTestingModule({
+          |                     ^
+      205 |     imports: [
+      206 |       harnessConfig(),
+      207 |       PrismaModule,
+
+      at Module.isCustomProvider (../node_modules/@nestjs/core/injector/module.js:185:52)
+      at Module.addExportedProviderOrModule (../node_modules/@nestjs/core/injector/module.js:285:18)
+      at NestContainer.addExportedProviderOrModule (../node_modules/@nestjs/core/injector/container.js:182:19)
+      at DependenciesScanner.insertExportedProviderOrModule (../node_modules/@nestjs/core/scanner.js:297:24)
+      at ../node_modules/@nestjs/core/scanner.js:156:50
+          at Array.forEach (<anonymous>)
+      at DependenciesScanner.reflectExports (../node_modules/@nestjs/core/scanner.js:156:17)
+      at DependenciesScanner.scanModulesForDependencies (../node_modules/@nestjs/core/scanner.js:109:18)
+      at DependenciesScanner.scan (../node_modules/@nestjs/core/scanner.js:32:9)
+      at TestingModuleBuilder.compile (../node_modules/@nestjs/testing/testing-module.builder.js:70:9)
+      at bootFixtureContext (widgets-live/support/bootstrap.ts:204:21)
+      at Object.<anonymous> (widgets-live/crm-branch-binding-restart.probe-spec.ts:79:10)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        4.729 s
+Ran all test suites within paths "test/widgets-live/crm-branch-binding-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-branch-binding-http-20261007-01/prepare-jest.json

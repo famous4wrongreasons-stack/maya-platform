@@ -1,0 +1,115 @@
+{
+  "contract": "maya.crm-branch-binding-checkpoint/1",
+  "candidateCommit": "d1e42074400a9d706ab5ddbac8b4daf3af137346",
+  "baselineCommit": "7a3dac581a36fcd6373bf5fa9d62f3da35ad7ace",
+  "codeCommit": "86ababd0",
+  "status": "QUALIFIED_LOCAL_DEVELOPMENT_CHECKPOINT",
+  "checks": {
+    "unitTests": 388,
+    "unitSuites": 16,
+    "driverTests": 7,
+    "httpStages": 2,
+    "httpCheckpoints": 7,
+    "fullWidgetsTypeScript": "PASS",
+    "scopedEslint": "PASS",
+    "diffCheck": "PASS"
+  },
+  "sourceHashes": {
+    "maya-saas-backend/scripts/c9-occupancy-proof.mjs": "3851f3dbc2b3079cecb9e0e32b88e268c6e0a2e789606d4aad7d43d10cbb2371",
+    "maya-saas-backend/scripts/c9-occupancy-proof.test.mjs": "d7e88acbcfc7f6d73dcfd4e3aaad44f38433b78881b69dafd120385d5341f150",
+    "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "2a21a5200d5558c36555318ecdea79d7a5d0cf20682767418d8259a3a1878f46",
+    "maya-saas-backend/src/action-engine/action-engine.runtime.ts": "7c035d4c12fb17329907cfc450fce6e81d2233ce78baa87be4ed489c663b9c3d",
+    "maya-saas-backend/src/action-engine/client-booking-idempotency.kernel.spec.ts": "83021381147325298237ffaebef2d03b736b3a8f78190054b40bf945ac4ee9a9",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "18b15b1491f102f636720687f04e1873101e3230a5033d78fd035303cec78249",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "eb414020f50e6578b3623520c68ac91f0f51cab2ee5a4442a26d8ac6ff405d52",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "1c7c3ba0f7691057002df93043d2d326231500b36ddf11d66ec3f179a3808ef0",
+    "maya-saas-backend/src/ai-tools/ai-tool.types.ts": "9ff3edb71d76af34d007c60fbc5fac6739cf885320035b98b617fd6f37d53fb0",
+    "maya-saas-backend/src/appointments/appointments.service.spec.ts": "fd52851c1dbb7dd3cd3f280a7d67c2fdaa27e9b422b87ea37eac653f2484c181",
+    "maya-saas-backend/src/appointments/appointments.service.ts": "c6e2ef4b4bfb0fd6de8c6f8deac6a4afbf7cb51e25f0e35aa9c6d5799178af9b",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts": "85ef4b4d95188408d2fb2350377e2fab9c4667e91209760c11d02a43e134fc50",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "a113f5f1bfffed97a476a5fa8ebdcc67ccad527e48c35a066c1f6e514d02d1bb",
+    "maya-saas-backend/src/crm/client-appointment-reschedule.service.spec.ts": "9250dd899132003543997b87095a6a70d8362a14062636c607c7201d3c0ec482",
+    "maya-saas-backend/src/crm/client-appointment-reschedule.service.ts": "1415f600552ae79ab0ec3393e3be499312411ccfe59ed2fb5a3c8e6dd6fb2e89",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "785b6722e055901e11f017f68ec02523a782cb79cc9e91fc7b138178b4e85eee",
+    "maya-saas-backend/src/crm/crm-branch-binding.spec.ts": "0e197290a936923eae9402ddd3e202b891511680925a14623743991add4a9562",
+    "maya-saas-backend/src/crm/crm-provider-settings.spec.ts": "1d29541510b0ad7260a4ebc98b12200e31cddbfc7efb1c5cf914a1aba2850144",
+    "maya-saas-backend/src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+    "maya-saas-backend/src/crm/crm.service.ts": "09449a14e647f0fb95e44fc86b6448cc2a46881afc18116d78bc555334916832",
+    "maya-saas-backend/src/crm/dto/connect-crm-integration.dto.ts": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+    "maya-saas-backend/src/crm/dto/create-crm-integration.dto.ts": "de5d4146e154fbb987c1ef5c91308293abdefeaa57f2746b397065811dea9f63",
+    "maya-saas-backend/src/crm/dto/update-crm-integration.dto.ts": "e0c560cc2b7dc1999e5371e1acaf8cd22ebdb7cbdb8bb021b4a23bebe70cc55e",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-branch-binding.spec.ts": "8c964a8d5c01aab95a8754748d5aa43ac314ae78b1faa66ac576caba4314309b",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts": "b409df48beb5b685f8623b8f54439f3cddd0bceb5bad5c9b7300fba7f3449388",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "9dbadc9d9e1d0e64191daed95e2c89b371dc1f9016fc77e7f4846e4d38848779",
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "2573ede2b1fb9327bd7ee20dc409c8bd4d60244ad36c582e33f778edaf47664c",
+    "maya-saas-backend/test/widgets-live/crm-branch-binding-restart.probe-spec.ts": "3e2c741923672373340b34d427f4e5feacfc640c9bc585ae32e5430b8a62ff40"
+  },
+  "cleanup": [
+    {
+      "attempt": 1,
+      "status": "failed",
+      "clusterStopped": true,
+      "postmasterPidAbsent": true
+    },
+    {
+      "attempt": 2,
+      "status": "failed",
+      "clusterStopped": true,
+      "postmasterPidAbsent": true
+    },
+    {
+      "attempt": 3,
+      "status": "failed",
+      "clusterStopped": true,
+      "postmasterPidAbsent": true
+    },
+    {
+      "attempt": 4,
+      "status": "passed",
+      "clusterStopped": true,
+      "postmasterPidAbsent": true
+    }
+  ],
+  "failedAttempts": {
+    "01": "Early static kernel/registry imports exposed circular Nest export during fixture bootstrap; delayed test imports after canonical graph.",
+    "02": "Synthetic canonical origin lacked mandatory immutable caller key; added existing idempotency scope/key.",
+    "03": "Synthetic direct terminal state update rejected by immutable AE database revision trigger; fixture now uses kernel claim/MAY/ACK/finalizeSuccess, with no direct state mutation."
+  },
+  "limits": [
+    "one configured company to one explicit tenant-owned branch",
+    "provider transport is finite synthetic GET-only",
+    "kernel origin fixtures simulate success without provider dispatch",
+    "no native reschedule UNKNOWN restart acceptance",
+    "no new C9 native composed chat proof beyond existing separately qualified C9 tests",
+    "no background authority, new schema, retention policy, live model/provider or production acceptance",
+    "website/device/production/push/merge untouched"
+  ],
+  "artifacts": {
+    "checks/driver-01.log": "f4447f0e2b9697989f6049a2e7152b5b15359ffc380c2f88bdb2dbe1d9c4cc89",
+    "checks/lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/types-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/unit-final.log": "331cc20c19f54b3f32c06f1fd2eb16ecccde92209d40f346f8d71c2aeff0f346",
+    "failed-01/manifest.json": "c38b12a3a91b387829768a558e8f8d2e8f41fcb4bcf0a9c2d4ab262fea63e9be",
+    "failed-01/pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "failed-01/prepare-jest.json": "6f56d5dbb4114d06f61ff2c27751f500816a8c5505be9622cc804fe2a360e6c7",
+    "failed-01/prepare.log": "dae38ce26db3c7a88b7acf9a5298952c9673bfcc17ca1db3daab0b77083f9e4a",
+    "failed-02/manifest.json": "35de0c4399b74ac12e6af14dc40fe109b2ef4112e3fe15977d1ae8780ee2a3ae",
+    "failed-02/pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "failed-02/prepare-jest.json": "48ae43e3e687cd67fee49adea80f75ce1d833edb5eaa4e0b8c0a0c697711ab29",
+    "failed-02/prepare.log": "0fece211774cc1415198be60c4da06f9ef296f79b218939e239f8d0fe8eaa2d8",
+    "failed-03/manifest.json": "43250e10f5898ab7ac9578c0e3c9c5aff33a8cfb076aee764700a92da492c227",
+    "failed-03/pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "failed-03/prepare-jest.json": "da30327c72b14b5329ebeb6959aac022a8a15fc36a94b76824c0ec870296f3a6",
+    "failed-03/prepare.log": "f4eefb399a44855723acbfbbbd95588f8e521550e8ef43b03ebbe2d8bb14401e",
+    "final-04/manifest.json": "4e39e70747567d76c603ecb5af8bd212523d3dc1d8ff71d1e899ab2f76990062",
+    "final-04/pg-restart.log": "bac7abf7364be600303283a1d16ad165b699730ce72ec9984e271c9e63595482",
+    "final-04/pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "final-04/prepare-jest.json": "a484d7177a6e8a2ad0a1b72c070c95c13718cb7fbe8b65d7bae9ea120ff49d50",
+    "final-04/prepare.json": "f9eee04f217c0f9b245cabefea21c98009886f81494694d48b2d25963cd03243",
+    "final-04/prepare.log": "913b00424460be750663a7fbbc9b1d2dcc4eb1acab3911a5f83acd64793f76b6",
+    "final-04/resume-jest.json": "7cda87baa70f5a5ee613779e8794d9d451d6a8c1ef803dc0b88bab8abfaf4c13",
+    "final-04/resume.json": "fdb8089f9a692e2b7bc7eaa2915e9031c33ed788429cd6aafbd3bff91165d620",
+    "final-04/resume.log": "44ab1a1597dc154e2ef64793437d3c9f34c3c7556a0f8207381494c4f8fb852b",
+    "independent-review.json": "27c76402fddd55b5cc1525c106099009655817a1da1d0dae60b0166adf287e19"
+  }
+}

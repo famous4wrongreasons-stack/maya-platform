@@ -1,0 +1,10 @@
+[Nest] 49372  - 10/07/2026, 9:39:24 PM    WARN [CrmService] CRM preview failed provider=yclients operation=connection_check status=unknown
+[Nest] 49372  - 10/07/2026, 9:39:24 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token
+[Nest] 49372  - 10/07/2026, 9:39:24 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured
+[Nest] 49372  - 10/07/2026, 9:39:24 PM    WARN [CrmService] CRM team access synchronization deferred tenant=tenant-1: unavailable
+
+Test Suites: 16 passed, 16 total
+Tests:       388 passed, 388 total
+Snapshots:   0 total
+Time:        1.99 s, estimated 3 s
+Ran all test suites within paths "src/crm/crm-branch-binding.spec.ts", "src/crm/crm-provider-settings.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/crm/client-appointment-reschedule.service.spec.ts", "src/crm/crm.service.spec.ts", "src/crm/opportunity-lifecycle.runner.spec.ts", "src/appointments/appointments.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts", "src/package5-wave3/package5-wave3-branch-binding.spec.ts", "src/action-engine/client-booking-idempotency.kernel.spec.ts", "src/action-engine/action-engine.runtime-concurrency.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts", "src/orchestration/c9.occupancy.spec.ts".

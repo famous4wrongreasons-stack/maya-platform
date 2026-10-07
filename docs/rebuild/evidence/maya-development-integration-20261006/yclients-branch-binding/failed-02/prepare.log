@@ -1,0 +1,29 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_1dfce77e1caf on 127.0.0.1:51880 (local)
+[31m[Nest] 46438  - [39m10/07/2026, 6:34:16 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 46438  - [39m10/07/2026, 6:34:16 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/crm-branch-binding-restart.probe-spec.ts
+  native explicit branch binding across HTTP/application/PG restart
+    ✕ stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL (373 ms)
+
+  ● native explicit branch binding across HTTP/application/PG restart › stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL
+
+    ActionContractError: Canonical booking requires the common immutable caller binding
+
+      1680 |         !requestIdempotencyKeyHash
+      1681 |       )
+    > 1682 |         throw new ActionContractError(
+           |               ^
+      1683 |           'Canonical booking requires the common immutable caller binding',
+      1684 |         );
+      1685 |       const snapshot = normalizeClientBookingIntent(
+
+      at ActionEngineKernel.normalizeRequest (../src/action-engine/action-engine.kernel.ts:1682:15)
+      at ActionEngineKernel.createExecutionForControlledFixture (../src/action-engine/action-engine.kernel.ts:277:47)
+      at Object.<anonymous> (widgets-live/crm-branch-binding-restart.probe-spec.ts:333:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.3 s, estimated 5 s
+Ran all test suites within paths "test/widgets-live/crm-branch-binding-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-branch-binding-http-20261007-02/prepare-jest.json
