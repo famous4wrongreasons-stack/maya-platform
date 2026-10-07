@@ -32,6 +32,9 @@ export const gate1 = async (
   )
     return expired();
 
+  // A withdrawn emission keeps its sealed audit history, never its action admission.
+  if (r.emissionLifecycleState === 'CANCELLED') return expired();
+
   if (r.expiresAt.getTime() <= ctx.now.getTime()) return expired();
   // Single use is what makes a replayed tap find a consumed row instead of a second effect.
   if (r.singleUse && r.consumedAt !== null) return expired();

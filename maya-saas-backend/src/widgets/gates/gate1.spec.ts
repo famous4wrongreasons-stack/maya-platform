@@ -69,3 +69,14 @@ describe('P-G15a Gate 1 — seal, binding and lifecycle in V1.1 order', () => {
     ]);
   });
 });
+
+it('refuses a cancelled TIME_SLOT_SELECTOR DRAFT despite a valid seal and unused token', async () => {
+  const record = rec({
+    widgetKind: 'TIME_SLOT_SELECTOR',
+    effect: 'DRAFT',
+    emissionLifecycleState: 'CANCELLED',
+    consumedAt: null,
+    supersededByWidgetId: null,
+  });
+  expect(await gate1(ctx(record), verifier())).toEqual({ outcome: 'expired' });
+});

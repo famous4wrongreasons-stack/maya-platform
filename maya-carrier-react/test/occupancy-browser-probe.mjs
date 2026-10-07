@@ -64,18 +64,23 @@ async function login(page, email) {
   assert.ok(await page.waitFor('!!Q.code()'));
   await snapshot(page);
   assert.equal(await page.fill('Q.code()', response.debug_code), true);
+  const priorHistory = page.apiRequests('/ai/conversation').length;
+  const priorWidgets = page.apiRequests('/widgets/resolve').length;
   await clickNamed(page, 'Войти');
   assert.ok(await page.waitFor('!!Q.composer()'), 'Real UI sign-in must complete');
   // Do not publish auth bodies, code, email, tokens, console or request postData.
   delete response.debug_code;
   assert.equal(response.retry_after_seconds, 60, 'Existing local profile cooldown changed; review acceptance timing');
-  await until(() => page.apiRequests('/ai/conversation').some((r) => r.finishedAt), 'HTTP history');
+  await until(() => page.apiRequests('/ai/conversation').slice(priorHistory).some((r) => r.finishedAt), 'HTTP history');
+  await until(() => page.apiRequests('/widgets/resolve').slice(priorWidgets).some((r) => r.finishedAt && r.status === 200), 'HTTP widget history');
+  await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
   return Date.now() + (response.retry_after_seconds + 1) * 1000;
 }
 async function sendOwnerRequest(page) {
   const view = await snapshot(page);
   assert.ok(view.controls.some((control) => control.name === 'Сообщение для MAYA'));
   assert.equal(await page.fill('Q.composer()', OWNER_REQUEST), true);
+  assert.ok(await page.waitFor('!!Q.byName("button", /^Отправить$/) && !Q.byName("button", /^Отправить$/).disabled'));
   await clickNamed(page, 'Отправить');
 }
 async function answer(page, before, outcome, replyCount = 1) {

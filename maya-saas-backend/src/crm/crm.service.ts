@@ -2133,7 +2133,7 @@ export class CrmService {
     if (!tenant || (branchId && !branch))
       throw new NotFoundException('Capacity source branch not found');
     const integration = tenant.crmIntegration;
-    if (tenant.calendarSource === CalendarSource.EXTERNAL) {
+    if (tenant.calendarSource === 'external') {
       let bound = !branchId;
       if (
         integration &&

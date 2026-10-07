@@ -100,7 +100,7 @@ export class C9OccupancySource {
 
   /** Transient verifier; no new durable identity or retention owner. */
   async readForExposure(runId: string) {
-    let revalidate: () => Promise<boolean> = async () => true;
+    let revalidate: () => Promise<boolean> = () => Promise.resolve(true);
     const projection = await this.readProjection(runId, (verify) => {
       revalidate = verify;
     });

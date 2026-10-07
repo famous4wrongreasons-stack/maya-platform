@@ -345,9 +345,9 @@ it('withholds current availability when source changes after settlement without 
 
 it('rechecks authority after the final metadata verifier', async () => {
   const f = fixture();
-  f.source.revalidate.mockImplementation(async () => {
+  f.source.revalidate.mockImplementation(() => {
     f.source.authorize.mockRejectedValue(new Error('revoked'));
-    return true;
+    return Promise.resolve(true);
   });
   await expect(f.create().checkCancellationWindows(f.turn)).rejects.toThrow(
     'revoked',

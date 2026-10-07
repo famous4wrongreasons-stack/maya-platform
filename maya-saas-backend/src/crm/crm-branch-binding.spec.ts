@@ -618,7 +618,7 @@ it('capacity metadata uses the selected branch timezone and no provider transpor
     defaultTimezone: 'UTC',
     branches: [f.branch],
     crmIntegration: f.integration,
-  } as never);
+  });
   global.fetch = jest.fn();
   const source = await f.run(() =>
     f.service.readCapacitySource('tenant-a', 'branch-a'),
@@ -643,7 +643,7 @@ it.each(['timezone', 'binding', 'foreign', 'calendar'])(
       branches: [f.branch],
       crmIntegration: f.integration,
     };
-    f.prisma.tenant.findUnique.mockResolvedValue(snapshot as never);
+    f.prisma.tenant.findUnique.mockResolvedValue(snapshot);
     const read = () =>
       f.run(() => f.service.readCapacitySource('tenant-a', 'branch-a'));
     const source = await read();

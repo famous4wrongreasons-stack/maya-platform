@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -24,6 +25,15 @@ import {
 } from './support/http-bootstrap';
 import type { Fixtures, TenantFixture, UserFixture } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
+
+import {
+  firstOption,
+  firstSlot,
+  object,
+  observe,
+  startBooking,
+  submit,
+} from './support/release-booking-flow';
 
 // Mandatory two-process proof, never an in-memory "restart" fallback. The driver
 // creates its own cluster/database, runs prepare, restarts PG, then runs resume.
@@ -247,7 +257,10 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         .set('idempotency-key', randomUUID())
         .send(body);
     const preview = await personal('appointments/preview', dto);
-    expect({ status: preview.status, body: preview.body }).toMatchObject({
+    expect({
+      status: preview.status,
+      body: preview.body as unknown,
+    }).toMatchObject({
       status: 201,
       body: {
         timezone: 'Europe/Moscow',
@@ -281,7 +294,10 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
       ...dto,
       previewFactsHash: factsHash,
     });
-    expect({ status: changed.status, body: changed.body }).toMatchObject({
+    expect({
+      status: changed.status,
+      body: changed.body as unknown,
+    }).toMatchObject({
       status: 409,
       body: { error: { code: 'booking_preview_stale' } },
     });
@@ -293,7 +309,10 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
       ...dto,
       previewFactsHash: factsHash,
     });
-    expect({ status: removed.status, body: removed.body }).toMatchObject({
+    expect({
+      status: removed.status,
+      body: removed.body as unknown,
+    }).toMatchObject({
       status: 503,
       body: { error: { code: 'booking_branch_source_unavailable' } },
     });
@@ -328,7 +347,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
     });
     observations.branchPreview = {
       previewStatus: preview.status,
-      branchTimezone: preview.body.timezone,
+      branchTimezone: (preview.body as { timezone: string }).timezone,
       companyChangeStatus: changed.status,
       removalStatus: removed.status,
       historicalRevision: historical.coordination.revision,
@@ -338,6 +357,113 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
       actionExecutions: 0,
       providerWrites: 0,
     };
+  }
+  async function cancelledSlotAdmission() {
+    const { AiToolRuntimeService } = createRequire(__filename)(
+      '../../src/ai-tools/ai-tool-runtime.service',
+    ) as typeof import('../../src/ai-tools/ai-tool-runtime.service');
+    const runtime = http.app.get(AiToolRuntimeService);
+    const original = runtime.execute.bind(runtime);
+    const cases = [];
+    for (const failureAt of [2, 3]) {
+      const s = await startBooking(fx, http);
+      touchedTenants.push(s.tenant.id);
+      const branch = await db.prisma.branch.create({
+        data: {
+          tenantId: s.tenant.id,
+          name: 'Synthetic internal branch',
+          timezone: 'Europe/Moscow',
+        },
+      });
+      await db.prisma.internalProvider.update({
+        where: { id: s.source.staffId },
+        data: { branchId: branch.id },
+      });
+      await observe(http, s.token, s.envelope);
+      const staff = object(
+        (
+          await submit(
+            http,
+            s.token,
+            s.envelope,
+            'REFINE',
+            firstOption(s.envelope),
+          )
+        ).next_envelope,
+      );
+      await observe(http, s.token, staff);
+      let validations = 0;
+      const spy = jest
+        .spyOn(runtime, 'execute')
+        .mockImplementation((actor, name, dto, internal = {}) =>
+          original(actor, name, dto, {
+            ...internal,
+            onAvailabilityScope: (check) =>
+              internal.onAvailabilityScope?.(async () => {
+                validations += 1;
+                if (validations === failureAt)
+                  await db.prisma.branch.update({
+                    where: { id: branch.id },
+                    data: { timezone: 'UTC' },
+                  });
+                await check();
+              }),
+          }),
+        );
+      let declined: Record<string, unknown>;
+      try {
+        declined = await submit(
+          http,
+          s.token,
+          staff,
+          'REFINE',
+          firstOption(staff),
+        );
+      } finally {
+        spy.mockRestore();
+      }
+      expect(declined.next_envelope ?? null).toBeNull();
+      expect(validations).toBe(failureAt);
+      const rows = await db.prisma.widgetEmission.findMany({
+        where: { tenantId: s.tenant.id, kind: 'TIME_SLOT_SELECTOR' },
+        include: { renderReceipts: true },
+      });
+      expect(rows).toHaveLength(1);
+      expect(rows[0].lifecycleState).toBe('CANCELLED');
+      const slot = object(rows[0].renderReceipts[0].emittedEnvelopeJson);
+      const restored = await http.resolveWidgets(s.token, {
+        thread_page: { limit: 50 },
+      });
+      expect(restored.status).toBe(200);
+      // Even the original valid sealed DRAFT cannot turn cancelled history into a preview.
+      const denied = await submit(
+        http,
+        s.token,
+        slot,
+        'DRAFT',
+        firstSlot(slot).slot_ref,
+      );
+      expect(denied.outcome).toBe('EXPIRED');
+      expect(
+        await db.prisma.widgetEmission.count({
+          where: { tenantId: s.tenant.id, kind: 'BOOKING_CONFIRMATION' },
+        }),
+      ).toBe(0);
+      expect(
+        await db.prisma.actionExecution.count({
+          where: { tenantId: s.tenant.id },
+        }),
+      ).toBe(0);
+      cases.push({
+        failureAt,
+        state: rows[0].lifecycleState,
+        restoreStatus: restored.status,
+        draftOutcome: denied.outcome,
+        confirmations: 0,
+        actionExecutions: 0,
+      });
+    }
+    observations.cancelledSlotAdmission = cases;
   }
   async function postgresStarted() {
     const rows = await db.prisma.$queryRaw<
@@ -1184,6 +1310,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         currentTasks: 0,
       });
       await branchPreviewNegatives();
+      await cancelledSlotAdmission();
       reads.length = 0;
       const foreign = await request(http.app.getHttpServer())
         .get(`/api/orchestration/runs/${replay.coordination.run_id}`)
