@@ -86,3 +86,7 @@ test('branch binding uses the same owned serial restart driver without a carrier
  assert.ok(plan[4].args.includes('test/widgets-live/crm-branch-binding-restart.probe-spec.ts'));
  assert.throws(()=>proofCommands({...args,browser:true}),/exclusive/);
 });
+
+test('command deadline override rejects unbounded or malformed values before spawn/files', async()=>{
+ for (const timeoutMs of [0,-1,720001,Infinity,1.5,'720000']) await assert.rejects(runCommand({name:'browser',timeoutMs}, {}, '/not-created', {}), /bounded/);
+});

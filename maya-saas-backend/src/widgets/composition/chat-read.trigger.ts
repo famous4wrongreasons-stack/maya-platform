@@ -200,7 +200,12 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
               row.result_kind === 'STAFF_SELECTOR' ||
               row.result_kind === 'TIME_SLOT_SELECTOR'
             ? await this.emitter
-                .emitBookingSelector(mintRequest, { source: input.result })
+                .emitBookingSelector(mintRequest, {
+                  source: input.result,
+                  ...(input.revalidateSource
+                    ? { revalidateSource: input.revalidateSource }
+                    : {}),
+                })
                 .catch((error: unknown) => {
                   // A completed READ can truthfully have no options, or no
                   // inherited service selection. It still remains a READ;

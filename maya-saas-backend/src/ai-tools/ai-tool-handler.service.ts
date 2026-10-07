@@ -8,6 +8,7 @@ import {
 import { GovernedSettingsReadService } from '../package5-wave1/governed-settings.read';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpException,
   Injectable,
@@ -1512,6 +1513,10 @@ export class AiToolHandlerService {
     tenantId: string,
     args: ValidatedAiToolArguments,
   ) {
+    const branchId = typeof args.branch_id === 'string' ? args.branch_id : null;
+    const branchSourceRevision = branchId
+      ? await this.crmService.readBranchAvailabilityRevision(tenantId, branchId)
+      : null;
     const slots = await this.appointmentsService.getAvailableSlots(tenantId, {
       date: this.requiredString(args.date),
       ...(typeof args.staff_id === 'string' ? { staffId: args.staff_id } : {}),
@@ -1538,8 +1543,24 @@ export class AiToolHandlerService {
       services.filter((s) => s.id === serviceIds[0]).length === 1 &&
       staff.filter((s) => s.id === args.staff_id).length === 1 &&
       slots.every((slot) => slot.staff_id === args.staff_id)
-        ? { tenantId, serviceId: serviceIds[0], staffId: args.staff_id }
+        ? {
+            tenantId,
+            serviceId: serviceIds[0],
+            staffId: args.staff_id,
+            ...(branchId && branchSourceRevision
+              ? { branchId, branchSourceRevision }
+              : {}),
+          }
         : null;
+    if (
+      branchId &&
+      branchSourceRevision &&
+      (await this.crmService.readBranchAvailabilityRevision(
+        tenantId,
+        branchId,
+      )) !== branchSourceRevision
+    )
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
     return {
       timezone,
       booking_selection: selection,

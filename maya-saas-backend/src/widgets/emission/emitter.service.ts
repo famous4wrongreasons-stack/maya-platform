@@ -344,11 +344,7 @@ export class WidgetEmitterService {
           'branch_id' in slot &&
           slot.branch_id != null,
       );
-    if (
-      hasBranchSlots &&
-      selector.predecessorWidgetId &&
-      !selector.revalidateSource
-    )
+    if (hasBranchSlots && !selector.revalidateSource)
       throw new IntentTemplateRefusal('booking_selector_source_unavailable');
     await selector.revalidateSource?.();
     const internalCalendar =

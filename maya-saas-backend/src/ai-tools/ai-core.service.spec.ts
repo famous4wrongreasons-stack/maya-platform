@@ -39,6 +39,310 @@ describe('AiCoreService', () => {
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
 
+  describe('current tenant-owned branch preferences in Client booking', () => {
+    const client = { ...user, role: UserRole.CLIENT };
+    const names = [
+      'catalog.staff.read',
+      'catalog.services.read',
+      'booking.availability.read',
+      'appointments.own.create',
+    ];
+    const initial = {
+      branch: 'Центральный',
+      employee: 'Антон',
+      services: ['Стрижка'],
+      date_or_period: 'tomorrow',
+    };
+    function bookingFixture() {
+      const mocks = createService(names, {}, 'UTC');
+      const branches = [
+        { id: 'branch-a', name: 'Центральный', timezone: 'Europe/Moscow' },
+        { id: 'branch-b', name: 'Северный', timezone: 'Asia/Novosibirsk' },
+      ];
+      mocks.crm.resolveBookingBranchPreference.mockImplementation(
+        (_tenant: string, preference: string | null, proposed?: string) => {
+          const branch = branches.find(
+            (row) =>
+              row.name === preference ||
+              row.id === preference ||
+              (!preference && row.id === proposed),
+          );
+          return Promise.resolve(
+            branch && (!proposed || proposed === branch.id) ? branch : null,
+          );
+        },
+      );
+      let saved: unknown = null;
+      let serial = 0;
+      const timeline = {
+        routeTypedUtterance: jest.fn().mockResolvedValue(null),
+        persistTypedTurn: jest.fn().mockImplementation(() =>
+          Promise.resolve({
+            turnId: `booking-turn-${++serial}`,
+            conversationId: 'booking-conversation',
+          }),
+        ),
+        readConversationContext: jest
+          .fn()
+          .mockImplementation(() => Promise.resolve(saved)),
+        persistAssistantReply: jest
+          .fn<Promise<void>, [{ semanticContext: unknown }]>()
+          .mockImplementation((input) => {
+            saved = input.semanticContext;
+            return Promise.resolve();
+          }),
+      };
+      Object.defineProperty(mocks.service, 'moduleRef', {
+        value: { get: () => timeline },
+      });
+      Object.defineProperty(mocks.service, 'orchestrator', {
+        value: {
+          conversationDigest: () => 'a'.repeat(64),
+          conversationRead: (
+            ...args: Parameters<C9Orchestrator['conversationRead']>
+          ) => args[4](),
+          finishConversationReads: jest.fn().mockResolvedValue(null),
+        },
+      });
+      mocks.runtime.execute.mockImplementation((_actor, name) =>
+        Promise.resolve({
+          status: 'completed',
+          result:
+            name === 'catalog.staff.read'
+              ? {
+                  staff: [
+                    { id: 'staff-a', name: 'Антон' },
+                    { id: 'staff-b', name: 'Борис' },
+                  ],
+                }
+              : name === 'catalog.services.read'
+                ? {
+                    services: [
+                      { id: 'service-a', name: 'Стрижка' },
+                      { id: 'service-b', name: 'Борода' },
+                    ],
+                  }
+                : { slots: [] },
+        }),
+      );
+      async function turn(
+        entities: Record<string, string | string[]>,
+        args: Record<string, unknown> = {},
+        intent = 'booking.find_availability',
+      ) {
+        mocks.model.decide.mockImplementationOnce((input) =>
+          Promise.resolve(
+            decision({
+              reply: '',
+              semanticPlan: new ConversationIntelligenceService().validatePlan(
+                {
+                  tasks: [{ intent, entities, confidence: 1 }],
+                  parent_request: 'Проверить выбранное время',
+                },
+                UserRole.CLIENT,
+                names,
+                input.conversationPlan,
+              ),
+              toolCall: {
+                name:
+                  intent === 'booking.create_own'
+                    ? 'appointments.own.create'
+                    : 'booking.availability.read',
+                arguments: args,
+              },
+            }),
+          ),
+        );
+        return mocks.service.chat(client, {
+          ...dto,
+          conversationId: 'booking-conversation',
+          requestId: `booking-request-${serial + 1}`,
+          messages: [{ role: 'user', content: 'Проверить выбранное время' }],
+        });
+      }
+      const availabilityArgs = () =>
+        mocks.runtime.execute.mock.calls
+          .filter((call) => call[1] === 'booking.availability.read')
+          .map((call) => call[2].arguments);
+      return { ...mocks, timeline, turn, availabilityArgs };
+    }
+
+    it('retains every other choice across date, service, staff and branch corrections and intent transition', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
+      try {
+        const f = bookingFixture();
+        await f.turn(initial);
+        // The selected Moscow day is already 8 October; tomorrow is the 9th.
+        expect(f.availabilityArgs().at(-1)).toEqual({
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+          date: '2026-10-09',
+        });
+        jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
+        await f.turn({ services: ['Борода'] });
+        await f.turn({ employee: 'Борис' });
+        await f.turn({ branch: 'Северный' });
+        await f.turn({ date_or_period: '2026-10-11' });
+        await f.turn({ time: '14:30' }, {}, 'booking.create_own');
+        expect(f.availabilityArgs()).toEqual([
+          {
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-a'],
+            date: '2026-10-09',
+          },
+          {
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
+          },
+          {
+            branch_id: 'branch-a',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
+          },
+          {
+            branch_id: 'branch-b',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
+          },
+          {
+            branch_id: 'branch-b',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-11',
+          },
+          {
+            branch_id: 'branch-b',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-11',
+          },
+        ]);
+        expect(f.crm.resolveBookingBranchPreference.mock.calls).toEqual([
+          ['tenant-a', 'Центральный', undefined],
+          ['tenant-a', 'Центральный', undefined],
+          ['tenant-a', 'Центральный', undefined],
+          ['tenant-a', 'Северный', undefined],
+          ['tenant-a', 'Северный', undefined],
+          ['tenant-a', 'Северный', undefined],
+        ]);
+        const stored = f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0];
+        expect(stored).toMatchObject({
+          semanticContext: {
+            plan: {
+              tasks: [
+                {
+                  entities: {
+                    branch: 'Северный',
+                    employee: 'Борис',
+                    services: ['Борода'],
+                    date: '2026-10-11',
+                    time: '14:30',
+                  },
+                },
+              ],
+            },
+          },
+        });
+        expect(JSON.stringify(stored)).not.toMatch(
+          /branch-[ab]|staff-[ab]|service-[ab]/,
+        );
+        expect(
+          f.runtime.execute.mock.calls.every(
+            (call) => !call[1].startsWith('appointments.'),
+          ),
+        ).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it.each([
+      ['foreign branch', 'foreign-branch', undefined],
+      ['ambiguous branch', 'Неоднозначный', undefined],
+      ['conflicting fresh ID', 'Центральный', 'branch-b'],
+    ])(
+      'refuses %s before actionable availability',
+      async (_label, branch, branchId) => {
+        const f = bookingFixture();
+        const result = await f.turn(
+          { ...initial, branch },
+          branchId ? { branch_id: branchId } : {},
+        );
+        expect(result.reply).toContain('Уточните филиал');
+        expect(result.action).toBeNull();
+        expect(f.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+
+    it('revalidates a branch supplied only as a fresh ID and stores its public preference for the next correction', async () => {
+      const f = bookingFixture();
+      const entities = {
+        employee: initial.employee,
+        services: initial.services,
+        date_or_period: initial.date_or_period,
+      };
+      await f.turn(entities, { branch_id: 'branch-a' });
+      await f.turn({ employee: 'Борис' });
+      expect(f.crm.resolveBookingBranchPreference.mock.calls).toEqual([
+        ['tenant-a', null, 'branch-a'],
+        ['tenant-a', 'Центральный', undefined],
+      ]);
+      expect(f.availabilityArgs().at(-1)).toMatchObject({
+        branch_id: 'branch-a',
+        staff_id: 'staff-b',
+        service_ids: ['service-a'],
+      });
+    });
+
+    it('retains the branch-local day while clarifying a missing service', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
+      try {
+        const f = bookingFixture();
+        const entities = {
+          branch: initial.branch,
+          employee: initial.employee,
+          date_or_period: initial.date_or_period,
+        };
+        const clarification = await f.turn(entities);
+        expect(clarification.reply).toContain('Какую услугу выбрать');
+        expect(f.availabilityArgs()).toEqual([]);
+        jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
+        await f.turn({ services: ['Борода'] });
+        expect(f.availabilityArgs()).toEqual([
+          {
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
+          },
+        ]);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('does not reuse a retained branch when its current source binding is unavailable', async () => {
+      const f = bookingFixture();
+      await f.turn(initial);
+      f.runtime.execute.mockClear();
+      f.crm.resolveBookingBranchPreference.mockRejectedValueOnce(
+        new ServiceUnavailableException({
+          error: { code: 'booking_branch_source_unavailable' },
+        }),
+      );
+      await expect(f.turn({ services: ['Борода'] })).rejects.toThrow(
+        ServiceUnavailableException,
+      );
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+    });
+  });
+
   it('a stale history replay cannot append UNKNOWN after the original request saved SUCCEEDED', async () => {
     const mocks = createService();
     let release!: () => void;
@@ -5581,6 +5885,14 @@ describe('AiCoreService', () => {
     const tenantRead = jest
       .fn()
       .mockResolvedValue({ defaultTimezone: businessTimezone });
+    const crm = {
+      resolveBookingBranchPreference: jest
+        .fn<
+          Promise<{ id: string; name: string; timezone: string } | null>,
+          [string, string | null, string?]
+        >()
+        .mockResolvedValue(null),
+    };
     const service = new AiCoreService(
       config as unknown as ConfigService,
       tenantContext as unknown as TenantContextService,
@@ -5597,6 +5909,8 @@ describe('AiCoreService', () => {
       businessTimezone
         ? ({ tenant: { findUnique: tenantRead } } as never)
         : undefined,
+      undefined,
+      crm as never,
     );
     return {
       auditLog,
@@ -5609,6 +5923,7 @@ describe('AiCoreService', () => {
       tenantRead,
       brain,
       memory,
+      crm,
     };
   }
 });

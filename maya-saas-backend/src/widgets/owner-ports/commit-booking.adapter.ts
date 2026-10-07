@@ -177,6 +177,9 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
           {
             ...invocation,
             expectedBookingFactsHash: input.expectedBookingFactsHash,
+            ...(nouns.get('branch_source_revision')
+              ? { branchSourceRevision: nouns.get('branch_source_revision') }
+              : {}),
           },
         );
       }

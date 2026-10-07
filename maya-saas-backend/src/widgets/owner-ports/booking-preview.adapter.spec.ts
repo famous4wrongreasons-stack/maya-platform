@@ -89,15 +89,59 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
     },
   });
 
+  it('retains the authenticated slot branch/witness through canonical quote and confirmation nouns', async () => {
+    const { adapter, create } = harness();
+    const input = request();
+    const scope = { branchId: 'branch-a', sourceRevision: 'b'.repeat(64) };
+    input.handles.slot = new SealService().mintNounHandles([
+      {
+        tenantId: TENANT,
+        noun: 'slot',
+        ownerKind: 'booking_availability',
+        ownerRef: encodeBookingSlotOwnerRef('2026-10-02T10:00:00Z', scope)!,
+      },
+    ]).slot;
+    const result = await adapter.proposeCreateSelection(input);
+    expect(create.quoteForAccount).toHaveBeenCalledWith(
+      TENANT,
+      'user-1',
+      {
+        staffId: 'staff-1',
+        serviceIds: ['service-1'],
+        start: '2026-10-02T10:00:00.000Z',
+        branchId: 'branch-a',
+      },
+      { branchSourceRevision: scope.sourceRevision },
+    );
+    expect(result.values.get('branch')).toBe(scope.branchId);
+    expect(result.values.get('branch_source_revision')).toBe(
+      scope.sourceRevision,
+    );
+    expect(result.outcome.ownerDecision).toMatchObject({
+      preview: { frozenArgumentHandles: input.handles },
+    });
+    create.quoteForAccount.mockRejectedValueOnce(
+      new Error('Source revision changed'),
+    );
+    expect(
+      (await adapter.proposeCreateSelection(input)).outcome.receiptOutcome,
+    ).toBe('REFUSED');
+  });
+
   it('reopens exact opaque handles and delegates quote semantics to the existing booking owner', async () => {
     const { adapter, create } = harness();
     const input = request();
     const result = await adapter.proposeCreateSelection(input);
-    expect(create.quoteForAccount).toHaveBeenCalledWith(TENANT, 'user-1', {
-      staffId: 'staff-1',
-      serviceIds: ['service-1'],
-      start: '2026-10-02T10:00:00.000Z',
-    });
+    expect(create.quoteForAccount).toHaveBeenCalledWith(
+      TENANT,
+      'user-1',
+      {
+        staffId: 'staff-1',
+        serviceIds: ['service-1'],
+        start: '2026-10-02T10:00:00.000Z',
+      },
+      {},
+    );
     expect(result.values).toEqual(
       new Map([
         ['service', 'service-1'],

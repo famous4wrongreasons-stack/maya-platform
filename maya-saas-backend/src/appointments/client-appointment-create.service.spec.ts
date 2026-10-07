@@ -223,6 +223,112 @@ function setup() {
 }
 
 describe('B31 verified Client create initiator and canonical executor', () => {
+  it('refuses a mixed source snapshot before quoting even without an inbound slot witness', async () => {
+    const h = setup();
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    h.prisma.client.findUnique.mockResolvedValue({
+      ...h.client,
+      user: { encryptedName: 'cipher', phone: '+79990001122' },
+    });
+    let currentRevision = 'a'.repeat(64);
+    const revision = jest.fn(() => Promise.resolve(currentRevision));
+    Object.assign(h.crm, { readBranchAvailabilityRevision: revision });
+    h.prisma.branch.findFirst.mockImplementationOnce(() => {
+      // The target was read from A, but the mapping/zone changed before the
+      // branch read completed. No preview may stamp B onto that old target.
+      currentRevision = 'b'.repeat(64);
+      return Promise.resolve({
+        id: 'branch-1',
+        timezone: 'Asia/Yekaterinburg',
+      });
+    });
+    await expect(
+      h.context.runAsAuthPrincipal(
+        { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+        () =>
+          h.service.quoteForAccount('tenant-1', 'user-1', {
+            ...h.dto,
+            branchId: 'branch-1',
+          }),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(revision).toHaveBeenCalledTimes(2);
+    expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+  });
+
+  it('pins bound source revision in preview facts and refuses a changed mapping before AE ingress', async () => {
+    const h = setup();
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    h.prisma.client.findUnique.mockResolvedValue({
+      ...h.client,
+      user: { encryptedName: 'cipher', phone: '+79990001122' },
+    });
+    const revision = jest.fn().mockResolvedValue('a'.repeat(64));
+    Object.assign(h.crm, { readBranchAvailabilityRevision: revision });
+    const dto = { ...h.dto, branchId: 'branch-1' };
+    const actor = { tenantId: 'tenant-1', userId: 'user-1', role: 'client' };
+    const quoted = await h.context.runAsAuthPrincipal(actor, () =>
+      h.service.quoteForAccount('tenant-1', 'user-1', dto),
+    );
+    expect(quoted.branchSourceRevision).toBe('a'.repeat(64));
+    revision.mockResolvedValue('b'.repeat(64));
+    await expect(
+      h.context.runAsAuthPrincipal(actor, () =>
+        h.service.forAccount('tenant-1', 'user-1', dto, {
+          expectedBookingFactsHash: quoted.factsHash!,
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    await expect(
+      h.context.runAsAuthPrincipal(actor, () =>
+        h.service.quoteForAccount('tenant-1', 'user-1', dto, {
+          branchSourceRevision: quoted.branchSourceRevision!,
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('READY/reconciliation keep the originally persisted source after a new caller observes a changed mapping', async () => {
+    const h = setup();
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    h.prisma.client.findUnique.mockResolvedValue({
+      ...h.client,
+      user: { encryptedName: 'cipher', phone: '+79990001122' },
+    });
+    const revision = jest.fn().mockResolvedValue('a'.repeat(64));
+    Object.assign(h.crm, { readBranchAvailabilityRevision: revision });
+    await h.run({ ...h.dto, branchId: 'branch-1' } as typeof h.dto);
+    const plan = h.plans[0];
+    expect(plan.request.evidenceRefs).toContain(
+      'crm-branch-source/1:' + 'a'.repeat(64),
+    );
+    revision.mockResolvedValue('b'.repeat(64));
+    const context = { tenantId: 'tenant-1', executionId: 'execution-1' };
+    await expect(
+      h.context.runAsAuthPrincipal(
+        { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+        () => plan.handlers.prepare!(plan.input, context),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    await expect(
+      h.context.runAsSystemTenant('tenant-1', () =>
+        plan.handlers.reconcile(plan.input, undefined, context),
+      ),
+    ).resolves.toMatchObject({ outcome: 'STILL_UNKNOWN' });
+    expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
+    expect(h.provider.getClientAppointments).not.toHaveBeenCalled();
+  });
   it('uses the common creator for an authenticated channel without an account actor', async () => {
     const h = setup();
     h.client.crmLinks.push({
@@ -481,9 +587,14 @@ describe('B31 verified Client create initiator and canonical executor', () => {
       ).kind,
     ).toBe('unknown');
     h.provider.getClientAppointments.mockResolvedValue([]);
-    expect((await plan.handlers.reconcile(plan.input)).outcome).toBe(
-      'PROVEN_NOT_EXECUTED',
-    );
+    const reconcile = () =>
+      h.context.runAsSystemTenant('tenant-1', () =>
+        plan.handlers.reconcile(plan.input, undefined, {
+          tenantId: 'tenant-1',
+          executionId: 'execution-1',
+        }),
+      );
+    expect((await reconcile()).outcome).toBe('PROVEN_NOT_EXECUTED');
     h.provider.getClientAppointments.mockResolvedValue([
       {
         status: 'confirmed',
@@ -498,9 +609,7 @@ describe('B31 verified Client create initiator and canonical executor', () => {
         service_ids: ['svc-1'],
       },
     ] as never);
-    expect((await plan.handlers.reconcile(plan.input)).outcome).toBe(
-      'STILL_UNKNOWN',
-    );
+    expect((await reconcile()).outcome).toBe('STILL_UNKNOWN');
     expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
   });
 
@@ -755,6 +864,37 @@ describe('Factual booking admission, precondition and durable retry', () => {
     const repeated = await h.run();
     expect(repeated.appointment.id).toBe(first.appointment.id);
     expect(h.rows).toHaveLength(1);
+    expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+  });
+  it('a removed mapping cannot hide a durable result or create another provider effect', async () => {
+    const h = setup();
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    h.prisma.client.findUnique.mockResolvedValue({
+      ...h.client,
+      user: { encryptedName: 'cipher', phone: '+79990001122' },
+    });
+    const revision = jest.fn().mockResolvedValue('a'.repeat(64));
+    Object.assign(h.crm, { readBranchAvailabilityRevision: revision });
+    const dto = { ...h.dto, branchId: 'branch-1' };
+    const first = await h.run(dto);
+    h.prisma.actionExecution.findUnique.mockResolvedValue({
+      id: 'execution-1',
+    });
+    revision.mockRejectedValue(
+      new ServiceUnavailableException({
+        error: { code: 'booking_branch_source_unavailable' },
+      }),
+    );
+    (h.crm.readServiceCatalog as jest.Mock).mockRejectedValue(
+      new Error('catalog unavailable'),
+    );
+    h.runtime.executeWithReceipt.mockResolvedValue({
+      value: { external_id: first.appointment.crmExternalId },
+      execution: { state: 'SUCCEEDED', executionId: 'execution-1' },
+    });
+    (h.crm.getAvailableSlots as jest.Mock).mockClear();
+    expect((await h.run(dto)).appointment.id).toBe(first.appointment.id);
+    expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
     expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
   });
   it('refuses changed provider target before dispatch even with identical service facts', async () => {

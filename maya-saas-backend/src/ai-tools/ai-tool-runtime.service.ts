@@ -324,6 +324,7 @@ export class AiToolRuntimeService {
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
+      revalidateAvailability,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
@@ -416,6 +417,7 @@ export class AiToolRuntimeService {
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
+      revalidateAvailability,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
@@ -432,6 +434,7 @@ export class AiToolRuntimeService {
     triggerKind: 'T-2a' | 'T-2b',
     requestId: string | null,
     userTurn?: { readonly turnId: string; readonly conversationId: string },
+    revalidateSource?: () => Promise<void>,
   ): Promise<unknown> {
     if (
       definition.riskTier !== 'read' ||
@@ -473,6 +476,7 @@ export class AiToolRuntimeService {
       replayed: value.replayed === true,
       trigger: triggerKind,
       requestId,
+      ...(revalidateSource ? { revalidateSource } : {}),
     });
     return resolution === null ? completed : { ...value, resolution };
   }

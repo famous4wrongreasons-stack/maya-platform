@@ -1,20 +1,21 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createPersonalBooking } from '../src/shell/personal-booking.ts';
-import { projectPersonalPreview, projectPersonalResults } from '../src/net/personal.ts';
+import { projectPersonalBranches, projectPersonalPreview, projectPersonalResults } from '../src/net/personal.ts';
 import { createTransport } from '../src/net/client.ts';
 const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
 const ok = (value) => ({ ok: true, value });
 const start = '2026-10-15T09:00:00.000Z';
 const preview = { factsHash: 'a'.repeat(64), services: [{ name: 'Стрижка', price: 1000, currency: 'RUB', durationMinutes: 30 }], staff: 'Мастер', start, timezone: 'Europe/Moscow', source: 'internal', asOf: '2026-10-07T00:00:00Z', existing: false, requestState: null };
 const empty = { results: [], hasPending: false, hasMore: false };
-function setup() {
+function setup(branches = []) {
   let shell = { fullscreen: null }, signedIn = true, result = empty, exact = preview;
   const ws = new Set(), ss = new Set(), calls = [];
   const transport = {
-    personalServices: async () => ok([{ id: 'service', name: 'Стрижка' }]),
-    personalStaff: async () => ok([{ id: 'staff', name: 'Мастер' }]),
-    personalSlots: async () => ok([{ start, staffId: 'staff', branchId: 'branch' }]),
+    personalBranches: async () => ok(branches),
+    personalServices: async () => ok([{ id: 'service', name: 'Стрижка' }, { id: 'service2', name: 'Борода' }]),
+    personalStaff: async () => ok([{ id: 'staff', name: 'Мастер' }, { id: 'staff2', name: 'Другой мастер' }]),
+    personalSlots: async (date, serviceId, staffId, signal, branchId) => { calls.push(['slots', { date, serviceId, staffId, branchId }]); return ok([{ start, staffId: 'staff', branchId: 'branch' }]); },
     personalPreview: async (s) => { calls.push(['preview', structuredClone(s)]); return ok(exact); },
     personalResults: async () => { calls.push(['results']); return ok(result); },
     personalCreate: async (s) => { calls.push(['create', structuredClone(s)]); return ok(true); },
@@ -44,6 +45,49 @@ test('selection invalidates preview, unknown choices cannot alter it, confirmati
   f.port.chooseService('foreign'); assert.equal(f.port.view().phase, 'preview');
   f.port.date('2026-10-16'); assert.equal(f.port.view().preview, null);
   await f.port.confirm(); assert.equal(f.calls.filter(c => c[0] === 'create').length, 0); f.port.dispose();
+});
+test('explicit branch selection preserves all other choices, filters exact branch and binds preview/create', async () => {
+  const branches = [{ id: 'branch', name: 'Первый', timezone: 'Europe/Moscow' }, { id: 'branch2', name: 'Второй', timezone: 'Asia/Yekaterinburg' }];
+  const f = setup(branches); f.show(); await flush();
+  f.port.chooseService('service'); f.port.chooseStaff('staff'); f.port.date('2026-10-15');
+  await f.port.slots(); assert.equal(f.calls.some((c) => c[0] === 'slots'), false);
+  f.port.chooseBranch('foreign'); assert.equal(f.port.view().branchId, '');
+  f.port.chooseBranch('branch');
+  f.transport.personalSlots = async (date, serviceId, staffId, signal, branchId) => {
+    f.calls.push(['slots', { date, serviceId, staffId, branchId }]);
+    return ok([{ start, staffId: 'staff', branchId: null }, { start, staffId: 'staff', branchId: 'branch2' }, { start, staffId: 'staff2', branchId: 'branch' }, { start, staffId: 'staff', branchId: 'branch' }]);
+  };
+  await f.port.slots(); assert.deepEqual(f.calls.find((c) => c[0] === 'slots')[1], { date: '2026-10-15', serviceId: 'service', staffId: 'staff', branchId: 'branch' });
+  assert.equal(f.port.view().slots.length, 1); assert.match(f.port.view().notice, /Europe\/Moscow/);
+  await f.port.preview(0); assert.equal(f.calls.find((c) => c[0] === 'preview')[1].branchId, 'branch');
+  f.port.chooseBranch('foreign'); assert.equal(f.port.view().phase, 'preview');
+  f.port.chooseBranch('branch2');
+  assert.equal(f.port.view().preview, null); assert.equal(f.port.view().slots.length, 0);
+  assert.deepEqual([f.port.view().branchId, f.port.view().serviceId, f.port.view().staffId, f.port.view().date], ['branch2', 'service', 'staff', '2026-10-15']);
+  await f.port.confirm(); assert.equal(f.calls.some((c) => c[0] === 'create'), false);
+  f.port.chooseService('service2'); assert.deepEqual([f.port.view().branchId, f.port.view().staffId, f.port.view().date], ['branch2', 'staff', '2026-10-15']);
+  f.port.chooseStaff('staff2'); assert.deepEqual([f.port.view().branchId, f.port.view().serviceId, f.port.view().date], ['branch2', 'service2', '2026-10-15']);
+  f.port.date('2026-10-16'); assert.deepEqual([f.port.view().branchId, f.port.view().serviceId, f.port.view().staffId], ['branch2', 'service2', 'staff2']);
+  f.port.chooseBranch('branch'); f.port.chooseService('service'); f.port.chooseStaff('staff'); await f.port.slots(); await f.port.preview(0);
+  await f.port.confirm(); assert.equal(f.calls.find((c) => c[0] === 'create')[1].branchId, 'branch'); f.port.dispose();
+});
+test('empty branch list preserves unscoped flow; selected unbound branch surfaces server failure without dispatch', async () => {
+  const f = setup(); await ready(f);
+  assert.equal(f.calls.find((c) => c[0] === 'slots')[1].branchId, undefined); f.port.dispose();
+  const g = setup([{ id: 'unbound', name: 'Филиал без привязки', timezone: null }]);
+  g.show(); await flush(); g.port.chooseBranch('unbound'); g.port.chooseService('service'); g.port.chooseStaff('staff'); g.port.date('2026-10-15');
+  g.transport.personalSlots = async () => ({ ok: false, failure: { reason: 'branch_unavailable' } });
+  await g.port.slots(); await g.port.confirm();
+  assert.equal(g.port.view().phase, 'unavailable'); assert.match(g.port.view().notice, /Источник записи для выбранного филиала недоступен/);
+  assert.equal(g.calls.some((c) => c[0] === 'create' || c[0] === 'preview'), false); g.port.dispose();
+});
+test('branch projection keeps only server list display fields and rejects invalid/duplicate zones or identities', () => {
+  const valid = { id: 'branch', name: 'Филиал', timezone: 'Europe/Moscow' };
+  assert.deepEqual(projectPersonalBranches([{ ...valid, tenant_id: 'PRIVATE', phone: 'PRIVATE', address: 'PRIVATE', provider: 'PRIVATE' }]), [valid]);
+  assert.deepEqual(projectPersonalBranches([{ ...valid, timezone: null }]), [{ ...valid, timezone: null }]);
+  assert.equal(projectPersonalBranches([{ ...valid, timezone: 'not/a-zone' }]), null);
+  assert.equal(projectPersonalBranches([valid, valid]), null);
+  assert.equal(projectPersonalBranches([{ ...valid, id: '' }]), null);
 });
 test('double confirmation sends exact frozen selection once; only same canonical selection SUCCEEDED confirms', async () => {
   const f = setup(); await ready(f); f.exact({ ...preview, existing: true, requestState: 'SUCCEEDED' });
@@ -82,15 +126,19 @@ test('fixed personal wire adds literal header only on personal routes, encodes q
     const net = createTransport({ authorize: async () => ({ kind: 'bearer', bearer: 'synthetic', serial: 1 }) });
     const signal = new AbortController().signal;
     await net.personalServices(signal); await net.personalStaff(signal); await net.personalResults(signal);
-    await net.personalSlots('2026-10-15', 's&clientId=foreign', 'p', signal);
+    await net.personalSlots('2026-10-15', 's&clientId=foreign', 'p', signal, 'b&tenantId=foreign');
     await net.personalPreview({ staffId: 'p', serviceIds: ['s'], start, role: 'admin', clientId: 'foreign', clientPhone: 'PRIVATE' }, signal);
     await net.personalCreate({ staffId: 'p', serviceIds: ['s'], start, role: 'admin' }, signal);
     assert.equal(calls[0].headers['X-Maya-Authority-Context'], undefined);
     assert.equal(calls[2].headers['X-Maya-Authority-Context'], 'personal_client');
     assert.match(calls[3].url, /serviceIds=s%26clientId%3Dforeign/);
+    assert.match(calls[3].url, /branchId=b%26tenantId%3Dforeign/);
     assert.deepEqual(JSON.parse(calls[4].body), { staffId: 'p', serviceIds: ['s'], start });
     assert.deepEqual(JSON.parse(calls[5].body), { staffId: 'p', serviceIds: ['s'], start });
     assert.equal(calls.filter(c => c.method === 'POST').length, 2);
+    await net.personalBranches(signal);
+    assert.equal(calls[6].url, '/api/branches'); assert.equal(calls[6].method, 'GET'); assert.equal(calls[6].body, null);
+    assert.equal(calls[6].headers.Authorization, 'Bearer synthetic'); assert.equal(calls[6].headers['X-Maya-Authority-Context'], undefined);
   } finally { globalThis.fetch = savedFetch; }
 });
 test('forbidden at result read clears prior private facts even after exact succeeded', async () => {
@@ -107,6 +155,9 @@ test('material fact refusal stays distinct from unknown after a transport or pro
     const selected = { staffId: 'p', serviceIds: ['s'], start, previewFactsHash: preview.factsHash };
     globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: 'booking_service_facts_unavailable' } }), { status: 503 });
     assert.deepEqual(await transport.personalCreate(selected, new AbortController().signal), { ok: false, failure: { reason: 'facts_unavailable' } });
+    globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: 'booking_branch_source_unavailable' } }), { status: 503 });
+    assert.deepEqual(await transport.personalSlots('2026-10-15', 's', 'p', new AbortController().signal, 'branch'), { ok: false, failure: { reason: 'branch_unavailable' } });
+    assert.deepEqual(await transport.personalCreate(selected, new AbortController().signal), { ok: false, failure: { reason: 'branch_unavailable' } });
     globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: 'crm_outcome_unknown' } }), { status: 503 });
     assert.deepEqual(await transport.personalCreate(selected, new AbortController().signal), { ok: false, failure: { reason: 'unknown' } });
   } finally { globalThis.fetch = originalFetch; }

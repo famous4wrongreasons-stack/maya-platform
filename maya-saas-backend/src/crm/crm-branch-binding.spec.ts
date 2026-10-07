@@ -118,6 +118,190 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+describe('current CRM owner resolves semantic booking branch preferences', () => {
+  function preferenceFixture() {
+    const f = fixture();
+    const branches = [
+      { ...f.branch, tenantId: 'tenant-a', name: 'Центральный' },
+      {
+        id: 'branch-b',
+        tenantId: 'tenant-a',
+        name: 'Северный',
+        timezone: 'Asia/Tokyo',
+      },
+      {
+        id: 'branch-foreign',
+        tenantId: 'tenant-b',
+        name: 'Другой салон',
+        timezone: 'Europe/London',
+      },
+    ];
+    const findMany = jest.fn().mockImplementation(
+      (query: {
+        where: {
+          tenantId: string;
+          id?: string;
+          OR?: [{ id: string }, { name: { equals: string; mode: string } }];
+        };
+        take: number;
+      }) =>
+        Promise.resolve(
+          branches
+            .filter(
+              (branch) =>
+                branch.tenantId === query.where.tenantId &&
+                (query.where.OR
+                  ? branch.id === query.where.OR[0].id ||
+                    branch.name.toLocaleLowerCase('ru-RU') ===
+                      query.where.OR[1].name.equals.toLocaleLowerCase('ru-RU')
+                  : branch.id === query.where.id),
+            )
+            .slice(0, query.take)
+            .map(({ id, name }) => ({ id, name })),
+        ),
+    );
+    Object.assign(f.prisma.branch, { findMany });
+    f.prisma.tenant.findUnique.mockImplementation(
+      (query: {
+        where: { id: string };
+        select: { branches: { where: { id: string } } };
+      }) =>
+        Promise.resolve({
+          calendarSource: 'external',
+          defaultTimezone: 'UTC',
+          branches: branches
+            .filter(
+              (branch) =>
+                branch.tenantId === query.where.id &&
+                branch.id === query.select.branches.where.id,
+            )
+            .map(({ id, timezone }) => ({ id, timezone })),
+          crmIntegration: structuredClone(f.integration),
+        }),
+    );
+    global.fetch = jest.fn();
+    const resolve = (preference?: string | null, proposedId?: string) =>
+      f.run(() =>
+        f.service.resolveBookingBranchPreference(
+          'tenant-a',
+          preference,
+          proposedId,
+        ),
+      );
+    const noProviderOrExecution = () => {
+      expect(global.fetch).not.toHaveBeenCalled();
+      expect(f.create).not.toHaveBeenCalled();
+      expect(f.origin).not.toHaveBeenCalled();
+      expect(f.prisma.actionExecution.findFirst).not.toHaveBeenCalled();
+      expect(f.prisma.appointment.findFirst).not.toHaveBeenCalled();
+    };
+    return { ...f, branches, findMany, resolve, noProviderOrExecution };
+  }
+
+  it.each([
+    ['case-insensitive exact name', 'центральный', undefined],
+    ['tenant-owned ID', 'branch-a', undefined],
+    ['matching semantic and proposed ID', 'Центральный', 'branch-a'],
+    ['proposed ID only', null, 'branch-a'],
+  ])(
+    'resolves %s using verified branch timezone, not tenant timezone',
+    async (_label, preference, proposedId) => {
+      const f = preferenceFixture();
+      await expect(
+        f.resolve(preference, proposedId ?? undefined),
+      ).resolves.toEqual({
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
+      });
+      expect(f.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ tenantId: 'tenant-a' }) as unknown,
+          take: 2,
+          select: { id: true, name: true },
+        }),
+      );
+      expect(f.prisma.tenant.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'tenant-a' },
+          select: expect.objectContaining({
+            branches: {
+              where: { id: 'branch-a' },
+              select: { id: true, timezone: true },
+              take: 1,
+            },
+          }) as unknown,
+        }),
+      );
+      f.noProviderOrExecution();
+    },
+  );
+
+  it.each([
+    ['foreign ID', 'branch-foreign', undefined],
+    ['foreign name', 'Другой салон', undefined],
+    ['foreign proposed ID', null, 'branch-foreign'],
+    ['conflicting proposed ID', 'Центральный', 'branch-b'],
+    ['partial name', 'Центр', undefined],
+  ])(
+    'does not bind %s or read a replacement source',
+    async (_label, preference, proposedId) => {
+      const f = preferenceFixture();
+      await expect(
+        f.resolve(preference, proposedId ?? undefined),
+      ).resolves.toBeNull();
+      expect(f.prisma.tenant.findUnique).not.toHaveBeenCalled();
+      f.noProviderOrExecution();
+    },
+  );
+
+  it('refuses two tenant-owned matches even when a proposed ID names one of them', async () => {
+    const f = preferenceFixture();
+    f.branches.push({
+      id: 'branch-duplicate',
+      tenantId: 'tenant-a',
+      name: 'Центральный',
+      timezone: 'Europe/Moscow',
+    });
+    await expect(f.resolve('Центральный', 'branch-a')).resolves.toBeNull();
+    expect(f.prisma.tenant.findUnique).not.toHaveBeenCalled();
+    f.noProviderOrExecution();
+  });
+
+  it('rejects a foreign tenant before querying branch metadata', async () => {
+    const f = preferenceFixture();
+    await expect(
+      f.run(() =>
+        f.service.resolveBookingBranchPreference('tenant-b', 'branch-foreign'),
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(f.findMany).not.toHaveBeenCalled();
+    expect(f.prisma.tenant.findUnique).not.toHaveBeenCalled();
+    f.noProviderOrExecution();
+  });
+
+  it.each(['removed', 'company-changed', 'inactive'])(
+    'rechecks a previously resolved branch and refuses its %s source binding',
+    async (change) => {
+      const f = preferenceFixture();
+      await expect(f.resolve('Центральный')).resolves.toMatchObject({
+        id: 'branch-a',
+      });
+      if (change === 'removed') f.integration.settingsJson.branchBinding = null;
+      if (change === 'company-changed')
+        f.integration.settingsJson.companyId = 999;
+      if (change === 'inactive') f.integration.status = 'pending_activation';
+      await expect(f.resolve('Центральный')).rejects.toMatchObject({
+        status: 503,
+        response: { error: { code: 'booking_branch_source_unavailable' } },
+      });
+      expect(f.findMany).toHaveBeenCalledTimes(2);
+      expect(f.prisma.tenant.findUnique).toHaveBeenCalledTimes(2);
+      f.noProviderOrExecution();
+    },
+  );
+});
+
 it('uses persisted tenant-owned binding with actual adapter and selected branch timezone', async () => {
   const f = fixture();
   global.fetch = jest.fn().mockResolvedValue({
@@ -189,6 +373,51 @@ it('binds source revision to explicit removal, never cached attribution', async 
     ),
   ).rejects.toMatchObject({ status: 503 });
 });
+it.each(['missing', 'old', 'duplicate', 'current'])(
+  'READY create checks its persisted original branch witness: %s',
+  async (kind) => {
+    const f = fixture();
+    global.fetch = jest.fn();
+    const revision = await f.run(() =>
+      f.service.readBranchAvailabilityRevision('tenant-a', 'branch-a'),
+    );
+    const ref = 'crm-branch-source/1:' + revision;
+    f.prisma.actionExecution.findFirst.mockResolvedValue({
+      evidenceRefsJson:
+        kind === 'missing'
+          ? []
+          : kind === 'old'
+            ? ['crm-branch-source/1:' + 'f'.repeat(64)]
+            : kind === 'duplicate'
+              ? [ref, ref]
+              : [ref],
+    });
+    const owner = f.service as unknown as {
+      confirmedCreateBranchRevision(
+        t: string,
+        b: string,
+        e: string,
+      ): Promise<string>;
+    };
+    const check = () =>
+      f.run(() =>
+        owner.confirmedCreateBranchRevision(
+          'tenant-a',
+          'branch-a',
+          'execution-a',
+        ),
+      );
+    if (kind === 'current') {
+      await expect(check()).resolves.toBe(revision);
+      // Same company/branch after reconfiguration is still a different source.
+      f.integration.updatedAt = new Date('2026-10-07T00:00:01Z');
+    }
+    await expect(check()).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  },
+);
 it.each([null, 'old', 'current'])(
   'READY reschedule requires the original persisted source witness: %s',
   async (witness) => {
@@ -432,6 +661,12 @@ it.each([undefined, 'after-post'] as const)(
   'verified create uses immutable branch zone at native wire; drift=%s',
   async (drift) => {
     const f = fixture();
+    const sourceRevision = await f.run(() =>
+      f.service.readBranchAvailabilityRevision('tenant-a', 'branch-a'),
+    );
+    f.prisma.actionExecution.findFirst.mockResolvedValue({
+      evidenceRefsJson: ['crm-branch-source/1:' + sourceRevision],
+    });
     const writes = nativeWire(f, drift);
     const owner = f.service as unknown as TestOwner;
     const invocation = {

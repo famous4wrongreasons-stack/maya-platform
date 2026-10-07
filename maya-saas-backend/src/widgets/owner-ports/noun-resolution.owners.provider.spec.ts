@@ -1,4 +1,5 @@
 import { SealService } from '../emission/seal.service';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { asHandle } from '../noun-resolution/noun-handles';
 import type {
   NounActor,
@@ -72,6 +73,37 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
     };
   };
 
+  it('derives branch/source only from the sealed scoped slot and passes it to the fresh owner read', async () => {
+    const quote = jest
+      .fn<Promise<{ start: string }>, [unknown, ReadonlyMap<string, string>]>()
+      .mockResolvedValue({ start: START });
+    const provider = new NounResolutionOwnersProvider(
+      { quote } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    const scope = { branchId: 'branch-a', sourceRevision: 'b'.repeat(64) };
+    const request = input(encodeBookingSlotOwnerRef(START, scope));
+    const result = await provider.read(request, actor);
+    expect(result.kind).toBe('resolved');
+    expect(quote.mock.calls[0][1].get('branch')).toBe('branch-a');
+    expect(quote.mock.calls[0][1].get('branch_source_revision')).toBe(
+      scope.sourceRevision,
+    );
+    // A scope encoded for create cannot silently become reschedule authority.
+    await expect(
+      provider.read(
+        {
+          ...request,
+          capability: { space: 'C9', key: 'appointments.own.reschedule' },
+        },
+        actor,
+      ),
+    ).resolves.toMatchObject({ kind: 'gone' });
+    expect(quote).toHaveBeenCalledTimes(1);
+  });
+
   it('defers the exact selector-stage pair until Gate 13 supplies the validated slot', async () => {
     const quote = jest.fn();
     const provider = new NounResolutionOwnersProvider(
@@ -85,6 +117,37 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
       kind: 'policy_deferred',
     });
     expect(quote).not.toHaveBeenCalled();
+  });
+
+  it('maps only known withdrawn branch source to a gone noun, preserving genuine provider faults', async () => {
+    const quote = jest.fn();
+    const provider = new NounResolutionOwnersProvider(
+      { quote } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    const request = input(
+      encodeBookingSlotOwnerRef(START, {
+        branchId: 'branch-a',
+        sourceRevision: 'a'.repeat(64),
+      }),
+    );
+    quote.mockRejectedValueOnce(
+      new ServiceUnavailableException({
+        error: { code: 'booking_branch_source_unavailable' },
+      }),
+    );
+    await expect(provider.read(request, actor)).resolves.toEqual({
+      kind: 'gone',
+      reason: 'not_found',
+    });
+    quote.mockRejectedValueOnce(
+      new ServiceUnavailableException('Provider timeout'),
+    );
+    await expect(provider.read(request, actor)).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
   });
 
   it('decodes only the recognized opaque booking slot before the canonical fresh quote', async () => {

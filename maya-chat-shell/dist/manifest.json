@@ -65,7 +65,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "a105d982c55a69ef57ee87cdaa081c6ee322ae99e9842852fcff82810cba8b9c"
+        "sha256": "961cd93eb6bdff5bae58a1b41402bea394af3a3ce622489445765829a9ce6b33"
       },
       {
         "path": "src/net/endpoint.ts",
@@ -73,7 +73,7 @@
       },
       {
         "path": "src/net/personal.ts",
-        "sha256": "93d2ad60393620a53d9a28700503fbdecebc9a9ee6e5a3939983806a366ab80f"
+        "sha256": "ec6c24f9fbe4cc438448b368127e1fc7bb53b9b374981fa055e896207ed99f9b"
       },
       {
         "path": "src/net/project.ts",
@@ -85,7 +85,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "e82a47d5175281631409eece44f82f9f1f10e27bf16eadd40c50a3f24b396b3f"
+        "sha256": "912f2b12b9816fbaa4eb13314e25b7e31ed5afc963f01ac374073c08ba9c80fe"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -125,7 +125,7 @@
       },
       {
         "path": "src/shell/personal-booking.ts",
-        "sha256": "933684258df9d88da948773e6fc7b841b6ea83d462e02146aba48c25ab3019b7"
+        "sha256": "062e02462f0a567a71e9b35b0df84821171030c8eb75b8f0a535d28f491d6fa0"
       },
       {
         "path": "src/shell/ports.ts",
@@ -145,8 +145,8 @@
       }
     ]
   },
-  "bytes": 512096,
-  "digest": "08dad9ca7520c378758bb984a8e6e9674c05c3b6cbc037c022b5ca683cf4e1c4",
+  "bytes": 514870,
+  "digest": "28eb4dcbd07ca32e585af84c427f2ef067577fad0e0a4a2ebb998389ca09fc0d",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -154,8 +154,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "cdb73c211e6bef37213c52e2bd73f94cd2e5e319fdbe973276a503f87c4e2dce",
-    "modulePath": "m/cdb73c211e6bef37/",
+    "digest": "95a92d2fc5b82c774d263044c3095ad297242d0588535be8235cfbc65910f8d1",
+    "modulePath": "m/95a92d2fc5b82c77/",
     "files": [
       {
         "path": "entry/main.js",
@@ -214,8 +214,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "476ed59726bd92459e31ed4e0fb4d9c1915d7676f45de8e1f0651436af55fd41",
-        "bytes": 25349
+        "sha256": "e553246e49ce132c6d1e5f86e3a4e8f5d3c21e0483914185f200a44f27ea1efb",
+        "bytes": 26097
       },
       {
         "path": "src/net/endpoint.js",
@@ -224,8 +224,8 @@
       },
       {
         "path": "src/net/personal.js",
-        "sha256": "d47b9aeb94dc88112311005d7bf6bd608b982c4742a63274c5bef414c0355549",
-        "bytes": 3577
+        "sha256": "2f97f6c04e58f7471a103192521e63e859781a70b09fe3f44b148275b742dd81",
+        "bytes": 4242
       },
       {
         "path": "src/net/project.js",
@@ -294,8 +294,8 @@
       },
       {
         "path": "src/shell/personal-booking.js",
-        "sha256": "98635a441fd6f9f6444ac79dfd21a167a7e26ccb157564809b5e611de4d66e02",
-        "bytes": 9575
+        "sha256": "d72279d39d175b4882562be894c9fd0cd296ce0c57a3da36f4d8ce05226f44ff",
+        "bytes": 10619
       },
       {
         "path": "src/shell/ports.js",
@@ -333,7 +333,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "362ae7233ac3d7c83d670e4d0c57b87c8e331adacb5ea094720146522a0c7b70",
+      "sha256": "2390cc26af8860fd48a3ef70b8521dca27b4e4ec93e698f0b73a6db23a938e3b",
       "bytes": 1344
     },
     "assets": [

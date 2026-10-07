@@ -22,6 +22,8 @@ export interface AiReadWidgetTriggerPort {
     readonly replayed: boolean;
     readonly trigger: 'T-2a' | 'T-2b';
     readonly requestId: string | null;
+    /** Transient READ-source check; never serialized as authority or history. */
+    readonly revalidateSource?: () => Promise<void>;
     readonly userTurn?: {
       readonly turnId: string;
       readonly conversationId: string;

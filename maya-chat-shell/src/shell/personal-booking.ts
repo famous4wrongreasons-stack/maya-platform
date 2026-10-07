@@ -1,10 +1,11 @@
 // A request-local personal form, mounted only after the existing bound-detail admission.
 // No writer, session switch, model history, timer, retry or persistent client store.
-import type { PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults, PersonalSelection, PersonalTransport, PersonalFailure } from '../net/types.ts';
+import type { PersonalBranch, PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults, PersonalSelection, PersonalTransport, PersonalFailure } from '../net/types.ts';
 import type { SessionPort, WidgetPort } from './ports.ts';
 export interface PersonalBookingView {
   readonly phase: 'closed' | 'loading' | 'choose' | 'slots' | 'preview' | 'submitting' | 'outcome' | 'unavailable';
   readonly busy: boolean;
+  readonly branches: readonly PersonalBranch[]; readonly branchId: string;
   readonly services: readonly PersonalChoice[]; readonly staff: readonly PersonalChoice[];
   readonly serviceId: string; readonly staffId: string; readonly date: string;
   readonly slots: readonly PersonalSlot[]; readonly preview: PersonalPreview | null;
@@ -12,13 +13,13 @@ export interface PersonalBookingView {
 }
 export interface PersonalBookingPort {
   view(): PersonalBookingView; subscribe(listener: (v: PersonalBookingView) => void): () => void;
-  chooseService(id: string): void; chooseStaff(id: string): void; date(value: string): void;
+  chooseBranch(id: string): void; chooseService(id: string): void; chooseStaff(id: string): void; date(value: string): void;
   slots(): Promise<void>; preview(index: number): Promise<void>; confirm(): Promise<void>;
   refresh(): Promise<void>; dispose(): void;
 }
-const empty = (): PersonalBookingView => ({ phase: 'closed', busy: false, services: [], staff: [], serviceId: '', staffId: '', date: '', slots: [], preview: null, results: null, notice: '' });
+const empty = (): PersonalBookingView => ({ phase: 'closed', busy: false, branches: [], branchId: '', services: [], staff: [], serviceId: '', staffId: '', date: '', slots: [], preview: null, results: null, notice: '' });
 const uncertain = 'Результат записи пока не подтверждён. Повторно запрос не отправляем. Можно проверить сохранённый результат.';
-const message = (failure: PersonalFailure) => failure.reason === 'forbidden' ? 'Личная запись недоступна: подтверждённая связь или доступ изменились.' : failure.reason === 'conflict' ? 'Предложение изменилось. Проверьте записи и выберите время заново.' : failure.reason === 'facts_unavailable' ? 'Цена или длительность услуги пока не подтверждены. Уточните их в салоне перед записью.' : 'Не удалось прочитать актуальные данные. Запись не подтверждена.';
+const message = (failure: PersonalFailure) => failure.reason === 'forbidden' ? 'Личная запись недоступна: подтверждённая связь или доступ изменились.' : failure.reason === 'conflict' ? 'Предложение изменилось. Проверьте записи и выберите время заново.' : failure.reason === 'branch_unavailable' ? 'Источник записи для выбранного филиала недоступен. Проверьте привязку филиала к CRM. Запись не подтверждена.' : failure.reason === 'facts_unavailable' ? 'Цена или длительность услуги пока не подтверждены. Уточните их в салоне перед записью.' : 'Не удалось прочитать актуальные данные. Запись не подтверждена.';
 export function createPersonalBooking(deps: { transport: PersonalTransport; widgets: Pick<WidgetPort, 'view' | 'subscribe'>; session: Pick<SessionPort, 'view' | 'subscribe'>; newAbort: () => AbortController }): PersonalBookingPort {
   let current = empty(), item: string | null = null, serial = 0, abort = deps.newAbort();
   let selection: PersonalSelection | null = null;
@@ -36,13 +37,16 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
     publish({ results: results.value });
     if (results.value.hasPending) { publish({ phase: 'outcome', busy: false, notice: uncertain }); return; }
     // Reads are finite and serial. Public choices carry no personal authority.
+    const branches = await deps.transport.personalBranches(signal);
+    if (!active(version)) return;
+    if (!branches.ok) { fail(branches.failure); return; }
     const services = await deps.transport.personalServices(signal);
     if (!active(version)) return;
     if (!services.ok) { fail(services.failure); return; }
     const staff = await deps.transport.personalStaff(signal);
     if (!active(version)) return;
     if (!staff.ok) { fail(staff.failure); return; }
-    publish({ phase: 'choose', busy: false, services: services.value, staff: staff.value, notice: 'Запись для вашего подтверждённого клиентского профиля. Роль в компании не меняется.' });
+    publish({ phase: 'choose', busy: false, branches: branches.value, services: services.value, staff: staff.value, notice: 'Запись для вашего подтверждённого клиентского профиля. Роль в компании не меняется.' });
   };
   const watch = () => {
     const view = deps.widgets.view().fullscreen;
@@ -66,20 +70,22 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
   const port: PersonalBookingPort = {
     view: () => current,
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    chooseBranch(id) { if (editable() && current.branches.some((branch) => branch.id === id)) invalidate({ branchId: id }); },
     chooseService(id) { if (editable() && current.services.some((s) => s.id === id)) invalidate({ serviceId: id }); },
     chooseStaff(id) { if (editable() && current.staff.some((s) => s.id === id)) invalidate({ staffId: id }); },
     date(value) { if (editable()) invalidate({ date: value.slice(0, 10) }); },
     async slots() {
-      if (!editable() || !current.serviceId || !current.staffId || !/^\d{4}-\d{2}-\d{2}$/.test(current.date)) return;
+      if (!editable() || (current.branches.length > 0 && !current.branchId) || !current.serviceId || !current.staffId || !/^\d{4}-\d{2}-\d{2}$/.test(current.date)) return;
       const day = Date.parse(current.date + 'T00:00:00Z');
       if (!Number.isFinite(day) || new Date(day).toISOString().slice(0, 10) !== current.date) { publish({ notice: 'Введите существующую дату в формате ГГГГ-ММ-ДД.' }); return; }
       const version = serial;
       selection = null; publish({ busy: true, preview: null, slots: [] });
-      const result = await deps.transport.personalSlots(current.date, current.serviceId, current.staffId, abort.signal);
+      const result = await deps.transport.personalSlots(current.date, current.serviceId, current.staffId, abort.signal, current.branchId || undefined);
       if (!active(version)) return;
       if (!result.ok) { fail(result.failure); return; }
-      const slots = result.value.filter((slot) => slot.staffId === current.staffId);
-      publish({ phase: 'slots', busy: false, slots, notice: slots.length ? 'Время ниже указано в UTC. Часовой пояс салона будет показан в предложении.' : 'Доступных окон на выбранную дату нет.' });
+      const slots = result.value.filter((slot) => slot.staffId === current.staffId && (!current.branchId || slot.branchId === current.branchId));
+      const timezone = current.branches.find((branch) => branch.id === current.branchId)?.timezone;
+      publish({ phase: 'slots', busy: false, slots, notice: slots.length ? timezone ? `Время филиала: ${timezone}. Окно будет проверено ещё раз перед записью.` : 'Время ниже указано в UTC. Часовой пояс салона будет показан в предложении.' : 'Доступных окон на выбранную дату нет.' });
     },
     async preview(index) {
       if (current.phase !== 'slots' || current.busy || !Number.isInteger(index)) return;

@@ -60,6 +60,7 @@ async function freePort() {
   return port;
 }
 export async function runCommand(spec, env, output, control) {
+  assert.ok(spec.timeoutMs === undefined || (Number.isSafeInteger(spec.timeoutMs) && spec.timeoutMs > 0 && spec.timeoutMs <= 720_000), 'Owned command timeout must be bounded by 720000ms');
   const cleanup = spec.name === 'pg-stop';
   if (control.cancelled && !cleanup) throw new Error('Proof cancelled: ' + control.cancelled);
   const fd = fs.openSync(path.join(output, spec.name + '.log'), 'wx', 0o600);
@@ -73,7 +74,7 @@ export async function runCommand(spec, env, output, control) {
       };
       control.terminateActive = terminate;
       control.activeCleanup = cleanup;
-      const timer = setTimeout(() => { timedOut = true; terminate(); }, cleanup ? 45_000 : spec.name === 'browser' ? 300_000 : 180_000);
+      const timer = setTimeout(() => { timedOut = true; terminate(); }, cleanup ? 45_000 : spec.timeoutMs ?? (spec.name === 'browser' ? 300_000 : 180_000));
       const done = () => {
         if (finished) return false;
         finished = true;

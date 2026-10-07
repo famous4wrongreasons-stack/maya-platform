@@ -20,6 +20,7 @@ const PATHS = {
   personal3: '/personal-client/appointments/preview',
   personal4: '/personal-client/appointments/results',
   personal5: '/personal-client/appointments',
+  personalBranches: '/branches',
 
   widgetAdmin: '/widgets/admin',
 } as const;

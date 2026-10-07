@@ -228,6 +228,7 @@ export const P1_PATHS = [
   '/mobile/pwa/search',
   '/widgets/intent',
   '/widgets/resolve',
+  '/branches',
   '/services',
   '/staff',
   '/available-slots',

@@ -157,6 +157,17 @@ export class ClientAppointmentCreateService {
           return name && name.length <= 160 ? { id: dto.staffId, name } : null;
         })
         .catch(() => null);
+      if (
+        quoted.branchSourceRevision &&
+        dto.branchId &&
+        (await this.crm.readBranchAvailabilityRevision(
+          tenantId,
+          dto.branchId,
+        )) !== quoted.branchSourceRevision
+      )
+        throw new ConflictException({
+          error: { code: 'booking_preview_stale' },
+        });
       return { ...quoted, staff };
     } catch (error) {
       if (error instanceof ActionConflictError)
@@ -233,6 +244,34 @@ export class ClientAppointmentCreateService {
       },
     });
     if (!client) throw new ForbiddenException('client_identity_unresolved');
+    // Pin the source before reading the target, branch timezone or catalogue.
+    // A durable replay may outlive a removed mapping; defer only that known
+    // source refusal until the canonical retry lookup has resolved.
+    const sourceFailure: { error: ServiceUnavailableException | null } = {
+      error: null,
+    };
+    const initialBranchSourceRevision = dto.branchId
+      ? await this.crm
+          .readBranchAvailabilityRevision(tenantId, dto.branchId)
+          .catch((error: unknown) => {
+            const response =
+              error instanceof ServiceUnavailableException
+                ? error.getResponse()
+                : null;
+            if (
+              error instanceof ServiceUnavailableException &&
+              typeof response === 'object' &&
+              response !== null &&
+              'error' in response &&
+              (response.error as { code?: unknown } | null)?.code ===
+                'booking_branch_source_unavailable'
+            ) {
+              sourceFailure.error = error;
+              return null;
+            }
+            throw error;
+          })
+      : null;
     const calendarTarget =
       await this.crm.canonicalClientBookingTarget(tenantId);
     const source = calendarTarget.source;
@@ -346,6 +385,23 @@ export class ClientAppointmentCreateService {
         clientId: link.clientId,
         start,
       }));
+    if (!previous && sourceFailure.error) throw sourceFailure.error;
+    const branchSourceRevision = previous ? null : initialBranchSourceRevision;
+    if (
+      !previous &&
+      dto.branchId &&
+      (await this.crm.readBranchAvailabilityRevision(
+        tenantId,
+        dto.branchId,
+      )) !== branchSourceRevision
+    )
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+    if (
+      !previous &&
+      invocation.branchSourceRevision &&
+      invocation.branchSourceRevision !== branchSourceRevision
+    )
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
     const services = await this.crm
       .readBookableServices(tenantId, dto.serviceIds)
       .catch(
@@ -367,6 +423,7 @@ export class ClientAppointmentCreateService {
             staffId: dto.staffId,
             start,
             timezone,
+            ...(branchSourceRevision ? { branchSourceRevision } : {}),
           },
           services,
         )
@@ -389,6 +446,17 @@ export class ClientAppointmentCreateService {
         throw new ServiceUnavailableException({
           error: { code: 'booking_service_facts_unavailable' },
         });
+      if (
+        branchSourceRevision &&
+        dto.branchId &&
+        (await this.crm.readBranchAvailabilityRevision(
+          tenantId,
+          dto.branchId,
+        )) !== branchSourceRevision
+      )
+        throw new ConflictException({
+          error: { code: 'booking_preview_stale' },
+        });
     }
     return {
       link,
@@ -403,6 +471,7 @@ export class ClientAppointmentCreateService {
       bookingIdentity,
       services,
       factsHash,
+      branchSourceRevision,
       previous,
     };
   }
@@ -424,6 +493,7 @@ export class ClientAppointmentCreateService {
       bookingIdentity,
       services,
       factsHash,
+      branchSourceRevision,
       previous,
     } = await this.quoteVerifiedLink(tenantId, resolveLink, dto, invocation);
     if (
@@ -456,6 +526,7 @@ export class ClientAppointmentCreateService {
         timezone,
       },
       ...(!previous && factsHash ? { bookingFactsHash: factsHash } : {}),
+      ...(!previous && branchSourceRevision ? { branchSourceRevision } : {}),
       authorizationCheck: async () => {
         const current = await resolveLink();
         if (

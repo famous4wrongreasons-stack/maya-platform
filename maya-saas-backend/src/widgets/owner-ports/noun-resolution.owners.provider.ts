@@ -13,6 +13,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  HttpException,
   Injectable,
   Inject,
   Optional,
@@ -38,7 +39,7 @@ import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
 import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
 import {
-  decodeBookingSlotOwnerRef,
+  decodeBookingSlotSelectionRef,
   isBookingNounIdentity,
 } from '../booking/booking-noun-identity';
 
@@ -111,10 +112,23 @@ export class NounResolutionOwnersProvider implements NounReadPort {
         return { kind: 'gone', reason: 'not_found' };
       const bookingSlot =
         noun === 'slot' && isBookingNounIdentity(opened, 'slot');
-      const ownerValue = bookingSlot
-        ? decodeBookingSlotOwnerRef(opened.ownerRef)
-        : opened.ownerRef;
+      const slot = bookingSlot
+        ? decodeBookingSlotSelectionRef(opened.ownerRef)
+        : null;
+      const ownerValue = bookingSlot ? (slot?.start ?? null) : opened.ownerRef;
       if (ownerValue === null) return { kind: 'gone', reason: 'not_found' };
+      if (slot?.scope) {
+        if (
+          !['appointments.own.create', 'crm.appointment.create.v1'].includes(
+            input.capability?.key ?? '',
+          ) ||
+          input.frozenNouns.has('branch') ||
+          input.frozenNouns.has('branch_source_revision')
+        )
+          return { kind: 'gone', reason: 'not_found' };
+        values.set('branch', slot.scope.branchId);
+        values.set('branch_source_revision', slot.scope.sourceRevision);
+      }
       if (
         input.capability?.key === SCHEDULE_AE &&
         opened.ownerKind !== 'schedule_approval'
@@ -181,6 +195,24 @@ export class NounResolutionOwnersProvider implements NounReadPort {
       } else return { kind: 'policy_deferred' };
       return { kind: 'resolved', values };
     } catch (error) {
+      // A withdrawn canonical source is an unresolved noun, not a provider
+      // transport outage or evidence that the time was taken.
+      if (values.has('branch') && error instanceof HttpException) {
+        const body = error.getResponse();
+        const detail =
+          typeof body === 'object' && body !== null && 'error' in body
+            ? body.error
+            : null;
+        const code =
+          typeof detail === 'object' && detail !== null && 'code' in detail
+            ? detail.code
+            : null;
+        if (
+          code === 'booking_branch_source_unavailable' ||
+          code === 'booking_preview_stale'
+        )
+          return { kind: 'gone', reason: 'not_found' };
+      }
       if (error instanceof ForbiddenException)
         return { kind: 'policy_deferred' };
       if (error instanceof NotFoundException)

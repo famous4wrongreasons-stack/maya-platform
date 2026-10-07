@@ -3,6 +3,7 @@ import {
   isBookingNounIdentity,
   encodeBookingSlotOwnerRef,
   decodeBookingSlotOwnerRef,
+  decodeBookingSlotSelectionRef,
 } from './booking-noun-identity';
 
 describe('Canonical booking noun identity [BUILD]', () => {
@@ -33,5 +34,28 @@ describe('Canonical booking noun identity [BUILD]', () => {
     expect(decodeBookingSlotOwnerRef(handle + '=')).toBeNull();
     expect(decodeBookingSlotOwnerRef(iso)).toBeNull();
     expect(encodeBookingSlotOwnerRef('invalid')).toBeNull();
+  });
+  it('retains exact branch and original revision inside the bounded opaque slot identity', () => {
+    const start = '2035-10-01T12:30:00.000Z';
+    const scope = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+    const ref = encodeBookingSlotOwnerRef(start, scope)!;
+    expect(ref.length).toBeLessThanOrEqual(256);
+    expect(decodeBookingSlotSelectionRef(ref)).toEqual({ start, scope });
+    expect(
+      decodeBookingSlotSelectionRef(encodeBookingSlotOwnerRef(start)!),
+    ).toEqual({ start, scope: null });
+    for (const malformed of [
+      ref + ':extra',
+      ref.replace('slot_v2:', 'slot_v3:'),
+      ref.replace(':YnJhbmNoLWE:', ':YnJhbmNoLWE=:'),
+      ref.slice(0, -1),
+    ])
+      expect(decodeBookingSlotSelectionRef(malformed)).toBeNull();
+    expect(
+      encodeBookingSlotOwnerRef(start, { ...scope, branchId: 'bad/branch' }),
+    ).toBeNull();
+    expect(
+      encodeBookingSlotOwnerRef(start, { ...scope, sourceRevision: 'missing' }),
+    ).toBeNull();
   });
 });

@@ -341,6 +341,7 @@ export type Outcome<T, F> =
 
 // Explicit personal booking: request-local, already verified profile.
 export interface PersonalChoice { readonly id: string; readonly name: string }
+export interface PersonalBranch extends PersonalChoice { readonly timezone: string | null }
 export interface PersonalSlot { readonly start: string; readonly staffId: string; readonly branchId: string | null }
 export interface PersonalSelection { readonly staffId: string; readonly serviceIds: readonly string[]; readonly start: string; readonly branchId?: string; readonly previewFactsHash?: string }
 export interface PersonalPreview {
@@ -353,11 +354,12 @@ export interface PersonalResults {
   readonly results: readonly { readonly id: string; readonly state: string; readonly recordedAt: string }[];
   readonly hasPending: boolean; readonly hasMore: boolean;
 }
-export type PersonalFailure = { readonly reason: 'forbidden' | 'unavailable' | 'facts_unavailable' | 'unknown' | 'conflict' | 'aborted' };
+export type PersonalFailure = { readonly reason: 'forbidden' | 'unavailable' | 'branch_unavailable' | 'facts_unavailable' | 'unknown' | 'conflict' | 'aborted' };
 export interface PersonalTransport {
+  personalBranches(signal: AbortSignal): Promise<Outcome<readonly PersonalBranch[], PersonalFailure>>;
   personalServices(signal: AbortSignal): Promise<Outcome<readonly PersonalChoice[], PersonalFailure>>;
   personalStaff(signal: AbortSignal): Promise<Outcome<readonly PersonalChoice[], PersonalFailure>>;
-  personalSlots(date: string, serviceId: string, staffId: string, signal: AbortSignal): Promise<Outcome<readonly PersonalSlot[], PersonalFailure>>;
+  personalSlots(date: string, serviceId: string, staffId: string, signal: AbortSignal, branchId?: string): Promise<Outcome<readonly PersonalSlot[], PersonalFailure>>;
   personalPreview(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<PersonalPreview, PersonalFailure>>;
   personalResults(signal: AbortSignal): Promise<Outcome<PersonalResults, PersonalFailure>>;
   personalCreate(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>>;

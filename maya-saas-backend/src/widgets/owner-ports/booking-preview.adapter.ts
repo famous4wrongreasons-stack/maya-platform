@@ -15,7 +15,7 @@ import type {
 import type { DraftOwnerPort } from './draft-owner.registry';
 import { openWidgetNounHandle } from '../emission/seal.service';
 import {
-  decodeBookingSlotOwnerRef,
+  decodeBookingSlotSelectionRef,
   isBookingNounIdentity,
 } from '../booking/booking-noun-identity';
 
@@ -112,7 +112,17 @@ export class BookingPreviewAdapter
       const quoted = await this.create.quoteForAccount(
         input.routing.tenantId,
         input.actorUserId,
-        { staffId, serviceIds: [serviceId], start },
+        {
+          staffId,
+          serviceIds: [serviceId],
+          start,
+          ...(nouns.get('branch') ? { branchId: nouns.get('branch') } : {}),
+        },
+        {
+          ...(nouns.get('branch_source_revision')
+            ? { branchSourceRevision: nouns.get('branch_source_revision') }
+            : {}),
+        },
       );
       const service = quoted.services.find(
         (candidate) => candidate.id === serviceId,
@@ -180,12 +190,15 @@ export class BookingPreviewAdapter
         !isBookingNounIdentity(value, noun)
       )
         return { outcome: refused(), values: new Map() };
-      const ownerRef =
-        noun === 'slot'
-          ? decodeBookingSlotOwnerRef(value.ownerRef)
-          : value.ownerRef;
+      const slot =
+        noun === 'slot' ? decodeBookingSlotSelectionRef(value.ownerRef) : null;
+      const ownerRef = noun === 'slot' ? (slot?.start ?? null) : value.ownerRef;
       if (ownerRef === null) return { outcome: refused(), values: new Map() };
       opened.set(noun, ownerRef);
+      if (slot?.scope) {
+        opened.set('branch', slot.scope.branchId);
+        opened.set('branch_source_revision', slot.scope.sourceRevision);
+      }
     }
     const serviceId = opened.get('service');
     const staffId = opened.get('staff');
@@ -196,7 +209,17 @@ export class BookingPreviewAdapter
       const quoted = await this.create.quoteForAccount(
         input.routing.tenantId,
         input.actorUserId,
-        { staffId, serviceIds: [serviceId], start },
+        {
+          staffId,
+          serviceIds: [serviceId],
+          start,
+          ...(opened.get('branch') ? { branchId: opened.get('branch') } : {}),
+        },
+        {
+          ...(opened.get('branch_source_revision')
+            ? { branchSourceRevision: opened.get('branch_source_revision') }
+            : {}),
+        },
       );
       const service = quoted.services.find(
         (candidate) => candidate.id === serviceId,
@@ -232,6 +255,7 @@ export class BookingPreviewAdapter
           ),
         }),
         values: new Map([
+          ...opened,
           ['service', serviceId],
           ['staff', staffId],
           ['slot', quoted.start],

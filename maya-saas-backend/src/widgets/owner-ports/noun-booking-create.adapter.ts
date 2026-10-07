@@ -11,11 +11,20 @@ export class BookingCreateNounAdapter {
     const serviceId = nouns.get('service');
     const start = nouns.get('slot') ?? nouns.get('start');
     if (!staffId || !serviceId || !start) return null;
-    return this.owner.quoteForAccount(actor.tenantId, actor.userId, {
-      staffId,
-      serviceIds: [serviceId],
-      start,
-      ...(nouns.get('branch') ? { branchId: nouns.get('branch') } : {}),
-    });
+    return this.owner.quoteForAccount(
+      actor.tenantId,
+      actor.userId,
+      {
+        staffId,
+        serviceIds: [serviceId],
+        start,
+        ...(nouns.get('branch') ? { branchId: nouns.get('branch') } : {}),
+      },
+      {
+        ...(nouns.get('branch_source_revision')
+          ? { branchSourceRevision: nouns.get('branch_source_revision') }
+          : {}),
+      },
+    );
   }
 }

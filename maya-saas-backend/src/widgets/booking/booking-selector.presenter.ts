@@ -242,13 +242,21 @@ const presentSlots = (
     return null;
   }
   const slots = list(record(input.source)?.slots);
-  // The sealed slot_iso noun cannot retain a branch. Do not lower a bound
-  // availability read into an unscoped booking preview. The READ remains usable.
+  const selection = record(record(input.source)?.booking_selection);
+  const branchId = str(selection?.branchId);
+  const sourceRevision = str(selection?.branchSourceRevision);
+  const scope =
+    branchId && sourceRevision ? { branchId, sourceRevision } : null;
+  // External branch facts become actionable only with the originating owner's
+  // exact branch/source witness. Historical ISO-only refs are never upgraded.
   if (
     !input.internalCalendar &&
     (record(input.source)?.branch_id != null ||
-      slots.some((slot) => slot.branch_id != null))
+      slots.some((slot) => slot.branch_id != null)) &&
+    (!scope || slots.some((slot) => slot.branch_id !== scope.branchId))
   )
+    return null;
+  if (scope && slots.some((slot) => slot.branch_id !== scope.branchId))
     return null;
   const rendered: TimeSlotSelectorBody['groups'][number]['slots'] = [];
   for (const slot of slots) {
@@ -265,7 +273,7 @@ const presentSlots = (
       1,
       Math.round((Date.parse(end) - Date.parse(start)) / 60_000),
     );
-    const slotOwnerRef = encodeBookingSlotOwnerRef(start);
+    const slotOwnerRef = encodeBookingSlotOwnerRef(start, scope ?? undefined);
     if (slotOwnerRef === null) continue;
     const handle = input.mint({
       tenantId: input.tenantId,

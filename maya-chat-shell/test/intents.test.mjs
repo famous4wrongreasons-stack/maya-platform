@@ -1655,6 +1655,7 @@ test('personal receiver follows real Widgets integrity/expiry and survives acces
   }
   const s = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: detail, accepted: true }) } });
   const personal = createPersonalBooking({ widgets: s.runtime.widgetPort, session: { view: () => ({ signedIn: true }), subscribe: () => () => {} }, newAbort: () => new AbortController(), transport: {
+    personalBranches: async () => ({ ok: true, value: [] }),
     personalResults: async () => ({ ok: true, value: { results: [], hasPending: false, hasMore: false } }),
     personalServices: async () => ({ ok: true, value: [{ id: 's', name: 'Service' }] }),
     personalStaff: async () => ({ ok: true, value: [{ id: 'p', name: 'Staff' }] }),

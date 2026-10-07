@@ -154,7 +154,7 @@ export type AppointmentActionInvocation = {
   expectedBookingFactsHash?: string;
   /** Server-observed terms persisted once as evidence on a new canonical create. */
   bookingFactsHash?: string;
-  /** Immutable server source witness for a new verified Client reschedule. */
+  /** Immutable server source witness for a new verified Client create/reschedule. */
   branchSourceRevision?: string;
   /** Server-resolved timezone of a verified Client reschedule preview. */
   appointmentTimezone?: string;
@@ -1851,14 +1851,15 @@ export class CrmService {
         invocation,
       }),
       handlers: {
-        dispatch: async (input) => {
+        dispatch: async (input, _prepared, executionContext) => {
           await invocation.authorizationCheck?.();
           const durable = this.createAppointmentInput(input);
           const branchRevision =
             verifiedCanonicalClient && durable.branchId
-              ? await this.readBranchAvailabilityRevision(
+              ? await this.confirmedCreateBranchRevision(
                   scopedTenantId,
                   durable.branchId,
+                  executionContext.executionId,
                 )
               : null;
           const assertSourceCurrent = verifiedCanonicalClient
@@ -2061,7 +2062,12 @@ export class CrmService {
       durable.branchId &&
       (await this.getCalendarSource(tenantId)) === CalendarSource.EXTERNAL
     ) {
-      await this.readBranchAvailabilityRevision(tenantId, durable.branchId);
+      await this.confirmedCreateBranchRevision(
+        tenantId,
+        durable.branchId,
+        executionId,
+        execution?.evidenceRefsJson,
+      );
       await this.assertBookingBranchTimezone(
         tenantId,
         durable.branchId,
@@ -2081,6 +2087,15 @@ export class CrmService {
         staffId: durable.staffId,
         start: durable.start,
         timezone: invocation.bookingIntent.timezone,
+        ...(durable.branchId &&
+        (await this.getCalendarSource(tenantId)) === CalendarSource.EXTERNAL
+          ? await this.createBranchFactsScope(
+              tenantId,
+              durable.branchId,
+              executionId,
+              execution?.evidenceRefsJson,
+            )
+          : {}),
       },
       services,
     );
@@ -2089,6 +2104,58 @@ export class CrmService {
         error: { code: 'booking_preview_stale' },
       });
     return services;
+  }
+
+  private async createBranchFactsScope(
+    tenantId: string,
+    branchId: string,
+    executionId: string,
+    evidenceRefs: unknown,
+  ) {
+    const revision = await this.confirmedCreateBranchRevision(
+      tenantId,
+      branchId,
+      executionId,
+      evidenceRefs,
+    );
+    return revision ? { branchSourceRevision: revision } : {};
+  }
+
+  /** READY/restart must use the originally persisted source, never a fresh
+   * caller's witness. The same check precedes provider POST and reconciliation. */
+  private async confirmedCreateBranchRevision(
+    tenantId: string,
+    branchId: string,
+    executionId: string | undefined,
+    evidenceRefs?: unknown,
+  ): Promise<string | null> {
+    const revision = await this.readBranchAvailabilityRevision(
+      tenantId,
+      branchId,
+    );
+    if (revision === null) return null;
+    if (evidenceRefs === undefined && executionId) {
+      evidenceRefs = (
+        await this.prisma.actionExecution.findFirst({
+          where: {
+            id: executionId,
+            tenantId,
+            capability: 'crm.appointment.create.v1',
+          },
+          select: { evidenceRefsJson: true },
+        })
+      )?.evidenceRefsJson;
+    }
+    const prefix = 'crm-branch-source/1:';
+    const refs = Array.isArray(evidenceRefs)
+      ? evidenceRefs.filter(
+          (value): value is string =>
+            typeof value === 'string' && value.startsWith(prefix),
+        )
+      : [];
+    if (refs.length !== 1 || refs[0] !== prefix + revision)
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+    return revision;
   }
 
   private async assertBookingBranchTimezone(
@@ -2170,6 +2237,43 @@ export class CrmService {
         .update(JSON.stringify([tenantId, branchId, tenant, timezone]))
         .digest('hex'),
     };
+  }
+
+  /** Finite semantic branch binding. Names/IDs select only an existing tenant
+   * branch; source qualification remains with the current CRM owner. */
+  async resolveBookingBranchPreference(
+    tenantId: string,
+    semanticNameOrId?: string | null,
+    proposedBranchId?: string,
+  ): Promise<{ id: string; name: string; timezone: string } | null> {
+    this.tenantContext.assertTenantId(tenantId);
+    const preference = semanticNameOrId?.trim();
+    const selected = proposedBranchId?.trim();
+    if (
+      (!preference && !selected) ||
+      (preference?.length ?? 0) > 160 ||
+      (selected?.length ?? 0) > 128
+    )
+      return null;
+    const branches = await this.prisma.branch.findMany({
+      where: {
+        tenantId,
+        ...(preference
+          ? {
+              OR: [
+                { id: preference },
+                { name: { equals: preference, mode: 'insensitive' } },
+              ],
+            }
+          : { id: selected! }),
+      },
+      take: 2,
+      select: { id: true, name: true },
+    });
+    if (branches.length !== 1 || (selected && branches[0].id !== selected))
+      return null;
+    const source = await this.readCapacitySource(tenantId, branches[0].id);
+    return { ...branches[0], timezone: source.timezone };
   }
 
   async readBranchAvailabilityRevision(

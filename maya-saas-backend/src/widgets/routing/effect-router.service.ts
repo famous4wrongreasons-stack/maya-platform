@@ -916,6 +916,14 @@ export class EffectRouterService {
             service: input.resolvedNouns.values.get('service'),
             staff: input.resolvedNouns.values.get('staff'),
             slot: input.resolvedNouns.values.get('slot'),
+            ...(input.resolvedNouns.values.get('branch')
+              ? {
+                  branch: input.resolvedNouns.values.get('branch'),
+                  branchSourceRevision: input.resolvedNouns.values.get(
+                    'branch_source_revision',
+                  ),
+                }
+              : {}),
           },
           ttlSeconds: 900,
         },

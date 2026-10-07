@@ -1,10 +1,21 @@
 // Fixed projections for the existing verified personal-client HTTP contract.
 // No contact, role, link, provider payload or authority token leaves net/.
-import type { PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults } from './types.ts';
+import type { PersonalBranch, PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults } from './types.ts';
 const object = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : null;
 const string = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 512;
 const instant = (v: unknown): v is string => string(v) && /T.*(Z|[+-]\d\d:\d\d)$/.test(v) && Number.isFinite(Date.parse(v));
 const amount = (v: unknown): number | null => typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
+export function projectPersonalBranches(raw: unknown): readonly PersonalBranch[] | null {
+  if (!Array.isArray(raw) || raw.length > 200) return null;
+  const out: PersonalBranch[] = [];
+  for (const value of raw) {
+    const v = object(value);
+    if (!v || !string(v.id) || !string(v.name) || !(v.timezone === null || string(v.timezone)) || out.some((x) => x.id === v.id)) return null;
+    if (v.timezone !== null) { try { new Intl.DateTimeFormat('ru', { timeZone: v.timezone as string }); } catch { return null; } }
+    out.push({ id: v.id, name: v.name, timezone: v.timezone as string | null });
+  }
+  return out;
+}
 export function projectPersonalChoices(raw: unknown): readonly PersonalChoice[] | null {
   if (!Array.isArray(raw) || raw.length > 200) return null;
   const out: PersonalChoice[] = [];

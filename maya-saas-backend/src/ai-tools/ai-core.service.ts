@@ -24,6 +24,7 @@ import {
 } from './service-price-chat-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
+import { CrmService } from '../crm/crm.service';
 import {
   mutationClarification,
   mutationReceiptReply,
@@ -554,6 +555,7 @@ export class AiCoreService {
     private readonly conversationIntelligence?: ConversationIntelligenceService,
     @Optional() private readonly prisma?: PrismaService,
     @Optional() private readonly moduleRef?: ModuleRef,
+    @Optional() private readonly crm?: CrmService,
   ) {}
 
   private readonly historyReplays = new WeakSet<AiCoreChatDto>();
@@ -1142,6 +1144,63 @@ export class AiCoreService {
         ) {
           const task = activeSemanticPlan.tasks[0];
           const proposedArguments = decision.toolCall?.arguments ?? {};
+          // A retained branch is a preference, never a principal or a provider
+          // binding. Resolve it anew through the CRM owner before deriving the
+          // local booking day or asking for actionable availability.
+          const hasBranchPreference =
+            'branch' in task.entities ||
+            proposedArguments.branch_id !== undefined;
+          const branch = hasBranchPreference
+            ? await this.crm?.resolveBookingBranchPreference(
+                tenantId,
+                typeof task.entities.branch === 'string'
+                  ? task.entities.branch
+                  : null,
+                typeof proposedArguments.branch_id === 'string'
+                  ? proposedArguments.branch_id
+                  : undefined,
+              )
+            : null;
+          if (
+            hasBranchPreference &&
+            (!branch ||
+              ('branch' in task.entities &&
+                (typeof task.entities.branch !== 'string' ||
+                  !task.entities.branch.trim())) ||
+              (proposedArguments.branch_id !== undefined &&
+                typeof proposedArguments.branch_id !== 'string'))
+          ) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Уточните филиал салона. Не удалось однозначно проверить выбранный филиал; запись пока не подготовлена.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'blocked',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
+          if (branch) task.entities.branch = branch.name;
+          const dateKey =
+            task.intent === 'booking.create_own' ? 'date' : 'date_or_period';
+          const date = bookingPreferenceDate(
+            task.entities[dateKey],
+            branch?.timezone ?? businessTimezone,
+          );
+          // Persist the selected local day, so changing service/staff/branch on
+          // a later turn cannot reinterpret yesterday's "tomorrow" as a new day.
+          if (date) task.entities[dateKey] = date;
           const readCatalog = async (name: string) => {
             const execution = this.record(
               await this.executeChatTool(
@@ -1261,7 +1320,6 @@ export class AiCoreService {
               toolResults,
             );
           }
-          const args = proposedArguments;
           // The language contract requires configured business-local daypart bounds.
           // This booking path has no such owner setting; never invent an 18:00 cutoff.
           const timePreference =
@@ -1288,12 +1346,6 @@ export class AiCoreService {
               toolResults,
             );
           }
-          const date = bookingPreferenceDate(
-            task.entities[
-              task.intent === 'booking.create_own' ? 'date' : 'date_or_period'
-            ],
-            businessTimezone,
-          );
           if (typeof date === 'string') {
             const execution = this.record(
               await this.executeChatTool(
@@ -1306,9 +1358,7 @@ export class AiCoreService {
                     date,
                     staff_id: bound.staff.id,
                     service_ids: bound.services.map((s) => s.id),
-                    ...(args.branch_id === undefined
-                      ? {}
-                      : { branch_id: args.branch_id }),
+                    ...(branch ? { branch_id: branch.id } : {}),
                   },
                   idempotencyKey: this.toolIdempotencyKey(
                     tenantId,

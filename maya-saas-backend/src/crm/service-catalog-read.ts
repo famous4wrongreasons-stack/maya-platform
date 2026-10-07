@@ -124,6 +124,8 @@ export function bookingServiceFactsFingerprint(
     staffId: string;
     start: string;
     timezone: string;
+    /** Optional immutable source revision for explicitly bound native bookings. */
+    branchSourceRevision?: string;
   },
   services: readonly ServiceOffering[],
 ): string {

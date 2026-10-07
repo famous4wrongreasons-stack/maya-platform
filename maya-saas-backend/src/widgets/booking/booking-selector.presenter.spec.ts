@@ -246,7 +246,7 @@ describe('FBE2E-2 — booking selector presentation', () => {
   });
 });
 
-it('refuses a bound slot selector before minting an ISO-only noun that would lose branch scope', () => {
+it('refuses bound slot facts without the original source witness', () => {
   const mint = jest.fn();
   expect(
     presentBookingSelector({
@@ -267,6 +267,41 @@ it('refuses a bound slot selector before minting an ISO-only noun that would los
     }),
   ).toBeNull();
   expect(mint).not.toHaveBeenCalled();
+});
+
+it('mints a scoped external slot only when every returned branch matches its qualified selection', () => {
+  const minted: Array<{ ownerRef: string }> = [];
+  const mint = jest.fn((identity: { ownerRef: string }) => {
+    minted.push(identity);
+    return 'opaque-slot';
+  });
+  const source = {
+    timezone: 'Europe/Moscow',
+    booking_selection: {
+      branchId: 'branch-a',
+      branchSourceRevision: 'a'.repeat(64),
+    },
+    slots: [
+      {
+        branch_id: 'branch-a',
+        start: '2035-01-01T07:00:00Z',
+        end: '2035-01-01T08:00:00Z',
+      },
+    ],
+  };
+  const present = () =>
+    presentBookingSelector({
+      tenantId: 'tenant-a',
+      kind: 'TIME_SLOT_SELECTOR',
+      inherited: { staff: 'opaque-staff', service: 'opaque-service' },
+      source,
+      mint,
+    });
+  expect(present()?.kind).toBe('TIME_SLOT_SELECTOR');
+  expect(minted[0].ownerRef).toMatch(/^slot_v2:/);
+  source.slots.push({ ...source.slots[0], branch_id: 'foreign-branch' });
+  expect(present()).toBeNull();
+  expect(mint).toHaveBeenCalledTimes(1);
 });
 
 it('preserves INTERNAL provider-owned selection when the emitter confirms the source', () => {
