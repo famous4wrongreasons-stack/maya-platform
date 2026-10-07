@@ -456,7 +456,12 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         'DRAFT',
         firstSlot(slot).slot_ref,
       );
-      expect(denied.outcome).toBe('EXPIRED');
+      expect(denied).toMatchObject({
+        outcome: 'expired',
+        code: null,
+        stopped_at_gate: '1',
+        next_envelope: null,
+      });
       expect(
         await db.prisma.widgetEmission.count({
           where: { tenantId: s.tenant.id, kind: 'BOOKING_CONFIRMATION' },
