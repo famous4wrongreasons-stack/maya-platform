@@ -421,7 +421,7 @@ describe('P-RT6 — erasure ordering with Gate 9', () => {
       }),
     ).toMatchObject({
       diffJson: null,
-      erasedAt: expect.any(Date),
+      erasedAt: expect.any(Date) as unknown,
     });
     for (const row of retained)
       expect(
@@ -461,7 +461,7 @@ describe('P-RT6 — erasure ordering with Gate 9', () => {
       }),
     ).toMatchObject({
       utteranceEcho: null,
-      erasedAt: expect.any(Date),
+      erasedAt: expect.any(Date) as unknown,
       refusalCode: 'proof_only',
     });
   }, 60_000);
@@ -556,11 +556,130 @@ describe('P-RT6 — erasure ordering with Gate 9', () => {
         }),
       ).toMatchObject({
         textContent: null,
-        erasedAt: expect.any(Date),
+        erasedAt: expect.any(Date) as unknown,
       });
     } finally {
       release();
       await Promise.allSettled([writer, eraser]);
+    }
+  }, 60_000);
+
+  it('RT6-7 [PG] two conversation erasures stamp a shared draft only once after overlapping snapshots', async () => {
+    const built = await record('RT6-7');
+    const sibling = await fx.widget({
+      tenant: built.tenant,
+      actor: built.actor,
+      kind: 'METRIC',
+      body: { value: 2 },
+    });
+    const tenantId = built.tenant.id;
+    const draftRef = `rt6-shared-${randomUUID()}`;
+    const draft = await ctx.prisma.widgetDraft.create({
+      data: {
+        tenantId,
+        draftRef,
+        draftClass: 'task',
+        ownerCapabilitySpace: 'C9',
+        ownerCapabilityKey: 'c9.booking.propose',
+        principalProofHash: built.principalProofHash,
+        diffJson: { note: 'synthetic shared draft' },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 600_000),
+      },
+    });
+    // Synthetic shared audit references make the UPDATE-local fence load-bearing.
+    await ctx.prisma.widgetIntentRecord.updateMany({
+      where: {
+        tenantId,
+        intentTokenHash: {
+          in: [built.record.intentTokenHash, sibling.intentTokenHash],
+        },
+      },
+      data: { confirmationOfKind: 'draft', confirmationOfRef: draftRef },
+    });
+    let release!: () => void;
+    let acquired!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const locked = new Promise<void>((resolve) => {
+      acquired = resolve;
+    });
+    const holder = ctx.prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT "id" FROM "WidgetDraft" WHERE "tenantId" = ${tenantId} AND "id" = ${draft.id}::uuid FOR UPDATE`;
+        acquired();
+        await held;
+      },
+      { timeout: 15_000, isolationLevel: 'ReadCommitted' },
+    );
+    await Promise.race([
+      locked,
+      holder.then(() => {
+        throw new Error('holder ended before row lock');
+      }),
+    ]);
+    const pids: number[] = [];
+    const job = new WidgetConversationErasureJob(ctx.prisma);
+    const erasers = [built.record, sibling].map((widget) =>
+      ctx.prisma.$transaction(
+        async (tx) => {
+          const [{ pid }] = await tx.$queryRaw<
+            { pid: number }[]
+          >`SELECT pg_backend_pid() AS pid`;
+          pids.push(pid);
+          return job.runInTransaction(
+            tx,
+            {
+              tenantId,
+              conversationId: widget.conversationId,
+              erasureRequestRef: `erase-${randomUUID()}`,
+              subjectPrincipalProofHash: built.principalProofHash,
+            },
+            new Date(),
+          );
+        },
+        { timeout: 15_000, isolationLevel: 'ReadCommitted' },
+      ),
+    );
+    const all = Promise.all(erasers);
+    // Attach a rejection handler while observing the barriers; the actual error is rethrown below.
+    void all.catch(() => undefined);
+    try {
+      let bothWaiting = false;
+      for (let attempt = 0; attempt < 100; attempt++) {
+        if (pids.length === 2) {
+          const [{ waiting }] = await ctx.prisma.$queryRaw<
+            { waiting: boolean }[]
+          >`
+            SELECT cardinality(pg_blocking_pids(${pids[0]})) > 0
+              AND cardinality(pg_blocking_pids(${pids[1]})) > 0 AS waiting
+          `;
+          if (waiting) {
+            bothWaiting = true;
+            break;
+          }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      expect(bothWaiting).toBe(true);
+      release();
+      await Promise.all([holder, all]);
+      const tombstones = await ctx.prisma.widgetErasureTombstone.findMany({
+        where: { tenantId, rowKey: `WidgetDraft/${draft.id}` },
+      });
+      expect(tombstones).toHaveLength(1);
+      expect(
+        await ctx.prisma.widgetDraft.findUniqueOrThrow({
+          where: { id: draft.id },
+        }),
+      ).toMatchObject({
+        diffJson: null,
+        erasedAt: tombstones[0].erasedAt,
+      });
+    } finally {
+      release();
+      await Promise.allSettled([holder, ...erasers]);
     }
   }, 60_000);
 });

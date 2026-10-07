@@ -42,8 +42,10 @@ const schemaErasableFields = (): Readonly<
 const mockPrisma = (changed = 7) => {
   const execute = jest.fn().mockResolvedValue(changed);
   const transaction = jest.fn(
-    async (work: (tx: unknown) => Promise<unknown>, _options?: unknown) =>
-      work({ $executeRaw: execute }),
+    async (work: (tx: unknown) => Promise<unknown>, options?: unknown) => {
+      void options;
+      return work({ $executeRaw: execute });
+    },
   );
   return {
     prisma: { $transaction: transaction } as unknown as PrismaService,
@@ -90,7 +92,11 @@ describe('P-RT6 — conversation erasure job', () => {
     });
     expect(execute).toHaveBeenCalledTimes(2);
     const sql = statementOf(execute);
-    expect(execute.mock.calls[0][0].join('?')).toBe(
+    const [lockStrings] = execute.mock.calls[0] as [
+      TemplateStringsArray,
+      ...unknown[],
+    ];
+    expect(lockStrings.join('?')).toBe(
       'SELECT pg_advisory_xact_lock(hashtextextended(?, 0))',
     );
     expect(sql).not.toContain('pg_advisory_xact_lock');
