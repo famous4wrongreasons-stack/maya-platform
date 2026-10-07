@@ -219,9 +219,21 @@ async function main() {
   } finally {
     try {
       report.guard = guard ? { blocked: guard.blocked, errors: guard.errors } : null;
-      report.observedCompletions = observed;
       // Status metadata only: never archive login bodies, headers, OTPs or bearer values.
       report.http = page ? page.apiRequests('').map(r => ({ path: new URL(r.url).pathname, method: r.method, status: r.status ?? null, failed: Boolean(r.failed) })) : [];
+      // Owner completions explain transparent transport retries separately from
+      // UI requests. Keep a bounded projection, never the upstream body itself.
+      report.observedCompletions = {
+        count: observed.length,
+        droppedCount: observed.filter(value => value.dropped).length,
+        truncated: observed.length > 16,
+        entries: observed.slice(0, 16).map(({ completed, dropped }) => ({
+          dropped,
+          requestId: typeof completed.requestId === 'string' && completed.requestId.length === 36 ? completed.requestId : null,
+          conversationId: typeof completed.conversationId === 'string' && completed.conversationId.length === 36 ? completed.conversationId : null,
+          erasedAt: typeof completed.erasedAt === 'string' && completed.erasedAt.length <= 32 ? completed.erasedAt : null,
+        })),
+      };
       fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
     } finally {
       try { await cleanup(); }
