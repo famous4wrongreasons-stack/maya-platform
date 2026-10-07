@@ -49,6 +49,7 @@ async function clickNamed(page, name) {
   assert.equal(await page.click(`Q.all('button').find(el => Q.visible(el) && Q.name(el) === ${JSON.stringify(name)})`), true);
 }
 async function login(page, email) {
+  const beforeHistory = page.apiRequests('/ai/conversation').length;
   assert.ok(await page.waitFor('!!Q.byName("button", /^Войти по email$/)'));
   await clickNamed(page, 'Войти по email');
   assert.ok(await page.waitFor('!!Q.email()'));
@@ -69,7 +70,7 @@ async function login(page, email) {
   // Do not publish auth bodies, code, email, tokens, console or request postData.
   delete response.debug_code;
   assert.equal(response.retry_after_seconds, 60, 'Existing local profile cooldown changed; review acceptance timing');
-  await until(() => page.apiRequests('/ai/conversation').some((r) => r.finishedAt), 'HTTP history');
+  await until(() => page.apiRequests('/ai/conversation').slice(beforeHistory).some((r) => r.finishedAt), 'fresh HTTP history');
   return Date.now() + (response.retry_after_seconds + 1) * 1000;
 }
 async function sendClientRequest(page, prompt) {
@@ -96,7 +97,7 @@ async function main() {
   const output = path.join(input.output, 'output', 'playwright');
   fs.mkdirSync(output, { recursive: true, mode: 0o700 });
   const report = { contract: 'maya.booking-confirmation-browser/1', status: 'running', syntheticInternalCatalog: true, syntheticLocalProvider: true, syntheticA18Verifier: true, scriptedModel: true, realModelAcceptance: false, externalProviderAcceptance: false, snapshots: {}, observations: {} };
-  let browser, dev, chromeChild, chromeProfile;
+  let browser, dev, chromeChild, chromeProfile, activePage;
   const pages = [], guards = [];
   let closing;
   const cleanup = () => closing ??= (async () => {
@@ -188,6 +189,7 @@ async function main() {
     const reloads = [];
     for (const scenario of input.scenarios) {
       const page = await newPage(origin);
+      activePage = page;
       const nextLoginAt = await login(page, scenario.email);
       const before = page.apiRequests('/ai/chat').length;
       await sendClientRequest(page, PROMPTS.catalog);
@@ -230,10 +232,13 @@ async function main() {
     // The current web carrier keeps its grant in memory. A reload requires real
     // UI authentication again; respect the existing email cooldown unchanged.
     for (const { page, scenario, commit, expectedText, nextLoginAt } of reloads) {
+      activePage = page;
       while (Date.now() < nextLoginAt) await pause(Math.min(1000, nextLoginAt - Date.now()));
       await page.goto(origin + '/');
       await login(page, scenario.email);
-      if (expectedText) assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expectedText)})`));
+      const restored = page.apiRequests('/ai/conversation').filter(r => r.finishedAt).at(-1);
+      report.observations[scenario.key + 'RestoredHistory'] = JSON.parse(await page.responseBody(restored.requestId));
+      if (expectedText) assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expectedText)})`), scenario.key + ': restored terminal text must be visible');
       if (scenario.key !== 'success') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
       if (scenario.key === 'unknown') {
         assert.equal(await page.eval(`Q.all('button[data-ref]').filter(Q.visible).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), false);
@@ -246,8 +251,8 @@ async function main() {
     report.status = 'passed';
   } catch (error) {
     report.status = 'failed'; report.failure = error.message;
-    if (pages.length) {
-      try { await capture(pages.at(-1), 'failure'); } catch { report.failureCapture = 'unavailable'; }
+    if (activePage) {
+      try { await capture(activePage, 'failure'); } catch { report.failureCapture = 'unavailable'; }
     }
     throw error;
   } finally {
