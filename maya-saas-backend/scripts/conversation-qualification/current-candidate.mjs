@@ -17,6 +17,9 @@ const GROUPS = [
 ];
 const RUNTIME_SOURCES = [
   'src/ai-tools/ai-core-model.service.ts',
+  'src/ai-tools/planner-wire-context.ts',
+  'src/conversation-intelligence/conversation-intelligence.service.ts',
+  'src/widgets/composition/chat-read.trigger.ts',
   'src/ai-tools/ai-core.service.ts',
   'src/ai-tools/ai-tool-registry.service.ts',
   'src/orchestration/c9.registry.ts',

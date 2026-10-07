@@ -1,0 +1,11 @@
+{"event":"opened","mode":"OFFLINE_SYNTHETIC_ONLY","manifestSha256":"eeb0dfca29cf6dac392c61877fedd359c11d5a1775109508a93bada25ba564b0","candidateCommit":"1f1d4ea32ea97610760487a8abc2a397cd790819","limits":{"model":"deepseek-v4-pro","dialogs":24,"turns":64,"attempts":96,"inputTokens":8000000,"outputTokens":196608,"outputPerAttempt":2048,"spendNanoUsd":12000000000,"durationMs":3600000,"timeoutMs":30000,"intervalMs":6000,"requestBytes":98304,"responseBytes":1048576,"inputNanoUsdPerToken":1320,"outputNanoUsdPerToken":3960,"pricingStatus":"HISTORICAL_2026_10_05_NOT_CURRENT_VERIFIED"},"startedAt":1791376616856,"paidAuthorized":false}
+{"event":"dialog","number":1}
+{"event":"turn","number":1}
+{"event":"reserved","attempt":1,"at":1791376623283,"bytes":66968,"input":71064,"output":1200,"nanoUsd":98556480,"totalInput":71064,"totalOutput":1200,"totalNanoUsd":98556480}
+{"event":"response","attempt":1,"status":200}
+{"event":"turn","number":2}
+{"event":"reserved","attempt":2,"at":1791376629284,"bytes":67799,"input":71895,"output":1200,"nanoUsd":99653400,"totalInput":142959,"totalOutput":2400,"totalNanoUsd":198209880}
+{"event":"response","attempt":2,"status":200}
+{"event":"dialog","number":2}
+{"event":"turn","number":3}
+{"event":"closed","dialogs":2,"turns":3,"attempts":2,"inputTokens":142959,"outputTokens":2400,"reservedNanoUsd":198209880,"halted":false}

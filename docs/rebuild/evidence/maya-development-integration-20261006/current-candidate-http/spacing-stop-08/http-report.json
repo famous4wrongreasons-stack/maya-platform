@@ -1,0 +1,3504 @@
+{
+  "mode": "ACTUAL_AUTHENTICATED_HTTP_CANNED_TRANSPORT_ONLY",
+  "status": "STOPPED_REMAINING_UNEXECUTED",
+  "candidate": "1f1d4ea32ea97610760487a8abc2a397cd790819",
+  "bindingManifestSha256": "eeb0dfca29cf6dac392c61877fedd359c11d5a1775109508a93bada25ba564b0",
+  "requestByteCap": 98304,
+  "maxRequestBytes": 67799,
+  "maxConservativeInputTokenBound": 71895,
+  "transportCalls": 2,
+  "actualPaidCalls": 0,
+  "externalFetchCalls": 0,
+  "providerWrites": 0,
+  "modelQuality": "NOT_EVALUATED",
+  "cannedResponse": "FIXED_CLARIFICATION_NOT_SELECTED_FROM_CASE_ORACLE",
+  "requests": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "phase": "tool_planning",
+      "bytes": 66968,
+      "bodySha256": "eaf329faa5ae155f69759c8cb0ebeb60cc20716be956a68add6d393301b25933",
+      "conservativeInputTokenBound": 71064,
+      "outputLimit": 1200,
+      "sections": {
+        "phase": 15,
+        "surface": 5,
+        "principal_role": 8,
+        "now_utc": 26,
+        "business_timezone": 15,
+        "conversation": 151,
+        "remembered_notes": 2,
+        "tool_results": 2,
+        "semantic_plan": 4,
+        "required_tools": 128,
+        "available_tools": 1869,
+        "tool_input_schemas": 1965,
+        "conversation_contract": 42383,
+        "response_contract": 190
+      },
+      "systemBytes": 15413
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "phase": "tool_planning",
+      "bytes": 67799,
+      "bodySha256": "a67e94448d353e0a2fdbceaf5d003fa5a04d1fe5df6058ceb49083547e4afc83",
+      "conservativeInputTokenBound": 71895,
+      "outputLimit": 1200,
+      "sections": {
+        "phase": 15,
+        "surface": 5,
+        "principal_role": 8,
+        "now_utc": 26,
+        "business_timezone": 15,
+        "conversation": 201,
+        "remembered_notes": 2,
+        "tool_results": 2,
+        "semantic_plan": 815,
+        "required_tools": 2,
+        "available_tools": 1869,
+        "tool_input_schemas": 1965,
+        "conversation_contract": 42383,
+        "response_contract": 190
+      },
+      "systemBytes": 15413
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "bytes": 66968,
+      "bodySha256": "d05f9ce2cfb20eead6508a764dfbc404b46d57b544723891c9b72f76027233ae",
+      "conservativeInputTokenBound": 71064,
+      "outputLimit": 1200,
+      "sections": {
+        "phase": 15,
+        "surface": 5,
+        "principal_role": 8,
+        "now_utc": 26,
+        "business_timezone": 15,
+        "conversation": 151,
+        "remembered_notes": 2,
+        "tool_results": 2,
+        "semantic_plan": 4,
+        "required_tools": 128,
+        "available_tools": 1869,
+        "tool_input_schemas": 1965,
+        "conversation_contract": 42383,
+        "response_contract": 190
+      },
+      "systemBytes": 15413
+    }
+  ],
+  "modelInputs": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "company.business-hours.read"
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-07T12:37:03.273Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-07T12:37:03.374Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "company.business-hours.read"
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-07T12:37:09.354Z",
+      "timezone": "Europe/Moscow"
+    }
+  ],
+  "policyReads": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 0,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-admin-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "employee",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.own.read",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ]
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ]
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ]
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ]
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "customers.count",
+        "clients.dormant.list",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ]
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "customers.count",
+        "clients.dormant.list",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ]
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.service.price.update",
+        "inventory.goods.receipt.prepare",
+        "inventory.goods.read",
+        "inventory.stock.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.service.price.update",
+        "inventory.goods.receipt.prepare",
+        "inventory.goods.read",
+        "inventory.stock.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "current-goods-negative",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.service.price.update",
+        "inventory.goods.receipt.prepare",
+        "inventory.goods.read",
+        "inventory.stock.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    }
+  ],
+  "preflights": [
+    {
+      "caseId": "current-booking-ordinary",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "0abcf79818f738c1715a0662d82414586c016b500b14b86f55ab07e214d1eacc",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "d3097607516c5289568f3d7087550c898240d9d6b1afa630632e50c9df93b5e4",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "7d5430a1f87ac53d26ddd3904856fcbfcc776fbc7850f66ecf53fc275949b032",
+      "appointments": null,
+      "services": null,
+      "slots": 6,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-booking-correction",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "05c51fdea52423bf9d2878f7075e3f9005578f5e47df42fc8cadb9b430e6bfbf",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-booking-correction",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "a873e432fbf1a98d62467bbed60671e263f734faf1d85dcb60dd9ac21ff33e54",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-booking-correction",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "a9e72e05f575521ce3e3319f002cc34b2ea5f50e8f12196926052aa020e51a80",
+      "appointments": null,
+      "services": null,
+      "slots": 6,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-booking-negative",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "e6d50c8ab6ade3a4a3aa8b1a20d95f89a54be3d6fef986989fb6f57f4d27343d",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-booking-negative",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "1f32fe088a6df5b50677ae8f9e3af7a1fcf755a261eafa0430f0dfc91274af75",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-booking-negative",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "a981fb767707ab90f0a0a9d9bddcf3954db72f516542e73e734d0dbed9579cef",
+      "appointments": null,
+      "services": null,
+      "slots": 0,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "name": "appointments.own.list",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "appointments"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "84666fc97441090679e26ca77d72a40e8c58a70608a07f236b3374a19ba920d6",
+      "appointments": 1,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-personal-correction",
+      "name": "appointments.own.list",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "appointments"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "794ea6fb1230064637b33a11bfa76b4973e47103d57a1f79ffd8a4d12e5704bc",
+      "appointments": 1,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-personal-negative",
+      "name": "appointments.own.list",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "appointments"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "87db7cb5ec136037e945212e24d1259fffaf960e44a525b70bf24f97990a3de8",
+      "appointments": 0,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "508d536e3efe7b1292e905380d3ec88a61a8e69bb24bfd8cd82a34cf824ef95a",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "name": "company.business-hours.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "verified",
+        "source",
+        "title",
+        "address",
+        "timezone",
+        "schedule",
+        "schedule_available"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "f519adf0b7623f52b03f79bfb51ef81fe914062736dba092eea0be99c450e62d",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-admin-correction",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "7a14cb33a641f00da6d445de05d6307e52324d5e8e2b134a02b97a145dec0287",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-admin-correction",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-admin-correction",
+      "name": "company.business-hours.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "verified",
+        "source",
+        "title",
+        "address",
+        "timezone",
+        "schedule",
+        "schedule_available"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "f519adf0b7623f52b03f79bfb51ef81fe914062736dba092eea0be99c450e62d",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-admin-negative",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "ddc0d09f2726c2767a8e7850a6fe65824d4d68f3ef9eee43a7f22a7f61466b0a",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-admin-negative",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-admin-negative",
+      "name": "company.business-hours.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "verified",
+        "source",
+        "title",
+        "address",
+        "timezone",
+        "schedule",
+        "schedule_available"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "f519adf0b7623f52b03f79bfb51ef81fe914062736dba092eea0be99c450e62d",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "a045b948f686c8873bd85dd45af94ab93e4fbb6aeba56f8062acd8687cfb6bd8",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "name": "staff.schedule.own.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "available",
+        "verified",
+        "source",
+        "date",
+        "is_working",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "7c089e4751274e088ccfd3b7fe17f296f57508bb53435339c427f44834f46092",
+      "appointments": null,
+      "services": null,
+      "slots": 1,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "91fb03b6b6994a1fdbc9cdc76c8e34cc0a493de314ad658bdd36b968f4d82bc6",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "name": "catalog.service.price.update",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "approval_required",
+      "keys": [
+        "status",
+        "approval",
+        "replayed"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6e40847f841ecd050b1d4aad7ac2acd0afa09f315919eebb46ae5789d03bd4c2",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "8a99d0e1b6be4f995a200f625501c20d5674bb46e1363725bf7690c470250d09",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "name": "catalog.service.price.update",
+      "httpStatus": 403,
+      "expectedHttpStatus": 403,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Forbidden",
+      "contract": null,
+      "resultSha256": "5a417e88cd10f932b8d36210fb2bbb053cc79bf612268b20f58bde9d5de23304",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "OBSERVATION_ONLY_PUBLIC_READ_DOES_NOT_PROVE_BRANCH_DENIAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "aa3c021f20f8763e764cb4848d42b1273305595cf32a937a77f4a46942f71031",
+      "appointments": null,
+      "services": null,
+      "slots": 1,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "name": "C7.own.snapshot",
+      "httpStatus": 200,
+      "expectedHttpStatus": 200,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "contract",
+        "mode",
+        "revisionId",
+        "snapshotHash",
+        "revision",
+        "expiresAt",
+        "kind",
+        "subject",
+        "rule",
+        "asOf",
+        "period",
+        "completeness",
+        "qualification",
+        "attribution",
+        "metrics",
+        "limitations"
+      ],
+      "error": null,
+      "contract": "c7.measurement.read/1",
+      "resultSha256": "d451a79056dbdecc2726f5e44a6c69552328103549059d41c0f3270cda69f3a2",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "name": "C7.foreign.snapshot",
+      "httpStatus": 404,
+      "expectedHttpStatus": 404,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Not Found",
+      "contract": null,
+      "resultSha256": "b403788e82ec1f31086b21a07b022ce633d3521977fa623fd6b01179709923a8",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-bi-correction",
+      "name": "C7.own.snapshot",
+      "httpStatus": 200,
+      "expectedHttpStatus": 200,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "contract",
+        "mode",
+        "revisionId",
+        "snapshotHash",
+        "revision",
+        "expiresAt",
+        "kind",
+        "subject",
+        "rule",
+        "asOf",
+        "period",
+        "completeness",
+        "qualification",
+        "attribution",
+        "metrics",
+        "limitations"
+      ],
+      "error": null,
+      "contract": "c7.measurement.read/1",
+      "resultSha256": "b852a3c248466f73673b5c2bb76e169313edb555965dd79c681380b7fb16d723",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-bi-correction",
+      "name": "C7.foreign.snapshot",
+      "httpStatus": 404,
+      "expectedHttpStatus": 404,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Not Found",
+      "contract": null,
+      "resultSha256": "b403788e82ec1f31086b21a07b022ce633d3521977fa623fd6b01179709923a8",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-bi-negative",
+      "name": "C7.foreign.snapshot",
+      "httpStatus": 404,
+      "expectedHttpStatus": 404,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Not Found",
+      "contract": null,
+      "resultSha256": "b403788e82ec1f31086b21a07b022ce633d3521977fa623fd6b01179709923a8",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "name": "C8.own.snapshot",
+      "httpStatus": 200,
+      "expectedHttpStatus": 200,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "contract",
+        "id",
+        "revision",
+        "snapshotHash",
+        "expiresAt",
+        "subject",
+        "mode",
+        "current",
+        "version",
+        "kind",
+        "available",
+        "basis",
+        "currency",
+        "asOf",
+        "period",
+        "completeness",
+        "qualification",
+        "values",
+        "reasons",
+        "rule",
+        "boundaries",
+        "numericPrediction",
+        "calibration",
+        "activation",
+        "message",
+        "horizonEnd",
+        "policyRevision",
+        "modelVersionId",
+        "ranking"
+      ],
+      "error": null,
+      "contract": "c8.valuation.read/1",
+      "resultSha256": "82a6d8c59f833c4649c98f73b28b5806ee4ea44c7be8b1ae4d8af4777c378fc4",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "name": "C8.foreign.snapshot",
+      "httpStatus": 404,
+      "expectedHttpStatus": 404,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Not Found",
+      "contract": null,
+      "resultSha256": "002c965efcf9f693cf980da05005fc2534f860ef230813a9233f49574de7f76d",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "name": "C8.own.snapshot",
+      "httpStatus": 200,
+      "expectedHttpStatus": 200,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "contract",
+        "id",
+        "revision",
+        "snapshotHash",
+        "expiresAt",
+        "subject",
+        "mode",
+        "current",
+        "version",
+        "kind",
+        "available",
+        "basis",
+        "currency",
+        "asOf",
+        "period",
+        "completeness",
+        "qualification",
+        "values",
+        "reasons",
+        "rule",
+        "boundaries",
+        "numericPrediction",
+        "calibration",
+        "activation",
+        "message",
+        "horizonEnd",
+        "policyRevision",
+        "modelVersionId",
+        "ranking"
+      ],
+      "error": null,
+      "contract": "c8.valuation.read/1",
+      "resultSha256": "4824603f0cff3d5acd3ae8a1cb9f4421c1f05b3d4b35566985b8dcb0d5ff42be",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "name": "C8.foreign.snapshot",
+      "httpStatus": 404,
+      "expectedHttpStatus": 404,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Not Found",
+      "contract": null,
+      "resultSha256": "002c965efcf9f693cf980da05005fc2534f860ef230813a9233f49574de7f76d",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "name": "C8.own.snapshot",
+      "httpStatus": 401,
+      "expectedHttpStatus": 401,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Unauthorized",
+      "contract": null,
+      "resultSha256": "aed9e5bc116072038917a772d1c325d162982238ff70e92038f841b7e4c101a5",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "name": "C8.foreign.snapshot",
+      "httpStatus": 401,
+      "expectedHttpStatus": 401,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": null,
+      "keys": [
+        "message",
+        "error",
+        "statusCode"
+      ],
+      "error": "Unauthorized",
+      "contract": null,
+      "resultSha256": "aed9e5bc116072038917a772d1c325d162982238ff70e92038f841b7e4c101a5",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "6e78024fc28bb0e52b834514d17f2b328e056a32f1e29b9f3cf85d39c4d09aad",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "ec7e9dfdbe44020444991eca0549e1da8cd95b4917fcd011f6fffd1677d3a61e",
+      "appointments": null,
+      "services": null,
+      "slots": 1,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "d7107d57991e5b2d97532ea1ae00a3b937d5547f38bf07149827d608e276c2fc",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "4b62349f5afa0c25d4299e69763449183c6edb8b9e8348d42c174794d9b6cf26",
+      "appointments": null,
+      "services": null,
+      "slots": 1,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "name": "catalog.services.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "catalog_exhaustive",
+        "services"
+      ],
+      "error": null,
+      "contract": "maya.service-catalog.read/1",
+      "resultSha256": "b8b4a3cbb7a7eb0cb207e5adb0f372d58bef1fbf9721d11e4844c0086b91dfdf",
+      "appointments": null,
+      "services": 1,
+      "slots": null,
+      "widgetEmitted": true
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "name": "catalog.staff.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "salon",
+        "staff"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "name": "booking.availability.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "timezone",
+        "booking_selection",
+        "slots"
+      ],
+      "error": null,
+      "contract": null,
+      "resultSha256": "44b7860ba73031576f637c493480de1d36f8958520576515831a4450042229fd",
+      "appointments": null,
+      "services": null,
+      "slots": 0,
+      "widgetEmitted": false
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "name": "inventory.goods.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "company_id",
+        "currency",
+        "currency_source",
+        "item",
+        "item_kind",
+        "stock",
+        "limitations"
+      ],
+      "error": null,
+      "contract": "maya.goods-item.read/2",
+      "resultSha256": "95f2413070dc13789a118dbef6bf14cf054a3c1fadc8c06bc7a5ef5948b9512a",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false,
+      "item": {
+        "id": "123",
+        "name": "Синтетический шампунь",
+        "article": null,
+        "barcode": null,
+        "sale_price": "100",
+        "cost_price": "40",
+        "unit_cost_price": "4",
+        "sale_unit_id": "11",
+        "write_off_unit_id": "22",
+        "sale_unit_label": "флакон",
+        "write_off_unit_label": "мл",
+        "unit_ratio": "10"
+      },
+      "stock": {
+        "status": "observed",
+        "rows": [
+          {
+            "store_id": "9",
+            "quantity": "1.250"
+          }
+        ],
+        "unit_basis": "not_provided",
+        "exhaustive": false
+      }
+    },
+    {
+      "caseId": "current-goods-correction",
+      "name": "inventory.goods.read",
+      "httpStatus": 201,
+      "expectedHttpStatus": 201,
+      "expectedStatusMatched": true,
+      "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+      "status": "completed",
+      "keys": [
+        "contract",
+        "source",
+        "scope",
+        "as_of",
+        "company_id",
+        "currency",
+        "currency_source",
+        "item",
+        "item_kind",
+        "stock",
+        "limitations"
+      ],
+      "error": null,
+      "contract": "maya.goods-item.read/2",
+      "resultSha256": "1bf786bdb14318a8a0921781e553b3cd1003606137c0f5bf6953401f88c3b6f5",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false,
+      "item": {
+        "id": "123",
+        "name": "Синтетический шампунь",
+        "article": null,
+        "barcode": null,
+        "sale_price": "100",
+        "cost_price": "40",
+        "unit_cost_price": "4",
+        "sale_unit_id": "11",
+        "write_off_unit_id": "22",
+        "sale_unit_label": "флакон",
+        "write_off_unit_label": "мл",
+        "unit_ratio": "10"
+      },
+      "stock": {
+        "status": "observed",
+        "rows": [
+          {
+            "store_id": "9",
+            "quantity": "1.250"
+          }
+        ],
+        "unit_basis": "not_provided",
+        "exhaustive": false
+      }
+    },
+    {
+      "caseId": "current-goods-negative",
+      "name": "inventory.goods.read",
+      "httpStatus": 500,
+      "expectedHttpStatus": 500,
+      "expectedStatusMatched": true,
+      "qualification": "SOURCE_UNAVAILABLE_FAILS_CLOSED_WITH_CURRENT_HTTP_500_NOT_UX_ACCEPTANCE",
+      "status": null,
+      "keys": [
+        "statusCode",
+        "message"
+      ],
+      "error": "Internal server error",
+      "contract": null,
+      "resultSha256": "fcbda2e2660dbbff82ba8df76212f3d4ab9ced3b9b9a8b8700621f45fb5ce006",
+      "appointments": null,
+      "services": null,
+      "slots": null,
+      "widgetEmitted": false
+    }
+  ],
+  "outcomes": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "httpStatus": 201,
+      "status": "CANNED_HTTP_MECHANICS",
+      "source": "safe_fallback",
+      "actionStatus": null,
+      "grounding": "not_required",
+      "serializedCalls": 1,
+      "modelCalls": 1,
+      "modelCoverage": "CANNED_NOT_LANGUAGE_COVERAGE",
+      "zeroModelReason": null,
+      "occupancy": null,
+      "replySha256": "8425bc1d7e3e4e87b1ea9fdf4eabbfbd83a5719f8a0250a39e16231f5d043194",
+      "initialTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "httpStatus": 201,
+      "status": "CANNED_HTTP_MECHANICS",
+      "source": "safe_fallback",
+      "actionStatus": null,
+      "grounding": "not_required",
+      "serializedCalls": 1,
+      "modelCalls": 1,
+      "modelCoverage": "CANNED_NOT_LANGUAGE_COVERAGE",
+      "zeroModelReason": null,
+      "occupancy": null,
+      "replySha256": "8425bc1d7e3e4e87b1ea9fdf4eabbfbd83a5719f8a0250a39e16231f5d043194",
+      "initialTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "httpStatus": 503,
+      "status": "REQUEST_ADMISSION_REFUSED",
+      "actionStatus": null,
+      "serializedCalls": 1,
+      "modelCalls": 1,
+      "modelCoverage": "CANNED_NOT_LANGUAGE_COVERAGE",
+      "zeroModelReason": null,
+      "occupancy": null,
+      "replySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "initialTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-admin-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    },
+    {
+      "caseId": "current-goods-negative",
+      "turn": 1,
+      "status": "UNEXECUTED",
+      "reason": "batch_halted_after_request_admission_failure",
+      "blockedBy": {
+        "caseId": "current-booking-correction",
+        "turn": 1,
+        "bytes": 66968,
+        "reason": "candidate_spacing_not_elapsed"
+      }
+    }
+  ],
+  "admissionFailure": {
+    "caseId": "current-booking-correction",
+    "turn": 1,
+    "bytes": 66968,
+    "reason": "candidate_spacing_not_elapsed"
+  },
+  "budget": {
+    "dialogs": 2,
+    "turns": 3,
+    "attempts": 2,
+    "inputTokens": 142959,
+    "outputTokens": 2400,
+    "reservedNanoUsd": 198209880,
+    "halted": false
+  },
+  "pgClock": "2026-10-07 12:37:15.355641+00",
+  "bindings": [
+    {
+      "caseId": "current-booking-ordinary",
+      "role": "client",
+      "grantedFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idSha256": "c05fa9ba787fe8e00ffa863588b65756bebd8f778c80dbf3100254ca4aef6ce5",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:57.005Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-booking-correction",
+      "role": "client",
+      "grantedFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idSha256": "a1a5389e0f822280edc5e954dc38d062b12f68bd64e47d9e438cf90889b8214b",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:57.265Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-booking-negative",
+      "role": "client",
+      "grantedFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idSha256": "7d59b0488fe1b6e46ae4e575a18d540e34d18f250cd737f27168de9282517aad",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:57.457Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "role": "client",
+      "grantedFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idSha256": "54af6980c08c9ec21e70f45ea57e176ea04726bc7350f57833cc318223461f4c",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idSha256": "3b2205845ed7d1a788a3cfb3a9acc0dc1780754b925bb6c0cbe613d90e7b0bab",
+          "status": "OTHER_CLIENT_DENIED"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idSha256": "451528f971e2bd1c6ad71bed581b140fda138d02f6fea94d88d72b8bb5874e5c",
+          "status": "OWN"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:57.643Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-personal-correction",
+      "role": "client",
+      "grantedFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idSha256": "28237e6dc37e46ba026b8f9709c5a22b96f2fa07af8e55a09f3aa889f18d34ec",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idSha256": "8ab3e588053e2fd1af77025ad2e1cf4742a45a6b064fefa71b6637a53aee521a",
+          "status": "OTHER_CLIENT_DENIED"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idSha256": "7dc968f16b84cd46d79eded748956eff3b1ea05bc12f1cf1868691bbc96f32a2",
+          "status": "OWN"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:57.833Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-personal-negative",
+      "role": "client",
+      "grantedFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idSha256": "fe9479f925e8a7511df9f43bf8ca08fc04d30cd91db274ef0f0787ef7435efea",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idSha256": "55062b4b43eee8b2788552585d1bf249684ff12b4dd078e6de8dc4a5cc627211",
+          "status": "OTHER_CLIENT_DENIED"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:58.020Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "role": "admin",
+      "grantedFeatures": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.admin",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "ac8cfdbb41528eeb68fed45d1d630aa7dd5c09448b7d49034caf22ba76c4d0ae",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "service-catalog-contract",
+        "staff",
+        "company"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:58.204Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-admin-correction",
+      "role": "admin",
+      "grantedFeatures": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.admin",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "fb7020609984169b0190077d262d1ad5709e9dfc314be37aced4ac2d98a48f5c",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "service-catalog-contract",
+        "staff",
+        "company"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:58.376Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-admin-negative",
+      "role": "admin",
+      "grantedFeatures": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.admin",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "98840de1240f314a9381d383107c1b58ce62b42b062d51483585aa196c69df3e",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "service-catalog-contract",
+        "staff",
+        "company"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:58.546Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "role": "employee",
+      "grantedFeatures": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "754af9375653036a7ae8c87a080764fe5e0237c52a79f8dae7adc4903397b3e2",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "CRM_STAFF_ACCESS",
+          "idSha256": "1203be29445062a1dd273e5fb9f4e84c1b44ef3202bb1423d4cb931eae6623f1",
+          "status": "SELF_ONLY"
+        }
+      ],
+      "reads": [
+        "team-access",
+        "service-catalog-contract",
+        "staff",
+        "schedule:2026-10-08"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:58.717Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "b5585919e43593ab9d72fddfb8f4d48c6d5995a160d66a7cc8c39207565e3656",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "service-catalog-contract",
+        "staff",
+        "service-price-snapshot"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:58.900Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "61ba7b35932581e0601e2177a2640d67190e51f37a8dd95262a7fa5e6c2efc58",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "MEMBERSHIP_BRANCH_SCOPE",
+          "idSha256": "d021168d6c8bbde642993426067200700d80056fcba4db9dbf90e990163248ea",
+          "status": "OUTSIDE_MEMBERSHIP_BRANCH_PUBLIC_READ_DENIAL_UNPROVEN"
+        }
+      ],
+      "reads": [
+        "service-catalog-contract",
+        "staff",
+        "availability",
+        "services",
+        "staff"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:59.071Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idSha256": "3891ecef5c2a4cc5e714fe0b94c97f3d3218dcdb990dc9e54674217693f88e46",
+          "status": "PUBLISHED_PERIOD_STILL_OPEN_NOT_FULL_MONTH_ACCEPTANCE"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:59.242Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-bi-correction",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idSha256": "2a214ada26182c64908b811d428a94232d68f8048a4a3b34e8b8b66c48862286",
+          "status": "PUBLISHED_PERIOD_STILL_OPEN_NOT_FULL_MONTH_ACCEPTANCE"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:59.486Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-bi-negative",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idSha256": "5ad38304b535c2987dbd24657c1a11b884984ff600d9f389deb0d4e634fee792",
+          "status": "MISSING_PERIOD_NO_ESTIMATE"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:59.703Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idSha256": "1f2e91dc4d3c9337f36176d809d5dd0a1c71ffaa3b2587ba1fc8371db0ccd86f",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:36:59.871Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idSha256": "53aaae4c2fd4597ce204e429836d56e72c8efb52f48e7362ce7cd26456fd52b7",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:00.288Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idSha256": "d2f1bd6494c398bd97ad5ee456f5d8fc3292cd4159e003bcc87cc872cecb4785",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "reads": [],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:00.631Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-occupancy-ordinary",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "dab64c82849635aaa2007737368e2448e97bcae5d1c0763e06cd555c45a978d2",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "OPPORTUNITY",
+          "idSha256": "d5952b808e9c39ae96ec4ab3ccc76153c8989fefcba7f6f008a77a600a96bf3c",
+          "status": "CURRENT_SYNTHETIC_CANCELLATION"
+        }
+      ],
+      "reads": [
+        "schedule:2026-10-08",
+        "availability",
+        "service-catalog-contract",
+        "staff",
+        "availability",
+        "services",
+        "staff"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:00.970Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "5883de43660d5d02896e014a32e900b8b013a26622cc11f3d2fce7154d9a678f",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "OPPORTUNITY",
+          "idSha256": "4833643b6c9b246fda0359167bccd0a40cb9fdb567bbe2817f73d696a6656bea",
+          "status": "CURRENT_SYNTHETIC_CANCELLATION"
+        }
+      ],
+      "reads": [
+        "schedule:2026-10-08",
+        "availability",
+        "service-catalog-contract",
+        "staff",
+        "availability",
+        "services",
+        "staff"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:01.176Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "booking.customer_app",
+        "booking.public",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "005cbccd2785e6f867b6f250fde731b69c58a0e6c96bdc8b6fbc4e4ae581893b",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "schedule:2026-10-08",
+        "availability",
+        "service-catalog-contract",
+        "staff",
+        "availability",
+        "services",
+        "staff"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:01.361Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "6bec3b902c9c029b9173cc6f52c996ad9572bc558727ee9c7e3f152a0a05b664",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "goods"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:01.539Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-goods-correction",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "e2ddf396a03047b1c6c88c124ab9fb63f8f6c8f8da8c5c5443d741ff4b0eb02a",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "goods"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:01.710Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "current-goods-negative",
+      "role": "owner",
+      "grantedFeatures": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "effectiveFeatures": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idSha256": "e1dee82f3f081ed685680214b6ca8344f809b2ea0c4e562a86db57e48fe7bb52",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "reads": [
+        "goods"
+      ],
+      "clockBinding": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-07T12:37:01.881Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-08",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    }
+  ],
+  "authWithoutToken": 401,
+  "sourceCorpusUnchanged": true,
+  "fixtureSourceLanguageAcceptance": false,
+  "qualificationLimits": [
+    "Fixed canned clarification does not select or explain domain sources; source preflight is separate.",
+    "Public availability has no membership-branch denial contract; scoped price preparation refusal is tested separately.",
+    "Current goods source unavailability returns HTTP 500; no substitute item or effect is authorized.",
+    "Authored absolute October remains an open period at the real fixture date; no full-month result is claimed.",
+    "Zero-model deterministic paths contribute zero model coverage; no real model or provider acceptance."
+  ]
+}

@@ -1,0 +1,41 @@
+✔ refuses unapproved calls and foreign endpoints before transport (119.118542ms)
+✔ fsync reservation precedes dispatch; failures retain spend and secret/content never enter ledger (83.16175ms)
+✔ enforces spend cap, request count, timeout horizon, turn/dialog ceilings and request spacing (6008.116375ms)
+✔ refuses concurrent dispatch and unexpected model/output contract (66.081209ms)
+✔ provider requests require an active counted turn, and dialogs cannot overlap it (55.988834ms)
+✔ explicit resume retains failed-call reservation, lifetime and counters with exclusive lock (148.009916ms)
+✔ resume rejects truncated or altered budgets and never creates a replacement ledger (62.992625ms)
+✔ broker compatibility handoff must bind the exact prior ledger and carried reserve (73.525334ms)
+✔ offline binding is mandatory, no default/live transport or old ledger resume (61.628041ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (119.758917ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (68.603833ms)
+✔ short writes are completed before dispatch and zero progress fails closed (138.068083ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (103.958542ms)
+✔ early wakeup cannot dispatch before the minimum interval (83.70975ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (1937.492792ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (2414.600041ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (58.877875ms)
+✔ 24 dialog and 64 turn caps apply independently (1078.551667ms)
+✔ wall time and clock reversal cannot reopen budget (101.907167ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (112.301584ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (76.374042ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (85.761709ms)
+✔ oversized output is unresolved, with full reservation kept (71.962ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (3.428875ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (8.643333ms)
+✔ existing replay rejects tampered manifest before opening a dialog (2.43475ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (900.49825ms)
+✔ broker preflight admits canonical request within 96KiB and refuses excess UTF8 bytes (1.231208ms)
+✔ freezes reproducible balanced dev selection, identifies correlated families, and keeps test holdout untouched (30.777417ms)
+✔ replays only real assistant responses with canonical body, no labels or gold responses (4.963375ms)
+✔ unknown result stops without retry, closes fixture and does not serialize exception secrets (5.247417ms)
+✔ tampered manifest refuses before opening fixture (4.341583ms)
+✔ client-first slice covers only booking groups and keeps independent families visible (4.229042ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7484.217833

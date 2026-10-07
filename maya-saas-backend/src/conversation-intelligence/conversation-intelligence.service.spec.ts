@@ -79,8 +79,8 @@ describe('ConversationIntelligenceService', () => {
     const encoded = JSON.stringify(contract);
 
     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
-    // 85 existing intents + A22 read + explicit Occupancy + personal catalog preparation.
-    expect(contract.intents).toHaveLength(88);
+    // 85 existing intents + A22 + Occupancy + personal catalog + goods item.
+    expect(contract.intents).toHaveLength(89);
     expect(
       contract.intents.find(
         (item) => item.intent === 'schedule.review_cancellation_windows',

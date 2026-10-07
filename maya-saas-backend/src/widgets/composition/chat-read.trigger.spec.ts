@@ -6,6 +6,7 @@ import type { PrincipalResolver } from '../authority/principal-view';
 import type { WidgetProjectorService } from '../projection/widget-projector.service';
 import type { WidgetStoresService } from '../stores/widget-stores.service';
 import { ChatReadTriggerService } from './chat-read.trigger';
+import { IntentTemplateRefusal } from '../emission/intent-template.registry';
 
 const actor = {
   userId: 'user-a',
@@ -258,4 +259,37 @@ describe('P-MT2a ChatReadTriggerService', () => {
       expect(h.emit).not.toHaveBeenCalled();
     },
   );
+  it.each(['T-2a', 'T-2b'] as const)(
+    '%s preserves completed facts without a selector for an empty/unselected read',
+    async (trigger) => {
+      const h = harness();
+      h.emitBookingSelector.mockRejectedValue(
+        new IntentTemplateRefusal('booking_selector_source_unavailable'),
+      );
+      await expect(
+        h.service.afterCompletedRead({
+          ...input(),
+          trigger,
+          toolName: 'catalog.staff.read',
+          result: { staff: [] },
+        }),
+      ).resolves.toBeNull();
+      expect(h.emit).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    new IntentTemplateRefusal('booking_selector_kind_required'),
+    new Error('database_unavailable'),
+    new Error('booking_selector_source_unavailable'),
+  ])('does not hide other selector failures: %s', async (error) => {
+    const h = harness();
+    h.emitBookingSelector.mockRejectedValue(error);
+    await expect(
+      h.service.afterCompletedRead({
+        ...input(),
+        toolName: 'booking.availability.read',
+        result: { slots: [] },
+      }),
+    ).rejects.toBe(error);
+  });
 });

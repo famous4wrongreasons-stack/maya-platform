@@ -1,0 +1,51 @@
+{
+  "contract": "maya.current-candidate-pricing-proposal/1",
+  "checkedDateUtc": "2026-10-07",
+  "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "verification": "OFFICIAL_PUBLIC_DOCUMENTATION_ONLY",
+  "model": "deepseek-v4-pro",
+  "documentedVersion": "DeepSeek-V4-Pro-0813",
+  "modality": "text",
+  "ratesUsdPerMillion": {
+    "inputPeakCacheMiss": "1.32",
+    "outputPeak": "3.96"
+  },
+  "discountAssumptions": "NONE; no cache-hit or off-peak discount relied upon",
+  "authorizedPaidCalls": 0,
+  "brokerRearmed": false,
+  "status": "PROPOSAL_ONLY_NOT_AN_EXECUTABLE_PERMIT",
+  "limits": {
+    "dialogs": 24,
+    "turns": 64,
+    "attempts": 96,
+    "reservedInputTokens": 8000000,
+    "outputTokens": 196608,
+    "outputTokensPerAttempt": 2048,
+    "spendCeilingNanoUsd": 12000000000,
+    "requestBytes": 98304,
+    "responseBytes": 1048576,
+    "durationMs": 3600000,
+    "timeoutMs": 30000,
+    "minimumIntervalMs": 6000,
+    "concurrency": 1
+  },
+  "worstCaseAtTokenCeilings": {
+    "inputNanoUsd": 10560000000,
+    "outputNanoUsd": 778567680,
+    "totalNanoUsd": 11338567680,
+    "totalUsd": "11.33856768"
+  },
+  "reservation": "full serialized UTF-8 request body bytes + 4096; local conservative bound, not tokenizer/provider measured tokens",
+  "admission": "All limits apply jointly; a limit can stop the batch before all dialogs finish. Unknown usage is not refunded. No old permit/ledger reuse. A fresh explicit paid authorization and admitted broker are still required.",
+  "candidate": {
+    "executedBaseCommit": "1f1d4ea32ea97610760487a8abc2a397cd790819",
+    "runtimeSourceOverlay": "final-10/candidate-manifest.json",
+    "bindingManifestSha256": "3c02f6be5e1c5151f2fbb5f984384daa0ebf1d2ba1a5a5aa53db48ac22754390",
+    "sourceCorpusSha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+    "offlineFullRequestMaximumBytes": 93222,
+    "offlineMaximumConservativeInputTokenBound": 97318,
+    "offlineAttemptCount": 29,
+    "offlineReservedNanoUsd": 3232009440,
+    "offlineReservationIsActualSpend": false
+  }
+}

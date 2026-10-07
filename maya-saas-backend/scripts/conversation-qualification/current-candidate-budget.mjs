@@ -119,7 +119,9 @@ export class CandidateBudgetGate {
     mode,
     transport,
     now = Date.now,
-    wait = (ms, signal) => delay(ms, undefined, { signal }),
+    // Real timers may wake one clock tick early. The margin is waiting only;
+    // the absolute six-second admission check below remains authoritative.
+    wait = (ms, signal) => delay(ms + 25, undefined, { signal }),
   }) {
     if (mode !== 'OFFLINE_SYNTHETIC_ONLY' || typeof transport !== 'function')
       throw new Error('candidate_offline_transport_required');

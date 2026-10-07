@@ -11,6 +11,7 @@ import type { ChannelId } from '../../widget-contract/lifecycle';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GATE6_OWNERS, PRINCIPAL_RESOLVER } from '../di-tokens';
 import { WidgetEmitterService } from '../emission/emitter.service';
+import { IntentTemplateRefusal } from '../emission/intent-template.registry';
 import type { PrincipalResolver } from '../authority/principal-view';
 import { TimelineStore } from '../stores/timeline.store';
 import { WidgetStoresService } from '../stores/widget-stores.service';
@@ -198,10 +199,21 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
           : row.result_kind === 'SERVICE_SELECTOR' ||
               row.result_kind === 'STAFF_SELECTOR' ||
               row.result_kind === 'TIME_SLOT_SELECTOR'
-            ? await this.emitter.emitBookingSelector(mintRequest, {
-                source: input.result,
-              })
+            ? await this.emitter
+                .emitBookingSelector(mintRequest, { source: input.result })
+                .catch((error: unknown) => {
+                  // A completed READ can truthfully have no options, or no
+                  // inherited service selection. It still remains a READ;
+                  // never invent an actionable selector to present it.
+                  if (
+                    error instanceof IntentTemplateRefusal &&
+                    error.code === 'booking_selector_source_unavailable'
+                  )
+                    return null;
+                  throw error;
+                })
             : await this.emitter.emit(mintRequest);
+      if (minted === null) return null;
       for (const tokenHash of minted.intentTokenHashes)
         provenance.log(
           JSON.stringify({

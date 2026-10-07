@@ -1,0 +1,29 @@
+{
+  "kind": "current-candidate-authenticated-http-offline-mechanics",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-candidate-http-eybzdJ/pg",
+  "database": "maya_widget_gate_proof_candidate_1de7df33bfe7",
+  "port": 61623,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "har13-diagnostic-placement",
+    "candidate-http",
+    "pg-stop"
+  ],
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "photoParser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "sourceProvider": "SYNTHETIC_READS_ONLY",
+  "externalFetchCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1
+  },
+  "clusterStopped": true
+}

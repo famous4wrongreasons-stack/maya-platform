@@ -1,0 +1,14 @@
+Independent review by /root/independent_review, 2026-10-07.
+Read-only code and artifact review; no tests, services or edits by reviewer.
+
+Production changes: no concrete blockers. Final Director persona bytes independently match the base; wire table/schema decoding preserves all fields; semantic_plan dedupe is coherent. Completed-READ selector handling remains narrowly scoped to the exact source-unavailable refusal.
+
+Final10: 24 sourceHashes plus 8 bindingSources (29 distinct paths) match disk. All five final-10 files match /tmp byte-for-byte; archived 06/08 files also match. Ledger: 117 entries, 24 dialogs, 33 turns, 29 reservations and 29 responses. Request sequence/body sizes/sums/bindingManifest match. Minimum spacing 6,019 ms. Reservations: 2,344,092 input, 34,800 output, 3,232,009,440 nano USD.
+
+32 HTTP 201 plus one expected 401. All 54 source/approval-preparation preflights matched. Two explicit C9 first turns: AVAILABLE, PROPOSED, current, revision 1, evidence 2, options 2, deterministic, zero model, noSideEffects, no execution authority. Owned PostgreSQL stopped; postmaster.pid absent.
+
+Top-level C9 capture matches actual AiCore.complete. Mandatory first-turn assertions are non-vacuous. Launcher rejects STOPPED corpus after preserving status and retains finally cleanup.
+
+Limits: fixed canned transport is not natural-language/domain-source-selection acceptance. Occupied fixture change on correction turn 2 does not prove a C9 occupied recheck. Branch availability denial is unproven. Goods negative HTTP 500 is fail-closed mechanics, not acceptable UX. Price preparation is not a READ-only operation but executes no approval. October remains open. No real model/provider/OCR/production/C10 acceptance.
+
+This review covered the named source and evidence files; the generated archive.json index was not yet present at that read. Its hash verification is recorded separately by the implementing agent.

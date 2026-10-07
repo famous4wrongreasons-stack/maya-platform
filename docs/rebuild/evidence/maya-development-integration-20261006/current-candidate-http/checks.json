@@ -1,0 +1,68 @@
+[
+  {
+    "kind": "focused-unit",
+    "command": "NODE_OPTIONS=--max-old-space-size=1536 node node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/planner-wire-context.spec.ts src/ai-tools/ai-core-model.service.spec.ts src/ai-tools/ai-core-model.semantic-slots.spec.ts src/widgets/composition/chat-read.trigger.spec.ts src/widgets/booking/booking-selector.presenter.spec.ts src/conversation-intelligence/conversation-intelligence.service.spec.ts",
+    "exitCode": 0,
+    "passedTests": 103,
+    "passedSuites": 6,
+    "log": "checks/unit.txt"
+  },
+  {
+    "kind": "offline-mechanics",
+    "command": "NODE_OPTIONS=--max-old-space-size=1536 node --test scripts/conversation-qualification/budget-gate.test.mjs scripts/conversation-qualification/proof-broker-contract.test.mjs scripts/conversation-qualification/current-candidate.test.mjs scripts/conversation-qualification/replay.test.mjs",
+    "exitCode": 0,
+    "passedTests": 33,
+    "log": "checks/node.txt"
+  },
+  {
+    "kind": "production-types",
+    "command": "NODE_OPTIONS=--max-old-space-size=4096 node node_modules/typescript/bin/tsc --noEmit --project tsconfig.build.json --incremental false",
+    "exitCode": 0,
+    "log": "checks/types-production.txt"
+  },
+  {
+    "kind": "widgets-live-types",
+    "command": "NODE_OPTIONS=--max-old-space-size=4096 node node_modules/typescript/bin/tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false",
+    "exitCode": 0,
+    "log": "checks/types-widgets-live.txt"
+  },
+  {
+    "kind": "scoped-eslint",
+    "exitCode": 0,
+    "files": [
+      "src/ai-tools/planner-wire-context.ts",
+      "src/ai-tools/planner-wire-context.spec.ts",
+      "src/ai-tools/ai-core-model.service.ts",
+      "src/ai-tools/ai-core-model.service.spec.ts",
+      "src/conversation-intelligence/conversation-intelligence.service.ts",
+      "src/conversation-intelligence/conversation-intelligence.service.spec.ts",
+      "src/widgets/composition/chat-read.trigger.ts",
+      "src/widgets/composition/chat-read.trigger.spec.ts",
+      "test/widgets-live/current-candidate-http.probe-spec.ts",
+      "test/widgets-live/support/current-candidate-sources.ts"
+    ],
+    "log": "checks/lint.txt"
+  },
+  {
+    "kind": "diff-check",
+    "command": "git diff --check",
+    "exitCode": 0,
+    "log": "checks/diff-check.txt"
+  },
+  {
+    "kind": "final-http",
+    "exitCode": 0,
+    "success": true,
+    "passedTests": 1,
+    "pendingTests": 0,
+    "rawReportSha256": "e521dff833b39d02111d426d7571b4aa5d0e42f8b85a19cc08eb9dab1c55740e"
+  },
+  {
+    "kind": "HAR-13-filter-only",
+    "exitCode": 0,
+    "success": true,
+    "passedTests": 2,
+    "pendingTests": 143,
+    "rawReportSha256": "2e78d776acdbe0b567fd2192759352c3d482c7adce169855b5b89cc49384e493"
+  }
+]

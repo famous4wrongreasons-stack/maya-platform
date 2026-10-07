@@ -1,0 +1,32 @@
+[Nest] 80270  - 10/07/2026, 3:40:27 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 80270  - 10/07/2026, 3:40:27 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 80270  - 10/07/2026, 3:40:27 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 80270  - 10/07/2026, 3:40:27 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:conversation_plan_missing
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_output_missing
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_unexpected_tool_call
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_api_key_missing
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)
+[Nest] 80270  - 10/07/2026, 3:40:27 PM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_base_url_invalid
+
+Test Suites: 6 passed, 6 total
+Tests:       103 passed, 103 total
+Snapshots:   0 total
+Time:        0.793 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/planner-wire-context.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts", "src/ai-tools/ai-core-model.semantic-slots.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/widgets/booking/booking-selector.presenter.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".

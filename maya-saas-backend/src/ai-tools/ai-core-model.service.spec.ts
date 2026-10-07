@@ -83,42 +83,47 @@ describe('AiCoreModelService', () => {
       'The only top-level keys are semantic_plan and tool_call.',
     );
     expect(system).toContain('CONVERSATION INTELLIGENCE CONTRACT maya-ci/1');
-    expect(system).toContain('🔴 ПРИВЯЗКА ЧИСЛА К ИМЕНИ:');
-    expect(system).toContain('Салонный итог');
-    expect(system).toContain('🔴 КОГОРТЫ КЛИЕНТОВ — НОВЫЕ И ВЕРНУВШИЕСЯ:');
-    expect(system).toContain('cohort_lookback_days');
-    expect(system).toContain('returning_share_percent');
-    expect(system).toContain(
+    const fullSystem = service['finalResponseInstructions'](input, false);
+    expect(fullSystem).toContain('🔴 ПРИВЯЗКА ЧИСЛА К ИМЕНИ:');
+    expect(fullSystem).toContain('Салонный итог');
+    expect(fullSystem).toContain('🔴 КОГОРТЫ КЛИЕНТОВ — НОВЫЕ И ВЕРНУВШИЕСЯ:');
+    expect(fullSystem).toContain('cohort_lookback_days');
+    expect(fullSystem).toContain('returning_share_percent');
+    expect(fullSystem).toContain(
       'Подменять их показателем repeat_clients_in_period ЗАПРЕЩЕНО',
     );
-    expect(system).toContain('🔴 ЯЗЫК САЛОНА, А НЕ СХЕМЫ ДАННЫХ:');
-    expect(system).toContain('Говори словами салона: барбер');
-    expect(system).toContain('🔴 НЕТ КАССЫ — НЕ ВЫДУМЫВАЙ ДЕНЬГИ:');
-    expect(system).toContain('ЗАПИСИ ДНЯ ≠ КАССА МЕСЯЦА');
-    expect(system).toContain('три разных вопроса');
-    expect(system).toContain('средний чек из кассы/записей за период, НЕ цена');
-    expect(system).toContain('🔴 ПЕРИОД — В КАЖДОМ ОТВЕТЕ С ЧИСЛАМИ:');
-    expect(system).toContain('предупреди об этом ПЕРВОЙ фразой');
-    expect(system).toContain('C7 ФИНАНСОВЫЕ РЕЗУЛЬТАТЫ:');
-    expect(system).toContain('Неизвестное не равно нулю');
-    expect(system).toContain('Не складывай валюты');
-    expect(system).toContain('measurement с contract=c7.measurement.read/1');
-    expect(system).toContain(
+    expect(fullSystem).toContain('🔴 ЯЗЫК САЛОНА, А НЕ СХЕМЫ ДАННЫХ:');
+    expect(fullSystem).toContain('Говори словами салона: барбер');
+    expect(fullSystem).toContain('🔴 НЕТ КАССЫ — НЕ ВЫДУМЫВАЙ ДЕНЬГИ:');
+    expect(fullSystem).toContain('ЗАПИСИ ДНЯ ≠ КАССА МЕСЯЦА');
+    expect(fullSystem).toContain('три разных вопроса');
+    expect(fullSystem).toContain(
+      'средний чек из кассы/записей за период, НЕ цена',
+    );
+    expect(fullSystem).toContain('🔴 ПЕРИОД — В КАЖДОМ ОТВЕТЕ С ЧИСЛАМИ:');
+    expect(fullSystem).toContain('предупреди об этом ПЕРВОЙ фразой');
+    expect(fullSystem).toContain('C7 ФИНАНСОВЫЕ РЕЗУЛЬТАТЫ:');
+    expect(fullSystem).toContain('Неизвестное не равно нулю');
+    expect(fullSystem).toContain('Не складывай валюты');
+    expect(fullSystem).toContain(
+      'measurement с contract=c7.measurement.read/1',
+    );
+    expect(fullSystem).toContain(
       'дедупликация принадлежит источнику по durable identity',
     );
-    expect(system).toContain(
+    expect(fullSystem).toContain(
       'Команда expenses.period.complete сохраняет только',
     );
-    expect(system).not.toContain('временно считает нулевыми');
-    expect(system).toContain('🔴 СТОИМОСТЬ НОВОГО КЛИЕНТА:');
-    expect(system).toContain('На нуле новых гостей делить нечего');
-    expect(system).toContain(
+    expect(fullSystem).not.toContain('временно считает нулевыми');
+    expect(fullSystem).toContain('🔴 СТОИМОСТЬ НОВОГО КЛИЕНТА:');
+    expect(fullSystem).toContain('На нуле новых гостей делить нечего');
+    expect(fullSystem).toContain(
       '🔴 ОКУПАЕМОСТЬ РЕКЛАМЫ (ROMI) НЕ СУЩЕСТВУЕТ И НЕ ПОЯВИТСЯ:',
     );
-    expect(system).toContain(
+    expect(fullSystem).toContain(
       'Never expose the data schema to the person: no field names, tool names',
     );
-    expect(system).toContain(
+    expect(fullSystem).toContain(
       'Name the period out loud in every answer that contains numbers',
     );
     const modelInput = JSON.parse(payload.messages[1]?.content ?? '{}') as {

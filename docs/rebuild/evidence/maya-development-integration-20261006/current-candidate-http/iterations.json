@@ -1,0 +1,207 @@
+[
+  {
+    "attempt": 1,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-01",
+    "outerStatus": "failed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "pg-stop"
+    ],
+    "manifestSha256": "1ef2b8fcae918ea7849a2262d0e5032c9e416efc9fe9f69ace7104548334e77d",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 2,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-02",
+    "outerStatus": "failed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "pg-stop"
+    ],
+    "manifestSha256": "2e737bd94e0584ccd4909048ea851cc25220b4b9bee57d4924c39b5c65437a23",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 3,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-03",
+    "outerStatus": "failed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "pg-stop"
+    ],
+    "manifestSha256": "dd2b2ab353f0c5bdd88f7fbf15d546e26cb54db5afc407bfa9fec052fdb8fb29",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 4,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-04",
+    "outerStatus": "failed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "pg-stop"
+    ],
+    "manifestSha256": "5061563d27734ee51dc7b667d0ee3ee10f5bd44a84f9fd823abbc39f0c65dee0",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 5,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-05",
+    "outerStatus": "failed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "pg-stop"
+    ],
+    "manifestSha256": "60654c8ed11d121c300bb01e1e1dab3a74aad817c26fcf2e2e32332d305c4622",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 6,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-06",
+    "outerStatus": "passed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "candidate-http",
+      "pg-stop"
+    ],
+    "manifestSha256": "51a99237ae936c43758ba95ec73ab86eefd6e87e6b9811c7f429c4f599c8002c",
+    "corpusStatus": "STOPPED_REMAINING_UNEXECUTED",
+    "transportCalls": 9,
+    "maxRequestBytes": 120791,
+    "unexecutedTurns": 23,
+    "admissionFailure": {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "bytes": 120791,
+      "reason": "candidate_body_limit"
+    },
+    "reportSha256": "d9d1dcc5ab68675b277b599cd7f3fb6bfb2e6338ee5e42e5bbebec91ee3b54c5",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 7,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-07",
+    "outerStatus": "passed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "candidate-http",
+      "pg-stop"
+    ],
+    "manifestSha256": "92a755a52a734e4a43330e4fa668b1080679cdd943b75e87b3e48d75496aa514",
+    "corpusStatus": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+    "transportCalls": 29,
+    "maxRequestBytes": 93222,
+    "unexecutedTurns": 0,
+    "admissionFailure": null,
+    "reportSha256": "f79c6137a039621f851d735293ce0f5877ffa53b77a0f630f09999d43d1e49ea",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 8,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-08",
+    "outerStatus": "passed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "candidate-http",
+      "pg-stop"
+    ],
+    "manifestSha256": "6f703bd5f060af3389e5b975a4f8efc11704e375fb0f8c90580cd320b909f06b",
+    "corpusStatus": "STOPPED_REMAINING_UNEXECUTED",
+    "transportCalls": 2,
+    "maxRequestBytes": 67799,
+    "unexecutedTurns": 30,
+    "admissionFailure": {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "bytes": 66968,
+      "reason": "candidate_spacing_not_elapsed"
+    },
+    "reportSha256": "9e8148c35a9a69f9bee6b4693a5b25cae678fbe39a36d1e6bc6f2c32cdc317de",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 9,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-09",
+    "outerStatus": "passed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "candidate-http",
+      "pg-stop"
+    ],
+    "manifestSha256": "3ca760ef6be7e60eed5907abf162fea0559d91f4bc7854338ef6d7ece9df3d9b",
+    "corpusStatus": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+    "transportCalls": 29,
+    "maxRequestBytes": 93222,
+    "unexecutedTurns": 0,
+    "admissionFailure": null,
+    "reportSha256": "3807ac4582d2867551ed2d63b780d7705d23544f4dfff460511f50831896e59b",
+    "qualification": "HISTORICAL_ATTEMPT_NOT_FINAL_ACCEPTANCE"
+  },
+  {
+    "attempt": 10,
+    "retainedLocalPath": "/tmp/maya-candidate-http-20261007-10",
+    "outerStatus": "passed",
+    "clusterStopped": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "har13-diagnostic-placement",
+      "candidate-http",
+      "pg-stop"
+    ],
+    "manifestSha256": "3acabecaea09c780a77ebe73570c107da28fd0dc17c483c88c657f741868ac07",
+    "corpusStatus": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+    "transportCalls": 29,
+    "maxRequestBytes": 93222,
+    "unexecutedTurns": 0,
+    "admissionFailure": null,
+    "reportSha256": "76bc47dab3b4c569f647b1c46952e68042ffa7b4190bc1fb8184b2f9866b3902",
+    "qualification": "FINAL_OFFLINE_CANDIDATE"
+  }
+]
