@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Headers,
   Post,
   UsePipes,
@@ -13,6 +14,7 @@ import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PersonalClientContextService } from './personal-client-context.service';
+import { PersonalClientReadService } from './personal-client-read.service';
 
 /** Explicit personal authority on each request. No global mode or role switch. */
 @Controller('personal-client')
@@ -22,7 +24,32 @@ export class PersonalClientController {
   constructor(
     private readonly contexts: PersonalClientContextService,
     private readonly appointments: AppointmentsService,
+    private readonly reads: PersonalClientReadService,
   ) {}
+
+  @Get('appointments/results')
+  results(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('x-maya-authority-context') selection: string | undefined,
+  ) {
+    return this.reads.results(user, selection);
+  }
+
+  @Post('appointments/preview')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
+  preview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('x-maya-authority-context') selection: string | undefined,
+    @Body() dto: CreateAppointmentDto,
+  ) {
+    return this.reads.preview(user, selection, dto);
+  }
 
   @Post('appointments')
   @UsePipes(
