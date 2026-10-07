@@ -1,0 +1,33 @@
+{
+  "kind": "lifecycle-owner-react-http-pg-restart-local-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-lifecycle-react-PNkSPJ/pg",
+  "database": "maya_widget_gate_proof_lifecyclereact_0090a0637737",
+  "port": 63765,
+  "status": "passed",
+  "completed": [
+    "shell-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "har13-diagnostic-placement",
+    "prepare",
+    "pg-restart",
+    "resume",
+    "pg-stop"
+  ],
+  "modelCalls": 0,
+  "syntheticC8Facts": true,
+  "providerCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 1
+  },
+  "clusterStopped": true
+}

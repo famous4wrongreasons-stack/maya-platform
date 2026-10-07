@@ -368,6 +368,10 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
           grantCall('new Fixtures(ctx)'),
       );
 
+      // Diagnostic helpers remain outside the allowed caller surface even
+      // when reached from an explicit Jest entrypoint.
+      plant('test/widgets-diagnostics/support/rogue.ts', grantCall('fixtures'));
+
       const found = scanEntitlementGrants(root).sort((a, b) =>
         a.file.localeCompare(b.file),
       );
@@ -375,6 +379,7 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
         'prisma/seed.ts',
         'scripts/some-other-proof.ts',
         'scripts/widgets-http-proof/gateZ-bad.cases.ts',
+        'test/widgets-diagnostics/support/rogue.ts',
       ]);
       expect(found[0].why).toContain('TenantEntitlement');
       expect(found[2].why).toContain('ctx.fixtures');

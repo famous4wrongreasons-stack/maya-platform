@@ -20,7 +20,17 @@ describe('combined current React carrier [SCRIPTED SYNTHETIC]', () => {
     if (!output || !path.isAbsolute(output) || existsSync(output))
       throw new Error('Fresh absolute JEST_COMBINED_BROWSER_OUTPUT required');
     mkdirSync(output, { recursive: true, mode: 0o700 });
-    const f = await developmentIntegrationFixture();
+    const f = await developmentIntegrationFixture(async (fixtures, tenant) => {
+      for (const feature of [
+        'ai.consultant',
+        'ai.owner',
+        'widgets.runtime',
+        'booking',
+        'booking.customer_app',
+        'crm.integration',
+      ] as const)
+        await fixtures.grantFeature(tenant, feature);
+    });
     try {
       f.config.set('EMAIL_LOGIN_ENABLED', 'true');
       f.config.set('EMAIL_AUTH_PROVIDER', 'debug');

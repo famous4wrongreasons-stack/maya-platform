@@ -1,0 +1,13 @@
+widgets-live: proof database maya_widget_gate_proof_lifecyclereact_0090a0637737 on 127.0.0.1:63765 (local)
+[31m[Nest] 7283  - [39m10/07/2026, 4:48:00 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 7283  - [39m10/07/2026, 4:48:00 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/lifecycle-owner-react.probe-spec.ts (48.84 s)
+  Lifecycle current React [synthetic C8 source, actual HTTP and PG restart]
+    ✓ restores historical response without work, then rechecks exact current sources on a new explicit UI turn (48100 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        48.858 s, estimated 78 s
+Ran all test suites within paths "test/widgets-live/lifecycle-owner-react.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-react-20261007-r2/resume-jest.json

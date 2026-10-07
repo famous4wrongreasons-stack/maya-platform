@@ -1,0 +1,22 @@
+PASS src/widgets/rendering/refusal-codes-covered.spec.ts
+  P-RENDER — R3.9.3 rendering: the map is total and the grant path is one
+    ✓ REN-1 every §3.9 refusal code the contract prints has a LIMITATION_REASON_TABLE row (2 ms)
+    ✓ REN-1 every §1.3 ReasonCode has a row, because DenialProjection.reason_code is a table key
+    ✓ REN-1 the table carries no row that is neither a §3.9 code, a response outcome nor a ReasonCode
+    ✓ REN-1 every row states a reason code equal to its key, and a severity that is never error (1 ms)
+    ✓ REN-1 the barrel hazard is checked, not commented: nobody reads the two tables through ./index (49 ms)
+    ✓ REN-3 every RefusalCode has a canonical rendering row after U8b (1 ms)
+    ✓ REN-6 no migration, seed or script creates a widgets.runtime TenantEntitlement (61 ms)
+    ✓ REN-6 the proof fixture stays guarded alongside the single AR-1 certified writer
+    ✓ REN-6 refuses raw SQL outside the certified writer: INSERT INTO "TenantEntitlement" VALUES (1) (1 ms)
+    ✓ REN-6 refuses raw SQL outside the certified writer: UPDATE "TenantEntitlement" SET enabled=true (1 ms)
+    ✓ REN-6 refuses raw SQL outside the certified writer: UPDATE public."TenantEntitlement" SET enabled=true (1 ms)
+    ✓ REN-6 refuses raw SQL outside the certified writer: DELETE FROM "TenantEntitlement"
+    ✓ REN-6 self-test: the scanner fails a planted seed grant and passes the BIN runner call (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        0.304 s, estimated 1 s
+Ran all test suites within paths "src/widgets/rendering/refusal-codes-covered.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-ren6-r1.json

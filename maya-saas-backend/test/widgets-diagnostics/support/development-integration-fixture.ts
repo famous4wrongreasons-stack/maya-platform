@@ -1,3 +1,7 @@
+import type {
+  Fixtures,
+  TenantFixture,
+} from '../../widgets-live/support/fixtures';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
@@ -35,7 +39,12 @@ export const INTEGRATION_PROMPTS = Object.freeze({
 
 /** Synthetic CRM boundary only. Auth, C5 lifecycle, C9, timeline, AE and release
  * owners are real. No network provider/model, no candidate certification. */
-export async function developmentIntegrationFixture() {
+export async function developmentIntegrationFixture(
+  setupEntitlements: (
+    fixtures: Fixtures,
+    tenant: TenantFixture,
+  ) => Promise<void>,
+) {
   const db = await bootFixtureContext();
   let http: Awaited<ReturnType<typeof bootHttp>>;
   try {
@@ -260,15 +269,7 @@ export async function developmentIntegrationFixture() {
     );
     owned.push(tenant.id);
     const owner = await fx.user(tenant, UserRole.TENANT_OWNER);
-    for (const feature of [
-      'ai.consultant',
-      'ai.owner',
-      'widgets.runtime',
-      'booking',
-      'booking.customer_app',
-      'crm.integration',
-    ] as const)
-      await fx.grantFeature(tenant, feature);
+    await setupEntitlements(fx, tenant);
     await db.prisma.tenant.update({
       where: { id: tenant.id },
       data: { defaultTimezone: 'Europe/Moscow' },

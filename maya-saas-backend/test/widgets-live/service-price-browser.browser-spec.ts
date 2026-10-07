@@ -4,5 +4,14 @@ import { runServicePriceBrowserHarness } from '../widgets-diagnostics/support/se
 // A green runner result means the local harness closed, never that browser proof passed.
 jest.setTimeout(32 * 60_000);
 it('serves the owned service-price browser session until STOP', async () => {
-  await runServicePriceBrowserHarness();
+  await runServicePriceBrowserHarness(async (fixtures, tenant) => {
+    for (const feature of [
+      'ai.owner',
+      'ai.consultant',
+      'crm.integration',
+      'booking',
+      'widgets.runtime',
+    ] as const)
+      await fixtures.grantFeature(tenant, feature);
+  });
 });

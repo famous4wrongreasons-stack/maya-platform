@@ -1,0 +1,308 @@
+{
+  "kind": "explicit-lifecycle-current-react-and-ren6-placement",
+  "base": "fcd14dde892ffb7875f9f4897ceafcecbf550565",
+  "qualification": "NOT_ISSUED",
+  "acceptanceRun": "r2",
+  "earlierRun": "r1 passes but precedes two browser evidence-race fixes; not final browser attestation",
+  "browserCheckpoints": 5,
+  "newOsProcess": true,
+  "postgresRestart": true,
+  "realUiLogin": true,
+  "reloadRelogin": true,
+  "syntheticC8Facts": true,
+  "realModelAcceptance": false,
+  "providerAcceptance": false,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "aeBefore": 1,
+  "aeAfter": 1,
+  "c8RevisionsBefore": 1,
+  "c8RevisionsAfter": 1,
+  "savedC9Versions": {
+    "prepare": 1,
+    "resume": 3,
+    "explanation": "one proposal per new explicit UI turn; history restores create none"
+  },
+  "ren6Tests": 13,
+  "har13DiagnosticNegativeTests": 2,
+  "scopedLintFiles": 7,
+  "c10Complete": false,
+  "backgroundAuthority": false,
+  "oldRedEvidencePreserved": "../booking-reasons",
+  "sourceHashes": [
+    {
+      "path": "maya-carrier-react/test/lifecycle-owner-browser-guard.mjs",
+      "sha256": "3aa64e807602c699b7817679bcbaec729ae4bb6d6ce3d2bd5fdd36e4d61d7d6d"
+    },
+    {
+      "path": "maya-carrier-react/test/lifecycle-owner-browser-probe.mjs",
+      "sha256": "5ac9d05b964f3177b223b9366bce405bde947191bec3a0ca9f90c014f72df248"
+    },
+    {
+      "path": "maya-saas-backend/scripts/lifecycle-react-proof.mjs",
+      "sha256": "4caa6effe129f4a88942f9aa3888bbc58e0098e8d847574bfa7e1910ec22fde7"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/lifecycle-owner-react.probe-spec.ts",
+      "sha256": "22e5d033da07ac5880a44717a9ec8fa5664c124467e4c5e76854d9e24c8d99a9"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/rendering/refusal-codes-covered.spec.ts",
+      "sha256": "a82d98a59d4125014f58d7b1c938029fd0a7d5e8b6d2eabeca3fbce5c5919624"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-diagnostics/support/development-integration-fixture.ts",
+      "sha256": "d9cefc099c014fcb266a91b74dbbfa635808e61da19087912d755610a5a4d635"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-diagnostics/support/service-price-browser-harness.ts",
+      "sha256": "686a31d2516d78b2d017c8b5264cd142218fd083b6cd9f22ab67f2f1697d129d"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/development-integration.live-spec.ts",
+      "sha256": "2395fe5748f3dd3e0ce006b65d1df88936a51cd4271833c5c155e319a5197d20"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/development-integration.browser-spec.ts",
+      "sha256": "af6919ff97f3755b9e447c466276b4f53b5609f97e3c5fca78d1ffebc723a743"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/service-price-browser.browser-spec.ts",
+      "sha256": "e0892abe549d7176745deff219c264b0e5c35acb925f39cc4a2f6a757e4fe876"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "sha256": "9975a24864c7a4bfcb2255abc429eeca65e3da0b28f960037f31ac98836b76fd"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+      "sha256": "25eb712bb530fa49860d3f15ccfd425b229ed828c3b119582487f6ae36dbcfec"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.agents.ts",
+      "sha256": "afc9f4568807c7b6598d23f095760676fa78839a77061e267795b6ad6314bca1"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "ab212623ed01aef00f65404be6e64ed3c0029cd9aa6973e8d6bdb70e3ca1e76a"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977"
+    }
+  ],
+  "evidenceHashes": [
+    {
+      "path": "independent-review.txt",
+      "sha256": "5948eefe8fbceace6ad0613e4c5d77543b05873e257bb392fefe628148e58c89"
+    },
+    {
+      "path": "maya-lifecycle-react-cleanup.json",
+      "sha256": "09fe798452a6bb15ab9df23495b0b615b5e0e33e2d73663a55335df4a2ee179f"
+    },
+    {
+      "path": "maya-lifecycle-react-lint-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-ren6-r1.json",
+      "sha256": "b916651913cc65468cbe3ab3ff33ca6cff3640636654baf241b92eee6863a6cf"
+    },
+    {
+      "path": "maya-ren6-r1.log",
+      "sha256": "01d79d75ed8daca47a1329d3fa242f9b416e6580c547b872c44c9f882e550536"
+    },
+    {
+      "path": "r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1/har13-diagnostic-placement.log",
+      "sha256": "f6755fa6b717f1dc0b7fec1b4d7f91ce93480145ff992e6d67adf5d9dc27bc10"
+    },
+    {
+      "path": "r1/har13-jest.json",
+      "sha256": "e71b61d19491ade4382fa5ac6b6361ca6c7313b4362bc582f27080d645498dac"
+    },
+    {
+      "path": "r1/initdb.log",
+      "sha256": "8bbd0c668ac21331c2f94f8fc6d82099e174a6a3f8fb1ffcda0269aea7c72204"
+    },
+    {
+      "path": "r1/migrations.log",
+      "sha256": "63d0af085b44ddc5ddf36c2b6d78cc146f86e454ba22d5c102038ccce2806bfe"
+    },
+    {
+      "path": "r1/pg-restart.log",
+      "sha256": "299bf9582ef9407fb6025c801d7a9273411c0845ef18c87e5f7b400856119ba9"
+    },
+    {
+      "path": "r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r1/postgres.log",
+      "sha256": "368e835ca349e5372cfb2dcb26c4ebc417068d5d8060aa9df10ed16a1dcb6cc4"
+    },
+    {
+      "path": "r1/prepare-browser/output/playwright/browser.json",
+      "sha256": "5bae77a68ffaf73a20ba09df8ac9ae64925063b0fd9c42ab8a5b6e3ed4068625"
+    },
+    {
+      "path": "r1/prepare-browser/output/playwright/initial.png",
+      "sha256": "75428a16b421428e82f4bb49c0892ea318f7c4cafbdd2944e2d2857653951050"
+    },
+    {
+      "path": "r1/prepare-browser/output/playwright/reload-restored.png",
+      "sha256": "aa628c93b5ddbd31b3986e3e539c627771a72a72e33ecf46026d752d1af49f32"
+    },
+    {
+      "path": "r1/prepare-jest.json",
+      "sha256": "432ba5713dcde4cca900fa9b543f1ec5d64347af5df4ad41604c43f037fd495a"
+    },
+    {
+      "path": "r1/prepare-observations.json",
+      "sha256": "3292359f4da2907d57370559ad1149894b5278fa98852a3d610a7e8fda41775e"
+    },
+    {
+      "path": "r1/prepare.log",
+      "sha256": "5955b744d5c22f9489d23a10390be1c42c72495a1a8e3e5c8b81b9b0f3ab70b3"
+    },
+    {
+      "path": "r1/react-build.log",
+      "sha256": "a1f7933a71e04daacc5b882bda9631e68671c2e5b4e955014393e0f8b5479743"
+    },
+    {
+      "path": "r1/resume-browser/output/playwright/browser.json",
+      "sha256": "ccce73d9ac06369615654296aeca3553c007ebafa1ef4b40ff4e82fd31457d6f"
+    },
+    {
+      "path": "r1/resume-browser/output/playwright/initial.png",
+      "sha256": "8def160f39b69ad0f291fee4471941e16523d15c899e2e320361f84978c471f6"
+    },
+    {
+      "path": "r1/resume-browser/output/playwright/restart-restored.png",
+      "sha256": "aa628c93b5ddbd31b3986e3e539c627771a72a72e33ecf46026d752d1af49f32"
+    },
+    {
+      "path": "r1/resume-browser/output/playwright/unavailable.png",
+      "sha256": "30e82dde759b76da8a45fcca44391ccf3542bfe4609540dba5cabc56087cf138"
+    },
+    {
+      "path": "r1/resume-jest.json",
+      "sha256": "3e10e488f1087f807c323a7a93999208f76bb913047dc6a7ec6d41f0d8cfec16"
+    },
+    {
+      "path": "r1/resume-observations.json",
+      "sha256": "9019fabe0e5b0481be751563a31290b78d1d2f7b29e6cb2b85faeab541ab2e7e"
+    },
+    {
+      "path": "r1/resume.log",
+      "sha256": "8f7902ab5057ef31d2102b0396fd90882c808fc15fa0fe64dfc51ff635ea30a1"
+    },
+    {
+      "path": "r1/shell-build.log",
+      "sha256": "b0beccd0e78cf1caa2dcdb17c2f0c9b160e6d1fc4b1e3bfc02f872857fa51bbd"
+    },
+    {
+      "path": "r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r2/har13-diagnostic-placement.log",
+      "sha256": "d33dd9475475a132f01f74f2f8372fe2cb16ca17b62a48d69640a592782cbce1"
+    },
+    {
+      "path": "r2/har13-jest.json",
+      "sha256": "fead1e5a5a9c4e9a06a415866f460d3dc8426def441fb95b841596ab44a31ac2"
+    },
+    {
+      "path": "r2/initdb.log",
+      "sha256": "31da398b49b3085229cabfaa1bfbb3c7016c36f62973e244e202fa76405bcf2b"
+    },
+    {
+      "path": "r2/migrations.log",
+      "sha256": "634c7f35b5d951d1cc48b2b0d89694f9a32bcf15d7e0d1df6d5673e67bad307e"
+    },
+    {
+      "path": "r2/pg-restart.log",
+      "sha256": "e46072ce06d865a4f33b01a40a9531e83e0785a741b0a9d8916247dfa76beade"
+    },
+    {
+      "path": "r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r2/postgres.log",
+      "sha256": "a2d334d31758b8081a786993f5ef8913e9b9668f51281ad554550a32e5596902"
+    },
+    {
+      "path": "r2/prepare-browser/output/playwright/browser.json",
+      "sha256": "7a9f82ec87ba041f305b34658a33e7cf67ea2ac3d40ac08b640c51816609263a"
+    },
+    {
+      "path": "r2/prepare-browser/output/playwright/initial.png",
+      "sha256": "d6cd663c534f8a3a53da7f65a9e86ccf1c8e5cf8c7143cf3c688095cddc715d3"
+    },
+    {
+      "path": "r2/prepare-browser/output/playwright/reload-restored.png",
+      "sha256": "113978cf0926ce970a9eb13f506a1cb844f30432623a68d5af01925f868b96bb"
+    },
+    {
+      "path": "r2/prepare-jest.json",
+      "sha256": "391ff8218642bb8732a5094bd0ad8cf07d3e7dd47d056e1feb75f73097d37f8f"
+    },
+    {
+      "path": "r2/prepare-observations.json",
+      "sha256": "0e98972f55e69b5890b1d4f236a0fb1fd57d47283049118c797a0e8e6a5252bf"
+    },
+    {
+      "path": "r2/prepare.log",
+      "sha256": "36e0080d14e737f5bc81730cf97edb2090c4adf65715cb3f1b6cb350eb5a202d"
+    },
+    {
+      "path": "r2/react-build.log",
+      "sha256": "a1f7933a71e04daacc5b882bda9631e68671c2e5b4e955014393e0f8b5479743"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/browser.json",
+      "sha256": "02e638bc22307668a83024ad0ec79730b9f3d210478f22641f322d162871b4fc"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/initial.png",
+      "sha256": "a0c50ed63568c046b61e48c099399e419d7e1f20d1dabd1370bb6b23968d1858"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/restart-restored.png",
+      "sha256": "113978cf0926ce970a9eb13f506a1cb844f30432623a68d5af01925f868b96bb"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/unavailable.png",
+      "sha256": "8f6293937f6756597f65e1c24a167262e8f08d9fe277b2056851f4abffff04a2"
+    },
+    {
+      "path": "r2/resume-jest.json",
+      "sha256": "e547fafbf3f3c3149e0cbb8d041f97df9c13061875c7f6a03d2aec34b19414b7"
+    },
+    {
+      "path": "r2/resume-observations.json",
+      "sha256": "4b2436074d77ad4161ec2870877262b66c721524109f58c7cd918ea25178051e"
+    },
+    {
+      "path": "r2/resume.log",
+      "sha256": "8d1356e1cce3cef84da39393d788e1a375256274e15633f919d80817154a4bda"
+    },
+    {
+      "path": "r2/shell-build.log",
+      "sha256": "b0beccd0e78cf1caa2dcdb17c2f0c9b160e6d1fc4b1e3bfc02f872857fa51bbd"
+    }
+  ]
+}

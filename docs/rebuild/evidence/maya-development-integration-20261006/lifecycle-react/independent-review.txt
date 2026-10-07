@@ -1,0 +1,5 @@
+Independent reviewer /root/independent_review, read-only, 2026-10-07.
+REN-6: required typed callbacks move visible fixed grant loops into the three existing Jest entrypoints; proof writer and scanner allowlist unchanged. Diagnostic negative case retains the prohibition.
+Two P2 browser races were found and corrected: wait for enabled Send after history restoration; require exactly one new Maya message plus normalized exact reply so old matching history cannot pass.
+Final r2 manifest passed, owned cluster stopped; prepare/resume each one PASS; five actual React checkpoints; two HAR-13 diagnostic negatives pass (143 unrelated cases skipped). Observed model/fetch counts zero, C8 one, AE 1 to 1, new explicit turn creates new run, source correction yields UNAVAILABLE and zero findings. Reviewer inspected unavailable.png: current full answer is visibly rendered. Technical rule/PARTIAL/ISO labels remain; polished UX is not claimed.
+This review is local development evidence, not release certification or real-model/provider acceptance.

@@ -1,0 +1,168 @@
+widgets-live: proof database maya_widget_gate_proof_lifecyclereact_0090a0637737 on 127.0.0.1:63765 (local)
+PASS test/widgets-live/harness.live-spec.ts
+  widgets-live harness
+    proof-database guard
+      ○ skipped refuses missing
+      ○ skipped refuses blank
+      ○ skipped refuses not a URL
+      ○ skipped refuses mysql
+      ○ skipped refuses localhost
+      ○ skipped refuses another host
+      ○ skipped refuses a host parameter
+      ○ skipped refuses a dbname parameter
+      ○ skipped refuses no port (the driver would use 5432)
+      ○ skipped refuses an empty port
+      ○ skipped refuses port 5432 locally
+      ○ skipped refuses port 05432 locally
+      ○ skipped refuses maya_saas
+      ○ skipped refuses postgres
+      ○ skipped refuses a prod clone with the prefix
+      ○ skipped refuses a clone with the prefix
+      ○ skipped refuses no prefix
+      ○ skipped refuses an upper-case name
+      ○ skipped refuses maya_ci without CI mode
+      ○ skipped refuses maya_ci with CI but no WIDGET_GATEWAY_PG
+      ○ skipped refuses maya_ci with CI and WIDGET_GATEWAY_PG but not on GitHub Actions
+      ○ skipped refuses the workflows' maya_ci URL (port 5432) without GITHUB_ACTIONS
+      ○ skipped refuses maya_ci without a port in CI mode
+      ○ skipped refuses a proof name in CI mode
+      ○ skipped refuses a prod name in CI mode
+      ○ skipped refuses the shell workstream's database
+      ○ skipped refuses the shell workstream's database in CI mode
+      ○ skipped refuses the shell workstream's database upper-cased
+      ○ skipped admits a proof database on 127.0.0.1 and a dedicated port locally, and maya_ci (port 5432 included) only in CI mode
+      ○ skipped admits widgets-live.yml's DATABASE_URL in CI mode, and refuses it once GITHUB_ACTIONS is absent
+      ○ skipped admits widgets-mutation.yml's DATABASE_URL in CI mode, and refuses it once GITHUB_ACTIONS is absent
+      ○ skipped never echoes the password in a refusal
+    environment
+      ○ skipped HAR-4 Platform HTTP smoke declares the same explicit AppModule prerequisites
+      ○ skipped HAR-4 carries exactly platform-ci.yml's platform-backend literals (DATABASE_URL excepted), plus the declared widgets-live extras
+      ○ skipped HAR-4 widgets-live.yml carries exactly the widgets-live literals (platform-ci ∪ extras), its CI DATABASE_URL and WIDGET_GATEWAY_PG
+      ○ skipped HAR-4 widgets-mutation.yml carries exactly the widgets-live literals (platform-ci ∪ extras), its CI DATABASE_URL and WIDGET_GATEWAY_PG
+      ○ skipped scrubs every variable that is neither a process variable nor a literal, and admits DATABASE_URL only through the guard
+      ○ skipped builds a child process's environment by the same scrub, on a copy, plus fixed settings
+      ○ skipped the BIN runner spawns the binary with the child environment, never the raw shell
+      ○ skipped this suite's own environment was scrubbed before it loaded
+      ○ skipped refuses to boot AppModule next to an .env or .env.local file (existence only)
+    NW recorder [GW]
+      ○ skipped classifies raw "SELECT 1" as read (D-12: a lock is not a write)
+      ○ skipped classifies raw "  with x as (select 1) select * from x" as read (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT \"shareCount\", \"advisory\" FROM \"WidgetDraft\"" as read (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT \"forUpdate\" FROM \"WidgetDraft\"" as read (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT pg_advisory_xact_lock(1)" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "select pg_try_advisory_xact_lock(1)" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT pg_advisory_xact_lock_shared(hashtextextended('k', 0))::text" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT pg_advisory_unlock_all()" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT id FROM \"Tenant\" WHERE id = $1 FOR SHARE" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT id FROM \"Tenant\" WHERE id = $1 FOR KEY SHARE" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT id FROM \"Tenant\" WHERE id = $1 FOR UPDATE" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT id FROM \"Tenant\" WHERE id = $1 FOR NO KEY UPDATE" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT id FROM \"Tenant\" FOR UPDATE SKIP LOCKED" as lock (D-12: a lock is not a write)
+      ○ skipped classifies raw "SET TRANSACTION READ ONLY" as write (D-12: a lock is not a write)
+      ○ skipped classifies raw "LOCK TABLE \"Tenant\" IN SHARE MODE" as write (D-12: a lock is not a write)
+      ○ skipped classifies raw "INSERT INTO \"WidgetDraft\" VALUES (1)" as write (D-12: a lock is not a write)
+      ○ skipped classifies raw "WITH d AS (DELETE FROM \"WidgetDraft\" RETURNING *) SELECT * FROM d" as write (D-12: a lock is not a write)
+      ○ skipped classifies raw "WITH d AS (UPDATE \"Tenant\" SET name = name RETURNING id) SELECT id FROM d FOR SHARE" as write (D-12: a lock is not a write)
+      ○ skipped classifies raw "SELECT nextval('s')" as write (D-12: a lock is not a write)
+      ○ skipped classifies raw undefined as write (D-12: a lock is not a write)
+      ○ skipped the gateway's store client is the recorded one, and the hook changes no result
+      ○ skipped sees a model write, a raw write and a record change, and reports the row delta
+      ○ skipped HAR-3 [GW] the recorder records a FOR SHARE and an advisory lock as locks, not writes, and NW turns red on a durable write in the same request
+      ○ skipped HAR-9 [GW] the verifier rejects a manifest line whose record is missing from the server's mint provenance lines, or from the database before teardown (a Fixtures.widget record)
+    owner spies
+      ○ skipped cover exactly G12 §6.2's owner reads (an emptied or shortened set would make every spy assertion vacuous)
+      ○ skipped count a call made through any instance, and restore every owner method unchanged
+    bootstraps
+      ○ skipped override no guard, and bind nothing but the recorded store client
+      ○ skipped the gateway level imports exactly Config, Prisma, Tenancy and Widgets; the HTTP level exactly AppModule
+    evidence manifest
+      ○ skipped HAR-6 the evidence manifest is written only when WIDGETS_EVIDENCE=1, and a malformed line is refused either way
+    mint provenance capture (D-17)
+      ○ skipped HAR-14 parses the server's WidgetMintProvenance line as the BIN runner reads the binary's stdout and as the HTTP sink receives it; other contexts and malformed lines are never captured
+      ○ skipped HAR-14 the HTTP sink refuses a provenance line logged from test code, the reviewer forgery included, and the writer refuses a line no capture point registered
+    evidence verifier
+      ○ skipped HAR-10 the verifier rejects an E-TAMPER label on a column the SealVerifier reads, except for key G1-a
+      ○ skipped diagnostic fixtures cannot enter production or canonical evidence support through transitive imports
+      ○ skipped rejects nothing on an empty evidence directory, and passes the real harness support files through its override allowlist
+    evidence verifier rules (review findings 1-2)
+      ✓ HAR-13 refuses the actual synthetic diagnostic helper through a direct clause import (55 ms)
+      ✓ HAR-13 refuses the actual synthetic diagnostic helper through a nested clause import (53 ms)
+      ○ skipped HAR-13 admits a clean L pair: an HTTP half and a BIN half, each with its own production-minted record, trace and process
+      ○ skipped WR-H1 accepts a successor only through its durable captured predecessor
+      ○ skipped WR-H1 rejects a missing predecessor chain
+      ○ skipped WR-H1 rejects a foreign-process predecessor chain
+      ○ skipped WR-H1 rejects a not-durable predecessor chain
+      ○ skipped WR-H1 rejects a cycle predecessor chain
+      ○ skipped WR-H1 rejects a duplicate predecessor chain
+      ○ skipped HAR-13 V-L-PAIR turns red on an HTTP half with no BIN half
+      ○ skipped HAR-13 V-L-PAIR turns red on halves offered for different clauses
+      ○ skipped HAR-13 V-L-PAIR turns red on a BIN half that claims nothing
+      ○ skipped HAR-13 V-PROV-RECORD turns red on an L claim that names no record
+      ○ skipped HAR-13 V-PROV-MINT turns red on a record with no server mint line
+      ○ skipped HAR-13 V-PROV-MINT turns red on a record with two server mint lines
+      ○ skipped HAR-13 V-PROV-DB turns red on a record missing from the database before teardown
+      ○ skipped HAR-13 V-PROV-TRIGGER turns red on a mint line whose trigger is not a production trigger
+      ○ skipped HAR-13 V-PROV-TRIGGER turns red on a successor mint whose predecessor is not traced
+      ○ skipped HAR-13 V-PROV-TRACE turns red on a trace id that is not the mint line's request id
+      ○ skipped HAR-13 V-PROV-TRACE turns red on a claim with no trace id
+      ○ skipped HAR-13 V-PROV-PID turns red on a line written by another process than the capture
+      ○ skipped HAR-13 V-PROV-FORGED turns red on a capture point that refused a provenance line
+      ○ skipped HAR-13 V-ENTRY-SOURCE turns red on an HTTP claim from a support file
+      ○ skipped HAR-13 V-ENTRY-SOURCE turns red on a BIN claim from a live spec
+      ○ skipped HAR-13 V-PROCESS turns red on one process writing both the HTTP and the BIN half
+      ○ skipped HAR-13 V-LABEL-CLASS turns red on an E-INDEP label on an L claim
+      ○ skipped HAR-13 V-LABEL-CLASS turns red on an E-TAMPER label on an L claim
+      ○ skipped HAR-13 V-LABEL-CLASS turns red on an L claim whose only label is an L-T class
+      ○ skipped HAR-13 V-SCHEMA turns red on a claim with no evidence label
+      ○ skipped HAR-13 V-SYNTH-CLAIM turns red on a G-SYNTH label on an L claim
+      ○ skipped HAR-13 V-SYNTH-CLAIM turns red on a synthetic label in another case
+      ○ skipped HAR-13 V-GW turns red on a claim on a GW line
+      ○ skipped HAR-13 V-INVENTORY turns red on a clause key that is not in the inventory
+      ○ skipped HAR-13 V-LT-G9-G10 turns red on an L-T claim on a Gate 9 key
+      ○ skipped HAR-13 V-U-PROOF turns red on a live-shaped U claim without the frozen proof duties
+      ○ skipped HAR-13 V-TAMPER-SHAPE turns red on an E-TAMPER naming two columns besides the floor
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on Fixtures.widget through a variable argument
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on Fixtures.synthetic
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on a widget model write
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on the emitter
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on raw SQL
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on its own database client
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on a logger with a provenance context assembled at run time
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on the evidence directory's files
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on code loaded dynamically
+      ○ skipped HAR-13 V-FIXTURE-WRITE turns red on a helper it imports that writes
+      ○ skipped HAR-13 V-MODEL-STUB turns red on a synthetic diagnostic model helper imported by a clause claimant
+      ○ skipped HAR-13 V-OVERRIDE turns red on a synthetic diagnostic transport helper imported by a clause claimant
+      ○ skipped HAR-13 V-OVERRIDE turns red on a module mock
+      ○ skipped HAR-13 V-OVERRIDE turns red on a providers-array binding
+      ○ skipped HAR-13 V-OVERRIDE turns red on a replaced property
+      ○ skipped HAR-13 V-OVERRIDE turns red on a spy replaced in a second statement
+      ○ skipped HAR-13 V-OVERRIDE turns red on a member assigned on a resolved provider
+      ○ skipped HAR-13 V-OVERRIDE turns red on a member assigned through a variable holding a resolved provider
+      ○ skipped HAR-13 V-OVERRIDE turns red on a guard override
+      ○ skipped HAR-13 V-OVERRIDE turns red on a prototype member assigned
+      ○ skipped HAR-13 V-OVERRIDE turns red on an override in a nested support directory
+      ○ skipped HAR-13 V-OVERRIDE turns red on an allowlisted target overridden from a file the allowlist does not name
+      ○ skipped HAR-13 V-MODEL-STUB turns red on a module mock of the model transport
+      ○ skipped HAR-13 V-MODEL-STUB turns red on the model transport replaced on its resolved provider
+      ○ skipped HAR-13 V-MODEL-STUB turns red on a spy on decide replaced in a second statement
+      ○ skipped HAR-13 V-MODEL-STUB turns red on a providers-array binding of the model transport in a support file
+      ○ skipped HAR-13 V-CONTROLLED turns red on controlledFixtureMode
+    D-17 (3) evidence sources [BUILD]
+      ○ skipped HAR-12 [BUILD] no labelled evidence test in a live spec or cases file names the provenance context or calls Fixtures.widget, Fixtures.synthetic, the emitter or the record writer
+      ○ skipped HAR-12 [BUILD] the scan goes red on every forbidden construct in a labelled test, through a helper too, and stays quiet on unlabelled tests
+    gate audit check
+      ○ skipped HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included
+    mutation runner probe
+      ○ skipped HAR-11 probe [GW]: the target of the mutation runner self-test, red only when its neutraliser set and both mutant edits are applied (not a gate test)
+    HTTP level [HTTP]
+      ○ skipped HAR-1 [HTTP] AppModule boots with the widgets-live literals: the widget route is mapped behind the global guards, and the mint provenance sink is installed and empty
+      ○ skipped HAR-1b [HTTP] a harness login consumes exactly the loopback subject's password-login preflight bucket the hygiene mirror computes, and the reset removes it
+      ○ skipped HAR-8 [HTTP] the call-through wrappers return byte-identical results to the unwrapped call (the recorded store client and the submit scope spy)
+
+Test Suites: 1 passed, 1 total
+Tests:       143 skipped, 2 passed, 145 total
+Snapshots:   0 total
+Time:        0.733 s, estimated 1 s
+Ran all test suites within paths "test/widgets-live/harness.live-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-react-20261007-r2/har13-jest.json

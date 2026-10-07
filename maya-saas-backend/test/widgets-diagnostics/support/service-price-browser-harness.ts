@@ -1,3 +1,7 @@
+import type {
+  Fixtures,
+  TenantFixture,
+} from '../../widgets-live/support/fixtures';
 /**
  * Owned, opt-in browser session. Real AppModule/auth/HTTP/AE/PG and YclientsCRMAdapter;
  * only the model selection, email delivery and external YCLIENTS transport are synthetic.
@@ -120,7 +124,12 @@ function runDirectory(): string {
 }
 
 /** Starts only when explicitly run through service-price-browser.browser-spec.ts. */
-export async function runServicePriceBrowserHarness(): Promise<void> {
+export async function runServicePriceBrowserHarness(
+  setupEntitlements: (
+    fixtures: Fixtures,
+    tenant: TenantFixture,
+  ) => Promise<void>,
+): Promise<void> {
   const admitted = assertProofDatabase();
   const connection = new URL(admitted.connectionString);
   if (
@@ -453,14 +462,7 @@ export async function runServicePriceBrowserHarness(): Promise<void> {
       );
       ownedTenantIds.push(tenant.id);
       const user = await fixtures.user(tenant, UserRole.TENANT_OWNER, name);
-      for (const feature of [
-        'ai.owner',
-        'ai.consultant',
-        'crm.integration',
-        'booking',
-        'widgets.runtime',
-      ] as const)
-        await fixtures.grantFeature(tenant, feature);
+      await setupEntitlements(fixtures, tenant);
       const companyId = String(99101 + index),
         token = `synthetic-browser-user-${companyId}`;
       states.push({

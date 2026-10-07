@@ -1,0 +1,279 @@
+{
+  "contract": "maya.lifecycle-owner-browser/1",
+  "status": "passed",
+  "syntheticC8Facts": true,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "initial": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nКого пора вернуть?\nMAYA:\nПроверены опубликованные оценки давности по подтверждённому правилу бизнеса. Оценка 1: По оценке на 2026-10-07T04:43:23.275Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL. Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен. Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись. Варианты: По новому запросу проверить актуальность оценок; Ничего не делать. Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "reload-restored": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nКого пора вернуть?\nMAYA:\nПроверены опубликованные оценки давности по подтверждённому правилу бизнеса. Оценка 1: По оценке на 2026-10-07T04:43:23.275Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL. Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен. Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись. Варианты: По новому запросу проверить актуальность оценок; Ничего не делать. Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "initial": {
+      "request_id": "ceb36d76-bc80-4ebc-af8f-65417ddb0717",
+      "recommendation": {
+        "contract": "maya.c9-lifecycle-response/1",
+        "outcome": "PARTIAL",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "CLIENT_LIFECYCLE",
+          "intent": "c9.client_return",
+          "findings": [
+            {
+              "statement": "По оценке на 2026-10-07T04:43:23.275Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL.",
+              "evidence_refs": [
+                "h_5329b2e4c6a951e8cd150f073570080aed4045ebb00a56d72705e3bd70042abc"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "c8.result.read",
+              "status": "measured_incomplete",
+              "as_of": "2026-10-07T04:43:23.275Z",
+              "evidence_refs": [
+                "h_5329b2e4c6a951e8cd150f073570080aed4045ebb00a56d72705e3bd70042abc"
+              ],
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "d4653d39a125ae53825089a4dc56607648f9fde83bdf97c38fe40d4d940b311a",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "confirmed_dormancy_rule_met"
+                ]
+              },
+              "basis": "proven_attendance_policy"
+            }
+          ],
+          "confidence": "low",
+          "limitations": [
+            "population_coverage_unknown",
+            "confirmed_dormancy_rule_met"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "PARTIAL",
+            "requestedScopeHash": "d4653d39a125ae53825089a4dc56607648f9fde83bdf97c38fe40d4d940b311a",
+            "returnedCount": 1,
+            "totalCount": null,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "population_coverage_unknown",
+              "confirmed_dormancy_rule_met"
+            ]
+          },
+          "evidence_refs": [
+            "h_5329b2e4c6a951e8cd150f073570080aed4045ebb00a56d72705e3bd70042abc"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "15a35084-6022-4483-975f-14a20be4f7c7",
+          "checkedAt": "2026-10-07T04:43:27.987Z",
+          "sourceHandles": [
+            "h_5329b2e4c6a951e8cd150f073570080aed4045ebb00a56d72705e3bd70042abc"
+          ]
+        },
+        "options": [
+          {
+            "key": "review_later",
+            "title": "По новому запросу проверить актуальность оценок"
+          },
+          {
+            "key": "c9.no_action",
+            "title": "Ничего не делать"
+          }
+        ],
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "canContact": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "75c1dc0e-9d35-4790-952b-f8e4a8703d94",
+        "scope": "explicit_lifecycle",
+        "state": "PROPOSED",
+        "revision_id": "22b294ca-b10c-4691-95e0-722cde9ea675",
+        "revision": 1,
+        "replayed": false,
+        "current": true
+      },
+      "user_turn": {
+        "turnId": "3aa9ddea-b60d-4c02-a594-d839db2b71b2",
+        "conversationId": "eba5f20a-4031-4c2c-80df-0626a78b75a0"
+      },
+      "reply": "Проверены опубликованные оценки давности по подтверждённому правилу бизнеса. Оценка 1: По оценке на 2026-10-07T04:43:23.275Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL. Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен. Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись. Варианты: По новому запросу проверить актуальность оценок; Ничего не делать. Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:63431",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/RGYTJPHA/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/RGYTJPHA/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

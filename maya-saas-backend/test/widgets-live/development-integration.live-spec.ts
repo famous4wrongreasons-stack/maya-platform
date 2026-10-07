@@ -29,7 +29,17 @@ type ChatReply = {
 describe('combined owner conversation [HTTP] [PostgreSQL] [SCRIPTED SYNTHETIC]', () => {
   let f: Awaited<ReturnType<typeof developmentIntegrationFixture>>;
   beforeAll(async () => {
-    f = await developmentIntegrationFixture();
+    f = await developmentIntegrationFixture(async (fixtures, tenant) => {
+      for (const feature of [
+        'ai.consultant',
+        'ai.owner',
+        'widgets.runtime',
+        'booking',
+        'booking.customer_app',
+        'crm.integration',
+      ] as const)
+        await fixtures.grantFeature(tenant, feature);
+    });
   });
   afterAll(async () => {
     await f?.close();
