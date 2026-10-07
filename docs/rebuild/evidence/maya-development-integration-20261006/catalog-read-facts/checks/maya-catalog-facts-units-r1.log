@@ -1,0 +1,28 @@
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+FAIL src/widgets/booking/booking-selector.presenter.spec.ts
+  ● FBE2E-2 — booking selector presentation › projects valid availability into exact opaque slot refs and refuses malformed facts
+
+    expect(received).toBeNull()
+
+    Received: {"body": {"category_path": [], "more_intent": null, "options": [{"badges": [], "combinable_with": [], "duration": {"as_of": null, "basis": "По данным системы записи", "basis_key": null, "comparison": null, "currency": null, "evidence_refs": [], "fact_ref": null, "formatted": "Нет данных", "key": "booking.duration", "label": "Нет данных", "next_intent_ref": null, "reason_code": "NOT_COLLECTED", "state": "NOT_MEASURED", "unit": "minutes", "value": null}, "enabled": {"as_of": null, "evidence_refs": [], "fact_ref": null, "label": "Нет данных", "next_intent_ref": null, "reason_code": "NOT_COLLECTED", "state": "NOT_MEASURED", "value": null}, "intent_ref": "i1", "label": {"as_of": null, "evidence_refs": [], "fact_ref": 0, "label": "Missing price", "next_intent_ref": null, "reason_code": null, "state": "KNOWN", "value": "Missing price"}, "measures": [], "media": null, "option_id": "tenant-a:service:catalog_service:service-1", "price": {"as_of": null, "basis": "По данным системы записи", "basis_key": null, "comparison": null, "currency": null, "evidence_refs": [], "fact_ref": null, "formatted": "Нет данных", "key": "booking.price", "label": "Нет данных", "next_intent_ref": null, "reason_code": "NOT_COLLECTED", "state": "NOT_MEASURED", "unit": "RUB", "value": null}, "requires_consultation": {"as_of": null, "evidence_refs": [], "fact_ref": null, "label": "Нет данных", "next_intent_ref": null, "reason_code": "NOT_COLLECTED", "state": "NOT_MEASURED", "value": null}, "service_ref": "tenant-a:service:catalog_service:service-1", "sublabel": null}], "prompt": {"phrase_key": "booking.selector", "rendered": "Выберите услугу"}, "select": "single", "shown_count": 1, "total_count": null, "total_preview": null}, "kind": "SERVICE_SELECTOR"}
+
+      243 |         mint,
+      244 |       }),
+    > 245 |     ).toBeNull();
+          |       ^
+      246 |   });
+      247 | });
+      248 |
+
+      at Object.<anonymous> (widgets/booking/booking-selector.presenter.spec.ts:245:7)
+
+PASS src/crm/adapters/mock-crm.adapter.spec.ts
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 158 passed, 159 total
+Snapshots:   0 total
+Time:        0.992 s, estimated 1 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/crm/adapters/mock-crm.adapter.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/widgets/booking/booking-selector.presenter.spec.ts", "src/widgets/emission/emitter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-catalog-facts-units-r1.json

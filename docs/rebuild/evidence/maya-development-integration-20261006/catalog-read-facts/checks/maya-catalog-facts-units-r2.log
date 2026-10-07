@@ -1,0 +1,18 @@
+PASS src/widgets/booking/booking-selector.presenter.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/ai-tools/owner-money-questions.acceptance.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/crm/crm.service.spec.ts
+PASS src/crm/adapters/mock-crm.adapter.spec.ts
+
+Test Suites: 7 passed, 7 total
+Tests:       199 passed, 199 total
+Snapshots:   0 total
+Time:        0.912 s, estimated 2 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/crm/adapters/mock-crm.adapter.spec.ts", "src/crm/crm.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/owner-money-questions.acceptance.spec.ts", "src/widgets/booking/booking-selector.presenter.spec.ts", "src/widgets/emission/emitter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-catalog-facts-units-r2.json
+[33m[Nest] 37356  - [39m10/07/2026, 5:37:52 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM preview failed provider=yclients operation=connection_check status=unknown[39m
+[33m[Nest] 37356  - [39m10/07/2026, 5:37:52 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token[39m
+[33m[Nest] 37356  - [39m10/07/2026, 5:37:52 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured[39m
+[33m[Nest] 37356  - [39m10/07/2026, 5:37:52 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM team access synchronization deferred tenant=tenant-1: unavailable[39m

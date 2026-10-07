@@ -1,0 +1,59 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/owner-money-questions.acceptance.spec.ts
+  560:29  error  Replace `⏎······.fn()⏎······` with `.fn()`  prettier/prettier
+  563:1   error  Delete `··`                                 prettier/prettier
+  564:7   error  Delete `··`                                 prettier/prettier
+  565:1   error  Replace `········` with `······`            prettier/prettier
+  566:1   error  Delete `··`                                 prettier/prettier
+  567:7   error  Delete `··`                                 prettier/prettier
+  568:1   error  Replace `··········` with `········`        prettier/prettier
+  569:1   error  Delete `··`                                 prettier/prettier
+  570:11  error  Delete `··`                                 prettier/prettier
+  571:1   error  Delete `··`                                 prettier/prettier
+  572:11  error  Delete `··`                                 prettier/prettier
+  573:1   error  Delete `··`                                 prettier/prettier
+  574:1   error  Delete `··`                                 prettier/prettier
+  575:11  error  Delete `··`                                 prettier/prettier
+  576:11  error  Delete `··`                                 prettier/prettier
+  577:1   error  Delete `··`                                 prettier/prettier
+  578:9   error  Delete `··`                                 prettier/prettier
+  579:1   error  Delete `··`                                 prettier/prettier
+  580:1   error  Delete `··`                                 prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts
+   41:30  warning  Unsafe argument of type `any` assigned to a parameter of type `string | URL | Request`  @typescript-eslint/no-unsafe-argument
+  102:20  warning  Unsafe argument of type `any` assigned to a parameter of type `string | URL | Request`  @typescript-eslint/no-unsafe-argument
+  107:24  error    Replace `⏎······.fn<typeof·fetch>()⏎······` with `.fn<typeof·fetch>()`                  prettier/prettier
+  110:7   error    Delete `··`                                                                             prettier/prettier
+  111:1   error    Delete `··`                                                                             prettier/prettier
+  112:11  error    Delete `··`                                                                             prettier/prettier
+  113:1   error    Delete `··`                                                                             prettier/prettier
+  114:1   error    Replace `················` with `··············`                                        prettier/prettier
+  115:1   error    Delete `··`                                                                             prettier/prettier
+  116:1   error    Delete `··`                                                                             prettier/prettier
+  117:1   error    Replace `··················` with `················`                                    prettier/prettier
+  118:1   error    Delete `··`                                                                             prettier/prettier
+  119:17  error    Delete `··`                                                                             prettier/prettier
+  120:1   error    Replace `················` with `··············`                                        prettier/prettier
+  121:1   error    Delete `··`                                                                             prettier/prettier
+  122:11  error    Delete `··`                                                                             prettier/prettier
+  123:1   error    Replace `··········` with `········`                                                    prettier/prettier
+  124:7   error    Delete `··`                                                                             prettier/prettier
+  125:1   error    Delete `··`                                                                             prettier/prettier
+  147:23  warning  Unsafe argument of type `any` assigned to a parameter of type `string | URL | Request`  @typescript-eslint/no-unsafe-argument
+  147:45  error    Unsafe member access [0] on an `any` value                                              @typescript-eslint/no-unsafe-member-access
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/crm/crm.service.spec.ts
+  285:28  error  Replace `⏎······.fn()⏎······` with `.fn()`  prettier/prettier
+  288:1   error  Replace `········` with `······`            prettier/prettier
+  289:1   error  Delete `··`                                 prettier/prettier
+  290:1   error  Replace `········` with `······`            prettier/prettier
+  291:1   error  Delete `··`                                 prettier/prettier
+  292:1   error  Replace `········` with `······`            prettier/prettier
+  293:1   error  Delete `··`                                 prettier/prettier
+  294:1   error  Replace `········` with `······`            prettier/prettier
+  295:1   error  Delete `··`                                 prettier/prettier
+
+✖ 49 problems (46 errors, 3 warnings)
+  45 errors and 0 warnings potentially fixable with the `--fix` option.
+

@@ -1,0 +1,292 @@
+{
+  "kind": "qualified-c9-service-catalog-read-facts",
+  "head": "8b5efd50f3505112eb1fae71e452a8a9458e1680",
+  "qualification": "NOT_ISSUED",
+  "targetedDistinctTests": 324,
+  "batches": [
+    {
+      "name": "units-r2",
+      "passed": 199,
+      "failed": 0
+    },
+    {
+      "name": "regression-r1",
+      "passed": 89,
+      "failed": 0
+    },
+    {
+      "name": "final-r1",
+      "passed": 127,
+      "failed": 0
+    },
+    {
+      "name": "review-fix-r2",
+      "passed": 45,
+      "failed": 0
+    }
+  ],
+  "productionTypes": {
+    "status": "PASS",
+    "heapMb": 4096,
+    "command": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc --noEmit -p tsconfig.build.json",
+    "log": "checks/maya-catalog-facts-prod-types-r2.log"
+  },
+  "scopedLint": {
+    "status": "PASS",
+    "errors": 0,
+    "warnings": 0,
+    "files": 17,
+    "log": "checks/maya-catalog-facts-lint-r3.log"
+  },
+  "diffCheck": "PASS",
+  "modelSerialization": {
+    "sourceServices": 201,
+    "serializedServices": 200,
+    "catalogExhaustive": false,
+    "fullSerializedBodyPreserved": true,
+    "scriptedResponse": true,
+    "externalCalls": 0
+  },
+  "httpPostgresReactForThisChange": false,
+  "realModelAcceptance": false,
+  "realYclientsAcceptance": false,
+  "publicServicesDtoChanged": false,
+  "legacyBookingPreviewFixed": false,
+  "mutationHashChanged": false,
+  "newSchemaRetentionAutonomy": false,
+  "C10Complete": false,
+  "redAttempts": {
+    "units-r1": "158 passed, 1 failed: preserve refusal for missing fields while accepting explicit null",
+    "lint-r1": "formatting and unsafe mock typing, fixed in follow-up",
+    "review-fix-r1": "44 passed, 1 failed: expected stale 20-item limit rather than actual 200"
+  },
+  "sourceHashes": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts",
+      "sha256": "080ad71e6f5742dc7a45dcd82bd98cd0a9ab1211f2a099582a468dbc70f0cc4c",
+      "bytes": 36300
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "sha256": "9650bb113564c943e2e8bf0ebb8653a85fdecc19fa8e28d0207a3a30daec51d5",
+      "bytes": 87026
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "8b3f506fb3d64039ba25fc634e01b1607383a70ca5668485476c5d8264505f32",
+      "bytes": 293839
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+      "sha256": "bef8194ad83d0962a1fcd8572b401bce2d1d9043fc3c8c447096cc412b855b47",
+      "bytes": 104742
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "698a63f95a4fa2edc61075a86f3a5854736f71401064ac8f452e4fb832131939",
+      "bytes": 145913
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "sha256": "140e383c7d371e343975e7446404cc26fe2ffb47e55c19ed01839671dbea4aed",
+      "bytes": 28435
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "sha256": "7578bd32991c478dbd1abe8b80d2ca4aa437e06e782812d0df07adfb95136f3b",
+      "bytes": 68709
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "sha256": "bde0e1e28aeb3f637ffbc95ecad959e2ded36f79655dafb6b450f0cdc7d6d890",
+      "bytes": 53373
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/owner-money-questions.acceptance.spec.ts",
+      "sha256": "00d954dc0d47f78dc79e4cd8a20d0e162b42b4312b395039ce14ae1f79cd78b9",
+      "bytes": 44576
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client-read.service.ts",
+      "sha256": "7b6d38e4243e6ddd7e180691ee0b5213909025b2b2eb1c2734d9ec2175a1af5a",
+      "bytes": 5055
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/mock-crm.adapter.ts",
+      "sha256": "6c6ad54f0e52800a1320c771cbcfad8834bcb4e2c6bfb16a8fb36ef43e980c15",
+      "bytes": 9011
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts",
+      "sha256": "53c2fbc80492057404ef487abdfbdf83f08c55486cbcfe94d13069560d91198c",
+      "bytes": 113218
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "sha256": "226b2ad0c0d987ffea0bf9d3aace85875247b40fe4709cba6bbbecfcdde51fb3",
+      "bytes": 152244
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+      "sha256": "4a1c802d053ea7a272feff1de1043913fa013e38d4864b8e19ac1d1a0b2dfb91",
+      "bytes": 25910
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.spec.ts",
+      "sha256": "580d30247d3c583973c78ad98ccde726c737e725432925a131fc77b4389427bd",
+      "bytes": 33285
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "829bad138b9420c0a3cb9a465571075aeb9a3fbd0e2026b03267d7cf5cc5643d",
+      "bytes": 169518
+    },
+    {
+      "path": "maya-saas-backend/src/crm/service-catalog-read.ts",
+      "sha256": "9f206c3fdd4fb83c01580d104a2bcacb7cbcca64193c3f3475034a7c2b8ed9b3",
+      "bytes": 1852
+    },
+    {
+      "path": "maya-saas-backend/src/domain/catalog.ts",
+      "sha256": "42213ec310e8a12f2e6d69ac11538b5acb3d5de7ed958f0d09cc6e8815630202",
+      "bytes": 2899
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/booking/booking-selector.presenter.spec.ts",
+      "sha256": "2a421e138bce3f2c35e0f20e017c2551bb3289c8a985e9d9700d10033225d3b4",
+      "bytes": 6721
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts",
+      "sha256": "6757aa0fa9e1182e069eeb700e1a9f180f9792289725afb89130e73c6c3865f3",
+      "bytes": 8796
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/emission/emitter.spec.ts",
+      "sha256": "566ed59b3acb9619d0826224d813d1fc4a4f8b78a94272aca282c5e386eed4e9",
+      "bytes": 30780
+    }
+  ],
+  "files": [
+    {
+      "path": "checks/maya-catalog-facts-capture.cjs",
+      "sha256": "19b38332fbe978cd7b725ffda27ebcaea07600320da6c157dbe177b4b822b54d",
+      "bytes": 2381
+    },
+    {
+      "path": "checks/maya-catalog-facts-final-r1.json",
+      "sha256": "4f3f6b3c153b44e705d9e4a00d7ddadba7285da19fb18c991aad99d33963fa19",
+      "bytes": 55185
+    },
+    {
+      "path": "checks/maya-catalog-facts-final-r1.log",
+      "sha256": "66b915311d24aa48786d837ac55f80adf68b03a281bb66b462fabe34e41a2692",
+      "bytes": 556
+    },
+    {
+      "path": "checks/maya-catalog-facts-lint-fix.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-catalog-facts-lint-r1.log",
+      "sha256": "177ccdb5241681f9ff5c7aed4f5cff1e723f8e79276fbeda87cf76f861648839",
+      "bytes": 5790
+    },
+    {
+      "path": "checks/maya-catalog-facts-lint-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-catalog-facts-lint-r3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-catalog-facts-prod-types-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-catalog-facts-prod-types-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-catalog-facts-regression-r1.json",
+      "sha256": "d9576d03b22824eba3ef701ad961acfec6b2f66a87e49f5a944b2f7ef004dc11",
+      "bytes": 44430
+    },
+    {
+      "path": "checks/maya-catalog-facts-regression-r1.log",
+      "sha256": "51e4ee784682efb0fffb03e6323842174ec7f9960e09445a79ca858639d1606d",
+      "bytes": 698
+    },
+    {
+      "path": "checks/maya-catalog-facts-review-fix-r1.json",
+      "sha256": "fe6750f2d4942e20e36c6ac85b0289b5f8867a9363f569eccfa35408a391c625",
+      "bytes": 31056
+    },
+    {
+      "path": "checks/maya-catalog-facts-review-fix-r1.log",
+      "sha256": "f8750120bc95dd8d4b939e531654bcb30afe4517f37acce67f857f94254d6106",
+      "bytes": 7217
+    },
+    {
+      "path": "checks/maya-catalog-facts-review-fix-r2.json",
+      "sha256": "c883ded534b706577382e29a90d48692a93b1774890da31b07b7117274bd6a9c",
+      "bytes": 23685
+    },
+    {
+      "path": "checks/maya-catalog-facts-review-fix-r2.log",
+      "sha256": "512a5f25f373748a829ceda9e238662e2c2d8f7d5382671fcc44c8f4c5935b11",
+      "bytes": 4661
+    },
+    {
+      "path": "checks/maya-catalog-facts-serialization-observation.json",
+      "sha256": "31f40a66e527a18541b98d6643e761602f17d84395903b75de659f2549af2183",
+      "bytes": 246
+    },
+    {
+      "path": "checks/maya-catalog-facts-serialization.log",
+      "sha256": "e6a58914d615e67130ef13686c58cd65f71b8601c9677990fc9c823c03b120cc",
+      "bytes": 103
+    },
+    {
+      "path": "checks/maya-catalog-facts-serialized-body.json",
+      "sha256": "c305deddf3064bdbedc55e4c3f9722da84b6be526b9f6f392fb86e7cdb25b08f",
+      "bytes": 80982
+    },
+    {
+      "path": "checks/maya-catalog-facts-units-r1.json",
+      "sha256": "179c7bb5bb7ce06b316277592f7aba119e0c5a19cb55dc76b843543a39ce45ca",
+      "bytes": 79011
+    },
+    {
+      "path": "checks/maya-catalog-facts-units-r1.log",
+      "sha256": "ceeb49abeab821a32b5a9cc122a1613f40c3e16b1aaa54dcde30de21b5be63a1",
+      "bytes": 3028
+    },
+    {
+      "path": "checks/maya-catalog-facts-units-r2.json",
+      "sha256": "9f4d772b7d01fe7e8e5bae60168a4254ca424b50fc11b19bec96e4fd2301f058",
+      "bytes": 91297
+    },
+    {
+      "path": "checks/maya-catalog-facts-units-r2.log",
+      "sha256": "c1585e8ee710711c374f5a9b9e8f912e2abbc9526d4e694a07869d04a802db74",
+      "bytes": 1691
+    },
+    {
+      "path": "independent-review.txt",
+      "sha256": "a2f755678ea26391720e7105a5d3ea7b98e2839ef4d14a188b66a3687a37384d",
+      "bytes": 1522
+    },
+    {
+      "path": "synthetic-environment-launcher.cjs",
+      "sha256": "e1700a645aa03148a6734f622d1aad2306df0376b6ee5eacb79cea0ed6148a33",
+      "bytes": 1647
+    }
+  ]
+}

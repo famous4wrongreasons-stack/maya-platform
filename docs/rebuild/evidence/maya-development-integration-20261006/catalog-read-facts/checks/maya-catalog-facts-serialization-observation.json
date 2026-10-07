@@ -1,0 +1,10 @@
+{
+  "codeHead": "8b5efd50f3505112eb1fae71e452a8a9458e1680",
+  "sourceRows": 201,
+  "serializedRows": 200,
+  "catalogExhaustive": false,
+  "callsIntercepted": 1,
+  "externalCalls": 0,
+  "scriptedModelReply": true,
+  "realModelAcceptance": false
+}

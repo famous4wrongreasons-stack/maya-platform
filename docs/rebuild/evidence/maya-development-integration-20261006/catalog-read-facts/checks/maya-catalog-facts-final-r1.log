@@ -1,0 +1,10 @@
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/ai-tools/ai-core.development-integration.spec.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       127 passed, 127 total
+Snapshots:   0 total
+Time:        0.74 s, estimated 1 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/ai-core.development-integration.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-catalog-facts-final-r1.json

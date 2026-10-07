@@ -1,0 +1,9 @@
+Independent read-only review by /root/independent_review, 2026-10-07.
+
+Initial final review: one P2. observedServiceCatalog declared catalog_exhaustive:true while downstream AiCore truncates lists. Reviewer requested honest completeness and actual serialized-body regression with 201 services. No other blocking finding: CRM retains fact ownership; fresh READ avoids cache/defaults/management fallback; null measures remain NOT_MEASURED; input hash rejects old receipts; public DTO/mutation callers and authority unchanged.
+
+Follow-up final review: P2 closed. catalog_exhaustive is literal false in the contract and projection. Actual AiCoreModelService serializer sends 200 of 201 services with false completeness. r2 confirms 45/45 passing tests. No new blocking finding in the narrow fix; local code/unit checkpoint allowed.
+
+Reviewer ran no tests or services. Legacy personal preview/public services remain unchanged; HTTP/React and real YCLIENTS are not qualified for this new projection.
+
+Final evidence review: exact code HEAD confirmed; all 21 source hashes and 24 evidence hashes/sizes matched; union of final four reports is exactly 324 passing tests; preserved serialized body has 200 services and false completeness; capture intercepts fetch before network. Checkpoint and map preserve NOT_ISSUED, synthetic qualification and unchanged legacy preview/public services. No unsupported HTTP/React or real-provider/model acceptance claims. Docs/evidence ready for local checkpoint. Reviewer ran no tests/services.

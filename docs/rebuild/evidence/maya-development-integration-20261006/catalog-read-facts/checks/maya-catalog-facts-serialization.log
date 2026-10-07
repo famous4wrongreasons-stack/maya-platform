@@ -1,0 +1,1 @@
+PASS: 201 source rows; 200 serialized; exhaustive false; one intercepted request; zero external calls.

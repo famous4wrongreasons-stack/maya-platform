@@ -1,0 +1,48 @@
+PASS src/ai-tools/owner-money-questions.acceptance.spec.ts
+FAIL src/ai-tools/ai-core-model.service.spec.ts
+  ● AiCoreModelService › never serializes a bounded 201-service catalog as exhaustive
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 20
+    Received length: 200
+    Received array:  [{"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-1", "limitations": [], "name": "Synthetic service 1", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-2", "limitations": [], "name": "Synthetic service 2", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-3", "limitations": [], "name": "Synthetic service 3", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-4", "limitations": [], "name": "Synthetic service 4", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-5", "limitations": [], "name": "Synthetic service 5", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-6", "limitations": [], "name": "Synthetic service 6", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-7", "limitations": [], "name": "Synthetic service 7", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-8", "limitations": [], "name": "Synthetic service 8", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-9", "limitations": [], "name": "Synthetic service 9", "price": 100, "price_max": 100, "price_min": 100}, {"category": null, "currency": "RUB", "duration_minutes": 30, "id": "service-10", "limitations": [], "name": "Synthetic service 10", "price": 100, "price_max": 100, "price_min": 100}, …]
+
+      659 |     };
+      660 |     expect(serialized.tool_results[0]?.result.catalog_exhaustive).toBe(false);
+    > 661 |     expect(serialized.tool_results[0]?.result.services).toHaveLength(20);
+          |                                                         ^
+      662 |   });
+      663 |
+      664 |   it('повторяет неудачный финальный запрос и на телефоне', async () => {
+
+      at Object.<anonymous> (ai-tools/ai-core-model.service.spec.ts:661:57)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 44 passed, 45 total
+Snapshots:   0 total
+Time:        0.59 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core-model.service.spec.ts", "src/ai-tools/owner-money-questions.acceptance.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-catalog-facts-review-fix-r1.json
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 42531  - [39m10/07/2026, 5:47:54 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m

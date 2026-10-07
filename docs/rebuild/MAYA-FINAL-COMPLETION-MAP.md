@@ -892,3 +892,20 @@ channel, while a never-linked user without such a source needs a trusted
 bootstrap product decision. Real first-link activation, normal relay parity,
 model/provider acceptance, UI polish and C10 completion remain unqualified.
 No new schema, retention or autonomy. `NOT_ISSUED`.
+
+### Qualified catalog facts in the existing C9 READ — 2026-10-07
+
+Code `8b5efd50` routes only `catalog.services.read` through a fresh, tenant-scoped
+CRM projection. YCLIENTS missing numbers remain null, ranges remain ranges,
+currency needs explicit configuration, and no cache/management fallback invents
+values. Valid services with unknown measures remain selectable as NOT_MEASURED.
+The catalog-only READ hash refuses old defaulted receipts without source dispatch;
+public `/services`, shared booking DTOs and mutation hashes remain unchanged.
+
+324 distinct targeted tests, production types and scoped lint pass. The actual
+model serializer maps 201 synthetic services to 200 with completeness false;
+the full intercepted request and executable harness are preserved. Independent
+review has no remaining blocker. This is local code/unit evidence, not a fresh
+HTTP/React, real-model or YCLIENTS qualification. Personal booking preview still
+has the legacy numeric-default boundary. See [checkpoint, exact limits and RED/green evidence](MAYA-CATALOG-READ-FACTS-CHECKPOINT-20261007.md).
+No schema, retention, autonomy, first-link decision or C10 completion. `NOT_ISSUED`.
