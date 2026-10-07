@@ -1,0 +1,30 @@
+{
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "qualification": "NOT_ISSUED",
+  "success-result": {
+    "capability": "crm.appointment.create.v1",
+    "state": "SUCCEEDED",
+    "executionAttemptCount": 1
+  },
+  "unknown-result": {
+    "capability": "crm.appointment.create.v1",
+    "state": "UNKNOWN",
+    "executionAttemptCount": 1
+  },
+  "checkpoints": [
+    "success-preview",
+    "success-result",
+    "revoked-preview",
+    "revoked-result",
+    "unknown-preview",
+    "unknown-result"
+  ],
+  "modelCalls": 6,
+  "provider": {
+    "dispatches": 1,
+    "socketLosses": 1,
+    "reconciliations": 3
+  },
+  "unexpected": []
+}

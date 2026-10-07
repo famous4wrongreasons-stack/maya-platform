@@ -1,0 +1,875 @@
+{
+  "contract": "maya.booking-confirmation-browser/1",
+  "status": "passed",
+  "syntheticInternalCatalog": true,
+  "syntheticLocalProvider": true,
+  "syntheticA18Verifier": true,
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "success-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\n{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"58585bc8-b727-4fcd-b9e4-756e9f01acd1\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Оформление бороды\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Оформление бороды\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Оформление бороды\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Александр\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Александр\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"key\":\"booking.when\",\"label\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"uni…\nBOOKING_CONFIRMATION\n\nОформление бороды\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) Canonical booking owner\nАлександр\n30 min Canonical booking owner\n1500 RUB Canonical booking owner\n\nCONFIRM BOOKING\nDISMISS\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Confirm booking"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "success-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\n{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"58585bc8-b727-4fcd-b9e4-756e9f01acd1\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Оформление бороды\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Оформление бороды\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Оформление бороды\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Александр\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Александр\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"key\":\"booking.when\",\"label\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"uni…\nBOOKING_CONFIRMATION\n\nОформление бороды\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) Canonical booking owner\nАлександр\n30 min Canonical booking owner\n1500 RUB Canonical booking owner\n\nCONFIRM BOOKING\nDISMISS\nMAYA:\nЗапись подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Confirm booking"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\n{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"2c6a4bd4-598d-4436-80c9-81c6c8580b66\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Оформление бороды\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Оформление бороды\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Оформление бороды\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Александр\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Александр\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"key\":\"booking.when\",\"label\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"uni…\nBOOKING_CONFIRMATION\n\nОформление бороды\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) Canonical booking owner\nАлександр\n30 min Canonical booking owner\n1500 RUB Canonical booking owner\n\nCONFIRM BOOKING\nDISMISS\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Confirm booking"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\n{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"2c6a4bd4-598d-4436-80c9-81c6c8580b66\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Оформление бороды\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Оформление бороды\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Оформление бороды\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Александр\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Александр\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"key\":\"booking.when\",\"label\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"uni…\nBOOKING_CONFIRMATION\n\nОформление бороды\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) Canonical booking owner\nАлександр\n30 min Canonical booking owner\n1500 RUB Canonical booking owner\n\nCONFIRM BOOKING\nDISMISS\n\nЭто действие сейчас недоступно\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Confirm booking"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unknown-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\n{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"6e91e028-8811-4e20-a412-4408359a1084\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"45 min\",\"key\":\"booking.duration\",\"label\":\"45 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":45},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Консультация\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Консультация\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Консультация\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Алексей Орлов\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Алексей Орлов\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"key\":\"booking.when\",\"label\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"dat…\nBOOKING_CONFIRMATION\n\nКонсультация\n\nКонсультация\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) Canonical booking owner\nАлексей Орлов\n45 min Canonical booking owner\n1500 RUB Canonical booking owner\n\nCONFIRM BOOKING\nDISMISS\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Confirm booking"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unknown-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\n{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"6e91e028-8811-4e20-a412-4408359a1084\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"45 min\",\"key\":\"booking.duration\",\"label\":\"45 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":45},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Консультация\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Консультация\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Консультация\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Алексей Орлов\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Алексей Орлов\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"key\":\"booking.when\",\"label\":\"8 окт. 2026 г., 12:00 (Europe/Moscow)\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"dat…\nBOOKING_CONFIRMATION\n\nКонсультация\n\nКонсультация\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) Canonical booking owner\nАлексей Орлов\n45 min Canonical booking owner\n1500 RUB Canonical booking owner\n\nCONFIRM BOOKING\nDISMISS\nMAYA:\nЗапрос принят. Подтверждение ожидается.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Confirm booking"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Dismiss"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "success-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nВы:\nChoose service\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nChoose specialist\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nReview booking\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nConfirm booking\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапись подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nВы:\nChoose service\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nChoose specialist\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nReview booking\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nConfirm booking\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапись не подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unknown-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nВы:\nChoose service\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nChoose specialist\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nReview booking\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nВы:\nConfirm booking\nОтвет на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапрос принят. Подтверждение ожидается.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "successPreview": {
+      "staffName": "Александр",
+      "serviceName": "Оформление бороды",
+      "start": "2026-10-08T09:00:00.000Z"
+    },
+    "successResult": {
+      "contract": "maya.widget.intent/1",
+      "outcome": "terminate",
+      "code": null,
+      "reason_text": null,
+      "stopped_at_gate": "13",
+      "gates_run": 14,
+      "gates_total": 15,
+      "next_envelope": null,
+      "resolved_widget": null,
+      "owner_decision": {
+        "state": "SUCCEEDED",
+        "outcomeCode": "provider_applied"
+      },
+      "receipt_outcome": "ACCEPTED"
+    },
+    "revokedPreview": {
+      "staffName": "Александр",
+      "serviceName": "Оформление бороды",
+      "start": "2026-10-08T09:00:00.000Z"
+    },
+    "revokedResult": {
+      "contract": "maya.widget.intent/1",
+      "outcome": "terminate",
+      "code": null,
+      "reason_text": null,
+      "stopped_at_gate": "13",
+      "gates_run": 14,
+      "gates_total": 15,
+      "next_envelope": null,
+      "resolved_widget": null,
+      "owner_decision": null,
+      "receipt_outcome": "REFUSED"
+    },
+    "unknownPreview": {
+      "staffName": "Алексей Орлов",
+      "serviceName": "Консультация",
+      "start": "2026-10-08T09:00:00.000Z"
+    },
+    "unknownResult": {
+      "contract": "maya.widget.intent/1",
+      "outcome": "terminate",
+      "code": null,
+      "reason_text": null,
+      "stopped_at_gate": "13",
+      "gates_run": 14,
+      "gates_total": 15,
+      "next_envelope": null,
+      "resolved_widget": null,
+      "owner_decision": {
+        "state": "UNKNOWN",
+        "reconciliation": "required"
+      },
+      "receipt_outcome": "ACCEPTED"
+    },
+    "successRestoredHistory": {
+      "contract": "maya.conversation-history/1",
+      "conversationId": "212b0294-1f6a-48d6-a09f-05c1ebd153c8",
+      "truncated": false,
+      "interrupted": true,
+      "turns": [
+        {
+          "id": "4adbe089-9d8b-436c-aa4a-8849dea2fc88",
+          "role": "user",
+          "text": "Покажи услуги для записи",
+          "createdAt": "2026-10-07T00:19:34.260Z",
+          "completed": true
+        },
+        {
+          "id": "3c9849b3-6166-4925-aafa-36dbf4b1bce7",
+          "role": "assistant",
+          "text": "Выберите услугу для записи.",
+          "createdAt": "2026-10-07T00:19:34.390Z",
+          "completed": true
+        },
+        {
+          "id": "d009cbd8-0d51-4e97-aa8b-21776e1dc113",
+          "role": "user",
+          "text": "Choose service",
+          "createdAt": "2026-10-07T00:19:34.468Z",
+          "completed": false
+        },
+        {
+          "id": "5dbd506b-4b2e-4083-ac5f-51eef94a8614",
+          "role": "user",
+          "text": "Choose specialist",
+          "createdAt": "2026-10-07T00:19:34.586Z",
+          "completed": false
+        },
+        {
+          "id": "136367d4-9dfe-401a-a990-50f903784b46",
+          "role": "user",
+          "text": "Review booking",
+          "createdAt": "2026-10-07T00:19:34.650Z",
+          "completed": false
+        },
+        {
+          "id": "d2856001-9033-4188-afc4-ea6702fc904d",
+          "role": "user",
+          "text": "Confirm booking",
+          "createdAt": "2026-10-07T00:19:34.803Z",
+          "completed": false
+        }
+      ]
+    },
+    "revokedRestoredHistory": {
+      "contract": "maya.conversation-history/1",
+      "conversationId": "410e1f42-c8b9-4127-825d-3f618648c9a3",
+      "truncated": false,
+      "interrupted": true,
+      "turns": [
+        {
+          "id": "fabfa90e-748e-4697-afd0-317fd869cef2",
+          "role": "user",
+          "text": "Покажи услуги для записи",
+          "createdAt": "2026-10-07T00:19:35.370Z",
+          "completed": true
+        },
+        {
+          "id": "af7c5a03-5f6f-4799-ae64-bf92eb753ca3",
+          "role": "assistant",
+          "text": "Выберите услугу для записи.",
+          "createdAt": "2026-10-07T00:19:35.418Z",
+          "completed": true
+        },
+        {
+          "id": "0d101a02-21b9-4764-a3ae-422008300d56",
+          "role": "user",
+          "text": "Choose service",
+          "createdAt": "2026-10-07T00:19:35.483Z",
+          "completed": false
+        },
+        {
+          "id": "adb1677c-7721-4c76-a2ec-a6950bd78037",
+          "role": "user",
+          "text": "Choose specialist",
+          "createdAt": "2026-10-07T00:19:35.565Z",
+          "completed": false
+        },
+        {
+          "id": "b1563acd-8202-4deb-ac7c-e137451c8c32",
+          "role": "user",
+          "text": "Review booking",
+          "createdAt": "2026-10-07T00:19:35.667Z",
+          "completed": false
+        },
+        {
+          "id": "02a01f72-a325-469d-ac67-8b38112addee",
+          "role": "user",
+          "text": "Confirm booking",
+          "createdAt": "2026-10-07T00:19:35.818Z",
+          "completed": false
+        }
+      ]
+    },
+    "unknownRestoredHistory": {
+      "contract": "maya.conversation-history/1",
+      "conversationId": "0e22f4f5-3462-43cb-bdbe-17de39e8e4dd",
+      "truncated": false,
+      "interrupted": true,
+      "turns": [
+        {
+          "id": "1d9c046e-a82e-45c0-af41-82e27717f4e4",
+          "role": "user",
+          "text": "Покажи услуги для записи",
+          "createdAt": "2026-10-07T00:19:36.557Z",
+          "completed": true
+        },
+        {
+          "id": "e88171f6-27e8-4ba8-a2d4-c3a11082c511",
+          "role": "assistant",
+          "text": "Выберите услугу для записи.",
+          "createdAt": "2026-10-07T00:19:36.607Z",
+          "completed": true
+        },
+        {
+          "id": "7a2d5c60-7393-4d3e-a0ce-c4fa4507ce4f",
+          "role": "user",
+          "text": "Choose service",
+          "createdAt": "2026-10-07T00:19:36.669Z",
+          "completed": false
+        },
+        {
+          "id": "815c089e-6f26-4da6-ae71-0f9b7c35bd23",
+          "role": "user",
+          "text": "Choose specialist",
+          "createdAt": "2026-10-07T00:19:36.734Z",
+          "completed": false
+        },
+        {
+          "id": "019045fe-1eab-40aa-a9a4-72d74ffc16bc",
+          "role": "user",
+          "text": "Review booking",
+          "createdAt": "2026-10-07T00:19:36.802Z",
+          "completed": false
+        },
+        {
+          "id": "16fe17a3-0994-49ba-ab26-d12f9ee5a052",
+          "role": "user",
+          "text": "Confirm booking",
+          "createdAt": "2026-10-07T00:19:36.952Z",
+          "completed": false
+        }
+      ]
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:64191",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/LORCEJP7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/LORCEJP7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/LORCEJP7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/LORCEJP7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/LORCEJP7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/LORCEJP7/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

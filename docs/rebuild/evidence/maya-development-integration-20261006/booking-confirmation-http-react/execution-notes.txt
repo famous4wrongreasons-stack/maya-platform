@@ -1,0 +1,24 @@
+Local development evidence, completed 2026-10-07 UTC.
+Original staff projection code: 58cc3397535af09e1d573d0b0926449f74ff960c.
+Restoration runtime and tests: cabb3c1a.
+Final capture harness: f1ee7805. R8 source tree was clean before execution.
+R1: HTTP 6 pass / 1 fail, old assistant-history assertion after the privacy fix.
+R2: HTTP 7 pass, browser preparation had a serializable identity-fixture conflict.
+R3: HTTP 7 pass, harness wrongly expected pwa.default instead of canonical pwa/1.
+R4: first booking succeeded; reload correctly required real UI authentication.
+R5: all six initial states pass; restoration absence found, initial failure capture used wrong tab.
+R6: fresh history response confirms persisted AE result missing from restored UI (runtime RED).
+R7: 7 HTTP tests and nine React checkpoints pass at cabb3c1a; one background-tab screenshot was not fully painted.
+R8: focus before capture, 7 HTTP tests and nine React checkpoints pass; inspect the final screenshots.
+All owned PostgreSQL clusters stopped. Chrome/HTTP were owned and cleaned per run.
+Only local synthetic catalogs, synthetic A18 verification, scripted model, and owned loopback provider.
+No YCLIENTS/model/production/phone/SMS/deploy/push/merge. Real model/provider acceptance NOT_ISSUED.
+Backend production-only types: 4096 MB, PASS in 5.48s; full-project types remain unqualified.
+Shell/carrier typechecks pass. Initial carrier refusal required regenerating the existing shell runtime manifest; no guard was weakened.
+Runtime tests: backend 69; shell 224; React parity/detail 77. Earlier cohorts overlap, not additive evidence.
+R8 login/reload is an actual new AuthSession in the same server process. This booking package does not prove application/PG restart.
+Known UX limits: technical English sealed labels, duplicate service labels, generic catalog JSON card, and interrupted notices for lowered widget turns.
+Restored results are last20 current-principal widgets, text only, not the complete or exact latest-conversation transcript.
+No old widgets/tokens/COMMIT controls are ingested; no new schema, storage writer, retention or authority.
+CLIENT fixture uses canonical active ClientChannelLink and retains legacy Client.userId for contact lookup. No legacy-free booking or owner personal-client carrier activation is claimed.
+SB-1 JSON V2 is approved; old schema/issuer STOP is superseded. Its carrier activation and real identity verification are outside this proof.

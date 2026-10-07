@@ -1,0 +1,21 @@
+{
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "qualification": "NOT_ISSUED",
+  "success-result": {
+    "capability": "crm.appointment.create.v1",
+    "state": "SUCCEEDED",
+    "executionAttemptCount": 1
+  },
+  "checkpoints": [
+    "success-preview",
+    "success-result"
+  ],
+  "modelCalls": 2,
+  "provider": {
+    "dispatches": 0,
+    "socketLosses": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

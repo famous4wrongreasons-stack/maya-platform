@@ -1,0 +1,13 @@
+{
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "qualification": "NOT_ISSUED",
+  "checkpoints": [],
+  "modelCalls": 2,
+  "provider": {
+    "dispatches": 0,
+    "socketLosses": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

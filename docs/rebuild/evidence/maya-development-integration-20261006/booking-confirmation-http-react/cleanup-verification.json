@@ -1,0 +1,53 @@
+{
+  "method": "pg_ctl status for exact owned cluster paths after all8 runs",
+  "checks": [
+    {
+      "run": 1,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-iWd9zW/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 2,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-Bc8xDk/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 3,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-DvGGs4/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 4,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-42HJNT/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 5,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-Qe0IDd/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 6,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-mI1mji/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 7,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-9Hbo7d/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    },
+    {
+      "run": 8,
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-vW64Yv/pg",
+      "pgCtlStatus": 3,
+      "stopped": true
+    }
+  ]
+}

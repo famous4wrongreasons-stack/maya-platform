@@ -804,3 +804,25 @@ limitation. Synthetic model/CRM/identity fixtures do not establish external
 acceptance, full-project types, carrier personal-booking activation or C10 completion.
 See the extended [personal checkpoint](MAYA-PERSONAL-READ-CONTEXT-20261006.md) and
 [public-profile checkpoint](MAYA-COMPANY-PROFILE-READ-20261006.md). `NOT_ISSUED`.
+
+### Canonical chat booking confirmation and historical outcomes — 2026-10-07
+
+Staff projection `58cc3397` replaces raw specialist IDs in new confirmation
+previews with an exact current public name, refusing missing/ambiguous labels.
+Outcome restoration `cabb3c1a` reads one existing current-principal page and
+restores only BOOKING_CONFIRMATION terminal prose through shared receipt dedupe.
+It does not ingest old widgets/tokens or dispatch an action. Unbound pages,
+session changes and reader/presentation failures remain closed without blocking
+ordinary chat.
+
+Final r8 at `f1ee7805` passes 7 actual HTTP tests and 9 current React checkpoints:
+readable preview, explicit COMMIT, SUCCEEDED once, canonical link revocation with
+zero effects, natural local-provider UNKNOWN, and fresh UI sign-in after reload.
+Successful and UNKNOWN AE attempts remain one; provider dispatch remains one.
+Targeted backend 69, runtime 224 and React 77 tests pass; production-only backend
+types, shell/carrier types and scoped lint pass. Independent review finds no
+remaining blocker for this qualification. Owned services stopped. This package
+does not prove application/PG restart, real model/provider, owner-personal-client
+carrier activation or polished UX; technical labels and interrupted widget-turn
+notices remain. See [checkpoint and preserved RED/green evidence](MAYA-BOOKING-CONFIRMATION-OUTCOMES-20261007.md).
+No new autonomy, schema, retention or C10 completion; `NOT_ISSUED`.

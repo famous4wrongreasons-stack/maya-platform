@@ -1,0 +1,11 @@
+Independent read-only review: /root/independent_review, 2026-10-07 UTC.
+Reviewer did not run tests/services or modify files.
+
+Staff projection review found malformed name data could throw during trim and obstruct existing booking handling. Fixed: runtime array/object/string guards and bounded nullable projection with the entire asynchronous projection caught. Numeric/object/null/root regressions are included in final 69/69 backend cohort. No remaining runtime blocker was reported.
+
+Restoration review found two P2s: tenant_bound:false could reach the sink, and a throwing sink in the .then success handler could leave restoration pending. Fixed by exact tenant-bound admission, protected sink cleanup and rejection handling. Four new regressions cover unbound response, rejected/synchronous-throw reader and throwing sink. Reviewer verified fixes; final runtime cohort 224/224, shell/carrier typechecks PASS. One existing current-principal read, BOOKING_CONFIRMATION text only, shared dedupe, abort/generation; no ingest or token restoration.
+
+Final proof review verified f1ee78057dd0686c5e3abb1394786bbf58d9acad, MAYA-BOOKING-CONFIRMATION-OUTCOMES-20261007.md and completion map. All 22 source entries and 170 original evidence file hashes matched (2,829,108 bytes) before this note/cleanup verification was added.
+R8: 7 HTTP tests, 9 React checkpoints PASS; SUCCEEDED/UNKNOWN attemptCount1 before/after reload; provider dispatch1; revoked0 AE/appointments. Final PNGs show readable preview and fully painted UNKNOWN after relogin. Cleanup confirmed. No remaining blocker for this qualified local checkpoint.
+
+Limits explicitly retained: scripted model, synthetic A18 and owned loopback provider; last20 current-principal widgets, not complete/latest-conversation history; reload/relogin, not app/PG restart; no actual owner verification/personal-client carrier activation, production, external provider/model or C10 acceptance. Technical labels and interrupted widget-turn notices remain UX limitations. NOT_ISSUED.

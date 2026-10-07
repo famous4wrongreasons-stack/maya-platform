@@ -1,0 +1,1027 @@
+{
+  "kind": "qualified-local-booking-confirmation-and-outcome-restoration",
+  "head": "f1ee78057dd0686c5e3abb1394786bbf58d9acad",
+  "staffProjectionHead": "58cc3397535af09e1d573d0b0926449f74ff960c",
+  "restorationHead": "cabb3c1a48241183a114e628fbb1de7afc81a142",
+  "qualification": "NOT_ISSUED",
+  "actualHttpAuthC9ActionEnginePostgres": true,
+  "actualReactChromium": true,
+  "actualUiReauthentication": true,
+  "applicationAndPostgresRestart": false,
+  "servicesStopped": true,
+  "externalNetworkCalls": 0,
+  "scriptedModel": true,
+  "syntheticA18Verifier": true,
+  "syntheticLocalProvider": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "targetedBackendUnits": 69,
+  "targetedRuntimeTests": 224,
+  "targetedReactTests": 77,
+  "httpTests": 7,
+  "browserCheckpoints": 9,
+  "outcomes": {
+    "realModelAcceptance": false,
+    "externalProviderAcceptance": false,
+    "qualification": "NOT_ISSUED",
+    "success-result": {
+      "capability": "crm.appointment.create.v1",
+      "state": "SUCCEEDED",
+      "executionAttemptCount": 1
+    },
+    "revoked-result": {
+      "actionExecutions": 0,
+      "appointments": 0
+    },
+    "unknown-result": {
+      "capability": "crm.appointment.create.v1",
+      "state": "UNKNOWN",
+      "executionAttemptCount": 1
+    },
+    "success-reload": {
+      "capability": "crm.appointment.create.v1",
+      "state": "SUCCEEDED",
+      "executionAttemptCount": 1
+    },
+    "revoked-reload": {
+      "actionExecutions": 0,
+      "appointments": 0
+    },
+    "unknown-reload": {
+      "capability": "crm.appointment.create.v1",
+      "state": "UNKNOWN",
+      "executionAttemptCount": 1
+    },
+    "checkpoints": [
+      "success-preview",
+      "success-result",
+      "revoked-preview",
+      "revoked-result",
+      "unknown-preview",
+      "unknown-result",
+      "success-reload",
+      "revoked-reload",
+      "unknown-reload"
+    ],
+    "modelCalls": 6,
+    "provider": {
+      "dispatches": 1,
+      "socketLosses": 1,
+      "reconciliations": 3
+    },
+    "unexpected": []
+  },
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.ts",
+      "sha256": "1464ae1f6429c25172df3d52c925304d7f01e1c639082442c4e71ccb072c5a31"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts",
+      "sha256": "ce1c3f85b606d09f96d18e9357e0e87c25a33e0b8ee1b1c0bd7986b1f1070819"
+    },
+    {
+      "path": "maya-saas-backend/scripts/booking-confirmation-proof.mjs",
+      "sha256": "a1d934ce6f10881e460452d18a4b2b42acc7cc72cff1aa2c13c7ddd343b04ac8"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/booking-confirmation-react.probe-spec.ts",
+      "sha256": "88cbd91c5f3b30cf10936c688c204b4bb32e582e46ba97f30d78ec779ec296d8"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "sha256": "2d6cdd870699af3c91b1d8bc2d9e93bc398ceb5e7ff7392999271820756884a7"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts",
+      "sha256": "bc8ce331fba8e203b066e181a64992d7905b84f67fc3d224510ed80777d361b7"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/shell-booking-flow.mjs",
+      "sha256": "309596b53d2b6490028a859dcfe3d08c266af7aecb52181a6bd9f9dd10f8bccd"
+    },
+    {
+      "path": "maya-carrier-react/test/booking-confirmation-browser-probe.mjs",
+      "sha256": "d67253bf06985bad8141cfe0e77465376453f4be3c0032441c0d6f7e3b484b04"
+    },
+    {
+      "path": "maya-carrier-react/test/booking-confirmation-browser-guard.mjs",
+      "sha256": "f0f1cf8be21a8083ee74b97c1dfd80ef77b9b802d3e4d4d52f9d8a19377d65ac"
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/copy.ts",
+      "sha256": "29060005a8602176b111a05430eb8bc6f7790b18bde2f1b81b5ec92eaf5b6e61"
+    },
+    {
+      "path": "maya-chat-shell/src/dom/timeline.ts",
+      "sha256": "c93c42124915aeec41b2f8822506ddb29456d41c70bc03220dc968b982673f8a"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/conversation.ts",
+      "sha256": "cb8a301facbbd48bceb3285b0d3689aad92330bd6e405ba5240e456c1dfeaf67"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/intents.ts",
+      "sha256": "b1bcf04e819a35fd63c902b6973258b06f8f78c20e7f1982c602cb7a91887bf2"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/ports.ts",
+      "sha256": "71994d7d6a3c875bd2296d58a4318b709e237115cbe48a36c256af2b04663dc5"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/shell.ts",
+      "sha256": "5fa7ef49927077a19e94ca12835bf1e4e64d135b2602872e13bd411b1e17ad51"
+    },
+    {
+      "path": "maya-chat-shell/test/conversation.test.mjs",
+      "sha256": "5ccd9a016dbd69bebda513221cc9df1d004dcb75d5cfe9483aa006e5b02ed0fd"
+    },
+    {
+      "path": "maya-chat-shell/test/intents.test.mjs",
+      "sha256": "70ded1c8a3b892120f405376315e23afc125872ee0fddef5b5b74240c297f834"
+    },
+    {
+      "path": "maya-chat-shell/test/dom.test.mjs",
+      "sha256": "dd784a59dcf9dbe3f6a956351814f7846d5a3613aa522a0878ba97180bece357"
+    },
+    {
+      "path": "maya-chat-shell/test/shell.test.mjs",
+      "sha256": "219b39106ddc328492265c6f509241711e9efffcd34a110bf57727c0c791167a"
+    },
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "84750924d0e19d15e70f22692be24fb70eb5d93ed03a74c0f9bb20cb3d6d1472"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts",
+      "sha256": "d6850f0bba97d0f9cca7010f000732554f1e4f3be0b19166d322916f5202f9f8"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.ts",
+      "sha256": "a1122f7729b2e454185b433a9666a6cc8d1ca59ad8195643a3d10947c19e6841"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup-verification.json",
+      "bytes": 1536,
+      "sha256": "8e12f51078a8e3e2c92e03c4711fb9304218603309cce825a71baa170a7a67f0"
+    },
+    {
+      "path": "execution-notes.txt",
+      "bytes": 2459,
+      "sha256": "5e5c9133dd6c087585c8c1dd6156dc5869de8f775c5ea096253c439f2c6925ab"
+    },
+    {
+      "path": "independent-review.txt",
+      "bytes": 2023,
+      "sha256": "52d86338d7db8931a8ca1fc0691a3d4d2003ac150a8f327ca20bb6b71e9d6898"
+    },
+    {
+      "path": "production-types/result.json",
+      "bytes": 439,
+      "sha256": "33ad00c44d93e8455be2b027c26f23db833ea34ef3d21993f8c224b3ad17f5a7"
+    },
+    {
+      "path": "production-types/types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1/http-booking-jest.json",
+      "bytes": 6665,
+      "sha256": "141d01037012a8297ebcd441630530bbc50df7e11e76bd392fc2b8e0358ca1ed"
+    },
+    {
+      "path": "r1/http-booking.log",
+      "bytes": 2705,
+      "sha256": "73e536aa9bfe7e7a537ffa3b5b4ec9772c34aadbdf5b2d494759a21dfd7f5fbf"
+    },
+    {
+      "path": "r1/initdb.log",
+      "bytes": 962,
+      "sha256": "409ec3a7f39daf5493c0f89e294aa4e83a2b9a5fb2d14dc90a974fbe58fe6142"
+    },
+    {
+      "path": "r1/manifest.json",
+      "bytes": 739,
+      "sha256": "0a5056ee55bc7744cb25546340c8cca844b74ce021bcd98eb82a4f8afdd95e03"
+    },
+    {
+      "path": "r1/migrations.log",
+      "bytes": 14734,
+      "sha256": "c67be187bd01ac35a816759d7e27d52810c895430c764135936c6b1f51e560fd"
+    },
+    {
+      "path": "r1/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r1/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r1/postgres.log",
+      "bytes": 1246,
+      "sha256": "cf4b1955e796dbe30938bd5d061f15895ede97c081bd65a2ab38a014e907a9c8"
+    },
+    {
+      "path": "r1/react-web-build.log",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r2/booking-observations.json",
+      "bytes": 257,
+      "sha256": "18d9a80688f41238dae32104c7fd65e2d3870e0a7deffe298e43359be866aa4d"
+    },
+    {
+      "path": "r2/browser-jest.json",
+      "bytes": 8319,
+      "sha256": "15e96a9da58e95340cbc9d32dac9a9e38f5324a371e6cfa188587dc7b511604e"
+    },
+    {
+      "path": "r2/browser.log",
+      "bytes": 3983,
+      "sha256": "a28a13cb9a67bc212cd7eba1f81327b962347fac51c43ffb52a484e904be4127"
+    },
+    {
+      "path": "r2/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r2/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "a2ff3126a1fff6dee434b9f7c8070270045a3eb1f501a9b86567cdc94db08ea7"
+    },
+    {
+      "path": "r2/http-booking.log",
+      "bytes": 1946,
+      "sha256": "ed5c181abaeb274998241d6814a6e2834c914fa2545ef9483b883c67575de1ed"
+    },
+    {
+      "path": "r2/initdb.log",
+      "bytes": 962,
+      "sha256": "c3677db61f609e8b8ba8f0999042686de51f334f63f97f86f603e5fbed4f81bf"
+    },
+    {
+      "path": "r2/manifest.json",
+      "bytes": 759,
+      "sha256": "3fc2e41daa539b89a6959663324111ae61d49f9df1badd8f28cdfc0c16f06538"
+    },
+    {
+      "path": "r2/migrations.log",
+      "bytes": 14734,
+      "sha256": "44d12f11e1d348758f2d6e853b79c55fdaa8b02e3b26404a9cc7139a6100d47a"
+    },
+    {
+      "path": "r2/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r2/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r2/postgres.log",
+      "bytes": 3259,
+      "sha256": "7bc7e92fd6680bf0d66ffbc64a7d797c2b9f74f3f12f9f689f0d1cd867515de6"
+    },
+    {
+      "path": "r2/react-web-build.log",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r3/booking-observations.json",
+      "bytes": 257,
+      "sha256": "8038a56aa29e7c95608a409413a9d849d24567f303d092bad883b4a9cf79243f"
+    },
+    {
+      "path": "r3/browser-jest.json",
+      "bytes": 2431,
+      "sha256": "d228410ed15d5a63ea84ba47234f501366ecd4a6dc394218e570f7098fa40cf1"
+    },
+    {
+      "path": "r3/browser.log",
+      "bytes": 2023,
+      "sha256": "5d794c2e4a8973d2ce7803b00d1d7d26f12822ec1d424e2e374bc71a58ad7e08"
+    },
+    {
+      "path": "r3/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r3/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "e94c2edc31504aedfad113edd7f1cfba3b3cc35fd9cb8716530861f53d6b009d"
+    },
+    {
+      "path": "r3/http-booking.log",
+      "bytes": 1944,
+      "sha256": "b171b5cba294346be3175d2d1c8c1741982336bf65a347400c63ad31971e67fc"
+    },
+    {
+      "path": "r3/initdb.log",
+      "bytes": 962,
+      "sha256": "4f0bcadb66cd1583a9832bf47db66111bffc8c1428a5f9e6b74cfbac07151cd7"
+    },
+    {
+      "path": "r3/manifest.json",
+      "bytes": 759,
+      "sha256": "0e4bf46e2570ae174feb20cbbd4269150948d2206b60523f0fd576e2a6e138cf"
+    },
+    {
+      "path": "r3/migrations.log",
+      "bytes": 14734,
+      "sha256": "c29c91142580178ebaaf1e94affb3e836d0fe455b2d1db94d0b6d3dbfab16bcd"
+    },
+    {
+      "path": "r3/output/playwright/browser.json",
+      "bytes": 5231,
+      "sha256": "d69a463ea4c04a92637d3942952fad119e85c5b3539a524a943ea479c85c24f0"
+    },
+    {
+      "path": "r3/output/playwright/failure.png",
+      "bytes": 49429,
+      "sha256": "479bcf0028c81a272882146e4df49a559d6b1679922abe7a3cbe647c28ab6db0"
+    },
+    {
+      "path": "r3/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r3/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r3/postgres.log",
+      "bytes": 1246,
+      "sha256": "576ae4d512d8564a4ac88dc189fc4036306b671da7cae7d3f3dcbb9be9d1992f"
+    },
+    {
+      "path": "r3/react-web-build.log",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r4/booking-observations.json",
+      "bytes": 435,
+      "sha256": "30b9112a61bfed0ea70cbafe1c0136f7acfa14dcffc5d33c416c02884c01c482"
+    },
+    {
+      "path": "r4/browser-jest.json",
+      "bytes": 2570,
+      "sha256": "10793b1d3169d2adf7ec869a87cdb9237777a997af27d3cdbe23792d9f6be4a1"
+    },
+    {
+      "path": "r4/browser.log",
+      "bytes": 2091,
+      "sha256": "78a72742467ff4ad729b93b5fc0294c5ce62603d7c2f53d164f8ae7810041d21"
+    },
+    {
+      "path": "r4/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r4/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "5a0e92d6e255d57c5d142083b9a8e2b62ce547bd02eb44c2b1c81d7c3071c106"
+    },
+    {
+      "path": "r4/http-booking.log",
+      "bytes": 1946,
+      "sha256": "f4fd6478aa53a9d176f4b1a2087995a68863fb2f508939d5917d735c94872155"
+    },
+    {
+      "path": "r4/initdb.log",
+      "bytes": 962,
+      "sha256": "76ca03be8dd88d13f4b3886b2e0e0977e088a5001798276b419b31c39c18470f"
+    },
+    {
+      "path": "r4/manifest.json",
+      "bytes": 759,
+      "sha256": "950aa810192eb85f85f16121c6f61fe1cd6dbf4462201a741cf03a0d4efcf5c4"
+    },
+    {
+      "path": "r4/migrations.log",
+      "bytes": 14734,
+      "sha256": "cecdcb7055c40f5a556be07988adca8f4baad50d0c7206a078a14fb3051ebd43"
+    },
+    {
+      "path": "r4/output/playwright/browser.json",
+      "bytes": 10686,
+      "sha256": "608d3f8a387c9f7856533b7777de2a4544fdb5a35d08609656a19f6341a1dcee"
+    },
+    {
+      "path": "r4/output/playwright/failure.png",
+      "bytes": 23640,
+      "sha256": "3b432f23ea443f496bc83ea2e29d3bd75c4f232e99d0349e2b433cb463ff9fbd"
+    },
+    {
+      "path": "r4/output/playwright/success-preview.png",
+      "bytes": 56263,
+      "sha256": "1b4f1ec40dc6465495e31bdb64a7de5c542a0d40baeae4b2a580c5f5418da4c4"
+    },
+    {
+      "path": "r4/output/playwright/success-result.png",
+      "bytes": 59700,
+      "sha256": "cc9ec13085950d1f6164144801c836acb7b89d5f9912b339b7405504e3d12e05"
+    },
+    {
+      "path": "r4/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r4/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r4/postgres.log",
+      "bytes": 1246,
+      "sha256": "5769599ffa1f99b7e08b2e75aee8ccfef544b70111e39310d32332fc9db4cae1"
+    },
+    {
+      "path": "r4/react-web-build.log",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r5/booking-observations.json",
+      "bytes": 654,
+      "sha256": "449ac4d8a6fb8850d9eb9d705c2a072dcadd333d04e3e99f1ece2347669f44ed"
+    },
+    {
+      "path": "r5/browser-jest.json",
+      "bytes": 2672,
+      "sha256": "00b7731cec7e62b539e9b43b6bf4e9413c49d7f88e6147202d0c4c9fe644f3e9"
+    },
+    {
+      "path": "r5/browser.log",
+      "bytes": 2142,
+      "sha256": "a73d3c2c504492275f976e3754451bbdb71635883dc657c7e857ead12ee5573f"
+    },
+    {
+      "path": "r5/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r5/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "100831acd277d140af2cb90e6087f5ba6316c89d1241fc9b27cf92d3768027a0"
+    },
+    {
+      "path": "r5/http-booking.log",
+      "bytes": 1946,
+      "sha256": "377817349dd2a71f0348eac91d7f35365aea073d0482129c5babc3e1efa4f3d6"
+    },
+    {
+      "path": "r5/initdb.log",
+      "bytes": 962,
+      "sha256": "e74fa4e1fdf116a71da44a3fe04b1c413d6472027719e27242632fc9368a45e6"
+    },
+    {
+      "path": "r5/manifest.json",
+      "bytes": 759,
+      "sha256": "1583b861e03e42d681aeaf685394a3857b36da8b0938ccf446bd92391443ceac"
+    },
+    {
+      "path": "r5/migrations.log",
+      "bytes": 14734,
+      "sha256": "eb468400096742a819b1357b9bed1adeb16390e81a5b1e5b12ddbe8d4cf33d51"
+    },
+    {
+      "path": "r5/output/playwright/browser.json",
+      "bytes": 30436,
+      "sha256": "fede2d7a0e04f4ca4d4c6af7f05c8db88dd909ade5347c7fc032f847bbc7e18c"
+    },
+    {
+      "path": "r5/output/playwright/failure.png",
+      "bytes": 60537,
+      "sha256": "e8454d742f1a24516709b40038bcc822ff15a8d132657cff9ded97588c80ff8a"
+    },
+    {
+      "path": "r5/output/playwright/revoked-preview.png",
+      "bytes": 56278,
+      "sha256": "3847617a409562081551794d19c900afed91ba01abf1a3c7611429990c0c8f24"
+    },
+    {
+      "path": "r5/output/playwright/revoked-result.png",
+      "bytes": 59131,
+      "sha256": "3f79ce866b7304f0257e3287ce02b5423b808a58f3995f6060608bda7e1647eb"
+    },
+    {
+      "path": "r5/output/playwright/success-preview.png",
+      "bytes": 56263,
+      "sha256": "1b4f1ec40dc6465495e31bdb64a7de5c542a0d40baeae4b2a580c5f5418da4c4"
+    },
+    {
+      "path": "r5/output/playwright/success-result.png",
+      "bytes": 59700,
+      "sha256": "cc9ec13085950d1f6164144801c836acb7b89d5f9912b339b7405504e3d12e05"
+    },
+    {
+      "path": "r5/output/playwright/unknown-preview.png",
+      "bytes": 54845,
+      "sha256": "1290d8dc0cdaff5df90d1ff430c4763c4987d8e16b999aab426f1885a4059816"
+    },
+    {
+      "path": "r5/output/playwright/unknown-result.png",
+      "bytes": 60545,
+      "sha256": "c3f97ecf09d00ad412a857ac924a3103694f10e2a21b78f680e038c8818d0cae"
+    },
+    {
+      "path": "r5/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r5/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r5/postgres.log",
+      "bytes": 1246,
+      "sha256": "68a47b09d6cdae10742d70965fe8a6bfa1b9efdee3cbc9efdeff032149b82322"
+    },
+    {
+      "path": "r5/react-web-build.log",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r6/booking-observations.json",
+      "bytes": 654,
+      "sha256": "449ac4d8a6fb8850d9eb9d705c2a072dcadd333d04e3e99f1ece2347669f44ed"
+    },
+    {
+      "path": "r6/browser-jest.json",
+      "bytes": 2468,
+      "sha256": "4fb5221a917c422089a24c423ba4e9d2def5a5e63cc810acc9bc4b4f131ef976"
+    },
+    {
+      "path": "r6/browser.log",
+      "bytes": 2057,
+      "sha256": "289e58fa2a8147b7ddbba108a06dd151d29f55be7cca45a26b54cd5492d82bbc"
+    },
+    {
+      "path": "r6/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r6/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "e7d630583e0aababf791be1ac7035d7e5b206b6e224b2faa8f586abcb5a4aabc"
+    },
+    {
+      "path": "r6/http-booking.log",
+      "bytes": 1946,
+      "sha256": "fde15351ac23084a8760be96b6c4f9694a3b101682db7a9bac10136b5072f4a6"
+    },
+    {
+      "path": "r6/initdb.log",
+      "bytes": 962,
+      "sha256": "120e955a2229fd74ed4b69ac7045b5c4ce4c07c1a99058a7a4202e8781531dc4"
+    },
+    {
+      "path": "r6/manifest.json",
+      "bytes": 759,
+      "sha256": "bc55597f5d089c362aa4c14f941afa852385766de7a90f4064b04cb9c2383b13"
+    },
+    {
+      "path": "r6/migrations.log",
+      "bytes": 14734,
+      "sha256": "1f0ad678e2d294869e083d09593118e9f1e253b5876a3617fbe04b31ef13dc70"
+    },
+    {
+      "path": "r6/output/playwright/browser.json",
+      "bytes": 30578,
+      "sha256": "8f857d1e98a42bc1cc1514b3587ed8e0728b248bb2992893163701b251570854"
+    },
+    {
+      "path": "r6/output/playwright/failure.png",
+      "bytes": 70765,
+      "sha256": "21c921b86375177f57964a1957d89224b98213543d9356f73fb0270bf815c5ce"
+    },
+    {
+      "path": "r6/output/playwright/revoked-preview.png",
+      "bytes": 56278,
+      "sha256": "3847617a409562081551794d19c900afed91ba01abf1a3c7611429990c0c8f24"
+    },
+    {
+      "path": "r6/output/playwright/revoked-result.png",
+      "bytes": 59131,
+      "sha256": "3f79ce866b7304f0257e3287ce02b5423b808a58f3995f6060608bda7e1647eb"
+    },
+    {
+      "path": "r6/output/playwright/success-preview.png",
+      "bytes": 56278,
+      "sha256": "3847617a409562081551794d19c900afed91ba01abf1a3c7611429990c0c8f24"
+    },
+    {
+      "path": "r6/output/playwright/success-result.png",
+      "bytes": 59714,
+      "sha256": "0306e419acd61f9dc4f87a473396b973f217ec8e519778e63e4a1b6d99676d2c"
+    },
+    {
+      "path": "r6/output/playwright/unknown-preview.png",
+      "bytes": 54845,
+      "sha256": "1290d8dc0cdaff5df90d1ff430c4763c4987d8e16b999aab426f1885a4059816"
+    },
+    {
+      "path": "r6/output/playwright/unknown-result.png",
+      "bytes": 60545,
+      "sha256": "c3f97ecf09d00ad412a857ac924a3103694f10e2a21b78f680e038c8818d0cae"
+    },
+    {
+      "path": "r6/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r6/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r6/postgres.log",
+      "bytes": 1246,
+      "sha256": "f88831b392c891393e7eaf5f9741a2b8857be0aff9266f18f7297abc70548dec"
+    },
+    {
+      "path": "r6/react-web-build.log",
+      "bytes": 185,
+      "sha256": "5cddb1b7f5c0569033b605e74da22415b84b43e6389c4ec5152b8259da52534e"
+    },
+    {
+      "path": "r7/booking-observations.json",
+      "bytes": 980,
+      "sha256": "1303d03eeb8e05dc2fcdf03f1c837c97c637a243fc397ea0550a03aa34e5d431"
+    },
+    {
+      "path": "r7/browser-jest.json",
+      "bytes": 1503,
+      "sha256": "7933f2d7aeb5054e99f94557b3889788c23bdce963bfb5b4833c6a4016fff7d0"
+    },
+    {
+      "path": "r7/browser.log",
+      "bytes": 1413,
+      "sha256": "dd8a7b10153b49c0cca33e12e473e53470ade2d0841e6a4b3afdc1554cc2c17b"
+    },
+    {
+      "path": "r7/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r7/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "c9b9ec9ce55a8eb74e786142468691390e61be07539947515d9881b3c2c312a3"
+    },
+    {
+      "path": "r7/http-booking.log",
+      "bytes": 1946,
+      "sha256": "1c69b752520227f4f220b8e10da4f00a85d57a7f50ca31cfd082a00fb75b592d"
+    },
+    {
+      "path": "r7/initdb.log",
+      "bytes": 962,
+      "sha256": "f2f210dfc9d7dee70130065e51f8cdc03dbf1fec71531aecea3f4825f530ebad"
+    },
+    {
+      "path": "r7/manifest.json",
+      "bytes": 774,
+      "sha256": "97fab406bb7a295bb5310f7e431d88e5c2ed090016f0ae35657a98c1a6403c82"
+    },
+    {
+      "path": "r7/migrations.log",
+      "bytes": 14734,
+      "sha256": "ac8cc3ed2770970cbbf7710fd8eec95481a1ad6b2b31182641207194a5929181"
+    },
+    {
+      "path": "r7/output/playwright/browser.json",
+      "bytes": 40360,
+      "sha256": "d937f61d48a592fea379a733e059200e9119be334eb788c5f633505ee76047ec"
+    },
+    {
+      "path": "r7/output/playwright/revoked-preview.png",
+      "bytes": 56278,
+      "sha256": "3847617a409562081551794d19c900afed91ba01abf1a3c7611429990c0c8f24"
+    },
+    {
+      "path": "r7/output/playwright/revoked-reload.png",
+      "bytes": 78391,
+      "sha256": "d7f86a96fb91394f4a8acb07913836e855369827913378deefa639edf7c3754c"
+    },
+    {
+      "path": "r7/output/playwright/revoked-result.png",
+      "bytes": 59131,
+      "sha256": "3f79ce866b7304f0257e3287ce02b5423b808a58f3995f6060608bda7e1647eb"
+    },
+    {
+      "path": "r7/output/playwright/success-preview.png",
+      "bytes": 56263,
+      "sha256": "1b4f1ec40dc6465495e31bdb64a7de5c542a0d40baeae4b2a580c5f5418da4c4"
+    },
+    {
+      "path": "r7/output/playwright/success-reload.png",
+      "bytes": 78067,
+      "sha256": "5f4d59c337fcd77bba4990611b3885f983e570c14dc1e8d49d64b8cc44933859"
+    },
+    {
+      "path": "r7/output/playwright/success-result.png",
+      "bytes": 59700,
+      "sha256": "cc9ec13085950d1f6164144801c836acb7b89d5f9912b339b7405504e3d12e05"
+    },
+    {
+      "path": "r7/output/playwright/unknown-preview.png",
+      "bytes": 54831,
+      "sha256": "7590007ebb71549f0827d87deff3bcdf982d116784b1fb35bbb05fb5165c83be"
+    },
+    {
+      "path": "r7/output/playwright/unknown-reload.png",
+      "bytes": 80174,
+      "sha256": "8f1c16051e050f06258ed615d44fc3a539fe0f7a08e5b087e0fb229a780742b1"
+    },
+    {
+      "path": "r7/output/playwright/unknown-result.png",
+      "bytes": 60534,
+      "sha256": "84e472d458bc86c9c9d863ffe01a832d248308785be57be39ed64b6ecd70f227"
+    },
+    {
+      "path": "r7/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r7/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r7/postgres.log",
+      "bytes": 1246,
+      "sha256": "a97fed4bac03e83dbd97aa9fb891f34c179b01c69539783210a3953aef154c64"
+    },
+    {
+      "path": "r7/react-web-build.log",
+      "bytes": 185,
+      "sha256": "d6b4fcfa69d3deeff5e6e41daa9fe194f3e8b892cc5152d1bb97416c500d23b6"
+    },
+    {
+      "path": "r8/booking-observations.json",
+      "bytes": 1132,
+      "sha256": "116384a4264dd077e37c8b1e81c945f7bf86cd09e25206daa51864c742ea89dd"
+    },
+    {
+      "path": "r8/browser-jest.json",
+      "bytes": 1503,
+      "sha256": "2a0fb9f7f308678fe36a78a74110bd2a996569e0216ccbe611f3818b290825fe"
+    },
+    {
+      "path": "r8/browser.log",
+      "bytes": 1429,
+      "sha256": "0e906139a670d9299e009769c965234080f6c8c871f3c3dc1af13f239dd92a34"
+    },
+    {
+      "path": "r8/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r8/http-booking-jest.json",
+      "bytes": 5246,
+      "sha256": "fc4b54b004b2f74f0d07dd7264654238a45058b7c4464b14dbc998cf1235440e"
+    },
+    {
+      "path": "r8/http-booking.log",
+      "bytes": 1946,
+      "sha256": "48dd44148e9b15a4d4d60d75166a3d5e5efb6fd86613e6c25c326e5e4438ab00"
+    },
+    {
+      "path": "r8/initdb.log",
+      "bytes": 962,
+      "sha256": "31df3113d8a6cfc8bdebfc2dc5b81cf15ae30dabd2b41a75957cb8ed281d1be6"
+    },
+    {
+      "path": "r8/manifest.json",
+      "bytes": 774,
+      "sha256": "3486638abfe324f2758ecc60c7cf6b9972df8360ad1419093f4c80b185f7cdf9"
+    },
+    {
+      "path": "r8/migrations.log",
+      "bytes": 14734,
+      "sha256": "bbd488a0a5b0277325b8f18fa0f12bd371bee697ab5b9c041cdb2e99cb3674f9"
+    },
+    {
+      "path": "r8/output/playwright/browser.json",
+      "bytes": 40360,
+      "sha256": "d4740d431065d04cde98359ba7eb400edadd2a8a5d44d0ac0e2a92d1f4a28f21"
+    },
+    {
+      "path": "r8/output/playwright/revoked-preview.png",
+      "bytes": 56278,
+      "sha256": "3847617a409562081551794d19c900afed91ba01abf1a3c7611429990c0c8f24"
+    },
+    {
+      "path": "r8/output/playwright/revoked-reload.png",
+      "bytes": 78391,
+      "sha256": "d7f86a96fb91394f4a8acb07913836e855369827913378deefa639edf7c3754c"
+    },
+    {
+      "path": "r8/output/playwright/revoked-result.png",
+      "bytes": 59131,
+      "sha256": "3f79ce866b7304f0257e3287ce02b5423b808a58f3995f6060608bda7e1647eb"
+    },
+    {
+      "path": "r8/output/playwright/success-preview.png",
+      "bytes": 56263,
+      "sha256": "1b4f1ec40dc6465495e31bdb64a7de5c542a0d40baeae4b2a580c5f5418da4c4"
+    },
+    {
+      "path": "r8/output/playwright/success-reload.png",
+      "bytes": 78067,
+      "sha256": "5f4d59c337fcd77bba4990611b3885f983e570c14dc1e8d49d64b8cc44933859"
+    },
+    {
+      "path": "r8/output/playwright/success-result.png",
+      "bytes": 59700,
+      "sha256": "cc9ec13085950d1f6164144801c836acb7b89d5f9912b339b7405504e3d12e05"
+    },
+    {
+      "path": "r8/output/playwright/unknown-preview.png",
+      "bytes": 54831,
+      "sha256": "7590007ebb71549f0827d87deff3bcdf982d116784b1fb35bbb05fb5165c83be"
+    },
+    {
+      "path": "r8/output/playwright/unknown-reload.png",
+      "bytes": 80174,
+      "sha256": "8f1c16051e050f06258ed615d44fc3a539fe0f7a08e5b087e0fb229a780742b1"
+    },
+    {
+      "path": "r8/output/playwright/unknown-result.png",
+      "bytes": 60534,
+      "sha256": "84e472d458bc86c9c9d863ffe01a832d248308785be57be39ed64b6ecd70f227"
+    },
+    {
+      "path": "r8/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r8/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r8/postgres.log",
+      "bytes": 1246,
+      "sha256": "1889437a2045e5d51f7ef3718e52c37ff73151e446c42a32b462b815079d5d04"
+    },
+    {
+      "path": "r8/react-web-build.log",
+      "bytes": 185,
+      "sha256": "d6b4fcfa69d3deeff5e6e41daa9fe194f3e8b892cc5152d1bb97416c500d23b6"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-cohort1.log",
+      "bytes": 12720,
+      "sha256": "b44eb8ddfdf10fd0804d22404a6e6428567c8f58f8a3ebf63c150400f591a812"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-cohort2.log",
+      "bytes": 13325,
+      "sha256": "4524bf44bb423673e0e0a14575856d8bba6a51d7cc0a88d86cd60e8b5bd5b255"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-cohort3.log",
+      "bytes": 27117,
+      "sha256": "846425efb72f33323ba37805f0538c2d910fc503fe1e26ed799375997116a5c0"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-cohort4.log",
+      "bytes": 26014,
+      "sha256": "cde3be5cecb19f67346cb873e89cd0d6d802cacc2bd8fd6afeb72be9c881df7f"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-react-cohort.log",
+      "bytes": 4971,
+      "sha256": "b4330c87a8f05baf4a38c9c5f71d50ca39f7186c5e9ac5d61aa2d1d6923d230a"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-react-harness.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-react-types.log",
+      "bytes": 3434,
+      "sha256": "0b1eef5bcee2cfda6a8856c8b51fc47d1cf9b2d6ec5175403139e2ef2b44ab4a"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-react-types2.log",
+      "bytes": 126,
+      "sha256": "797d28fbfd65ee270dce0bb4fcc3ed04917ed9ae0025fdd84f254feab863502b"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-react-types3.log",
+      "bytes": 126,
+      "sha256": "797d28fbfd65ee270dce0bb4fcc3ed04917ed9ae0025fdd84f254feab863502b"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-shell-build.log",
+      "bytes": 1010,
+      "sha256": "f1e361e88ca652f3820bbb84e220f09f974e2345bd6261c61a319af3d44ed6e5"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-shell-build2.log",
+      "bytes": 1010,
+      "sha256": "91a6c7b8e50d5d0d9977b4905f2cf12204750348e33b99d520010c3c9029afa3"
+    },
+    {
+      "path": "targeted/maya-booking-outcome-restore-shell-types.log",
+      "bytes": 253,
+      "sha256": "4b37875a7f6ff341fd2cd61b10b109de528977c7d32a530a37ed86a9b4cb671d"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-cohort.json",
+      "bytes": 32992,
+      "sha256": "aba136ba9c1def7de14cbe337d8784dc26a44355aab7ef3dd089aedf6f5f0fc5"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-cohort.log",
+      "bytes": 883,
+      "sha256": "3468140bbd0d6757e1db0a335a2728d5a7520dda38b861b401c841da9b2f45ce"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-cohort2.json",
+      "bytes": 34918,
+      "sha256": "7c5845573804fd138e26de1e89fee306e32cbe40b840db72702edad840cb82b4"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-cohort2.log",
+      "bytes": 884,
+      "sha256": "b67c23483f261e2b01d169ee54b7b22c13b6f79cc25216eabcae18533ddfb68a"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-green1.json",
+      "bytes": 24443,
+      "sha256": "d383c9b7b167d331577d985872ec15abea675b5fbef196b016edc56f8717bf14"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-green1.log",
+      "bytes": 1200,
+      "sha256": "984898de61f9dff885bf61a937d118096a0d57b9e1c53544a942bbd0d0859c7b"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-lint1.log",
+      "bytes": 3066,
+      "sha256": "524a578a8d6c875d0ebe5230e7a4e5c01eb335a4e7c8064754552a88823ccc1b"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-lint2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-lint3.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-lint4.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-red.json",
+      "bytes": 42130,
+      "sha256": "516b474fed4f7fd68b143d87a20e92b5c4ad940b8d2c203ce9bf2051b0544bac"
+    },
+    {
+      "path": "targeted/maya-booking-staff-label-red.log",
+      "bytes": 10652,
+      "sha256": "57b368aafade74f20aafe3d97de781f500861d85549f110c7207cacfb3b00b50"
+    }
+  ],
+  "independentReview": "No remaining blocker for qualified local checkpoint; review did not run tests"
+}
