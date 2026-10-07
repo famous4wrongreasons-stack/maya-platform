@@ -157,6 +157,9 @@ export async function main(args) {
             '../maya-chat-shell/build.mjs',
             '../maya-carrier-react/test/branch-booking-selector-browser-probe.mjs',
             '../maya-carrier-react/test/branch-booking-selector-browser-guard.mjs',
+            '../maya-carrier-react/test/personal-owner-proof-server.mjs',
+            '../maya-carrier-react/test/personal-owner-browser-guard.mjs',
+            '../maya-chat-shell/test/cdp-verify.mjs',
           ]
         : []),
     ],
@@ -285,7 +288,7 @@ export async function main(args) {
   }
   assert.equal(manifest.status, 'passed');
   process.stdout.write(
-    `Synthetic native branch selector HTTP/PG restart passed: ${values.output}\n`,
+    `Synthetic native branch selector ${values.browser ? 'current React reload/re-login' : 'HTTP/PG restart'} passed: ${values.output}\n`,
   );
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)

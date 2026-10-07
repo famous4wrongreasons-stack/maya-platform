@@ -25,12 +25,7 @@ import {
 } from './support/http-bootstrap';
 import { assertProofDatabase } from './support/proof-db-guard';
 import type { Fixtures } from './support/fixtures';
-import {
-  firstSlot,
-  object,
-  observe,
-  submit,
-} from './support/release-booking-flow';
+import { firstSlot, object, submit } from './support/release-booking-flow';
 
 const stage = process.env.JEST_BRANCH_BOOKING_STAGE;
 const receiptPath = process.env.JEST_BRANCH_BOOKING_RECEIPT!;
@@ -477,7 +472,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     expect(object(body.result).timezone).toBe('Europe/Moscow');
     const envelope = object(object(object(body.resolution).receipt).envelope);
     expect(envelope.kind).toBe('TIME_SLOT_SELECTOR');
-    await observe(http, token, envelope);
+    // Render observations belong only to SERVICE/STAFF_SELECTOR; TIME_SLOT is not that lifecycle.
+    expect(
+      (await http.resolveWidgets(token, { thread_page: { limit: 50 } })).status,
+    ).toBe(200);
     return envelope;
   }
   async function preview(s: Scenario, token: string) {
@@ -493,7 +491,9 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     const confirmation = object(result.next_envelope);
     expect(confirmation.kind).toBe('BOOKING_CONFIRMATION');
     expect(JSON.stringify(confirmation.body)).toContain('Europe/Moscow');
-    await observe(http, token, confirmation);
+    expect(
+      (await http.resolveWidgets(token, { thread_page: { limit: 50 } })).status,
+    ).toBe(200);
     expect(
       await db.prisma.actionExecution.count({
         where: { tenantId: s.tenantId },
@@ -569,10 +569,12 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       );
       let failure: Error | undefined,
         stderr = '',
-        pending = Promise.resolve();
+        pending = Promise.resolve(),
+        killTimer: ReturnType<typeof setTimeout> | undefined;
       const fail = (error: unknown) => {
         failure ??= error instanceof Error ? error : new Error(String(error));
         child.kill('SIGTERM');
+        killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
       };
       const timer = setTimeout(
         () => fail(new Error('Bounded branch browser timeout')),
@@ -704,6 +706,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       child.once('error', fail);
       child.once('close', (code) => {
         clearTimeout(timer);
+        clearTimeout(killTimer);
         void pending.then(() =>
           failure
             ? reject(failure)
@@ -851,13 +854,29 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
                 firstSlot(oldSelector).slot_ref,
               )
             : await submit(http, token, confirmation!, 'COMMIT');
-          expect(result.receipt_outcome).not.toBe('ACCEPTED');
-          expect(result.next_envelope ?? null).toBeNull();
+          expect(result).toMatchObject(
+            change === 'revoked' || change === 'old-slot'
+              ? {
+                  outcome: 'terminate',
+                  receipt_outcome: 'REFUSED',
+                  code: 'effect_not_admissible',
+                  stopped_at_gate: '13',
+                  next_envelope: null,
+                }
+              : {
+                  outcome: 'superseded',
+                  receipt_outcome: null,
+                  code: 'handle_stale',
+                  stopped_at_gate: '11',
+                  next_envelope: null,
+                },
+          );
           await assertNoEffect(s);
           observations[change] = {
             outcome: result.outcome,
             receiptOutcome: result.receipt_outcome,
             code: result.code,
+            stoppedAtGate: result.stopped_at_gate,
             syntheticPosts: 0,
             actionExecutions: 0,
           };

@@ -190,7 +190,7 @@ async function main() {
       assert.equal(request.status, 200);
       return JSON.parse(await page.responseBody(request.requestId));
     }
-    const publicResult = result => ({ outcome: result.outcome ?? null, code: result.code ?? null, receiptOutcome: result.receipt_outcome ?? null, ownerState: result.owner_decision?.state ?? null, hasSuccessor: result.next_envelope != null });
+    const publicResult = result => ({ outcome: result.outcome ?? null, code: result.code ?? null, stoppedAtGate: result.stopped_at_gate ?? null, receiptOutcome: result.receipt_outcome ?? null, ownerState: result.owner_decision?.state ?? null, hasSuccessor: result.next_envelope != null });
     const requests = (page, pathname) => [...page.requests.values()].filter(r => new URL(r.url).pathname === '/api' + pathname);
     const createCount = page => requests(page, '/personal-client/appointments').length;
     const liveRef = (page, ref) => page.eval(`Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled).some(el => el.dataset.ref === ${JSON.stringify(ref)})`);
@@ -281,7 +281,12 @@ async function main() {
           assert.ok(await page.waitFor('document.body.innerText.includes("Результат пока не подтверждён. Не отправляйте повторно.")'));
           assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
         } else {
-          assert.notEqual(result.receipt_outcome, 'ACCEPTED'); assert.equal(result.next_envelope ?? null, null);
+          // The removed binding must fail the originating source witness before
+          // dispatch. An unrelated refusal cannot stand in for stale-preview proof.
+          assert.equal(result.outcome, 'superseded'); assert.equal(result.code, 'handle_stale');
+          assert.equal(result.receipt_outcome, null); assert.equal(result.owner_decision, null);
+          assert.equal(result.next_envelope ?? null, null);
+          assert.ok(await page.waitFor('document.body.innerText.includes("Данные изменились с момента показа. Откройте актуальную версию.")'));
           assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
         }
         assert.ok(await page.waitFor(`!Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), 'Consumed/refused COMMIT cannot remain actionable');
@@ -318,10 +323,12 @@ async function main() {
         const expected = scenario.key === 'success' ? 'Запись подтверждена.' : 'Предложение изменилось';
         assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expected)})`));
         assert.equal(created.status, scenario.key === 'success' ? 201 : 409);
+        const errorCode = scenario.key === 'success' ? null : JSON.parse(await page.responseBody(created.requestId)).error?.code;
+        if (scenario.key === 'changed') assert.equal(errorCode, 'booking_preview_stale');
         assert.equal(createCount(page), createsBefore + 1);
         assert.equal(await page.eval('!!Q.byName("button", /^Подтвердить личную запись$/)'), false);
         if (scenario.key !== 'success') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
-        const result = { status: created.status, stateSummary: scenario.key === 'success' ? 'CORRELATED_SUCCEEDED' : 'STALE_PREVIEW_REFUSED' };
+        const result = { status: created.status, errorCode, stateSummary: scenario.key === 'success' ? 'CORRELATED_SUCCEEDED' : 'STALE_PREVIEW_REFUSED' };
         report.observations[id + 'Result'] = result;
         await capture(page, id + '-result'); await checkpoint(id + '-result', result);
         const beforeResults = requests(page, '/personal-client/appointments/results').length;
