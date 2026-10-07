@@ -1,0 +1,24 @@
+{
+  "nodeTests": 48,
+  "nodeBreakdown": {
+    "profile": 6,
+    "currentCandidate": 19,
+    "legacyBudget": 8,
+    "ownedCleanup": 3,
+    "dryBroker": 11,
+    "brokerContract": 1
+  },
+  "profileFinalRerun": 6,
+  "completeWidgetsLiveTypeScript": "PASS",
+  "scopedEslint": "PASS zero errors/warnings",
+  "diffCheck": "PASS",
+  "httpTests": 1,
+  "har13Passed": 2,
+  "har13Skipped": 143,
+  "testedCodeCommit": "832c86c6e2a064636aca39bbbb5546c7d61e96d2",
+  "heavyRun": "serial own cluster; no aggregate gate",
+  "productionCodeChanged": false,
+  "priorProductionRegression": "213 tests / 6 suites at 8c8b9657, not rerun here",
+  "ownProcessInspection": "No current-candidate runner, broker or owned PG process after completion; unrelated PostgreSQL instances untouched",
+  "runtimeSourceOverlay": false
+}

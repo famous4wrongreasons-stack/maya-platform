@@ -1,0 +1,14 @@
+✔ explicit installed profile reads exactly four versions and hashes without resource creation (3.530417ms)
+✔ no remote directory guessing, relative path or unqualified Node major (0.381458ms)
+✔ mixed or unsupported PG versions and malformed banners refuse (2.32775ms)
+✔ missing or non-executable binaries and failed version reads refuse (1.603166ms)
+✔ binary symlink cannot silently mix a second installation (2.175166ms)
+✔ CLI rejects conflicting preflight and invalid installation before creating output (59.688167ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 107.591

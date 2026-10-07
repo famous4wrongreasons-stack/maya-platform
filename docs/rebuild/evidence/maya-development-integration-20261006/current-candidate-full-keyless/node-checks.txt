@@ -1,0 +1,44 @@
+✔ refuses unapproved calls and foreign endpoints before transport (57.058292ms)
+✔ fsync reservation precedes dispatch; failures retain spend and secret/content never enter ledger (57.2365ms)
+✔ enforces spend cap, request count, timeout horizon, turn/dialog ceilings and request spacing (3235.700792ms)
+✔ refuses concurrent dispatch and unexpected model/output contract (45.734708ms)
+✔ provider requests require an active counted turn, and dialogs cannot overlap it (28.526917ms)
+✔ explicit resume retains failed-call reservation, lifetime and counters with exclusive lock (73.994875ms)
+✔ resume rejects truncated or altered budgets and never creates a replacement ledger (41.984375ms)
+✔ broker compatibility handoff must bind the exact prior ledger and carried reserve (52.647625ms)
+✔ explicit installed profile reads exactly four versions and hashes without resource creation (3.738125ms)
+✔ no remote directory guessing, relative path or unqualified Node major (0.556667ms)
+✔ mixed or unsupported PG versions and malformed banners refuse (2.231917ms)
+✔ missing or non-executable binaries and failed version reads refuse (1.779417ms)
+✔ binary symlink cannot silently mix a second installation (2.253167ms)
+✔ CLI rejects conflicting preflight and invalid installation before creating output (58.190458ms)
+✔ offline binding is mandatory, no default/live transport or old ledger resume (24.193459ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (58.99ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (40.1475ms)
+✔ short writes are completed before dispatch and zero progress fails closed (61.209583ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (50.066417ms)
+✔ early wakeup cannot dispatch before the minimum interval (39.025625ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (1042.720958ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (1210.358625ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (24.99425ms)
+✔ 24 dialog and 64 turn caps apply independently (526.4035ms)
+✔ wall time and clock reversal cannot reopen budget (51.96875ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (64.758ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (43.03375ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (42.692541ms)
+✔ oversized output is unresolved, with full reservation kept (36.081958ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (5.347042ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (1.668208ms)
+✔ existing replay rejects tampered manifest before opening a dialog (2.368333ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (858.229166ms)
+✔ spawn error without exit settles cleanup (0.56075ms)
+✔ live child gets TERM then KILL and settles on close (5.024042ms)
+✔ unconfirmed child termination rejects within a bound (10.839833ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8018.475417

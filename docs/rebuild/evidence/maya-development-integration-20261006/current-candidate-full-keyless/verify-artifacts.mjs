@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+const root=process.cwd(), raw='/tmp/maya-candidate-full-keyless-20261007-01';
+const read=n=>JSON.parse(fs.readFileSync(path.join(raw,n),'utf8'));
+const digest=v=>createHash('sha256').update(v).digest('hex');
+const m=read('manifest.json'), c=read('candidate-manifest.json'), h=read('http-report.json'), b=read('broker-report.json');
+const {bindingManifestSha256,...bound}=c;
+assert.equal(digest(JSON.stringify(bound)),bindingManifestSha256);
+const hashes={...c.sourceHashes,...c.bindingSources};
+for(const [file,sha] of Object.entries(hashes))assert.equal(digest(fs.readFileSync(path.join(root,file))),sha,file);
+assert.equal(c.candidateCommit,'832c86c6e2a064636aca39bbbb5546c7d61e96d2');
+assert.equal(h.candidate,c.candidateCommit);assert.equal(b.candidate,c.candidateCommit);
+assert.equal(h.bindingManifestSha256,bindingManifestSha256);assert.equal(b.bindingManifestSha256,bindingManifestSha256);
+assert.equal(m.status,'passed');assert.equal(m.clusterStopped,true);assert.equal(m.brokerStopped,true);assert.equal(b.stopped,true);
+assert.equal(fs.existsSync(path.join(m.cluster,'postmaster.pid')),false);
+assert.equal(h.status,'OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS');assert.equal(h.selectedDialogs,24);assert.equal(h.selectedTurns,33);assert.equal(m.unexecutedTurns,0);
+assert.equal(h.actualPaidCalls,0);assert.equal(h.externalFetchCalls,0);assert.equal(h.providerWrites,0);assert.equal(b.upstreamCalls,0);assert.equal(b.credentialsLoaded,false);
+assert.equal(h.preflights.every(p=>p.expectedStatusMatched),true);
+const tuple=r=>[r.caseId,r.turn,r.bytes,r.bodySha256];
+assert.deepEqual(h.requests.map(tuple),b.requests.map(tuple));
+for(const key of ['attempts','inputTokens','outputTokens','reservedNanoUsd','halted'])assert.equal(h.budget[key],b.stats[key],key);
+assert.equal(b.stats.dialogs,new Set(b.requests.map(r=>r.caseId)).size);assert.equal(b.stats.turns,new Set(b.requests.map(r=>r.caseId+':'+r.turn)).size);
+const ledgers=['ledger.jsonl','broker-ledger.jsonl'].map(n=>fs.readFileSync(path.join(raw,n),'utf8').trim().split('\n').map(JSON.parse));
+const spacing=[];
+for(const [index,rows] of ledgers.entries()){assert.deepEqual(rows.at(-1),{event:'closed',...(index===0?h.budget:b.stats)});const reserved=rows.filter(r=>r.event==='reserved');assert.equal(reserved.length,h.requests.length);for(let i=1;i<reserved.length;i++){const dt=reserved[i].at-reserved[i-1].at;assert.ok(dt>=6000);spacing.push(dt);}}
+const summary={candidateCommit:c.candidateCommit,bindingManifestSha256,verifiedSourcePaths:Object.keys(hashes).length,sourceHashesMatchCurrentCode:true,requestTuplesAndReservationCountersMatch:true,brokerScopeMatchesOnlyRequestedModelTurns:true,brokerBudget:b.stats,verificationScopeCorrection:'Initial helper incorrectly compared all chat dialogs/turns to broker model-request scope; corrected using exact per-request identities. No runtime or proof artifact changed.',minimumReservationIntervalMs:Math.min(...spacing),ledgersClosed:true,brokerStopped:true,clusterStopped:true,postmasterPidFileAbsent:true,selectedDialogs:h.selectedDialogs,selectedTurns:h.selectedTurns,transportCalls:h.transportCalls,sourcePreflights:h.preflights.length,preflightHttpStatuses:h.preflights.reduce((a,p)=>(a[p.httpStatus]=(a[p.httpStatus]??0)+1,a),{}),outcomeHttpStatuses:h.outcomes.reduce((a,p)=>(a[p.httpStatus]=(a[p.httpStatus]??0)+1,a),{}),zeroModelOutcomes:h.outcomes.filter(p=>p.modelCalls===0),maxRequestBytes:h.maxRequestBytes,maxConservativeInputTokenBound:h.maxConservativeInputTokenBound,budget:h.budget,paidCalls:0,providerWrites:0,upstreamCalls:0,qualification:'OFFLINE_MECHANICS_ONLY_NOT_MODEL_LINUX_OR_LIVE_PROVIDER_ACCEPTANCE'};
+assert.deepEqual(read('verification.json'),summary); // Read-only revalidation of the preserved result.
+console.log(JSON.stringify(summary,null,2));

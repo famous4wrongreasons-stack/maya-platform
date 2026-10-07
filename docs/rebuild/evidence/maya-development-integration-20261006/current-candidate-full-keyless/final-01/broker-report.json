@@ -1,0 +1,240 @@
+{
+  "contract": "maya.current-candidate-dry-broker/1",
+  "mode": "NO_UPSTREAM_ONLY",
+  "candidate": "832c86c6e2a064636aca39bbbb5546c7d61e96d2",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "startedAt": "2026-10-07T16:08:46.356Z",
+  "expiresAt": "2026-10-07T17:08:46.356Z",
+  "lifetimeMs": 3600000,
+  "requests": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "bytes": 66968,
+      "bodySha256": "d2dd5d6b98d148fecc2e2f922f46e4f2e7fa0cad71c8c6442e8a7c69d509fa62",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "bytes": 67799,
+      "bodySha256": "4b2c20439caee85692ddba6903fba51282ee4cceed69fffda20f0b30603c60df",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "bytes": 66968,
+      "bodySha256": "a20a405d06b22e89b25afae5635f7a1778e73035c63f69cc12bfb997d1ab13e3",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 2,
+      "bytes": 67851,
+      "bodySha256": "f8358875a81e1c6573839a199ce9fced320922a14b97ecda529a2d096c64c0a3",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "bytes": 66809,
+      "bodySha256": "ef9213ca3f2efe89a7f7ba8bc9f747636140686dba3f9752f61bfd42c6072c44",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "bytes": 66899,
+      "bodySha256": "913518740269d03370c8ccfb96504a51f65f17ca2ea2eb017f927d5d1da87848",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "bytes": 66902,
+      "bodySha256": "745fee8a73d6810c5b7ac3e09e6156007e4dcd22ee9471a8563467079c2db81d",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "bytes": 67911,
+      "bodySha256": "5e92aaceb7d4820bede5b0d8bbdce24e2163acb22bc2a6d41fc93306be908196",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "bytes": 66899,
+      "bodySha256": "5fc8e0e011a249fc44888315c1c1a2390978a617f5ef1dbad8ce8cb73d22c81c",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "bytes": 77633,
+      "bodySha256": "c52059bf1c87b773f5480925d78c136f9a6f19936a9832551b7800c52f8ad2b5",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "bytes": 77833,
+      "bodySha256": "fdcf86f2c190688fc2f9f629c1f6b845478255d462c7a07b7ef45ed6d2bed861",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "bytes": 78868,
+      "bodySha256": "ab12d91346762033bac09a22d87166bbeaac8107c0e9b305a9a7eebae1b0dc2e",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-negative",
+      "turn": 1,
+      "bytes": 77883,
+      "bodySha256": "49f4566e9438cb34d49d977724526a541651c28db6ec5dc936147e1a17c3fbdc",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "turn": 1,
+      "bytes": 74209,
+      "bodySha256": "c4cb38adf8095f355f4f4324d29823db0ba997550dda75dc734182d76b5e4107",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "bytes": 78797,
+      "bodySha256": "ad5952660afca7531e629f664b4911d6b2502d3de443df38dbf99fe56a27eeb9",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "bytes": 79774,
+      "bodySha256": "4add5d84956fd441ab87768df990143381440d3b7d6a2714c89e8efbc3d0de46",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "bytes": 78582,
+      "bodySha256": "e9b9c7f7566e61f0b22977033d68a1eab90ebf6b7083462967a30fe742e84c40",
+      "status": 200
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "turn": 1,
+      "bytes": 84291,
+      "bodySha256": "ddf7d777dc27539ba307f588ce169d4161a90359bef5f686bcf60bb8704cba2c",
+      "status": 200
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 1,
+      "bytes": 84220,
+      "bodySha256": "25167c79573d8db94259419c9c92bcbab81fdfbdd0270430360f83dc34eca7f0",
+      "status": 200
+    },
+    {
+      "caseId": "current-bi-correction",
+      "turn": 2,
+      "bytes": 85200,
+      "bodySha256": "2635d4e00fcd04d41f11792bc3efa3ee59248ebd5bc5b359842b24171d6fd9ed",
+      "status": 200
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "bytes": 84289,
+      "bodySha256": "0f9ce54ec4712951e3055c03313134970073bc30ee5c74d2ae51d853145ffc95",
+      "status": 200
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "bytes": 85306,
+      "bodySha256": "2bb89b2c9ac0f831659c6030b487aa0618624cf4020b5b283cfc7c8349fff980",
+      "status": 200
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 1,
+      "bytes": 85216,
+      "bodySha256": "c258762c6d66b94ee9c66e2d9b0c006e84befa4aab6f326aa2272071e209be37",
+      "status": 200
+    },
+    {
+      "caseId": "current-lifecycle-correction",
+      "turn": 2,
+      "bytes": 86240,
+      "bodySha256": "193ed703e14c5594df5f4d2ebc335c56a9027680188b5897693a6a8e1735607f",
+      "status": 200
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "bytes": 93222,
+      "bodySha256": "b46ed811b34f02fc285fd780eb008236983a26ee707431275293766ed0ad290b",
+      "status": 200
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "bytes": 93144,
+      "bodySha256": "196d3439a1300b55e842f4c4c4e1776ef530aeab9d4fb0cd2fc3be8d27c0e013",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "turn": 1,
+      "bytes": 73350,
+      "bodySha256": "fa0ef58ef7dce5dae50989209a4a3bf9712a5d654f0bfdd450b23b6fac8cc3c5",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "bytes": 73306,
+      "bodySha256": "dd8cffd8b0a62c0bbcc152fd06e79e41e043dc83890ffffa2eb9d195c79daab1",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "bytes": 74305,
+      "bodySha256": "775a527907d3c4e604042f340ae01c4de011462ad0a620e8fd788c07bac0177d",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-negative",
+      "turn": 1,
+      "bytes": 73376,
+      "bodySha256": "c2bcc95a6e3cc08039b93ef221046d96c5e2b7bcaea001b85d545949b76fa6ca",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "bindingManifestSha256": "f1ce3e57db8c79ef1c5b050de7613967fd1ff637e224bb2d84737d88e95e66f4",
+  "verifiedSourcePaths": 39,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-07T16:11:47.561Z",
+  "stats": {
+    "dialogs": 22,
+    "turns": 30,
+    "attempts": 30,
+    "inputTokens": 2426930,
+    "outputTokens": 36000,
+    "reservedNanoUsd": 3346107600,
+    "halted": false
+  }
+}

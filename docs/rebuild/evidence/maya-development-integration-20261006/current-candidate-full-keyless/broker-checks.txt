@@ -1,0 +1,20 @@
+✔ separate keyless broker boots, binds exact source/corpus, reserves before canned response and stops (144.799625ms)
+✔ rejects wrong-binding with zero dispatch (63.006167ms)
+✔ rejects oversize with zero dispatch (63.978875ms)
+✔ rejects authorization with zero dispatch (47.995708ms)
+✔ rejects wrong-model with zero dispatch (64.516541ms)
+✔ rejects foreign-case with zero dispatch (64.705959ms)
+✔ no paid switch or credential environment is admitted (74.512334ms)
+✔ TTL destroys active partial-body and exits without dispatch (1045.821417ms)
+✔ TTL destroys active partial-headers and exits without dispatch (1056.38675ms)
+✔ TTL aborts a request in budget spacing before its reservation or response (1557.359375ms)
+✔ dry lifetime cannot extend the one-hour ceiling (51.818833ms)
+✔ broker preflight admits canonical request within 96KiB and refuses excess UTF8 bytes (0.828875ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4317.1435

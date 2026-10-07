@@ -1,0 +1,29 @@
+{
+  "kind": "full-current-candidate-separate-keyless-broker-offline-checkpoint",
+  "testedCodeCommit": "832c86c6e2a064636aca39bbbb5546c7d61e96d2",
+  "rawRun": "/tmp/maya-candidate-full-keyless-20261007-01",
+  "status": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+  "bindingManifestSha256": "f1ce3e57db8c79ef1c5b050de7613967fd1ff637e224bb2d84737d88e95e66f4",
+  "independentReview": "PASS_WITH_OFFLINE_SCOPE_QUALIFIERS",
+  "files": {
+    "broker-checks.txt": "0c989b68b6dac76033600ed988efcd1dee50caa9ef50319d2e663460dfbb7b98",
+    "checks.json": "e400b643d9302f38b8df1414a936eb48c2e5d853c0bde009a3af1934e35ca643",
+    "final-01/broker-ledger.jsonl": "f719067afad04ab93822e6966f2ea5730ddd35083fe647964525a06112cf6203",
+    "final-01/broker-report.json": "267dbb674ece64f033f236b5b1d2324794286bed1cdecf34764a962b7730ec88",
+    "final-01/candidate-manifest.json": "3fac15fd95c7ad34fc59805627fd6760dbdece29ca69c20534cd90df2d9a538e",
+    "final-01/har13-jest-summary.json": "3a7e01a2ad012c8944b5233a5118ac58ac1e5020a5da372dae1a7329d769b1b0",
+    "final-01/http-report.json": "7087b4f75532416469ef64834384f13c3be4d91ef3b44808872b3b3e17bc22a5",
+    "final-01/jest-summary.json": "8cf5d58f3fdd058a5242faf432d22b34adf6451b615853b9194cf46f89605b7e",
+    "final-01/ledger.jsonl": "5bc378d93946b45c0e2f59492b65ce439027d6cef3b71f71073fed71637fd547",
+    "final-01/manifest.json": "b653eface06be70a4f28c27e505c1c3510d1bff458a24c462877c7c8dd31bb5d",
+    "final-01/source-preflights.json": "489bcbf377dd94b331db2792acb169f91e1cafb85191c606c0bab5de622a2120",
+    "final-01/verification.json": "420a130205ee0f88095b60b5acaeb4002da449c800ddca2696eb8660ecbe0b47",
+    "independent-review.txt": "5846820d9db79b0332492f0b981ce63463c5968f2b3ad826d508dbc0d2bdc4c7",
+    "node-checks.txt": "f62e1d78f5b13af018b15bacb12388605aa99bd89b27ea587e1d862bed54c19b",
+    "profile-final-checks.txt": "b2f6e46adcf094b2f3d92b77299688c9e6f292282e2ddfc2dc09c25050452272",
+    "scoped-lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "standalone-profile.json": "9e4c9d50e86043377c1b5ee02bf0ae0875194e70333e922a42c03ccbf319b87a",
+    "verify-artifacts.mjs": "fea314f582585802cb152ef701d79f38c86de9611721d6908dc5a10254b19130",
+    "widgets-types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,10 @@
+Code review: existing independent_review agent, 2026-10-07, commit 832c86c6e2a064636aca39bbbb5546c7d61e96d2.
+No blocking findings. Preflight precedes resource creation; version subprocess receives only LANG/TZ; four same-install PG16 minor binaries.
+Qualifiers: runner heap is supplied by invocation, not inspected/enforced; BI/Lifecycle availabilityEvidence describes configured INTERNAL source, not a separate availability invocation; no remote/Linux, peak RSS or paid admission. Reviewer ran no tests/processes and changed no files.
+Artifact review: PASS_WITH_OFFLINE_SCOPE_QUALIFIERS, existing independent_review agent, 2026-10-07.
+No blocking findings. Independently verified 39 source/harness hashes against working files and git show exact commit; correct binding manifest; 19 archive hashes; eight byte-identical raw copies; both derived Jest summaries.
+Confirmed 24 dialogs / 33 turns, 65 expected preflights, 30 exact app/broker request tuples. App 24/33 versus broker 22/30 scopes are correct. Max 93,222 bytes under 98,304 cap; reservation counters agree; both ledgers close.
+Confirmed two C9 AVAILABLE/PROPOSED results: revision 1, evidence 2, options 2, no execution authority. Cleanup supported by manifest, PG stop log and absent owned pidfile.
+The stale model-plan sentence saying the latest full corpus was pending was corrected to pending only for the selected remote/server profile and rechecked.
+Claims correctly remain synthetic/canned Mac mechanics, not language, live YCLIENTS, Linux/server, peak RSS, paid or C10 acceptance. Native YC branch refusal and synthetic Occupancy source are distinguished.
+Reviewer changed no files and ran no tests, services or network calls. Root refreshed archive hashes after recording this result.
