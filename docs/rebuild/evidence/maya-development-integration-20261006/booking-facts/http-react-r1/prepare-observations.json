@@ -1,0 +1,18 @@
+{
+  "stage": "prepare",
+  "entrySource": "catalog",
+  "initialAppointments": 0,
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

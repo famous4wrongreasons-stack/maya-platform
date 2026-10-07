@@ -909,3 +909,23 @@ review has no remaining blocker. This is local code/unit evidence, not a fresh
 HTTP/React, real-model or YCLIENTS qualification. Personal booking preview still
 has the legacy numeric-default boundary. See [checkpoint, exact limits and RED/green evidence](MAYA-CATALOG-READ-FACTS-CHECKPOINT-20261007.md).
 No schema, retention, autonomy, first-link decision or C10 completion. `NOT_ISSUED`.
+
+### Factual personal booking terms and public services — 2026-10-07
+
+Code `c6555a62` moves `/services` and personal/canonical Client creation onto the
+same existing factual CRM catalog. Unknown/range terms refuse booking; exact
+observed zero is retained. Personal preview supplies a non-authority fingerprint;
+new creation, post-claim prepare and post-provider mirror compare current facts
+with the original durable witness. Mutation identity and AE authority are unchanged.
+
+306 distinct backend tests, 9 shell tests, production types and scoped lint pass.
+Current React/HTTP plus actual app/PG restart prove incomplete and stale refusals,
+READY price-drift refusal with immutable evidence, SUCCEEDED restore and UNKNOWN
+without redispatch. Model/CRM/identity are explicitly synthetic; independent review
+has no blocking code finding. Shared `/services` null/range semantics and stricter
+YCLIENTS availability affect other consumers. Old READY/UNKNOWN without a witness
+fail closed; provider price checking is optimistic. The separate chat confirmation
+draft numeric binding remains open at this checkpoint. See [code and evidence](MAYA-BOOKING-FACTS-CHECKPOINT-20261007.md)
+and [precise initial-binding decision brief](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md).
+No first-link/schema/retention/autonomy approval or real-provider/model/C10 acceptance.
+`NOT_ISSUED`.

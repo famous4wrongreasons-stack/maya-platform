@@ -16,6 +16,8 @@ A retry revalidates the context before the canonical idempotent execution. The o
 
 ## Evidence boundary
 
+Development amendment, 2026-10-07: the separately authorized factual booking slice adds optional syntactic `previewFactsHash` (64 lowercase hex characters) to the create DTO. New personal creation requires it to match the current server quote; an already durable canonical retry may omit it and restores/rechecks its original evidence. Preview still accepts only the original selection DTO. This is an optimistic business-terms precondition, not Client authority or execution identity. See [code, compatibility limits and local evidence](../../MAYA-BOOKING-FACTS-CHECKPOINT-20261007.md). This amendment makes no new identity, schema, production or autonomy grant.
+
 Unit negatives cover no selection, foreign tenant/actor, revoked/expired sessions, membership drift, revoked/ambiguous/version-invalid links, Client merge/hold and link/client/evidence changes after selection. HTTP and production-binary cases use a synthetic verified link and an isolated internal calendar. They assert one durable action, immutable retry, actual actor/context evidence and unchanged tenant_owner membership. No production verifier or real external effect is simulated as production evidence.
 
 The HTTP fixture's downstream staff inbox publication currently reports the existing R06 Appointment/Client/branch refusal for its branchless synthetic source. Booking/action/audit assertions pass. This is not evidence of staff notification delivery.

@@ -1,0 +1,12 @@
+PASS src/appointments/client-appointment-create.service.spec.ts
+PASS src/appointments/appointments.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/appointments/personal-client-read.service.spec.ts
+PASS src/crm/service-catalog-read.spec.ts
+
+Test Suites: 5 passed, 5 total
+Tests:       202 passed, 202 total
+Snapshots:   0 total
+Time:        0.724 s, estimated 1 s
+Ran all test suites within paths "src/appointments/client-appointment-create.service.spec.ts", "src/crm/service-catalog-read.spec.ts", "src/appointments/personal-client-read.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/appointments/appointments.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-facts-units-final-r2.json

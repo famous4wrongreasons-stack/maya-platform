@@ -1,0 +1,724 @@
+{
+  "kind": "qualified-booking-facts-personal-http-react-restart",
+  "head": "c6555a62f78ee868b6b4c4259e8fc1789f76c714",
+  "qualification": "NOT_ISSUED",
+  "targetedDistinctBackendTests": 306,
+  "batches": [
+    {
+      "name": "regression-r1",
+      "passed": 124,
+      "failed": 0
+    },
+    {
+      "name": "units-final-r2",
+      "passed": 202,
+      "failed": 0
+    }
+  ],
+  "shellTests": 9,
+  "productionTypes": {
+    "status": "PASS",
+    "heapMb": 4096,
+    "log": "checks/maya-booking-facts-prod-types-final.log"
+  },
+  "scopedLint": {
+    "status": "PASS",
+    "files": 15,
+    "log": "checks/maya-booking-facts-lint-final.log"
+  },
+  "diffCheck": "PASS",
+  "httpReact": {
+    "finalAttempt": "http-react-r3",
+    "actualAppAndPostgresRestart": true,
+    "syntheticReadyHoldBeforeClaim": true,
+    "changedReadyRefused": true,
+    "unknownRedispatch": false,
+    "scriptedModelBodies": 16,
+    "realModelAcceptance": false,
+    "realYclientsAcceptance": false,
+    "normalRelayQualified": false
+  },
+  "sharedSeams": [
+    "public GET /services array fields may be null and include observed ranges",
+    "Yclients getAvailableSlots rejects malformed/missing duration/time instead of defaulting",
+    "canonical Client create compares persisted terms for every new execution; old READY/UNKNOWN without witness fail closed"
+  ],
+  "canonicalMutationIdentityChanged": false,
+  "newSchemaRetentionAutonomy": false,
+  "C10Complete": false,
+  "redAttempts": {
+    "http-react-r1": "synthetic availability fixture returned 60-minute slots against 30-minute selected facts; test-only slot fixture corrected",
+    "http-react-r2": "scripted model cap still 10 after adding 4 requests; bounded cap corrected to 14",
+    "units-final": "new company drift case lacked synthetic external Client contact, so authority refused before tested boundary; fixture corrected",
+    "earlierUnitsAndLint": "all retained; final overlapping batches and lint resolve errors"
+  },
+  "sourceHashes": [
+    {
+      "path": "maya-carrier-react/test/personal-owner-browser-guard.mjs",
+      "sha256": "3aa90b41921cac7614b234aada10cd3ab2495f03e17c49ef48a7fc3fbaee6926",
+      "bytes": 3983
+    },
+    {
+      "path": "maya-carrier-react/test/personal-owner-browser-probe.mjs",
+      "sha256": "e740fe7829b10da7406d4b8079b6879aa4d450be4ac0364e43ce04cb4dd8ef9b",
+      "bytes": 22276
+    },
+    {
+      "path": "maya-carrier-react/test/personal-owner-proof-server.mjs",
+      "sha256": "b6377aed4a7fd2a844fcb68a652cbcc07a9c9b0a5bc30a7e6f168fe20d45e1bd",
+      "bytes": 2596
+    },
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "f442d638fd3098f646119259476b16a395eec6ec612fa9b160c3f418f693ddb3",
+      "bytes": 11881
+    },
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "a105d982c55a69ef57ee87cdaa081c6ee322ae99e9842852fcff82810cba8b9c",
+      "bytes": 35908
+    },
+    {
+      "path": "maya-chat-shell/src/net/personal.ts",
+      "sha256": "93d2ad60393620a53d9a28700503fbdecebc9a9ee6e5a3939983806a366ab80f",
+      "bytes": 3965
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "61488a381231de4ce1e2531246c7fd16cc9d6b730cbe782014b550bc113421bc",
+      "bytes": 16467
+    },
+    {
+      "path": "maya-chat-shell/src/shell/personal-booking.ts",
+      "sha256": "933684258df9d88da948773e6fc7b841b6ea83d462e02146aba48c25ab3019b7",
+      "bytes": 10327
+    },
+    {
+      "path": "maya-chat-shell/test/personal-booking.test.mjs",
+      "sha256": "cd940665f844e33e3ca6154633fcfde42ea15d8c6450f16a4f758b2122c3bddb",
+      "bytes": 9697
+    },
+    {
+      "path": "maya-saas-backend/scripts/personal-owner-react-proof.mjs",
+      "sha256": "20df03849a97eb4c503321ea552bff6fade351eba137832e30bc1f1dbabd4245",
+      "bytes": 6733
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/client-booking-intent.contract.ts",
+      "sha256": "66d3bfccecd167143e45e333585886f76e84ba5a1de81aa92c718747e0853820",
+      "bytes": 4161
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/appointments.service.spec.ts",
+      "sha256": "e261bfd8d85213d4febcd3eecdc0466fe2ceb41e45de0e8a707e3ea91447f8b5",
+      "bytes": 27882
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/appointments.service.ts",
+      "sha256": "26f4e51c1387909e2d956c018861ab72eb2573afeedf4dd7517d48d999dd55d5",
+      "bytes": 30434
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts",
+      "sha256": "064d4c24774aa5609dee3818752200b5677160f5a04a20279d7b7ee330213994",
+      "bytes": 33345
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.ts",
+      "sha256": "17e10d0292bb2418e73902a93a942dc5ac95345c1aded5aeb5ba423c9b36d7cc",
+      "bytes": 17311
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/dto/personal-create-appointment.dto.ts",
+      "sha256": "3685d8fbeee91249a13ce8911a944597161e0456b996fbed07c18a9cbd1418a5",
+      "bytes": 352
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client-read.service.spec.ts",
+      "sha256": "498f952047a7b675c78749198f002f93b0d2fd7a3b4df250d8dffa43f94a9322",
+      "bytes": 7890
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client-read.service.ts",
+      "sha256": "7b6090fa2608d66ccf0cc3b74e2f5667dc4a56d034a376fa26a5bb27a8cda86b",
+      "bytes": 5089
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client.controller.ts",
+      "sha256": "63ba755dc505e91ded0b75776c2ad991d124a5f2d8b48e3058929715ce0aa9c8",
+      "bytes": 2712
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts",
+      "sha256": "ec460bd62c46e36d1f94bfa31fb4fbda6f2d036c5e9a8432363e1c0fdfc2ec9a",
+      "bytes": 115087
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "sha256": "35730ffe6c1f64c716cd09e8eb6e005ff190672a408a2da98fa061cc97189497",
+      "bytes": 153107
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "219e73584e9fc93768512768be75e91c5096ee1e592609c63689112d68ef6e09",
+      "bytes": 172885
+    },
+    {
+      "path": "maya-saas-backend/src/crm/service-catalog-read.spec.ts",
+      "sha256": "a6e1da5f581e173f97571a08096bc8f14b0cda321f2e404017ed45ac8625e582",
+      "bytes": 4047
+    },
+    {
+      "path": "maya-saas-backend/src/crm/service-catalog-read.ts",
+      "sha256": "e75923d720a35782aee32e2f02e65a9715ff4bda9891b317b9a9dd6d00fcaea4",
+      "bytes": 4812
+    },
+    {
+      "path": "maya-saas-backend/src/services/services.service.ts",
+      "sha256": "28f4076953b2abbf6daf2e21970f4daad363d0a0c86b7010bf9b01eccde35390",
+      "bytes": 321
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.ts",
+      "sha256": "a1122f7729b2e454185b433a9666a6cc8d1ca59ad8195643a3d10947c19e6841",
+      "bytes": 11240
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.ts",
+      "sha256": "b12f109df9c47fcfd2846f67abf272e72c69156ef3a5a24873d7a46cdf888e4f",
+      "bytes": 7102
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/personal-owner-react.probe-spec.ts",
+      "sha256": "a6f9aba9af6a3d538854f8aee72e727eb15f52a4028bcbeed26d37262ea8e4a0",
+      "bytes": 31274
+    }
+  ],
+  "files": [
+    {
+      "path": "checks/maya-booking-facts-cleanup.json",
+      "sha256": "34a0dd4f22a77aa2437d208a2f86295f67aab5fdb9ee33a5f9fede46b36a609e",
+      "bytes": 172
+    },
+    {
+      "path": "checks/maya-booking-facts-format-r1.log",
+      "sha256": "a62da47be5fdc947b4c6119eb129c46a38d923b0dd839710e89cf73d38acca16",
+      "bytes": 515
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-fix-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-fix-r3.log",
+      "sha256": "ecdcc8d1cbff0a31cbd6d4c888eab812c357be880ac98f3dc131ae6bd5e82fc9",
+      "bytes": 239
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-fix-r4.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-fix-r5.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-fix-r6.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-lint-r1.log",
+      "sha256": "d576ca0c9cb68b1b796694b5551714797ddec1e109319da4feaf6a38099f9595",
+      "bytes": 2240
+    },
+    {
+      "path": "checks/maya-booking-facts-owner-r4.json",
+      "sha256": "9b74699b8a5f092cea61e3e3c9b262fab9bfdc94678e92ac0024239426d190f7",
+      "bytes": 30352
+    },
+    {
+      "path": "checks/maya-booking-facts-owner-r4.log",
+      "sha256": "c250e6a94b80986d87a6735ec39e26daf57a75d202ccdd87a14c63cedfb901b2",
+      "bytes": 6518
+    },
+    {
+      "path": "checks/maya-booking-facts-owner-r5.json",
+      "sha256": "1292d54d40b5d6f99c8db3e9e96ff8f0b4fdf975f744feeb2514efe70387564f",
+      "bytes": 28106
+    },
+    {
+      "path": "checks/maya-booking-facts-owner-r5.log",
+      "sha256": "4956aa908b7fec99063e9ef4f2ad7f0ea8a4bdd642c91595bbc5f9cecdc44504",
+      "bytes": 5629
+    },
+    {
+      "path": "checks/maya-booking-facts-prod-types-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-prod-types-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-booking-facts-regression-r1.json",
+      "sha256": "8873d9d434884b62bf7bf18d7bc644cd97d2478c2315fdbc5d8232661a856a74",
+      "bytes": 56097
+    },
+    {
+      "path": "checks/maya-booking-facts-regression-r1.log",
+      "sha256": "6f1d45dab4660d7be878522017246c759d58a73f9020db101bac1c30424b1ee7",
+      "bytes": 1630
+    },
+    {
+      "path": "checks/maya-booking-facts-shell-final.log",
+      "sha256": "0bca10365bf6404e26b8b26224381dd11b2c6440148d8ae5fe2dbf87da4d9fbc",
+      "bytes": 1126
+    },
+    {
+      "path": "checks/maya-booking-facts-shell-r1.log",
+      "sha256": "7615993e7b2ba79571bc519188c6998c9df2b0905d27a884aa378bf625db4cd2",
+      "bytes": 1022
+    },
+    {
+      "path": "checks/maya-booking-facts-units-final-r2.json",
+      "sha256": "58749c076d0495d52d390143d50c55e2b46c3e74ed7e0fb10013257d562c3a47",
+      "bytes": 91492
+    },
+    {
+      "path": "checks/maya-booking-facts-units-final-r2.log",
+      "sha256": "b92fceddb7e73a3b8b679b12473097e3303adf067ddfcefd102455611317d6f5",
+      "bytes": 773
+    },
+    {
+      "path": "checks/maya-booking-facts-units-final.json",
+      "sha256": "49532b6ddb4db6794b483a6cb2521851fd222e90a607b4c8e1692d039f96eb42",
+      "bytes": 95925
+    },
+    {
+      "path": "checks/maya-booking-facts-units-final.log",
+      "sha256": "5b0f5e75db5a308b59fe5b8f957c1c0194de873360c11d037af46ffa28bbd68d",
+      "bytes": 1739
+    },
+    {
+      "path": "checks/maya-booking-facts-units-r1.json",
+      "sha256": "8294fbb4b56215712334f87b5f30114847c9095bf671b2ef5c3338b9d928c61e",
+      "bytes": 84150
+    },
+    {
+      "path": "checks/maya-booking-facts-units-r1.log",
+      "sha256": "7070029c8ded2ec6da2268f4c87a56605da743ff1c09e21e123a7a54ad007eed",
+      "bytes": 4867
+    },
+    {
+      "path": "checks/maya-booking-facts-units-r2.json",
+      "sha256": "7920f9c17b88fc000e6e606d17374615e0d4e692ca203232a3ff05898b7353cc",
+      "bytes": 81431
+    },
+    {
+      "path": "checks/maya-booking-facts-units-r2.log",
+      "sha256": "5f1ec8270c11e4daaa876356e930a884f626060a53435acee93dc05002de0196",
+      "bytes": 667
+    },
+    {
+      "path": "checks/maya-booking-facts-units-r3.json",
+      "sha256": "45184e27bd03d06e2a5d75b10479a1893d80b15dc8e5c92572a399a805fa4775",
+      "bytes": 92014
+    },
+    {
+      "path": "checks/maya-booking-facts-units-r3.log",
+      "sha256": "0b29f0ee076b3d1fccc0247596face2d6781c10608dde296864560852ffe0c56",
+      "bytes": 1558
+    },
+    {
+      "path": "http-react-r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "http-react-r1/initdb.log",
+      "sha256": "4037ff799e72945dca2b2dbe09523b271d81ac456a5baf68b74e3d3637cd5550",
+      "bytes": 950
+    },
+    {
+      "path": "http-react-r1/manifest.json",
+      "sha256": "7e9a1ed21432edbcc4a181d97a0ebccf93f4c5695c2449b20a74917b1eb5ee0f",
+      "bytes": 809
+    },
+    {
+      "path": "http-react-r1/migrations.log",
+      "sha256": "eb5df57cb0202def91e49216001b6e248c729404e5ad839d5e8cbb139918442d",
+      "bytes": 14728
+    },
+    {
+      "path": "http-react-r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "http-react-r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "http-react-r1/postgres.log",
+      "sha256": "823e0b4143f728e3fd71f406f9e2edfb23c91e1f4cbe0ed6d3e86ced0be6fe8d",
+      "bytes": 1246
+    },
+    {
+      "path": "http-react-r1/prepare-jest.json",
+      "sha256": "6a676f75e183dbdf5b68dea7d254ece19337ac51267694e13693d0b59098a171",
+      "bytes": 3177
+    },
+    {
+      "path": "http-react-r1/prepare-observations.json",
+      "sha256": "1eccd95e58f5ea630c0576f9f2d3a07b9194f27c69dd48366fd4a13cde33d87c",
+      "bytes": 371
+    },
+    {
+      "path": "http-react-r1/prepare-serialized-model-requests.json",
+      "sha256": "5dc49714371db7ba5ee872e10bd87072931f1ebf6a197c60f54ec68207e23b4e",
+      "bytes": 84
+    },
+    {
+      "path": "http-react-r1/prepare.log",
+      "sha256": "bd4028727e3dc8c6a4a83989da1000a15f82dad19171404d9cb81274f1ceaa36",
+      "bytes": 2312
+    },
+    {
+      "path": "http-react-r1/react-build.log",
+      "sha256": "6708aba56f091ccc5f674b376ef99bea3f8368221f714624c66b62f93fc49e04",
+      "bytes": 185
+    },
+    {
+      "path": "http-react-r1/shell-build.log",
+      "sha256": "626fbb80d0a073a82941cf9a6750f8e21489e063134300e3e2840680c965faff",
+      "bytes": 1010
+    },
+    {
+      "path": "http-react-r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "http-react-r2/initdb.log",
+      "sha256": "7ed2067088da780435454f1eb20aff4ada495706fe54f4ad7e1c7ea205713e8f",
+      "bytes": 950
+    },
+    {
+      "path": "http-react-r2/manifest.json",
+      "sha256": "55f64829389b2f2a650f7f040e0d29b14837169c47e200baa8a84c40d73475b9",
+      "bytes": 809
+    },
+    {
+      "path": "http-react-r2/migrations.log",
+      "sha256": "b9afc5ee86f5a510b584c2ba8eea7fd2c1dc9b94929f4882e388381e027aafc6",
+      "bytes": 14728
+    },
+    {
+      "path": "http-react-r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "http-react-r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "http-react-r2/postgres.log",
+      "sha256": "399510586ed553d07e8da975b94cbfda097f097cb2fe5e571b183d1292267289",
+      "bytes": 1246
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/browser.json",
+      "sha256": "cfd9075ca26de5a72297ddaa62d6814ff52538d1ec000c5fed52bfb1b92b15e8",
+      "bytes": 37977
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/failure.png",
+      "sha256": "40689ca16fb583b40bcad7360a5b9691af67bf40c43a2c8c60fae79a22dea3e1",
+      "bytes": 26024
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/navRevoked-nav-refused.png",
+      "sha256": "e6b0d724aa575e5a049a70ff467b2b9d5b2faeb2edb4ce68698c4989214ddce0",
+      "bytes": 56622
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/revoked-chat-again.png",
+      "sha256": "c3579bd43a163a694fdd46b16d0e31c836c36bd674e5bbef3043000867d25052",
+      "bytes": 66865
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/revoked-preview.png",
+      "sha256": "608a31ee012c6ddb058dac49a96d08c89e48814a758fb018edcc5c8a3108e221",
+      "bytes": 113017
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/revoked-result.png",
+      "sha256": "11380f5db4b65c757b4812ad8f5c087fc52f03ad219e234ec7a48575342bcc02",
+      "bytes": 83424
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/success-chat-again.png",
+      "sha256": "21e19a9501bfb995fb9f11f51c31922b63b28b17cbb9f27268477e338493592e",
+      "bytes": 84507
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/success-preview.png",
+      "sha256": "608a31ee012c6ddb058dac49a96d08c89e48814a758fb018edcc5c8a3108e221",
+      "bytes": 113017
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/success-result.png",
+      "sha256": "71dd20dcf23709a63d9e29bc817771ca18fa6b8712ec74b73ef1128e8282f025",
+      "bytes": 84436
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/unknown-chat-again.png",
+      "sha256": "380253a5f4abadb39511eb57720598b44b884507004b5347ce588997c3b90023",
+      "bytes": 89398
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/unknown-preview.png",
+      "sha256": "4de96d2f79d2ac40a1f5bd2121ff4906d822d2770935af25c17cbe99da684dc9",
+      "bytes": 153385
+    },
+    {
+      "path": "http-react-r2/prepare-browser/output/playwright/unknown-result.png",
+      "sha256": "5565d88cb36d11dbaa90b7298d57169a4ce973a8a6874019b20fcfa33339506e",
+      "bytes": 138021
+    },
+    {
+      "path": "http-react-r2/prepare-jest.json",
+      "sha256": "e1e7c96c342454d3babb1ba24365fdf5f61ddae4381371951019c4dc5adb682e",
+      "bytes": 2570
+    },
+    {
+      "path": "http-react-r2/prepare-observations.json",
+      "sha256": "dc521624193ffbbf54f8cf2a7834dd6c671b2e1b1a5a4698103cd54a0d7660ef",
+      "bytes": 2014
+    },
+    {
+      "path": "http-react-r2/prepare-serialized-model-requests.json",
+      "sha256": "197fe3893a49080946cb60fc0590e446f174c78a4a8cca712d2802c99f33eb81",
+      "bytes": 1555396
+    },
+    {
+      "path": "http-react-r2/prepare.log",
+      "sha256": "f7ccdb54231f3e05e45ab1783164d2f33b5e42d5604903f48903ba8ced951a27",
+      "bytes": 2889
+    },
+    {
+      "path": "http-react-r2/react-build.log",
+      "sha256": "47479b76b2b38250f9324cc254405d3450a0d076b7381f024f839bef9aa974fe",
+      "bytes": 185
+    },
+    {
+      "path": "http-react-r2/shell-build.log",
+      "sha256": "33e55f26eb471d5168c1c6a19d11e90b3cfddc5ff2fd02cece972615463db968",
+      "bytes": 1010
+    },
+    {
+      "path": "http-react-r3/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "http-react-r3/initdb.log",
+      "sha256": "af75ae89fa915cc7d74075d0b9a6ebab2711ced3207787b18582c4b367f19601",
+      "bytes": 950
+    },
+    {
+      "path": "http-react-r3/manifest.json",
+      "sha256": "601d6aed17211bd9a039caf9b583aa052071ac327f65f19abfaeeec4bfd595dc",
+      "bytes": 856
+    },
+    {
+      "path": "http-react-r3/migrations.log",
+      "sha256": "92cd1a26063f65990169be7722ee6195d14d2a8611830621d6845521d3e914e6",
+      "bytes": 14728
+    },
+    {
+      "path": "http-react-r3/pg-restart.log",
+      "sha256": "54c1daeb81d651f8d0c9dc764ac7eea72df22d5e9aca6aad4ae55c1f66efce2d",
+      "bytes": 1349
+    },
+    {
+      "path": "http-react-r3/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "http-react-r3/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "http-react-r3/postgres.log",
+      "sha256": "ba2561ff29c19342d32ce3c4a238ff7500e917ba2fbb92507e987d320c06792a",
+      "bytes": 1246
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/browser.json",
+      "sha256": "942a37fef5143cf299ec95c7f9c6e99bae87d7bd56d09d144ce26c0d8a0583c0",
+      "bytes": 51224
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/changed-chat-again.png",
+      "sha256": "549ddcf0ade566b7fdec2a43e3fe82b29976717912804e552a4b99696ea0d595",
+      "bytes": 64889
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/changed-preview.png",
+      "sha256": "bac894ec35bb183fc60d35177cba3e9df2ff91e30078c48019424db9bbb8e57b",
+      "bytes": 113126
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/changed-result.png",
+      "sha256": "93ae53bc3e959654a9cb734ee96850484eec84ba76ab96f9b22727c65443dc5c",
+      "bytes": 82824
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/incomplete-unavailable.png",
+      "sha256": "3abc11564073cc98a341d60090c4d29ab8bce0e6c84cd2839ce6b64535478219",
+      "bytes": 127351
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/navRevoked-nav-refused.png",
+      "sha256": "d316f2049d3feb7276f41f6076604f593c1cb2198a16b1b90f02396480bd4724",
+      "bytes": 56628
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/revoked-chat-again.png",
+      "sha256": "af90d74127077c5f283196a78b9944e3449baee1d185c5e01b0a75d92a035b67",
+      "bytes": 66896
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/revoked-preview.png",
+      "sha256": "bac894ec35bb183fc60d35177cba3e9df2ff91e30078c48019424db9bbb8e57b",
+      "bytes": 113126
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/revoked-result.png",
+      "sha256": "b8d6b08d503763f210230bcee12051b52eda56382845a33be34a29d2ef6b4a3f",
+      "bytes": 83417
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/success-chat-again.png",
+      "sha256": "21e19a9501bfb995fb9f11f51c31922b63b28b17cbb9f27268477e338493592e",
+      "bytes": 84507
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/success-preview.png",
+      "sha256": "bac894ec35bb183fc60d35177cba3e9df2ff91e30078c48019424db9bbb8e57b",
+      "bytes": 113126
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/success-result.png",
+      "sha256": "576d6e2fef79b754b4b9536d30dd751b252db5f86fd31c7dc0bd301976374afd",
+      "bytes": 84508
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/unknown-chat-again.png",
+      "sha256": "380253a5f4abadb39511eb57720598b44b884507004b5347ce588997c3b90023",
+      "bytes": 89398
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/unknown-preview.png",
+      "sha256": "290a3676c63c31bc5e55943b9ac46b10b19ee8e261f4739d363141cf9416a1ee",
+      "bytes": 153481
+    },
+    {
+      "path": "http-react-r3/prepare-browser/output/playwright/unknown-result.png",
+      "sha256": "25e1390c2b6c99fb6d326282edb04522bcfc9d5f1ce3563c9c63e4cc82f644b5",
+      "bytes": 138075
+    },
+    {
+      "path": "http-react-r3/prepare-jest.json",
+      "sha256": "157b662fd1b9b96842697d78170e4155bbb15d8bcc4473aa2a93dbb3c540185b",
+      "bytes": 1536
+    },
+    {
+      "path": "http-react-r3/prepare-observations.json",
+      "sha256": "08b47a96fa1e74f1b2ad62eabc3402c5b34f1138b0f708e21626b66b02df1b6e",
+      "bytes": 2577
+    },
+    {
+      "path": "http-react-r3/prepare-serialized-model-requests.json",
+      "sha256": "a96c7a927faf46cf75cfa6f3965ab1292764bdc170ac52d6606cadf14be619f3",
+      "bytes": 1980554
+    },
+    {
+      "path": "http-react-r3/prepare.log",
+      "sha256": "9d6f8f5b29e8c87817f6fd2bee1b38f70018d916edc7d4d8d359590f05258d17",
+      "bytes": 1887
+    },
+    {
+      "path": "http-react-r3/react-build.log",
+      "sha256": "47479b76b2b38250f9324cc254405d3450a0d076b7381f024f839bef9aa974fe",
+      "bytes": 185
+    },
+    {
+      "path": "http-react-r3/resume-browser/output/playwright/browser.json",
+      "sha256": "ffee4cf02ede8afc04c36220d881a47588eb73b0f072002bdf08b6a7e01f9d94",
+      "bytes": 13552
+    },
+    {
+      "path": "http-react-r3/resume-browser/output/playwright/success-restart.png",
+      "sha256": "ea24cf7cd0a35a2b137507ca8dc1a8bcc9104a84bdf9a2caa52898999b1a67db",
+      "bytes": 148837
+    },
+    {
+      "path": "http-react-r3/resume-browser/output/playwright/unknown-restart.png",
+      "sha256": "42db14a0ac6b8e083b56311c5c212d59b2ddf00f9ed1d182b7d1a1dad2a3f041",
+      "bytes": 149199
+    },
+    {
+      "path": "http-react-r3/resume-jest.json",
+      "sha256": "08ad36742c4db2cb3f9cd7a53aec1d548d67cc635d3cedf2fb02e1c9e6a82083",
+      "bytes": 1536
+    },
+    {
+      "path": "http-react-r3/resume-observations.json",
+      "sha256": "62787933161a287b8e867a01d5c14b31991dedeb54cbaca430d8abf98c0d9c11",
+      "bytes": 957
+    },
+    {
+      "path": "http-react-r3/resume-serialized-model-requests.json",
+      "sha256": "b2300a14761805468c305cc513ade701e86bb7e6f1f0aec22941833fb7590439",
+      "bytes": 284782
+    },
+    {
+      "path": "http-react-r3/resume.log",
+      "sha256": "21e67b05b460893302a188f6f4642eab247188a50c51164eaa80c207216c3385",
+      "bytes": 1689
+    },
+    {
+      "path": "http-react-r3/shell-build.log",
+      "sha256": "33e55f26eb471d5168c1c6a19d11e90b3cfddc5ff2fd02cece972615463db968",
+      "bytes": 1010
+    },
+    {
+      "path": "independent-review.txt",
+      "sha256": "89dee6297b7729defb96a90c00710ea28cf0293d8c1dd185bce78cc5a953aaf0",
+      "bytes": 936
+    },
+    {
+      "path": "synthetic-environment-launcher.cjs",
+      "sha256": "e1700a645aa03148a6734f622d1aad2306df0376b6ee5eacb79cea0ed6148a33",
+      "bytes": 1647
+    }
+  ]
+}

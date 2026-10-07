@@ -1,0 +1,23 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts
+  680:16  error  Unsafe call of a type that could not be resolved                  @typescript-eslint/no-unsafe-call
+  680:54  error  Unsafe member access .services on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+  691:12  error  Unsafe call of a type that could not be resolved                  @typescript-eslint/no-unsafe-call
+  691:50  error  Unsafe member access .services on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+  706:15  error  Unsafe assignment of an error typed value                         @typescript-eslint/no-unsafe-assignment
+  706:29  error  Unsafe call of a type that could not be resolved                  @typescript-eslint/no-unsafe-call
+  706:67  error  Unsafe member access .services on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+  724:11  error  Unsafe assignment of an error typed value                         @typescript-eslint/no-unsafe-assignment
+  724:25  error  Unsafe call of a type that could not be resolved                  @typescript-eslint/no-unsafe-call
+  724:63  error  Unsafe member access .services on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/personal-owner-react.probe-spec.ts
+  489:22  error  Unsafe member access .services on an `any` value   @typescript-eslint/no-unsafe-member-access
+  497:7   error  Unsafe assignment of an `any` value                @typescript-eslint/no-unsafe-assignment
+  497:35  error  Unsafe member access .factsHash on an `any` value  @typescript-eslint/no-unsafe-member-access
+  536:9   error  Unsafe assignment of an `any` value                @typescript-eslint/no-unsafe-assignment
+  536:40  error  Unsafe member access .factsHash on an `any` value  @typescript-eslint/no-unsafe-member-access
+  547:54  error  Unsafe member access .factsHash on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+✖ 16 problems (16 errors, 0 warnings)
+

@@ -14,3 +14,21 @@ Existing V1 code: [runtime resolver](../../maya-saas-backend/src/crm/client-chan
 The missing product decision is precisely: **if a person has no verified MAYA Client channel, which trusted source proves that a particular same-tenant Client card belongs to that person?** A User row, `Client.userId`, phone/name equality, or an operator selecting a CRM card does not provide that authority. After selecting and approving the trusted resolver, the first-time carrier flow needs its explicit initiation, verification, refusal and audit evidence through A18. No schema change or new resolver is authorized by this note.
 
 Do not send first-time visitors through predecessor reverification. The confirmed-Client personal booking development slice can continue while this bootstrap decision is open. No real SMS, new user linkage, production query or identity mutation was performed here.
+
+## Decision brief: smallest reuse of an existing trusted proof owner
+
+The existing proof is **successful entry of an OTP delivered by the strict SMS owner to a number freshly resolved through the exact canonical Client→CRM link**. It currently belongs to SB-1 V2 successor verification. This is more specific than choosing an unspecified new resolver.
+
+`ClientReverificationCandidateService` selects the one unmerged Client associated with the authenticated User, resolves its active exact `CrmClientLink(provider, externalId)`, reads the complete current CRM registry, and rechecks lineage after that external read. The destination comes from the matching CRM card, not request input, `User.phone`, or a search by number. `PhoneAuthDeliveryService` supplies the strict delivery path without debug/test fallback. Delivery alone is not proof: successful subject-bound OTP consumption is required. User→Client lineage selects a candidate only; it does not grant Client authority.
+
+The **missing entry** is an initial-only OTP challenge/consume branch for a Maya subject with no link episode. The current `/api/personal-client/reverification/challenge` and `/consume` require the latest revoked predecessor. Existing V1 `/api/client-channel/challenges` can transfer trust from an already verified channel but cannot establish absent trust. The signed Telegram bridge is another existing transport into V1; the bridge secret or Maya JWT alone does not prove Client ownership.
+
+The minimum decision to approve or reject is:
+
+> Permit first binding to the account's single existing Client card after a one-time SMS code sent to the number freshly obtained from that card's exact CRM linkage. This grants access to that Client's personal bookings/history. Refuse missing or ambiguous lineage, CRM linkage or destination, and any previous Maya binding. Do not search or merge Client cards by phone.
+
+This proposal does **not** cover a person with no unambiguous User→Client lineage. That case stays closed. It does not force first-time visitors through the successor flow.
+
+Approval would authorize a separate initial evidence/consumption branch in the existing A18 challenge owner and initial-only link writer, preserving tenant/subject binding, expiry, rate limits and atomic consumption. It would not authorize removing the V2 predecessor guard: [the V2 migration](../../maya-saas-backend/prisma/migrations/20260929190000_client_link_challenge_json_v2/migration.sql) requires and validates predecessor evidence. A new table has not been shown necessary, but an unchanged SQL constraint cannot be promised before the approved contract is designed. No such approval, schema change or initial issuer is implemented by this brief.
+
+Source owners: [candidate resolver](../../maya-saas-backend/src/crm/client-reverification-candidate.service.ts), [strict delivery](../../maya-saas-backend/src/auth/phone-auth-delivery.service.ts), [existing channel endpoints](../../maya-saas-backend/src/crm/client-channel.controller.ts), [V2 contract](widget-release-programme/sb1-v2/CONTRACT.md). Independent read-only review confirmed this inventory; no provider/SMS or production test was performed.

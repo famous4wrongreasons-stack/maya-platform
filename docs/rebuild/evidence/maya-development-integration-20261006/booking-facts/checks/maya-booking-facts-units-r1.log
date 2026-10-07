@@ -1,0 +1,87 @@
+PASS src/crm/service-catalog-read.spec.ts
+PASS src/appointments/personal-client-read.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+FAIL src/appointments/client-appointment-create.service.spec.ts
+  ● B31 verified Client create initiator and canonical executor › uses the common creator for an authenticated channel without an account actor
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+      Array [
+        "client-authority:v1:link-1",
+    +   "booking-service-facts:v1:092a19bc48fc97f221707be9c769bf4a89f817d855c52e815f692cfa673d2be2",
+      ]
+
+      243 |     );
+      244 |     expect(h.plans[0].request.source.actorUserId).toBeUndefined();
+    > 245 |     expect(h.plans[0].request.evidenceRefs).toEqual([
+          |                                             ^
+      246 |       'client-authority:v1:link-1',
+      247 |     ]);
+      248 |     expect(h.prisma.membership.findFirst).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:245:45)
+
+  ● B31 verified Client create initiator and canonical executor › restores the execution-owned internal row on repeat without another write
+
+    ConflictException: Conflict Exception
+
+      1563 |           : [];
+      1564 |         if (refs.length !== 1 || !new RegExp('^' + BOOKING_FACTS_EVIDENCE_PREFIX + '[a-f0-9]{64}$').test(refs[0]))
+    > 1565 |           throw new ConflictException({ error: { code: 'booking_preview_refresh_required' } });
+           |                 ^
+      1566 |         const durable = this.createAppointmentInput(input);
+      1567 |         const services = await this.readBookableServices(tenantId, durable.serviceIds);
+      1568 |         const current = bookingServiceFactsFingerprint({
+
+      at Object.prepare (crm/crm.service.ts:1565:17)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:145:9)
+      at ClientAppointmentCreateService.forVerifiedLink (appointments/client-appointment-create.service.ts:452:23)
+      at ClientAppointmentCreateService.forAccount (appointments/client-appointment-create.service.ts:108:14)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:378:20)
+
+  ● SB-1 canonical create with personal context › SB1-CREATE persists actual actor/context alongside Client authority without owner privileges
+
+    ConflictException: Conflict Exception
+
+      413 |         ((invocation.personalContext && !invocation.expectedBookingFactsHash) ||
+      414 |           (invocation.expectedBookingFactsHash && invocation.expectedBookingFactsHash !== factsHash)))
+    > 415 |       throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+          |             ^
+      416 |     const input = {
+      417 |       ...dto,
+      418 |       ...bookingIdentity,
+
+      at ClientAppointmentCreateService.forVerifiedLink (appointments/client-appointment-create.service.ts:415:13)
+      at ClientAppointmentCreateService.forAccount (appointments/client-appointment-create.service.ts:108:14)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:693:5)
+
+  ● SB-1 canonical create with personal context › SB1-DISPATCH rechecks revocation immediately before provider dispatch
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "revoked"
+    Received message:   "Conflict Exception"
+
+          413 |         ((invocation.personalContext && !invocation.expectedBookingFactsHash) ||
+          414 |           (invocation.expectedBookingFactsHash && invocation.expectedBookingFactsHash !== factsHash)))
+        > 415 |       throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+              |             ^
+          416 |     const input = {
+          417 |       ...dto,
+          418 |       ...bookingIdentity,
+
+      at ClientAppointmentCreateService.forVerifiedLink (appointments/client-appointment-create.service.ts:415:13)
+      at ClientAppointmentCreateService.forAccount (appointments/client-appointment-create.service.ts:108:14)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:734:5)
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:740:15)
+
+Test Suites: 1 failed, 3 passed, 4 total
+Tests:       4 failed, 156 passed, 160 total
+Snapshots:   0 total
+Time:        0.807 s, estimated 1 s
+Ran all test suites within paths "src/crm/service-catalog-read.spec.ts", "src/appointments/client-appointment-create.service.spec.ts", "src/appointments/personal-client-read.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-facts-units-r1.json

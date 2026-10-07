@@ -1,0 +1,7 @@
+Independent read-only review by /root/independent_review, 2026-10-07.
+
+Four initial findings fixed: selected mixed currencies; post-dispatch mirror could use changed catalog numbers; prepare used prior instead of current calendar target; exact facts-unavailable 503 mapped to UNKNOWN in UI. Reviewer confirmed no remaining blocking finding. confirmedBookingServices uses immutable original witness, never retry-supplied replacement, with current authority revalidation.
+
+Required limits: old READY without witness refuses; external UNKNOWN without witness cannot finish mirror reconciliation; SUCCEEDED replay remains available. Provider price validation is optimistic, not atomic. Numeric binding of the separate BOOKING_CONFIRMATION draft remains open at this code checkpoint. Requested company 42 to 43 regression was added and passes in final batch.
+
+Reviewer did not run tests or services; no independent runtime acceptance claim.

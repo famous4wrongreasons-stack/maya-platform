@@ -1,0 +1,39 @@
+FAIL src/appointments/client-appointment-create.service.spec.ts
+  ● Factual booking admission, precondition and durable retry › refuses company 42 to 43 drift with the same external provider and service facts
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 3
+    + Received  + 1
+
+      Object {
+        "response": Object {
+    -     "error": Object {
+    -       "code": "booking_preview_stale",
+    -     },
+    +     "error": "Forbidden",
+        },
+      }
+
+      807 |       return execute(req, handlers);
+      808 |     });
+    > 809 |     await expect(h.run()).rejects.toMatchObject({
+          |                                   ^
+      810 |       response: { error: { code: 'booking_preview_stale' } },
+      811 |     });
+      812 |     expect(h.provider.createAppointment).not.toHaveBeenCalled();
+
+      at Object.toMatchObject (../node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:809:35)
+
+PASS src/appointments/appointments.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/crm/service-catalog-read.spec.ts
+PASS src/appointments/personal-client-read.service.spec.ts
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 201 passed, 202 total
+Snapshots:   0 total
+Time:        0.751 s, estimated 1 s
+Ran all test suites within paths "src/appointments/client-appointment-create.service.spec.ts", "src/crm/service-catalog-read.spec.ts", "src/appointments/personal-client-read.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/appointments/appointments.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-facts-units-final.json

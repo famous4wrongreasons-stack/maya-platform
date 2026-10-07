@@ -1,0 +1,28 @@
+FAIL src/appointments/client-appointment-create.service.spec.ts
+  ● B31 verified Client create initiator and canonical executor › persists the exact canonical owner inside CRM dispatch and reconciliation
+
+    ConflictException: Conflict Exception
+
+      1572 |   ): Promise<ServiceItem[]> {
+      1573 |     if (!executionId || !invocation.bookingIntent)
+    > 1574 |       throw new ConflictException({
+           |             ^
+      1575 |         error: { code: 'booking_preview_refresh_required' },
+      1576 |       });
+      1577 |     const execution = await this.prisma.actionExecution.findFirst({
+
+      at CrmService.confirmedBookingServices (crm/crm.service.ts:1574:13)
+      at Object.reconcile (crm/crm.service.ts:1745:28)
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:453:8)
+
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/appointments/appointments.service.spec.ts
+PASS src/crm/service-catalog-read.spec.ts
+PASS src/appointments/personal-client-read.service.spec.ts
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 199 passed, 200 total
+Snapshots:   0 total
+Time:        0.924 s, estimated 1 s
+Ran all test suites within paths "src/crm/service-catalog-read.spec.ts", "src/appointments/client-appointment-create.service.spec.ts", "src/appointments/personal-client-read.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/appointments/appointments.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-facts-units-r3.json

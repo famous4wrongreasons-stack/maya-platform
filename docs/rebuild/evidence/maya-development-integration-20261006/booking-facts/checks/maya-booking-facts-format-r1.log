@@ -1,0 +1,10 @@
+src/crm/service-catalog-read.ts 29ms
+src/crm/service-catalog-read.spec.ts 8ms
+src/crm/crm.service.ts 116ms
+src/crm/adapters/yclients-crm.adapter.ts 89ms
+src/crm/adapters/yclients-crm.adapter.spec.ts 65ms
+src/appointments/client-appointment-create.service.ts 10ms
+src/appointments/client-appointment-create.service.spec.ts 19ms
+src/appointments/personal-client-read.service.ts 3ms (unchanged)
+src/appointments/personal-client.controller.ts 2ms
+src/appointments/dto/personal-create-appointment.dto.ts 1ms (unchanged)

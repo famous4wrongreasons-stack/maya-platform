@@ -1,0 +1,68 @@
+PASS src/appointments/client-appointment-create.service.spec.ts
+  B31 verified Client create initiator and canonical executor
+    ✓ uses the common creator for an authenticated channel without an account actor (4 ms)
+    ✓ rejects a new external intent without canonical contact instead of inventing a User (8 ms)
+    ✓ creates an owned internal Appointment through the existing action without a Maya User (1 ms)
+    ✓ resolves Client-without-User contact through one exact active CRM link (1 ms)
+    ✓ rejects missing before any Action Engine ingress or write (1 ms)
+    ✓ rejects revoked before any Action Engine ingress or write
+    ✓ rejects ambiguous before any Action Engine ingress or write
+    ✓ rejects merged before any Action Engine ingress or write (1 ms)
+    ✓ rejects wrong_tenant before any Action Engine ingress or write
+    ✓ rejects wrong_user before any Action Engine ingress or write
+    ✓ rejects inactive before any Action Engine ingress or write (1 ms)
+    ✓ rejects unsupported_version before any Action Engine ingress or write
+    ✓ rejects an unavailable slot or invalid services before ingress (1 ms)
+    ✓ rechecks exact Client and binding before dispatch (3 ms)
+    ✓ restores the execution-owned internal row on repeat without another write (1 ms)
+    ✓ preserves branch/tenant wall time (Asia/Novosibirsk, null)
+    ✓ preserves branch/tenant wall time (Asia/Novosibirsk, Europe/Moscow) (1 ms)
+    ✓ keeps unresolved staff identity null rather than substituting the external id (1 ms)
+    ✓ persists the exact canonical owner inside CRM dispatch and reconciliation (1 ms)
+    ✓ keeps provider timeout and post-provider mirror failure UNKNOWN without blind retry (1 ms)
+    ✓ rejects an external phone override before ingress or provider dispatch
+    ✓ maps a durable UNKNOWN to unavailable without claiming accepted ownership
+  U-OWN read-only create quote
+    ✓ quotes the owned create without an execution or a row (3 ms)
+    ✓ answers exactly what the create then uses (one sequence) (1 ms)
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection (%j)
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection (null)
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":123}) (1 ms)
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":{"value":"Untrusted object"}})
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"foreign-staff","name":"Other salon"})
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":" "}) (1 ms)
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
+    ✓ keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":"First"}) (1 ms)
+    ✓ treats a malformed catalogue root as missing presentation data
+    ✓ treats staff catalogue failure only as missing presentation data, preserving the execution owner (1 ms)
+    ✓ rejects a foreign tenant or actor before reading public staff
+    ✓ refuses invalid services with the owner code and no execution
+    ✓ refuses an unavailable slot with the owner code and no execution
+    ✓ refuses a missing verified binding before any owner read
+  Factual booking admission, precondition and durable retry
+    ✓ refuses incomplete selected terms before availability or action ingress: {"price":null,"price_min":100,"price_max":200} (1 ms)
+    ✓ refuses incomplete selected terms before availability or action ingress: {"price":null,"price_min":null,"price_max":null}
+    ✓ refuses incomplete selected terms before availability or action ingress: {"duration_minutes":null}
+    ✓ refuses incomplete selected terms before availability or action ingress: {"currency":null} (1 ms)
+    ✓ does not guess a slot when observed service duration conflicts with availability
+    ✓ rejects changed terms after preview without changing execution identity or creating an action (1 ms)
+    ✓ prepare compares durable initial evidence, not the retry request current snapshot (1 ms)
+    ✓ historical canonical replay reaches the durable result when the catalog is unavailable
+    ✓ refuses changed provider target before dispatch even with identical service facts (1 ms)
+    ✓ does not mirror new numbers if catalog terms change after provider acceptance
+  SB-1 canonical create with personal context
+    ✓ SB1-NOSELECT refuses owner create and quote without an explicit personal context (2 ms)
+    ✓ SB1-CREATE persists actual actor/context alongside Client authority without owner privileges (1 ms)
+    ✓ SB1-BOUND refuses a changed selected tenantId
+    ✓ SB1-BOUND refuses a changed selected userId
+    ✓ SB1-BOUND refuses a changed selected linkId (1 ms)
+    ✓ SB1-BOUND refuses a changed selected clientId
+    ✓ SB1-BOUND refuses a changed selected verificationEvidenceHash
+    ✓ SB1-DISPATCH rechecks revocation immediately before provider dispatch (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       56 passed, 56 total
+Snapshots:   0 total
+Time:        0.413 s, estimated 1 s
+Ran all test suites within paths "src/appointments/client-appointment-create.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-facts-owner-r5.json

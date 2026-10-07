@@ -1,0 +1,44 @@
+{
+  "stage": "resume",
+  "entrySource": "catalog",
+  "initialAppointments": 0,
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "applicationAndPostgresRestart": true,
+  "readyRestartRefusedChangedFacts": {
+    "status": 409,
+    "state": "FAILED",
+    "attempts": 1,
+    "originalEvidenceUnchanged": true,
+    "appointments": 0,
+    "providerDispatches": 0
+  },
+  "success-restart": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "unknown-restart": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "providerLedgerCount": 1,
+  "checkpoints": [
+    "success-restart",
+    "unknown-restart"
+  ],
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

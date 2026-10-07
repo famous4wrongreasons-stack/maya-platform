@@ -1,0 +1,120 @@
+{
+  "stage": "prepare",
+  "entrySource": "catalog",
+  "initialAppointments": 0,
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "factsHttp": {
+    "checks": [
+      {
+        "patch": {
+          "price": null,
+          "price_min": null,
+          "price_max": null
+        },
+        "servicesStatus": 200,
+        "previewStatus": 503,
+        "createStatus": 503
+      },
+      {
+        "patch": {
+          "price": null,
+          "price_min": 1000,
+          "price_max": 2000
+        },
+        "servicesStatus": 200,
+        "previewStatus": 503,
+        "createStatus": 503
+      },
+      {
+        "patch": {
+          "duration_minutes": null
+        },
+        "servicesStatus": 200,
+        "previewStatus": 503,
+        "createStatus": 503
+      },
+      {
+        "patch": {
+          "currency": null
+        },
+        "servicesStatus": 200,
+        "previewStatus": 503,
+        "createStatus": 503
+      }
+    ],
+    "observedZeroPreserved": true,
+    "stalePreviewStatus": 409,
+    "actions": 0,
+    "providerDispatches": 0
+  },
+  "readyHeldBeforeClaim": {
+    "state": "READY",
+    "attempts": 0,
+    "syntheticHold": true,
+    "originalFactsPersisted": true
+  },
+  "initialStateVerified": true,
+  "success-result": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "revoked-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "unknown-result": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "navRevoked-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "personalNavigationRefusedDurably": true,
+  "incomplete-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "changed-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "providerLedgerCount": 1,
+  "checkpoints": [
+    "success-preview",
+    "success-result",
+    "revoked-preview",
+    "revoked-result",
+    "unknown-preview",
+    "unknown-result",
+    "navRevoked-before-nav",
+    "navRevoked-result",
+    "incomplete-result",
+    "changed-preview",
+    "changed-result"
+  ],
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 1,
+    "reconciliations": 3
+  },
+  "unexpected": []
+}
