@@ -1684,6 +1684,86 @@ test('stale source witness: submitted booking confirmation displays the canonica
   await s.runtime.widgets.activate(itemId, 'intent:i1');
   assert.equal(submissions, 1); assert.equal(reads, 0); s.runtime.dispose();
 });
+const pendingBookingDate = () => ({
+  contract: 'maya.widget.intent/1', outcome: 'terminate', code: null,
+  next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED',
+  owner_decision: { kind: 'booking_selection_pending', next: 'date', reply: 'На какую дату проверить время у выбранного мастера?' },
+});
+test('booking selection pending: exact closed projection emits only the date discriminator and performs no receipt read', async () => {
+  const value = projectWidgetIntent(pendingBookingDate()); assert.ok(value);
+  assert.equal(value.booking_selection_pending, 'date'); assert.equal(value.owner_decision, undefined);
+  assert.equal(JSON.stringify(value).includes('На какую дату'), false);
+  let submits = 0, reads = 0;
+  const port = createLiveSubmission({ widgetIntent: async () => { submits++; return { ok: true, value }; }, resolveWidgets: async () => { reads++; throw new Error('Preference is not an action receipt'); } });
+  assert.deepEqual(await port.submit({ widget_id: 'synthetic' }, new AbortController().signal), { status: 'booking_selection_pending', next: 'date' });
+  assert.equal(submits, 1); assert.equal(reads, 0);
+});
+test('booking selection pending: wrong next/reply and contradictory receipt/result/successor refuse projection', () => {
+  const base = pendingBookingDate();
+  for (const patch of [
+    { outcome: 'superseded' }, { code: 'handle_stale' }, { receipt_outcome: null }, { receipt_outcome: 'REFUSED' },
+    { next_envelope: envelope('kind-staff-selector') }, { resolved_widget: envelope('kind-staff-selector') },
+    { owner_decision: { ...base.owner_decision, next: 'payment' } },
+    { owner_decision: { ...base.owner_decision, reply: 'Запись подтверждена.' } },
+    { owner_decision: { kind: 'booking_selection_pending', next: 'date' } },
+    { owner_decision: { ...base.owner_decision, state: 'SUCCEEDED' } },
+    { owner_decision: { ...base.owner_decision, state: 'UNKNOWN' } },
+    { owner_decision: { ...base.owner_decision, outcome: { action_execution_id: 'synthetic' } } },
+  ]) assert.equal(projectWidgetIntent({ ...base, ...patch }), null);
+  const unknown = projectWidgetIntent({ ...base, owner_decision: { ...base.owner_decision, kind: 'other_pending' } });
+  assert.ok(unknown); assert.equal(unknown.booking_selection_pending, undefined); assert.equal(JSON.stringify(unknown).includes('На какую дату'), false);
+});
+test('booking selection pending: injected contradictory projection cannot advance, accept or trigger a receipt read', async () => {
+  const base = projectWidgetIntent(pendingBookingDate()); assert.ok(base);
+  let reads = 0;
+  for (const patch of [{ booking_selection_pending: 'payment' }, { code: 'handle_stale' }, { outcome: 'refuse' }, { receipt_outcome: 'REFUSED' }, { next_envelope: envelope('kind-staff-selector') }, { resolved_widget: envelope('kind-staff-selector') }, { owner_decision: { state: 'SUCCEEDED' } }]) {
+    const port = createLiveSubmission({ widgetIntent: async () => ({ ok: true, value: { ...base, ...patch } }), resolveWidgets: async () => { reads++; throw new Error('No receipt read'); } });
+    assert.deepEqual(await port.submit({ widget_id: 'synthetic' }, new AbortController().signal), { status: 'forbidden' });
+  }
+  assert.equal(reads, 0);
+});
+const pendingStaffSelector = () => {
+  const e = envelope('kind-staff-selector'); e.intents[0].input_schema.fields[0].name = 'staff_ref'; return reseal(e);
+};
+test('booking selection pending: exact staff REFINE displays only canonical date question and consumes control across redraw', async () => {
+  let submits = 0, reads = 0;
+  const s = setup({ observe: async () => ({ ok: true, value: { widgets: [] } }), submission: createLiveSubmission({
+    widgetIntent: async () => { submits++; return { ok: true, value: projectWidgetIntent(pendingBookingDate()) }; },
+    resolveWidgets: async () => { reads++; throw new Error('No booking receipt'); },
+  }) });
+  const { itemId } = s.runtime.widgets.ingest(pendingStaffSelector());
+  s.runtime.widgetPort.rendered(itemId); await flush();
+  const ref = s.item(itemId).result.readingOrder.find(r => r.startsWith('option:'));
+  assert.ok(ref); assert.deepEqual(await s.runtime.widgets.activate(itemId, ref), { outcome: 'dismissed' });
+  assert.equal(s.item(itemId).sentence, 'booking_date_required'); assert.equal(s.item(itemId).display, 'terminal');
+  assert.deepEqual(s.item(itemId).result.readingOrder, []); assert.equal(s.item(itemId).result.mode, 'frozen_prose');
+  s.setA11y({ ...A11Y, text_scale: 1.2 });
+  assert.deepEqual(s.item(itemId).result.readingOrder, []); assert.equal(s.item(itemId).sentence, 'booking_date_required');
+  await s.runtime.widgets.activate(itemId, ref);
+  assert.equal(submits, 1); assert.equal(reads, 0); s.runtime.dispose();
+});
+test('booking selection pending: wrong selector kind/effect/capability/template never displays date acknowledgement', async () => {
+  for (const mutate of [
+    e => { e.intents[0].effect = 'DRAFT'; },
+    e => { e.intents[0].capability.key = 'catalog.services.read'; },
+    e => { e.source.capability = 'catalog.services.read'; },
+    e => { e.provenance.source_capability = 'catalog.services.read'; },
+    e => { e.intents[0].input_schema.fields[0].name = 'selection'; },
+    null,
+  ]) {
+    let submits = 0;
+    const s = setup({ observe: async () => ({ ok: true, value: { widgets: [] } }), submission: {
+      submit: async () => { submits++; return { status: 'booking_selection_pending', next: 'date' }; },
+    } });
+    const e = mutate === null ? envelope('kind-service-selector') : pendingStaffSelector();
+    if (mutate !== null) mutate(e);
+    reseal(e);
+    const { itemId } = s.runtime.widgets.ingest(e); s.runtime.widgetPort.rendered(itemId); await flush();
+    const ref = s.item(itemId).result.readingOrder.find(r => r.startsWith('option:')); assert.ok(ref);
+    await s.runtime.widgets.activate(itemId, ref);
+    assert.equal(submits, 1); assert.notEqual(s.item(itemId).sentence, 'booking_date_required'); s.runtime.dispose();
+  }
+});
 test('personal receiver follows real Widgets integrity/expiry and survives accessibility redraw', async () => {
   const { source, detail } = detailPair();
   for (const e of [source, detail]) {

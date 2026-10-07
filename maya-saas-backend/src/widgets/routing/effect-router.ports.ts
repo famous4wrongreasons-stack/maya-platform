@@ -196,7 +196,9 @@ export interface BookingSelectorOwnerPort {
     step: 'service' | 'staff';
     handles: Readonly<Record<string, string>>;
   }): Promise<{
-    nextKind: 'STAFF_SELECTOR' | 'TIME_SLOT_SELECTOR';
+    nextKind: 'STAFF_SELECTOR' | 'TIME_SLOT_SELECTOR' | null;
+    selectionScope?:
+      import('../booking/booking-noun-identity').BookingSlotScope | null;
     capabilityKey: 'catalog.staff.read' | 'booking.availability.read';
     source: unknown;
     fact: FactUsed;

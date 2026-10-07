@@ -202,6 +202,12 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
             ? await this.emitter
                 .emitBookingSelector(mintRequest, {
                   source: input.result,
+                  ...(input.bookingSelector
+                    ? {
+                        bookingSelection: input.bookingSelector,
+                        revalidateSource: input.bookingSelector.revalidate,
+                      }
+                    : {}),
                   ...(input.revalidateSource
                     ? { revalidateSource: input.revalidateSource }
                     : {}),

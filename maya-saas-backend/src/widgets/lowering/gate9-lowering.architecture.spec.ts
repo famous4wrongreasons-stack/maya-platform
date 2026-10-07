@@ -368,6 +368,8 @@ const STORE_METHOD_ALLOWLIST = new Set([
   'readReplyForUserTurn', // inert retained completion; no capability/dispatch
   // Internal bounded context reads share the encrypted transcript owner and erasure.
   'readChatContext',
+  'readBookingSelection', // bounded Class A choices for a new explicit chat; never lowers a turn
+  'recordAcceptedBookingSelection', // post-gateway audit of closed choices; no turn writes
   'readActiveUserTurnIdentity',
   'appendUserTurn',
   'readUserTurn',
@@ -639,6 +641,52 @@ describe('T-ARCH-STORE-METHODS — no second method reaches the turn table (9.11
       expect([name, declarationOf(sf, name) !== null]).toEqual([name, true]);
       expect(STORE_METHOD_ALLOWLIST.has(name)).toBe(true);
     }
+  });
+
+  it('T-ARCH-STORE-BOOKING preference recovery reads only identity and retained closed choices, never text or authority', () => {
+    const source = parseSrc('widgets/stores/timeline.store.ts');
+    const method = declarationOf(source, 'readBookingSelection');
+    expect(method).not.toBeNull();
+    const text = method!.getText(source);
+    expect(
+      prismaOps(parseSource('preference.ts', `class Owner { ${text} }`)),
+    ).toEqual(['widgetTimelineTurn.findFirst', 'widgetIntentRecord.findMany']);
+    expect(text).not.toMatch(
+      /\btextContent\b|\bsemanticContext\b|\blowerToUserTurn\b|\bactionExecution\b/,
+    );
+    expect(text).toContain('bookingSelectionPreferences');
+    expect(text).toContain('take: 33');
+    expect(text).toContain('take: 17');
+    const callers = productionSources().filter(
+      (f) => callsOf(parseSrc(f), 'readBookingSelection') > 0,
+    );
+    expect(callers.sort()).toEqual([
+      'ai-tools/ai-core.service.ts',
+      'widgets/composition/typed-step0.ts',
+    ]);
+  });
+
+  it('T-ARCH-STORE-BOOKING-AUDIT cannot insert turns or use the claimed profile as a query key', () => {
+    const source = parseSrc('widgets/stores/widget-stores.service.ts');
+    const method = declarationOf(source, 'recordAcceptedBookingSelection');
+    expect(method).not.toBeNull();
+    const text = method!.getText(source);
+    expect(
+      prismaOps(parseSource('audit.ts', `class Owner { ${text} }`)),
+    ).toEqual(['widgetIntentRecord.findFirst']);
+    expect(text).not.toMatch(
+      /\bwidgetTimelineTurn\b|\blowerToUserTurn\b|\bactionExecution\b|\.profileId\b|\.profile_id\b/,
+    );
+    expect(text).toContain('this.intentAudit.recordSubmission');
+    expect(text).toContain('bookingClosedSelection');
+    expect(text).toContain("outcome: 'ACCEPTED'");
+    const callers = productionSources().filter(
+      (f) => callsOf(parseSrc(f), 'recordAcceptedBookingSelection') > 0,
+    );
+    expect(callers.sort()).toEqual([
+      'widgets/widgets.controller.ts',
+      'widgets/widgets.module.ts',
+    ]);
   });
 });
 

@@ -154,6 +154,9 @@ export class AiToolRuntimeService {
       readonly suppressWidgetTrigger?: boolean;
       /** Transient metadata witness for the existing typed booking successor. */
       readonly onAvailabilityScope?: (check: () => Promise<void>) => void;
+      readonly bookingSelector?: Parameters<
+        AiReadWidgetTriggerPort['afterCompletedRead']
+      >[0]['bookingSelector'];
       readonly widgetTrigger?: 'T-2a' | 'T-2b';
       readonly requestId?: string | null;
       readonly userTurn?: {
@@ -274,7 +277,13 @@ export class AiToolRuntimeService {
     );
     if (revalidateAvailability)
       internal.onAvailabilityScope?.(revalidateAvailability);
-    const inputHash = this.inputHash(toolName, args, principal);
+    await internal.bookingSelector?.revalidate();
+    const inputHash = this.inputHash(
+      toolName,
+      args,
+      principal,
+      internal.bookingSelector,
+    );
 
     if (definition.approvalPolicy !== 'none') {
       const idempotencyKey = this.requireIdempotencyKey(dto.idempotencyKey);
@@ -300,6 +309,7 @@ export class AiToolRuntimeService {
           );
     }
 
+    await internal.bookingSelector?.revalidate();
     const completed = await this.executeNow({
       principal,
       definition,
@@ -313,6 +323,7 @@ export class AiToolRuntimeService {
     });
     await personal?.revalidate();
     await revalidateAvailability?.();
+    await internal.bookingSelector?.revalidate();
     if (internal.suppressWidgetTrigger === true) return completed;
     const output = await this.attachReadWidget(
       user,
@@ -325,6 +336,7 @@ export class AiToolRuntimeService {
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
       revalidateAvailability,
+      internal.bookingSelector,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
@@ -360,7 +372,13 @@ export class AiToolRuntimeService {
       definition,
       args,
     );
-    const inputHash = this.inputHash(toolName, args, principal);
+    await internal.bookingSelector?.revalidate();
+    const inputHash = this.inputHash(
+      toolName,
+      args,
+      principal,
+      internal.bookingSelector,
+    );
     const execution = await this.prisma.aiToolExecution.findUnique({
       where: {
         tenantId_idempotencyKey: {
@@ -406,6 +424,7 @@ export class AiToolRuntimeService {
         };
     await personal?.revalidate();
     await revalidateAvailability?.();
+    await internal.bookingSelector?.revalidate();
     if (internal.suppressWidgetTrigger === true) return completed;
     const output = await this.attachReadWidget(
       user,
@@ -418,6 +437,7 @@ export class AiToolRuntimeService {
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
       revalidateAvailability,
+      internal.bookingSelector,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
@@ -435,6 +455,9 @@ export class AiToolRuntimeService {
     requestId: string | null,
     userTurn?: { readonly turnId: string; readonly conversationId: string },
     revalidateSource?: () => Promise<void>,
+    bookingSelector?: Parameters<
+      AiReadWidgetTriggerPort['afterCompletedRead']
+    >[0]['bookingSelector'],
   ): Promise<unknown> {
     if (
       definition.riskTier !== 'read' ||
@@ -477,6 +500,7 @@ export class AiToolRuntimeService {
       trigger: triggerKind,
       requestId,
       ...(revalidateSource ? { revalidateSource } : {}),
+      ...(bookingSelector ? { bookingSelector } : {}),
     });
     return resolution === null ? completed : { ...value, resolution };
   }
@@ -2348,6 +2372,9 @@ export class AiToolRuntimeService {
     toolName: string,
     args: ValidatedAiToolArguments,
     principal: AiToolPrincipal,
+    bookingSelector?: NonNullable<
+      Parameters<AiToolRuntimeService['execute']>[3]
+    >['bookingSelector'],
   ): string {
     const canonical = this.canonicalJson({
       actor_user_id: principal.userId,
@@ -2373,6 +2400,16 @@ export class AiToolRuntimeService {
                           source_projection: 'maya.availability-source-scope/2',
                         }
                       : {}),
+              ...(bookingSelector &&
+              ['catalog.services.read', 'catalog.staff.read'].includes(toolName)
+                ? {
+                    booking_catalog_scope: {
+                      contract: 'maya.booking-catalog-scope/1',
+                      tenantId: bookingSelector.tenantId,
+                      scope: bookingSelector.scope,
+                    },
+                  }
+                : {}),
               role: principal.role,
               ...principal.readAuthority,
             },

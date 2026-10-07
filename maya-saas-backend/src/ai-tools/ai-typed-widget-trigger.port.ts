@@ -36,6 +36,18 @@ export interface AiTypedWidgetTriggerPort {
     conversationId: string,
     beforeTurnId: string,
   ): Promise<unknown>;
+  /** Accepted closed choices as preferences for a NEW explicit turn, never intent authority. */
+  readBookingSelection?(
+    actor: Readonly<AuthenticatedUser>,
+    conversationId: string,
+    beforeTurnId: string,
+  ): Promise<{
+    selectedAt: string;
+    services: string[];
+    employee?: string;
+    branch?: string;
+    sourceRevision?: string;
+  } | null>;
   persistAssistantReply(input: {
     readonly actor: Readonly<AuthenticatedUser>;
     readonly userTurn: {

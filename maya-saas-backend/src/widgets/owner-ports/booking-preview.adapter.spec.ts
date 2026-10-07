@@ -1,9 +1,14 @@
 import { SealService } from '../emission/seal.service';
 import { BookingPreviewAdapter } from './booking-preview.adapter';
-import { encodeBookingSlotOwnerRef } from '../booking/booking-noun-identity';
+import {
+  encodeBookingSlotOwnerRef,
+  encodeBookingCatalogOwnerRef,
+  type BookingSlotScope,
+} from '../booking/booking-noun-identity';
 
 const TENANT = '00000000-0000-4000-8000-000000000001';
 const OTHER_TENANT = '00000000-0000-4000-8000-000000000002';
+const SCOPE = { branchId: 'branch-a', sourceRevision: 'b'.repeat(64) };
 
 describe('FBE2E-2 — selected slot to canonical booking preview', () => {
   const oldIdentity = process.env.ACTION_ENGINE_IDENTITY_SECRET;
@@ -26,6 +31,7 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
     tenantId: string,
     noun: 'service' | 'staff' | 'slot',
     ownerRef: string,
+    scope: BookingSlotScope | null = SCOPE,
   ) =>
     new SealService().mintNounHandles([
       {
@@ -39,8 +45,11 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
               : 'booking_availability',
         ownerRef:
           noun === 'slot'
-            ? (encodeBookingSlotOwnerRef(ownerRef) as string)
-            : ownerRef,
+            ? (encodeBookingSlotOwnerRef(
+                ownerRef,
+                scope ?? undefined,
+              ) as string)
+            : encodeBookingCatalogOwnerRef(ownerRef, scope)!,
       },
     ])[noun];
 
@@ -89,18 +98,10 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
     },
   });
 
-  it('retains the authenticated slot branch/witness through canonical quote and confirmation nouns', async () => {
+  it('retains the exact shared scoped service/staff/slot witness through the synthetic quote seam', async () => {
     const { adapter, create } = harness();
     const input = request();
-    const scope = { branchId: 'branch-a', sourceRevision: 'b'.repeat(64) };
-    input.handles.slot = new SealService().mintNounHandles([
-      {
-        tenantId: TENANT,
-        noun: 'slot',
-        ownerKind: 'booking_availability',
-        ownerRef: encodeBookingSlotOwnerRef('2026-10-02T10:00:00Z', scope)!,
-      },
-    ]).slot;
+    const scope = SCOPE;
     const result = await adapter.proposeCreateSelection(input);
     expect(create.quoteForAccount).toHaveBeenCalledWith(
       TENANT,
@@ -139,14 +140,17 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
         staffId: 'staff-1',
         serviceIds: ['service-1'],
         start: '2026-10-02T10:00:00.000Z',
+        branchId: SCOPE.branchId,
       },
-      {},
+      { branchSourceRevision: SCOPE.sourceRevision },
     );
     expect(result.values).toEqual(
       new Map([
         ['service', 'service-1'],
         ['staff', 'staff-1'],
         ['slot', '2026-10-02T10:00:00.000Z'],
+        ['branch', SCOPE.branchId],
+        ['branch_source_revision', SCOPE.sourceRevision],
       ]),
     );
     expect(result.outcome).toMatchObject({
@@ -188,6 +192,8 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
           ['service', 'service-1'],
           ['staff', 'staff-1'],
           ['slot', '2026-10-02T10:00:00.000Z'],
+          ['branch', SCOPE.branchId],
+          ['branch_source_revision', SCOPE.sourceRevision],
         ]),
       },
     } as never;
@@ -215,6 +221,36 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
       expect(await adapter.draft(draftRequest())).toMatchObject({
         receiptOutcome: 'REFUSED',
       });
+    },
+  );
+
+  it.each(['legacy-catalog', 'legacy-slot'] as const)(
+    'refuses historical mixed scope (%s) before quote without upgrading source authority',
+    async (shape) => {
+      const { adapter, create } = harness();
+      const input = request();
+      if (shape === 'legacy-catalog') {
+        input.handles.service = mint(TENANT, 'service', 'service-1', null);
+        input.handles.staff = mint(TENANT, 'staff', 'staff-1', null);
+      } else
+        input.handles.slot = mint(
+          TENANT,
+          'slot',
+          '2026-10-02T10:00:00.000Z',
+          null,
+        );
+      expect(await adapter.proposeCreateSelection(input)).toEqual({
+        outcome: {
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+          actionReceiptRef: null,
+          nextEnvelope: null,
+          resolvedWidget: null,
+          ownerDecision: null,
+        },
+        values: new Map(),
+      });
+      expect(create.quoteForAccount).not.toHaveBeenCalled();
     },
   );
 

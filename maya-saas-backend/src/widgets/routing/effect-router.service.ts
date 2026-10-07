@@ -16,6 +16,7 @@ import {
   Inject,
   Injectable,
   Optional,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { IntentTemplateRefusal } from '../emission/intent-template.registry';
 import {
@@ -781,6 +782,44 @@ export class EffectRouterService {
     ctx: GateContext,
     input: import('./routing-input').RoutingInput,
   ): Promise<EffectRouteOutcome> {
+    try {
+      return await this.advanceCurrentBookingSelector(ctx, input);
+    } catch (error) {
+      // Only the native source owner's declared unavailability/drift is an ordinary
+      // refusal. The minter already cancels its exact newly minted child on drift.
+      const response =
+        error instanceof ServiceUnavailableException
+          ? error.getResponse()
+          : null;
+      const unavailable =
+        response &&
+        typeof response === 'object' &&
+        'error' in response &&
+        response.error &&
+        typeof response.error === 'object' &&
+        'code' in response.error &&
+        response.error.code === 'booking_branch_source_unavailable';
+      if (
+        unavailable ||
+        (error instanceof Error &&
+          error.name === 'BookingCatalogSourceChangedError' &&
+          [
+            'booking_catalog_source_changed',
+            'booking_catalog_scope_required',
+          ].includes(error.message))
+      )
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
+      throw error;
+    }
+  }
+
+  private async advanceCurrentBookingSelector(
+    ctx: GateContext,
+    input: import('./routing-input').RoutingInput,
+  ): Promise<EffectRouteOutcome> {
     const serviceStep = input.record.widgetKind === 'SERVICE_SELECTOR';
     const selected = selectedClosedInput(
       ctx,
@@ -810,6 +849,20 @@ export class EffectRouterService {
         receiptOutcome: 'REFUSED',
         refusalCode: 'effect_not_admissible',
       });
+    if (advanced.nextKind === null) {
+      if (serviceStep)
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
+      return admitted({
+        ownerDecision: {
+          kind: 'booking_selection_pending',
+          next: 'date',
+          reply: 'На какую дату проверить время у выбранного мастера?',
+        },
+      });
+    }
     const projected = this.projector.composeCompletedRead(
       {
         ...projectionPlan(ctx, input.record),
@@ -835,6 +888,7 @@ export class EffectRouterService {
       composerInput: projected.input,
       source: advanced.source,
       inheritedHandles: advanced.inheritedHandles,
+      selectionScope: advanced.selectionScope,
       revalidateSource: advanced.revalidateSource,
     });
     return minted === null

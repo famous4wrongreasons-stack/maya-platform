@@ -109,6 +109,34 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     });
   }
 
+  async readBookingSelection(
+    actor: Parameters<AiTypedWidgetTriggerPort['readCurrentConversation']>[0],
+    conversationId: string,
+    beforeTurnId: string,
+  ) {
+    if (!actor.tenantId) return null;
+    const tenantId = actor.tenantId;
+    return this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        !principal ||
+        principal.authority.tenantId !== tenantId ||
+        principal.authority.userId !== actor.userId ||
+        principal.role !== 'client'
+      )
+        return null;
+      const now = await TimelineStore.readDatabaseClock(tx);
+      return TimelineStore.readBookingSelection(
+        tx,
+        tenantId,
+        principal.proofHash,
+        conversationId,
+        beforeTurnId,
+        now,
+      );
+    });
+  }
+
   async readCurrentConversation(
     actor: Parameters<AiTypedWidgetTriggerPort['readCurrentConversation']>[0],
   ): ReturnType<AiTypedWidgetTriggerPort['readCurrentConversation']> {
@@ -337,9 +365,25 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
               : null,
           )
         : null;
+    const pending =
+      result.verdict.outcome === 'terminate' &&
+      result.verdict.route?.receipt_outcome === 'ACCEPTED'
+        ? (result.verdict.route.owner_decision as {
+            kind?: string;
+            next?: string;
+            reply?: string;
+          } | null)
+        : null;
+    const bookingReply =
+      pending?.kind === 'booking_selection_pending' &&
+      pending.next === 'date' &&
+      pending.reply === 'На какую дату проверить время у выбранного мастера?'
+        ? pending.reply
+        : null;
     return Object.freeze({
       ...(userTurn === undefined ? {} : { userTurn }),
       reply:
+        bookingReply ??
         scheduleReply ??
         (code === null
           ? (goodsReply ?? priceReply ?? 'Готово.')

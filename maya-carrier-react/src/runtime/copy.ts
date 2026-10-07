@@ -129,6 +129,8 @@ export const widgetSentence = (sentence: WidgetSentence): string => {
       return 'Цена подтверждена в YCLIENTS';
     case 'booking_stale':
       return 'Данные изменились с момента показа. Откройте актуальную версию.';
+    case 'booking_date_required':
+      return 'На какую дату проверить время у выбранного мастера?';
     case 'booking_confirmation_required':
       return 'Сначала нужно подтвердить запись.';
     case 'booking_facts_unavailable':

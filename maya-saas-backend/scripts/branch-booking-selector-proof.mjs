@@ -32,6 +32,7 @@ export function proofCommands(options) {
       ),
       env: {
         JEST_BRANCH_BOOKING_STAGE: step.name,
+        ...(options.ordinary ? { JEST_BRANCH_BOOKING_ORDINARY: '1' } : {}),
         JEST_BRANCH_BOOKING_RECEIPT: options.receipt,
         JEST_BRANCH_BOOKING_REPORT: path.join(
           options.output,
@@ -84,6 +85,7 @@ export async function main(args) {
     options: {
       run: { type: 'boolean' },
       browser: { type: 'boolean' },
+      ordinary: { type: 'boolean' },
       output: { type: 'string' },
       'pg-bin': {
         type: 'string',
@@ -93,7 +95,7 @@ export async function main(args) {
   });
   if (!values.run) {
     process.stdout.write(
-      'Preparation only. Parent heavy slot required: node scripts/branch-booking-selector-proof.mjs --run --output=/absolute/new/path [--browser] [--pg-bin=/explicit/pg/bin]\n',
+      'Preparation only. Parent heavy slot required: node scripts/branch-booking-selector-proof.mjs --run --output=/absolute/new/path [--browser] [--ordinary] [--pg-bin=/explicit/pg/bin]\n',
     );
     return;
   }
@@ -135,6 +137,7 @@ export async function main(args) {
     receipt: path.join(privateRoot, 'private-restart.json'),
     output: values.output,
     browser: values.browser,
+    ordinary: values.ordinary,
   });
   const tracked = execFileSync(
     'git',
@@ -157,6 +160,12 @@ export async function main(args) {
             '../maya-chat-shell/build.mjs',
             '../maya-carrier-react/test/branch-booking-selector-browser-probe.mjs',
             '../maya-carrier-react/test/branch-booking-selector-browser-guard.mjs',
+            ...(values.ordinary
+              ? [
+                  '../maya-carrier-react/test/ordinary-booking-selector-browser-probe.mjs',
+                  '../maya-carrier-react/test/ordinary-booking-selector-browser-guard.mjs',
+                ]
+              : []),
             '../maya-carrier-react/test/personal-owner-proof-server.mjs',
             '../maya-carrier-react/test/personal-owner-browser-guard.mjs',
             '../maya-chat-shell/test/cdp-verify.mjs',
@@ -191,6 +200,7 @@ export async function main(args) {
   );
   const manifest = {
     contract: 'maya.branch-booking-selector-owned-cluster/1',
+    ordinary: values.ordinary === true,
     mode: values.browser
       ? 'current-react-native-synthetic'
       : 'http-pg-restart-native-synthetic',

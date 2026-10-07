@@ -9,6 +9,8 @@ import type { OwnerNounIdentity } from '../noun-resolution/noun-handle.codec';
 import {
   BOOKING_NOUN_OWNERS,
   encodeBookingSlotOwnerRef,
+  encodeBookingCatalogOwnerRef,
+  type BookingSlotScope,
 } from './booking-noun-identity';
 
 type SelectorKind = Extract<
@@ -97,6 +99,7 @@ export const presentBookingSelector = (input: {
   inherited?: Readonly<Record<string, string>>;
   /** Resolved by the emitter from tenant state, never from source/model input. */
   internalCalendar?: boolean;
+  scope?: BookingSlotScope | null;
 }): PresentedSelector | null => {
   if (input.kind === 'SERVICE_SELECTOR') return presentServices(input);
   if (input.kind === 'STAFF_SELECTOR') return presentStaff(input);
@@ -123,11 +126,13 @@ const presentServices = (
       (service.duration_minutes !== null && duration === null)
     )
       continue;
+    const ownerRef = encodeBookingCatalogOwnerRef(id, input.scope);
+    if (!ownerRef) continue;
     const handle = input.mint({
       tenantId: input.tenantId,
       noun: 'service',
       ownerKind: BOOKING_NOUN_OWNERS.service,
-      ownerRef: id,
+      ownerRef,
     });
     options.push({
       option_id: handle,
@@ -184,11 +189,13 @@ const presentStaff = (
     const id = str(member.id);
     const name = str(member.name);
     if (!id || !name) continue;
+    const ownerRef = encodeBookingCatalogOwnerRef(id, input.scope);
+    if (!ownerRef) continue;
     const handle = input.mint({
       tenantId: input.tenantId,
       noun: 'staff',
       ownerKind: BOOKING_NOUN_OWNERS.staff,
-      ownerRef: id,
+      ownerRef,
     });
     const role = str(member.title) ?? str(member.specialization) ?? 'Мастер';
     options.push({

@@ -1,10 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BookingCatalogSourceChangedError,
+  isBookingSourceUnavailable,
+} from '../../ai-tools/booking-catalog-binding';
+import { CrmService } from '../../crm/crm.service';
+import { Injectable, Optional } from '@nestjs/common';
 
 import { AiToolRuntimeService } from '../../ai-tools/ai-tool-runtime.service';
 import { AvailabilityCalendarService } from '../../crm/availability-calendar.service';
 import { openWidgetNounHandle } from '../emission/seal.service';
 import type { BookingSelectorOwnerPort } from '../routing/effect-router.ports';
-import { isBookingNounIdentity } from '../booking/booking-noun-identity';
+import {
+  isBookingNounIdentity,
+  decodeBookingCatalogOwnerRef,
+  sameBookingScope,
+  type BookingSlotScope,
+} from '../booking/booking-noun-identity';
 
 const fact = (
   capability: string,
@@ -33,10 +43,23 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
   constructor(
     private readonly runtime: AiToolRuntimeService,
     private readonly availability: AvailabilityCalendarService,
+    @Optional() private readonly crm?: CrmService,
   ) {}
 
   async advance(input: Parameters<BookingSelectorOwnerPort['advance']>[0]) {
+    try {
+      return await this.advanceCurrent(input);
+    } catch (error) {
+      if (isBookingSourceUnavailable(error)) return null;
+      throw error;
+    }
+  }
+
+  private async advanceCurrent(
+    input: Parameters<BookingSelectorOwnerPort['advance']>[0],
+  ) {
     const opened = new Map<string, string>();
+    let scope: BookingSlotScope | null | undefined;
     for (const [noun, handle] of Object.entries(input.handles)) {
       const value = openWidgetNounHandle(handle as never);
       if (
@@ -46,56 +69,75 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
         !isBookingNounIdentity(value, noun)
       )
         return null;
-      opened.set(noun, value.ownerRef);
+      const decoded = decodeBookingCatalogOwnerRef(value.ownerRef);
+      if (
+        !decoded ||
+        (scope !== undefined && !sameBookingScope(scope, decoded.scope))
+      )
+        return null;
+      scope = decoded.scope;
+      opened.set(noun, decoded.id);
     }
-    if (input.actor.tenantId !== input.routing.tenantId) return null;
     if (
-      input.step === 'staff' &&
-      (!opened.get('service') || !opened.get('staff'))
+      input.actor.tenantId !== input.routing.tenantId ||
+      !opened.get('service') ||
+      (input.step === 'staff' && !opened.get('staff'))
     )
       return null;
-    const day =
-      input.step === 'staff'
-        ? await this.availability.nextAvailabilityDay(
+    const pinned = scope ?? null;
+    const revalidate = async () => {
+      if (pinned) {
+        if (
+          !this.crm ||
+          (await this.crm.readBranchAvailabilityRevision(
             input.routing.tenantId,
-            opened.get('staff')!,
-            input.routing.now,
-          )
-        : null;
-    const name: 'catalog.staff.read' | 'booking.availability.read' =
-      input.step === 'service'
-        ? 'catalog.staff.read'
-        : 'booking.availability.read';
-    const args =
-      input.step === 'service'
-        ? {}
-        : {
-            date: day!.date,
-            service_ids: [opened.get('service')],
-            staff_id: opened.get('staff'),
-            ...(day!.branchId ? { branch_id: day!.branchId } : {}),
-          };
-    if (
-      input.step === 'staff' &&
-      (!opened.get('service') || !opened.get('staff'))
-    )
-      return null;
-    let revalidateSource: (() => Promise<void>) | undefined;
+            pinned.branchId,
+          )) !== pinned.sourceRevision
+        )
+          throw new BookingCatalogSourceChangedError(
+            'booking_catalog_source_changed',
+          );
+      } else if (
+        this.crm &&
+        (await this.crm.resolveConfiguredBookingBranch(input.routing.tenantId))
+      ) {
+        throw new BookingCatalogSourceChangedError(
+          'booking_catalog_scope_required',
+        );
+      }
+    };
+    await revalidate();
+    // Closed selection is preference, never permission to guess a day or create a booking.
+    if (input.step === 'staff')
+      return {
+        nextKind: null,
+        capabilityKey: 'catalog.staff.read' as const,
+        source: null,
+        fact: fact(
+          'catalog.staff.read',
+          input.routing.record.requestedScopeHash,
+          input.routing.now,
+          0,
+        ),
+        inheritedHandles: Object.freeze({ ...input.handles }),
+        selectionScope: pinned,
+      };
+    const name = 'catalog.staff.read' as const;
+    const args = {};
     const execution = await this.runtime.execute(
       input.actor,
       name,
       { arguments: args, surface: 'web' },
       {
         suppressWidgetTrigger: true,
-        ...(input.step === 'staff'
-          ? {
-              onAvailabilityScope: (check: () => Promise<void>) => {
-                revalidateSource = check;
-              },
-            }
-          : {}),
+        bookingSelector: {
+          tenantId: input.routing.tenantId,
+          scope: pinned,
+          revalidate,
+        },
       },
     );
+    await revalidate();
     if (
       !isRecord(execution) ||
       execution.status !== 'completed' ||
@@ -105,26 +147,14 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
     const source = execution.result;
     // The runtime returns a list, not evidence that the list is exhaustive.
     // Unrecognised payloads must not masquerade as a measured empty list.
-    const rows = isRecord(source)
-      ? input.step === 'service'
-        ? source.staff
-        : source.slots
-      : null;
+    const rows = isRecord(source) ? source.staff : null;
     if (!Array.isArray(rows)) return null;
     const returned = rows.length;
     return {
-      nextKind:
-        input.step === 'service'
-          ? ('STAFF_SELECTOR' as const)
-          : ('TIME_SLOT_SELECTOR' as const),
+      nextKind: 'STAFF_SELECTOR' as const,
       capabilityKey: name,
-      source: day
-        ? {
-            ...(source as Record<string, unknown>),
-            timezone: day.timezone,
-            local_date: day.date,
-          }
-        : source,
+      source,
+      selectionScope: pinned,
       fact: fact(
         name,
         input.routing.record.requestedScopeHash,
@@ -132,7 +162,7 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
         returned,
       ),
       inheritedHandles: Object.freeze({ ...input.handles }),
-      revalidateSource,
+      revalidateSource: revalidate,
     };
   }
 }

@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
+import { encodeSelectionDomain } from '../input-schema/codec';
 import { RETENTION, WidgetStoresService } from './widget-stores.service';
 
 type Call = { model: string; op: string; args: unknown };
@@ -167,6 +168,96 @@ describe('WidgetStoresService — every existing method sends what it sent befor
   });
 
   describe('2. intent-audit store', () => {
+    const acceptedRecord = () => {
+      const domain = encodeSelectionDomain({ staff_ref: ['sealed-choice'] });
+      if (!domain.ok) throw new Error('Invalid test domain');
+      return {
+        widgetKind: 'STAFF_SELECTOR',
+        capabilityKey: 'catalog.staff.read',
+        selectionDomain: domain.value,
+      };
+    };
+    const selectionInput = {
+      tenantId: 't-1',
+      widgetId: 'w-1',
+      intentTokenHash: 'h-1',
+      clientNonce: 'n-1',
+      profileId: 'pr-1',
+      inputsClosed: { staff_ref: 'sealed-choice' },
+    };
+
+    it('persists an accepted scalar choice as a closed array; profile stays audit-only', async () => {
+      const queries: unknown[] = [];
+      for (const profileId of ['pr-1', 'advisory-other-profile']) {
+        const { stores, calls } = storesOver(undefined, (model) =>
+          model === 'widgetIntentRecord' ? acceptedRecord() : { id: 'audit-1' },
+        );
+        await stores.recordAcceptedBookingSelection({
+          ...selectionInput,
+          profileId,
+        });
+        expect(calls).toHaveLength(2);
+        expect(calls[0].model).toBe('widgetIntentRecord');
+        expect(calls[0].op).toBe('findFirst');
+        queries.push(calls[0].args);
+        expect(calls[0].args).toMatchObject({
+          where: {
+            tenantId: 't-1',
+            widgetId: 'w-1',
+            intentTokenHash: 'h-1',
+            effect: 'REFINE',
+            capabilitySpace: 'C9',
+            erasedAt: null,
+            consumedAt: { not: null },
+            receipts: {
+              some: {
+                outcome: 'ACCEPTED',
+                erasedAt: null,
+                actionReceiptRef: null,
+              },
+            },
+          },
+        });
+        expect(calls[1].model).toBe('widgetIntentSubmissionAudit');
+        expect(calls[1].op).toBe('create');
+        expect(calls[1].args).toMatchObject({
+          data: {
+            tenantId: 't-1',
+            widgetId: 'w-1',
+            intentTokenHash: 'h-1',
+            clientNonce: 'n-1',
+            profileId,
+            inputsClosedJson: { staff_ref: ['sealed-choice'] },
+          },
+        });
+      }
+      expect(queries[0]).toEqual(queries[1]);
+    });
+
+    it.each([
+      { staff_ref: 'outside-domain' },
+      { staff_ref: ['sealed-choice', 'outside-domain'] },
+      { staff_ref: 'sealed-choice', injected: 'extra' },
+      { service_ref: 'sealed-choice' },
+      null,
+    ])(
+      'does not audit a malformed or nonclosed accepted input %j',
+      async (inputsClosed) => {
+        const { stores, calls } = storesOver(acceptedRecord());
+        await stores.recordAcceptedBookingSelection({
+          ...selectionInput,
+          inputsClosed,
+        });
+        expect(calls).toHaveLength(1);
+      },
+    );
+
+    it('does not audit when the accepted retained REFINE record is absent', async () => {
+      const { stores, calls } = storesOver(null);
+      await stores.recordAcceptedBookingSelection(selectionInput);
+      expect(calls).toHaveLength(1);
+    });
+
     it('recordSubmission writes the submission audit row with nulls for every absent member', async () => {
       const { stores, calls } = storesOver();
       const row = await stores.recordSubmission(
@@ -878,6 +969,7 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
         'readDraft',
         'readTimeline',
         'reconcileAcceptedReceipt',
+        'recordAcceptedBookingSelection',
         'recordFreeInput',
         'recordDivergence',
         'recordSubmission',
@@ -891,6 +983,7 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     expect(storeFiles.sort()).toEqual(
       [
         ...SUB_STORES.map(([file]) => file),
+        'booking-selection-audit.port.ts', // Narrow post-gateway metadata port, no new sub-store.
         'chat-reply-codec.ts', // Accepted resume contract: encoding in the same erasable text column.
         'tenant-scope.ts',
         'user-turn-binding.ts',

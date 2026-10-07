@@ -1,3 +1,4 @@
+import { bookingClosedSelection } from '../booking/booking-selection-preferences';
 // K3 — the five widget-layer stores, behind one facade.
 //
 // Callers see one service. Since U0 (integrator decision D-6) it is a FACADE over sub-stores, so a
@@ -125,6 +126,56 @@ export class WidgetStoresService {
     now = new Date(),
   ): Promise<{ id: string }> {
     return this.intentAudit.writeReceipt(input, now);
+  }
+
+  /** Post-gateway audit: retain the actual wire metadata only for accepted closed booking selections.
+   * This is historical preference evidence, never a gate antecedent or confirmation. */
+  async recordAcceptedBookingSelection(
+    input: Parameters<IntentAuditStore['recordSubmission']>[0],
+  ): Promise<void> {
+    const record = await this.prisma.widgetIntentRecord.findFirst({
+      where: scoped(input.tenantId, {
+        tenantId: input.tenantId,
+        widgetId: input.widgetId,
+        intentTokenHash: input.intentTokenHash,
+        effect: 'REFINE',
+        capabilitySpace: 'C9',
+        erasedAt: null,
+        consumedAt: { not: null },
+        receipts: {
+          some: { outcome: 'ACCEPTED', erasedAt: null, actionReceiptRef: null },
+        },
+      }),
+      select: { widgetKind: true, capabilityKey: true, selectionDomain: true },
+    });
+    const key =
+      record?.widgetKind === 'SERVICE_SELECTOR' &&
+      record.capabilityKey === 'catalog.services.read'
+        ? 'service_ref'
+        : record?.widgetKind === 'STAFF_SELECTOR' &&
+            record.capabilityKey === 'catalog.staff.read'
+          ? 'staff_ref'
+          : null;
+    if (!key || !record) return;
+    const wire = input.inputsClosed;
+    const closed =
+      wire &&
+      typeof wire === 'object' &&
+      !Array.isArray(wire) &&
+      Object.keys(wire).length === 1 &&
+      typeof (wire as Record<string, unknown>)[key] === 'string'
+        ? { [key]: [(wire as Record<string, unknown>)[key]] }
+        : wire;
+    const selected = bookingClosedSelection(
+      closed,
+      key,
+      record.selectionDomain,
+    );
+    if (!selected) return;
+    await this.intentAudit.recordSubmission({
+      ...input,
+      inputsClosed: { [key]: [selected] },
+    });
   }
 
   // ── 4. SERVER-OWNED DRAFT STORE ─────────────────────────────────────────────────────────────

@@ -5,11 +5,16 @@ import type {
   NounActor,
   NounResolverInput,
 } from '../noun-resolution/noun-resolution';
-import { encodeBookingSlotOwnerRef } from '../booking/booking-noun-identity';
+import {
+  encodeBookingSlotOwnerRef,
+  encodeBookingCatalogOwnerRef,
+  type BookingSlotScope,
+} from '../booking/booking-noun-identity';
 import { NounResolutionOwnersProvider } from './noun-resolution.owners.provider';
 
 const TENANT = '00000000-0000-4000-8000-000000000001';
 const START = '2026-10-02T10:00:00.000Z';
+const SCOPE = { branchId: 'branch-a', sourceRevision: 'b'.repeat(64) };
 
 describe('FBE2E-2 — booking nouns at Gate 11', () => {
   const beforeIdentity = process.env.ACTION_ENGINE_IDENTITY_SECRET;
@@ -31,19 +36,22 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
 
   const actor: NounActor = { tenantId: TENANT, userId: 'user-1' };
 
-  const input = (slotOwnerRef: string | null): NounResolverInput => {
+  const input = (
+    slotOwnerRef: string | null,
+    catalogScope: BookingSlotScope | null = SCOPE,
+  ): NounResolverInput => {
     const identities = [
       {
         tenantId: TENANT,
         noun: 'service',
         ownerKind: 'catalog_service',
-        ownerRef: 'service-1',
+        ownerRef: encodeBookingCatalogOwnerRef('service-1', catalogScope)!,
       },
       {
         tenantId: TENANT,
         noun: 'staff',
         ownerKind: 'catalog_staff',
-        ownerRef: 'staff-1',
+        ownerRef: encodeBookingCatalogOwnerRef('staff-1', catalogScope)!,
       },
       ...(slotOwnerRef === null
         ? []
@@ -73,7 +81,7 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
     };
   };
 
-  it('derives branch/source only from the sealed scoped slot and passes it to the fresh owner read', async () => {
+  it('requires matching sealed service/staff/slot scopes before the synthetic fresh-owner seam', async () => {
     const quote = jest
       .fn<Promise<{ start: string }>, [unknown, ReadonlyMap<string, string>]>()
       .mockResolvedValue({ start: START });
@@ -83,7 +91,7 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
       {} as never,
       {} as never,
     );
-    const scope = { branchId: 'branch-a', sourceRevision: 'b'.repeat(64) };
+    const scope = SCOPE;
     const request = input(encodeBookingSlotOwnerRef(START, scope));
     const result = await provider.read(request, actor);
     expect(result.kind).toBe('resolved');
@@ -127,12 +135,7 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
       {} as never,
       {} as never,
     );
-    const request = input(
-      encodeBookingSlotOwnerRef(START, {
-        branchId: 'branch-a',
-        sourceRevision: 'a'.repeat(64),
-      }),
-    );
+    const request = input(encodeBookingSlotOwnerRef(START, SCOPE));
     quote.mockRejectedValueOnce(
       new ServiceUnavailableException({
         error: { code: 'booking_branch_source_unavailable' },
@@ -142,11 +145,19 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
       kind: 'gone',
       reason: 'not_found',
     });
-    quote.mockRejectedValueOnce(
-      new ServiceUnavailableException('Provider timeout'),
-    );
-    await expect(provider.read(request, actor)).rejects.toBeInstanceOf(
-      ServiceUnavailableException,
+    expect(quote).toHaveBeenCalledTimes(1);
+    const fault = new ServiceUnavailableException('Provider timeout');
+    quote.mockRejectedValueOnce(fault);
+    await expect(provider.read(request, actor)).rejects.toBe(fault);
+    expect(quote).toHaveBeenCalledTimes(2);
+    expect((quote.mock.calls[1] as unknown[])[1]).toEqual(
+      new Map([
+        ['service', 'service-1'],
+        ['staff', 'staff-1'],
+        ['slot', START],
+        ['branch', SCOPE.branchId],
+        ['branch_source_revision', SCOPE.sourceRevision],
+      ]),
     );
   });
 
@@ -158,7 +169,7 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
       {} as never,
       {} as never,
     );
-    const slot = encodeBookingSlotOwnerRef(START);
+    const slot = encodeBookingSlotOwnerRef(START, SCOPE);
     if (slot === null) throw new Error('fixture slot did not encode');
 
     await expect(provider.read(input(slot), actor)).resolves.toMatchObject({
@@ -170,9 +181,33 @@ describe('FBE2E-2 — booking nouns at Gate 11', () => {
         ['service', 'service-1'],
         ['staff', 'staff-1'],
         ['slot', START],
+        ['branch', SCOPE.branchId],
+        ['branch_source_revision', SCOPE.sourceRevision],
       ]),
     );
   });
+
+  it.each(['legacy-catalog', 'legacy-slot'] as const)(
+    'refuses historical mixed scope (%s) without calling quote or treating it as current authority',
+    async (shape) => {
+      const quote = jest.fn();
+      const provider = new NounResolutionOwnersProvider(
+        { quote } as never,
+        {} as never,
+        {} as never,
+        {} as never,
+      );
+      const request =
+        shape === 'legacy-catalog'
+          ? input(encodeBookingSlotOwnerRef(START, SCOPE), null)
+          : input(encodeBookingSlotOwnerRef(START));
+      await expect(provider.read(request, actor)).resolves.toEqual({
+        kind: 'gone',
+        reason: 'not_found',
+      });
+      expect(quote).not.toHaveBeenCalled();
+    },
+  );
 
   it('fails closed when a server-recognized booking slot has no canonical encoding', async () => {
     const quote = jest.fn();

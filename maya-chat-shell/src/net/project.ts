@@ -306,6 +306,13 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
   if (code !== null && typeof code !== 'string') return null;
   if (next !== null && !isIngestibleEnvelope(next)) return null;
   if (receipt !== null && (typeof receipt !== 'string' || !RECEIPT_OUTCOMES.has(receipt))) return null;
+  const bookingPending = own(decision, 'kind') === 'booking_selection_pending';
+  const pendingDecision = bookingPending && isRecord(decision) ? decision as Record<string, unknown> : null;
+  if (bookingPending && (outcome !== 'terminate' || code !== null || receipt !== 'ACCEPTED'
+    || next !== null || resolved !== null || pendingDecision === null
+    || Object.keys(pendingDecision).length !== 3 || !Object.keys(pendingDecision).every(key => ['kind', 'next', 'reply'].includes(key))
+    || own(decision, 'next') !== 'date'
+    || own(decision, 'reply') !== 'На какую дату проверить время у выбранного мастера?')) return null;
   // NS-1: `resolved_widget` was not projected at all, so a parent return arrived as an ordinary
   // ACCEPTED and the open detail stayed on screen with no canonical parent to restore.
   //
@@ -314,6 +321,7 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
   // are not envelopes, so they project to null rather than rejecting the response: HANDOFF stays
   // exactly where it is, and an ordinary CONTROL dismissal keeps its existing path.
   return {
+    ...(bookingPending ? { booking_selection_pending: 'date' as const } : {}),
     ...(() => {
       const reason = bookingRefusal(code);
       const phrase = own(body, 'reason_text');
@@ -326,7 +334,7 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
     next_envelope: next as WidgetIntentProjection['next_envelope'],
     resolved_widget: (isIngestibleEnvelope(resolved) ? resolved : null) as WidgetIntentProjection['resolved_widget'],
     receipt_outcome: receipt as WidgetIntentProjection['receipt_outcome'],
-    ...(isRecord(decision) ? { owner_decision: {
+    ...(!bookingPending && isRecord(decision) ? { owner_decision: {
       decision: text(own(decision, 'decision')),
       status: text(own(decision, 'status')),
       state: text(own(decision, 'state')),

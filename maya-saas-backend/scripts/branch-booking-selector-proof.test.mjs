@@ -106,3 +106,31 @@ test('browser uses five-case probe with bounded720s supervisor and actual Reactb
   assert.ok(plan[5].args.includes('--testTimeout=660000'));
   assert.ok(plan[4].cwd.endsWith('/maya-carrier-react'));
 });
+
+test('ordinary mode is an explicit finite flag on the same serial owner driver', () => {
+  const options = {
+    pgBin: '/owned/bin',
+    cluster: '/tmp/owned/pg',
+    log: '/tmp/evidence/pg.log',
+    port: 45678,
+    database: 'maya_widget_gate_proof_c9occ_abcdef',
+    receipt: '/tmp/private/receipt.json',
+    output: '/tmp/evidence',
+    ordinary: true,
+  };
+  const plan = proofCommands(options);
+  for (const stage of plan.filter((step) =>
+    ['prepare', 'resume'].includes(step.name),
+  )) {
+    assert.equal(stage.env.JEST_BRANCH_BOOKING_ORDINARY, '1');
+    assert.ok(
+      stage.args.includes(
+        'test/widgets-live/branch-booking-selector.probe-spec.ts',
+      ),
+    );
+    assert.ok(stage.args.includes('--runInBand'));
+  }
+  const browser = proofCommands({ ...options, browser: true }).at(-1);
+  assert.equal(browser.env.JEST_BRANCH_BOOKING_ORDINARY, '1');
+  assert.equal(browser.timeoutMs, 720000);
+});

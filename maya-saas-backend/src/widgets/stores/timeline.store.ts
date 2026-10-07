@@ -1,3 +1,4 @@
+import { bookingSelectionPreferences } from '../booking/booking-selection-preferences';
 import { stableActionJson } from '../../action-engine/action-engine.identity';
 import { sha256Hex } from '../token.util';
 // K3 — the timeline store: conversation turns and emissions (§4.4.1, T_TIMELINE).
@@ -242,6 +243,86 @@ export class TimelineStore {
     return (
       decodeChatCompletion(encryption, row.textContent).semanticContext ?? null
     );
+  }
+
+  /** Retained closed choices for a NEW explicit chat turn. No live intent is restored. */
+  static async readBookingSelection(
+    tx: TimelineClient,
+    tenantId: string,
+    principalProofHash: string,
+    conversationId: string,
+    beforeTurnId: string,
+    now: Date,
+  ) {
+    await TimelineStore.lockConversation(tx, tenantId, conversationId);
+    const turn = await tx.widgetTimelineTurn.findFirst({
+      where: scoped(tenantId, {
+        id: beforeTurnId,
+        tenantId,
+        conversationId,
+        principalProofHash: principalProofHash,
+        role: 'user',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      }),
+      select: { turnIndex: true },
+    });
+    if (!turn) return null;
+    const records = await tx.widgetIntentRecord.findMany({
+      where: scoped(tenantId, {
+        tenantId,
+        principalProofHash: principalProofHash,
+        erasedAt: null,
+        expiresAt: { gt: now },
+        OR: [
+          {
+            widgetKind: { in: ['SERVICE_SELECTOR', 'STAFF_SELECTOR'] },
+            effect: 'REFINE',
+          },
+          { widgetKind: 'TIME_SLOT_SELECTOR', effect: 'DRAFT' },
+          { widgetKind: 'BOOKING_CONFIRMATION', effect: 'COMMIT' },
+        ],
+        emission: {
+          erasedAt: null,
+          retentionUntil: { gt: now },
+          turn: {
+            tenantId,
+            conversationId,
+            principalProofHash: principalProofHash,
+            erasedAt: null,
+            retentionUntil: { gt: now },
+            turnIndex: { lt: turn.turnIndex },
+          },
+        },
+      }),
+      orderBy: [{ issuedAt: 'desc' }, { intentTokenHash: 'desc' }],
+      take: 33,
+      select: {
+        widgetKind: true,
+        effect: true,
+        capabilitySpace: true,
+        capabilityKey: true,
+        inputSchemaHash: true,
+        singleUse: true,
+        consumedAt: true,
+        frozenNounsJson: true,
+        selectionDomain: true,
+        receipts: {
+          select: {
+            outcome: true,
+            actionReceiptRef: true,
+            submittedAt: true,
+            erasedAt: true,
+          },
+        },
+        submissionAudits: {
+          orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }],
+          take: 17,
+          select: { inputsClosedJson: true, erasedAt: true },
+        },
+      },
+    });
+    return bookingSelectionPreferences(records, tenantId);
   }
 
   /** Bounded history-only replay. The result is text, never a live intent or authority. */

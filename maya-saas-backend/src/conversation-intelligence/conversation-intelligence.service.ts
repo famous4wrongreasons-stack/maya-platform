@@ -159,9 +159,11 @@ export class ConversationIntelligenceService {
           : undefined;
       if (
         previous &&
-        ['booking.find_availability', 'booking.create_own'].includes(
-          previous.intent,
-        ) &&
+        [
+          'booking.prepare_personal',
+          'booking.find_availability',
+          'booking.create_own',
+        ].includes(previous.intent) &&
         ['booking.find_availability', 'booking.create_own'].includes(
           definition.id,
         )

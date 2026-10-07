@@ -13,6 +13,29 @@ const mint = (identity: {
   `${identity.tenantId}:${identity.noun}:${identity.ownerKind}:${identity.ownerRef}`;
 
 describe('FBE2E-2 — booking selector presentation', () => {
+  it('refuses an unencodable scoped catalog identity before minting instead of throwing', () => {
+    const mintSpy = jest.fn(mint);
+    expect(
+      presentBookingSelector({
+        tenantId: 'tenant',
+        kind: 'SERVICE_SELECTOR',
+        scope: { branchId: 'b'.repeat(128), sourceRevision: 'a'.repeat(64) },
+        mint: mintSpy,
+        source: {
+          services: [
+            {
+              id: 's'.repeat(128),
+              name: 'Service',
+              price: null,
+              duration_minutes: null,
+            },
+          ],
+        },
+      }),
+    ).toBeNull();
+    expect(mintSpy).not.toHaveBeenCalled();
+  });
+
   it('projects canonical services into opaque server-minted choices', () => {
     const presented = presentBookingSelector({
       tenantId: 'tenant-a',

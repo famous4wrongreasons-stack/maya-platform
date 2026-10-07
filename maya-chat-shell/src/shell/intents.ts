@@ -98,6 +98,13 @@ export const createLiveSubmission = (
       if (sent.failure.reason === 'server_error') return { status: 'server_error' };
       return { status: 'unexpected_response' };
     }
+    if (sent.value.booking_selection_pending !== undefined) {
+      return sent.value.booking_selection_pending === 'date' && sent.value.outcome === 'terminate'
+        && sent.value.code === null && sent.value.receipt_outcome === 'ACCEPTED'
+        && sent.value.next_envelope === null && sent.value.resolved_widget === null
+        && sent.value.owner_decision === undefined
+        ? { status: 'booking_selection_pending', next: 'date' } : { status: 'forbidden' };
+    }
     if (sent.value.next_envelope !== null) return {
       status: 'advanced',
       envelope: sent.value.next_envelope,
@@ -211,6 +218,8 @@ interface Entry {
   /** Presentation receipt only; never rewrites the sealed envelope or its lifecycle. */
   priceReceipt: WidgetSentence | null;
   bookingReceipt: boolean;
+  /** Spent selector presentation only; never used in a request or booking decision. */
+  pendingStaffOption: string | null;
   inflight: AbortHandle | null;
   expiry: Cancel | null;
   /** Bumped whenever the entry's emission changes, so a late outcome for a predecessor is ignored. */
@@ -401,6 +410,19 @@ const bookingReceiptResult = (result: RenderResult, view: EnvelopeView): RenderR
     description: '', liveRegion: 'off', focus: 'none' };
 };
 
+const pendingStaffResult = (result: RenderResult, view: EnvelopeView, optionId: string): RenderResult => {
+  if (view.kind !== 'STAFF_SELECTOR' || !('for_service_refs' in view.body)) return result;
+  const option = view.body.options.find(item => item.option_id === optionId);
+  if (!option) return result;
+  const nodes: RenderNode[] = [
+    { t: 'leaf', source: 'cell', state: option.label.state, text: option.label.label, detail: null },
+    { t: 'leaf', source: 'cell', state: option.role_label.state, text: option.role_label.label, detail: null },
+    ...result.nodes.filter(node => node.t === 'limitation'),
+  ];
+  return { ...result, nodes, mode: 'frozen_prose', readingOrder: [], accessibleNames: {},
+    description: '', liveRegion: 'off', focus: 'none' };
+};
+
 /**
  * L27: which canonical terminal outcome a line IS — server-authored, never the sentence it carries.
  *
@@ -431,6 +453,8 @@ const sentenceFor = (outcome: SubmissionOutcome): WidgetSentence => {
   switch (outcome.status) {
     case 'refused':
       return outcome.sentence;
+    case 'booking_selection_pending':
+      return 'activation_forbidden';
     case 'forbidden':
       return 'activation_forbidden';
     case 'no_connection':
@@ -642,6 +666,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
         sentence: next.sentence,
         priceReceipt: null,
       bookingReceipt: false,
+      pendingStaffOption: null,
         emission: predecessor.emission + 1,
       });
       if (predecessor.display === 'collapsed') vault.drop(predecessor.itemId);
@@ -664,6 +689,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       sentence: next.sentence,
       priceReceipt: null,
       bookingReceipt: false,
+      pendingStaffOption: null,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -719,6 +745,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       sentence: next.sentence,
       priceReceipt: null,
       bookingReceipt: false,
+      pendingStaffOption: null,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -830,6 +857,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       sentence: next.sentence,
       priceReceipt: null,
       bookingReceipt: false,
+      pendingStaffOption: null,
       emission: opener.emission + 1,
     });
     if (opener.display === 'collapsed') vault.drop(opener.itemId);
@@ -840,7 +868,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
     const entry = entries.get(itemId);
     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
-    if (entry.priceReceipt !== null || entry.bookingReceipt) return { outcome: 'ignored', reason: 'not_drawn' };
+    if (entry.priceReceipt !== null || entry.bookingReceipt || entry.pendingStaffOption !== null) return { outcome: 'ignored', reason: 'not_drawn' };
     const drawn = entry.display === 'collapsed' ? [] : entry.result.readingOrder;
     if (!drawn.includes(ref)) return { outcome: 'ignored', reason: 'not_drawn' };
     // One activation in flight per item; the busy control is already drawn as pending.
@@ -913,6 +941,25 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     }
     entry.inflight = null;
     entry.pending = null;
+    if (outcome.status === 'booking_selection_pending') {
+      const optionId = ref.startsWith('option:') ? ref.slice('option:'.length) : null;
+      const field = intent.input_schema?.fields[0];
+      if (outcome.next !== 'date' || entry.envelope.kind !== 'STAFF_SELECTOR' || intent.effect !== 'REFINE'
+        || intent.capability?.space !== 'C9' || intent.capability.key !== 'catalog.staff.read'
+        || entry.envelope.source.from !== 'capability_envelope' || entry.envelope.source.capability !== 'catalog.staff.read'
+        || entry.envelope.provenance.source_capability !== 'catalog.staff.read'
+        || intent.input_schema?.fields.length !== 1 || field?.name !== 'staff_ref'
+        || optionId === null || inputs?.staff_ref !== optionId || !('for_service_refs' in entry.view.body)
+        || !entry.view.body.options.some(option => option.option_id === optionId && option.intent_ref === intent.intent_ref)) {
+        return endInSentence(entry, 'activation_forbidden', true);
+      }
+      cancelWork(entry); vault.drop(entry.itemId);
+      entry.pendingStaffOption = optionId;
+      entry.display = 'terminal'; entry.sentence = 'booking_date_required';
+      entry.result = pendingStaffResult(entry.result, entry.view, optionId);
+      publish(entry); counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
     const priceSentence = servicePriceSentence(entry.envelope, intent, outcome) ?? goodsReceiptSentence(entry.envelope, intent, outcome);
     if (priceSentence !== null) {
       // A response loss is also a submitted mutation with an unresolved outcome, never an ordinary
@@ -1030,7 +1077,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const offEnvironment = deps.environment.onA11yChange(() => {
     for (const entry of entries.values()) {
       const result = renderEntry(entry.view, entry.verdict, entry.place);
-      entry.result = entry.bookingReceipt ? bookingReceiptResult(result, entry.view)
+      entry.result = entry.pendingStaffOption !== null ? pendingStaffResult(result, entry.view, entry.pendingStaffOption)
+        : entry.bookingReceipt ? bookingReceiptResult(result, entry.view)
         : entry.priceReceipt === null ? result : servicePriceReceiptResult(result, entry.view);
       publish(entry);
     }

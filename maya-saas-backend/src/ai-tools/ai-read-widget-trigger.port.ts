@@ -24,6 +24,15 @@ export interface AiReadWidgetTriggerPort {
     readonly requestId: string | null;
     /** Transient READ-source check; never serialized as authority or history. */
     readonly revalidateSource?: () => Promise<void>;
+    readonly bookingSelector?: {
+      readonly tenantId: string;
+      readonly serviceId?: string;
+      readonly scope: {
+        readonly branchId: string;
+        readonly sourceRevision: string;
+      } | null;
+      readonly revalidate: () => Promise<void>;
+    };
     readonly userTurn?: {
       readonly turnId: string;
       readonly conversationId: string;

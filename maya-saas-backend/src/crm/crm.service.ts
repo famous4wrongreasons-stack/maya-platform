@@ -2276,6 +2276,53 @@ export class CrmService {
     return { ...branches[0], timezone: source.timezone };
   }
 
+  /** The configured native company-to-branch attribution, never a guessed first branch. */
+  async resolveConfiguredBookingBranch(tenantId: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    if ((await this.getCalendarSource(tenantId)) === CalendarSource.INTERNAL)
+      return null;
+    const integration = await this.getStoredIntegration(tenantId);
+    const unavailable = () =>
+      new ServiceUnavailableException({
+        error: { code: 'booking_branch_source_unavailable' },
+      });
+    if (!['yclients', 'altegio'].includes(integration.provider))
+      throw unavailable();
+    const settings = (integration.settingsJson ?? {}) as Record<
+      string,
+      unknown
+    >;
+    let binding;
+    try {
+      binding = normalizeCrmBranchBinding(
+        settings.branchBinding,
+        settings.companyId,
+      );
+    } catch {
+      // Refuse an unqualified source, without selecting a replacement branch.
+    }
+    if (integration.status !== 'active' || !binding) throw unavailable();
+    // Pin before reading the display timezone. A later current witness cannot
+    // qualify facts obtained from an earlier mapping/timezone snapshot.
+    const sourceRevision = await this.readBranchAvailabilityRevision(
+      tenantId,
+      binding.branchId,
+    );
+    if (!sourceRevision) throw unavailable();
+    const branch = await this.resolveBookingBranchPreference(
+      tenantId,
+      null,
+      binding.branchId,
+    );
+    if (
+      !branch ||
+      (await this.readBranchAvailabilityRevision(tenantId, branch.id)) !==
+        sourceRevision
+    )
+      throw unavailable();
+    return { ...branch, sourceRevision };
+  }
+
   async readBranchAvailabilityRevision(
     tenantId: string,
     branchId: string,

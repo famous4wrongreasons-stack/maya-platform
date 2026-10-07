@@ -1,3 +1,5 @@
+import { encodeBookingCatalogOwnerRef } from '../booking/booking-noun-identity';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { SealService } from '../emission/seal.service';
 import { BookingSelectorAdapter } from './booking-selector.adapter';
 
@@ -98,7 +100,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
       actor,
       'catalog.staff.read',
       { arguments: {}, surface: 'web' },
-      { suppressWidgetTrigger: true },
+      expect.objectContaining({ suppressWidgetTrigger: true }),
     );
     await expect(
       adapter.advance({
@@ -111,7 +113,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
     expect(runtime.execute).toHaveBeenCalledTimes(1);
   });
 
-  it('reads availability with exact reopened service/staff ids and rejects foreign tenant handles', async () => {
+  it('asks for an explicit day after exact service/staff selection without availability or provider writes', async () => {
     const runtime = {
       execute: jest.fn().mockResolvedValue({
         status: 'completed',
@@ -139,26 +141,12 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         handles: { service, staff },
       }),
     ).resolves.toMatchObject({
-      nextKind: 'TIME_SLOT_SELECTOR',
-      capabilityKey: 'booking.availability.read',
+      nextKind: null,
+      capabilityKey: 'catalog.staff.read',
       inheritedHandles: { service, staff },
     });
-    expect(runtime.execute).toHaveBeenCalledWith(
-      actor,
-      'booking.availability.read',
-      {
-        arguments: {
-          date: '2026-10-02',
-          service_ids: ['service-1'],
-          staff_id: 'staff-1',
-        },
-        surface: 'web',
-      },
-      {
-        suppressWidgetTrigger: true,
-        onAvailabilityScope: expect.any(Function) as unknown,
-      },
-    );
+    expect(runtime.execute).not.toHaveBeenCalled();
+    expect(availability.nextAvailabilityDay).not.toHaveBeenCalled();
 
     const foreign = handle(OTHER_TENANT, 'staff', 'staff-1');
     await expect(
@@ -167,6 +155,109 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         actor: actor as never,
         step: 'staff',
         handles: { service, staff: foreign },
+      }),
+    ).resolves.toBeNull();
+    expect(runtime.execute).not.toHaveBeenCalled();
+  });
+
+  it('retains the native source in the successor, rejects mixed scopes and refuses a withdrawn binding', async () => {
+    const scope = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+    const runtime = {
+      execute: jest.fn().mockResolvedValue({
+        status: 'completed',
+        result: { staff: [{ id: '71', name: 'Антон' }] },
+      }),
+    };
+    const crm = {
+      readBranchAvailabilityRevision: jest
+        .fn()
+        .mockResolvedValue(scope.sourceRevision),
+    };
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+      crm as never,
+    );
+    const service = handle(
+      TENANT,
+      'service',
+      encodeBookingCatalogOwnerRef('81', scope)!,
+    );
+    const staff = handle(
+      TENANT,
+      'staff',
+      encodeBookingCatalogOwnerRef('71', {
+        ...scope,
+        sourceRevision: 'b'.repeat(64),
+      })!,
+    );
+    await expect(
+      adapter.advance({
+        routing: routing as never,
+        actor: actor as never,
+        step: 'service',
+        handles: { service },
+      }),
+    ).resolves.toMatchObject({
+      nextKind: 'STAFF_SELECTOR',
+      selectionScope: scope,
+    });
+    await expect(
+      adapter.advance({
+        routing: routing as never,
+        actor: actor as never,
+        step: 'staff',
+        handles: { service, staff },
+      }),
+    ).resolves.toBeNull();
+    crm.readBranchAvailabilityRevision.mockRejectedValue(
+      new ServiceUnavailableException({
+        error: { code: 'booking_branch_source_unavailable' },
+      }),
+    );
+    await expect(
+      adapter.advance({
+        routing: routing as never,
+        actor: actor as never,
+        step: 'service',
+        handles: { service },
+      }),
+    ).resolves.toBeNull();
+    expect(runtime.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses source drift during staff read and does not mint a successor from mixed provenance', async () => {
+    const scope = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+    const crm = {
+      readBranchAvailabilityRevision: jest
+        .fn()
+        .mockResolvedValue(scope.sourceRevision),
+    };
+    const runtime = {
+      execute: jest.fn().mockImplementation(() => {
+        crm.readBranchAvailabilityRevision.mockResolvedValue('b'.repeat(64));
+        return Promise.resolve({
+          status: 'completed',
+          result: { staff: [{ id: '71', name: 'Антон' }] },
+        });
+      }),
+    };
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+      crm as never,
+    );
+    const service = handle(
+      TENANT,
+      'service',
+      encodeBookingCatalogOwnerRef('81', scope)!,
+    );
+    await expect(
+      adapter.advance({
+        routing: routing as never,
+        actor: actor as never,
+        step: 'service',
+        handles: { service },
       }),
     ).resolves.toBeNull();
     expect(runtime.execute).toHaveBeenCalledTimes(1);

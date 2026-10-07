@@ -118,6 +118,124 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+describe('configured native booking branch retains one source window', () => {
+  function configuredFixture() {
+    const f = fixture();
+    // The preference owner's own tenant/name resolution is covered below. This
+    // seam changes source metadata while that owner's asynchronous read runs.
+    const preference = jest
+      .spyOn(f.service, 'resolveBookingBranchPreference')
+      .mockImplementation(() =>
+        Promise.resolve({
+          id: f.branch.id,
+          name: 'Центральный',
+          timezone: f.branch.timezone!,
+        }),
+      );
+    global.fetch = jest.fn();
+    return {
+      ...f,
+      preference,
+      configured: () =>
+        f.run(() => f.service.resolveConfiguredBookingBranch('tenant-a')),
+      noProvider: () => {
+        expect(global.fetch).not.toHaveBeenCalled();
+        expect(f.create).not.toHaveBeenCalled();
+        expect(f.origin).not.toHaveBeenCalled();
+      },
+    };
+  }
+
+  it('uses the configured branch ID and the canonical availability revision', async () => {
+    const f = configuredFixture();
+    const revision = await f.run(() =>
+      f.service.readBranchAvailabilityRevision('tenant-a', 'branch-a'),
+    );
+    await expect(f.configured()).resolves.toEqual({
+      id: 'branch-a',
+      name: 'Центральный',
+      timezone: 'Europe/Moscow',
+      sourceRevision: revision,
+    });
+    expect(f.preference).toHaveBeenCalledWith('tenant-a', null, 'branch-a');
+    f.noProvider();
+  });
+
+  it.each([
+    'timezone',
+    'metadata',
+    'company',
+    'withdrawn',
+    'provider',
+    'internal',
+  ])(
+    'refuses %s changing while the display preference is read',
+    async (change) => {
+      const f = configuredFixture();
+      f.preference.mockImplementationOnce(() => {
+        const prior = {
+          id: f.branch.id,
+          name: 'Центральный',
+          timezone: f.branch.timezone!,
+        };
+        if (change === 'timezone') f.branch.timezone = 'Asia/Tokyo';
+        if (change === 'metadata')
+          f.integration.updatedAt = new Date('2026-10-07T00:01:00Z');
+        if (change === 'company') f.integration.settingsJson.companyId = 456;
+        if (change === 'withdrawn')
+          f.integration.settingsJson.branchBinding = null;
+        if (change === 'provider')
+          f.integration.provider = 'unsupported-provider';
+        if (change === 'internal')
+          f.prisma.tenant.findUnique.mockResolvedValue({
+            calendarSource: 'internal',
+            defaultTimezone: 'UTC',
+          });
+        return Promise.resolve(prior);
+      });
+      await expect(f.configured()).rejects.toMatchObject({
+        status: 503,
+        response: { error: { code: 'booking_branch_source_unavailable' } },
+      });
+      expect(f.preference).toHaveBeenCalledTimes(1);
+      f.noProvider();
+    },
+  );
+
+  it('treats an unsupported external provider as unavailable, never as an internal calendar', async () => {
+    const f = configuredFixture();
+    f.integration.provider = 'unsupported-provider';
+    await expect(f.configured()).rejects.toMatchObject({
+      status: 503,
+      response: { error: { code: 'booking_branch_source_unavailable' } },
+    });
+    expect(f.preference).not.toHaveBeenCalled();
+    f.noProvider();
+  });
+
+  it('keeps the existing internal-calendar path unscoped without reading CRM', async () => {
+    const f = configuredFixture();
+    f.prisma.tenant.findUnique.mockResolvedValue({
+      calendarSource: 'internal',
+      defaultTimezone: 'UTC',
+    });
+    await expect(f.configured()).resolves.toBeNull();
+    expect(f.prisma.crmIntegration.findUnique).not.toHaveBeenCalled();
+    expect(f.preference).not.toHaveBeenCalled();
+    f.noProvider();
+  });
+
+  it('rejects a foreign tenant before source or preference reads', async () => {
+    const f = configuredFixture();
+    await expect(
+      f.run(() => f.service.resolveConfiguredBookingBranch('tenant-b')),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(f.prisma.tenant.findUnique).not.toHaveBeenCalled();
+    expect(f.preference).not.toHaveBeenCalled();
+    f.noProvider();
+  });
+});
+
 describe('current CRM owner resolves semantic booking branch preferences', () => {
   function preferenceFixture() {
     const f = fixture();

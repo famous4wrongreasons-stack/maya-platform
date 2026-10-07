@@ -173,6 +173,7 @@ export interface SessionPort {
 export type BookingRefusalSentence = 'booking_stale' | 'booking_confirmation_required' | 'booking_facts_unavailable';
 
 export type SubmissionOutcome =
+  | { readonly status: 'booking_selection_pending'; readonly next: 'date' }
   | { readonly status: 'refused'; readonly sentence: BookingRefusalSentence }
   // Safe stale successors may still advance the timeline; fullscreen requires an accepted reply.
   | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope; readonly accepted: boolean }
@@ -223,6 +224,7 @@ export type TurnRetry =
 /** Why a widget item carries a neutral sentence instead of a state change (D9). */
 export type WidgetSentence =
   | BookingRefusalSentence
+  | 'booking_date_required'
   | 'booking_unconfirmed'
   | 'activation_unavailable'
   | 'activation_forbidden'

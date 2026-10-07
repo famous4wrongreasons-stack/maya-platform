@@ -1,5 +1,9 @@
+import { BookingCatalogSourceChangedError } from '../../ai-tools/booking-catalog-binding';
 import { IntentTemplateRefusal } from '../emission/intent-template.registry';
-import { ForbiddenException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type { NavigateWidgetMinterPort } from './effect-router.ports';
 import type { GateContext, PrincipalView } from '../gate.types';
 import { ctx, rec } from '../gates/gate-fixtures.spec-helper.spec';
@@ -847,6 +851,131 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     );
     expect(successors.mintBookingSelector).toHaveBeenCalledWith(
       expect.objectContaining({ kind: 'STAFF_SELECTOR' }),
+    );
+  });
+
+  it.each([
+    new BookingCatalogSourceChangedError('booking_catalog_source_changed'),
+    new ServiceUnavailableException({
+      error: { code: 'booking_branch_source_unavailable' },
+    }),
+  ])(
+    'persists exact REFUSED after declared source failure during successor mint: %p',
+    async (error) => {
+      const f = fixture();
+      f.bookingSelectors.advance.mockResolvedValue({
+        nextKind: 'STAFF_SELECTOR',
+        capabilityKey: 'catalog.staff.read',
+        source: { staff: [] },
+        fact: { capability: 'catalog.staff.read' },
+        inheritedHandles: { service: 'opaque-service' },
+      });
+      f.projector.composeCompletedRead.mockReturnValue({
+        kind: 'composer_input',
+        input: { kind_proposal: 'STAFF_SELECTOR' },
+      });
+      f.successors.mintBookingSelector.mockRejectedValue(error);
+      const input = ctx(
+        rec({
+          effect: 'REFINE',
+          widgetKind: 'SERVICE_SELECTOR',
+          capabilitySpace: 'C9',
+          capabilityKey: 'catalog.services.read',
+          frozenNounsJson: {},
+        }),
+        {
+          principal: PRINCIPAL,
+          facts: {
+            validatedInputs: {
+              closed: new Map([['service_ref', ['opaque-service']]]),
+            },
+          },
+        },
+      );
+      await expect(routeEffect(f.router, input)).resolves.toMatchObject({
+        outcome: 'terminate',
+        route: {
+          receipt_outcome: 'REFUSED',
+          refusal_code: 'effect_not_admissible',
+          next_envelope: null,
+        },
+      });
+      expect(f.stores.writeReceipt).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'REFUSED', actionReceiptRef: null }),
+        input.now,
+      );
+    },
+  );
+
+  it.each([
+    new ForbiddenException('revoked'),
+    new Error('database unavailable'),
+  ])('preserves unexpected/auth source exceptions: %p', async (error) => {
+    const f = fixture();
+    f.bookingSelectors.advance.mockRejectedValue(error);
+    const input = ctx(
+      rec({
+        effect: 'REFINE',
+        widgetKind: 'SERVICE_SELECTOR',
+        capabilitySpace: 'C9',
+        capabilityKey: 'catalog.services.read',
+        frozenNounsJson: {},
+      }),
+      {
+        principal: PRINCIPAL,
+        facts: {
+          validatedInputs: {
+            closed: new Map([['service_ref', ['opaque-service']]]),
+          },
+        },
+      },
+    );
+    await expect(routeEffect(f.router, input)).rejects.toBe(error);
+    expect(f.stores.writeReceipt).not.toHaveBeenCalled();
+  });
+
+  it('retains accepted staff preference as a date question without booking completion or successor', async () => {
+    const f = fixture();
+    f.bookingSelectors.advance.mockResolvedValue({
+      nextKind: null,
+      capabilityKey: 'catalog.staff.read',
+      source: null,
+      fact: { capability: 'catalog.staff.read' },
+      inheritedHandles: { service: 'opaque-service', staff: 'opaque-staff' },
+    });
+    const input = ctx(
+      rec({
+        effect: 'REFINE',
+        widgetKind: 'STAFF_SELECTOR',
+        capabilitySpace: 'C9',
+        capabilityKey: 'catalog.staff.read',
+        frozenNounsJson: { service: 'opaque-service' },
+      }),
+      {
+        principal: PRINCIPAL,
+        facts: {
+          validatedInputs: {
+            closed: new Map([['staff_ref', ['opaque-staff']]]),
+          },
+        },
+      },
+    );
+    await expect(routeEffect(f.router, input)).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: {
+        receipt_outcome: 'ACCEPTED',
+        next_envelope: null,
+        owner_decision: {
+          kind: 'booking_selection_pending',
+          next: 'date',
+          reply: 'На какую дату проверить время у выбранного мастера?',
+        },
+      },
+    });
+    expect(f.successors.mintBookingSelector).not.toHaveBeenCalled();
+    expect(f.stores.writeReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'ACCEPTED', actionReceiptRef: null }),
+      input.now,
     );
   });
 

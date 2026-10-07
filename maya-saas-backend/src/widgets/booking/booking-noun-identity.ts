@@ -24,6 +24,50 @@ export type BookingSlotSelection = {
   readonly scope: BookingSlotScope | null;
 };
 
+const CATALOG_PREFIX = 'catalog_v2:';
+export const encodeBookingCatalogOwnerRef = (
+  id: string,
+  scope?: BookingSlotScope | null,
+): string | null => {
+  if (!/^[A-Za-z0-9_:-]{1,256}$/.test(id) || id.startsWith(CATALOG_PREFIX))
+    return null;
+  if (!scope) return id;
+  if (
+    !/^[A-Za-z0-9_-]{1,128}$/.test(scope.branchId) ||
+    !/^[a-f0-9]{64}$/.test(scope.sourceRevision)
+  )
+    return null;
+  const ref = `${CATALOG_PREFIX}${Buffer.from(id).toString('base64url')}:${Buffer.from(scope.branchId).toString('base64url')}:${scope.sourceRevision}`;
+  return ref.length <= 256 ? ref : null;
+};
+
+export const decodeBookingCatalogOwnerRef = (
+  ref: string,
+): { id: string; scope: BookingSlotScope | null } | null => {
+  if (!ref.startsWith(CATALOG_PREFIX))
+    return encodeBookingCatalogOwnerRef(ref) === ref
+      ? { id: ref, scope: null }
+      : null;
+  const parts = ref.slice(CATALOG_PREFIX.length).split(':');
+  if (parts.length !== 3) return null;
+  const id = Buffer.from(parts[0], 'base64url').toString('utf8');
+  const scope = {
+    branchId: Buffer.from(parts[1], 'base64url').toString('utf8'),
+    sourceRevision: parts[2],
+  };
+  return encodeBookingCatalogOwnerRef(id, scope) === ref ? { id, scope } : null;
+};
+
+export const sameBookingScope = (
+  a: BookingSlotScope | null,
+  b: BookingSlotScope | null,
+): boolean =>
+  a === null
+    ? b === null
+    : b !== null &&
+      a.branchId === b.branchId &&
+      a.sourceRevision === b.sourceRevision;
+
 /** Slot facts have no provider row id. Retain their canonical ISO instant as an opaque handle ref. */
 export const encodeBookingSlotOwnerRef = (
   value: string,

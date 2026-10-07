@@ -13,6 +13,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import * as ts from 'typescript';
 
 import {
   F88_EXEMPTIONS,
@@ -32,6 +33,102 @@ const read = (relative: string): string =>
 /** Comments are prose about a fence, never a read of one; a ratchet that counts them measures nothing. */
 const withoutComments = (source: string): string =>
   source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+/** §4.4.1 requires the actual claimed profile in the submission audit. Admit
+ * only the literal metadata projection in the DI-bound post-gateway sink, not
+ * the module/file, a conditional, a query or any gate-facing call. */
+const withoutBookingAuditProfileProjection = (source: string): string => {
+  const tree = ts.createSourceFile(
+    'widgets.module.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const spans: { start: number; end: number }[] = [];
+  const text = (node: ts.Node): string =>
+    node.getText(tree).replace(/\s+/g, '');
+  const property = (object: ts.ObjectLiteralExpression, name: string) =>
+    object.properties.find(
+      (p): p is ts.PropertyAssignment =>
+        ts.isPropertyAssignment(p) && text(p.name) === name,
+    );
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      text(node) === 'dto.profile_id'
+    ) {
+      const field = node.parent;
+      const object = field.parent;
+      const call = object.parent;
+      let callback: ts.PropertyAssignment | undefined;
+      let factory: ts.PropertyAssignment | undefined;
+      for (
+        let parent: ts.Node | undefined = call;
+        parent;
+        parent = parent.parent
+      ) {
+        if (
+          ts.isPropertyAssignment(parent) &&
+          text(parent.name) === 'recordAcceptedBookingSelection'
+        )
+          callback = parent;
+        if (
+          ts.isPropertyAssignment(parent) &&
+          text(parent.name) === 'useFactory'
+        )
+          factory = parent;
+      }
+      const provider = factory?.parent;
+      const expected = [
+        'tenantId',
+        'widgetId',
+        'intentTokenHash',
+        'clientNonce',
+        'profileId',
+        'clientEmittedAt',
+        'inputsClosed',
+      ].sort();
+      if (
+        ts.isPropertyAssignment(field) &&
+        field.initializer === node &&
+        text(field.name) === 'profileId' &&
+        ts.isObjectLiteralExpression(object) &&
+        object.properties.every(ts.isPropertyAssignment) &&
+        object.properties
+          .map((p) => text(p.name!))
+          .sort()
+          .join('|') === expected.join('|') &&
+        ts.isCallExpression(call) &&
+        call.arguments.length === 1 &&
+        call.arguments[0] === object &&
+        text(call.expression) === 'stores.recordAcceptedBookingSelection' &&
+        callback &&
+        ts.isArrowFunction(callback.initializer) &&
+        callback.initializer.parameters.map((p) => text(p.name)).join('|') ===
+          'dto|actor' &&
+        factory &&
+        ts.isArrowFunction(factory.initializer) &&
+        factory.initializer.parameters.length === 1 &&
+        text(factory.initializer.parameters[0]) ===
+          'stores:WidgetStoresService' &&
+        provider &&
+        ts.isObjectLiteralExpression(provider) &&
+        property(provider, 'provide')?.initializer.getText(tree) ===
+          'BOOKING_SELECTION_AUDIT' &&
+        text(property(provider, 'inject')?.initializer ?? tree) ===
+          '[WidgetStoresService]'
+      ) {
+        spans.push({ start: node.getStart(tree), end: node.end });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(tree);
+  for (const span of spans.sort((a, b) => b.start - a.start)) {
+    source = source.slice(0, span.start) + 'undefined' + source.slice(span.end);
+  }
+  return source;
+};
 
 const widgetSources = (): { file: string; text: string }[] => {
   const out: { file: string; text: string }[] = [];
@@ -311,7 +408,7 @@ describe('F88 — the one structural validator, at runtime', () => {
   });
 
   describe('F88-7 [BUILD] — no gate antecedent reads the submission `profile_id` (R3.8.3)', () => {
-    it('F88-7 [BUILD] finds no read of it in any RUNTIME module under src/widgets outside the DTO that declares it', () => {
+    it('F88-7 [BUILD] finds no runtime read outside its declaration or the exact post-gateway audit projection', () => {
       // A READ, not a mention: the ratchet matches `.profile_id`, `['profile_id']` and a destructuring
       // of it, after comments are stripped. The record's own column is `profileId` and is a different
       // name — R3.8.3 itself says Gate 8-R keys on the record, not on the submission.
@@ -332,8 +429,12 @@ describe('F88 — the one structural validator, at runtime', () => {
             !file.startsWith('src/widgets/validation/') &&
             !file.endsWith('.spec.ts'),
         )
-        .filter(({ text }) => {
-          const code = withoutComments(text);
+        .filter(({ file, text }) => {
+          const code = withoutComments(
+            file === 'src/widgets/widgets.module.ts'
+              ? withoutBookingAuditProfileProjection(text)
+              : text,
+          );
           return (
             /\.\s*profile_id\b/.test(code) ||
             /\[\s*['"]profile_id['"]\s*\]/.test(code) ||
@@ -342,6 +443,47 @@ describe('F88 — the one structural validator, at runtime', () => {
         })
         .map(({ file }) => file);
       expect(reads).toEqual([]);
+    });
+
+    it('F88-7-audit [BUILD] admits only the DI-bound metadata sink and catches a new predicate, query or gateway read', () => {
+      const module = read('src/widgets/widgets.module.ts');
+      expect(module.match(/dto\.profile_id/g)).toHaveLength(1);
+      expect(withoutBookingAuditProfileProjection(module)).not.toMatch(
+        /\.profile_id/,
+      );
+      for (const changed of [
+        module.replace('if (!actor.tenantId)', 'if (dto.profile_id)'),
+        module.replace(
+          'stores.recordAcceptedBookingSelection({',
+          'stores.query({',
+        ),
+        module.replace(
+          'provide: BOOKING_SELECTION_AUDIT',
+          'provide: EFFECT_ROUTE_AUDIT',
+        ),
+        module.replace(
+          'profileId: dto.profile_id,',
+          'profileId: dto.profile_id, where: dto.profile_id,',
+        ),
+        module.replace(
+          'profileId: dto.profile_id,',
+          'where: { profileId: dto.profile_id },',
+        ),
+      ])
+        expect(withoutBookingAuditProfileProjection(changed)).toMatch(
+          /\.profile_id/,
+        );
+      const controller = read('src/widgets/widgets.controller.ts');
+      expect(controller).not.toContain("from './stores/widget-stores.service'");
+      expect(controller.indexOf('await this.gateway.submit')).toBeLessThan(
+        controller.indexOf(
+          'await this.selectionAudit?.recordAcceptedBookingSelection',
+        ),
+      );
+      expect(controller).toContain("route?.receipt_outcome === 'ACCEPTED'");
+      // The audit transport does not import the store facade into the gate graph.
+      const port = read('src/widgets/stores/booking-selection-audit.port.ts');
+      expect(port).not.toMatch(/WidgetStoresService|profile_id|profileId/);
     });
 
     it('F88-7c [BUILD] the spec exclusion is not a hole: the fences that plant a read are named, and the runtime fence that replaced this reach exists', () => {

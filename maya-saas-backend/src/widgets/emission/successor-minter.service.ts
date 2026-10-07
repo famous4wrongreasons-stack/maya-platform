@@ -49,6 +49,8 @@ export interface BookingSelectorSuccessorRequest extends SuccessorMintRequest {
   readonly source: unknown;
   readonly inheritedHandles: Readonly<Record<string, string>>;
   readonly revalidateSource?: () => Promise<void>;
+  readonly selectionScope?:
+    import('../booking/booking-noun-identity').BookingSlotScope | null;
 }
 
 export interface SuccessorMintResult {
@@ -344,6 +346,10 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         source: request.source,
         revalidateSource: request.revalidateSource,
         inheritedHandles: request.inheritedHandles,
+        bookingSelection: {
+          tenantId: request.tenantId,
+          scope: request.selectionScope ?? null,
+        },
         predecessorWidgetId: predecessor.widgetId,
       },
       request.now,

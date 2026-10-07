@@ -408,6 +408,57 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     expect(prisma.emissions).toHaveLength(1);
   });
 
+  it.each([
+    ['STAFF_SELECTOR', 's'.repeat(256), '71'],
+    ['TIME_SLOT_SELECTOR', 's'.repeat(256), '71'],
+    ['TIME_SLOT_SELECTOR', '81', 's'.repeat(256)],
+  ] as const)(
+    'returns the existing bounded source refusal before minting an overlong inherited %s identity',
+    async (kind, serviceId, staffId) => {
+      const { emitter, prisma } = make();
+      const scope = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+      const revalidateSource = jest.fn().mockResolvedValue(undefined);
+      await expect(
+        emitter.emitBookingSelector(
+          {
+            ...req(),
+            kind,
+            composerInput: composerFor(
+              kind,
+              kind === 'STAFF_SELECTOR'
+                ? 'catalog.staff.read'
+                : 'booking.availability.read',
+              [],
+            ),
+          },
+          {
+            source: {
+              staff: [],
+              slots: [],
+              booking_selection: {
+                tenantId: 't1',
+                serviceId,
+                staffId,
+                branchId: scope.branchId,
+                branchSourceRevision: scope.sourceRevision,
+              },
+            },
+            ...(kind === 'STAFF_SELECTOR'
+              ? { bookingSelection: { tenantId: 't1', serviceId, scope } }
+              : {}),
+            revalidateSource,
+          },
+        ),
+      ).rejects.toMatchObject({ code: 'booking_selector_source_unavailable' });
+      // ChatReadTrigger already projects this exact refusal to null for T-2a/T-2b;
+      // no token or selector can remain from the failed inherited noun projection.
+      expect(prisma.emissions).toEqual([]);
+      expect(prisma.records).toEqual([]);
+      expect(prisma.receipts).toEqual([]);
+      expect(revalidateSource).not.toHaveBeenCalled();
+    },
+  );
+
   it('mints source-qualified nullable measures without losing the real service choice', async () => {
     const { emitter } = make();
     const minted = await emitter.emitBookingSelector(

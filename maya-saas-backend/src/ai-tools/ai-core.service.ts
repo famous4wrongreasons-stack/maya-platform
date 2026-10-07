@@ -15,6 +15,9 @@ import {
 } from '../common/person-name-forms';
 import {
   bindBookingCatalog,
+  bindBookingServices,
+  BookingCatalogSourceChangedError,
+  isBookingSourceUnavailable,
   bookingPreferenceDate,
   MULTI_SERVICE_LIMITATION,
 } from './booking-catalog-binding';
@@ -539,6 +542,10 @@ const STAFF_SURFACE_ROLES = new Set<UserRole>([
 
 @Injectable()
 export class AiCoreService {
+  private readonly bookingPreferenceSources = new WeakMap<
+    AiCoreChatDto,
+    { branchId: string; sourceRevision: string }
+  >();
   constructor(
     private readonly configService: ConfigService,
     private readonly tenantContext: TenantContextService,
@@ -1133,136 +1140,463 @@ export class AiCoreService {
           activeSemanticPlan.tasks[0].permission.status === 'allowed' &&
           (!decision.toolCall || allowedNames.has(decision.toolCall.name)) &&
           activeSemanticPlan.tasks[0].tool.status === 'ready' &&
-          ['booking.find_availability', 'booking.create_own'].includes(
-            activeSemanticPlan.tasks[0].intent,
-          ) &&
+          [
+            'booking.prepare_personal',
+            'booking.find_availability',
+            'booking.create_own',
+          ].includes(activeSemanticPlan.tasks[0].intent) &&
           allowedNames.has('catalog.staff.read') &&
           allowedNames.has('catalog.services.read') &&
-          allowedNames.has('booking.availability.read') &&
-          (decision.toolCall?.arguments.staff_id !== undefined ||
-            activeSemanticPlan.tasks[0].entities.employee !== undefined ||
-            decision.toolCall?.arguments.branch_id !== undefined ||
-            'branch' in activeSemanticPlan.tasks[0].entities)
+          allowedNames.has('booking.availability.read')
         ) {
           const task = activeSemanticPlan.tasks[0];
-          const proposedArguments = decision.toolCall?.arguments ?? {};
-          // A retained branch is a preference, never a principal or a provider
-          // binding. Resolve it anew through the CRM owner before deriving the
-          // local booking day or asking for actionable availability.
-          const hasBranchPreference =
-            'branch' in task.entities ||
-            proposedArguments.branch_id !== undefined;
-          const branch = hasBranchPreference
-            ? await this.crm?.resolveBookingBranchPreference(
-                tenantId,
-                typeof task.entities.branch === 'string'
-                  ? task.entities.branch
-                  : null,
-                typeof proposedArguments.branch_id === 'string'
-                  ? proposedArguments.branch_id
-                  : undefined,
-              )
-            : null;
-          if (
-            hasBranchPreference &&
-            (!branch ||
-              ('branch' in task.entities &&
-                (typeof task.entities.branch !== 'string' ||
-                  !task.entities.branch.trim())) ||
-              (proposedArguments.branch_id !== undefined &&
-                typeof proposedArguments.branch_id !== 'string'))
-          ) {
-            return this.complete(
-              user,
-              dto,
-              brain,
-              sanitized.redacted,
-              toolsUsed,
-              decisions,
-              {
-                reply:
-                  'Уточните филиал салона. Не удалось однозначно проверить выбранный филиал; запись пока не подготовлена.',
-                source: 'safe_fallback',
-                action: null,
-                grounding: this.groundingReport(
-                  requirement,
-                  'blocked',
-                  toolResults,
-                ),
-              },
-              toolResults,
-            );
-          }
-          if (branch) task.entities.branch = branch.name;
-          const dateKey =
-            task.intent === 'booking.create_own' ? 'date' : 'date_or_period';
-          const date = bookingPreferenceDate(
-            task.entities[dateKey],
-            branch?.timezone ?? businessTimezone,
-          );
-          // Persist the selected local day, so changing service/staff/branch on
-          // a later turn cannot reinterpret yesterday's "tomorrow" as a new day.
-          if (date) task.entities[dateKey] = date;
-          const readCatalog = async (name: string) => {
-            const execution = this.record(
-              await this.executeChatTool(
+          try {
+            const proposedArguments = decision.toolCall?.arguments ?? {};
+            // A retained branch is a preference, never a principal or a provider
+            // binding. Resolve it anew through the CRM owner before deriving the
+            // local booking day or asking for actionable availability.
+            const hasBranchPreference =
+              'branch' in task.entities ||
+              proposedArguments.branch_id !== undefined;
+            const configuredBranch =
+              await this.crm?.resolveConfiguredBookingBranch?.(tenantId);
+            const branch = hasBranchPreference
+              ? await this.crm?.resolveBookingBranchPreference(
+                  tenantId,
+                  typeof task.entities.branch === 'string'
+                    ? task.entities.branch
+                    : null,
+                  typeof proposedArguments.branch_id === 'string'
+                    ? proposedArguments.branch_id
+                    : undefined,
+                )
+              : (configuredBranch ?? null);
+            if (
+              hasBranchPreference &&
+              (!branch ||
+                ('branch' in task.entities &&
+                  (typeof task.entities.branch !== 'string' ||
+                    !task.entities.branch.trim())) ||
+                (proposedArguments.branch_id !== undefined &&
+                  typeof proposedArguments.branch_id !== 'string'))
+            ) {
+              return this.complete(
+                user,
                 dto,
-                toolUser,
-                name,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
                 {
-                  surface: dto.surface,
-                  arguments: {},
-                  idempotencyKey: this.toolIdempotencyKey(
-                    tenantId,
-                    user.userId,
-                    dto.requestId,
-                    step,
-                    name,
+                  reply:
+                    'Уточните филиал салона. Не удалось однозначно проверить выбранный филиал; запись пока не подготовлена.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'blocked',
+                    toolResults,
                   ),
                 },
-                { suppressWidgetTrigger: true },
-              ),
+                toolResults,
+              );
+            }
+            if (configuredBranch && branch?.id !== configuredBranch.id) {
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply:
+                    'Выбранный филиал сейчас недоступен для записи. Уточните филиал.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'blocked',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            }
+            const scope = configuredBranch
+              ? {
+                  branchId: configuredBranch.id,
+                  sourceRevision: configuredBranch.sourceRevision,
+                }
+              : null;
+            const retainedScope = this.bookingPreferenceSources.get(dto);
+            if (
+              task.intent !== 'booking.prepare_personal' &&
+              retainedScope &&
+              (!scope ||
+                scope.branchId !== retainedScope.branchId ||
+                scope.sourceRevision !== retainedScope.sourceRevision)
+            )
+              throw new BookingCatalogSourceChangedError(
+                'booking_catalog_source_changed',
+              );
+            const revalidateCatalog = async () => {
+              if (
+                scope &&
+                (await this.crm?.readBranchAvailabilityRevision(
+                  tenantId,
+                  scope.branchId,
+                )) !== scope.sourceRevision
+              )
+                throw new BookingCatalogSourceChangedError(
+                  'booking_catalog_source_changed',
+                );
+              if (
+                !scope &&
+                this.crm?.resolveConfiguredBookingBranch &&
+                (await this.crm.resolveConfiguredBookingBranch(tenantId))
+              )
+                throw new BookingCatalogSourceChangedError(
+                  'booking_catalog_source_changed',
+                );
+            };
+            await revalidateCatalog();
+            if (scope) this.bookingPreferenceSources.set(dto, scope);
+            else this.bookingPreferenceSources.delete(dto);
+            if (branch) task.entities.branch = branch.name;
+            const dateKey =
+              task.intent === 'booking.create_own' ? 'date' : 'date_or_period';
+            const date = bookingPreferenceDate(
+              task.entities[dateKey],
+              configuredBranch?.timezone ??
+                branch?.timezone ??
+                businessTimezone,
             );
-            toolsUsed.push({
-              name,
-              status:
-                typeof execution.status === 'string'
-                  ? execution.status
-                  : 'unknown',
-              execution_id:
-                typeof execution.execution_id === 'string'
-                  ? execution.execution_id
-                  : null,
-            });
-            if (execution.status === 'completed')
-              toolResults.push({
+            // Persist the selected local day, so changing service/staff/branch on
+            // a later turn cannot reinterpret yesterday's "tomorrow" as a new day.
+            if (date) task.entities[dateKey] = date;
+            const readCatalog = async (
+              name: string,
+              emit = false,
+              serviceId?: string,
+            ) => {
+              const execution = this.record(
+                await this.executeChatTool(
+                  dto,
+                  toolUser,
+                  name,
+                  {
+                    surface: dto.surface,
+                    arguments: {},
+                    idempotencyKey: this.toolIdempotencyKey(
+                      tenantId,
+                      user.userId,
+                      dto.requestId,
+                      step,
+                      name,
+                    ),
+                  },
+                  {
+                    suppressWidgetTrigger: !emit,
+                    widgetTrigger: 'T-2a',
+                    requestId: dto.requestId,
+                    userTurn: this.persistedUserTurns.get(dto),
+                    bookingSelector: {
+                      tenantId,
+                      serviceId,
+                      scope,
+                      revalidate: revalidateCatalog,
+                    },
+                  },
+                ),
+              );
+              toolsUsed.push({
+                ...this.widgetResolution(execution),
                 name,
-                result: this.sanitizeToolResult(execution.result),
+                status:
+                  typeof execution.status === 'string'
+                    ? execution.status
+                    : 'unknown',
+                execution_id:
+                  typeof execution.execution_id === 'string'
+                    ? execution.execution_id
+                    : null,
               });
-            return execution.status === 'completed' ? execution.result : null;
-          };
-          const staffSource = await readCatalog('catalog.staff.read');
-          const serviceSource = await readCatalog('catalog.services.read');
-          const bound = bindBookingCatalog({
-            staffSource,
-            serviceSource,
-            employee:
-              'employee' in task.entities
-                ? task.entities.employee
-                : proposedArguments.staff_id,
-            services:
+              if (execution.status === 'completed')
+                toolResults.push({
+                  name,
+                  result: this.sanitizeToolResult(execution.result),
+                });
+              return execution.status === 'completed' ? execution.result : null;
+            };
+            const servicesPreference =
               'services' in task.entities
                 ? task.entities.services
-                : proposedArguments.service_ids,
-            nameReferences: sanitized.nameReferences,
-          });
-          if (bound.staff) task.entities.employee = bound.staff.name;
-          if (bound.kind === 'resolved')
+                : proposedArguments.service_ids;
+            const employeePreference =
+              'employee' in task.entities
+                ? task.entities.employee
+                : proposedArguments.staff_id;
+            const serviceSource = await readCatalog(
+              'catalog.services.read',
+              servicesPreference === undefined,
+            );
+            if (servicesPreference === undefined)
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply: serviceSource
+                    ? 'Выберите услугу для записи.'
+                    : 'Не удалось проверить каталог салона. Запись пока не подготовлена.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    serviceSource ? 'verified' : 'blocked',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            const services = bindBookingServices(
+              serviceSource,
+              servicesPreference,
+            );
+            if (!services || services.length !== 1)
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply:
+                    Array.isArray(servicesPreference) &&
+                    servicesPreference.length > 1
+                      ? MULTI_SERVICE_LIMITATION
+                      : 'Уточните одну услугу из каталога салона. Остальные пожелания сохранены.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'blocked',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            task.entities.services = services.map((service) => service.name);
+            const staffSource = await readCatalog(
+              'catalog.staff.read',
+              employeePreference === undefined,
+              services[0].id,
+            );
+            if (employeePreference === undefined)
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply: staffSource
+                    ? 'Выберите мастера. Услугу и остальные пожелания сохранила.'
+                    : 'Не удалось проверить каталог мастеров. Запись пока не подготовлена.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    staffSource ? 'verified' : 'blocked',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            const bound = bindBookingCatalog({
+              staffSource,
+              serviceSource,
+              employee:
+                'employee' in task.entities
+                  ? task.entities.employee
+                  : proposedArguments.staff_id,
+              services:
+                'services' in task.entities
+                  ? task.entities.services
+                  : proposedArguments.service_ids,
+              nameReferences: sanitized.nameReferences,
+            });
+            if (bound.staff) task.entities.employee = bound.staff.name;
+            if (bound.kind === 'resolved')
+              task.entities.services = bound.services.map((s) => s.name);
+            const multiService =
+              Array.isArray(task.entities.services) &&
+              task.entities.services.length > 1;
+            if (bound.kind === 'unresolved' || bound.services.length !== 1) {
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply: multiService
+                    ? MULTI_SERVICE_LIMITATION
+                    : bound.kind === 'unresolved' &&
+                        bound.reason === 'source_unavailable'
+                      ? 'Не удалось проверить каталог салона. Запись пока не подготовлена.'
+                      : bound.kind === 'unresolved' && bound.staff
+                        ? 'services' in task.entities
+                          ? 'Уточните услугу из каталога салона. Мастера сохранила.'
+                          : 'date' in task.entities ||
+                              'date_or_period' in task.entities
+                            ? 'Какую услугу выбрать? Мастера и дату сохранила.'
+                            : 'Какую услугу и на какую дату выбрать? Мастера сохранила.'
+                        : 'Уточните точное имя мастера из каталога салона. Запись пока не подготовлена.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'blocked',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            }
+            // Persist public preferences only. Revalidate against this tenant's catalog
+            // on every turn; these values never become a principal or execution permit.
+            task.entities.employee = bound.staff.name;
             task.entities.services = bound.services.map((s) => s.name);
-          const multiService =
-            Array.isArray(task.entities.services) &&
-            task.entities.services.length > 1;
-          if (bound.kind === 'unresolved' || bound.services.length !== 1) {
+            if (!date && task.requires_clarification) {
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply:
+                    this.semanticClarification(activeSemanticPlan) ??
+                    'Уточните дату и время для выбранных мастера и услуги.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'not_required',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            }
+            // The language contract requires configured business-local daypart bounds.
+            // This booking path has no such owner setting; never invent an 18:00 cutoff.
+            const timePreference =
+              task.entities.time ?? task.entities.time_of_day;
+            if (timePreference && !isExactBookingTime(timePreference)) {
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply:
+                    'Во сколько вам удобно? Мастера, услугу и дату сохранила.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    'not_required',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            }
+            if (typeof date === 'string') {
+              const execution = this.record(
+                await this.executeChatTool(
+                  dto,
+                  toolUser,
+                  'booking.availability.read',
+                  {
+                    surface: dto.surface,
+                    arguments: {
+                      date,
+                      staff_id: bound.staff.id,
+                      service_ids: bound.services.map((s) => s.id),
+                      ...(branch ? { branch_id: branch.id } : {}),
+                    },
+                    idempotencyKey: this.toolIdempotencyKey(
+                      tenantId,
+                      user.userId,
+                      dto.requestId,
+                      step,
+                      'booking.availability.read',
+                    ),
+                  },
+                  {
+                    widgetTrigger: 'T-2a',
+                    bookingSelector: {
+                      tenantId,
+                      scope,
+                      revalidate: revalidateCatalog,
+                    },
+                    requestId: dto.requestId,
+                    userTurn: this.persistedUserTurns.get(dto),
+                  },
+                ),
+              );
+              if (execution.status === 'completed')
+                toolResults.push({
+                  name: 'booking.availability.read',
+                  result: this.sanitizeToolResult(execution.result),
+                });
+              toolsUsed.push({
+                name: 'booking.availability.read',
+                status:
+                  typeof execution.status === 'string'
+                    ? execution.status
+                    : 'unknown',
+                execution_id:
+                  typeof execution.execution_id === 'string'
+                    ? execution.execution_id
+                    : null,
+                ...this.widgetResolution(execution),
+              });
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply: this.widgetResolution(execution).resolution
+                    ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
+                    : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
+                  source: 'safe_fallback',
+                  action: null,
+                  grounding: this.groundingReport(
+                    requirement,
+                    execution.status === 'completed' ? 'verified' : 'blocked',
+                    toolResults,
+                  ),
+                },
+                toolResults,
+              );
+            }
             return this.complete(
               user,
               dto,
@@ -1271,19 +1605,32 @@ export class AiCoreService {
               toolsUsed,
               decisions,
               {
-                reply: multiService
-                  ? MULTI_SERVICE_LIMITATION
-                  : bound.kind === 'unresolved' &&
-                      bound.reason === 'source_unavailable'
-                    ? 'Не удалось проверить каталог салона. Запись пока не подготовлена.'
-                    : bound.kind === 'unresolved' && bound.staff
-                      ? 'services' in task.entities
-                        ? 'Уточните услугу из каталога салона. Мастера сохранила.'
-                        : 'date' in task.entities ||
-                            'date_or_period' in task.entities
-                          ? 'Какую услугу выбрать? Мастера и дату сохранила.'
-                          : 'Какую услугу и на какую дату выбрать? Мастера сохранила.'
-                      : 'Уточните точное имя мастера из каталога салона. Запись пока не подготовлена.',
+                reply: 'На какую дату проверить время у выбранного мастера?',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'not_required',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          } catch (error) {
+            if (!isBookingSourceUnavailable(error)) throw error;
+            this.bookingPreferenceSources.delete(dto);
+            for (const key of Object.keys(task.entities))
+              delete task.entities[key];
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Данные филиала изменились или сейчас недоступны. Уточните филиал и выбранную услугу заново; запись не создана.',
                 source: 'safe_fallback',
                 action: null,
                 grounding: this.groundingReport(
@@ -1295,146 +1642,6 @@ export class AiCoreService {
               toolResults,
             );
           }
-          // Persist public preferences only. Revalidate against this tenant's catalog
-          // on every turn; these values never become a principal or execution permit.
-          task.entities.employee = bound.staff.name;
-          task.entities.services = bound.services.map((s) => s.name);
-          if (!decision.toolCall || task.requires_clarification) {
-            return this.complete(
-              user,
-              dto,
-              brain,
-              sanitized.redacted,
-              toolsUsed,
-              decisions,
-              {
-                reply:
-                  this.semanticClarification(activeSemanticPlan) ??
-                  'Уточните дату и время для выбранных мастера и услуги.',
-                source: 'safe_fallback',
-                action: null,
-                grounding: this.groundingReport(
-                  requirement,
-                  'not_required',
-                  toolResults,
-                ),
-              },
-              toolResults,
-            );
-          }
-          // The language contract requires configured business-local daypart bounds.
-          // This booking path has no such owner setting; never invent an 18:00 cutoff.
-          const timePreference =
-            task.entities.time ?? task.entities.time_of_day;
-          if (timePreference && !isExactBookingTime(timePreference)) {
-            return this.complete(
-              user,
-              dto,
-              brain,
-              sanitized.redacted,
-              toolsUsed,
-              decisions,
-              {
-                reply:
-                  'Во сколько вам удобно? Мастера, услугу и дату сохранила.',
-                source: 'safe_fallback',
-                action: null,
-                grounding: this.groundingReport(
-                  requirement,
-                  'not_required',
-                  toolResults,
-                ),
-              },
-              toolResults,
-            );
-          }
-          if (typeof date === 'string') {
-            const execution = this.record(
-              await this.executeChatTool(
-                dto,
-                toolUser,
-                'booking.availability.read',
-                {
-                  surface: dto.surface,
-                  arguments: {
-                    date,
-                    staff_id: bound.staff.id,
-                    service_ids: bound.services.map((s) => s.id),
-                    ...(branch ? { branch_id: branch.id } : {}),
-                  },
-                  idempotencyKey: this.toolIdempotencyKey(
-                    tenantId,
-                    user.userId,
-                    dto.requestId,
-                    step,
-                    'booking.availability.read',
-                  ),
-                },
-                {
-                  widgetTrigger: 'T-2a',
-                  requestId: dto.requestId,
-                  userTurn: this.persistedUserTurns.get(dto),
-                },
-              ),
-            );
-            if (execution.status === 'completed')
-              toolResults.push({
-                name: 'booking.availability.read',
-                result: this.sanitizeToolResult(execution.result),
-              });
-            toolsUsed.push({
-              name: 'booking.availability.read',
-              status:
-                typeof execution.status === 'string'
-                  ? execution.status
-                  : 'unknown',
-              execution_id:
-                typeof execution.execution_id === 'string'
-                  ? execution.execution_id
-                  : null,
-              ...this.widgetResolution(execution),
-            });
-            return this.complete(
-              user,
-              dto,
-              brain,
-              sanitized.redacted,
-              toolsUsed,
-              decisions,
-              {
-                reply: this.widgetResolution(execution).resolution
-                  ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
-                  : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
-                source: 'safe_fallback',
-                action: null,
-                grounding: this.groundingReport(
-                  requirement,
-                  execution.status === 'completed' ? 'verified' : 'blocked',
-                  toolResults,
-                ),
-              },
-              toolResults,
-            );
-          }
-          return this.complete(
-            user,
-            dto,
-            brain,
-            sanitized.redacted,
-            toolsUsed,
-            decisions,
-            {
-              reply: 'На какую дату проверить время у выбранного мастера?',
-              source: 'safe_fallback',
-              action: null,
-              grounding: this.groundingReport(
-                requirement,
-                'not_required',
-                toolResults,
-              ),
-            },
-            toolResults,
-          );
         }
         if (!decision.toolCall) {
           const task =
@@ -2579,6 +2786,15 @@ export class AiCoreService {
           ? null
           : {
               version: 'maya.chat-semantic-context/1',
+              ...(lastPlan.tasks.length === 1 &&
+              [
+                'booking.prepare_personal',
+                'booking.find_availability',
+                'booking.create_own',
+              ].includes(lastPlan.tasks[0].intent) &&
+              this.bookingPreferenceSources.has(dto)
+                ? { bookingSource: this.bookingPreferenceSources.get(dto) }
+                : {}),
               savedAt: new Date().toISOString(),
               timezone: await this.resolveBusinessTimezone(
                 this.requireTenant(user),
@@ -2758,6 +2974,37 @@ export class AiCoreService {
       tools.map((t) => t.name),
     );
     if (!plan) return null;
+    const retainedSource = this.record(saved.bookingSource);
+    if (
+      plan.tasks.length === 1 &&
+      [
+        'booking.prepare_personal',
+        'booking.find_availability',
+        'booking.create_own',
+      ].includes(plan.tasks[0].intent) &&
+      typeof retainedSource.branchId === 'string' &&
+      typeof retainedSource.sourceRevision === 'string'
+    ) {
+      try {
+        const configured = await this.crm?.resolveConfiguredBookingBranch?.(
+          this.requireTenant(user),
+        );
+        if (
+          !configured ||
+          configured.id !== retainedSource.branchId ||
+          configured.sourceRevision !== retainedSource.sourceRevision
+        )
+          return null;
+        this.bookingPreferenceSources.set(dto, {
+          branchId: configured.id,
+          sourceRevision: configured.sourceRevision,
+        });
+      } catch (error) {
+        if (isBookingSourceUnavailable(error)) return null;
+        throw error;
+      }
+    }
+
     if (
       saved.timezone !== timezone ||
       localCalendarDate(timezone, savedDate) !== localCalendarDate(timezone)
@@ -2774,9 +3021,68 @@ export class AiCoreService {
         }
       }
     }
+    let bookingSelectionMerged = false;
+    if (
+      plan.tasks.length === 1 &&
+      [
+        'booking.prepare_personal',
+        'booking.find_availability',
+        'booking.create_own',
+      ].includes(plan.tasks[0].intent)
+    ) {
+      const selected = await timeline.readBookingSelection?.(
+        user,
+        dto.conversationId,
+        currentTurn.turnId,
+      );
+      if (
+        selected &&
+        new Date(selected.selectedAt).getTime() > savedDate.getTime()
+      ) {
+        let configured;
+        try {
+          configured = await this.crm?.resolveConfiguredBookingBranch?.(
+            this.requireTenant(user),
+          );
+        } catch (error) {
+          if (isBookingSourceUnavailable(error)) return null;
+          throw error;
+        }
+        const sameSource = selected.sourceRevision
+          ? configured?.id === selected.branch &&
+            configured?.sourceRevision === selected.sourceRevision
+          : configured === null;
+        if (!sameSource) return null;
+        if (sameSource) {
+          bookingSelectionMerged = true;
+          if (configured)
+            this.bookingPreferenceSources.set(dto, {
+              branchId: configured.id,
+              sourceRevision: configured.sourceRevision,
+            });
+          plan.tasks[0].entities.services = selected.services;
+          if (selected.employee)
+            plan.tasks[0].entities.employee = selected.employee;
+          if (selected.branch) plan.tasks[0].entities.branch = selected.branch;
+        }
+      }
+    }
     // Revalidate current permissions and available capabilities. History carries
     // semantic preferences only; no confirmation, execution or authority survives.
-    return plan;
+    return bookingSelectionMerged
+      ? this.conversationLayer().validatePlan(
+          {
+            ...plan,
+            tasks: plan.tasks.map((task) => ({
+              ...task,
+              requires_clarification: false,
+              clarification_question: null,
+            })),
+          },
+          effectiveRole,
+          tools.map((tool) => tool.name),
+        )
+      : plan;
   }
 
   private conversationLayer(): ConversationIntelligenceService {

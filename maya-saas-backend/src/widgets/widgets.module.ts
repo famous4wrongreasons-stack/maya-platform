@@ -34,6 +34,11 @@ import { EFFECT_ROUTE_AUDIT } from './routing/effect-router.ports';
 import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
+import {
+  BOOKING_SELECTION_AUDIT,
+  type BookingSelectionAuditPort,
+} from './stores/booking-selection-audit.port';
+import { sha256Hex } from './token.util';
 import { WidgetsController } from './widgets.controller';
 import { WidgetThreadPageService } from './resolve/thread-page.service';
 import { ChatReadTriggerService } from './composition/chat-read.trigger';
@@ -71,6 +76,28 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
     WidgetStoresService,
     { provide: GATE10_STORE, useExisting: WidgetStoresService },
     { provide: EFFECT_ROUTE_AUDIT, useExisting: WidgetStoresService },
+    {
+      provide: BOOKING_SELECTION_AUDIT,
+      inject: [WidgetStoresService],
+      // Wire metadata is forwarded only to the post-gateway audit owner. The
+      // gate-facing ports never acquire this store facade or its profile input.
+      useFactory: (stores: WidgetStoresService): BookingSelectionAuditPort => ({
+        recordAcceptedBookingSelection: (dto, actor) => {
+          if (!actor.tenantId) return Promise.resolve();
+          return stores.recordAcceptedBookingSelection({
+            tenantId: actor.tenantId,
+            widgetId: dto.widget_id,
+            intentTokenHash: sha256Hex(dto.intent_token),
+            clientNonce: dto.client_nonce,
+            profileId: dto.profile_id,
+            clientEmittedAt: dto.client_emitted_at
+              ? new Date(dto.client_emitted_at)
+              : null,
+            inputsClosed: dto.inputs,
+          });
+        },
+      }),
+    },
     ControlRegistryService,
     // P-RT6: dark until K12 schedules it. Registering the provider establishes the one atomic
     // erasure mechanism without adding a route, trigger or production effect.

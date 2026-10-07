@@ -18,7 +18,10 @@ import {
   scheduleTemplate,
   SCHEDULE_TEMPLATE,
 } from './schedule-intent-template';
-import { BOOKING_NOUN_OWNERS } from '../booking/booking-noun-identity';
+import {
+  BOOKING_NOUN_OWNERS,
+  encodeBookingCatalogOwnerRef,
+} from '../booking/booking-noun-identity';
 import { presentPersonalSchedule } from '../booking/personal-schedule.presenter';
 import type { PersonalScheduleSource } from '../owner-ports/personal-schedule.port';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
@@ -147,6 +150,12 @@ export interface SealedEmission {
 
 export interface BookingSelectorContext {
   readonly source: unknown;
+  readonly bookingSelection?: {
+    readonly tenantId: string;
+    readonly serviceId?: string;
+    readonly scope:
+      import('../booking/booking-noun-identity').BookingSlotScope | null;
+  };
   readonly inheritedHandles?: Readonly<Record<string, string>>;
   readonly revalidateSource?: () => Promise<void>;
   readonly predecessorWidgetId?: string;
@@ -312,11 +321,43 @@ export class WidgetEmitterService {
       source && typeof source === 'object' && !Array.isArray(source)
         ? (source.booking_selection as Record<string, unknown> | null)
         : null;
+    const catalogRef = (
+      id: string,
+      scope: Parameters<typeof encodeBookingCatalogOwnerRef>[1],
+    ) => {
+      const ref = encodeBookingCatalogOwnerRef(id, scope);
+      if (!ref)
+        throw new IntentTemplateRefusal('booking_selector_source_unavailable');
+      return ref;
+    };
+    const sourceScope =
+      selection &&
+      typeof selection.branchId === 'string' &&
+      typeof selection.branchSourceRevision === 'string'
+        ? {
+            branchId: selection.branchId,
+            sourceRevision: selection.branchSourceRevision,
+          }
+        : null;
     const inheritedHandles =
       selector.inheritedHandles ??
+      (request.kind === 'STAFF_SELECTOR' &&
+      selector.bookingSelection?.tenantId === request.tenantId &&
+      selector.bookingSelection.serviceId
+        ? this.seals.mintNounHandles([
+            {
+              tenantId: request.tenantId,
+              noun: 'service',
+              ownerKind: BOOKING_NOUN_OWNERS.service,
+              ownerRef: catalogRef(
+                selector.bookingSelection.serviceId,
+                selector.bookingSelection.scope,
+              ),
+            },
+          ])
+        : undefined) ??
       (request.kind === 'TIME_SLOT_SELECTOR' &&
-      selection &&
-      selection.tenantId === request.tenantId &&
+      selection?.tenantId === request.tenantId &&
       typeof selection.serviceId === 'string' &&
       typeof selection.staffId === 'string'
         ? this.seals.mintNounHandles([
@@ -324,13 +365,13 @@ export class WidgetEmitterService {
               tenantId: request.tenantId,
               noun: 'service',
               ownerKind: BOOKING_NOUN_OWNERS.service,
-              ownerRef: selection.serviceId,
+              ownerRef: catalogRef(selection.serviceId, sourceScope),
             },
             {
               tenantId: request.tenantId,
               noun: 'staff',
               ownerKind: BOOKING_NOUN_OWNERS.staff,
-              ownerRef: selection.staffId,
+              ownerRef: catalogRef(selection.staffId, sourceScope),
             },
           ])
         : undefined);
@@ -361,6 +402,7 @@ export class WidgetEmitterService {
       kind: request.kind,
       source: selector.source,
       inherited: inheritedHandles,
+      scope: selector.bookingSelection?.scope,
       internalCalendar,
       mint: (identity: OwnerNounIdentity) =>
         this.seals.mintNounHandles([identity])[identity.noun],

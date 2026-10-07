@@ -40,6 +40,9 @@ import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter'
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
 import {
   decodeBookingSlotSelectionRef,
+  decodeBookingCatalogOwnerRef,
+  sameBookingScope,
+  type BookingSlotScope,
   isBookingNounIdentity,
 } from '../booking/booking-noun-identity';
 
@@ -102,6 +105,7 @@ export class NounResolutionOwnersProvider implements NounReadPort {
         ? this.price.readNoun(input, actor)
         : { kind: 'policy_deferred' };
     const values = new Map<string, string>();
+    const bookingScopes: (BookingSlotScope | null)[] = [];
     for (const [noun, handle] of input.frozenNouns) {
       const opened = openWidgetNounHandle(handle);
       if (
@@ -115,7 +119,21 @@ export class NounResolutionOwnersProvider implements NounReadPort {
       const slot = bookingSlot
         ? decodeBookingSlotSelectionRef(opened.ownerRef)
         : null;
-      const ownerValue = bookingSlot ? (slot?.start ?? null) : opened.ownerRef;
+      const bookingCatalog =
+        (noun === 'service' || noun === 'staff') &&
+        isBookingNounIdentity(opened, noun);
+      const catalog = bookingCatalog
+        ? decodeBookingCatalogOwnerRef(opened.ownerRef)
+        : null;
+      const ownerValue = bookingSlot
+        ? (slot?.start ?? null)
+        : bookingCatalog
+          ? (catalog?.id ?? null)
+          : opened.ownerRef;
+      if (bookingSlot || bookingCatalog)
+        bookingScopes.push(
+          bookingSlot ? (slot?.scope ?? null) : (catalog?.scope ?? null),
+        );
       if (ownerValue === null) return { kind: 'gone', reason: 'not_found' };
       if (slot?.scope) {
         if (
@@ -136,6 +154,10 @@ export class NounResolutionOwnersProvider implements NounReadPort {
         return { kind: 'gone', reason: 'not_found' };
       values.set(noun, ownerValue);
     }
+    if (
+      bookingScopes.some((scope) => !sameBookingScope(scope, bookingScopes[0]))
+    )
+      return { kind: 'gone', reason: 'not_found' };
     try {
       const key = input.capability?.key ?? '';
       if (key === SCHEDULE_AE) {

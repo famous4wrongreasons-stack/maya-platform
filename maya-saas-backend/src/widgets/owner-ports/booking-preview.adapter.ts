@@ -16,6 +16,9 @@ import type { DraftOwnerPort } from './draft-owner.registry';
 import { openWidgetNounHandle } from '../emission/seal.service';
 import {
   decodeBookingSlotSelectionRef,
+  decodeBookingCatalogOwnerRef,
+  sameBookingScope,
+  type BookingSlotScope,
   isBookingNounIdentity,
 } from '../booking/booking-noun-identity';
 
@@ -182,6 +185,7 @@ export class BookingPreviewAdapter
     values: ReadonlyMap<string, string>;
   }> {
     const opened = new Map<string, string>();
+    const scopes: (BookingSlotScope | null)[] = [];
     for (const noun of ['service', 'staff', 'slot'] as const) {
       const value = openWidgetNounHandle(input.handles[noun] as never);
       if (
@@ -192,7 +196,13 @@ export class BookingPreviewAdapter
         return { outcome: refused(), values: new Map() };
       const slot =
         noun === 'slot' ? decodeBookingSlotSelectionRef(value.ownerRef) : null;
-      const ownerRef = noun === 'slot' ? (slot?.start ?? null) : value.ownerRef;
+      const catalog =
+        noun === 'slot' ? null : decodeBookingCatalogOwnerRef(value.ownerRef);
+      const ownerRef =
+        noun === 'slot' ? (slot?.start ?? null) : (catalog?.id ?? null);
+      scopes.push(
+        noun === 'slot' ? (slot?.scope ?? null) : (catalog?.scope ?? null),
+      );
       if (ownerRef === null) return { outcome: refused(), values: new Map() };
       opened.set(noun, ownerRef);
       if (slot?.scope) {
@@ -200,6 +210,8 @@ export class BookingPreviewAdapter
         opened.set('branch_source_revision', slot.scope.sourceRevision);
       }
     }
+    if (scopes.some((scope) => !sameBookingScope(scope, scopes[0])))
+      return { outcome: refused(), values: new Map() };
     const serviceId = opened.get('service');
     const staffId = opened.get('staff');
     const start = opened.get('slot');

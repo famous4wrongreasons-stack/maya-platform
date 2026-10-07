@@ -1,3 +1,7 @@
+import {
+  BOOKING_SELECTION_AUDIT,
+  type BookingSelectionAuditPort,
+} from './stores/booking-selection-audit.port';
 // K3 — the programme's two widget routes.
 //
 // §3 P-01 fixes them: `POST /api/widgets/resolve` and `POST /api/widgets/intent`. Two, and no more.
@@ -14,6 +18,8 @@ import {
   ForbiddenException,
   HttpCode,
   Post,
+  Optional,
+  Inject,
 } from '@nestjs/common';
 import { SelectorLifecycleService } from './rendering/selector-lifecycle.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -40,6 +46,9 @@ export class WidgetsController {
     private readonly gateway: IntentGatewayService,
     private readonly threadPage: WidgetThreadPageService,
     private readonly lifecycle: SelectorLifecycleService,
+    @Optional()
+    @Inject(BOOKING_SELECTION_AUDIT)
+    private readonly selectionAudit?: BookingSelectionAuditPort,
   ) {}
 
   /**
@@ -87,6 +96,9 @@ export class WidgetsController {
     const result = await this.gateway.submit(intentSubmitArgs(dto, actor));
     const route =
       result.verdict.outcome === 'terminate' ? result.verdict.route : undefined;
+    if (route?.receipt_outcome === 'ACCEPTED' && actor.tenantId) {
+      await this.selectionAudit?.recordAcceptedBookingSelection(dto, actor);
+    }
     const code =
       'code' in result.verdict
         ? result.verdict.code

@@ -256,6 +256,8 @@ export interface WidgetOwnerDecisionProjection {
 }
 
 export interface WidgetIntentProjection {
+  /** Closed preference-selection acknowledgement; never a booking/action result. */
+  readonly booking_selection_pending?: 'date';
   readonly reason_text?: { readonly phrase_key: string; readonly rendered: string };
   readonly schedule_outcome?: 'SUCCEEDED' | 'FAILED' | 'UNKNOWN' | null;
   readonly outcome: 'terminate' | 'refuse' | 'expired' | 'superseded';

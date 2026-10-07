@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 import { isSingleDaySemanticValue } from '../conversation-intelligence/semantic-slot-normalization';
@@ -44,6 +45,21 @@ const staffPreference = (list: Row[], preference: unknown): Row | null => {
   );
   return matches.length === 1 ? matches[0] : null;
 };
+export function bindBookingServices(
+  source: unknown,
+  preferences: unknown,
+): Row[] | null {
+  const catalog = rows(source, 'services');
+  if (!catalog) return null;
+  const choices = (
+    Array.isArray(preferences) ? preferences : [preferences]
+  ).map((p) => unique(catalog, p));
+  return choices.length &&
+    choices.every((c): c is Row => c !== null) &&
+    new Set(choices.map((c) => c.id)).size === choices.length
+    ? choices
+    : null;
+}
 export type BookingCatalogBinding =
   | { kind: 'resolved'; staff: Row; services: Row[] }
   | {
@@ -113,4 +129,22 @@ export function bookingPreferenceDate(
         localDateMinuteToUtc(today, 24 * 60, timezone),
       )
     : today;
+}
+
+export class BookingCatalogSourceChangedError extends Error {
+  readonly name = 'BookingCatalogSourceChangedError';
+}
+export function isBookingSourceUnavailable(error: unknown): boolean {
+  if (error instanceof BookingCatalogSourceChangedError) return true;
+  if (!(error instanceof ServiceUnavailableException)) return false;
+  const response = error.getResponse();
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'error' in response &&
+    typeof response.error === 'object' &&
+    response.error !== null &&
+    'code' in response.error &&
+    response.error.code === 'booking_branch_source_unavailable'
+  );
 }

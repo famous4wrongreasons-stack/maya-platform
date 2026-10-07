@@ -294,6 +294,67 @@ describe('AiToolRuntimeService', () => {
     },
   );
 
+  describe.each(['catalog.services.read', 'catalog.staff.read'])(
+    'booking catalog source identity %s',
+    (toolName) => {
+      it.each([false, true])(
+        'refuses cached A under current B without rereading or minting, replay=%s',
+        async (replay) => {
+          const h = createHarness();
+          let row: Record<string, unknown> | null = null;
+          h.executionFindUnique.mockImplementation(() => Promise.resolve(row));
+          h.executionCreate.mockImplementation((v: unknown) => {
+            row = { ...record(record(v).data), id: 'catalog-source-read' };
+            return Promise.resolve(row);
+          });
+          h.executionUpdate.mockImplementation((v: unknown) => {
+            row = { ...row, ...record(record(v).data) };
+            return Promise.resolve(row);
+          });
+          h.handlerExecute.mockResolvedValue(
+            toolName === 'catalog.services.read'
+              ? { services: [{ id: 'old-company-service' }] }
+              : { staff: [{ id: 'old-company-staff' }] },
+          );
+          const actor = { ...customer, role: UserRole.TENANT_OWNER };
+          const input = {
+            surface: 'web' as const,
+            idempotencyKey: IDEMPOTENCY_KEY,
+            arguments: {},
+          };
+          let revision = 'a'.repeat(64);
+          const internal = () => ({
+            suppressWidgetTrigger: true,
+            bookingSelector: {
+              tenantId: 'tenant-a',
+              scope: { branchId: 'maya-branch', sourceRevision: revision },
+              revalidate: () => Promise.resolve(),
+            },
+          });
+          await h.tenantContext.runAsSystemTenant('tenant-a', () =>
+            h.runtime.execute(actor, toolName, input, internal()),
+          );
+          revision = 'b'.repeat(64);
+          await expect(
+            h.tenantContext.runAsSystemTenant('tenant-a', () =>
+              replay
+                ? h.runtime.replayCompletedRead(
+                    actor,
+                    toolName,
+                    input,
+                    'catalog-source-read',
+                    internal(),
+                  )
+                : h.runtime.execute(actor, toolName, input, internal()),
+            ),
+          ).rejects.toThrow(ConflictException);
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+          expect(h.executionCreate).toHaveBeenCalledTimes(1);
+        },
+      );
+    },
+  );
+
   describe.each([
     'booking.availability.read',
     'booking.group-availability.read',

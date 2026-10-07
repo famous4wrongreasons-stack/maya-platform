@@ -75,6 +75,7 @@ describe('AiCoreService', () => {
       let saved: unknown = null;
       let serial = 0;
       const timeline = {
+        readBookingSelection: jest.fn().mockResolvedValue(null),
         routeTypedUtterance: jest.fn().mockResolvedValue(null),
         persistTypedTurn: jest.fn().mockImplementation(() =>
           Promise.resolve({
@@ -145,9 +146,11 @@ describe('AiCoreService', () => {
               ),
               toolCall: {
                 name:
-                  intent === 'booking.create_own'
-                    ? 'appointments.own.create'
-                    : 'booking.availability.read',
+                  intent === 'booking.prepare_personal'
+                    ? 'catalog.services.read'
+                    : intent === 'booking.create_own'
+                      ? 'appointments.own.create'
+                      : 'booking.availability.read',
                 arguments: args,
               },
             }),
@@ -166,6 +169,148 @@ describe('AiCoreService', () => {
           .map((call) => call[2].arguments);
       return { ...mocks, timeline, turn, availabilityArgs };
     }
+
+    it('continues ordinary service → staff → explicit day with bounded fresh reads and retained source preferences', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T10:00:00Z'));
+      try {
+        const f = bookingFixture();
+        const sourceRevision = 'a'.repeat(64);
+        f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
+          sourceRevision,
+        });
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
+        await f.turn({}, {}, 'booking.prepare_personal');
+        expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
+          'catalog.services.read',
+        ]);
+        f.timeline.readBookingSelection.mockResolvedValue({
+          selectedAt: '2026-10-07T10:00:01Z',
+          services: ['service-a'],
+          branch: 'branch-a',
+          sourceRevision,
+        });
+        jest.setSystemTime(new Date('2026-10-07T10:00:02Z'));
+        f.runtime.execute.mockClear();
+        await f.turn({});
+        expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
+          'catalog.services.read',
+          'catalog.staff.read',
+        ]);
+        expect(f.runtime.execute.mock.calls[1][3]).toMatchObject({
+          suppressWidgetTrigger: false,
+          bookingSelector: {
+            serviceId: 'service-a',
+            scope: { branchId: 'branch-a', sourceRevision },
+          },
+        });
+        f.timeline.readBookingSelection.mockResolvedValue({
+          selectedAt: '2026-10-07T10:00:03Z',
+          services: ['service-a'],
+          employee: 'staff-a',
+          branch: 'branch-a',
+          sourceRevision,
+        });
+        jest.setSystemTime(new Date('2026-10-07T10:00:04Z'));
+        f.runtime.execute.mockClear();
+        await f.turn({ date_or_period: '2026-10-09' });
+        expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
+          'catalog.services.read',
+          'catalog.staff.read',
+          'booking.availability.read',
+        ]);
+        expect(f.availabilityArgs()).toEqual([
+          {
+            branch_id: 'branch-a',
+            service_ids: ['service-a'],
+            staff_id: 'staff-a',
+            date: '2026-10-09',
+          },
+        ]);
+        f.timeline.readBookingSelection.mockResolvedValue(null);
+        f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
+          sourceRevision: 'b'.repeat(64),
+        });
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue('b'.repeat(64));
+        f.runtime.execute.mockClear();
+        await f.turn({ date_or_period: '2026-10-10' });
+        expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
+          'catalog.services.read',
+        ]);
+        expect(f.availabilityArgs()).toEqual([]);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('refuses a source change between retained preferences and the next model decision', async () => {
+      const f = bookingFixture();
+      const sourceA = {
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
+        sourceRevision: 'a'.repeat(64),
+      };
+      f.crm.resolveConfiguredBookingBranch.mockResolvedValue(sourceA);
+      f.crm.readBranchAvailabilityRevision.mockResolvedValue(
+        sourceA.sourceRevision,
+      );
+      await f.turn({ ...initial, date_or_period: '2026-10-09' });
+      f.runtime.execute.mockClear();
+      f.crm.resolveConfiguredBookingBranch
+        .mockResolvedValueOnce(sourceA)
+        .mockResolvedValue({ ...sourceA, sourceRevision: 'b'.repeat(64) });
+      const response = await f.turn({ date_or_period: '2026-10-10' });
+      expect(response.reply).toContain('Данные филиала изменились');
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+      expect(response.action).toBeNull();
+    });
+
+    it('pins the selected catalog source through availability admission and refuses a last-moment binding change', async () => {
+      const f = bookingFixture();
+      const source = {
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
+        sourceRevision: 'a'.repeat(64),
+      };
+      f.crm.resolveConfiguredBookingBranch.mockResolvedValue(source);
+      f.crm.readBranchAvailabilityRevision.mockResolvedValue(
+        source.sourceRevision,
+      );
+      const delegated = f.runtime.execute.getMockImplementation();
+      if (!delegated) throw new Error('fixture runtime missing');
+      const dispatched: string[] = [];
+      f.runtime.execute.mockImplementation(
+        async (...args: Parameters<AiToolRuntimeService['execute']>) => {
+          // Exercise the runtime's existing private pre-read witness boundary with the
+          // real AiCore internal options, while provider facts remain synthetic.
+          await args[3]?.bookingSelector?.revalidate();
+          dispatched.push(args[1]);
+          const result = await delegated(...args);
+          if (args[1] === 'catalog.staff.read')
+            f.crm.readBranchAvailabilityRevision.mockResolvedValue(
+              'b'.repeat(64),
+            );
+          return result;
+        },
+      );
+      const response = await f.turn({
+        ...initial,
+        date_or_period: '2026-10-09',
+      });
+      expect(dispatched).toEqual([
+        'catalog.services.read',
+        'catalog.staff.read',
+      ]);
+      expect(response.reply).toContain('Данные филиала изменились');
+      expect(response.action).toBeNull();
+    });
 
     it('retains every other choice across date, service, staff and branch corrections and intent transition', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
@@ -310,7 +455,7 @@ describe('AiCoreService', () => {
           date_or_period: initial.date_or_period,
         };
         const clarification = await f.turn(entities);
-        expect(clarification.reply).toContain('Какую услугу выбрать');
+        expect(clarification.reply).toContain('Выберите услугу');
         expect(f.availabilityArgs()).toEqual([]);
         jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
         await f.turn({ services: ['Борода'] });
@@ -328,7 +473,7 @@ describe('AiCoreService', () => {
     });
 
     it.each(['semantic branch', 'proposed branch ID'])(
-      'clarifies a missing staff member without an unscoped selector and retains %s, service and local day',
+      'offers a current staff selector and retains %s, service and local day',
       async (source) => {
         jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
         try {
@@ -343,19 +488,19 @@ describe('AiCoreService', () => {
             },
             source === 'proposed branch ID' ? { branch_id: 'branch-a' } : {},
           );
-          expect(clarification.reply).toContain('Уточните точное имя мастера');
+          expect(clarification.reply).toContain('Выберите мастера');
           expect(clarification.action).toBeNull();
           expect(clarification).not.toHaveProperty('resolution');
           expect(f.availabilityArgs()).toEqual([]);
           expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-            'catalog.staff.read',
             'catalog.services.read',
+            'catalog.staff.read',
           ]);
           expect(
-            f.runtime.execute.mock.calls.every(
-              (call) => call[3]?.suppressWidgetTrigger === true,
+            f.runtime.execute.mock.calls.map(
+              (call) => call[3]?.suppressWidgetTrigger,
             ),
-          ).toBe(true);
+          ).toEqual([true, false]);
           expect(
             f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0],
           ).toMatchObject({
@@ -411,9 +556,10 @@ describe('AiCoreService', () => {
           error: { code: 'booking_branch_source_unavailable' },
         }),
       );
-      await expect(f.turn({ services: ['Борода'] })).rejects.toThrow(
-        ServiceUnavailableException,
-      );
+      await expect(f.turn({ services: ['Борода'] })).resolves.toMatchObject({
+        action: null,
+        reply: expect.stringContaining('Данные филиала изменились') as unknown,
+      });
       expect(f.runtime.execute).not.toHaveBeenCalled();
     });
   });
@@ -5961,6 +6107,8 @@ describe('AiCoreService', () => {
       .fn()
       .mockResolvedValue({ defaultTimezone: businessTimezone });
     const crm = {
+      resolveConfiguredBookingBranch: jest.fn().mockResolvedValue(null),
+      readBranchAvailabilityRevision: jest.fn().mockResolvedValue(null),
       resolveBookingBranchPreference: jest
         .fn<
           Promise<{ id: string; name: string; timezone: string } | null>,

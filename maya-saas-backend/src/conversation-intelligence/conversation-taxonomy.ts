@@ -148,8 +148,15 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         dataClass: 'C',
         permission: 'catalog.services.read',
         tools: ['catalog.services.read'],
+        optionalSlots: [
+          'services',
+          'employee',
+          'branch',
+          'date_or_period',
+          'time_of_day',
+        ],
         responseRule:
-          'Offer the explicit personal booking form; its existing server contract separately requires a verified Client context. Do not change business role or infer Client identity from appointment history.',
+          'For a verified Client, select a current service, then staff, then ask for an explicit day before reading availability. Other roles use the existing personal booking form. Never infer Client identity or confirmation.',
         synonyms: [
           'хочу записаться',
           'записаться для себя',
