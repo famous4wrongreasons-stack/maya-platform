@@ -198,15 +198,19 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
             'Запишите меня, пожалуйста',
           ].includes(prompt ?? '');
           const resume = prompt === 'Продолжим запись';
+          const staffCorrection =
+            /^Лучше к (\[name removed\]@[a-f0-9]{32}_\d+)$/.exec(prompt ?? '');
           const entities: Record<string, unknown> = {};
           if (prompt === `На ${s.day}`) entities.date_or_period = s.day;
           else if (prompt === `Лучше на ${alternateDay}`)
             entities.date_or_period = alternateDay;
           else if (prompt === 'Лучше Синтетическая борода')
             entities.services = ['Синтетическая борода'];
-          else if (prompt === 'Лучше к Другой синтетический мастер')
-            entities.employee = 'Другой синтетический мастер';
-          else
+          else if (staffCorrection) {
+            entities.employee = staffCorrection[1];
+            observations.staffCorrectionPrivateAliases =
+              Number(observations.staffCorrectionPrivateAliases ?? 0) + 1;
+          } else
             assert.ok(
               initial || resume,
               'Only finite explicit ordinary prompts admitted',
@@ -412,7 +416,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
             },
             {
               id: 72,
-              name: 'Другой синтетический мастер',
+              name: 'Борис', // Synthetic distinct name; the real privacy layer aliases it.
               bookable: true,
               fired: false,
               hidden: false,
@@ -1460,7 +1464,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
                   serviceName: 'Синтетическая стрижка',
                   otherServiceName: 'Синтетическая борода',
                   staffName: 'Синтетический мастер',
-                  otherStaffName: 'Другой синтетический мастер',
+                  otherStaffName: 'Борис',
                   serviceId: '81',
                   otherServiceId: '82',
                   staffId: '71',
@@ -1602,6 +1606,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       });
     });
     expect(checkpoints).toHaveLength(ordinary ? 27 : 15);
+    if (ordinary) expect(observations.staffCorrectionPrivateAliases).toBe(3);
   }
   it(
     ordinary
