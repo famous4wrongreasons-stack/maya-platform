@@ -48,6 +48,7 @@ export interface BookingSelectorSuccessorRequest extends SuccessorMintRequest {
   readonly composerInput: WidgetComposerInput;
   readonly source: unknown;
   readonly inheritedHandles: Readonly<Record<string, string>>;
+  readonly revalidateSource?: () => Promise<void>;
 }
 
 export interface SuccessorMintResult {
@@ -341,6 +342,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
       },
       {
         source: request.source,
+        revalidateSource: request.revalidateSource,
         inheritedHandles: request.inheritedHandles,
         predecessorWidgetId: predecessor.widgetId,
       },

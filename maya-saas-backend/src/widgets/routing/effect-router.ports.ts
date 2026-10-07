@@ -201,6 +201,7 @@ export interface BookingSelectorOwnerPort {
     source: unknown;
     fact: FactUsed;
     inheritedHandles: Readonly<Record<string, string>>;
+    revalidateSource?: () => Promise<void>;
   } | null>;
 }
 

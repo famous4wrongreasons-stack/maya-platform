@@ -148,6 +148,7 @@ export interface SealedEmission {
 export interface BookingSelectorContext {
   readonly source: unknown;
   readonly inheritedHandles?: Readonly<Record<string, string>>;
+  readonly revalidateSource?: () => Promise<void>;
   readonly predecessorWidgetId?: string;
 }
 
@@ -343,6 +344,13 @@ export class WidgetEmitterService {
           'branch_id' in slot &&
           slot.branch_id != null,
       );
+    if (
+      hasBranchSlots &&
+      selector.predecessorWidgetId &&
+      !selector.revalidateSource
+    )
+      throw new IntentTemplateRefusal('booking_selector_source_unavailable');
+    await selector.revalidateSource?.();
     const internalCalendar =
       request.kind === 'TIME_SLOT_SELECTOR' && hasBranchSlots
         ? (
@@ -405,7 +413,7 @@ export class WidgetEmitterService {
         },
       ],
     };
-    return this.emitInternal(
+    const emitted = await this.emitInternal(
       {
         ...request,
         body: presented.body as unknown as Record<string, unknown>,
@@ -416,6 +424,8 @@ export class WidgetEmitterService {
       null,
       selector.predecessorWidgetId ?? null,
     );
+    await selector.revalidateSource?.();
+    return emitted;
   }
 
   /** R3.9.4's dedicated server-owned lane. Generic composer calls cannot resolve this template. */

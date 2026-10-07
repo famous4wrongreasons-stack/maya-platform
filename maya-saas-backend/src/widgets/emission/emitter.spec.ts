@@ -915,3 +915,47 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     expect(JSON.stringify(prisma.records[0])).not.toContain('{{selection}}');
   });
 });
+
+it('refuses external-to-internal drift before a typed branch selector can be minted', async () => {
+  const { emitter, prisma } = make();
+  // The current calendar alone would say INTERNAL; the original read witness refuses the flip.
+  Object.assign(prisma, {
+    tenant: {
+      findUnique: jest.fn().mockResolvedValue({ calendarSource: 'internal' }),
+    },
+  });
+  const revalidateSource = jest
+    .fn()
+    .mockRejectedValue(new Error('ai_tool_availability_source_changed'));
+  await expect(
+    emitter.emitBookingSelector(
+      {
+        ...req(),
+        kind: 'TIME_SLOT_SELECTOR',
+        composerInput: composerFor(
+          'TIME_SLOT_SELECTOR',
+          'booking.availability.read',
+          [],
+        ),
+      },
+      {
+        source: {
+          timezone: 'UTC',
+          slots: [
+            {
+              staff_id: '71',
+              branch_id: 'branch',
+              start: '2035-01-01T10:00:00Z',
+              end: '2035-01-01T11:00:00Z',
+            },
+          ],
+        },
+        inheritedHandles: { service: 'service', staff: 'staff' },
+        predecessorWidgetId: 'prior',
+        revalidateSource,
+      },
+    ),
+  ).rejects.toThrow('ai_tool_availability_source_changed');
+  expect(prisma.emissions).toHaveLength(0);
+  expect(revalidateSource).toHaveBeenCalledTimes(1);
+});

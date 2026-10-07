@@ -755,6 +755,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
       'history',
       'offline',
       'reconnected',
+      'unbound',
       'revoked',
       'expired',
     ];
@@ -826,7 +827,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
                   (ref) => ref.id,
                 ),
               ).toEqual(
-                message.name === 'expired'
+                ['expired', 'unbound'].includes(message.name)
                   ? []
                   : [currentSalon.opportunityId, currentSalon.taskId],
               );
@@ -847,7 +848,9 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
             expect(runCount).toBe(
               ['available', 'history', 'offline'].includes(message.name)
                 ? 1
-                : 2,
+                : message.name === 'reconnected'
+                  ? 2
+                  : 3,
             );
             expect(reads).toHaveLength(
               ['available', 'history', 'offline'].includes(message.name)
@@ -861,6 +864,20 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
               expect(body!.coordination.run_id).not.toBe(
                 first!.coordination.run_id,
               );
+              await db.prisma.crmIntegration.update({
+                where: { tenantId: salon.tenant.id },
+                data: {
+                  settingsJson: {
+                    companyId: 424242,
+                    currency: 'RUB',
+                    branchBinding: null,
+                  },
+                },
+              });
+            }
+            if (message.name === 'unbound') {
+              expect(body!.recommendation.outcome).toBe('UNAVAILABLE');
+              expect(body!.coordination.current).toBe(false);
               await db.prisma.membership.updateMany({
                 where: { tenantId: salon.tenant.id, userId: salon.owner.id },
                 data: { status: 'suspended' },

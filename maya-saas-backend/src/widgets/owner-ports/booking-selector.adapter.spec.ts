@@ -154,7 +154,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         },
         surface: 'web',
       },
-      { suppressWidgetTrigger: true },
+      {
+        suppressWidgetTrigger: true,
+        onAvailabilityScope: expect.any(Function) as unknown,
+      },
     );
 
     const foreign = handle(OTHER_TENANT, 'staff', 'staff-1');

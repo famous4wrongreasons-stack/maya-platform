@@ -98,7 +98,7 @@ async function answer(page, before, outcome, replyCount = 1) {
   assert.ok(visible.includes('Предложение сохранено, версия 1'));
   for (const text of outcome === 'AVAILABLE'
     ? ['12:00', '13:00', 'Europe/Moscow', 'на момент проверки']
-    : ['срок возможности истёк', 'Рекомендация заполнить его неактуальна']) assert.ok(visible.includes(text), 'Visible answer missing: ' + text);
+    : outcome === 'UNAVAILABLE' ? ['недоступность источника', 'не отсутствие свободных окон'] : ['срок возможности истёк', 'Рекомендация заполнить его неактуальна']) assert.ok(visible.includes(text), 'Visible answer missing: ' + text);
   return body;
 }
 
@@ -111,7 +111,7 @@ async function main() {
   assert.ok(path.isAbsolute(input.output));
   const output = path.join(input.output, 'output', 'playwright');
   fs.mkdirSync(output, { recursive: true, mode: 0o700 });
-  const report = { contract: 'maya.explicit-occupancy-browser/1', status: 'running', syntheticCrmAdapter: true, realModelAcceptance: false, externalProviderAcceptance: false, snapshots: {}, observations: {} };
+  const report = { contract: 'maya.explicit-occupancy-browser/1', status: 'running', syntheticCrmAdapter: false, nativeYclientsAdapter: true, syntheticProviderTransport: true, realModelAcceptance: false, externalProviderAcceptance: false, snapshots: {}, observations: {} };
   let browser, dev, chromeChild, chromeProfile;
   const pages = [], guards = [];
   let closing;
@@ -223,8 +223,18 @@ async function main() {
     assert.equal(page.apiRequests('/ai/chat').length, beforeRetry + 1, 'Bounded single retry');
     report.observations.reconnected = reconnected;
     await capture(page, 'reconnected');
-    // Parent suspends the actual membership only after checking persisted state.
+    // Parent removes only the owned synthetic branch binding after this checkpoint.
     await checkpoint('reconnected', { body: reconnected });
+
+    const beforeUnbound = page.apiRequests('/ai/chat').length;
+    await sendOwnerRequest(page);
+    const unbound = await answer(page, beforeUnbound, 'UNAVAILABLE', 3);
+    assert.equal(unbound.coordination.current, false);
+    assert.deepEqual(unbound.recommendation.options.map((option) => option.key), ['c9.no_action']);
+    report.observations.unbound = unbound;
+    await capture(page, 'binding-removed');
+    // Parent now suspends the actual membership.
+    await checkpoint('unbound', { body: unbound });
 
     const beforeRevoked = page.apiRequests('/ai/chat').length;
     await sendOwnerRequest(page);

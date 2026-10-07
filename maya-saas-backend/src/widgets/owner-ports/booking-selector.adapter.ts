@@ -80,11 +80,21 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
       (!opened.get('service') || !opened.get('staff'))
     )
       return null;
+    let revalidateSource: (() => Promise<void>) | undefined;
     const execution = await this.runtime.execute(
       input.actor,
       name,
       { arguments: args, surface: 'web' },
-      { suppressWidgetTrigger: true },
+      {
+        suppressWidgetTrigger: true,
+        ...(input.step === 'staff'
+          ? {
+              onAvailabilityScope: (check: () => Promise<void>) => {
+                revalidateSource = check;
+              },
+            }
+          : {}),
+      },
     );
     if (
       !isRecord(execution) ||
@@ -122,6 +132,7 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
         returned,
       ),
       inheritedHandles: Object.freeze({ ...input.handles }),
+      revalidateSource,
     };
   }
 }

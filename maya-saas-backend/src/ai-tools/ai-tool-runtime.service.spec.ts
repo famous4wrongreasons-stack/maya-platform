@@ -382,6 +382,30 @@ describe('AiToolRuntimeService', () => {
       },
     };
     const actor = { ...customer, role: UserRole.TENANT_OWNER };
+    it('retains the original metadata witness through typed successor emission', async () => {
+      const h = createHarness();
+      h.handlerExecute.mockResolvedValue({ slots: [] });
+      let verify: (() => Promise<void>) | undefined;
+      await h.tenantContext.runAsSystemTenant('tenant-a', () =>
+        h.runtime.execute(actor, toolName, input, {
+          suppressWidgetTrigger: true,
+          onAvailabilityScope: (check) => {
+            verify = check;
+          },
+        }),
+      );
+      expect(verify).toBeDefined();
+      h.availabilityTenant.mockResolvedValue({
+        calendarSource: 'internal',
+        defaultTimezone: 'UTC',
+      });
+      await expect(
+        h.tenantContext.runAsSystemTenant('tenant-a', () => verify!()),
+      ).rejects.toMatchObject({
+        response: { error: { code: 'ai_tool_availability_source_changed' } },
+      });
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
     function fixture() {
       const h = createHarness();
       let row: Record<string, unknown> | null = null;

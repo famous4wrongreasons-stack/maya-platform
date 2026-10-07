@@ -152,6 +152,8 @@ export class AiToolRuntimeService {
     dto: ExecuteAiToolDto,
     internal: {
       readonly suppressWidgetTrigger?: boolean;
+      /** Transient metadata witness for the existing typed booking successor. */
+      readonly onAvailabilityScope?: (check: () => Promise<void>) => void;
       readonly widgetTrigger?: 'T-2a' | 'T-2b';
       readonly requestId?: string | null;
       readonly userTurn?: {
@@ -270,6 +272,8 @@ export class AiToolRuntimeService {
       definition,
       args,
     );
+    if (revalidateAvailability)
+      internal.onAvailabilityScope?.(revalidateAvailability);
     const inputHash = this.inputHash(toolName, args, principal);
 
     if (definition.approvalPolicy !== 'none') {

@@ -610,3 +610,51 @@ it('reconciles offset-less native detail in branch timezone without another PUT'
   expect(writes).toEqual([]);
   expect(mirror).toHaveBeenCalledTimes(1);
 });
+
+it('capacity metadata uses the selected branch timezone and no provider transport', async () => {
+  const f = fixture();
+  f.prisma.tenant.findUnique.mockResolvedValue({
+    calendarSource: 'external',
+    defaultTimezone: 'UTC',
+    branches: [f.branch],
+    crmIntegration: f.integration,
+  } as never);
+  global.fetch = jest.fn();
+  const source = await f.run(() =>
+    f.service.readCapacitySource('tenant-a', 'branch-a'),
+  );
+  expect(source).toMatchObject({
+    timezone: 'Europe/Moscow',
+    revision: expect.stringMatching(/^[a-f0-9]{64}$/) as unknown,
+  });
+  f.integration.settingsJson.companyId = 999;
+  await expect(
+    f.run(() => f.service.readCapacitySource('tenant-a', 'branch-a')),
+  ).rejects.toMatchObject({ status: 503 });
+  expect(global.fetch).not.toHaveBeenCalled();
+});
+it.each(['timezone', 'binding', 'foreign', 'calendar'])(
+  'capacity metadata detects %s drift',
+  async (change) => {
+    const f = fixture();
+    const snapshot = {
+      calendarSource: 'external',
+      defaultTimezone: 'UTC',
+      branches: [f.branch],
+      crmIntegration: f.integration,
+    };
+    f.prisma.tenant.findUnique.mockResolvedValue(snapshot as never);
+    const read = () =>
+      f.run(() => f.service.readCapacitySource('tenant-a', 'branch-a'));
+    const source = await read();
+    if (change === 'timezone') snapshot.branches[0].timezone = 'Asia/Tokyo';
+    if (change === 'binding') f.integration.settingsJson.branchBinding = null;
+    if (change === 'foreign') snapshot.branches = [];
+    if (change === 'calendar') snapshot.calendarSource = 'internal';
+    if (['binding', 'foreign'].includes(change))
+      await expect(read()).rejects.toMatchObject({
+        status: change === 'foreign' ? 404 : 503,
+      });
+    else expect((await read()).revision).not.toBe(source.revision);
+  },
+);
