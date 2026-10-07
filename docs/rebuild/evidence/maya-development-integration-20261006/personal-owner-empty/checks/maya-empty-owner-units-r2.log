@@ -1,0 +1,60 @@
+FAIL src/widgets/emission/emitter.spec.ts
+  ● K3 emission — mint, compose, fit, seal › FBE2E-2 mints a strict service selector and a closed server-owned transition domain
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+    @@ -4,6 +4,10 @@
+          "k": "option",
+        },
+        ObjectContaining {
+          "k": "intent",
+        },
+    +   Object {
+    +     "id": "i3",
+    +     "k": "intent",
+    +   },
+      ]
+
+      368 |     expect(refine?.input_schema?.fields).toHaveLength(1);
+      369 |     expect(refine?.input_schema?.fields[0]?.name).toBe('service_ref');
+    > 370 |     expect(envelope.presentation.a11y.reading_order).toEqual([
+          |                                                      ^
+      371 |       {
+      372 |         k: 'option',
+      373 |         id: 'opaque:service:catalog_service:service-1',
+
+      at Object.<anonymous> (widgets/emission/emitter.spec.ts:370:54)
+
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+FAIL src/widgets/routing/effect-router.service.spec.ts
+  ● U13a — closed Gate 13 spine, claim, receipt and dismiss › revoked Client refuses catalog navigation before catalog reread or mint
+
+    personal_client_context_changed
+
+      507 |     const h = fixture();
+      508 |     h.personalSchedules.prepare.mockRejectedValue(
+    > 509 |       new Error('personal_client_context_changed'),
+          |       ^
+      510 |     );
+      511 |     const input = ctx(
+      512 |       rec({
+
+      at Object.<anonymous> (widgets/routing/effect-router.service.spec.ts:509:7)
+
+PASS src/widgets/composition/chat-read.trigger.spec.ts
+PASS src/widgets/emission/intent-template.registry.spec.ts
+
+Test Suites: 2 failed, 4 passed, 6 total
+Tests:       2 failed, 100 passed, 102 total
+Snapshots:   0 total
+Time:        0.757 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-empty-owner-units-r2.json
+[32m[Nest] 23072  - [39m10/07/2026, 5:12:17 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 23072  - [39m10/07/2026, 5:12:17 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 23072  - [39m10/07/2026, 5:12:17 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 23072  - [39m10/07/2026, 5:12:17 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m

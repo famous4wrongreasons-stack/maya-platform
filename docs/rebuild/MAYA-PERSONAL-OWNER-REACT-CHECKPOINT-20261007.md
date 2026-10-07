@@ -92,6 +92,8 @@ Chrome remains. See the [hashed evidence manifest](evidence/maya-development-int
 
 ## Exact remaining boundaries
 
+Subsequent clarification: [First Client binding remainder](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md) records the existing A18 V1 initial-binding path through another verified channel. The V2-only observation below is historical and does not mean all initial Maya binding mechanisms are absent.
+
 1. **First Client link is not authorized by SB-1 V2.** The approved
    [successor contract](widget-release-programme/sb1-v2/CONTRACT.md) requires the
    exact latest revoked predecessor and canonical CRM verification channel.

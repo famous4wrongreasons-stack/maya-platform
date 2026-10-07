@@ -1,0 +1,50 @@
+FAIL src/widgets/emission/emitter.spec.ts
+  ● K3 emission — mint, compose, fit, seal › FBE2E-2 mints a strict service selector and a closed server-owned transition domain
+
+    IntentTemplateRefusal: intent template refused: personal_catalog_source_required
+
+      648 |         input.source.capability !== 'catalog.services.read')
+      649 |     )
+    > 650 |       throw new IntentTemplateRefusal('personal_catalog_source_required');
+          |             ^
+      651 |
+      652 |     const resolved = input.intent_proposals.map((proposal) => {
+      653 |       if (proposal.intent_template_key === SCHEDULE_TEMPLATE) {
+
+      at WidgetEmitterService.emitInternal (widgets/emission/emitter.service.ts:650:13)
+      at WidgetEmitterService.emitBookingSelector (widgets/emission/emitter.service.ts:368:17)
+      at Object.<anonymous> (widgets/emission/emitter.spec.ts:302:34)
+
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+PASS src/widgets/composition/chat-read.trigger.spec.ts
+[32m[Nest] 20654  - [39m10/07/2026, 5:07:23 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 20654  - [39m10/07/2026, 5:07:23 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 20654  - [39m10/07/2026, 5:07:23 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 20654  - [39m10/07/2026, 5:07:23 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+PASS src/widgets/routing/effect-router.service.spec.ts
+PASS src/widgets/emission/intent-template.registry.spec.ts
+FAIL src/conversation-intelligence/conversation-intelligence.service.spec.ts
+  ● ConversationIntelligenceService › keeps the runtime planner contract compact while retaining every intent
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 87
+    Received length: 88
+    Received array:  [{"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Find suitable booking slots.", "domain": "booking", "intent": "booking.find_availability", "language_hints": ["окно", "свободное время", "слот", "Есть окно вечером?", "К Артёму завтра после шести"], "optional_slots": ["employee", "services", "branch", "time_of_day"], "readiness": "ready", "readiness_note": null, "ready_tools": ["booking.availability.read"], "required_slots": ["date_or_period"], "slot_aliases": {"date_or_period": ["date", "period"], "services": ["service"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "List the actor own appointments.", "domain": "booking", "intent": "booking.list_own", "language_hints": ["мои записи", "мои визиты", "когда я записан", "Покажи мои записи", "Когда я записан в следующий раз?"], "optional_slots": ["period", "status"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", "domain": "booking", "intent": "booking.prepare_personal", "language_hints": ["хочу записаться", "записаться для себя", "открыть личную запись", "Хочу записаться", "Открой форму личной записи"], "optional_slots": [], "readiness": "ready", "readiness_note": null, "ready_tools": ["catalog.services.read"], "required_slots": [], "slot_aliases": {}}, {"action": "execute", "allowed_for_role": false, "data_class": "E", "description": "Create an appointment for the actor.", "domain": "booking", "intent": "booking.create_own", "language_hints": ["запиши", "поставь меня", "забронируй", "Запиши меня завтра", "Давай к Саше на 19:00"], "optional_slots": ["employee", "branch"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["services", "date", "time"], "slot_aliases": {"date": ["date_or_period"], "services": ["service"]}}, {"action": "execute", "allowed_for_role": false, "data_class": "E", "description": "Reschedule the actor appointment.", "domain": "booking", "intent": "booking.reschedule_own", "language_hints": ["перенеси", "передвинь запись", "другое время", "Перенеси меня на пятницу", "Нет, лучше завтра"], "optional_slots": ["new_employee"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["appointment", "new_date", "new_time"], "slot_aliases": {}}, {"action": "execute", "allowed_for_role": false, "data_class": "E", "description": "Cancel the actor appointment.", "domain": "booking", "intent": "booking.cancel_own", "language_hints": ["отмени запись", "не смогу прийти", "сними бронь", "Отмени мою запись на завтра"], "optional_slots": [], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["appointment"], "slot_aliases": {}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Tell who performs an appointment.", "domain": "booking", "intent": "booking.get_employee", "language_hints": ["к кому я записан", "кто меня стрижёт", "Кто меня сегодня стрижёт?"], "optional_slots": ["appointment", "date"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {"date": ["date_or_period"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Repeat the last usual service bundle.", "domain": "booking", "intent": "booking.repeat_last", "language_hints": ["мне как обычно", "как в прошлый раз", "повтори прошлую запись", "Мне как всегда, только в пятницу"], "optional_slots": ["date", "time"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {"date": ["date_or_period"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Find slots for multiple people.", "domain": "booking", "intent": "booking.group_or_simultaneous", "language_hints": ["нас двое", "одновременно", "рядом по времени", "Можно записать нас двоих одновременно?"], "optional_slots": ["simultaneous", "branch"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["party_size", "services", "date_or_period"], "slot_aliases": {"date_or_period": ["date", "period"], "services": ["service"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Read the employee own work schedule.", "domain": "schedule", "intent": "schedule.get_own", "language_hints": ["мой график", "когда я работаю", "моя смена", "Я завтра работаю?"], "optional_slots": ["period"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {}}, …]
+
+      81 |     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
+      82 |     // 85 existing intents + staff-only A22 read + the explicit C9 Occupancy vertical.
+    > 83 |     expect(contract.intents).toHaveLength(87);
+         |                              ^
+      84 |     expect(
+      85 |       contract.intents.find(
+      86 |         (item) => item.intent === 'schedule.review_cancellation_windows',
+
+      at Object.<anonymous> (conversation-intelligence/conversation-intelligence.service.spec.ts:83:30)
+
+Test Suites: 2 failed, 4 passed, 6 total
+Tests:       2 failed, 95 passed, 97 total
+Snapshots:   0 total
+Time:        0.995 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-empty-owner-units-r1.json

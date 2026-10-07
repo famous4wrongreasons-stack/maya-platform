@@ -1,0 +1,7 @@
+Final independent read-only review, /root/independent_review, 2026-10-07
+
+No remaining blocking finding in the reviewed final diff. Registry pin regenerated through the existing candidate generator (NOT_ISSUED); actual fresh catalog NAV gates the reply; known personal/source refusals persist REFUSED while infrastructure errors remain errors. First-link note correctly separates initial-only V1 binding, V2 successor and unresolved bootstrap.
+
+Reviewed r3 evidence: actual React/HTTP and App+PG restart PASS; zero initial Appointment rows; success one appointment/one AE attempt; revoke-before-confirm zero appointments/AE; revoke-before-NAV one persisted REFUSED and parent only/no child; repeated NAV a distinct bounded child; UNKNOWN attempt one after restart and zero provider dispatch/reconciliation after restart; scoped preview/results writes empty. All twelve full serialized model bodies contain user-only conversation, empty tool results and no tested private markers/UUID. Screenshots show visible form, NAV refusal and restarted UNKNOWN.
+
+The reviewer ran no tests or services. Duplicate catalog in detail remains a UI limitation. Synthetic A18/model/provider and special loopback relay are not real acceptance, production parity, first-link activation or C10 completion.

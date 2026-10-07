@@ -871,3 +871,24 @@ production relay header parity remain explicit gaps. Success after restart is
 visible in fresh own.list, not a restored success terminal. This is not release,
 real-model/provider acceptance, autonomy or C10 completion. See [scenario,
 boundaries and evidence](MAYA-PERSONAL-OWNER-REACT-CHECKPOINT-20261007.md).
+
+### Verified owner without prior appointments — 2026-10-07
+
+Code `5f24fcbc` adds `booking.prepare_personal`: explicit «Хочу записаться» →
+existing C9/catalog.services.read → sealed SERVICE_SELECTOR NAV → independently
+revalidated SB-1 personal form. Zero initial Appointment rows are supported;
+old own.list/SCHEDULE guard and owner own.create denial remain unchanged.
+Fresh r3 actual React/HTTP/app+PG restart proves one confirmed action, durable
+pre-NAV refusal, revoked-before-confirm zero effects, bounded repeated opening,
+UNKNOWN attempt 1 and zero provider dispatch/reconciliation after restart.
+Twelve full serialized scripted-model requests exclude tested personal facts.
+172 domain/registry, 177 AiCore and 110 runtime checks pass; production types,
+scoped lint, registry check and shell/React builds pass. Independent review has
+no blocker; owned services stopped. [Checkpoint/evidence](MAYA-PERSONAL-EMPTY-OWNER-CHECKPOINT-20261007.md).
+
+The earlier first-link wording is narrowed by the [A18 inventory](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md):
+V1 already supports an initial Maya link from another active verified Client
+channel, while a never-linked user without such a source needs a trusted
+bootstrap product decision. Real first-link activation, normal relay parity,
+model/provider acceptance, UI polish and C10 completion remain unqualified.
+No new schema, retention or autonomy. `NOT_ISSUED`.

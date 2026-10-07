@@ -1,0 +1,40 @@
+FAIL src/widgets/emission/emitter.spec.ts
+  ● K3 emission — mint, compose, fit, seal › catalog personal child retains a sealed exact parent and no recursive navigation or mutation recipe
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 1
+
+      Array [
+    -   "NONE",
+    -   "DISMISS",
+    +   "CONTROL",
+      ]
+
+      346 |       presentation: { fullscreen_detail: { route_key: 'fs.booking' } },
+      347 |     });
+    > 348 |     expect(prisma.records.map((r) => r.effect)).toEqual(['NONE', 'DISMISS']);
+          |                                                 ^
+      349 |     expect(lookup).toHaveBeenCalledWith({
+      350 |       where: expect.objectContaining({
+      351 |         tenantId: 't1',
+
+      at Object.<anonymous> (widgets/emission/emitter.spec.ts:348:49)
+
+PASS src/widgets/routing/effect-router.service.spec.ts
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/widgets/composition/chat-read.trigger.spec.ts
+PASS src/widgets/emission/intent-template.registry.spec.ts
+
+Test Suites: 1 failed, 5 passed, 6 total
+Tests:       1 failed, 102 passed, 103 total
+Snapshots:   0 total
+Time:        0.716 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-empty-owner-units-r3.json
+[32m[Nest] 23778  - [39m10/07/2026, 5:13:10 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 23778  - [39m10/07/2026, 5:13:10 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 23778  - [39m10/07/2026, 5:13:10 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 23778  - [39m10/07/2026, 5:13:10 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m

@@ -1,0 +1,49 @@
+PASS src/widgets/routing/effect-router.service.spec.ts
+  gate spec fixtures
+    ✓ the registries the gate specs read load, and the base fixture is a live-shaped record (1 ms)
+  U13a — closed Gate 13 spine, claim, receipt and dismiss
+    ✓ keeps SETTINGS_DRAFT commit isolated after installing every owner (1 ms)
+    ✓ keeps APPROVAL commit isolated after installing every owner (1 ms)
+    ✓ keeps BOOKING_CONFIRMATION commit isolated after installing every owner
+    ✓ G13-R10 exposes exactly the seven routable effects, with no NONE
+    ✓ B28 refuses NONE without claim, handler or receipt (1 ms)
+    ✓ B28 refuses INVENTED without claim, handler or receipt
+    ✓ G13-P01 refuses a missing record without claim, handler or receipt
+    ✓ N08: DRAFT fails closed before the claim while its canonical registry has no owner
+    ✓ G13-P06 routes REQUEST_APPROVAL through the canonical owner after claim (1 ms)
+    ✓ G13-P07 routes booking COMMIT through the canonical owner with no router-side business facts
+    ✓ G13-P08 routes APPROVAL COMMIT by the server-owned approvalDecision
+    ✓ G6-14C counts a fresh Gate 14 revocation but preserves Gate 14 refusal (1 ms)
+    ✓ G13-P02 NAVIGATE(detail) reprojects and mints one successor envelope
+    ✓ personal catalog navigation verifies Client independently before the current read and bounded child (1 ms)
+    ✓ revoked Client refuses catalog navigation before catalog reread or mint
+    ✓ a changed Client at child mint persists the refusal; infrastructure errors stay errors (7 ms)
+    ✓ persists bounded refusal when retained parent or current catalog changes: personal_parent_unavailable
+    ✓ persists bounded refusal when retained parent or current catalog changes: booking_selector_source_unavailable (1 ms)
+    ✓ G13-P02-W returns the exact stored sealed envelope after current authority
+    ✓ pricing detail re-reads its one owner noun and mints a bound child through the named seam (1 ms)
+    ✓ pricing detail refuses the unpaired target fs.audit without owner reads
+    ✓ pricing detail refuses the unpaired target fs.calendar without owner reads
+    ✓ G13-P03 REFINE mints one successor for the same live principal
+    ✓ FBE2E-2 SERVICE_SELECTOR uses the validated opaque option and the canonical server owner to choose STAFF_SELECTOR (1 ms)
+    ✓ FBE2E-2 STAFF_SELECTOR retains the exact service handle and lets the canonical owner choose TIME_SLOT_SELECTOR
+    ✓ FBE2E-2 TIME_SLOT_SELECTOR creates an existing server draft and confirmation without client-selected capability
+    ✓ FBE2E-2 fails closed when a selector input or inherited handle set is not exact (1 ms)
+    ✓ G13-P04 HANDOFF returns exactly one signed principal-bound target
+    ✓ N05 an invalid HANDOFF target fails before the claim
+    ✓ G13-R5 claims once, runs the one registered control, and writes a B-29 receipt with no echo
+    ✓ AMB-54 one concurrent claimant wins; the loser executes no destination and writes no receipt (1 ms)
+    ✓ G13-I5 a reusable record preserves reusable claim semantics while still recording its adjudication
+    ✓ N-CTRL-FOREIGN-P: a control without a live principal has no destination and is not claimed
+    ✓ N-CANCEL-FOREIGN: run.cancel rechecks the exact tenant and principal at its owner adapter
+    ✓ B-29 reconciliation fills the accepted receipt ref through the one store edge
+    ✓ WR-L7 refuses selector DRAFT when authority-tenant disagrees, before quoting or storing (1 ms)
+    ✓ WR-L7 refuses selector DRAFT when authority-user disagrees, before quoting or storing
+    ✓ WR-L7 refuses selector DRAFT when actor-tenant disagrees, before quoting or storing
+
+Test Suites: 1 passed, 1 total
+Tests:       39 passed, 39 total
+Snapshots:   0 total
+Time:        0.379 s, estimated 1 s
+Ran all test suites within paths "src/widgets/routing/effect-router.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-empty-owner-refusal-r1.json

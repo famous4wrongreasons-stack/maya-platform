@@ -1,0 +1,17 @@
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+PASS src/widgets/routing/effect-router.service.spec.ts
+PASS src/widgets/composition/chat-read.trigger.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/widgets/emission/intent-template.registry.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       103 passed, 103 total
+Snapshots:   0 total
+Time:        0.7 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-empty-owner-units-r4.json
+[32m[Nest] 24034  - [39m10/07/2026, 5:13:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 24034  - [39m10/07/2026, 5:13:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 24034  - [39m10/07/2026, 5:13:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m
+[32m[Nest] 24034  - [39m10/07/2026, 5:13:36 AM [32m    LOG[39m [38;5;3m[WidgetMintProvenance] [39m[32m{"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}[39m

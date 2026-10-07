@@ -1,0 +1,55 @@
+{
+  "stage": "prepare",
+  "entrySource": "catalog",
+  "initialAppointments": 0,
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "initialStateVerified": true,
+  "success-result": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "revoked-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "unknown-result": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "navRevoked-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 0,
+    "membershipUnchanged": true
+  },
+  "personalNavigationRefusedDurably": true,
+  "providerLedgerCount": 1,
+  "checkpoints": [
+    "success-preview",
+    "success-result",
+    "revoked-preview",
+    "revoked-result",
+    "unknown-preview",
+    "unknown-result",
+    "navRevoked-before-nav",
+    "navRevoked-result"
+  ],
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 1,
+    "reconciliations": 3
+  },
+  "unexpected": []
+}

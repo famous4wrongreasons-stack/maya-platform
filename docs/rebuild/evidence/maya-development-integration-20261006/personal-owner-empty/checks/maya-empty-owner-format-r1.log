@@ -1,0 +1,11 @@
+src/widgets/owner-ports/personal-schedule.port.ts 18ms
+src/widgets/owner-ports/personal-schedule.adapter.ts 15ms (unchanged)
+src/widgets/emission/intent-template.registry.ts 22ms (unchanged)
+src/widgets/emission/emitter.service.ts 37ms
+src/widgets/emission/envelope.factory.ts 20ms
+src/widgets/routing/effect-router.ports.ts 4ms (unchanged)
+src/widgets/routing/effect-router.service.ts 19ms
+src/widgets/routing/effect-router.service.spec.ts 19ms (unchanged)
+src/widgets/emission/emitter.spec.ts 22ms (unchanged)
+src/conversation-intelligence/conversation-taxonomy.ts 16ms
+src/ai-tools/ai-core.service.ts 135ms

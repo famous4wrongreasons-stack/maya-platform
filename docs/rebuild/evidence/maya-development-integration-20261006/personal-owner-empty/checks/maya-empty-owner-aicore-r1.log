@@ -1,0 +1,9 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-core.development-integration.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       177 passed, 177 total
+Snapshots:   0 total
+Time:        1.086 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.development-integration.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-empty-owner-aicore-r1.json

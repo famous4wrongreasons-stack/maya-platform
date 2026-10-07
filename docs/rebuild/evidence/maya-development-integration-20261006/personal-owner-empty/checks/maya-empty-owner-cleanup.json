@@ -1,0 +1,37 @@
+{
+  "attempts": [
+    {
+      "attempt": "maya-empty-owner-react-20261007-r1",
+      "manifestStatus": "failed",
+      "clusterStopped": true,
+      "pgCtlExit": 3,
+      "closedPorts": [
+        63245,
+        63267
+      ]
+    },
+    {
+      "attempt": "maya-empty-owner-react-20261007-r2",
+      "manifestStatus": "passed",
+      "clusterStopped": true,
+      "pgCtlExit": 3,
+      "closedPorts": [
+        63405,
+        63425,
+        63521
+      ]
+    },
+    {
+      "attempt": "maya-empty-owner-react-20261007-r3",
+      "manifestStatus": "passed",
+      "clusterStopped": true,
+      "pgCtlExit": 3,
+      "closedPorts": [
+        63907,
+        63937,
+        64040
+      ]
+    }
+  ],
+  "ownedChromeProcesses": 0
+}
