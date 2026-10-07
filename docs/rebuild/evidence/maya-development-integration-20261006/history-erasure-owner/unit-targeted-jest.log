@@ -1,0 +1,75 @@
+[Nest] 99275  - 10/08/2026, 2:02:24 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 99275  - 10/08/2026, 2:02:24 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 99275  - 10/08/2026, 2:02:24 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 99275  - 10/08/2026, 2:02:24 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+FAIL src/widgets/widget-import-graph.architecture.spec.ts (17.933 s)
+  ● D-6 — the union import-graph test: owners only through the owner-ports boundary › CONTROL: the widget layer as it stands breaks none of the rules
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 27
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "at": "consent/history-erasure.controller.ts:5",
+    +     "rule": "D6-CLOSED",
+    +     "what": "decorators/current-user.decorator.ts is not enumerated for consent/history-erasure.controller.ts (only widgets.controller.ts)",
+    +   },
+    +   Object {
+    +     "at": "consent/history-erasure.controller.ts:6",
+    +     "rule": "D6-CLOSED",
+    +     "what": "decorators/tenant-scoped.decorator.ts is not enumerated for consent/history-erasure.controller.ts (only widgets.controller.ts)",
+    +   },
+    +   Object {
+    +     "at": "emission/emitter.service.ts:422",
+    +     "rule": "FR1-MODEL",
+    +     "what": "the Tenant delegate",
+    +   },
+    +   Object {
+    +     "at": "owner-ports/booking-selector.adapter.ts:1",
+    +     "rule": "D6-CLOSED",
+    +     "what": "ai-tools/booking-catalog-binding.ts is not enumerated for owner-ports/booking-selector.adapter.ts",
+    +   },
+    +   Object {
+    +     "at": "owner-ports/booking-selector.adapter.ts:5",
+    +     "rule": "D6-CLOSED",
+    +     "what": "crm/crm.service.ts is not enumerated for owner-ports/booking-selector.adapter.ts",
+    +   },
+    + ]
+
+      1111 |
+      1112 |   it('CONTROL: the widget layer as it stands breaks none of the rules', () => {
+    > 1113 |     expect(baseline().violations).toEqual([]);
+           |                                   ^
+      1114 |   }, 60_000);
+      1115 |
+      1116 |   it('the Prisma client delegates the widget layer uses are its own models, and the scan sees them', () => {
+
+      at Object.<anonymous> (widgets/widget-import-graph.architecture.spec.ts:1113:35)
+
+  ● D-6 — the union import-graph test: owners only through the owner-ports boundary › the Prisma client delegates the widget layer uses are its own models, and the scan sees them
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      1149 |           x === 'consent/erasure.job.ts:$executeRaw',
+      1150 |       ),
+    > 1151 |     ).toBe(true);
+           |       ^
+      1152 |   }, 60_000);
+      1153 |
+      1154 |   it('CLOSED: every non-widget import is enumerated, and every enumerated entry is used', () => {
+
+      at Object.<anonymous> (widgets/widget-import-graph.architecture.spec.ts:1151:7)
+
+
+Test Suites: 1 failed, 7 passed, 8 total
+Tests:       2 failed, 195 passed, 197 total
+Snapshots:   0 total
+Time:        18.758 s, estimated 32 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/stores/timeline.store.spec.ts", "src/widgets/stores/intent-audit.store.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts", "src/widgets/authority/k5-principal.architecture.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-history-erasure-owner-20261007-unit/targeted-jest.json

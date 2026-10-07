@@ -1,0 +1,8 @@
+{
+  "contract": "maya.history-erasure.cleanup-check/1",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-history-erasure-8eTPbX/pg",
+  "pgCtlStatus": 3,
+  "stdout": "pg_ctl: no server running",
+  "stderr": "",
+  "postmasterPidPresent": false
+}

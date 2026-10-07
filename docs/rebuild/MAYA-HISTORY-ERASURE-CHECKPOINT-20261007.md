@@ -1,4 +1,5 @@
 # History erasure: scoped kernel checkpoint, 2026-10-07
+**Current successor:** [the local privacy-owner checkpoint](MAYA-HISTORY-ERASURE-OWNER-CHECKPOINT-20261007.md) at `6b4a89b1` now qualifies callable HTTP admission, durable completion replay and late-writer fences with 17 actual HTTP/PG cases. The dark-only statements below describe the earlier checkpoint; UI/RT8 remain open.
 
 **Useful result:** the existing dark erasure job now acquires the conversation lock before taking its target snapshot, scopes drafts through retained conversation references, and can clean late children of erased parents on retry. No HTTP erasure route or UI delete action is enabled. `GAP-HISTORY-ERASE` remains open.
 

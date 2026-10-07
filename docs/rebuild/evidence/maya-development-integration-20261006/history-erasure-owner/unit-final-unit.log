@@ -1,0 +1,11 @@
+[Nest] 4570  - 10/08/2026, 2:11:03 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 4570  - 10/08/2026, 2:11:03 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 4570  - 10/08/2026, 2:11:03 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 4570  - 10/08/2026, 2:11:03 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+
+Test Suites: 11 passed, 11 total
+Tests:       247 passed, 247 total
+Snapshots:   0 total
+Time:        19.308 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/stores/timeline.store.spec.ts", "src/widgets/stores/intent-audit.store.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts", "src/widgets/authority/k5-principal.architecture.spec.ts", "src/widgets/consent/history-erasure.owner.spec.ts", "src/privacy/history-erasure.controller.spec.ts", "src/widgets/owner-ports/booking-selector.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-history-erasure-owner-20261007-unit/final-unit.json

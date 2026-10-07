@@ -1,0 +1,36 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/privacy/history-erasure.controller.spec.ts
+  26:20  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/composition/chat-read.trigger.spec.ts
+  159:9  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/consent/history-erasure.owner.spec.ts
+   86:76  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  110:34  error  '_tx' is defined but never used                 @typescript-eslint/no-unused-vars
+  110:50  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  170:71  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  278:9   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/emission/emitter.spec.ts
+  1081:9  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/routing/effect-router.service.spec.ts
+  1166:11  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/stores/intent-audit.store.spec.ts
+   38:59  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+   51:57  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  150:33  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  221:11  error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  241:9   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  274:36  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  277:36  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  282:64  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  289:36  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  305:9   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+
+✖ 19 problems (19 errors, 0 warnings)
+

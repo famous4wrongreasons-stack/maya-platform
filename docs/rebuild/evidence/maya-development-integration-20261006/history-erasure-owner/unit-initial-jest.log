@@ -1,0 +1,84 @@
+[Nest] 98055  - 10/08/2026, 2:00:18 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 98055  - 10/08/2026, 2:00:18 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 98055  - 10/08/2026, 2:00:18 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 98055  - 10/08/2026, 2:00:18 AM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+FAIL src/widgets/composition/chat-read.trigger.spec.ts
+  ● P-MT2a ChatReadTriggerService › WR-L11 dispatches catalog.services.read to the canonical selector minter
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      {"body": {"services": [], "slots": [], "staff": []}, "composerInput": {"capability": "catalog.services.read", "intent_proposals": [], "kind_proposal": "SERVICE_SELECTOR"}, "conversationId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "deliveryChannel": "pwa", "freshnessClass": "live", "kind": "SERVICE_SELECTOR", "principal": {"authority": {"channelLinkId": null, "clientId": null, "kind": "USER", "membershipId": "membership-a", "tenantId": "tenant-a", "userId": "user-a"}, "presentationMode": "owner", "proofHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "role": "tenant_owner", "verificationLevel": "SESSION_VERIFIED"}, "principalProofHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "tenantId": "tenant-a", "ttlSeconds": 600, "turnId": "22222222-2222-4222-8222-222222222222"},
+      {"source": {"services": [], "slots": [], "staff": []}},
+    + 2026-10-07T23:00:18.232Z,
+    + {"$executeRaw": [Function mockConstructor], "widgetEmission": {"findFirst": [Function mockConstructor]}},
+
+    Number of calls: 1
+
+      265 |         result: source,
+      266 |       });
+    > 267 |       expect(h.emitBookingSelector).toHaveBeenCalledWith(
+          |                                     ^
+      268 |         expect.objectContaining({ kind }),
+      269 |         { source },
+      270 |       );
+
+      at widgets/composition/chat-read.trigger.spec.ts:267:37
+
+  ● P-MT2a ChatReadTriggerService › WR-L11 dispatches catalog.staff.read to the canonical selector minter
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      {"body": {"services": [], "slots": [], "staff": []}, "composerInput": {"capability": "catalog.staff.read", "intent_proposals": [], "kind_proposal": "STAFF_SELECTOR"}, "conversationId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "deliveryChannel": "pwa", "freshnessClass": "live", "kind": "STAFF_SELECTOR", "principal": {"authority": {"channelLinkId": null, "clientId": null, "kind": "USER", "membershipId": "membership-a", "tenantId": "tenant-a", "userId": "user-a"}, "presentationMode": "owner", "proofHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "role": "tenant_owner", "verificationLevel": "SESSION_VERIFIED"}, "principalProofHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "tenantId": "tenant-a", "ttlSeconds": 600, "turnId": "22222222-2222-4222-8222-222222222222"},
+      {"source": {"services": [], "slots": [], "staff": []}},
+    + 2026-10-07T23:00:18.233Z,
+    + {"$executeRaw": [Function mockConstructor], "widgetEmission": {"findFirst": [Function mockConstructor]}},
+
+    Number of calls: 1
+
+      265 |         result: source,
+      266 |       });
+    > 267 |       expect(h.emitBookingSelector).toHaveBeenCalledWith(
+          |                                     ^
+      268 |         expect.objectContaining({ kind }),
+      269 |         { source },
+      270 |       );
+
+      at widgets/composition/chat-read.trigger.spec.ts:267:37
+
+  ● P-MT2a ChatReadTriggerService › WR-L11 dispatches booking.availability.read to the canonical selector minter
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      {"body": {"services": [], "slots": [], "staff": []}, "composerInput": {"capability": "booking.availability.read", "intent_proposals": [], "kind_proposal": "TIME_SLOT_SELECTOR"}, "conversationId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "deliveryChannel": "pwa", "freshnessClass": "live", "kind": "TIME_SLOT_SELECTOR", "principal": {"authority": {"channelLinkId": null, "clientId": null, "kind": "USER", "membershipId": "membership-a", "tenantId": "tenant-a", "userId": "user-a"}, "presentationMode": "owner", "proofHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "role": "tenant_owner", "verificationLevel": "SESSION_VERIFIED"}, "principalProofHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "tenantId": "tenant-a", "ttlSeconds": 600, "turnId": "22222222-2222-4222-8222-222222222222"},
+      {"source": {"services": [], "slots": [], "staff": []}},
+    + 2026-10-07T23:00:18.233Z,
+    + {"$executeRaw": [Function mockConstructor], "widgetEmission": {"findFirst": [Function mockConstructor]}},
+
+    Number of calls: 1
+
+      265 |         result: source,
+      266 |       });
+    > 267 |       expect(h.emitBookingSelector).toHaveBeenCalledWith(
+          |                                     ^
+      268 |         expect.objectContaining({ kind }),
+      269 |         { source },
+      270 |       );
+
+      at widgets/composition/chat-read.trigger.spec.ts:267:37
+
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       3 failed, 130 passed, 133 total
+Snapshots:   0 total
+Time:        0.822 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/emitter.spec.ts", "src/widgets/composition/chat-read.trigger.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/stores/timeline.store.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-history-erasure-owner-20261007-unit/initial-jest.json

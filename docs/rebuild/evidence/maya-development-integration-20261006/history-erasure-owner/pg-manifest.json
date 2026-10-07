@@ -1,0 +1,41 @@
+{
+  "contract": "maya.history-erasure-owned-cluster/1",
+  "commit": "6b4a89b19dc940cb147c885be6ee79bb80a5b12f",
+  "sourceTrees": {
+    "src": "7d0f63b091547204e94299c438d21ad892ada942",
+    "test": "e0f3cb31cfad5dd62e72fc2e66229670848ec73d",
+    "scripts": "fcbf8372e975727a6f4a29e483d0e77f2ac5e3a8",
+    "prisma": "508191c08b108bda616b9a7ff8e63ac5e7f352f9"
+  },
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-history-erasure-8eTPbX/pg",
+  "database": "maya_widget_gate_proof_c9occ_eef75d55af08",
+  "port": 65338,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "erasure-pg"
+  ],
+  "clusterStopped": true,
+  "scope": "RT6 storage/gateway, late writer and current privacy HTTP fixtures; fresh Nest application restart, not a deployed binary; RT8 UI/product acceptance remains open",
+  "sourceBinding": "Committed src/test/scripts/prisma trees; installed dependencies are not hashed",
+  "expectedExternalProviderCalls": 0,
+  "expectedModelCalls": 0,
+  "externalEgressMeasured": false,
+  "fixtureData": "synthetic-only",
+  "resources": {
+    "nodeHeapMiB": 3072,
+    "pgSharedBuffersMiB": 64,
+    "pgWorkMemMiB": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "observedTests": {
+    "passed": 17,
+    "failed": 0,
+    "pending": 0
+  },
+  "postRunSourcesUnchanged": true
+}

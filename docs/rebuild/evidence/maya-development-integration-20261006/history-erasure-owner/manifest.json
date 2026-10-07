@@ -1,0 +1,151 @@
+{
+  "contract": "maya.history-erasure-owner-checkpoint/1",
+  "codeCommit": "6b4a89b19dc940cb147c885be6ee79bb80a5b12f",
+  "baseCommit": "c3e37e2447b552bf64d42c1462a3988370535ad0",
+  "sourceTrees": {
+    "src": "7d0f63b091547204e94299c438d21ad892ada942",
+    "test": "e0f3cb31cfad5dd62e72fc2e66229670848ec73d",
+    "scripts": "fcbf8372e975727a6f4a29e483d0e77f2ac5e3a8",
+    "prisma": "508191c08b108bda616b9a7ff8e63ac5e7f352f9"
+  },
+  "scope": "Local authenticated exact-conversation privacy erasure plus late writer fences and durable completion replay; no UI/RT8/real-model/provider/C10 completion",
+  "checks": {
+    "unit": {
+      "passed": 247,
+      "suites": 11
+    },
+    "httpPg": {
+      "passed": 17,
+      "suites": 3,
+      "pending": 0,
+      "attempts": 1
+    },
+    "k3": "10/10 PASS",
+    "scopedLint": "PASS",
+    "widgetsLiveTypes": "PASS",
+    "cleanup": "pg_ctl status 3, no postmaster.pid; owned cluster only"
+  },
+  "restartQualification": "Fresh Nest application instances in one process, same running ephemeral PostgreSQL; not separate binary/process/PG restart",
+  "expectedExternalProviderCalls": 0,
+  "expectedModelCalls": 0,
+  "externalEgressMeasured": false,
+  "fixtureData": "synthetic-only",
+  "bindingLimit": "Four committed source trees; installed dependencies and aggregate release gates not bound",
+  "artifacts": {
+    "pg-manifest.json": {
+      "sha256": "ff9a0bd6cf5152f158c1fc0e34314c32609f40d114701e051dfc8e4b3f4e57c0",
+      "bytes": 1361,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/manifest.json"
+    },
+    "pg-cleanup-check.json": {
+      "sha256": "38d85a23fa26bc77c444d69d551743ee42d6e194a0b1a1f4195a115e9681ca80",
+      "bytes": 263,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/cleanup-check.json"
+    },
+    "pg-erasure-pg-jest.json": {
+      "sha256": "3df0c908280607d0ee86ad8516cf4080f101ee1f04574e380fa96d012964061d",
+      "bytes": 10012,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/erasure-pg-jest.json"
+    },
+    "pg-erasure-pg.log": {
+      "sha256": "5881098cb4ae3d2965dc116e2a35a094d8ac286a0df565ee6041a56dd4b9acb8",
+      "bytes": 3026,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/erasure-pg.log"
+    },
+    "pg-initdb.log": {
+      "sha256": "e362b5dc2eb77b3069ee7a778fa00fc82675fe6832e570d8fa4cf38771419b33",
+      "bytes": 952,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/initdb.log"
+    },
+    "pg-pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/pg-start.log"
+    },
+    "pg-createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/createdb.log"
+    },
+    "pg-migrations.log": {
+      "sha256": "51b3cd23b4589bb22ef2c84bbb27a0ed319f23eac4bc7f59a43b170c63d513cc",
+      "bytes": 14720,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/migrations.log"
+    },
+    "pg-pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/pg-stop.log"
+    },
+    "pg-postgres.log": {
+      "sha256": "0967feb43004271b0be8d0e13b660a906e0423c741b496bcc06b46d2d512c1e5",
+      "bytes": 1234,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-pg-01/postgres.log"
+    },
+    "unit-initial-jest.json": {
+      "sha256": "b03b03f540398152ea6cc8dbe79f330926d4dd1008e0b6f71895621764fd2742",
+      "bytes": 94733,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/initial-jest.json"
+    },
+    "unit-initial-jest.log": {
+      "sha256": "52bebbf9d672ae68f6c35003652c108ad62626e93802cf9a4fd4f2ef7a6379f3",
+      "bytes": 6792,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/initial-jest.log"
+    },
+    "unit-targeted-jest.json": {
+      "sha256": "2bfd92de6d2106f7d329a123386ebcee178314d14fa04c6d5ecd869035c99da2",
+      "bytes": 132625,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/targeted-jest.json"
+    },
+    "unit-targeted-jest.log": {
+      "sha256": "9884694e9daae7f5da546827f573e997c97fb44f5b0b99301a4f610baa804dc5",
+      "bytes": 4677,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/targeted-jest.log"
+    },
+    "unit-initial-tsc.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/initial-tsc.log"
+    },
+    "unit-current-tsc.log": {
+      "sha256": "5c1e1bdc2de869710386bbe71de9f7e78d21c7ab1ea68c200ad9be21cf8512eb",
+      "bytes": 4815,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/current-tsc.log"
+    },
+    "unit-initial-eslint.log": {
+      "sha256": "49015af56fa264daa2444a194539c0835951a095093ea499bf3b2beebb951dc3",
+      "bytes": 3109,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/initial-eslint.log"
+    },
+    "unit-initial-k3.log": {
+      "sha256": "b21cd1b53b0cdd5a4741ff1f3961cf25600bdeeed46d17f23ce52af976766de9",
+      "bytes": 2509,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/initial-k3.log"
+    },
+    "unit-final-unit.json": {
+      "sha256": "f1c35f439c863b12432d992fd5a6a2aa2ff461fa7d3f572dd7a1293c17c6cbcf",
+      "bytes": 147455,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/final-unit.json"
+    },
+    "unit-final-unit.log": {
+      "sha256": "aa740b93fe30fffff3891bfb0c61c505f00b9de2fd03accff74a1f86b5aa2ed8",
+      "bytes": 2161,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/final-unit.log"
+    },
+    "unit-final-tsc.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/final-tsc.log"
+    },
+    "unit-scoped-eslint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/scoped-eslint.log"
+    },
+    "unit-k3.log": {
+      "sha256": "30e5bf5957dfc6eb5e2e328fab5d336c6564fdb19eb5889d959bdfdc33d8c2f6",
+      "bytes": 7947,
+      "copiedFrom": "/tmp/maya-history-erasure-owner-20261007-unit/k3.log"
+    }
+  }
+}
