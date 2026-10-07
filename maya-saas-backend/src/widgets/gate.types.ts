@@ -124,6 +124,8 @@ export type IntentReceiptOutcome =
 
 /** What Gate 13's routing returns inside a `terminate` (G13 §6). Each `unknown` is `null` when absent. */
 export interface RouteResult {
+  /** Internal routing reason, rendered through the existing public code/reason_text pair. */
+  readonly refusal_code?: string | null;
   /** `null` exactly when no D12 member fits (G13 A14). */
   readonly receipt_outcome: IntentReceiptOutcome | null;
   readonly next_envelope: unknown;

@@ -1,0 +1,43 @@
+PASS src/widgets/routing/effect-router.service.spec.ts
+FAIL src/widgets/rendering/refusal-codes-covered.spec.ts
+  ● P-RENDER — R3.9.3 rendering: the map is total and the grant path is one › REN-6 no migration, seed or script creates a widgets.runtime TenantEntitlement
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "file": "test/widgets-diagnostics/support/development-integration-fixture.ts",
+    +     "why": "reaches Fixtures.grantFeature for widgets.runtime outside the allowlist",
+    +   },
+    +   Object {
+    +     "file": "test/widgets-diagnostics/support/service-price-browser-harness.ts",
+    +     "why": "reaches Fixtures.grantFeature for widgets.runtime outside the allowlist",
+    +   },
+    + ]
+
+      294 |
+      295 |   it('REN-6 no migration, seed or script creates a widgets.runtime TenantEntitlement', () => {
+    > 296 |     expect(scanEntitlementGrants(BE)).toEqual([]);
+          |                                       ^
+      297 |   });
+      298 |
+      299 |   it('REN-6 the proof fixture stays guarded alongside the single AR-1 certified writer', () => {
+
+      at Object.<anonymous> (widgets/rendering/refusal-codes-covered.spec.ts:296:39)
+
+PASS src/widgets/intent-submit-args.spec.ts
+PASS src/widgets/stores/widget-stores.service.spec.ts
+PASS src/widgets/owner-ports/commit-booking.adapter.spec.ts
+PASS src/widgets/routing/effect-router.architecture.spec.ts
+PASS src/widgets/rendering/anti-error-lint.spec.ts
+
+Test Suites: 1 failed, 6 passed, 7 total
+Tests:       1 failed, 132 passed, 133 total
+Snapshots:   0 total
+Time:        1.032 s
+Ran all test suites within paths "src/widgets/owner-ports/commit-booking.adapter.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts", "src/widgets/intent-submit-args.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/routing/effect-router.architecture.spec.ts", "src/widgets/rendering/anti-error-lint.spec.ts", "src/widgets/rendering/refusal-codes-covered.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-reasons-backend.json

@@ -243,6 +243,7 @@ export interface WidgetOwnerDecisionProjection {
 }
 
 export interface WidgetIntentProjection {
+  readonly reason_text?: { readonly phrase_key: string; readonly rendered: string };
   readonly schedule_outcome?: 'SUCCEEDED' | 'FAILED' | 'UNKNOWN' | null;
   readonly outcome: 'terminate' | 'refuse' | 'expired' | 'superseded';
   readonly code: string | null;

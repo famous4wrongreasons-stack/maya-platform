@@ -1,3 +1,4 @@
+import { bookingRefusal } from './booking-reasons.ts';
 // K5 — allowlist projections of the verified backend responses (D12c).
 //
 // A projection builds a fresh object from the keys it lists and names no dropped key. Everything
@@ -313,6 +314,13 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
   // are not envelopes, so they project to null rather than rejecting the response: HANDOFF stays
   // exactly where it is, and an ordinary CONTROL dismissal keeps its existing path.
   return {
+    ...(() => {
+      const reason = bookingRefusal(code);
+      const phrase = own(body, 'reason_text');
+      return reason !== null && own(phrase, 'phrase_key') === reason.phrase_key
+        && own(phrase, 'rendered') === reason.rendered
+        ? { reason_text: { phrase_key: reason.phrase_key, rendered: reason.rendered } } : {};
+    })(),
     outcome: outcome as WidgetIntentProjection['outcome'],
     code: code as string | null,
     next_envelope: next as WidgetIntentProjection['next_envelope'],

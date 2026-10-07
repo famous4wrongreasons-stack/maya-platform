@@ -192,6 +192,7 @@ export class EffectRouterService {
     );
 
     const route: RouteResult = {
+      refusal_code: routed.refusalCode,
       receipt_outcome: routed.receiptOutcome,
       next_envelope: routed.nextEnvelope,
       resolved_widget: routed.resolvedWidget,

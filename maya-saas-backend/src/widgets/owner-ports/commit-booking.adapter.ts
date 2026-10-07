@@ -1,5 +1,5 @@
 import { EntitlementsService } from '../../entitlements/entitlements.service';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 
 import {
   type ActionInvocationReceiptContext,
@@ -23,6 +23,31 @@ const rejected = (reason?: string): EffectRouteOutcome => ({
   ownerDecision: null,
   gate14RefusalReason: reason ?? null,
 });
+
+// Owner codes select existing presentation reasons; arbitrary exception text never does.
+const bookingRefusal = (error: unknown): EffectRouteOutcome | null => {
+  if (!(error instanceof HttpException)) return null;
+  const response = error.getResponse();
+  if (
+    typeof response !== 'object' ||
+    response === null ||
+    !('error' in response)
+  )
+    return null;
+  const detail = response.error;
+  if (typeof detail !== 'object' || detail === null || !('code' in detail))
+    return null;
+  const code = detail.code;
+  const reason =
+    code === 'booking_preview_stale'
+      ? 'handle_stale'
+      : code === 'booking_preview_refresh_required'
+        ? 'booking_confirmation_required'
+        : code === 'booking_service_facts_unavailable'
+          ? 'NOT_COLLECTED'
+          : null;
+  return reason === null ? null : { ...rejected(), refusalCode: reason };
+};
 
 /**
  * U13c: COMMIT reaches the three existing appointment owners. This adapter
@@ -79,10 +104,13 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
       },
     };
 
+    let ownerError: unknown;
     try {
       await withActionInvocationReceipt(receipt, () => this.invoke(input));
     } catch (error) {
-      if (executionId === null) return rejected(gate14Reason(error));
+      ownerError = error;
+      if (executionId === null)
+        return bookingRefusal(error) ?? rejected(gate14Reason(error));
     }
     if (executionId === null) return rejected();
 
@@ -110,7 +138,9 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
         ownerDecision: { state: result.state, reconciliation: 'required' },
         gate14RefusalReason: null,
       };
-    return rejected();
+    return result.state === 'FAILED'
+      ? (bookingRefusal(ownerError) ?? rejected())
+      : rejected();
   }
 
   private invoke(input: ActuatingRoutingInput): Promise<unknown> {

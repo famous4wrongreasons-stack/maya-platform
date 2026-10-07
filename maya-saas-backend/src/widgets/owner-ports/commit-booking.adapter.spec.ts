@@ -1,3 +1,4 @@
+import { ConflictException, ServiceUnavailableException } from '@nestjs/common';
 import type { EntitlementsService } from '../../entitlements/entitlements.service';
 import type { ActionExecution } from '@prisma/client';
 
@@ -278,4 +279,74 @@ describe('U13c booking COMMIT owner port', () => {
       gate14RefusalReason: null,
     });
   });
+});
+
+describe('booking owner reason projection', () => {
+  it.each([
+    ['booking_preview_stale', 'handle_stale'],
+    ['booking_preview_refresh_required', 'booking_confirmation_required'],
+    ['booking_service_facts_unavailable', 'NOT_COLLECTED'],
+  ])('maps exact %s before execution to existing %s', async (code, reason) => {
+    const built = fixture();
+    built.create.forAccount.mockRejectedValue(
+      new ConflictException({ error: { code } }),
+    );
+    await expect(built.adapter.commit(input())).resolves.toMatchObject({
+      receiptOutcome: 'REFUSED',
+      refusalCode: reason,
+      actionReceiptRef: null,
+    });
+    expect(built.create.executionResult).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    new Error('booking_preview_stale'),
+    new ServiceUnavailableException('booking_service_facts_unavailable'),
+    new ConflictException({ code: 'booking_preview_stale' }),
+    new ConflictException({ error: { code: 'arbitrary_provider_message' } }),
+  ])(
+    'never classifies arbitrary messages or HTTP status as factual staleness',
+    async (error) => {
+      const built = fixture();
+      built.create.forAccount.mockRejectedValue(error);
+      await expect(built.adapter.commit(input())).resolves.toMatchObject({
+        receiptOutcome: 'REFUSED',
+        refusalCode: 'effect_not_admissible',
+      });
+    },
+  );
+
+  it.each(['UNKNOWN', 'SUCCEEDED', 'FAILED'])(
+    'canonical %s outranks a caught stale exception',
+    async (state) => {
+      const built = fixture();
+      const original = built.create.forAccount.getMockImplementation()!;
+      built.create.forAccount.mockImplementation(async (...args: unknown[]) => {
+        await original(...args);
+        throw new ConflictException({
+          error: { code: 'booking_preview_stale' },
+        });
+      });
+      built.create.executionResult.mockResolvedValue({
+        executionId: execution.id,
+        state,
+        outcomeCode: null,
+      });
+      const result = await built.adapter.commit(input());
+      expect(result.receiptOutcome).toBe(
+        state === 'FAILED' ? 'REFUSED' : 'ACCEPTED',
+      );
+      expect(result.refusalCode).toBe(
+        state === 'FAILED' ? 'handle_stale' : null,
+      );
+      expect(result.actionReceiptRef).toBe(
+        state === 'SUCCEEDED' ? execution.id : null,
+      );
+      if (state === 'UNKNOWN')
+        expect(result.ownerDecision).toEqual({
+          state,
+          reconciliation: 'required',
+        });
+    },
+  );
 });

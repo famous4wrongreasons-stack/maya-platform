@@ -429,6 +429,13 @@ export const widgetSentence = (sentence: NonNullable<WidgetItem['sentence']>): s
       return 'Карточка устарела — показана сводка';
     case 'service_price_confirmed':
       return 'Цена подтверждена в YCLIENTS';
+    case 'booking_stale':
+      return 'Данные изменились с момента показа. Откройте актуальную версию.';
+    case 'booking_confirmation_required':
+      return 'Сначала нужно подтвердить запись.';
+    case 'booking_facts_unavailable':
+      return 'Эти данные пока не собраны.';
+    case 'booking_unconfirmed':
     case 'service_price_unconfirmed':
       return 'Результат пока не подтверждён. Не отправляйте повторно';
     case 'service_price_rejected':

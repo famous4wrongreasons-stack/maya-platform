@@ -26,6 +26,7 @@ import type { EnvelopeView, IntegrityVerdict, RenderNode, RenderResult } from '.
 import { resolveTarget } from '../routes/registry.ts';
 import type { AbortHandle, TimelineWriter, WidgetItemView } from './conversation.ts';
 import type {
+  BookingRefusalSentence,
   Cancel,
   EnvironmentProbe,
   RenderFn,
@@ -102,8 +103,16 @@ export const createLiveSubmission = (
       envelope: sent.value.next_envelope,
       accepted: sent.value.outcome === 'terminate' && sent.value.code === null && sent.value.receipt_outcome === 'ACCEPTED',
     };
+    const reason: BookingRefusalSentence | null = sent.value.reason_text === undefined ? null
+      : sent.value.code === 'handle_stale' ? 'booking_stale'
+      : sent.value.code === 'booking_confirmation_required' ? 'booking_confirmation_required'
+      : sent.value.code === 'NOT_COLLECTED' ? 'booking_facts_unavailable' : null;
+    const bookingFailure = sent.value.outcome === 'terminate' && sent.value.receipt_outcome === 'REFUSED'
+      && sent.value.owner_decision?.state !== 'UNKNOWN' && reason !== null;
+    const fallback: SubmissionOutcome = bookingFailure ? { status: 'refused', sentence: reason }
+      : { status: 'forbidden' };
     const scheduleFailure = sent.value.outcome === 'terminate' && sent.value.receipt_outcome === 'REFUSED' && sent.value.schedule_outcome === 'FAILED';
-    if (!scheduleFailure && (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED')) {
+    if (!scheduleFailure && !bookingFailure && (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED')) {
       return { status: 'forbidden' };
     }
     // NS-1: an ACCEPTED reply that carries a re-resolved widget is a RETURN, not a plain
@@ -122,11 +131,11 @@ export const createLiveSubmission = (
     const owner = sent.value.code === null && sent.value.owner_decision !== undefined
       ? { ownerDecision: sent.value.owner_decision } : {};
     const page = await transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
-    if (!page.ok) return { status: scheduleFailure ? 'forbidden' : 'accepted', ...owner };
+    if (!page.ok || !page.value.tenant_bound) return bookingFailure || scheduleFailure ? fallback : { status: 'accepted', ...owner };
     const current = page.value.widgets.find((widget) => widget.envelope.widget_id === submission.widget_id);
     return current !== undefined && current.terminal_lines.length > 0
       ? { status: 'settled', lines: current.terminal_lines, ...owner }
-      : { status: scheduleFailure ? 'forbidden' : 'accepted', ...owner };
+      : bookingFailure || scheduleFailure ? fallback : { status: 'accepted', ...owner };
   },
 });
 
@@ -193,6 +202,7 @@ interface Entry {
   sentence: WidgetSentence | null;
   /** Presentation receipt only; never rewrites the sealed envelope or its lifecycle. */
   priceReceipt: WidgetSentence | null;
+  bookingReceipt: boolean;
   inflight: AbortHandle | null;
   expiry: Cancel | null;
   /** Bumped whenever the entry's emission changes, so a late outcome for a predecessor is ignored. */
@@ -329,6 +339,30 @@ const servicePriceReceiptResult = (result: RenderResult, view: EnvelopeView): Re
     description: '', liveRegion: 'off', focus: 'none' };
 };
 
+/** Static factual preview after a booking COMMIT. Body and lifecycle remain sealed and unchanged. */
+const bookingReceiptResult = (result: RenderResult, view: EnvelopeView): RenderResult => {
+  if (view.kind !== 'BOOKING_CONFIRMATION' || !('confirmation_subject' in view.body)) return result;
+  const b = view.body;
+  const leaf = (value: Cell<unknown> | Measure): RenderNode => ({ t: 'leaf',
+    source: 'formatted' in value ? 'measure' : 'cell', state: value.state,
+    text: 'formatted' in value && value.state === 'KNOWN' ? value.formatted : value.label,
+    detail: 'basis' in value ? value.basis : null });
+  const nodes: RenderNode[] = [
+    ...result.nodes.filter(node => node.t === 'heading'),
+    ...b.lines.flatMap(line => [
+      { t: 'leaf' as const, source: 'phrase' as const, state: null, text: line.label.rendered, detail: null },
+      leaf(line.detail), ...line.measures.map(leaf),
+    ]),
+    ...[b.when, b.when_previous, b.staff_label, b.duration_total, b.price_total,
+      b.price_delta, b.refund_preview, b.loyalty_applied].flatMap(value => value === null ? [] : [leaf(value)]),
+    ...b.policy_notices.map(phrase => ({ t: 'leaf' as const, source: 'phrase' as const,
+      state: null, text: phrase.rendered, detail: null })),
+    ...result.nodes.filter(node => node.t === 'limitation'),
+  ];
+  return { ...result, nodes, mode: 'frozen_prose', readingOrder: [], accessibleNames: {},
+    description: '', liveRegion: 'off', focus: 'none' };
+};
+
 /**
  * L27: which canonical terminal outcome a line IS — server-authored, never the sentence it carries.
  *
@@ -357,6 +391,8 @@ const outcomeKey = (widgetId: string, line: TerminalLine): string =>
 
 const sentenceFor = (outcome: SubmissionOutcome): WidgetSentence => {
   switch (outcome.status) {
+    case 'refused':
+      return outcome.sentence;
     case 'forbidden':
       return 'activation_forbidden';
     case 'no_connection':
@@ -567,6 +603,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
         display: next.display,
         sentence: next.sentence,
         priceReceipt: null,
+      bookingReceipt: false,
         emission: predecessor.emission + 1,
       });
       if (predecessor.display === 'collapsed') vault.drop(predecessor.itemId);
@@ -588,6 +625,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       pending: null,
       sentence: next.sentence,
       priceReceipt: null,
+      bookingReceipt: false,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -642,6 +680,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       pending: null,
       sentence: next.sentence,
       priceReceipt: null,
+      bookingReceipt: false,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -752,6 +791,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       display: next.display,
       sentence: next.sentence,
       priceReceipt: null,
+      bookingReceipt: false,
       emission: opener.emission + 1,
     });
     if (opener.display === 'collapsed') vault.drop(opener.itemId);
@@ -762,7 +802,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
     const entry = entries.get(itemId);
     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
-    if (entry.priceReceipt !== null) return { outcome: 'ignored', reason: 'not_drawn' };
+    if (entry.priceReceipt !== null || entry.bookingReceipt) return { outcome: 'ignored', reason: 'not_drawn' };
     const drawn = entry.display === 'collapsed' ? [] : entry.result.readingOrder;
     if (!drawn.includes(ref)) return { outcome: 'ignored', reason: 'not_drawn' };
     // One activation in flight per item; the busy control is already drawn as pending.
@@ -862,6 +902,24 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       counters = { ...counters, stateChanges: counters.stateChanges + 1 };
       return { outcome: 'dismissed' };
     }
+    if (entry.envelope.kind === 'BOOKING_CONFIRMATION' && intent.effect === 'COMMIT'
+      && outcome.status !== 'advanced' && outcome.status !== 'returned') {
+      // A submitted COMMIT spends the local interaction even if its reply was lost.
+      // Keep the sealed preview and canonical receipt semantics; never invent a failed receipt.
+      cancelWork(entry);
+      vault.drop(entry.itemId);
+      entry.bookingReceipt = true;
+      entry.display = 'terminal';
+      entry.result = bookingReceiptResult(entry.result, entry.view);
+      if (outcome.status === 'settled') {
+        for (const line of outcome.lines) if (line.text.trim().length > 0) publishOutcome(submission.widget_id, line);
+        entry.sentence = null;
+      } else entry.sentence = outcome.status === 'refused' ? outcome.sentence
+        : outcome.status === 'forbidden' ? 'activation_forbidden' : 'booking_unconfirmed';
+      publish(entry);
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
     if (route === 'opens_detail' && outcome.status === 'advanced') {
       // Only the accepted server-declared detail path resolves PROGRESS into OPEN. Keeping the
       // same chrome owner preserves its history entry and focus return; ordinary successors
@@ -934,7 +992,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const offEnvironment = deps.environment.onA11yChange(() => {
     for (const entry of entries.values()) {
       const result = renderEntry(entry.view, entry.verdict, entry.place);
-      entry.result = entry.priceReceipt === null ? result : servicePriceReceiptResult(result, entry.view);
+      entry.result = entry.bookingReceipt ? bookingReceiptResult(result, entry.view)
+        : entry.priceReceipt === null ? result : servicePriceReceiptResult(result, entry.view);
       publish(entry);
     }
   });

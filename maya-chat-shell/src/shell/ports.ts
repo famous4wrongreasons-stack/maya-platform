@@ -170,7 +170,10 @@ export interface SessionPort {
  * The P1 binding answers `unavailable` (D9). The receipt member arrives with R7-E1 and B3; until
  * then no receipt shape exists in the shell.
  */
+export type BookingRefusalSentence = 'booking_stale' | 'booking_confirmation_required' | 'booking_facts_unavailable';
+
 export type SubmissionOutcome =
+  | { readonly status: 'refused'; readonly sentence: BookingRefusalSentence }
   // Safe stale successors may still advance the timeline; fullscreen requires an accepted reply.
   | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope; readonly accepted: boolean }
   /** NS-1: an accepted re-resolve. The envelope is the server's `resolved_widget`, nothing else. */
@@ -219,6 +222,8 @@ export type TurnRetry =
 
 /** Why a widget item carries a neutral sentence instead of a state change (D9). */
 export type WidgetSentence =
+  | BookingRefusalSentence
+  | 'booking_unconfirmed'
   | 'activation_unavailable'
   | 'activation_forbidden'
   | 'no_connection'

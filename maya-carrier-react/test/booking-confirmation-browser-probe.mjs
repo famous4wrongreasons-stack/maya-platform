@@ -230,10 +230,13 @@ async function main() {
       assert.ok(commit);
       result = await clickRef(page, 'intent:' + commit.intent_ref);
       report.observations[scenario.key + 'Result'] = result;
-      const expectedText = scenario.key === 'success' ? 'Запись подтверждена.' : scenario.key === 'unknown' ? 'Запрос принят. Подтверждение ожидается.' : null;
+      const expectedText = scenario.key === 'success' ? 'Запись подтверждена.' : scenario.key === 'unknown' ? 'Результат пока не подтверждён. Не отправляйте повторно.' : scenario.key === 'changed' ? 'Данные изменились с момента показа. Откройте актуальную версию.' : null;
       if (expectedText) assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expectedText)})`));
       else assert.notEqual(result.receipt_outcome, 'ACCEPTED');
       if (scenario.key === 'unknown') assert.equal(result.owner_decision?.state, 'UNKNOWN');
+      if (scenario.key === 'changed') assert.equal(result.code, 'handle_stale');
+      if (['success', 'unknown', 'changed'].includes(scenario.key))
+        assert.equal(await page.eval(`Q.all('button[data-ref]').filter(Q.visible).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), false, scenario.key + ': submitted COMMIT is not drawn');
       await capture(page, scenario.key + '-result');
       await checkpoint(scenario.key + '-result', { result });
       reloads.push({ page, scenario, commit, expectedText, nextLoginAt });
@@ -249,7 +252,7 @@ async function main() {
       report.observations[scenario.key + 'RestoredHistory'] = JSON.parse(await page.responseBody(restored.requestId));
       if (expectedText) assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expectedText)})`), scenario.key + ': restored terminal text must be visible');
       if (scenario.key !== 'success') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
-      if (scenario.key === 'unknown') {
+      if (['unknown', 'changed'].includes(scenario.key)) {
         assert.equal(await page.eval(`Q.all('button[data-ref]').filter(Q.visible).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), false);
       }
       await capture(page, scenario.key + '-reload');

@@ -1,0 +1,17 @@
+{
+  "ports": [
+    {
+      "port": 59410,
+      "closed": true
+    },
+    {
+      "port": 59641,
+      "closed": true
+    },
+    {
+      "port": 59654,
+      "closed": true
+    }
+  ],
+  "clustersStopped": true
+}

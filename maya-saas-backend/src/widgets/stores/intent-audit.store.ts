@@ -7,6 +7,7 @@
 
 import { isPostgresSerializationConflict } from '../../common/postgres-transaction-conflict';
 import { PrismaService } from '../../prisma/prisma.service';
+import { reasonTextOrNull } from '../rendering/reason-text';
 import { scoped } from './tenant-scope';
 
 export class IntentAuditStore {
@@ -94,6 +95,7 @@ export class IntentAuditStore {
         id: true,
         widgetId: true,
         outcome: true,
+        refusalCode: true,
         actionReceiptRef: true,
       },
     });
@@ -305,6 +307,7 @@ const ownedBy = (
 
 const terminalLine = (receipt: {
   outcome: string;
+  refusalCode?: string | null;
   actionReceiptRef: string | null;
 }) => {
   if (receipt.outcome === 'ACCEPTED' && receipt.actionReceiptRef !== null)
@@ -316,12 +319,14 @@ const terminalLine = (receipt: {
   if (receipt.outcome === 'ACCEPTED')
     return Object.freeze({
       outcome: 'SUBMITTED',
-      text: 'Запрос принят. Подтверждение ожидается.',
+      text: 'Результат пока не подтверждён. Не отправляйте повторно.',
       action_receipt_ref: null,
     });
   return Object.freeze({
     outcome: 'NOT_CONFIRMED',
-    text: 'Запись не подтверждена.',
+    text:
+      reasonTextOrNull(receipt.refusalCode ?? null)?.rendered ??
+      'Запись не подтверждена.',
     action_receipt_ref: null,
   });
 };

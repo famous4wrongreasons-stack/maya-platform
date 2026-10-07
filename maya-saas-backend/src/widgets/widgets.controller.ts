@@ -85,7 +85,14 @@ export class WidgetsController {
     // Every argument, including the tenant (from the actor, never the body) and `v`, is derived in
     // `intentSubmitArgs`, the one derivation the live-path harness also uses.
     const result = await this.gateway.submit(intentSubmitArgs(dto, actor));
-    const code = 'code' in result.verdict ? result.verdict.code : null;
+    const route =
+      result.verdict.outcome === 'terminate' ? result.verdict.route : undefined;
+    const code =
+      'code' in result.verdict
+        ? result.verdict.code
+        : route?.receipt_outcome === 'REFUSED'
+          ? (route.refusal_code ?? null)
+          : null;
     const reasonKey =
       code ??
       (result.verdict.outcome === 'expired'
@@ -93,9 +100,6 @@ export class WidgetsController {
         : result.verdict.outcome === 'superseded'
           ? 'SUPERSEDED'
           : null);
-    const route =
-      result.verdict.outcome === 'terminate' ? result.verdict.route : undefined;
-
     return {
       contract: 'maya.widget.intent/1',
       outcome: result.verdict.outcome,

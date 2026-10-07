@@ -947,3 +947,16 @@ restart or serializer acceptance. Expiry uses a test clock and erasure a fixture
 mark. Independent code/evidence review has no blocker. Generic refusal copy and
 the visible consumed confirmation remain UI limits. See [qualified checkpoint](MAYA-WIDGET-BOOKING-FACTS-CHECKPOINT-20261007.md).
 Initial binding, real-provider/model acceptance and C10 remain open. `NOT_ISSUED`.
+
+
+### Development checkpoint: booking reason continuity and next owner capability (2026-10-07)
+
+The [chat confirmation follow-up](MAYA-WIDGET-BOOKING-FACTS-CHECKPOINT-20261007.md#follow-up-precise-refusal-and-submitted-preview-2026-10-07) closes generic changed-terms refusal and visible consumed COMMIT. Exact existing reasons reach the response and persisted terminal line. UNKNOWN/transport loss freezes only presentation and says not to resend. Local evidence: 132 backend checks pass with one documented unchanged REN-6 fixture guard failure, 56 shell checks pass, types/lint/build pass, current React/HTTP/PG proof passes 12 checkpoints. No immutable ledger/hash repair or authority change.
+
+| Domain | Useful local path | Remaining boundary / next work |
+|---|---|---|
+| Admin | Catalog/rules, personal bookings and AE confirmations; precise factual create terms | Customer inbound transport ownership and first Client binding decision remain open; see [bootstrap brief](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md). |
+| Occupancy | Explicit cancellation-window request → existing C9 → Opportunity/current CRM → saved bounded recommendation | No background initiator or autonomous execution grant; broader windows/branches are not silently inferred. |
+| Lifecycle | Qualified C8 dormancy READ in chat, prior synthetic HTTP/C8/PG source proof | Selected next executable gap: explicit owner “Кого пора вернуть?” → actual C8 revision refs → existing C9 domain explanation and saved bounded recommendation; no contacts, predictions or campaign. |
+| BI | Registered financial READ through C9 and C7 qualification | Complete domain explanations and model quality are not uniformly qualified; unavailable cause/coverage cannot be inferred. |
+| C10 | Explicit L0/L1 and L2.5 shadow foundations | No autonomous initiator, background authority or C10-complete claim from contracts. |

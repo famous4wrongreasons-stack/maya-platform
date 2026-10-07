@@ -1,0 +1,17 @@
+[
+  {
+    "path": "maya-saas-backend/src/widgets/rendering/refusal-codes-covered.spec.ts",
+    "sha256": "a77208e867fb69c59c8a6ef719b20ab0d9cc9e1e40d79516190134c70471dbc6",
+    "identicalTo90277391": true
+  },
+  {
+    "path": "maya-saas-backend/test/widgets-diagnostics/support/development-integration-fixture.ts",
+    "sha256": "bacb51a3e0c2887448f00cf32c31cebc919c5da4d30e123eaa368cb345139757",
+    "identicalTo90277391": true
+  },
+  {
+    "path": "maya-saas-backend/test/widgets-diagnostics/support/service-price-browser-harness.ts",
+    "sha256": "af991ecb1a270b249b764f9e2860e30cee2078f0a0d8d0782b5702b45330c51c",
+    "identicalTo90277391": true
+  }
+]

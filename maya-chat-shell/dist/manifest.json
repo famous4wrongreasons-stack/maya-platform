@@ -14,6 +14,7 @@
     "src/dom/timeline.ts",
     "src/dom/voice-control.ts",
     "src/integrity/h7.ts",
+    "src/net/booking-reasons.ts",
     "src/net/client.ts",
     "src/net/endpoint.ts",
     "src/net/personal.ts",
@@ -59,6 +60,10 @@
         "sha256": "b89f2493a7073b757a8e10368d7b780ec6b5e680c1e26aff0eb118f0391647a1"
       },
       {
+        "path": "src/net/booking-reasons.ts",
+        "sha256": "655215aa6d9ea17f2d85ae9472ff00505de2ee54fd4692e2015f38c65fa4099d"
+      },
+      {
         "path": "src/net/client.ts",
         "sha256": "a105d982c55a69ef57ee87cdaa081c6ee322ae99e9842852fcff82810cba8b9c"
       },
@@ -72,7 +77,7 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "2d84a3e7f6ef40e1b6e3b8d7938a5374159fe343294cb8a4a0cfa5031e139560"
+        "sha256": "0c88c43b931ed541ba52d60bdbbb3aa3c330df376b64df78d1e1e99cbfba08e1"
       },
       {
         "path": "src/net/session.ts",
@@ -80,7 +85,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "61488a381231de4ce1e2531246c7fd16cc9d6b730cbe782014b550bc113421bc"
+        "sha256": "50ba3ea528d677f8b1bc88ca206e4ed5dc0dccf0aaab7c0755841422235f5d77"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -116,7 +121,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "b1bcf04e819a35fd63c902b6973258b06f8f78c20e7f1982c602cb7a91887bf2"
+        "sha256": "d654ffd14d28bafc6deba892b93c39f229a59278e85f656ba5be7ba992348547"
       },
       {
         "path": "src/shell/personal-booking.ts",
@@ -124,7 +129,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "7e109fdcf4015052b434b147da63253e20cee3c4e32a5ce7dee41d7b62aa4b34"
+        "sha256": "9db04c8484ca69e49d3a307c45dcf4b5e0d30c5c869da5b9217024f6e5b8941c"
       },
       {
         "path": "src/shell/shell.ts",
@@ -140,8 +145,8 @@
       }
     ]
   },
-  "bytes": 501829,
-  "digest": "88b5c8f1460ad5311429f963af499883cfea5354fcbc7ec5294a55bece078a5b",
+  "bytes": 507828,
+  "digest": "c8039003aafe66481b568d9a246dd983dec83920cc56312542d9eed2690596d6",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -149,8 +154,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "f45c6ea7adf1ca19cbf6297a6879bc6f19fb030780ffac207d837b0d84494586",
-    "modulePath": "m/f45c6ea7adf1ca19/",
+    "digest": "b0a26c4f7de8cbc35486586e55dc67054efdbf4a68053d98f631fd1938d9c825",
+    "modulePath": "m/b0a26c4f7de8cbc3/",
     "files": [
       {
         "path": "entry/main.js",
@@ -174,8 +179,8 @@
       },
       {
         "path": "src/dom/host.js",
-        "sha256": "062ca17b5c4490fd84817974ed2277067a795d96e38b00f003ec4de268c142e6",
-        "bytes": 21201
+        "sha256": "510242c1ee0bd3c80dd0831337cb24d8c5fe50c7a414580abc4a6b573c84f9d1",
+        "bytes": 21652
       },
       {
         "path": "src/dom/nav.js",
@@ -203,6 +208,11 @@
         "bytes": 7782
       },
       {
+        "path": "src/net/booking-reasons.js",
+        "sha256": "9a6e2796a267fe00cfcf299d2528175a31b5d64130f33379e880041ab43d11d2",
+        "bytes": 817
+      },
+      {
         "path": "src/net/client.js",
         "sha256": "476ed59726bd92459e31ed4e0fb4d9c1915d7676f45de8e1f0651436af55fd41",
         "bytes": 25349
@@ -219,8 +229,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "a56a63931761fc658deeb21ee5814ba333303de59339adcc295302df83ef7da1",
-        "bytes": 14057
+        "sha256": "144f7c3b13fa0b4e057e40add87ceff37130e4ec20c853692e3eb245a254d74e",
+        "bytes": 14499
       },
       {
         "path": "src/net/session.js",
@@ -279,8 +289,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "41d46079b6571e79693884d02d2ec1d3844661dfb34b0e48ab727144e8a36d57",
-        "bytes": 34557
+        "sha256": "2f78d8ac7af417e56e04bf2631a977fd066156623529d67e73f9c852a97e0b15",
+        "bytes": 37944
       },
       {
         "path": "src/shell/personal-booking.js",
@@ -323,7 +333,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "21dc2c6473830b7b0169b0134580efc3b9f9cf956980063338b3f6b29a21af6c",
+      "sha256": "02040a6ef0083a1f2c2be7046f1fc22b0bf4050d586f604966706f30c31630bc",
       "bytes": 1344
     },
     "assets": [

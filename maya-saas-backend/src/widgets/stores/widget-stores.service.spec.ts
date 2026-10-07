@@ -304,6 +304,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
             id: true,
             widgetId: true,
             outcome: true,
+            refusalCode: true,
             actionReceiptRef: true,
           },
         });
@@ -352,6 +353,37 @@ describe('WidgetStoresService — every existing method sends what it sent befor
             {
               outcome: 'NOT_CONFIRMED',
               text: 'Запись не подтверждена.',
+              action_receipt_ref: null,
+            },
+          ],
+        },
+      });
+    });
+
+    it('keeps the original refusal reason when a contradictory retry writes its terminal line', async () => {
+      const { stores, calls } = storesOver({
+        id: 'receipt-stale',
+        widgetId: 'w-1',
+        outcome: 'REFUSED',
+        refusalCode: 'handle_stale',
+        actionReceiptRef: null,
+      });
+      await stores.writeReceipt({
+        tenantId: 't-1',
+        widgetId: 'w-1',
+        intentTokenHash: 'h-1',
+        outcome: 'ACCEPTED',
+        refusalCode: 'NOT_COLLECTED',
+        answeringChannel: 'pwa',
+        actionReceiptRef: 'invented',
+      });
+      expect(calls[0].args).toMatchObject({ update: {} });
+      expect(calls[1].args).toMatchObject({
+        data: {
+          terminalLinesJson: [
+            {
+              outcome: 'NOT_CONFIRMED',
+              text: 'Данные изменились с момента показа. Откройте актуальную версию.',
               action_receipt_ref: null,
             },
           ],

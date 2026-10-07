@@ -178,3 +178,66 @@ describe("intentSubmitArgs — the controller's derivation, callable by a harnes
     expect(Object.keys(derived)).toEqual(Object.keys(clean));
   });
 });
+
+describe('routed booking reasons use the existing response contract', () => {
+  it.each(['handle_stale', 'booking_confirmation_required', 'NOT_COLLECTED'])(
+    'renders persisted route reason %s',
+    async (code) => {
+      const controller = new WidgetsController(
+        {
+          gateCount: 15,
+          submit: () =>
+            Promise.resolve({
+              verdict: {
+                outcome: 'terminate',
+                route: {
+                  receipt_outcome: 'REFUSED',
+                  refusal_code: code,
+                  next_envelope: null,
+                  resolved_widget: null,
+                  owner_decision: null,
+                },
+              },
+              stoppedAt: '13',
+              ran: 13,
+            }),
+        } as never,
+        {} as never,
+      );
+      await expect(controller.intent(dto(), actor())).resolves.toMatchObject({
+        code,
+        reason_text: reasonText(code),
+        receipt_outcome: 'REFUSED',
+      });
+    },
+  );
+  it('never labels an accepted UNKNOWN as a refusal through route reason text', async () => {
+    const controller = new WidgetsController(
+      {
+        gateCount: 15,
+        submit: () =>
+          Promise.resolve({
+            verdict: {
+              outcome: 'terminate',
+              route: {
+                receipt_outcome: 'ACCEPTED',
+                refusal_code: 'handle_stale',
+                next_envelope: null,
+                resolved_widget: null,
+                owner_decision: { state: 'UNKNOWN' },
+              },
+            },
+            stoppedAt: '13',
+            ran: 13,
+          }),
+      } as never,
+      {} as never,
+    );
+    await expect(controller.intent(dto(), actor())).resolves.toMatchObject({
+      code: null,
+      reason_text: null,
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: { state: 'UNKNOWN' },
+    });
+  });
+});
