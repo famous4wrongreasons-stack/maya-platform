@@ -659,6 +659,23 @@ describe('AppointmentsService', () => {
     });
     expect(getAvailableSlotsMock).toHaveBeenCalledTimes(4);
   });
+  it('does not turn unavailable CRM slot facts into an empty available-days calendar', async () => {
+    const {
+      service,
+      mocks: { getAvailableSlotsMock },
+    } = createService();
+    getAvailableSlotsMock.mockRejectedValue(
+      new Error('booking_slot_facts_unavailable'),
+    );
+    await expect(
+      service.getAvailableDays('tenant-1', {
+        from: '2026-07-05',
+        to: '2026-07-06',
+        staffId: 'staff-1',
+        serviceIds: ['svc-1'],
+      }),
+    ).rejects.toThrow('booking_slot_facts_unavailable');
+  });
 
   it('returns service_not_found before probing available days', async () => {
     const {

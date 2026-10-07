@@ -1,5 +1,8 @@
 import {
   observedServiceCatalog,
+  requireBookableServiceFacts,
+  bookingServiceFactsFingerprint,
+  BOOKING_FACTS_EVIDENCE_PREFIX,
   type ServiceCatalogRead,
 } from './service-catalog-read';
 import { resolveAvailabilityCalendar } from './availability-calendar.service';
@@ -126,6 +129,10 @@ import {
 } from './crm-request.errors';
 
 export type AppointmentActionInvocation = {
+  /** Business-terms expectation only; never part of authority or idempotency. */
+  expectedBookingFactsHash?: string;
+  /** Server-observed terms persisted once as evidence on a new canonical create. */
+  bookingFactsHash?: string;
   /** SB-1 server-resolved explicit personal context; never copied from a DTO. */
   personalContext?: import('../appointments/personal-client-context.service').PersonalClientContext;
   /** Server-resolved channel and canonical target; never copied from a DTO. */
@@ -909,6 +916,13 @@ export class CrmService {
     return adapter.readServiceCatalog(scopedTenantId);
   }
 
+  async readBookableServices(tenantId: string, serviceIds: readonly string[]) {
+    return requireBookableServiceFacts(
+      await this.readServiceCatalog(tenantId),
+      serviceIds,
+    );
+  }
+
   /** The existing CRM owner binds the company's service to current tenant authority. */
   private async servicePriceContext(tenantId: string, userId: string) {
     this.tenantContext.assertTenantId(tenantId);
@@ -1537,7 +1551,75 @@ export class CrmService {
     return this.actionEngineRuntime.executeWithReceipt(plan.request, {
       ...plan.handlers,
       authorizeIngress: invocation.authorizationCheck,
+      prepare: async (input, context) => {
+        await invocation.authorizationCheck!();
+        await this.confirmedBookingServices(
+          tenantId,
+          input,
+          invocation,
+          context.executionId,
+        );
+        return plan.handlers.prepare?.(input, context);
+      },
     });
+  }
+
+  private async confirmedBookingServices(
+    tenantId: string,
+    input: Record<string, unknown>,
+    invocation: AppointmentActionInvocation,
+    executionId: string | undefined,
+  ): Promise<ServiceItem[]> {
+    if (!executionId || !invocation.bookingIntent)
+      throw new ConflictException({
+        error: { code: 'booking_preview_refresh_required' },
+      });
+    const execution = await this.prisma.actionExecution.findFirst({
+      where: {
+        id: executionId,
+        tenantId,
+        capability: 'crm.appointment.create.v1',
+      },
+      select: { evidenceRefsJson: true },
+    });
+    const refs = Array.isArray(execution?.evidenceRefsJson)
+      ? execution.evidenceRefsJson.filter(
+          (ref): ref is string =>
+            typeof ref === 'string' &&
+            ref.startsWith(BOOKING_FACTS_EVIDENCE_PREFIX),
+        )
+      : [];
+    if (
+      refs.length !== 1 ||
+      !new RegExp('^' + BOOKING_FACTS_EVIDENCE_PREFIX + '[a-f0-9]{64}$').test(
+        refs[0],
+      )
+    )
+      throw new ConflictException({
+        error: { code: 'booking_preview_refresh_required' },
+      });
+    const durable = this.createAppointmentInput(input);
+    const services = await this.readBookableServices(
+      tenantId,
+      durable.serviceIds,
+    );
+    const current = bookingServiceFactsFingerprint(
+      {
+        tenantId,
+        clientId: durable.clientId,
+        calendarTarget: await this.canonicalClientBookingTarget(tenantId),
+        branchId: durable.branchId ?? null,
+        staffId: durable.staffId,
+        start: durable.start,
+        timezone: invocation.bookingIntent.timezone,
+      },
+      services,
+    );
+    if (refs[0] !== BOOKING_FACTS_EVIDENCE_PREFIX + current)
+      throw new ConflictException({
+        error: { code: 'booking_preview_stale' },
+      });
+    return services;
   }
 
   async canonicalClientBookingTarget(
@@ -1633,6 +1715,12 @@ export class CrmService {
                 this.createAppointmentInput(durable),
                 result.value,
                 provider,
+                await this.confirmedBookingServices(
+                  tenantId,
+                  durable,
+                  invocation,
+                  context.executionId,
+                ),
               );
             } catch (error) {
               throw new CrmOutcomeUnknownError(
@@ -1654,6 +1742,12 @@ export class CrmService {
                 this.createAppointmentInput(durable),
                 this.restoreCreatedAppointment(result.safeResult),
                 provider,
+                await this.confirmedBookingServices(
+                  tenantId,
+                  durable,
+                  invocation,
+                  context?.executionId,
+                ),
               );
             return result;
           },
@@ -1728,6 +1822,12 @@ export class CrmService {
               request,
               value,
               null,
+              await this.confirmedBookingServices(
+                tenantId,
+                durable,
+                invocation,
+                context.executionId,
+              ),
             );
             const accepted = this.internalCreatedAppointment(row);
             return {
@@ -1799,6 +1899,7 @@ export class CrmService {
     input: CreateAppointmentRequest,
     value: CreatedAppointment,
     provider: string | null,
+    services: readonly ServiceItem[],
   ) {
     const client = await this.prisma.client.findUnique({
       where: { id_tenantId: { id: input.clientId, tenantId } },
@@ -1806,9 +1907,6 @@ export class CrmService {
     });
     if (!client || client.mergedIntoClientId)
       throw new ForbiddenException('Canonical Client unavailable');
-    const services = (await this.getServices(tenantId)).filter((service) =>
-      input.serviceIds.includes(service.id),
-    );
     const timing = provider
       ? { bufferBeforeMinutes: 0, bufferAfterMinutes: 0 }
       : await this.internalCalendarService.getServiceTiming(
@@ -3121,6 +3219,12 @@ export class CrmService {
               input.invocation.clientPrincipal.appointmentId,
             ),
             ...(input.invocation.personalContext?.evidenceRefs ?? []),
+            ...(input.invocation.bookingFactsHash
+              ? [
+                  BOOKING_FACTS_EVIDENCE_PREFIX +
+                    input.invocation.bookingFactsHash,
+                ]
+              : []),
           ]
         : [],
       callerIdempotency: input.invocation.callerIdempotency,

@@ -12,6 +12,7 @@ function fixture() {
   };
   const contexts = { select: jest.fn().mockResolvedValue(personal) };
   const quote = {
+    factsHash: 'a'.repeat(64),
     services: [
       {
         id: 'service-a',

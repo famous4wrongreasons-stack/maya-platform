@@ -264,13 +264,23 @@ async function main() {
       const slot = JSON.parse(await page.responseBody(slotsRequest.requestId))[0]; assert.ok(slot);
       const label = new Intl.DateTimeFormat('ru', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }).format(new Date(slot.start)) + ' UTC';
       await clickNamed(page, label);
+      if (scenario.key === 'incomplete') {
+        const refused = await until(() => page.apiRequests('/personal-client/appointments/preview').find(r => r.finishedAt), 'incomplete facts preview refusal');
+        assert.equal(refused.status, 503);
+        assert.ok(await page.waitFor('document.body.innerText.includes("Цена или длительность услуги пока не подтверждены")'));
+        assert.equal((await snapshot(page)).controls.some(c => c.name === 'Подтвердить личную запись'), false);
+        assert.equal(page.apiRequests('/personal-client/appointments').filter(r => new URL(r.url).pathname === '/api/personal-client/appointments').length, 0);
+        await capture(page, 'incomplete-unavailable');
+        await checkpoint('incomplete-result');
+        continue;
+      }
       assert.ok(await page.waitFor('!!Q.byName("button", /^Подтвердить личную запись$/)'));
       await capture(page, scenario.key + '-preview');
       await checkpoint(scenario.key + '-preview', { selectedStart: slot.start });
       const createsBefore = page.apiRequests('/personal-client/appointments').filter(r => new URL(r.url).pathname === '/api/personal-client/appointments').length;
       await clickNamed(page, 'Подтвердить личную запись');
       await until(() => page.apiRequests('/personal-client/appointments').filter(r => new URL(r.url).pathname === '/api/personal-client/appointments').slice(createsBefore).find(r => r.finishedAt), 'personal create result');
-      const expected = scenario.key === 'success' ? 'Запись подтверждена.' : scenario.key === 'revoked' ? 'подтверждённая связь или доступ изменились' : 'Результат записи пока не подтверждён';
+      const expected = scenario.key === 'success' ? 'Запись подтверждена.' : scenario.key === 'revoked' ? 'подтверждённая связь или доступ изменились' : scenario.key === 'changed' ? 'Предложение изменилось' : 'Результат записи пока не подтверждён';
       assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expected)})`));
       assert.equal(page.apiRequests('/personal-client/appointments').filter(r => new URL(r.url).pathname === '/api/personal-client/appointments').length, createsBefore + 1);
       assert.equal((await snapshot(page)).controls.some(c => c.name === 'Подтвердить личную запись'), false);

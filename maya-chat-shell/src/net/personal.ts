@@ -22,10 +22,11 @@ export function projectPersonalPreview(raw: unknown): PersonalPreview | null {
   const v = object(raw);
   if (!v || v.contract !== 'maya.personal-booking.preview/1' || !Array.isArray(v.services) || v.services.length === 0 || v.services.length > 20 || !string(v.staff) || !instant(v.start) || !instant(v.asOf) || !string(v.source) || !(v.timezone === null || string(v.timezone)) || !(v.requestState === null || typeof v.requestState === 'string' && STATES.has(v.requestState)) || !['existing_request', 'available_at_read'].includes(String(v.availability))) return null;
   if (v.timezone !== null) { try { new Intl.DateTimeFormat('ru', { timeZone: v.timezone as string }); } catch { return null; } }
+  if (!(v.factsHash === null || typeof v.factsHash === 'string' && /^[a-f0-9]{64}$/.test(v.factsHash))) return null;
   const services = [];
   for (const rawService of v.services) { const s = object(rawService); if (!s || !string(s.name)) return null;
     services.push({ name: s.name, price: amount(s.price), currency: string(s.currency) ? s.currency : null, durationMinutes: amount(s.durationMinutes) }); }
-  return { services, staff: v.staff, start: v.start, timezone: v.timezone as string | null, source: v.source, asOf: v.asOf, existing: v.availability === 'existing_request', requestState: v.requestState as string | null };
+  return { factsHash: v.factsHash as string | null, services, staff: v.staff, start: v.start, timezone: v.timezone as string | null, source: v.source, asOf: v.asOf, existing: v.availability === 'existing_request', requestState: v.requestState as string | null };
 }
 const STATES = new Set(['PENDING_APPROVAL', 'READY', 'EXECUTING', 'UNKNOWN', 'SUCCEEDED', 'FAILED', 'NOT_EXECUTED']);
 export function projectPersonalResults(raw: unknown): PersonalResults | null {

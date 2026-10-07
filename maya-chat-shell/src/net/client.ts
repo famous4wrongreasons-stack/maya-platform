@@ -566,6 +566,7 @@ const personalOutcome = <T>(ex: AuthorizedExchange, project: (raw: unknown) => T
   if (ex.kind === 'response' && isSuccess(ex.status)) { const value = project(ex.body); return value === null ? fail({ reason: 'unavailable' }) : { ok: true, value }; }
   if (ex.kind === 'aborted') return fail({ reason: 'aborted' });
   if (ex.kind === 'signed_out' || (ex.kind === 'response' && [401, 403].includes(ex.status))) return fail({ reason: 'forbidden' });
+  if (ex.kind === 'response' && errorCode(ex.body) === 'booking_service_facts_unavailable') return fail({ reason: 'facts_unavailable' });
   if (ex.kind === 'response' && ex.status === 409) return fail({ reason: 'conflict' });
   return fail({ reason: 'unavailable' });
 };
@@ -582,9 +583,9 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
     async personalResults(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalResults', {}, signal, timeouts.requestMs), projectPersonalResults); },
     async personalCreate(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>> {
       // No network/timeout retry. Only the shared pre-dispatch 401 refresh is eligible.
-      const ex = await authorizedExchange(auth, 'personalCreate', personalBody(selection), signal, timeouts.requestMs);
+      const ex = await authorizedExchange(auth, 'personalCreate', { ...personalBody(selection), ...(selection.previewFactsHash === undefined ? {} : { previewFactsHash: selection.previewFactsHash }) }, signal, timeouts.requestMs);
       if (ex.kind === 'response' && isSuccess(ex.status)) return { ok: true, value: true };
-      if (ex.kind === 'signed_out' || (ex.kind === 'response' && [400, 401, 403, 409].includes(ex.status))) return personalOutcome(ex, () => true as const);
+      if (ex.kind === 'signed_out' || (ex.kind === 'response' && ([400, 401, 403, 409].includes(ex.status) || errorCode(ex.body) === 'booking_service_facts_unavailable'))) return personalOutcome(ex, () => true as const);
       return fail({ reason: 'unknown' });
     },
     async conversation(signal: AbortSignal): Promise<Outcome<ConversationHistoryProjection, ChatFailure>> {

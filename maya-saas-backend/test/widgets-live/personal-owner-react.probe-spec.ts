@@ -3,6 +3,16 @@
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { ConfigService } from '@nestjs/config';
+import { ServiceUnavailableException } from '@nestjs/common';
+import request from 'supertest';
+import {
+  ActionEngineRuntimeService,
+  CanonicalActionIngressService,
+} from '../../src/action-engine';
+import {
+  BOOKING_FACTS_EVIDENCE_PREFIX,
+  type ServiceCatalogReadItem,
+} from '../../src/crm/service-catalog-read';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
@@ -57,6 +67,10 @@ type Saved = {
   unknown: Salon;
   navRevoked: Salon;
   revoked: Salon;
+  incomplete: Salon;
+  changed: Salon;
+  ready: Salon;
+  readyEvidence?: unknown;
   notBefore: number;
   conversationId: string;
   privateReply: string;
@@ -69,6 +83,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
     unexpected: string[] = [];
   let dispatches = 0,
     reconciliations = 0;
+  const catalogOverrides = new Map<string, Partial<ServiceCatalogReadItem>>();
   const observations: Record<string, unknown> = {
     stage,
     entrySource: catalogEntry ? 'catalog' : 'schedule',
@@ -160,13 +175,21 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
       }
       requests.push(init.body);
       expect(requests.length).toBeLessThanOrEqual(
-        stage === 'prepare' ? (catalogEntry ? 10 : 6) : 2,
+        stage === 'prepare' ? (catalogEntry ? 14 : 9) : 2,
       );
       expect(init.body).not.toMatch(
         /PRIVATE_OWNER_VISIT|PRIVATE_PERSONAL_BRANCH|Предстоящих: 1|12:00|Release proof client/,
       );
       if (saved)
-        for (const s of [saved.success, saved.unknown, saved.navRevoked]) {
+        for (const s of [
+          saved.success,
+          saved.unknown,
+          saved.navRevoked,
+          saved.revoked,
+          saved.incomplete,
+          saved.changed,
+          saved.ready,
+        ]) {
           for (const value of [
             s.tenant.id,
             s.user.id,
@@ -236,6 +259,42 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
       provider: CrmProvider.YCLIENTS,
       apiToken: 'synthetic-no-credential',
     });
+    const catalog = adapter.readServiceCatalog.bind(adapter);
+    const syntheticSlots = adapter.getAvailableSlots.bind(adapter);
+    // The owned provider fixture supplies exact slot ends for its selected
+    // synthetic services; the generic mock's one-hour grid is not such evidence.
+    adapter.getAvailableSlots = async (params) => {
+      const slots = await syntheticSlots(params);
+      const selected = (await adapter.getServices(params.tenantId)).filter(
+        (service) => params.serviceIds?.includes(service.id),
+      );
+      if (selected.length !== params.serviceIds?.length)
+        throw new Error('Synthetic service selection incomplete');
+      const duration = selected.reduce(
+        (sum, service) => sum + service.duration_minutes,
+        0,
+      );
+      return slots.map((slot) => ({
+        ...slot,
+        end: new Date(
+          new Date(slot.start).getTime() + duration * 60_000,
+        ).toISOString(),
+      }));
+    };
+    adapter.readServiceCatalog = async (tenantId) => {
+      const read = await catalog(tenantId);
+      const override = catalogOverrides.get(tenantId);
+      return override
+        ? {
+            ...read,
+            services: read.services.map((service) =>
+              service.id === 'svc-consultation'
+                ? { ...service, ...override }
+                : service,
+            ),
+          }
+        : read;
+    };
     adapter.createAppointment = async (params) => {
       try {
         await fetch(providerUrl + '/bookings', {
@@ -407,6 +466,153 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
     expect(memberships).toEqual([{ role: 'tenant_owner', status: 'active' }]);
     return { rows, appointments: await db.prisma.appointment.count({ where }) };
   }
+  const personal = (token: string, route: string, body: object) =>
+    request(http.app.getHttpServer())
+      .post('/api/personal-client/' + route)
+      .set('authorization', 'Bearer ' + token)
+      .set('x-maya-authority-context', 'personal_client')
+      .send(body);
+  const login = (s: Salon) =>
+    http.login(s.tenant.slug, s.user.email, s.user.password);
+
+  async function factsHttp() {
+    const s = saved.incomplete,
+      token = await login(s);
+    const checks = [];
+    for (const patch of [
+      { price: null, price_min: null, price_max: null },
+      { price: null, price_min: 1000, price_max: 2000 },
+      { duration_minutes: null },
+      { currency: null },
+    ]) {
+      catalogOverrides.set(s.tenant.id, patch);
+      const listed = await request(http.app.getHttpServer())
+        .get('/api/services')
+        .set('authorization', 'Bearer ' + token);
+      expect(listed.status).toBe(200);
+      expect(
+        (listed.body as ServiceCatalogReadItem[]).find(
+          (v) => v.id === 'svc-consultation',
+        ),
+      ).toMatchObject(patch);
+      const preview = await personal(token, 'appointments/preview', s.dto);
+      const create = await personal(token, 'appointments', {
+        ...s.dto,
+        previewFactsHash: '0'.repeat(64),
+      });
+      expect(preview.status).toBe(503);
+      expect(create.status).toBe(503);
+      expect(preview.body).toMatchObject({
+        error: { code: 'booking_service_facts_unavailable' },
+      });
+      checks.push({
+        patch,
+        servicesStatus: listed.status,
+        previewStatus: preview.status,
+        createStatus: create.status,
+      });
+    }
+    catalogOverrides.set(s.tenant.id, { price: 0, price_min: 0, price_max: 0 });
+    const zero = await personal(token, 'appointments/preview', s.dto);
+    expect(zero.status).toBe(201);
+    const zeroBody = zero.body as {
+      services: Array<{ price: number | null }>;
+      factsHash: string;
+    };
+    expect(zeroBody.services[0].price).toBe(0);
+    catalogOverrides.set(s.tenant.id, {
+      price: 2000,
+      price_min: 2000,
+      price_max: 2000,
+    });
+    const stale = await personal(token, 'appointments', {
+      ...s.dto,
+      previewFactsHash: zeroBody.factsHash,
+    });
+    expect(stale.status).toBe(409);
+    expect(await state(s)).toEqual({ rows: [], appointments: seedCount });
+    catalogOverrides.set(s.tenant.id, {
+      price: null,
+      price_min: 1000,
+      price_max: 2000,
+    });
+    observations.factsHttp = {
+      checks,
+      observedZeroPreserved: true,
+      stalePreviewStatus: stale.status,
+      actions: 0,
+      providerDispatches: dispatches,
+    };
+  }
+
+  async function readyRestart() {
+    const s = saved.ready,
+      token = await login(s);
+    if (stage === 'prepare') {
+      const preview = await personal(token, 'appointments/preview', s.dto);
+      expect(preview.status).toBe(201);
+      const previewBody = preview.body as { factsHash: string };
+      expect(previewBody.factsHash).toMatch(/^[a-f0-9]{64}$/);
+      const runtime = http.app.get(ActionEngineRuntimeService);
+      const hold = jest
+        .spyOn(runtime, 'executeWithReceipt')
+        .mockImplementationOnce(async (input, handlers) => {
+          await handlers.authorizeIngress!();
+          const execution = await http.app
+            .get(CanonicalActionIngressService)
+            .createExecution(input);
+          expect(execution.state).toBe('READY');
+          throw new ServiceUnavailableException(
+            'synthetic_stop_after_canonical_admission',
+          );
+        });
+      const held = await personal(token, 'appointments', {
+        ...s.dto,
+        previewFactsHash: previewBody.factsHash,
+      });
+      hold.mockRestore();
+      expect(held.status).toBe(503);
+      const snapshot = await state(s);
+      expect(snapshot.rows).toHaveLength(1);
+      expect(snapshot.rows[0]).toMatchObject({
+        state: 'READY',
+        executionAttemptCount: 0,
+      });
+      expect(snapshot.rows[0].evidenceRefsJson).toContain(
+        BOOKING_FACTS_EVIDENCE_PREFIX + previewBody.factsHash,
+      );
+      saved.readyEvidence = snapshot.rows[0].evidenceRefsJson;
+      await db.prisma.internalService.update({
+        where: { id: s.dto.serviceIds[0] },
+        data: { price: { increment: 1 } },
+      });
+      observations.readyHeldBeforeClaim = {
+        state: 'READY',
+        attempts: 0,
+        syntheticHold: true,
+        originalFactsPersisted: true,
+      };
+    } else {
+      const retried = await personal(token, 'appointments', s.dto);
+      expect(retried.status).toBe(409);
+      const snapshot = await state(s);
+      expect(snapshot.rows).toHaveLength(1);
+      expect(snapshot.rows[0]).toMatchObject({
+        state: 'FAILED',
+        executionAttemptCount: 1,
+      });
+      expect(snapshot.rows[0].evidenceRefsJson).toEqual(saved.readyEvidence);
+      expect(snapshot.appointments).toBe(seedCount);
+      observations.readyRestartRefusedChangedFacts = {
+        status: retried.status,
+        state: snapshot.rows[0].state,
+        attempts: 1,
+        originalEvidenceUnchanged: true,
+        appointments: snapshot.appointments,
+        providerDispatches: dispatches,
+      };
+    }
+  }
   async function revoke(s: Salon) {
     const proof = randomUUID();
     const prior = await db.prisma.clientChannelLink.findUniqueOrThrow({
@@ -447,6 +653,9 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         unknown: await salon(true),
         navRevoked: await salon(),
         revoked: await salon(),
+        incomplete: await salon(true),
+        changed: await salon(),
+        ready: await salon(),
         conversationId: '',
         privateReply: '',
         notBefore: 0,
@@ -457,6 +666,8 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
       expect(saved.pgStarted).not.toBe(pg.rows[0].started);
       observations.applicationAndPostgresRestart = true;
     }
+    if (stage === 'prepare') await factsHttp();
+    await readyRestart();
     if (stage === 'prepare') {
       for (const key of ['success', 'revoked', 'unknown'] as const) {
         expect(await state(saved[key])).toEqual({
@@ -469,8 +680,21 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
     const keys =
       stage === 'prepare'
         ? catalogEntry
-          ? (['success', 'revoked', 'unknown', 'navRevoked'] as const)
-          : (['success', 'revoked', 'unknown'] as const)
+          ? ([
+              'success',
+              'revoked',
+              'unknown',
+              'navRevoked',
+              'incomplete',
+              'changed',
+            ] as const)
+          : ([
+              'success',
+              'revoked',
+              'unknown',
+              'incomplete',
+              'changed',
+            ] as const)
         : (['success', 'unknown'] as const);
     const checkpoints: string[] = [];
     const browserOutput = path.join(output, stage + '-browser');
@@ -518,18 +742,23 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                 scenarios: keys.map((key) => ({
                   key,
                   email: saved[key].user.email,
-                  serviceName:
-                    key === 'unknown' ? 'Консультация' : 'PRIVATE_OWNER_VISIT',
-                  staffName:
-                    key === 'unknown'
-                      ? 'Алексей Орлов'
-                      : 'Release proof provider',
+                  serviceName: ['unknown', 'incomplete'].includes(key)
+                    ? 'Консультация'
+                    : 'PRIVATE_OWNER_VISIT',
+                  staffName: ['unknown', 'incomplete'].includes(key)
+                    ? 'Алексей Орлов'
+                    : 'Release proof provider',
                   date: saved[key].dto.start.slice(0, 10),
                 })),
               });
             } else if (m.type === 'checkpoint') {
               const key = m.name.split('-')[0] as
-                'success' | 'revoked' | 'unknown' | 'navRevoked';
+                | 'success'
+                | 'revoked'
+                | 'unknown'
+                | 'navRevoked'
+                | 'incomplete'
+                | 'changed';
               const salon = saved[key],
                 snapshot = await state(salon);
               if (m.name.endsWith('-before-nav')) {
@@ -544,11 +773,24 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                 if (key === 'unknown')
                   delete (salon.dto as { branchId?: string }).branchId;
                 if (key === 'revoked') await revoke(salon);
+                if (key === 'changed')
+                  await db.prisma.internalService.update({
+                    where: { id: salon.dto.serviceIds[0] },
+                    data: { price: { increment: 1 } },
+                  });
               } else {
                 expect(snapshot.rows).toHaveLength(
-                  ['revoked', 'navRevoked'].includes(key) ? 0 : 1,
+                  ['revoked', 'navRevoked', 'incomplete', 'changed'].includes(
+                    key,
+                  )
+                    ? 0
+                    : 1,
                 );
-                if (!['revoked', 'navRevoked'].includes(key)) {
+                if (
+                  !['revoked', 'navRevoked', 'incomplete', 'changed'].includes(
+                    key,
+                  )
+                ) {
                   expect(snapshot.rows[0]).toMatchObject({
                     state: key === 'success' ? 'SUCCEEDED' : 'UNKNOWN',
                     executionAttemptCount: 1,
@@ -611,7 +853,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         flag: 'wx',
       });
       expect(dispatches).toBe(1);
-      expect(requests).toHaveLength(catalogEntry ? 10 : 6);
+      expect(requests).toHaveLength(catalogEntry ? 14 : 9);
     } else {
       expect(dispatches).toBe(0);
       expect(requests).toHaveLength(2);

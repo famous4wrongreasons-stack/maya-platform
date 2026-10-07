@@ -17,6 +17,7 @@ import {
   CLIENT_BOOKING_INTENT_CONTRACT,
 } from '../action-engine/client-booking-intent.contract';
 import { canonicalAppointmentInstant } from '../crm/appointment-time.utils';
+import { bookingServiceFactsFingerprint } from '../crm/service-catalog-read';
 import { ClientChannelLinkService } from '../crm/client-channel-link.service';
 import { clientChannelSubjectHash } from '../crm/client-channel-subject';
 import {
@@ -336,24 +337,6 @@ export class ClientAppointmentCreateService {
       clientName: normalizeClientName(name),
       clientPhone: normalizeBookingPhone(phone),
     };
-    const services = await this.crm
-      .getServices(tenantId)
-      .catch(
-        (error: unknown): Awaited<ReturnType<CrmService['getServices']>> => {
-          // Catalog labels are presentation data on a bound replay. The executor
-          // still owns any checks required before a not-yet-completed create.
-          if (bound) return [];
-          throw error;
-        },
-      );
-    if (
-      !bound &&
-      (!dto.serviceIds.length ||
-        dto.serviceIds.some(
-          (id) => !services.some((service) => service.id === id),
-        ))
-    )
-      throw new BadRequestException({ error: { code: 'service_not_found' } });
     // A replay must reach the durable action even after its slot was consumed.
     const previous =
       bound ??
@@ -363,6 +346,31 @@ export class ClientAppointmentCreateService {
         clientId: link.clientId,
         start,
       }));
+    const services = await this.crm
+      .readBookableServices(tenantId, dto.serviceIds)
+      .catch(
+        (
+          error: unknown,
+        ): Awaited<ReturnType<CrmService['readBookableServices']>> => {
+          // Alias-bound and historical executions both retain their result path.
+          if (previous) return [];
+          throw error;
+        },
+      );
+    const factsHash = services.length
+      ? bookingServiceFactsFingerprint(
+          {
+            tenantId,
+            clientId: link.clientId,
+            calendarTarget,
+            branchId: dto.branchId ?? null,
+            staffId: dto.staffId,
+            start,
+            timezone,
+          },
+          services,
+        )
+      : null;
     if (!previous) {
       const slots = await this.crm.getAvailableSlots(tenantId, {
         date: localStart,
@@ -370,8 +378,17 @@ export class ClientAppointmentCreateService {
         serviceIds: dto.serviceIds,
         branchId: dto.branchId,
       });
-      if (!findMatchingSlotByLocalStart(slots, localStart, timezone))
+      const slot = findMatchingSlotByLocalStart(slots, localStart, timezone);
+      if (!slot)
         throw new BadRequestException({ error: { code: 'slot_taken' } });
+      if (
+        new Date(slot.end).getTime() - new Date(slot.start).getTime() !==
+        services.reduce((sum, service) => sum + service.duration_minutes, 0) *
+          60_000
+      )
+        throw new ServiceUnavailableException({
+          error: { code: 'booking_service_facts_unavailable' },
+        });
     }
     return {
       link,
@@ -385,6 +402,7 @@ export class ClientAppointmentCreateService {
       key,
       bookingIdentity,
       services,
+      factsHash,
       previous,
     };
   }
@@ -405,7 +423,16 @@ export class ClientAppointmentCreateService {
       key,
       bookingIdentity,
       services,
+      factsHash,
+      previous,
     } = await this.quoteVerifiedLink(tenantId, resolveLink, dto, invocation);
+    if (
+      !previous &&
+      ((invocation.personalContext && !invocation.expectedBookingFactsHash) ||
+        (invocation.expectedBookingFactsHash &&
+          invocation.expectedBookingFactsHash !== factsHash))
+    )
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
     const input = {
       ...dto,
       ...bookingIdentity,
@@ -428,6 +455,7 @@ export class ClientAppointmentCreateService {
         calendarTarget,
         timezone,
       },
+      ...(!previous && factsHash ? { bookingFactsHash: factsHash } : {}),
       authorizationCheck: async () => {
         const current = await resolveLink();
         if (

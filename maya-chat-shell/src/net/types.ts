@@ -328,8 +328,9 @@ export type Outcome<T, F> =
 // Explicit personal booking: request-local, already verified profile.
 export interface PersonalChoice { readonly id: string; readonly name: string }
 export interface PersonalSlot { readonly start: string; readonly staffId: string; readonly branchId: string | null }
-export interface PersonalSelection { readonly staffId: string; readonly serviceIds: readonly string[]; readonly start: string; readonly branchId?: string }
+export interface PersonalSelection { readonly staffId: string; readonly serviceIds: readonly string[]; readonly start: string; readonly branchId?: string; readonly previewFactsHash?: string }
 export interface PersonalPreview {
+  readonly factsHash: string | null;
   readonly services: readonly { readonly name: string; readonly price: number | null; readonly currency: string | null; readonly durationMinutes: number | null }[];
   readonly staff: string; readonly start: string; readonly timezone: string | null;
   readonly source: string; readonly asOf: string; readonly existing: boolean; readonly requestState: string | null;
@@ -338,7 +339,7 @@ export interface PersonalResults {
   readonly results: readonly { readonly id: string; readonly state: string; readonly recordedAt: string }[];
   readonly hasPending: boolean; readonly hasMore: boolean;
 }
-export type PersonalFailure = { readonly reason: 'forbidden' | 'unavailable' | 'unknown' | 'conflict' | 'aborted' };
+export type PersonalFailure = { readonly reason: 'forbidden' | 'unavailable' | 'facts_unavailable' | 'unknown' | 'conflict' | 'aborted' };
 export interface PersonalTransport {
   personalServices(signal: AbortSignal): Promise<Outcome<readonly PersonalChoice[], PersonalFailure>>;
   personalStaff(signal: AbortSignal): Promise<Outcome<readonly PersonalChoice[], PersonalFailure>>;

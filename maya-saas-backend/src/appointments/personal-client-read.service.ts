@@ -66,6 +66,7 @@ export class PersonalClientReadService {
     await personalContext.revalidate();
     return {
       contract: 'maya.personal-booking.preview/1' as const,
+      factsHash: quote.factsHash,
       services,
       staff: quote.staff.name,
       start: quote.start,

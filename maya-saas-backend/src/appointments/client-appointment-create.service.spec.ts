@@ -13,10 +13,15 @@ import { ClientAppointmentCreateService } from './client-appointment-create.serv
 import { CrmService } from '../crm/crm.service';
 import { CrmOutcomeUnknownError } from '../crm/crm-request.errors';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import {
+  observedServiceCatalog,
+  BOOKING_FACTS_EVIDENCE_PREFIX,
+} from '../crm/service-catalog-read';
 
 const START = '2099-09-20T10:00:00.000Z';
 const END = '2099-09-20T11:00:00.000Z';
 function setup() {
+  let executionEvidence: readonly string[] | null = null;
   const context = new TenantContextService();
   const link = {
     id: 'link-1',
@@ -64,7 +69,12 @@ function setup() {
         .fn()
         .mockResolvedValue({ id: 'branch-1', timezone: 'Europe/Moscow' }),
     },
-    actionExecution: { findUnique: jest.fn().mockResolvedValue(null) },
+    actionExecution: {
+      findUnique: jest.fn().mockResolvedValue(null),
+      findFirst: jest.fn(() =>
+        Promise.resolve({ evidenceRefsJson: executionEvidence ?? [] }),
+      ),
+    },
     appointment: {
       findFirst: jest.fn(({ where }: { where: Record<string, unknown> }) =>
         Promise.resolve(
@@ -90,6 +100,7 @@ function setup() {
       currency: 'RUB',
     },
   ];
+  const catalog = observedServiceCatalog(services, 'synthetic');
   const slots = [
     { start: START, end: END, staff_id: 'staff-1', branch_id: null },
   ];
@@ -138,6 +149,11 @@ function setup() {
           .get(request.capability)
           .normalizeInput(request.input);
         plans.push({ request, handlers, input });
+        executionEvidence ??= request.evidenceRefs;
+        await handlers.prepare?.(input, {
+          tenantId: request.tenantId,
+          executionId: 'execution-1',
+        });
         const result = await handlers.dispatch(input, 'transport-key', {
           tenantId: request.tenantId,
           executionId: 'execution-1',
@@ -158,6 +174,7 @@ function setup() {
     getExternalProviderKey: jest.fn().mockResolvedValue('yclients'),
     getAdapterForTenant: jest.fn().mockResolvedValue(provider),
     getServices: jest.fn().mockResolvedValue(services),
+    readServiceCatalog: jest.fn().mockResolvedValue(catalog),
     getStaff: jest
       .fn()
       .mockResolvedValue([
@@ -199,6 +216,7 @@ function setup() {
     crm,
     provider,
     calendar,
+    catalog,
     dto,
     run,
   };
@@ -238,6 +256,9 @@ describe('B31 verified Client create initiator and canonical executor', () => {
     expect(h.plans[0].request.source.actorUserId).toBeUndefined();
     expect(h.plans[0].request.evidenceRefs).toEqual([
       'client-authority:v1:link-1',
+      expect.stringMatching(
+        new RegExp('^' + BOOKING_FACTS_EVIDENCE_PREFIX + '[a-f0-9]{64}$'),
+      ),
     ]);
     expect(h.prisma.membership.findFirst).not.toHaveBeenCalled();
     expect(h.rows[0].mayaClientId).toBe('client-1');
@@ -429,7 +450,14 @@ describe('B31 verified Client create initiator and canonical executor', () => {
         : {},
     ]);
     expect(
-      (await h.plans[0].handlers.reconcile(h.plans[0].input)).outcome,
+      (
+        await h.context.runAsSystemTenant('tenant-1', () =>
+          h.plans[0].handlers.reconcile(h.plans[0].input, undefined, {
+            tenantId: 'tenant-1',
+            executionId: 'execution-1',
+          }),
+        )
+      ).outcome,
     ).toBe('PROVEN_SUCCEEDED');
     expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
   });
@@ -645,6 +673,164 @@ describe('U-OWN read-only create quote', () => {
   });
 });
 
+describe('Factual booking admission, precondition and durable retry', () => {
+  it.each([
+    { price: null, price_min: 100, price_max: 200 },
+    { price: null, price_min: null, price_max: null },
+    { duration_minutes: null },
+    { currency: null },
+  ])(
+    'refuses incomplete selected terms before availability or action ingress: %j',
+    async (patch) => {
+      const h = setup();
+      Object.assign(h.catalog.services[0], patch);
+      await expect(h.run()).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+      expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      expect(h.rows).toHaveLength(0);
+    },
+  );
+  it('does not guess a slot when observed service duration conflicts with availability', async () => {
+    const h = setup();
+    h.catalog.services[0].duration_minutes = 30;
+    await expect(h.run()).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+  });
+  it('rejects changed terms after preview without changing execution identity or creating an action', async () => {
+    const h = setup();
+    await h.context.runAsAuthPrincipal(
+      { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+      async () => {
+        const quote = await h.service.quoteForAccount(
+          'tenant-1',
+          'user-1',
+          h.dto,
+        );
+        const fact = h.catalog.services[0];
+        Object.assign(fact, { price: 2600, price_min: 2600, price_max: 2600 });
+        await expect(
+          h.service.forAccount('tenant-1', 'user-1', h.dto, {
+            expectedBookingFactsHash: quote.factsHash!,
+          }),
+        ).rejects.toMatchObject({
+          response: { error: { code: 'booking_preview_stale' } },
+        });
+      },
+    );
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+  it('prepare compares durable initial evidence, not the retry request current snapshot', async () => {
+    const h = setup();
+    await h.run();
+    const originalEvidence = [...h.plans[0].request.evidenceRefs];
+    const fact = h.catalog.services[0];
+    Object.assign(fact, { price: 2600, price_min: 2600, price_max: 2600 });
+    h.prisma.actionExecution.findUnique.mockResolvedValue({
+      id: 'execution-1',
+    });
+    await expect(h.run()).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(h.plans[1].request.evidenceRefs).not.toContain(
+      originalEvidence.at(-1),
+    );
+    expect(h.rows).toHaveLength(1);
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+  it('historical canonical replay reaches the durable result when the catalog is unavailable', async () => {
+    const h = setup();
+    const first = await h.run();
+    h.prisma.actionExecution.findUnique.mockResolvedValue({
+      id: 'execution-1',
+    });
+    (h.crm.readServiceCatalog as jest.Mock).mockRejectedValue(
+      new Error('catalog unavailable'),
+    );
+    h.runtime.executeWithReceipt.mockResolvedValue({
+      value: { external_id: first.appointment.id },
+      execution: { state: 'SUCCEEDED', executionId: 'execution-1' },
+    });
+    (h.crm.getAvailableSlots as jest.Mock).mockClear();
+    const repeated = await h.run();
+    expect(repeated.appointment.id).toBe(first.appointment.id);
+    expect(h.rows).toHaveLength(1);
+    expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+  });
+  it('refuses changed provider target before dispatch even with identical service facts', async () => {
+    const h = setup();
+    const execute = h.runtime.executeWithReceipt.getMockImplementation()!;
+    h.runtime.executeWithReceipt.mockImplementation(async (req, handlers) => {
+      (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+      return execute(req, handlers);
+    });
+    await expect(h.run()).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+  it('does not mirror new numbers if catalog terms change after provider acceptance', async () => {
+    const h = setup();
+    Object.assign(h.client, {
+      user: { encryptedName: 'encrypted', phone: '+79990001122' },
+    });
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    h.provider.createAppointment.mockImplementation(() => {
+      Object.assign(h.catalog.services[0], {
+        price: 2600,
+        price_min: 2600,
+        price_max: 2600,
+      });
+      return Promise.resolve({
+        external_id: 'remote-1',
+        status: 'confirmed',
+        start: START,
+        end: END,
+        staff_id: 'staff-1',
+        service_ids: ['svc-1'],
+      });
+    });
+    await expect(h.run()).rejects.toBeInstanceOf(CrmOutcomeUnknownError);
+    expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
+    expect(h.rows).toHaveLength(0);
+  });
+  it('refuses company 42 to 43 drift with the same external provider and service facts', async () => {
+    const h = setup();
+    Object.assign(h.client, {
+      user: { encryptedName: 'encrypted', phone: '+79990001122' },
+    });
+    (h.crm.getCalendarSource as jest.Mock).mockResolvedValue('external');
+    const execute = h.runtime.executeWithReceipt.getMockImplementation()!;
+    h.runtime.executeWithReceipt.mockImplementation(async (req, handlers) => {
+      h.prisma.crmIntegration.findUnique.mockResolvedValue({
+        provider: 'yclients',
+        settingsJson: { companyId: 43 },
+      });
+      return execute(req, handlers);
+    });
+    await expect(h.run()).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+  it('refuses legacy READY without a durable facts witness before dispatch', async () => {
+    const h = setup();
+    h.prisma.actionExecution.findUnique.mockResolvedValue({
+      id: 'execution-1',
+    });
+    h.prisma.actionExecution.findFirst.mockResolvedValue({
+      evidenceRefsJson: [],
+    });
+    await expect(h.run()).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_refresh_required' } },
+    });
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+});
+
 describe('SB-1 canonical create with personal context', () => {
   const personal = () => ({
     kind: 'personal_client' as const,
@@ -684,15 +870,22 @@ describe('SB-1 canonical create with personal context', () => {
   it('SB1-CREATE persists actual actor/context alongside Client authority without owner privileges', async () => {
     const h = setup();
     const selected = personal();
+    const quote = await ownerRun(h, () =>
+      h.service.quoteForAccount('tenant-1', 'user-1', h.dto, {
+        personalContext: selected,
+      }),
+    );
     await ownerRun(h, () =>
       h.service.forAccount('tenant-1', 'user-1', h.dto, {
         personalContext: selected,
+        expectedBookingFactsHash: quote.factsHash!,
       }),
     );
     expect(h.plans[0].request.source.actorUserId).toBeUndefined();
     expect(h.plans[0].request.evidenceRefs).toEqual([
       'client-authority:v1:link-1',
       ...selected.evidenceRefs,
+      BOOKING_FACTS_EVIDENCE_PREFIX + quote.factsHash,
     ]);
     expect(h.plans[0].input.clientId).toBe('client-1');
     expect(h.plans[0].input.creationMode).toBe('client');
@@ -721,6 +914,11 @@ describe('SB-1 canonical create with personal context', () => {
   it('SB1-DISPATCH rechecks revocation immediately before provider dispatch', async () => {
     const h = setup();
     const selected = personal();
+    const quote = await ownerRun(h, () =>
+      h.service.quoteForAccount('tenant-1', 'user-1', h.dto, {
+        personalContext: selected,
+      }),
+    );
     selected.revalidate
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce(undefined)
@@ -729,6 +927,7 @@ describe('SB-1 canonical create with personal context', () => {
       ownerRun(h, () =>
         h.service.forAccount('tenant-1', 'user-1', h.dto, {
           personalContext: selected,
+          expectedBookingFactsHash: quote.factsHash!,
         }),
       ),
     ).rejects.toThrow('revoked');

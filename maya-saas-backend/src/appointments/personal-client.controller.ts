@@ -15,6 +15,7 @@ import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PersonalClientContextService } from './personal-client-context.service';
 import { PersonalClientReadService } from './personal-client-read.service';
+import { PersonalCreateAppointmentDto } from './dto/personal-create-appointment.dto';
 
 /** Explicit personal authority on each request. No global mode or role switch. */
 @Controller('personal-client')
@@ -62,20 +63,27 @@ export class PersonalClientController {
   async create(
     @CurrentUser() user: AuthenticatedUser,
     @Headers('x-maya-authority-context') selection: string | undefined,
-    @Body() dto: CreateAppointmentDto,
+    @Body() dto: PersonalCreateAppointmentDto,
     @Headers('idempotency-key') key?: string,
   ) {
     const personalContext = await this.contexts.select(user, selection);
-    return this.appointments.createForClient(user.tenantId!, user.userId, dto, {
-      personalContext,
-      ...(key?.trim()
-        ? {
-            callerIdempotency: {
-              scope: 'personal-client.http.create',
-              key: key.trim(),
-            },
-          }
-        : {}),
-    });
+    const { previewFactsHash, ...booking } = dto;
+    return this.appointments.createForClient(
+      user.tenantId!,
+      user.userId,
+      booking,
+      {
+        personalContext,
+        expectedBookingFactsHash: previewFactsHash,
+        ...(key?.trim()
+          ? {
+              callerIdempotency: {
+                scope: 'personal-client.http.create',
+                key: key.trim(),
+              },
+            }
+          : {}),
+      },
+    );
   }
 }

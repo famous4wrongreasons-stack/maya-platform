@@ -18,7 +18,7 @@ export interface PersonalBookingPort {
 }
 const empty = (): PersonalBookingView => ({ phase: 'closed', busy: false, services: [], staff: [], serviceId: '', staffId: '', date: '', slots: [], preview: null, results: null, notice: '' });
 const uncertain = 'Результат записи пока не подтверждён. Повторно запрос не отправляем. Можно проверить сохранённый результат.';
-const message = (failure: PersonalFailure) => failure.reason === 'forbidden' ? 'Личная запись недоступна: подтверждённая связь или доступ изменились.' : failure.reason === 'conflict' ? 'Предложение изменилось. Проверьте записи и выберите время заново.' : 'Не удалось прочитать актуальные данные. Запись не подтверждена.';
+const message = (failure: PersonalFailure) => failure.reason === 'forbidden' ? 'Личная запись недоступна: подтверждённая связь или доступ изменились.' : failure.reason === 'conflict' ? 'Предложение изменилось. Проверьте записи и выберите время заново.' : failure.reason === 'facts_unavailable' ? 'Цена или длительность услуги пока не подтверждены. Уточните их в салоне перед записью.' : 'Не удалось прочитать актуальные данные. Запись не подтверждена.';
 export function createPersonalBooking(deps: { transport: PersonalTransport; widgets: Pick<WidgetPort, 'view' | 'subscribe'>; session: Pick<SessionPort, 'view' | 'subscribe'>; newAbort: () => AbortController }): PersonalBookingPort {
   let current = empty(), item: string | null = null, serial = 0, abort = deps.newAbort();
   let selection: PersonalSelection | null = null;
@@ -91,8 +91,8 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
       if (!active(version)) return;
       if (!result.ok) { fail(result.failure); return; }
       if (result.value.existing) { publish({ phase: 'outcome', busy: false, notice: 'Такой запрос уже сохранён. Проверьте его результат.' }); await refresh(); return; }
-      if (Date.parse(result.value.start) !== Date.parse(proposed.start) || result.value.timezone === null) { fail({ reason: 'unavailable' }); return; }
-      selection = proposed; publish({ phase: 'preview', busy: false, preview: result.value, notice: 'Окно проверено на момент предложения. Запись появится только после подтверждённого результата.' });
+      if (Date.parse(result.value.start) !== Date.parse(proposed.start) || result.value.timezone === null || result.value.factsHash === null) { fail({ reason: 'unavailable' }); return; }
+      selection = { ...proposed, previewFactsHash: result.value.factsHash }; publish({ phase: 'preview', busy: false, preview: result.value, notice: 'Окно проверено на момент предложения. Запись появится только после подтверждённого результата.' });
     },
     async confirm() {
       if (current.phase !== 'preview' || current.busy || selection === null || current.preview === null) return;

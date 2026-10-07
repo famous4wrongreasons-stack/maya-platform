@@ -6,7 +6,7 @@ import { createTransport } from '../src/net/client.ts';
 const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
 const ok = (value) => ({ ok: true, value });
 const start = '2026-10-15T09:00:00.000Z';
-const preview = { services: [{ name: 'Стрижка', price: 1000, currency: 'RUB', durationMinutes: 30 }], staff: 'Мастер', start, timezone: 'Europe/Moscow', source: 'internal', asOf: '2026-10-07T00:00:00Z', existing: false, requestState: null };
+const preview = { factsHash: 'a'.repeat(64), services: [{ name: 'Стрижка', price: 1000, currency: 'RUB', durationMinutes: 30 }], staff: 'Мастер', start, timezone: 'Europe/Moscow', source: 'internal', asOf: '2026-10-07T00:00:00Z', existing: false, requestState: null };
 const empty = { results: [], hasPending: false, hasMore: false };
 function setup() {
   let shell = { fullscreen: null }, signedIn = true, result = empty, exact = preview;
@@ -48,7 +48,7 @@ test('selection invalidates preview, unknown choices cannot alter it, confirmati
 test('double confirmation sends exact frozen selection once; only same canonical selection SUCCEEDED confirms', async () => {
   const f = setup(); await ready(f); f.exact({ ...preview, existing: true, requestState: 'SUCCEEDED' });
   await Promise.all([f.port.confirm(), f.port.confirm()]);
-  assert.deepEqual(f.calls.find(c => c[0] === 'create')[1], { staffId: 'staff', serviceIds: ['service'], start, branchId: 'branch' });
+  assert.deepEqual(f.calls.find(c => c[0] === 'create')[1], { staffId: 'staff', serviceIds: ['service'], start, branchId: 'branch', previewFactsHash: preview.factsHash });
   assert.equal(f.calls.filter(c => c[0] === 'create').length, 1);
   assert.equal(f.port.view().notice, 'Запись подтверждена.'); f.port.dispose();
 });
@@ -99,4 +99,15 @@ test('forbidden at result read clears prior private facts even after exact succe
   await f.port.confirm();
   assert.equal(f.port.view().phase, 'unavailable'); assert.equal(f.port.view().results, null); assert.equal(f.port.view().preview, null);
   assert.equal(f.port.view().services.length, 0); assert.doesNotMatch(f.port.view().notice, /Запись подтверждена/); f.port.dispose();
+});
+test('material fact refusal stays distinct from unknown after a transport or provider failure', async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    const transport = createTransport({ authorize: async () => ({ kind: 'bearer', bearer: 'synthetic', serial: 1 }) });
+    const selected = { staffId: 'p', serviceIds: ['s'], start, previewFactsHash: preview.factsHash };
+    globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: 'booking_service_facts_unavailable' } }), { status: 503 });
+    assert.deepEqual(await transport.personalCreate(selected, new AbortController().signal), { ok: false, failure: { reason: 'facts_unavailable' } });
+    globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: 'crm_outcome_unknown' } }), { status: 503 });
+    assert.deepEqual(await transport.personalCreate(selected, new AbortController().signal), { ok: false, failure: { reason: 'unknown' } });
+  } finally { globalThis.fetch = originalFetch; }
 });

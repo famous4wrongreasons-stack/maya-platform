@@ -6,7 +6,7 @@ import { CrmService } from '../crm/crm.service';
 export class ServicesService {
   constructor(private readonly crmService: CrmService) {}
 
-  listServices(tenantId: string) {
-    return this.crmService.getServices(tenantId);
+  async listServices(tenantId: string) {
+    return (await this.crmService.readServiceCatalog(tenantId)).services;
   }
 }

@@ -34,7 +34,8 @@ export function admitted(request, origin) {
     }
     if (['/api/personal-client/appointments/preview', '/api/personal-client/appointments'].includes(url.pathname)) {
       const body = JSON.parse(request.postData);
-      return Object.keys(body).every(k => ['staffId', 'serviceIds', 'start', 'branchId'].includes(k)) && typeof body.staffId === 'string' && Array.isArray(body.serviceIds) && body.serviceIds.length === 1 && typeof body.start === 'string';
+      const keys = ['staffId', 'serviceIds', 'start', 'branchId', ...(url.pathname.endsWith('/appointments') ? ['previewFactsHash'] : [])];
+      return Object.keys(body).every(k => keys.includes(k)) && (body.previewFactsHash === undefined || /^[a-f0-9]{64}$/.test(body.previewFactsHash)) && typeof body.staffId === 'string' && Array.isArray(body.serviceIds) && body.serviceIds.length === 1 && typeof body.start === 'string';
     }
     if (url.pathname !== '/api/ai/chat') return false;
     const body = JSON.parse(request.postData);

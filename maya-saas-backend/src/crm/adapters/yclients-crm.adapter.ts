@@ -861,7 +861,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
             },
           );
 
-          return (response.data || []).map((slot) =>
+          if (!Array.isArray(response.data))
+            throw new Error('booking_slot_facts_unavailable');
+          return response.data.map((slot) =>
             this.mapSlot(date, staffId, slot, params.timezone, params.branchId),
           );
         } catch (error) {
@@ -4251,12 +4253,32 @@ export class YclientsCRMAdapter implements CRMAdapter {
     timezone: string,
     branchId?: string,
   ): AvailableSlot {
-    const start = slot.datetime || `${date}T${slot.time || '00:00:00'}`;
+    if (
+      !slot ||
+      (!slot.datetime && !slot.time) ||
+      (slot.datetime != null &&
+        (typeof slot.datetime !== 'string' ||
+          !slot.datetime.startsWith(date + 'T'))) ||
+      (slot.time != null &&
+        (typeof slot.time !== 'string' ||
+          !/^\d{2}:\d{2}(?::\d{2})?$/.test(slot.time))) ||
+      typeof slot.seance_length !== 'number' ||
+      !Number.isFinite(slot.seance_length) ||
+      slot.seance_length <= 0
+    )
+      throw new Error('booking_slot_facts_unavailable');
+    const start = slot.datetime || `${date}T${slot.time}`;
     const normalizedStart = canonicalAppointmentInstant(start, timezone);
+    if (
+      appointmentInstantForProvider(normalizedStart, timezone).slice(0, 10) !==
+        date ||
+      (slot.time &&
+        canonicalAppointmentInstant(`${date}T${slot.time}`, timezone) !==
+          normalizedStart)
+    )
+      throw new Error('booking_slot_facts_unavailable');
     const startDate = new Date(normalizedStart);
-    const endDate = new Date(
-      startDate.getTime() + (slot.seance_length || 3600) * 1000,
-    );
+    const endDate = new Date(startDate.getTime() + slot.seance_length * 1000);
 
     return {
       start: startDate.toISOString(),

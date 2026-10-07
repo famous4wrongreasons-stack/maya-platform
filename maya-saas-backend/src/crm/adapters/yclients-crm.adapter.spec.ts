@@ -1072,6 +1072,61 @@ describe('YclientsCRMAdapter', () => {
     });
   });
 
+  it.each([
+    { time: '10:00' },
+    { seance_length: 1800 },
+    { time: '10:00', seance_length: 0 },
+    { time: '10:00', seance_length: -1800 },
+    { time: '10:00', seance_length: '1800' },
+    { time: '25:00', seance_length: 1800 },
+    { datetime: '2026-07-06T10:00:00', seance_length: 1800 },
+    { datetime: '2026-07-05T10:00:00', time: '11:00', seance_length: 1800 },
+  ])(
+    'refuses incomplete or contradictory slot facts instead of inventing midnight/hour: %j',
+    async (slot) => {
+      global.fetch = jest
+        .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+        .mockResolvedValue(new Response(JSON.stringify({ data: [slot] })));
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'synthetic',
+        settings: { companyId: 123 },
+      });
+      await expect(
+        adapter.getAvailableSlots({
+          tenantId: 'tenant',
+          timezone: 'Europe/Moscow',
+          date: '2026-07-05',
+          staffId: '15',
+          serviceIds: ['1'],
+        }),
+      ).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each([null, {}, { slots: [] }])(
+    'refuses malformed availability rather than reporting no windows: %j',
+    async (data) => {
+      global.fetch = jest
+        .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+        .mockResolvedValue(new Response(JSON.stringify({ data })));
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'synthetic',
+        settings: { companyId: 123 },
+      });
+      await expect(
+        adapter.getAvailableSlots({
+          tenantId: 'tenant',
+          timezone: 'Europe/Moscow',
+          date: '2026-07-05',
+          staffId: '15',
+        }),
+      ).rejects.toThrow('booking_slot_facts_unavailable');
+    },
+  );
+
   it('normalizes ISO datetime query and maps slots', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
