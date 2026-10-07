@@ -515,17 +515,7 @@ export class AiToolHandlerService {
   }
 
   private async readServices(tenantId: string) {
-    const services = await this.crmService.getServices(tenantId);
-    return {
-      services: services.map((service) => ({
-        id: service.id,
-        name: service.name,
-        price: service.price,
-        duration_minutes: service.duration_minutes,
-        currency: service.currency,
-        category: service.category ?? null,
-      })),
-    };
+    return this.crmService.readServiceCatalog(tenantId);
   }
 
   private async listOwnAppointments(principal: AiToolPrincipal) {

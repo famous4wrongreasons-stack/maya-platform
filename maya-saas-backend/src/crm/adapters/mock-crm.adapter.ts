@@ -1,4 +1,8 @@
 import {
+  observedServiceCatalog,
+  type ServiceCatalogRead,
+} from '../service-catalog-read';
+import {
   DEFAULT_INDUSTRY_PRESET_ID,
   IndustryPresetId,
   isIndustryPresetId,
@@ -143,6 +147,13 @@ export class MockCRMAdapter implements CRMAdapter {
       : DEFAULT_INDUSTRY_PRESET_ID;
 
     return MOCK_DATASETS[presetId];
+  }
+
+  async readServiceCatalog(tenantId: string): Promise<ServiceCatalogRead> {
+    return observedServiceCatalog(
+      await this.getServices(tenantId),
+      'synthetic',
+    );
   }
 
   getServices(tenantId: string): Promise<ServiceItem[]> {

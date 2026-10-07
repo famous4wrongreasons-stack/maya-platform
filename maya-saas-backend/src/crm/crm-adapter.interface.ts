@@ -1,3 +1,4 @@
+import type { ServiceCatalogRead } from './service-catalog-read';
 import { CrmProvider } from '../common/domain.enums';
 import type { ServicePriceSnapshot } from './yclients-service-price.contract';
 import type {
@@ -498,6 +499,8 @@ export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
+  /** Fresh observed catalog facts, before legacy numeric defaults. Not a mutation quote. */
+  readServiceCatalog?(tenantId: string): Promise<ServiceCatalogRead>;
   /** Exact management read; the public booking catalog cannot authorize pricing. */
   getServicePriceSnapshot?(
     serviceId: string,

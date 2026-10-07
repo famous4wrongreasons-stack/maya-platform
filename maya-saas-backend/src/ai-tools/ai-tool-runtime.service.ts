@@ -1,3 +1,4 @@
+import { SERVICE_CATALOG_READ_CONTRACT } from '../crm/service-catalog-read';
 import {
   ConflictException,
   ForbiddenException,
@@ -1856,6 +1857,9 @@ export class AiToolRuntimeService {
         ? {
             read_authority: {
               contract: 'maya.read-authority/1',
+              ...(toolName === 'catalog.services.read'
+                ? { source_projection: SERVICE_CATALOG_READ_CONTRACT }
+                : {}),
               role: principal.role,
               ...principal.readAuthority,
             },

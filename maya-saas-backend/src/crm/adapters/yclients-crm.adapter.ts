@@ -1,3 +1,8 @@
+import {
+  assertCatalogIdentities,
+  SERVICE_CATALOG_READ_CONTRACT,
+  type ServiceCatalogRead,
+} from '../service-catalog-read';
 import { Logger } from '@nestjs/common';
 import {
   priceUnavailable,
@@ -465,6 +470,74 @@ export class YclientsCRMAdapter implements CRMAdapter {
           ? categoryTitlesById.get(service.category_id) || undefined
           : undefined),
     }));
+  }
+
+  /** One fresh public READ; no cached/defaulted ServiceOffering or management fallback. */
+  async readServiceCatalog(tenantId: string): Promise<ServiceCatalogRead> {
+    void tenantId;
+    const response = await this.request<{
+      services?: YclientsServiceApiItem[];
+    }>(`book_services/${this.getCompanyId()}`);
+    if (!Array.isArray(response.data?.services))
+      throw new Error('service_catalog_source_unavailable');
+    const asOf = new Date().toISOString();
+    // Currency is a declared tenant setting here, not an observed provider default.
+    const currency =
+      typeof this.settings.currency === 'string' &&
+      /^[A-Z]{3}$/.test(this.settings.currency)
+        ? this.settings.currency
+        : null;
+    const nonnegative = (v: unknown): number | null =>
+      typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
+    const services = response.data.services.map((service) => {
+      const id = String(service?.id ?? '');
+      if (
+        !service ||
+        !/^[1-9]\d{0,14}$/.test(id) ||
+        typeof service.title !== 'string'
+      )
+        throw new Error('service_catalog_identity_unavailable');
+      const minimum = nonnegative(service.price_min),
+        maximum = nonnegative(service.price_max);
+      const ordered =
+        minimum !== null && maximum !== null && maximum >= minimum;
+      const fixed = ordered && minimum === maximum;
+      const seconds = service.seance_length;
+      const duration =
+        typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0
+          ? seconds / 60
+          : null;
+      const limitations: string[] = [];
+      if (!fixed)
+        limitations.push(
+          ordered ? 'price_is_range' : 'fixed_price_not_observed',
+        );
+      if (duration === null) limitations.push('duration_not_observed');
+      if (currency === null) limitations.push('currency_not_configured');
+      return {
+        id,
+        name: service.title.trim(),
+        price: fixed ? minimum : null,
+        price_min: ordered ? minimum : null,
+        price_max: ordered ? maximum : null,
+        duration_minutes: duration,
+        currency,
+        category:
+          typeof service.category?.title === 'string'
+            ? service.category.title
+            : null,
+        limitations,
+      };
+    });
+    assertCatalogIdentities(services);
+    return {
+      contract: SERVICE_CATALOG_READ_CONTRACT,
+      source: 'external_crm',
+      scope: 'public_booking_catalog',
+      as_of: asOf,
+      catalog_exhaustive: false,
+      services,
+    };
   }
 
   /** Uncached management read. Provider permissions are a separate authoritative read. */

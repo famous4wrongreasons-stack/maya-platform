@@ -557,6 +557,25 @@ function createHarness(
     },
   );
   const crmService = {
+    readServiceCatalog: jest.fn().mockResolvedValue({
+      source: 'synthetic',
+      scope: 'active_services',
+      as_of: '2026-10-06T09:00:00Z',
+      catalog_exhaustive: false,
+      services: [
+        {
+          id: 'service-synthetic',
+          name: 'Стрижка',
+          price: 2000,
+          price_min: 2000,
+          price_max: 2000,
+          duration_minutes: 60,
+          currency: 'RUB',
+          category: null,
+          limitations: [],
+        },
+      ],
+    }),
     getServices: jest.fn().mockResolvedValue([
       {
         id: 'service-synthetic',

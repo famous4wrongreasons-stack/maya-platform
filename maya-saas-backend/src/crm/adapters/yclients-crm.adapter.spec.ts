@@ -32,6 +32,168 @@ describe('YclientsCRMAdapter', () => {
     jest.restoreAllMocks();
   });
 
+  it('qualified catalog reads raw current facts without cached defaults, range-to-fixed conversion or guessed currency', async () => {
+    let rows: unknown[] = [{ id: 1, title: 'Unknown service' }];
+    const fetchMock = jest.fn<
+      ReturnType<typeof fetch>,
+      Parameters<typeof fetch>
+    >((input) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: requestUrl(input).includes('/book_services/')
+              ? { services: rows }
+              : [],
+          }),
+        ),
+      ),
+    );
+    global.fetch = fetchMock;
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic',
+      settings: { companyId: 123 },
+    });
+    // Compatibility witness: old public DTO keeps its old values; the READ does not consume them.
+    await expect(adapter.getServices('tenant')).resolves.toEqual([
+      expect.objectContaining({ price: 0, duration_minutes: 60 }),
+    ]);
+    const unknown = await adapter.readServiceCatalog('tenant');
+    expect(unknown).toMatchObject({
+      source: 'external_crm',
+      scope: 'public_booking_catalog',
+      catalog_exhaustive: false,
+      services: [
+        {
+          id: '1',
+          name: 'Unknown service',
+          price: null,
+          price_min: null,
+          price_max: null,
+          duration_minutes: null,
+          currency: null,
+          limitations: [
+            'fixed_price_not_observed',
+            'duration_not_observed',
+            'currency_not_configured',
+          ],
+        },
+      ],
+    });
+    expect(Number.isFinite(Date.parse(unknown.as_of))).toBe(true);
+    rows = [
+      {
+        id: 1,
+        title: 'Changed service',
+        price_min: 1000,
+        price_max: 2000,
+        seance_length: 1830,
+      },
+    ];
+    const changed = await adapter.readServiceCatalog('tenant');
+    expect(changed.services[0]).toMatchObject({
+      name: 'Changed service',
+      price: null,
+      price_min: 1000,
+      price_max: 2000,
+      duration_minutes: 30.5,
+      currency: null,
+      limitations: ['price_is_range', 'currency_not_configured'],
+    });
+    expect(
+      fetchMock.mock.calls.filter(([input]) =>
+        requestUrl(input).includes('/book_services/'),
+      ),
+    ).toHaveLength(3);
+  });
+  it('qualified catalog preserves observed free prices and exact duration, and never uses management fallback', async () => {
+    global.fetch = jest
+      .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            data: {
+              services: [
+                {
+                  id: 2,
+                  title: 'Consultation',
+                  price_min: 0,
+                  price_max: 0,
+                  seance_length: 900,
+                },
+              ],
+            },
+          }),
+        ),
+      );
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic',
+      settings: { companyId: 123, currency: 'RUB' },
+    });
+    await expect(adapter.readServiceCatalog('tenant')).resolves.toMatchObject({
+      services: [
+        { price: 0, duration_minutes: 15, currency: 'RUB', limitations: [] },
+      ],
+    });
+    const refused = jest
+      .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ meta: { message: 'Route not available' } }),
+          { status: 404 },
+        ),
+      );
+    global.fetch = refused;
+    await expect(adapter.readServiceCatalog('tenant')).rejects.toThrow();
+    expect(refused).toHaveBeenCalledTimes(1);
+    expect(requestUrl(refused.mock.calls[0][0])).toContain(
+      '/book_services/123',
+    );
+  });
+  it.each([
+    [
+      { id: 1, title: 'One' },
+      { id: 1, title: 'Duplicate' },
+    ],
+    [{ id: 0, title: 'Invalid' }],
+    [{ id: 1, title: ' ' }],
+    [null],
+  ])(
+    'qualified catalog refuses ambiguous or invalid source identities: %j',
+    async (...rows) => {
+      global.fetch = jest
+        .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ data: { services: rows } })),
+        );
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'synthetic',
+        settings: { companyId: 123 },
+      });
+      await expect(adapter.readServiceCatalog('tenant')).rejects.toThrow(
+        'service_catalog_identity_unavailable',
+      );
+    },
+  );
+  it.each([null, {}, { services: null }])(
+    'qualified catalog refuses malformed containers, not an empty complete catalog: %j',
+    async (data) => {
+      global.fetch = jest
+        .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+        .mockResolvedValue(new Response(JSON.stringify({ data })));
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'synthetic',
+        settings: { companyId: 123 },
+      });
+      await expect(adapter.readServiceCatalog('tenant')).rejects.toThrow(
+        'service_catalog_source_unavailable',
+      );
+    },
+  );
+
   it('guest create sends api_id and rejects echoed id without record_id', async () => {
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,

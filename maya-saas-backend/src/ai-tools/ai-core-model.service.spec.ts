@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { UserRole } from '../common/domain.enums';
 import { MAYA_CONVERSATION_TAXONOMY } from '../conversation-intelligence/conversation-taxonomy';
+import { observedServiceCatalog } from '../crm/service-catalog-read';
 import type { AiCoreModelInput } from './ai-core.types';
 import { AiCoreModelService } from './ai-core-model.service';
 
@@ -615,6 +616,49 @@ describe('AiCoreModelService', () => {
     expect(
       finalInput.tool_results?.[0]?.result?.rows?.[0]?.nested,
     ).toHaveLength(20);
+  });
+
+  it('never serializes a bounded 201-service catalog as exhaustive', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(deepSeekResponse('Доступна часть каталога.'));
+    const service = createService({
+      AI_CORE_PROVIDER: 'deepseek',
+      DEEPSEEK_API_KEY: 'synthetic-catalog-test-key',
+      DEEPSEEK_BASE_URL: 'https://catalog-model.example.test',
+    });
+    const catalog = observedServiceCatalog(
+      Array.from({ length: 201 }, (_, index) => ({
+        id: `service-${index + 1}`,
+        name: `Synthetic service ${index + 1}`,
+        price: 100,
+        duration_minutes: 30,
+        currency: 'RUB',
+      })),
+      'internal_calendar',
+    );
+    expect(catalog.services).toHaveLength(201);
+
+    await service.decide({
+      ...input,
+      surface: 'native',
+      tools: [],
+      requiredToolNames: [],
+      allowToolCall: false,
+      toolResults: [{ name: 'catalog.services.read', result: catalog }],
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const payload = requestPayload(fetchMock, 0) as {
+      messages: Array<{ content: string }>;
+    };
+    const serialized = JSON.parse(payload.messages[1]?.content ?? '{}') as {
+      tool_results: Array<{
+        result: { catalog_exhaustive: boolean; services: unknown[] };
+      }>;
+    };
+    expect(serialized.tool_results[0]?.result.catalog_exhaustive).toBe(false);
+    expect(serialized.tool_results[0]?.result.services).toHaveLength(200);
   });
 
   it('повторяет неудачный финальный запрос и на телефоне', async () => {

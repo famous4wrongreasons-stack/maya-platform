@@ -270,6 +270,62 @@ describe('CrmService', () => {
     expect(crmFindUniqueMock).not.toHaveBeenCalled();
   });
 
+  it('qualified catalog keeps current tenant isolation and refuses a default-only adapter', async () => {
+    const tenantContext = new TenantContextService();
+    const result = {
+      source: 'external_crm',
+      scope: 'public_booking_catalog',
+      as_of: '2035-05-10T09:00:00Z',
+      catalog_exhaustive: false,
+      services: [],
+    };
+    const readServiceCatalog = jest.fn().mockResolvedValue(result),
+      getServices = jest.fn();
+    const adapter = { readServiceCatalog, getServices };
+    const findUnique = jest.fn().mockResolvedValue({
+      id: 'crm',
+      tenantId: 'tenant-a',
+      provider: CrmProvider.YCLIENTS,
+      status: CrmIntegrationStatus.ACTIVE,
+      encryptedApiToken: 'synthetic',
+      settingsJson: { companyId: 123 },
+      updatedAt: new Date(),
+    });
+    const service = new CrmService(
+      {
+        tenant: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValue({ calendarSource: 'external' }),
+        },
+        crmIntegration: { findUnique },
+      } as unknown as PrismaService,
+      { decrypt: () => 'synthetic' } as unknown as EncryptionService,
+      { create: jest.fn().mockReturnValue(adapter) },
+      tenantContext,
+    );
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.readServiceCatalog('foreign'),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(findUnique).not.toHaveBeenCalled();
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.readServiceCatalog('tenant-a'),
+      ),
+    ).resolves.toEqual(result);
+    expect(readServiceCatalog).toHaveBeenCalledWith('tenant-a');
+    expect(getServices).not.toHaveBeenCalled();
+    delete (adapter as { readServiceCatalog?: unknown }).readServiceCatalog;
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.readServiceCatalog('tenant-a'),
+      ),
+    ).rejects.toThrow('qualified_service_catalog_unavailable');
+    expect(getServices).not.toHaveBeenCalled();
+  });
+
   it('requires a fresh token when switching from mock to a real provider', async () => {
     const crmUpdateMock = jest.fn();
     const prisma = {

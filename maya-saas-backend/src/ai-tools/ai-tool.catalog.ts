@@ -165,7 +165,8 @@ const BRANCH_COMPARISON_SCHEMA = {
 export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'catalog.services.read',
-    description: 'Read the current tenant service catalog without credentials.',
+    description:
+      'Read current source-qualified service facts. Null price, duration or currency means unknown. Price bounds are not an exact fixed price. public_booking_catalog is only the public booking scope, never the complete management catalog or a confirmed booking quote.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
     allowedSurfaces: ALL_SURFACES,

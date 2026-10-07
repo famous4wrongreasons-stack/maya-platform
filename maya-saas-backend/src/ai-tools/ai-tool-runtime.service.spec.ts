@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 
@@ -198,6 +199,49 @@ describe('AiToolRuntimeService', () => {
     );
     expect(JSON.stringify(executionUpdateData)).not.toContain('customer_count');
   });
+
+  it.each([false, true])(
+    'old defaulted catalog receipt cannot replay under the qualified READ contract (explicit replay=%s)',
+    async (replay) => {
+      const h = createHarness();
+      // Exact historical read-authority/1 identity before the catalog projection pin.
+      const oldHash = createHash('sha256')
+        .update(
+          '{"actor_user_id":"customer_12345678","arguments":{},"read_authority":{"branchId":null,"contract":"maya.read-authority/1","membershipId":"membership-a","membershipStatus":"active","role":"tenant_owner"},"surface":"web","tool_name":"catalog.services.read"}',
+        )
+        .digest('hex');
+      h.executionFindUnique.mockResolvedValue({
+        id: 'old-catalog',
+        toolName: 'catalog.services.read',
+        actorUserId: customer.userId,
+        surface: 'web',
+        inputHash: oldHash,
+        status: 'completed',
+        encryptedResult: 'old-unqualified-result',
+      });
+      const actor = { ...customer, role: UserRole.TENANT_OWNER },
+        input = {
+          arguments: {},
+          surface: 'web' as const,
+          idempotencyKey: IDEMPOTENCY_KEY,
+        };
+      await expect(
+        h.tenantContext.runAsSystemTenant('tenant-a', () =>
+          replay
+            ? h.runtime.replayCompletedRead(
+                actor,
+                'catalog.services.read',
+                input,
+                'old-catalog',
+              )
+            : h.runtime.execute(actor, 'catalog.services.read', input),
+        ),
+      ).rejects.toThrow(ConflictException);
+      expect(h.handlerExecute).not.toHaveBeenCalled();
+      expect(h.executionCreate).not.toHaveBeenCalled();
+      expect(h.executionUpdate).not.toHaveBeenCalled();
+    },
+  );
 
   it('SH-19 attaches the authorized widget resolution to a completed model-free read', async () => {
     const afterCompletedRead: jest.MockedFunction<

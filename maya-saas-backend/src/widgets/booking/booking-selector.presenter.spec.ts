@@ -61,6 +61,68 @@ describe('FBE2E-2 — booking selector presentation', () => {
     expect(JSON.stringify(presented)).not.toContain('+79990000000');
   });
 
+  it('retains observed service identities with unavailable measures and does not invent currency', () => {
+    const shown = presentBookingSelector({
+      tenantId: 'tenant',
+      kind: 'SERVICE_SELECTOR',
+      mint,
+      source: {
+        services: [
+          {
+            id: 'missing',
+            name: 'Unknown',
+            price: null,
+            duration_minutes: null,
+            currency: null,
+          },
+          {
+            id: 'range',
+            name: 'Range',
+            price: null,
+            price_min: 1000,
+            price_max: 2000,
+            duration_minutes: 30.5,
+            currency: 'RUB',
+          },
+          {
+            id: 'free',
+            name: 'Observed zero',
+            price: 0,
+            duration_minutes: 15,
+            currency: 'RUB',
+          },
+          {
+            id: 'currency',
+            name: 'Unknown currency',
+            price: 100,
+            duration_minutes: 20,
+            currency: null,
+          },
+        ],
+      },
+    });
+    expect(shown?.body).toMatchObject({
+      shown_count: 4,
+      options: [
+        {
+          label: { value: 'Unknown' },
+          duration: { state: 'NOT_MEASURED', value: null },
+          price: { state: 'NOT_MEASURED', value: null, currency: null },
+        },
+        {
+          label: { value: 'Range' },
+          duration: { state: 'KNOWN', value: 30.5 },
+          price: { state: 'NOT_MEASURED', value: null },
+        },
+        {
+          price: { state: 'KNOWN', value: 0, currency: 'RUB' },
+          duration: { state: 'KNOWN', value: 15 },
+        },
+        { price: { state: 'NOT_MEASURED', value: null, currency: null } },
+      ],
+    });
+  });
+
   it('requires the inherited service for staff and the inherited staff for slots', () => {
     expect(
       presentBookingSelector({

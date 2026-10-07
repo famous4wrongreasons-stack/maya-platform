@@ -112,9 +112,15 @@ const presentServices = (
     const name = str(service.name);
     const duration = num(service.duration_minutes);
     const price = num(service.price);
-    const currency = str(service.currency) ?? 'RUB';
+    const currency = str(service.currency);
     const category = str(service.category);
-    if (!id || !name || duration === null || price === null) continue;
+    if (
+      !id ||
+      !name ||
+      (service.price !== null && price === null) ||
+      (service.duration_minutes !== null && duration === null)
+    )
+      continue;
     const handle = input.mint({
       tenantId: input.tenantId,
       noun: 'service',
@@ -131,19 +137,20 @@ const presentServices = (
       media: null,
       intent_ref: 'i1',
       enabled: unknownCell<boolean>(),
-      duration: measure(
-        'booking.duration',
-        duration,
-        'minutes',
-        `${duration} мин`,
-      ),
-      price: measure(
-        'booking.price',
-        price,
-        'RUB',
-        `${price} ${currency}`,
-        currency,
-      ),
+      duration:
+        duration !== null && duration > 0
+          ? measure('booking.duration', duration, 'minutes', `${duration} мин`)
+          : unknownMeasure('booking.duration', 'minutes'),
+      price:
+        price !== null && price >= 0 && currency !== null
+          ? measure(
+              'booking.price',
+              price,
+              'RUB',
+              `${price} ${currency}`,
+              currency,
+            )
+          : unknownMeasure('booking.price', 'RUB'),
       requires_consultation: unknownCell<boolean>(),
       combinable_with: [],
     });

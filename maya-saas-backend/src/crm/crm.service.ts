@@ -1,3 +1,7 @@
+import {
+  observedServiceCatalog,
+  type ServiceCatalogRead,
+} from './service-catalog-read';
 import { resolveAvailabilityCalendar } from './availability-calendar.service';
 import { createHash } from 'node:crypto';
 import {
@@ -885,6 +889,24 @@ export class CrmService {
 
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     return adapter.getServices(scopedTenantId);
+  }
+
+  /** Tenant scope and current adapter ownership stay here; no public/mutation DTO change. */
+  async readServiceCatalog(tenantId: string): Promise<ServiceCatalogRead> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    )
+      return observedServiceCatalog(
+        await this.internalCalendarService.listServices(scopedTenantId),
+        'internal_calendar',
+      );
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.readServiceCatalog)
+      throw new ServiceUnavailableException(
+        'qualified_service_catalog_unavailable',
+      );
+    return adapter.readServiceCatalog(scopedTenantId);
   }
 
   /** The existing CRM owner binds the company's service to current tenant authority. */

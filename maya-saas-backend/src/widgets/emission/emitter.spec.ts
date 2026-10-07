@@ -397,6 +397,47 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     expect(prisma.emissions).toHaveLength(1);
   });
 
+  it('mints source-qualified nullable measures without losing the real service choice', async () => {
+    const { emitter } = make();
+    const minted = await emitter.emitBookingSelector(
+      {
+        ...req(),
+        kind: 'SERVICE_SELECTOR',
+        composerInput: composerFor(
+          'SERVICE_SELECTOR',
+          'catalog.services.read',
+          [],
+        ),
+      },
+      {
+        source: {
+          services: [
+            {
+              id: 'observed',
+              name: 'Observed service',
+              price: null,
+              duration_minutes: null,
+              currency: null,
+            },
+          ],
+        },
+      },
+    );
+    expect(minted.envelope).toMatchObject({
+      kind: 'SERVICE_SELECTOR',
+      body: {
+        shown_count: 1,
+        options: [
+          {
+            label: { value: 'Observed service' },
+            price: { state: 'NOT_MEASURED', value: null, currency: null },
+            duration: { state: 'NOT_MEASURED', value: null },
+          },
+        ],
+      },
+    });
+  });
+
   it('FBE2E-2 mints a strict service selector and a closed server-owned transition domain', async () => {
     const { prisma, emitter } = make();
     const minted = await emitter.emitBookingSelector(

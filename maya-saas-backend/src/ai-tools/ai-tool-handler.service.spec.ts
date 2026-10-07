@@ -32,6 +32,47 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  it('catalog READ uses the CRM qualified projection and never the defaulted public DTO', async () => {
+    const snapshot = {
+      source: 'external_crm',
+      scope: 'public_booking_catalog',
+      as_of: '2035-05-10T09:00:00Z',
+      catalog_exhaustive: false,
+      services: [
+        {
+          id: '1',
+          name: 'Observed service',
+          price: null,
+          duration_minutes: null,
+          currency: null,
+          limitations: ['fixed_price_not_observed', 'duration_not_observed'],
+        },
+      ],
+    };
+    const readServiceCatalog = jest.fn().mockResolvedValue(snapshot),
+      getServices = jest.fn();
+    const service = createService({
+      crmService: { readServiceCatalog, getServices } as unknown as CrmService,
+    });
+    await expect(
+      service.execute('catalog.services.read', principal, {}, 'catalog-read'),
+    ).resolves.toEqual(snapshot);
+    expect(readServiceCatalog).toHaveBeenCalledWith('tenant-a');
+    expect(getServices).not.toHaveBeenCalled();
+    readServiceCatalog.mockRejectedValue(
+      new Error('service_catalog_source_unavailable'),
+    );
+    await expect(
+      service.execute(
+        'catalog.services.read',
+        principal,
+        {},
+        'catalog-refused',
+      ),
+    ).rejects.toThrow('source_unavailable');
+    expect(getServices).not.toHaveBeenCalled();
+  });
+
   it('reads only the current tenant/account CRM staff link for the own schedule', async () => {
     const findFirst = jest
       .fn()
