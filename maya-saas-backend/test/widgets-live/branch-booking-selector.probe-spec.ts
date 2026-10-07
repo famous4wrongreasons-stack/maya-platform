@@ -860,7 +860,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     object(object(object(body.resolution).receipt).envelope);
   async function selectionAudits(s: Scenario) {
     return db.prisma.widgetIntentSubmissionAudit.findMany({
-      where: { tenantId: s.tenantId, profileId: 'canonical-booking-selection' },
+      where: {
+        tenantId: s.tenantId,
+        widgetId: { in: s.selectionWidgetIds ?? [] },
+      },
       orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }],
       select: {
         id: true,
