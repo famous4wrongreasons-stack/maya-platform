@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import type { ErasureClass } from '../../widget-contract/lifecycle';
-import { timelineLockKey } from '../stores/timeline.store';
+import type { RequestTx } from '../authority/principal-view';
+import { TimelineStore } from '../stores/timeline.store';
 import { ErasureRefusal, type ErasureRequest } from './erasure';
 
 type ErasableClass = Extract<
@@ -75,8 +76,9 @@ export interface ConversationErasureResult {
 /**
  * P-RT6's dark provider. K12 will schedule it; this unit only establishes the atomic mechanism.
  *
- * The single data statement first takes the same transaction advisory lock as Gate 9, freezes every
- * target set, clears all C/X columns, stamps `erasedAt`, and appends one tombstone per changed row.
+ * Acquire Gate 9's lock in a separate statement BEFORE taking the target snapshot. A lock inside
+ * the erasure CTE would retain a pre-wait READ COMMITTED snapshot and miss a concurrent writer.
+ * The following data statement clears C/X columns and appends one tombstone per changed row.
  * A retry sees no `erasedAt IS NULL` target and therefore cannot duplicate a tombstone.
  */
 @Injectable()
@@ -87,18 +89,25 @@ export class WidgetConversationErasureJob {
     request: ConversationErasureRequest,
     now = new Date(),
   ): Promise<ConversationErasureResult> {
-    for (const [name, value] of Object.entries({
-      tenantId: request.tenantId,
-      conversationId: request.conversationId,
-      erasureRequestRef: request.erasureRequestRef,
-      subjectPrincipalProofHash: request.subjectPrincipalProofHash,
-    }))
-      if (value.trim().length === 0)
-        throw new ErasureRefusal(
-          `${name} is required for conversation erasure`,
-        );
+    this.assertRequest(request);
+    return this.prisma.$transaction(
+      (tx) => this.runInTransaction(tx, request, now),
+      { isolationLevel: 'ReadCommitted' },
+    );
+  }
 
-    const lockKey = timelineLockKey(request.tenantId, request.conversationId);
+  /** The future privacy owner must resolve authority in this SAME ReadCommitted transaction. */
+  async runInTransaction(
+    tx: RequestTx,
+    request: ConversationErasureRequest,
+    now: Date,
+  ): Promise<ConversationErasureResult> {
+    this.assertRequest(request);
+    await TimelineStore.lockConversation(
+      tx,
+      request.tenantId,
+      request.conversationId,
+    );
 
     const fields = {
       turn: fieldsFor('WidgetTimelineTurn'),
@@ -110,54 +119,54 @@ export class WidgetConversationErasureJob {
       draft: fieldsFor('WidgetDraft'),
     } as const;
 
-    const tombstonesWritten = await this.prisma.$transaction(
-      async (tx) =>
-        tx.$executeRaw`
-        WITH lock_row AS MATERIALIZED (
-          SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))
-        ),
-        turn_targets AS MATERIALIZED (
-          SELECT t."id"
+    const tombstonesWritten = await tx.$executeRaw`
+        WITH turn_scope AS MATERIALIZED (
+          SELECT t."id", t."erasedAt"
           FROM "WidgetTimelineTurn" t
-          CROSS JOIN lock_row
           WHERE t."tenantId" = ${request.tenantId}
             AND t."conversationId" = ${request.conversationId}::uuid
             AND t."principalProofHash" = ${request.subjectPrincipalProofHash}
-            AND t."erasedAt" IS NULL
+        ),
+        turn_targets AS MATERIALIZED (
+          SELECT "id" FROM turn_scope WHERE "erasedAt" IS NULL
+        ),
+        emission_scope AS MATERIALIZED (
+          SELECT e."id", e."widgetId", e."erasedAt"
+          FROM "WidgetEmission" e
+          JOIN turn_scope t ON t."id" = e."turnId"
+          WHERE e."tenantId" = ${request.tenantId}
         ),
         emission_targets AS MATERIALIZED (
-          SELECT e."id", e."widgetId"
-          FROM "WidgetEmission" e
-          JOIN turn_targets t ON t."id" = e."turnId"
-          WHERE e."tenantId" = ${request.tenantId}
-            AND e."erasedAt" IS NULL
+          SELECT "id" FROM emission_scope WHERE "erasedAt" IS NULL
         ),
-        record_targets AS MATERIALIZED (
-          SELECT r."id", r."intentTokenHash"
+        record_scope AS MATERIALIZED (
+          SELECT r."id", r."intentTokenHash", r."confirmationOfKind", r."confirmationOfRef", r."erasedAt"
           FROM "WidgetIntentRecord" r
-          JOIN emission_targets e ON e."widgetId" = r."widgetId"
+          JOIN emission_scope e ON e."widgetId" = r."widgetId"
           WHERE r."tenantId" = ${request.tenantId}
             AND r."principalProofHash" = ${request.subjectPrincipalProofHash}
-            AND r."erasedAt" IS NULL
+        ),
+        record_targets AS MATERIALIZED (
+          SELECT "id" FROM record_scope WHERE "erasedAt" IS NULL
         ),
         submission_targets AS MATERIALIZED (
           SELECT a."id"
           FROM "WidgetIntentSubmissionAudit" a
-          JOIN record_targets r ON r."intentTokenHash" = a."intentTokenHash"
+          JOIN record_scope r ON r."intentTokenHash" = a."intentTokenHash"
           WHERE a."tenantId" = ${request.tenantId}
             AND a."erasedAt" IS NULL
         ),
         receipt_targets AS MATERIALIZED (
           SELECT r."id"
           FROM "WidgetIntentReceipt" r
-          JOIN record_targets i ON i."intentTokenHash" = r."intentTokenHash"
+          JOIN record_scope i ON i."intentTokenHash" = r."intentTokenHash"
           WHERE r."tenantId" = ${request.tenantId}
             AND r."erasedAt" IS NULL
         ),
         render_targets AS MATERIALIZED (
           SELECT r."id"
           FROM "WidgetRenderReceipt" r
-          JOIN emission_targets e ON e."widgetId" = r."widgetId"
+          JOIN emission_scope e ON e."widgetId" = r."widgetId"
           WHERE r."tenantId" = ${request.tenantId}
             AND r."erasedAt" IS NULL
         ),
@@ -167,6 +176,11 @@ export class WidgetConversationErasureJob {
           WHERE d."tenantId" = ${request.tenantId}
             AND d."principalProofHash" = ${request.subjectPrincipalProofHash}
             AND d."erasedAt" IS NULL
+            AND EXISTS (
+              SELECT 1 FROM record_scope r
+              WHERE r."confirmationOfKind" = 'draft'
+                AND r."confirmationOfRef" = d."draftRef"
+            )
         ),
         erased_turns AS (
           UPDATE "WidgetTimelineTurn" t
@@ -175,6 +189,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM turn_targets x
           WHERE t."id" = x."id" AND t."tenantId" = ${request.tenantId}
+            AND t."erasedAt" IS NULL
           RETURNING t."id"
         ),
         erased_emissions AS (
@@ -186,6 +201,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM emission_targets x
           WHERE e."id" = x."id" AND e."tenantId" = ${request.tenantId}
+            AND e."erasedAt" IS NULL
           RETURNING e."id"
         ),
         erased_records AS (
@@ -199,6 +215,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM record_targets x
           WHERE r."id" = x."id" AND r."tenantId" = ${request.tenantId}
+            AND r."erasedAt" IS NULL
           RETURNING r."id"
         ),
         erased_submissions AS (
@@ -210,6 +227,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM submission_targets x
           WHERE a."id" = x."id" AND a."tenantId" = ${request.tenantId}
+            AND a."erasedAt" IS NULL
           RETURNING a."id"
         ),
         erased_receipts AS (
@@ -218,6 +236,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM receipt_targets x
           WHERE r."id" = x."id" AND r."tenantId" = ${request.tenantId}
+            AND r."erasedAt" IS NULL
           RETURNING r."id"
         ),
         erased_renders AS (
@@ -227,6 +246,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM render_targets x
           WHERE r."id" = x."id" AND r."tenantId" = ${request.tenantId}
+            AND r."erasedAt" IS NULL
           RETURNING r."id"
         ),
         erased_drafts AS (
@@ -235,6 +255,7 @@ export class WidgetConversationErasureJob {
               "erasedAt" = ${now}
           FROM draft_targets x
           WHERE d."id" = x."id" AND d."tenantId" = ${request.tenantId}
+            AND d."erasedAt" IS NULL
           RETURNING d."id"
         ),
         changed AS (
@@ -250,9 +271,28 @@ export class WidgetConversationErasureJob {
           ("id", "tenantId", "erasedAt", "erasureRequestRef", "store", "rowKey", "fieldsErased")
         SELECT gen_random_uuid(), ${request.tenantId}, ${now}, ${request.erasureRequestRef}, store, row_key, fields
         FROM changed
-      `,
-    );
+      `;
 
     return Object.freeze({ tombstonesWritten });
+  }
+
+  private assertRequest(request: ConversationErasureRequest): void {
+    for (const [name, value] of Object.entries({
+      tenantId: request.tenantId,
+      conversationId: request.conversationId,
+      erasureRequestRef: request.erasureRequestRef,
+      subjectPrincipalProofHash: request.subjectPrincipalProofHash,
+    }))
+      if (typeof value !== 'string' || value.trim().length === 0)
+        throw new ErasureRefusal(
+          `${name} is required for conversation erasure`,
+        );
+    // UUID aliases must not use different advisory locks for the same database tuple.
+    if (
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+        request.conversationId,
+      )
+    )
+      throw new ErasureRefusal('conversationId must be a canonical UUID');
   }
 }

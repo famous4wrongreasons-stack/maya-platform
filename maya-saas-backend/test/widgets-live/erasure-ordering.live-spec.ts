@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { UserRole } from '../../src/common/domain.enums';
 import type { AuthenticatedUser } from '../../src/common/authenticated-user.interface';
 import { WidgetConversationErasureJob } from '../../src/widgets/consent/erasure.job';
+import { TimelineStore } from '../../src/widgets/stores/timeline.store';
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
 import {
   bootFixtureContext,
@@ -206,10 +207,11 @@ describe('P-RT6 — erasure ordering with Gate 9', () => {
         utteranceEcho: 'erase me',
       },
     });
+    const draftRef = `rt6-${randomUUID()}`;
     await ctx.prisma.widgetDraft.create({
       data: {
         tenantId,
-        draftRef: `rt6-${randomUUID()}`,
+        draftRef,
         draftClass: 'task',
         ownerCapabilitySpace: 'AE',
         ownerCapabilityKey: 'appointments.own.create',
@@ -218,6 +220,11 @@ describe('P-RT6 — erasure ordering with Gate 9', () => {
         createdAt: startAt,
         expiresAt: new Date(startAt.getTime() + 600_000),
       },
+    });
+    // Synthetic retained linkage for the erasure fixture, not a minted COMMIT or authority.
+    await ctx.prisma.widgetIntentRecord.updateMany({
+      where: { tenantId, intentTokenHash: built.record.intentTokenHash },
+      data: { confirmationOfKind: 'draft', confirmationOfRef: draftRef },
     });
     await ctx.prisma.widgetEmission.update({
       where: {
@@ -340,5 +347,220 @@ describe('P-RT6 — erasure ordering with Gate 9', () => {
       verdict: { outcome: 'superseded', code: 'handle_stale' },
     });
     expect(result).not.toHaveProperty('nextEnvelope');
+  }, 60_000);
+
+  it('RT6-4 [PG] preserves sibling, foreign-principal, foreign-tenant and unlinked drafts', async () => {
+    const built = await record('RT6-4');
+    const sibling = await fx.widget({
+      tenant: built.tenant,
+      actor: built.actor,
+      kind: 'METRIC',
+      body: { value: 2 },
+    });
+    const foreignUser = await fx.user(built.tenant, UserRole.ADMINISTRATOR);
+    const foreignActor = await fx.actor(built.tenant, foreignUser);
+    const foreignProof = await fx.principalProofHash(foreignActor);
+    const foreign = await record('RT6-4-foreign');
+    const create = async (
+      tenantId: string,
+      proof: string,
+      widget: WidgetFixture | null,
+    ) => {
+      const draftRef = `rt6-${randomUUID()}`;
+      const row = await ctx.prisma.widgetDraft.create({
+        data: {
+          tenantId,
+          draftRef,
+          draftClass: 'task',
+          ownerCapabilitySpace: 'C9',
+          ownerCapabilityKey: 'c9.booking.propose',
+          principalProofHash: proof,
+          diffJson: { note: 'synthetic scoped draft' },
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 600_000),
+        },
+      });
+      if (widget)
+        await ctx.prisma.widgetIntentRecord.updateMany({
+          where: { tenantId, intentTokenHash: widget.intentTokenHash },
+          data: { confirmationOfKind: 'draft', confirmationOfRef: draftRef },
+        });
+      return row;
+    };
+    const target = await create(
+      built.tenant.id,
+      built.principalProofHash,
+      built.record,
+    );
+    const foreignDraftLink = await fx.widget({
+      tenant: built.tenant,
+      actor: built.actor,
+      kind: 'METRIC',
+      body: { value: 3 },
+    });
+    // Synthetic cross-principal reference inside the target scope. This makes the draft's
+    // own principal predicate load-bearing, independently of the record-scope predicate.
+    await ctx.prisma.widgetTimelineTurn.update({
+      where: { id: foreignDraftLink.turnId },
+      data: { conversationId: built.record.conversationId, turnIndex: 99 },
+    });
+    const retained = [
+      await create(built.tenant.id, built.principalProofHash, sibling),
+      await create(built.tenant.id, foreignProof, foreignDraftLink),
+      await create(
+        foreign.tenant.id,
+        foreign.principalProofHash,
+        foreign.record,
+      ),
+      await create(built.tenant.id, built.principalProofHash, null),
+    ];
+    await erase(built);
+    expect(
+      await ctx.prisma.widgetDraft.findUniqueOrThrow({
+        where: { id: target.id },
+      }),
+    ).toMatchObject({
+      diffJson: null,
+      erasedAt: expect.any(Date),
+    });
+    for (const row of retained)
+      expect(
+        await ctx.prisma.widgetDraft.findUniqueOrThrow({
+          where: { id: row.id },
+        }),
+      ).toEqual(row);
+    expect(
+      await ctx.prisma.widgetTimelineTurn.findUniqueOrThrow({
+        where: { id: sibling.turnId },
+      }),
+    ).toMatchObject({ erasedAt: null });
+  }, 60_000);
+
+  it('RT6-5 [PG] retry clears a late child through erased parent identity without repeating tombstones', async () => {
+    const built = await record('RT6-5');
+    const ref = `erase-${randomUUID()}`;
+    await erase(built, ref);
+    // Deliberately simulate a writer which has not yet joined the erasure lock protocol.
+    const receipt = await ctx.prisma.widgetIntentReceipt.create({
+      data: {
+        tenantId: built.tenant.id,
+        widgetId: built.record.widgetId,
+        intentTokenHash: built.record.intentTokenHash,
+        submittedAt: new Date(),
+        outcome: 'REFUSED',
+        refusalCode: 'proof_only',
+        answeringChannel: 'pwa',
+        utteranceEcho: 'synthetic late content',
+      },
+    });
+    expect(await erase(built, ref)).toEqual({ tombstonesWritten: 1 });
+    expect(await erase(built, ref)).toEqual({ tombstonesWritten: 0 });
+    expect(
+      await ctx.prisma.widgetIntentReceipt.findUniqueOrThrow({
+        where: { id: receipt.id },
+      }),
+    ).toMatchObject({
+      utteranceEcho: null,
+      erasedAt: expect.any(Date),
+      refusalCode: 'proof_only',
+    });
+  }, 60_000);
+
+  it('RT6-6 [PG] takes a fresh snapshot after waiting for a held writer lock', async () => {
+    const built = await record('RT6-6');
+    let release!: () => void;
+    let acquired!: () => void;
+    let identify!: (pid: number) => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const locked = new Promise<void>((resolve) => {
+      acquired = resolve;
+    });
+    const backend = new Promise<number>((resolve) => {
+      identify = resolve;
+    });
+    const writer = ctx.prisma.$transaction(
+      async (tx) => {
+        await TimelineStore.lockConversation(
+          tx,
+          built.tenant.id,
+          built.record.conversationId,
+        );
+        const row = await TimelineStore.appendUserTurn(
+          {
+            tenantId: built.tenant.id,
+            conversationId: built.record.conversationId,
+            principalProofHash: built.principalProofHash,
+            channel: 'pwa',
+            textContent: 'synthetic concurrent turn',
+          },
+          tx,
+        );
+        acquired();
+        await held;
+        return row;
+      },
+      { timeout: 15_000, isolationLevel: 'ReadCommitted' },
+    );
+    await Promise.race([
+      locked,
+      writer.then(() => {
+        throw new Error('writer ended before lock barrier');
+      }),
+    ]);
+    const job = new WidgetConversationErasureJob(ctx.prisma);
+    const eraser = ctx.prisma.$transaction(
+      async (tx) => {
+        const [{ pid }] = await tx.$queryRaw<
+          { pid: number }[]
+        >`SELECT pg_backend_pid() AS pid`;
+        identify(pid);
+        return job.runInTransaction(
+          tx,
+          {
+            tenantId: built.tenant.id,
+            conversationId: built.record.conversationId,
+            subjectPrincipalProofHash: built.principalProofHash,
+            erasureRequestRef: `erase-${randomUUID()}`,
+          },
+          new Date(),
+        );
+      },
+      { timeout: 15_000, isolationLevel: 'ReadCommitted' },
+    );
+    try {
+      const pid = await Promise.race([
+        backend,
+        eraser.then(() => {
+          throw new Error('eraser ended before lock barrier');
+        }),
+      ]);
+      let waiting = false;
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const rows = await ctx.prisma.$queryRaw<{ waiting: boolean }[]>`
+          SELECT EXISTS (SELECT 1 FROM pg_locks WHERE pid = ${pid} AND locktype = 'advisory' AND NOT granted) AS waiting
+        `;
+        if (rows[0].waiting) {
+          waiting = true;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      expect(waiting).toBe(true);
+      release();
+      const [row] = await Promise.all([writer, eraser]);
+      expect(
+        await ctx.prisma.widgetTimelineTurn.findUniqueOrThrow({
+          where: { id: row.id },
+        }),
+      ).toMatchObject({
+        textContent: null,
+        erasedAt: expect.any(Date),
+      });
+    } finally {
+      release();
+      await Promise.allSettled([writer, eraser]);
+    }
   }, 60_000);
 });
