@@ -1,0 +1,88 @@
+{
+  "contract": "maya.history-erasure-pg-evidence/1",
+  "codeCommit": "bf7257ed1fac9d511a24bd12883a980e2902367e",
+  "artifacts": [
+    {
+      "path": "eslint-attempt-2-failed.log",
+      "bytes": 906,
+      "sha256": "ac080124beb3f4de537c37a9b3aaeeae0c56e23b9c727f1a1c618b2bd43a33ce"
+    },
+    {
+      "path": "eslint-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "qualification.json",
+      "bytes": 2043,
+      "sha256": "2458d1b06623296709dfb2c3a25284a06e7da7fb74e4a16fd714db4d0490a46a"
+    },
+    {
+      "path": "raw-cleanup-check.json",
+      "bytes": 193,
+      "sha256": "6a5a79139d96effecd3cb136a5adb0934359dc0fcc06e6703fb3b42c7b59dce9"
+    },
+    {
+      "path": "raw-createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw-erasure-pg-jest.json",
+      "bytes": 4222,
+      "sha256": "60fb00a96b305d1c937800278e25e39b61196129976a7fb89cc9e2b2ce22edce"
+    },
+    {
+      "path": "raw-erasure-pg.log",
+      "bytes": 1890,
+      "sha256": "d60b2a2a6fdaa4a7099c096179f7044829d279bbd276f5957495236bacb588df"
+    },
+    {
+      "path": "raw-initdb.log",
+      "bytes": 952,
+      "sha256": "c0401c170712def4e51b00763d37d510ac68e35fe7eb055c84bae49b22d4b411"
+    },
+    {
+      "path": "raw-manifest.json",
+      "bytes": 1281,
+      "sha256": "137698a912fdcb558ef6757f0e2f4fd5996ead411b973a323bc3570787343522"
+    },
+    {
+      "path": "raw-migrations.log",
+      "bytes": 14720,
+      "sha256": "b4fc0ed42ff0ed9312870b6939125b07f9bfd6eab2aa413269bdeba236246529"
+    },
+    {
+      "path": "raw-pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "raw-pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "raw-postgres.log",
+      "bytes": 1246,
+      "sha256": "f3da55ccf9b15fb87d9d6e006bdf69a47ae1291f91072f065d4ddc1eb8f9c0eb"
+    },
+    {
+      "path": "types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "unit-final.json",
+      "bytes": 21519,
+      "sha256": "9d95705407a1d3e401c55c82a53674507027a1bbf97105996a72c14c1e0c1da4"
+    }
+  ],
+  "rawArchiveVerified": true,
+  "sourceTrees": {
+    "src": "afebc9a58adfef683095b482feac8b525d98821e",
+    "test": "128be577a8aa22f8753562c17f805d746e2e11be",
+    "scripts": "832ce90788a83490cad563bf336a4684f04d1e58",
+    "prisma": "508191c08b108bda616b9a7ff8e63ac5e7f352f9"
+  }
+}

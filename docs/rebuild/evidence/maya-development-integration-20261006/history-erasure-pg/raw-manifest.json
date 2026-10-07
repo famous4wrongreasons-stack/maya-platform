@@ -1,0 +1,41 @@
+{
+  "contract": "maya.history-erasure-owned-cluster/1",
+  "commit": "bf7257ed1fac9d511a24bd12883a980e2902367e",
+  "sourceTrees": {
+    "src": "afebc9a58adfef683095b482feac8b525d98821e",
+    "test": "128be577a8aa22f8753562c17f805d746e2e11be",
+    "scripts": "832ce90788a83490cad563bf336a4684f04d1e58",
+    "prisma": "508191c08b108bda616b9a7ff8e63ac5e7f352f9"
+  },
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-history-erasure-lQNt6b/pg",
+  "database": "maya_widget_gate_proof_c9occ_513b4e491abe",
+  "port": 62562,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "erasure-pg"
+  ],
+  "clusterStopped": true,
+  "scope": "RT6 storage and gateway fixture only; not HTTP/privacy admission or RT8 completion",
+  "sourceBinding": "Committed src/test/scripts/prisma trees; installed dependencies are not hashed",
+  "expectedExternalProviderCalls": 0,
+  "expectedModelCalls": 0,
+  "externalEgressMeasured": false,
+  "fixtureData": "synthetic-only",
+  "resources": {
+    "nodeHeapMiB": 3072,
+    "pgSharedBuffersMiB": 64,
+    "pgWorkMemMiB": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "observedTests": {
+    "passed": 7,
+    "failed": 0,
+    "pending": 0
+  },
+  "postRunSourcesUnchanged": true
+}

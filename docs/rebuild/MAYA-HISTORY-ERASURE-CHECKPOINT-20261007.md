@@ -2,7 +2,9 @@
 
 **Useful result:** the existing dark erasure job now acquires the conversation lock before taking its target snapshot, scopes drafts through retained conversation references, and can clean late children of erased parents on retry. No HTTP erasure route or UI delete action is enabled. `GAP-HISTORY-ERASE` remains open.
 
-Base: accepted `d418e253eb918341f212a4c31a29a698de915b5c`; code `51f420084fef4185f4870a95994a311a0b9bb1b9`. Code checkpoint and artifact hashes are recorded in the adjacent [evidence manifest](evidence/maya-development-integration-20261006/history-erasure/manifest.json). Only lightweight local checks ran; no user data was deleted, and no build, PostgreSQL, browser, model, provider or production/site operation ran.
+Base: accepted `d418e253eb918341f212a4c31a29a698de915b5c`; code `51f420084fef4185f4870a95994a311a0b9bb1b9`. Code checkpoint and artifact hashes are recorded in the adjacent [evidence manifest](evidence/maya-development-integration-20261006/history-erasure/manifest.json). At that initial checkpoint only lightweight local checks ran; no user data was deleted, and no build, PostgreSQL, browser, model, provider or production/site operation ran.
+
+**Subsequent bounded qualification:** after the parent returned the heavy slot, code `bf7257ed1fac9d511a24bd12883a980e2902367e` passed **7/7 actual PostgreSQL tests**, scoped lint and widgets-live types. The current qualification is detailed below and archived separately in [PG evidence](evidence/maya-development-integration-20261006/history-erasure-pg/manifest.json). The earlier light-only evidence and failures remain historical, unchanged. HTTP/UI erasure is still not enabled.
 
 ## Existing authority and implemented correction
 
@@ -18,7 +20,7 @@ The existing owner is [`WidgetConversationErasureJob`](../../maya-saas-backend/s
 - UUID aliases are refused before acquiring locks, preventing uppercase/braced UUID spellings from selecting one database tuple under different advisory lock identities.
 - The C/X field map, schema, canonical business rows and retained audit references are unchanged. Row idempotency is not claimed as immutable erasure-request replay.
 
-## Verification and limits
+## Initial lightweight verification and limits
 
 | Check | Result |
 | --- | --- |
@@ -31,6 +33,16 @@ The existing owner is [`WidgetConversationErasureJob`](../../maya-saas-backend/s
 | PG regression source | Existing RT6-2 fixture now links its synthetic draft explicitly. New RT6-4 covers sibling/foreign/unlinked drafts; RT6-5 covers late-child retry; RT6-6 holds a writer lock, observes the eraser's actual advisory wait by PID, then commits the writer. All remain authored, unexecuted fixtures. |
 
 The raw failed and final unit results, schema result, exact rejected metadata tool request and hashes are archived together. No historical PG/HTTP proof is relabeled as acceptance of this code. Independent review found the UPDATE race and confirmed the narrower correction after it was applied; its qualification remains dark-only and does not close RT8.
+
+## Subsequent owned PostgreSQL qualification
+
+[`scripts/history-erasure-proof.mjs`](../../maya-saas-backend/scripts/history-erasure-proof.mjs) reuses the existing C9 proof's clean environment, finite setup commands and owned-child cleanup. It starts a new private cluster and random loopback proof database, runs only `erasure-ordering.live-spec.ts`, and stops that cluster in `finally`. No browser build or preview is included. The four committed `src/test/scripts/prisma` trees are captured before execution and checked for changes afterward; installed dependencies are outside this binding.
+
+At `bf7257ed`, **all seven PG tests passed without skips or retries**: Gate 9 ordering; C/X clearing with byte-identical canonical appointment/consent/loyalty reads; erased predecessor refusal; sibling/foreign/unlinked draft preservation; late-child retry; fresh snapshot after an observed advisory-lock wait; and one shared-draft tombstone after both erasers are observed waiting on row locks. The last case specifically qualifies the UPDATE-local `erasedAt IS NULL` predicate under overlapping snapshots. Synthetic reference rewrites in these storage fixtures are not minted COMMIT authority. RT6-2 explicitly seeds an appointment and a loyalty account; its consent query is compared before/after but no consent fact is seeded. It therefore does not qualify preservation of a populated consent register or every RT7 canonical owner.
+
+The updated unit suites passed **45/2**; scoped ESLint and `test/tsconfig.widgets-live.json` type checking passed at a 3,072 MiB heap limit. The first larger lint attempt found six test-only typing issues; their failure log and the subsequent pass are preserved. The earlier 512 MiB OOM remains in the initial evidence. No build or browser check was added.
+
+Cleanup was independently checked with `pg_ctl status` on the exact owned directory: exit **3**, no `postmaster.pid`. The runner completed, source trees remained unchanged, and the heavy slot was released. Foreign design preview `4177` and other clusters/processes were untouched. Raw run `/tmp/maya-history-erasure-pg-20261007-01` and its archived copies match. The runner labels zero provider/model calls as expected scope, not measured egress counters. This is actual storage concurrency proof, not HTTP authentication, privacy UI, request restart/replay or model/provider acceptance.
 
 ## Conversational UI contract for the existing privacy surface
 
@@ -52,6 +64,6 @@ This describes the remaining implementation target, not an enabled UI or endpoin
 | In-flight writers can save children after erasure | `WidgetEmitterService.emitInternal` opens its transaction at line 1140 without a general erasure lock/parent-liveness protocol. Late-child retry cleanup is mitigation, not a promise that no data remains after the first run. The writer protocol must be fixed before exposing deletion. |
 | Naive emitter locking deadlocks | `ChatReadTrigger.afterCompletedRead` already holds the conversation lock in an outer transaction (lines 97–98) while awaiting an emitter that opens another transaction. Reuse one transaction through the existing emission owner or move the lock/dedupe into its atomic write; do not put a second same-key lock on another connection. |
 | Request replay and conversation closure | No canonical request owner currently freezes a confirmation and reconciles its retry. The kernel's `erasureRequestRef` is a tombstone correlation, not a single-use authorization or immutable request ledger. Complete this within the existing owners before wiring HTTP. A schema/retention change, if actually necessary, needs its exact design and separate decision; none is requested or made in this checkpoint. |
-| Current runtime qualification | Once the heavy slot is available, run scoped types/lint and the prepared isolated RT6 PG fixtures. Add overlap proof for a shared draft and erase-before/after-mint ordering; then prove authenticated privacy admission, revocation, foreign rejection, restart/replay, no content restoration and byte-identical canonical reads. Only then evaluate RT8 and the UI action. |
+| Current runtime qualification | Scoped types/lint and seven isolated RT6 PG fixtures now pass, including shared-draft overlap. Still required: erase-before/after-mint ordering after the writer protocol is corrected, authenticated privacy admission, revocation, foreign HTTP rejection, request restart/replay and no content restoration. Only then evaluate RT8 and the UI action. |
 
 The working website, initial Client binding, C10 machine authority and paid model acceptance are outside this checkpoint. The original explicit-request Occupancy development slice and accepted booking/branch checkpoints remain independently qualified; this work does not announce MAYA or C10 completion.

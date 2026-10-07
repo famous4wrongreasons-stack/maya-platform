@@ -1,0 +1,61 @@
+{
+  "contract": "maya.history-erasure-pg-qualification/1",
+  "codeCommit": "bf7257ed1fac9d511a24bd12883a980e2902367e",
+  "parentHeavySlot": "Returned after design preview3a4e990a was confirmed; foreign preview4177 untouched.",
+  "scope": "Scoped dark storage kernel; no HTTP/privacy request owner, UI deletion, restart erasure-request proof or RT8 discharge.",
+  "postgres": {
+    "passed": 7,
+    "failed": 0,
+    "pending": 0,
+    "freshOwnedCluster": true,
+    "actualAdvisoryWait": true,
+    "actualSharedDraftRowWait": true,
+    "canonicalReadsByteIdentical": [
+      "appointment",
+      "consent",
+      "loyalty"
+    ],
+    "restartTested": false
+  },
+  "unit": {
+    "passed": 45,
+    "suites": 2,
+    "source": "unit-final.json"
+  },
+  "schema": "9/2 previous light tests; schema and those files unchanged, not rerun",
+  "lint": {
+    "status": "PASS",
+    "heapMiB": 3072,
+    "scope": [
+      "src/widgets/consent/erasure.job.ts",
+      "src/widgets/consent/erasure.job.spec.ts",
+      "src/widgets/consent/consent.spec.ts",
+      "test/widgets-live/erasure-ordering.live-spec.ts"
+    ],
+    "priorAttempts": [
+      "512MiB OOM retained in preceding checkpoint",
+      "3072MiB six test-only typing findings retained here; fixed without weakening assertions"
+    ]
+  },
+  "types": {
+    "status": "PASS",
+    "command": "node --max-old-space-size=3072 node_modules/typescript/bin/tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false"
+  },
+  "cleanup": {
+    "pgCtlStatusExit": 3,
+    "postmasterPidPresent": false,
+    "foreignProcessesStopped": 0,
+    "heavySlotReleased": true
+  },
+  "notPerformed": [
+    "HTTP erasure admission",
+    "UI/browser proof",
+    "model/provider acceptance",
+    "real user data deletion",
+    "website/production change",
+    "remote inventory retry",
+    "C10 authority admission"
+  ],
+  "rawDirectory": "/tmp/maya-history-erasure-pg-20261007-01",
+  "sourceBindingScope": "Four committed backend trees checked before/after execution; node_modules is outside the binding."
+}
