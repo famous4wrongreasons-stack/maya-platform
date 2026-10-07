@@ -297,11 +297,11 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
     );
   }
   it('shows current names before explicit COMMIT; success once, revoked link refused, natural UNKNOWN persists on reload', async () => {
-    const scenarios = await Promise.all(
-      ['success', 'revoked', 'unknown'].map((key) =>
-        scenario(key as Scenario['key']),
-      ),
-    );
+    const scenarios: Scenario[] = [];
+    // Canonical link creation uses serializable transactions; prepare the
+    // three owned fixtures serially as well as the browser scenarios.
+    for (const key of ['success', 'revoked', 'unknown'] as const)
+      scenarios.push(await scenario(key));
     const selectedStarts = new Map<string, string>();
     await new Promise<void>((resolve, reject) => {
       const child = spawn(
