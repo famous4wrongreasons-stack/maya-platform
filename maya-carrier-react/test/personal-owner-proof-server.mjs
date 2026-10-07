@@ -33,7 +33,14 @@ export function createPersonalProofServer({ root, backendOrigin, historyErasureF
               const drop = historyErasureFault.dropFirstCommittedResponse === true && !erasureResponseDropped;
               if (drop) erasureResponseDropped = true;
               historyErasureFault.observe?.({ completed, dropped: drop });
-              if (drop) { res.destroy(); return; }
+              if (drop) {
+                // Commit real response headers and only a prefix of its body. Dropping
+                // before headers can make Chrome transparently replay a reused socket;
+                // truncation instead proves a lost body after the actual owner commit.
+                res.writeHead(response.statusCode, { ...SECURITY_HEADERS, 'Content-Type': response.headers['content-type'] ?? 'application/json', 'Content-Length': body.length });
+                res.write(body.subarray(0, Math.max(1, Math.floor(body.length / 2))), () => res.destroy());
+                return;
+              }
               res.writeHead(response.statusCode, { ...SECURITY_HEADERS, 'Content-Type': response.headers['content-type'] ?? 'application/json' });
               res.end(body);
             } catch { res.destroy(); }

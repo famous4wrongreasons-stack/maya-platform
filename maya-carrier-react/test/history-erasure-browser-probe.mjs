@@ -219,6 +219,7 @@ async function main() {
   } finally {
     try {
       report.guard = guard ? { blocked: guard.blocked, errors: guard.errors } : null;
+      report.observedCompletions = observed;
       // Status metadata only: never archive login bodies, headers, OTPs or bearer values.
       report.http = page ? page.apiRequests('').map(r => ({ path: new URL(r.url).pathname, method: r.method, status: r.status ?? null, failed: Boolean(r.failed) })) : [];
       fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
