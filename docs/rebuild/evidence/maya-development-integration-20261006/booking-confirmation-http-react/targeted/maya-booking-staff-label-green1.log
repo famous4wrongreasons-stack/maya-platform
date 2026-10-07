@@ -1,0 +1,26 @@
+FAIL src/appointments/client-appointment-create.service.spec.ts
+  ● U-OWN read-only create quote › treats staff catalogue failure only as missing presentation data, preserving the execution owner
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      574 |     await h.run();
+      575 |     expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+    > 576 |     expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
+          |                                          ^
+      577 |     expect(h.crm.getStaff).toHaveBeenCalledTimes(1);
+      578 |   });
+      579 |
+
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:576:42)
+
+PASS src/widgets/owner-ports/booking-preview.adapter.spec.ts
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 45 passed, 46 total
+Snapshots:   0 total
+Time:        0.48 s, estimated 1 s
+Ran all test suites within paths "src/appointments/client-appointment-create.service.spec.ts", "src/widgets/owner-ports/booking-preview.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-staff-label-green1.json

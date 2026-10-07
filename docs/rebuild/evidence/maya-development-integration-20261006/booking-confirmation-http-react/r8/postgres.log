@@ -1,0 +1,11 @@
+2026-10-07 00:21:54.485 UTC [62650] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-07 00:21:54.485 UTC [62650] LOG:  listening on IPv4 address "127.0.0.1", port 64654
+2026-10-07 00:21:54.487 UTC [62653] LOG:  database system was shut down at 2026-10-07 00:21:54 UTC
+2026-10-07 00:21:54.488 UTC [62650] LOG:  database system is ready to accept connections
+2026-10-07 00:23:23.792 UTC [62650] LOG:  received fast shutdown request
+2026-10-07 00:23:23.793 UTC [62650] LOG:  aborting any active transactions
+2026-10-07 00:23:23.793 UTC [62650] LOG:  background worker "logical replication launcher" (PID 62656) exited with exit code 1
+2026-10-07 00:23:23.794 UTC [62651] LOG:  shutting down
+2026-10-07 00:23:23.794 UTC [62651] LOG:  checkpoint starting: shutdown immediate
+2026-10-07 00:23:23.855 UTC [62651] LOG:  checkpoint complete: wrote 2150 buffers (26.2%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.033 s, sync=0.028 s, total=0.061 s; sync files=1496, longest=0.001 s, average=0.001 s; distance=15874 kB, estimate=15874 kB; lsn=0/249E578, redo lsn=0/249E578
+2026-10-07 00:23:23.857 UTC [62650] LOG:  database system is shut down

@@ -1,0 +1,12 @@
+PASS src/appointments/client-appointment-create.service.spec.ts
+PASS src/widgets/owner-ports/noun-resolution.owners.provider.spec.ts
+PASS src/widgets/owner-ports/booking-preview.adapter.spec.ts
+PASS src/widgets/owner-ports/commit-booking.adapter.spec.ts
+PASS src/widgets/emission/booking-confirmation-minter.service.spec.ts
+
+Test Suites: 5 passed, 5 total
+Tests:       69 passed, 69 total
+Snapshots:   0 total
+Time:        0.713 s, estimated 1 s
+Ran all test suites within paths "src/appointments/client-appointment-create.service.spec.ts", "src/widgets/owner-ports/booking-preview.adapter.spec.ts", "src/widgets/emission/booking-confirmation-minter.service.spec.ts", "src/widgets/owner-ports/noun-resolution.owners.provider.spec.ts", "src/widgets/owner-ports/commit-booking.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-staff-label-cohort2.json

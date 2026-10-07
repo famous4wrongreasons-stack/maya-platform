@@ -1,0 +1,257 @@
+FAIL src/appointments/client-appointment-create.service.spec.ts
+  ● U-OWN read-only create quote › quotes the owned create without an execution or a row
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"id": "staff-1", "name": "Александр"}
+    Received: undefined
+
+      530 |     });
+      531 |     expect(quoted.services).toHaveLength(1);
+    > 532 |     expect(quoted.staff).toEqual({ id: 'staff-1', name: 'Александр' });
+          |                          ^
+      533 |     expect(h.crm.getStaff).toHaveBeenCalledWith('tenant-1');
+      534 |     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      535 |     expect(h.provider.createAppointment).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:532:26)
+
+  ● U-OWN read-only create quote › answers exactly what the create then uses (one sequence)
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      548 |     expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+      549 |     expect(h.rows).toHaveLength(1);
+    > 550 |     expect(h.crm.getStaff).toHaveBeenCalledTimes(1);
+          |                            ^
+      551 |   });
+      552 |
+      553 |   it.each([
+
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:550:28)
+
+  ● U-OWN read-only create quote › keeps incomplete or ambiguous staff labels outside the quote projection (%j)
+
+    expect(received).toBeNull()
+
+    Received: undefined
+
+      563 |     const h = setup();
+      564 |     (h.crm.getStaff as jest.Mock).mockResolvedValue(members);
+    > 565 |     expect((await quote(h)).staff).toBeNull();
+          |                                    ^
+      566 |     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      567 |     expect(h.rows).toHaveLength(0);
+      568 |   });
+
+      at appointments/client-appointment-create.service.spec.ts:565:36
+
+  ● U-OWN read-only create quote › keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"foreign-staff","name":"Other salon"})
+
+    expect(received).toBeNull()
+
+    Received: undefined
+
+      563 |     const h = setup();
+      564 |     (h.crm.getStaff as jest.Mock).mockResolvedValue(members);
+    > 565 |     expect((await quote(h)).staff).toBeNull();
+          |                                    ^
+      566 |     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      567 |     expect(h.rows).toHaveLength(0);
+      568 |   });
+
+      at appointments/client-appointment-create.service.spec.ts:565:36
+
+  ● U-OWN read-only create quote › keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":" "})
+
+    expect(received).toBeNull()
+
+    Received: undefined
+
+      563 |     const h = setup();
+      564 |     (h.crm.getStaff as jest.Mock).mockResolvedValue(members);
+    > 565 |     expect((await quote(h)).staff).toBeNull();
+          |                                    ^
+      566 |     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      567 |     expect(h.rows).toHaveLength(0);
+      568 |   });
+
+      at appointments/client-appointment-create.service.spec.ts:565:36
+
+  ● U-OWN read-only create quote › keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"})
+
+    expect(received).toBeNull()
+
+    Received: undefined
+
+      563 |     const h = setup();
+      564 |     (h.crm.getStaff as jest.Mock).mockResolvedValue(members);
+    > 565 |     expect((await quote(h)).staff).toBeNull();
+          |                                    ^
+      566 |     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      567 |     expect(h.rows).toHaveLength(0);
+      568 |   });
+
+      at appointments/client-appointment-create.service.spec.ts:565:36
+
+  ● U-OWN read-only create quote › keeps incomplete or ambiguous staff labels outside the quote projection ({"id":"staff-1","name":"First"})
+
+    expect(received).toBeNull()
+
+    Received: undefined
+
+      563 |     const h = setup();
+      564 |     (h.crm.getStaff as jest.Mock).mockResolvedValue(members);
+    > 565 |     expect((await quote(h)).staff).toBeNull();
+          |                                    ^
+      566 |     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      567 |     expect(h.rows).toHaveLength(0);
+      568 |   });
+
+      at appointments/client-appointment-create.service.spec.ts:565:36
+
+  ● U-OWN read-only create quote › treats staff catalogue failure only as missing presentation data, preserving the execution owner
+
+    expect(received).toBeNull()
+
+    Received: undefined
+
+      571 |     const h = setup();
+      572 |     (h.crm.getStaff as jest.Mock).mockRejectedValue(new Error('catalogue down'));
+    > 573 |     expect((await quote(h)).staff).toBeNull();
+          |                                    ^
+      574 |     await h.run();
+      575 |     expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+      576 |     expect(h.provider.createAppointment).toHaveBeenCalledTimes(1);
+
+      at Object.<anonymous> (appointments/client-appointment-create.service.spec.ts:573:36)
+
+FAIL src/widgets/owner-ports/booking-preview.adapter.spec.ts
+  ● FBE2E-2 — selected slot to canonical booking preview › reopens exact opaque handles and delegates quote semantics to the existing booking owner
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -8,11 +8,11 @@
+              "slot": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsIm5vdW4iOiJzbG90Iiwib3duZXJLaW5kIjoiYm9va2luZ19hdmFpbGFiaWxpdHkiLCJvd25lclJlZiI6InNsb3RfaXNvOk1qQXlOaTB4TUMwd01sUXhNRG93TURvd01DNHdNREJhIn0.24fe5111f44859573c30331672f878dbc4313599a0a16cb0f55cd1ab91ed8d68",
+              "staff": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDAwMSIsIm5vdW4iOiJzdGFmZiIsIm93bmVyS2luZCI6ImNhdGFsb2dfc3RhZmYiLCJvd25lclJlZiI6InN0YWZmLTEifQ.ffd7ddcf81d04b7cddc3edd61b8a39b8899550cf0da3563e7394c28c59bb44d4",
+            },
+            "serviceLabel": "Haircut",
+            "sourceCapabilityKey": "appointments.own.create",
+    -       "staffLabel": "Александр",
+    +       "staffLabel": "staff-1",
+            "subject": "create",
+            "when": "2026-10-02T10:00:00.000Z",
+          },
+        },
+        "receiptOutcome": "ACCEPTED",
+
+      103 |       ]),
+      104 |     );
+    > 105 |     expect(result.outcome).toMatchObject({
+          |                            ^
+      106 |       receiptOutcome: 'ACCEPTED',
+      107 |       actionReceiptRef: null,
+      108 |       ownerDecision: {
+
+      at Object.<anonymous> (widgets/owner-ports/booking-preview.adapter.spec.ts:105:28)
+
+  ● FBE2E-2 — selected slot to canonical booking preview › also renders the current canonical public staff label in the draft path
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "ownerDecision": Object {
+          "preview": Object {
+            "serviceLabel": "Haircut",
+    -       "staffLabel": "Александр",
+    +       "staffLabel": "staff-1",
+          },
+        },
+        "receiptOutcome": "ACCEPTED",
+      }
+
+      146 |   it('also renders the current canonical public staff label in the draft path', async () => {
+      147 |     const { adapter } = harness();
+    > 148 |     expect(await adapter.draft(draftRequest())).toMatchObject({
+          |                                                 ^
+      149 |       receiptOutcome: 'ACCEPTED',
+      150 |       ownerDecision: {
+      151 |         preview: { staffLabel: 'Александр', serviceLabel: 'Haircut' },
+
+      at Object.<anonymous> (widgets/owner-ports/booking-preview.adapter.spec.ts:148:49)
+
+  ● FBE2E-2 — selected slot to canonical booking preview › refuses both new confirmation paths without the exact current staff projection (null)
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 2
+    + Received  + 6
+
+      Object {
+        "outcome": Object {
+    -     "receiptOutcome": "REFUSED",
+    +     "receiptOutcome": "ACCEPTED",
+        },
+    -   "values": Map {},
+    +   "values": Map {
+    +     "service" => "service-1",
+    +     "staff" => "staff-1",
+    +     "slot" => "2026-10-02T10:00:00.000Z",
+    +   },
+      }
+
+      160 |       const quoted = await create.quoteForAccount();
+      161 |       create.quoteForAccount.mockResolvedValue({ ...quoted, staff });
+    > 162 |       expect(await adapter.proposeCreateSelection(request())).toMatchObject({
+          |                                                               ^
+      163 |         outcome: { receiptOutcome: 'REFUSED' },
+      164 |         values: new Map(),
+      165 |       });
+
+      at widgets/owner-ports/booking-preview.adapter.spec.ts:162:63
+
+  ● FBE2E-2 — selected slot to canonical booking preview › refuses both new confirmation paths without the exact current staff projection ({"id":"foreign-staff","name":"Foreign"})
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 2
+    + Received  + 6
+
+      Object {
+        "outcome": Object {
+    -     "receiptOutcome": "REFUSED",
+    +     "receiptOutcome": "ACCEPTED",
+        },
+    -   "values": Map {},
+    +   "values": Map {
+    +     "service" => "service-1",
+    +     "staff" => "staff-1",
+    +     "slot" => "2026-10-02T10:00:00.000Z",
+    +   },
+      }
+
+      160 |       const quoted = await create.quoteForAccount();
+      161 |       create.quoteForAccount.mockResolvedValue({ ...quoted, staff });
+    > 162 |       expect(await adapter.proposeCreateSelection(request())).toMatchObject({
+          |                                                               ^
+      163 |         outcome: { receiptOutcome: 'REFUSED' },
+      164 |         values: new Map(),
+      165 |       });
+
+      at widgets/owner-ports/booking-preview.adapter.spec.ts:162:63
+
+Test Suites: 2 failed, 2 total
+Tests:       12 failed, 34 passed, 46 total
+Snapshots:   0 total
+Time:        0.497 s, estimated 1 s
+Ran all test suites within paths "src/appointments/client-appointment-create.service.spec.ts", "src/widgets/owner-ports/booking-preview.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-staff-label-red.json

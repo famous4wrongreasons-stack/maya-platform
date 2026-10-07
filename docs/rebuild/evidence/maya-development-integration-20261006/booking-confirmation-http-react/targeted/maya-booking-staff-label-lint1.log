@@ -1,0 +1,20 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts
+  161:19  error  Replace `.fn()` with `⏎······.fn()⏎······`                                                                                                                                                 prettier/prettier
+  162:1   error  Insert `··`                                                                                                                                                                                prettier/prettier
+  163:1   error  Insert `··`                                                                                                                                                                                prettier/prettier
+  562:6   error  Replace `'keeps·incomplete·or·ambiguous·staff·labels·outside·the·quote·projection·(%j)',` with `⏎····'keeps·incomplete·or·ambiguous·staff·labels·outside·the·quote·projection·(%j)',⏎···`  prettier/prettier
+  563:1   error  Replace `····` with `······`                                                                                                                                                               prettier/prettier
+  564:1   error  Insert `··`                                                                                                                                                                                prettier/prettier
+  565:1   error  Insert `··`                                                                                                                                                                                prettier/prettier
+  566:5   error  Insert `··`                                                                                                                                                                                prettier/prettier
+  567:1   error  Insert `··`                                                                                                                                                                                prettier/prettier
+  568:3   error  Replace `}` with `··},⏎··`                                                                                                                                                                 prettier/prettier
+  572:53  error  Replace `new·Error('catalogue·down')` with `⏎······new·Error('catalogue·down'),⏎····`                                                                                                      prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts
+  160:13  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+✖ 12 problems (12 errors, 0 warnings)
+  11 errors and 0 warnings potentially fixable with the `--fix` option.
+

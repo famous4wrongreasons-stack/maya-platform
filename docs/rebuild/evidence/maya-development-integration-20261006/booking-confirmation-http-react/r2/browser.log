@@ -1,0 +1,46 @@
+widgets-live: proof database maya_widget_gate_proof_bookingconfirmation_31e3e19bfcd3 on 127.0.0.1:61138 (local)
+[31m[Nest] 50448  - [39m10/07/2026, 12:00:51 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 50448  - [39m10/07/2026, 12:00:51 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/booking-confirmation-react.probe-spec.ts
+  Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHETIC A18 / OWN LOCAL PROVIDER]
+    ✕ shows current names before explicit COMMIT; success once, revoked link refused, natural UNKNOWN persists on reload (99 ms)
+
+  ● Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHETIC A18 / OWN LOCAL PROVIDER] › shows current names before explicit COMMIT; success once, revoked link refused, natural UNKNOWN persists on reload
+
+    DriverAdapterError: TransactionWriteConflict
+
+      492 |     for (let attempt = 0; attempt < 5; attempt++) {
+      493 |       try {
+    > 494 |         return await this.prisma.$transaction(work, {
+          |                ^
+      495 |           isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      496 |         });
+      497 |       } catch (error) {
+
+      at PgTransaction.onError (../node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PgTransaction.performIO (../node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PgTransaction.executeRaw (../node_modules/@prisma/adapter-pg/dist/index.js:643:13)
+      at n (../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:422:13)
+      at qt.#d (../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:463:7)
+      at ../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:226:9
+      at ../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:391:14
+      at qt.#c (../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:407:14)
+      at qt.#p (../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:389:12)
+      at ../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:208:7
+      at qt.commitTransaction (../node_modules/@prisma/client-engine-runtime/src/transaction-manager/transaction-manager.ts:207:12)
+      at e.commitTransaction (../node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:97:5)
+      at jt.transaction (../node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:450:9)
+      at Proxy._transactionWithCallback (../node_modules/@prisma/client/src/runtime/getPrismaClient.ts:821:9)
+      at ClientChannelLinkService.serializable (../src/crm/client-channel-link.service.ts:494:16)
+      at Fixtures.client (widgets-live/support/fixtures.ts:361:20)
+      at Fixtures.bookingSource (widgets-live/support/fixtures.ts:417:5)
+      at scenario (widgets-live/booking-confirmation-react.probe-spec.ts:212:20)
+          at async Promise.all (index 0)
+      at Object.<anonymous> (widgets-live/booking-confirmation-react.probe-spec.ts:300:23)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        4.043 s
+Ran all test suites within paths "test/widgets-live/booking-confirmation-react.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-confirmation-http-react-20261006-r2/browser-jest.json

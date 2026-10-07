@@ -1,0 +1,19 @@
+2026-10-07 00:00:38.654 UTC [50317] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-07 00:00:38.655 UTC [50317] LOG:  listening on IPv4 address "127.0.0.1", port 61138
+2026-10-07 00:00:38.657 UTC [50320] LOG:  database system was shut down at 2026-10-07 00:00:38 UTC
+2026-10-07 00:00:38.658 UTC [50317] LOG:  database system is ready to accept connections
+2026-10-07 00:00:51.775 UTC [50503] ERROR:  could not serialize access due to read/write dependencies among transactions
+2026-10-07 00:00:51.775 UTC [50503] DETAIL:  Reason code: Canceled on identification as a pivot, during commit attempt.
+2026-10-07 00:00:51.775 UTC [50503] HINT:  The transaction might succeed if retried.
+2026-10-07 00:00:51.775 UTC [50503] STATEMENT:  COMMIT
+2026-10-07 00:00:51.776 UTC [50502] ERROR:  could not serialize access due to read/write dependencies among transactions
+2026-10-07 00:00:51.776 UTC [50502] DETAIL:  Reason code: Canceled on identification as a pivot, during write.
+2026-10-07 00:00:51.776 UTC [50502] HINT:  The transaction might succeed if retried.
+2026-10-07 00:00:51.776 UTC [50502] STATEMENT:  INSERT INTO "public"."ClientChannelLink" ("id","tenantId","clientId","provider","providerSubjectHash","subjectHashVersion","verificationMethod","verificationVersion","verificationIdentityHash","verificationEvidenceJson","verificationEvidenceHash","verifiedAt","createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING "public"."ClientChannelLink"."id", "public"."ClientChannelLink"."tenantId", "public"."ClientChannelLink"."clientId", "public"."ClientChannelLink"."provider", "public"."ClientChannelLink"."providerSubjectHash", "public"."ClientChannelLink"."deliveryAddressEncrypted", "public"."ClientChannelLink"."subjectHashVersion", "public"."ClientChannelLink"."verificationMethod", "public"."ClientChannelLink"."verificationVersion", "public"."ClientChannelLink"."verificationIdentityHash", "public"."ClientChannelLink"."verificationEvidenceJson", "public"."ClientChannelLink"."verificationEvidenceHash", "public"."ClientChannelLink"."verifiedAt", "public"."ClientChannelLink"."createdAt", "public"."ClientChannelLink"."supersedesLinkId", "public"."ClientChannelLink"."revokedAt", "public"."ClientChannelLink"."revocationIdentityHash", "public"."ClientChannelLink"."revocationEvidenceJson", "public"."ClientChannelLink"."revocationEvidenceHash"
+2026-10-07 00:00:52.014 UTC [50317] LOG:  received fast shutdown request
+2026-10-07 00:00:52.014 UTC [50317] LOG:  aborting any active transactions
+2026-10-07 00:00:52.014 UTC [50317] LOG:  background worker "logical replication launcher" (PID 50323) exited with exit code 1
+2026-10-07 00:00:52.015 UTC [50318] LOG:  shutting down
+2026-10-07 00:00:52.015 UTC [50318] LOG:  checkpoint starting: shutdown immediate
+2026-10-07 00:00:52.069 UTC [50318] LOG:  checkpoint complete: wrote 2036 buffers (24.9%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.028 s, sync=0.026 s, total=0.055 s; sync files=1487, longest=0.001 s, average=0.001 s; distance=14764 kB, estimate=14764 kB; lsn=0/2388BC0, redo lsn=0/2388BC0
+2026-10-07 00:00:52.072 UTC [50317] LOG:  database system is shut down

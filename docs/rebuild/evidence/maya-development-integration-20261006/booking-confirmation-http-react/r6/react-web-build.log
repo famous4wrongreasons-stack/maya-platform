@@ -1,0 +1,3 @@
+gate: PASS (21 source files, 0 refusals)
+typecheck: PASS (21 carrier files + 20 runtime modules, contract 201 exports, 5.9.3)
+built React AChat -> dist/web/m/6PD6C2U7/main.js (8 files)
