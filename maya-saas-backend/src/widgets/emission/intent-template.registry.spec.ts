@@ -77,8 +77,8 @@ describe('P-MINT — closed intent template registry', () => {
         priority: 0,
         singleUse: true,
         ttlSeconds: 600,
-        label: 'Dismiss',
-        utteranceTemplate: 'Dismiss',
+        label: 'Закрыть',
+        utteranceTemplate: 'Закрыть',
       }),
     );
   });

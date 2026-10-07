@@ -448,9 +448,11 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
           // No old request ID, retry, widget or approval is restored. An unfinished
           // turn remains display-only and never becomes context for a new request.
           append({ kind: 'user', id: nextId('u'), text: turn.text, modality: 'typed', requestId: '', state: 'sent', failure: null, retry: NO_RETRY, historyEligible: turn.completed });
-          if (!turn.completed) append({ kind: 'notice', id: nextId('n'), notice: 'history_interrupted' });
         }
       }
+      // One shared warning preserves uncertainty without repeating it after
+      // every lowered selector step. No turn is promoted to completed.
+      if (history.turns.some(turn => !turn.completed)) append({ kind: 'notice', id: nextId('n'), notice: 'history_interrupted' });
       const finish = (page: WidgetResolveProjection | null): void => {
         if (!signedIn || generation !== restoreGeneration || restoring !== abort) return;
         try {

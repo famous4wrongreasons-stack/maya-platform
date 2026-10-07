@@ -113,6 +113,20 @@ const interactiveNodes = (result) => {
   return out;
 };
 
+for (const frozen of [false, true]) test(`booking prose ${frozen ? 'frozen' : 'TEXT_ONLY'} preserves each itemized warning and source exactly once`, () => {
+  const facts = ['Услуга: Стрижка', 'Стоимость: Нет данных (Система записи)', 'Уточните необходимость консультации', 'Доступность уточняется'];
+  const result = renderOf('kind-booking-confirmation', {
+    tier: 'TEXT_ONLY', ...(frozen ? { verdict: 'expired' } : {}),
+    mutate: view => { view.presentation.text_equivalent = {
+      headline: 'Проверка записи', body: '', itemized: facts,
+      completeness_sentence: null, unknowns_sentence: null,
+    }; },
+  });
+  const text = nodesOfType(result, 'text').map(node => node.text);
+  for (const fact of facts) assert.equal(text.filter(value => value === fact).length, 1);
+  assert.ok(!text.includes('Запись подтверждена.'));
+});
+
 const KIND_FIXTURES = INDEX.fixtures.filter((f) => f.category === 'kind' && f.id.startsWith('kind-'));
 const LIVE_FIXTURES = INDEX.fixtures.filter((f) => f.expect.mode !== 'frozen_prose');
 const ESCAPE_FIXTURES = LIVE_FIXTURES.filter((f) => envelopeOf(f.id).intents.some((i) => i.role === 'escape'));

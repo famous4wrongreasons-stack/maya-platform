@@ -56,7 +56,7 @@ export const noticeSentence = (notice: NoticeKind): string => {
     case 'history_truncated':
       return 'Показаны последние 50 сохранённых сообщений.';
     case 'history_interrupted':
-      return 'Ответ на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.';
+      return 'Не все ответы сохранены. Если вы просили выполнить действие, уточните его результат.';
     case 'history_unavailable':
       return 'Не удалось загрузить переписку. Нажмите отправить, чтобы повторить загрузку. Сообщение пока останется в поле ввода.';
     case 'history_not_supported':

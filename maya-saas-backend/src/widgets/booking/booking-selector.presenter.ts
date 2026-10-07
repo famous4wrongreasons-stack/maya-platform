@@ -45,7 +45,7 @@ const known = <T>(value: T, label = String(value)): Cell<T> => ({
 const unknownCell = <T>(): Cell<T> => ({
   state: 'NOT_MEASURED',
   value: null,
-  label: 'Not measured',
+  label: 'Нет данных',
   reason_code: 'NOT_COLLECTED',
   fact_ref: null,
   as_of: null,
@@ -53,16 +53,16 @@ const unknownCell = <T>(): Cell<T> => ({
   next_intent_ref: null,
 });
 const unknownMeasure = (key: string, unit: Measure['unit']): Measure => ({
-  ...known<null>(null, 'Not measured'),
+  ...known<null>(null, 'Нет данных'),
   state: 'NOT_MEASURED',
   reason_code: 'NOT_COLLECTED',
   fact_ref: null,
   key,
   unit,
   basis_key: null,
-  basis: 'Canonical booking owner',
+  basis: 'По данным системы записи',
   currency: null,
-  formatted: 'Not measured',
+  formatted: 'Нет данных',
   comparison: null,
 });
 const measure = (
@@ -76,7 +76,7 @@ const measure = (
   key,
   unit,
   basis_key: null,
-  basis: 'Canonical booking owner',
+  basis: 'По данным системы записи',
   currency,
   formatted,
   comparison: null,
@@ -135,7 +135,7 @@ const presentServices = (
         'booking.duration',
         duration,
         'minutes',
-        `${duration} min`,
+        `${duration} мин`,
       ),
       price: measure(
         'booking.price',
@@ -152,7 +152,7 @@ const presentServices = (
   return {
     kind: 'SERVICE_SELECTOR',
     body: {
-      prompt: phrase('Choose a service'),
+      prompt: phrase('Выберите услугу'),
       category_path: [],
       select: 'single',
       options,
@@ -181,8 +181,7 @@ const presentStaff = (
       ownerKind: BOOKING_NOUN_OWNERS.staff,
       ownerRef: id,
     });
-    const role =
-      str(member.title) ?? str(member.specialization) ?? 'Specialist';
+    const role = str(member.title) ?? str(member.specialization) ?? 'Мастер';
     options.push({
       option_id: handle,
       staff_ref: handle,
@@ -205,7 +204,7 @@ const presentStaff = (
   return {
     kind: 'STAFF_SELECTOR',
     body: {
-      prompt: phrase('Choose a specialist'),
+      prompt: phrase('Выберите мастера'),
       for_service_refs: [service],
       options,
       any_staff_option: null,
@@ -269,7 +268,7 @@ const presentSlots = (
         'booking.slot.duration',
         minutes,
         'minutes',
-        `${minutes} min`,
+        `${minutes} мин`,
       ),
       staff_ref: staff,
       price: null,
@@ -282,14 +281,14 @@ const presentSlots = (
   return {
     kind: 'TIME_SLOT_SELECTOR',
     body: {
-      prompt: phrase('Choose a time'),
+      prompt: phrase('Выберите время'),
       timezone,
       window: { from: starts[0], to: starts[starts.length - 1] },
       grouping: 'flat',
       groups: [
         {
           group_id: 'available',
-          label: phrase('Available times'),
+          label: phrase('Предложенные варианты времени'),
           slots: rendered,
         },
       ],

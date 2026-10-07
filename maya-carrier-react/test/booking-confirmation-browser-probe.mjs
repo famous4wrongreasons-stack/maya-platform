@@ -219,6 +219,12 @@ async function main() {
       assert.ok(await page.waitFor(`Q.all('article.widget--live').some(el => Q.visible(el) && el.innerText.includes(${JSON.stringify(scenario.staffName)}) && el.innerText.includes(${JSON.stringify(scenario.serviceName)}))`));
       report.observations[scenario.key + 'Preview'] = { staffName: confirmation.body.staff_label.value, serviceName: scenario.serviceName, start: confirmation.body.when.value };
       await capture(page, scenario.key + '-preview');
+      const previewText = report.snapshots[scenario.key + '-preview'].text;
+      assert.ok(previewText.includes('Проверка записи'));
+      assert.ok(previewText.includes('По данным системы записи'));
+      assert.ok(report.snapshots[scenario.key + '-preview'].controls.some((control) => control.name === 'Подтвердить запись'));
+      assert.doesNotMatch(previewText, /BOOKING_CONFIRMATION|Canonical booking owner|Confirm booking|Dismiss/);
+      assert.equal(previewText.split(scenario.serviceName).length - 1, 1, 'Service label shown once');
       await checkpoint(scenario.key + '-preview', { confirmation, selectedStart: slot.start.value });
       const commit = confirmation.intents.find(intent => intent.effect === 'COMMIT');
       assert.ok(commit);
@@ -247,6 +253,9 @@ async function main() {
         assert.equal(await page.eval(`Q.all('button[data-ref]').filter(Q.visible).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), false);
       }
       await capture(page, scenario.key + '-reload');
+      const restoredText = report.snapshots[scenario.key + '-reload'].text;
+      assert.equal(restoredText.split('Не все ответы сохранены.').length - 1, 1, 'One uncertainty warning for the restored page');
+      assert.doesNotMatch(restoredText, /Choose service|Choose specialist|Review booking|Confirm booking/);
       await checkpoint(scenario.key + '-reload');
     }
     for (const guard of guards) { assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []); }

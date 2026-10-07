@@ -48,7 +48,7 @@ const measure = (args: {
   key: args.key,
   unit: args.unit,
   basis_key: null,
-  basis: 'Canonical booking owner',
+  basis: 'По данным системы записи',
   currency: args.currency ?? null,
   formatted: args.formatted,
   comparison: null,
@@ -57,7 +57,7 @@ const measure = (args: {
 const unknownMoneyMeasure = (currency: string): Measure => ({
   state: 'NOT_MEASURED',
   value: null,
-  label: 'Not measured',
+  label: 'Нет данных',
   reason_code: 'NOT_COLLECTED',
   fact_ref: null,
   as_of: null,
@@ -66,9 +66,9 @@ const unknownMoneyMeasure = (currency: string): Measure => ({
   key: 'booking.price',
   unit: 'RUB',
   basis_key: null,
-  basis: 'Canonical booking owner',
+  basis: 'По данным системы записи',
   currency,
-  formatted: 'Not measured',
+  formatted: 'Нет данных',
   comparison: null,
 });
 
@@ -112,7 +112,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
       appointment_ref: p.appointmentRef,
       lines: [
         {
-          label: phrase(p.serviceLabel),
+          label: phrase('Услуга'),
           detail: cell(p.serviceLabel),
           measures: [],
         },
@@ -137,7 +137,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
         key: 'booking.duration',
         value: p.durationMinutes,
         unit: 'minutes',
-        formatted: `${p.durationMinutes} min`,
+        formatted: `${p.durationMinutes} мин`,
       }),
       price_total:
         p.priceKopecks === null

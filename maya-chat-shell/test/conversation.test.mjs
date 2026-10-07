@@ -197,12 +197,13 @@ test('server continuation waits before send, restores text only, excludes unfini
     { id: 'u1', role: 'user', text: 'Есть окна у Стаса?', completed: true },
     { id: 'a1', role: 'assistant', text: 'Сохранённый ответ', completed: true },
     { id: 'u2', role: 'user', text: 'Оборванное действие', completed: false },
+    { id: 'u3', role: 'user', text: 'Ещё один незавершённый шаг', completed: false },
   ] } });
   await flush();
   assert.equal(s.conversation.view().inFlight, false);
   assert.equal(s.items().some((i) => i.notice === 'history_restored'), true);
   assert.equal(s.items().some((i) => i.notice === 'history_truncated'), true);
-  assert.equal(s.items().some((i) => i.notice === 'history_interrupted'), true);
+  assert.equal(s.items().filter((i) => i.notice === 'history_interrupted').length, 1);
   for (const item of s.items().filter((i) => i.kind === 'user')) {
     assert.deepEqual(item.retry, { retry: 'none' });
     assert.equal(item.userTurn, undefined, 'no reusable source/widget authority restored');

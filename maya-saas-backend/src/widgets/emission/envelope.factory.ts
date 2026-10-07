@@ -197,6 +197,114 @@ const textEquivalent = (
   sourceCapability: string,
   intents: readonly WidgetIntent[],
 ) => {
+  if (kind === 'BOOKING_CONFIRMATION') {
+    const itemized = records(body.lines).map((line) =>
+      [
+        `${phraseText(line.label) ?? 'Услуга'}: ${displayValue(line.detail)}`,
+        ...records(line.measures).map(displayValue),
+      ].join(' · '),
+    );
+    for (const [key, label] of [
+      ['when', 'Время'],
+      ['when_previous', 'Прежнее время'],
+      ['staff_label', 'Мастер'],
+      ['duration_total', 'Длительность'],
+      ['price_total', 'Стоимость'],
+      ['price_delta', 'Изменение стоимости'],
+      ['refund_preview', 'Возврат'],
+      ['loyalty_applied', 'Лояльность'],
+    ])
+      if (body[key] != null)
+        itemized.push(`${label}: ${displayValue(body[key])}`);
+    itemized.push(
+      ...records(body.policy_notices).map(
+        (value) => phraseText(value) ?? 'Нет данных',
+      ),
+    );
+    const headline =
+      body.confirmation_subject === 'cancel'
+        ? 'Отмена записи'
+        : body.confirmation_subject === 'reschedule'
+          ? 'Перенос записи'
+          : 'Проверка записи';
+    return {
+      headline,
+      body: '',
+      itemized,
+      completeness_sentence: null,
+      unknowns_sentence: null,
+    };
+  }
+  if (
+    kind === 'SERVICE_SELECTOR' ||
+    kind === 'STAFF_SELECTOR' ||
+    kind === 'TIME_SLOT_SELECTOR'
+  ) {
+    const headline = phraseText(body.prompt) ?? 'Выберите вариант записи';
+    const optionText = (
+      option: Record<string, unknown>,
+      extra: readonly string[],
+    ) =>
+      [
+        option.label,
+        option.sublabel,
+        ...records(option.badges),
+        ...records(option.measures),
+        ...records([option.media]).map((media) => media.alt),
+        option.enabled,
+        ...extra.map((key) => option[key]),
+      ]
+        .filter((value) => value != null)
+        .map(displayValue)
+        .join(' · ');
+    const itemized: string[] = [];
+    if (kind === 'TIME_SLOT_SELECTOR') {
+      if (typeof body.timezone === 'string')
+        itemized.push(`Часовой пояс: ${body.timezone}`);
+      for (const group of records(body.groups)) {
+        itemized.push(phraseText(group.label) ?? 'Время');
+        for (const slot of records(group.slots))
+          itemized.push(
+            [slot.start, slot.duration, slot.price, slot.availability]
+              .filter((value) => value != null)
+              .map(displayValue)
+              .join(' · '),
+          );
+      }
+    } else {
+      if (kind === 'SERVICE_SELECTOR')
+        itemized.push(
+          ...records(body.category_path).map(
+            (value) => phraseText(value) ?? 'Нет данных',
+          ),
+        );
+      const extra =
+        kind === 'SERVICE_SELECTOR'
+          ? ['duration', 'price', 'requires_consultation']
+          : ['role_label', 'nearest_availability', 'rating'];
+      itemized.push(
+        ...records(body.options).map((option) => optionText(option, extra)),
+      );
+      if (body.total_preview != null)
+        itemized.push(displayValue(body.total_preview));
+      itemized.push(
+        ...records([body.any_staff_option]).map((option) =>
+          optionText(option, []),
+        ),
+      );
+    }
+    const completeness =
+      typeof body.shown_count === 'number'
+        ? `Показано вариантов: ${body.shown_count}. Всего: ${typeof body.total_count === 'number' ? body.total_count : 'нет данных'}.`
+        : null;
+    return {
+      headline,
+      body: '',
+      itemized,
+      completeness_sentence: completeness,
+      unknowns_sentence: null,
+    };
+  }
   if (
     kind === 'APPROVAL' &&
     sourceCapability === SERVICE_PRICE_TOOL &&
@@ -259,6 +367,34 @@ const textEquivalent = (
     completeness_sentence: null,
     unknowns_sentence: null,
   };
+};
+
+const records = (value: unknown): Record<string, unknown>[] =>
+  Array.isArray(value)
+    ? value.filter(
+        (item): item is Record<string, unknown> =>
+          typeof item === 'object' && item !== null && !Array.isArray(item),
+      )
+    : [];
+const phraseText = (value: unknown): string | null => {
+  if (typeof value !== 'object' || value === null || !('rendered' in value))
+    return null;
+  return typeof value.rendered === 'string' ? value.rendered : null;
+};
+const displayValue = (value: unknown): string => {
+  const phrase = phraseText(value);
+  if (phrase !== null) return phrase;
+  if (typeof value !== 'object' || value === null) return 'Нет данных';
+  const formatted =
+    'state' in value &&
+    value.state === 'KNOWN' &&
+    'formatted' in value &&
+    typeof value.formatted === 'string'
+      ? value.formatted
+      : (cellLabel(value) ?? 'Нет данных');
+  return 'basis' in value && typeof value.basis === 'string' && value.basis
+    ? `${formatted} (${value.basis})`
+    : formatted;
 };
 
 const cellLabel = (value: unknown): string | null => {
