@@ -1,4 +1,9 @@
 import {
+  goodsId,
+  observedGoodsItem,
+  type GoodsItemRead,
+} from '../yclients-goods-read';
+import {
   assertCatalogIdentities,
   SERVICE_CATALOG_READ_CONTRACT,
   type ServiceCatalogRead,
@@ -470,6 +475,22 @@ export class YclientsCRMAdapter implements CRMAdapter {
           ? categoryTitlesById.get(service.category_id) || undefined
           : undefined),
     }));
+  }
+
+  /** One current exact-ID catalog read; no search/category or cached fallback. */
+  async readGoodsItem(tenantId: string, id: string): Promise<GoodsItemRead> {
+    void tenantId;
+    const exactId = goodsId(id),
+      companyId = String(this.getCompanyId());
+    const response = await this.request<unknown>(
+      `goods/${companyId}/${exactId}`,
+    );
+    return observedGoodsItem(
+      response.data,
+      exactId,
+      companyId,
+      this.settings.currency,
+    );
   }
 
   /** One fresh public READ; no cached/defaulted ServiceOffering or management fallback. */

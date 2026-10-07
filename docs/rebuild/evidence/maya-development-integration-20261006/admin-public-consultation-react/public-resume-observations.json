@@ -1,0 +1,136 @@
+{
+  "stage": "public-resume",
+  "syntheticC8Facts": false,
+  "syntheticPublicCatalogFacts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "processRestart": true,
+  "postgresRestart": true,
+  "salon-current": {
+    "request_id": "8960a645-c0fa-4f4a-9202-55028e8f9d68",
+    "coordination": {
+      "run_id": "b93ccfd0-54df-4fcc-a073-a63300dba908",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "e63968cd-7f9b-4bb5-afc4-71b0d6fcd554",
+      "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+    },
+    "reply": "Название в профиле: Мужская Эстетика.\n\nАдрес в профиле: Тестовая улица, 10.\n\nИз сохранённого описания салона:\nСохранённое описание после обновления\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "catalog.staff.read",
+        "status": "completed",
+        "execution_id": "cmuxs32uu000200c9ey9evk6d"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "staff_catalog",
+      "required_tools": [
+        "catalog.staff.read"
+      ],
+      "evidence_tools": [
+        "catalog.staff.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "staff-current": {
+    "request_id": "5613d6c2-911f-4caf-8386-b6e2d1055c4d",
+    "coordination": {
+      "run_id": "b1f5151b-e8af-408c-ace0-890d69487b93",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "910f9d68-a920-4b85-a4d1-3098ff0a1fe0",
+      "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+    },
+    "reply": "Название в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nОбновлённый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "catalog.staff.read",
+        "status": "completed",
+        "execution_id": "cmuxs331u000700c9035jnzzq"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "staff_catalog",
+      "required_tools": [
+        "catalog.staff.read"
+      ],
+      "evidence_tools": [
+        "catalog.staff.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "staff_operations"
+    }
+  },
+  "staff-empty": {
+    "request_id": "51617cf8-3f6e-402c-b2be-88ab0403257c",
+    "coordination": {
+      "run_id": "68788fa6-0512-4097-9643-2c922c909970",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "d41a5119-699b-40c8-a348-253b2629c015",
+      "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+    },
+    "reply": "Название в профиле: Мужская Эстетика.\n\nВ полученном публичном каталоге нет записей о мастерах.\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "catalog.staff.read",
+        "status": "completed",
+        "execution_id": "cmuxs3385000c00c9ptr5kjvh"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "staff_catalog",
+      "required_tools": [
+        "catalog.staff.read"
+      ],
+      "evidence_tools": [
+        "catalog.staff.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "staff_operations"
+    }
+  },
+  "checkpoints": [
+    "restart-restored",
+    "salon-current",
+    "staff-current",
+    "staff-empty"
+  ],
+  "scriptedModelSelection": true,
+  "externalModelCalls": 0,
+  "sourceReads": 3,
+  "actionExecutions": 0,
+  "c8Revisions": 0,
+  "strategyRevisions": 0,
+  "workReceipts": 5,
+  "modelCalls": 3,
+  "externalFetchCalls": 0
+}

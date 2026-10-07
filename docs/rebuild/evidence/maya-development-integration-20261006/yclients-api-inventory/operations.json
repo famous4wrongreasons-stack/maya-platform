@@ -1,0 +1,4896 @@
+{
+  "contract": "maya.yclients.offline-api-inventory/1",
+  "source": "https://developers.yclients.com/ru/",
+  "capturedOn": "2026-10-07",
+  "sourceSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+  "openapi": "3.0.3",
+  "operationCount": 304,
+  "byMethod": {
+    "DELETE": 32,
+    "GET": 150,
+    "PATCH": 8,
+    "POST": 87,
+    "PUT": 27
+  },
+  "byScope": {
+    "technical_domain_mapping_pending": 118,
+    "approved_domain_bounded_mapping": 159,
+    "bounded_personal_income_read_mapping": 10,
+    "excluded_current_product": 11,
+    "deferred_external_messaging": 6
+  },
+  "meaning": {
+    "coverage": "Every HTTP operation in the saved public OpenAPI, preserving query-template paths. Completeness is relative to this capture, not all undocumented provider capabilities.",
+    "scope": "Engineering triage under docs/product/README.md. Approved domain is not approval of every operation, production effect or identity/retention change. Mapping pending is engineering work, not an owner decision.",
+    "implementation": "Only named evidence links are mapped here. Unmapped does not mean absent, unsupported or failed. This inventory is not a new runtime registry.",
+    "permissions": "No integration credentials or API business calls used; insufficient rights and unsupported API cannot be concluded.",
+    "exclusion": "Excluded/deferred product operations remain inventoried. Legacy implemented code is not removed."
+  },
+  "operations": [
+    {
+      "id": "DELETE /api/v1/activity/{company_id}/{activity_id}",
+      "method": "DELETE",
+      "path": "/api/v1/activity/{company_id}/{activity_id}",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "method": "DELETE",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "tags": [
+        "Типы абонементов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/chain/{chain_id}/loyalty/programs/{loyalty_program_id}",
+      "method": "DELETE",
+      "path": "/api/v1/chain/{chain_id}/loyalty/programs/{loyalty_program_id}",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/client/{company_id}/{id}",
+      "method": "DELETE",
+      "path": "/api/v1/client/{company_id}/{id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/booking_forms/{form_id}/",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/booking_forms/{form_id}/",
+      "tags": [
+        "Настройки букформы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/clients/{client_id}/comments/{comment_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/clients/{client_id}/comments/{comment_id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/clients/files/{client_id}/{file_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/clients/files/{client_id}/{file_id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/sale/{document_id}/payment/loyalty_transaction/{payment_transaction_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/sale/{document_id}/payment/loyalty_transaction/{payment_transaction_id}",
+      "tags": [
+        "Операция продажи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/sale/{document_id}/payment/payment_transaction/{payment_transaction_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/sale/{document_id}/payment/payment_transaction/{payment_transaction_id}",
+      "tags": [
+        "Операция продажи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/schedules/{schedule_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/schedules/{schedule_id}/client_schedules/{client_schedule_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/client_schedules/{client_schedule_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/schedules/{schedule_id}/days/{day_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/days/{day_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{company_id}/users/{user_id}",
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/users/{user_id}",
+      "tags": [
+        "Пользователи компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/company/{id}/",
+      "method": "DELETE",
+      "path": "/api/v1/company/{id}/",
+      "tags": [
+        "Компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/custom_fields/{field_category}/{company_id}/{field_id}",
+      "method": "DELETE",
+      "path": "/api/v1/custom_fields/{field_category}/{company_id}/{field_id}",
+      "tags": [
+        "Дополнительные поля"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/finance_transactions/{company_id}/{transaction_id}",
+      "method": "DELETE",
+      "path": "/api/v1/finance_transactions/{company_id}/{transaction_id}",
+      "tags": [
+        "Финансовые транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/goods_categories/{company_id}/{category_id}",
+      "method": "DELETE",
+      "path": "/api/v1/goods_categories/{company_id}/{category_id}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/goods/{company_id}/{good_id}",
+      "method": "DELETE",
+      "path": "/api/v1/goods/{company_id}/{good_id}",
+      "tags": [
+        "Товары"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/images/{entity}",
+      "method": "DELETE",
+      "path": "/api/v1/images/{entity}",
+      "tags": [
+        "Изображения"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/labels/{company_id}/{label_id}",
+      "method": "DELETE",
+      "path": "/api/v1/labels/{company_id}/{label_id}",
+      "tags": [
+        "Категории"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/loyalty/cards/{company_id}/{card_id}",
+      "method": "DELETE",
+      "path": "/api/v1/loyalty/cards/{company_id}/{card_id}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/record/{company_id}/{record_id}",
+      "method": "DELETE",
+      "path": "/api/v1/record/{company_id}/{record_id}",
+      "tags": [
+        "Записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/service_category/{company_id}/{id}",
+      "method": "DELETE",
+      "path": "/api/v1/service_category/{company_id}/{id}",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/services/{company_id}/{service_id}",
+      "method": "DELETE",
+      "path": "/api/v1/services/{company_id}/{service_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/staff/{company_id}/{staff_id}",
+      "method": "DELETE",
+      "path": "/api/v1/staff/{company_id}/{staff_id}",
+      "tags": [
+        "Сотрудники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/storage_operations/documents/{company_id}/{document_id}",
+      "method": "DELETE",
+      "path": "/api/v1/storage_operations/documents/{company_id}/{document_id}",
+      "tags": [
+        "Документы складских операций"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/storage_operations/goods_transactions/{company_id}/{transaction_id}",
+      "method": "DELETE",
+      "path": "/api/v1/storage_operations/goods_transactions/{company_id}/{transaction_id}",
+      "tags": [
+        "Товарные транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/technological_cards/record_consumables/technological_cards/{company_id}/{record_id}/{service_id}",
+      "method": "DELETE",
+      "path": "/api/v1/technological_cards/record_consumables/technological_cards/{company_id}/{record_id}/{service_id}",
+      "tags": [
+        "Технологические карты и расходники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v1/user/records/{record_id}/{record_hash}",
+      "method": "DELETE",
+      "path": "/api/v1/user/records/{record_id}/{record_hash}",
+      "tags": [
+        "Записи пользователя"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v2/companies/{company_id}/waiting_list/{waiting_list_entry_id}",
+      "method": "DELETE",
+      "path": "/api/v2/companies/{company_id}/waiting_list/{waiting_list_entry_id}",
+      "tags": [
+        "Лист ожидания"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "DELETE /api/v2/companies/{salonId}/activities/{activityId}",
+      "method": "DELETE",
+      "path": "/api/v2/companies/{salonId}/activities/{activityId}",
+      "tags": [
+        "Групповые события v2"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "GET /api/v1/accounts/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/accounts/{company_id}",
+      "tags": [
+        "Кассы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/{activity_id}",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/{activity_id}",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/duplication_strategy",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/duplication_strategy",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/filters/",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/filters/",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/search_dates_range/",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/search_dates_range/",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/search_dates/",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/search_dates/",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/search/",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/search/",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/activity/{company_id}/services?staff_id=1&term=test",
+      "method": "GET",
+      "path": "/api/v1/activity/{company_id}/services?staff_id=1&term=test",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/attendance/receipt_print/{visit_id}",
+      "method": "GET",
+      "path": "/api/v1/attendance/receipt_print/{visit_id}",
+      "tags": [
+        "Визиты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/book_dates/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/book_dates/{company_id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/book_record/{company_id}/{record_id}/{record_hash}",
+      "method": "GET",
+      "path": "/api/v1/book_record/{company_id}/{record_id}/{record_hash}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/book_services/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/book_services/{company_id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "bounded_catalog_read_local_tested",
+      "evidence": "MAYA-CATALOG-READ-FACTS-CHECKPOINT-20261007.md",
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/book_staff_seances/{company_id}/{staff_id}/",
+      "method": "GET",
+      "path": "/api/v1/book_staff_seances/{company_id}/{staff_id}/",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/book_staff/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/book_staff/{company_id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/book_times/{company_id}/{staff_id}/{date}",
+      "method": "GET",
+      "path": "/api/v1/book_times/{company_id}/{staff_id}/{date}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/bookform/{id}",
+      "method": "GET",
+      "path": "/api/v1/bookform/{id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/booking/user/data",
+      "method": "GET",
+      "path": "/api/v1/booking/user/data",
+      "tags": [
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/booking/user/phone_confirmation",
+      "method": "GET",
+      "path": "/api/v1/booking/user/phone_confirmation",
+      "tags": [
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/chain/{chain_id}/loyalty/abonements",
+      "method": "GET",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonements",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/chain/{chain_id}/loyalty/card_types",
+      "method": "GET",
+      "path": "/api/v1/chain/{chain_id}/loyalty/card_types",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/chain/{chain_id}/loyalty/notification_message_templates/programs",
+      "method": "GET",
+      "path": "/api/v1/chain/{chain_id}/loyalty/notification_message_templates/programs",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/chain/{chain_id}/loyalty/programs/{loyalty_program_id}",
+      "method": "GET",
+      "path": "/api/v1/chain/{chain_id}/loyalty/programs/{loyalty_program_id}",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/chain/{chain_id}/loyalty/transactions",
+      "method": "GET",
+      "path": "/api/v1/chain/{chain_id}/loyalty/transactions",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/chain/{chain_id}/service_categories",
+      "method": "GET",
+      "path": "/api/v1/chain/{chain_id}/service_categories",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/cities?country_id=1&company_id=1",
+      "method": "GET",
+      "path": "/api/v1/cities?country_id=1&company_id=1",
+      "tags": [
+        "Города"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/client/{company_id}/{id}",
+      "method": "GET",
+      "path": "/api/v1/client/{company_id}/{id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/clients/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/clients/{company_id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/comments/{company_id}/",
+      "method": "GET",
+      "path": "/api/v1/comments/{company_id}/",
+      "tags": [
+        "Комментарии"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/companies",
+      "method": "GET",
+      "path": "/api/v1/companies",
+      "tags": [
+        "Компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company_users/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/company_users/{company_id}",
+      "tags": [
+        "Пользователи компании"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/loyalty_programs/income/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/loyalty_programs/income/",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/loyalty_programs/staff/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/loyalty_programs/staff/",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/loyalty_programs/visits",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/loyalty_programs/visits",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/overall/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/overall/",
+      "tags": [
+        "Аналитика"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/overall/charts/fullness_daily/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/overall/charts/fullness_daily/",
+      "tags": [
+        "Аналитика"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/overall/charts/income_daily/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/overall/charts/income_daily/",
+      "tags": [
+        "Аналитика"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/overall/charts/record_source/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/overall/charts/record_source/",
+      "tags": [
+        "Аналитика"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/overall/charts/record_status/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/overall/charts/record_status/",
+      "tags": [
+        "Аналитика"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/analytics/overall/charts/records_daily/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/analytics/overall/charts/records_daily/",
+      "tags": [
+        "Аналитика"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/booking_forms/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/booking_forms/",
+      "tags": [
+        "Настройки букформы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/booking_forms/{form_id}/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/booking_forms/{form_id}/",
+      "tags": [
+        "Настройки букформы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/client/{client_id}/loyalty/abonements/{abonement_id}/check_for_activity/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/client/{client_id}/loyalty/abonements/{abonement_id}/check_for_activity/",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/client/{client_id}/loyalty/abonements/search_for_activity/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/client/{client_id}/loyalty/abonements/search_for_activity/",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/clients/{client_id}/comments",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/clients/{client_id}/comments",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/clients/files/{client_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/clients/files/{client_id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/goods_categories/{parent_category_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/goods_categories/{parent_category_id}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/loyalty/abonement_types/fetch",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/loyalty/abonement_types/fetch",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/loyalty/abonement_types/search",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/loyalty/abonement_types/search",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/loyalty/certificate_types/fetch",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/loyalty/certificate_types/fetch",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/loyalty/certificate_types/search",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/loyalty/certificate_types/search",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/loyalty/programs/search",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/loyalty/programs/search",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/calculation/staff/{staff_id}/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/calculation/staff/{staff_id}/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/calculation/staff/{staff_id}/salary_schemes_count/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/calculation/staff/{staff_id}/salary_schemes_count/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/calculation/staff/daily/{staff_id}/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/calculation/staff/daily/{staff_id}/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/payroll/staff/{staff_id}/calculation/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/payroll/staff/{staff_id}/calculation/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/payroll/staff/{staff_id}/calculation/{calculation_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/payroll/staff/{staff_id}/calculation/{calculation_id}",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/period/staff/{staff_id}/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/period/staff/{staff_id}/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/period/staff/daily/{staff_id}/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/period/staff/daily/{staff_id}/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/staff/{staff_id}/calculation/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/staff/{staff_id}/calculation/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/staff/{staff_id}/period/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/staff/{staff_id}/period/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/salary/staff/{staff_id}/salary_schemes/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/salary/staff/{staff_id}/salary_schemes/",
+      "tags": [
+        "Расчёт зарплат"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "bounded_personal_income_read_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/sale/{document_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/sale/{document_id}",
+      "tags": [
+        "Операция продажи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/schedules/{schedule_id}/days/{day_id}/events",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/days/{day_id}/events",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/schedules/search/{entity_type}/{entity_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/schedules/search/{entity_type}/{entity_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/service_categories/{id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/service_categories/{id}",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/services/{service_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/services/{service_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "existing_pricing_lane_read",
+      "evidence": "MAYA-FINAL-COMPLETION-MAP.md#yclients-fixed-service-price--isolated-local-backend-candidate-2026-10-06-utc",
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/settings/online",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/settings/online",
+      "tags": [
+        "Настройки онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/settings/timeslots",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/settings/timeslots",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/settings/timetable",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/settings/timetable",
+      "tags": [
+        "Настройки журнала записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/staff/{staff_id}",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/staff/{staff_id}",
+      "tags": [
+        "Сотрудники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/staff/positions/",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/staff/positions/",
+      "tags": [
+        "Должности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/staff/schedule",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/staff/schedule",
+      "tags": [
+        "График работы сотрудника"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/users",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/users",
+      "tags": [
+        "Пользователи компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/users/{user_id}/permissions",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/users/{user_id}/permissions",
+      "tags": [
+        "Пользователи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/users/{user_id}/roles",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/users/{user_id}/roles",
+      "tags": [
+        "Пользователи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{company_id}/users/roles",
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/users/roles",
+      "tags": [
+        "Пользователи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/company/{id}/",
+      "method": "GET",
+      "path": "/api/v1/company/{id}/",
+      "tags": [
+        "Компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/countries",
+      "method": "GET",
+      "path": "/api/v1/countries",
+      "tags": [
+        "Страны"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/custom_fields/{field_category}/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/custom_fields/{field_category}/{company_id}",
+      "tags": [
+        "Дополнительные поля"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/deposits/chain/{chain_id}",
+      "method": "GET",
+      "path": "/api/v1/deposits/chain/{chain_id}",
+      "tags": [
+        "Личные счета"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/deposits/chain/{chain_id}/deposit_history/{deposit_id}",
+      "method": "GET",
+      "path": "/api/v1/deposits/chain/{chain_id}/deposit_history/{deposit_id}",
+      "tags": [
+        "Личные счета"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/deposits/chain/{chain_id}/phone/{phone}",
+      "method": "GET",
+      "path": "/api/v1/deposits/chain/{chain_id}/phone/{phone}",
+      "tags": [
+        "Личные счета"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/deposits/company/{company_id}/client/{client_id}",
+      "method": "GET",
+      "path": "/api/v1/deposits/company/{company_id}/client/{client_id}",
+      "tags": [
+        "Личные счета"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/finance_transactions/{company_id}/{transaction_id}",
+      "method": "GET",
+      "path": "/api/v1/finance_transactions/{company_id}/{transaction_id}",
+      "tags": [
+        "Финансовые транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/goods_categories/{company_id}/{parent_category_id}",
+      "method": "GET",
+      "path": "/api/v1/goods_categories/{company_id}/{parent_category_id}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/goods_categories/multiple/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/goods_categories/multiple/{company_id}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/goods/{company_id}/{good_id}",
+      "method": "GET",
+      "path": "/api/v1/goods/{company_id}/{good_id}",
+      "tags": [
+        "Товары"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "internal_read_port_local_tested",
+      "evidence": "MAYA-YCLIENTS-GOODS-READ-CHECKPOINT-20261007.md",
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/goods/category_node/{company_id}/{category_id}?page={page}&count={count}",
+      "method": "GET",
+      "path": "/api/v1/goods/category_node/{company_id}/{category_id}?page={page}&count={count}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/goods/search/{company_id}?term={search_term}&count={max_count}",
+      "method": "GET",
+      "path": "/api/v1/goods/search/{company_id}?term={search_term}&count={max_count}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/group/{group_id}/clients/",
+      "method": "GET",
+      "path": "/api/v1/group/{group_id}/clients/",
+      "tags": [
+        "Сетевые клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/groups",
+      "method": "GET",
+      "path": "/api/v1/groups",
+      "tags": [
+        "Сети салонов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/i18n/{langCode}",
+      "method": "GET",
+      "path": "/api/v1/i18n/{langCode}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/integration/kkm/references/tax_system/{countryId}",
+      "method": "GET",
+      "path": "/api/v1/integration/kkm/references/tax_system/{countryId}",
+      "tags": [
+        "Фискализация чеков"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/kkm_transactions/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/kkm_transactions/{company_id}",
+      "tags": [
+        "ККМ транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/labels/{company_id}/{entity}",
+      "method": "GET",
+      "path": "/api/v1/labels/{company_id}/{entity}",
+      "tags": [
+        "Категории"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/labels/{company_id}/clients",
+      "method": "GET",
+      "path": "/api/v1/labels/{company_id}/clients",
+      "tags": [
+        "Категории"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/license/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/license/{company_id}",
+      "tags": [
+        "Лицензии"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/abonements/",
+      "method": "GET",
+      "path": "/api/v1/loyalty/abonements/",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/card_types/client/{company_id}/{phone}",
+      "method": "GET",
+      "path": "/api/v1/loyalty/card_types/client/{company_id}/{phone}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/card_types/salon/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/loyalty/card_types/salon/{company_id}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/cards/{phone}/{group_id}/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/loyalty/cards/{phone}/{group_id}/{company_id}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/certificates/",
+      "method": "GET",
+      "path": "/api/v1/loyalty/certificates/",
+      "tags": [
+        "Сертификаты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/client_cards/{client_id}",
+      "method": "GET",
+      "path": "/api/v1/loyalty/client_cards/{client_id}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/loyalty/generate_code/{company_id}/{good_Id}",
+      "method": "GET",
+      "path": "/api/v1/loyalty/generate_code/{company_id}/{good_Id}",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/master_record_review/{recordToken}",
+      "method": "GET",
+      "path": "/api/v1/master_record_review/{recordToken}",
+      "tags": [
+        "Отзывы и чаевые"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/notification_settings/{company_id}/notification_types",
+      "method": "GET",
+      "path": "/api/v1/notification_settings/{company_id}/notification_types",
+      "tags": [
+        "Уведомления"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/notification_settings/{company_id}/users/{user_id}",
+      "method": "GET",
+      "path": "/api/v1/notification_settings/{company_id}/users/{user_id}",
+      "tags": [
+        "Уведомления"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/privacy_policy/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/privacy_policy/{company_id}",
+      "tags": [
+        "Правила обработки персональных данных"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/record/{company_id}/{record_id}",
+      "method": "GET",
+      "path": "/api/v1/record/{company_id}/{record_id}",
+      "tags": [
+        "Записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/records/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/records/{company_id}",
+      "tags": [
+        "Записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/records/partner/",
+      "method": "GET",
+      "path": "/api/v1/records/partner/",
+      "tags": [
+        "Записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/references/business_groups_with_types",
+      "method": "GET",
+      "path": "/api/v1/references/business_groups_with_types",
+      "tags": [
+        "Справочники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/reports/z_report/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/reports/z_report/{company_id}",
+      "tags": [
+        "Z-Отчет"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/resources/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/resources/{company_id}",
+      "tags": [
+        "Ресурсы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/schedule/{company_id}/{staff_id}/{start_date}/{end_date}",
+      "method": "GET",
+      "path": "/api/v1/schedule/{company_id}/{staff_id}/{start_date}/{end_date}",
+      "tags": [
+        "График работы сотрудника"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/service_categories/{company_id}/{id}",
+      "method": "GET",
+      "path": "/api/v1/service_categories/{company_id}/{id}",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/service_category/{company_id}/{id}",
+      "method": "GET",
+      "path": "/api/v1/service_category/{company_id}/{id}",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/services/{company_id}/{service_id}",
+      "method": "GET",
+      "path": "/api/v1/services/{company_id}/{service_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/staff/{company_id}/{staff_id}",
+      "method": "GET",
+      "path": "/api/v1/staff/{company_id}/{staff_id}",
+      "tags": [
+        "Сотрудники"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/storage_operations/documents/{company_id}/{document_id}",
+      "method": "GET",
+      "path": "/api/v1/storage_operations/documents/{company_id}/{document_id}",
+      "tags": [
+        "Документы складских операций"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/storage_operations/documents/finance_transactions/{document_id}",
+      "method": "GET",
+      "path": "/api/v1/storage_operations/documents/finance_transactions/{document_id}",
+      "tags": [
+        "Документы складских операций"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/storage_operations/documents/goods_transactions/{document_id}",
+      "method": "GET",
+      "path": "/api/v1/storage_operations/documents/goods_transactions/{document_id}",
+      "tags": [
+        "Документы складских операций"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/storage_operations/goods_transactions/{company_id}/{transaction_id}",
+      "method": "GET",
+      "path": "/api/v1/storage_operations/goods_transactions/{company_id}/{transaction_id}",
+      "tags": [
+        "Товарные транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/storages/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/storages/{company_id}",
+      "tags": [
+        "Склады"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/storages/transactions/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/storages/transactions/{company_id}",
+      "tags": [
+        "Товарные транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/technological_cards/{company_id}/",
+      "method": "GET",
+      "path": "/api/v1/technological_cards/{company_id}/",
+      "tags": [
+        "Технологические карты и расходники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/technological_cards/default_for_staff_and_service/{company_id}/{staffId}/{serviceId}/",
+      "method": "GET",
+      "path": "/api/v1/technological_cards/default_for_staff_and_service/{company_id}/{staffId}/{serviceId}/",
+      "tags": [
+        "Технологические карты и расходники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/technological_cards/record_consumables/{company_id}/{record_id}/",
+      "method": "GET",
+      "path": "/api/v1/technological_cards/record_consumables/{company_id}/{record_id}/",
+      "tags": [
+        "Технологические карты и расходники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/timetable/dates/{company_id}/{date}",
+      "method": "GET",
+      "path": "/api/v1/timetable/dates/{company_id}/{date}",
+      "tags": [
+        "Даты для журнала"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/timetable/seances/{company_id}/{staff_id}/{date}",
+      "method": "GET",
+      "path": "/api/v1/timetable/seances/{company_id}/{staff_id}/{date}",
+      "tags": [
+        "Сеансы для журнала"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/timetable/transactions/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/timetable/transactions/{company_id}",
+      "tags": [
+        "Финансовые транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/tips/{company_id}/settings",
+      "method": "GET",
+      "path": "/api/v1/tips/{company_id}/settings",
+      "tags": [
+        "Чаевые"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/tips/{company_id}/settings/{master_tips_settings_id}/enable",
+      "method": "GET",
+      "path": "/api/v1/tips/{company_id}/settings/{master_tips_settings_id}/enable",
+      "tags": [
+        "Чаевые"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/transactions/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/transactions/{company_id}",
+      "tags": [
+        "Финансовые транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/user/loyalty_cards/{group_id}",
+      "method": "GET",
+      "path": "/api/v1/user/loyalty_cards/{group_id}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/user/loyalty/abonements/",
+      "method": "GET",
+      "path": "/api/v1/user/loyalty/abonements/",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/user/loyalty/certificates/",
+      "method": "GET",
+      "path": "/api/v1/user/loyalty/certificates/",
+      "tags": [
+        "Сертификаты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/user/permissions/{company_id}",
+      "method": "GET",
+      "path": "/api/v1/user/permissions/{company_id}",
+      "tags": [
+        "Пользователь"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/user/records/{record_id}/{record_hash}",
+      "method": "GET",
+      "path": "/api/v1/user/records/{record_id}/{record_hash}",
+      "tags": [
+        "Записи пользователя"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/validation/validate_phone/{phone}",
+      "method": "GET",
+      "path": "/api/v1/validation/validate_phone/{phone}",
+      "tags": [
+        "Валидация данных"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/visit/details/{salon_id}/{record_id}/{visit_id}",
+      "method": "GET",
+      "path": "/api/v1/visit/details/{salon_id}/{record_id}/{visit_id}",
+      "tags": [
+        "Визиты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/visit/loyalty/transactions/{visit_id}",
+      "method": "GET",
+      "path": "/api/v1/visit/loyalty/transactions/{visit_id}",
+      "tags": [
+        "Применение лояльности в визите"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/visits/{visit_id}",
+      "method": "GET",
+      "path": "/api/v1/visits/{visit_id}",
+      "tags": [
+        "Визиты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v1/voip/integration/calls",
+      "method": "GET",
+      "path": "/api/v1/voip/integration/calls",
+      "tags": [
+        "Интеграция с сетевой телефонией"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v2/companies/{company_id}/waiting_list",
+      "method": "GET",
+      "path": "/api/v2/companies/{company_id}/waiting_list",
+      "tags": [
+        "Лист ожидания"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /api/v2/companies/{salonId}/activities/{activityId}",
+      "method": "GET",
+      "path": "/api/v2/companies/{salonId}/activities/{activityId}",
+      "tags": [
+        "Групповые события v2"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /marketplace/application/{application_id}/salons",
+      "method": "GET",
+      "path": "/marketplace/application/{application_id}/salons",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /marketplace/application/{application_id}/tariffs",
+      "method": "GET",
+      "path": "/marketplace/application/{application_id}/tariffs",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /marketplace/application/payment_link",
+      "method": "GET",
+      "path": "/marketplace/application/payment_link",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "GET /marketplace/salon/{salon_id}/application/{application_id}",
+      "method": "GET",
+      "path": "/marketplace/salon/{salon_id}/application/{application_id}",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "read_still_requires_current_rights"
+    },
+    {
+      "id": "PATCH /api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "method": "PATCH",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "tags": [
+        "Типы абонементов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/booking_forms/{form_id}/",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/booking_forms/{form_id}/",
+      "tags": [
+        "Настройки букформы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/schedules/{schedule_id}",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/schedules/{schedule_id}/client_schedules/{client_schedule_id}",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/client_schedules/{client_schedule_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/schedules/{schedule_id}/days/{day_id}",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/days/{day_id}",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/services/{service_id}",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/services/{service_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "existing_fixed_price_ae_lane",
+      "evidence": "MAYA-FINAL-COMPLETION-MAP.md#yclients-pricing--repaired-local-browser-ui-2026-10-06-1807-utc",
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/settings/online",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/settings/online",
+      "tags": [
+        "Настройки онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PATCH /api/v1/company/{company_id}/settings/timetable",
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/settings/timetable",
+      "tags": [
+        "Настройки журнала записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/",
+      "method": "POST",
+      "path": "/api/v1/",
+      "tags": [
+        "Отправка СМС через операторов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "deferred_external_messaging",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/activity/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/activity/{company_id}",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/activity/{company_id}/{activity_id}/book",
+      "method": "POST",
+      "path": "/api/v1/activity/{company_id}/{activity_id}/book",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/activity/{company_id}/{activity_id}/duplicate/",
+      "method": "POST",
+      "path": "/api/v1/activity/{company_id}/{activity_id}/duplicate/",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/activity/{company_id}/duplication_strategy",
+      "method": "POST",
+      "path": "/api/v1/activity/{company_id}/duplication_strategy",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/activity/{company_id}/duplication_strategy/{strategy_id}",
+      "method": "POST",
+      "path": "/api/v1/activity/{company_id}/duplication_strategy/{strategy_id}",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/auth",
+      "method": "POST",
+      "path": "/api/v1/auth",
+      "tags": [
+        "Авторизация"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/book_check/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/book_check/{company_id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/book_code/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/book_code/{company_id}",
+      "tags": [
+        "Онлайн-запись",
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/book_record/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/book_record/{company_id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/booking/auth",
+      "method": "POST",
+      "path": "/api/v1/booking/auth",
+      "tags": [
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonement_types",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonement_types",
+      "tags": [
+        "Типы абонементов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "tags": [
+        "Типы абонементов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}/clone",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}/clone",
+      "tags": [
+        "Типы абонементов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/freeze",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/freeze",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/set_balance",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/set_balance",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/set_period",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/set_period",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/unfreeze",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonements/{abonementId}/unfreeze",
+      "tags": [
+        "Абонементы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/cards/{card_id}/manual_transaction",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/cards/{card_id}/manual_transaction",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/chain/{chain_id}/loyalty/programs/",
+      "method": "POST",
+      "path": "/api/v1/chain/{chain_id}/loyalty/programs/",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/clients/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/clients/{company_id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/clients/{company_id}/bulk",
+      "method": "POST",
+      "path": "/api/v1/clients/{company_id}/bulk",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/comments/{company_id}/{staff_id}",
+      "method": "POST",
+      "path": "/api/v1/comments/{company_id}/{staff_id}",
+      "tags": [
+        "Комментарии"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/companies",
+      "method": "POST",
+      "path": "/api/v1/companies",
+      "tags": [
+        "Компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/booking_forms/",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/booking_forms/",
+      "tags": [
+        "Настройки букформы"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/clients/{client_id}/comments",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/clients/{client_id}/comments",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/clients/search",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/clients/search",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/clients/visits/search",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/clients/visits/search",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/loyalty/cards/{card_id}/manual_transaction",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/loyalty/cards/{card_id}/manual_transaction",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/positions/quick/",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/positions/quick/",
+      "tags": [
+        "Должности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/sale/{document_id}/payment",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/sale/{document_id}/payment",
+      "tags": [
+        "Операция продажи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/schedules",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/schedules",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/schedules/{schedule_id}/client_schedules",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/client_schedules",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/schedules/{schedule_id}/days",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/schedules/{schedule_id}/days",
+      "tags": [
+        "Расписания записей/событий"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/services/{service_id}/staff",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/services/links",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/services/links",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/staff/quick",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/staff/quick",
+      "tags": [
+        "Сотрудники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/users/{user_id}/copy_to_companies",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/users/{user_id}/copy_to_companies",
+      "tags": [
+        "Пользователи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/company/{company_id}/users/{user_id}/remove_from_companies",
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/users/{user_id}/remove_from_companies",
+      "tags": [
+        "Пользователи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/custom_fields/{field_category}/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/custom_fields/{field_category}/{company_id}",
+      "tags": [
+        "Дополнительные поля"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/delivery/status",
+      "method": "POST",
+      "path": "/api/v1/delivery/status",
+      "tags": [
+        "Отправка СМС через операторов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "deferred_external_messaging",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/deposits_operations/{salon_id}",
+      "method": "POST",
+      "path": "/api/v1/deposits_operations/{salon_id}",
+      "tags": [
+        "Личные счета"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/email/clients/by_filter/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/email/clients/by_filter/{company_id}",
+      "tags": [
+        "Email рассылка"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "deferred_external_messaging",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/email/clients/by_id/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/email/clients/by_id/{company_id}",
+      "tags": [
+        "Email рассылка"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "deferred_external_messaging",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/finance_transactions/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/finance_transactions/{company_id}",
+      "tags": [
+        "Финансовые транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/goods_categories/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/goods_categories/{company_id}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/goods/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/goods/{company_id}",
+      "tags": [
+        "Товары"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/https://your-api.url",
+      "method": "POST",
+      "path": "/api/v1/https://your-api.url",
+      "tags": [
+        "Фискализация чеков"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/images/{entity}",
+      "method": "POST",
+      "path": "/api/v1/images/{entity}",
+      "tags": [
+        "Изображения"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/integration/kkm/callback/",
+      "method": "POST",
+      "path": "/api/v1/integration/kkm/callback/",
+      "tags": [
+        "Фискализация чеков"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/kkm_transactions/{company_id}/print_document_bill",
+      "method": "POST",
+      "path": "/api/v1/kkm_transactions/{company_id}/print_document_bill",
+      "tags": [
+        "ККМ транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/labels/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/labels/{company_id}",
+      "tags": [
+        "Категории"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/labels/{company_id}/clients/create",
+      "method": "POST",
+      "path": "/api/v1/labels/{company_id}/clients/create",
+      "tags": [
+        "Категории"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/loyalty/cards/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/loyalty/cards/{company_id}",
+      "tags": [
+        "Карты лояльности"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/master_record_review/{recordToken}",
+      "method": "POST",
+      "path": "/api/v1/master_record_review/{recordToken}",
+      "tags": [
+        "Отзывы и чаевые"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/notification_settings/{company_id}/users/{user_id}",
+      "method": "POST",
+      "path": "/api/v1/notification_settings/{company_id}/users/{user_id}",
+      "tags": [
+        "Уведомления"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/records/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/records/{company_id}",
+      "tags": [
+        "Записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/service_categories/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/service_categories/{company_id}",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/services/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/services/{company_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/sms/clients/by_filter/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/sms/clients/by_filter/{company_id}",
+      "tags": [
+        "SMS рассылка"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "deferred_external_messaging",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/sms/clients/by_id/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/sms/clients/by_id/{company_id}",
+      "tags": [
+        "SMS рассылка"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "deferred_external_messaging",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/staff/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/staff/{company_id}",
+      "tags": [
+        "Сотрудники"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/storage_operations/documents/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/storage_operations/documents/{company_id}",
+      "tags": [
+        "Документы складских операций"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/storage_operations/goods_transactions/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/storage_operations/goods_transactions/{company_id}",
+      "tags": [
+        "Товарные транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/storage_operations/operation/{company_id}",
+      "method": "POST",
+      "path": "/api/v1/storage_operations/operation/{company_id}",
+      "tags": [
+        "Складские операции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/tips/{company_id}/settings/{master_tips_settings_id}/disable",
+      "method": "POST",
+      "path": "/api/v1/tips/{company_id}/settings/{master_tips_settings_id}/disable",
+      "tags": [
+        "Чаевые"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/user/auth",
+      "method": "POST",
+      "path": "/api/v1/user/auth",
+      "tags": [
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/user/invite/{salon_id}",
+      "method": "POST",
+      "path": "/api/v1/user/invite/{salon_id}",
+      "tags": [
+        "Пользователь"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/visit/loyalty/apply_card_withdrawal/{company_id}/{card_id}",
+      "method": "POST",
+      "path": "/api/v1/visit/loyalty/apply_card_withdrawal/{company_id}/{card_id}",
+      "tags": [
+        "Применение лояльности в визите"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/visit/loyalty/apply_discount_program/{company_id}/{card_id}/{program_id}",
+      "method": "POST",
+      "path": "/api/v1/visit/loyalty/apply_discount_program/{company_id}/{card_id}/{program_id}",
+      "tags": [
+        "Применение лояльности в визите"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/visit/loyalty/apply_referral_program/{company_id}/{group_id}",
+      "method": "POST",
+      "path": "/api/v1/visit/loyalty/apply_referral_program/{company_id}/{group_id}",
+      "tags": [
+        "Применение лояльности в визите"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/visit/loyalty/cancel_card_withdrawal/{company_id}/{card_id}",
+      "method": "POST",
+      "path": "/api/v1/visit/loyalty/cancel_card_withdrawal/{company_id}/{card_id}",
+      "tags": [
+        "Применение лояльности в визите"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/visit/loyalty/cancel_discount_program/{company_id}/{card_id}/{program_id}",
+      "method": "POST",
+      "path": "/api/v1/visit/loyalty/cancel_discount_program/{company_id}/{card_id}/{program_id}",
+      "tags": [
+        "Применение лояльности в визите"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v1/voip/integration",
+      "method": "POST",
+      "path": "/api/v1/voip/integration",
+      "tags": [
+        "Интеграция с сетевой телефонией"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "excluded_current_product",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v2/companies/{company_id}/waiting_list",
+      "method": "POST",
+      "path": "/api/v2/companies/{company_id}/waiting_list",
+      "tags": [
+        "Лист ожидания"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v2/companies/{salonId}/activities",
+      "method": "POST",
+      "path": "/api/v2/companies/{salonId}/activities",
+      "tags": [
+        "Групповые события v2"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v2/companies/{salonId}/activities/{activityId}/records",
+      "method": "POST",
+      "path": "/api/v2/companies/{salonId}/activities/{activityId}/records",
+      "tags": [
+        "Групповые события v2"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /api/v2/companies/{salonId}/activities/{activityId}/records/{recordId}",
+      "method": "POST",
+      "path": "/api/v2/companies/{salonId}/activities/{activityId}/records/{recordId}",
+      "tags": [
+        "Групповые события v2"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace_webhook",
+      "method": "POST",
+      "path": "/marketplace_webhook",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/application/add_discount",
+      "method": "POST",
+      "path": "/marketplace/application/add_discount",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/application/update_channel",
+      "method": "POST",
+      "path": "/marketplace/application/update_channel",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/partner/callback",
+      "method": "POST",
+      "path": "/marketplace/partner/callback",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/partner/callback/redirect",
+      "method": "POST",
+      "path": "/marketplace/partner/callback/redirect",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/partner/payment",
+      "method": "POST",
+      "path": "/marketplace/partner/payment",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/partner/payment/refund/{payment_id}",
+      "method": "POST",
+      "path": "/marketplace/partner/payment/refund/{payment_id}",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/partner/short_names",
+      "method": "POST",
+      "path": "/marketplace/partner/short_names",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "POST /marketplace/salon/{salon_id}/application/{application_id}/uninstall",
+      "method": "POST",
+      "path": "/marketplace/salon/{salon_id}/application/{application_id}/uninstall",
+      "tags": [
+        "Маркетплейс"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/activity/{company_id}/{activity_id}",
+      "method": "PUT",
+      "path": "/api/v1/activity/{company_id}/{activity_id}",
+      "tags": [
+        "Групповые события"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/book_record/{company_id}/{record_id}",
+      "method": "PUT",
+      "path": "/api/v1/book_record/{company_id}/{record_id}",
+      "tags": [
+        "Онлайн-запись"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/booking/user",
+      "method": "PUT",
+      "path": "/api/v1/booking/user",
+      "tags": [
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/booking/user/password",
+      "method": "PUT",
+      "path": "/api/v1/booking/user/password",
+      "tags": [
+        "Пользователи онлайн-записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "method": "PUT",
+      "path": "/api/v1/chain/{chain_id}/loyalty/abonement_types/{loyalty_abonement_type_id}",
+      "tags": [
+        "Типы абонементов"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/chain/{chain_id}/loyalty/programs/{loyalty_program_id}",
+      "method": "PUT",
+      "path": "/api/v1/chain/{chain_id}/loyalty/programs/{loyalty_program_id}",
+      "tags": [
+        "Лояльность"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/client/{company_id}/{id}",
+      "method": "PUT",
+      "path": "/api/v1/client/{company_id}/{id}",
+      "tags": [
+        "Клиенты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "method": "PUT",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/company/{company_id}/staff/schedule",
+      "method": "PUT",
+      "path": "/api/v1/company/{company_id}/staff/schedule",
+      "tags": [
+        "График работы сотрудника"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/company/{company_id}/users/{user_id}/permissions",
+      "method": "PUT",
+      "path": "/api/v1/company/{company_id}/users/{user_id}/permissions",
+      "tags": [
+        "Пользователи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/company/{id}/",
+      "method": "PUT",
+      "path": "/api/v1/company/{id}/",
+      "tags": [
+        "Компании"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/custom_fields/{field_category}/{company_id}/{field_id}",
+      "method": "PUT",
+      "path": "/api/v1/custom_fields/{field_category}/{company_id}/{field_id}",
+      "tags": [
+        "Дополнительные поля"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/finance_transactions/{company_id}/{transaction_id}",
+      "method": "PUT",
+      "path": "/api/v1/finance_transactions/{company_id}/{transaction_id}",
+      "tags": [
+        "Финансовые транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/goods_categories/{company_id}/{category_id}",
+      "method": "PUT",
+      "path": "/api/v1/goods_categories/{company_id}/{category_id}",
+      "tags": [
+        "Категории товаров"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/goods/{company_id}/{good_id}",
+      "method": "PUT",
+      "path": "/api/v1/goods/{company_id}/{good_id}",
+      "tags": [
+        "Товары"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/labels/{company_id}/{label_id}",
+      "method": "PUT",
+      "path": "/api/v1/labels/{company_id}/{label_id}",
+      "tags": [
+        "Категории"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/record/{company_id}/{record_id}",
+      "method": "PUT",
+      "path": "/api/v1/record/{company_id}/{record_id}",
+      "tags": [
+        "Записи"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/schedule/{company_id}/{staff_id}",
+      "method": "PUT",
+      "path": "/api/v1/schedule/{company_id}/{staff_id}",
+      "tags": [
+        "График работы сотрудника"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/service_category/{company_id}/{id}",
+      "method": "PUT",
+      "path": "/api/v1/service_category/{company_id}/{id}",
+      "tags": [
+        "Категория услуг"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/services/{company_id}/{service_id}",
+      "method": "PUT",
+      "path": "/api/v1/services/{company_id}/{service_id}",
+      "tags": [
+        "Услуги"
+      ],
+      "deprecated": true,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/staff/{company_id}/{staff_id}",
+      "method": "PUT",
+      "path": "/api/v1/staff/{company_id}/{staff_id}",
+      "tags": [
+        "Сотрудники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/storage_operations/documents/{company_id}/{document_id}",
+      "method": "PUT",
+      "path": "/api/v1/storage_operations/documents/{company_id}/{document_id}",
+      "tags": [
+        "Документы складских операций"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/storage_operations/goods_transactions/{company_id}/{transaction_id}",
+      "method": "PUT",
+      "path": "/api/v1/storage_operations/goods_transactions/{company_id}/{transaction_id}",
+      "tags": [
+        "Товарные транзакции"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/technological_cards/record_consumables/consumables/{company_id}/{record_id}/{service_id}/",
+      "method": "PUT",
+      "path": "/api/v1/technological_cards/record_consumables/consumables/{company_id}/{record_id}/{service_id}/",
+      "tags": [
+        "Технологические карты и расходники"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v1/visits/{visit_id}/{record_id}",
+      "method": "PUT",
+      "path": "/api/v1/visits/{visit_id}/{record_id}",
+      "tags": [
+        "Визиты"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v2/companies/{company_id}/waiting_list/{waiting_list_entry_id}",
+      "method": "PUT",
+      "path": "/api/v2/companies/{company_id}/waiting_list/{waiting_list_entry_id}",
+      "tags": [
+        "Лист ожидания"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "approved_domain_bounded_mapping",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    },
+    {
+      "id": "PUT /api/v2/companies/{salonId}/activities/{activityId}",
+      "method": "PUT",
+      "path": "/api/v2/companies/{salonId}/activities/{activityId}",
+      "tags": [
+        "Групповые события v2"
+      ],
+      "deprecated": false,
+      "documentation": "present_in_captured_openapi",
+      "productScope": "technical_domain_mapping_pending",
+      "implementation": "not_mapped_by_this_inventory",
+      "evidence": null,
+      "integrationPermission": "not_observed",
+      "providerAcceptance": "not_executed",
+      "mutationAdmission": "not_granted_by_documentation"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+PASS src/crm/yclients-goods-read.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/crm/crm.service.spec.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       153 passed, 153 total
+Snapshots:   0 total
+Time:        0.792 s, estimated 1 s
+Ran all test suites within paths "src/crm/yclients-goods-read.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/crm/crm.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-read-unit-20261007.json
+[33m[Nest] 94671  - [39m10/07/2026, 10:25:01 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM preview failed provider=yclients operation=connection_check status=unknown[39m
+[33m[Nest] 94671  - [39m10/07/2026, 10:25:01 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token[39m
+[33m[Nest] 94671  - [39m10/07/2026, 10:25:01 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured[39m
+[33m[Nest] 94671  - [39m10/07/2026, 10:25:01 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM team access synchronization deferred tenant=tenant-1: unavailable[39m

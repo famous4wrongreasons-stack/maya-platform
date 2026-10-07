@@ -1,0 +1,41 @@
+{
+  "contract": "maya.yclients-goods-read-local-proof/1",
+  "status": "PASSED",
+  "unitTests": 153,
+  "unitSuites": 3,
+  "productionTypes": "PASS",
+  "fullWidgetProbeTypes": "PASS without exclusions",
+  "scopedLint": "PASS",
+  "providerEdge": "MOCK",
+  "newGoodsDispatchMethods": [
+    "GET"
+  ],
+  "chatIngress": false,
+  "photoIngress": false,
+  "mutationAuthority": false,
+  "newSchema": false,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "independentReview": "No blocking findings. Internal source port only; as_of is read time; physical goods kind not qualified.",
+  "certificate": "NOT_ISSUED",
+  "baseCommit": "1878b0e4841dcf685c78e995d2fb64449210d463",
+  "sourceHashes": {
+    "maya-saas-backend/src/crm/yclients-goods-read.ts": "bfa9012995dc62eba6e816d3dbb40fda37f019bacae6bbfc6144f13fe3183b15",
+    "maya-saas-backend/src/crm/yclients-goods-read.spec.ts": "669f654ef8b0e79ba88211f46cd4b6039cbeff7ee62092bc921e431e9becdfd9",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "ed34dacdd5d895f6041bed46d73cb6ae1d8c713d73823d78c9a2aae42d19d96f",
+    "maya-saas-backend/src/crm/crm.service.ts": "3f9f84254480b7f6ae38ce83a31918bd90d97c117b010f385820fce75a15e36e",
+    "maya-saas-backend/src/crm/crm.service.spec.ts": "1db3e1a266955d0953acf43fc585abc574594b2356868cca95f4b3877c1419b4",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "3c34d2b2b9012adcf8b2a666fa8cab06af0a44bcf84cf82a8f3348d17109d4f0",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts": "7cc18a9817d2a8fd4063d86a9c85cd3f84d1f466caaf97f15bc24888d2717178"
+  },
+  "evidenceHashes": {
+    "maya-goods-build-types-20261007.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "maya-goods-domain-boundary-20261007.json": "944450909141be2eaf2aac1de7dbbd03798ffdde21b9553ece979d3999604962",
+    "maya-goods-domain-boundary-20261007.txt": "89ced9c7420af46f1d1f6e3a98f6764becf40b4118267ff85e2680acf6446d4a",
+    "maya-goods-lint-20261007.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "maya-goods-probe-types-20261007.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "maya-goods-read-unit-20261007.json": "99f1b03b64c47acd061b6d9062a341c9ede297134c6a3563bbdfdd30e97a42b0",
+    "maya-goods-read-unit-20261007.txt": "478249d96fa1ba939482099b73fb1a025dc0fdc67c15eb5e85373a3795bb7866"
+  },
+  "domainBoundaryTests": 5
+}

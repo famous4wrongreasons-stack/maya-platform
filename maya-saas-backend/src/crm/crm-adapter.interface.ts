@@ -1,3 +1,4 @@
+import type { GoodsItemRead } from './yclients-goods-read';
 import type { ServiceCatalogRead } from './service-catalog-read';
 import { CrmProvider } from '../common/domain.enums';
 import type { ServicePriceSnapshot } from './yclients-service-price.contract';
@@ -501,6 +502,8 @@ export interface CRMAdapter {
   getServices(tenantId: string): Promise<ServiceItem[]>;
   /** Fresh observed catalog facts, before legacy numeric defaults. Not a mutation quote. */
   readServiceCatalog?(tenantId: string): Promise<ServiceCatalogRead>;
+  /** Exact goods metadata, separate price meanings/units; not stock or a write quote. */
+  readGoodsItem?(tenantId: string, goodsId: string): Promise<GoodsItemRead>;
   /** Exact management read; the public booking catalog cannot authorize pricing. */
   getServicePriceSnapshot?(
     serviceId: string,

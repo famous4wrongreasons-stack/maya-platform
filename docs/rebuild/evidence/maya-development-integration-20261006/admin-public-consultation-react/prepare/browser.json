@@ -1,0 +1,262 @@
+{
+  "contract": "maya.public-consultation-owner-browser/1",
+  "status": "passed",
+  "syntheticPublicCatalogFacts": true,
+  "scriptedModelSelection": true,
+  "providerCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "salon-initial": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nРасскажи о салоне\nMAYA:\nНазвание в профиле: Мужская Эстетика.\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "staff-initial": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nРасскажи о салоне\nMAYA:\nНазвание в профиле: Мужская Эстетика.\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.\nВы:\nКакие у вас мастера?\nMAYA:\nНазвание в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nТестовый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "reload-restored": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nРасскажи о салоне\nMAYA:\nНазвание в профиле: Мужская Эстетика.\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.\nВы:\nКакие у вас мастера?\nMAYA:\nНазвание в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nТестовый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "salon-initial": {
+      "request_id": "303c2ca2-b74b-4364-ae98-47b6b55d90d0",
+      "coordination": {
+        "run_id": "18416ce3-faa2-474c-a89f-6537d138cf57",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "85f42c3f-c1a9-46d3-af68-9aa12de85303",
+        "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+      },
+      "reply": "Название в профиле: Мужская Эстетика.\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxs0gbx000deqc97gd1sumy"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "staff-initial": {
+      "request_id": "15fb7ab8-72f7-4c9f-b19c-c370f8937242",
+      "coordination": {
+        "run_id": "9b206238-9a0e-4833-9068-c4a4a1b46c51",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "9930d367-e37c-459f-a367-469f89e20bb3",
+        "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+      },
+      "reply": "Название в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nТестовый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxs0ghd000ieqc9n8xovxxa"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "staff_operations"
+      }
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:51198",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/RGYTJPHA/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/RGYTJPHA/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

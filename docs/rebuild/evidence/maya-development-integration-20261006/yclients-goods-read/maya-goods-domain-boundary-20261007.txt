@@ -1,0 +1,14 @@
+PASS src/domain/boundary.spec.ts
+  граница канонического домена
+    ✓ домен ни от чего не зависит: ни Nest, ни Prisma, ни соседних модулей (4 ms)
+    ✓ внутренний календарь не знает границы CRM (1 ms)
+    ✓ число импортёров границы CRM только сокращается (85 ms)
+    ✓ решения о доступе не читают внешний id провайдера (1 ms)
+    ✓ список временных алиасов границы только сокращается
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.285 s, estimated 1 s
+Ran all test suites within paths "src/domain/boundary.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-domain-boundary-20261007.json

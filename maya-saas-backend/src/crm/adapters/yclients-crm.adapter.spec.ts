@@ -32,6 +32,56 @@ describe('YclientsCRMAdapter', () => {
     jest.restoreAllMocks();
   });
 
+  it('reads exact goods metadata fresh through one existing authenticated GET without writes or catalog fallback', async () => {
+    let rows: unknown = [
+      {
+        good_id: '123',
+        title: 'Товар',
+        cost: '100.50',
+        actual_cost: '60.00',
+        unit_id: '11',
+        service_unit_id: '22',
+        unit_equals: '10',
+      },
+    ];
+    const calls: Array<{ url: string; method: string }> = [];
+    global.fetch = jest.fn((input, init) => {
+      calls.push({ url: requestUrl(input), method: init?.method ?? 'GET' });
+      return Promise.resolve(
+        new Response(JSON.stringify({ success: true, data: rows })),
+      );
+    });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic',
+      settings: { companyId: 5, currency: 'RUB' },
+    });
+    expect((await adapter.readGoodsItem('tenant', '123')).item.sale_price).toBe(
+      '100.50',
+    );
+    rows = [{ good_id: '123', title: 'Товар', cost: '120.00' }];
+    expect((await adapter.readGoodsItem('tenant', '123')).item.sale_price).toBe(
+      '120.00',
+    );
+    rows = [{ good_id: '456', title: 'Неверный товар' }];
+    await expect(adapter.readGoodsItem('tenant', '123')).rejects.toThrow(
+      'goods_read_identity_unavailable',
+    );
+    rows = null;
+    await expect(adapter.readGoodsItem('tenant', '123')).rejects.toThrow(
+      'goods_read_source_unavailable',
+    );
+    await expect(adapter.readGoodsItem('tenant', '../123')).rejects.toThrow(
+      'goods_read_invalid_id',
+    );
+    expect(calls).toHaveLength(4);
+    for (const call of calls) {
+      expect(new URL(call.url).pathname).toBe('/api/v1/goods/5/123');
+      expect(new URL(call.url).search).toBe('');
+      expect(call.method).toBe('GET');
+    }
+  });
+
   it('qualified catalog reads raw current facts without cached defaults, range-to-fixed conversion or guessed currency', async () => {
     let rows: unknown[] = [{ id: 1, title: 'Unknown service' }];
     const fetchMock = jest.fn<

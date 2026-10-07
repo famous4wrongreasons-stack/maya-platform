@@ -1,0 +1,20 @@
+{
+  "contract": "maya.yclients-api-inventory-evidence/1",
+  "status": "PASSED",
+  "operationCount": 304,
+  "exactSourceSetMatch": true,
+  "sourceSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+  "mappedOperations": 4,
+  "unmappedOperations": 300,
+  "deprecatedOperations": 10,
+  "queryTemplatePaths": 4,
+  "externalCallsInGeneration": 0,
+  "sourceHashes": {
+    "maya-saas-backend/scripts/yclients-offline-api-inventory.mjs": "e72bccc4956dc248602e46d3cb10fe8e1e04b36e769fca19a9fd68d24184dd47"
+  },
+  "evidenceHashes": {
+    "operations.json": "25c55a77443aa96778ff338ba3436c302fdce4fce4cf13277dea21fc88eba153"
+  },
+  "independentReview": "Exact set, tags, deprecated flags and captured source SHA checked read-only.",
+  "certificate": "NOT_ISSUED"
+}

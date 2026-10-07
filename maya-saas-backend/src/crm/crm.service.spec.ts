@@ -326,6 +326,52 @@ describe('CrmService', () => {
     expect(getServices).not.toHaveBeenCalled();
   });
 
+  it('goods READ keeps tenant/adapter scope, refuses internal fallback and never dispatches an invalid ID', async () => {
+    const tenantContext = new TenantContextService();
+    const result = { contract: 'maya.goods-item.read/1', item: { id: '123' } };
+    const readGoodsItem = jest.fn().mockResolvedValue(result);
+    const adapter: { readGoodsItem?: typeof readGoodsItem } = { readGoodsItem };
+    let calendarSource = 'external';
+    const findUnique = jest.fn().mockResolvedValue({
+      id: 'crm',
+      tenantId: 'tenant-a',
+      provider: CrmProvider.YCLIENTS,
+      status: CrmIntegrationStatus.ACTIVE,
+      encryptedApiToken: 'synthetic',
+      settingsJson: { companyId: 5 },
+      updatedAt: new Date(),
+    });
+    const service = new CrmService(
+      {
+        tenant: {
+          findUnique: jest
+            .fn()
+            .mockImplementation(() => Promise.resolve({ calendarSource })),
+        },
+        crmIntegration: { findUnique },
+      } as unknown as PrismaService,
+      { decrypt: () => 'synthetic' } as unknown as EncryptionService,
+      { create: jest.fn().mockReturnValue(adapter) },
+      tenantContext,
+    );
+    const read = (tenantId = 'tenant-a', id = '123') =>
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.readGoodsItem(tenantId, id),
+      );
+    await expect(read('foreign')).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(read('tenant-a', '../123')).rejects.toThrow(
+      'goods_read_invalid_id',
+    );
+    expect(findUnique).not.toHaveBeenCalled();
+    await expect(read()).resolves.toEqual(result);
+    expect(readGoodsItem).toHaveBeenCalledWith('tenant-a', '123');
+    delete adapter.readGoodsItem;
+    await expect(read()).rejects.toThrow('qualified_goods_catalog_unavailable');
+    calendarSource = 'internal';
+    await expect(read()).rejects.toThrow('external_goods_catalog_unavailable');
+    expect(readGoodsItem).toHaveBeenCalledTimes(1);
+  });
+
   it('requires a fresh token when switching from mock to a real provider', async () => {
     const crmUpdateMock = jest.fn();
     const prisma = {

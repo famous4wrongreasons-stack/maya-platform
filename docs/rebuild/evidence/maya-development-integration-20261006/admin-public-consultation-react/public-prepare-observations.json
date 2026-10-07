@@ -1,0 +1,96 @@
+{
+  "stage": "public-prepare",
+  "syntheticC8Facts": false,
+  "syntheticPublicCatalogFacts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "salon-initial": {
+    "request_id": "303c2ca2-b74b-4364-ae98-47b6b55d90d0",
+    "coordination": {
+      "run_id": "18416ce3-faa2-474c-a89f-6537d138cf57",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "85f42c3f-c1a9-46d3-af68-9aa12de85303",
+      "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+    },
+    "reply": "Название в профиле: Мужская Эстетика.\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "catalog.staff.read",
+        "status": "completed",
+        "execution_id": "cmuxs0gbx000deqc97gd1sumy"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "staff_catalog",
+      "required_tools": [
+        "catalog.staff.read"
+      ],
+      "evidence_tools": [
+        "catalog.staff.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "staff-initial": {
+    "request_id": "15fb7ab8-72f7-4c9f-b19c-c370f8937242",
+    "coordination": {
+      "run_id": "9b206238-9a0e-4833-9068-c4a4a1b46c51",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "9930d367-e37c-459f-a367-469f89e20bb3",
+      "conversationId": "c9cfbc12-4a22-4ebc-bafa-ad5b103b844c"
+    },
+    "reply": "Название в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nТестовый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "catalog.staff.read",
+        "status": "completed",
+        "execution_id": "cmuxs0ghd000ieqc9n8xovxxa"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "staff_catalog",
+      "required_tools": [
+        "catalog.staff.read"
+      ],
+      "evidence_tools": [
+        "catalog.staff.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "staff_operations"
+    }
+  },
+  "checkpoints": [
+    "salon-initial",
+    "staff-initial",
+    "reload-restored"
+  ],
+  "scriptedModelSelection": true,
+  "externalModelCalls": 0,
+  "sourceReads": 2,
+  "actionExecutions": 0,
+  "c8Revisions": 0,
+  "strategyRevisions": 0,
+  "workReceipts": 2,
+  "modelCalls": 2,
+  "externalFetchCalls": 0
+}

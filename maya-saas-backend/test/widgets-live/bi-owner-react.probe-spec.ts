@@ -405,7 +405,7 @@ describe('BI published snapshot current React [synthetic facts, actual HTTP and 
           },
         ],
       };
-      const send = (body: unknown, auth = token) =>
+      const send = (body: typeof dto, auth = token) =>
         request(http.app.getHttpServer())
           .post('/api/ai/chat')
           .set('Authorization', `Bearer ${auth}`)

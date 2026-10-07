@@ -1,3 +1,4 @@
+import { goodsId, type GoodsItemRead } from './yclients-goods-read';
 import {
   observedServiceCatalog,
   requireBookableServiceFacts,
@@ -914,6 +915,25 @@ export class CrmService {
         'qualified_service_catalog_unavailable',
       );
     return adapter.readServiceCatalog(scopedTenantId);
+  }
+
+  /** Internal read port for approved goods work. An ingress must still enforce
+   * its existing actor/feature rights; this method creates no new public route. */
+  async readGoodsItem(tenantId: string, id: string): Promise<GoodsItemRead> {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const exactId = goodsId(id);
+    if (
+      (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
+    )
+      throw new ServiceUnavailableException(
+        'external_goods_catalog_unavailable',
+      );
+    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    if (!adapter.readGoodsItem)
+      throw new ServiceUnavailableException(
+        'qualified_goods_catalog_unavailable',
+      );
+    return adapter.readGoodsItem(scopedTenantId, exactId);
   }
 
   async readBookableServices(tenantId: string, serviceIds: readonly string[]) {

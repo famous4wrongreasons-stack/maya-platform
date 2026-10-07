@@ -171,7 +171,7 @@ describe('own schedule actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETIC C
           throw new Error('Unscripted turn forbidden');
         }
         return Promise.resolve({
-          reply: null,
+          reply: '',
           toolCall: {
             name: 'staff.schedule.own.read',
             arguments: { date: '2099-01-01' },

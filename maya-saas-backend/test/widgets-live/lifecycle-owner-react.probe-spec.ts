@@ -1,5 +1,6 @@
+import { ConversationIntelligenceService } from '../../src/conversation-intelligence/conversation-intelligence.service';
 // Local current React + real HTTP/C8/C9 + two OS processes and PostgreSQL restart.
-// Synthetic C8 source facts; no model, provider, notification or production access.
+// Synthetic source facts; explicit Lifecycle has no model calls, semantic stages use scripted selections. No external provider/production access.
 import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -27,11 +28,18 @@ const stage = process.env.JEST_LIFECYCLE_REACT_STAGE;
 const receipt = process.env.JEST_LIFECYCLE_REACT_RECEIPT!;
 const output = process.env.JEST_LIFECYCLE_REACT_OUTPUT!;
 if (
-  !['prepare', 'resume', 'semantic'].includes(stage ?? '') ||
+  ![
+    'prepare',
+    'resume',
+    'semantic',
+    'public-prepare',
+    'public-resume',
+  ].includes(stage ?? '') ||
   !receipt ||
   !output
 )
   throw new Error('Use scripts/lifecycle-react-proof.mjs');
+const publicStage = stage?.startsWith('public-') === true;
 const database = assertProofDatabase();
 if (
   !/^maya_widget_gate_proof_lifecyclereact_[a-f0-9]+$/.test(database.database)
@@ -80,7 +88,8 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
   let model: jest.SpyInstance, external: jest.SpyInstance;
   const observations: Record<string, unknown> = {
     stage,
-    syntheticC8Facts: true,
+    syntheticC8Facts: !publicStage,
+    syntheticPublicCatalogFacts: publicStage,
     realModelAcceptance: false,
     externalProviderAcceptance: false,
     certificate: 'NOT_ISSUED',
@@ -97,6 +106,42 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
     model = jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
       .mockImplementation((input) => {
+        if (publicStage) {
+          const prompt = input.messages
+            .filter((m) => m.role === 'user')
+            .at(-1)?.content;
+          if (
+            !['Расскажи о салоне', 'Какие у вас мастера?'].includes(
+              prompt ?? '',
+            ) ||
+            input.toolResults.length
+          )
+            throw new Error('Unexpected public consultation model turn');
+          return Promise.resolve({
+            reply: '',
+            toolCall: { name: 'catalog.staff.read', arguments: {} },
+            semanticPlan: new ConversationIntelligenceService().validatePlan(
+              {
+                dialogue_act: 'request',
+                tasks: [
+                  {
+                    intent:
+                      prompt === 'Расскажи о салоне'
+                        ? 'company.public_info'
+                        : 'employees.list_public',
+                    entities: {},
+                    confidence: 0.99,
+                  },
+                ],
+              },
+              UserRole.TENANT_OWNER,
+              ['catalog.staff.read'],
+            ),
+            provider: 'openai',
+            model: 'SCRIPTED_SYNTHETIC_PUBLIC_SELECTION',
+            usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+          });
+        }
         if (stage !== 'semantic')
           throw new Error('Lifecycle explicit READ admits no model call');
         const text = input.messages
@@ -111,7 +156,7 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
         if (!name || input.toolResults.length)
           throw new Error('Unexpected semantic model turn');
         return Promise.resolve({
-          reply: null,
+          reply: '',
           toolCall: { name, arguments: {} },
           provider: 'openai',
           model: 'SCRIPTED_SYNTHETIC_SEMANTIC_SELECTION',
@@ -316,7 +361,7 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
     await unchanged();
     return revision.snapshotHash;
   }
-  (stage === 'semantic' ? it.skip : it)(
+  (['prepare', 'resume'].includes(stage ?? '') ? it : it.skip)(
     'restores historical response without work, then rechecks exact current sources on a new explicit UI turn',
     async () => {
       if (stage === 'prepare') saved = await seed();
@@ -645,6 +690,294 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
       observations.strategyRevisions = 0;
       observations.appRestart = false;
       observations.postgresRestart = false;
+    },
+    210000,
+  );
+  (publicStage ? it : it.skip)(
+    'public consultation survives real backend/PG restart and rechecks current catalog in React',
+    async () => {
+      type ReadBody = {
+        reply: string;
+        action: unknown;
+        recommendation?: unknown;
+        tools_used: { name: string }[];
+        coordination: { run_id: string; scope: string; state: string };
+      };
+      type PublicSaved = {
+        database: string;
+        pid: number;
+        pgStarted: string;
+        tenant: TenantFixture;
+        user: UserFixture;
+        staffId: string;
+        notBefore: number;
+        firstReplies: string[];
+        expectedProfile: {
+          appName: string;
+          contactDetailsJson: Record<string, string>;
+          onboardingJson: Record<string, string[]>;
+        };
+        expectedStaff: { displayName: string; active: boolean; title: string };
+      };
+      let current: PublicSaved;
+      if (stage === 'public-prepare') {
+        const tenant = await fx.tenant(
+          'Public consultation synthetic',
+          CalendarSource.INTERNAL,
+        );
+        const user = await fx.user(tenant, UserRole.TENANT_OWNER);
+        for (const feature of [
+          'ai.consultant',
+          'booking',
+          'widgets.runtime',
+          'ai.owner',
+          'ai.admin',
+          'analytics.business',
+        ] as const)
+          await fx.grantFeature(tenant, feature);
+        const expectedProfile = {
+          appName: 'Мужская Эстетика',
+          contactDetailsJson: {},
+          onboardingJson: {},
+        };
+        await db.prisma.brandingSettings.create({
+          data: { tenantId: tenant.id, ...expectedProfile },
+        });
+        const expectedStaff = {
+          displayName: 'Тестовый мастер',
+          active: true,
+          title: 'Барбер',
+        };
+        const staff = await db.prisma.internalProvider.create({
+          data: { tenantId: tenant.id, ...expectedStaff },
+        });
+        current = {
+          database: database.database,
+          pid: process.pid,
+          pgStarted: await pgStarted(),
+          tenant,
+          user,
+          staffId: staff.id,
+          notBefore: 0,
+          firstReplies: [],
+          expectedProfile,
+          expectedStaff,
+        };
+      } else {
+        current = JSON.parse(readFileSync(receipt, 'utf8')) as PublicSaved;
+        expect(current.database).toBe(database.database);
+        expect(current.pid).not.toBe(process.pid);
+        expect(current.pgStarted).not.toBe(await pgStarted());
+        observations.processRestart = true;
+        observations.postgresRestart = true;
+      }
+      const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+      const browserOutput = path.join(output, stage! + '-browser');
+      mkdirSync(browserOutput);
+      let reads = 0;
+      const previousReceipts = stage === 'public-prepare' ? 0 : 2;
+      const checkpoints: string[] = [];
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          [
+            path.resolve(
+              '../maya-carrier-react/test/public-consultation-owner-browser-probe.mjs',
+            ),
+          ],
+          { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] },
+        );
+        let failure: Error | undefined,
+          stderr = '',
+          pending = Promise.resolve(),
+          killTimer: NodeJS.Timeout | undefined;
+        const fail = (error: unknown) => {
+          failure ??= error instanceof Error ? error : new Error(String(error));
+          child.kill('SIGTERM');
+          killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
+        };
+        const timer = setTimeout(
+          () => fail(new Error('Public consultation browser timed out')),
+          200000,
+        );
+        child.stderr!.on('data', (b: Buffer) => {
+          stderr += b.toString();
+        });
+        child.on('message', (raw: unknown) => {
+          pending = pending
+            .then(async () => {
+              const m = raw as {
+                type: string;
+                name: string;
+                response?: ReadBody;
+                notBefore?: number;
+              };
+              if (m.type === 'ready')
+                child.send({
+                  type: 'start',
+                  backendOrigin: await http.listenLoopback(),
+                  output: browserOutput,
+                  stage,
+                  email: current.user.email,
+                  notBefore: current.notBefore,
+                  firstReplies: current.firstReplies,
+                });
+              else if (m.type === 'checkpoint') {
+                if (m.response) {
+                  reads++;
+                  const response = m.response;
+                  expect(response.coordination).toMatchObject({
+                    scope: 'deterministic_reads',
+                    state: 'COMPLETED',
+                  });
+                  expect(response.action).toBeNull();
+                  expect(response.recommendation).toBeUndefined();
+                  expect(response.tools_used).toHaveLength(1);
+                  expect(response.tools_used[0].name).toBe(
+                    'catalog.staff.read',
+                  );
+                  const work = await db.prisma.c9WorkReceipt.findMany({
+                    where: { runId: response.coordination.run_id },
+                  });
+                  expect(work).toHaveLength(1);
+                  expect(work[0]).toMatchObject({
+                    taskKey: 'catalog.staff.read',
+                    kind: 'TOOL_READ',
+                    state: 'SETTLED',
+                    domain: 'OCCUPANCY',
+                  });
+                  expect(JSON.stringify(work[0].resultJson)).not.toMatch(
+                    /Тестовый мастер|Обновлённый мастер|Мужская Эстетика/,
+                  );
+                  if (stage === 'public-prepare')
+                    current.firstReplies.push(response.reply);
+                  observations[m.name] = response;
+                }
+                if (m.notBefore) current.notBefore = m.notBefore;
+                expect(model).toHaveBeenCalledTimes(reads);
+                expect(source).toHaveBeenCalledTimes(reads);
+                expect(external).not.toHaveBeenCalled();
+                for (const [, principal] of source.mock.calls)
+                  expect(principal).toMatchObject({
+                    tenantId: current.tenant.id,
+                    userId: current.user.id,
+                    role: UserRole.TENANT_OWNER,
+                  });
+                expect(
+                  await db.prisma.actionExecution.count({
+                    where: { tenantId: current.tenant.id },
+                  }),
+                ).toBe(0);
+                expect(
+                  await db.prisma.c8ResultRevision.count({
+                    where: { tenantId: current.tenant.id },
+                  }),
+                ).toBe(0);
+                expect(
+                  await db.prisma.c9StrategyRevision.count({
+                    where: { tenantId: current.tenant.id },
+                  }),
+                ).toBe(0);
+                expect(
+                  await db.prisma.c9WorkReceipt.count({
+                    where: { tenantId: current.tenant.id },
+                  }),
+                ).toBe(previousReceipts + reads);
+                expect(
+                  await db.prisma.brandingSettings.findUniqueOrThrow({
+                    where: { tenantId: current.tenant.id },
+                    select: {
+                      appName: true,
+                      contactDetailsJson: true,
+                      onboardingJson: true,
+                    },
+                  }),
+                ).toEqual(current.expectedProfile);
+                expect(
+                  await db.prisma.internalProvider.findUniqueOrThrow({
+                    where: { id: current.staffId },
+                    select: { displayName: true, active: true, title: true },
+                  }),
+                ).toEqual(current.expectedStaff);
+                // Only fixture mutations: change sources before process/PG restart,
+                // then deactivate the staff member after the fresh source reply.
+                if (m.name === 'reload-restored') {
+                  current.expectedProfile = {
+                    appName: 'Мужская Эстетика',
+                    contactDetailsJson: { address: 'Тестовая улица, 10' },
+                    onboardingJson: {
+                      about: ['Сохранённое описание после обновления'],
+                    },
+                  };
+                  current.expectedStaff = {
+                    ...current.expectedStaff,
+                    displayName: 'Обновлённый мастер',
+                  };
+                  await db.prisma.brandingSettings.update({
+                    where: { tenantId: current.tenant.id },
+                    data: current.expectedProfile,
+                  });
+                  await db.prisma.internalProvider.update({
+                    where: { id: current.staffId },
+                    data: current.expectedStaff,
+                  });
+                }
+                if (m.name === 'staff-current') {
+                  current.expectedStaff = {
+                    ...current.expectedStaff,
+                    active: false,
+                  };
+                  await db.prisma.internalProvider.update({
+                    where: { id: current.staffId },
+                    data: current.expectedStaff,
+                  });
+                }
+                checkpoints.push(m.name);
+                child.send({ type: 'continue:' + m.name });
+              }
+            })
+            .catch(fail);
+        });
+        child.once('error', fail);
+        child.once('close', (code) => {
+          clearTimeout(timer);
+          clearTimeout(killTimer);
+          void pending.then(
+            () =>
+              failure
+                ? reject(failure)
+                : code !== 0
+                  ? reject(new Error('Public browser failed: ' + stderr))
+                  : resolve(),
+            reject,
+          );
+        });
+      });
+      expect(checkpoints).toEqual(
+        stage === 'public-prepare'
+          ? ['salon-initial', 'staff-initial', 'reload-restored']
+          : [
+              'restart-restored',
+              'salon-current',
+              'staff-current',
+              'staff-empty',
+            ],
+      );
+      if (stage === 'public-prepare')
+        writeFileSync(receipt, JSON.stringify(current), {
+          mode: 0o600,
+          flag: 'wx',
+        });
+      Object.assign(observations, {
+        checkpoints,
+        scriptedModelSelection: true,
+        externalModelCalls: 0,
+        sourceReads: reads,
+        actionExecutions: 0,
+        c8Revisions: 0,
+        strategyRevisions: 0,
+        workReceipts: previousReceipts + reads,
+      });
     },
     210000,
   );

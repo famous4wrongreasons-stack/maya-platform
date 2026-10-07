@@ -190,9 +190,7 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
         ).toBe('Покажи услуги для записи');
         if (modelCalls > 8) throw new Error('Unbounded model loop');
         return Promise.resolve({
-          reply: input.toolResults.length
-            ? 'Выберите услугу для записи.'
-            : null,
+          reply: input.toolResults.length ? 'Выберите услугу для записи.' : '',
           toolCall: input.toolResults.length
             ? null
             : { name: 'catalog.services.read', arguments: {} },

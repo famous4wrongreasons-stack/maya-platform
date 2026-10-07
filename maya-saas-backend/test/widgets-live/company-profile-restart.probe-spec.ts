@@ -145,7 +145,7 @@ describe('company profile actual HTTP/auth/C9/PG/React [SCRIPTED MODEL, SYNTHETI
           throw new Error('Unscripted turn forbidden');
         }
         return Promise.resolve({
-          reply: null,
+          reply: '',
           toolCall: {
             name: 'company.business-hours.read',
             arguments: {},

@@ -1,0 +1,34 @@
+{
+  "kind": "public-consultation-owner-react-http-pg-restart-local-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-lifecycle-react-JXiG9b/pg",
+  "database": "maya_widget_gate_proof_lifecyclereact_8483788e9626",
+  "port": 51157,
+  "status": "passed",
+  "completed": [
+    "shell-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "har13-diagnostic-placement",
+    "public-prepare",
+    "pg-restart",
+    "public-resume",
+    "pg-stop"
+  ],
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "syntheticC8Facts": false,
+  "syntheticPublicCatalogFacts": true,
+  "providerCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 1
+  },
+  "clusterStopped": true
+}
