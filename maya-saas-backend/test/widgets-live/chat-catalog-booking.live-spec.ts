@@ -525,11 +525,13 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       messages: { content: string }[];
     };
     const data = JSON.parse(payload.messages.at(-1)!.content) as {
-      conversation: { content: string }[];
+      conversation: { role: string; content: string }[];
     };
-    expect(data.conversation[0].content).toMatch(
-      /^\[name removed\]@[a-f0-9]{32}_\d+: выберем/,
-    );
+    // Unclassified assistant prose is now excluded at the model boundary;
+    // existing server-owned semantic context still resolves the chosen master.
+    expect(data.conversation).toEqual([
+      { role: 'user', content: 'Борода завтра' },
+    ]);
     expect(
       (
         second.body as {
