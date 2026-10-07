@@ -1,0 +1,15 @@
+{
+  "stage": "resume",
+  "syntheticC7Facts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "processRestart": true,
+  "postgresRestart": true,
+  "exactReplayAfterNewPublication": {
+    "status": 201,
+    "sameWorkReceipt": true
+  },
+  "modelCalls": 0,
+  "externalFetchCalls": 0
+}

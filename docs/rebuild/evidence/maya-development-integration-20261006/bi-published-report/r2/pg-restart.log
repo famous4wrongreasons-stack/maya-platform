@@ -1,0 +1,24 @@
+waiting for server to shut down.... done
+server stopped
+waiting for server to start....2026-10-07 05:11:26.775 UTC [21157] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-07 05:11:26.776 UTC [21157] LOG:  listening on IPv4 address "127.0.0.1", port 49441
+2026-10-07 05:11:26.778 UTC [21160] LOG:  database system was shut down at 2026-10-07 05:11:26 UTC
+2026-10-07 05:11:26.781 UTC [21157] LOG:  database system is ready to accept connections
+ done
+server started
+2026-10-07 05:12:15.730 UTC [21654] ERROR:  duplicate key value violates unique constraint "C9Run_2_key"
+2026-10-07 05:12:15.730 UTC [21654] DETAIL:  Key ("tenantId", "requestKeyHash")=(cmuxnfb750000qmc9z2d1vihw, 3f6b5d7c4f7322481cc5161ac6c90cca435302b20daf46e9e020bdc5320a09d3) already exists.
+2026-10-07 05:12:15.730 UTC [21654] STATEMENT:  INSERT INTO "C9Run" SELECT * FROM jsonb_populate_record(NULL::"C9Run", $1::jsonb) RETURNING *
+2026-10-07 05:12:15.789 UTC [21654] ERROR:  could not serialize access due to concurrent update
+2026-10-07 05:12:15.789 UTC [21654] STATEMENT:  SELECT * FROM "C9Run" WHERE id=$1::uuid AND "tenantId"=$2 FOR UPDATE
+2026-10-07 05:12:15.793 UTC [21654] ERROR:  could not serialize access due to concurrent update
+2026-10-07 05:12:15.793 UTC [21654] STATEMENT:  SELECT * FROM "C9Run" WHERE id=$1::uuid AND "tenantId"=$2 FOR UPDATE
+2026-10-07 05:12:15.815 UTC [21654] ERROR:  could not serialize access due to concurrent update
+2026-10-07 05:12:15.815 UTC [21654] STATEMENT:  SELECT * FROM "C9Run" WHERE id=$1::uuid AND "tenantId"=$2 FOR UPDATE
+2026-10-07 05:12:16.194 UTC [21157] LOG:  received fast shutdown request
+2026-10-07 05:12:16.194 UTC [21157] LOG:  aborting any active transactions
+2026-10-07 05:12:16.195 UTC [21157] LOG:  background worker "logical replication launcher" (PID 21163) exited with exit code 1
+2026-10-07 05:12:16.195 UTC [21158] LOG:  shutting down
+2026-10-07 05:12:16.195 UTC [21158] LOG:  checkpoint starting: shutdown immediate
+2026-10-07 05:12:16.203 UTC [21158] LOG:  checkpoint complete: wrote 387 buffers (4.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.004 s, total=0.008 s; sync files=154, longest=0.001 s, average=0.001 s; distance=2133 kB, estimate=2133 kB; lsn=0/2400A28, redo lsn=0/2400A28
+2026-10-07 05:12:16.204 UTC [21157] LOG:  database system is shut down

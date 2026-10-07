@@ -194,7 +194,7 @@ export function comparePresentedMeasurements(
 }
 
 /** Display-only fallback when the language model is unavailable; no new calculation. */
-export function measurementText(view: MeasurementPresentation): string {
+export function measurementTextParts(view: MeasurementPresentation) {
   const labels: Record<string, string> = {
     observed_booked_value: 'Стоимость записанных услуг',
     provider_reported_gross:
@@ -219,14 +219,20 @@ export function measurementText(view: MeasurementPresentation): string {
   }
   if (!lines.length)
     lines.push('Денежные показатели за этот период не измерены.');
+  const qualifications: string[] = [];
   if (!measurementMoney(view, 'net_profit').length)
-    lines.push(
+    qualifications.push(
       'Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль.',
     );
   if (view.completeness !== 'COMPLETE')
-    lines.push(
+    qualifications.push(
       'Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты.',
     );
-  lines.push(`Состояние данных: ${view.asOf}.`);
-  return lines.join(' ');
+  qualifications.push(`Состояние данных: ${view.asOf}.`);
+  return { metrics: lines, qualifications };
+}
+
+export function measurementText(view: MeasurementPresentation): string {
+  const parts = measurementTextParts(view);
+  return [...parts.metrics, ...parts.qualifications].join(' ');
 }

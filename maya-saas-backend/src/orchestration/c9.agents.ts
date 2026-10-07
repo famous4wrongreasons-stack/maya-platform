@@ -1,3 +1,4 @@
+import { biReportExplanation } from './c9.bi-presentation';
 import { lifecycleStatement } from './c9.lifecycle-presentation';
 import { occupancyStatement } from './c9.occupancy-presentation';
 import type { OccupancyProjection } from './c9.occupancy-source';
@@ -155,6 +156,21 @@ export class C9Agents {
         reasonCodes.add('source_result_unavailable');
         continue;
       }
+      if (
+        domain === 'BUSINESS_INTELLIGENCE' &&
+        fact.kind === 'business_period'
+      ) {
+        const explanation = biReportExplanation(fact);
+        if (explanation.truncated) {
+          incomplete = true;
+          reasonCodes.add('financial_display_bound');
+        }
+        findings.push({
+          statement: explanation.statement,
+          evidence_refs: [handle],
+        });
+        continue;
+      }
       // A finding restates what the source already qualified. It adds no arithmetic.
       findings.push({
         statement:
@@ -179,7 +195,13 @@ export class C9Agents {
           ? 'PARTIAL'
           : 'COMPLETE';
     if (!facts.length) reasonCodes.add('no_permitted_qualified_evidence');
-    const limitations = [...reasonCodes].slice(0, 20);
+    const orderedReasons = reasonCodes.has('financial_display_bound')
+      ? [
+          'financial_display_bound',
+          ...[...reasonCodes].filter((r) => r !== 'financial_display_bound'),
+        ]
+      : [...reasonCodes];
+    const limitations = orderedReasons.slice(0, 20);
     return {
       result: c9AgentResult(
         {
@@ -204,7 +226,7 @@ export class C9Agents {
             hasMore: population && trusted.lifecycleHasMore === true,
             cursorRef: null,
             truncated: population && trusted.lifecycleHasMore === true,
-            reasonCodes: [...reasonCodes].slice(0, 20),
+            reasonCodes: orderedReasons.slice(0, 20),
           },
           evidence_refs: handles,
         },

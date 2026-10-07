@@ -1,3 +1,4 @@
+import { C9BiSource, BI_REPORT_CALL } from './c9.bi-source';
 import {
   C9LifecycleSource,
   type LifecycleSelection,
@@ -90,6 +91,7 @@ export class C9Orchestrator {
     @Optional() private readonly occupancy?: C9OccupancySource,
     @Optional() private readonly strategy?: C9Strategy,
     @Optional() private readonly lifecycle?: C9LifecycleSource,
+    @Optional() private readonly bi?: C9BiSource,
   ) {}
   requestIdentity(channelProof?: string) {
     return this.store.event(channelProof);
@@ -592,6 +594,143 @@ export class C9Orchestrator {
         noSideEffects: true,
         executionAuthority: false,
         canContact: false,
+        reasoning: 'deterministic',
+      },
+    };
+  }
+
+  /** One published C7 snapshot, no strategy or proposal from the read-only BI domain. */
+  async explainFinancialReport(turn: C9ConversationReads) {
+    if (!this.bi) c9Deny('context_fact_source_unavailable');
+    const root = await this.store.conversationReadRun(
+      turn.turn,
+      turn.intentHash,
+      'bi',
+    );
+    const refs = await this.bi.select(root.id);
+    const cap = c9Capability('c7.measurement.read', 'BUSINESS_INTELLIGENCE');
+    const receipt = await this.work.reserve(root.id, {
+      callKey: BI_REPORT_CALL,
+      domain: 'BUSINESS_INTELLIGENCE',
+      kind: 'TOOL_READ',
+      taskKey: cap.capabilityKey,
+      inputHash: c9Hash('bi-report-request/1', [turn.intentHash]),
+      evidenceRefs: refs,
+      reservation: {
+        contract: 'maya.c9-reservation/1',
+        toolCalls: 1,
+        modelCalls: 0,
+        domain: 'BUSINESS_INTELLIGENCE',
+        inputTokens: 0,
+        outputTokens: 0,
+        costMicros: '0',
+        priceHash: null,
+        zeroCostEvidenceRef: `local:${cap.toolOrInterface}:no-provider-charge`,
+        stepRef: null,
+      },
+    });
+    const replayed = receipt.state === 'SETTLED';
+    const sourceDigest = c9Hash('bi-report-source/1', [refs]);
+    if (replayed) {
+      const result = c9Object(receipt.resultJson);
+      if (
+        result.contract !== 'maya.c9-bi-report-receipt/1' ||
+        result.sourceDigest !== sourceDigest
+      )
+        c9Deny('source_read_receipt');
+    } else {
+      if (receipt.state !== 'RESERVED')
+        c9Deny('read_work_in_progress_or_unknown');
+      const lease = await this.work.claim(root.id, receipt.id);
+      if (!lease) c9Deny('read_work_in_progress_or_unknown');
+      try {
+        await this.context.build(
+          root.id,
+          'BUSINESS_INTELLIGENCE',
+          refs,
+          'Объясни опубликованный финансовый снимок',
+        );
+        await this.work.settle(
+          lease,
+          {
+            contract: 'maya.c9-bi-report-receipt/1',
+            sourceDigest,
+            mode: 'as_reported',
+            sourceCount: refs.length,
+          },
+          {
+            contract: 'maya.c9-usage/1',
+            usageReceiptRef: lease.workId,
+            verifiedAt: new Date().toISOString(),
+            inputTokens: 0,
+            outputTokens: 0,
+            costMicros: '0',
+            priceHash: null,
+            completionKind: 'CONFIRMED',
+          },
+        );
+      } catch (error) {
+        await this.work.hold(lease).catch(() => undefined);
+        throw error;
+      }
+    }
+    // Permissions, source expiry and scope are checked again before every exposure.
+    // Nothing asynchronous follows the final authorized source read.
+    await this.bi.authorize(root.id);
+    const { context, handles } = await this.context.build(
+      root.id,
+      'BUSINESS_INTELLIGENCE',
+      refs,
+      'Объясни опубликованный финансовый снимок',
+    );
+    const answer = this.agents.answer(
+      'BUSINESS_INTELLIGENCE',
+      'c9.business_overview',
+      context,
+      new Set([cap.capabilityKey]),
+      handles.keys(),
+    );
+    const findings = (answer.result.findings as C9Object[]).map((f) =>
+      String(f.statement),
+    );
+    return {
+      reply: [
+        refs.length
+          ? replayed
+            ? 'Повторно открыт тот же опубликованный снимок; новая версия не выбиралась.'
+            : 'Проверен последний доступный опубликованный финансовый снимок на начало запроса.'
+          : replayed
+            ? 'Открыт сохранённый результат проверки наличия отчёта; новый поиск не выполнялся.'
+            : 'Проверено наличие опубликованного финансового снимка на начало запроса.',
+        ...findings,
+        !findings.length
+          ? 'Доступного опубликованного финансового снимка для объяснения нет. Это не означает нулевую выручку или прибыль.'
+          : '',
+        refs.length
+          ? 'Факт чтения и ссылка на источник сохранены.'
+          : 'Сохранён факт проверки без найденного снимка.',
+        'План действий не создавался; записи не менялись, сообщения не отправлялись.',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      coordination: {
+        run_id: root.id,
+        scope: 'explicit_bi_report' as const,
+        state: root.state,
+        replayed,
+        current: false,
+      },
+      analysis: {
+        contract: 'maya.c9-bi-report-response/1',
+        mode: 'as_reported',
+        outcome: c9Object(answer.result.completeness).status,
+        agent: answer.result,
+        evidence: {
+          workReceiptId: receipt.id,
+          sourceHandles: [...handles.keys()],
+        },
+        noSideEffects: true,
+        executionAuthority: false,
         reasoning: 'deterministic',
       },
     };

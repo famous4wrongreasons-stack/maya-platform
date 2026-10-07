@@ -1,0 +1,21 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/measurement/measurement.pwa.spec.ts
+PASS src/orchestration/c9.release.spec.ts
+PASS src/measurement/measurement.finance.spec.ts
+PASS src/measurement/measurement.read.spec.ts
+PASS src/orchestration/c9.bi.spec.ts
+PASS src/orchestration/c9.context.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+PASS src/orchestration/c9.lifecycle.spec.ts
+PASS src/orchestration/c9.context-and-bi.spec.ts
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+PASS src/orchestration/c9.conversation-reads.spec.ts
+PASS src/orchestration/c9.bi-source.spec.ts
+PASS src/orchestration/c9.retention.spec.ts
+
+Test Suites: 14 passed, 14 total
+Tests:       325 passed, 325 total
+Snapshots:   0 total
+Time:        1.89 s, estimated 3 s
+Ran all test suites within paths "src/orchestration/c9.bi.spec.ts", "src/orchestration/c9.bi-source.spec.ts", "src/orchestration/c9.context-and-bi.spec.ts", "src/orchestration/c9.context.spec.ts", "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.occupancy.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/orchestration/c9.release.spec.ts", "src/orchestration/c9.retention.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/measurement/measurement.finance.spec.ts", "src/measurement/measurement.read.spec.ts", "src/measurement/measurement.pwa.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-bi-unit-r4.json

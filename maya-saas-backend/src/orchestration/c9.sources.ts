@@ -62,6 +62,8 @@ export class C9Sources {
       );
       return {
         sourceContract: v.contract,
+        mode: v.mode,
+        revision: v.revision,
         kind: v.kind,
         asOf: v.asOf,
         period: v.period,

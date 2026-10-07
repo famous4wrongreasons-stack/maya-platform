@@ -1,0 +1,23 @@
+PASS src/orchestration/c9.bi.spec.ts
+PASS src/orchestration/c9.bi-source.spec.ts
+FAIL src/orchestration/c9.conversation-read.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.conversation-read.spec.ts'
+
+      at runTestInternal (../node_modules/jest-runner/build/index.js:133:27)
+
+PASS src/orchestration/c9.release.spec.ts
+PASS src/orchestration/c9.context-and-bi.spec.ts
+PASS src/orchestration/c9.lifecycle.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+PASS src/orchestration/c9.context.spec.ts
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+PASS src/orchestration/c9.retention.spec.ts
+
+Test Suites: 1 failed, 9 passed, 10 total
+Tests:       114 passed, 114 total
+Snapshots:   0 total
+Time:        1.15 s
+Ran all test suites within paths "src/orchestration/c9.bi.spec.ts", "src/orchestration/c9.bi-source.spec.ts", "src/orchestration/c9.context-and-bi.spec.ts", "src/orchestration/c9.context.spec.ts", "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.occupancy.spec.ts", "src/orchestration/c9.conversation-read.spec.ts", "src/orchestration/c9.release.spec.ts", "src/orchestration/c9.retention.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-bi-unit-r1.json

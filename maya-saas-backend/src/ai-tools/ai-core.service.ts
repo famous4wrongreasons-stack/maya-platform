@@ -1,3 +1,4 @@
+import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
 import { isExplicitClientReturnRequest } from '../orchestration/c9.lifecycle-presentation';
 import { isExplicitCancellationWindowRequest } from '../orchestration/c9.occupancy-presentation';
 import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
@@ -205,6 +206,7 @@ type GroundingReport = {
 };
 
 type AiCoreCompletion = {
+  biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
   reply: string;
@@ -647,6 +649,24 @@ export class AiCoreService {
         source: 'safe_fallback',
         action: null,
         lifecycle,
+      });
+    }
+    if (
+      !clientAudience &&
+      dto.surface === 'web' &&
+      [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        toolUser.role,
+      ) &&
+      isExplicitFinancialReportRequest(this.latestUserText(dto.messages))
+    ) {
+      const turn = this.readTurns.get(dto);
+      if (!turn) this.modelFailure('conversation_history_unavailable');
+      const biReport = await this.orchestrator.explainFinancialReport(turn);
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply: biReport.reply,
+        source: 'safe_fallback',
+        action: null,
+        biReport,
       });
     }
     const memoryCommand = this.memory
@@ -2334,6 +2354,7 @@ export class AiCoreService {
   ) {
     const readTurn = this.readTurns.get(dto);
     const coordination =
+      response.biReport?.coordination ??
       response.lifecycle?.coordination ??
       response.occupancy?.coordination ??
       (readTurn
@@ -2395,6 +2416,7 @@ export class AiCoreService {
       .find((tool) => tool.resolution !== undefined)?.resolution;
     const completion = {
       request_id: dto.requestId,
+      ...(response.biReport ? { analysis: response.biReport.analysis } : {}),
       ...(response.lifecycle
         ? { recommendation: response.lifecycle.recommendation }
         : {}),

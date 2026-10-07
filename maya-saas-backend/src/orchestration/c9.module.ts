@@ -1,3 +1,4 @@
+import { C9BiSource } from './c9.bi-source';
 import { C9LifecycleSource } from './c9.lifecycle-source';
 import { C9OccupancySource } from './c9.occupancy-source';
 import { AiToolPolicyService } from '../ai-tools/ai-tool-policy.service';
@@ -37,6 +38,7 @@ import { C9PolicyService } from './c9.policy.service';
   ],
   controllers: [C9Controller],
   providers: [
+    C9BiSource,
     C9LifecycleSource,
     C9OccupancySource,
     AiToolPolicyService,

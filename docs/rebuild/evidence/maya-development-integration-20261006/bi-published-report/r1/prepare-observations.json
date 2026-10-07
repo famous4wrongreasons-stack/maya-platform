@@ -1,0 +1,139 @@
+{
+  "stage": "prepare",
+  "syntheticC7Facts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "initial": {
+    "response": {
+      "request_id": "e59fe68d-d76b-4391-88a0-b85a5de1fa06",
+      "analysis": {
+        "contract": "maya.c9-bi-report-response/1",
+        "mode": "as_reported",
+        "outcome": "PARTIAL",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "BUSINESS_INTELLIGENCE",
+          "intent": "c9.business_overview",
+          "findings": [
+            {
+              "statement": "Опубликованный финансовый снимок, версия 1. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:04:47.258Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 123,45 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль.",
+              "evidence_refs": [
+                "h_c90b2832abd1bc74e1b59b7d73870c7a02ac7d53dc9d8d780ae1c7240718c856"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "c7.measurement.read",
+              "status": "measured_incomplete",
+              "as_of": "2026-10-07T05:04:47.258Z",
+              "evidence_refs": [
+                "h_c90b2832abd1bc74e1b59b7d73870c7a02ac7d53dc9d8d780ae1c7240718c856"
+              ],
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "e8e92201809da7a4a9ce5aa6b653b6d342ca325fabc15089d7d6ebd741005c62",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "canonical_booked_history_coverage_not_proven_complete",
+                  "expense_period_completeness_not_declared",
+                  "financial_source_unavailable",
+                  "fiscal_cash_not_proven",
+                  "net_requires_complete_cash_refund_and_expense_evidence",
+                  "refund_coverage_not_supported",
+                  "source_observations_are_not_historical_reconstruction"
+                ]
+              }
+            }
+          ],
+          "confidence": "low",
+          "limitations": [
+            "financial_display_bound",
+            "canonical_booked_history_coverage_not_proven_complete",
+            "expense_period_completeness_not_declared",
+            "financial_source_unavailable",
+            "fiscal_cash_not_proven",
+            "net_requires_complete_cash_refund_and_expense_evidence",
+            "refund_coverage_not_supported",
+            "source_observations_are_not_historical_reconstruction"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "PARTIAL",
+            "requestedScopeHash": "e8e92201809da7a4a9ce5aa6b653b6d342ca325fabc15089d7d6ebd741005c62",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "financial_display_bound",
+              "canonical_booked_history_coverage_not_proven_complete",
+              "expense_period_completeness_not_declared",
+              "financial_source_unavailable",
+              "fiscal_cash_not_proven",
+              "net_requires_complete_cash_refund_and_expense_evidence",
+              "refund_coverage_not_supported",
+              "source_observations_are_not_historical_reconstruction"
+            ]
+          },
+          "evidence_refs": [
+            "h_c90b2832abd1bc74e1b59b7d73870c7a02ac7d53dc9d8d780ae1c7240718c856"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "f01eca28-6a3f-44df-948c-f03eb3ecb0d3",
+          "sourceHandles": [
+            "h_c90b2832abd1bc74e1b59b7d73870c7a02ac7d53dc9d8d780ae1c7240718c856"
+          ]
+        },
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "fe99d3e2-3743-46f5-88bd-cea24c3aee1a",
+        "scope": "explicit_bi_report",
+        "state": "DRAFT",
+        "replayed": false,
+        "current": false
+      },
+      "user_turn": {
+        "turnId": "755a8fd5-6a0e-42d7-a718-f549d184c796",
+        "conversationId": "6e9c8651-43e9-43f7-a35f-1bf1ea2be9d2"
+      },
+      "reply": "Проверен последний доступный опубликованный финансовый снимок на начало запроса. Опубликованный финансовый снимок, версия 1. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:04:47.258Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 123,45 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль. Показана ограниченная часть показателей снимка; остальные не приняты за ноль. Факт чтения и ссылка на источник сохранены. План действий не создавался; записи не менялись, сообщения не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "sourceCount": 1,
+    "actionCount": 0
+  },
+  "checkpoints": [
+    "initial",
+    "reload-restored"
+  ],
+  "c7ResultCount": 1,
+  "actionCountBefore": 0,
+  "actionCountAfter": 0,
+  "strategyRevisions": 0,
+  "modelCalls": 0,
+  "externalFetchCalls": 0
+}

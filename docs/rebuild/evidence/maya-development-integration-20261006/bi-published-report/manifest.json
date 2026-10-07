@@ -1,0 +1,370 @@
+{
+  "kind": "explicit-owner-published-c7-bi-explanation",
+  "base": "ba6328a4",
+  "qualification": "NOT_ISSUED",
+  "acceptanceRun": "r2",
+  "priorRed": "r1 restore expectation preceded correct latest-completion semantics; fixed probe ordering, not runtime history",
+  "targetedTests": 325,
+  "targetedSuites": 14,
+  "productionTypes": "PASS heap4096",
+  "scopedLint": "PASS 12 files; changed probe lint final PASS",
+  "currentReactCheckpoints": 4,
+  "newOsProcess": true,
+  "postgresRestart": true,
+  "realUiLogin": true,
+  "exactReplayAfterNewPublication": true,
+  "concurrentStatuses": [
+    201,
+    201
+  ],
+  "concurrentNewReceiptCount": 1,
+  "foreignRunStatus": 400,
+  "branchRefusalStatus": 400,
+  "financeRevocationStatus": 403,
+  "AECountBefore": 0,
+  "AECountAfter": 0,
+  "strategyRevisions": 0,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "C7Counts": {
+    "prepare": 1,
+    "resume": 2,
+    "qualification": "the fixture publishes one later snapshot before resume; no request publishes or recomputes C7"
+  },
+  "sourceFacts": "synthetic owned internal facts, actual C7 publisher/reader, actual C9/HTTP/React",
+  "realModelAcceptance": false,
+  "providerAcceptance": false,
+  "newSchema": false,
+  "newRetentionClass": false,
+  "newIdentityAuthority": false,
+  "C10Complete": false,
+  "backgroundAuthority": false,
+  "sourceHashes": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "82bbd1a0201f70febdb5683f8c037ba3ed354be5b32f2d61f68c63fd3b1caf74"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.presentation.ts",
+      "sha256": "5bb4e3059afb76fabad58040f486aa4e7ab8bdfe58564d9ee1c0131dfac0ad5a"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.agents.ts",
+      "sha256": "9575d0ecc65deaaf68aebefd35d9cc1de6201bc9066c74316879280a68ca7c4e"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.bi-source.ts",
+      "sha256": "d66dcbd433d3ba761a9036e42ab8e61221d72b6ba315bdfc9a92f588056e85c3"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.bi-source.spec.ts",
+      "sha256": "eace77cac08e140f4c4e8c9a0387f3202b272af1a8cfef9f1d6a9ff19cf347c8"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.bi-presentation.ts",
+      "sha256": "03aba0b72995475f5bbfab0791abb199f21e46abcf28d57838209712cb62704e"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.bi.spec.ts",
+      "sha256": "41a14ab0401d16b4ffe73286a56666b0ab61cfb88475c5ae9e815eda595d5c85"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.module.ts",
+      "sha256": "e5bce4c04dcdff5fd731a5ba9c9f8af6cd0d6f05e23b98afde285df7ffb8a1ae"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "sha256": "469bfdec14d96784a84ecff716f0adcb6513814047f12fec4c0d5360719306a3"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.sources.ts",
+      "sha256": "8cf3daf8c88dae89fb67f39c26e3db003db716314c4a295635fe7626992243c6"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.store.ts",
+      "sha256": "6d146081c86cb5b67f096e7f68d527c865629762c7e6423d07ae190b5253612b"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.work.ts",
+      "sha256": "9752b80b35503b7d54b0c3af06999c0d4c98130faaabaaa6bd6949aec5c451a3"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "sha256": "b36af70a59307ad2f751ce920b635e337546d1e6730989ee80fe9589eb7304bb"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/bi-owner-react.probe-spec.ts",
+      "sha256": "619084f010ca0940e419db85887ed77bc88f715575ece829601afb25a72c543e"
+    },
+    {
+      "path": "maya-saas-backend/scripts/bi-react-proof.mjs",
+      "sha256": "2db482b236b15757ac8576382c9f8e575eeca0e9b200e982902899252272bd8f"
+    },
+    {
+      "path": "maya-carrier-react/test/bi-owner-browser-probe.mjs",
+      "sha256": "6fb5a26200e4ce8754550da631631b4c18e1a8ab540358fd742c2d01d22f9ddd"
+    },
+    {
+      "path": "maya-carrier-react/test/bi-owner-browser-guard.mjs",
+      "sha256": "afa19e87db4afee434865193fe9f80f26b2f3c694659a3057eeafe5e66e4ca2c"
+    }
+  ],
+  "evidenceHashes": [
+    {
+      "path": "independent-review.txt",
+      "sha256": "f84c1db6f5f2fc5da436cf06a3fea8969773c25dba65afa8f676c0d0eb5b7134"
+    },
+    {
+      "path": "maya-bi-cleanup.json",
+      "sha256": "8ac2bd32f1d000849302f0d0cd998dd5600cabbc5a0155d9c50c6be7cfe8a17c"
+    },
+    {
+      "path": "maya-bi-lint-r1.log",
+      "sha256": "b0748aeef5800e998149334a7a0a48274a401e80c5027789c59b27cf94aa88e6"
+    },
+    {
+      "path": "maya-bi-lint-r2.log",
+      "sha256": "3937ad9059a6c00de1b2c04514e58b1ef8674f632fdfb39ad94969aa6a69d6e5"
+    },
+    {
+      "path": "maya-bi-lint-r3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-bi-lint-r4.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-bi-probe-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-bi-types-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-bi-types-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-bi-types-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-bi-unit-r1.json",
+      "sha256": "09c7a9b9d155f0b764b738ec9ade639babd67ab118cf6e1ef28a6f8e72160631"
+    },
+    {
+      "path": "maya-bi-unit-r1.log",
+      "sha256": "873b59a49cc459d9e137590a28d558d195854b9199e33bde2caca7db0063316f"
+    },
+    {
+      "path": "maya-bi-unit-r2.json",
+      "sha256": "211720c4e418bf1ef5a4dc730ba9fdf7668c3c57f144cdba71b3f75aa0a7a412"
+    },
+    {
+      "path": "maya-bi-unit-r2.log",
+      "sha256": "0b49210fc7736abea0a1c9fbe7ccd097f7b4847f43f852493256633ce526c3c6"
+    },
+    {
+      "path": "maya-bi-unit-r3.json",
+      "sha256": "34ae7bf53c44cab71cab1ba159bc6cd52790d6aa4f16dd5402b49b37179bdbf1"
+    },
+    {
+      "path": "maya-bi-unit-r3.log",
+      "sha256": "a7c76bab9f38d066b44c5df7cec6830541b59a13f105fbfe3c699e80855ceb3d"
+    },
+    {
+      "path": "maya-bi-unit-r4.json",
+      "sha256": "48eeb8e0f3bac926a1d8c6559d01cec6f11c2e83b495dec31c0a02f8a6fd8b7f"
+    },
+    {
+      "path": "maya-bi-unit-r4.log",
+      "sha256": "f951bbaac28c010a047a03e9ac6b070765d26634e3f71457ec90978c199da102"
+    },
+    {
+      "path": "maya-bi-unit-r5.json",
+      "sha256": "0f9624126531c96ff4ed8da327531012f31828c655c7dfc9adb969eca09f755b"
+    },
+    {
+      "path": "maya-bi-unit-r5.log",
+      "sha256": "9d2214c46c554c8c34914d4ac63cdddd3ebe085cc585485adf784d627c8f618f"
+    },
+    {
+      "path": "r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r1/initdb.log",
+      "sha256": "2f9695793086c39743068142c21518a9fbe7a8a06112c3fbda1c395267b75a6b"
+    },
+    {
+      "path": "r1/manifest.json",
+      "sha256": "43687d3b1de22527e6c0d07318cb9503252a5bff72ad273a20865c6b7f45a17b"
+    },
+    {
+      "path": "r1/migrations.log",
+      "sha256": "1df7afddf518b855503c97e7977d87fd5853f0cc8341bf01b96034dde7229615"
+    },
+    {
+      "path": "r1/pg-restart.log",
+      "sha256": "b4a805d87a3f17b0c46c5622d06b4df03c307de063c51ee1982b761a929e7039"
+    },
+    {
+      "path": "r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r1/postgres.log",
+      "sha256": "1d2c0df8c2e94c5648ac2da1c66cffaed4e8c2d144abb019371c0d562208d111"
+    },
+    {
+      "path": "r1/prepare-browser/output/playwright/browser.json",
+      "sha256": "abe644db7e9a42d8aac312d11713fa906b56d24c7d451173c374e512606e7a3a"
+    },
+    {
+      "path": "r1/prepare-browser/output/playwright/initial.png",
+      "sha256": "51165cac020de660c47b94bc215c19c5fca0e58a1f891360f799dc2e06662564"
+    },
+    {
+      "path": "r1/prepare-browser/output/playwright/reload-restored.png",
+      "sha256": "09963848c0b507a1dccd0033db9d556f3d63e8d299a60f423ff6a83a9aa94dde"
+    },
+    {
+      "path": "r1/prepare-jest.json",
+      "sha256": "bb4ee1558733a4167f3b32504aa6f14a978316f8c7fba511436054c07ab7e2e0"
+    },
+    {
+      "path": "r1/prepare-observations.json",
+      "sha256": "6ceda48f1e6b6cf721eeb0b8c9dcd23b7d133e2edcb407e468761164000e70ef"
+    },
+    {
+      "path": "r1/prepare.log",
+      "sha256": "3d2c34582bd35d213a55ad3cfd38b2aa4cc8dbbef17541d95dc3bfb42377533e"
+    },
+    {
+      "path": "r1/react-build.log",
+      "sha256": "a1f7933a71e04daacc5b882bda9631e68671c2e5b4e955014393e0f8b5479743"
+    },
+    {
+      "path": "r1/resume-browser/output/playwright/browser.json",
+      "sha256": "9f05e572b98dc6d0a4682883967dd92ef88bff66521430369e251d71e8afc1e2"
+    },
+    {
+      "path": "r1/resume-browser/output/playwright/failure.png",
+      "sha256": "b7756e52a044f83b638c7cc8c79f809d46d456981e44c0003fa12493e165e5fe"
+    },
+    {
+      "path": "r1/resume-jest.json",
+      "sha256": "d0f9f87e924b40fde713e012aa88476f7a872b976cc9832cc85e34d969551774"
+    },
+    {
+      "path": "r1/resume-observations.json",
+      "sha256": "c8a67280c6acd52910f2848a2361f59dd0feb0bda2bfe0856481839e09e103ec"
+    },
+    {
+      "path": "r1/resume.log",
+      "sha256": "4f2945595eefbc65eb9a8dccfc43786551b0dedfcb75dd9d9da5086510bf362e"
+    },
+    {
+      "path": "r1/shell-build.log",
+      "sha256": "b0beccd0e78cf1caa2dcdb17c2f0c9b160e6d1fc4b1e3bfc02f872857fa51bbd"
+    },
+    {
+      "path": "r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "r2/initdb.log",
+      "sha256": "28cb021504a830a2657e905b7f826590e188540d3bd96325626b842d8ad692f7"
+    },
+    {
+      "path": "r2/manifest.json",
+      "sha256": "c11985f2811e7117c8e5c5058b0f1e68ff706c8b7a476d86367270b23f174705"
+    },
+    {
+      "path": "r2/migrations.log",
+      "sha256": "57d4adfe56d08b60a73bd072195d61468ff61c5e81a266534197baa2a9e560e7"
+    },
+    {
+      "path": "r2/pg-restart.log",
+      "sha256": "6a2b9e13e9f009a0cb2d4c60a26436789ddcc327a3c0ccf395fea7a4a96811df"
+    },
+    {
+      "path": "r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "r2/postgres.log",
+      "sha256": "f4a36dc4f6e9a5aba4d4db3bd88de099bb80013aea184002decc020dec6fc307"
+    },
+    {
+      "path": "r2/prepare-browser/output/playwright/browser.json",
+      "sha256": "81875cafcd0f9c90960721efb78ec6eefdd6e8255c8f6b0b68523aaa3048ab9f"
+    },
+    {
+      "path": "r2/prepare-browser/output/playwright/initial.png",
+      "sha256": "d9dd984835f5e7fe4f12020518e0389ac3894e4509b95a9b78bd1b2a31e527fd"
+    },
+    {
+      "path": "r2/prepare-browser/output/playwright/reload-restored.png",
+      "sha256": "0a7a9eb902c5e7daa804abe55665b23ca1137e5a72dd8d8bf2da3b9106726424"
+    },
+    {
+      "path": "r2/prepare-jest.json",
+      "sha256": "b43d06d3af1bc5d8ec61888ed363b358ca08e43df552c9ccb10c655adc5018b9"
+    },
+    {
+      "path": "r2/prepare-observations.json",
+      "sha256": "2aafb33a822ceac9fc37d56393c736e9ec699394b229f9264f85e3fc42433530"
+    },
+    {
+      "path": "r2/prepare.log",
+      "sha256": "6e748c4fdff52a3fd360ce25be578e79c803f33c9fc830d8f40cf3414584cd9b"
+    },
+    {
+      "path": "r2/react-build.log",
+      "sha256": "a1f7933a71e04daacc5b882bda9631e68671c2e5b4e955014393e0f8b5479743"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/browser.json",
+      "sha256": "296a79e321d04022cfca8178dc732332c38babde9d0cea9dbbc9cb1aa332b0a3"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/initial.png",
+      "sha256": "469621cc42c4a4f870f88b730cc0834570c34705ff72e7182242dbe994b57526"
+    },
+    {
+      "path": "r2/resume-browser/output/playwright/restart-restored.png",
+      "sha256": "0a7a9eb902c5e7daa804abe55665b23ca1137e5a72dd8d8bf2da3b9106726424"
+    },
+    {
+      "path": "r2/resume-jest.json",
+      "sha256": "11977de4bd3806fc71a3cca08a211c8e556225fbe47c3a37d12f541014bf6359"
+    },
+    {
+      "path": "r2/resume-observations.json",
+      "sha256": "0d1dbfeb85ae0d29c65e9a7ebdeb3ed551c1cddd15ed6dd080cbaf5df79d77bc"
+    },
+    {
+      "path": "r2/resume.log",
+      "sha256": "f1fc7d9bec4130e50593de41236382cadded24aa82c42e3f82e54f27c922d31c"
+    },
+    {
+      "path": "r2/shell-build.log",
+      "sha256": "b0beccd0e78cf1caa2dcdb17c2f0c9b160e6d1fc4b1e3bfc02f872857fa51bbd"
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+{
+  "contract": "maya.bi-owner-browser/1",
+  "status": "passed",
+  "syntheticC7Facts": true,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "restart-restored": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nОбъясни последний опубликованный финансовый отчёт\nMAYA:\nПроверен последний доступный опубликованный финансовый снимок на начало запроса. Опубликованный финансовый снимок, версия 1. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:10:09.601Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 123,45 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль. Факт чтения и ссылка на источник сохранены. План действий не создавался; записи не менялись, сообщения не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "initial": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nОбъясни последний опубликованный финансовый отчёт\nMAYA:\nПроверен последний доступный опубликованный финансовый снимок на начало запроса. Опубликованный финансовый снимок, версия 1. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:10:09.601Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 123,45 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль. Факт чтения и ссылка на источник сохранены. План действий не создавался; записи не менялись, сообщения не отправлялись.\nВы:\nОбъясни последний опубликованный финансовый отчёт\nMAYA:\nПроверен последний доступный опубликованный финансовый снимок на начало запроса. Опубликованный финансовый снимок, версия 2. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:11:27.881Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 543,21 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль. Факт чтения и ссылка на источник сохранены. План действий не создавался; записи не менялись, сообщения не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "initial": {
+      "request_id": "2a3c1aa4-80d8-4393-b348-385bb8d3b79f",
+      "analysis": {
+        "contract": "maya.c9-bi-report-response/1",
+        "mode": "as_reported",
+        "outcome": "PARTIAL",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "BUSINESS_INTELLIGENCE",
+          "intent": "c9.business_overview",
+          "findings": [
+            {
+              "statement": "Опубликованный финансовый снимок, версия 2. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:11:27.881Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 543,21 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль.",
+              "evidence_refs": [
+                "h_f74aaa785f9393ae1e3ad78b9adfc7e451263d1a5680ca840f1e491cb369823e"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "c7.measurement.read",
+              "status": "measured_incomplete",
+              "as_of": "2026-10-07T05:11:27.881Z",
+              "evidence_refs": [
+                "h_f74aaa785f9393ae1e3ad78b9adfc7e451263d1a5680ca840f1e491cb369823e"
+              ],
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "216956a475c2c9d22308be6f1ed03cdb8362cae2ba581bef55b0e60854951119",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "canonical_booked_history_coverage_not_proven_complete",
+                  "expense_period_completeness_not_declared",
+                  "financial_source_unavailable",
+                  "fiscal_cash_not_proven",
+                  "net_requires_complete_cash_refund_and_expense_evidence",
+                  "refund_coverage_not_supported",
+                  "source_observations_are_not_historical_reconstruction"
+                ]
+              }
+            }
+          ],
+          "confidence": "low",
+          "limitations": [
+            "financial_display_bound",
+            "canonical_booked_history_coverage_not_proven_complete",
+            "expense_period_completeness_not_declared",
+            "financial_source_unavailable",
+            "fiscal_cash_not_proven",
+            "net_requires_complete_cash_refund_and_expense_evidence",
+            "refund_coverage_not_supported",
+            "source_observations_are_not_historical_reconstruction"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "PARTIAL",
+            "requestedScopeHash": "216956a475c2c9d22308be6f1ed03cdb8362cae2ba581bef55b0e60854951119",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "financial_display_bound",
+              "canonical_booked_history_coverage_not_proven_complete",
+              "expense_period_completeness_not_declared",
+              "financial_source_unavailable",
+              "fiscal_cash_not_proven",
+              "net_requires_complete_cash_refund_and_expense_evidence",
+              "refund_coverage_not_supported",
+              "source_observations_are_not_historical_reconstruction"
+            ]
+          },
+          "evidence_refs": [
+            "h_f74aaa785f9393ae1e3ad78b9adfc7e451263d1a5680ca840f1e491cb369823e"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "0595b5d5-3f78-4380-b77f-b3526330a099",
+          "sourceHandles": [
+            "h_f74aaa785f9393ae1e3ad78b9adfc7e451263d1a5680ca840f1e491cb369823e"
+          ]
+        },
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "86a48838-6111-44db-afd8-c3aba03b3304",
+        "scope": "explicit_bi_report",
+        "state": "DRAFT",
+        "replayed": false,
+        "current": false
+      },
+      "user_turn": {
+        "turnId": "3da4b224-89aa-4ad8-ab08-90e830907326",
+        "conversationId": "8734eb36-0cce-48d4-aa3e-3886e640a19c"
+      },
+      "reply": "Проверен последний доступный опубликованный финансовый снимок на начало запроса. Опубликованный финансовый снимок, версия 2. Период 2026-10-06T00:00:00.000Z — 2026-10-07T00:00:00.000Z (конец не включён), часовой пояс UTC. Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль. Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты. Состояние данных: 2026-10-07T05:11:27.881Z. Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена. Стоимость записанных услуг: 543,21 ₽. Оборот операций по данным CRM (не подтверждённая касса): не измерено. Подтверждённые начисления зарплаты: не измерено. Подтверждённые поступления: не измерено. Показана часть показателей; остальные не приняты за ноль. Факт чтения и ссылка на источник сохранены. План действий не создавался; записи не менялись, сообщения не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:49646",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/RGYTJPHA/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

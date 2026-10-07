@@ -1,0 +1,20 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "status": "failed",
+      "clusterStopped": true,
+      "databasePortClosed": true,
+      "postmasterPidFileAbsent": true
+    },
+    {
+      "run": 2,
+      "status": "passed",
+      "clusterStopped": true,
+      "databasePortClosed": true,
+      "postmasterPidFileAbsent": true
+    }
+  ],
+  "ownedChromeCount": 0,
+  "ownedChromePids": []
+}

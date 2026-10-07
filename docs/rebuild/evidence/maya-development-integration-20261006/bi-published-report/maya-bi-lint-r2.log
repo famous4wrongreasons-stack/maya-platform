@@ -1,0 +1,18 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.bi-presentation.ts
+  62:49  error  Invalid type "unknown" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.bi.spec.ts
+  67:16  error  Replace `⏎······.fn()⏎······` with `.fn()`    prettier/prettier
+  70:1   error  Replace `········` with `······`              prettier/prettier
+  71:1   error  Delete `··`                                   prettier/prettier
+  72:1   error  Replace `··········` with `········`          prettier/prettier
+  73:1   error  Delete `··`                                   prettier/prettier
+  74:1   error  Replace `··············` with `············`  prettier/prettier
+  75:9   error  Delete `··`                                   prettier/prettier
+  76:1   error  Delete `··`                                   prettier/prettier
+  77:1   error  Delete `··`                                   prettier/prettier
+
+✖ 10 problems (10 errors, 0 warnings)
+  9 errors and 0 warnings potentially fixable with the `--fix` option.
+
