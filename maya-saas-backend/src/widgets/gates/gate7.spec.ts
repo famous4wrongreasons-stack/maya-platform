@@ -802,6 +802,143 @@ describe('YC-SP1 F74a — typed canonical chat approval source and malformed reg
   });
 });
 
+describe('GR-PC1 F74b — typed canonical chat approval source and malformed registry counterfactuals', () => {
+  const approvalRecord = (over: Partial<IntentRecordRow> = {}) =>
+    record({
+      widgetKind: 'APPROVAL',
+      effect: 'COMMIT',
+      ...AE('crm.goods.receipt.create.v1'),
+      confirmationOfKind: 'approval',
+      confirmationOfRef: 'actual-ai-approval-id',
+      producedByIntentTokenHash: null,
+      approvalOfIntentRef: null,
+      approvalDecision: 'approve',
+      frozenNounsJson: { approval: 'server-sealed-approval-handle' },
+      ...over,
+    });
+  const allowed = [row('crm.goods.receipt.create.v1', 'APPROVAL', 'approval')];
+  const paired = [
+    pair('inventory.goods.receipt.prepare', 'crm.goods.receipt.create.v1'),
+  ];
+  const run = (
+    over: Partial<IntentRecordRow>,
+    pairing: readonly ProposePairingRow[] = paired,
+  ) =>
+    withSubstitutes({ allowlist: allowed, pairing }, (g) =>
+      g(ctx(approvalRecord(over)), NEVER_ASKED.load),
+    );
+
+  it('admits the canonical chat record shape against the actual registered F38 pair', async () => {
+    expect((await gate7(ctx(approvalRecord()), NEVER_ASKED.load)).outcome).toBe(
+      'pass',
+    );
+  });
+
+  it.each(['approve', 'reject'])(
+    'admits %s with retained owner noun and no invented producing record',
+    async (approvalDecision) => {
+      const loader = producing({});
+      const verdict = await withSubstitutes(
+        { allowlist: allowed, pairing: paired },
+        (g) => g(ctx(approvalRecord({ approvalDecision })), loader.load),
+      );
+      expect(verdict.outcome).toBe('pass');
+      expect(loader.asked).toEqual([]);
+    },
+  );
+
+  it.each([
+    [
+      'fake producing record',
+      { producedByIntentTokenHash: 'fake-request-approval-hash' },
+    ],
+    [
+      'fake requesting record',
+      { approvalOfIntentRef: 'fake-request-approval-id' },
+    ],
+    ['missing decision', { approvalDecision: null }],
+    ['unknown decision', { approvalDecision: 'allow' }],
+    ['missing noun', { frozenNounsJson: null }],
+    [
+      'wrong noun field',
+      { frozenNounsJson: { record: 'server-sealed-approval-handle' } },
+    ],
+    [
+      'extra noun',
+      {
+        frozenNounsJson: {
+          approval: 'server-sealed-approval-handle',
+          other: 'foreign',
+        },
+      },
+    ],
+    ['array noun', { frozenNounsJson: ['server-sealed-approval-handle'] }],
+    [
+      'object in handle',
+      { frozenNounsJson: { approval: { id: 'actual-ai-approval-id' } } },
+    ],
+    ['empty handle', { frozenNounsJson: { approval: '' } }],
+  ] satisfies Array<[string, Partial<IntentRecordRow>]>)(
+    'refuses %s before owner decision',
+    async (_name, over) => {
+      const verdict = await run(over);
+      expect([code(verdict), clause(verdict)]).toEqual([
+        'booking_confirmation_required',
+        'C5a',
+      ]);
+    },
+  );
+
+  it('requires an approval ref and the APPROVAL kind', async () => {
+    for (const over of [
+      { confirmationOfRef: null },
+      { confirmationOfKind: 'draft' },
+    ])
+      expect(clause(await run(over))).toBe('C4');
+    for (const widgetKind of [
+      'SETTINGS_DRAFT',
+      'PAYMENT_HANDOFF',
+      'BOOKING_CONFIRMATION',
+    ])
+      expect(clause(await run({ widgetKind }))).toBe('C6');
+  });
+
+  it('refuses missing, duplicate and wrong-owner pairings independently of a planted allowlist row', async () => {
+    for (const pairing of [
+      [],
+      [...paired, ...paired],
+      [pair('expenses.create', 'crm.goods.receipt.create.v1')],
+      [pair('catalog.service.price.update', 'crm.goods.receipt.create.v1')],
+    ])
+      expect(clause(await run({}, pairing))).toBe('C8b');
+  });
+
+  it('does not extend canonical-chat source admission to B35 or other financial controls', async () => {
+    const b35 = 'communication.bulk-campaign.admit.v2';
+    const ordinary = await withSubstitutes(
+      {
+        allowlist: [row(b35, 'APPROVAL', 'approval')],
+        pairing: [pair('b35.confirm', b35)],
+      },
+      (g) => g(ctx(approvalRecord({ ...AE(b35) })), NEVER_ASKED.load),
+    );
+    expect(clause(ordinary)).toBe('C5a');
+    for (const key of [
+      'loyalty.internal-adjust.execute.v1',
+      'expenses.create.execute.v1',
+    ]) {
+      const verdict = await withSubstitutes(
+        { allowlist: [row(key, 'APPROVAL', 'approval')] },
+        (g) => g(ctx(approvalRecord({ ...AE(key) })), NEVER_ASKED.load),
+      );
+      expect([code(verdict), clause(verdict)]).toEqual([
+        'effect_not_admissible',
+        'C9a',
+      ]);
+    }
+  });
+});
+
 describe('the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b', () => {
   it('G7-P-C11-CREATE: the canonical create subject matches the live booking row', async () => {
     const v = await gate7(ctx(commitRecord()), NEVER_ASKED.load);

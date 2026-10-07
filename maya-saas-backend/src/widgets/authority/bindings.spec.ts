@@ -61,7 +61,9 @@ describe('the runtime allowlist binding carries confirmation_kind', () => {
     }
     expect(
       Object.keys(AE_WIDGET_COMMIT_ALLOWLIST).filter(
-        (key) => key !== SERVICE_PRICE_CAPABILITY,
+        (key) =>
+          key !== SERVICE_PRICE_CAPABILITY &&
+          key !== 'crm.goods.receipt.create.v1',
       ),
     ).toHaveLength(10);
     expect(AE_WIDGET_COMMIT_ALLOWLIST[SERVICE_PRICE_CAPABILITY]).toEqual({

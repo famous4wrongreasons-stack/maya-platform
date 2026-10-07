@@ -1,0 +1,9 @@
+{
+  "contract": "maya.goods-ui-profile-candidate/1",
+  "previousCommit": "ba5a9dde",
+  "previousFileSha256": "a9006692818d37e0f7449335898eefc60e57d5b03cdca2c8ae79c0bbdbd3789d",
+  "candidateFileSha256": "e3d492284cd44b6426f92004f3279da13c9f08e754e2dfdc574bda60867ba47b",
+  "registryDigest": "9bfd4305fcc6e21980f3457467f25f335f1e08907c4777e756b18bf559cda2a5",
+  "certificate": "NOT_ISSUED",
+  "oldCertificatesChanged": false
+}

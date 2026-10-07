@@ -148,6 +148,7 @@ const fixture = () => {
       .fn()
       .mockResolvedValue({ envelope: { widget_id: 'personal-catalog-child' } }),
     emitJournalDetail: jest.fn(),
+    emitGoodsReceiptDetail: jest.fn(),
     emitServicePriceDetail: jest
       .fn<
         ReturnType<NavigateWidgetMinterPort['emitServicePriceDetail']>,

@@ -1,3 +1,8 @@
+import {
+  INVENTORY_RECEIPT_PURCHASE_COST,
+  isInventoryReceiptPurchaseCost,
+} from '../inventory/goods-receipt-widget.contract';
+import { GOODS_RECEIPT_TOOL } from '../../crm/goods-receipt.contract';
 // P-23 — F31 at EP-REGISTRY-LOAD.
 
 import { ActionCapabilityRegistry } from '../../action-engine/action-engine.registry';
@@ -95,7 +100,7 @@ export const allowlistStartupProblems = (
       );
 
     const cataloguePrice = isCataloguePriceConfiguration(cap);
-    if (MONEY(cap) && !cataloguePrice)
+    if (MONEY(cap) && !cataloguePrice && !isInventoryReceiptPurchaseCost(cap))
       problems.push(`AL-2 ${cap.capability}: MONEY veto`);
     if (
       cataloguePrice &&
@@ -108,6 +113,18 @@ export const allowlistStartupProblems = (
     )
       problems.push(
         `AL-2 ${cap.capability}: catalogue price typed admission veto`,
+      );
+    if (
+      isInventoryReceiptPurchaseCost(cap) &&
+      (row.family !== INVENTORY_RECEIPT_PURCHASE_COST ||
+        row.confirmation_kind !== 'APPROVAL' ||
+        row.min_verification !== 'SESSION_VERIFIED' ||
+        row.requires_ae_approval !== false ||
+        row.propose.space !== 'C9' ||
+        row.propose.key !== GOODS_RECEIPT_TOOL)
+    )
+      problems.push(
+        `AL-2 ${cap.capability}: goods receipt typed admission veto`,
       );
     if (BOOKING(cap) && row.confirmation_kind !== 'BOOKING_CONFIRMATION')
       problems.push(`AL-2 ${cap.capability}: BOOKING kind veto`);

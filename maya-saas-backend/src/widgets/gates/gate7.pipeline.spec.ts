@@ -113,7 +113,7 @@ describe('S-G7-F69 [BUILD] — the two halves of F69 are the contract’s own (C
   it('S-G7-F69-SHA: the contract this suite reads is the owner-approved V1.4 contract', () => {
     expect(
       createHash('sha256').update(fs.readFileSync(CONTRACT)).digest('hex'),
-    ).toBe('9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769');
+    ).toBe('0843f3cfc8c651423a8d3a355092aa27742163bcf5fc5ba99f8328a4f033398c');
   });
 
   it('S-G7-F69-ROWS: F69 has one row per effect class, and the rows are the eight `EffectClass` members', () => {
@@ -228,10 +228,13 @@ describe('S-G7-PAIR [BUILD] — the pairing is `AE_PROPOSE_PAIRING`, never the a
 });
 
 describe('S-G7-F74a [BUILD] — the additional origin is a closed semantic subtype', () => {
-  it('keeps the MONEY veto and derives the sole exception from the registered descriptor', () => {
+  it('keeps the MONEY veto and derives each separate exception from its registered descriptor', () => {
     const source = codeOf(read(GATE7));
     expect(source).toContain('isCataloguePriceConfiguration(cap)');
-    expect(source).toMatch(/MONEY\(cap\)\s*&&\s*!cataloguePrice/);
+    expect(source).toMatch(
+      /MONEY\(cap\)\s*&&\s*!cataloguePrice\s*&&\s*!goodsReceipt/,
+    );
+    expect(source).toContain('isInventoryReceiptPurchaseCost(cap)');
     expect(source).not.toContain(
       "cap.capability === 'crm.service.fixed-price.update.v1'",
     );
@@ -248,14 +251,14 @@ describe('S-G7-F74a [BUILD] — the additional origin is a closed semantic subty
       'r.approvalOfIntentRef !== null',
       'Object.keys(nouns).length !== 1',
       'pairingForAe(ae.key)',
-      'pairing.propose.key !== SERVICE_PRICE_TOOL',
+      'goodsReceipt ? GOODS_RECEIPT_TOOL : SERVICE_PRICE_TOOL',
     ])
       expect(source).toContain(predicate);
     expect(source).toMatch(
       /producingRecordProblem\(\s*commit\s*,\s*loadProducingRecord/,
     );
     expect(source).toMatch(
-      /if \(cataloguePrice\)[\s\S]*?else\s*\{\s*const producing = await producingRecordProblem/,
+      /if \(cataloguePrice \|\| goodsReceipt\)[\s\S]*?else\s*\{\s*const producing = await producingRecordProblem/,
     );
   });
 });

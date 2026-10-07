@@ -1,3 +1,4 @@
+import { goodsReceiptDecision } from '../inventory/goods-receipt-intent-template.registry';
 import { randomBytes } from 'node:crypto';
 
 import type { IntentProposal } from '../../widget-contract/derived-shapes';
@@ -49,6 +50,11 @@ export interface ServicePriceApprovalLinkage {
   readonly payloadHash: string;
   readonly revalidate: () => Promise<void>;
 }
+export interface GoodsReceiptApprovalLinkage {
+  readonly approvalId: string;
+  readonly payloadHash: string;
+  readonly revalidate: () => Promise<void>;
+}
 
 const cellTrue = (label: string): WidgetIntent['enabled'] => ({
   state: 'KNOWN',
@@ -80,6 +86,7 @@ export const mintIntentMaterial = (args: {
   readonly envelopeExpiresAt: Date;
   readonly slotless: boolean;
   readonly servicePriceLinkage?: ServicePriceApprovalLinkage | null;
+  readonly goodsReceiptLinkage?: GoodsReceiptApprovalLinkage | null;
 }): MintedIntentMaterial => {
   const { row } = args.resolved;
   const subjects = subjectFields(args.resolved);
@@ -104,8 +111,14 @@ export const mintIntentMaterial = (args: {
     throw new IntentTemplateRefusal('registered_selection_domain_invalid');
 
   const utteranceTemplate = args.slotless ? row.label : row.utteranceTemplate;
-  const priceDecision = servicePriceDecision(args.proposal.intent_template_key);
-  if (priceDecision !== null && !args.servicePriceLinkage)
+  const template = args.proposal.intent_template_key;
+  const goodsDecision = goodsReceiptDecision(template);
+  const priceDecision = servicePriceDecision(template) ?? goodsDecision;
+  const linkage =
+    goodsDecision === null
+      ? args.servicePriceLinkage
+      : args.goodsReceiptLinkage;
+  if (priceDecision !== null && !linkage)
     throw new IntentTemplateRefusal('service_price_approval_context_required');
   const intent: WidgetIntent = {
     intent_ref: `i${args.intentIndex + 1}`,
@@ -147,7 +160,7 @@ export const mintIntentMaterial = (args: {
             requires_readback: false,
             readback_ref: null,
             readback_text: null,
-            idempotency_key: `service-price:${args.servicePriceLinkage!.approvalId}:${args.servicePriceLinkage!.payloadHash}:${priceDecision}`,
+            idempotency_key: `${goodsDecision === null ? 'service-price' : 'goods-receipt'}:${linkage!.approvalId}:${linkage!.payloadHash}:${priceDecision}`,
             approval_policy: 'actor',
           },
     authority_hint: {
@@ -202,6 +215,7 @@ export const intentRecordData = (args: {
   readonly c9Domain?: C9Domain | null;
   readonly bookingLinkage?: BookingConfirmationLinkage | null;
   readonly servicePriceLinkage?: ServicePriceApprovalLinkage | null;
+  readonly goodsReceiptLinkage?: GoodsReceiptApprovalLinkage | null;
 }): Record<string, unknown> => {
   const { intent } = args.material;
   if (args.material.tokenHash === null)
@@ -225,13 +239,14 @@ export const intentRecordData = (args: {
     args.material.intent.ordinal === booking.commitIntentIndex + 1;
   if (isBookingCommit && intent.effect !== 'COMMIT')
     throw new IntentTemplateRefusal('booking_linkage_not_commit');
-  const priceDecision = servicePriceDecision(
-    args.material.proposal.intent_template_key,
-  );
-  if (
-    priceDecision !== null &&
-    (!args.servicePriceLinkage || intent.effect !== 'COMMIT')
-  )
+  const template = args.material.proposal.intent_template_key;
+  const goodsDecision = goodsReceiptDecision(template);
+  const priceDecision = servicePriceDecision(template) ?? goodsDecision;
+  const linkage =
+    goodsDecision === null
+      ? args.servicePriceLinkage
+      : args.goodsReceiptLinkage;
+  if (priceDecision !== null && (!linkage || intent.effect !== 'COMMIT'))
     throw new IntentTemplateRefusal('service_price_approval_context_required');
   return {
     tenantId: args.tenantId,
@@ -285,7 +300,7 @@ export const intentRecordData = (args: {
       ? booking.confirmationOfRef
       : priceDecision === null
         ? null
-        : args.servicePriceLinkage!.approvalId,
+        : linkage!.approvalId,
     producedByIntentTokenHash: isBookingCommit
       ? booking.producedByIntentTokenHash
       : null,

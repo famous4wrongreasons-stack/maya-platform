@@ -1,3 +1,4 @@
+import { GOODS_RECEIPT_TOOL } from '../../crm/goods-receipt.contract';
 import type {
   Completeness,
   WidgetComposerInput,
@@ -307,7 +308,8 @@ const textEquivalent = (
   }
   if (
     kind === 'APPROVAL' &&
-    sourceCapability === SERVICE_PRICE_TOOL &&
+    (sourceCapability === SERVICE_PRICE_TOOL ||
+      sourceCapability === GOODS_RECEIPT_TOOL) &&
     Array.isArray(body.effect_preview)
   ) {
     const itemized = (
@@ -330,8 +332,11 @@ const textEquivalent = (
       `Действия: ${intents.map((intent) => intent.label).join('; ')}`,
     );
     return {
-      headline: `Изменение цены · ${cellLabel(body.subject) ?? 'Услуга'}`,
-      body: itemized.join('. '),
+      headline:
+        sourceCapability === GOODS_RECEIPT_TOOL
+          ? `Приход товара · ${cellLabel(body.subject) ?? 'Товар'}`
+          : `Изменение цены · ${cellLabel(body.subject) ?? 'Услуга'}`,
+      body: sourceCapability === GOODS_RECEIPT_TOOL ? '' : itemized.join('. '),
       itemized,
       completeness_sentence: null,
       unknowns_sentence: null,

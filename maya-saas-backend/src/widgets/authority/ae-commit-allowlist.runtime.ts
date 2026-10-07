@@ -1,3 +1,7 @@
+import {
+  INVENTORY_RECEIPT_PURCHASE_COST,
+  isInventoryReceiptPurchaseCost,
+} from '../inventory/goods-receipt-widget.contract';
 // P-23 — the one executable AE commit allowlist and its family derivation.
 //
 // No row is inferred from a capability name. The positive set starts with P-25's traced
@@ -87,6 +91,8 @@ export const deriveAeFamily = (
   if (BOOKING(cap)) return 'booking';
   if (MARKETING_FANOUT(cap)) return 'marketing_fanout';
   if (isCataloguePriceConfiguration(cap)) return CATALOGUE_PRICE_CONFIGURATION;
+  if (isInventoryReceiptPurchaseCost(cap))
+    return INVENTORY_RECEIPT_PURCHASE_COST;
   if (MONEY(cap)) return 'money';
   if (CONSENT(cap)) return 'consent';
   if (IDENTITY(cap)) return 'identity';
@@ -101,6 +107,7 @@ export const confirmationKindFor = (
   if (family === 'booking') return 'BOOKING_CONFIRMATION';
   if (family === 'marketing_fanout') return 'APPROVAL';
   if (family === CATALOGUE_PRICE_CONFIGURATION) return 'APPROVAL';
+  if (family === INVENTORY_RECEIPT_PURCHASE_COST) return 'APPROVAL';
   if (family === 'money') return 'PAYMENT_HANDOFF';
   return 'SETTINGS_DRAFT';
 };
@@ -117,7 +124,9 @@ const admittedPairingRows = AE_PROPOSE_PAIRING.flatMap((pair) => {
   if (
     cap.policyDecision !== 'ALLOW' ||
     !cap.allowedSourceTypes.includes('authenticated_request') ||
-    (MONEY(cap) && !isCataloguePriceConfiguration(cap)) ||
+    (MONEY(cap) &&
+      !isCataloguePriceConfiguration(cap) &&
+      !isInventoryReceiptPurchaseCost(cap)) ||
     CONSENT(cap) ||
     IDENTITY(cap) ||
     TENANT_AUTHORITY(cap)

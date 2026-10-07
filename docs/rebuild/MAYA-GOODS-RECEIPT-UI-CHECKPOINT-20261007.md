@@ -1,0 +1,33 @@
+# Goods receipt confirmation in the current React chat — development checkpoint
+
+**Useful result:** the explicit owner goods request now produces a readable, source-bound APPROVAL with exact fractional quantity, purchase unit cost and server-computed total. The owner can inspect its details, approve or reject it. A confirmed result requires the matching canonical AE execution; UNKNOWN removes the controls and says that the result is unconfirmed and must be checked in YCLIENTS. This is a local candidate, **NOT_ISSUED**, with synthetic model/provider edges. Real provider admission remains blocked.
+
+The owner approved this exact, separately named `inventory_receipt_purchase_cost` exception at 2026-10-07 09:57:42 UTC (answer «да»), following the 09:54:21 UTC proposal relayed by the parent. [F32b/F74b GR-PC1](MAYA-WIDGET-CONTRACT-V1.md) records the finite delta. [The exact decision bounds](MAYA-GOODS-RECEIPT-CARRIER-DELTA-PROPOSAL-20261007.md) retain F32a catalogue-price configuration unchanged.
+
+## What reaches the existing owners
+
+The existing C9 tool `inventory.goods.receipt.prepare` retains its AiApprovalRequest, immutable payload/hash, 10-minute approval TTL, current source/permission revisions and corrected versions. A finite goods trigger binds only an existing authenticated chat turn to that same request. The new owner port and three templates present the approval, reject it or open its sealed detail. The effect remains the existing `crm.goods.receipt.create.v1` through canonical AiToolRuntime/R10/AE. Widgets do not query or fabricate ActionExecution, approve a different action, or confer authority from presentation.
+
+The exact descriptor admits one existing goods item, one company/store, positive fractional quantity, one explicit unit and purchase unit cost/currency/received_at. Exact decimal strings survive server projection and carrier verification. The confirmation adapter revalidates the exact approval payload hash, then matches the AE execution ID, tenant, actor, capability, sourceRef, targetRef, SUCCEEDED and attempt=1 through the canonical owner before returning a verified receipt. It does not directly compare AE.inputHash. The UI independently requires the receipt/AE IDs, exact nine reviewed fields and both forbidden-effect flags false. It does not recalculate a total.
+
+Current active tenant-wide TENANT_OWNER/BUSINESS_OWNER, source/integration/permission revisions and required features are rechecked. Scoped branch owners remain refused. Ordinary MONEY, B35 consumed-record admission and F32a remain independent. No payment, discount, sale-price edit, absolute stock assignment, new SKU, batch, supplier accounting or background effect was added. Existing 30-day AE payload / 7×365-day audit retention is reused; there is no new schema, photo store or retention decision.
+
+## Evidence and limits
+
+Validation: **410 backend tests / 15 suites, 66 shell tests PASS**; production and complete HTTP-probe types PASS; scoped lint PASS (two existing unused-disable warnings); generated floor/profile checks PASS. Final local proof attempt 08 passed HAR13, preparation, actual process/PG restart and seven browser checkpoints. It observed **16 scripted model selections, six synthetic receipt dispatches, zero OCR and zero external fetch**. All owned services stopped.
+
+[Archived evidence](evidence/maya-development-integration-20261006/goods-ui/archive.json) binds the candidate files, local checks and sanitized actual React/HTTP/PG artifacts. The test uses actual AppModule, auth, C9, widget gates, R10/AE and PostgreSQL; only model choice and the provider adapter are synthetic. The UI signs in through the real local debug-email flow; it does not seed tokens or replace API responses. Network admission is restricted to the owned loopback server. OCR is forbidden and observed unused.
+
+The actual proof checks immutable correction, old-widget supersession, source stale/expired, actor/tenant mismatch, branch binding change, permission/feature/membership revocation, rejection, one observed concurrent approve/reject race (approve won; both interleavings are not claimed), dedupe, one-attempt UNKNOWN and saved pending approval. Negative scenarios pin their exact HTTP/domain refusal and unchanged AE/provider counts. The restart creates a new backend process and PostgreSQL start time, then compares the same saved execution IDs/sourceRefs/states/attempts. Old tokens expire; canonical success and UNKNOWN replay retain their original result with zero redispatch. One pending approval can complete after restart.
+
+Real React checkpoints show exact `2.5 × 10.25 = 25.625`, a loaded detail panel, SUCCEEDED, REJECTED and UNKNOWN; the corrected backend version preserves `3.25 × 10.25 = 33.3125`. Reload and real sign-in restore history without new chat/intent/provider work. **The goods terminal sentence is not restored after reload**: the historical proposal text remains, while canonical outcome state and no-resend behavior are durable. This UI recovery gap is not claimed closed.
+
+The existing provider blocker is unchanged: official `storages_ids` / `storages_transactions_types` permission scope semantics are insufficiently specified, so the real adapter does not admit receipt writes. [Provider checkpoint](MAYA-YCLIENTS-RECEIPT-ADAPTER-CHECKPOINT-20261007.md). No real YCLIENTS, model, OCR, production, notification or phone call occurred. There is no paid-model, provider-quality, production-release or C10-completion claim.
+
+The generated candidate profile digest is `9bfd4305fcc6e21980f3457467f25f335f1e08907c4777e756b18bf559cda2a5`. Previous and new profile source snapshots are retained in the evidence; no old certificate or historical evidence was changed. A new production certificate is not issued by this checkpoint.
+
+Independent read-only review found no remaining authority/success/no-resend blocker after moving AE verification to its canonical owner, pinning exact refusals and removing duplicated TEXT_ONLY goods facts. The final proof evidence is recorded separately from that code review. Earlier failed local runs exposed probe timing/oracle errors and raw JSON fallback; they are listed in the archive, not reported as passes. No real business effect was involved.
+
+## Continuation preserved
+
+The separate [offline HTTP-bindings checkpoint](MAYA-CURRENT-CANDIDATE-HTTP-BINDINGS-CHECKPOINT-20261007.md), commit `ba5a9dde`, remains intact. Its authenticated corpus bindings and real-model qualification are still unimplemented/unexecuted; the 98,304-byte cap was not raised. Website/realbooking, other pricing/schedule lanes, memories, pushes and merges were not touched.

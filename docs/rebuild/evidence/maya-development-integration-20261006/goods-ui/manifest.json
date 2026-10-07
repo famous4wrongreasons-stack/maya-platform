@@ -1,0 +1,33 @@
+{
+  "kind": "goods-ui-react-http-pg-restart-local-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-goods-ui-dCJibn/pg",
+  "database": "maya_widget_gate_proof_goods_180ebee3a808",
+  "port": 64090,
+  "status": "passed",
+  "completed": [
+    "shell-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "har13-diagnostic-placement",
+    "prepare",
+    "pg-restart",
+    "resume",
+    "pg-stop"
+  ],
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "photoParser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "goodsProvider": "SYNTHETIC_ADAPTER_ONLY",
+  "externalFetchCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1
+  },
+  "clusterStopped": true
+}

@@ -1,3 +1,5 @@
+import { isInventoryReceiptPurchaseCost } from '../inventory/goods-receipt-widget.contract';
+import { GOODS_RECEIPT_TOOL } from '../../crm/goods-receipt.contract';
 // ── Gate 7 — effect admissibility: §3.9 row 7 in full ───────────────────────────────────────────
 //
 // GATES-PLAN-V11 U7a. What stood here refused almost nothing: `if (!ACTUATING.includes(r.effect))
@@ -282,7 +284,8 @@ export const gate7 = async (
   const cap = actionCapabilityRegistry.tryGet(ae.key);
   if (!cap) return no('C9a', `${ae.key} is not a registered AE capability`);
   const cataloguePrice = isCataloguePriceConfiguration(cap);
-  if (MONEY(cap) && !cataloguePrice)
+  const goodsReceipt = isInventoryReceiptPurchaseCost(cap);
+  if (MONEY(cap) && !cataloguePrice && !goodsReceipt)
     return no('C9a', `${ae.key} is MONEY (§3.10)`);
 
   try {
@@ -309,7 +312,7 @@ export const gate7 = async (
     // only for a non-draft COMMIT.
     // F74a is the typed canonical chat approval branch. The HMAC identity, pending
     // owner hash and durable authenticated chat provenance are re-read at Gate 11.
-    if (cataloguePrice) {
+    if (cataloguePrice || goodsReceipt) {
       const nouns = r.frozenNounsJson;
       if (
         r.widgetKind !== 'APPROVAL' ||
@@ -340,12 +343,13 @@ export const gate7 = async (
         'C8b',
         `${ae.key} is BOOKING and is the ae side of no single pairing row`,
       );
-    if (cataloguePrice) {
+    if (cataloguePrice || goodsReceipt) {
       const pairing = pairingForAe(ae.key);
       if (
         !pairing ||
         pairing.propose.space !== 'C9' ||
-        pairing.propose.key !== SERVICE_PRICE_TOOL
+        pairing.propose.key !==
+          (goodsReceipt ? GOODS_RECEIPT_TOOL : SERVICE_PRICE_TOOL)
       )
         return unconfirmed('C8b', 'canonical chat approval pairing required');
     }

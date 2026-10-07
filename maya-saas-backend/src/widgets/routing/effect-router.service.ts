@@ -1,3 +1,9 @@
+import {
+  GOODS_RECEIPT_APPROVAL_OWNER,
+  parseGoodsReceiptApprovalRef,
+  type GoodsReceiptApprovalOwnerPort,
+} from '../inventory/goods-receipt-approval.port';
+import { goodsReceiptApprovalMintRequest } from '../inventory/goods-receipt-approval.presenter';
 import type { PersonalSchedulePort } from '../owner-ports/personal-schedule.port';
 import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
 import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
@@ -141,6 +147,9 @@ export class EffectRouterService {
     @Optional()
     @Inject(PERSONAL_SCHEDULE_SOURCE)
     private readonly personalSchedules?: PersonalSchedulePort,
+    @Optional()
+    @Inject(GOODS_RECEIPT_APPROVAL_OWNER)
+    private readonly goodsApprovals?: GoodsReceiptApprovalOwnerPort,
   ) {}
 
   async route(
@@ -402,6 +411,88 @@ export class EffectRouterService {
                 current.payloadHash !== snapshot.payloadHash
               )
                 throw new Error('service_price_detail_source_changed');
+            },
+          },
+          input.record.widgetId,
+          input.now,
+        );
+        return admitted({ nextEnvelope: minted.envelope });
+      }
+      if (
+        input.record.sourceCapabilitySpace === 'C9' &&
+        input.record.sourceCapabilityKey === 'inventory.goods.receipt.prepare'
+      ) {
+        const approvalRef = resolvedNouns?.values.get('approval');
+        const parsed =
+          typeof approvalRef === 'string'
+            ? parseGoodsReceiptApprovalRef(approvalRef)
+            : null;
+        const owner = this.goodsApprovals;
+        if (
+          input.record.widgetKind !== 'APPROVAL' ||
+          resolvedNouns?.values.size !== 1 ||
+          !parsed ||
+          !approvalRef ||
+          !owner ||
+          target.class !== 'detail' ||
+          target.ref !== 'fs.catalogue'
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+        const actor = { tenantId: input.tenantId, userId: ctx.actor.userId };
+        const snapshot = await owner.read(
+          actor,
+          approvalRef,
+          principal.proofHash,
+          true,
+        );
+        const ttlSeconds = Math.floor(
+          (snapshot.expiresAt.getTime() - input.now.getTime()) / 1000,
+        );
+        if (
+          snapshot.id !== parsed.id ||
+          snapshot.payloadHash !== parsed.hash ||
+          snapshot.origin.conversationId !== source.conversationId ||
+          snapshot.origin.principalProofHash !== principal.proofHash ||
+          ttlSeconds <= 0
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+        const request = goodsReceiptApprovalMintRequest(
+          snapshot,
+          principal,
+          source.turnId,
+          ttlSeconds,
+          input.answeringChannel,
+        );
+        request.composerInput = {
+          ...request.composerInput,
+          correlation_refs: {
+            ...request.composerInput.correlation_refs,
+            parent_id: input.record.widgetId,
+          },
+        };
+        const minted = await this.emitter.emitGoodsReceiptDetail(
+          request,
+          {
+            approvalId: snapshot.id,
+            payloadHash: snapshot.payloadHash,
+            revalidate: async () => {
+              const current = await owner.read(
+                actor,
+                approvalRef,
+                principal.proofHash,
+                false,
+              );
+              if (
+                current.origin.conversationId !== source.conversationId ||
+                current.payloadHash !== snapshot.payloadHash
+              )
+                throw new Error('goods_receipt_detail_source_changed');
             },
           },
           input.record.widgetId,

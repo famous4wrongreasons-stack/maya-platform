@@ -1,0 +1,9 @@
+Independent read-only review checkpoint, 2026-10-07
+
+Code review: no remaining authority/success/no-resend blocker found. Exact named goods descriptor, owner-owned AE verification, per-label refusal assertions, and nonduplicated TEXT_ONLY facts reviewed. F32a was not widened.
+
+Final evidence review: 53 candidate source hashes, 31 evidence hashes and eight served React asset hashes matched. Prior profile snapshot equals ba5a9dde; candidate matches the generated digest. Logs support 410 backend tests/15 suites, 66 shell tests, HAR13, actual process/PG restart, 16 scripted selections, six synthetic dispatches, zero OCR/fetch. PG pid file absent; manifest passed/stopped.
+
+Clarifications incorporated before commit: approval payload hash is revalidated separately from AE linkage/state/attempt matching; direct AE.inputHash comparison is not claimed. Recorded concurrent approve/reject race is approve-wins only. No tests/processes/edits were run by the reviewer.
+
+Remaining limits: real provider permission semantics blocked; terminal goods sentence not restored after reload; offline corpus HTTP bindings unfinished. No real model/provider/OCR acceptance or production certificate.

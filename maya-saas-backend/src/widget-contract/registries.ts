@@ -22,7 +22,8 @@ export interface AeCommitRow {
     | 'tenant_authority'
     | 'settings'
     | 'operational'
-    | 'catalogue_price_configuration';
+    | 'catalogue_price_configuration'
+    | 'inventory_receipt_purchase_cost';
   min_verification: VerificationLevel; // ≥ SESSION_VERIFIED for every row
   requires_ae_approval: boolean; // MUST equal registry.approvalRequirement === 'REQUIRED'
   propose: CapabilityRef; // the C9 propose key; never null

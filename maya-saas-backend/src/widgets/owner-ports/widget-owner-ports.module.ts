@@ -1,3 +1,5 @@
+import { GOODS_RECEIPT_APPROVAL_OWNER } from '../di-tokens';
+import { GoodsReceiptApprovalAdapter } from './goods-receipt-approval.adapter';
 import { EncryptionModule } from '../../encryption/encryption.module';
 import { ChatReplyCipherAdapter } from './chat-reply-cipher.adapter';
 import { CHAT_REPLY_CIPHER } from '../di-tokens';
@@ -116,6 +118,11 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     C9CancelAdapter,
     { provide: C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
     ApprovalRequestAdapter,
+    GoodsReceiptApprovalAdapter,
+    {
+      provide: GOODS_RECEIPT_APPROVAL_OWNER,
+      useExisting: GoodsReceiptApprovalAdapter,
+    },
     ServicePriceApprovalAdapter,
     CanonicalApprovalAdapter,
     {
@@ -150,6 +157,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    GOODS_RECEIPT_APPROVAL_OWNER,
     SERVICE_PRICE_APPROVAL_OWNER,
     CHAT_REPLY_CIPHER,
     SCHEDULE_APPROVAL_OWNER,

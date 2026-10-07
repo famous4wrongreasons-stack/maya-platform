@@ -1,3 +1,5 @@
+import { isInventoryReceiptPurchaseCost } from '../widgets/inventory/goods-receipt-widget.contract';
+import { GOODS_RECEIPT_TOOL } from '../crm/goods-receipt.contract';
 // U-TAB (GATES-PLAN-V11 D-5) — §2.4's owner classes, at runtime.
 //
 // `kinds.ts` DECLARES `ownerClassKeys` and `allowedKinds` (§2.4, C11:2853-2860) and `KindRule` carries
@@ -265,8 +267,12 @@ const resolveRow = (kind: WidgetKind): readonly CapabilityRef[] => {
       ...AE_CAPABILITIES.filter(
         (c) =>
           c.approvalRequirement === 'REQUIRED' ||
-          isCataloguePriceConfiguration(c),
+          isCataloguePriceConfiguration(c) ||
+          isInventoryReceiptPurchaseCost(c),
       ).map((c) => internRef('AE', c.capability)),
+      ...(AE_CAPABILITIES.some(isInventoryReceiptPurchaseCost)
+        ? [internRef('C9', GOODS_RECEIPT_TOOL)]
+        : []),
       ...(AE_CAPABILITIES.some(isCataloguePriceConfiguration)
         ? [internRef('C9', SERVICE_PRICE_TOOL)]
         : []),

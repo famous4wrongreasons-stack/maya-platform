@@ -306,6 +306,36 @@ const servicePriceSentence = (
   return 'service_price_unconfirmed';
 };
 
+/** GR-PC1 presentation only: exact reviewed strings and canonical AE/readback evidence. */
+const goodsReceiptSentence = (envelope: WidgetEnvelope, intent: WidgetIntent, outcome: SubmissionOutcome): WidgetSentence | null => {
+  if (envelope.kind !== 'APPROVAL' || envelope.source.from !== 'capability_envelope'
+    || envelope.source.capability !== 'inventory.goods.receipt.prepare'
+    || intent.effect !== 'COMMIT' || intent.capability?.space !== 'AE'
+    || intent.capability.key !== 'crm.goods.receipt.create.v1'
+    || !('approve_intent' in envelope.body)) return null;
+  const body = envelope.body;
+  const approving = intent.intent_ref === body.approve_intent;
+  const rejecting = intent.intent_ref === body.reject_intent;
+  if (!approving && !rejecting) return null;
+  if (outcome.status !== 'accepted' && outcome.status !== 'settled')
+    return ['no_connection', 'server_error', 'unexpected_response'].includes(outcome.status) ? 'goods_receipt_unconfirmed' : null;
+  const decision = outcome.ownerDecision;
+  if (rejecting && decision?.decision === 'REJECTED' && decision.status === 'rejected' && decision.state === 'REJECTED') return 'goods_receipt_rejected';
+  const result = decision?.outcome, goods = result?.goods_receipt;
+  const same = (key: string, expected: string | null | undefined): boolean => {
+    const rows = body.effect_preview.filter(row => row.label.phrase_key === `approval.goods_receipt.${key}`);
+    return typeof expected === 'string' && expected.length > 0 && rows.length === 1
+      && rows[0]?.value.state === 'KNOWN' && typeof rows[0].value.value === 'string' && rows[0].value.value === expected;
+  };
+  if (approving && decision?.decision === 'APPROVED' && decision.status === 'completed' && decision.state === 'SUCCEEDED'
+    && result?.verified === true && result.source === 'yclients' && result.action_execution_id?.trim()
+    && goods?.receipt_id?.trim() && goods.no_catalog_price_change && goods.no_absolute_stock_assignment
+    && same('currency', result.currency)
+    && (['company_id', 'goods_id', 'store_id', 'quantity', 'unit_id', 'unit_cost', 'line_total', 'received_at'] as const)
+      .every(key => same(key, goods[key]))) return 'goods_receipt_confirmed';
+  return 'goods_receipt_unconfirmed';
+};
+
 /** A submitted pricing proposal is a static preview plus the separate owner-result sentence.
  * Drop obsolete approval prompts and every control without editing sealed body/lifecycle facts.
  * No text is composed here: retained facts come from the verified projected body.
@@ -875,7 +905,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     }
     entry.inflight = null;
     entry.pending = null;
-    const priceSentence = servicePriceSentence(entry.envelope, intent, outcome);
+    const priceSentence = servicePriceSentence(entry.envelope, intent, outcome) ?? goodsReceiptSentence(entry.envelope, intent, outcome);
     if (priceSentence !== null) {
       // A response loss is also a submitted mutation with an unresolved outcome, never an ordinary
       // retry. Freeze only presentation, keep the exact diff, and forget spendable tokens. The

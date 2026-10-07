@@ -200,6 +200,7 @@ export const AE_FAMILY_FLOOR: Readonly<
   settings: 'SESSION_VERIFIED',
   operational: 'SESSION_VERIFIED',
   catalogue_price_configuration: 'SESSION_VERIFIED',
+  inventory_receipt_purchase_cost: 'SESSION_VERIFIED',
   marketing_fanout: 'STEP_UP_VERIFIED',
   money: 'STEP_UP_VERIFIED',
   consent: 'STEP_UP_VERIFIED',

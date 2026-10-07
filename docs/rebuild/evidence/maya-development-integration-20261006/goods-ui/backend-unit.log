@@ -1,0 +1,6 @@
+
+Test Suites: 15 passed, 15 total
+Tests:       410 passed, 410 total
+Snapshots:   0 total
+Time:        33.823 s, estimated 34 s
+Ran all test suites within paths "src/widgets/inventory/goods-receipt-widget.contract.spec.ts", "src/widgets/pricing/service-price-widget.contract.spec.ts", "src/widgets/pricing/service-price-approval-trigger.service.spec.ts", "src/widgets/authority/bindings.spec.ts", "src/widgets/authority/allowlist-startup.assert.spec.ts", "src/widgets/authority/totality.spec.ts", "src/widgets/authority/propose-pairing.spec.ts", "src/widgets/gates/gate7.spec.ts", "src/widgets/gates/gate7.pipeline.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts", "src/widget-contract/owner-classes.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/widgets/projection/projector-fences.architecture.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts".

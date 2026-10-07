@@ -1,5 +1,13 @@
 import {
+  AI_GOODS_APPROVAL_WIDGET_TRIGGER,
+  type AiGoodsApprovalWidgetTriggerPort,
+  type GoodsReceiptChatOrigin,
+  type GoodsReceiptApprovalSnapshot,
+} from './ai-approval-widget-trigger.port';
+import {
   GOODS_RECEIPT_TOOL,
+  GOODS_RECEIPT_CAPABILITY,
+  goodsHash,
   goodsProposal,
 } from '../crm/goods-receipt.contract';
 import { SERVICE_CATALOG_READ_CONTRACT } from '../crm/service-catalog-read';
@@ -196,12 +204,18 @@ export class AiToolRuntimeService {
         );
         if (['rejected', 'expired', 'failed'].includes(saved.status))
           this.approvalConflict('goods_proposal_no_longer_pending');
-        return this.requestApproval(
+        const pending = await this.requestApproval(
           principal,
           definition,
           savedArgs,
           this.inputHash(toolName, savedArgs, principal),
           dto.idempotencyKey,
+        );
+        return this.attachGoodsReceiptApprovalWidget(
+          user,
+          definition,
+          pending,
+          internal,
         );
       }
     }
@@ -262,12 +276,19 @@ export class AiToolRuntimeService {
         inputHash,
         idempotencyKey,
       );
-      return this.attachServicePriceApprovalWidget(
-        user,
-        definition,
-        pending,
-        internal,
-      );
+      return definition.name === GOODS_RECEIPT_TOOL
+        ? this.attachGoodsReceiptApprovalWidget(
+            user,
+            definition,
+            pending,
+            internal,
+          )
+        : this.attachServicePriceApprovalWidget(
+            user,
+            definition,
+            pending,
+            internal,
+          );
     }
 
     const completed = await this.executeNow({
@@ -660,6 +681,277 @@ export class AiToolRuntimeService {
       identities[1] !== null &&
       identities[0].companyId === identities[1].companyId &&
       identities[0].serviceId === identities[1].serviceId
+    );
+  }
+
+  private async attachGoodsReceiptApprovalWidget(
+    actor: AuthenticatedUser,
+    definition: AiToolDefinition,
+    result: unknown,
+    internal: Parameters<AiToolRuntimeService['execute']>[3],
+  ): Promise<unknown> {
+    if (
+      definition.name !== GOODS_RECEIPT_TOOL ||
+      internal?.suppressWidgetTrigger ||
+      internal?.widgetTrigger !== 'T-2a' ||
+      !internal.userTurn ||
+      !actor.tenantId ||
+      !result ||
+      typeof result !== 'object'
+    )
+      return result;
+    const pending = result as Record<string, unknown>;
+    const approval = pending.approval as
+      { id?: unknown; payload_hash?: unknown } | undefined;
+    if (
+      pending.status !== 'approval_required' ||
+      typeof approval?.id !== 'string' ||
+      typeof approval.payload_hash !== 'string'
+    )
+      return result;
+    let trigger: AiGoodsApprovalWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiGoodsApprovalWidgetTriggerPort>(
+        AI_GOODS_APPROVAL_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      return result;
+    }
+    if (!trigger) return result;
+    const id = approval.id,
+      payloadHash = approval.payload_hash;
+    const bound = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw(
+        Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`goods-receipt-chat-origin:${actor.tenantId}:${id}`}, 0))`,
+      );
+      const existing = await this.auditLog.entityEvents(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'ai.goods_receipt_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: id,
+        },
+        tx,
+      );
+      if (existing.length) return existing.length === 1;
+      // A later retry cannot attach a standalone or unrelated historical approval to a new chat.
+      if (pending.replayed !== false) return false;
+      const binding = await trigger.readGoodsReceiptUserTurnBinding(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          turnId: internal.userTurn!.turnId,
+          conversationId: internal.userTurn!.conversationId,
+        },
+        tx,
+      );
+      if (!binding) return false;
+      const origin: GoodsReceiptChatOrigin = {
+        contract: 'maya.goods-receipt-chat-approval/1',
+        approvalId: id,
+        payloadHash,
+        userTurnId: internal.userTurn!.turnId,
+        conversationId: internal.userTurn!.conversationId,
+        principalProofHash: binding.principalProofHash,
+      };
+      await this.auditLog.log(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'ai.goods_receipt_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: id,
+          metadata: { ...origin },
+        },
+        tx,
+      );
+      return true;
+    });
+    if (!bound) return result;
+    const resolution = await trigger.afterPendingGoodsReceiptApproval({
+      actor,
+      approvalId: id,
+      payloadHash,
+      userTurn: internal.userTurn,
+    });
+    return resolution ? { ...pending, resolution } : result;
+  }
+
+  /** Canonical AI approval owner read. The widget sees a bounded snapshot, not encrypted args. */
+  async readGoodsReceiptWidgetApproval(
+    actor: AuthenticatedUser,
+    approvalId: string,
+    payloadHash: string,
+    revalidateSource = false,
+  ): Promise<GoodsReceiptApprovalSnapshot> {
+    const row = await this.findApproval(actor, approvalId);
+    const principal = this.principal(actor, this.assertSurface(row.surface));
+    const definition = this.registry.get(GOODS_RECEIPT_TOOL);
+    if (
+      row.toolName !== GOODS_RECEIPT_TOOL ||
+      row.surface !== 'web' ||
+      row.requestedByUserId !== actor.userId
+    )
+      throw new ForbiddenException(
+        'Exact owner service price approval required',
+      );
+    await this.policy.assertCanExecute(principal, definition);
+    this.policy.assertCanDecide(definition, row.requestedByUserId, principal);
+    this.assertPayloadHash(row, payloadHash);
+    this.assertPendingApproval(row);
+    if (row.expiresAt.getTime() <= Date.now())
+      this.approvalConflict('ai_approval_expired');
+    const args = this.registry.validateArguments(
+      GOODS_RECEIPT_TOOL,
+      this.parseJson(this.encryption.decrypt(row.encryptedArguments)),
+    );
+    if (this.inputHash(GOODS_RECEIPT_TOOL, args, principal) !== payloadHash)
+      this.approvalConflict('ai_approval_payload_mismatch');
+    await this.handler.normalizeArguments('inventory.goods.read', principal, {
+      goods_id: args.goods_id,
+    });
+    if (revalidateSource) {
+      const fresh = await this.handler.normalizeArguments(
+        GOODS_RECEIPT_TOOL,
+        principal,
+        args,
+      );
+      if (this.inputHash(GOODS_RECEIPT_TOOL, fresh, principal) !== payloadHash)
+        this.approvalConflict('goods_receipt_proposal_stale');
+    }
+    const events = await this.auditLog.entityEvents({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      action: 'ai.goods_receipt_chat_approval_bound',
+      entityType: 'AiApprovalRequest',
+      entityId: row.id,
+    });
+    const origin = events[0]?.metadataJson as unknown as
+      GoodsReceiptChatOrigin | undefined;
+    if (
+      events.length !== 1 ||
+      !origin ||
+      origin.contract !== 'maya.goods-receipt-chat-approval/1' ||
+      origin.approvalId !== row.id ||
+      origin.payloadHash !== row.payloadHash ||
+      typeof origin.userTurnId !== 'string' ||
+      typeof origin.conversationId !== 'string' ||
+      typeof origin.principalProofHash !== 'string'
+    )
+      this.approvalConflict('goods_receipt_chat_origin_missing');
+    let trigger: AiGoodsApprovalWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiGoodsApprovalWidgetTriggerPort>(
+        AI_GOODS_APPROVAL_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      /* Missing presentation proof owner fails closed below. */
+    }
+    if (!trigger) this.approvalConflict('goods_receipt_chat_origin_missing');
+    const proof = await trigger.readGoodsReceiptUserTurnBinding({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      turnId: origin.userTurnId,
+      conversationId: origin.conversationId,
+      principalProofHash: origin.principalProofHash,
+    });
+    if (!proof) this.approvalConflict('goods_receipt_chat_origin_missing');
+    return {
+      id: row.id,
+      payloadHash: row.payloadHash,
+      expiresAt: row.expiresAt,
+      createdAt: row.createdAt,
+      summary: row.summary,
+      facts: Object.freeze({ ...args }),
+      origin,
+    };
+  }
+
+  /** Presentation supersession only: compare canonical prepared identities, including a
+   * rejected prior proposal. This does not reactivate it or authorize any decision. */
+  /** Receipt evidence stays with the existing canonical runtime owner, never widget Prisma access. */
+  async verifyGoodsReceiptWidgetExecution(
+    actor: AuthenticatedUser,
+    approvalId: string,
+    payloadHash: string,
+    executionId: unknown,
+  ): Promise<boolean> {
+    if (typeof executionId !== 'string' || !executionId) return false;
+    const row = await this.findApproval(actor, approvalId);
+    if (
+      row.toolName !== GOODS_RECEIPT_TOOL ||
+      row.requestedByUserId !== actor.userId ||
+      row.status !== APPROVAL_STATUS.COMPLETED
+    )
+      return false;
+    this.assertPayloadHash(row, payloadHash);
+    const principal = this.principal(actor, this.assertSurface(row.surface));
+    await this.policy.assertCanExecute(
+      principal,
+      this.registry.get(GOODS_RECEIPT_TOOL),
+    );
+    const args = this.registry.validateArguments(
+      GOODS_RECEIPT_TOOL,
+      this.parseJson(this.encryption.decrypt(row.encryptedArguments)),
+    );
+    if (this.inputHash(GOODS_RECEIPT_TOOL, args, principal) !== payloadHash)
+      return false;
+    await this.handler.normalizeArguments('inventory.goods.read', principal, {
+      goods_id: args.goods_id,
+    });
+    return (
+      (await this.prisma.actionExecution.findFirst({
+        where: {
+          id: executionId,
+          tenantId: principal.tenantId,
+          capability: GOODS_RECEIPT_CAPABILITY,
+          actorUserId: principal.userId,
+          sourceType: 'authenticated_request',
+          dryRun: false,
+          sourceRef: `goods-photo:${goodsHash({ photo: args.photo_sha256, line: args.source_line })}:${row.id}`,
+          targetRef: `yclients-goods/${String(args.company_id)}/${String(args.goods_id)}/store/${String(args.store_id)}`,
+          state: 'SUCCEEDED',
+          executionAttemptCount: 1,
+        },
+        select: { id: true },
+      })) !== null
+    );
+  }
+
+  async sameGoodsReceiptApproval(
+    actor: AuthenticatedUser,
+    previousId: string,
+    currentId: string,
+  ): Promise<boolean> {
+    const rows = await Promise.all([
+      this.findApproval(actor, previousId),
+      this.findApproval(actor, currentId),
+    ]);
+    const principal = this.principal(actor, 'web');
+    const identities = rows.map((row) => {
+      if (
+        row.toolName !== GOODS_RECEIPT_TOOL ||
+        row.surface !== 'web' ||
+        row.requestedByUserId !== actor.userId
+      )
+        return null;
+      const args = this.registry.validateArguments(
+        GOODS_RECEIPT_TOOL,
+        this.parseJson(this.encryption.decrypt(row.encryptedArguments)),
+      );
+      return this.inputHash(GOODS_RECEIPT_TOOL, args, principal) ===
+        row.payloadHash
+        ? { photo: args.photo_sha256, line: args.source_line }
+        : null;
+    });
+    return (
+      identities[0] !== null &&
+      identities[1] !== null &&
+      identities[0].photo === identities[1].photo &&
+      identities[0].line === identities[1].line
     );
   }
 

@@ -111,11 +111,12 @@ describe('P-25 — AE_PROPOSE_PAIRING, the runtime rows of F38', () => {
       ),
     );
     const parsed = F38();
-    expect(parsed).toHaveLength(14);
+    expect(parsed).toHaveLength(15);
     // the parse and the hand transcription agree, so neither alone is the oracle
     expect(parsed.slice(0, 13)).toEqual(TRANSCRIBED.map((p) => [...p]));
     expect(parsed.slice(13)).toEqual([
       ['catalog.service.price.update', 'crm.service.fixed-price.update.v1'],
+      ['inventory.goods.receipt.prepare', 'crm.goods.receipt.create.v1'],
     ]);
     expect(pairs(AE_PROPOSE_PAIRING)).toEqual(parsed);
   });

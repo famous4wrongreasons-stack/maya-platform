@@ -320,6 +320,8 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
           ),
           `AE:${SERVICE_PRICE_CAPABILITY}`,
           `C9:${SERVICE_PRICE_TOOL}`,
+          'AE:crm.goods.receipt.create.v1',
+          'C9:inventory.goods.receipt.prepare',
         ];
       else if (ownerClass === 'SETTINGS_OWNER')
         expected = Object.values(F79_OWNER_CLASS_KEYS)
@@ -354,6 +356,8 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
         ),
         `AE:${SERVICE_PRICE_CAPABILITY}`,
         `C9:${SERVICE_PRICE_TOOL}`,
+        'AE:crm.goods.receipt.create.v1',
+        'C9:inventory.goods.receipt.prepare',
       ].sort(),
     );
     expect([

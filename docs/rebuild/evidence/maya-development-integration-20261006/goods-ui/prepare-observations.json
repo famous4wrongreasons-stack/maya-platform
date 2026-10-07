@@ -1,0 +1,128 @@
+{
+  "stage": "prepare",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "parser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "provider": "SYNTHETIC_ADAPTER",
+  "certificate": "NOT_ISSUED",
+  "refusals": {
+    "superseded": {
+      "status": 200,
+      "outcome": "superseded",
+      "code": "handle_stale",
+      "receiptOutcome": null,
+      "writes": 0,
+      "aeCount": 0
+    },
+    "stale": {
+      "status": 200,
+      "outcome": "superseded",
+      "code": "handle_stale",
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "expired": {
+      "status": 200,
+      "outcome": "superseded",
+      "code": "handle_stale",
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "foreign-actor": {
+      "status": 200,
+      "outcome": "refuse",
+      "code": "widget_principal_mismatch",
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "foreign-tenant": {
+      "status": 200,
+      "outcome": "expired",
+      "code": null,
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "scoped-owner": {
+      "status": 200,
+      "outcome": "refuse",
+      "code": "widget_principal_mismatch",
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "permission-revoked": {
+      "status": 200,
+      "outcome": "superseded",
+      "code": "handle_stale",
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "feature-revoked": {
+      "status": 200,
+      "outcome": "refuse",
+      "code": "insufficient_authority",
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    },
+    "membership-suspended": {
+      "status": 401,
+      "outcome": null,
+      "code": null,
+      "receiptOutcome": null,
+      "writes": 2,
+      "aeCount": 2
+    }
+  },
+  "race": {
+    "status": "completed",
+    "writes": 1
+  },
+  "checked": [
+    "exact-decimals",
+    "chat-replay",
+    "corrected-version",
+    "stale-old-widget",
+    "detail-child",
+    "canonical-AE-success",
+    "duplicate",
+    "rejection",
+    "UNKNOWN-no-resend",
+    "source-stale",
+    "expiry",
+    "foreign-actor",
+    "foreign-tenant",
+    "scoped-owner",
+    "permission-revoked",
+    "feature-revoked",
+    "membership-suspended",
+    "concurrent-approve-reject"
+  ],
+  "modelCalls": 13,
+  "parserCalls": 0,
+  "externalCalls": 0,
+  "sourceStates": [
+    {
+      "company": "77101",
+      "readCount": 0,
+      "contextReads": 34,
+      "writeCount": 2
+    },
+    {
+      "company": "77102",
+      "readCount": 0,
+      "contextReads": 0,
+      "writeCount": 0
+    },
+    {
+      "company": "77103",
+      "readCount": 0,
+      "contextReads": 6,
+      "writeCount": 1
+    }
+  ]
+}

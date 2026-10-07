@@ -1,3 +1,4 @@
+import { isInventoryReceiptPurchaseCost } from '../inventory/goods-receipt-widget.contract';
 import { ActionCapabilityRegistry } from '../../action-engine/action-engine.registry';
 import type { RegisteredActionCapabilityV1 } from '../../action-engine/action-engine.contract';
 import { canonicalProductionPolicyDefinitions } from '../../action-engine/action-engine.policy-registry';
@@ -85,12 +86,16 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
     // exclude a prefix or loosen the old finite counts when comparing history.
     expect(
       capabilities.filter(
-        (capability) => capability.capability !== SERVICE_PRICE_CAPABILITY,
+        (capability) =>
+          capability.capability !== SERVICE_PRICE_CAPABILITY &&
+          capability.capability !== 'crm.goods.receipt.create.v1',
       ),
     ).toHaveLength(226);
     const historicalRows = Object.fromEntries(
       Object.entries(AE_WIDGET_COMMIT_ALLOWLIST).filter(
-        ([key]) => key !== SERVICE_PRICE_CAPABILITY,
+        ([key]) =>
+          key !== SERVICE_PRICE_CAPABILITY &&
+          key !== 'crm.goods.receipt.create.v1',
       ),
     );
     expect(Object.keys(historicalRows)).toHaveLength(10);
@@ -99,7 +104,9 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
     ).toBe('34481119f34d97ba619c5df7598bd3722f04df3df8b853c15b1139decd5b3867');
     expect(
       Object.keys(AE_CAPABILITY_GAP_LEDGER).filter(
-        (key) => key !== SERVICE_PRICE_CAPABILITY,
+        (key) =>
+          key !== SERVICE_PRICE_CAPABILITY &&
+          key !== 'crm.goods.receipt.create.v1',
       ),
     ).toHaveLength(216);
     expect(allowlistStartupProblems()).toEqual([]);
@@ -188,7 +195,9 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
       [
         'MONEY',
         (candidate) =>
-          MONEY(candidate) && !isCataloguePriceConfiguration(candidate),
+          MONEY(candidate) &&
+          !isCataloguePriceConfiguration(candidate) &&
+          !isInventoryReceiptPurchaseCost(candidate),
         'MONEY veto',
       ],
       ['CONSENT', CONSENT, 'CONSENT/IDENTITY veto'],

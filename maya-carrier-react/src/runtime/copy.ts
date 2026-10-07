@@ -119,6 +119,12 @@ export const widgetSentence = (sentence: WidgetSentence): string => {
       return 'Этот переход здесь недоступен';
     case 'expired_not_resolved':
       return 'Карточка устарела — показана сводка';
+    case 'goods_receipt_confirmed':
+      return 'Приход товара подтверждён в YCLIENTS.';
+    case 'goods_receipt_rejected':
+      return 'Приход отклонён. Изменений в складе нет.';
+    case 'goods_receipt_unconfirmed':
+      return 'Результат прихода не подтверждён. Повторная отправка остановлена; проверьте документ в YCLIENTS.';
     case 'service_price_confirmed':
       return 'Цена подтверждена в YCLIENTS';
     case 'booking_stale':

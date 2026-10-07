@@ -1,0 +1,27 @@
+[
+  {
+    "name": "lint",
+    "exitCode": 0,
+    "heapMb": 1536
+  },
+  {
+    "name": "production-types",
+    "exitCode": 0,
+    "heapMb": 4096
+  },
+  {
+    "name": "http-probe-types",
+    "exitCode": 0,
+    "heapMb": 4096
+  },
+  {
+    "name": "profile-check",
+    "exitCode": 0,
+    "heapMb": 512
+  },
+  {
+    "name": "floor-check",
+    "exitCode": 0,
+    "heapMb": 512
+  }
+]

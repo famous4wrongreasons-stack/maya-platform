@@ -113,8 +113,11 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   'common/domain.enums.ts': {
     why: 'YC-SP1 uses the canonical role enum for its exact fresh owner membership check',
     only: [
+      'owner-ports/personal-schedule.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
+      'owner-ports/goods-receipt-approval.adapter.ts',
       'pricing/service-price-approval-trigger.service.ts',
+      'inventory/goods-receipt-approval-trigger.service.ts',
     ],
   },
   'common/authenticated-user.interface.ts': {
@@ -140,9 +143,29 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     why: 'YC-SP1 narrow canonical pending-approval hook and bounded owner snapshot types',
     only: [
       'pricing/service-price-approval-trigger.service.ts',
+      'inventory/goods-receipt-approval-trigger.service.ts',
       'pricing/service-price-approval.presenter.ts',
+      'inventory/goods-receipt-approval.presenter.ts',
       'pricing/service-price-approval.port.ts',
+      'inventory/goods-receipt-approval.port.ts',
       'widgets.module.ts',
+    ],
+  },
+  'action-engine/goods-receipt.contract.ts': {
+    why: 'GR-PC1 exact pure normalizer identity; no executor entry',
+    only: ['inventory/goods-receipt-widget.contract.ts'],
+  },
+  'crm/goods-receipt.contract.ts': {
+    why: 'GR-PC1 named capability/tool constants only; no provider or service access',
+    only: [
+      'inventory/goods-receipt-widget.contract.ts',
+      'inventory/goods-receipt-intent-template.registry.ts',
+      'authority/allowlist-startup.assert.ts',
+      'gates/gate7.ts',
+      'emission/emitter.service.ts',
+      'emission/envelope.factory.ts',
+      'owner-ports/goods-receipt-approval.adapter.ts',
+      'owner-ports/noun-resolution.owners.provider.ts',
     ],
   },
   'action-engine/service-price.contract.ts': {
@@ -262,6 +285,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/booking-selector.adapter.ts',
       'owner-ports/personal-schedule.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
+      'owner-ports/goods-receipt-approval.adapter.ts',
       'owner-ports/schedule-approval.adapter.ts',
     ],
   },
@@ -337,6 +361,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/gate6.owners.provider.ts',
       'owner-ports/commit-booking.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
+      'owner-ports/goods-receipt-approval.adapter.ts',
     ],
   },
   'ai-tools/ai-tool-policy.module.ts': {

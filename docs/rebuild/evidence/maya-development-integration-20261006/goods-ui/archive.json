@@ -1,0 +1,116 @@
+{
+  "contract": "maya.goods-ui-development-checkpoint/1",
+  "baseCommit": "ba5a9dde0af12b2486a073af7b1fc683cba1e2ad",
+  "status": "QUALIFIED_LOCAL_PASS",
+  "certificate": "NOT_ISSUED",
+  "finalAttempt": "08",
+  "checks": {
+    "backendTests": 410,
+    "backendSuites": 15,
+    "shellTests": 66,
+    "httpPgStages": [
+      "HAR13",
+      "prepare",
+      "actual PostgreSQL restart",
+      "new backend process / resume",
+      "React actual UI / reload"
+    ],
+    "types": [
+      "production",
+      "complete widgets-live"
+    ],
+    "scopedLint": "PASS (two existing unused-disable warnings)",
+    "generatedProfile": "PASS",
+    "generatedFloor": "PASS"
+  },
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "modelCalls": 16,
+  "provider": "SYNTHETIC_ADAPTER_ONLY",
+  "syntheticDispatches": 6,
+  "externalFetchCalls": 0,
+  "ocrCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "reloadTerminalSentenceRestored": false,
+  "ownedServicesStopped": true,
+  "independentReview": "Read-only review; final remaining code findings resolved; no authority/success/no-resend blocker found. Terminal reload result remains an explicit limitation.",
+  "priorAttempts": [
+    {
+      "attempt": "01",
+      "status": "failed",
+      "clusterStopped": null,
+      "note": "React source hash mismatch: missing shell rebuild."
+    },
+    {
+      "attempt": "02",
+      "status": "failed",
+      "clusterStopped": null,
+      "note": "Shell build heap was 512 MB; increased only local build heap to the authorized 4096 MB."
+    },
+    {
+      "attempt": "03",
+      "status": "failed",
+      "clusterStopped": true,
+      "note": "Probe selected role=dialog instead of native dialog; actual raw JSON fallback found and fixed."
+    },
+    {
+      "attempt": "04",
+      "status": "failed",
+      "clusterStopped": true,
+      "note": "Probe sampled progress drawer before loaded detail."
+    },
+    {
+      "attempt": "05",
+      "status": "failed",
+      "clusterStopped": true,
+      "note": "Over-specific UNKNOWN oracle expected HTTP409; actual canonical replay is HTTP201 status unknown."
+    },
+    {
+      "attempt": "06",
+      "status": "failed",
+      "clusterStopped": true,
+      "note": "Probe typed before history application completed."
+    },
+    {
+      "attempt": "07",
+      "status": "passed",
+      "clusterStopped": true,
+      "note": "Passed; final follow-up instruments an explicit forbidden OCR counter and removes unused copied helpers."
+    }
+  ],
+  "excluded": "No private restart receipt, credentials, OTP, tokens, request bodies, database or images from user documents are archived.",
+  "files": {
+    "backend-unit.log": "e671e574351fac68b18fb9ee1253a5754e93b840e2041a8112b5d295fc9d9010",
+    "browser/browser.json": "c5420a36062163c31fbc446fb2415a065174faa05fe0baea13c36895493f476e",
+    "browser/detail.png": "35ce2adbec507444b7b7670aadd05975be842b08fd0ab85bae977ed9a307a01e",
+    "browser/reject-outcome.png": "d6125ce3c6e6b1b8147faa5631d65c71e0a3b155f45ffa760182d2868aa3492c",
+    "browser/reject-preview.png": "0e546631da02b745bbc605a9f50f88598b1205202f081951a52d8cd0dea217d9",
+    "browser/reload.png": "11b6a8752ccc5d0e8a533efb940b9fe1019f4a5868c36f75eb0ccfb903a6559f",
+    "browser/restart-history.png": "2d12b96b250073ba96dc71c3f6af09fa2418bd1540b968cf3661a0212239e4c5",
+    "browser/success-outcome.png": "c00ffc6f3eddaa7a7c6be9091139df6cedd63c83e41bf8891e26391c2559fed0",
+    "browser/success-preview.png": "48d6617d7ae7d6cd1adccc162f2d21e0b2c8e3f3fb089e2d854c6407d53460c0",
+    "browser/unknown-outcome.png": "febf3a9c719e5dbccd00fad3a845b6fffb9757c0e5bfebbc49c215fbb1ed4209",
+    "browser/unknown-preview.png": "3047f88db6344937e9a2358f5ce16226c02f4a58453525fa9ee8f1e43ffe7e75",
+    "candidate-files.sha256.json": "7a8625f6e2511e156fad6d6cd8c5bb7952a815b3aa1dfab770d6854138a69e08",
+    "candidate-profile-registry.ts.txt": "e3d492284cd44b6426f92004f3279da13c9f08e754e2dfdc574bda60867ba47b",
+    "checks/floor-check.log": "ff22c52034ae9e86eda0b55b91ed18f2f8a6b60824e063e78e93efb268a4a066",
+    "checks/http-probe-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/lint.log": "bda9fa1a82b9ca45125c91c2d080ad5aec3e686586a7cd3b3a8a36d5d1dc601b",
+    "checks/production-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/profile-check.log": "5d7657ab94677198160fe7de50fed9736ea58e81e77ebd3cd0a7b147fcda0d6c",
+    "checks/results.json": "a8a78acec58c69910b01239e62a535fa4d412c6f07c3d7392f318a8bd6b973b5",
+    "har13-diagnostic-placement.log": "8241ccda88692ba03daf91da2c803cf5055900d406d7a17ee374944273b3635d",
+    "manifest.json": "c02e9a2ff4c2b5bed07830e301e8a3697a5b757d466baa1d56b8daea29de349a",
+    "prepare-observations.json": "88fa95b9df45240943499d0da9012fbc49f868bbe98092d4bb1abecb40b1181d",
+    "prepare.log": "8caf12f5f7db46ae5ada81d2c6c13bde11fc48dfcd50e504585acda7a87d4897",
+    "previous-profile-registry.ts.txt": "a9006692818d37e0f7449335898eefc60e57d5b03cdca2c8ae79c0bbdbd3789d",
+    "profile-identity.json": "72997a7688703a713a75ce9d118a6d8dae3377f6a51415373e9468ab68152415",
+    "react-build.log": "fee268689a7fbea1a3743a26160bbb2363bd40d8f060e3b2e956f1adafcddc17",
+    "react-served-assets.sha256.json": "15c82609f3282f8cb4d9f6461f1c09dc4b7357e2a115c5a1358cf7087d3bdc20",
+    "resume-observations.json": "49c7647b81f78ed23147bb569f88ce6dcb99181e8c3fa2d79f49b4e7aac7a80b",
+    "resume.log": "98def741c846bfb745e4e3f5721bfb5723b920979b451f0ad9fc95561a403229",
+    "shell-build.log": "473c73931b305ace7558b9a76d8541c8bdabab5d336fffb5b2ee6a3984ea81a5",
+    "shell-unit.log": "6fe9a502b69d3021f8c56e7dc87fd466f1d0c25a3e5b9737c6fee9fbda0465fd",
+    "independent-review.txt": "90984c4350aec17db1c338777aeb1504df0739aa6b31dd7c06c1dc44a8223315"
+  }
+}

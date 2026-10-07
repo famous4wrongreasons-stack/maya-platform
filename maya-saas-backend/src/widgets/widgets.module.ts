@@ -1,3 +1,5 @@
+import { AI_GOODS_APPROVAL_WIDGET_TRIGGER } from '../ai-tools/ai-approval-widget-trigger.port';
+import { GoodsReceiptApprovalTriggerService } from './inventory/goods-receipt-approval-trigger.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SelectorLifecycleService } from './rendering/selector-lifecycle.service';
 import { SelectorDeliveryInterceptor } from './rendering/selector-delivery.interceptor';
@@ -102,6 +104,11 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
     WidgetThreadPageService,
     ChatReadTriggerService,
     { provide: AI_READ_WIDGET_TRIGGER, useExisting: ChatReadTriggerService },
+    GoodsReceiptApprovalTriggerService,
+    {
+      provide: AI_GOODS_APPROVAL_WIDGET_TRIGGER,
+      useExisting: GoodsReceiptApprovalTriggerService,
+    },
     ServicePriceApprovalTriggerService,
     {
       provide: AI_APPROVAL_WIDGET_TRIGGER,

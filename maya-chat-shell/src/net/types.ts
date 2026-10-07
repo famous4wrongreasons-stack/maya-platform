@@ -239,6 +239,19 @@ export interface WidgetOwnerDecisionProjection {
     readonly service_id: string | null;
     readonly price_rubles: number | null;
     readonly action_execution_id: string | null;
+    readonly goods_receipt?: {
+      readonly receipt_id: string | null;
+      readonly company_id: string | null;
+      readonly goods_id: string | null;
+      readonly store_id: string | null;
+      readonly quantity: string | null;
+      readonly unit_id: string | null;
+      readonly unit_cost: string | null;
+      readonly line_total: string | null;
+      readonly received_at: string | null;
+      readonly no_catalog_price_change: boolean;
+      readonly no_absolute_stock_assignment: boolean;
+    };
   } | null;
 }
 

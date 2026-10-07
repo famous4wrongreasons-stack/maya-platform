@@ -1,3 +1,12 @@
+import {
+  GOODS_RECEIPT_CAPABILITY,
+  GOODS_RECEIPT_TOOL,
+} from '../../crm/goods-receipt.contract';
+import {
+  GOODS_RECEIPT_APPROVAL_OWNER,
+  GOODS_RECEIPT_APPROVAL_NOUN_OWNER,
+  type GoodsReceiptApprovalOwnerPort,
+} from '../inventory/goods-receipt-approval.port';
 import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
 import { SCHEDULE_AE } from '../emission/schedule-intent-template';
 import {
@@ -44,6 +53,9 @@ export class NounResolutionOwnersProvider implements NounReadPort {
     @Inject(SERVICE_PRICE_APPROVAL_OWNER)
     private readonly price?: ServicePriceApprovalOwnerPort,
     @Optional() private readonly schedule?: ScheduleApprovalAdapter,
+    @Optional()
+    @Inject(GOODS_RECEIPT_APPROVAL_OWNER)
+    private readonly goods?: GoodsReceiptApprovalOwnerPort,
   ) {}
 
   async read(
@@ -52,6 +64,13 @@ export class NounResolutionOwnersProvider implements NounReadPort {
   ): Promise<NounReadResult> {
     if (actor.tenantId === null || actor.tenantId !== input.tenantId)
       return { kind: 'policy_deferred' };
+    if (
+      input.capability?.key === GOODS_RECEIPT_CAPABILITY ||
+      input.capability?.key === GOODS_RECEIPT_TOOL
+    )
+      return this.goods
+        ? this.goods.readNoun(input, actor)
+        : { kind: 'policy_deferred' };
     if (
       input.capability?.key === SERVICE_PRICE_CAPABILITY ||
       input.capability?.key === 'catalog.service.price.update'
@@ -65,6 +84,14 @@ export class NounResolutionOwnersProvider implements NounReadPort {
       input.capability === null && input.frozenNouns.size === 1
         ? input.frozenNouns.get('approval')
         : undefined;
+    if (
+      detailApproval &&
+      openWidgetNounHandle(detailApproval)?.ownerKind ===
+        GOODS_RECEIPT_APPROVAL_NOUN_OWNER
+    )
+      return this.goods
+        ? this.goods.readNoun(input, actor)
+        : { kind: 'policy_deferred' };
     if (
       detailApproval &&
       openWidgetNounHandle(detailApproval)?.ownerKind ===

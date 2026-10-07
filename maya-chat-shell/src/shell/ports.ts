@@ -231,7 +231,10 @@ export type WidgetSentence =
   | 'expired_not_resolved'
   | 'service_price_confirmed'
   | 'service_price_unconfirmed'
-  | 'service_price_rejected';
+  | 'service_price_rejected'
+  | 'goods_receipt_confirmed'
+  | 'goods_receipt_unconfirmed'
+  | 'goods_receipt_rejected';
 
 export type TimelineItemView =
   | {

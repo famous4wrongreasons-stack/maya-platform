@@ -1,3 +1,4 @@
+import { GoodsReceiptApprovalAdapter } from './goods-receipt-approval.adapter';
 import { EncryptionModule } from '../../encryption/encryption.module';
 import { ChatReplyCipherAdapter } from './chat-reply-cipher.adapter';
 import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
@@ -148,6 +149,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       C9CancelAdapter,
       { provide: DI_TOKENS.C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
       ApprovalRequestAdapter,
+      GoodsReceiptApprovalAdapter,
+      {
+        provide: DI_TOKENS.GOODS_RECEIPT_APPROVAL_OWNER,
+        useExisting: GoodsReceiptApprovalAdapter,
+      },
       ServicePriceApprovalAdapter,
       CanonicalApprovalAdapter,
       {
@@ -179,6 +185,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
+      DI_TOKENS.GOODS_RECEIPT_APPROVAL_OWNER,
       DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
       DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
@@ -230,6 +237,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
     // it: that is what keeps "unbound" from drifting into "nobody checked".
     const BOUND: readonly string[] = [
+      DI_TOKENS.GOODS_RECEIPT_APPROVAL_OWNER,
       DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
       DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
