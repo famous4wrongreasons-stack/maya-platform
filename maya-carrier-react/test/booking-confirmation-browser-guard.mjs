@@ -27,7 +27,8 @@ export function admitted(request, origin) {
     if (/^\/api\/widgets\/(?:resolve|rendered|observe)$/.test(url.pathname)) return true;
     if (url.pathname === '/api/widgets/intent') {
       const body = JSON.parse(request.postData);
-      return typeof body.widget_id === 'string' && typeof body.intent_token === 'string' && body.profile_id === 'pwa.default';
+      return body.contract === 'maya.widget.intent.submission/1' &&
+        typeof body.widget_id === 'string' && typeof body.intent_token === 'string' && body.profile_id === 'pwa/1';
     }
     if (url.pathname !== '/api/ai/chat') return false;
     const body = JSON.parse(request.postData);

@@ -369,6 +369,18 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
               if (s.key === 'revoked') await revoke(s);
             } else if (s.key === 'success') {
               expect(await db.prisma.actionExecution.count({ where })).toBe(1);
+              const execution =
+                await db.prisma.actionExecution.findFirstOrThrow({ where });
+              expect(execution).toMatchObject({
+                capability: 'crm.appointment.create.v1',
+                state: 'SUCCEEDED',
+                executionAttemptCount: 1,
+              });
+              observations[m.name] = {
+                capability: execution.capability,
+                state: execution.state,
+                executionAttemptCount: execution.executionAttemptCount,
+              };
               const appointment = await db.prisma.appointment.findFirstOrThrow({
                 where,
               });
@@ -384,10 +396,18 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
               expect(await db.prisma.appointment.count({ where })).toBe(0);
             } else {
               expect(await db.prisma.actionExecution.count({ where })).toBe(1);
-              expect(
-                (await db.prisma.actionExecution.findFirstOrThrow({ where }))
-                  .state,
-              ).toBe('UNKNOWN');
+              const execution =
+                await db.prisma.actionExecution.findFirstOrThrow({ where });
+              expect(execution).toMatchObject({
+                capability: 'crm.appointment.create.v1',
+                state: 'UNKNOWN',
+                executionAttemptCount: 1,
+              });
+              observations[m.name] = {
+                capability: execution.capability,
+                state: execution.state,
+                executionAttemptCount: execution.executionAttemptCount,
+              };
               expect(await db.prisma.appointment.count({ where })).toBe(0);
               expect(dispatches).toBe(1);
               expect(socketLosses).toBe(1);
