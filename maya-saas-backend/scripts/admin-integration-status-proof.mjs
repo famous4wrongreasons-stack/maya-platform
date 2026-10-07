@@ -10,7 +10,7 @@ import { parseArgs } from 'node:util';
 import { proofCommands, proofEnvironment, runCommand } from './c9-occupancy-proof.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' } } });
+const { values } = parseArgs({ options: { run: { type: 'boolean' }, public: { type: 'boolean' }, output: { type: 'string' } } });
 assert.equal(values.run, true, 'Explicit --run and parent heavy slot required');
 assert.ok(values.output && path.isAbsolute(values.output) && !fs.existsSync(values.output));
 for (const name of ['.env', '.env.local']) assert.equal(fs.existsSync(path.join(backend, name)), false);
@@ -26,8 +26,8 @@ const database = 'maya_widget_gate_proof_c9occ_' + randomBytes(6).toString('hex'
 const pgBin = '/opt/homebrew/opt/postgresql@16/bin';
 const env = proofEnvironment(process.env, `postgresql://c9_proof@127.0.0.1:${port}/${database}`);
 const commands = proofCommands({ pgBin, cluster, port, database, output, log: path.join(output, 'postgres.log'), receipt: path.join(output, 'unused-receipt.json') }).slice(0, 4);
-commands.push({ name: 'admin-http', command: process.execPath, args: ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/c9-chat-reads.live-spec.ts', '--testNamePattern=Admin integration status', '--json', '--outputFile=' + path.join(output, 'admin-http-jest.json')], env: { JEST_ADMIN_STATUS_REPORT: path.join(output, 'admin-http.json') } });
-const manifest = { contract: 'maya.admin-status-owned-cluster/1', status: 'running', cluster, port, database, completed: [], resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, pgWorkMemMb: 4, pgMaxConnections: 30, jestWorkers: 1 }, realModelAcceptance: false, browserAcceptance: false, backgroundAuthority: false };
+commands.push({ name: 'admin-http', command: process.execPath, args: ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/c9-chat-reads.live-spec.ts', '--testNamePattern=' + (values.public ? 'Admin public consultation' : 'Admin integration status'), '--json', '--outputFile=' + path.join(output, 'admin-http-jest.json')], env: { [values.public ? 'JEST_PUBLIC_CONSULTATION_REPORT' : 'JEST_ADMIN_STATUS_REPORT']: path.join(output, 'admin-http.json') } });
+const manifest = { contract: values.public ? 'maya.admin-public-consultation-owned-cluster/1' : 'maya.admin-status-owned-cluster/1', status: 'running', cluster, port, database, completed: [], resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, pgWorkMemMb: 4, pgMaxConnections: 30, jestWorkers: 1 }, realModelAcceptance: false, browserAcceptance: false, backgroundAuthority: false };
 const save = () => fs.writeFileSync(path.join(output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 const control = { cancelled: null, terminateActive: null, activeCleanup: false };
 const cancel = signal => { control.cancelled ??= signal; manifest.cancelledBy = signal; save(); if (!control.activeCleanup) control.terminateActive?.(); };

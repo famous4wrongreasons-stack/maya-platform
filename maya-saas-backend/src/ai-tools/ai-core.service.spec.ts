@@ -1202,6 +1202,123 @@ describe('AiCoreService', () => {
     });
   });
 
+  it.each([
+    [
+      'Какие у вас мастера?',
+      false,
+      { staff: [{ name: 'Тестовый мастер', title: 'Барбер' }] },
+      'verified',
+    ],
+    [
+      'Какие у вас мастера?',
+      true,
+      { staff: [{ name: 'Тестовый мастер' }] },
+      'blocked',
+    ],
+    ['Какие у вас мастера?', false, { staff: null }, 'blocked'],
+  ] as const)(
+    'composes semantic public staff consultation: %s',
+    async (message, stale, result, status) => {
+      const mocks = createService([
+        'catalog.staff.read',
+        'analytics.business.query',
+      ]);
+      mocks.model.decide.mockResolvedValueOnce(
+        decision({
+          reply: null,
+          toolCall: { name: 'catalog.staff.read', arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'employees.list_public',
+                  entities: {},
+                  confidence: 0.99,
+                },
+              ],
+            },
+            user.role,
+            ['catalog.staff.read'],
+          ),
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValueOnce({
+        status: 'completed',
+        execution_id: 'public-source-read',
+        stale,
+        result,
+      });
+      const out = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: message }],
+      });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute.mock.calls[0]?.[3]).toMatchObject({
+        suppressWidgetTrigger: true,
+      });
+      expect(out).toMatchObject({
+        action: null,
+        source: 'safe_fallback',
+        grounding: {
+          status,
+          domain: 'staff_catalog',
+          evidence_tools: ['catalog.staff.read'],
+        },
+      });
+      if (status === 'verified')
+        expect(out.reply).toContain('Тестовый мастер — Барбер');
+      else expect(out.reply).not.toContain('Тестовый мастер');
+    },
+  );
+
+  it('keeps a compound public catalog plan in its existing continuation', async () => {
+    const mocks = createService([
+      'catalog.staff.read',
+      'analytics.business.query',
+    ]);
+    const semanticPlan = new ConversationIntelligenceService().validatePlan(
+      {
+        dialogue_act: 'request',
+        tasks: [
+          { intent: 'employees.list_public', entities: {}, confidence: 0.99 },
+          { intent: 'company.public_info', entities: {}, confidence: 0.99 },
+        ],
+      },
+      user.role,
+      ['catalog.staff.read'],
+    );
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        semanticPlan,
+        toolCall: { name: 'catalog.staff.read', arguments: {} },
+      }),
+    );
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: 'Сведения о салоне и команде получены.',
+        semanticPlan,
+        toolCall: null,
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValueOnce({
+      status: 'completed',
+      execution_id: 'compound-public-read',
+      result: { salon: {}, staff: [] },
+    });
+    await mocks.service.chat(user, {
+      ...dto,
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Расскажи о барбершопе' }],
+    });
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    expect(mocks.runtime.execute.mock.calls[0]?.[3]).not.toHaveProperty(
+      'suppressWidgetTrigger',
+    );
+  });
+
   it('keeps owner in client audience on salon story without business analytics', async () => {
     const mocks = createService([
       'analytics.business.query',
@@ -1213,13 +1330,16 @@ describe('AiCoreService', () => {
       decision({
         reply: null,
         toolCall: { name: 'catalog.staff.read', arguments: {} },
-      }),
-    );
-    mocks.model.decide.mockResolvedValueOnce(
-      decision({
-        reply:
-          'У нас тёплая команда барберов и спокойная атмосфера. Записать вас?',
-        toolCall: null,
+        semanticPlan: new ConversationIntelligenceService().validatePlan(
+          {
+            dialogue_act: 'request',
+            tasks: [
+              { intent: 'company.public_info', entities: {}, confidence: 0.99 },
+            ],
+          },
+          UserRole.CUSTOMER,
+          ['catalog.staff.read'],
+        ),
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
@@ -1244,7 +1364,7 @@ describe('AiCoreService', () => {
     });
 
     expect(mocks.runtime.listTools).toHaveBeenCalled();
-    const firstModelInput = mocks.model.decide.mock.calls[1]?.[0];
+    const firstModelInput = mocks.model.decide.mock.calls[0]?.[0];
     expect(firstModelInput?.persona).toBe('admin');
     expect(
       firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
@@ -1269,6 +1389,9 @@ describe('AiCoreService', () => {
       expect.anything(),
       expect.anything(),
     );
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(result.reply).toContain('Из сохранённого описания салона');
+    expect(result.reply).not.toContain('более 6 лет');
     expect(result.brain).toMatchObject({ persona: 'admin' });
     expect(result.widget).toBeUndefined();
     expect(result.reply).not.toMatch(/выручк|прибыл|загрузк|аналитик/i);

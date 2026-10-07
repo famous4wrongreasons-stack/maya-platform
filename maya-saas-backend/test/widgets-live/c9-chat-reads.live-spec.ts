@@ -1,4 +1,7 @@
-import { randomUUID } from 'node:crypto';
+import { AiToolRuntimeService } from '../../src/ai-tools/ai-tool-runtime.service';
+import { ConversationIntelligenceService } from '../../src/conversation-intelligence/conversation-intelligence.service';
+import { createHash, randomUUID } from 'node:crypto';
+import { EncryptionService } from '../../src/encryption/encryption.service';
 import { writeFileSync } from 'node:fs';
 import request from 'supertest';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
@@ -129,6 +132,257 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
     );
   }
 
+  it('Admin public consultation uses current tenant profile and staff through C9 without invented facts or mutations', async () => {
+    const owner = await fixture(
+      'Мужская Эстетика',
+      1500,
+      UserRole.TENANT_OWNER,
+    );
+    const other = await fixture('Другой салон', 2300, UserRole.TENANT_OWNER);
+    const staff = await db.prisma.internalProvider.create({
+      data: {
+        tenantId: owner.tenant.id,
+        displayName: 'Тестовый мастер',
+        title: 'Барбер',
+      },
+    });
+    await db.prisma.internalProvider.create({
+      data: { tenantId: other.tenant.id, displayName: 'Другой мастер' },
+    });
+    const profile = await db.prisma.brandingSettings.create({
+      data: {
+        tenantId: owner.tenant.id,
+        appName: 'Мужская Эстетика',
+        onboardingJson: {},
+        contactDetailsJson: {},
+      },
+    });
+    const network = jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
+      throw new Error('No network permitted');
+    });
+    const tool = 'catalog.staff.read';
+    const model = jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation((input) => {
+        if (input.toolResults.length)
+          throw new Error('Public source facts must not return to the model');
+        const content = input.messages
+          .filter((m) => m.role === 'user')
+          .at(-1)?.content;
+        const intent =
+          content === 'Расскажи о салоне'
+            ? 'company.public_info'
+            : 'employees.list_public';
+        return Promise.resolve({
+          reply: '',
+          toolCall: { name: tool, arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [{ intent, entities: {}, confidence: 0.99 }],
+            },
+            UserRole.TENANT_OWNER,
+            [tool],
+          ),
+          provider: 'openai',
+          model: 'SCRIPTED_SYNTHETIC_PUBLIC_SELECTION',
+          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+        });
+      });
+    const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+    const runtime = jest.spyOn(http.app.get(AiToolRuntimeService), 'execute');
+    const firstId = randomUUID();
+    const first = await owner.chat(firstId, 'Какие у вас мастера?');
+    expect(first.status).toBe(201);
+    if (first.body.coordination?.state !== 'COMPLETED') {
+      const sourceOutcomes = await Promise.all(
+        runtime.mock.results.map(async (result) => {
+          try {
+            await result.value;
+            return 'resolved';
+          } catch (error) {
+            return error instanceof Error
+              ? error.message.slice(0, 500)
+              : 'source_failed';
+          }
+        }),
+      );
+      throw new Error(
+        JSON.stringify({
+          first,
+          sourceOutcomes,
+          executionErrors: await db.prisma.aiToolExecution.findMany({
+            where: { tenantId: owner.tenant.id },
+            select: { status: true, errorCode: true },
+          }),
+        }),
+      );
+    }
+    expect(first.body).toMatchObject({
+      action: null,
+      coordination: { scope: 'deterministic_reads', state: 'COMPLETED' },
+      grounding: { status: 'verified', evidence_tools: [tool] },
+    });
+    expect(first.body.reply).toContain('Тестовый мастер');
+    expect(first.body.reply).not.toContain('Другой мастер');
+    const replay = await owner.chat(firstId, 'Какие у вас мастера?');
+    expect(replay.body.reply).toBe(first.body.reply);
+    expect(source).toHaveBeenCalledTimes(1);
+    expect(model).toHaveBeenCalledTimes(2);
+    const salon = await owner.chat(randomUUID(), 'Расскажи о салоне');
+    expect(salon.status).toBe(201);
+    expect(salon.body.reply).toContain('Название в профиле: Мужская Эстетика');
+    expect(salon.body.reply).not.toMatch(
+      /Ставропол|Лермонтов|2020|шест|премиальн|стабильн/,
+    );
+    const beforeUpdate = await db.prisma.brandingSettings.findUniqueOrThrow({
+      where: { id: profile.id },
+    });
+    expect(beforeUpdate).toEqual(profile);
+    const second = await other.chat(randomUUID(), 'Какие у вас мастера?');
+    expect(second.status).toBe(201);
+    expect(second.body.reply).toContain('Другой мастер');
+    expect(second.body.reply).not.toContain('Тестовый мастер');
+    const foreign = await request(http.app.getHttpServer())
+      .get(`/api/orchestration/runs/${first.body.coordination.run_id}`)
+      .set('Authorization', `Bearer ${other.token}`);
+    expect(foreign.status).toBe(400);
+    await db.prisma.internalProvider.update({
+      where: { id: staff.id },
+      data: { active: false },
+    });
+    const changed = await owner.chat(randomUUID(), 'Какие у вас мастера?');
+    expect(changed.status).toBe(201);
+    expect(changed.body.reply).toContain(
+      'В полученном публичном каталоге нет записей',
+    );
+    expect(changed.body.reply).not.toContain('Тестовый мастер');
+    for (const [, principal] of source.mock.calls)
+      expect([owner.tenant.id, other.tenant.id]).toContain(principal.tenantId);
+    expect(source.mock.calls[0]?.[1]).toMatchObject({
+      tenantId: owner.tenant.id,
+      userId: owner.user.id,
+      role: UserRole.TENANT_OWNER,
+    });
+    // Reproduce a pre-fix durable source receipt, including its old input identity.
+    // The existing C9 replay must refuse it without redispatch or invented prose.
+    const principal = source.mock.calls[0][1];
+    const canonical = (value: unknown): string => {
+      if (value !== null && typeof value === 'object')
+        return (
+          '{' +
+          Object.entries(value)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([k, v]) => JSON.stringify(k) + ':' + canonical(v))
+            .join(',') +
+          '}'
+        );
+      return JSON.stringify(value);
+    };
+    const oldHash = createHash('sha256')
+      .update(
+        canonical({
+          actor_user_id: principal.userId,
+          arguments: {},
+          surface: 'web',
+          tool_name: tool,
+          read_authority: {
+            contract: 'maya.read-authority/1',
+            role: principal.role,
+            ...principal.readAuthority,
+          },
+        }),
+      )
+      .digest('hex');
+    const oldPayload = {
+      salon: {
+        name: 'Мужская Эстетика',
+        about: ['Лермонтова, 343. Работаем больше шести лет.'],
+      },
+      staff: [],
+    };
+    await db.prisma.aiToolExecution.update({
+      where: { id: first.body.tools_used[0].execution_id },
+      data: {
+        inputHash: oldHash,
+        encryptedResult: http.app
+          .get(EncryptionService)
+          .encrypt(JSON.stringify(oldPayload)),
+      },
+    });
+    const callsBeforeLegacyReplay = source.mock.calls.length;
+    const legacyReplay = await owner.chat(firstId, 'Какие у вас мастера?');
+    expect(legacyReplay.body.coordination.state).toBe('INCOMPLETE');
+    expect(legacyReplay.body.reply).not.toMatch(
+      /Лермонтов|шест|Тестовый мастер/,
+    );
+    expect(source).toHaveBeenCalledTimes(callsBeforeLegacyReplay);
+    const readsBeforeRevocation = source.mock.calls.length;
+    await db.prisma.membership.updateMany({
+      where: { tenantId: owner.tenant.id, userId: owner.user.id },
+      data: { status: 'suspended' },
+    });
+    const revoked = await owner.chat(firstId, 'Какие у вас мастера?');
+    expect(revoked.status).toBe(401);
+    expect(source).toHaveBeenCalledTimes(readsBeforeRevocation);
+    const executions = await db.prisma.actionExecution.count({
+      where: { tenantId: { in: [owner.tenant.id, other.tenant.id] } },
+    });
+    expect(executions).toBe(0);
+    expect(network).not.toHaveBeenCalled();
+    const receipts = await db.prisma.c9WorkReceipt.findMany({
+      where: { tenantId: owner.tenant.id },
+    });
+    expect(receipts).toHaveLength(3);
+    for (const receipt of receipts) {
+      expect(receipt).toMatchObject({
+        taskKey: tool,
+        kind: 'TOOL_READ',
+        state: 'SETTLED',
+      });
+      expect(JSON.stringify(receipt.resultJson)).not.toMatch(
+        /Тестовый мастер|Мужская Эстетика|encryptedDisplayName/,
+      );
+    }
+    if (process.env.JEST_PUBLIC_CONSULTATION_REPORT)
+      writeFileSync(
+        process.env.JEST_PUBLIC_CONSULTATION_REPORT,
+        JSON.stringify(
+          {
+            contract: 'maya.admin-public-consultation-http/1',
+            syntheticSourceFacts: true,
+            scriptedModelSelection: true,
+            realModelAcceptance: false,
+            externalProviderAcceptance: false,
+            browserAcceptance: false,
+            appRestart: false,
+            modelCalls: model.mock.calls.length,
+            sourceCalls: source.mock.calls.length,
+            networkCalls: network.mock.calls.length,
+            actionExecutions: executions,
+            initialProfileUnchanged: true,
+            legacyReplay,
+            first,
+            replay,
+            salon,
+            other: second,
+            changed,
+            foreignStatus: foreign.status,
+            revokedStatus: revoked.status,
+            receipts: receipts.map(({ kind, domain, state, taskKey }) => ({
+              kind,
+              domain,
+              state,
+              taskKey,
+            })),
+            certificate: 'NOT_ISSUED',
+          },
+          null,
+          2,
+        ) + '\n',
+      );
+  });
+
   it('Admin integration status uses stored tenant facts through C9 without live provider health or side effects', async () => {
     const owner = await fixture(
       'Stored Admin status',
@@ -167,7 +421,7 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
     const model = jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
       .mockResolvedValue({
-        reply: null,
+        reply: '',
         toolCall: { name: tool, arguments: {} },
         provider: 'openai',
         model: 'SCRIPTED_SYNTHETIC_ADMIN_SELECTION',
@@ -314,7 +568,7 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
       data: { userId: null },
     });
     jest.spyOn(http.app.get(AiCoreModelService), 'decide').mockResolvedValue({
-      reply: null,
+      reply: '',
       toolCall: { name: 'appointments.own.list', arguments: {} },
       provider: 'openai',
       model: 'SCRIPTED_SYNTHETIC_PERSONAL_READ',

@@ -1,3 +1,4 @@
+import { publicConsultationReply } from './public-consultation-presentation';
 import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
 import { integrationStatusReply } from './integration-status-presentation';
 import {
@@ -1686,6 +1687,17 @@ export class AiCoreService {
         }
         signatures.add(signature);
 
+        // Public consultation consumes the existing semantic intent, not a
+        // phrase fastpath. Catalog reads supporting booking/compound plans keep
+        // their existing continuation; this presentation grants no authority.
+        const publicConsultation =
+          decision.toolCall.name === 'catalog.staff.read' &&
+          activeSemanticPlan?.tasks.length === 1 &&
+          activeSemanticPlan.tasks[0].permission.status === 'allowed' &&
+          activeSemanticPlan.tasks[0].tool.status === 'ready' &&
+          ['employees.list_public', 'company.public_info'].includes(
+            activeSemanticPlan.tasks[0].intent,
+          );
         let execution: Record<string, unknown>;
         try {
           execution = this.record(
@@ -1706,6 +1718,8 @@ export class AiCoreService {
               },
               {
                 widgetTrigger: 'T-2a',
+                // Consultation is a READ answer, not a booking selector.
+                ...(publicConsultation ? { suppressWidgetTrigger: true } : {}),
                 requestId: dto.requestId,
                 userTurn: this.persistedUserTurns.get(dto),
               },
@@ -1831,32 +1845,42 @@ export class AiCoreService {
             decision.toolCall.name,
             this.contextualUserText(sanitized.messages),
           ) ||
-          personalPreparation
+          personalPreparation ||
+          publicConsultation
         ) {
-          const sourceReply = personalPreparation
-            ? this.personalCatalogPreparationReply(execution)
-            : decision.toolCall.name === 'staff.schedule.own.read'
-              ? this.deterministicOwnStaffScheduleReply(
-                  execution.result,
-                  hardenedArguments.date,
-                  execution.stale === true,
-                )
-              : decision.toolCall.name === 'company.business-hours.read'
-                ? this.deterministicCompanyProfileReply(
+          const sourceReply = publicConsultation
+            ? publicConsultationReply(
+                execution.result,
+                activeSemanticPlan!.tasks[0].intent === 'employees.list_public'
+                  ? 'staff'
+                  : 'salon',
+                execution.stale === true,
+              )
+            : personalPreparation
+              ? this.personalCatalogPreparationReply(execution)
+              : decision.toolCall.name === 'staff.schedule.own.read'
+                ? this.deterministicOwnStaffScheduleReply(
                     execution.result,
+                    hardenedArguments.date,
                     execution.stale === true,
                   )
-                : decision.toolCall.name === 'appointments.own.list'
-                  ? this.deterministicOwnAppointmentsReply(
+                : decision.toolCall.name === 'company.business-hours.read'
+                  ? this.deterministicCompanyProfileReply(
                       execution.result,
                       execution.stale === true,
                     )
-                  : decision.toolCall.name === 'support.integration-status.read'
-                    ? integrationStatusReply(
+                  : decision.toolCall.name === 'appointments.own.list'
+                    ? this.deterministicOwnAppointmentsReply(
                         execution.result,
                         execution.stale === true,
                       )
-                    : null;
+                    : decision.toolCall.name ===
+                        'support.integration-status.read'
+                      ? integrationStatusReply(
+                          execution.result,
+                          execution.stale === true,
+                        )
+                      : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(

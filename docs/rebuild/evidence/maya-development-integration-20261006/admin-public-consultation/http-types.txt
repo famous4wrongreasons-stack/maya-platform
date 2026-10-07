@@ -1,0 +1,29 @@
+test/widgets-live/bi-owner-react.probe-spec.ts(412,17): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string | object | undefined'.
+test/widgets-live/booking-confirmation-react.probe-spec.ts(186,27): error TS2345: Argument of type '(input: AiCoreModelInput) => Promise<{ reply: string | null; toolCall: { name: string; arguments: {}; } | null; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to parameter of type '(input: AiCoreModelInput) => Promise<AiCoreModelDecision | null>'.
+  Type 'Promise<{ reply: string | null; toolCall: { name: string; arguments: {}; } | null; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to type 'Promise<AiCoreModelDecision | null>'.
+    Type '{ reply: string | null; toolCall: { name: string; arguments: {}; } | null; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }' is not assignable to type 'AiCoreModelDecision'.
+      Types of property 'reply' are incompatible.
+        Type 'string | null' is not assignable to type 'string'.
+          Type 'null' is not assignable to type 'string'.
+test/widgets-live/c9-chat-reads.live-spec.ts(166,27): error TS2345: Argument of type '(input: AiCoreModelInput) => Promise<{ reply: null; toolCall: { name: string; arguments: {}; }; semanticPlan: ConversationSemanticPlan | null; provider: "openai"; model: string; usage: { ...; }; }>' is not assignable to parameter of type '(input: AiCoreModelInput) => Promise<AiCoreModelDecision | null>'.
+  Type 'Promise<{ reply: null; toolCall: { name: string; arguments: {}; }; semanticPlan: ConversationSemanticPlan | null; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to type 'Promise<AiCoreModelDecision | null>'.
+    Type '{ reply: null; toolCall: { name: string; arguments: {}; }; semanticPlan: ConversationSemanticPlan | null; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }' is not assignable to type 'AiCoreModelDecision'.
+      Types of property 'reply' are incompatible.
+        Type 'null' is not assignable to type 'string'.
+test/widgets-live/c9-chat-reads.live-spec.ts(424,9): error TS2322: Type 'null' is not assignable to type 'string'.
+test/widgets-live/c9-chat-reads.live-spec.ts(571,7): error TS2322: Type 'null' is not assignable to type 'string'.
+test/widgets-live/company-profile-restart.probe-spec.ts(136,27): error TS2345: Argument of type '(input: AiCoreModelInput) => Promise<{ reply: null; toolCall: { name: string; arguments: {}; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to parameter of type '(input: AiCoreModelInput) => Promise<AiCoreModelDecision | null>'.
+  Type 'Promise<{ reply: null; toolCall: { name: string; arguments: {}; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to type 'Promise<AiCoreModelDecision | null>'.
+    Type '{ reply: null; toolCall: { name: string; arguments: {}; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }' is not assignable to type 'AiCoreModelDecision'.
+      Types of property 'reply' are incompatible.
+        Type 'null' is not assignable to type 'string'.
+test/widgets-live/lifecycle-owner-react.probe-spec.ts(99,27): error TS2345: Argument of type '(input: AiCoreModelInput) => Promise<{ reply: null; toolCall: { name: string; arguments: {}; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to parameter of type '(input: AiCoreModelInput) => Promise<AiCoreModelDecision | null>'.
+  Type 'Promise<{ reply: null; toolCall: { name: string; arguments: {}; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to type 'Promise<AiCoreModelDecision | null>'.
+    Type '{ reply: null; toolCall: { name: string; arguments: {}; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }' is not assignable to type 'AiCoreModelDecision'.
+      Types of property 'reply' are incompatible.
+        Type 'null' is not assignable to type 'string'.
+test/widgets-live/own-schedule-restart.probe-spec.ts(164,27): error TS2345: Argument of type '(input: AiCoreModelInput) => Promise<{ reply: null; toolCall: { name: string; arguments: { date: string; }; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to parameter of type '(input: AiCoreModelInput) => Promise<AiCoreModelDecision | null>'.
+  Type 'Promise<{ reply: null; toolCall: { name: string; arguments: { date: string; }; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }>' is not assignable to type 'Promise<AiCoreModelDecision | null>'.
+    Type '{ reply: null; toolCall: { name: string; arguments: { date: string; }; }; provider: "openai"; model: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number; }; }' is not assignable to type 'AiCoreModelDecision'.
+      Types of property 'reply' are incompatible.
+        Type 'null' is not assignable to type 'string'.

@@ -1,0 +1,292 @@
+{
+  "source": "https://developers.yclients.com/ru/",
+  "readAt": "2026-10-07",
+  "publicDocumentationOnly": true,
+  "businessApiCalls": 0,
+  "htmlSha256": "ed57f3e1908597d58e880184d7cea555534d6243837d5648069b114f4326bd36",
+  "openapi": "3.0.3",
+  "schemas": {
+    "goods_company_request_data_type": {
+      "required": [
+        "category_id",
+        "sale_unit_id",
+        "service_unit_id",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "print_title": {
+          "type": "string"
+        },
+        "article": {
+          "type": "string"
+        },
+        "barcode": {
+          "type": "string"
+        },
+        "category_id": {
+          "type": "integer"
+        },
+        "cost": {
+          "type": "number",
+          "format": "float"
+        },
+        "actual_cost": {
+          "type": "number",
+          "format": "float"
+        },
+        "sale_unit_id": {
+          "type": "integer"
+        },
+        "service_unit_id": {
+          "type": "integer"
+        },
+        "unit_equals": {
+          "type": "number",
+          "format": "float"
+        },
+        "critical_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "desired_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "netto": {
+          "type": "number",
+          "format": "float"
+        },
+        "brutto": {
+          "type": "number",
+          "format": "float"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "tax_variant": {
+          "type": "integer"
+        },
+        "vat_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "storage_operation_good_transaction_request_data_types": {
+      "required": [
+        "amount",
+        "cost",
+        "cost_per_unit",
+        "discount",
+        "document_id",
+        "good_id",
+        "operation_unit_type"
+      ],
+      "properties": {
+        "document_id": {
+          "type": "number",
+          "format": "float"
+        },
+        "good_id": {
+          "type": "number"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "cost_per_unit": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount": {
+          "type": "number"
+        },
+        "cost": {
+          "type": "number",
+          "format": "float"
+        },
+        "operation_unit_type": {
+          "type": "number"
+        },
+        "good_special_number": {
+          "type": "string"
+        },
+        "master_id": {
+          "type": "number"
+        },
+        "client_id": {
+          "type": "number"
+        },
+        "supplier_id": {
+          "type": "number"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "storage_operation_operation_request_data_types": {
+      "required": [
+        "create_date",
+        "goods_transactions",
+        "storage_id",
+        "type_id"
+      ],
+      "properties": {
+        "type_id": {
+          "type": "number"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "create_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "master_id": {
+          "type": "number"
+        },
+        "storage_id": {
+          "type": "number"
+        },
+        "goods_transactions": {
+          "type": "array"
+        }
+      }
+    },
+    "staff_companyid_request_data_types": {
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "specialization": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "number"
+        },
+        "information": {
+          "type": "string"
+        },
+        "api_id": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "number"
+        },
+        "fired": {
+          "type": "number"
+        },
+        "user_id": {
+          "type": "number"
+        }
+      }
+    },
+    "services_companyid_request_data_types": {
+      "required": [],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "category_id": {
+          "type": "number"
+        },
+        "price_min": {
+          "type": "number",
+          "format": "float"
+        },
+        "price_max": {
+          "type": "number",
+          "format": "float"
+        },
+        "duration": {
+          "type": "number"
+        },
+        "technical_break_duration": {
+          "type": "number"
+        },
+        "discount": {
+          "type": "number",
+          "format": "float"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "number"
+        },
+        "service_type": {
+          "type": "number"
+        },
+        "api_service_id": {
+          "type": "string"
+        },
+        "staff": {
+          "type": "array"
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "method": "POST",
+      "path": "/api/v1/goods/{company_id}",
+      "summary": "Создать товар",
+      "requestSchemaRefs": [
+        "#/components/schemas/goods_company_request_data_type"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage_operations/goods_transactions/{company_id}",
+      "summary": "Создать транзакцию",
+      "requestSchemaRefs": [
+        "#/components/schemas/storage_operation_good_transaction_request_data_types"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage_operations/operation/{company_id}",
+      "summary": "Создание складской операции",
+      "requestSchemaRefs": [
+        "#/components/schemas/storage_operation_operation_request_data_types"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/staff/quick",
+      "summary": "Быстрое создание сотрудника",
+      "requestSchemaRefs": []
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/staff/{company_id}/{staff_id}",
+      "summary": "Изменить сотрудника",
+      "requestSchemaRefs": [
+        "#/components/schemas/staff_companyid_request_data_types"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/services/{company_id}",
+      "summary": "Создать услугу",
+      "requestSchemaRefs": [
+        "#/components/schemas/services_companyid_request_data_types"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff",
+      "summary": "Привязка сотрудника, оказывающего услугу",
+      "requestSchemaRefs": []
+    }
+  ],
+  "documentationAmbiguity": {
+    "operationSchemaArray": "goods_transactions",
+    "exampleArrayKeys": [
+      "transactions"
+    ]
+  }
+}

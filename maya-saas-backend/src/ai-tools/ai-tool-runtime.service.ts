@@ -1859,7 +1859,10 @@ export class AiToolRuntimeService {
               contract: 'maya.read-authority/1',
               ...(toolName === 'catalog.services.read'
                 ? { source_projection: SERVICE_CATALOG_READ_CONTRACT }
-                : {}),
+                : toolName === 'catalog.staff.read'
+                  ? // READ cache identity only; rejects legacy name-derived facts.
+                    { source_projection: 'maya.public-catalog-source-facts/1' }
+                  : {}),
               role: principal.role,
               ...principal.readAuthority,
             },

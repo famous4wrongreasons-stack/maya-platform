@@ -1,0 +1,6 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core.service.spec.ts
+  79:27  warning  Unsafe argument of type `any` assigned to a parameter of type `AuthenticatedUser`  @typescript-eslint/no-unsafe-argument
+  79:34  warning  Unsafe argument of type `any` assigned to a parameter of type `AiCoreChatDto`      @typescript-eslint/no-unsafe-argument
+
+✖ 2 problems (0 errors, 2 warnings)

@@ -25,6 +25,92 @@ describe('AiTool extended capabilities', () => {
     surface: 'ios' as const,
   };
 
+  it.each(['Мужская Эстетика', 'malesthetic', 'Другой салон'])(
+    'never fabricates profile facts for %s while preserving actual staff',
+    async (name) => {
+      const listStaff = jest
+        .fn()
+        .mockResolvedValue([
+          { id: 'source-staff', name: 'Тестовый мастер', title: 'Барбер' },
+        ]);
+      const findUnique = jest
+        .fn()
+        .mockResolvedValue({ name, brandingSettings: null });
+      const service = createService({
+        staffService: { listStaff } as unknown as StaffService,
+        prisma: { tenant: { findUnique } } as unknown as PrismaService,
+      });
+      const result = await service.execute(
+        'catalog.staff.read',
+        owner,
+        {},
+        'read-only',
+      );
+      expect(listStaff).toHaveBeenCalledWith('tenant-a');
+      expect(findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'tenant-a' } }),
+      );
+      expect(result).toEqual({
+        salon: {
+          name,
+          city: null,
+          address: null,
+          phone: null,
+          tagline: null,
+          about: [],
+          founded_hint: null,
+        },
+        staff: [
+          {
+            id: 'source-staff',
+            name: 'Тестовый мастер',
+            title: 'Барбер',
+            specialization: null,
+          },
+        ],
+      });
+    },
+  );
+
+  it('keeps explicitly configured public profile facts', async () => {
+    const service = createService({
+      staffService: {
+        listStaff: jest.fn().mockResolvedValue([]),
+      } as unknown as StaffService,
+      prisma: {
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({
+            name: 'Tenant name',
+            brandingSettings: {
+              appName: 'Публичное имя',
+              onboardingJson: {
+                about: ['Сохранённый текст'],
+                founded_year: 2018,
+              },
+              contactDetailsJson: {
+                city: 'Тестовый город',
+                address: 'Улица 1',
+              },
+              storeListingJson: {},
+            },
+          }),
+        },
+      } as unknown as PrismaService,
+    });
+    expect(
+      await service.execute('catalog.staff.read', owner, {}, 'read-only'),
+    ).toMatchObject({
+      salon: {
+        name: 'Публичное имя',
+        city: 'Тестовый город',
+        address: 'Улица 1',
+        about: ['Сохранённый текст'],
+        founded_hint: '2018',
+      },
+      staff: [],
+    });
+  });
+
   it('normalizes and protects the new tool contracts', () => {
     const registry = new AiToolRegistryService();
 

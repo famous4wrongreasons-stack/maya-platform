@@ -1,0 +1,280 @@
+{
+  "contract": "maya.admin-public-consultation-http/1",
+  "syntheticSourceFacts": true,
+  "scriptedModelSelection": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "browserAcceptance": false,
+  "appRestart": false,
+  "modelCalls": 6,
+  "sourceCalls": 4,
+  "networkCalls": 0,
+  "actionExecutions": 0,
+  "initialProfileUnchanged": true,
+  "legacyReplay": {
+    "status": 201,
+    "body": {
+      "request_id": "176ba4a0-4ee4-45c4-94eb-340f42c6ccea",
+      "coordination": {
+        "run_id": "c88fb206-aaf6-40f8-9cf6-ed94e5113461",
+        "scope": "deterministic_reads",
+        "state": "INCOMPLETE"
+      },
+      "user_turn": {
+        "turnId": "bf9b97cd-7a26-4a31-aab4-a47a8e0fac8a",
+        "conversationId": "8765a3ab-885a-4911-b6c4-4f45e7631a76"
+      },
+      "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "blocked",
+        "domain": "business_query",
+        "required_tools": [
+          "analytics.business.query",
+          "catalog.services.read",
+          "booking.availability.read",
+          "appointments.own.list",
+          "analytics.business.profit",
+          "catalog.staff.read",
+          "clients.retention.scan",
+          "clients.dossier.read",
+          "staff.schedule.read",
+          "staff.schedule.own.read",
+          "operations.journal.read",
+          "company.business-hours.read"
+        ],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "staff_operations"
+      }
+    }
+  },
+  "first": {
+    "status": 201,
+    "body": {
+      "request_id": "176ba4a0-4ee4-45c4-94eb-340f42c6ccea",
+      "coordination": {
+        "run_id": "c88fb206-aaf6-40f8-9cf6-ed94e5113461",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "bf9b97cd-7a26-4a31-aab4-a47a8e0fac8a",
+        "conversationId": "8765a3ab-885a-4911-b6c4-4f45e7631a76"
+      },
+      "reply": "Название в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nТестовый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxrk6jf000qbpc9075xm1j5"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "staff_operations"
+      }
+    }
+  },
+  "replay": {
+    "status": 201,
+    "body": {
+      "request_id": "176ba4a0-4ee4-45c4-94eb-340f42c6ccea",
+      "coordination": {
+        "run_id": "c88fb206-aaf6-40f8-9cf6-ed94e5113461",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "bf9b97cd-7a26-4a31-aab4-a47a8e0fac8a",
+        "conversationId": "8765a3ab-885a-4911-b6c4-4f45e7631a76"
+      },
+      "reply": "Название в профиле: Мужская Эстетика.\n\nМастера в полученном публичном каталоге:\nТестовый мастер — Барбер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxrk6jf000qbpc9075xm1j5"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "staff_operations"
+      }
+    }
+  },
+  "salon": {
+    "status": 201,
+    "body": {
+      "request_id": "4b78d502-20a4-4d8d-803a-87ec0a5e36df",
+      "coordination": {
+        "run_id": "3b2a9778-a527-46e8-b23e-84b1ca0412c7",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "079c0bf0-080d-492b-a22d-35a2f97dd199",
+        "conversationId": "9e6953f8-002d-4051-ab6d-229f362cde36"
+      },
+      "reply": "Название в профиле: Мужская Эстетика.\n\nЭто сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxrk6ln000wbpc9r6x4c432"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "other": {
+    "status": 201,
+    "body": {
+      "request_id": "ba80508b-f7d0-472d-84ec-61c4dd6edde9",
+      "coordination": {
+        "run_id": "c6e1c51e-181f-4c26-b090-54b7ec97b31a",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "9f06dcb4-1b43-476d-a0c0-e5272ecec004",
+        "conversationId": "ba88912c-56ca-42f8-bc0f-95b0f614762c"
+      },
+      "reply": "Название в профиле: widgets-live Другой салон.\n\nМастера в полученном публичном каталоге:\nДругой мастер\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxrk6mp0011bpc9y0312gj1"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "staff_operations"
+      }
+    }
+  },
+  "changed": {
+    "status": 201,
+    "body": {
+      "request_id": "1838446b-97a2-478d-a875-ff12ae057cd3",
+      "coordination": {
+        "run_id": "7c436b6e-1629-4791-bd3a-3b59911b00ca",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "61fce22a-f25d-4958-a2c6-18bc72a87bb4",
+        "conversationId": "a2dbd2d4-8fcb-43cd-b05b-b6659ac3dbed"
+      },
+      "reply": "Название в профиле: Мужская Эстетика.\n\nВ полученном публичном каталоге нет записей о мастерах.\n\nПринадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "catalog.staff.read",
+          "status": "completed",
+          "execution_id": "cmuxrk6nu0016bpc9816tc9ej"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "staff_catalog",
+        "required_tools": [
+          "catalog.staff.read"
+        ],
+        "evidence_tools": [
+          "catalog.staff.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "staff_operations"
+      }
+    }
+  },
+  "foreignStatus": 400,
+  "revokedStatus": 401,
+  "receipts": [
+    {
+      "kind": "TOOL_READ",
+      "domain": "OCCUPANCY",
+      "state": "SETTLED",
+      "taskKey": "catalog.staff.read"
+    },
+    {
+      "kind": "TOOL_READ",
+      "domain": "OCCUPANCY",
+      "state": "SETTLED",
+      "taskKey": "catalog.staff.read"
+    },
+    {
+      "kind": "TOOL_READ",
+      "domain": "OCCUPANCY",
+      "state": "SETTLED",
+      "taskKey": "catalog.staff.read"
+    }
+  ],
+  "certificate": "NOT_ISSUED"
+}

@@ -1,0 +1,91 @@
+{
+  "contract": "maya.admin-public-consultation-checkpoint/1",
+  "baseCommit": "40cc9fb9",
+  "status": "PASSED_SCOPED_QUALIFICATION",
+  "unitTestsPassed": 247,
+  "unitTestsFailed": 0,
+  "unitSuites": 5,
+  "productionTypes": "PASS",
+  "scopedHttpTypes": "PASS",
+  "scopedLint": "PASS; two existing schedule-fixture warnings",
+  "aggregateWidgetProbeTypes": "NOT_PASS; initial run found nullable scripted replies / unknown send in other probe files; own c9-chat-reads errors corrected and scoped types pass",
+  "httpCasesPassed": 1,
+  "scriptedModelSelections": 6,
+  "sourceReads": 4,
+  "externalFetchCalls": 0,
+  "actionExecutions": 0,
+  "workReceiptDomain": "OCCUPANCY (existing registry first domain; no new Admin agent mapping)",
+  "sourceFixtures": "SYNTHETIC_INTERNAL_CALENDAR",
+  "sourceDedupe": true,
+  "legacyReceiptReplay": "INCOMPLETE, no source redispatch",
+  "foreignRunStatus": 400,
+  "revokedMembershipStatus": 401,
+  "publicConsultationBrowserAcceptance": false,
+  "restartAcceptance": false,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "ownedClusterStopped": true,
+  "independentReview": "Legacy-cache issue fixed; public-only selector suppression preserves authority, booking and compound continuation. No remaining blocker.",
+  "certificate": "NOT_ISSUED",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.ts": "7026e4e133e9e4b47fd02d7480e96c06a1719120aa75afb5880a0b2e49ec30e0",
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.spec.ts": "17dc0be1d03d9266ad3b8eaf75f146fc32ba21df1f349896b0fe1fb9c7d2f577",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "9bb0def2de4dd8733f01fd3aa7ea7b15fb16383b009899eec5389c8d0a03df4b",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "c8ee24a02e5981f00ff5254e18b1041f99d096d693cfe36d91d6c25b02b27d39",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "21c7a5eb4ff256e3aecdbc175e4e687bdd99ded7b94b111de9fef97682e29f04",
+    "maya-saas-backend/src/ai-tools/ai-tool-extended-capabilities.spec.ts": "782e0eb1efea7da099a5521c6ea590ec84649388f7f5af888549eb1abc187bed",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "d2d4b9be90260f1253c37e163eaaf781b858a8f2708531e7cf5f9693daa21806",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "9d5437958a22d72e17c84bc6923968641b6cf88af93fbea48d77dad8f1f75ea7",
+    "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts": "a37cbf2d55eb1cc4d20325f7527ab464205e424820d10f713c5677ab8e44c4c1",
+    "maya-saas-backend/scripts/admin-integration-status-proof.mjs": "f7b1f251e83fb27866735051913fdce40626bd016fcfbf279de2d5402320834f"
+  },
+  "evidenceHashes": {
+    "admin-http-jest.json": "85dc29d91b6f8aa7920ba5eb2714411fa9c69080fc44e922724b69cf5645c762",
+    "admin-http.json": "6ec2ab77e2db006beb1ea2e57f7fae772f7dc3cfe9f9a2a8e7c0a25b5b6afb3f",
+    "http-types.txt": "efe77f6ad072d088d13acdfdd7e5ad7475bad22b34fa883964508e3f962de001",
+    "lint.txt": "24b2bfc83d76dc1530de38c3aa401e63d97592a7c117b5b828fb1b07b56382a9",
+    "manifest.json": "7897a738b918f4d5b150bb3c75f7fc4c955934642c2f68b569066c4a99698225",
+    "pg-stop.txt": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "scoped-types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit.json": "a11071a7d446dd77f0882c414e68ab2534ac5857bccd22ed2332a35331866f0b"
+  },
+  "qualificationAttempts": [
+    {
+      "attempt": 1,
+      "clusterStopped": true,
+      "result": "FAIL",
+      "reason": "Post-read failure discovered"
+    },
+    {
+      "attempt": 2,
+      "clusterStopped": true,
+      "result": "FAIL",
+      "reason": "Source completion isolated"
+    },
+    {
+      "attempt": 3,
+      "clusterStopped": true,
+      "result": "FAIL",
+      "reason": "booking_selector_source_unavailable identified"
+    },
+    {
+      "attempt": 4,
+      "clusterStopped": true,
+      "result": "FAIL",
+      "reason": "Fixed implementation; corrected model replay test expectation"
+    },
+    {
+      "attempt": 5,
+      "clusterStopped": true,
+      "result": "FAIL",
+      "reason": "Legacy C9 replay passed; corrected invalid fixture MembershipStatus"
+    },
+    {
+      "attempt": 6,
+      "clusterStopped": true,
+      "result": "PASS",
+      "reason": "Full narrow case passed"
+    }
+  ]
+}

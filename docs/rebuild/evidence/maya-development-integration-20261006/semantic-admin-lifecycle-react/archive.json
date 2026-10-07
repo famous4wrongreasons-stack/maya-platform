@@ -38,11 +38,12 @@
     "lifecycle-unavailable.png": "386eb74939c655ccae6499e61be6ac49bab3a9c4f03b33a24eec13173f62cee6",
     "manifest.json": "9332d9da7e253fbbecfdc272e89d76737065361aa02b1a10c80832301f176399",
     "maya-semantic-react-guard-20261007.json": "57e5e7dcc554a37a1004a59c01c9cf292a5c318ecf400b6f27afb12306891c0d",
-    "maya-semantic-react-lint-20261007.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "maya-semantic-react-types-20261007.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
     "reload-restored.png": "6fc2ab49788515b1f1123b0ec58cb6451a271527777aa94ccbb86b25e136eafd",
     "semantic-jest.json": "9f5e8efc5e2a0a68ea49d434b4d288d6aee5bf644526eddb6db46aab8363789f",
-    "semantic-observations.json": "bf29da04f50879649c17ad2ecaf8af8b3976e3e4bf6d0520e6254bfee585c95f"
-  }
+    "semantic-observations.json": "bf29da04f50879649c17ad2ecaf8af8b3976e3e4bf6d0520e6254bfee585c95f",
+    "maya-semantic-react-lint-20261007.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "maya-semantic-react-types-20261007.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pg-stop.txt": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+  },
+  "sourceCommit": "40cc9fb9"
 }

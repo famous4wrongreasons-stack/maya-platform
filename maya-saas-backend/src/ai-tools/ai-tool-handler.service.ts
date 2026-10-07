@@ -562,13 +562,9 @@ export class AiToolHandlerService {
     const contacts = this.record(branding?.contactDetailsJson);
     const onboarding = this.record(branding?.onboardingJson);
     const store = this.record(branding?.storeListingJson);
-    const aboutRaw = this.stringList(
+    const about = this.stringList(
       onboarding.about ?? store.about ?? contacts.about,
     );
-    const about =
-      aboutRaw.length > 0
-        ? aboutRaw
-        : this.defaultSalonAbout(tenant?.name ?? branding?.appName ?? null);
     return {
       salon: {
         name: branding?.appName ?? tenant?.name ?? null,
@@ -586,9 +582,7 @@ export class AiToolHandlerService {
           typeof onboarding.founded_year === 'string' ||
           typeof onboarding.founded_year === 'number'
             ? String(onboarding.founded_year)
-            : this.defaultFoundedHint(
-                tenant?.name ?? branding?.appName ?? null,
-              ),
+            : null,
       },
       staff: staff.map((item) => ({
         id: item.id,
@@ -1497,31 +1491,6 @@ export class AiToolHandlerService {
       .map((item) => item.trim())
       .filter(Boolean)
       .slice(0, 8);
-  }
-
-  private isMeSalonName(name: string | null | undefined): boolean {
-    const key = String(name || '')
-      .toLowerCase()
-      .replace(/ё/g, 'е');
-    return /мужская\s*эстетик|malesthetic|muzhskaya/.test(key);
-  }
-
-  private defaultSalonAbout(name: string | null): string[] {
-    if (!this.isMeSalonName(name)) {
-      return [];
-    }
-    return [
-      'Мы не просто стрижём. Мы создаём пространство, где каждая деталь продумана — от инструментов до атмосферы.',
-      'Стабильная команда мастеров, премиальный интерьер и широкий спектр услуг — всё это Мужская Эстетика.',
-      'Барбершоп в Ставрополе на ул. Лермонтова, 343. Работаем уже больше шести лет.',
-    ];
-  }
-
-  private defaultFoundedHint(name: string | null): string | null {
-    if (!this.isMeSalonName(name)) {
-      return null;
-    }
-    return 'около 2020 (более 6 лет)';
   }
 
   private async readAvailability(
