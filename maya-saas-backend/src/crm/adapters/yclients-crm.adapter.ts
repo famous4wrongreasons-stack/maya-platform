@@ -39,6 +39,7 @@ import {
   BadRequestException,
   ConflictException,
   InternalServerErrorException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 
 import {
@@ -996,6 +997,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
     branchId?: string;
   }): Promise<AvailableSlot[]> {
     void params.tenantId;
+    // The integration owns one company; no canonical Maya Branch mapping is
+    // stored. Never label that company's slots with a caller-selected branch,
+    // even when it is the tenant's only branch or resembles the company ID.
+    if (params.branchId != null)
+      throw new ServiceUnavailableException({
+        message:
+          'Не удалось подтвердить расписание выбранного филиала в CRM. Это не означает, что свободных окон нет.',
+        error: { code: 'booking_branch_source_unavailable' },
+      });
 
     const date = this.toYclientsDate(params.date);
     const staffIds = params.staffId
@@ -1027,7 +1037,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           if (!Array.isArray(response.data))
             throw new Error('booking_slot_facts_unavailable');
           return response.data.map((slot) =>
-            this.mapSlot(date, staffId, slot, params.timezone, params.branchId),
+            this.mapSlot(date, staffId, slot, params.timezone),
           );
         } catch (error) {
           // YClients book_times returns 422 "Дата недоступна" for days off /
@@ -4446,7 +4456,6 @@ export class YclientsCRMAdapter implements CRMAdapter {
     staffId: number,
     slot: YclientsSlotApiItem,
     timezone: string,
-    branchId?: string,
   ): AvailableSlot {
     if (
       !slot ||
@@ -4479,7 +4488,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       start: startDate.toISOString(),
       end: endDate.toISOString(),
       staff_id: String(staffId),
-      branch_id: branchId ?? null,
+      branch_id: null,
     };
   }
 }

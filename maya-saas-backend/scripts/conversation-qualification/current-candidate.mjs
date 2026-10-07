@@ -21,6 +21,7 @@ const RUNTIME_SOURCES = [
   'src/conversation-intelligence/conversation-intelligence.service.ts',
   'src/widgets/composition/chat-read.trigger.ts',
   'src/ai-tools/ai-core.service.ts',
+  'src/ai-tools/ai-tool-runtime.service.ts',
   'src/appointments/appointments.service.ts',
   'src/crm/crm.service.ts',
   'src/crm/crm-request.errors.ts',

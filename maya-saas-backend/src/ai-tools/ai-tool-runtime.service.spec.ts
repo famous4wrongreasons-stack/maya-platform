@@ -294,6 +294,78 @@ describe('AiToolRuntimeService', () => {
     },
   );
 
+  describe.each([
+    'booking.availability.read',
+    'booking.group-availability.read',
+  ])('qualified availability source scope: %s', (toolName) => {
+    it.each([false, true])(
+      'refuses legacy completed receipt without reread or rewrite, C9 replay=%s',
+      async (replay) => {
+        const h = createHarness();
+        const args = {
+          branch_id: 'maya-branch',
+          date: '2026-10-08T09:00:00Z',
+          ...(toolName === 'booking.group-availability.read'
+            ? { party_size: 2 }
+            : {}),
+        };
+        const oldHash = createHash('sha256')
+          .update(
+            JSON.stringify({
+              actor_user_id: customer.userId,
+              arguments: args,
+              read_authority: {
+                branchId: null,
+                contract: 'maya.read-authority/1',
+                membershipId: 'membership-a',
+                membershipStatus: 'active',
+                role: 'tenant_owner',
+              },
+              surface: 'web',
+              tool_name: toolName,
+            }),
+          )
+          .digest('hex');
+        h.executionFindUnique.mockResolvedValue({
+          id: 'old-availability',
+          toolName,
+          actorUserId: customer.userId,
+          surface: 'web',
+          inputHash: oldHash,
+          status: 'completed',
+          encryptedResult:
+            'encrypted:' +
+            JSON.stringify({
+              slots: [
+                { branch_id: 'maya-branch', staff_id: 'wrong-company-staff' },
+              ],
+            }),
+        });
+        const actor = { ...customer, role: UserRole.TENANT_OWNER };
+        const input = {
+          arguments: args,
+          surface: 'web' as const,
+          idempotencyKey: IDEMPOTENCY_KEY,
+        };
+        await expect(
+          h.tenantContext.runAsSystemTenant('tenant-a', () =>
+            replay
+              ? h.runtime.replayCompletedRead(
+                  actor,
+                  toolName,
+                  input,
+                  'old-availability',
+                )
+              : h.runtime.execute(actor, toolName, input),
+          ),
+        ).rejects.toThrow(ConflictException);
+        expect(h.handlerExecute).not.toHaveBeenCalled();
+        expect(h.executionCreate).not.toHaveBeenCalled();
+        expect(h.executionUpdate).not.toHaveBeenCalled();
+      },
+    );
+  });
+
   it('SH-19 attaches the authorized widget resolution to a completed model-free read', async () => {
     const afterCompletedRead: jest.MockedFunction<
       AiReadWidgetTriggerPort['afterCompletedRead']

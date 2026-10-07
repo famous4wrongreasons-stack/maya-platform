@@ -1225,6 +1225,36 @@ describe('YclientsCRMAdapter', () => {
     },
   );
 
+  it.each([CrmProvider.YCLIENTS, CrmProvider.ALTEGIO])(
+    'refuses unbound Maya branch before any %s transport, including company-like identifiers',
+    async (provider) => {
+      global.fetch = jest.fn();
+      const adapter = new YclientsCRMAdapter({
+        provider,
+        apiToken: 'synthetic',
+        settings: {
+          companyId: 123,
+          branchId: 'invented',
+          branchMapping: { invented: 123 },
+        },
+      });
+      for (const branchId of ['maya-branch', '123', 'invented', '']) {
+        await expect(
+          adapter.getAvailableSlots({
+            tenantId: 'tenant',
+            timezone: 'Europe/Moscow',
+            date: '2026-07-05',
+            branchId,
+          }),
+        ).rejects.toMatchObject({
+          status: 503,
+          response: { error: { code: 'booking_branch_source_unavailable' } },
+        });
+      }
+      expect(global.fetch).not.toHaveBeenCalled();
+    },
+  );
+
   it('normalizes ISO datetime query and maps slots', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,

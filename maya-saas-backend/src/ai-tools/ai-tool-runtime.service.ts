@@ -2345,7 +2345,12 @@ export class AiToolRuntimeService {
                       {
                         source_projection: 'maya.public-catalog-source-facts/1',
                       }
-                    : {}),
+                    : toolName === 'booking.availability.read' ||
+                        toolName === 'booking.group-availability.read'
+                      ? {
+                          source_projection: 'maya.availability-source-scope/1',
+                        }
+                      : {}),
               role: principal.role,
               ...principal.readAuthority,
             },

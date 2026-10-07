@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { C9OccupancySource } from './c9.occupancy-source';
 import { C9Store } from './c9.store';
 import { c9C5Fingerprint } from './c9.sources';
@@ -258,14 +259,22 @@ describe('explicit Occupancy current-source projection (synthetic CRM, no model)
       evidenceRefs: [],
     });
   });
-  it('does not convert provider failure to no available windows or retry', async () => {
-    const f = fixture();
-    f.crm.getAvailableSlots.mockRejectedValue(new Error('synthetic outage'));
-    expect(await f.source.read('run')).toMatchObject({
-      outcome: 'UNAVAILABLE',
-    });
-    expect(f.crm.getAvailableSlots).toHaveBeenCalledTimes(1);
-  });
+  it.each([
+    new Error('synthetic outage'),
+    new ServiceUnavailableException({
+      error: { code: 'booking_branch_source_unavailable' },
+    }),
+  ])(
+    'does not convert provider failure %s to no available windows or retry',
+    async (error) => {
+      const f = fixture();
+      f.crm.getAvailableSlots.mockRejectedValue(error);
+      expect(await f.source.read('run')).toMatchObject({
+        outcome: 'UNAVAILABLE',
+      });
+      expect(f.crm.getAvailableSlots).toHaveBeenCalledTimes(1);
+    },
+  );
   it('bounds a stalled provider without a retry or claim of no windows', async () => {
     jest.useFakeTimers();
     try {

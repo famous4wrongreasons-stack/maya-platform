@@ -15,6 +15,7 @@ import { EntitlementsService } from '../../src/entitlements/entitlements.service
 import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
 import type { CRMAdapter } from '../../src/crm/crm-adapter.interface';
 import { CrmOutcomeUnknownError } from '../../src/crm/crm-request.errors';
+import { syntheticYclientsAvailability } from './support/synthetic-yclients-availability';
 import { observedGoodsItem } from '../../src/crm/yclients-goods-read';
 import { observedServiceCatalog } from '../../src/crm/service-catalog-read';
 import { servicePriceSnapshot } from '../../src/crm/yclients-service-price.contract';
@@ -69,6 +70,8 @@ const write = (name: string, value: unknown) =>
 describe('Current corpus actual authenticated HTTP / canned transport mechanics', () => {
   let db: FixtureContext, http: HttpHarness;
   const sources = new Map<string, CandidateSource>();
+  let nativeAvailability:
+    ReturnType<typeof syntheticYclientsAvailability> | undefined;
   let active: CandidateSource | null = null,
     currentTurn = 0;
   let gate: InstanceType<typeof CandidateBudgetGate>;
@@ -110,6 +113,13 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
             currency: 'RUB',
           },
         ];
+        const native =
+          source.item.id === 'current-admin-ordinary'
+            ? (nativeAvailability ??= syntheticYclientsAvailability(
+                source.company,
+                source.startsAt.slice(0, 10),
+              ))
+            : undefined;
         const adapter = {
           getCompanyProfile: () => {
             read('company');
@@ -209,14 +219,12 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
               revision: 'synthetic-current-schedule',
             });
           },
-          getAvailableSlots: ({
-            tenantId,
-            staffId,
-          }: {
-            tenantId: string;
-            staffId?: string;
-          }) => {
+          getAvailableSlots: (
+            params: Parameters<CRMAdapter['getAvailableSlots']>[0],
+          ) => {
+            const { tenantId, staffId } = params;
             read('availability', tenantId);
+            if (native) return native.adapter.getAvailableSlots(params);
             return Promise.resolve(
               source.occupied
                 ? []
@@ -320,6 +328,8 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         return decide(input);
       });
     jest.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+      const synthetic = nativeAvailability?.respond(url, init);
+      if (synthetic) return synthetic;
       if (
         !active ||
         !gate ||
@@ -406,6 +416,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       'test/widgets-live/support/current-candidate-mjs-transform.cjs',
       'test/widgets-live/current-candidate-http.probe-spec.ts',
       'test/widgets-live/support/current-candidate-sources.ts',
+      'test/widgets-live/support/synthetic-yclients-availability.ts',
       'scripts/conversation-qualification/current-candidate-http.mjs',
       'scripts/conversation-qualification/current-candidate-dry-broker.mjs',
       'scripts/conversation-qualification/owned-child-cleanup.mjs',
@@ -579,6 +590,19 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         expect(failed.errorCode).toBe('goods_read_source_unavailable');
         expect(failed.encryptedResult).toBeNull();
       }
+      if (
+        response.status === 503 &&
+        [
+          'booking.availability.read',
+          'booking.group-availability.read',
+        ].includes(name)
+      ) {
+        expect(body.error).toEqual({
+          code: 'booking_branch_source_unavailable',
+        });
+        expect(body.result).toBeUndefined();
+        expect(body.resolution).toBeUndefined();
+      }
       const revoked =
         source.item.group === 'lifecycle' && source.item.variant === 'negative';
       const expectedStatus =
@@ -608,7 +632,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
           name === 'booking.availability.read'
             ? 'OBSERVATION_ONLY_PUBLIC_READ_DOES_NOT_PROVE_BRANCH_DENIAL'
             : expectedStatus === 503
-              ? 'KNOWN_SOURCE_FAILURE_HTTP_503_NO_GOODS_FACTS_NO_EFFECT'
+              ? 'KNOWN_SOURCE_UNAVAILABLE_HTTP_503_NO_FACTS_NO_EFFECT'
               : 'AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL',
         status: body.status ?? null,
         keys: Object.keys(result),
@@ -730,6 +754,140 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         source: 'ACTUAL_INTERNAL_CALENDAR',
       });
     }
+    // Native YC availability owner with a typed finite synthetic provider
+    // transport. Source preflight is separate from canned language selection.
+    const ycSource = [...sources.values()].find(
+      (s) => s.item.id === 'current-admin-ordinary',
+    )!;
+    active = ycSource;
+    const ycOtherBranch = await db.prisma.branch.create({
+      data: {
+        tenantId: ycSource.tenant.id,
+        name: 'Other synthetic Maya branch',
+      },
+    });
+    ycSource.privateValues.push(ycOtherBranch.id);
+    const ycArgs = {
+      date: ycSource.startsAt,
+      staff_id: '71',
+      service_ids: ['81'],
+    };
+    const ycDay = ycSource.startsAt.slice(0, 10);
+    const ycRoute = (branchId?: string, days = false) =>
+      '/api/available-' +
+      (days ? 'days' : 'slots') +
+      '?' +
+      new URLSearchParams({
+        ...(days ? { from: ycDay, to: ycDay } : { date: ycDay }),
+        staffId: '71',
+        serviceIds: '81',
+        ...(branchId === undefined ? {} : { branchId }),
+      }).toString();
+    const ycUnscoped = await preflight(
+      ycSource,
+      'booking.availability.read',
+      ycArgs,
+    );
+    expect(ycUnscoped.slots).toEqual([
+      {
+        start: new Date(ycSource.startsAt).toISOString(),
+        end: new Date(ycSource.endsAt).toISOString(),
+        staff_id: '71',
+        branch_id: null,
+      },
+    ]);
+    const ycReads = nativeAvailability!.reads;
+    expect(ycReads).toBe(1);
+    const ycBranchEvidence: Record<string, unknown>[] = [
+      {
+        kind: 'UNSCOPED_CONFIGURED_COMPANY',
+        status: 201,
+        slots: 1,
+        branchId: null,
+        nativeProviderReads: ycReads,
+      },
+    ];
+    for (const [branchId, status, kind] of [
+      [ycSource.branchId, 503, 'OWN_TENANT_BRANCH_UNBOUND'],
+      [ycOtherBranch.id, 503, 'OTHER_TENANT_OWNED_BRANCH_UNBOUND'],
+      [foreignBranch.id, 404, 'FOREIGN_TENANT_REJECTED'],
+      [randomUUID(), 404, 'UNKNOWN_BRANCH_REJECTED'],
+    ] as const) {
+      const result = await preflight(
+        ycSource,
+        'availability.slots.http',
+        {},
+        ycRoute(branchId),
+        status,
+      );
+      expect(result.slots).toBeUndefined();
+      if (status === 503) {
+        expect(result.error).toEqual({
+          code: 'booking_branch_source_unavailable',
+        });
+        expect(result.message).toContain('не означает');
+      }
+      expect(nativeAvailability!.reads).toBe(ycReads);
+      ycBranchEvidence.push({
+        kind,
+        status,
+        slots: null,
+        nativeProviderReadDelta: 0,
+      });
+    }
+    for (const name of [
+      'booking.availability.read',
+      'booking.group-availability.read',
+    ]) {
+      const result = await preflight(
+        ycSource,
+        name,
+        {
+          ...ycArgs,
+          ...(name.includes('group')
+            ? { staff_id: undefined, party_size: 2 }
+            : {}),
+          branch_id: ycOtherBranch.id,
+        },
+        undefined,
+        503,
+      );
+      expect(result.error).toEqual({
+        code: 'booking_branch_source_unavailable',
+      });
+      expect(result.slots).toBeUndefined();
+      expect(result.groups).toBeUndefined();
+      const failed = await db.prisma.aiToolExecution.findFirstOrThrow({
+        where: { tenantId: ycSource.tenant.id, toolName: name },
+        orderBy: { createdAt: 'desc' },
+      });
+      expect(failed.status).toBe('failed');
+      expect(failed.errorCode).toBe('booking_branch_source_unavailable');
+      expect(failed.encryptedResult).toBeNull();
+      expect(nativeAvailability!.reads).toBe(ycReads);
+      ycBranchEvidence.push({
+        kind: name,
+        status: 503,
+        canonicalExecution: 'FAILED_NO_RESULT',
+        nativeProviderReadDelta: 0,
+      });
+    }
+    const ycDays = await preflight(
+      ycSource,
+      'availability.days.http',
+      {},
+      ycRoute(ycSource.branchId, true),
+      503,
+    );
+    expect(ycDays.error).toEqual({ code: 'booking_branch_source_unavailable' });
+    expect(ycDays.days).toBeUndefined();
+    expect(nativeAvailability!.reads).toBe(ycReads);
+    ycBranchEvidence.push({
+      kind: 'AVAILABLE_DAYS_UNBOUND',
+      status: 503,
+      nativeProviderReadDelta: 0,
+      catalogReadsMayPrecedeRefusal: true,
+    });
     const selectedSources = [...sources.values()].filter((s) =>
       selectedCases.some((c) => c.id === s.item.id),
     );
@@ -1128,10 +1286,11 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       selectedDialogs: selectedCases.length,
       selectedTurns: selectedCases.reduce((n, c) => n + c.userTurns.length, 0),
       branchEvidence,
+      ycBranchEvidence,
       fixtureSourceLanguageAcceptance: false,
       qualificationLimits: [
         'Fixed canned clarification does not select or explain domain sources; source preflight is separate.',
-        'Public INTERNAL availability allows another same-tenant branch and rejects foreign/unknown branch; YCLIENTS configured-company-to-Maya-branch mapping remains unqualified.',
+        'Public INTERNAL availability allows another same-tenant branch; native YCLIENTS adapter refuses every selected Maya branch without canonical mapping and returns branch_id:null for unscoped configured-company reads. Provider transport is finite synthetic, not live acceptance.',
         'Known goods source unavailability returns HTTP 503 with a stable error code; unexpected program errors remain errors, not empty goods facts.',
         'Authored absolute October remains an open period at the real fixture date; no full-month result is claimed.',
         'Zero-model deterministic paths contribute zero model coverage; no real model or provider acceptance.',

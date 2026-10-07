@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 
 import { DOMAIN_EVENT_TYPE } from '../domain';
@@ -322,6 +323,35 @@ describe('OpportunityLifecycleRunner', () => {
     });
     const input = built.reconcileCurrentProjection.mock.calls[0][0];
     expect(input.currentState.resolutions).toEqual([]);
+  });
+
+  it('unbound provider branch remains unknown and cannot create or close an Opportunity', async () => {
+    const built = build({
+      activeOpportunities: [
+        {
+          semanticKey: 'b'.repeat(64),
+          affectedEntityRef: opportunityShadowAppointmentRef(
+            TENANT_ID,
+            'appointment-1',
+          ),
+        },
+      ],
+    });
+    built.getAvailableSlots.mockRejectedValue(
+      new ServiceUnavailableException({
+        error: { code: 'booking_branch_source_unavailable' },
+      }),
+    );
+    expect(await built.run()).toMatchObject({
+      completeness: 'provider_failure',
+      detectedNow: 0,
+      actionIntentsExecuted: 0,
+      externalSideEffects: 0,
+    });
+    const input = built.reconcileCurrentProjection.mock.calls[0][0];
+    expect(input.projection.opportunities).toEqual([]);
+    expect(input.currentState.resolutions).toEqual([]);
+    expect(built.getAvailableSlots).toHaveBeenCalledTimes(1);
   });
 
   it('complete canonical evidence derives resolution proof when a condition disappears', async () => {
