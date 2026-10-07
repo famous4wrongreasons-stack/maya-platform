@@ -1,0 +1,20 @@
+widgets-live: proof database maya_widget_gate_proof_lifecycleowner_4be6db4879f5 on 127.0.0.1:61310 (local)
+[31m[Nest] 90385  - [39m10/07/2026, 4:17:34 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 90385  - [39m10/07/2026, 4:17:34 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 90385  - [39m10/07/2026, 4:17:34 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/owner-read-paths.live-spec.ts
+  Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]
+    ✓ explicit Lifecycle uses actual C8 revisions, saves one bounded proposal and rechecks after app restart (990 ms)
+    ○ skipped keeps a multi-turn owner booking request out of analytics and never invents Client authority
+    ○ skipped reports planner unavailability without an unrelated CRM report or invented CRM outage
+    ○ skipped qualifies existing analytics owner through HTTP: Как сегодня дела?
+    ○ skipped qualifies existing analytics owner through HTTP: Почему просела выручка?
+    ○ skipped qualifies existing analytics owner through HTTP: Что мне сейчас сделать?
+    ○ skipped reads a real C8 result through chat, preserves replay and denies foreign/revoked access
+
+Test Suites: 1 passed, 1 total
+Tests:       6 skipped, 1 passed, 7 total
+Snapshots:   0 total
+Time:        1.805 s, estimated 3 s
+Ran all test suites within paths "test/widgets-live/owner-read-paths.live-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-http-20261007-r2/http-lifecycle-jest.json

@@ -1,0 +1,17 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/orchestration/c9.lifecycle.spec.ts
+PASS src/orchestration/c9.release.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+PASS src/orchestration/c9.conversation-reads.spec.ts
+PASS src/orchestration/c9.context.spec.ts
+PASS src/orchestration/c9.retention.spec.ts
+PASS src/orchestration/c9.context-and-result.spec.ts
+PASS src/orchestration/c9.source-boundaries.architecture.spec.ts
+
+Test Suites: 10 passed, 10 total
+Tests:       263 passed, 263 total
+Snapshots:   0 total
+Time:        1.188 s, estimated 2 s
+Ran all test suites within paths "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.release.spec.ts", "src/orchestration/c9.retention.spec.ts", "src/orchestration/c9.context-and-result.spec.ts", "src/orchestration/c9.context.spec.ts", "src/orchestration/c9.occupancy.spec.ts", "src/orchestration/c9.source-boundaries.architecture.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-unit-final.json

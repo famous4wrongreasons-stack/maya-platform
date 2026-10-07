@@ -1,0 +1,31 @@
+{
+  "kind": "lifecycle-owner-http-local-proof",
+  "browserRun": false,
+  "appRestart": true,
+  "postgresRestart": false,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-lifecycle-owner-UrDF2P/pg",
+  "database": "maya_widget_gate_proof_lifecycleowner_bc37e8fc4d60",
+  "port": 61044,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "http-lifecycle",
+    "pg-stop"
+  ],
+  "modelCalled": false,
+  "syntheticC8SourceFacts": true,
+  "providerCalled": false,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 0
+  },
+  "clusterStopped": true
+}

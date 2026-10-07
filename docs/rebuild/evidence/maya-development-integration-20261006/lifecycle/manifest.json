@@ -1,0 +1,326 @@
+{
+  "kind": "explicit-lifecycle-c8-agent-saved-version",
+  "base": "3135cafb",
+  "qualification": "NOT_ISSUED",
+  "unitTests": 263,
+  "denialContractTests": 7,
+  "productionTypes": {
+    "status": "PASS",
+    "heapMb": 4096
+  },
+  "scopedLint": {
+    "status": "PASS",
+    "files": 10
+  },
+  "httpProof": {
+    "attempts": [
+      "http-r1",
+      "http-r2"
+    ],
+    "testCasesPerRun": 1,
+    "unrelatedSkipped": 6,
+    "appCloseBootRestart": true,
+    "newOsProcess": false,
+    "postgresRestart": false,
+    "reactBrowser": false,
+    "sourceFacts": "synthetic owned fixtures; real C8 policy/compute/read",
+    "modelCalls": 0,
+    "externalProviderCalls": 0,
+    "AECountBefore": 1,
+    "AECountAfter": 1,
+    "AEExplanation": "one fixture policy admission before the explicit READ",
+    "C8RevisionsBefore": 1,
+    "C8RevisionsAfter": 1,
+    "savedStrategyVersions": 1,
+    "revokedFeatureStatus": 403,
+    "foreignRunStatus": 400
+  },
+  "C10Complete": false,
+  "autonomousInitiator": false,
+  "newSchema": false,
+  "newRetentionClass": false,
+  "newIdentityAuthority": false,
+  "sourceHashes": [
+    {
+      "path": "docs/rebuild/CYCLE-09-PREFLIGHT-AND-SCOPE.md",
+      "sha256": "3e0293935190c44719a788deda4dc3805e269e450d85c6a763cce81cf69fc223"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977"
+    },
+    {
+      "path": "maya-saas-backend/scripts/lifecycle-owner-proof.mjs",
+      "sha256": "e8e6aee154bf06738c0d395a1d796aa2d39caaa64f206e591f0a103e0c05a66c"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "ab212623ed01aef00f65404be6e64ed3c0029cd9aa6973e8d6bdb70e3ca1e76a"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.agents.ts",
+      "sha256": "afc9f4568807c7b6598d23f095760676fa78839a77061e267795b6ad6314bca1"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.contract.ts",
+      "sha256": "ecb96696d1023e91733d3a4a7325cdf7eb4f129523d81ecff78f68af8313f566"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts",
+      "sha256": "063328fae447962725df80a940abbc50f62d387ac8580485f46ea2ea9886a95a"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts",
+      "sha256": "15017578eb043d05a59463a7b5d6541e14812a1ca4a1dc35498a2025526f29de"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+      "sha256": "25eb712bb530fa49860d3f15ccfd425b229ed828c3b119582487f6ae36dbcfec"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts",
+      "sha256": "2720bf681186485faa2c7927e3c615d8581fb7e2ddcccdeabd43af8299a3941c"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.module.ts",
+      "sha256": "f8103b7af8306be8e6dff4e9bb8f02c25883c446dd92a4800d682cad23b03bc5"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "sha256": "9975a24864c7a4bfcb2255abc429eeca65e3da0b28f960037f31ac98836b76fd"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.sources.ts",
+      "sha256": "dccc36293106a7cf2f082ccdbaf14088006b1c6d3d897784c7ec047f629d2f14"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.store.ts",
+      "sha256": "1e00e848797b7115aafebca77a993de901b68f5bc31af4e1a9b88442c2f47c3f"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.read.ts",
+      "sha256": "c2a6e193252eb504b20a323635a13f8a1b045ed70c4890342b2542213bc77a8d"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/owner-read-paths.live-spec.ts",
+      "sha256": "1236142f22bc7ca92486bb73879ccf86a50165ed3c55e01ee26be8686a608c7d"
+    }
+  ],
+  "files": [
+    {
+      "path": "checks/cleanup.json",
+      "sha256": "8ee993fb1d2d51738d6736146962211c8a0033c0695e3108b06b4312bcba5b27"
+    },
+    {
+      "path": "checks/maya-lifecycle-attestation-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-lifecycle-attestation-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-lifecycle-attestation.json",
+      "sha256": "428bef21cb717a8e27893ec1c278a435eeee5997621415d6a6cbb11696e29541"
+    },
+    {
+      "path": "checks/maya-lifecycle-attestation.log",
+      "sha256": "eab849808ff6241ed7fb1135fea131a7231eb47d5b618d0a5bba14de7ee7e5cb"
+    },
+    {
+      "path": "checks/maya-lifecycle-denial.json",
+      "sha256": "6212194ba6e0231d79143fa10a82b4bff56b091b19035ffbd998ab1d3c240de0"
+    },
+    {
+      "path": "checks/maya-lifecycle-denial.log",
+      "sha256": "b2c50e404fcd25609e6cadd5221e021b6ea748b5b3fbb2fe1a3a505b47f871a8"
+    },
+    {
+      "path": "checks/maya-lifecycle-format-r3.log",
+      "sha256": "fbf1b65c532e0e11fd91be7c52470daca8507e307ff9c3f82d98204c534d6902"
+    },
+    {
+      "path": "checks/maya-lifecycle-format-r4.log",
+      "sha256": "7dac986ae57ccc03952e63506e8db571f5d1fe50124fcfa76178225c0c058d7c"
+    },
+    {
+      "path": "checks/maya-lifecycle-format-r6.log",
+      "sha256": "93ec3e46e9b512a9b99e461be33913bbafdf3f305e7f92910a087ed1f7bb5eb1"
+    },
+    {
+      "path": "checks/maya-lifecycle-format.log",
+      "sha256": "0c3f4c3a2cb89c9a7b1afffbc34ce3f62c1d5b40d5879e9e494a4b6f733fbbed"
+    },
+    {
+      "path": "checks/maya-lifecycle-lint-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-lifecycle-lint.log",
+      "sha256": "e6df335d6e58911fc2e5f8746812a64e294e3625d19e71875c3160f22ada5891"
+    },
+    {
+      "path": "checks/maya-lifecycle-test-format-r2.log",
+      "sha256": "602486d3cb0c7c5fd0d1304c6ff027b6e4d158f4ea3b48d9c4dbce5553965a5f"
+    },
+    {
+      "path": "checks/maya-lifecycle-test-format-r5.log",
+      "sha256": "52ac3ac9c5d5d84d056c419896deac42911f58e82f602c33e783eb28e7a35b83"
+    },
+    {
+      "path": "checks/maya-lifecycle-test-format.log",
+      "sha256": "52004800b2b53e1453ca516d8a385ca472d2d250169939924e880b0179125196"
+    },
+    {
+      "path": "checks/maya-lifecycle-types-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-lifecycle-types-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-lifecycle-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-final.json",
+      "sha256": "fc371baea57df83152ded86c419c3040fb006cdea6122bf1dd4e3d819da65c05"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-final.log",
+      "sha256": "cb41a5ecebcd2db2ed169fbd2604e2e6b7bfc0cc8ec930f04aa1baa673891b22"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r2.json",
+      "sha256": "3457d5cfacb61ba99f87be8d299906c531397778e12361e6d58018d47a65425a"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r2.log",
+      "sha256": "9bf92a5078ce7255e614e4695b1e0675354990cc83e02cfaaa227b757548f3be"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r3.json",
+      "sha256": "d3f9890750c1a1270bcb389321125981471eba94ba3792ab7b9153d4d1e1e1df"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r3.log",
+      "sha256": "b091dc74f7e9ef8d12288035cb818ca7b3117533ab0fea7951d8fb0d3ac23dfd"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r4.json",
+      "sha256": "0f208085eb5e0411223c7520db2cbafa8a8942e52830452b7a00b92cda317aff"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r4.log",
+      "sha256": "4580856a225263873a16c44c9fae1af5b415d3b4726f0821df35cc19beb3d80f"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r5.json",
+      "sha256": "35c9854df9ccada8058561344afb45a0ec716bcc4d8e4ff3a5b40fdbb38401ad"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit-r5.log",
+      "sha256": "ab12a33ad744df6e4901715896d30be10dd0a42b4a94af73748ee52671981fdf"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit.json",
+      "sha256": "248713fb354667c4c4b8ec699dd109d7b21e18a451582e6fada257e2f3701f3c"
+    },
+    {
+      "path": "checks/maya-lifecycle-unit.log",
+      "sha256": "23eae7dad56b2489ae6bc918c455368f136e26d02eb5cebf28008e057e993521"
+    },
+    {
+      "path": "checks/process-cleanup.json",
+      "sha256": "eb61e7e608ac2610ee4aa7460fe8881f4e86593427403913b1c8bbcf969a66c2"
+    },
+    {
+      "path": "http-r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "http-r1/http-lifecycle-jest.json",
+      "sha256": "060271449b33dc498adb1822d68225636d51b5c07c20cc52d55d8e9bde0711fc"
+    },
+    {
+      "path": "http-r1/http-lifecycle.log",
+      "sha256": "61212987e4c74016d97434cb9e444e8c5e89199190249fe9834c44476c41f554"
+    },
+    {
+      "path": "http-r1/initdb.log",
+      "sha256": "0ff471d7983190b5e87cc28962df65b2db4542e7da023777a7064800a33991dc"
+    },
+    {
+      "path": "http-r1/manifest.json",
+      "sha256": "a61fdb4873bf65f87069fcf40f19da0404f80b9b6cedd2536c9e6b647007358b"
+    },
+    {
+      "path": "http-r1/migrations.log",
+      "sha256": "e6c8861864b1849741a6d530bf1c1b273817428dec51b9ddad7650b46103c8f6"
+    },
+    {
+      "path": "http-r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "http-r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "http-r1/postgres.log",
+      "sha256": "4a461bab555c9b037bf67a6341889cad8f283b6d634239aaa0d428200dbff914"
+    },
+    {
+      "path": "http-r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "http-r2/http-lifecycle-jest.json",
+      "sha256": "d5499404e8efaf78dee3bc429abfbc259b16482152d2c77607589ec0eced4e1b"
+    },
+    {
+      "path": "http-r2/http-lifecycle.log",
+      "sha256": "93f84c63e4e3cc53246affda5ac9a3ad28b6224a4c6f9c9b8260ba368079a2bd"
+    },
+    {
+      "path": "http-r2/initdb.log",
+      "sha256": "2fbc4d7db226b65ffde531c2f999696ecd64582d4180b255dc05b00e5baecb9f"
+    },
+    {
+      "path": "http-r2/lifecycle-observations.json",
+      "sha256": "a482293b559f031e3322bd86b0a5a31082cfc68909246d72286e0e0412d2353d"
+    },
+    {
+      "path": "http-r2/manifest.json",
+      "sha256": "fb87df679d0b5e5450ca89b54a41ae90222f05d046321021839144324a108960"
+    },
+    {
+      "path": "http-r2/migrations.log",
+      "sha256": "3ce825e8cf2354dedc49d47efac0cde79f67245f993d23e1701d1ace28c54ac4"
+    },
+    {
+      "path": "http-r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "http-r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "http-r2/postgres.log",
+      "sha256": "98a9735c7797a567492ef0edcf8903437e9589743d24a63c0ee3ed234268c29b"
+    },
+    {
+      "path": "independent-review.txt",
+      "sha256": "1f20efa979c55a22f26c4caaf987479d19fb98b72c8f1e5271df5f0a2357a82d"
+    }
+  ],
+  "finalAttestation": {
+    "tests": 270,
+    "suites": 11,
+    "lint": "PASS",
+    "productionTypes": "PASS (4096 MB)",
+    "log": "checks/maya-lifecycle-attestation.log"
+  }
+}

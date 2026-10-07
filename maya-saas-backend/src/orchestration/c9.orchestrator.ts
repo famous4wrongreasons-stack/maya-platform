@@ -1,3 +1,8 @@
+import {
+  C9LifecycleSource,
+  type LifecycleSelection,
+} from './c9.lifecycle-source';
+import { lifecycleSignal } from './c9.lifecycle-presentation';
 import { Injectable, Optional } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import {
@@ -23,6 +28,7 @@ import {
   c9Deny,
   c9Hash,
   c9Object,
+  c9Refs,
 } from './c9.contract';
 import {
   C9_WIDGET_TRIGGER,
@@ -83,6 +89,7 @@ export class C9Orchestrator {
     @Optional() private readonly moduleRef?: ModuleRef,
     @Optional() private readonly occupancy?: C9OccupancySource,
     @Optional() private readonly strategy?: C9Strategy,
+    @Optional() private readonly lifecycle?: C9LifecycleSource,
   ) {}
   requestIdentity(channelProof?: string) {
     return this.store.event(channelProof);
@@ -373,6 +380,274 @@ export class C9Orchestrator {
         executionAuthority: false,
         reasoning: 'deterministic',
       },
+    };
+  }
+
+  /** Qualified C8 snapshots only; one explicit request never starts a campaign. */
+  async checkClientReturn(turn: C9ConversationReads) {
+    if (!this.lifecycle || !this.strategy)
+      c9Deny('context_fact_source_unavailable');
+    const root = await this.store.conversationReadRun(
+      turn.turn,
+      turn.intentHash,
+      'lifecycle',
+    );
+    await this.lifecycle.authorize(root.id);
+    const cap = c9Capability('clients.dormant.list', 'CLIENT_LIFECYCLE');
+    const receipt = await this.work.reserve(root.id, {
+      callKey: 'explicit-client-return',
+      domain: 'CLIENT_LIFECYCLE',
+      kind: 'TOOL_READ',
+      taskKey: cap.capabilityKey,
+      inputHash: c9Hash('lifecycle-request/1', [turn.intentHash]),
+      evidenceRefs: [],
+      reservation: {
+        contract: 'maya.c9-reservation/1',
+        toolCalls: 1,
+        modelCalls: 0,
+        domain: 'CLIENT_LIFECYCLE',
+        inputTokens: 0,
+        outputTokens: 0,
+        costMicros: '0',
+        priceHash: null,
+        zeroCostEvidenceRef: `local:${cap.toolOrInterface}:no-provider-charge`,
+        stepRef: null,
+      },
+    });
+    const replayed = receipt.state === 'SETTLED';
+    let selection: LifecycleSelection;
+    let savedRevisionId: string;
+    let savedSourceDigest: string | undefined;
+    if (replayed) {
+      const prior = c9Object(receipt.resultJson);
+      if (
+        prior.contract !== 'maya.c9-lifecycle-receipt/1' ||
+        typeof prior.revisionId !== 'string' ||
+        typeof prior.sourceDigest !== 'string'
+      )
+        c9Deny('source_read_receipt');
+      savedRevisionId = prior.revisionId;
+      savedSourceDigest = prior.sourceDigest;
+      selection = {
+        contract: 'maya.c9-lifecycle-selection/1',
+        asOf: prior.asOf as string,
+        configured: prior.configured === true,
+        hasMore: prior.hasMore === true,
+        withheld: prior.withheld === true,
+        refs: [],
+      };
+    } else {
+      if (receipt.state !== 'RESERVED')
+        c9Deny('read_work_in_progress_or_unknown');
+      const lease = await this.work.claim(root.id, receipt.id);
+      if (!lease) c9Deny('read_work_in_progress_or_unknown');
+      try {
+        selection = await this.lifecycle.select(root.id);
+        const qualified = await this.lifecycleContext(root.id, selection);
+        // Unavailable refs are not promoted into a plan. The evidence remains with its source.
+        if (qualified.stale)
+          selection = { ...selection, withheld: true, refs: [] };
+        const refs = selection.refs;
+        const proposal = this.strategy.propose({
+          objectiveKey: 'c9.client_return',
+          safeDescription:
+            'Проверка оценок давности по явному запросу владельца',
+          budgetManifestHash: root.budgetManifestHash,
+          validUntil: new Date(
+            Math.min(
+              root.validUntil.getTime(),
+              ...refs.map((r) => Date.parse(r.validUntil as string)),
+            ),
+          ).toISOString(),
+          scopeRefs: refs,
+          unknowns: [
+            'Охват клиентской базы не установлен.',
+            'Оценка относится к указанной дате и правилу, не к текущему спросу.',
+            'Вероятность возврата и разрешение на контакт не установлены.',
+          ],
+          options: refs.length
+            ? [
+                {
+                  optionKey: 'review_later',
+                  title: 'По новому запросу проверить актуальность оценок',
+                  domain: 'CLIENT_LIFECYCLE',
+                  capability: 'clients.dormant.list',
+                  intentContract: cap.inputContract,
+                  intent: {},
+                  evidenceRefs: refs,
+                },
+              ]
+            : [],
+          recommendedOptionKey: null,
+        });
+        const saved = await this.store.revision(
+          root.id,
+          'explicit-client-return-proposal',
+          proposal,
+        );
+        savedRevisionId = saved.id;
+        await this.work.settle(
+          lease,
+          {
+            contract: 'maya.c9-lifecycle-receipt/1',
+            revisionId: saved.id,
+            sourceDigest: c9Hash('lifecycle-source/1', [selection]),
+            asOf: selection.asOf,
+            configured: selection.configured,
+            hasMore: selection.hasMore,
+            withheld: selection.withheld,
+          },
+          {
+            contract: 'maya.c9-usage/1',
+            usageReceiptRef: lease.workId,
+            verifiedAt: selection.asOf,
+            inputTokens: 0,
+            outputTokens: 0,
+            costMicros: '0',
+            priceHash: null,
+            completionKind: 'CONFIRMED',
+          },
+        );
+      } catch (error) {
+        await this.work.hold(lease).catch(() => undefined);
+        throw error;
+      }
+    }
+    const snapshot = await this.store.snapshot(root.id);
+    const revision = snapshot.revisions.find((r) => r.id === savedRevisionId);
+    if (!revision) c9Deny('source_read_receipt');
+    // Subject-linked refs live only in the source-capped revision, never the longer-lived work receipt.
+    selection.refs = c9Refs(revision.evidenceRefsJson) as C9Object[];
+    if (
+      selection.refs.length > 3 ||
+      (savedSourceDigest !== undefined &&
+        savedSourceDigest !== c9Hash('lifecycle-source/1', [selection]))
+    )
+      c9Deny('source_read_receipt');
+    // Every exposure (including replay) repeats current subject/policy checks for these exact refs.
+    // This is not another discovery, compute, or dispatch; saved version/evidence never changes.
+    const qualified = await this.lifecycleContext(root.id, selection);
+    const answer = this.agents.answer(
+      'CLIENT_LIFECYCLE',
+      'c9.client_return',
+      qualified.context,
+      new Set(['c8.result.read']),
+      qualified.handles,
+    );
+    const findings = (answer.result.findings as C9Object[]).map((f) =>
+      String(f.statement),
+    );
+    const alternatives = revision.alternativesJson as unknown as C9Object[];
+    return {
+      reply: [
+        replayed
+          ? `Сохранённая версия ${revision.revision}; новые оценки не запрашивались. Проверена доступность её источников.`
+          : 'Проверены опубликованные оценки давности по подтверждённому правилу бизнеса.',
+        ...findings.map((line, i) => `Оценка ${i + 1}: ${line}`),
+        !findings.length
+          ? replayed
+            ? 'В сохранённой версии нет доступных оценок; для новой проверки нужен новый запрос.'
+            : 'Подтверждённые оценки сейчас недоступны. Отсутствие оценки не означает, что гости активны или спят.'
+          : '',
+        qualified.stale || selection.withheld
+          ? 'Часть источников изменилась или недоступна; прежние выводы не используются.'
+          : '',
+        'Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен.',
+        'Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись.',
+        'Варианты: ' +
+          alternatives.map((a) => String(a.title)).join('; ') +
+          '.',
+        `Предложение сохранено, версия ${revision.revision}. Клиентские записи не менялись, сообщения не отправлялись.`,
+      ]
+        .filter(Boolean)
+        .join(' '),
+      coordination: {
+        run_id: root.id,
+        scope: 'explicit_lifecycle' as const,
+        state: 'PROPOSED',
+        revision_id: revision.id,
+        revision: revision.revision,
+        replayed,
+        current: !replayed && !qualified.stale && findings.length > 0,
+      },
+      recommendation: {
+        contract: 'maya.c9-lifecycle-response/1',
+        outcome:
+          replayed && !qualified.stale
+            ? 'HISTORICAL'
+            : qualified.stale
+              ? 'STALE'
+              : !selection.configured
+                ? 'UNCONFIGURED'
+                : findings.length
+                  ? 'PARTIAL'
+                  : 'UNAVAILABLE',
+        agent: answer.result,
+        evidence: {
+          workReceiptId: receipt.id,
+          checkedAt: selection.asOf,
+          sourceHandles: [...qualified.handles],
+        },
+        options: alternatives.map((a) => ({ key: a.key, title: a.title })),
+        noSideEffects: true,
+        executionAuthority: false,
+        canContact: false,
+        reasoning: 'deterministic',
+      },
+    };
+  }
+
+  private async lifecycleContext(runId: string, selection: LifecycleSelection) {
+    await this.lifecycle!.authorize(runId);
+    let built: Awaited<ReturnType<C9ContextService['build']>>;
+    let stale = false;
+    try {
+      built = await this.context.build(
+        runId,
+        'CLIENT_LIFECYCLE',
+        selection.refs,
+        'Кого пора вернуть?',
+      );
+    } catch (error) {
+      // Permission/subject/branch failures still deny. Only an absent/invalidated source becomes unavailable.
+      if (
+        !(error instanceof Error) ||
+        ![
+          'c9_source_expired',
+          'c9_source_missing',
+          'c9_source_changed',
+          'c9_source_not_published',
+          'c8_result_unavailable',
+        ].includes(error.message)
+      )
+        throw error;
+      stale = true;
+      built = await this.context.build(
+        runId,
+        'CLIENT_LIFECYCLE',
+        [],
+        'Кого пора вернуть?',
+      );
+    }
+    const original = c9Object(built.context);
+    const facts = (original.facts as C9Object[]).filter(
+      (f) => lifecycleSignal(f) !== null,
+    );
+    stale ||= facts.length !== selection.refs.length;
+    // A drift during read cannot expose a subset as the unchanged saved proposal.
+    const permitted = stale ? [] : facts;
+    return {
+      stale,
+      handles: new Set(permitted.map((f) => f.evidenceHandle as string)),
+      context: {
+        ...original,
+        trusted: {
+          ...c9Object(original.trusted),
+          lifecyclePopulation: true,
+          lifecycleHasMore: selection.hasMore,
+        },
+        facts: permitted,
+      } as C9Object,
     };
   }
 

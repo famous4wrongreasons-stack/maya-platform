@@ -1,0 +1,13 @@
+{
+  "postgresPorts": [
+    {
+      "port": 61044,
+      "closed": true
+    },
+    {
+      "port": 61310,
+      "closed": true
+    }
+  ],
+  "clustersStopped": true
+}

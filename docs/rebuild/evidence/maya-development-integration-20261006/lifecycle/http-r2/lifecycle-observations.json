@@ -1,0 +1,328 @@
+{
+  "contract": "maya.explicit-lifecycle-proof/1",
+  "qualification": "NOT_ISSUED",
+  "syntheticSourceFacts": true,
+  "modelCalls": 0,
+  "externalProviderAcceptance": false,
+  "appRestart": true,
+  "postgresRestart": false,
+  "initial": {
+    "request_id": "9a944e5a-2cbd-4147-a81b-dc687594b417",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "PARTIAL",
+      "agent": {
+        "contract": "AgentResult@1",
+        "agent_id": "CLIENT_LIFECYCLE",
+        "intent": "c9.client_return",
+        "findings": [
+          {
+            "statement": "По оценке на 2026-10-07T04:17:34.556Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL.",
+            "evidence_refs": [
+              "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+            ]
+          }
+        ],
+        "facts_used": [
+          {
+            "capability": "c8.result.read",
+            "status": "measured_incomplete",
+            "as_of": "2026-10-07T04:17:34.556Z",
+            "evidence_refs": [
+              "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+            ],
+            "completeness": {
+              "status": "PARTIAL",
+              "requestedScopeHash": "98d4305b504b2aa1c000ceaa53ba68846cf663c59a7f863496fad09277b1f504",
+              "returnedCount": 1,
+              "totalCount": 1,
+              "hasMore": false,
+              "cursorRef": null,
+              "truncated": false,
+              "reasonCodes": [
+                "confirmed_dormancy_rule_met"
+              ]
+            },
+            "basis": "proven_attendance_policy"
+          }
+        ],
+        "confidence": "low",
+        "limitations": [
+          "population_coverage_unknown",
+          "confirmed_dormancy_rule_met"
+        ],
+        "proposed_action_intents": [],
+        "completeness": {
+          "status": "PARTIAL",
+          "requestedScopeHash": "98d4305b504b2aa1c000ceaa53ba68846cf663c59a7f863496fad09277b1f504",
+          "returnedCount": 1,
+          "totalCount": null,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "population_coverage_unknown",
+            "confirmed_dormancy_rule_met"
+          ]
+        },
+        "evidence_refs": [
+          "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+        ]
+      },
+      "evidence": {
+        "workReceiptId": "46c21a61-2875-47cb-9472-9fdddcd61804",
+        "checkedAt": "2026-10-07T04:17:34.637Z",
+        "sourceHandles": [
+          "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+        ]
+      },
+      "options": [
+        {
+          "key": "review_later",
+          "title": "По новому запросу проверить актуальность оценок"
+        },
+        {
+          "key": "c9.no_action",
+          "title": "Ничего не делать"
+        }
+      ],
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false,
+      "reasoning": "deterministic"
+    },
+    "coordination": {
+      "run_id": "34174625-d899-4d7e-88a6-8cf757897de2",
+      "scope": "explicit_lifecycle",
+      "state": "PROPOSED",
+      "revision_id": "a064c09f-206b-4b3e-a759-85d10c29b7e1",
+      "revision": 1,
+      "replayed": false,
+      "current": true
+    },
+    "user_turn": {
+      "turnId": "581b0814-46a3-43fb-a7e3-361bd1592939",
+      "conversationId": "bffd5776-ae73-4b6f-b132-7adf7fd32ac8"
+    },
+    "reply": "Проверены опубликованные оценки давности по подтверждённому правилу бизнеса. Оценка 1: По оценке на 2026-10-07T04:17:34.556Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL. Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен. Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись. Варианты: По новому запросу проверить актуальность оценок; Ничего не делать. Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "replay": {
+    "request_id": "9a944e5a-2cbd-4147-a81b-dc687594b417",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "HISTORICAL",
+      "agent": {
+        "contract": "AgentResult@1",
+        "agent_id": "CLIENT_LIFECYCLE",
+        "intent": "c9.client_return",
+        "findings": [
+          {
+            "statement": "По оценке на 2026-10-07T04:17:34.556Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL.",
+            "evidence_refs": [
+              "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+            ]
+          }
+        ],
+        "facts_used": [
+          {
+            "capability": "c8.result.read",
+            "status": "measured_incomplete",
+            "as_of": "2026-10-07T04:17:34.556Z",
+            "evidence_refs": [
+              "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+            ],
+            "completeness": {
+              "status": "PARTIAL",
+              "requestedScopeHash": "98d4305b504b2aa1c000ceaa53ba68846cf663c59a7f863496fad09277b1f504",
+              "returnedCount": 1,
+              "totalCount": 1,
+              "hasMore": false,
+              "cursorRef": null,
+              "truncated": false,
+              "reasonCodes": [
+                "confirmed_dormancy_rule_met"
+              ]
+            },
+            "basis": "proven_attendance_policy"
+          }
+        ],
+        "confidence": "low",
+        "limitations": [
+          "population_coverage_unknown",
+          "confirmed_dormancy_rule_met"
+        ],
+        "proposed_action_intents": [],
+        "completeness": {
+          "status": "PARTIAL",
+          "requestedScopeHash": "98d4305b504b2aa1c000ceaa53ba68846cf663c59a7f863496fad09277b1f504",
+          "returnedCount": 1,
+          "totalCount": null,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "population_coverage_unknown",
+            "confirmed_dormancy_rule_met"
+          ]
+        },
+        "evidence_refs": [
+          "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+        ]
+      },
+      "evidence": {
+        "workReceiptId": "46c21a61-2875-47cb-9472-9fdddcd61804",
+        "checkedAt": "2026-10-07T04:17:34.637Z",
+        "sourceHandles": [
+          "h_05bd2fb8db8a41bad2bdadfb71c61eb380242dee036d99438f59806a165850fd"
+        ]
+      },
+      "options": [
+        {
+          "key": "review_later",
+          "title": "По новому запросу проверить актуальность оценок"
+        },
+        {
+          "key": "c9.no_action",
+          "title": "Ничего не делать"
+        }
+      ],
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false,
+      "reasoning": "deterministic"
+    },
+    "coordination": {
+      "run_id": "34174625-d899-4d7e-88a6-8cf757897de2",
+      "scope": "explicit_lifecycle",
+      "state": "PROPOSED",
+      "revision_id": "a064c09f-206b-4b3e-a759-85d10c29b7e1",
+      "revision": 1,
+      "replayed": true,
+      "current": false
+    },
+    "user_turn": {
+      "turnId": "581b0814-46a3-43fb-a7e3-361bd1592939",
+      "conversationId": "bffd5776-ae73-4b6f-b132-7adf7fd32ac8"
+    },
+    "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников. Оценка 1: По оценке на 2026-10-07T04:17:34.556Z условие c8.dormancy/barber_cadence (версия 1) выполнено. Полнота исходных данных: PARTIAL. Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен. Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись. Варианты: По новому запросу проверить актуальность оценок; Ничего не делать. Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "stale": {
+    "request_id": "9a944e5a-2cbd-4147-a81b-dc687594b417",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "STALE",
+      "agent": {
+        "contract": "AgentResult@1",
+        "agent_id": "CLIENT_LIFECYCLE",
+        "intent": "c9.client_return",
+        "findings": [],
+        "facts_used": [],
+        "confidence": "low",
+        "limitations": [
+          "population_coverage_unknown",
+          "no_permitted_qualified_evidence"
+        ],
+        "proposed_action_intents": [],
+        "completeness": {
+          "status": "UNAVAILABLE",
+          "requestedScopeHash": "2ef91fd88d5d682b372793ef7ac7dc63d5c6e4875c74fcdb2c5b84154b7a6617",
+          "returnedCount": 0,
+          "totalCount": null,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "population_coverage_unknown",
+            "no_permitted_qualified_evidence"
+          ]
+        },
+        "evidence_refs": []
+      },
+      "evidence": {
+        "workReceiptId": "46c21a61-2875-47cb-9472-9fdddcd61804",
+        "checkedAt": "2026-10-07T04:17:34.637Z",
+        "sourceHandles": []
+      },
+      "options": [
+        {
+          "key": "review_later",
+          "title": "По новому запросу проверить актуальность оценок"
+        },
+        {
+          "key": "c9.no_action",
+          "title": "Ничего не делать"
+        }
+      ],
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false,
+      "reasoning": "deterministic"
+    },
+    "coordination": {
+      "run_id": "34174625-d899-4d7e-88a6-8cf757897de2",
+      "scope": "explicit_lifecycle",
+      "state": "PROPOSED",
+      "revision_id": "a064c09f-206b-4b3e-a759-85d10c29b7e1",
+      "revision": 1,
+      "replayed": true,
+      "current": false
+    },
+    "user_turn": {
+      "turnId": "581b0814-46a3-43fb-a7e3-361bd1592939",
+      "conversationId": "bffd5776-ae73-4b6f-b132-7adf7fd32ac8"
+    },
+    "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников. В сохранённой версии нет доступных оценок; для новой проверки нужен новый запрос. Часть источников изменилась или недоступна; прежние выводы не используются. Это ограниченная проверка до трёх оценок, а не список уникальных клиентов. Полный охват базы не установлен. Выполнение условия давности не означает готовность гостя вернуться. Прогноз возврата, скидка и разрешение на контакт не определялись. Варианты: По новому запросу проверить актуальность оценок; Ничего не делать. Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "revokedStatus": 403,
+  "foreignStatus": 400,
+  "revisions": 1,
+  "c8Revisions": 1,
+  "originalRevisionHash": "ca12f5d050e5c3123fc99dde92f103bcebf200d22959ac110c2bbb30bcb02310",
+  "immutableRevisionHashUnchanged": true,
+  "effectCountBefore": 1,
+  "effectCountAfter": 1,
+  "workReceiptHasClientRefs": false,
+  "sourceExpiryCapsRevisionRetention": true
+}

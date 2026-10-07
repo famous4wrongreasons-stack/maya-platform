@@ -1,0 +1,25 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts
+  101:9   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  162:50  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.lifecycle-source.ts
+  97:30  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts
+   94:23  error  '_run' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   94:37  error  '_draft' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  219:37  error  The `Function` type accepts any function-like value.
+Prefer explicitly defining any function parameters and return type  @typescript-eslint/no-unsafe-function-type
+  220:9   error  Unsafe return of a value of type `any`                                                                                   @typescript-eslint/no-unsafe-return
+  220:9   error  Unsafe call of a `Function` typed value                                                                                  @typescript-eslint/no-unsafe-call
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/owner-read-paths.live-spec.ts
+  536:23  error  Unsafe member access .reply on an `any` value           @typescript-eslint/no-unsafe-member-access
+  552:24  error  Unsafe member access .coordination on an `any` value    @typescript-eslint/no-unsafe-member-access
+  564:23  error  Unsafe member access .recommendation on an `any` value  @typescript-eslint/no-unsafe-member-access
+  568:23  error  Unsafe member access .reply on an `any` value           @typescript-eslint/no-unsafe-member-access
+
+✖ 12 problems (12 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

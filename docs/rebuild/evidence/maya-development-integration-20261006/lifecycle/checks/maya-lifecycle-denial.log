@@ -1,0 +1,16 @@
+PASS src/widgets/rendering/denial-projection.ratchet.spec.ts
+  P-RENDER — P10: every canonical denial code has a rendering, and none is an error
+    ✓ REN-2 the enumeration sees every c9Deny call site: no call passes a non-literal (3 ms)
+    ✓ REN-2 the contract counts 127 distinct codes, and the source still has exactly those (2 ms)
+    ✓ REN-2 C9_DENIAL_PROJECTION has a row for every code, and no row for a code that is gone (1 ms)
+    ✓ REN-2 the families partition the code space: every code is claimed exactly once (1 ms)
+    ✓ REN-2 no projection is a failure state, and no severity is error (9 ms)
+    ✓ REN-2 P10(b): an unmapped code degrades to an honest unknown, and never throws
+    ✓ REN-2 a mapped code answers from its own row, not from the default
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        0.156 s, estimated 1 s
+Ran all test suites within paths "src/widgets/rendering/denial-projection.ratchet.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-denial.json

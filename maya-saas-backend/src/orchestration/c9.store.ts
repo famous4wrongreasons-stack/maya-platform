@@ -269,7 +269,7 @@ export class C9Store {
   conversationReadRun(
     turn: { turnId: string; conversationId: string },
     intentHash: string,
-    purpose: 'reads' | 'occupancy' = 'reads',
+    purpose: 'reads' | 'occupancy' | 'lifecycle' = 'reads',
   ) {
     return this.transaction(undefined, async (tx, p, now) => {
       if (!/^[a-f0-9]{64}$/.test(intentHash))
@@ -308,7 +308,9 @@ export class C9Store {
         safeQuestion:
           purpose === 'occupancy'
             ? 'Проверь окна после отмен'
-            : 'Read capabilities selected by the conversation runtime.',
+            : purpose === 'lifecycle'
+              ? 'Кого пора вернуть?'
+              : 'Read capabilities selected by the conversation runtime.',
         period: null,
         subjectRefs: [],
         oneOffConstraints: {

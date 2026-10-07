@@ -1,0 +1,152 @@
+FAIL src/orchestration/c9.lifecycle.spec.ts
+  ● explicit C9 Lifecycle (synthetic durable adapter) › uses actual refs, one bounded read, agent, saved READ/NO_ACTION proposal, unknown population and no identifiers in response
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.lifecycle.spec.ts:116:33
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:114:26)
+      at C9Orchestrator.lifecycleContext (orchestration/c9.orchestrator.ts:567:34)
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:433:27)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:172:22)
+
+  ● explicit C9 Lifecycle (synthetic durable adapter) › restart reuses the version, reauthorizes exact saved refs and never rediscovers
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.lifecycle.spec.ts:116:33
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:114:26)
+      at C9Orchestrator.lifecycleContext (orchestration/c9.orchestrator.ts:567:34)
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:433:27)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:203:5)
+
+  ● explicit C9 Lifecycle (synthetic durable adapter) › policy/dependency change before exposure withholds prior findings without rewriting evidence
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.lifecycle.spec.ts:116:33
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:114:26)
+      at C9Orchestrator.lifecycleContext (orchestration/c9.orchestrator.ts:567:34)
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:433:27)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:224:22)
+
+  ● explicit C9 Lifecycle (synthetic durable adapter) › a stale source at restart never exposes the saved boolean
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.lifecycle.spec.ts:116:33
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:114:26)
+      at C9Orchestrator.lifecycleContext (orchestration/c9.orchestrator.ts:567:34)
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:433:27)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:235:5)
+
+  ● explicit C9 Lifecycle (synthetic durable adapter) › revocation and cancellation cannot be bypassed with a saved version
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.lifecycle.spec.ts:116:33
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:114:26)
+      at C9Orchestrator.lifecycleContext (orchestration/c9.orchestrator.ts:567:34)
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:433:27)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:267:5)
+
+  ● explicit C9 Lifecycle (synthetic durable adapter) › subject scope denial is not converted into historical success
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.lifecycle.spec.ts:116:33
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:114:26)
+      at C9Orchestrator.lifecycleContext (orchestration/c9.orchestrator.ts:567:34)
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:433:27)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:281:5)
+
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+PASS src/orchestration/c9.context.spec.ts
+PASS src/orchestration/c9.conversation-reads.spec.ts
+PASS src/orchestration/c9.context-and-result.spec.ts
+PASS src/orchestration/c9.source-boundaries.architecture.spec.ts
+
+Test Suites: 1 failed, 6 passed, 7 total
+Tests:       6 failed, 221 passed, 227 total
+Snapshots:   0 total
+Time:        1.151 s, estimated 2 s
+Ran all test suites within paths "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.context-and-result.spec.ts", "src/orchestration/c9.context.spec.ts", "src/orchestration/c9.occupancy.spec.ts", "src/orchestration/c9.source-boundaries.architecture.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-unit.json

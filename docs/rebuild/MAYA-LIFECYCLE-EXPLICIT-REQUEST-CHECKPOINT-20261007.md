@@ -1,0 +1,30 @@
+# Explicit Lifecycle request: qualified C8 explanation and saved proposal
+
+On the isolated integration branch, the owner's explicit web request **«Кого пора вернуть?»** now reaches the existing C9 Lifecycle agent and a saved proposal through actual C8 revision references. It returns a bounded explanation of published dormancy evaluations and the options “check again on a new request” / “do nothing”. No Client audience, contact permission, discount or return probability is invented. **Local development checkpoint, NOT_ISSUED.**
+
+The two other exact commands are «Проверь спящих клиентов» and «Проверь оценки давности клиентов». Mixed requests, a specified branch and recurring/sending instructions do not enter this narrow path. Existing natural-language dormant reads remain intact. Initial scope is a tenant-wide owner; a branch-scoped owner fails closed. The website and other booking lane were not edited.
+
+## Source and persistence
+
+`/api/ai/chat` → persisted explicit user turn → existing `C9Orchestrator.checkClientReturn` → current `customers.core` tool policy **and** existing C8 `analytics.business` reader → C8 list of at most three published Client policy signals → metadata of those exact same-tenant C8 rows → existing `C9ContextService` / `C9Sources` snapshot qualification → `C9Agents.answer(CLIENT_LIFECYCLE)` → `C9Strategy.propose` / existing revision writer → one response.
+
+The boolean is explained **as of its published evaluation date** and confirmed rule version. “Current” source eligibility does not recalculate the condition for today. False does not mean an active Client. `totalCount:null` preserves unknown population coverage; these are evaluations, not a count of unique Clients. Empty, unconfigured, filtered and partial results do not become zero customers or a healthy base.
+
+Exact source reads repeat immediately before composing the reply. A policy/dependency change can produce `available:false` without throwing; the new path explicitly withholds those findings. Subject/branch/tenant permission failures remain refusals. A replay reauthorizes and reads only the original saved refs; it never rediscovers or computes a new population and is labelled historical. Interrupted or uncertain work remains held and is not dispatched again. A cancelled run or revoked actor cannot use saved evidence to bypass current authority.
+
+The immutable proposal carries actual C8 refs and inherits their expiry as a retention cap. The longer-lived work receipt contains only metadata, exact revision ID and a digest, not Client subject refs. Replay selects that exact revision even after a later owner edit; cleanup of that revision is an explicit stop, never a fallback to a newer version. No old hash, ledger row, deadline, schema or retention class was repaired or rewritten. Only READ and NO_ACTION steps are proposed; the response is not execution authority.
+
+## Evidence
+
+- **263 targeted tests + 7 denial-contract tests pass.** Source selection, tenant/actor/branch gates, both entitlements, metadata revision/hash checks, exact-version replay, missing-revision stop, source drift, held-work no-loop, current subject denial, population missingness and existing Occupancy/AiCore paths are covered.
+- Production TypeScript (4096 MB), scoped ESLint (10 files) and whitespace checks pass. RED development runs and their causes are preserved: test clone realm mismatch, one missing mock revision evidence field, and scoped test lint. Independent review corrections include exact zero-cost evidence, the last source check ordering, source retention and exact-version replay; no remaining blocking code issue was reported.
+- A narrow actual **HTTP/C8/PostgreSQL proof** passes twice. The final run saves [actual response observations](evidence/maya-development-integration-20261006/lifecycle/http-r2/lifecycle-observations.json). The test first admits a synthetic confirmed policy and computes one real C8 revision through existing owners, then submits the explicit chat request. The result is PARTIAL, with one C9 revision. Closing and booting a fresh Nest application in the same process preserves the exact revision and yields HISTORICAL on replay. Changing source attendance then yields STALE with no old findings. `customers.core` revocation returns 403; foreign run read returns 400.
+- The fixture has one AE from policy setup; the explicit requests leave the count **1 → 1**. C8 revision count remains one, the saved strategy hash remains unchanged, and the work result contains no Client refs. No model call was admitted. Both fresh owned PostgreSQL clusters stopped; their ports are closed and the earlier owned booking Chrome count is zero.
+
+[Manifest and source hashes](evidence/maya-development-integration-20261006/lifecycle/manifest.json) include both HTTP runs, unit/lint/type logs, cleanup and independent review. Six unrelated cases in the HTTP file were intentionally skipped. This is application close/boot restart, **not a new OS process or PostgreSQL restart**. No Lifecycle React/browser, real-model quality, YCLIENTS, production, phone, SMS, HTTPS, campaign or notification acceptance is claimed.
+
+## Remaining scope
+
+This completes a useful explicit READ vertical, not a Client-return campaign or complete Lifecycle domain. It does not create candidate audience membership or discover/contact people. Broader wording, branch selection, financial rankings and B35 audience/content/route approval remain existing owners' separate work. There is no C10 initiator, background authority, agent v2 or second orchestrator. No C10-complete claim follows from this checkpoint.
+
+The independent [first Client binding decision](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md) remains open. No new initial-binding trust was granted. The earlier [booking refusal checkpoint](MAYA-WIDGET-BOOKING-FACTS-CHECKPOINT-20261007.md#follow-up-precise-refusal-and-submitted-preview-2026-10-07) is commit `3135cafb`; its unrelated pre-existing REN-6 fixture guard failure remains documented and was not weakened here.

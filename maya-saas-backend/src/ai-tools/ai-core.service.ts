@@ -1,3 +1,4 @@
+import { isExplicitClientReturnRequest } from '../orchestration/c9.lifecycle-presentation';
 import { isExplicitCancellationWindowRequest } from '../orchestration/c9.occupancy-presentation';
 import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
 import {
@@ -204,6 +205,7 @@ type GroundingReport = {
 };
 
 type AiCoreCompletion = {
+  lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
   reply: string;
   source: 'deepseek' | 'openai' | 'safe_fallback';
@@ -627,6 +629,24 @@ export class AiCoreService {
         source: 'safe_fallback',
         action: null,
         occupancy,
+      });
+    }
+    if (
+      !clientAudience &&
+      dto.surface === 'web' &&
+      [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        toolUser.role,
+      ) &&
+      isExplicitClientReturnRequest(this.latestUserText(dto.messages))
+    ) {
+      const turn = this.readTurns.get(dto);
+      if (!turn) this.modelFailure('conversation_history_unavailable');
+      const lifecycle = await this.orchestrator.checkClientReturn(turn);
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply: lifecycle.reply,
+        source: 'safe_fallback',
+        action: null,
+        lifecycle,
       });
     }
     const memoryCommand = this.memory
@@ -2314,6 +2334,7 @@ export class AiCoreService {
   ) {
     const readTurn = this.readTurns.get(dto);
     const coordination =
+      response.lifecycle?.coordination ??
       response.occupancy?.coordination ??
       (readTurn
         ? await this.orchestrator
@@ -2374,6 +2395,9 @@ export class AiCoreService {
       .find((tool) => tool.resolution !== undefined)?.resolution;
     const completion = {
       request_id: dto.requestId,
+      ...(response.lifecycle
+        ? { recommendation: response.lifecycle.recommendation }
+        : {}),
       ...(response.occupancy
         ? { recommendation: response.occupancy.recommendation }
         : {}),

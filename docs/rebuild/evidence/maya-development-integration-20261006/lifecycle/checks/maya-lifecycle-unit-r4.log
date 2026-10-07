@@ -1,0 +1,26 @@
+FAIL src/orchestration/c9.lifecycle.spec.ts
+  ● explicit C9 Lifecycle (synthetic durable adapter) › policy/dependency change before exposure withholds prior findings without rewriting evidence
+
+    BadRequestException: c9_array_bounds
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at orchestration/c9.contract.ts:100:7
+      at C9Orchestrator.checkClientReturn (orchestration/c9.orchestrator.ts:520:28)
+      at Object.<anonymous> (orchestration/c9.lifecycle.spec.ts:263:22)
+
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 24 passed, 25 total
+Snapshots:   0 total
+Time:        0.515 s, estimated 1 s
+Ran all test suites within paths "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-lifecycle-unit-r4.json

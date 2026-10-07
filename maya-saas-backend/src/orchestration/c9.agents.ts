@@ -1,3 +1,4 @@
+import { lifecycleStatement } from './c9.lifecycle-presentation';
 import { occupancyStatement } from './c9.occupancy-presentation';
 import type { OccupancyProjection } from './c9.occupancy-source';
 import { Injectable } from '@nestjs/common';
@@ -114,7 +115,9 @@ export class C9Agents {
     const used: C9Object[] = [],
       findings: C9Object[] = [],
       reasonCodes = new Set<string>();
-    let incomplete = false;
+    const population = trusted.lifecyclePopulation === true;
+    if (population) reasonCodes.add('population_coverage_unknown');
+    let incomplete = population;
     for (const fact of facts) {
       const handle = fact.evidenceHandle as string,
         status = factStatus(fact),
@@ -160,7 +163,9 @@ export class C9Agents {
                 fact.occupancy as OccupancyProjection,
                 fact.historical === true,
               )
-            : `${factLabel(fact)}: ${status} as of ${String(fact.asOf)}`,
+            : fact.kind === 'POLICY_SIGNAL' && domain === 'CLIENT_LIFECYCLE'
+              ? lifecycleStatement(fact)
+              : `${factLabel(fact)}: ${status} as of ${String(fact.asOf)}`,
         evidence_refs: [handle],
       });
     }
@@ -195,10 +200,10 @@ export class C9Agents {
             status,
             requestedScopeHash,
             returnedCount: handles.length,
-            totalCount: facts.length,
-            hasMore: false,
+            totalCount: population ? null : facts.length,
+            hasMore: population && trusted.lifecycleHasMore === true,
             cursorRef: null,
-            truncated: false,
+            truncated: population && trusted.lifecycleHasMore === true,
             reasonCodes: [...reasonCodes].slice(0, 20),
           },
           evidence_refs: handles,
