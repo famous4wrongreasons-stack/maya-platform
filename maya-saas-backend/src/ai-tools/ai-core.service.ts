@@ -1,4 +1,5 @@
 import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
+import { integrationStatusReply } from './integration-status-presentation';
 import { isExplicitClientReturnRequest } from '../orchestration/c9.lifecycle-presentation';
 import { isExplicitCancellationWindowRequest } from '../orchestration/c9.occupancy-presentation';
 import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
@@ -425,6 +426,7 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'catalog.services.read': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
   'company.business-hours.read': 'company_profile',
+  'support.integration-status.read': 'integration_status',
   'staff.schedule.read': 'staff_schedule',
   // 🔴 Свой график мастера обязан быть ИСТОЧНИКОМ ДАННЫХ наравне с командным.
   // Его тут не было, поэтому инструмент, выданный мастеру каталогом, не мог
@@ -476,6 +478,8 @@ const PII_SENSITIVE_TOOLS = new Set([
  */
 const SERVER_COMPOSED_REPLY_TOOLS = new Set([
   'company.business-hours.read',
+  // Stored integration checks must never be paraphrased as a live provider probe.
+  'support.integration-status.read',
   // Quoted internal guidance is data. Keep free-form rules out of model
   // instructions and preserve the confirmed wording for authorized staff.
   'business.rules.read',
@@ -1788,7 +1792,15 @@ export class AiCoreService {
         const safeResult = this.sanitizeToolResult(execution.result);
         toolResults.push({
           name: decision.toolCall.name,
-          result: safeResult,
+          result:
+            decision.toolCall.name === 'support.integration-status.read'
+              ? {
+                  ...this.record(safeResult),
+                  stale:
+                    execution.stale === true ||
+                    this.record(safeResult).stale === true,
+                }
+              : safeResult,
         });
         // Здесь раньше стоял второй перехват: как только инструмент отдавал
         // данные, ход завершался шаблоном — модель уходила за цифрами и не
@@ -1835,7 +1847,12 @@ export class AiCoreService {
                       execution.result,
                       execution.stale === true,
                     )
-                  : null;
+                  : decision.toolCall.name === 'support.integration-status.read'
+                    ? integrationStatusReply(
+                        execution.result,
+                        execution.stale === true,
+                      )
+                    : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(
@@ -3343,6 +3360,8 @@ export class AiCoreService {
       );
     }
     switch (evidence.name) {
+      case 'support.integration-status.read':
+        return integrationStatusReply(evidence.result).reply;
       case 'business.rules.read': {
         const data = this.record(evidence.result);
         if (

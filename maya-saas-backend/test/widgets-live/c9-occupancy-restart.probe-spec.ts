@@ -983,7 +983,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         terminalReasonCode: 'provider_schedule_or_available_slot_absent',
         terminalEvidenceFingerprint: expect.stringMatching(
           /^resolution-evidence_[a-f0-9]{64}$/,
-        ),
+        ) as unknown,
       });
       expect(resolved.task.status).toBe('invalidated');
       await measureShadow('c7_resolved', salon, accessToken, 'resolved');

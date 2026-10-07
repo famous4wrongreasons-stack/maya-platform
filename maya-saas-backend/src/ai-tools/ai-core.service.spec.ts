@@ -1856,6 +1856,114 @@ describe('AiCoreService', () => {
     },
   );
 
+  describe('stored Admin integration status [scripted selection only]', () => {
+    const tool = 'support.integration-status.read';
+    const payload = {
+      configured: true,
+      calendar_source: 'external',
+      next_action: 'reconnect',
+      connection: {
+        provider: 'yclients',
+        status: 'error',
+        verified: true,
+        verified_at: '2026-10-05T08:00:00.000Z',
+        last_checked_at: '2026-10-06T09:00:00.000Z',
+        last_sync_at: null,
+      },
+    };
+    function fixture(stale = false, result: unknown = payload) {
+      const mocks = createService([tool]);
+      mocks.model.decide
+        .mockResolvedValueOnce(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: {} },
+          }),
+        )
+        .mockResolvedValue(
+          decision({ reply: 'MODEL: CRM работает сейчас.', toolCall: null }),
+        );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'stored-admin-status',
+        stale,
+        result,
+      });
+      return mocks;
+    }
+    it.each(['native', 'web'] as const)(
+      'answers the selected READ on %s with one model selection and unchanged actor',
+      async (surface) => {
+        const mocks = fixture();
+        const output = await mocks.service.chat(user, {
+          ...dto,
+          surface,
+          messages: [{ role: 'user', content: 'Как состояние подключения?' }],
+        });
+        expect(output.reply).toContain(
+          'Сохранённый статус интеграции YCLIENTS: ошибка подключения',
+        );
+        expect(output.reply).toContain('06.10.2026, 09:00 (UTC)');
+        expect(output.reply).toContain(
+          'Текущая доступность CRM не подтверждена',
+        );
+        expect(output.reply).toContain('переподключить CRM');
+        expect(output.reply).not.toContain('MODEL');
+        expect(output).toMatchObject({
+          action: null,
+          grounding: {
+            status: 'verified',
+            domain: 'integration_status',
+            evidence_tools: [tool],
+          },
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute.mock.calls[0]?.[0]).toEqual(user);
+        expect(mocks.runtime.execute.mock.calls[0]?.[1]).toBe(tool);
+      },
+    );
+    it.each([
+      ['stale', true, payload],
+      ['incomplete', false, {}],
+    ] as const)(
+      'keeps %s source blocked without a recovery recommendation',
+      async (_label, stale, result) => {
+        const mocks = fixture(stale, result);
+        const output = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Как состояние подключения?' }],
+        });
+        expect(output.grounding.status).toBe('blocked');
+        expect(output.reply).not.toMatch(/переподключить CRM|MODEL/);
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('does not reuse a successful status after source access is revoked', async () => {
+      const mocks = fixture();
+      const first = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Как состояние подключения?' }],
+      });
+      mocks.model.decide.mockResolvedValue(
+        decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
+      );
+      mocks.runtime.execute.mockRejectedValue(
+        new ForbiddenException('feature revoked'),
+      );
+      await expect(
+        mocks.service.chat(user, {
+          ...dto,
+          requestId: 'admin-revoked-next',
+          messages: [
+            { role: 'assistant', content: first.reply },
+            { role: 'user', content: 'А теперь?' },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+  });
+
   // Scripted tool selection and source fixtures: no model/provider acceptance.
   describe('public company profile consultation', () => {
     const tool = 'company.business-hours.read';

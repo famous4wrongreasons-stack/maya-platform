@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { writeFileSync } from 'node:fs';
 import request from 'supertest';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
@@ -127,6 +128,179 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
       owner.revoke({ proof: token }),
     );
   }
+
+  it('Admin integration status uses stored tenant facts through C9 without live provider health or side effects', async () => {
+    const owner = await fixture(
+      'Stored Admin status',
+      1500,
+      UserRole.TENANT_OWNER,
+    );
+    const other = await fixture(
+      'Other Admin status',
+      2300,
+      UserRole.TENANT_OWNER,
+    );
+    const client = await fixture('Client cannot read integration', 1500);
+    for (const f of [owner, other, client])
+      await fx.grantFeature(f.tenant, 'crm.integration');
+    await db.prisma.tenant.update({
+      where: { id: owner.tenant.id },
+      data: { calendarSource: CalendarSource.EXTERNAL },
+    });
+    const integration = await db.prisma.crmIntegration.create({
+      data: {
+        tenantId: owner.tenant.id,
+        provider: 'yclients',
+        status: 'error',
+        encryptedApiToken: 'SYNTHETIC_NEVER_DECRYPT',
+        baseUrl: 'https://synthetic.invalid',
+        verifiedAt: new Date('2026-10-05T08:00:00.000Z'),
+        lastCheckedAt: new Date('2026-10-06T09:00:00.000Z'),
+        lastSyncAt: null,
+        lastErrorCode: 'PRIVATE_SOURCE_ERROR',
+      },
+    });
+    const network = jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
+      throw new Error('No network permitted');
+    });
+    const tool = 'support.integration-status.read';
+    const model = jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockResolvedValue({
+        reply: null,
+        toolCall: { name: tool, arguments: {} },
+        provider: 'openai',
+        model: 'SCRIPTED_SYNTHETIC_ADMIN_SELECTION',
+        usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      });
+    const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+    const text = 'Как состояние подключения?';
+    const id = randomUUID();
+    const first = await owner.chat(id, text);
+    expect(first.status).toBe(201);
+    expect(first.body.reply).toContain(
+      'Сохранённый статус интеграции YCLIENTS: ошибка подключения',
+    );
+    expect(first.body.reply).toContain('06.10.2026, 09:00 (UTC)');
+    expect(first.body.reply).toContain('дата недоступна');
+    expect(first.body.reply).toContain(
+      'Текущая доступность CRM не подтверждена',
+    );
+    expect(first.body.reply).toContain('переподключить CRM');
+    expect(first.body.reply).not.toMatch(
+      /PRIVATE|SYNTHETIC_NEVER_DECRYPT|synthetic.invalid/,
+    );
+    expect(first.body.coordination).toMatchObject({
+      scope: 'deterministic_reads',
+      state: 'COMPLETED',
+    });
+    expect(model).toHaveBeenCalledTimes(1);
+    expect(source).toHaveBeenCalledTimes(1);
+    expect(source.mock.calls[0]?.[1]).toMatchObject({
+      tenantId: owner.tenant.id,
+      userId: owner.user.id,
+      role: UserRole.TENANT_OWNER,
+    });
+    const replay = await owner.chat(id, text);
+    expect(replay.body.reply).toBe(first.body.reply);
+    expect(source).toHaveBeenCalledTimes(1);
+    const second = await other.chat(randomUUID(), text);
+    expect(second.status).toBe(201);
+    expect(second.body.reply).toContain('интеграция CRM не настроена');
+    expect(second.body.reply).not.toMatch(/YCLIENTS|09:00|переподключить CRM/);
+    const foreign = await request(http.app.getHttpServer())
+      .get(`/api/orchestration/runs/${first.body.coordination.run_id}`)
+      .set('Authorization', `Bearer ${other.token}`);
+    expect(foreign.status).toBe(400);
+    const callsBeforeDenials = source.mock.calls.length;
+    const deniedClient = await client.chat(randomUUID(), text);
+    // The deliberately invalid model selection is refused before source dispatch.
+    expect(deniedClient.status).toBe(503);
+    expect(JSON.stringify(deniedClient.body)).not.toMatch(
+      /Сохранённый статус интеграции|09:00|переподключить CRM/,
+    );
+    expect(source).toHaveBeenCalledTimes(callsBeforeDenials);
+    const clientTool = await request(http.app.getHttpServer())
+      .post(`/api/ai/tools/${tool}/execute`)
+      .set('Authorization', `Bearer ${client.token}`)
+      .send({ surface: 'web', arguments: {} });
+    expect(clientTool.status).toBe(403);
+    await db.prisma.tenantEntitlement.update({
+      where: {
+        tenantId_featureKey: {
+          tenantId: owner.tenant.id,
+          featureKey: 'crm.integration',
+        },
+      },
+      data: { enabled: false },
+    });
+    const revoked = await owner.chat(id, text);
+    expect(revoked.status).toBe(503);
+    expect(JSON.stringify(revoked.body)).not.toMatch(
+      /Сохранённый статус интеграции|09:00|переподключить CRM/,
+    );
+    expect(source).toHaveBeenCalledTimes(callsBeforeDenials);
+    const revokedTool = await request(http.app.getHttpServer())
+      .post(`/api/ai/tools/${tool}/execute`)
+      .set('Authorization', `Bearer ${owner.token}`)
+      .send({ surface: 'web', arguments: {} });
+    expect(revokedTool.status).toBe(403);
+    const receipts = await db.prisma.c9WorkReceipt.findMany({
+      where: { tenantId: owner.tenant.id },
+    });
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0]).toMatchObject({
+      taskKey: tool,
+      domain: 'ADMIN',
+      state: 'SETTLED',
+    });
+    expect(JSON.stringify(receipts[0].resultJson)).not.toMatch(
+      /YCLIENTS|last_checked_at|MeasurementRevision|PRIVATE/,
+    );
+    const storedAfter = await db.prisma.crmIntegration.findUniqueOrThrow({
+      where: { id: integration.id },
+    });
+    expect(storedAfter).toEqual(integration);
+    const executions = await db.prisma.actionExecution.count({
+      where: { tenantId: owner.tenant.id },
+    });
+    expect(executions).toBe(0);
+    expect(network).not.toHaveBeenCalled();
+    if (process.env.JEST_ADMIN_STATUS_REPORT)
+      writeFileSync(
+        process.env.JEST_ADMIN_STATUS_REPORT,
+        JSON.stringify(
+          {
+            contract: 'maya.admin-stored-status-http-proof/1',
+            syntheticSource: true,
+            scriptedModelSelection: true,
+            realModelAcceptance: false,
+            browserAcceptance: false,
+            networkCalls: network.mock.calls.length,
+            sourceCalls: source.mock.calls.length,
+            scriptedModelCalls: model.mock.calls.length,
+            actionExecutions: executions,
+            sourceIntegrationUnchanged: true,
+            first,
+            replay,
+            other: second,
+            foreignStatus: foreign.status,
+            clientDenied: deniedClient,
+            featureRevoked: revoked,
+            directClientToolStatus: clientTool.status,
+            directRevokedToolStatus: revokedTool.status,
+            receipt: {
+              kind: receipts[0].kind,
+              domain: receipts[0].domain,
+              state: receipts[0].state,
+              taskKey: receipts[0].taskKey,
+            },
+          },
+          null,
+          2,
+        ) + '\n',
+      );
+  });
 
   it('a personal chat read uses the verified Client and refuses replay after its link is revoked without changing the owner role', async () => {
     const f = await fixture(

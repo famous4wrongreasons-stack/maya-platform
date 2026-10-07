@@ -1,0 +1,29 @@
+{
+  "contract": "maya.c5-c9-c7-qualified-archive/1",
+  "sourceCommit": "3f6b154b193d0b00f49bee5618e65264163537b8",
+  "status": "HTTP_PG_RESTART_PASSED",
+  "syntheticCrmAdapter": true,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "backgroundAuthority": false,
+  "c10Complete": false,
+  "certificate": "NOT_ISSUED",
+  "checks": {
+    "prepareTests": 1,
+    "resumeTests": 1,
+    "ownedClusterStopped": true,
+    "modelCalls": 0,
+    "actionExecutions": 0
+  },
+  "sourceHashes": {
+    "maya-saas-backend/scripts/c9-occupancy-proof.mjs": "742437cb7514a3e70eb156ccb2d31e14d4edb5591602396c5ebdc4eef11402ac",
+    "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts": "028362b14444c66f57f59eeac6cc7858be28e06d2db95058a2921b21a744089c"
+  },
+  "evidenceHashes": {
+    "manifest.json": "8ff0819619d4f6fb181d5fbe561f278db32bd8027f8e3e7f2513301c581b5a64",
+    "prepare.json": "e48c7e04f4f64afb9013e7bcbd574eff92f8fb5449dc051c5c6b16dd39656d47",
+    "resume.json": "d4889c4169bdcb7bbc951ff0e9628c2a85d62e97e25c931054ee3f3dd91cb30d",
+    "prepare-jest.json": "e08e84b24d59bbe3cfaf4a7f459b5a7dc0cfa236b450574694dd359cef3d75b1",
+    "resume-jest.json": "afeccb5df173f48bf9594d92ac3324854e43a44dbb531e4b5082c726df58514d"
+  }
+}

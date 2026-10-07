@@ -1,0 +1,159 @@
+{
+  "contract": "maya.admin-stored-status-http-proof/1",
+  "syntheticSource": true,
+  "scriptedModelSelection": true,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "networkCalls": 0,
+  "sourceCalls": 2,
+  "scriptedModelCalls": 5,
+  "actionExecutions": 0,
+  "sourceIntegrationUnchanged": true,
+  "first": {
+    "status": 201,
+    "body": {
+      "request_id": "b7d3fc86-7349-4b5b-90af-a0e23d21b1e6",
+      "coordination": {
+        "run_id": "b8437401-0a53-4298-92e4-5f801e1c2c43",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "3fdc7781-50c5-47d9-ac94-256a166acc95",
+        "conversationId": "dc926204-8231-4a91-ae05-3dd58739b8bc"
+      },
+      "reply": "Сохранённый статус интеграции YCLIENTS: ошибка подключения.\n\nИсточником календаря выбрана внешняя CRM.\n\nПоследняя сохранённая проверка: 06.10.2026, 09:00 (UTC).\n\nПоследняя сохранённая синхронизация: дата недоступна.\n\nПодключение было подтверждено 05.10.2026, 08:00 (UTC); это историческая отметка.\n\nТекущая доступность CRM не подтверждена: проверка соединения не выполнялась.\n\nСледующий шаг из сохранённого статуса: переподключить CRM.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "support.integration-status.read",
+          "status": "completed",
+          "execution_id": "cmuxpmudi0012k7c9i7k483op"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "integration_status",
+        "required_tools": [
+          "support.integration-status.read"
+        ],
+        "evidence_tools": [
+          "support.integration-status.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "replay": {
+    "status": 201,
+    "body": {
+      "request_id": "b7d3fc86-7349-4b5b-90af-a0e23d21b1e6",
+      "coordination": {
+        "run_id": "b8437401-0a53-4298-92e4-5f801e1c2c43",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "3fdc7781-50c5-47d9-ac94-256a166acc95",
+        "conversationId": "dc926204-8231-4a91-ae05-3dd58739b8bc"
+      },
+      "reply": "Сохранённый статус интеграции YCLIENTS: ошибка подключения.\n\nИсточником календаря выбрана внешняя CRM.\n\nПоследняя сохранённая проверка: 06.10.2026, 09:00 (UTC).\n\nПоследняя сохранённая синхронизация: дата недоступна.\n\nПодключение было подтверждено 05.10.2026, 08:00 (UTC); это историческая отметка.\n\nТекущая доступность CRM не подтверждена: проверка соединения не выполнялась.\n\nСледующий шаг из сохранённого статуса: переподключить CRM.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "support.integration-status.read",
+          "status": "completed",
+          "execution_id": "cmuxpmudi0012k7c9i7k483op"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "integration_status",
+        "required_tools": [
+          "support.integration-status.read"
+        ],
+        "evidence_tools": [
+          "support.integration-status.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "other": {
+    "status": 201,
+    "body": {
+      "request_id": "000441aa-1aa7-495c-a8d2-4c4c13411b45",
+      "coordination": {
+        "run_id": "30fc612f-8bdc-4f7b-838a-8dabace013eb",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "76be7eee-8bab-45e5-a9c6-a1721c4933ce",
+        "conversationId": "c3c1d03e-bf22-438f-ad57-4c9dd1b5c1b2"
+      },
+      "reply": "По сохранённым данным, интеграция CRM не настроена.\n\nИсточником календаря выбран внутренний календарь MAYA.\n\nТекущая доступность CRM не подтверждена: проверка соединения не выполнялась.\n\nСледующий шаг в сохранённом статусе не указан.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "support.integration-status.read",
+          "status": "completed",
+          "execution_id": "cmuxpmufo0018k7c9c78e8t6l"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "integration_status",
+        "required_tools": [
+          "support.integration-status.read"
+        ],
+        "evidence_tools": [
+          "support.integration-status.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "foreignStatus": 400,
+  "clientDenied": {
+    "status": 503,
+    "body": {
+      "message": "MAYA could not safely complete this turn.",
+      "error": {
+        "code": "ai_model_tool_not_allowed"
+      }
+    }
+  },
+  "featureRevoked": {
+    "status": 503,
+    "body": {
+      "message": "MAYA could not safely complete this turn.",
+      "error": {
+        "code": "ai_model_tool_not_allowed"
+      }
+    }
+  },
+  "directClientToolStatus": 403,
+  "directRevokedToolStatus": 403,
+  "receipt": {
+    "kind": "TOOL_READ",
+    "domain": "ADMIN",
+    "state": "SETTLED",
+    "taskKey": "support.integration-status.read"
+  }
+}

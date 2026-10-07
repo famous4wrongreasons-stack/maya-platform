@@ -1,0 +1,25 @@
+{
+  "contract": "maya.admin-status-owned-cluster/1",
+  "status": "passed",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-admin-status-PMDC0N/pg",
+  "port": 57392,
+  "database": "maya_widget_gate_proof_c9occ_e0b9618ea220",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "admin-http"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "backgroundAuthority": false,
+  "clusterStopped": true
+}

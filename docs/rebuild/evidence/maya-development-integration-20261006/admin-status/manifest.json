@@ -1,0 +1,43 @@
+{
+  "contract": "maya.admin-stored-integration-status-checkpoint/1",
+  "baseCommit": "3f6b154b193d0b00f49bee5618e65264163537b8",
+  "status": "LOCAL_QUALIFIED",
+  "targetedTestsPassed": 272,
+  "httpTestsPassed": 1,
+  "productionTypes": "PASS",
+  "scopedLint": "PASS; two pre-existing warnings",
+  "scriptedModelSelections": 5,
+  "externalModelCalls": 0,
+  "externalFetchCalls": 0,
+  "actionExecutions": 0,
+  "crmRowUnchanged": true,
+  "ownedClusterStopped": true,
+  "independentReview": "no blocking finding",
+  "realModelAcceptance": false,
+  "providerAcceptance": false,
+  "browserAcceptance": false,
+  "adminRestartAcceptance": false,
+  "backgroundAuthority": false,
+  "c10Complete": false,
+  "certificate": "NOT_ISSUED",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/integration-status-presentation.ts": "950db31921eb5f384b8e3c4b0e0105ef6bfa91565f181bae270a6e84f5602315",
+    "maya-saas-backend/src/ai-tools/integration-status-presentation.spec.ts": "d76035fe9327f38addfce0187cc97a9c9c85adbb296cad5e799ddc1b3a3c7201",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "c613a49a664bba1268061112f16357e697031f16d30974be3378e8d0de4615ce",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "8a4404a26c285af7f9545548e43585d58705102e7bddaa015948279cca426900",
+    "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts": "6113588678aa7e7bfe78ef71ea9bfb734ad7433bad0360290e386519ca86199a",
+    "maya-saas-backend/scripts/admin-integration-status-proof.mjs": "fef5d95f08e81315a4711c31b7328adbd067964d6d4928944571caa181625155"
+  },
+  "evidenceHashes": {
+    "http-jest.json": "a0179ed0f2dc0a1b2062dfb9914e9f85f9a13223bcddb2f8f377cb662a32ed33",
+    "http-manifest.json": "cbcbcb9399e07bc66f1f270ac36f268e3d8e6318639880384895056815cb43e8",
+    "http-red-1.json": "347b60a9d849fe0c5f3b0778d32f3080100f685aacd66ecf8a7d8933f00ee155",
+    "http-red-2.json": "3f5371b7ebc9c12a7f0f3124aee17b839e758676e5b644fd1dd5cac165478a7e",
+    "http.json": "25f3b6de259268f4c7e412adfc913730346215adf6065ddbdbcd0f0492662f25",
+    "independent-review.txt": "96f32fc4534c6cb599c231bd7c993ef380bcd2c92e664093ddab352f9c1d4ac7",
+    "lint.txt": "ec5112afed49f29f526489c5ccf1d8d9f3513e75697851bf12c4a091f007b0f3",
+    "types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit-jest.json": "40f35f12d399b124ca15458d08d59bf6f008d63769660c5053c50f7b418d6662",
+    "unit-red.json": "21ae3c9f591930d0101bad75cca73eaef5c3e2f42bce15a591cc20c318857c8b"
+  }
+}

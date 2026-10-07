@@ -60,7 +60,7 @@ export function biReportExplanation(fact: C9Object): {
   } as unknown as MeasurementPresentation;
   const parts = measurementTextParts(view);
   const mandatory = [
-    `Опубликованный финансовый снимок, версия ${String(fact.revision)}.\nПериод: ${sourceInstantText(period.from as string, period.timezone as string)} — ${sourceInstantText(period.toExclusive as string, period.timezone as string)} (конец не включён; ${period.timezone}).`,
+    `Опубликованный финансовый снимок, версия ${String(fact.revision)}.\nПериод: ${sourceInstantText(period.from, period.timezone)} — ${sourceInstantText(period.toExclusive, period.timezone)} (конец не включён; ${period.timezone}).`,
     ...parts.qualifications,
     'Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.',
   ].join('\n');
