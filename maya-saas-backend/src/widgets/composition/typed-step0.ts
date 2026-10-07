@@ -1,3 +1,4 @@
+import { goodsReceiptDecisionReply } from '../inventory/goods-receipt-terminal.presenter';
 import { randomUUID } from 'node:crypto';
 import { TimelineStore } from '../stores/timeline.store';
 import {
@@ -162,6 +163,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         this.turnAudit,
       );
       if (binding !== null) {
+        const now = await TimelineStore.readDatabaseClock(tx);
         const turn = await TimelineStore.readUserTurn(
           tx,
           tenantId,
@@ -172,7 +174,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
           turn.role !== 'user' ||
           turn.channel !== 'pwa' ||
           turn.erasedAt !== null ||
-          turn.retentionUntil.getTime() <= Date.now() ||
+          turn.retentionUntil <= now ||
           turn.principalProofHash !== principal.proofHash ||
           turn.conversationId !== binding.conversationId ||
           (input.conversationId !== undefined &&
@@ -184,6 +186,25 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         )
           throw new ConflictException('user_turn_replay_conflict');
         if (binding.intentTokenHash === null) return null;
+        // Exact retained goods decision retries replay inert text before looking up
+        // a consumed/erased intent. They cannot dispatch again or replace its outcome.
+        if (
+          ['подтвердить приход', 'отклонить приход'].includes(
+            normaliseUtterance(input.utterance),
+          )
+        ) {
+          const reply = await TimelineStore.readReplyForUserTurn(
+            tx,
+            tenantId,
+            principal.proofHash,
+            binding,
+            now,
+            this.encryption,
+          );
+          if (reply === null)
+            throw new ConflictException('goods_receipt_history_unavailable');
+          return { kind: 'replay' as const, reply, userTurn: binding };
+        }
       }
       const candidates = await this.typedCandidates(
         tx,
@@ -196,10 +217,26 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
       const matched = routeUtterance(input.utterance, candidates);
       // A previously lowered widget request can never fall through to a new ordinary/model route.
       if (matched === null && binding !== null)
-        return { matched: null, userTurn: binding };
-      return matched === null ? null : { matched, userTurn: binding };
+        return { kind: 'route' as const, matched: null, userTurn: binding };
+      return matched === null
+        ? null
+        : { kind: 'route' as const, matched, userTurn: binding };
     });
     if (routed === null) return null;
+    if (routed.kind === 'replay')
+      return Object.freeze({
+        reply: routed.reply,
+        historyReplay: true as const,
+        action: Object.freeze({
+          status: 'terminate',
+          code: null,
+          stopped_at_gate: '13',
+        }),
+        userTurn: {
+          turnId: routed.userTurn.turnId,
+          conversationId: routed.userTurn.conversationId,
+        },
+      });
     if (routed.matched === null)
       return Object.freeze({
         reply: 'Этот вариант больше недоступен. Проверьте состояние карточки.',
@@ -278,6 +315,17 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
             turnId: committed.turnId,
             conversationId: committed.conversationId,
           };
+    const goodsReply =
+      matched.effect === 'COMMIT' &&
+      matched.capabilitySpace === 'AE' &&
+      matched.capabilityKey === 'crm.goods.receipt.create.v1'
+        ? goodsReceiptDecisionReply(
+            result.verdict.outcome === 'terminate' &&
+              result.verdict.route?.receipt_outcome === 'ACCEPTED'
+              ? result.verdict.route.owner_decision
+              : null,
+          )
+        : null;
     const priceReply =
       matched.effect === 'COMMIT' &&
       matched.capabilitySpace === 'AE' &&
@@ -294,7 +342,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
       reply:
         scheduleReply ??
         (code === null
-          ? (priceReply ?? 'Готово.')
+          ? (goodsReply ?? priceReply ?? 'Готово.')
           : 'Не удалось выполнить этот вариант. Откройте карточку и проверьте её состояние.'),
       action: Object.freeze({
         status: result.verdict.outcome,

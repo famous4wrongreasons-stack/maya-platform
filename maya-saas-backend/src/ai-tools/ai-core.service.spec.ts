@@ -39,6 +39,56 @@ describe('AiCoreService', () => {
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
 
+  it('a stale history replay cannot append UNKNOWN after the original request saved SUCCEEDED', async () => {
+    const mocks = createService();
+    let release!: () => void;
+    let observed!: () => void;
+    const read = new Promise<void>((resolve) => {
+      observed = resolve;
+    });
+    const wait = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let latest = 'pre-UNKNOWN';
+    const timeline = {
+      routeTypedUtterance: jest.fn().mockImplementation(async () => {
+        const reply = latest;
+        observed();
+        await wait;
+        return {
+          reply,
+          historyReplay: true,
+          userTurn: { turnId: 'turn', conversationId: 'conversation' },
+          action: { status: 'terminate', code: null, stopped_at_gate: '13' },
+        };
+      }),
+      persistAssistantReply: jest
+        .fn()
+        .mockImplementation(({ reply }: { reply: string }) => {
+          latest = reply;
+        }),
+    };
+    Object.defineProperty(mocks.service, 'moduleRef', {
+      value: { get: () => timeline },
+    });
+    const pending = mocks.service.chat(user, {
+      ...dto,
+      messages: [{ role: 'user', content: 'Подтвердить приход' }],
+    });
+    await read;
+    latest = 'SUCCEEDED exact immutable facts';
+    release();
+    const response = await pending;
+    expect(response).toMatchObject({
+      reply: 'pre-UNKNOWN',
+      user_turn: { turnId: 'turn', conversationId: 'conversation' },
+    });
+    expect(timeline.persistAssistantReply).not.toHaveBeenCalled();
+    expect(latest).toBe('SUCCEEDED exact immutable facts');
+    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
   it.each(['native', 'web'] as const)(
     'routes a %s conversation through the real schedule preview owner',
     async (surface) => {

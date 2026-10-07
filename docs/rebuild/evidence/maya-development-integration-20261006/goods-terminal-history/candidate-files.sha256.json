@@ -1,0 +1,18 @@
+{
+  "docs/rebuild/MAYA-GOODS-TERMINAL-HISTORY-CHECKPOINT-20261007.md": "1c034afecd4b4522302dce52a0cab90fee7baee1b8225e8fb2dd02e9d9128282",
+  "maya-carrier-react/test/goods-receipt-browser-probe.mjs": "e462c4f29052e4dd40e3a50e5e9212ad349f8887fbd049ddffce2473f6f584d1",
+  "maya-saas-backend/scripts/goods-ui-proof.mjs": "9b68ce8af2c9b66a70d0d8187e80cc5ebe52bed67aa35b3cdf4685d5c08bb195",
+  "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "504f724bd6fa6e9b55b9b68c0c10b48da2f66d106398513e85d4e44d0eccc92b",
+  "maya-saas-backend/src/ai-tools/ai-core.service.ts": "29713db8948c2bed794c82a4cbc25b482f2e16ce564108a62dd255b3be36b75b",
+  "maya-saas-backend/src/ai-tools/ai-typed-widget-trigger.port.ts": "f45c3025e36f1066bc6c8989befa539382143f0bd785a17b8ac4953d77b4ae0f",
+  "maya-saas-backend/src/widgets/composition/goods-typed-replay.spec.ts": "df763c55a7f6060355cb6da68409ec753196a5f6e1b4638cafe19d4a09183e7a",
+  "maya-saas-backend/src/widgets/composition/typed-step0.ts": "b017a82d09f881663024cc83984bdb9ea651d67dcdc633f4f5b1cb4b38fa5856",
+  "maya-saas-backend/src/widgets/inventory/goods-receipt-terminal.presenter.ts": "d58e6ff928fb54e20d090c34fb4ae779a0ce916294aba061e264293b236a127e",
+  "maya-saas-backend/src/widgets/lowering/gate9-lowering.architecture.spec.ts": "9c35f6448b136f07a5991952d190d9430b8c0549c377c6472bec949807238ccd",
+  "maya-saas-backend/src/widgets/owner-ports/goods-receipt-approval.adapter.ts": "70c55676d3150b6c0dc49b8fda6e4d791373b3e14cb23d7ecf36d98e31593618",
+  "maya-saas-backend/src/widgets/owner-ports/goods-receipt-history.spec.ts": "b0cdf55d0c0e3fc93700db9f21c5908a1df12705ce630afb3e0ccff7b5a02299",
+  "maya-saas-backend/src/widgets/routing/edges/approval-decision.edge.ts": "7c85c4c1575e9485e0006757d31b72849f9767d9f8fb63366cde61faa77c4a90",
+  "maya-saas-backend/src/widgets/routing/effect-router.ports.ts": "4d3f74d980265a54a11f8844004a3f9dcc5ed1d055d7259fcb77d9dd2638b0ba",
+  "maya-saas-backend/src/widgets/stores/timeline.store.ts": "d68064c99d20b7ad7e0295594329c49dc2832369077822bdc24eb37690b85f6a",
+  "maya-saas-backend/test/widgets-live/goods-ui.probe-spec.ts": "e84501c587c423b9891fe307eba7cb695d6c0e0e769f6baf574ca7be92a4d269"
+}

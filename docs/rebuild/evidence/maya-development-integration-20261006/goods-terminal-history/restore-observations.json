@@ -1,0 +1,33 @@
+{
+  "stage": "restore",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "parser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "provider": "SYNTHETIC_ADAPTER",
+  "certificate": "NOT_ISSUED",
+  "terminalRestart": {
+    "process": true,
+    "postgres": true,
+    "states": [
+      "SUCCEEDED",
+      "REJECTED",
+      "UNKNOWN"
+    ],
+    "sameExactFacts": true,
+    "canonicalExecutionsUnchanged": true,
+    "modelCalls": 0,
+    "providerReads": 0,
+    "providerWrites": 0,
+    "activeCommitCount": 0
+  },
+  "modelCalls": 0,
+  "parserCalls": 0,
+  "externalCalls": 0,
+  "sourceStates": [
+    {
+      "company": "77101",
+      "readCount": 0,
+      "contextReads": 0,
+      "writeCount": 0
+    }
+  ]
+}

@@ -32,7 +32,7 @@ const stage = process.env.JEST_GOODS_UI_STAGE;
 const receiptPath = process.env.JEST_GOODS_UI_RECEIPT!;
 const output = process.env.JEST_GOODS_UI_OUTPUT!;
 if (
-  !['prepare', 'resume'].includes(stage ?? '') ||
+  !['prepare', 'resume', 'restore'].includes(stage ?? '') ||
   !path.isAbsolute(receiptPath ?? '') ||
   !path.isAbsolute(output ?? '')
 )
@@ -459,6 +459,118 @@ describe('Goods UI and restart [synthetic model/provider, no OCR]', () => {
       },
       orderBy: { id: 'asc' },
     });
+  async function restoreTerminalHistory(pg: string) {
+    const saved = JSON.parse(readFileSync(receiptPath, 'utf8')) as {
+      tenant: TenantFixture;
+      user: UserFixture;
+      company: string;
+      resumePid: number;
+      resumePg: string;
+      resumeExecutions: Awaited<ReturnType<typeof executionRows>>;
+      terminalTexts: string[];
+    };
+    expect(process.pid).not.toBe(saved.resumePid);
+    expect(pg).not.toBe(saved.resumePg);
+    states.set(saved.company, { ...source(), cost: '999', stock: '800' });
+    const token = await http.login(
+      saved.tenant.slug,
+      saved.user.email,
+      saved.user.password,
+    );
+    const before = await executionRows(saved.tenant.id);
+    expect(before).toEqual(saved.resumeExecutions);
+    const history = await request(http.app.getHttpServer())
+      .get('/api/ai/conversation')
+      .set('Authorization', `Bearer ${token}`);
+    check(history, 200, 'terminal-history-new-process');
+    const text = (history.body as { turns: Array<{ text: string }> }).turns
+      .map((t) => t.text)
+      .join('\n');
+    for (const expected of saved.terminalTexts)
+      expect(text).toContain(expected);
+    expect(JSON.stringify(history.body)).not.toMatch(
+      /intent_token|approval_ref|photo_sha256|data:image|encryptedArguments/,
+    );
+    const checkpoints: string[] = [];
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(
+        process.execPath,
+        [
+          path.resolve(
+            '../maya-carrier-react/test/goods-receipt-browser-probe.mjs',
+          ),
+        ],
+        { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] },
+      );
+      let stderr = '';
+      let failure: Error | undefined, killTimer: NodeJS.Timeout | undefined;
+      const fail = (error: unknown) => {
+        failure ??= error instanceof Error ? error : new Error(String(error));
+        child.kill('SIGTERM');
+        killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
+      };
+      let pending = Promise.resolve();
+      const timer = setTimeout(() => {
+        fail(new Error('Terminal restore browser timed out'));
+      }, 150_000);
+      child.stderr!.on('data', (data: Buffer) => {
+        stderr += data.toString();
+      });
+      child.on('message', (raw: unknown) => {
+        pending = pending
+          .then(async () => {
+            const m = raw as { type: string; name: string };
+            if (m.type === 'ready')
+              child.send({
+                type: 'start',
+                backendOrigin: await http.listenLoopback(),
+                output: path.join(output, 'terminal-restore'),
+                ownerEmail: saved.user.email,
+                mode: 'terminal-restore',
+                loginNotBefore: Date.now() + 61_000,
+                expectedTerminalTexts: saved.terminalTexts,
+              });
+            if (m.type === 'checkpoint') {
+              expect(m.name).toBe('terminal-process-pg-restart');
+              checkpoints.push(m.name);
+              child.send({ type: 'continue:' + m.name });
+            }
+          })
+          .catch(fail);
+      });
+      child.once('error', fail);
+      child.once('close', (code) => {
+        clearTimeout(timer);
+        clearTimeout(killTimer);
+        void pending.then(
+          () =>
+            failure
+              ? reject(failure)
+              : code !== 0
+                ? reject(new Error(stderr))
+                : resolve(),
+          reject,
+        );
+      });
+    });
+    expect(checkpoints).toEqual(['terminal-process-pg-restart']);
+    expect(await executionRows(saved.tenant.id)).toEqual(before);
+    expect(states.get(saved.company)?.writeCount).toBe(0);
+    expect(states.get(saved.company)?.contextReads).toBe(0);
+    expect(states.get(saved.company)?.readCount).toBe(0);
+    expect(modelCalls).toBe(0);
+    observations.terminalRestart = {
+      process: true,
+      postgres: true,
+      states: ['SUCCEEDED', 'REJECTED', 'UNKNOWN'],
+      sameExactFacts: true,
+      canonicalExecutionsUnchanged: true,
+      modelCalls: 0,
+      providerReads: 0,
+      providerWrites: 0,
+      activeCommitCount: 0,
+    };
+  }
   it('proves exact goods UI, authority and persisted no-redispatch locally', async () => {
     const pg = (
       await db.prisma.$queryRaw<
@@ -667,7 +779,91 @@ describe('Goods UI and restart [synthetic model/provider, no OCR]', () => {
         decisions.filter((d) => state(d.body) === 'SUCCEEDED').length,
       ).toBe(rs.writeCount);
       observations.race = { status: final.status, writes: rs.writeCount };
-      const restartPending = await chat(f.token, proposal(freshHash()));
+      const typed = await setup('goods-ui-typed', '77104'),
+        ts = states.get(typed.company)!;
+      const typedOutcomes = [];
+      for (const mode of ['success', 'reject', 'unknown'] as const) {
+        const proposed = await chat(typed.token, proposal(freshHash()));
+        ts.loseReply = mode === 'unknown';
+        const beforeModel = modelCalls;
+        const typedRequest = {
+          surface: 'web',
+          audience: 'owner',
+          requestId: randomUUID(),
+          conversationId: proposed.body.user_turn.conversationId,
+          messages: [
+            {
+              role: 'user',
+              content:
+                mode === 'reject' ? 'Отклонить приход' : 'Подтвердить приход',
+            },
+          ],
+        };
+        const answer = await post(typed.token, '/api/ai/chat', typedRequest);
+        check(answer, 201, 'typed-' + mode);
+        expect(modelCalls).toBe(beforeModel);
+        const reply = (answer.body as { reply: string }).reply;
+        expect(reply).toContain(
+          mode === 'success'
+            ? 'Приход товара подтверждён в YCLIENTS.'
+            : mode === 'reject'
+              ? 'Приход отклонён.'
+              : 'Результат прихода не подтверждён.',
+        );
+        expect(reply).toContain('Количество: 2.5 флакон (код единицы 11).');
+        expect(reply).toContain('Сумма прихода: 25.625 RUB.');
+        expect(reply).not.toBe('Готово.');
+        const beforeRetry = await executionRows(typed.tenant.id);
+        const writesBeforeRetry = ts.writeCount;
+        const turnsBeforeRetry = await db.prisma.widgetTimelineTurn.count({
+          where: { tenantId: typed.tenant.id },
+        });
+        for (const eraseIntent of [false, true]) {
+          if (eraseIntent)
+            await db.prisma.widgetIntentRecord.updateMany({
+              where: { tenantId: typed.tenant.id, consumedAt: { not: null } },
+              data: { erasedAt: new Date() },
+            });
+          const retry = await post(typed.token, '/api/ai/chat', typedRequest);
+          check(retry, 201, 'typed-retry-' + mode);
+          expect((retry.body as { reply: string }).reply).toBe(reply);
+          expect(await executionRows(typed.tenant.id)).toEqual(beforeRetry);
+          expect(
+            await db.prisma.widgetTimelineTurn.count({
+              where: { tenantId: typed.tenant.id },
+            }),
+          ).toBe(turnsBeforeRetry);
+          expect(ts.writeCount).toBe(writesBeforeRetry);
+          expect(modelCalls).toBe(beforeModel);
+        }
+        const history = await request(http.app.getHttpServer())
+          .get('/api/ai/conversation')
+          .set('Authorization', `Bearer ${typed.token}`);
+        check(history, 200, 'typed-history-' + mode);
+        expect(
+          (
+            history.body as { turns: Array<{ role: string; text: string }> }
+          ).turns
+            .filter((t) => t.role === 'assistant')
+            .at(-1)?.text,
+        ).toBe(reply);
+        expect(JSON.stringify(history.body)).not.toMatch(
+          /photo_sha256|intent_token|data:image/,
+        );
+        typedOutcomes.push({
+          mode,
+          sameCanonicalHistoryText: true,
+          requestIdReplayAndErasedIntentReplay: true,
+          replayAppendedTurns: 0,
+          writes: ts.writeCount,
+        });
+      }
+      expect(ts.writeCount).toBe(2);
+      observations.typedOutcomes = typedOutcomes;
+      const restartPending = await chat(f.token, {
+        ...proposal(freshHash()),
+        quantity: '7.5',
+      });
       writeFileSync(
         receiptPath,
         JSON.stringify({
@@ -702,6 +898,8 @@ describe('Goods UI and restart [synthetic model/provider, no OCR]', () => {
         'membership-suspended',
         'concurrent-approve-reject',
       ];
+    } else if (stage === 'restore') {
+      await restoreTerminalHistory(pg);
     } else {
       const saved = JSON.parse(readFileSync(receiptPath, 'utf8')) as {
         tenant: TenantFixture;
@@ -846,6 +1044,37 @@ describe('Goods UI and restart [synthetic model/provider, no OCR]', () => {
       });
       observations.browserCheckpoints = browserCheckpoints;
       expect(browserCheckpoints).toContain('reload');
+      const terminalHistory = await request(http.app.getHttpServer())
+        .get('/api/ai/conversation')
+        .set('Authorization', `Bearer ${token}`);
+      check(terminalHistory, 200, 'terminal-history-before-restart');
+      const terminalTexts = (
+        terminalHistory.body as { turns: Array<{ role: string; text: string }> }
+      ).turns
+        .filter(
+          (t) =>
+            t.role === 'assistant' &&
+            [
+              'Приход товара подтверждён в YCLIENTS.\n',
+              'Приход отклонён. Изменений в складе по этому предложению нет.\n',
+              'Результат прихода не подтверждён. Повторная отправка остановлена; проверьте документ в YCLIENTS.\n',
+            ].some((prefix) => t.text.startsWith(prefix)),
+        )
+        .map((t) => t.text)
+        .filter((text) =>
+          text.includes('Количество: 2.5 флакон (код единицы 11).'),
+        );
+      expect(terminalTexts).toHaveLength(3);
+      writeFileSync(
+        receiptPath,
+        JSON.stringify({
+          ...saved,
+          resumePid: process.pid,
+          resumePg: pg,
+          resumeExecutions: await executionRows(saved.tenant.id),
+          terminalTexts,
+        }),
+      );
     }
     expect(externalCalls).toBe(0);
   });

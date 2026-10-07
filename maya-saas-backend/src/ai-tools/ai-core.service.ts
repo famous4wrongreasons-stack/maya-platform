@@ -556,6 +556,7 @@ export class AiCoreService {
     @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
 
+  private readonly historyReplays = new WeakSet<AiCoreChatDto>();
   private readonly persistedUserTurns = new WeakMap<
     AiCoreChatDto,
     { turnId: string; conversationId: string }
@@ -587,6 +588,7 @@ export class AiCoreService {
     const sanitized = this.sanitizeMessages(dto.messages);
     const typedWidget = await this.routeTypedWidget(user, dto);
     if (typedWidget !== null) {
+      if (typedWidget.historyReplay === true) this.historyReplays.add(dto);
       if (typedWidget.userTurn !== undefined)
         this.persistedUserTurns.set(dto, typedWidget.userTurn);
       const brain = this.brainRouter.route(
@@ -2507,7 +2509,11 @@ export class AiCoreService {
         : {}),
     };
     const userTurn = this.persistedUserTurns.get(dto);
-    if (userTurn !== undefined && this.moduleRef !== undefined) {
+    if (
+      userTurn !== undefined &&
+      this.moduleRef !== undefined &&
+      !this.historyReplays.has(dto)
+    ) {
       const timeline = this.moduleRef.get<AiTypedWidgetTriggerPort>(
         AI_TYPED_WIDGET_TRIGGER,
         { strict: false },

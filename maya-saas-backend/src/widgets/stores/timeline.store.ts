@@ -244,6 +244,55 @@ export class TimelineStore {
     );
   }
 
+  /** Bounded history-only replay. The result is text, never a live intent or authority. */
+  static async readReplyForUserTurn(
+    tx: TimelineClient,
+    tenantId: string,
+    principalProofHash: string,
+    userTurn: { turnId: string; conversationId: string },
+    now: Date,
+    encryption: ChatReplyCipher,
+  ): Promise<string | null> {
+    await TimelineStore.lockConversation(tx, tenantId, userTurn.conversationId);
+    const parent = await TimelineStore.readUserTurn(
+      tx,
+      tenantId,
+      userTurn.turnId,
+    );
+    if (
+      !parent ||
+      parent.role !== 'user' ||
+      parent.channel !== 'pwa' ||
+      parent.conversationId !== userTurn.conversationId ||
+      parent.principalProofHash !== principalProofHash ||
+      parent.erasedAt !== null ||
+      parent.retentionUntil <= now
+    )
+      return null;
+    const rows = await tx.widgetTimelineTurn.findMany({
+      where: scoped(tenantId, {
+        conversationId: userTurn.conversationId,
+        principalProofHash,
+        role: 'assistant',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+        textContent: { not: null },
+        turnIndex: { gt: parent.turnIndex },
+      }),
+      orderBy: { turnIndex: 'desc' },
+      take: 51,
+      select: { textContent: true },
+    });
+    for (const row of rows) {
+      if (!row.textContent || !isChatReply(row.textContent)) continue;
+      const completion = decodeChatCompletion(encryption, row.textContent);
+      if (completion.parentId === userTurn.turnId) return completion.text;
+    }
+    // Missing, erased, expired or beyond the bounded history window: no replay.
+    return null;
+  }
+
   static async readCurrentConversation(
     tx: TimelineClient,
     tenantId: string,

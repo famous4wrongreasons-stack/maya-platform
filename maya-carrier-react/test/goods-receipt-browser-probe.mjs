@@ -173,9 +173,33 @@ async function main() {
     } finally { clearTimeout(connectTimer); }
     report.chrome = await browser.version();
     const page = await newPage(origin);
+    if (input.mode === 'terminal-restore') {
+      assert.ok(Number.isFinite(input.loginNotBefore) && input.loginNotBefore <= Date.now() + 61_000);
+      while (Date.now() < input.loginNotBefore) await pause(Math.min(1000, input.loginNotBefore - Date.now()));
+    }
     const nextLoginAt = await login(page, input.ownerEmail);
     assert.equal(page.apiRequests('/ai/chat').length, 0, 'History restore never executes chat');
     await capture(page, 'restart-history');
+    const normalized = text => text.replace(/\s+/g,' ').trim();
+    const assertTerminals = async (texts) => {
+      assert.equal(texts.length,3);
+      for(const expected of texts) {
+        assert.ok(expected.includes('Количество: 2.5 флакон (код единицы 11).'));
+        assert.ok(expected.includes('Закупочная цена за единицу: 10.25 RUB.'));
+        assert.ok(expected.includes('Сумма прихода: 25.625 RUB.'));
+        assert.ok(await page.waitFor('document.body.innerText.replace(/\\s+/g," ").includes('+JSON.stringify(normalized(expected))+')'),'Saved exact terminal text must be visible');
+      }
+      assert.equal((await snapshot(page)).controls.filter(c=>c.tag==='BUTTON' && /^(Подтвердить приход|Отклонить приход)/.test(c.name)).length,0,'No restored goods COMMIT');
+      assert.equal(page.apiRequests('/widgets/intent').length,0,'A restore never submits');
+      assert.equal(page.apiRequests('/ai/chat').length,0,'A restore never asks the model');
+    };
+    if(input.mode==='terminal-restore') {
+      await assertTerminals(input.expectedTerminalTexts);
+      await capture(page,'terminal-process-pg-restart');
+      await checkpoint('terminal-process-pg-restart');
+      report.observations.terminalRestart={states:['SUCCEEDED','REJECTED','UNKNOWN'],exactFacts:true,activeCommitCount:0};
+    } else {
+    const terminalTexts=[];
     for (const key of ['success', 'reject', 'unknown']) {
       await checkpoint('prepare-' + key);
       const before = page.apiRequests('/ai/chat').length;
@@ -206,6 +230,8 @@ async function main() {
       assert.equal(sent.status, 200);
       const outcome = JSON.parse(await page.responseBody(sent.requestId));
       assert.equal(outcome.owner_decision?.state, {success:'SUCCEEDED',reject:'REJECTED',unknown:'UNKNOWN'}[key]);
+      assert.equal(typeof outcome.owner_decision.receipt_text,'string');
+      terminalTexts.push(outcome.owner_decision.receipt_text);
       const sentence = {success:'Приход товара подтверждён в YCLIENTS.',reject:'Приход отклонён. Изменений в складе нет.',unknown:'Результат прихода не подтверждён.'}[key];
       assert.ok(await page.waitFor('document.body.innerText.includes(' + JSON.stringify(sentence) + ')'));
       await capture(page, key + '-outcome');
@@ -225,7 +251,12 @@ async function main() {
     await until(() => page.apiRequests('/ai/conversation').filter(r=>r.finishedAt).length >= 2, 'reload history');
     assert.equal(page.apiRequests('/widgets/intent').length,beforeReload);
     assert.equal(page.apiRequests('/ai/chat').length,beforeChat);
+    for(const expected of terminalTexts) assert.ok(await page.waitFor('document.body.innerText.replace(/\\s+/g," ").includes('+JSON.stringify(normalized(expected))+')'),'Reload must restore the same canonical terminal text');
+    assert.equal((await snapshot(page)).controls.filter(c=>c.tag==='BUTTON' && /^(Подтвердить приход|Отклонить приход)/.test(c.name)).length,0);
     await capture(page,'reload'); await checkpoint('reload');
+    report.observations.terminalReload={states:['SUCCEEDED','REJECTED','UNKNOWN'],exactFacts:true,activeCommitCount:0};
+    }
+
     for (const guard of guards) { assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []); }
     for (const p of pages) assert.deepEqual(p.exceptions, [], 'No runtime exceptions');
     report.status = 'passed';

@@ -1,0 +1,86 @@
+{
+  "contract": "maya.goods-terminal-history-checkpoint/1",
+  "baseCommit": "880c45dbf2d16774fe10d0dc0923bc7cd0786c44",
+  "status": "QUALIFIED_LOCAL_PASS",
+  "certificate": "NOT_ISSUED",
+  "finalAttempt": "02",
+  "checks": {
+    "backendTests": 388,
+    "backendSuites": 11,
+    "productionTypes": "PASS",
+    "httpProbeTypes": "PASS",
+    "scopedLint": "0 errors, 2 existing warnings",
+    "generatedProfile": "PASS unchanged",
+    "generatedFloor": "PASS"
+  },
+  "processes": 3,
+  "postgresRestarts": 2,
+  "states": [
+    "SUCCEEDED",
+    "REJECTED",
+    "UNKNOWN"
+  ],
+  "terminalRestore": {
+    "exactFacts": true,
+    "activeCommitCount": 0,
+    "modelCalls": 0,
+    "providerReads": 0,
+    "providerWrites": 0,
+    "canonicalExecutionsUnchanged": true
+  },
+  "wholeProof": {
+    "scriptedModelSelections": 19,
+    "syntheticDispatches": 7,
+    "ocrCalls": 0,
+    "externalFetchCalls": 0
+  },
+  "sameRequestReplayAndErasedIntentReplay": {
+    "sameText": true,
+    "newTimelineRows": 0,
+    "dispatches": 0
+  },
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "ownedServicesStopped": true,
+  "priorAttempts": [
+    {
+      "attempt": "01",
+      "status": "failed",
+      "clusterStopped": true,
+      "reason": "Prepare/resume/terminal reload passed; third-process debug email login hit existing60second cooldown; proof now waits without bypassing limiter."
+    }
+  ],
+  "limits": [
+    "51-row bounded replay; unavailable history conflicts, no resend",
+    "Generic interrupted-history notice may remain for older incomplete turns",
+    "No provider permission semantics or paid model qualification solved"
+  ],
+  "excluded": "No private restart receipt, password, OTP, bearer token, request bodies, database or photo archived.",
+  "independentReview": "Code and actual proof evidence reviewed read-only; no remaining blocker. Source hash archive checked separately by implementing agent.",
+  "observedApproveRejectRace": "reject-wins; zero dispatch",
+  "files": {
+    "browser/browser.json": "547752a3a92c252a935837e627b5b391e2977581708c3161e1d4eea6ab5ed97c",
+    "browser/reload.png": "c68d1bfa81d8b0fa3edbc93cc5697ad3abe69b8cca23536a509de1c3771d8766",
+    "candidate-files.sha256.json": "4a9c2136e2e85e21cda910a9d319893d01e046b6ae2e68f757b948b545432fbc",
+    "checks/backend-unit.log": "782e2f2dc3a7d9c7373c65045d9f0d1f58148f792732841591fc7b97b20a6138",
+    "checks/floor-check.log": "ff22c52034ae9e86eda0b55b91ed18f2f8a6b60824e063e78e93efb268a4a066",
+    "checks/http-probe-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/lint.log": "ea49a55a29d185d97391d6eec39969a34673ed08e2f543d024bd28141f037184",
+    "checks/production-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checks/profile-check.log": "5d7657ab94677198160fe7de50fed9736ea58e81e77ebd3cd0a7b147fcda0d6c",
+    "har13-diagnostic-placement.log": "b90a7557fad6e1d310a4f92918aea78bebe81659fd80f4f2406de7476a658902",
+    "independent-review.txt": "39fde88aa53512620b51603809c885dbf90219a3fc0eac992cf520be6488c1ae",
+    "manifest.json": "b190421dc250c3f01ce1de184fd2422d441541cc3c4db71795f1a93e425c9fa6",
+    "prepare-observations.json": "ae0ce0638207675cb9e4b0f453b77c94777a18b9ed327ccc4257fa10c8dd838c",
+    "prepare.log": "3a5207da576a7c07522fbd739880a703bc84f67fb6e2f7de0e0da8447ba99d2b",
+    "react-build.log": "fee268689a7fbea1a3743a26160bbb2363bd40d8f060e3b2e956f1adafcddc17",
+    "react-served-assets.sha256.json": "15c82609f3282f8cb4d9f6461f1c09dc4b7357e2a115c5a1358cf7087d3bdc20",
+    "restore-observations.json": "6342e18941319cb1edc0a2caa3b58e71eb9f7fb48fca2af9f070b2316093aa0e",
+    "restore.log": "0017a1434f451ebaff6d89786597805f315be16b76ac6afd8d06edc6027dbc93",
+    "resume-observations.json": "f806918e2ef3813f474c285a2f48a17f034fed1f284570f4b09d201465d19227",
+    "resume.log": "23587940ccddff107a41a4423a28846c027007eb57d58770dfbb2becdd4e1b9a",
+    "shell-build.log": "473c73931b305ace7558b9a76d8541c8bdabab5d336fffb5b2ee6a3984ea81a5",
+    "terminal-restore/browser.json": "36c644218e5dce94e75cf6dc13c6c7b6113bfcb13056cc153d653399d3532c19",
+    "terminal-restore/terminal-process-pg-restart.png": "c68d1bfa81d8b0fa3edbc93cc5697ad3abe69b8cca23536a509de1c3771d8766"
+  }
+}

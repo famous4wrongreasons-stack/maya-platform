@@ -6,6 +6,8 @@ export const AI_TYPED_WIDGET_TRIGGER = 'AI_TYPED_WIDGET_TRIGGER';
 
 export interface AiTypedWidgetResult {
   readonly reply: string;
+  /** Server-owned history replay: return text without appending another completion. */
+  readonly historyReplay?: true;
   readonly userTurn?: {
     readonly turnId: string;
     readonly conversationId: string;

@@ -1,0 +1,48 @@
+{
+  "stage": "resume",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "parser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "provider": "SYNTHETIC_ADAPTER",
+  "certificate": "NOT_ISSUED",
+  "persistedExecutionStates": [
+    {
+      "id": "5d5ac082-673e-480f-8576-d8967a46b9a4",
+      "sourceRef": "goods-photo:6a1bd192dc30ea977dfcbaae7438f8ffcef0e6f3bbdc3cb7c1281121bc6eedf7:cmuy11lol000zmxc90zxt7uxb",
+      "state": "UNKNOWN",
+      "executionAttemptCount": 1
+    },
+    {
+      "id": "bbf36b98-fe10-4d6b-b35a-5825c6a8525c",
+      "sourceRef": "goods-photo:8b9950c9d16b428c60a2abfc599a64f448c187aa892d1efe0a5923a67bddc02d:cmuy11l3w000hmxc9uy1nvwtd",
+      "state": "SUCCEEDED",
+      "executionAttemptCount": 1
+    }
+  ],
+  "restart": {
+    "process": true,
+    "postgres": true,
+    "successResends": 0,
+    "unknownResends": 0,
+    "pendingWrites": 1
+  },
+  "browserCheckpoints": [
+    "prepare-success",
+    "success",
+    "prepare-reject",
+    "reject",
+    "prepare-unknown",
+    "unknown",
+    "reload"
+  ],
+  "modelCalls": 3,
+  "parserCalls": 0,
+  "externalCalls": 0,
+  "sourceStates": [
+    {
+      "company": "77101",
+      "readCount": 0,
+      "contextReads": 18,
+      "writeCount": 3
+    }
+  ]
+}

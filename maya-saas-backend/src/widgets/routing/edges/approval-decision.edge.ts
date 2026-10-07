@@ -11,7 +11,16 @@ export const approvalDecisionDestination = (
   owner: ApprovalRequestOwnerPort,
 ): (() => Promise<EffectRouteOutcome>) | null => {
   const input = actuatingInputOf(ctx, nouns);
-  return input === null ? null : () => owner.decide(input);
+  return input === null
+    ? null
+    : () =>
+        owner.decide({
+          ...input,
+          ...(input.routing.record.capabilityKey ===
+            'crm.goods.receipt.create.v1' && ctx.facts.loweredTurn
+            ? { goodsHistoryTurn: ctx.facts.loweredTurn }
+            : {}),
+        });
 };
 
 export const approvalPairClaimOf = (

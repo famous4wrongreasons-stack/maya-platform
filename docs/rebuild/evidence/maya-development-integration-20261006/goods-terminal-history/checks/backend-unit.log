@@ -1,0 +1,6 @@
+
+Test Suites: 11 passed, 11 total
+Tests:       388 passed, 388 total
+Snapshots:   0 total
+Time:        41.592 s
+Ran all test suites within paths "src/widgets/composition/goods-typed-replay.spec.ts", "src/widgets/composition/typed-step0.spec.ts", "src/widgets/stores/timeline.store.spec.ts", "src/widgets/owner-ports/goods-receipt-history.spec.ts", "src/widgets/lowering/gate9-lowering.architecture.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts", "src/widgets/projection/projector-fences.architecture.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts", "src/widgets/gates/gate-antecedents.inv30.spec.ts", "src/ai-tools/ai-core.service.spec.ts".

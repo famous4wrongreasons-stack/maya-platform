@@ -87,6 +87,8 @@ try {
   await stage('prepare');
   await run('pg-restart', pg('pg_ctl'), [...pgArgs, '-m', 'fast', 'restart']);
   await stage('resume');
+  await run('pg-restart-terminal', pg('pg_ctl'), [...pgArgs, '-m', 'fast', 'restart']);
+  await stage('restore');
   manifest.status = 'passed';
 } catch (e) { manifest.status = 'failed'; throw e; }
 finally {

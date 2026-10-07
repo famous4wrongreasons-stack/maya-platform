@@ -149,6 +149,12 @@ export interface HandoffSignerPort {
 }
 
 export interface ActuatingRoutingInput {
+  /** Existing Gate 9 turn, only for the exact goods terminal transcript sink.
+   * Correlation only; never a normalized effect input, policy grant or AE identity. */
+  readonly goodsHistoryTurn?: {
+    readonly turnId: string;
+    readonly conversationId: string;
+  };
   /** Non-authority quote precondition read from the live audit-retained draft ref. */
   readonly expectedBookingFactsHash?: string;
   readonly routing: RoutingInput;

@@ -5,7 +5,11 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { PRINCIPAL_RESOLVER } from '../di-tokens';
+import { goodsReceiptTerminalText } from '../inventory/goods-receipt-terminal.presenter';
+import type { ChatReplyCipher } from './chat-reply-cipher.port';
+import { sha256Hex } from '../token.util';
+import { stableActionJson } from '../authority/contract-bindings';
+import { CHAT_REPLY_CIPHER, PRINCIPAL_RESOLVER } from '../di-tokens';
 import type { PrincipalResolver } from '../authority/principal-view';
 import { EntitlementsService } from '../../entitlements/entitlements.service';
 import { AiToolRuntimeService } from '../../ai-tools/ai-tool-runtime.service';
@@ -52,6 +56,7 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
     private readonly prisma: PrismaService,
     private readonly entitlements: EntitlementsService,
     @Inject(PRINCIPAL_RESOLVER) private readonly principals: PrincipalResolver,
+    @Inject(CHAT_REPLY_CIPHER) private readonly encryption: ChatReplyCipher,
   ) {}
 
   private async actor(input: NounActor): Promise<AuthenticatedUser> {
@@ -178,6 +183,56 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
     }
   }
 
+  /** An encrypted historical reply, not an envelope or permission to execute again. */
+  private async recordTerminal(
+    input: ActuatingRoutingInput,
+    source: Awaited<ReturnType<GoodsReceiptApprovalAdapter['read']>>,
+    outcome: EffectRouteOutcome,
+  ): Promise<EffectRouteOutcome> {
+    const turn = input.goodsHistoryTurn;
+    if (!turn || turn.conversationId !== source.origin.conversationId)
+      throw new ConflictException('goods_receipt_history_scope_mismatch');
+    const decision = record(outcome.ownerDecision);
+    const state = decision.state;
+    if (state !== 'SUCCEEDED' && state !== 'REJECTED' && state !== 'UNKNOWN')
+      throw new ConflictException('goods_receipt_history_outcome_invalid');
+    const reply = goodsReceiptTerminalText(source.facts, state);
+    const completionHash = sha256Hex(
+      stableActionJson([
+        'maya.goods-receipt-terminal/1',
+        source.id,
+        source.payloadHash,
+        input.routing.record.approvalDecision,
+        reply,
+      ]),
+    );
+    await this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        !principal ||
+        principal.authority.kind !== 'USER' ||
+        principal.authority.tenantId !== input.routing.tenantId ||
+        principal.authority.userId !== input.actorUserId ||
+        principal.proofHash !== input.principal.proofHash
+      )
+        throw new ForbiddenException('goods_receipt_history_principal_changed');
+      const now = await TimelineStore.readDatabaseClock(tx);
+      await TimelineStore.persistChatReply(
+        tx,
+        {
+          tenantId: input.routing.tenantId,
+          principalProofHash: principal.proofHash,
+          userTurn: turn,
+          reply,
+          completionHash,
+        },
+        now,
+        this.encryption,
+      );
+    });
+    return { ...outcome, ownerDecision: { ...decision, receipt_text: reply } };
+  }
+
   async decide(input: ActuatingRoutingInput): Promise<EffectRouteOutcome> {
     const r = input.routing.record;
     const ref = input.resolvedNouns.values.get('approval');
@@ -186,6 +241,7 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
       r.widgetKind !== 'APPROVAL' ||
       r.capabilitySpace !== 'AE' ||
       r.capabilityKey !== GOODS_RECEIPT_CAPABILITY ||
+      !input.goodsHistoryTurn ||
       r.confirmationOfKind !== 'approval' ||
       !parsed ||
       r.confirmationOfRef !== parsed.id ||
@@ -199,14 +255,36 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
       userId: input.actorUserId,
     };
     let submitted = false;
+    let source:
+      Awaited<ReturnType<GoodsReceiptApprovalAdapter['read']>> | undefined;
+    let outcome: EffectRouteOutcome;
+    const unconfirmed: EffectRouteOutcome = {
+      receiptOutcome: 'ACCEPTED',
+      refusalCode: null,
+      actionReceiptRef: null,
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: {
+        decision: null,
+        requested_decision: r.approvalDecision,
+        state: 'UNKNOWN',
+        status: 'UNKNOWN',
+        reconciliation: 'required',
+      },
+      gate14RefusalReason: null,
+    };
     try {
-      const source = await this.read(
+      source = await this.read(
         actorInput,
         ref!,
         input.principal.proofHash,
         false,
       );
       const actor = await this.actor(actorInput);
+      // A crash before dispatch must already leave an honest, inert outcome.
+      // The catch uses this identical completion identity; it cannot supersede a
+      // final row whose database acknowledgement was lost.
+      await this.recordTerminal(input, source, unconfirmed);
       submitted = true;
       const value = record(
         r.approvalDecision === 'approve'
@@ -227,6 +305,7 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
             }),
       );
       const result = record(value.result);
+      const expectedFacts = source.facts;
       const verifiedExecution =
         await this.runtime.verifyGoodsReceiptWidgetExecution(
           actor,
@@ -255,8 +334,8 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
           'line_total',
           'currency',
           'received_at',
-        ].every((key) => result[key] === source.facts[key]);
-      return {
+        ].every((key) => result[key] === expectedFacts[key]);
+      outcome = {
         receiptOutcome: 'ACCEPTED',
         refusalCode: null,
         actionReceiptRef:
@@ -279,29 +358,12 @@ export class GoodsReceiptApprovalAdapter implements GoodsReceiptApprovalOwnerPor
             : {}),
         },
       };
-    } catch (error) {
-      const response =
-        error instanceof HttpException ? record(error.getResponse()) : {};
-      if (
-        submitted ||
-        record(response.error).code === 'ai_tool_outcome_unknown'
-      )
-        return {
-          receiptOutcome: 'ACCEPTED',
-          refusalCode: null,
-          actionReceiptRef: null,
-          nextEnvelope: null,
-          resolvedWidget: null,
-          ownerDecision: {
-            decision: null,
-            requested_decision: r.approvalDecision,
-            state: 'UNKNOWN',
-            status: 'UNKNOWN',
-            reconciliation: 'required',
-          },
-          gate14RefusalReason: null,
-        };
-      return refused();
+    } catch {
+      if (!submitted || !source) return refused();
+      outcome = unconfirmed;
     }
+    // Deliberately outside the effect catch: a failed/ambiguous final history
+    // write must not append a new UNKNOWN, or let typed chat replace CONFIRMED.
+    return this.recordTerminal(input, source, outcome);
   }
 }
