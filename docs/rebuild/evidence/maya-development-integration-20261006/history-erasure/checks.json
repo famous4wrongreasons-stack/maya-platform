@@ -1,0 +1,59 @@
+{
+  "contract": "maya.history-erasure-lightweight-checks/1",
+  "codeCommit": "51f420084fef4185f4870a95994a311a0b9bb1b9",
+  "unit": {
+    "tests": 45,
+    "suites": 2,
+    "status": "PASS",
+    "result": "unit-final.json",
+    "command": "node --max-old-space-size=768 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/widgets/consent/erasure.job.spec.ts src/widgets/consent/consent.spec.ts --json --outputFile=/tmp/maya-erasure-unit-20261007-final.json"
+  },
+  "schemaUnit": {
+    "tests": 9,
+    "suites": 2,
+    "status": "PASS",
+    "result": "schema-unit.json",
+    "command": "node --max-old-space-size=512 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/widgets/i-mig2.schema.spec.ts src/widgets/i-mig3.schema.spec.ts --json --outputFile=/tmp/maya-erasure-schema-unit-20261007.json"
+  },
+  "firstAttempt": {
+    "status": "FAIL",
+    "passed": 43,
+    "failed": 2,
+    "result": "unit-attempt-1-failed.json",
+    "sourceBinding": "pre-final working diff; not relabeled as final code",
+    "reason": "Stale existing AE/tool registry counts: expected227/49, observed228/51 after integrated goods lane. Exact counts corrected, consent3/identity6 unchanged."
+  },
+  "eslint": {
+    "status": "INCOMPLETE_OOM",
+    "exitCode": 134,
+    "heapLimitMiB": 512,
+    "toolSessionId": 64319,
+    "command": "node --max-old-space-size=512 node_modules/eslint/bin/eslint.js src/widgets/consent/erasure.job.ts src/widgets/consent/erasure.job.spec.ts src/widgets/consent/consent.spec.ts test/widgets-live/erasure-ordering.live-spec.ts",
+    "error": "FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory",
+    "rawOutput": "tool transcript; not captured to a separate raw file",
+    "retryCount": 0
+  },
+  "format": {
+    "status": "PASS",
+    "scope": "four changed code/test files, Prettier; git diff --check"
+  },
+  "notRun": [
+    "typecheck",
+    "build",
+    "HTTP",
+    "PostgreSQL",
+    "browser",
+    "YCLIENTS",
+    "model",
+    "production",
+    "website"
+  ],
+  "effects": {
+    "realUserDataErased": false,
+    "erasureRouteEnabled": false,
+    "schemaChanged": false,
+    "newAuthority": false,
+    "ownedServerResourcesStarted": false
+  },
+  "scope": "Dark kernel correction only; PG fixtures authored but unexecuted, no RT8 closure."
+}

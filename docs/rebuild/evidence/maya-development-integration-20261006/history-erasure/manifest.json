@@ -1,0 +1,103 @@
+{
+  "contract": "maya.history-erasure-lightweight-evidence/1",
+  "baseCommit": "d418e253eb918341f212a4c31a29a698de915b5c",
+  "codeCommit": "51f420084fef4185f4870a95994a311a0b9bb1b9",
+  "sourceBindingScope": "Selected changed and supporting source files, not a full dependency closure or release manifest",
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/widgets/consent/erasure.job.ts",
+      "sha256": "efe497c59bd11192058140c46183f51daf0040c4183f0b064d9dcbc5e946419f",
+      "gitBlob": "83022f879c5227c9f4c021c40a0fb5020a26951d"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/consent/erasure.job.spec.ts",
+      "sha256": "b65bfd38d3f7fe69473e005ebaf5b09f74e78d334bc6c4e1358f8ab3d8f50fde",
+      "gitBlob": "587c92f91b7521a48ab0e5b6a5612f1f054ad837"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/consent/consent.spec.ts",
+      "sha256": "c1b0b02867506a05a9bc6ed41b0d4c652bef018e4a5508f5d377f90ed396adfb",
+      "gitBlob": "32c0aada5e01c4fe177ba2ce9bb3ca3e6aa4952f"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/erasure-ordering.live-spec.ts",
+      "sha256": "b83bb06cb05fe5f073b6ae8e25ca2b4946153193f87bac9c8280cf5b4b2c1f40",
+      "gitBlob": "443a276fda2c63ed21848008d4e1a4ca6cffda73"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/consent/erasure.ts",
+      "sha256": "bd4814d69dc19384ac960ac0d6412db7f3cd0ebccc38f2830fa6b9016ff925d4",
+      "gitBlob": "f08a5e5a42c9704f919c1e90ed9f89c74d365308"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/consent/data-subject-acts.ts",
+      "sha256": "4abc230197c12fd9050dc829fa9c3995f209f42c8806726ab8d1c7550b8ffa61",
+      "gitBlob": "bcd55989e922513f7c776ca57f30b971764bf93a"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/stores/timeline.store.ts",
+      "sha256": "8953f558462873fea6ff59c6ca79435e024b314e71fb725ca952e94afcb5271a",
+      "gitBlob": "39753fca414e6d186b8b91be57f3b62e7137bec2"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/widgets.module.ts",
+      "sha256": "f682d7196df777ea7c5b0c024d07a69015e04873d0006b11c4a5f624f49e680a",
+      "gitBlob": "6715d6fa7a87870e8f22f4e19c13239c1eda3020"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977",
+      "gitBlob": "c1ba8524340bb78fb5546c61395c8b40db909160"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/i-mig2.schema.spec.ts",
+      "sha256": "b77af0939afbb42b51c4cc3bdee6802fc77a49f3318e48f6c1104defc67df0b5",
+      "gitBlob": "c5a5c823b61c38ce47d703f62cc459e853150147"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/i-mig3.schema.spec.ts",
+      "sha256": "de3d6c60f378c1b29798b926c426ad277e8876328a952b68e4b187317641fa4f",
+      "gitBlob": "df54b0b1aec4f1c1b4184c939dee1b7f01a266da"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "checks.json",
+      "bytes": 2299,
+      "sha256": "3b8eee63baacd11eab0cb9a9256999fc9b0b9eb2183ea0b6fda291e793a02601"
+    },
+    {
+      "path": "independent-review.md",
+      "bytes": 880,
+      "sha256": "3e27483aa4b0543585d7a35198ffbd275e473eecab4e957b267cea35dd91c0ac"
+    },
+    {
+      "path": "local-process-check.json",
+      "bytes": 2106,
+      "sha256": "e6fdeb68af7823950a986efcfe81b1bbc12cf9f8f5ee3d99fa3746c120749322"
+    },
+    {
+      "path": "metadata-action-rejected.json",
+      "bytes": 4366,
+      "sha256": "a9717018c57646bf24e14b925295ac8cc907fb99c50f79b46a29f481ff1a2d97"
+    },
+    {
+      "path": "schema-unit.json",
+      "bytes": 4909,
+      "sha256": "994ef46ebce75021967fdaa6a45af9940510dc39f3678cbb9699db8e6f286e65"
+    },
+    {
+      "path": "unit-attempt-1-failed.json",
+      "bytes": 79466,
+      "sha256": "9051a0956585832a817c4430f388d6663611efe93de161f9a015d839f1eaa2ab"
+    },
+    {
+      "path": "unit-final.json",
+      "bytes": 21519,
+      "sha256": "0b3494923ce9c8d33daed100533476e94213b3ef221766b613622de9440acb21"
+    }
+  ],
+  "httpActivation": false,
+  "pgExecution": false,
+  "modelAcceptance": false
+}

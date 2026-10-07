@@ -1,0 +1,73 @@
+{
+  "contract": "maya.local-process-names-observation/1",
+  "purpose": "Parent coordination request: check only local process names/elapsed for design build/preview/browser; do not stop anything or read private sessions.",
+  "readCommand": [
+    "/bin/ps",
+    "-axo",
+    "etime=,comm="
+  ],
+  "fieldsExposed": [
+    "basename(comm)",
+    "etime"
+  ],
+  "scope": "Filtered names matching node/postgres/chrom/playwright/esbuild/vite/webpack/jest/WebKit/Safari/tsc/npm/pnpm.",
+  "execution": {
+    "initialSandboxAttempt": "PermissionError: Operation not permitted: /bin/ps",
+    "sameCommandEscalatedAttempt": "PASS; read-only action approved",
+    "processesStopped": 0,
+    "argumentsRead": false,
+    "cwdRead": false,
+    "environmentsRead": false,
+    "privateSessionsRead": false
+  },
+  "selectedObservationsFromToolOutput": [
+    {
+      "name": "node",
+      "elapsed": "04:42",
+      "count": 1
+    },
+    {
+      "name": "node + node + node_repl",
+      "elapsed": "11:27",
+      "groups": 1
+    },
+    {
+      "name": "node + node + node_repl",
+      "elapsed": "13:55",
+      "groups": 1
+    },
+    {
+      "name": "node + node + node_repl",
+      "elapsed": "16:41",
+      "groups": 1
+    },
+    {
+      "name": "node + node + node_repl",
+      "elapsed": "32:44",
+      "groups": 1
+    },
+    {
+      "name": "node + node + node_repl",
+      "elapsed": "50:30",
+      "groups": 1
+    },
+    {
+      "name": "Google Chrome Helper (Renderer)",
+      "youngestObservedElapsed": "02:48:10"
+    },
+    {
+      "name": "postgres",
+      "youngestObservedElapsed": "02-09:27:08"
+    }
+  ],
+  "notObservedAsDistinctProcessNames": [
+    "vite",
+    "esbuild",
+    "jest",
+    "playwright",
+    "chromium",
+    "chrome-headless-shell"
+  ],
+  "conclusion": "No identifiable newly launched build/preview/headless-browser under those names. Node processes exist. Names and elapsed alone neither attribute Node/Chrome to the design worktree nor prove absence of load or that the heavy slot is free.",
+  "rawOutput": "tool transcript; selected metadata transcribed here, not a complete process inventory"
+}

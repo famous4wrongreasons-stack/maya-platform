@@ -1,0 +1,40 @@
+{
+  "contract": "maya.rejected-metadata-action/1",
+  "date": "2026-10-07",
+  "invocation": {
+    "tool": "functions.exec -> tools.exec_command",
+    "arguments": {
+      "cmd": "python3 - <<'PY'\nimport hashlib, json, os, pathlib, shlex, signal, subprocess, time\nsource=pathlib.Path('scripts/conversation-qualification/diagnostic-readonly-inventory.py').read_bytes()\npin='1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace'\nassert hashlib.sha256(source).hexdigest()==pin\nflags=['-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','UpdateHostKeys=no','-o','ConnectTimeout=8','-o','ConnectionAttempts=1']\nproxy=['ssh','-i',os.path.expanduser('~/.ssh/beget_deploy'),*flags,'-W','%h:%p','mocine3388@prime.beget.com']\ncmd=['ssh','-i',os.path.expanduser('~/.ssh/yandex_bot'),*flags,'-o','ProxyCommand='+shlex.join(proxy),'botadmin@api.mayaos.ru','python3 - --collect']\nroot=pathlib.Path('/tmp/maya-diagnostic-inventory-20261007')\nroot.mkdir(mode=0o700,exist_ok=True)\nstart=time.time()\np=subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)\ntry:\n    out,err=p.communicate(source,timeout=620)\n    status='completed'\nexcept subprocess.TimeoutExpired:\n    os.killpg(p.pid,signal.SIGTERM)\n    try: out,err=p.communicate(timeout=3)\n    except subprocess.TimeoutExpired:\n        os.killpg(p.pid,signal.SIGKILL)\n        out,err=p.communicate()\n    status='timeout'\n(root/'stdout.json').write_bytes(out)\n(root/'ssh-stderr.txt').write_bytes(err)\nreceipt={'status':status,'exitCode':p.returncode,'seconds':round(time.time()-start,3),'collectorSha256':pin,'target':'botadmin@api.mayaos.ru','remoteCommand':'python3 - --collect','stdoutBytes':len(out),'stderrBytes':len(err),'evidenceDirectory':str(root)}\n(root/'transport-receipt.json').write_text(json.dumps(receipt,indent=2)+'\\n')\nprint(json.dumps(receipt))\nPY",
+      "workdir": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "sandbox_permissions": "require_escalated",
+      "justification": "Выполнить ограниченный read-only metadata collector через существующий SSH-доступ к api.mayaos.ru: три исторические proof units, без sudo, чтения содержимого секретов, изменений сервисов или платных вызовов?",
+      "yield_time_ms": 1000,
+      "max_output_tokens": 1300
+    }
+  },
+  "result": {
+    "status": "REJECTED_BEFORE_PROCESS_CREATION",
+    "toolError": "CreateProcess: Rejected",
+    "reason": "This performs an unapproved SSH access to a private server and collects potentially sensitive infrastructure metadata; the user authorized the development task but not this exact remote inventory action.",
+    "prohibition": "Do not bypass this rejection through a workaround or indirect execution.",
+    "remoteExecution": false,
+    "collectorOutputProduced": false,
+    "retryCount": 0
+  },
+  "pendingApproval": {
+    "tool": "functions.request_user_input_async",
+    "question": "Разрешаете один read-only SSH inventory на botadmin@api.mayaos.ru через существующий доступ: максимум 10 минут, $0, только metadata трёх исторических proof-сервисов, версий, ресурсов и максимум 16 путей? Без sudo, содержимого секретов/конфигураций, изменений сайта или сервисов и без model/YCLIENTS calls. Автоматическая проверка отклонила запуск: она требует разрешения именно на удалённую инвентаризацию и считает инфраструктурные metadata потенциально чувствительными.",
+    "answer": null
+  },
+  "priorStatusCorrection": "Before this invocation no SSH/--collect had been attempted and no reviewer rejection existed. The earlier awaiting-owner note described a conservative workflow pause, not a technical denial.",
+  "authorityNotIncluded": [
+    "setup",
+    "credentials admission",
+    "service users",
+    "permission changes",
+    "service changes",
+    "paid calls",
+    "initial Client binding",
+    "C10 machine authority"
+  ]
+}
