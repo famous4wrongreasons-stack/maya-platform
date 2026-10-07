@@ -1,0 +1,23 @@
+{
+  "contract": "maya.c9-occupancy-owned-cluster/1",
+  "database": "maya_widget_gate_proof_c9occ_56b9b91a2e9d",
+  "port": 58556,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-c9occ-Yyvk9f/pg",
+  "mode": "browser",
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "clusterStopped": true
+}

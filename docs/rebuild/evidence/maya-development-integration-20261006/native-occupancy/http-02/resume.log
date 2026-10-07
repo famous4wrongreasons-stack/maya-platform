@@ -1,0 +1,39 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_1a8ec71cb153 on 127.0.0.1:59203 (local)
+[31m[Nest] 82347  - [39m10/07/2026, 7:40:55 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 82347  - [39m10/07/2026, 7:40:55 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/c9-occupancy-restart.probe-spec.ts
+  explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]
+    ✕ persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority (2226 ms)
+
+  ● explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model] › persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority
+
+    assert.strictEqual(received, expected)
+
+    Expected value to strictly be equal to:
+      200
+    Received:
+      409
+
+    Message:
+      {"message":"AI tool execution cannot be completed.","error":{"code":"ai_tool_availability_source_changed"}}
+
+    409 !== 200
+
+      55 |     profile_id: 'pwa.default',
+      56 |   });
+    > 57 |   assert.equal(response.status, 200, JSON.stringify(response.body));
+         |          ^
+      58 |   return object(response.body);
+      59 | }
+      60 | export async function startBooking(fx: Fixtures, http: HttpHarness) {
+
+      at submit (widgets-live/support/release-booking-flow.ts:57:10)
+      at cancelledSlotAdmission (widgets-live/c9-occupancy-restart.probe-spec.ts:415:20)
+      at Object.<anonymous> (widgets-live/c9-occupancy-restart.probe-spec.ts:1313:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        3.139 s
+Ran all test suites within paths "test/widgets-live/c9-occupancy-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-native-http-20261007-02/resume-jest.json

@@ -1,0 +1,31 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_dbabbfbdf54e on 127.0.0.1:59415 (local)
+[31m[Nest] 83360  - [39m10/07/2026, 7:42:37 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 83360  - [39m10/07/2026, 7:42:37 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/c9-occupancy-restart.probe-spec.ts
+  explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]
+    ✕ persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority (2016 ms)
+
+  ● explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model] › persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "EXPIRED"
+    Received: "expired"
+
+      457 |         firstSlot(slot).slot_ref,
+      458 |       );
+    > 459 |       expect(denied.outcome).toBe('EXPIRED');
+          |                              ^
+      460 |       expect(
+      461 |         await db.prisma.widgetEmission.count({
+      462 |           where: { tenantId: s.tenant.id, kind: 'BOOKING_CONFIRMATION' },
+
+      at cancelledSlotAdmission (widgets-live/c9-occupancy-restart.probe-spec.ts:459:30)
+      at Object.<anonymous> (widgets-live/c9-occupancy-restart.probe-spec.ts:1326:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        2.871 s
+Ran all test suites within paths "test/widgets-live/c9-occupancy-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-native-http-20261007-03/resume-jest.json

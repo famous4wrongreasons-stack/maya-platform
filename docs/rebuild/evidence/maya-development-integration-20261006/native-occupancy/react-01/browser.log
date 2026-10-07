@@ -1,0 +1,40 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_420fc0240395 on 127.0.0.1:58007 (local)
+[31m[Nest] 76011  - [39m10/07/2026, 7:29:03 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 76011  - [39m10/07/2026, 7:29:03 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/c9-occupancy-restart.probe-spec.ts (80.451 s)
+  explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]
+    ✕ persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority (78386 ms)
+
+  ● explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model] › persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority
+
+    Browser child exited 1: Expected values to be strictly deep-equal:
+    + actual - expected
+
+    + [
+    +   {
+    +     method: 'POST',
+    +     path: '/api/widgets/resolve'
+    +   },
+    +   {
+    +     method: 'POST',
+    +     path: '/api/widgets/resolve'
+    +   }
+    + ]
+    - []
+
+      895 |           if (failure) reject(failure);
+      896 |           else if (code !== 0)
+    > 897 |             reject(new Error(`Browser child exited ${code}: ${stderr}`));
+          |                    ^
+      898 |           else resolve();
+      899 |         });
+      900 |       });
+
+      at widgets-live/c9-occupancy-restart.probe-spec.ts:897:20
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        80.471 s
+Ran all test suites within paths "test/widgets-live/c9-occupancy-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-native-react-20261007-01/browser-jest.json

@@ -1,0 +1,1613 @@
+{
+  "contract": "maya.explicit-occupancy-http-pg-proof/1",
+  "stage": "prepare",
+  "pid": 82285,
+  "postgresStarted": "2026-10-07 19:40:49.593124+00",
+  "database": "maya_widget_gate_proof_c9occ_1a8ec71cb153",
+  "syntheticCrmAdapter": false,
+  "nativeYclientsAdapter": true,
+  "syntheticProviderTransport": true,
+  "tenantTimezone": "UTC",
+  "selectedBranchTimezone": "Europe/Moscow",
+  "c10AutonomousAdmission": false,
+  "c6ShadowAdmission": false,
+  "c7Measurement": "existing execution_funnel live read, no stored revision",
+  "c9Initiator": "explicit authenticated owner chat only",
+  "externalProviderAcceptance": false,
+  "providerReadCalls": 6,
+  "providerWriteCalls": 0,
+  "modelCalls": 0,
+  "browserAcceptance": false,
+  "observations": {
+    "same_event_repeat": {
+      "lifecycle": {
+        "status": "ran",
+        "completeness": "complete",
+        "detectedNow": 1,
+        "durableActiveBefore": 1,
+        "resolved": 0,
+        "expired": 0,
+        "superseded": 0,
+        "durableActiveAfter": 1,
+        "currentTasks": 1,
+        "staleTasks": 0,
+        "duplicateAttemptsCollapsed": 1,
+        "actionIntentsProposed": 1,
+        "actionIntentsExecuted": 0,
+        "externalSideEffects": 0
+      },
+      "opportunity": {
+        "id": "4b76b2e9-d168-4cf2-adab-374fd8542958",
+        "revision": 1,
+        "status": "active",
+        "terminalAt": null,
+        "terminalReasonCode": null,
+        "terminalEvidenceFingerprint": null
+      },
+      "task": {
+        "id": "1df1300c-8961-46ba-bf4b-f2860248b7b0",
+        "status": "current",
+        "autonomy": "L2_5_SHADOW"
+      },
+      "c9RunsBefore": 0,
+      "c9RunsAfter": 0,
+      "sourceReadCalls": 2,
+      "actionExecutions": 0
+    },
+    "c7_detected": {
+      "contract": "c7.measurement.read/1",
+      "mode": "live",
+      "revisionId": null,
+      "snapshotHash": null,
+      "revision": null,
+      "expiresAt": null,
+      "kind": "execution_funnel",
+      "subject": {
+        "clientId": null,
+        "appointmentId": null,
+        "staffId": null,
+        "branchId": null
+      },
+      "rule": {
+        "key": "c7.execution-funnel",
+        "version": 1
+      },
+      "asOf": "2026-10-07T19:40:53.302Z",
+      "period": {
+        "from": "2026-09-30T19:40:53.289Z",
+        "toExclusive": "2026-10-08T19:40:53.289Z",
+        "timezone": "UTC"
+      },
+      "completeness": "PARTIAL",
+      "qualification": "SOURCE_LABELLED",
+      "attribution": "NOT_APPLICABLE",
+      "metrics": [
+        {
+          "key": "opportunity_revision_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "opportunity_first_detected_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "opportunity_logical_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_semantic_key_in_revision_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "opportunity_active_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "opportunity_resolved_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "opportunity_expired_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "opportunity_superseded_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "task_assignment_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "agent_task_requested_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "task_current_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "task_invalidated_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_admitted_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "action_execution_created_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_dry_run_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_task_linked_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions_with_exact_task_fk",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_policy_allow_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_policy_deny_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_policy_shadow_only_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_not_required_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_pending_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_approved_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_rejected_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_expired_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_pending_approval_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_ready_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_executing_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_unknown_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_succeeded_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_failed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_not_executed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_real_success_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_nondryrun_approved_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "execution_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "reconciliation_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_started_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_succeeded_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_failed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_unknown_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "proposal_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "ephemeral_proposals_have_no_durable_admission_denominator",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "campaign_root_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "canonical_campaign_root_created_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "campaign_legacy_unqualified_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "legacy_campaign_cohort_without_canonical_lifecycle",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_slot_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_children_of_root_recipient_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "root_recipient_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipients_of_campaign_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "canonical_client_recipient_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "canonical_bulk_client_root_recipients",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_recipient_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "single_delivery_recipients_and_bulk_transport_children",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_not_sent_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_accepted_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_delivered_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_failed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_unknown_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_skipped_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "root_recipient_accepted_or_delivered_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_with_at_least_one_transport_receipt",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "root_recipient_delivered_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_with_delivered_receipt",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "delivery_execution_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "delivery_attempts_of_campaign_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "delivery_reconciliation_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "delivery_attempts_of_campaign_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_acceptance_rate_numerator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_acceptance_rate_denominator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_acceptance_rate",
+          "dimensions": {},
+          "unit": "ratio_ppm",
+          "basis": "floor_parts_per_million_distinct_root_recipients",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "recipient_delivery_rate_numerator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_delivery_rate_denominator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_delivery_rate",
+          "dimensions": {},
+          "unit": "ratio_ppm",
+          "basis": "floor_parts_per_million_distinct_root_recipients",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "recipient_read_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "canonical_delivery_has_no_read_receipt",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "recipient_read_rate",
+          "dimensions": {},
+          "unit": "ratio_ppm",
+          "basis": "canonical_delivery_has_no_read_receipt",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "a29_assignment_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_frozen_assignment_booked_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_governed_correction_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "immutable_owner_corrections_not_outcome_credit",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_current_booked_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_current_canceled_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_filled_window_flag_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_flag_not_capacity_proof",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        }
+      ],
+      "limitations": [
+        "a29_assignment_is_not_verified_client_credit",
+        "delivery_acceptance_is_not_delivery",
+        "filled_window_flag_is_not_capacity_proof",
+        "incremental_revenue_not_measured",
+        "owner_cohorts_use_distinct_admission_clocks",
+        "partial_period",
+        "proposal_admission_denominator_unavailable",
+        "read_receipt_not_supported",
+        "states_observed_at_read_not_reconstructed_as_of"
+      ]
+    },
+    "ca6405ad-53d1-4dff-a043-d57f3d04a6fb:2": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "ca6405ad-53d1-4dff-a043-d57f3d04a6fb",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки.",
+                    "evidence_refs": [
+                      "h_a76a51282fbd04bc200e31970ab1f791593059bef2798bcbd3b5ba3e5f6e41b9"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured",
+                    "as_of": "2026-10-07T19:40:53.477Z",
+                    "evidence_refs": [
+                      "h_a76a51282fbd04bc200e31970ab1f791593059bef2798bcbd3b5ba3e5f6e41b9"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "ca66eb55be1f3fc6e219114ff7f87ad70f7dd0881b3abe30e2e809a14bae438d",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "high",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "ca66eb55be1f3fc6e219114ff7f87ad70f7dd0881b3abe30e2e809a14bae438d",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_a76a51282fbd04bc200e31970ab1f791593059bef2798bcbd3b5ba3e5f6e41b9"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "b33e02c5-0dbf-483e-bc7d-4bf14b1a94d4",
+                "asOf": "2026-10-07T19:40:53.477Z",
+                "opportunityRefs": [
+                  {
+                    "sourceType": "Opportunity",
+                    "id": "4b76b2e9-d168-4cf2-adab-374fd8542958",
+                    "tenantId": "cmuyij2j70000hpc99p61sr58",
+                    "subjectKind": "appointment",
+                    "subjectRef": "appointment_89aa47b0e7b014b9f76a825bdb1f1bc1",
+                    "contractVersion": 1,
+                    "identityHash": "221f4397bdde77a8c504261eb2dda82bf4fc9e471f0659bf2872375320ea241c",
+                    "inputHash": "31d1cb7d06495c0a2ac85884cf8a24fd2c27c5866eb98470f5a6b7ed317d7a4c",
+                    "observedAt": "2026-10-07T19:40:53.477Z",
+                    "validUntil": "2026-10-09T10:00:00.000Z",
+                    "retentionUntil": null,
+                    "status": "VERIFIED",
+                    "completeness": "COMPLETE",
+                    "unavailableReason": null
+                  },
+                  {
+                    "sourceType": "AgentTask",
+                    "id": "1df1300c-8961-46ba-bf4b-f2860248b7b0",
+                    "tenantId": "cmuyij2j70000hpc99p61sr58",
+                    "subjectKind": "assignment",
+                    "subjectRef": "1df1300c-8961-46ba-bf4b-f2860248b7b0",
+                    "contractVersion": 1,
+                    "identityHash": "9fff962deac49730a0a777ef663d2b3531e50f7daeb271dd9233668ad16990db",
+                    "inputHash": "9fff962deac49730a0a777ef663d2b3531e50f7daeb271dd9233668ad16990db",
+                    "observedAt": "2026-10-07T19:40:53.477Z",
+                    "validUntil": "2026-10-09T10:00:00.000Z",
+                    "retentionUntil": null,
+                    "status": "VERIFIED",
+                    "completeness": "COMPLETE",
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_f4897c14cc76be3587c71a3c43d753b0"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "ed7ef215-4858-455d-826c-9501fd75da53",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "e5ec7e2b-1740-4a77-b13b-f93e6e6c03e1",
+              "revision": 1,
+              "replayed": false,
+              "current": true
+            },
+            "user_turn": {
+              "turnId": "fa096892-da52-404b-a45f-ba99bc04ea1a",
+              "conversationId": "058267a9-d2c7-4293-98a6-cb61b245337d"
+            },
+            "reply": "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "ca6405ad-53d1-4dff-a043-d57f3d04a6fb:3": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "chat",
+      "replies": [
+        "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "ca6405ad-53d1-4dff-a043-d57f3d04a6fb",
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен».",
+                    "evidence_refs": [
+                      "h_62112f9e7417770fd6c87389ed88c05f1e5177e67d0d11054f74ba579f022c8b"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured_incomplete",
+                    "as_of": "2026-10-07T19:40:53.477Z",
+                    "evidence_refs": [
+                      "h_62112f9e7417770fd6c87389ed88c05f1e5177e67d0d11054f74ba579f022c8b"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "bbde1d3c998803531e6ba414855d953f91ba00666c52bf8f1ae12472f187d9f4",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed",
+                        "historical_read_not_revalidated"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "low",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed",
+                  "historical_read_not_revalidated"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "bbde1d3c998803531e6ba414855d953f91ba00666c52bf8f1ae12472f187d9f4",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed",
+                    "historical_read_not_revalidated"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_62112f9e7417770fd6c87389ed88c05f1e5177e67d0d11054f74ba579f022c8b"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "b33e02c5-0dbf-483e-bc7d-4bf14b1a94d4",
+                "asOf": "2026-10-07T19:40:53.477Z",
+                "opportunityRefs": [
+                  {
+                    "id": "4b76b2e9-d168-4cf2-adab-374fd8542958",
+                    "status": "VERIFIED",
+                    "tenantId": "cmuyij2j70000hpc99p61sr58",
+                    "inputHash": "31d1cb7d06495c0a2ac85884cf8a24fd2c27c5866eb98470f5a6b7ed317d7a4c",
+                    "observedAt": "2026-10-07T19:40:53.477Z",
+                    "sourceType": "Opportunity",
+                    "subjectRef": "appointment_89aa47b0e7b014b9f76a825bdb1f1bc1",
+                    "validUntil": "2026-10-09T10:00:00.000Z",
+                    "subjectKind": "appointment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "221f4397bdde77a8c504261eb2dda82bf4fc9e471f0659bf2872375320ea241c",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  },
+                  {
+                    "id": "1df1300c-8961-46ba-bf4b-f2860248b7b0",
+                    "status": "VERIFIED",
+                    "tenantId": "cmuyij2j70000hpc99p61sr58",
+                    "inputHash": "9fff962deac49730a0a777ef663d2b3531e50f7daeb271dd9233668ad16990db",
+                    "observedAt": "2026-10-07T19:40:53.477Z",
+                    "sourceType": "AgentTask",
+                    "subjectRef": "1df1300c-8961-46ba-bf4b-f2860248b7b0",
+                    "validUntil": "2026-10-09T10:00:00.000Z",
+                    "subjectKind": "assignment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "9fff962deac49730a0a777ef663d2b3531e50f7daeb271dd9233668ad16990db",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_f4897c14cc76be3587c71a3c43d753b0"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "ed7ef215-4858-455d-826c-9501fd75da53",
+              "scope": "explicit_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "e5ec7e2b-1740-4a77-b13b-f93e6e6c03e1",
+              "revision": 1,
+              "replayed": true,
+              "current": false
+            },
+            "user_turn": {
+              "turnId": "fa096892-da52-404b-a45f-ba99bc04ea1a",
+              "conversationId": "058267a9-d2c7-4293-98a6-cb61b245337d"
+            },
+            "reply": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "c7_proposed": {
+      "contract": "c7.measurement.read/1",
+      "mode": "live",
+      "revisionId": null,
+      "snapshotHash": null,
+      "revision": null,
+      "expiresAt": null,
+      "kind": "execution_funnel",
+      "subject": {
+        "clientId": null,
+        "appointmentId": null,
+        "staffId": null,
+        "branchId": null
+      },
+      "rule": {
+        "key": "c7.execution-funnel",
+        "version": 1
+      },
+      "asOf": "2026-10-07T19:40:53.663Z",
+      "period": {
+        "from": "2026-09-30T19:40:53.657Z",
+        "toExclusive": "2026-10-08T19:40:53.657Z",
+        "timezone": "UTC"
+      },
+      "completeness": "PARTIAL",
+      "qualification": "SOURCE_LABELLED",
+      "attribution": "NOT_APPLICABLE",
+      "metrics": [
+        {
+          "key": "opportunity_revision_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "opportunity_first_detected_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "opportunity_logical_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_semantic_key_in_revision_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "opportunity_active_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "opportunity_resolved_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "opportunity_expired_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "opportunity_superseded_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_opportunity_revision_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "task_assignment_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "agent_task_requested_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "task_current_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "1"
+        },
+        {
+          "key": "task_invalidated_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_admitted_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "action_execution_created_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_dry_run_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_task_linked_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions_with_exact_task_fk",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_policy_allow_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_policy_deny_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_policy_shadow_only_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_not_required_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_pending_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_approved_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_rejected_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_approval_expired_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "admitted_actions",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_pending_approval_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_ready_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_executing_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_unknown_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_succeeded_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_failed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_not_executed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_admitted_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "action_real_success_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "current_nondryrun_approved_action_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "execution_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "reconciliation_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_started_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_succeeded_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_failed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "attempt_unknown_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "all_attempts_of_admitted_execution_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "proposal_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "ephemeral_proposals_have_no_durable_admission_denominator",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "campaign_root_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "canonical_campaign_root_created_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "campaign_legacy_unqualified_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "legacy_campaign_cohort_without_canonical_lifecycle",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_slot_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_children_of_root_recipient_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "root_recipient_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipients_of_campaign_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "canonical_client_recipient_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "canonical_bulk_client_root_recipients",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_recipient_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "single_delivery_recipients_and_bulk_transport_children",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_not_sent_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_accepted_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_delivered_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_failed_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_unknown_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "transport_delivery_skipped_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "transport_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "root_recipient_accepted_or_delivered_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_with_at_least_one_transport_receipt",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "root_recipient_delivered_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_with_delivered_receipt",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "delivery_execution_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "delivery_attempts_of_campaign_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "delivery_reconciliation_attempt_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "delivery_attempts_of_campaign_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_acceptance_rate_numerator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_acceptance_rate_denominator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_acceptance_rate",
+          "dimensions": {},
+          "unit": "ratio_ppm",
+          "basis": "floor_parts_per_million_distinct_root_recipients",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "recipient_delivery_rate_numerator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_delivery_rate_denominator",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "distinct_root_recipient_denominator",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "recipient_delivery_rate",
+          "dimensions": {},
+          "unit": "ratio_ppm",
+          "basis": "floor_parts_per_million_distinct_root_recipients",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "recipient_read_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "canonical_delivery_has_no_read_receipt",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "recipient_read_rate",
+          "dimensions": {},
+          "unit": "ratio_ppm",
+          "basis": "canonical_delivery_has_no_read_receipt",
+          "currency": null,
+          "state": "NOT_MEASURED",
+          "value": null
+        },
+        {
+          "key": "a29_assignment_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_frozen_assignment_booked_cohort",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_governed_correction_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "immutable_owner_corrections_not_outcome_credit",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_current_booked_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_current_canceled_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_current_assignment_state",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        },
+        {
+          "key": "a29_filled_window_flag_count",
+          "dimensions": {},
+          "unit": "count",
+          "basis": "source_labelled_flag_not_capacity_proof",
+          "currency": null,
+          "state": "COMPLETE",
+          "value": "0"
+        }
+      ],
+      "limitations": [
+        "a29_assignment_is_not_verified_client_credit",
+        "delivery_acceptance_is_not_delivery",
+        "filled_window_flag_is_not_capacity_proof",
+        "incremental_revenue_not_measured",
+        "owner_cohorts_use_distinct_admission_clocks",
+        "partial_period",
+        "proposal_admission_denominator_unavailable",
+        "read_receipt_not_supported",
+        "states_observed_at_read_not_reconstructed_as_of"
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_0a98ee647c4d on 127.0.0.1:59767 (local)
+[31m[Nest] 85047  - [39m10/07/2026, 7:45:20 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 85047  - [39m10/07/2026, 7:45:20 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+PASS test/widgets-live/c9-occupancy-restart.probe-spec.ts (79.831 s)
+  explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]
+    ✓ persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority (78475 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        79.85 s
+Ran all test suites within paths "test/widgets-live/c9-occupancy-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-native-react-20261007-03/browser-jest.json

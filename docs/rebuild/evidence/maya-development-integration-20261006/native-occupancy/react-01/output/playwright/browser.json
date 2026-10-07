@@ -1,0 +1,859 @@
+{
+  "contract": "maya.explicit-occupancy-browser/1",
+  "status": "failed",
+  "syntheticCrmAdapter": false,
+  "nativeYclientsAdapter": true,
+  "syntheticProviderTransport": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "available": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "history-after-relogin": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "offline": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\nВы:\nПроверь окна после отмен\nНет связи — повторить\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Повторить отправку"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "reconnected": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "binding-removed": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\nВы:\nПроверь окна после отмен\nMAYA:\nCRM сейчас не подтвердила доступность. Это недоступность источника, а не отсутствие свободных окон. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked": {
+      "text": "MAYA\nВход в MAYA\n\nНайдите свой салон и продолжите через Telegram.\n\nНазвание салона\nНайти салон\nВойти по email\n\nСессия завершена — войдите снова.",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Название салона"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Найти салон"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Войти по email"
+        }
+      ]
+    },
+    "expired": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПроверь окна после отмен\nMAYA:\nСохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "failure": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПроверь окна после отмен\nMAYA:\nСохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "available": {
+      "request_id": "83320068-3f24-44db-a42e-6adb111ad8b1",
+      "recommendation": {
+        "contract": "maya.c9-occupancy-response/1",
+        "outcome": "AVAILABLE",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "OCCUPANCY",
+          "intent": "c9.cancellation_windows",
+          "findings": [
+            {
+              "statement": "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки.",
+              "evidence_refs": [
+                "h_a092f7345ad7452fb1fdc3d4813a804dc05a4343e164a402ee14848f9153dec2"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "booking.availability.read",
+              "status": "measured",
+              "as_of": "2026-10-07T19:29:05.136Z",
+              "evidence_refs": [
+                "h_a092f7345ad7452fb1fdc3d4813a804dc05a4343e164a402ee14848f9153dec2"
+              ],
+              "completeness": {
+                "status": "COMPLETE",
+                "requestedScopeHash": "afe9c8795f3cd3e551a744c03f198d4532cb8c52a8f44393f23975c6fea418a6",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "provider_schedule_and_available_slot_confirmed"
+                ]
+              }
+            }
+          ],
+          "confidence": "high",
+          "limitations": [
+            "provider_schedule_and_available_slot_confirmed"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "COMPLETE",
+            "requestedScopeHash": "afe9c8795f3cd3e551a744c03f198d4532cb8c52a8f44393f23975c6fea418a6",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "provider_schedule_and_available_slot_confirmed"
+            ]
+          },
+          "evidence_refs": [
+            "h_a092f7345ad7452fb1fdc3d4813a804dc05a4343e164a402ee14848f9153dec2"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "50047c3a-a9f4-4978-8ec5-54b8ce9522a7",
+          "asOf": "2026-10-07T19:29:05.136Z",
+          "opportunityRefs": [
+            {
+              "sourceType": "Opportunity",
+              "id": "05c0f4c4-7597-4991-a567-a0f7de9b2cf4",
+              "tenantId": "cmuyi3vca0000nfc9hegc4u8d",
+              "subjectKind": "appointment",
+              "subjectRef": "appointment_0333e330189673f815c13fbd5964c73b",
+              "contractVersion": 1,
+              "identityHash": "9f3a600f4e4a15d6820ce3c0f5af19a7d46f108c7c06c47803c1a979560a4a71",
+              "inputHash": "d03674c75e82da8049f7bf82a82eebda3ea9c8e80e3e36a7b2a52de5cf818013",
+              "observedAt": "2026-10-07T19:29:05.136Z",
+              "validUntil": "2026-10-09T10:00:00.000Z",
+              "retentionUntil": null,
+              "status": "VERIFIED",
+              "completeness": "COMPLETE",
+              "unavailableReason": null
+            },
+            {
+              "sourceType": "AgentTask",
+              "id": "79869788-db52-44fe-822b-d6f2fa63f93b",
+              "tenantId": "cmuyi3vca0000nfc9hegc4u8d",
+              "subjectKind": "assignment",
+              "subjectRef": "79869788-db52-44fe-822b-d6f2fa63f93b",
+              "contractVersion": 1,
+              "identityHash": "ecaddb8f7a086a5e035b16123d3eb61b92db03c48936f43acbc0808b06ccda06",
+              "inputHash": "ecaddb8f7a086a5e035b16123d3eb61b92db03c48936f43acbc0808b06ccda06",
+              "observedAt": "2026-10-07T19:29:05.136Z",
+              "validUntil": "2026-10-09T10:00:00.000Z",
+              "retentionUntil": null,
+              "status": "VERIFIED",
+              "completeness": "COMPLETE",
+              "unavailableReason": null
+            }
+          ],
+          "scheduleRef": "schedule_31511e18b7e21c74678e1cfbe6221320"
+        },
+        "options": [
+          {
+            "key": "check_date",
+            "title": "По новому запросу проверить доступное время на эту дату"
+          },
+          {
+            "key": "c9.no_action",
+            "title": "Ничего не делать"
+          }
+        ],
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "6cd0a9a1-8828-464b-b504-2cc8c12e5c4b",
+        "scope": "explicit_occupancy",
+        "state": "PROPOSED",
+        "revision_id": "866a077e-f64c-4222-8850-da6a36626d9e",
+        "revision": 1,
+        "replayed": false,
+        "current": true
+      },
+      "user_turn": {
+        "turnId": "6c1a3592-8ddf-457d-ac63-53e10ef8e4ba",
+        "conversationId": "001bea55-035b-4061-8d26-67f92fcbc1f8"
+      },
+      "reply": "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "business_analytics"
+      }
+    },
+    "reconnected": {
+      "request_id": "1a01ad1f-e14b-4ce3-b20c-50b84239aca3",
+      "recommendation": {
+        "contract": "maya.c9-occupancy-response/1",
+        "outcome": "AVAILABLE",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "OCCUPANCY",
+          "intent": "c9.cancellation_windows",
+          "findings": [
+            {
+              "statement": "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки.",
+              "evidence_refs": [
+                "h_ea37f4339065a2fa41bc4936c81a116326627d1651c02965fb1ce9b570b5b59a"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "booking.availability.read",
+              "status": "measured",
+              "as_of": "2026-10-07T19:30:06.552Z",
+              "evidence_refs": [
+                "h_ea37f4339065a2fa41bc4936c81a116326627d1651c02965fb1ce9b570b5b59a"
+              ],
+              "completeness": {
+                "status": "COMPLETE",
+                "requestedScopeHash": "14b0486cbde7a11a32c5e8ba3e0e9adb59c3529c4206c4a6e979c9211493472d",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "provider_schedule_and_available_slot_confirmed"
+                ]
+              }
+            }
+          ],
+          "confidence": "high",
+          "limitations": [
+            "provider_schedule_and_available_slot_confirmed"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "COMPLETE",
+            "requestedScopeHash": "14b0486cbde7a11a32c5e8ba3e0e9adb59c3529c4206c4a6e979c9211493472d",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "provider_schedule_and_available_slot_confirmed"
+            ]
+          },
+          "evidence_refs": [
+            "h_ea37f4339065a2fa41bc4936c81a116326627d1651c02965fb1ce9b570b5b59a"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "17addfed-ebbc-44e0-8fea-3015fe32180a",
+          "asOf": "2026-10-07T19:30:06.552Z",
+          "opportunityRefs": [
+            {
+              "sourceType": "Opportunity",
+              "id": "05c0f4c4-7597-4991-a567-a0f7de9b2cf4",
+              "tenantId": "cmuyi3vca0000nfc9hegc4u8d",
+              "subjectKind": "appointment",
+              "subjectRef": "appointment_0333e330189673f815c13fbd5964c73b",
+              "contractVersion": 1,
+              "identityHash": "9f3a600f4e4a15d6820ce3c0f5af19a7d46f108c7c06c47803c1a979560a4a71",
+              "inputHash": "d03674c75e82da8049f7bf82a82eebda3ea9c8e80e3e36a7b2a52de5cf818013",
+              "observedAt": "2026-10-07T19:30:06.552Z",
+              "validUntil": "2026-10-09T10:00:00.000Z",
+              "retentionUntil": null,
+              "status": "VERIFIED",
+              "completeness": "COMPLETE",
+              "unavailableReason": null
+            },
+            {
+              "sourceType": "AgentTask",
+              "id": "79869788-db52-44fe-822b-d6f2fa63f93b",
+              "tenantId": "cmuyi3vca0000nfc9hegc4u8d",
+              "subjectKind": "assignment",
+              "subjectRef": "79869788-db52-44fe-822b-d6f2fa63f93b",
+              "contractVersion": 1,
+              "identityHash": "ecaddb8f7a086a5e035b16123d3eb61b92db03c48936f43acbc0808b06ccda06",
+              "inputHash": "ecaddb8f7a086a5e035b16123d3eb61b92db03c48936f43acbc0808b06ccda06",
+              "observedAt": "2026-10-07T19:30:06.552Z",
+              "validUntil": "2026-10-09T10:00:00.000Z",
+              "retentionUntil": null,
+              "status": "VERIFIED",
+              "completeness": "COMPLETE",
+              "unavailableReason": null
+            }
+          ],
+          "scheduleRef": "schedule_31511e18b7e21c74678e1cfbe6221320"
+        },
+        "options": [
+          {
+            "key": "check_date",
+            "title": "По новому запросу проверить доступное время на эту дату"
+          },
+          {
+            "key": "c9.no_action",
+            "title": "Ничего не делать"
+          }
+        ],
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "6c6fa29f-cf4c-462c-8629-01b17d0a4dee",
+        "scope": "explicit_occupancy",
+        "state": "PROPOSED",
+        "revision_id": "94219863-dce0-4c8d-9c8e-ff1de4230e09",
+        "revision": 1,
+        "replayed": false,
+        "current": true
+      },
+      "user_turn": {
+        "turnId": "eeaa46ad-8e1a-46b8-a9f2-0c2eb6b895d1",
+        "conversationId": "001bea55-035b-4061-8d26-67f92fcbc1f8"
+      },
+      "reply": "После снятия записи сохранилось окно 09.10.2026, 12:00 — 09.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "business_analytics"
+      }
+    },
+    "unbound": {
+      "request_id": "d35f8efd-68ef-4967-a7be-16b2d759a9c1",
+      "recommendation": {
+        "contract": "maya.c9-occupancy-response/1",
+        "outcome": "UNAVAILABLE",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "OCCUPANCY",
+          "intent": "c9.cancellation_windows",
+          "findings": [],
+          "facts_used": [
+            {
+              "capability": "booking.availability.read",
+              "status": "unavailable",
+              "as_of": "2026-10-07T19:30:06.812Z",
+              "evidence_refs": [],
+              "completeness": {
+                "status": "UNAVAILABLE",
+                "requestedScopeHash": "f0cdb11b59ab7342f77bfc6a2f562fa5500d2dc76e0ebcae821fadcdcbb3e592",
+                "returnedCount": 0,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "current_crm_read_unavailable"
+                ]
+              }
+            }
+          ],
+          "confidence": "low",
+          "limitations": [
+            "current_crm_read_unavailable",
+            "source_result_unavailable"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "UNAVAILABLE",
+            "requestedScopeHash": "f0cdb11b59ab7342f77bfc6a2f562fa5500d2dc76e0ebcae821fadcdcbb3e592",
+            "returnedCount": 0,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "current_crm_read_unavailable",
+              "source_result_unavailable"
+            ]
+          },
+          "evidence_refs": []
+        },
+        "evidence": {
+          "workReceiptId": "b2665144-2778-4a23-abbd-c7d5e0b7b46d",
+          "asOf": "2026-10-07T19:30:06.812Z",
+          "opportunityRefs": [],
+          "scheduleRef": null
+        },
+        "options": [
+          {
+            "key": "c9.no_action",
+            "title": "Ничего не делать"
+          }
+        ],
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "d4ad6dde-a90c-4b1b-8368-6da6cfd6edd3",
+        "scope": "explicit_occupancy",
+        "state": "PROPOSED",
+        "revision_id": "6a2d494e-f5e9-4322-b870-20a953030fcc",
+        "revision": 1,
+        "replayed": false,
+        "current": false
+      },
+      "user_turn": {
+        "turnId": "03555344-ee4e-4aeb-a090-42efcef3bff2",
+        "conversationId": "001bea55-035b-4061-8d26-67f92fcbc1f8"
+      },
+      "reply": "CRM сейчас не подтвердила доступность. Это недоступность источника, а не отсутствие свободных окон. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "business_analytics"
+      }
+    },
+    "expired": {
+      "request_id": "6630ef3b-b5c6-44cf-a946-b6e76e2265d6",
+      "recommendation": {
+        "contract": "maya.c9-occupancy-response/1",
+        "outcome": "EXPIRED",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "OCCUPANCY",
+          "intent": "c9.cancellation_windows",
+          "findings": [
+            {
+              "statement": "Сохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна.",
+              "evidence_refs": [
+                "h_cbde025f463f054bcf909a00e10077c78f46544d7f21ed5e68c7ee0f4f52555d"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "booking.availability.read",
+              "status": "measured",
+              "as_of": "2026-10-07T19:30:07.505Z",
+              "evidence_refs": [
+                "h_cbde025f463f054bcf909a00e10077c78f46544d7f21ed5e68c7ee0f4f52555d"
+              ],
+              "completeness": {
+                "status": "COMPLETE",
+                "requestedScopeHash": "8e3a8571074ac79c81ba952d67bf4ca53c2aa31ccec157af6902cd22814e6e39",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "opportunity_expired"
+                ]
+              }
+            }
+          ],
+          "confidence": "high",
+          "limitations": [
+            "opportunity_expired"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "COMPLETE",
+            "requestedScopeHash": "8e3a8571074ac79c81ba952d67bf4ca53c2aa31ccec157af6902cd22814e6e39",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "opportunity_expired"
+            ]
+          },
+          "evidence_refs": [
+            "h_cbde025f463f054bcf909a00e10077c78f46544d7f21ed5e68c7ee0f4f52555d"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "40e988ae-1b53-4264-9c02-8a3ae32a9459",
+          "asOf": "2026-10-07T19:30:07.505Z",
+          "opportunityRefs": [],
+          "scheduleRef": null
+        },
+        "options": [
+          {
+            "key": "c9.no_action",
+            "title": "Ничего не делать"
+          }
+        ],
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "0ea73998-6221-49ba-8731-6efda87e00c0",
+        "scope": "explicit_occupancy",
+        "state": "PROPOSED",
+        "revision_id": "3744ec42-bc21-4cb5-9f72-6451fd335ddc",
+        "revision": 1,
+        "replayed": false,
+        "current": false
+      },
+      "user_turn": {
+        "turnId": "55239eb0-a332-4563-a580-e23bb7ae6a92",
+        "conversationId": "fc49ae6d-7de5-40e0-8938-ca72633be980"
+      },
+      "reply": "Сохранённое окно уже началось или срок возможности истёк. Рекомендация заполнить его неактуальна. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "business_analytics"
+      }
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:58033",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "failure": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   {\n+     method: 'POST',\n+     path: '/api/widgets/resolve'\n+   },\n+   {\n+     method: 'POST',\n+     path: '/api/widgets/resolve'\n+   }\n+ ]\n- []\n",
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/Q74M3PON/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": null,
+      "failed": "net::ERR_BLOCKED_BY_CLIENT.Inspector"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/Q74M3PON/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": null,
+      "failed": "net::ERR_BLOCKED_BY_CLIENT.Inspector"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": null,
+      "failed": "net::ERR_INTERNET_DISCONNECTED"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 401,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/Q74M3PON/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": null,
+      "failed": "net::ERR_BLOCKED_BY_CLIENT.Inspector"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [
+        {
+          "method": "POST",
+          "path": "/api/widgets/resolve"
+        },
+        {
+          "method": "POST",
+          "path": "/api/widgets/resolve"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "blocked": [
+        {
+          "method": "POST",
+          "path": "/api/widgets/resolve"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

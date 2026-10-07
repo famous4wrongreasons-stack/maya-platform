@@ -1,0 +1,9 @@
+Independent read-only checkpoint review — 2026-10-07
+
+Reviewer: /root/independent_review. No edits, test execution or services by reviewer.
+
+Production 439eeb69: no remaining blocker in reviewed delta. Final authorize follows transient metadata verification; exact revision receipt has no latest fallback. Mixed/unattributed slots remain incomplete. Internal selector exception is server-owned and retains the original READ metadata witness. Post-emission/post-link failures cancel the exact successor. Gate 1 rejects CANCELLED sealed TIME_SLOT_SELECTOR/DRAFT before preview without deleting audit.
+
+Artifacts: HTTP prepare/resume PASS, backend PID 84366 -> 84422, PostgreSQL start 19:44:20 -> 19:44:23; React seven checkpoints PASS. Native synthetic GET counts 6 + 22 for HTTP and 8 for React; model/provider writes zero. Final owned PG pid files absent.
+
+Qualification: raw launcher reports do not embed commit/source hashes. Archive binds current source bytes to git show 439eeb698dc4fe2d1526f743353048791c51f171 after execution; this is post-run verification, not a launcher hash snapshot. Current sealed cancelled selector admission is proved through actual HTTP; cancelled selector visual appearance is not accepted. No real provider/model/C10 acceptance.
