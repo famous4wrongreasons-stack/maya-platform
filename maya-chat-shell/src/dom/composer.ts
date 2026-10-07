@@ -49,6 +49,8 @@ export interface Composer {
 export const composerReason = (state: ComposerState): string | null => {
   if (state.enabled) return null;
   switch (state.reason) {
+    case 'history_erasure':
+      return 'Сначала подтвердите результат удаления текущего разговора.';
     case 'subscription_required':
       return 'Отправка недоступна: разговор с MAYA не подключён для этого бизнеса';
     case 'tenant_required':

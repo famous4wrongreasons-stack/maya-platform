@@ -322,6 +322,7 @@ test('PATHS holds exactly the approved literals; one fetch call site; API_BASE i
   assert.deepEqual(values, [
     '/ai/chat',
     '/ai/conversation',
+    '/privacy/conversations',
     '/ai/transcribe',
     '/auth/email/start',
     '/auth/email/verify',
@@ -359,7 +360,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
   const net = createNet();
   assert.deepEqual(Object.keys(net).sort(), ['session', 'transport']);
   assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
-  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent']);
+  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'eraseConversation', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent']);
 });
 
 test('widget transport sends only typed bodies and retains only authorized response members', async () => {

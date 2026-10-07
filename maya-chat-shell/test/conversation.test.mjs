@@ -259,7 +259,7 @@ test('submitUserTurn is the sole path: only it (and retry of its own turn) calls
 
   // Surface: the port adds nothing that sends.
   const s = setup();
-  assert.deepEqual(Object.keys(s.conversation).sort(), ['dispose', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view']);
+  assert.deepEqual(Object.keys(s.conversation).sort(), ['dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view']);
   assert.deepEqual(Object.keys(s.conversation.timeline).sort(), ['appendNotice', 'appendServerLine', 'appendWidget', 'hasItem', 'onDropped', 'replaceWidget']);
   s.conversation.timeline.appendNotice('deeplink_refused');
   s.conversation.timeline.appendServerLine('server-authored receipt');

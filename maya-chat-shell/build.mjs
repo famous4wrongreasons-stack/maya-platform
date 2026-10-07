@@ -224,6 +224,7 @@ export const P1_PATHS = [
   '/auth/oauth/telegram/complete',
   '/ai/chat',
   '/ai/conversation',
+  '/privacy/conversations',
   '/ai/transcribe',
   '/mobile/pwa/search',
   '/widgets/intent',
@@ -1071,6 +1072,51 @@ export function runGates(ts, program, ctx) {
         return ts.isCallExpression(e) && ts.isIdentifier(e.expression) && e.expression.text === 'encodeURIComponent' && e.arguments.length === 1;
       });
     };
+    // The sole dynamic path is the privacy owner's exact conversation-erasure route. Keep
+    // its UUID guard and authored prefix/suffix closed; this does not admit generic URL builders.
+    const declaredErasurePath = (n) => {
+      if (!ts.isIdentifier(n)) return false;
+      const declarations = checker.getSymbolAtLocation(n)?.declarations ?? [];
+      if (declarations.length !== 1) return false;
+      const d = declarations[0];
+      if (!ts.isVariableDeclaration(d) || !d.initializer || !ts.isVariableDeclarationList(d.parent) || (d.parent.flags & ts.NodeFlags.Const) === 0) return false;
+      const owner = d.parent.parent.parent?.parent;
+      if (!owner || !ts.isFunctionDeclaration(owner) || owner.name?.text !== 'exchange' || owner.getSourceFile() !== sf) return false;
+      const expectedPath = "endpoint==='historyErasure'?`${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure`:PATHS[endpoint]";
+      const expectedGuard = "if(endpoint==='historyErasure'&&(erasureConversationId.length!==36||!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(erasureConversationId)))return{kind:'aborted'};";
+      const expected = ts.createSourceFile('privacy-path.ts', `const path = ${expectedPath};\n${expectedGuard}`, ts.ScriptTarget.Latest, true);
+      const printer = ts.createPrinter({ removeComments: true });
+      const syntax = (node) => printer.printNode(ts.EmitHint.Unspecified, node, node.getSourceFile());
+      if (syntax(skipOuter(ts, d.initializer)) !== syntax(expected.statements[0].declarationList.declarations[0].initializer)) return false;
+      const prefix = obj?.properties.find((p) => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === 'historyErasure');
+      if (!prefix || !ts.isStringLiteral(prefix.initializer) || prefix.initializer.text !== '/privacy/conversations') return false;
+      const guard = owner.body?.statements[0];
+      if (!guard || !ts.isIfStatement(guard) || syntax(guard) !== syntax(expected.statements[1])) return false;
+      // Both referenced strings must be these parameters, never mutable local aliases.
+      for (const name of ['endpoint', 'erasureConversationId']) {
+        const parameter = owner.parameters.find((p) => ts.isIdentifier(p.name) && p.name.text === name);
+        if (!parameter) return false;
+        const symbol = checker.getSymbolAtLocation(parameter.name);
+        let immutable = true;
+        const writesParameter = (node) => {
+          if (ts.isIdentifier(node) && checker.getSymbolAtLocation(node) === symbol) return true;
+          return ts.forEachChild(node, writesParameter) === true;
+        };
+        const visit = (node) => {
+          if (ts.isIdentifier(node) && node.text === name) {
+            if (checker.getSymbolAtLocation(node) !== symbol) immutable = false;
+            const p = node.parent;
+            if ((ts.isBinaryExpression(p) && p.left === node && p.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && p.operatorToken.kind <= ts.SyntaxKind.LastAssignment) || ((ts.isPrefixUnaryExpression(p) || ts.isPostfixUnaryExpression(p)) && (p.operator === ts.SyntaxKind.PlusPlusToken || p.operator === ts.SyntaxKind.MinusMinusToken))) immutable = false;
+          }
+          if (ts.isBinaryExpression(node) && node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && node.operatorToken.kind <= ts.SyntaxKind.LastAssignment && writesParameter(node.left)) immutable = false;
+          if ((ts.isForInStatement(node) || ts.isForOfStatement(node)) && writesParameter(node.initializer)) immutable = false;
+          ts.forEachChild(node, visit);
+        };
+        visit(owner.body);
+        if (!immutable) return false;
+      }
+      return true;
+    };
     for (const call of fetchSites) {
       let a = call.arguments[0] ? skipOuter(ts, call.arguments[0]) : null;
       let queryOk = true;
@@ -1085,9 +1131,9 @@ export function runGates(ts, program, ctx) {
         const shapeOk = ((ts.isPropertyAccessExpression(r) || ts.isElementAccessExpression(r)) && ts.isIdentifier(r.expression) && r.expression.text === 'PATHS') || ts.isIdentifier(r);
         const type = checker.getTypeAtLocation(r);
         const parts = type.isUnion() ? type.types : [type];
-        ok = shapeOk && parts.length > 0 && parts.every((t) => t.isStringLiteral() && allow.has(t.value));
+        ok = shapeOk && parts.length > 0 && (parts.every((t) => t.isStringLiteral() && allow.has(t.value)) || declaredErasurePath(r));
       }
-      if (!ok) out.push(refusal('fetch-shape', 'src/net/client.ts', lineOf(call), 'fetch', 'the fetch URL must be API_BASE + PATHS.<member>, typed as allowlisted path literals, optionally + a declared query (a template opening "?" whose substitutions are all encodeURIComponent calls) (N-1)'));
+      if (!ok) out.push(refusal('fetch-shape', 'src/net/client.ts', lineOf(call), 'fetch', 'the fetch URL must use allowlisted path literals or the exact UUID-guarded history-erasure path, optionally + a declared encoded query (N-1)'));
     }
   }
   if (present.has('src/net/endpoint.ts')) {

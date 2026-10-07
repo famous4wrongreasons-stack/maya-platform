@@ -1,8 +1,7 @@
 // K5 — the network client. The ONLY `fetch` in the bundle (N-1).
 //
-// Every request goes to `API_BASE + PATHS.<endpoint>`, and PATHS holds exactly the seven P1
-// endpoints. The widget intent and resolve endpoints are not among them: their wire shapes wait on
-// R7-E1/E2 and B3, so this module has no intent submission and no resolve.
+// Every request uses the closed PATHS allowlist. History erasure alone adds a validated UUID
+// and the fixed /erasure suffix; its path construction is checked by the build ratchet.
 //
 // Typed methods only. Each builds its request body as a fresh literal of the DTO's keys, so no
 // extra property (an audience, a tenant, a role or mode value) can ride along on the wire; each
@@ -21,6 +20,8 @@ import {
   projectBusinessSearch,
   projectChat,
   projectConversationHistory,
+  projectHistoryErasure,
+  projectHistoryErasureRequest,
   projectEmailStart,
   projectEmailVerify,
   projectPasswordLogin,
@@ -36,6 +37,9 @@ import type {
   ChatFailure,
   ChatProjection,
   ConversationHistoryProjection,
+  HistoryErasureCompletion,
+  HistoryErasureFailure,
+  HistoryErasureRequest,
   ChatRequest,
   EmailStartProjection,
   EmailStartRequest,
@@ -70,6 +74,7 @@ const PATHS = {
   logout: '/auth/logout',
   chat: '/ai/chat',
   conversation: '/ai/conversation',
+  historyErasure: '/privacy/conversations',
   transcribe: '/ai/transcribe',
   widgetIntent: '/widgets/intent',
   widgetResolve: '/widgets/resolve',
@@ -98,6 +103,7 @@ type RequestBody =
   | PasswordLoginRequest
   | RefreshRequest
   | ChatRequest
+  | Pick<HistoryErasureRequest, 'requestId'>
   | TranscribeRequest
   | WidgetIntentRequest
   | WidgetResolveRequest
@@ -146,7 +152,8 @@ const parseRetryAfter = (value: string | null): number | null => {
  * The one request site. A caller's abort and the timeout both abort the fetch; they are told apart,
  * because an abort is the shell's own decision and a timeout is a lost connection.
  */
-async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null): Promise<Exchange> {
+async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = ''): Promise<Exchange> {
+  if (endpoint === 'historyErasure' && (erasureConversationId.length !== 36 || !/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(erasureConversationId))) return { kind: 'aborted' };
   if (signal !== null && signal.aborted) return { kind: 'aborted' };
   const controller = new AbortController();
   let timedOut = false;
@@ -163,7 +170,7 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
   const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
   const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...(reading ? {} : { 'Content-Type': 'application/json' }) };
-  const path = PATHS[endpoint];
+  const path = endpoint === 'historyErasure' ? `${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure` : PATHS[endpoint];
   try {
     const response = await fetch(API_BASE + path + (slots !== null ? slots.branchId === undefined ? `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}` : `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}&branchId=${encodeURIComponent(slots.branchId)}` : search === null ? '' : `?q=${encodeURIComponent(search)}`), {
       method: reading ? 'GET' : 'POST',
@@ -478,16 +485,16 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = ''): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
-  const ex = await exchange(endpoint, body, first.bearer, signal, timeoutMs, null, slots);
+  const ex = await exchange(endpoint, body, first.bearer, signal, timeoutMs, null, slots, erasureConversationId);
   if (ex.kind !== 'response' || ex.status !== 401) return ex;
   const second = await unlessAborted(auth.reauthorize(first.serial), signal);
   if (second === null) return { kind: 'aborted' };
   if (second.kind !== 'bearer') return second;
-  const retried = await exchange(endpoint, body, second.bearer, signal, timeoutMs, null, slots);
+  const retried = await exchange(endpoint, body, second.bearer, signal, timeoutMs, null, slots, erasureConversationId);
   if (retried.kind === 'response' && retried.status === 401) {
     auth.refused(second.serial);
     return { kind: 'signed_out', reason: 'session_revoked' };
@@ -600,6 +607,23 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
         return value === null ? fail({ reason: 'unexpected_response', status: ex.status }) : { ok: true, value };
       }
       return fail(chatFailure(ex));
+    },
+    async eraseConversation(request: HistoryErasureRequest, signal: AbortSignal): Promise<Outcome<HistoryErasureCompletion, HistoryErasureFailure>> {
+      const canonical = projectHistoryErasureRequest(request);
+      if (canonical === null) return fail({ reason: 'invalid_request' });
+      // Only the shared 401 refresh can resend. A lost result requires explicit same-request retry.
+      const ex = await authorizedExchange(auth, 'historyErasure', { requestId: canonical.requestId }, signal, timeouts.requestMs, null, canonical.conversationId);
+      if (ex.kind === 'signed_out') return fail({ reason: 'signed_out', signedOut: ex.reason });
+      if (ex.kind !== 'response') return fail({ reason: 'unknown' });
+      if (isSuccess(ex.status)) {
+        const value = projectHistoryErasure(ex.body, canonical);
+        return value === null ? fail({ reason: 'unknown' }) : { ok: true, value };
+      }
+      if (ex.status === 400) return fail({ reason: 'invalid_request' });
+      if (ex.status === 403) return fail({ reason: 'forbidden' });
+      if (ex.status === 404) return fail({ reason: 'unavailable' });
+      if (ex.status === 409) return fail({ reason: 'conflict' });
+      return fail({ reason: 'unknown' });
     },
     /** Body keys `{surface, requestId, messages}` plus an optional server-issued `conversationId`, `surface` the constant 'web' (NT3). */
     async chat(request: ChatRequest, signal: AbortSignal): Promise<Outcome<ChatProjection, ChatFailure>> {

@@ -152,6 +152,7 @@ if (oauthLanded) {
 // `submission` is not optional in practice: omit it and createShellRuntime substitutes
 // createUnavailableSubmission, every widget answers `unavailable`, and booking looks broken with no
 // error anywhere. `render` is the pure renderer, injected — the shell may not import it.
+let cancelPrivacyVoice = (): void => {};
 const runtime = createShellRuntime({
   transport: net.transport,
   session: net.session,
@@ -161,6 +162,7 @@ const runtime = createShellRuntime({
   scheduler,
   history,
   newAbort,
+  onPrivacyFreeze: () => cancelPrivacyVoice(),
 });
 
 // ── FACTORY 3 — voice (entry/main.ts:195-205) ─────────────────────────────────────────────────
@@ -186,9 +188,11 @@ const voiceMachine = createVoiceControl({
 });
 
 export const voice = voiceMachine;
+cancelPrivacyVoice = () => voiceMachine.cancel();
 
 export const session = net.session;
 export const conversation = runtime.conversation;
+export const privacy = runtime.privacy;
 export const widgets = runtime.widgetPort;
 export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });
 

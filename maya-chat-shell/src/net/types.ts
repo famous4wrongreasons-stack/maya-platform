@@ -60,6 +60,12 @@ export interface ChatRequest {
   readonly conversationId?: string;
 }
 
+/** Exact current conversation; requestId remains fixed until its outcome is known. */
+export interface HistoryErasureRequest {
+  readonly conversationId: string;
+  readonly requestId: string;
+}
+
 /** `POST /ai/transcribe` — JSON form: `data:audio/wav;base64,…` (WAV PCM16 mono 16 kHz). */
 export interface TranscribeRequest {
   readonly audioBase64: string;
@@ -211,6 +217,23 @@ export interface ConversationHistoryProjection {
     readonly completed: boolean;
   }[];
 }
+
+/** Persisted historical completion, not a claim about content created afterwards. */
+export interface HistoryErasureCompletion {
+  readonly contract: 'maya.privacy.history-erasure/1';
+  readonly outcome: 'COMPLETED';
+  readonly requestId: string;
+  readonly conversationId: string;
+  readonly erasedAt: string;
+}
+
+export type HistoryErasureFailure =
+  | { readonly reason: 'unknown' }
+  | { readonly reason: 'forbidden' }
+  | { readonly reason: 'unavailable' }
+  | { readonly reason: 'conflict' }
+  | { readonly reason: 'invalid_request' }
+  | { readonly reason: 'signed_out'; readonly signedOut: SignedOutReason };
 
 /** SH-19's additive chat member, projected without re-authoring the certified envelope. */
 export interface ChatWidgetResolution {

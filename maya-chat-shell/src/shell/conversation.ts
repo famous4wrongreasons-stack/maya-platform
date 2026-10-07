@@ -87,7 +87,16 @@ export interface ConversationDeps {
 
 export interface Conversation extends ConversationPort {
   readonly timeline: TimelineWriter;
+  /** Internal runtime seam. Neither conversation identity nor generation is UI authority. */
+  erasureTarget(): ConversationErasureTarget | null;
+  freezeForErasure(target: ConversationErasureTarget): boolean;
+  finishErasure(): void;
   dispose(): void;
+}
+
+export interface ConversationErasureTarget {
+  readonly conversationId: string;
+  readonly generation: number;
 }
 
 // ── pure policy ────────────────────────────────────────────────────────────────────────────────
@@ -223,6 +232,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   let inflight: { readonly itemId: string; readonly abort: AbortHandle; readonly generation: number } | null = null;
   let restoring: AbortHandle | null = null;
   let historyUnavailable = false;
+  let erasurePending = false;
   let blocked: 'subscription_required' | 'tenant_required' | null = null;
   let signedIn = deps.session.view().signedIn;
   let current: ConversationView;
@@ -234,6 +244,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
 
   const composer = (): ComposerState => {
     if (!signedIn) return { enabled: false, reason: 'signed_out' };
+    if (erasurePending) return { enabled: false, reason: 'history_erasure' };
     if (blocked !== null) return { enabled: false, reason: blocked };
     return { enabled: true };
   };
@@ -412,7 +423,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   };
 
   const restore = (): void => {
-    if (!signedIn || !deps.transport.conversation || restoring !== null) return;
+    if (!signedIn || erasurePending || !deps.transport.conversation || restoring !== null) return;
     const abort = deps.newAbort();
     const restoreGeneration = generation;
     restoring = abort;
@@ -484,22 +495,24 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const unsubscribe = deps.session.subscribe((view) => {
     const wasSignedIn = signedIn;
     signedIn = view.signedIn;
-    if (wasSignedIn && !view.signedIn) clear();
+    if (wasSignedIn && !view.signedIn) { erasurePending = false; clear(); }
     if (!wasSignedIn && view.signedIn) restore();
     emit();
   });
 
   const timeline: TimelineWriter = {
     appendWidget(view) {
+      if (erasurePending) return;
       append({ kind: 'widget', id: view.id, view });
       emit();
     },
     appendServerLine(text) {
-      if (text.trim().length === 0) return;
+      if (erasurePending || text.trim().length === 0) return;
       append({ kind: 'assistant', id: nextId('a'), text });
       emit();
     },
     replaceWidget(view) {
+      if (erasurePending) return false;
       const index = items.findIndex((item) => item.kind === 'widget' && item.id === view.id);
       if (index < 0) return false;
       items[index] = { kind: 'widget', id: view.id, view };
@@ -508,6 +521,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     },
     hasItem: (itemId) => items.some((item) => item.id === itemId),
     appendNotice(notice) {
+      if (erasurePending) return '';
       const id = nextId('n');
       append({ kind: 'notice', id, notice });
       emit();
@@ -531,6 +545,23 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     submitUserTurn,
     retry,
     timeline,
+    erasureTarget: () => signedIn && !erasurePending && conversationId !== undefined
+      ? { conversationId, generation } : null,
+    freezeForErasure(target) {
+      if (!signedIn || erasurePending || conversationId !== target.conversationId || generation !== target.generation) return false;
+      erasurePending = true;
+      // Invalidate pending chat/history before releasing controls. The immutable retry tuple
+      // is owned by privacy.ts; content need not stay in memory during uncertainty.
+      clear();
+      emit();
+      return true;
+    },
+    finishErasure() {
+      if (!erasurePending || !signedIn) return;
+      erasurePending = false;
+      // A fresh empty conversation. Do not restore an older, different conversation here.
+      emit();
+    },
     dispose() {
       unsubscribe();
       clear();

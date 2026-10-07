@@ -182,6 +182,7 @@ function start(mountRoot: HTMLElement): void {
     view.history.replaceState(null, '', view.location.pathname + view.location.search);
     land(rawFragment);
   }
+  let cancelPrivacyVoice = (): void => {};
   const runtime = createShellRuntime({
     transport: net.transport,
     session: net.session,
@@ -191,6 +192,7 @@ function start(mountRoot: HTMLElement): void {
     scheduler,
     history,
     newAbort,
+    onPrivacyFreeze: () => cancelPrivacyVoice(),
   });
   const voice = createVoiceControl({
     capture: createCapture({ secureContext: view.isSecureContext }),
@@ -204,6 +206,7 @@ function start(mountRoot: HTMLElement): void {
     widgets: runtime.widgetPort,
   });
 
+  cancelPrivacyVoice = () => voice.cancel();
   mountRoot.replaceChildren();
   mountRoot.classList.add('app');
   const stops: Cancel[] = [

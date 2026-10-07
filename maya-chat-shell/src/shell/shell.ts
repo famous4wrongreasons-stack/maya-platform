@@ -17,6 +17,7 @@ import type { ChatWidgetResolution } from '../net/types.ts';
 import type { RenderResult } from '../renderer/nodes.ts';
 import { BASE_ROUTES } from '../routes/registry.ts';
 import { createConversation, type AbortHandle, type Conversation } from './conversation.ts';
+import { createPrivacy, type Privacy } from './privacy.ts';
 import { landDeepLink, type DeepLinkLanding } from './deeplink.ts';
 import { createRenderObserver, createUnavailableSubmission, createWidgets, type Widgets } from './intents.ts';
 import type {
@@ -269,7 +270,7 @@ export const createShell = (deps: ShellDeps): ShellController => {
 // ── composition, for entry/ ────────────────────────────────────────────────────────────────────
 
 export interface ShellRuntimeDeps {
-  readonly transport: Pick<Transport, 'chat' | 'resolveWidgets'>;
+  readonly transport: Pick<Transport, 'chat' | 'conversation' | 'eraseConversation' | 'resolveWidgets'>;
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly render: RenderFn;
   readonly environment: Pick<EnvironmentProbe, 'a11y' | 'onA11yChange' | 'fragment'>;
@@ -280,10 +281,13 @@ export interface ShellRuntimeDeps {
   readonly submission?: SubmissionPort;
   /** Request ids and client nonces; `crypto.randomUUID()` by default. */
   readonly newId?: () => string;
+  /** Late-bound voice cancellation at the host composition seam. No authority travels here. */
+  readonly onPrivacyFreeze?: () => void;
 }
 
 export interface ShellRuntime {
   readonly conversation: Conversation;
+  readonly privacy: Privacy;
   readonly widgets: Widgets;
   readonly shell: ShellController;
   /** The DOM's view of routes, widgets and the detail chrome. */
@@ -332,6 +336,15 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   };
   restoreBookingOutcomes = widgets.restoreBookingOutcomes;
   const disconnect = shell.connect(widgets);
+  const privacy = createPrivacy({
+    transport: deps.transport, session: deps.session, conversation,
+    newAbort: deps.newAbort, newId,
+    beforeFreeze: () => {
+      deps.onPrivacyFreeze?.();
+      shell.closeDetail();
+      observations.dispose();
+    },
+  });
   const widgetPort: WidgetPort = {
     rendered: widgets.rendered,
     view: shell.view,
@@ -342,6 +355,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   };
   return {
     conversation,
+    privacy,
     widgets,
     shell,
     widgetPort,
@@ -351,6 +365,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
         notice: (kind) => void conversation.timeline.appendNotice(kind),
       }),
     dispose() {
+      privacy.dispose();
       ingestAuthorizedEnvelope = null;
       restoreBookingOutcomes = null;
       disconnect();

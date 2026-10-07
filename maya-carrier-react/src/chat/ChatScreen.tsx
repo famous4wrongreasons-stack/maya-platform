@@ -19,7 +19,7 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation, session, voice, widgets } from '../runtime/compose.ts';
+import { conversation, privacy, session, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
 import { FullscreenDetail } from '../widgets/FullscreenDetail.tsx';
@@ -41,6 +41,7 @@ import { Backdrop } from '../identity/Backdrop.tsx';
 import { MayaMark, MayaMarkAnimated, MayaVolumeMark } from '../identity/MayaMark.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
 import { ReplyText } from '../reply-link.tsx';
+import { PrivacyPanel } from './PrivacyPanel.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -362,13 +363,17 @@ export function ChatScreen({
   const tooLong = draft.length > COMPOSER_LIMIT;
 
   const focusComposer = useCallback(() => {
-    composerRef.current?.focus({ preventScroll: true });
+    const input = composerRef.current;
+    if (input && !input.readOnly) input.focus({ preventScroll: true });
   }, []);
   const now = useCountdownClock(view);
+  const privacyView = usePortView(privacy);
+  const shellView = usePortView(widgets);
+  const privacyOpen = shellView.primary === 'shell.privacy';
   const voiceView = usePortView(voice);
   const listening = voiceView.state === 'listening' || voiceView.state === 'held';
   const micLive = listening || voiceView.state === 'recording';
-  const micUsable = voiceView.state === 'idle' || listening;
+  const micUsable = view.composer.enabled && (voiceView.state === 'idle' || listening);
   const micEngaged = listening || voiceView.state === 'recording' || voiceView.state === 'arming';
 
   const laneRef = useRef<DivOrNone>(null);
@@ -377,6 +382,27 @@ export function ChatScreen({
   const stickRef = useRef(true);
   const newestUserRef = useRef<ItemId>(null);
   const awaitingRef = useRef<{ itemId: string; text: string } | null>(null);
+  const localEpochRef = useRef(privacyView.localEpoch);
+
+  // Freeze/sign-out invalidates local drafts and DOM selection before the next paint.
+  // The epoch is only a clearing signal; the runtime owns erasure and its result.
+  useLayoutEffect(() => {
+    if (localEpochRef.current === privacyView.localEpoch) return;
+    localEpochRef.current = privacyView.localEpoch;
+    awaitingRef.current = null;
+    focusedRef.current = null;
+    newestUserRef.current = null;
+    stickRef.current = true;
+    setDraft('');
+    setRefused(null);
+    composerRef.current?.setSelectionRange(0, 0);
+    composerRef.current?.blur();
+    window.getSelection()?.removeAllRanges();
+  }, [privacyView.localEpoch]);
+
+  useLayoutEffect(() => {
+    if (privacyOpen) laneRef.current?.focus({ preventScroll: true });
+  }, [privacyOpen]);
 
   useLayoutEffect(() => {
     const input = composerRef.current;
@@ -558,6 +584,14 @@ export function ChatScreen({
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            aria-pressed={privacyOpen}
+            onClick={() => widgets.navigate('shell.privacy')}
+            style={{ pointerEvents: 'auto', maxWidth: 130, padding: '9px 12px', border: '1px solid', borderRadius: 12, background: t.bg, color: t.ink, fontFamily: READING, fontSize: 12, lineHeight: '17px', cursor: 'pointer' }}
+          >
+            Приватность и данные
+          </button>
         </div>
 
         {/* app.html:21647-21658 — the one scroller. 84px clears the header, 212px the composer. */}
@@ -569,10 +603,11 @@ export function ChatScreen({
         */}
         <div
           ref={laneRef}
+          tabIndex={privacyOpen ? -1 : undefined}
           onScroll={onLaneScroll}
-          role="log"
-          aria-live="polite"
-          aria-label="Сообщения"
+          role={privacyOpen ? 'region' : 'log'}
+          aria-live={privacyOpen ? 'off' : 'polite'}
+          aria-label={privacyOpen ? 'Приватность' : 'Сообщения'}
           style={{
             flex: 1,
             minHeight: 0,
@@ -583,10 +618,28 @@ export function ChatScreen({
             padding: `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
-          {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}
-          {view.items.map((item) => (
-            <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
-          ))}
+          {privacyOpen ? (
+            <PrivacyPanel
+              view={privacyView}
+              t={t}
+              requestConfirmation={() => privacy.requestConfirmation()}
+              cancelConfirmation={() => privacy.cancelConfirmation()}
+              confirmErasure={() => void privacy.confirmErasure()}
+              retry={() => void privacy.retry()}
+              signOut={() => void session.signOut()}
+              close={() => {
+                if (privacyView.phase === 'confirming') privacy.cancelConfirmation();
+                widgets.navigate('shell.root');
+              }}
+            />
+          ) : (
+            <>
+              {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}
+              {view.items.map((item) => (
+                <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
+              ))}
+            </>
+          )}
         </div>
 
         {/*
@@ -810,6 +863,7 @@ export function ChatScreen({
                   autoComplete="off"
                   enterKeyHint="send"
                   onChange={(event) => {
+                    if (!view.composer.enabled) return;
                     setDraft(event.target.value);
                     setRefused(null);
                   }}
@@ -857,6 +911,7 @@ export function ChatScreen({
                 */}
                 <button
                   type="button"
+                  disabled={!view.composer.enabled}
                   aria-disabled={micUsable ? undefined : 'true'}
                   aria-label={voiceActionLabel(voiceView.state)}
                   title={voiceActionLabel(voiceView.state)}
@@ -897,6 +952,7 @@ export function ChatScreen({
                 <button
                   type="button"
                   aria-label="Отправить"
+                  disabled={!view.composer.enabled}
                   aria-disabled={!canSend}
                   onClick={() => send()}
                   style={{

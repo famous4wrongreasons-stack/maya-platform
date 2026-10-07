@@ -15,6 +15,8 @@ import type {
   BusinessSearchProjection,
   ChatProjection,
   ConversationHistoryProjection,
+  HistoryErasureCompletion,
+  HistoryErasureRequest,
   ChatWidgetResolution,
   EmailStartProjection,
   EmailVerifyProjection,
@@ -164,6 +166,26 @@ export const projectRefresh = (body: unknown): RefreshProjection | null => {
 };
 
 // ── conversation ───────────────────────────────────────────────────────────────────────────────
+
+/** Validate before authorization or URL construction; never invoke request getters. */
+export const projectHistoryErasureRequest = (request: unknown): HistoryErasureRequest | null => {
+  const conversationId = own(request, 'conversationId');
+  const requestId = own(request, 'requestId');
+  const uuid = (value: unknown): value is string => typeof value === 'string' && value.length === 36 && /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(value);
+  return uuid(conversationId) && uuid(requestId) ? { conversationId: conversationId.toLowerCase(), requestId: requestId.toLowerCase() } : null;
+};
+
+/** Only the exact canonical request can receive this immutable completion. */
+export const projectHistoryErasure = (body: unknown, request: HistoryErasureRequest): HistoryErasureCompletion | null => {
+  const expected = projectHistoryErasureRequest(request);
+  const requestId = own(body, 'requestId');
+  const conversationId = own(body, 'conversationId');
+  const erasedAt = own(body, 'erasedAt');
+  if (expected === null || own(body, 'contract') !== 'maya.privacy.history-erasure/1' || own(body, 'outcome') !== 'COMPLETED' || requestId !== expected.requestId || conversationId !== expected.conversationId || typeof erasedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(erasedAt)) return null;
+  const timestamp = Date.parse(erasedAt);
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString() !== erasedAt) return null;
+  return { contract: 'maya.privacy.history-erasure/1', outcome: 'COMPLETED', requestId, conversationId, erasedAt };
+};
 
 /** Current principal only. Copy text, never old widgets, receipts or action tokens. */
 export const projectConversationHistory = (body: unknown): ConversationHistoryProjection | null => {

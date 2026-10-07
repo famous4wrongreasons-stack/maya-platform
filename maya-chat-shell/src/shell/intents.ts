@@ -533,7 +533,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     const id = entry.envelope.widget_id;
     if (renderObservations.has(id)) return;
     const observe = deps.recordRender;
-    const pending = Promise.resolve().then(() => observe ? observe(entry.envelope) : false).catch(() => false);
+    const pending = Promise.resolve().then(() => entries.get(itemId) === entry && observe ? observe(entry.envelope) : false).catch(() => false);
     renderObservations.set(id, pending);
     void pending.then((ok) => { if (!ok && renderObservations.get(id) === pending) renderObservations.delete(id); });
   };
@@ -1088,6 +1088,11 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     for (const id of ids) release(id);
     // A cleared conversation (sign-out) is a new one: what it receives next is drawn afresh.
     if (reason === 'cleared') {
+      // Detail entries may never have had a timeline item. Release every capability and
+      // pending callback when the conversation lifetime ends, including privacy erasure.
+      for (const id of [...entries.keys()]) release(id);
+      vault.clear();
+      detailOpeners.clear();
       seen.clear();
       published.clear();
       renderObservations.clear();

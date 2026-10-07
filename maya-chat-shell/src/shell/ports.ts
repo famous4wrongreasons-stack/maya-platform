@@ -27,6 +27,9 @@ import type {
   ConversationHistoryProjection,
   ChatRequest,
   FirstRunFailure,
+  HistoryErasureRequest,
+  HistoryErasureCompletion,
+  HistoryErasureFailure,
   Outcome,
   SignedOutReason,
   SignInDisplay,
@@ -98,6 +101,8 @@ export type RenderFn = (input: RenderInput) => RenderResult;
 // ── network, as the shell reaches it ───────────────────────────────────────────────────────────
 
 export interface Transport {
+  /** Explicit privacy confirmation only. Absent on older embedded hosts. */
+  eraseConversation?(request: HistoryErasureRequest, signal: AbortSignal): Promise<Outcome<HistoryErasureCompletion, HistoryErasureFailure>>;
   /** Optional for older embedded hosts; the canonical network transport always implements it. */
   conversation?(signal: AbortSignal): Promise<Outcome<ConversationHistoryProjection, ChatFailure>>;
   chat(request: ChatRequest, signal: AbortSignal): Promise<Outcome<ChatProjection, ChatFailure>>;
@@ -263,7 +268,7 @@ export type TimelineItemView =
 
 export type ComposerState =
   | { readonly enabled: true }
-  | { readonly enabled: false; readonly reason: 'subscription_required' | 'tenant_required' | 'signed_out' };
+  | { readonly enabled: false; readonly reason: 'subscription_required' | 'tenant_required' | 'signed_out' | 'history_erasure' };
 
 export interface ConversationView {
   readonly items: readonly TimelineItemView[];
@@ -283,6 +288,27 @@ export interface ConversationPort {
   /** THE one path for typed and spoken text. */
   submitUserTurn(text: string, origin: TurnOrigin): SubmitResult;
   retry(itemId: string): void;
+}
+
+/** A presentation projection; no subject, tenant, request id or authority can be supplied by UI. */
+export interface PrivacyView {
+  readonly phase: 'idle' | 'confirming' | 'erasing' | 'uncertain' | 'refused' | 'completed';
+  /** A new current-conversation request can be confirmed, not permission for a retry. */
+  readonly available: boolean;
+  /** Local content lifetime only; clears composer drafts and selection without changing login. */
+  readonly localEpoch: number;
+  readonly failure: 'forbidden' | 'unavailable' | 'conflict' | 'invalid_request' | 'signed_out' | null;
+  readonly erasedAt: string | null;
+}
+
+export interface PrivacyPort {
+  view(): PrivacyView;
+  subscribe(listener: (view: PrivacyView) => void): Cancel;
+  requestConfirmation(): void;
+  cancelConfirmation(): void;
+  confirmErasure(): void;
+  /** Only an uncertain request, with its original immutable request/scope tuple. */
+  retry(): void;
 }
 
 // ── widgets, routes and the fullscreen host, as the DOM reaches them ───────────────────────────

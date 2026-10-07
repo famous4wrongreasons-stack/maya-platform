@@ -145,7 +145,7 @@ export const widgetSentence = (sentence: WidgetSentence): string => {
 
 /** Why the composer will not send (§1.4). The runtime decides this; the carrier only words it. */
 export const composerReason = (
-  reason: 'subscription_required' | 'tenant_required' | 'signed_out',
+  reason: 'subscription_required' | 'tenant_required' | 'signed_out' | 'history_erasure',
 ): string => {
   switch (reason) {
     case 'subscription_required':
@@ -154,6 +154,8 @@ export const composerReason = (
       return 'Для разговора с MAYA нужен вход в бизнес';
     case 'signed_out':
       return 'Войдите, чтобы написать MAYA';
+    case 'history_erasure':
+      return 'Разговор заблокирован до подтверждения удаления';
   }
 };
 
