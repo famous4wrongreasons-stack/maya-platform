@@ -5,6 +5,7 @@
 // function returns a string.
 
 import { WidgetEmitterService } from './emitter.service';
+import type { RequestTx } from '../authority/principal-view';
 import { createHash } from 'node:crypto';
 import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
@@ -15,6 +16,10 @@ import { SCHEDULE_AE, SCHEDULE_TEMPLATE } from './schedule-intent-template';
 import { servicePriceApprovalMintRequest } from '../pricing/service-price-approval.presenter';
 
 class FakePrisma {
+  $executeRaw = jest.fn().mockResolvedValue(1);
+  widgetTimelineTurn = {
+    findFirst: jest.fn().mockResolvedValue({ id: 'turn-1' }),
+  };
   public emissions: Record<string, unknown>[] = [];
   public records: Record<string, unknown>[] = [];
   public receipts: Record<string, unknown>[] = [];
@@ -66,7 +71,7 @@ class FakePrisma {
   $transaction = (work: (tx: FakePrisma) => Promise<unknown>) => work(this);
 }
 
-const make = () => {
+const make = (calendarSource: 'internal' | 'external' | null = null) => {
   const prisma = new FakePrisma();
   const seals = {
     seal: (terms: unknown) =>
@@ -87,13 +92,20 @@ const make = () => {
         ),
       ),
   };
+  const readCalendarSource = jest.fn().mockResolvedValue(calendarSource);
   return {
     prisma,
-    emitter: new WidgetEmitterService(prisma as never, seals as never, {
-      admits: () => Promise.resolve(true),
-      bindMint: () => Promise.resolve(),
-      canProject: () => Promise.resolve(true),
-    }),
+    readCalendarSource,
+    emitter: new WidgetEmitterService(
+      prisma as never,
+      seals as never,
+      {
+        admits: () => Promise.resolve(true),
+        bindMint: () => Promise.resolve(),
+        canProject: () => Promise.resolve(true),
+      },
+      { readCalendarSource },
+    ),
   };
 };
 
@@ -979,13 +991,8 @@ describe('K3 emission — mint, compose, fit, seal', () => {
 });
 
 it('refuses external-to-internal drift before a typed branch selector can be minted', async () => {
-  const { emitter, prisma } = make();
-  // The current calendar alone would say INTERNAL; the original read witness refuses the flip.
-  Object.assign(prisma, {
-    tenant: {
-      findUnique: jest.fn().mockResolvedValue({ calendarSource: 'internal' }),
-    },
-  });
+  const { emitter, prisma, readCalendarSource } = make('internal');
+  // Even a current INTERNAL source cannot replace the original read witness.
   const revalidateSource = jest
     .fn()
     .mockRejectedValue(new Error('ai_tool_availability_source_changed'));
@@ -1020,6 +1027,7 @@ it('refuses external-to-internal drift before a typed branch selector can be min
   ).rejects.toThrow('ai_tool_availability_source_changed');
   expect(prisma.emissions).toHaveLength(0);
   expect(revalidateSource).toHaveBeenCalledTimes(1);
+  expect(readCalendarSource).not.toHaveBeenCalled();
 });
 
 it('cancels the exact minted selector if the final source check fails', async () => {
@@ -1059,3 +1067,87 @@ it('cancels the exact minted selector if the final source check fails', async ()
   expect(prisma.emissions[0].lifecycleState).toBe('CANCELLED');
   expect(revalidateSource).toHaveBeenCalledTimes(2);
 });
+
+describe('erasure admission at the one minter', () => {
+  it('refuses a delayed emission after its exact parent was erased', async () => {
+    const { prisma, emitter } = make();
+    prisma.widgetTimelineTurn.findFirst.mockResolvedValue(null);
+    await expect(emitter.emit(req())).rejects.toThrow(
+      'emission_turn_unavailable',
+    );
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.widgetTimelineTurn.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          tenantId: 't1',
+          id: 'turn-1',
+          conversationId: 'c1',
+          principalProofHash: 'p'.repeat(64),
+          erasedAt: null,
+        }) as unknown,
+      }),
+    );
+    expect(prisma.emissions).toHaveLength(0);
+    expect(prisma.records).toHaveLength(0);
+    expect(prisma.receipts).toHaveLength(0);
+  });
+
+  it('reuses the caller transaction through parent validation and all C writes', async () => {
+    const { prisma, emitter } = make();
+    const tx = new FakePrisma();
+    const transaction = jest.spyOn(prisma, '$transaction');
+    await emitter.emit(req(), new Date(), tx as unknown as RequestTx);
+    expect(transaction).not.toHaveBeenCalled();
+    expect(prisma.emissions).toHaveLength(0);
+    expect(tx.$executeRaw).toHaveBeenCalledTimes(1);
+    expect(tx.emissions).toHaveLength(1);
+    expect(tx.receipts).toHaveLength(1);
+  });
+});
+
+it.each(['internal', 'external', null] as const)(
+  'uses the canonical %s source projection for branch slots',
+  async (calendarSource) => {
+    const { emitter, prisma, readCalendarSource } = make(calendarSource);
+    const pending = emitter.emitBookingSelector(
+      {
+        ...req(),
+        kind: 'TIME_SLOT_SELECTOR',
+        composerInput: composerFor(
+          'TIME_SLOT_SELECTOR',
+          'booking.availability.read',
+          [],
+        ),
+      },
+      {
+        source: {
+          timezone: 'UTC',
+          slots: [
+            {
+              staff_id: '71',
+              branch_id: 'branch',
+              start: '2035-01-01T10:00:00Z',
+              end: '2035-01-01T11:00:00Z',
+            },
+          ],
+        },
+        inheritedHandles: { service: 'service', staff: 'staff' },
+        revalidateSource: () => Promise.resolve(),
+      },
+    );
+    if (calendarSource === 'internal') {
+      await expect(pending).resolves.toMatchObject({
+        kind: 'TIME_SLOT_SELECTOR',
+      });
+      expect(prisma.emissions).toHaveLength(1);
+    } else {
+      // External branch slots without the originating branch/revision witness
+      // remain unavailable; missing owner facts never default to INTERNAL.
+      await expect(pending).rejects.toThrow(
+        'booking_selector_source_unavailable',
+      );
+      expect(prisma.emissions).toHaveLength(0);
+    }
+    expect(readCalendarSource).toHaveBeenCalledWith('t1');
+  },
+);

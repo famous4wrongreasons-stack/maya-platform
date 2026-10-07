@@ -68,7 +68,7 @@ export const timelineLockKey = (
 
 export class TimelineStore {
   constructor(
-    private readonly prisma: PrismaService | TimelineClient,
+    private readonly prisma: PrismaService,
     private readonly encryption?: ChatReplyCipher,
   ) {}
 
@@ -483,7 +483,18 @@ export class TimelineStore {
     input: TimelineTurnInput,
     now = new Date(),
   ): Promise<{ id: string }> {
-    return this.insertTurn(this.prisma, input, now);
+    return this.prisma.$transaction(
+      async (tx) => {
+        await TimelineStore.lockConversation(
+          tx,
+          input.tenantId,
+          input.conversationId,
+        );
+        await TimelineStore.assertNotErased(tx, input);
+        return this.insertTurn(tx, input, now);
+      },
+      { isolationLevel: 'ReadCommitted' },
+    );
   }
 
   /**
@@ -494,45 +505,72 @@ export class TimelineStore {
     input: Omit<TimelineTurnInput, 'role'>,
     now = new Date(),
   ): Promise<{ id: string; principalProofHash: string }> {
-    const existing = await this.prisma.widgetTimelineTurn.findFirst({
+    return this.prisma.$transaction(
+      async (tx) => {
+        await TimelineStore.lockConversation(
+          tx,
+          input.tenantId,
+          input.conversationId,
+        );
+        await TimelineStore.assertNotErased(tx, input);
+        const existing = await tx.widgetTimelineTurn.findFirst({
+          where: scoped(input.tenantId, {
+            conversationId: input.conversationId,
+            turnIndex: input.turnIndex,
+          }),
+          select: {
+            id: true,
+            principalProofHash: true,
+            erasedAt: true,
+            retentionUntil: true,
+          },
+        });
+        if (existing !== null) {
+          if (existing.erasedAt !== null || existing.retentionUntil <= now)
+            throw new ConflictException('conversation_scope_conflict');
+          return {
+            id: existing.id,
+            principalProofHash: existing.principalProofHash,
+          };
+        }
+        return tx.widgetTimelineTurn.create({
+          data: {
+            tenantId: input.tenantId,
+            conversationId: input.conversationId,
+            turnIndex: input.turnIndex,
+            role: 'assistant',
+            principalProofHash: input.principalProofHash,
+            channel: input.channel,
+            createdAt: now,
+            retentionUntil: this.plusDays(now, RETENTION.timelineDays),
+            textContent: input.textContent ?? null,
+            spokenTranscript: input.spokenTranscript ?? null,
+          },
+          select: { id: true, principalProofHash: true },
+        });
+      },
+      { isolationLevel: 'ReadCommitted' },
+    );
+  }
+
+  /** After erasure, late generic producers cannot reopen the same principal's transcript. */
+  private static async assertNotErased(
+    tx: Pick<TimelineClient, 'widgetTimelineTurn'>,
+    input: Pick<
+      TimelineTurnInput,
+      'tenantId' | 'conversationId' | 'principalProofHash'
+    >,
+  ): Promise<void> {
+    const erased = await tx.widgetTimelineTurn.findFirst({
       where: scoped(input.tenantId, {
         conversationId: input.conversationId,
-        turnIndex: input.turnIndex,
+        principalProofHash: input.principalProofHash,
+        erasedAt: { not: null },
       }),
-      select: { id: true, principalProofHash: true },
+      select: { id: true },
     });
-    if (existing !== null) return existing;
-    try {
-      return await this.prisma.widgetTimelineTurn.create({
-        data: {
-          tenantId: input.tenantId,
-          conversationId: input.conversationId,
-          turnIndex: input.turnIndex,
-          role: 'assistant',
-          principalProofHash: input.principalProofHash,
-          channel: input.channel,
-          createdAt: now,
-          retentionUntil: this.plusDays(now, RETENTION.timelineDays),
-          textContent: input.textContent ?? null,
-          spokenTranscript: input.spokenTranscript ?? null,
-        },
-        select: { id: true, principalProofHash: true },
-      });
-    } catch (error) {
-      // A concurrent producer may win the unique tenant/conversation/index
-      // constraint. Read that exact tenant-fenced winner; every other failure
-      // remains a real store fault.
-      if (!isUniqueConstraint(error)) throw error;
-      const winner = await this.prisma.widgetTimelineTurn.findFirst({
-        where: scoped(input.tenantId, {
-          conversationId: input.conversationId,
-          turnIndex: input.turnIndex,
-        }),
-        select: { id: true, principalProofHash: true },
-      });
-      if (winner === null) throw error;
-      return winner;
-    }
+    if (erased !== null)
+      throw new ConflictException('conversation_scope_conflict');
   }
 
   /**
@@ -834,8 +872,3 @@ export class TimelineStore {
     }));
   }
 }
-
-const isUniqueConstraint = (error: unknown): boolean =>
-  typeof error === 'object' &&
-  error !== null &&
-  (error as { code?: unknown }).code === 'P2002';

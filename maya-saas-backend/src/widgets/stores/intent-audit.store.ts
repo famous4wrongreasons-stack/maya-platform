@@ -9,6 +9,7 @@ import { isPostgresSerializationConflict } from '../../common/postgres-transacti
 import { PrismaService } from '../../prisma/prisma.service';
 import { reasonTextOrNull } from '../rendering/reason-text';
 import { scoped } from './tenant-scope';
+import { TimelineStore } from './timeline.store';
 
 export class IntentAuditStore {
   constructor(private readonly prisma: PrismaService) {}
@@ -33,25 +34,93 @@ export class IntentAuditStore {
     },
     now = new Date(),
   ): Promise<{ id: string }> {
-    return this.prisma.widgetIntentSubmissionAudit.create({
-      data: {
-        tenantId: input.tenantId,
-        widgetId: input.widgetId,
-        intentTokenHash: input.intentTokenHash,
-        clientNonce: input.clientNonce,
-        profileId: input.profileId,
-        clientEmittedAt: input.clientEmittedAt ?? null,
-        receivedAt: now,
-        readbackRef: input.readbackRef ?? null,
-        readbackBodyHash: input.readbackBodyHash ?? null,
-        readbackAffirmation: input.readbackAffirmation ?? null,
-        // Closed-domain values only. Free text and PII have their own columns and their own fences
-        // in K4; writing them here would put unvalidated input into the audit trail.
-        inputsClosedJson: (input.inputsClosed ?? null) as never,
-        spokenTranscript: input.spokenTranscript ?? null,
+    const create = (
+      db: Pick<PrismaService, 'widgetIntentSubmissionAudit'>,
+      retainContent: boolean,
+    ) =>
+      db.widgetIntentSubmissionAudit.create({
+        data: {
+          tenantId: input.tenantId,
+          widgetId: input.widgetId,
+          intentTokenHash: input.intentTokenHash,
+          clientNonce: input.clientNonce,
+          profileId: input.profileId,
+          clientEmittedAt: input.clientEmittedAt ?? null,
+          receivedAt: now,
+          readbackRef: input.readbackRef ?? null,
+          readbackBodyHash: input.readbackBodyHash ?? null,
+          readbackAffirmation: retainContent
+            ? (input.readbackAffirmation ?? null)
+            : null,
+          // Closed-domain values only. Free text and PII have their own columns and their own fences
+          // in K4; writing them here would put unvalidated input into the audit trail.
+          inputsClosedJson: (input.inputsClosed ?? null) as never,
+          spokenTranscript: retainContent
+            ? (input.spokenTranscript ?? null)
+            : null,
+        },
+        select: { id: true },
+      });
+    // Closed selections and readback references are retained audit facts. Their
+    // write does not depend on conversation content surviving an erasure.
+    if (input.readbackAffirmation == null && input.spokenTranscript == null)
+      return create(this.prisma, false);
+
+    return this.prisma.$transaction(
+      async (tx) => {
+        const readParent = () =>
+          tx.widgetIntentRecord.findFirst({
+            where: scoped(input.tenantId, {
+              widgetId: input.widgetId,
+              intentTokenHash: input.intentTokenHash,
+            }),
+            // Only retained scope/lifecycle metadata, never transcript or body.
+            select: {
+              principalProofHash: true,
+              erasedAt: true,
+              emission: {
+                select: {
+                  erasedAt: true,
+                  turn: {
+                    select: {
+                      id: true,
+                      conversationId: true,
+                      principalProofHash: true,
+                      erasedAt: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+        const initial = await readParent();
+        if (initial === null) return create(tx, false);
+        const turn = initial.emission.turn;
+        await TimelineStore.lockConversation(
+          tx,
+          input.tenantId,
+          turn.conversationId,
+        );
+        // Separate post-lock statement: READ COMMITTED must observe an erasure
+        // which completed while this writer waited for the conversation lock.
+        const current = await readParent();
+        const retainContent =
+          current !== null &&
+          current.erasedAt === null &&
+          current.emission.erasedAt === null &&
+          current.emission.turn.erasedAt === null &&
+          current.emission.turn.id === turn.id &&
+          current.emission.turn.conversationId === turn.conversationId &&
+          current.principalProofHash === initial.principalProofHash &&
+          current.principalProofHash === turn.principalProofHash &&
+          current.principalProofHash ===
+            current.emission.turn.principalProofHash;
+        // Erasure must not discard the fact that a submission arrived. A late
+        // writer keeps its audit fields while leaving all content fields empty.
+        return create(tx, retainContent);
       },
-      select: { id: true },
-    });
+      { isolationLevel: 'ReadCommitted' },
+    );
   }
 
   // K3 builds the receipt shell: one adjudication per token, with a closed refusal vocabulary. The

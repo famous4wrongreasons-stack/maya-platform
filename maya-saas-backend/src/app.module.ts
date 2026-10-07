@@ -48,6 +48,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
 import { SubscriptionAccessGuard } from './guards/subscription-access.guard';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrivacyModule } from './privacy/privacy.module';
 import { QuotaGuard } from './quotas/quota.guard';
 import { QuotasModule } from './quotas/quotas.module';
 import { RecoveryModule } from './recovery/recovery.module';
@@ -95,6 +96,7 @@ import { SystemMetricsService } from './system-metrics.service';
     // `widgets.runtime`, which no plan grants, so the runtime is dark. Registering it is what makes
     // the gate pipeline testable.
     WidgetsModule,
+    PrivacyModule,
     CustomerSubscriptionsModule,
     CustomerPortalModule,
     DashboardPreferencesModule,

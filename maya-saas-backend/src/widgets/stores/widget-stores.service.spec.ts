@@ -31,15 +31,28 @@ const recordingPrisma = (result: unknown, reply?: Reply) => {
     {},
     {
       get: (_t, model: string) =>
-        new Proxy(
-          {},
-          {
-            get: (_m, op: string) => (args: unknown) => {
-              calls.push({ model, op, args });
-              return Promise.resolve(reply ? reply(model, op, args) : result);
-            },
-          },
-        ),
+        model === '$transaction'
+          ? (work: (tx: unknown) => unknown) => work(prisma)
+          : model === '$executeRaw'
+            ? () => Promise.resolve(1)
+            : new Proxy(
+                {},
+                {
+                  get: (_m, op: string) => (args: unknown) => {
+                    calls.push({ model, op, args });
+                    if (
+                      model === 'widgetTimelineTurn' &&
+                      op === 'findFirst' &&
+                      (args as { where?: { erasedAt?: unknown } }).where
+                        ?.erasedAt
+                    )
+                      return Promise.resolve(null);
+                    return Promise.resolve(
+                      reply ? reply(model, op, args) : result,
+                    );
+                  },
+                },
+              ),
     },
   );
   return { prisma, calls };
@@ -76,10 +89,11 @@ describe('WidgetStoresService — every existing method sends what it sent befor
         NOW,
       );
       expect(row).toEqual({ id: 'row-1' });
-      expect(calls).toHaveLength(1);
-      expect(calls[0].model).toBe('widgetTimelineTurn');
-      expect(calls[0].op).toBe('create');
-      expect(exactly(calls[0].args)).toBe(
+      expect(calls).toHaveLength(2);
+      const insert = calls[1];
+      expect(insert.model).toBe('widgetTimelineTurn');
+      expect(insert.op).toBe('create');
+      expect(exactly(insert.args)).toBe(
         exactly({
           data: {
             tenantId: 't-1',
@@ -112,7 +126,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
         spokenTranscript: 'spoken',
       });
       const data = (
-        calls[0].args as {
+        calls[1].args as {
           data: {
             createdAt: Date;
             retentionUntil: Date;
@@ -295,7 +309,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
       );
     });
 
-    it('recordSubmission passes every supplied member through', async () => {
+    it('recordSubmission passes retained A members through without conversation content', async () => {
       const { stores, calls } = storesOver();
       const emitted = new Date('2026-09-17T09:59:00.000Z');
       await stores.recordSubmission(
@@ -308,9 +322,9 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           clientEmittedAt: emitted,
           readbackRef: 'rb',
           readbackBodyHash: 'bh',
-          readbackAffirmation: 'yes',
+          readbackAffirmation: null,
           inputsClosed: { slot: ['a'] },
-          spokenTranscript: 'st',
+          spokenTranscript: null,
         },
         NOW,
       );
@@ -326,9 +340,9 @@ describe('WidgetStoresService — every existing method sends what it sent befor
             receivedAt: NOW,
             readbackRef: 'rb',
             readbackBodyHash: 'bh',
-            readbackAffirmation: 'yes',
+            readbackAffirmation: null,
             inputsClosedJson: { slot: ['a'] },
-            spokenTranscript: 'st',
+            spokenTranscript: null,
           },
           select: { id: true },
         }),
@@ -677,38 +691,47 @@ describe('WidgetStoresService — every existing method sends what it sent befor
   });
 
   describe('4. server-owned draft store', () => {
-    it('putDraft writes the draft with its expiry computed from the ttl', async () => {
+    it('creates reference-only drafts without any JSON payload', async () => {
       const { stores, calls } = storesOver();
-      await stores.putDraft(
-        {
-          tenantId: 't-1',
-          draftRef: 'd-1',
-          draftClass: 'booking',
-          ownerCapabilitySpace: 'AE',
-          ownerCapabilityKey: 'appointments.create',
-          principalProofHash: 'p',
-          diff: { a: 1 },
-          ttlSeconds: 90,
-        },
-        NOW,
+      await stores.putDraft({
+        tenantId: 't-1',
+        draftRef: 'd-1',
+        draftClass: 'task',
+        ownerCapabilitySpace: 'C9',
+        ownerCapabilityKey: 'c9.booking.propose',
+        principalProofHash: 'p',
+        diff: null,
+        ttlSeconds: 90,
+      });
+      expect(calls).toHaveLength(1);
+      expect(calls[0]).toMatchObject({
+        model: 'widgetDraft',
+        op: 'create',
+        args: { data: { draftRef: 'd-1', principalProofHash: 'p' } },
+      });
+      expect((calls[0].args as { data: object }).data).not.toHaveProperty(
+        'diffJson',
       );
-      expect(`${calls[0].model}.${calls[0].op}`).toBe('widgetDraft.create');
-      expect(exactly(calls[0].args)).toBe(
-        exactly({
-          data: {
+    });
+
+    it('refuses unlinked draft content before writing any row', async () => {
+      const { stores, calls } = storesOver();
+      await expect(
+        stores.putDraft(
+          {
             tenantId: 't-1',
             draftRef: 'd-1',
-            draftClass: 'booking',
-            ownerCapabilitySpace: 'AE',
-            ownerCapabilityKey: 'appointments.create',
+            draftClass: 'task',
+            ownerCapabilitySpace: 'C9',
+            ownerCapabilityKey: 'c9.booking.propose',
             principalProofHash: 'p',
-            diffJson: { a: 1 },
-            createdAt: NOW,
-            expiresAt: new Date(NOW.getTime() + 90_000),
+            diff: { synthetic: 'unlinked content' },
+            ttlSeconds: 90,
           },
-          select: { id: true },
-        }),
-      );
+          NOW,
+        ),
+      ).rejects.toThrow('draft_content_scope_required');
+      expect(calls).toEqual([]);
     });
 
     it('readDraft filters principal, consumption, erasure and expiry in the query, tenant-scoped', async () => {
@@ -1040,4 +1063,52 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     ]);
     expect(membersOf(3)).toEqual(['read']);
   });
+});
+
+describe('generic timeline writers after history erasure', () => {
+  it.each(['appendTurn', 'ensureAssistantTurn'] as const)(
+    '%s cannot resurrect an erased conversation',
+    async (method) => {
+      const tx = {
+        $executeRaw: jest.fn().mockResolvedValue(1),
+        widgetTimelineTurn: {
+          findFirst: jest.fn().mockResolvedValue({ id: 'erased-anchor' }),
+          create: jest.fn(),
+        },
+      };
+      const prisma = {
+        $transaction: jest.fn((work: (value: typeof tx) => unknown) =>
+          work(tx),
+        ),
+      };
+      const stores = new WidgetStoresService(prisma as never);
+      await expect(
+        stores[method]({
+          tenantId: 'tenant-a',
+          conversationId: 'conversation-a',
+          principalProofHash: 'proof-a',
+          turnIndex: 100,
+          channel: 'pwa',
+          role: 'assistant',
+          textContent: 'late reply',
+        }),
+      ).rejects.toThrow('conversation_scope_conflict');
+      expect(tx.$executeRaw.mock.invocationCallOrder[0]).toBeLessThan(
+        tx.widgetTimelineTurn.findFirst.mock.invocationCallOrder[0],
+      );
+      expect(tx.widgetTimelineTurn.findFirst).toHaveBeenCalledWith({
+        where: {
+          tenantId: 'tenant-a',
+          conversationId: 'conversation-a',
+          principalProofHash: 'proof-a',
+          erasedAt: { not: null },
+        },
+        select: { id: true },
+      });
+      expect(tx.widgetTimelineTurn.create).not.toHaveBeenCalled();
+      expect(prisma.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+        isolationLevel: 'ReadCommitted',
+      });
+    },
+  );
 });

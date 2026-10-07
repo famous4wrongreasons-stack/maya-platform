@@ -1,5 +1,5 @@
 // Finite RT6 PostgreSQL proof; reuse the existing owned-cluster command/cleanup owner.
-// Requires the parent's heavy slot. No browser, HTTP listener, model or provider call.
+// Requires the parent's heavy slot. Own loopback HTTP listener only; no browser, model or provider call.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -38,13 +38,13 @@ const setup = proofCommands({ pgBin, cluster, log: path.join(values.output, 'pos
   .filter((command) => allowedSetup.has(command.name));
 assert.equal(setup.length, 4);
 const commands = [...setup, {
-  name: 'erasure-pg', command: process.execPath,
-  args: ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/erasure-ordering.live-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'erasure-pg-jest.json')],
+  name: 'erasure-pg', command: process.execPath, timeoutMs: 300_000,
+  args: ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/erasure-ordering.live-spec.ts', 'test/widgets-live/history-erasure-writers.live-spec.ts', 'test/widgets-live/history-erasure-http.live-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'erasure-pg-jest.json')],
 }];
 const manifest = {
   contract: 'maya.history-erasure-owned-cluster/1', commit, sourceTrees, cluster, database, port,
   status: 'running', completed: [], clusterStopped: false,
-  scope: 'RT6 storage and gateway fixture only; not HTTP/privacy admission or RT8 completion',
+  scope: 'RT6 storage/gateway, late writer and current privacy HTTP fixtures; fresh Nest application restart, not a deployed binary; RT8 UI/product acceptance remains open',
   sourceBinding: 'Committed src/test/scripts/prisma trees; installed dependencies are not hashed',
   expectedExternalProviderCalls: 0, expectedModelCalls: 0, externalEgressMeasured: false, fixtureData: 'synthetic-only',
   resources: { nodeHeapMiB: 3072, pgSharedBuffersMiB: 64, pgWorkMemMiB: 4, pgMaxConnections: 30, jestWorkers: 1 },
@@ -69,7 +69,7 @@ try {
     manifest.completed.push(command.name); save();
   }
   const result = JSON.parse(fs.readFileSync(path.join(values.output, 'erasure-pg-jest.json'), 'utf8'));
-  assert.equal(result.numPassedTests, 7);
+  assert.equal(result.numPassedTests, 17);
   assert.equal(result.numFailedTests, 0);
   assert.equal(result.numPendingTests, 0);
   assert.equal(result.success, true);

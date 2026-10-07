@@ -1,5 +1,8 @@
 import { encodeBookingCatalogOwnerRef } from '../booking/booking-noun-identity';
-import { ServiceUnavailableException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { SealService } from '../emission/seal.service';
 import { BookingSelectorAdapter } from './booking-selector.adapter';
 
@@ -61,6 +64,54 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         ownerRef,
       },
     ])[noun];
+
+  it.each(['internal', 'external'] as const)(
+    'projects the canonical %s calendar without a tool or availability read',
+    async (source) => {
+      const runtime = { execute: jest.fn() };
+      const crm = { getCalendarSource: jest.fn().mockResolvedValue(source) };
+      const adapter = new BookingSelectorAdapter(
+        runtime as never,
+        availability as never,
+        crm as never,
+      );
+
+      await expect(adapter.readCalendarSource(TENANT)).resolves.toBe(source);
+      expect(crm.getCalendarSource).toHaveBeenCalledTimes(1);
+      expect(crm.getCalendarSource).toHaveBeenCalledWith(TENANT);
+      expect(runtime.execute).not.toHaveBeenCalled();
+      expect(availability.nextAvailabilityDay).not.toHaveBeenCalled();
+    },
+  );
+
+  it('has no internal-calendar fallback when the canonical owner is absent', async () => {
+    const runtime = { execute: jest.fn() };
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+    );
+
+    await expect(adapter.readCalendarSource(TENANT)).resolves.toBeNull();
+    expect(runtime.execute).not.toHaveBeenCalled();
+    expect(availability.nextAvailabilityDay).not.toHaveBeenCalled();
+  });
+
+  it('propagates the canonical owner tenant denial without a fallback or retry', async () => {
+    const denial = new ForbiddenException('Tenant scope mismatch');
+    const runtime = { execute: jest.fn() };
+    const crm = { getCalendarSource: jest.fn().mockRejectedValue(denial) };
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+      crm as never,
+    );
+
+    await expect(adapter.readCalendarSource(OTHER_TENANT)).rejects.toBe(denial);
+    expect(crm.getCalendarSource).toHaveBeenCalledTimes(1);
+    expect(crm.getCalendarSource).toHaveBeenCalledWith(OTHER_TENANT);
+    expect(runtime.execute).not.toHaveBeenCalled();
+    expect(availability.nextAvailabilityDay).not.toHaveBeenCalled();
+  });
 
   it('reads staff through the existing policy/runtime and never accepts a raw service id', async () => {
     const runtime = {

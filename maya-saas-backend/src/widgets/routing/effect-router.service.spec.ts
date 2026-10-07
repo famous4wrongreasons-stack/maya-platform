@@ -9,6 +9,7 @@ import type { GateContext, PrincipalView } from '../gate.types';
 import { ctx, rec } from '../gates/gate-fixtures.spec-helper.spec';
 import { EffectRouterService, ROUTABLE_EFFECTS } from './effect-router.service';
 import { SCHEDULE_AE } from '../emission/schedule-intent-template';
+import { mintBookingCreateFactsRef } from '../booking/booking-create-facts-ref';
 
 const PRINCIPAL: PrincipalView = {
   authority: {
@@ -1034,85 +1035,148 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     );
   });
 
-  it('FBE2E-2 TIME_SLOT_SELECTOR creates an existing server draft and confirmation without client-selected capability', async () => {
-    const { router, bookingPropose, bookingMinter, stores } = fixture();
-    bookingPropose.proposeCreateSelection.mockResolvedValue({
-      outcome: {
-        receiptOutcome: 'ACCEPTED',
-        refusalCode: null,
-        actionReceiptRef: null,
-        nextEnvelope: null,
-        resolvedWidget: null,
-        ownerDecision: {
-          kind: 'booking_preview',
-          preview: {
-            subject: 'create',
-            sourceCapabilityKey: 'appointments.own.create',
+  it.each(['minted', 'mint-failed', 'delayed-draft-write'] as const)(
+    'FBE2E-2 TIME_SLOT_SELECTOR keeps only audit draft metadata when confirmation is %s',
+    async (completion) => {
+      const { router, bookingPropose, bookingMinter, stores } = fixture();
+      const draftRef = mintBookingCreateFactsRef('b'.repeat(64));
+      const mintFailure = new Error('confirmation_mint_failed');
+      if (completion === 'mint-failed')
+        bookingMinter.mint.mockRejectedValue(mintFailure);
+      let releaseDraft!: () => void;
+      let enteredDraft!: () => void;
+      const draftStarted = new Promise<void>((resolve) => {
+        enteredDraft = resolve;
+      });
+      const draftReleased = new Promise<void>((resolve) => {
+        releaseDraft = resolve;
+      });
+      if (completion === 'delayed-draft-write')
+        stores.putDraft.mockImplementation(async () => {
+          enteredDraft();
+          await draftReleased;
+          return { id: 'draft-1' };
+        });
+      bookingPropose.proposeCreateSelection.mockResolvedValue({
+        outcome: {
+          receiptOutcome: 'ACCEPTED',
+          refusalCode: null,
+          actionReceiptRef: null,
+          nextEnvelope: null,
+          resolvedWidget: null,
+          ownerDecision: {
+            kind: 'booking_preview',
+            preview: {
+              subject: 'create',
+              sourceCapabilityKey: 'appointments.own.create',
+              frozenArgumentHandles: {
+                service: 'opaque-service',
+                staff: 'opaque-staff',
+                slot: 'opaque-slot',
+              },
+              draftRef,
+              appointmentRef: null,
+              producingIntentTokenHash: null,
+              when: '2026-06-02T10:00:00.000Z',
+              whenPrevious: null,
+              serviceLabel: 'Service',
+              staffLabel: 'Staff',
+              durationMinutes: 60,
+              priceKopecks: 100000,
+              currency: 'RUB',
+              fact: { capability: 'appointments.own.create' },
+            },
+          },
+        },
+        values: new Map([
+          ['service', 'service-1'],
+          ['staff', 'staff-1'],
+          ['slot', '2026-06-02T10:00:00.000Z'],
+          ['branch', 'branch-1'],
+          ['branch_source_revision', 'c'.repeat(64)],
+        ]),
+      });
+      const input = ctx(
+        rec({
+          effect: 'DRAFT',
+          widgetKind: 'TIME_SLOT_SELECTOR',
+          capabilitySpace: 'C9',
+          capabilityKey: 'appointments.own.create',
+          frozenNounsJson: {
+            service: 'opaque-service',
+            staff: 'opaque-staff',
+          },
+        }),
+        {
+          principal: PRINCIPAL,
+          facts: {
+            validatedInputs: {
+              closed: new Map([['slot_ref', ['opaque-slot']]]),
+            },
+          },
+        },
+      );
+      const result = routeEffect(router, input);
+      if (completion === 'delayed-draft-write') {
+        await draftStarted;
+        expect(bookingMinter.mint).not.toHaveBeenCalled();
+        // Even before the write completes, there are no copied bytes for a
+        // concurrent erasure to miss or for a late write to bring back.
+        expect(stores.putDraft).toHaveBeenCalledWith(
+          expect.objectContaining({ draftRef, diff: null }),
+          input.now,
+        );
+        releaseDraft();
+      }
+      if (completion === 'mint-failed') {
+        await expect(result).rejects.toBe(mintFailure);
+        expect(stores.writeReceipt).not.toHaveBeenCalled();
+      } else {
+        await expect(result).resolves.toMatchObject({
+          outcome: 'terminate',
+          route: { next_envelope: { widget_id: 'w-confirmation' } },
+        });
+      }
+      expect(bookingPropose.proposeCreateSelection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          handles: {
+            service: 'opaque-service',
+            staff: 'opaque-staff',
+            slot: 'opaque-slot',
+          },
+        }),
+      );
+      expect(stores.putDraft).toHaveBeenCalledTimes(1);
+      expect(stores.putDraft).toHaveBeenCalledWith(
+        {
+          tenantId: 't1',
+          draftRef,
+          draftClass: 'task',
+          ownerCapabilitySpace: 'C9',
+          ownerCapabilityKey: 'c9.booking.propose',
+          principalProofHash: PRINCIPAL.proofHash,
+          diff: null,
+          ttlSeconds: 900,
+        },
+        input.now,
+      );
+      expect(bookingMinter.mint).toHaveBeenCalledTimes(1);
+      expect(bookingMinter.mint).toHaveBeenCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({
+            draftRef,
             frozenArgumentHandles: {
               service: 'opaque-service',
               staff: 'opaque-staff',
               slot: 'opaque-slot',
             },
-            draftRef: 'draft-ref',
-            appointmentRef: null,
-            producingIntentTokenHash: null,
-            when: '2026-06-02T10:00:00.000Z',
-            whenPrevious: null,
             serviceLabel: 'Service',
             staffLabel: 'Staff',
-            durationMinutes: 60,
-            priceKopecks: 100000,
-            currency: 'RUB',
-            fact: { capability: 'appointments.own.create' },
-          },
-        },
-      },
-      values: new Map([
-        ['service', 'service-1'],
-        ['staff', 'staff-1'],
-        ['slot', '2026-06-02T10:00:00.000Z'],
-      ]),
-    });
-    await expect(
-      routeEffect(
-        router,
-        ctx(
-          rec({
-            effect: 'DRAFT',
-            widgetKind: 'TIME_SLOT_SELECTOR',
-            capabilitySpace: 'C9',
-            capabilityKey: 'appointments.own.create',
-            frozenNounsJson: {
-              service: 'opaque-service',
-              staff: 'opaque-staff',
-            },
-          }),
-          {
-            principal: PRINCIPAL,
-            facts: {
-              validatedInputs: {
-                closed: new Map([['slot_ref', ['opaque-slot']]]),
-              },
-            },
-          },
-        ),
-      ),
-    ).resolves.toMatchObject({
-      outcome: 'terminate',
-      route: { next_envelope: { widget_id: 'w-confirmation' } },
-    });
-    expect(bookingPropose.proposeCreateSelection).toHaveBeenCalledWith(
-      expect.objectContaining({
-        handles: {
-          service: 'opaque-service',
-          staff: 'opaque-staff',
-          slot: 'opaque-slot',
-        },
-      }),
-    );
-    expect(stores.putDraft).toHaveBeenCalledTimes(1);
-    expect(bookingMinter.mint).toHaveBeenCalledTimes(1);
-  });
+          }) as unknown,
+        }),
+      );
+    },
+  );
 
   it('FBE2E-2 fails closed when a selector input or inherited handle set is not exact', async () => {
     const { router, bookingSelectors, bookingPropose } = fixture();

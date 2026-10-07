@@ -24,7 +24,8 @@ import {
 } from '../booking/booking-noun-identity';
 import { presentPersonalSchedule } from '../booking/personal-schedule.presenter';
 import type { PersonalScheduleSource } from '../owner-ports/personal-schedule.port';
-import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import { BOOKING_SELECTOR_OWNER, WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import type { BookingSelectorOwnerPort } from '../routing/effect-router.ports';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 // P-MINT — the single compose → type → fit → seal → record pipeline.
 //
@@ -45,6 +46,8 @@ import { profileFor } from '../carriers/channel-profile';
 import { fit } from '../carriers/fitter';
 import { stableActionJson } from '../authority/contract-bindings';
 import type { PrincipalView } from '../gate.types';
+import type { RequestTx } from '../authority/principal-view';
+import { TimelineStore } from '../stores/timeline.store';
 import { assertNoForbiddenKeys } from '../validation/f88-walk';
 import { assertComposerInput } from './envelope-validator';
 import {
@@ -177,6 +180,11 @@ export class WidgetEmitterService {
     private readonly seals: SealService,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Inject(BOOKING_SELECTOR_OWNER)
+    private readonly selectorOwner?: Pick<
+      BookingSelectorOwnerPort,
+      'readCalendarSource'
+    >,
   ) {}
 
   /**
@@ -184,8 +192,28 @@ export class WidgetEmitterService {
    * one server-resolved authority view. The rest of `request` is transport/store context already
    * owned by the emission service, and contains no effect or target member.
    */
-  async emit(request: MintRequest, now = new Date()): Promise<SealedEmission> {
-    return this.emitInternal(request, now, null, null, null);
+  async emit(
+    request: MintRequest,
+    now = new Date(),
+    tx?: RequestTx,
+  ): Promise<SealedEmission> {
+    return this.emitInternal(
+      request,
+      now,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      tx,
+    );
   }
 
   /** BS-1: canonical personal read and handle production, never a caller-selected Client/id. */
@@ -194,6 +222,7 @@ export class WidgetEmitterService {
     source: PersonalScheduleSource,
     now = new Date(),
     parentWidgetId: string | null = null,
+    tx?: RequestTx,
   ): Promise<SealedEmission> {
     if (
       request.kind !== 'SCHEDULE' ||
@@ -229,6 +258,10 @@ export class WidgetEmitterService {
       null,
       null,
       parentWidgetId,
+      null,
+      null,
+      null,
+      tx,
     );
   }
 
@@ -307,6 +340,7 @@ export class WidgetEmitterService {
     request: MintRequest,
     selector: BookingSelectorContext,
     now = new Date(),
+    tx?: RequestTx,
   ): Promise<SealedEmission> {
     if (
       request.kind !== 'SERVICE_SELECTOR' &&
@@ -388,15 +422,13 @@ export class WidgetEmitterService {
     if (hasBranchSlots && !selector.revalidateSource)
       throw new IntentTemplateRefusal('booking_selector_source_unavailable');
     await selector.revalidateSource?.();
-    const internalCalendar =
-      request.kind === 'TIME_SLOT_SELECTOR' && hasBranchSlots
-        ? (
-            await this.prisma.tenant.findUnique({
-              where: { id: request.tenantId },
-              select: { calendarSource: true },
-            })
-          )?.calendarSource === 'internal'
-        : false;
+    const branchSlot = request.kind === 'TIME_SLOT_SELECTOR' && hasBranchSlots;
+    const calendarSource = branchSlot
+      ? await this.selectorOwner?.readCalendarSource(request.tenantId)
+      : null;
+    if (branchSlot && !calendarSource)
+      throw new IntentTemplateRefusal('booking_selector_source_unavailable');
+    const internalCalendar = calendarSource === 'internal';
     const presented = presentBookingSelector({
       tenantId: request.tenantId,
       kind: request.kind,
@@ -461,11 +493,21 @@ export class WidgetEmitterService {
       null,
       null,
       selector.predecessorWidgetId ?? null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      tx,
     );
     try {
       await selector.revalidateSource?.();
     } catch (error) {
-      await this.prisma.widgetEmission.updateMany({
+      await (tx ?? this.prisma).widgetEmission.updateMany({
         where: {
           tenantId: request.tenantId,
           widgetId: emitted.widgetId,
@@ -810,6 +852,7 @@ export class WidgetEmitterService {
     } | null = null,
     goodsReceipt: GoodsReceiptApprovalEmissionContext | null = null,
     goodsReceiptParentWidgetId: string | null = null,
+    transaction?: RequestTx,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
     if (servicePrice !== null && goodsReceipt !== null)
@@ -1137,7 +1180,28 @@ export class WidgetEmitterService {
         goodsReceiptLinkage: goodsReceipt,
       }) as never,
     }));
-    await this.prisma.$transaction(async (tx) => {
+    const persist = async (tx: RequestTx) => {
+      // All C writes share the erasure lock and a fresh parent check. Chat READ
+      // passes its existing transaction so dedupe and mint cannot deadlock on
+      // two transactions holding/waiting for the same conversation lock.
+      await TimelineStore.lockConversation(
+        tx,
+        request.tenantId,
+        request.conversationId,
+      );
+      const turn = await tx.widgetTimelineTurn.findFirst({
+        where: {
+          tenantId: request.tenantId,
+          id: request.turnId,
+          conversationId: request.conversationId,
+          principalProofHash: principal.proofHash,
+          erasedAt: null,
+          retentionUntil: { gt: now },
+        },
+        select: { id: true },
+      });
+      if (turn === null)
+        throw new IntentTemplateRefusal('emission_turn_unavailable');
       if (approvalParentWidgetId !== null) {
         if (approvalLinkage === null)
           throw new IntentTemplateRefusal(
@@ -1318,7 +1382,12 @@ export class WidgetEmitterService {
           emittedEnvelopeJson: envelopeForSeal as never,
         },
       });
-    });
+    };
+    if (transaction) await persist(transaction);
+    else
+      await this.prisma.$transaction(persist, {
+        isolationLevel: 'ReadCommitted',
+      });
 
     // Observability only: the already-persisted successor relation supplies provenance.
     // No request field, admission verdict, entitlement or lifecycle transition is changed.

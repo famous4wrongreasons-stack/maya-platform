@@ -46,6 +46,14 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
     @Optional() private readonly crm?: CrmService,
   ) {}
 
+  /** Presentation source qualification only; CRM retains tenant and calendar authority. */
+  async readCalendarSource(
+    tenantId: string,
+  ): Promise<'internal' | 'external' | null> {
+    if (!this.crm) return null;
+    return this.crm.getCalendarSource(tenantId);
+  }
+
   async advance(input: Parameters<BookingSelectorOwnerPort['advance']>[0]) {
     try {
       return await this.advanceCurrent(input);

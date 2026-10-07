@@ -935,11 +935,7 @@ export class EffectRouterService {
     return this.completeBookingPreview(
       {
         routing: input,
-        actorUserId: ctx.actor.userId,
         principal: ctx.principal,
-        // These values were opened by the booking owner; Gate 11 deferred this
-        // read. Do not claim an A1 row or a divergence verdict that never ran.
-        resolvedNouns: { values: proposed.values },
       },
       proposed.outcome,
     );
@@ -948,10 +944,8 @@ export class EffectRouterService {
   private async completeBookingPreview(
     input: Pick<
       import('./effect-router.ports').ActuatingRoutingInput,
-      'routing' | 'actorUserId' | 'principal'
-    > & {
-      resolvedNouns: Pick<ResolvedNouns, 'values'>;
-    },
+      'routing' | 'principal'
+    >,
     outcome: EffectRouteOutcome,
   ): Promise<EffectRouteOutcome> {
     const preview = bookingPreviewOf(outcome.ownerDecision);
@@ -966,19 +960,10 @@ export class EffectRouterService {
           ownerCapabilitySpace: 'C9',
           ownerCapabilityKey: 'c9.booking.propose',
           principalProofHash: input.routing.principalProofHash,
-          diff: {
-            service: input.resolvedNouns.values.get('service'),
-            staff: input.resolvedNouns.values.get('staff'),
-            slot: input.resolvedNouns.values.get('slot'),
-            ...(input.resolvedNouns.values.get('branch')
-              ? {
-                  branch: input.resolvedNouns.values.get('branch'),
-                  branchSourceRevision: input.resolvedNouns.values.get(
-                    'branch_source_revision',
-                  ),
-                }
-              : {}),
-          },
+          // COMMIT uses the audit-retained facts reference and re-resolves the
+          // sealed nouns. A copied diff has no reader here and could outlive
+          // erasure when minting fails before a conversation link exists.
+          diff: null,
           ttlSeconds: 900,
         },
         input.routing.now,

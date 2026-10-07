@@ -706,6 +706,7 @@ const OWNER_MODULES = [
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
 const BOUND_PORT_TOKENS = [
+  'GOODS_RECEIPT_APPROVAL_OWNER', // Existing integrated GR-PC1 owner token.
   'SERVICE_PRICE_APPROVAL_OWNER', // YC-SP1 canonical typed AI owner.
   'SCHEDULE_APPROVAL_OWNER', // Existing A15 typed approval adapter; no direct AE module import.
   'CHAT_REPLY_CIPHER', // RT6 encrypted erasable text, no key material.

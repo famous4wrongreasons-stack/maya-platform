@@ -94,153 +94,174 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
     if (turn === null || turn.principalProofHash !== principal.proofHash)
       return null;
 
-    return this.prisma.$transaction(async (tx) => {
-      await TimelineStore.lockConversation(tx, tenantId, conversationId);
-      const previous = await tx.widgetEmission.findFirst({
-        where: {
-          tenantId,
-          turnId: turn.id,
-          erasedAt: null,
-          turn: { principalProofHash: principal.proofHash },
-        },
-        orderBy: { issuedAt: 'desc' },
-        select: {
-          widgetId: true,
-          envelopeSeal: true,
-          renderReceipts: {
-            where: { erasedAt: null },
-            orderBy: { degradedAt: 'desc' },
-            take: 1,
-            select: { emittedEnvelopeJson: true },
-          },
-        },
-      });
-      if (previous !== null) {
-        if (
-          !(await this.releaseAccess.canProject(
+    return this.prisma.$transaction(
+      async (tx) => {
+        await TimelineStore.lockConversation(tx, tenantId, conversationId);
+        const previous = await tx.widgetEmission.findFirst({
+          where: {
             tenantId,
-            previous.widgetId,
-            tx,
-          ))
+            turnId: turn.id,
+            erasedAt: null,
+            turn: { principalProofHash: principal.proofHash, erasedAt: null },
+          },
+          orderBy: { issuedAt: 'desc' },
+          select: {
+            widgetId: true,
+            envelopeSeal: true,
+            renderReceipts: {
+              where: { erasedAt: null },
+              orderBy: { degradedAt: 'desc' },
+              take: 1,
+              select: { emittedEnvelopeJson: true },
+            },
+          },
+        });
+        if (previous !== null) {
+          if (
+            !(await this.releaseAccess.canProject(
+              tenantId,
+              previous.widgetId,
+              tx,
+            ))
+          )
+            return null;
+          const envelope = previous.renderReceipts[0]?.emittedEnvelopeJson;
+          if (!isRecord(envelope)) return null;
+          return resolution(previous.widgetId, previous.envelopeSeal, envelope);
+        }
+
+        const plan = this.plan(input, principal, row.result_kind, channel);
+        const fact: FactUsed = {
+          capability: input.toolName,
+          status: 'measured',
+          as_of: new Date().toISOString(),
+          // The canonical read already supplies a durable, server-produced 64-hex input identity.
+          // Reuse it as the audit handle rather than introducing a second local hashing site.
+          evidence_refs: [`h_${input.inputHash}`],
+          completeness: {
+            status: 'PARTIAL',
+            requestedScopeHash: input.inputHash,
+            returnedCount: 1,
+            totalCount: null,
+            hasMore: true,
+            cursorRef: null,
+            truncated: false,
+            reasonCodes: ['NOT_COLLECTED'],
+          },
+        };
+        const projected = this.projector.composeCompletedRead(plan, {
+          value: input.result,
+          fact,
+        });
+        if (projected.kind !== 'composer_input' || !isRecord(input.result))
+          return null;
+
+        const body =
+          input.toolName === 'operations.journal.read'
+            ? presentJournalSchedule(
+                input.result,
+                fact,
+                validateLocalBusinessDate(input.arguments.date),
+              )
+            : input.result;
+        if (!isRecord(body)) return null;
+
+        const mintRequest: import('../emission/emitter.service').MintRequest = {
+          tenantId,
+          conversationId,
+          turnId: turn.id,
+          kind: row.result_kind,
+          principalProofHash: principal.proofHash,
+          deliveryChannel: channel,
+          body,
+          ttlSeconds: 600,
+          freshnessClass: 'live',
+          composerInput: projected.input,
+          principal,
+          ...(input.toolName === 'operations.journal.read'
+            ? {
+                retainedQueryScalar: {
+                  type: 'local_business_date' as const,
+                  value: validateLocalBusinessDate(input.arguments.date),
+                  provenance: 'server_validated' as const,
+                },
+              }
+            : {}),
+        };
+        const personalSource =
+          input.toolName === 'appointments.own.list'
+            ? await this.personalSchedules.resolve(input.actor, input.result)
+            : null;
+        if (
+          input.toolName === 'appointments.own.list' &&
+          personalSource === null
         )
           return null;
-        const envelope = previous.renderReceipts[0]?.emittedEnvelopeJson;
-        if (!isRecord(envelope)) return null;
-        return resolution(previous.widgetId, previous.envelopeSeal, envelope);
-      }
-
-      const plan = this.plan(input, principal, row.result_kind, channel);
-      const fact: FactUsed = {
-        capability: input.toolName,
-        status: 'measured',
-        as_of: new Date().toISOString(),
-        // The canonical read already supplies a durable, server-produced 64-hex input identity.
-        // Reuse it as the audit handle rather than introducing a second local hashing site.
-        evidence_refs: [`h_${input.inputHash}`],
-        completeness: {
-          status: 'PARTIAL',
-          requestedScopeHash: input.inputHash,
-          returnedCount: 1,
-          totalCount: null,
-          hasMore: true,
-          cursorRef: null,
-          truncated: false,
-          reasonCodes: ['NOT_COLLECTED'],
-        },
-      };
-      const projected = this.projector.composeCompletedRead(plan, {
-        value: input.result,
-        fact,
-      });
-      if (projected.kind !== 'composer_input' || !isRecord(input.result))
-        return null;
-
-      const body =
-        input.toolName === 'operations.journal.read'
-          ? presentJournalSchedule(
-              input.result,
-              fact,
-              validateLocalBusinessDate(input.arguments.date),
-            )
-          : input.result;
-      if (!isRecord(body)) return null;
-
-      const mintRequest: import('../emission/emitter.service').MintRequest = {
-        tenantId,
-        conversationId,
-        turnId: turn.id,
-        kind: row.result_kind,
-        principalProofHash: principal.proofHash,
-        deliveryChannel: channel,
-        body,
-        ttlSeconds: 600,
-        freshnessClass: 'live',
-        composerInput: projected.input,
-        principal,
-        ...(input.toolName === 'operations.journal.read'
-          ? {
-              retainedQueryScalar: {
-                type: 'local_business_date' as const,
-                value: validateLocalBusinessDate(input.arguments.date),
-                provenance: 'server_validated' as const,
-              },
-            }
-          : {}),
-      };
-      const personalSource =
-        input.toolName === 'appointments.own.list'
-          ? await this.personalSchedules.resolve(input.actor, input.result)
-          : null;
-      if (input.toolName === 'appointments.own.list' && personalSource === null)
-        return null;
-      const minted =
-        personalSource !== null
-          ? await this.emitter.emitPersonalSchedule(mintRequest, personalSource)
-          : row.result_kind === 'SERVICE_SELECTOR' ||
-              row.result_kind === 'STAFF_SELECTOR' ||
-              row.result_kind === 'TIME_SLOT_SELECTOR'
-            ? await this.emitter
-                .emitBookingSelector(mintRequest, {
-                  source: input.result,
-                  ...(input.bookingSelector
-                    ? {
-                        bookingSelection: input.bookingSelector,
-                        revalidateSource: input.bookingSelector.revalidate,
-                      }
-                    : {}),
-                  ...(input.revalidateSource
-                    ? { revalidateSource: input.revalidateSource }
-                    : {}),
-                })
-                .catch((error: unknown) => {
-                  // A completed READ can truthfully have no options, or no
-                  // inherited service selection. It still remains a READ;
-                  // never invent an actionable selector to present it.
-                  if (
-                    error instanceof IntentTemplateRefusal &&
-                    error.code === 'booking_selector_source_unavailable'
+        const minted =
+          personalSource !== null
+            ? await this.emitter.emitPersonalSchedule(
+                mintRequest,
+                personalSource,
+                new Date(),
+                null,
+                tx,
+              )
+            : row.result_kind === 'SERVICE_SELECTOR' ||
+                row.result_kind === 'STAFF_SELECTOR' ||
+                row.result_kind === 'TIME_SLOT_SELECTOR'
+              ? await this.emitter
+                  .emitBookingSelector(
+                    mintRequest,
+                    {
+                      source: input.result,
+                      ...(input.bookingSelector
+                        ? {
+                            bookingSelection: input.bookingSelector,
+                            revalidateSource: input.bookingSelector.revalidate,
+                          }
+                        : {}),
+                      ...(input.revalidateSource
+                        ? { revalidateSource: input.revalidateSource }
+                        : {}),
+                    },
+                    new Date(),
+                    tx,
                   )
-                    return null;
-                  throw error;
-                })
-            : await this.emitter.emit(mintRequest);
-      if (minted === null) return null;
-      for (const tokenHash of minted.intentTokenHashes)
-        provenance.log(
-          JSON.stringify({
-            contract: 'maya.widget-mint-provenance/1',
-            trigger: input.trigger,
-            route:
-              input.trigger === 'T-2a'
-                ? 'POST /api/ai/chat'
-                : 'POST /api/ai/tools/:toolName/execute',
-            request_id: input.requestId,
-            intent_token_hash: tokenHash,
-            widget_id: minted.widgetId,
-          }),
+                  .catch((error: unknown) => {
+                    // A completed READ can truthfully have no options, or no
+                    // inherited service selection. It still remains a READ;
+                    // never invent an actionable selector to present it.
+                    if (
+                      error instanceof IntentTemplateRefusal &&
+                      error.code === 'booking_selector_source_unavailable'
+                    )
+                      return null;
+                    throw error;
+                  })
+              : await this.emitter.emit(mintRequest, new Date(), tx);
+        if (minted === null) return null;
+        for (const tokenHash of minted.intentTokenHashes)
+          provenance.log(
+            JSON.stringify({
+              contract: 'maya.widget-mint-provenance/1',
+              trigger: input.trigger,
+              route:
+                input.trigger === 'T-2a'
+                  ? 'POST /api/ai/chat'
+                  : 'POST /api/ai/tools/:toolName/execute',
+              request_id: input.requestId,
+              intent_token_hash: tokenHash,
+              widget_id: minted.widgetId,
+            }),
+          );
+        return resolution(
+          minted.widgetId,
+          minted.envelopeSeal,
+          minted.envelope,
         );
-      return resolution(minted.widgetId, minted.envelopeSeal, minted.envelope);
-    });
+      },
+      { isolationLevel: 'ReadCommitted' },
+    );
   }
 
   private plan(

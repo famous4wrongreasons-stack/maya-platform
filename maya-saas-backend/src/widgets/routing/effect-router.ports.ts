@@ -105,7 +105,8 @@ export interface EffectRouteAuditPort {
       ownerCapabilitySpace: string;
       ownerCapabilityKey: string;
       principalProofHash: string;
-      diff: unknown;
+      /** Booking previews retain only the audit reference, never copied content. */
+      diff: null;
       ttlSeconds: number;
     },
     now?: Date,
@@ -190,6 +191,8 @@ export interface BookingProposeOwnerPort {
 }
 
 export interface BookingSelectorOwnerPort {
+  /** Canonical tenant source projection; presentation never reads Tenant directly. */
+  readCalendarSource(tenantId: string): Promise<'internal' | 'external' | null>;
   advance(input: {
     routing: RoutingInput;
     actor: Readonly<AuthenticatedUser>;

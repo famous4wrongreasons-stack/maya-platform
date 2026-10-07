@@ -22,7 +22,12 @@ import { bookingClosedSelection } from '../booking/booking-selection-preferences
 // draft here is a proposal the server owns until it is committed; a receipt here is an adjudication
 // of a submission, not of a booking; the timeline is what was said, not what was done.
 
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
 import { bookingCreateFactsHashOf } from '../booking/booking-create-facts-ref';
 import { CHAT_REPLY_CIPHER } from '../di-tokens';
 import type { ChatReplyCipher } from '../owner-ports/chat-reply-cipher.port';
@@ -196,6 +201,11 @@ export class WidgetStoresService {
     },
     now = new Date(),
   ): Promise<{ id: string }> {
+    // There is no conversation provenance on WidgetDraft. Refuse new unlinked
+    // C content instead of creating an orphan that exact-scope erasure cannot
+    // attribute. Existing booking COMMIT reads only the A facts reference.
+    if (input.diff !== null)
+      throw new ConflictException('draft_content_scope_required');
     return this.prisma.widgetDraft.create({
       data: {
         tenantId: input.tenantId,
@@ -204,7 +214,7 @@ export class WidgetStoresService {
         ownerCapabilitySpace: input.ownerCapabilitySpace,
         ownerCapabilityKey: input.ownerCapabilityKey,
         principalProofHash: input.principalProofHash,
-        diffJson: input.diff as never,
+        // Omitted nullable diffJson has no default: INSERT stores SQL NULL.
         createdAt: now,
         expiresAt: new Date(now.getTime() + input.ttlSeconds * 1000),
       },

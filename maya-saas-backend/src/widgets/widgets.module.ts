@@ -12,6 +12,7 @@ import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
 import { WidgetConversationErasureJob } from './consent/erasure.job';
+import { HistoryErasureOwner } from './consent/history-erasure.owner';
 import {
   GATE10_STORE,
   GATE_8R_OWNERS,
@@ -99,9 +100,9 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
       }),
     },
     ControlRegistryService,
-    // P-RT6: dark until K12 schedules it. Registering the provider establishes the one atomic
-    // erasure mechanism without adding a route, trigger or production effect.
+    // K12 privacy confirmation reaches the existing atomic RT6 owner only.
     WidgetConversationErasureJob,
+    HistoryErasureOwner,
     // P-MINT/B-22: WidgetEmissionModule owns the keyed seal and the single minter pipeline. This
     // module sees only its exported emitter and SEAL_VERIFIER port; it cannot inject a key holder.
     // U8a (IR-8a-1): slot 8's built gate, and the one store read its pass performs (D-2). Both are
@@ -158,6 +159,7 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
     WidgetStoresService,
     ControlRegistryService,
     WidgetConversationErasureJob,
+    HistoryErasureOwner,
     WidgetEmissionModule,
   ],
 })

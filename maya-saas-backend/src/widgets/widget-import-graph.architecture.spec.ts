@@ -85,6 +85,11 @@ interface Allowed {
 
 /** Non-widget modules any widget file may import. Closed: a module not listed here is refused. */
 const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
+  'ai-tools/booking-catalog-binding.ts': {
+    why: 'Canonical booking-source drift error and classifier; DI-free.',
+    only: ['owner-ports/booking-selector.adapter.ts'],
+  },
+
   'action-engine/action-engine.identity.ts': {
     why: "H4/H6: the platform's one keyed-HMAC discipline (`ActionIdentityService.hmac`) and its one canonicaliser (`stableActionJson`); a plain class and a pure function over static code, constructed as values, no DI (D-6 registries)",
     only: [
@@ -371,6 +376,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   'entitlements/entitlements.module.ts': {
     why: "(e)'s owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",
     only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'crm/crm.service.ts': {
+    why: 'Canonical booking branch revision and calendar-source projection; boundary-only.',
+    only: ['owner-ports/booking-selector.adapter.ts'],
   },
   'crm/availability-calendar.service.ts': {
     why: 'L5/L24 canonical availability calendar owner; no widget-authored timezone',
@@ -1146,7 +1155,9 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
           /:(?:widget\w+|\$transaction)$/.test(x) ||
           x === 'stores/timeline.store.ts:$executeRaw' ||
           x === 'stores/timeline.store.ts:$queryRaw' ||
-          x === 'consent/erasure.job.ts:$executeRaw',
+          x === 'consent/erasure.job.ts:$executeRaw' ||
+          x === 'consent/history-erasure.owner.ts:$executeRaw' ||
+          x === 'consent/history-erasure.owner.ts:$queryRaw',
       ),
     ).toBe(true);
   }, 60_000);
@@ -1187,6 +1198,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'entitlements/entitlements.service.ts',
       'ai-tools/ai-tool-policy.module.ts',
       'entitlements/entitlements.module.ts',
+      'crm/crm.service.ts',
       'crm/availability-calendar.service.ts',
       'crm/crm.module.ts',
       'marketing/marketing.module.ts',
@@ -1316,6 +1328,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'GOODS_RECEIPT_APPROVAL_OWNER',
       'SERVICE_PRICE_APPROVAL_OWNER',
       'SCHEDULE_APPROVAL_OWNER',
       'CHAT_REPLY_CIPHER',

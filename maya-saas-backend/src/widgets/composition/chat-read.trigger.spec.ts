@@ -149,6 +149,18 @@ describe('P-MT2a ChatReadTriggerService', () => {
       dismiss_widget_id: null,
     });
     expect(h.composeCompletedRead).toHaveBeenCalledTimes(1);
+    expect(h.emit).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Date),
+      h.tx,
+    );
+    expect(h.tx.widgetEmission.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          turn: { principalProofHash: principal.proofHash, erasedAt: null },
+        }) as unknown,
+      }),
+    );
     expect(h.ensureAssistantTurn).toHaveBeenCalledWith(
       expect.objectContaining({
         conversationId: input().conversationId,
@@ -255,6 +267,8 @@ describe('P-MT2a ChatReadTriggerService', () => {
       expect(h.emitBookingSelector).toHaveBeenCalledWith(
         expect.objectContaining({ kind }),
         { source },
+        expect.any(Date),
+        h.tx,
       );
       expect(h.emit).not.toHaveBeenCalled();
     },
