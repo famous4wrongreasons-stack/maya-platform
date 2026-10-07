@@ -1,0 +1,875 @@
+{
+  "contract": "maya.booking-confirmation-browser/1",
+  "status": "passed",
+  "syntheticInternalCatalog": true,
+  "syntheticLocalProvider": true,
+  "syntheticA18Verifier": true,
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "success-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nПроверка записи\n\nУслуга\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) По данным системы записи\nАлександр\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "success-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nПроверка записи\n\nУслуга\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) По данным системы записи\nАлександр\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\nMAYA:\nЗапись подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nПроверка записи\n\nУслуга\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) По данным системы записи\nАлександр\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nПроверка записи\n\nУслуга\n\nОформление бороды\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) По данным системы записи\nАлександр\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nЭто действие сейчас недоступно\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unknown-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nПроверка записи\n\nУслуга\n\nКонсультация\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) По данным системы записи\nАлексей Орлов\n45 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unknown-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nПроверка записи\n\nУслуга\n\nКонсультация\n\n8 окт. 2026 г., 12:00 (Europe/Moscow) По данным системы записи\nАлексей Орлов\n45 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\nMAYA:\nЗапрос принят. Подтверждение ожидается.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "success-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nВы:\nВыбрать услугу\nВы:\nВыбрать мастера\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапись подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nВы:\nВыбрать услугу\nВы:\nВыбрать мастера\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапись не подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "unknown-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи услуги для записи\nMAYA:\nВыберите услугу для записи.\nВы:\nВыбрать услугу\nВы:\nВыбрать мастера\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапрос принят. Подтверждение ожидается.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "successPreview": {
+      "staffName": "Александр",
+      "serviceName": "Оформление бороды",
+      "start": "2026-10-08T09:00:00.000Z"
+    },
+    "successResult": {
+      "contract": "maya.widget.intent/1",
+      "outcome": "terminate",
+      "code": null,
+      "reason_text": null,
+      "stopped_at_gate": "13",
+      "gates_run": 14,
+      "gates_total": 15,
+      "next_envelope": null,
+      "resolved_widget": null,
+      "owner_decision": {
+        "state": "SUCCEEDED",
+        "outcomeCode": "provider_applied"
+      },
+      "receipt_outcome": "ACCEPTED"
+    },
+    "revokedPreview": {
+      "staffName": "Александр",
+      "serviceName": "Оформление бороды",
+      "start": "2026-10-08T09:00:00.000Z"
+    },
+    "revokedResult": {
+      "contract": "maya.widget.intent/1",
+      "outcome": "terminate",
+      "code": null,
+      "reason_text": null,
+      "stopped_at_gate": "13",
+      "gates_run": 14,
+      "gates_total": 15,
+      "next_envelope": null,
+      "resolved_widget": null,
+      "owner_decision": null,
+      "receipt_outcome": "REFUSED"
+    },
+    "unknownPreview": {
+      "staffName": "Алексей Орлов",
+      "serviceName": "Консультация",
+      "start": "2026-10-08T09:00:00.000Z"
+    },
+    "unknownResult": {
+      "contract": "maya.widget.intent/1",
+      "outcome": "terminate",
+      "code": null,
+      "reason_text": null,
+      "stopped_at_gate": "13",
+      "gates_run": 14,
+      "gates_total": 15,
+      "next_envelope": null,
+      "resolved_widget": null,
+      "owner_decision": {
+        "state": "UNKNOWN",
+        "reconciliation": "required"
+      },
+      "receipt_outcome": "ACCEPTED"
+    },
+    "successRestoredHistory": {
+      "contract": "maya.conversation-history/1",
+      "conversationId": "5664d8dc-ad4f-4de0-8f5d-af3742922a08",
+      "truncated": false,
+      "interrupted": true,
+      "turns": [
+        {
+          "id": "21e09d9b-4995-494a-afce-5b3b8bbfd154",
+          "role": "user",
+          "text": "Покажи услуги для записи",
+          "createdAt": "2026-10-07T00:45:06.543Z",
+          "completed": true
+        },
+        {
+          "id": "d76a29dd-0557-4582-ad90-948cfcd2e428",
+          "role": "assistant",
+          "text": "Выберите услугу для записи.",
+          "createdAt": "2026-10-07T00:45:06.679Z",
+          "completed": true
+        },
+        {
+          "id": "64c6f3d3-a4f5-4b2c-a8f0-0d48c8830b23",
+          "role": "user",
+          "text": "Выбрать услугу",
+          "createdAt": "2026-10-07T00:45:06.751Z",
+          "completed": false
+        },
+        {
+          "id": "689556c2-d268-4350-a252-ca5e233252bb",
+          "role": "user",
+          "text": "Выбрать мастера",
+          "createdAt": "2026-10-07T00:45:06.865Z",
+          "completed": false
+        },
+        {
+          "id": "aacc3cee-3834-4e2b-aa7d-d4f92d54e008",
+          "role": "user",
+          "text": "Проверить запись",
+          "createdAt": "2026-10-07T00:45:06.933Z",
+          "completed": false
+        },
+        {
+          "id": "de3b2342-a3f6-4e3c-a848-e3f6a11f93f3",
+          "role": "user",
+          "text": "Подтвердить запись",
+          "createdAt": "2026-10-07T00:45:07.084Z",
+          "completed": false
+        }
+      ]
+    },
+    "revokedRestoredHistory": {
+      "contract": "maya.conversation-history/1",
+      "conversationId": "b5944985-0519-488c-bed8-5ccf51b9ecfa",
+      "truncated": false,
+      "interrupted": true,
+      "turns": [
+        {
+          "id": "66ff9e97-7232-46e9-a3c3-68eaeade7c77",
+          "role": "user",
+          "text": "Покажи услуги для записи",
+          "createdAt": "2026-10-07T00:45:07.660Z",
+          "completed": true
+        },
+        {
+          "id": "a001821f-4e6c-4e57-a0e5-aec60fd3aad2",
+          "role": "assistant",
+          "text": "Выберите услугу для записи.",
+          "createdAt": "2026-10-07T00:45:07.711Z",
+          "completed": true
+        },
+        {
+          "id": "f5e8bee7-66ef-4817-a1c3-d9f4b4d95fbb",
+          "role": "user",
+          "text": "Выбрать услугу",
+          "createdAt": "2026-10-07T00:45:07.771Z",
+          "completed": false
+        },
+        {
+          "id": "fe5255c3-913c-4c21-a846-7c74c8753e41",
+          "role": "user",
+          "text": "Выбрать мастера",
+          "createdAt": "2026-10-07T00:45:07.836Z",
+          "completed": false
+        },
+        {
+          "id": "729c9f20-b770-4f8e-ad22-a4093c6ad712",
+          "role": "user",
+          "text": "Проверить запись",
+          "createdAt": "2026-10-07T00:45:07.905Z",
+          "completed": false
+        },
+        {
+          "id": "d7275dc3-12ef-4284-a112-2cd97b9d96a5",
+          "role": "user",
+          "text": "Подтвердить запись",
+          "createdAt": "2026-10-07T00:45:08.055Z",
+          "completed": false
+        }
+      ]
+    },
+    "unknownRestoredHistory": {
+      "contract": "maya.conversation-history/1",
+      "conversationId": "cfd03432-874a-45ba-82e5-cdccb8742b86",
+      "truncated": false,
+      "interrupted": true,
+      "turns": [
+        {
+          "id": "eaa63c2f-f90d-4912-ad32-a7e7132b8e40",
+          "role": "user",
+          "text": "Покажи услуги для записи",
+          "createdAt": "2026-10-07T00:45:08.828Z",
+          "completed": true
+        },
+        {
+          "id": "f802f323-c47c-4169-ab5e-7ce1b6e6e3a5",
+          "role": "assistant",
+          "text": "Выберите услугу для записи.",
+          "createdAt": "2026-10-07T00:45:08.873Z",
+          "completed": true
+        },
+        {
+          "id": "ad521b16-6b65-418b-a02e-33547933499b",
+          "role": "user",
+          "text": "Выбрать услугу",
+          "createdAt": "2026-10-07T00:45:08.941Z",
+          "completed": false
+        },
+        {
+          "id": "af1776d5-71c4-49a2-ac47-3f4558cf61f5",
+          "role": "user",
+          "text": "Выбрать мастера",
+          "createdAt": "2026-10-07T00:45:09.005Z",
+          "completed": false
+        },
+        {
+          "id": "90c9b512-c7ef-4fc7-ad1b-d1b672fce96d",
+          "role": "user",
+          "text": "Проверить запись",
+          "createdAt": "2026-10-07T00:45:09.075Z",
+          "completed": false
+        },
+        {
+          "id": "17dcadf7-52da-4ef7-a3df-8d3fdaf7b187",
+          "role": "user",
+          "text": "Подтвердить запись",
+          "createdAt": "2026-10-07T00:45:09.226Z",
+          "completed": false
+        }
+      ]
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:51697",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/HLHXWYNB/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/HLHXWYNB/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/HLHXWYNB/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/HLHXWYNB/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/HLHXWYNB/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/HLHXWYNB/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

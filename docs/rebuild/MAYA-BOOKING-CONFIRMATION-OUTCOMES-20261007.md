@@ -90,9 +90,28 @@ booking, current owner verification, real-model dialogue quality or actual
 YCLIENTS acceptance. No real external provider, model, SMS, production, phone,
 deploy, push or merge was used.
 
-Technical English sealed labels, duplicate service labels, the earlier generic
-catalog card and interrupted notices for lowered widget turns remain visible.
-Historical terminal text is available, but polished end-to-end UX is not accepted.
+The follow-up presentation checkpoint `6900dfcf` replaces technical English
+booking/control labels with Russian text and removes the repeated service title.
+One history warning covers incomplete lowered turns, without marking them complete
+or admitting them to model history. Frozen/text-only booking and selector views
+now carry readable facts instead of raw JSON. UNKNOWN/not-measured values,
+completeness, policy notices and each measure's provenance are retained.
+
+Independent review found omitted non-KNOWN facts and duplicate paragraph/list
+content in the first text projection; both were corrected before the final proof.
+This is qualified for the current booking producers, not every A21 shape/profile.
+The source basis remains attached to each measure; the earlier catalog response
+still precedes the confirmation. Polished end-to-end UX is not accepted.
+
+Fresh r10 actual HTTP (7 cases) and current React (9 checkpoints) pass for success,
+revocation, UNKNOWN and UI reauthentication with no second provider dispatch.
+r9 is preserved: its only failure was a test reading CSS-uppercase button text
+instead of the correct accessible name. Focused backend units 26/26, headless
+fallback/history tests 64/64 and React tests 93/93 pass. Scoped ESLint and
+production TypeScript at 4096 MB pass. All owned services were stopped; exact
+PostgreSQL paths were independently checked with pg_ctl status (exit 3).
+[Follow-up sources, failed/final runs and screenshots](evidence/maya-development-integration-20261006/booking-presentation-http-react/manifest.json).
+
 Revoked-link proof establishes refusal and zero effects; it does not claim a
 durable reconstructed refusal conversation after reload.
 

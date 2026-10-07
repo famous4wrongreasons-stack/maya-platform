@@ -1,0 +1,354 @@
+{
+  "kind": "booking-presentation-qualified-local-checkpoint",
+  "head": "6900dfcf11292f150679bd0ac1f3bf8015a15454",
+  "qualification": "NOT_ISSUED",
+  "syntheticModel": true,
+  "syntheticA18Verifier": true,
+  "ownedSyntheticProvider": true,
+  "realModelAcceptance": false,
+  "applicationAndPostgresRestart": false,
+  "finalAttempt": "r10",
+  "actualHttpTests": 7,
+  "actualReactCheckpoints": 9,
+  "servicesStopped": true,
+  "backendUnitTests": 26,
+  "runtimeFocusedTests": 64,
+  "reactTests": 93,
+  "productionTypecheckHeapMb": 4096,
+  "fullProjectTypecheck": "NOT_QUALIFIED",
+  "files": [
+    {
+      "path": "maya-booking-presentation-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-booking-presentation-lint2.log",
+      "sha256": "492c734e89abafec8934d5f4da2ca3e276cb9c5141115a08ada303d6571d7900",
+      "bytes": 347
+    },
+    {
+      "path": "maya-booking-presentation-lint3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-booking-presentation-react-tests.log",
+      "sha256": "3fa8bfbc0b235bfbd96d256309653e61090fca6e62fb8c6d900e388dd9a1dfdc",
+      "bytes": 6220
+    },
+    {
+      "path": "maya-booking-presentation-shell-build.log",
+      "sha256": "5165518ef30dd3be41328024f98fff0064a634d087c14a15de374ba4dc5cf540",
+      "bytes": 1010
+    },
+    {
+      "path": "maya-booking-presentation-shell1.log",
+      "sha256": "274a94d1e692d3d50600483abec2883bc718134e0309cf8626c13a110f2a389a",
+      "bytes": 19605
+    },
+    {
+      "path": "maya-booking-presentation-shell2.log",
+      "sha256": "9acdcbf7883bcc4a81cdcd179cf2b127c24f65ca5a8b5b5de4326904c7d262f8",
+      "bytes": 6675
+    },
+    {
+      "path": "maya-booking-presentation-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-booking-presentation-types2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-booking-presentation-unit1.json",
+      "sha256": "96a5732b28c368ee4865fb1efd3a775e933c006ca2f2a06abad42d2850d040d5",
+      "bytes": 20200
+    },
+    {
+      "path": "maya-booking-presentation-unit1.log",
+      "sha256": "5c52a507844519decd3a19752364bf9f8c11b7640a555381164db29a4ecdc5ea",
+      "bytes": 2942
+    },
+    {
+      "path": "maya-booking-presentation-unit2.json",
+      "sha256": "dc0233114f5166878a39ff4596e6b7399c7c51b11a6adf8432e9de29598fbd26",
+      "bytes": 14506
+    },
+    {
+      "path": "maya-booking-presentation-unit2.log",
+      "sha256": "7c8bd56d2b8b1eea49ce587867b48b132a438ce221bc3826844f96acb5068a26",
+      "bytes": 963
+    },
+    {
+      "path": "maya-booking-presentation-unit3.json",
+      "sha256": "45d411916ffa27348e4e292c29a496391c2044b240f7bdac831ca17ce04ea253",
+      "bytes": 14506
+    },
+    {
+      "path": "maya-booking-presentation-unit3.log",
+      "sha256": "3ab227c50c7ddc2c643e8b4391a2646231f0ed99e918ea5a4bc55beb479baff6",
+      "bytes": 963
+    },
+    {
+      "path": "r10/booking-observations.json",
+      "sha256": "116384a4264dd077e37c8b1e81c945f7bf86cd09e25206daa51864c742ea89dd",
+      "bytes": 1132
+    },
+    {
+      "path": "r10/browser-jest.json",
+      "sha256": "5cf623e40c340a27b5152c3eebb33454e6ed8a8f8eb886bc45f9ed40565bb74f",
+      "bytes": 1503
+    },
+    {
+      "path": "r10/browser.log",
+      "sha256": "f59bc88b052cac95402e17dc844e296736dda0a570c4edd06e6d4ac029b3b0ec",
+      "bytes": 1414
+    },
+    {
+      "path": "r10/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r10/http-booking-jest.json",
+      "sha256": "91a3753ac94d2d77a5713a77808b9723fbf4f4ba316cc663052ee865013a2bb2",
+      "bytes": 5246
+    },
+    {
+      "path": "r10/http-booking.log",
+      "sha256": "bbccb567f0d06506f3dae36b7e431318db985450f6afc435a27d7f7312b6357d",
+      "bytes": 1947
+    },
+    {
+      "path": "r10/initdb.log",
+      "sha256": "9fe7799af0fe9df184dc04a12ad05a97f4dba0afef66024e8368bf37e6d97432",
+      "bytes": 962
+    },
+    {
+      "path": "r10/manifest.json",
+      "sha256": "233ea18b9acf56f7b09782a49bb2a338fdf2baa54b7257a3923bf860785d28da",
+      "bytes": 774
+    },
+    {
+      "path": "r10/migrations.log",
+      "sha256": "7ac78da4460a1ff2bf365f9c44d4c38de6cdb0dc5feeff8487490c793a00348b",
+      "bytes": 14734
+    },
+    {
+      "path": "r10/output/playwright/browser.json",
+      "sha256": "2c494c276781f8d693071c43ee8d15d22a12c332d98a38d171d7ca48887c7322",
+      "bytes": 28218
+    },
+    {
+      "path": "r10/output/playwright/revoked-preview.png",
+      "sha256": "b6954b24793494f90aab45767687a3f2552b3900975ebd1d36d966a0e8381a5c",
+      "bytes": 53702
+    },
+    {
+      "path": "r10/output/playwright/revoked-reload.png",
+      "sha256": "f7bb13408270723e02f6aabf7619d4d0313e63aec9f81aa19a487cb44c2ccce2",
+      "bytes": 58298
+    },
+    {
+      "path": "r10/output/playwright/revoked-result.png",
+      "sha256": "15fe3972fcbf2f7a5d4769597b0568c8270a79fb89fc0457442c6e28b529df68",
+      "bytes": 56561
+    },
+    {
+      "path": "r10/output/playwright/success-preview.png",
+      "sha256": "52bfe1e172222d374c15ae290421f3f8fc9afc45d13a0643de842a5447161c22",
+      "bytes": 53719
+    },
+    {
+      "path": "r10/output/playwright/success-reload.png",
+      "sha256": "e7029c00a91422ac6711c5e91ea5ca22d6cd7967f058fe18dc23506363e93150",
+      "bytes": 57964
+    },
+    {
+      "path": "r10/output/playwright/success-result.png",
+      "sha256": "1582e81bf1ccef01b9c1042aa63ad7266b689fdb68ed9c976e4e684e9bf949e0",
+      "bytes": 57157
+    },
+    {
+      "path": "r10/output/playwright/unknown-preview.png",
+      "sha256": "7e4ef2d57ee5d32b837b38c15d49223b93fed5d69e24455cd02f664d24965598",
+      "bytes": 53237
+    },
+    {
+      "path": "r10/output/playwright/unknown-reload.png",
+      "sha256": "4df75620f915c2f98acb35880bf517227fe82f4f66c848fa6639d16b5912d685",
+      "bytes": 60123
+    },
+    {
+      "path": "r10/output/playwright/unknown-result.png",
+      "sha256": "226e5221652bb2df34a546f09e526780896ce59ac2656d32e2829d36b9a20dea",
+      "bytes": 59001
+    },
+    {
+      "path": "r10/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r10/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r10/postgres.log",
+      "sha256": "2e91d39e05e9e950f057823806b37b2e80b03b404bf8a2155979f9e5f9b988c6",
+      "bytes": 1246
+    },
+    {
+      "path": "r10/react-web-build.log",
+      "sha256": "106eea1b64eece14416c8244bcbafcd308e9b7f03ffa2f8795057a5c91a7576a",
+      "bytes": 185
+    },
+    {
+      "path": "r9/booking-observations.json",
+      "sha256": "8038a56aa29e7c95608a409413a9d849d24567f303d092bad883b4a9cf79243f",
+      "bytes": 257
+    },
+    {
+      "path": "r9/browser-jest.json",
+      "sha256": "3a6c3b892bef56309f8254c99e5776a41545d882d83c869996c5676da19bd7a1",
+      "bytes": 2615
+    },
+    {
+      "path": "r9/browser.log",
+      "sha256": "a0772cb360a86e7b0e855411a632a18298e400ffcb9f48a20d86d04f19ce386b",
+      "bytes": 2130
+    },
+    {
+      "path": "r9/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r9/http-booking-jest.json",
+      "sha256": "21fd6b847dcac79bf9e350a24434d4bb0009a47f643670d489445ab0521ae1e1",
+      "bytes": 5246
+    },
+    {
+      "path": "r9/http-booking.log",
+      "sha256": "9fae3e4bda3bb4fabf6fe1af3beb054949079b4a8adce20467aa359984f1c9c4",
+      "bytes": 1946
+    },
+    {
+      "path": "r9/initdb.log",
+      "sha256": "d65a938b69e41d9b5b978d4423677adb2c4f9019bf34dc7875e0f4266e63d9d0",
+      "bytes": 962
+    },
+    {
+      "path": "r9/manifest.json",
+      "sha256": "712412131657a26519b7d586431b81ab1d1284a84f0fcfd10611cb6fbd2199ec",
+      "bytes": 759
+    },
+    {
+      "path": "r9/migrations.log",
+      "sha256": "759e75d933e3d7e3cfc12ebf2b058bd914c883c75246f88f91b720b2c9a98ddf",
+      "bytes": 14734
+    },
+    {
+      "path": "r9/output/playwright/browser.json",
+      "sha256": "00279e3535aa2ee9df71d961c263f65ef31ed6465cb0f2b0ad6e2d90e5e3e888",
+      "bytes": 5242
+    },
+    {
+      "path": "r9/output/playwright/failure.png",
+      "sha256": "b6954b24793494f90aab45767687a3f2552b3900975ebd1d36d966a0e8381a5c",
+      "bytes": 53702
+    },
+    {
+      "path": "r9/output/playwright/success-preview.png",
+      "sha256": "b6954b24793494f90aab45767687a3f2552b3900975ebd1d36d966a0e8381a5c",
+      "bytes": 53702
+    },
+    {
+      "path": "r9/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r9/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r9/postgres.log",
+      "sha256": "818bd22b1ee6ba04cebe8406bb7d597e580c39178aaee28ad2f17a68584cae7f",
+      "bytes": 1246
+    },
+    {
+      "path": "r9/react-web-build.log",
+      "sha256": "106eea1b64eece14416c8244bcbafcd308e9b7f03ffa2f8795057a5c91a7576a",
+      "bytes": 185
+    },
+    {
+      "path": "cleanup.json",
+      "sha256": "6472bbc3714a834d95e8469327f2246eef59be67fcf77e3f9618571d8b4fce5c",
+      "bytes": 370
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": "maya-carrier-react/src/runtime/copy.ts",
+      "sha256": "41a5017fbd2874cb949feb9cdb1b253e1fb0cbf4a38b83f71a95d99600b82e29"
+    },
+    {
+      "path": "maya-carrier-react/test/booking-confirmation-browser-probe.mjs",
+      "sha256": "7ab99919b4ec08e5e7f98922d7e5f9e6dde4d108d1f09ec2d90bc2ad19ce4eb1"
+    },
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "cba35bd2560230ec22eb13de203d68d3b250b21ef15567c11f04b244ee874b57"
+    },
+    {
+      "path": "maya-chat-shell/src/dom/timeline.ts",
+      "sha256": "86f310bda30ba0ac75f643ae6fba7b3e0c95f500bd4941debf9c9d1f289048b4"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/conversation.ts",
+      "sha256": "dd97e10a03404229c9e84477b75b10344064492065cfe62162f2ce1a9533fcd9"
+    },
+    {
+      "path": "maya-chat-shell/test/conversation.test.mjs",
+      "sha256": "698a5ecae650b7d0c7cb4335332e705c05494297337a84cba0ed8a1c362d5929"
+    },
+    {
+      "path": "maya-chat-shell/test/renderer.conformance.test.mjs",
+      "sha256": "4d6a12cde70e96817605b110de6bfe95ad9a7f771519847d8c2c1dba8325a042"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/booking/booking-intent-template.registry.ts",
+      "sha256": "8cdaed01e11e0e9c19c845d18c3206e820521e002d81e317074ba2ec19d01d88"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts",
+      "sha256": "273d01b8477a1a9538f56976da0ff56ed52900274b15797166240bc7bc0bb345"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/emission/booking-confirmation-minter.service.spec.ts",
+      "sha256": "454069c1b6b8934d68b65ff7ed865d094941fc91125e4728f32be566b7fdcea3"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/emission/booking-confirmation-minter.service.ts",
+      "sha256": "ee92c9bfffeb741de22d1a54f873523d1fab4df2c5fa9613f102598eb3d54a75"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/emission/envelope.factory.ts",
+      "sha256": "4150c5ab89f80f2eb68264073b8a160aec12dabfeb6784904cdd2344ec808062"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/emission/intent-template.registry.spec.ts",
+      "sha256": "1ed38adbc1275e91710689d9f8bf84f1246346942cd4dd8a946e457c7365f7f9"
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/emission/intent-template.registry.ts",
+      "sha256": "3e78fa012de9ddc77d02e261d4c408d2030b357832ce64bb4d2ac041601e4caa"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+PASS src/widgets/emission/intent-template.registry.spec.ts
+PASS src/widgets/owner-ports/booking-preview.adapter.spec.ts
+PASS src/widgets/emission/booking-confirmation-minter.service.spec.ts
+PASS src/widgets/booking/booking-intent-template.registry.spec.ts
+PASS src/widgets/emission/envelope-codec.spec.ts
+PASS src/widgets/booking/booking-selector.presenter.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        0.542 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/booking-confirmation-minter.service.spec.ts", "src/widgets/booking/booking-selector.presenter.spec.ts", "src/widgets/booking/booking-intent-template.registry.spec.ts", "src/widgets/emission/envelope-codec.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts", "src/widgets/owner-ports/booking-preview.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-presentation-unit3.json

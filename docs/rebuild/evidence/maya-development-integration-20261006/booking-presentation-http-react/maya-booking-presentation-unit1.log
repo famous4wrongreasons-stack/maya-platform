@@ -1,0 +1,84 @@
+FAIL src/widgets/emission/intent-template.registry.spec.ts
+  ● P-MINT — closed intent template registry › MINT-1 derives each non-actuating effect and target from a closed server row
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  3
+    + Received  + 47
+
+    - ObjectContaining {
+    -   "label": "Dismiss",
+    + Object {
+    +   "allowedArgumentHandles": Array [],
+    +   "effect": "CONTROL",
+    +   "inputSchema": null,
+    +   "key": "control.dismiss@1",
+    +   "kinds": Array [
+    +     "CHOICE",
+    +     "SERVICE_SELECTOR",
+    +     "STAFF_SELECTOR",
+    +     "TIME_SLOT_SELECTOR",
+    +     "BOOKING_CONFIRMATION",
+    +     "SCHEDULE",
+    +     "CLIENT_LIST",
+    +     "METRIC",
+    +     "CHART",
+    +     "REPORT",
+    +     "STRATEGY_OPTIONS",
+    +     "APPROVAL",
+    +     "PROGRESS",
+    +     "LIMITATION",
+    +     "SOURCE_STATUS",
+    +     "SETTINGS_DRAFT",
+    +     "FORM",
+    +     "CONSENT_STATE",
+    +     "IDENTITY_BINDING",
+    +     "PAYMENT_HANDOFF",
+    +     "MEDIA_PREVIEW",
+    +     "ARTIFACT",
+    +   ],
+    +   "label": "Закрыть",
+        "priority": 0,
+    +   "roles": Array [
+    +     "escape",
+    +   ],
+    +   "selectionDomain": Object {},
+    +   "selectionDomainLabels": Object {},
+        "singleUse": true,
+    +   "sourceSubject": false,
+    +   "speechAliases": Array [
+    +     "dismiss",
+    +     "close",
+    +   ],
+    +   "subject": Object {
+    +     "key": "control.widget.dismiss",
+    +     "space": "CONTROL",
+    +   },
+    +   "target": null,
+        "ttlSeconds": 600,
+    -   "utteranceTemplate": "Dismiss",
+    +   "utteranceTemplate": "Закрыть",
+    +   "version": 1,
+      }
+
+      73 |       ref: { route: 'shell.account', param: null },
+      74 |     });
+    > 75 |     expect(INTENT_TEMPLATE_REGISTRY['control.dismiss@1']).toEqual(
+         |                                                           ^
+      76 |       expect.objectContaining({
+      77 |         priority: 0,
+      78 |         singleUse: true,
+
+      at Object.<anonymous> (widgets/emission/intent-template.registry.spec.ts:75:59)
+
+PASS src/widgets/booking/booking-intent-template.registry.spec.ts
+PASS src/widgets/emission/envelope-codec.spec.ts
+PASS src/widgets/emission/booking-confirmation-minter.service.spec.ts
+PASS src/widgets/booking/booking-selector.presenter.spec.ts
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 20 passed, 21 total
+Snapshots:   0 total
+Time:        0.497 s, estimated 1 s
+Ran all test suites within paths "src/widgets/emission/booking-confirmation-minter.service.spec.ts", "src/widgets/booking/booking-selector.presenter.spec.ts", "src/widgets/booking/booking-intent-template.registry.spec.ts", "src/widgets/emission/envelope-codec.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-booking-presentation-unit1.json
