@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { createRequire } from 'node:module';
+import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
 import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -29,6 +30,8 @@ import { assertProofDatabase } from './support/proof-db-guard';
 import {
   firstOption,
   firstSlot,
+  intent,
+  list,
   object,
   observe,
   startBooking,
@@ -412,13 +415,23 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         );
       let declined: Record<string, unknown>;
       try {
-        declined = await submit(
-          http,
-          s.token,
-          staff,
-          'REFINE',
-          firstOption(staff),
+        const refine = intent(staff, 'REFINE');
+        const field = String(
+          object(list(object(refine.input_schema).fields)[0]).name,
         );
+        const response = await http.postIntent(s.token, {
+          contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
+          widget_id: staff.widget_id,
+          intent_token: refine.intent_token,
+          inputs: { [field]: firstOption(staff) },
+          client_nonce: randomUUID(),
+          profile_id: 'pwa.default',
+        });
+        expect(response.status).toBe(409);
+        declined = object(response.body);
+        expect(declined).toMatchObject({
+          error: { code: 'ai_tool_availability_source_changed' },
+        });
       } finally {
         spy.mockRestore();
       }
