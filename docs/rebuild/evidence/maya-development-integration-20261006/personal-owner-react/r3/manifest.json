@@ -1,0 +1,31 @@
+{
+  "kind": "personal-owner-react-http-pg-restart-local-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-DehOa2/pg",
+  "database": "maya_widget_gate_proof_personalowner_142fa717becd",
+  "port": 58135,
+  "status": "interrupted-resume",
+  "completed": [
+    "shell-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "prepare",
+    "pg-restart"
+  ],
+  "syntheticModel": true,
+  "syntheticCanonicalAppointments": true,
+  "syntheticLocalProvider": true,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 1
+  },
+  "clusterStopped": true,
+  "interruption": "Tool session became unknown; launcher and browser were absent, owned PostgreSQL remained. Explicit verified pg_ctl cleanup succeeded. Resume unqualified."
+}

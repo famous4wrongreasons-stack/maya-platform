@@ -1,0 +1,28 @@
+{
+  "stage": "prepare",
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "success-result": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 2,
+    "membershipUnchanged": true
+  },
+  "revoked-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

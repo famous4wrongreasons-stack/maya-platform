@@ -844,9 +844,30 @@ suspended membership yields 401/no model. Preview/results scoped Prisma writes
 are zero. Units 85/85, production types and scoped lint pass; independent review
 has no blocker for this backend qualification. Services stopped.
 
-Owner React entry is still unimplemented. Denied own.create cannot authorize an
-fs.booking detail through its retained source; an actually completed own.list
-may support a separate verified-user entry. SB-1 V2 has no first-binding issuer.
+At this backend checkpoint the owner React entry was unimplemented; the qualified
+follow-up below implements the already-verified, nonempty own.list path. Denied
+own.create still cannot authorize fs.booking through its retained source.
+SB-1 V2 has no first-binding issuer.
 See [exact boundaries, results and preserved evidence](MAYA-PERSONAL-OWNER-READ-CHECKPOINT-20261007.md).
 Synthetic identities/model transport/provider are not real acceptance or C10;
 no new schema/retention/autonomy decision. `NOT_ISSUED`.
+
+### Verified owner personal React path — 2026-10-07
+
+Code `e7118871` adds a finite personal booking form after an actual C9
+appointments.own.list SCHEDULE and current-context, exact-parent sealed detail.
+TENANT_OWNER is unchanged; presentation grants no Client authority. Exact
+canonical selection/SUCCEEDED confirms the booking. UNKNOWN blocks repeat
+dispatch, including after fresh app/PG/browser restart. R5 actual React/HTTP
+proves success, revocation before confirm, UNKNOWN, manual read and restart;
+eight full serialized scripted-model bodies exclude tested private facts.
+Provider dispatch/reconciliation after restart are both zero. Scoped read
+writes are empty. All owned services stopped. Independent review has no blocker.
+
+77 backend, 166 runtime, 93 React and 10 build self-tests pass, as do production
+types, scoped lint and shell/React builds. The proof uses synthetic A18/model/
+provider and a test-only loopback relay. First binding, empty own.list entry and
+production relay header parity remain explicit gaps. Success after restart is
+visible in fresh own.list, not a restored success terminal. This is not release,
+real-model/provider acceptance, autonomy or C10 completion. See [scenario,
+boundaries and evidence](MAYA-PERSONAL-OWNER-REACT-CHECKPOINT-20261007.md).

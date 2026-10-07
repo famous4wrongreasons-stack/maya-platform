@@ -1,5 +1,9 @@
 # Personal owner booking read boundary — qualified local checkpoint
 
+Follow-up: the already-verified, nonempty own.list carrier path is now implemented
+and locally exercised in the [React checkpoint](MAYA-PERSONAL-OWNER-REACT-CHECKPOINT-20261007.md).
+The backend-only scope statements below describe this earlier checkpoint.
+
 At `f8e6f9d4`, an explicitly selected, verified personal context can preview a
 booking and read its saved canonical outcome without changing the account's
 owner role. Actual local HTTP proves successful creation once, natural UNKNOWN,

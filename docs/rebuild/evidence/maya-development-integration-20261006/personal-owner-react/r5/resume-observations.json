@@ -1,0 +1,34 @@
+{
+  "stage": "resume",
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "applicationAndPostgresRestart": true,
+  "success-restart": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 2,
+    "membershipUnchanged": true
+  },
+  "unknown-restart": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "providerLedgerCount": 1,
+  "checkpoints": [
+    "success-restart",
+    "unknown-restart"
+  ],
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

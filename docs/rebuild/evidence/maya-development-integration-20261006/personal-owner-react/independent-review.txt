@@ -1,0 +1,18 @@
+Independent reviewer: /root/independent_review (read-only, 2026-10-07).
+Final findings: no new blocking findings in this scope.
+Reviewed r5 manifest, both Jest reports, prepare/resume observations, browser/network reports,
+all 6+2 serialized model bodies and five key PNGs. No heavy tests run by reviewer.
+Actual App/PG restart preserved SUCCEEDED and UNKNOWN with executionAttemptCount=1.
+Revocation returned 403 without a new AE execution or appointment.
+Resume provider dispatch/reconciliation 0; a new completed manual GET causes no repeat create.
+Scoped preview/results writes are empty. Serialized bodies contain user messages and empty
+tool_results, without tested private markers/UUID/auth headers.
+Manifest and pg-stop log show the owned cluster stopped.
+Prior findings fixed: clear facts on forbidden/late forbidden; retain receiver through normal
+accessibility redraw; remove recursive child NAV; reject initially frozen/expired detail;
+wait for a new completed manual result GET rather than an already-satisfied total count.
+Actual composer aria-disabled=false is observed before sending after history restoration.
+Limits: synthetic model/A18/provider and own loopback relay; production PHP header parity absent.
+Success after restart is observed via fresh own.list, not a restored terminal success card.
+UNKNOWN is visible as a saved uncertain result. The incomplete-history notice is retained.
+This is not real-provider/model acceptance, certification or C10 completion.

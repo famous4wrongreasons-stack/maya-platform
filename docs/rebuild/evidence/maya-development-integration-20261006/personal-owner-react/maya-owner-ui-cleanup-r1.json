@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "attempt": "r1",
+      "status": "failed",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3,
+      "ownedRecordedPorts": [
+        {
+          "port": 57501,
+          "acceptsConnections": false
+        },
+        {
+          "port": 57550,
+          "acceptsConnections": false
+        }
+      ]
+    },
+    {
+      "attempt": "r2",
+      "status": "failed",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3,
+      "ownedRecordedPorts": [
+        {
+          "port": 57851,
+          "acceptsConnections": false
+        },
+        {
+          "port": 57889,
+          "acceptsConnections": false
+        }
+      ]
+    },
+    {
+      "attempt": "r3",
+      "status": "interrupted-resume",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3,
+      "ownedRecordedPorts": [
+        {
+          "port": 58135,
+          "acceptsConnections": false
+        },
+        {
+          "port": 58157,
+          "acceptsConnections": false
+        }
+      ]
+    },
+    {
+      "attempt": "r4",
+      "status": "failed",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3,
+      "ownedRecordedPorts": [
+        {
+          "port": 59462,
+          "acceptsConnections": false
+        },
+        {
+          "port": 59494,
+          "acceptsConnections": false
+        },
+        {
+          "port": 59609,
+          "acceptsConnections": false
+        }
+      ]
+    },
+    {
+      "attempt": "r5",
+      "status": "passed",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3,
+      "ownedRecordedPorts": [
+        {
+          "port": 60144,
+          "acceptsConnections": false
+        },
+        {
+          "port": 60186,
+          "acceptsConnections": false
+        },
+        {
+          "port": 60276,
+          "acceptsConnections": false
+        }
+      ]
+    }
+  ],
+  "ownedChromePids": [],
+  "allRecordedOwnedServicesStopped": true
+}

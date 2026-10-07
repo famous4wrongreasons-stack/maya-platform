@@ -1,0 +1,29 @@
+{
+  "kind": "personal-owner-react-http-pg-restart-local-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-3iF3rc/pg",
+  "database": "maya_widget_gate_proof_personalowner_a20c7dee61b1",
+  "port": 57501,
+  "status": "failed",
+  "completed": [
+    "shell-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "pg-stop"
+  ],
+  "syntheticModel": true,
+  "syntheticCanonicalAppointments": true,
+  "syntheticLocalProvider": true,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 1
+  },
+  "clusterStopped": true
+}

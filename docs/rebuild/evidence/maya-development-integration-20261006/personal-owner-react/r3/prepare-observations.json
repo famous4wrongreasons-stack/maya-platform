@@ -1,0 +1,43 @@
+{
+  "stage": "prepare",
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "success-result": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 2,
+    "membershipUnchanged": true
+  },
+  "revoked-result": {
+    "state": "REFUSED",
+    "attempts": 0,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "unknown-result": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 1,
+    "membershipUnchanged": true
+  },
+  "providerLedgerCount": 1,
+  "checkpoints": [
+    "success-preview",
+    "success-result",
+    "revoked-preview",
+    "revoked-result",
+    "unknown-preview",
+    "unknown-result"
+  ],
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 1,
+    "reconciliations": 3
+  },
+  "unexpected": []
+}
