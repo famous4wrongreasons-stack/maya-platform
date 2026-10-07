@@ -43,12 +43,12 @@ export function syntheticYclientsAvailability(companyId: string, day: string) {
       assert.equal(init?.method, 'GET');
       assert.equal(init.body, undefined);
       assert.equal(url.pathname, `/api/v1/book_times/${companyId}/71/${day}`);
-      assert.deepEqual(
-        [...url.searchParams],
-        [
+      assert.equal(
+        JSON.stringify([...url.searchParams]),
+        JSON.stringify([
           ['date', day],
           ['service_ids[]', '81'],
-        ],
+        ]),
       );
       assert.equal(
         new Headers(init.headers).get('authorization'),
