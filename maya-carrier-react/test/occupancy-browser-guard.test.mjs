@@ -31,3 +31,12 @@ test('request-stage guard continues admitted HTTP, blocks forbidden HTTP, never 
   assert.deepEqual(calls.map(([method]) => method), ['Network.setBypassServiceWorker', 'Network.setBlockedURLs', 'Fetch.enable', 'Fetch.continueRequest', 'Fetch.failRequest']);
   assert.equal(calls[2][1].patterns[0].requestStage, 'Request');
 });
+
+test('guard admits only bounded read-only widget history, never render observations or intents', () => {
+  const resolve = (body) => admitted({ url: origin + '/api/widgets/resolve', method: 'POST', postData: JSON.stringify(body) }, origin);
+  assert.equal(resolve({ thread_page: { limit: 30 } }), true);
+  assert.equal(resolve({ thread_page: { limit: 51 } }), false);
+  assert.equal(resolve({ thread_page: { limit: 30, tenantId: 'foreign' } }), false);
+  assert.equal(resolve({ thread_page: { limit: 30 }, rendered: {} }), false);
+  assert.equal(resolve({ thread_page: { limit: 30, before: 'bad' } }), false);
+});

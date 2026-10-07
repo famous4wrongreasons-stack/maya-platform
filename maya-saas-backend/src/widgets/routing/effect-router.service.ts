@@ -837,7 +837,6 @@ export class EffectRouterService {
       inheritedHandles: advanced.inheritedHandles,
       revalidateSource: advanced.revalidateSource,
     });
-    await advanced.revalidateSource?.();
     return minted === null
       ? admitted({
           receiptOutcome: 'REFUSED',

@@ -388,6 +388,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         });
         if (linked !== 1) throw new SuccessorLinkConflict();
       });
+      await request.revalidateSource?.();
     } catch (error) {
       await this.prisma.widgetEmission.updateMany({
         where: {

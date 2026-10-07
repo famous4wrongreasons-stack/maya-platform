@@ -131,3 +131,18 @@ describe('Booking successor principal boundary [BUILD]', () => {
     expect(f.cancel).not.toHaveBeenCalled();
   });
 });
+
+it('cancels the exact successor after a post-link metadata drift without removing audit', async () => {
+  const f = fixture();
+  const revalidateSource = jest
+    .fn()
+    .mockRejectedValue(new Error('source_changed'));
+  await expect(
+    f.service.mintBookingSelector({ ...request(), revalidateSource } as never),
+  ).rejects.toThrow('source_changed');
+  expect(f.closed).toHaveBeenCalledTimes(1);
+  expect(f.cancel).toHaveBeenCalledWith({
+    where: { tenantId: 'tenant', widgetId: 'next', lifecycleState: 'MINTED' },
+    data: { lifecycleState: 'CANCELLED' },
+  });
+});

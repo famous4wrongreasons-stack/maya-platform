@@ -424,7 +424,19 @@ export class WidgetEmitterService {
       null,
       selector.predecessorWidgetId ?? null,
     );
-    await selector.revalidateSource?.();
+    try {
+      await selector.revalidateSource?.();
+    } catch (error) {
+      await this.prisma.widgetEmission.updateMany({
+        where: {
+          tenantId: request.tenantId,
+          widgetId: emitted.widgetId,
+          lifecycleState: 'MINTED',
+        },
+        data: { lifecycleState: 'CANCELLED' },
+      });
+      throw error;
+    }
     return emitted;
   }
 

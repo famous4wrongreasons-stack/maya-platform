@@ -19,6 +19,17 @@ class FakePrisma {
   public records: Record<string, unknown>[] = [];
   public receipts: Record<string, unknown>[] = [];
   widgetEmission = {
+    updateMany: ({
+      where,
+      data,
+    }: {
+      where: { widgetId: string };
+      data: Record<string, unknown>;
+    }) => {
+      const row = this.emissions.find((r) => r.widgetId === where.widgetId);
+      if (row) Object.assign(row, data);
+      return { count: row ? 1 : 0 };
+    },
     create: (args: { data: Record<string, unknown> }) => {
       this.emissions.push(args.data);
       return args.data;
@@ -958,4 +969,42 @@ it('refuses external-to-internal drift before a typed branch selector can be min
   ).rejects.toThrow('ai_tool_availability_source_changed');
   expect(prisma.emissions).toHaveLength(0);
   expect(revalidateSource).toHaveBeenCalledTimes(1);
+});
+
+it('cancels the exact minted selector if the final source check fails', async () => {
+  const { emitter, prisma } = make();
+  const revalidateSource = jest
+    .fn()
+    .mockResolvedValueOnce(undefined)
+    .mockRejectedValueOnce(new Error('source_changed'));
+  await expect(
+    emitter.emitBookingSelector(
+      {
+        ...req(),
+        kind: 'SERVICE_SELECTOR',
+        composerInput: composerFor(
+          'SERVICE_SELECTOR',
+          'catalog.services.read',
+          [],
+        ),
+      },
+      {
+        source: {
+          services: [
+            {
+              id: 'observed',
+              name: 'Observed',
+              price: null,
+              duration_minutes: null,
+              currency: null,
+            },
+          ],
+        },
+        revalidateSource,
+      },
+    ),
+  ).rejects.toThrow('source_changed');
+  expect(prisma.emissions).toHaveLength(1);
+  expect(prisma.emissions[0].lifecycleState).toBe('CANCELLED');
+  expect(revalidateSource).toHaveBeenCalledTimes(2);
 });

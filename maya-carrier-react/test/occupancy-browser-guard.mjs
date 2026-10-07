@@ -24,6 +24,13 @@ export function admitted(request, origin) {
     }
     if (request.method !== 'POST' || url.search) return false;
     if (/^\/api\/auth\/(?:email\/(?:start|verify)|refresh)$/.test(url.pathname)) return true;
+    if (url.pathname === '/api/widgets/resolve') {
+      const body = JSON.parse(request.postData), page = body?.thread_page;
+      return body && Object.keys(body).join(',') === 'thread_page' && page &&
+        Object.keys(page).every((key) => ['before', 'limit'].includes(key)) &&
+        Number.isInteger(page.limit) && page.limit >= 1 && page.limit <= 50 &&
+        (page.before === undefined || (typeof page.before === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(page.before)));
+    }
     if (url.pathname !== '/api/ai/chat') return false;
     const body = JSON.parse(request.postData);
     return body.surface === 'web' && Array.isArray(body.messages) &&
