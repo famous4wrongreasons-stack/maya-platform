@@ -1,7 +1,7 @@
 // Explicit narrow local proof. Never reuses a cluster, DB, env file or output.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
+import { spawn, execFileSync } from 'node:child_process';
+import { randomBytes, createHash } from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import os from 'node:os';
@@ -9,6 +9,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { localProofProfile } from './current-candidate-local-profile.mjs';
+import {
+  qualifyProfileMetadata,
+  validateProfileMetadata,
+} from './current-candidate-profile-metadata.mjs';
+import { freezeCurrentCandidate } from './current-candidate.mjs';
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 const backend = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -22,8 +27,14 @@ const { values } = parseArgs({
     'broker-preflight': { type: 'boolean' },
     'pg-bin': { type: 'string' },
     preflight: { type: 'boolean' },
+    'profile-metadata': { type: 'string' },
   },
 });
+const hasProfileMetadata = values['profile-metadata'] !== undefined;
+assert.ok(
+  !hasProfileMetadata || values.preflight,
+  'candidate_profile_metadata_preflight_only',
+);
 if (values.preflight) {
   assert.ok(
     !values.run &&
@@ -32,9 +43,74 @@ if (values.preflight) {
       !values['broker-preflight'],
     'candidate_profile_mode_conflict',
   );
-  console.log(
-    JSON.stringify(localProofProfile({ pgBin: values['pg-bin'] }), null, 2),
-  );
+  let report;
+  if (hasProfileMetadata) {
+    // Read only the explicitly supplied bounded JSON. Never resolve or open any
+    // credential/evidence/target reference described inside it.
+    try {
+      const file = values['profile-metadata'];
+      if (!path.isAbsolute(file) || !file.endsWith('.json')) throw new Error();
+      const fd = fs.openSync(
+        file,
+        fs.constants.O_RDONLY |
+          fs.constants.O_NOFOLLOW |
+          fs.constants.O_NONBLOCK,
+      );
+      let metadata;
+      try {
+        const stat = fs.fstatSync(fd);
+        if (!stat.isFile() || stat.size > 16384) throw new Error();
+        const bytes = Buffer.alloc(16385);
+        const count = fs.readSync(fd, bytes, 0, bytes.length, 0);
+        if (count > 16384) throw new Error();
+        metadata = JSON.parse(bytes.subarray(0, count).toString('utf8'));
+      } finally {
+        fs.closeSync(fd);
+      }
+      validateProfileMetadata(metadata);
+      const commit = execFileSync('git', ['rev-parse', 'HEAD'], {
+        cwd: backend,
+        encoding: 'utf8',
+        timeout: 5000,
+      }).trim();
+      const candidate = freezeCurrentCandidate(backend, commit);
+      // No declared clean candidate when its frozen runtime/corpus bytes differ
+      // from HEAD. The preflight itself is not a live broker admission proof.
+      for (const [file, expected] of Object.entries(candidate.sourceHashes)) {
+        const committed = execFileSync(
+          'git',
+          ['show', `${commit}:maya-saas-backend/${file}`],
+          {
+            cwd: backend,
+            timeout: 5000,
+            maxBuffer: 4 * 1024 * 1024,
+          },
+        );
+        if (createHash('sha256').update(committed).digest('hex') !== expected)
+          throw new Error('candidate_profile_sources_uncommitted');
+      }
+      report = qualifyProfileMetadata({
+        metadata,
+        candidate,
+        localObservation: localProofProfile({ pgBin: values['pg-bin'] }),
+      });
+      report.sourceBinding = 'FROZEN_SOURCE_HASHES_CHECKED_AGAINST_HEAD';
+    } catch (error) {
+      const allowed = [
+        'candidate_profile_metadata_invalid',
+        'candidate_profile_binding_invalid',
+        'candidate_profile_binding_mismatch',
+        'candidate_profile_sources_uncommitted',
+      ];
+      console.error(
+        allowed.includes(error?.message)
+          ? error.message
+          : 'candidate_profile_preflight_failed',
+      );
+      process.exit(1);
+    }
+  } else report = localProofProfile({ pgBin: values['pg-bin'] });
+  console.log(JSON.stringify(report, null, 2));
   process.exit(0);
 }
 const groups = values.groups?.split(',');

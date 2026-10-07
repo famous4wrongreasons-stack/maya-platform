@@ -1,0 +1,18 @@
+{
+  "contract": "maya.current-candidate-profile-metadata/1",
+  "expectedCandidate": null,
+  "target": null,
+  "principals": null,
+  "credentialSource": null,
+  "isolationEvidence": {
+    "inventory": null,
+    "egress": null,
+    "credentialAccess": null
+  },
+  "authority": {
+    "paidAuthorized": false,
+    "credentialAdmission": false,
+    "resourceCreation": false,
+    "upstreamAllowed": false
+  }
+}

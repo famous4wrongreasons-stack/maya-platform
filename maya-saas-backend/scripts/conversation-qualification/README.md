@@ -1,4 +1,47 @@
-# Bounded conversation pilot
+# Current candidate: metadata preflight only (2026-10-07)
+
+The current candidate has **no live broker, credential admission or paid permit**.
+The historical pilot below is closed. Its approval does not authorize another run.
+Inspect the existing local installation and prepare exact missing profile metadata:
+
+```sh
+node scripts/conversation-qualification/current-candidate-http.mjs \
+  --preflight --pg-bin /opt/homebrew/opt/postgresql@16/bin \
+  --profile-metadata "$(pwd)/scripts/conversation-qualification/current-candidate-profile-metadata.example.json"
+```
+
+The example deliberately contains unknowns. Supply an absolute path to a regular
+JSON file of at most 16 KiB; the executable rejects symlinks, malformed/extra fields,
+authority flags other than false, a credential reader different from the broker,
+and a declared candidate digest different from the current frozen manifest. It
+reads the supplied JSON, Git blobs/current frozen sources and installed local
+Node/PG metadata only. Target, credential and evidence references are **never
+opened**. Do not place key values, environment maps, commands or headers in the
+metadata. Reports contain hashes and blocker codes, not supplied reference values.
+
+`expectedCandidate` is null for discovery, or `{candidateCommit, manifestSha256}`
+copied from that discovery for an exact subsequent check. `target` declares
+`host`, `profile`, `platform` (linux/darwin), `architecture` (x64/arm64), and an
+absolute `workDirectory`. `principals` declares backend, runner, broker and database
+identifiers; broker must differ from the others. `credentialSource` declares
+`kind` (file/secret-store), `reference`, `owner` and `reader`. Each isolation evidence
+entry is null or `{reference, sha256}`. References are bounded identifier strings,
+not executable instructions. Declarations are not verification of the remote host,
+principals, secret ownership or isolation evidence.
+
+Even a complete file yields only `METADATA_CHECKED_NOT_AUTHORIZED`; an incomplete
+file yields `INCOMPLETE`, both with `paidAuthorized:false` and `NOT_ISSUED`.
+Exit zero means the preflight was evaluated, never permission to run. Proposed
+model/budget/limits come from the existing candidate owner, with pricing explicitly
+unverified for a future run. Local binary observations do not qualify the declared
+remote target or resource headroom. The report lists the remaining target/isolation,
+live-broker/profile binding, full target keyless proof, account/model/pricing and
+fresh owner authorization requirements. `--run --profile-metadata` is refused;
+the existing offline-only dry broker and budget gate are unchanged.
+
+See [exact prerequisites](../../../docs/rebuild/MAYA-REAL-MODEL-PREREQUISITES-20261007.md).
+
+# Historical bounded conversation pilot
 
 Offline replay, bounded live broker runner, and budget mechanics. The real-model diagnostic below is not a language-quality certification.
 The owner approved at most $20 total for the existing DeepSeek account, up to 50 synthetic

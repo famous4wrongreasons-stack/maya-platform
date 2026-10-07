@@ -167,6 +167,18 @@ export async function bindCandidateSource(
         settingsJson: {
           companyId: source.company,
           syntheticTenantId: tenant.id,
+          // C5/C9 must qualify the selected branch through the same canonical
+          // metadata owner even with this older synthetic domain-port adapter.
+          // Other corpus groups keep their existing unbound-source negatives.
+          ...(item.group === 'occupancy'
+            ? {
+                branchBinding: {
+                  contract: 'maya.crm-branch-binding/1',
+                  companyId: Number(source.company),
+                  branchId: branch.id,
+                },
+              }
+            : {}),
         },
       },
     });
