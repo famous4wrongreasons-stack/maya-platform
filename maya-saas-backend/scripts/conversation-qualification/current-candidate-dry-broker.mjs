@@ -6,6 +6,11 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { freezeCurrentCandidate } from './current-candidate.mjs';
+import {
+  readBoundedProfileJson,
+  verifyKeylessProfileBinding,
+} from './current-candidate-keyless-profile.mjs';
 import {
   CandidateBudgetGate,
   CANDIDATE_LIMITS,
@@ -18,11 +23,17 @@ const { values } = parseArgs({
     candidate: { type: 'string' },
     'no-upstream': { type: 'boolean' },
     'lifetime-ms': { type: 'string' },
+    'keyless-profile-sha256': { type: 'string' },
   },
 });
 assert.equal(values['no-upstream'], true, 'dry_broker_no_upstream_required');
 assert.match(values.candidate ?? '', /^[a-f0-9]{40}$/);
 assert.ok(values.output && path.isAbsolute(values.output));
+const profilePin = values['keyless-profile-sha256'];
+assert.ok(
+  profilePin === undefined || /^[a-f0-9]{64}$/.test(profilePin),
+  'dry_broker_profile_pin',
+);
 // A dry proof may shorten its lifetime, never extend the proposed ceiling.
 const lifetimeMs =
   values['lifetime-ms'] === undefined
@@ -63,6 +74,8 @@ const report = {
   paidAuthorized: false,
   credentialsLoaded: false,
   upstreamCalls: 0,
+  keylessProfileSha256: profilePin ?? null,
+  keylessProfileVerified: false,
   startedAt: new Date().toISOString(),
   expiresAt: new Date(expiresAt).toISOString(),
   lifetimeMs,
@@ -104,6 +117,31 @@ function bind() {
       'dry_broker_source_changed',
     );
   }
+  if (profilePin !== undefined) {
+    assert.equal(
+      raw.keylessProfileSha256,
+      profilePin,
+      'dry_broker_profile_manifest',
+    );
+    const candidate = freezeCurrentCandidate(process.cwd(), values.candidate);
+    assert.equal(
+      raw.manifestSha256,
+      candidate.manifestSha256,
+      'dry_broker_profile_candidate',
+    );
+    verifyKeylessProfileBinding({
+      binding: readBoundedProfileJson(
+        path.join(output, 'keyless-profile-binding.json'),
+      ),
+      candidate,
+      expectedSha256: profilePin,
+    });
+    report.keylessProfileVerified = true;
+  } else
+    assert.ok(
+      raw.keylessProfileSha256 == null,
+      'dry_broker_profile_pin_missing',
+    );
   manifest = raw;
   report.bindingManifestSha256 = bindingManifestSha256;
   report.verifiedSourcePaths = Object.keys(files).length;

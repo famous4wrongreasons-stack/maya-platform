@@ -1,4 +1,4 @@
-# Current candidate: metadata preflight only (2026-10-07)
+# Current candidate: metadata preflight and keyless profile binding (2026-10-07)
 
 The current candidate has **no live broker, credential admission or paid permit**.
 The historical pilot below is closed. Its approval does not authorize another run.
@@ -38,6 +38,33 @@ remote target or resource headroom. The report lists the remaining target/isolat
 live-broker/profile binding, full target keyless proof, account/model/pricing and
 fresh owner authorization requirements. `--run --profile-metadata` is refused;
 the existing offline-only dry broker and budget gate are unchanged.
+
+An independently authorized local keyless proof can bind the metadata to its
+actual run using the separate flag below. It requires `--run --broker-preflight`;
+it cannot combine with `--preflight` or the old `--profile-metadata` flag.
+
+```sh
+node scripts/conversation-qualification/current-candidate-http.mjs \
+  --run --broker-preflight --output /tmp/NEW-UNUSED-KEYLESS-PROOF \
+  --keyless-profile-metadata "$(pwd)/scripts/conversation-qualification/current-candidate-profile-metadata.example.json"
+```
+
+Before creating resources, the launcher captures the exact code/corpus/limits,
+supplied metadata digest, effective candidate-bound metadata digest and installed
+local profile in `keyless-profile-binding.json`. A null `expectedCandidate` is
+filled from the captured candidate; a wrong declared expectation still refuses.
+Other unknown metadata stays incomplete. The full HTTP manifest includes the
+profile digest; launcher pins it separately to probe and dry broker. Both check
+the artifact against their current frozen candidate before model reservation.
+The existing two ledgers bind that same full manifest, not a new budget.
+
+This flag creates only the existing local synthetic proof resources. It does not
+connect to the declared host, open credential/evidence references, admit any
+credential or enable an upstream transport. All authority flags stay false,
+remote qualification stays false, and real-model quality remains unevaluated.
+Mutation of the pinned artifact or mismatching candidate/limits is refused. Runs
+without this optional flag retain their prior offline behavior and report a null
+profile digest; they must not be described as profile-bound evidence.
 
 See [exact prerequisites](../../../docs/rebuild/MAYA-REAL-MODEL-PREREQUISITES-20261007.md).
 

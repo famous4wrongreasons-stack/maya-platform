@@ -14,6 +14,10 @@ import {
   validateProfileMetadata,
 } from './current-candidate-profile-metadata.mjs';
 import { freezeCurrentCandidate } from './current-candidate.mjs';
+import {
+  createKeylessProfileBinding,
+  readBoundedProfileJson,
+} from './current-candidate-keyless-profile.mjs';
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 const backend = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -28,13 +32,59 @@ const { values } = parseArgs({
     'pg-bin': { type: 'string' },
     preflight: { type: 'boolean' },
     'profile-metadata': { type: 'string' },
+    'keyless-profile-metadata': { type: 'string' },
   },
 });
 const hasProfileMetadata = values['profile-metadata'] !== undefined;
+const hasKeylessProfile = values['keyless-profile-metadata'] !== undefined;
+assert.ok(
+  !hasKeylessProfile ||
+    (values.run &&
+      values['broker-preflight'] &&
+      !values.preflight &&
+      !hasProfileMetadata),
+  'candidate_keyless_profile_run_only',
+);
 assert.ok(
   !hasProfileMetadata || values.preflight,
   'candidate_profile_metadata_preflight_only',
 );
+function captureCommittedCandidate() {
+  const commit = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: backend,
+    encoding: 'utf8',
+    timeout: 5000,
+  }).trim();
+  const candidate = freezeCurrentCandidate(backend, commit);
+  for (const [file, expected] of Object.entries(candidate.sourceHashes)) {
+    const committed = execFileSync(
+      'git',
+      ['show', `${commit}:maya-saas-backend/${file}`],
+      {
+        cwd: backend,
+        timeout: 5000,
+        maxBuffer: 4 * 1024 * 1024,
+      },
+    );
+    if (createHash('sha256').update(committed).digest('hex') !== expected)
+      throw new Error('candidate_profile_sources_uncommitted');
+  }
+  return candidate;
+}
+function reportProfileFailure(error) {
+  const allowed = [
+    'candidate_profile_metadata_invalid',
+    'candidate_profile_binding_invalid',
+    'candidate_profile_binding_mismatch',
+    'candidate_profile_sources_uncommitted',
+  ];
+  console.error(
+    allowed.includes(error?.message)
+      ? error.message
+      : 'candidate_profile_preflight_failed',
+  );
+  process.exit(1);
+}
 if (values.preflight) {
   assert.ok(
     !values.run &&
@@ -48,47 +98,14 @@ if (values.preflight) {
     // Read only the explicitly supplied bounded JSON. Never resolve or open any
     // credential/evidence/target reference described inside it.
     try {
-      const file = values['profile-metadata'];
-      if (!path.isAbsolute(file) || !file.endsWith('.json')) throw new Error();
-      const fd = fs.openSync(
-        file,
-        fs.constants.O_RDONLY |
-          fs.constants.O_NOFOLLOW |
-          fs.constants.O_NONBLOCK,
+      const metadata = readBoundedProfileJson(
+        values['profile-metadata'],
+        16384,
       );
-      let metadata;
-      try {
-        const stat = fs.fstatSync(fd);
-        if (!stat.isFile() || stat.size > 16384) throw new Error();
-        const bytes = Buffer.alloc(16385);
-        const count = fs.readSync(fd, bytes, 0, bytes.length, 0);
-        if (count > 16384) throw new Error();
-        metadata = JSON.parse(bytes.subarray(0, count).toString('utf8'));
-      } finally {
-        fs.closeSync(fd);
-      }
       validateProfileMetadata(metadata);
-      const commit = execFileSync('git', ['rev-parse', 'HEAD'], {
-        cwd: backend,
-        encoding: 'utf8',
-        timeout: 5000,
-      }).trim();
-      const candidate = freezeCurrentCandidate(backend, commit);
       // No declared clean candidate when its frozen runtime/corpus bytes differ
       // from HEAD. The preflight itself is not a live broker admission proof.
-      for (const [file, expected] of Object.entries(candidate.sourceHashes)) {
-        const committed = execFileSync(
-          'git',
-          ['show', `${commit}:maya-saas-backend/${file}`],
-          {
-            cwd: backend,
-            timeout: 5000,
-            maxBuffer: 4 * 1024 * 1024,
-          },
-        );
-        if (createHash('sha256').update(committed).digest('hex') !== expected)
-          throw new Error('candidate_profile_sources_uncommitted');
-      }
+      const candidate = captureCommittedCandidate();
       report = qualifyProfileMetadata({
         metadata,
         candidate,
@@ -96,18 +113,7 @@ if (values.preflight) {
       });
       report.sourceBinding = 'FROZEN_SOURCE_HASHES_CHECKED_AGAINST_HEAD';
     } catch (error) {
-      const allowed = [
-        'candidate_profile_metadata_invalid',
-        'candidate_profile_binding_invalid',
-        'candidate_profile_binding_mismatch',
-        'candidate_profile_sources_uncommitted',
-      ];
-      console.error(
-        allowed.includes(error?.message)
-          ? error.message
-          : 'candidate_profile_preflight_failed',
-      );
-      process.exit(1);
+      reportProfileFailure(error);
     }
   } else report = localProofProfile({ pgBin: values['pg-bin'] });
   console.log(JSON.stringify(report, null, 2));
@@ -145,8 +151,33 @@ assert.ok(
 );
 for (const name of ['.env', '.env.local'])
   assert.equal(fs.existsSync(path.join(backend, name)), false);
-const localProfile = localProofProfile({ pgBin: values['pg-bin'] });
+let keylessProfileBinding = null;
+let localProfile;
+if (hasKeylessProfile) {
+  try {
+    const metadata = readBoundedProfileJson(
+      values['keyless-profile-metadata'],
+      16384,
+    );
+    validateProfileMetadata(metadata);
+    const candidate = captureCommittedCandidate();
+    localProfile = localProofProfile({ pgBin: values['pg-bin'] });
+    keylessProfileBinding = createKeylessProfileBinding({
+      metadata,
+      candidate,
+      localObservation: localProfile,
+    });
+  } catch (error) {
+    reportProfileFailure(error);
+  }
+} else localProfile = localProofProfile({ pgBin: values['pg-bin'] });
 fs.mkdirSync(values.output, { mode: 0o700 });
+if (keylessProfileBinding)
+  fs.writeFileSync(
+    path.join(values.output, 'keyless-profile-binding.json'),
+    JSON.stringify(keylessProfileBinding, null, 2) + '\n',
+    { flag: 'wx', mode: 0o600 },
+  );
 const privateRoot = fs.mkdtempSync(
   path.join(os.tmpdir(), 'maya-candidate-http-'),
 );
@@ -173,6 +204,7 @@ for (const key of ['PATH', 'HOME', 'TMPDIR'])
 const manifest = {
   kind: 'current-candidate-authenticated-http-offline-mechanics',
   localProfile,
+  keylessProfileSha256: keylessProfileBinding?.keylessProfileSha256 ?? null,
   cluster,
   database,
   port,
@@ -228,6 +260,12 @@ const startBroker = async () => {
         '--candidate',
         candidate,
         '--no-upstream',
+        ...(keylessProfileBinding
+          ? [
+              '--keyless-profile-sha256',
+              keylessProfileBinding.keylessProfileSha256,
+            ]
+          : []),
       ],
       { cwd: backend, env: brokerEnv, stdio: ['ignore', fd, fd, 'ipc'] },
     );
@@ -360,6 +398,12 @@ const stage = () =>
       JEST_CANDIDATE_HTTP_OUTPUT: values.output,
       ...(groups ? { JEST_CANDIDATE_GROUPS: groups.join(',') } : {}),
       ...(brokerUrl ? { JEST_CANDIDATE_DRY_BROKER: brokerUrl } : {}),
+      ...(keylessProfileBinding
+        ? {
+            JEST_CANDIDATE_KEYLESS_PROFILE_SHA256:
+              keylessProfileBinding.keylessProfileSha256,
+          }
+        : {}),
     },
   );
 let startAttempted = false;
@@ -410,6 +454,27 @@ try {
   const report = JSON.parse(
     fs.readFileSync(path.join(values.output, 'http-report.json'), 'utf8'),
   );
+  assert.equal(
+    report.keylessProfileSha256,
+    keylessProfileBinding?.keylessProfileSha256 ?? null,
+    'candidate_profile_http_binding_missing',
+  );
+  if (keylessProfileBinding) {
+    const brokerReport = readBoundedProfileJson(
+      path.join(values.output, 'broker-report.json'),
+    );
+    assert.equal(
+      brokerReport.keylessProfileSha256,
+      keylessProfileBinding.keylessProfileSha256,
+      'candidate_profile_broker_binding_missing',
+    );
+    if (report.transportCalls > 0)
+      assert.equal(
+        brokerReport.keylessProfileVerified,
+        true,
+        'candidate_profile_broker_not_verified',
+      );
+  }
   manifest.corpusStatus = report.status;
   manifest.unexecutedTurns = report.outcomes.filter(
     (turn) => turn.status === 'UNEXECUTED',

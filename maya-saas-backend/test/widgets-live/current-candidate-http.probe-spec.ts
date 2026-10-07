@@ -41,10 +41,21 @@ const { CandidateBudgetGate, CANDIDATE_LIMITS } = nativeRequire(
     'scripts/conversation-qualification/current-candidate-budget.mjs',
   ),
 ) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
+const { readBoundedProfileJson, verifyKeylessProfileBinding } = nativeRequire(
+  path.resolve(
+    'scripts/conversation-qualification/current-candidate-keyless-profile.mjs',
+  ),
+) as typeof import('../../scripts/conversation-qualification/current-candidate-keyless-profile.mjs');
 const output = process.env.JEST_CANDIDATE_HTTP_OUTPUT!;
 // Only an owned keyless loopback broker may be contacted by this prerequisite.
 const loopbackFetch = globalThis.fetch;
 const brokerUrl = process.env.JEST_CANDIDATE_DRY_BROKER;
+const keylessProfilePin = process.env.JEST_CANDIDATE_KEYLESS_PROFILE_SHA256;
+if (
+  keylessProfilePin !== undefined &&
+  (!brokerUrl || !/^[a-f0-9]{64}$/.test(keylessProfilePin))
+)
+  throw new Error('candidate_keyless_profile_pin');
 if (
   brokerUrl &&
   !/^http:\/\/127\.0\.0\.1:\d{1,5}\/chat\/completions$/.test(brokerUrl)
@@ -405,6 +416,16 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       encoding: 'utf8',
     }).trim();
     const base = freezeCurrentCandidate(process.cwd(), candidate);
+    const keylessProfileSha256 =
+      keylessProfilePin === undefined
+        ? null
+        : verifyKeylessProfileBinding({
+            binding: readBoundedProfileJson(
+              path.join(output, 'keyless-profile-binding.json'),
+            ),
+            candidate: base,
+            expectedSha256: keylessProfilePin,
+          });
     const groups = process.env.JEST_CANDIDATE_GROUPS?.split(',');
     if (groups?.some((g) => !base.cases.some((c) => c.group === g)))
       throw new Error('candidate_group_selection_invalid');
@@ -421,12 +442,15 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       'scripts/conversation-qualification/current-candidate-dry-broker.mjs',
       'scripts/conversation-qualification/owned-child-cleanup.mjs',
       'scripts/conversation-qualification/current-candidate-local-profile.mjs',
+      'scripts/conversation-qualification/current-candidate-keyless-profile.mjs',
+      'scripts/conversation-qualification/current-candidate-profile-metadata.mjs',
       'src/ai-tools/planner-wire-context.ts',
       'src/conversation-intelligence/conversation-intelligence.service.ts',
       'src/widgets/composition/chat-read.trigger.ts',
     ];
     const manifest = {
       ...base,
+      keylessProfileSha256,
       status: 'AUTHENTICATED_HTTP_CANNED_MECHANICS_CANDIDATE',
       bindingSources: Object.fromEntries(
         bindingSources.map((f) => [f, hash(readFileSync(f))]),
@@ -1245,6 +1269,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
           : 'OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS',
       candidate,
       bindingManifestSha256: manifestSha256,
+      keylessProfileSha256,
       requestByteCap: CANDIDATE_LIMITS.requestBytes,
       maxRequestBytes: Math.max(0, ...requests.map((r) => Number(r.bytes))),
       maxConservativeInputTokenBound: Math.max(

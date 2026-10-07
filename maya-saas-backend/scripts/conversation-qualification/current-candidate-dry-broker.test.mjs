@@ -7,6 +7,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { freezeCurrentCandidate } from './current-candidate.mjs';
+import { createKeylessProfileBinding } from './current-candidate-keyless-profile.mjs';
 const candidate = execFileSync('git', ['rev-parse', 'HEAD'], {
   encoding: 'utf8',
 }).trim();
@@ -18,12 +19,33 @@ const baseEnv = {
   NODE_OPTIONS: '--max-old-space-size=256',
   TZ: 'UTC',
 };
-function fixture() {
+function fixture(withProfile = false) {
   const output = fs.mkdtempSync(
     path.join(os.tmpdir(), 'maya-dry-broker-test-'),
   );
+  const base = freezeCurrentCandidate(process.cwd(), candidate);
+  const profile = withProfile
+    ? createKeylessProfileBinding({
+        candidate: base,
+        metadata: JSON.parse(
+          fs.readFileSync(
+            'scripts/conversation-qualification/current-candidate-profile-metadata.example.json',
+            'utf8',
+          ),
+        ),
+        localObservation: {
+          contract: 'maya.current-candidate-local-proof-profile/1',
+          mode: 'NO_UPSTREAM_ONLY',
+          paidAuthorized: false,
+          remoteServerQualified: false,
+          credentialsRead: false,
+          resourcesCreated: false,
+        },
+      })
+    : null;
   const manifest = {
-    ...freezeCurrentCandidate(process.cwd(), candidate),
+    ...base,
+    ...(profile ? { keylessProfileSha256: profile.keylessProfileSha256 } : {}),
     bindingSources: {},
     selectedCaseIds: ['current-admin-ordinary'],
   };
@@ -32,6 +54,11 @@ function fixture() {
     path.join(output, 'candidate-manifest.json'),
     JSON.stringify({ ...manifest, bindingManifestSha256: binding }),
   );
+  if (profile)
+    fs.writeFileSync(
+      path.join(output, 'keyless-profile-binding.json'),
+      JSON.stringify(profile),
+    );
   const body = JSON.stringify({
     model: 'deepseek-v4-pro',
     messages: [{ role: 'user', content: 'synthetic mechanics only' }],
@@ -39,7 +66,7 @@ function fixture() {
     stream: false,
     thinking: { type: 'disabled' },
   });
-  return { output, binding, body };
+  return { output, binding, body, profile };
 }
 async function start(output, env = baseEnv, extra = []) {
   const child = spawn(
@@ -270,3 +297,84 @@ test('dry lifetime cannot extend the one-hour ceiling', async () => {
     /refused/,
   );
 });
+
+test('broker verifies launch-pinned keyless profile before its first reservation', async () => {
+  const f = fixture(true),
+    pin = f.profile.keylessProfileSha256,
+    { child, url } = await start(f.output, baseEnv, [
+      '--keyless-profile-sha256',
+      pin,
+    ]);
+  try {
+    assert.equal(
+      (
+        await fetch(url + '/chat/completions', {
+          method: 'POST',
+          body: f.body,
+          headers: headers(f),
+        })
+      ).status,
+      200,
+    );
+  } finally {
+    await stop(child);
+  }
+  const report = readReport(f);
+  assert.equal(report.keylessProfileSha256, pin);
+  assert.equal(report.keylessProfileVerified, true);
+  assert.equal(report.stats.attempts, 1);
+  assert.equal(report.credentialsLoaded, false);
+  assert.equal(report.upstreamCalls, 0);
+  const opened = JSON.parse(
+    fs
+      .readFileSync(path.join(f.output, 'broker-ledger.jsonl'), 'utf8')
+      .split('\n')[0],
+  );
+  assert.equal(opened.manifestSha256, f.binding);
+});
+
+for (const kind of [
+  'changed-profile',
+  'wrong-launch-pin',
+  'missing-launch-pin',
+  'missing-profile',
+])
+  test(
+    'broker refuses ' + kind + ' before creating a budget ledger',
+    async () => {
+      const f = fixture(true),
+        file = path.join(f.output, 'keyless-profile-binding.json');
+      let pin = f.profile.keylessProfileSha256;
+      if (kind === 'changed-profile') {
+        f.profile.localObservation.platform = 'changed-after-launch-binding';
+        fs.writeFileSync(file, JSON.stringify(f.profile));
+      }
+      if (kind === 'missing-profile') fs.unlinkSync(file);
+      if (kind === 'wrong-launch-pin') pin = '0'.repeat(64);
+      const extra =
+        kind === 'missing-launch-pin' ? [] : ['--keyless-profile-sha256', pin];
+      const { child, url } = await start(f.output, baseEnv, extra);
+      try {
+        assert.equal(
+          (
+            await fetch(url + '/chat/completions', {
+              method: 'POST',
+              body: f.body,
+              headers: headers(f),
+            })
+          ).status,
+          503,
+        );
+      } finally {
+        await stop(child);
+      }
+      const report = readReport(f);
+      assert.equal(report.keylessProfileVerified, false);
+      assert.equal(report.stats?.attempts ?? 0, 0);
+      assert.equal(report.upstreamCalls, 0);
+      assert.equal(
+        fs.existsSync(path.join(f.output, 'broker-ledger.jsonl')),
+        false,
+      );
+    },
+  );

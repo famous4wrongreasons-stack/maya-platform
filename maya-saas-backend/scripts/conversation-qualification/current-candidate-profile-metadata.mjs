@@ -40,6 +40,15 @@ const evidence = (value) => {
   sha(value.sha256);
 };
 
+export const PROFILE_REQUIRED_BEFORE_LIVE = Object.freeze([
+  'TARGET_INVENTORY_PRINCIPALS_AND_ISOLATION_NOT_VERIFIED',
+  'TARGET_RESOURCE_HEADROOM_NOT_MEASURED',
+  'LIVE_BROKER_AND_PROFILE_BINDING_NOT_IMPLEMENTED',
+  'FINAL_TARGET_FULL_KEYLESS_PROOF_REQUIRED',
+  'CURRENT_PRICE_AND_ACCOUNT_MODEL_UNCHECKED',
+  'FRESH_OWNER_AUTHORIZATION_REQUIRED',
+]);
+
 export function validateProfileMetadata(metadata) {
   object(metadata, [
     'contract',
@@ -170,14 +179,7 @@ export function qualifyProfileMetadata({
     localObservation,
     localObservationSha256: digest(localObservation),
     missingMetadata: missing,
-    requiredBeforeLive: [
-      'TARGET_INVENTORY_PRINCIPALS_AND_ISOLATION_NOT_VERIFIED',
-      'TARGET_RESOURCE_HEADROOM_NOT_MEASURED',
-      'LIVE_BROKER_AND_PROFILE_BINDING_NOT_IMPLEMENTED',
-      'FINAL_TARGET_FULL_KEYLESS_PROOF_REQUIRED',
-      'CURRENT_PRICE_AND_ACCOUNT_MODEL_UNCHECKED',
-      'FRESH_OWNER_AUTHORIZATION_REQUIRED',
-    ],
+    requiredBeforeLive: [...PROFILE_REQUIRED_BEFORE_LIVE],
     referencesOpened: false,
     credentialsRead: false,
     resourcesCreated: false,
