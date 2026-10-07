@@ -914,16 +914,37 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
           token = await login(s),
           other = scenarios[0];
         const mark = reads.length;
-        expect((await slots(s, token, other.branchId)).status).toBe(404);
-        expect((await slots(s, token, s.otherBranchId)).status).toBe(503);
+        for (const branchId of [other.branchId, s.otherBranchId]) {
+          const refused = await slots(s, token, branchId);
+          expect(refused).toMatchObject({
+            status: 503,
+            body: { error: { code: 'booking_branch_source_unavailable' } },
+          });
+          expect(object(refused.body)).not.toHaveProperty('result');
+          expect(object(refused.body)).not.toHaveProperty('resolution');
+        }
+        // The authenticated public availability controller qualifies branch ownership
+        // before entering the CRM owner; its existing foreign-branch status is 404.
+        const publicForeign = await request(http.app.getHttpServer())
+          .get('/api/available-slots')
+          .set('Authorization', 'Bearer ' + token)
+          .query({
+            branchId: other.branchId,
+            date: s.day,
+            staffId: '71',
+            serviceIds: '81',
+          });
+        expect(publicForeign.status).toBe(404);
         expect(reads.length).toBe(mark);
         await assertNoEffect(s);
         checkpoints.push(
           'foreign and unbound branches refused before provider GET',
         );
         observations.foreignUnbound = {
-          foreign: 404,
-          unbound: 503,
+          toolForeign: 503,
+          toolUnbound: 503,
+          toolCode: 'booking_branch_source_unavailable',
+          authenticatedPublicForeign: 404,
           providerReads: 0,
         };
       }

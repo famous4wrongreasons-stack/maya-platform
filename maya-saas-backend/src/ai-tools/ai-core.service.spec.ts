@@ -327,6 +327,81 @@ describe('AiCoreService', () => {
       }
     });
 
+    it.each(['semantic branch', 'proposed branch ID'])(
+      'clarifies a missing staff member without an unscoped selector and retains %s, service and local day',
+      async (source) => {
+        jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
+        try {
+          const f = bookingFixture();
+          const clarification = await f.turn(
+            {
+              ...(source === 'semantic branch'
+                ? { branch: initial.branch }
+                : {}),
+              services: initial.services,
+              date_or_period: initial.date_or_period,
+            },
+            source === 'proposed branch ID' ? { branch_id: 'branch-a' } : {},
+          );
+          expect(clarification.reply).toContain('Уточните точное имя мастера');
+          expect(clarification.action).toBeNull();
+          expect(clarification).not.toHaveProperty('resolution');
+          expect(f.availabilityArgs()).toEqual([]);
+          expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+            'catalog.staff.read',
+            'catalog.services.read',
+          ]);
+          expect(
+            f.runtime.execute.mock.calls.every(
+              (call) => call[3]?.suppressWidgetTrigger === true,
+            ),
+          ).toBe(true);
+          expect(
+            f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0],
+          ).toMatchObject({
+            semanticContext: {
+              plan: {
+                tasks: [
+                  {
+                    entities: {
+                      branch: 'Центральный',
+                      services: ['Стрижка'],
+                      date_or_period: '2026-10-09',
+                    },
+                  },
+                ],
+              },
+            },
+          });
+          jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
+          await f.turn({ employee: 'Борис' });
+          expect(f.availabilityArgs()).toEqual([
+            {
+              branch_id: 'branch-a',
+              staff_id: 'staff-b',
+              service_ids: ['service-a'],
+              date: '2026-10-09',
+            },
+          ]);
+        } finally {
+          jest.useRealTimers();
+        }
+      },
+    );
+
+    it('refuses a foreign branch on a partial request before catalog reads or staff selection', async () => {
+      const f = bookingFixture();
+      const result = await f.turn({
+        branch: 'branch-foreign',
+        services: ['Стрижка'],
+        date_or_period: '2026-10-09',
+      });
+      expect(result.reply).toContain('Уточните филиал');
+      expect(result.action).toBeNull();
+      expect(result).not.toHaveProperty('resolution');
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+    });
+
     it('does not reuse a retained branch when its current source binding is unavailable', async () => {
       const f = bookingFixture();
       await f.turn(initial);

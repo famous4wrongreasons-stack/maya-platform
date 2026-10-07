@@ -1140,7 +1140,9 @@ export class AiCoreService {
           allowedNames.has('catalog.services.read') &&
           allowedNames.has('booking.availability.read') &&
           (decision.toolCall?.arguments.staff_id !== undefined ||
-            activeSemanticPlan.tasks[0].entities.employee !== undefined)
+            activeSemanticPlan.tasks[0].entities.employee !== undefined ||
+            decision.toolCall?.arguments.branch_id !== undefined ||
+            'branch' in activeSemanticPlan.tasks[0].entities)
         ) {
           const task = activeSemanticPlan.tasks[0];
           const proposedArguments = decision.toolCall?.arguments ?? {};
