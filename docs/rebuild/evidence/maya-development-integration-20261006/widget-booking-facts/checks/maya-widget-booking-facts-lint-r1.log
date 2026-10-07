@@ -1,0 +1,6 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts
+  115:11  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+✖ 1 problem (1 error, 0 warnings)
+

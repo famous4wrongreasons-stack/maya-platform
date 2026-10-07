@@ -1,0 +1,30 @@
+{
+  "kind": "booking-confirmation-http-react-local-proof",
+  "browserOnly": true,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-booking-confirmation-HBN7rs/pg",
+  "database": "maya_widget_gate_proof_bookingconfirmation_88aa8761cbde",
+  "port": 57364,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "browser",
+    "pg-stop"
+  ],
+  "syntheticModel": true,
+  "syntheticInternalCatalog": true,
+  "syntheticLocalProvider": true,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 1
+  },
+  "clusterStopped": true
+}

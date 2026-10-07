@@ -929,3 +929,21 @@ draft numeric binding remains open at this checkpoint. See [code and evidence](M
 and [precise initial-binding decision brief](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md).
 No first-link/schema/retention/autonomy approval or real-provider/model/C10 acceptance.
 `NOT_ISSUED`.
+
+### Chat booking confirmation facts through retained references — 2026-10-07
+
+Code `54871c2e` closes the separate create-confirmation numeric-binding gap:
+server-issued versioned draftRef carries the canonical quote checksum, and an
+A-only scoped store read forwards it to the existing creator on COMMIT. No
+conversation-content input, new schema/retention class or authority is introduced.
+Legacy bare-UUID drafts require a fresh proposal; existing result readers and
+consumed-token behavior remain unchanged. Cancel/reschedule are unchanged.
+
+168 targeted tests, production types and scoped lint pass. Current React/HTTP
+proves success, revocation, UNKNOWN and changed-price refusal before AE admission,
+plus reload/relogin and actual PG reference-isolation checks. This run uses eight
+scripted model calls and synthetic identity/provider; it has no fresh app/PG
+restart or serializer acceptance. Expiry uses a test clock and erasure a fixture
+mark. Independent code/evidence review has no blocker. Generic refusal copy and
+the visible consumed confirmation remain UI limits. See [qualified checkpoint](MAYA-WIDGET-BOOKING-FACTS-CHECKPOINT-20261007.md).
+Initial binding, real-provider/model acceptance and C10 remain open. `NOT_ISSUED`.

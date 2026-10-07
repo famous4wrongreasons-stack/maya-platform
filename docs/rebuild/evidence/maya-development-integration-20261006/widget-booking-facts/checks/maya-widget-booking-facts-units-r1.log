@@ -1,0 +1,43 @@
+PASS src/widgets/booking/booking-create-facts-ref.spec.ts
+PASS src/widgets/lowering/gate9-lowering.architecture.spec.ts
+PASS src/widgets/routing/effect-router.service.spec.ts
+FAIL src/widgets/stores/widget-stores.service.spec.ts
+  ● the stores split (U0, D-6): four sub-stores behind one facade, one tenant fence › the facade keeps the pre-split surface plus U13a claim and reconciliation
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+    @@ -5,10 +5,11 @@
+        "countFreeInputFields",
+        "ensureAssistantTurn",
+        "liveCandidates",
+        "lowerToUserTurn",
+        "putDraft",
+    +   "readBookingCreateFactsHash",
+        "readDraft",
+        "readTimeline",
+        "reconcileAcceptedReceipt",
+        "recordDivergence",
+        "recordFreeInput",
+
+      833 |         .filter((m) => m !== 'constructor')
+      834 |         .sort(),
+    > 835 |     ).toEqual(
+          |       ^
+      836 |       [
+      837 |         'appendTurn',
+      838 |         'claimIntentRecord',
+
+      at Object.<anonymous> (widgets/stores/widget-stores.service.spec.ts:835:7)
+
+PASS src/widgets/owner-ports/booking-preview.adapter.spec.ts
+PASS src/widgets/owner-ports/commit-booking.adapter.spec.ts
+
+Test Suites: 1 failed, 5 passed, 6 total
+Tests:       1 failed, 128 passed, 129 total
+Snapshots:   0 total
+Time:        5.099 s, estimated 6 s
+Ran all test suites within paths "src/widgets/booking/booking-create-facts-ref.spec.ts", "src/widgets/owner-ports/booking-preview.adapter.spec.ts", "src/widgets/owner-ports/commit-booking.adapter.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts", "src/widgets/lowering/gate9-lowering.architecture.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-widget-booking-facts-units-r1.json

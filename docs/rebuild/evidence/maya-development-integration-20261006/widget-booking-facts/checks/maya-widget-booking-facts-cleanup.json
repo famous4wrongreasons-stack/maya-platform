@@ -1,0 +1,9 @@
+{
+  "pgStatusExit": 3,
+  "pgStatus": "pg_ctl: no server running",
+  "closedPorts": {
+    "57364": true,
+    "57386": true
+  },
+  "ownedChromeCount": 0
+}

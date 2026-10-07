@@ -1,0 +1,7 @@
+Independent read-only review, /root/independent_review, 2026-10-07.
+
+Before implementation the reviewer corrected the proposed typed diff projection: F15 prohibits any CONVERSATION_CONTENT flow, even hidden behind DI. Implemented alternative uses existing AUDIT_RETAINED draftRef/confirmationOfRef with server nonce and canonical quote checksum. Reader selects only draftRef and checks exact tenant/principal/owner/task/liveness. No C/X content is read. No blocking production finding. Canonical authority, idempotency and result readers preserved; cancel/reschedule unchanged.
+
+Evidence r1 spotcheck: 12 browser checkpoints; changed price and revoked link REFUSED with zero AE/Appointment before and after reload. SUCCEEDED and UNKNOWN retain attempt 1. One provider dispatch/ledger row. PG stopped. No blocking evidence finding.
+
+Limits: browser reload/relogin, not new App/PG restart; browserOnly explicitly skips separate HTTP cohort. Eight scripted decide calls, not model serializer or real model. Expiry uses test clock, erased negative a synthetic fixture mark rather than canonical erasure job. Changed-price screenshot shows generic refusal and remaining confirmation card. NOT_ISSUED. Reviewer did not run tests/services.

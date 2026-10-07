@@ -25,3 +25,5 @@ The [hashed manifest](evidence/maya-development-integration-20261006/booking-fac
 - The normal deployment relay, actual model/provider/identity activation, bootstrap and C10 remain unqualified. No new schema, retention decision, background authority, production/SMS/phone/HTTPS call, push, merge or deployment. The proof's synthetic internal booking is not production acceptance or notification delivery.
 
 The [initial Client binding decision brief](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md) identifies an existing strict OTP owner and the precise missing initial-only entry. It requests no blanket new resolver and implements no new identity authority.
+
+Follow-up: `54871c2e` closes the separate create BOOKING_CONFIRMATION numeric-binding gap through existing AUDIT_RETAINED references. Its [own checkpoint and fresh React/HTTP proof](MAYA-WIDGET-BOOKING-FACTS-CHECKPOINT-20261007.md) preserve the distinct evidence scope and UI limitations.
