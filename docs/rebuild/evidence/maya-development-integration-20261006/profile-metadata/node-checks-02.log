@@ -1,0 +1,42 @@
+✔ explicit installed profile reads exactly four versions and hashes without resource creation (3.078875ms)
+✔ no remote directory guessing, relative path or unqualified Node major (0.372042ms)
+✔ mixed or unsupported PG versions and malformed banners refuse (2.176958ms)
+✔ missing or non-executable binaries and failed version reads refuse (12.14125ms)
+✔ binary symlink cannot silently mix a second installation (14.216458ms)
+✔ CLI rejects conflicting preflight and invalid installation before creating output (65.5765ms)
+✔ unknown profile reports exact missing metadata and never admits a run (0.894292ms)
+✔ fully declared metadata remains unverified, references unopened, all authority false (0.281917ms)
+✔ declared candidate drift and tampered frozen manifest refuse (0.427292ms)
+✔ metadata and observed install digests change independently (0.391917ms)
+✔ secret-shaped extras and malformed values fail without echoing input (0.228417ms)
+✔ metadata cannot enable any authority or bless a live local observation (0.447291ms)
+✔ CLI produces bounded metadata preflight without creating DB/output/ledger or opening references (1592.894666ms)
+✔ CLI refuses run mode and malformed metadata without input disclosure or resources (177.255042ms)
+✔ CLI refuses oversized and symlinked metadata before installed-binary reads (66.99ms)
+✔ offline binding is mandatory, no default/live transport or old ledger resume (35.4345ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (65.469042ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (41.388625ms)
+✔ short writes are completed before dispatch and zero progress fails closed (67.999542ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (53.201666ms)
+✔ early wakeup cannot dispatch before the minimum interval (43.068542ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (976.13875ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (2979.6215ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (23.603084ms)
+✔ 24 dialog and 64 turn caps apply independently (512.839584ms)
+✔ wall time and clock reversal cannot reopen budget (56.365958ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (69.883125ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (38.135417ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (53.101333ms)
+✔ oversized output is unresolved, with full reservation kept (37.036375ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (8.579417ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (1.900917ms)
+✔ existing replay rejects tampered manifest before opening a dialog (3.566042ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (854.291667ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5966.777041

@@ -1,0 +1,139 @@
+{
+  "contract": "maya.current-candidate-profile-preflight/1",
+  "status": "INCOMPLETE",
+  "metadataSha256": "36b3918f59c957866a95e3540ded3133fa2516c5fb2e444f5f51b4225510af91",
+  "candidate": {
+    "candidateCommit": "2aea729196668e498faf9a9dfc95b9989cb93615",
+    "manifestSha256": "9c5d03c75f48ab1d095680969e5a69a90be7da098cc65cdd9ae657f3aa2de17b",
+    "corpusSha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+    "sourceHashes": {
+      "datasets/conversation-intelligence/current-candidate-development-20261007.json": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+      "datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json": "48de10c63c0ffc8140d035c3f65f16d00ca97ab47b12e5b9bc63f56597d23c09",
+      "scripts/conversation-qualification/current-candidate-budget.mjs": "9a29db67245f1c6e028b65d114f2d956334131b1bb309cec38f7dc5a8764792e",
+      "scripts/conversation-qualification/current-candidate-offline.mjs": "80241d5f31369a11acdf9472f8608bcf68f6114852f02b20a41970f8316f5e1a",
+      "scripts/conversation-qualification/current-candidate-serializer.ts": "77c0e1d79fbf46a976e1429b3b82203600d1ab42e372005f06b5c8eeb8f454b9",
+      "scripts/conversation-qualification/current-candidate.mjs": "843171000921576e17042e3c7f5da435288c40c3668018de012efe416675132a",
+      "scripts/conversation-qualification/replay.mjs": "eb78c93e70336ebf91ff19aac6364e421bc5dfc4977988c74f5b16dfaf98418b",
+      "src/ai-tools/ai-core-model.service.ts": "e67808e01bd52ba6197ec845bc5a202cb3daf5d0e6cd5bdf720005a25b447937",
+      "src/ai-tools/ai-core.service.ts": "d39ff8cdf0506bc067fcd2487a4a7bdd2215c91fba20046a1b158c485381e4aa",
+      "src/ai-tools/ai-tool-registry.service.ts": "0b912bf4f01037262e14855af50fc32f565dafde73ced3a5880e02f8f7aacfdd",
+      "src/ai-tools/ai-tool-runtime.service.ts": "e826cbab6d5342fc43d30ed970e7415563c422aa7548cf70fe1cb506a7769385",
+      "src/ai-tools/ai-tool.catalog.ts": "b0d1c86ccd18a24bfb2e685ac58526e6c12fe9adc2f7904a1abc18b2706ec29b",
+      "src/ai-tools/planner-wire-context.ts": "08d31518d414e902f3b09043bfac71ef7370a438dead0e8151bd54f703280f85",
+      "src/appointments/appointments.service.ts": "c6e2ef4b4bfb0fd6de8c6f8deac6a4afbf7cb51e25f0e35aa9c6d5799178af9b",
+      "src/conversation-intelligence/conversation-intelligence.service.ts": "c3bc6b609121ba51cfd2ce4442cdb80d6dc8a616d95e03a0886bb9133f9e1db9",
+      "src/conversation-intelligence/conversation-taxonomy.ts": "5b0dbac9a87f84e7dbeb0d19553f50d7810d1695f6dedf8566e4ae1eb00b6b9b",
+      "src/crm/adapters/yclients-crm.adapter.ts": "a113f5f1bfffed97a476a5fa8ebdcc67ccad527e48c35a066c1f6e514d02d1bb",
+      "src/crm/crm-request.errors.ts": "696270478426c7048519c8d136b5e7ce96baf45a4f3d26aad24a4b08bc48907e",
+      "src/crm/crm.service.ts": "450cd3380a8acb24eae0e9dfc2c106dbef6dcc18d36eded09a4c90f73ad9c643",
+      "src/crm/yclients-goods-read.ts": "0e6e7cc172450dbcfcd9f19a5b7a709922596ed81925f023203f5c744a80615a",
+      "src/orchestration/c9.registry.ts": "0bcfad059ce8cca96d4a573077d297cc1d1c099e61914dcfe3fd2c6cd77a1845",
+      "src/widgets/composition/chat-read.trigger.ts": "cd496ebc65958423cde5ca6b3023a3719e1c776ff3dfc926203970cbb0da29cc",
+      "test/widgets-live/bi-owner-react.probe-spec.ts": "c7ad086de676da615264d01884d54c4e255074ee645335e1ad469ffbe1dcbd0a",
+      "test/widgets-live/c9-chat-reads.live-spec.ts": "a37cbf2d55eb1cc4d20325f7527ab464205e424820d10f713c5677ab8e44c4c1",
+      "test/widgets-live/c9-occupancy-restart.probe-spec.ts": "050549e5e73b3b0ee51e5a5f30a5fffb7224473fa0562d162b2190ecb9e679ac",
+      "test/widgets-live/chat-catalog-booking.live-spec.ts": "2d6cdd870699af3c91b1d8bc2d9e93bc398ceb5e7ff7392999271820756884a7",
+      "test/widgets-live/goods-vertical.probe-spec.ts": "335ce4dd3f5f39f0a9d3812ca0d01514e949a1c1511cf3f9f1a968a3a9d41f51",
+      "test/widgets-live/lifecycle-owner-react.probe-spec.ts": "e03436aecf4d7525e32b3aad3e6dffcc2bfb8d5565c4226b12f32daec384e4db",
+      "test/widgets-live/own-schedule-restart.probe-spec.ts": "4020a6689639ffc82b9bb639a1133b335873d4d3427783de83570ec0cd1314be",
+      "test/widgets-live/personal-owner-restart.probe-spec.ts": "1f20ff3a618d8fa8aaa6a4c27406f4c1c57f38d31d529c8a9a93d1183d10c4ee"
+    },
+    "proposedLimits": {
+      "model": "deepseek-v4-pro",
+      "dialogs": 24,
+      "turns": 64,
+      "attempts": 96,
+      "inputTokens": 8000000,
+      "outputTokens": 196608,
+      "outputPerAttempt": 2048,
+      "spendNanoUsd": 12000000000,
+      "durationMs": 3600000,
+      "timeoutMs": 30000,
+      "intervalMs": 6000,
+      "requestBytes": 98304,
+      "responseBytes": 1048576,
+      "inputNanoUsdPerToken": 1320,
+      "outputNanoUsdPerToken": 3960,
+      "pricingStatus": "HISTORICAL_2026_10_05_NOT_CURRENT_VERIFIED"
+    },
+    "limitsSha256": "15d9be2e45e825d9b39e2c35de5c42ef3fd58059c6ad4cf93615ac11bcc2f98e",
+    "currentPricesVerified": false
+  },
+  "localObservation": {
+    "contract": "maya.current-candidate-local-proof-profile/1",
+    "mode": "NO_UPSTREAM_ONLY",
+    "observedAt": "2026-10-07T20:04:11.706Z",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": {
+      "path": "/usr/local/bin/node",
+      "version": "24.15.0"
+    },
+    "pgBin": "/opt/homebrew/Cellar/postgresql@16/16.14/bin",
+    "binaries": {
+      "postgres": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/postgres",
+        "version": "16.14",
+        "sha256": "7774d7dc870dc00cac08729d745b5ed179b6a69149dfd6330869583259814643"
+      },
+      "initdb": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/initdb",
+        "version": "16.14",
+        "sha256": "016469b455ab979367b94e1be6ff53eca62fd3f90de60798d05f57b25f6ad88a"
+      },
+      "pg_ctl": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/pg_ctl",
+        "version": "16.14",
+        "sha256": "31de671ccba3a8420add4b0a347bd8c6dc4d48843a13654f59d471179e6954c6"
+      },
+      "createdb": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/createdb",
+        "version": "16.14",
+        "sha256": "1dc3d525f372d3144cff2f4849c412dc12822c2c1a60adc470b9f17346ed7bde"
+      }
+    },
+    "resources": {
+      "runnerHeapMb": 256,
+      "brokerHeapMb": 256,
+      "backendJestHeapMb": 3072,
+      "jestWorkers": 1,
+      "pgSharedBuffersMb": 64,
+      "pgWorkMemMb": 4,
+      "pgMaxConnections": 30,
+      "observedTotalMemoryBytes": 137438953472,
+      "observedFreeMemoryBytes": 45617807360,
+      "memoryQualification": "OBSERVATION_ONLY_NOT_PEAK_RSS_OR_ADMISSION"
+    },
+    "paidAuthorized": false,
+    "remoteServerQualified": false,
+    "credentialsRead": false,
+    "resourcesCreated": false
+  },
+  "localObservationSha256": "f0daf302597c4ae014d3da1bc5aa4524d8f43a1922160bbf43d9a4dc6ea02390",
+  "missingMetadata": [
+    "EXACT_CANDIDATE_NOT_DECLARED",
+    "TARGET_PROFILE_UNKNOWN",
+    "PROCESS_PRINCIPALS_UNKNOWN",
+    "CREDENTIAL_REFERENCE_OWNER_READER_UNKNOWN",
+    "ISOLATION_INVENTORY_EVIDENCE_UNKNOWN",
+    "ISOLATION_EGRESS_EVIDENCE_UNKNOWN",
+    "ISOLATION_CREDENTIAL_ACCESS_EVIDENCE_UNKNOWN"
+  ],
+  "requiredBeforeLive": [
+    "TARGET_INVENTORY_PRINCIPALS_AND_ISOLATION_NOT_VERIFIED",
+    "TARGET_RESOURCE_HEADROOM_NOT_MEASURED",
+    "LIVE_BROKER_AND_PROFILE_BINDING_NOT_IMPLEMENTED",
+    "FINAL_TARGET_FULL_KEYLESS_PROOF_REQUIRED",
+    "CURRENT_PRICE_AND_ACCOUNT_MODEL_UNCHECKED",
+    "FRESH_OWNER_AUTHORIZATION_REQUIRED"
+  ],
+  "referencesOpened": false,
+  "credentialsRead": false,
+  "resourcesCreated": false,
+  "paidAuthorized": false,
+  "upstreamAllowed": false,
+  "realModelAcceptance": false,
+  "remoteServerQualified": false,
+  "certificate": "NOT_ISSUED",
+  "sourceBinding": "FROZEN_SOURCE_HASHES_CHECKED_AGAINST_HEAD"
+}

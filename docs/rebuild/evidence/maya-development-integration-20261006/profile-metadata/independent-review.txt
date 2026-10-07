@@ -1,0 +1,22 @@
+Independent read-only review — 2026-10-07
+Reviewer: /root/independent_review
+Candidate: 2aea729196668e498faf9a9dfc95b9989cb93615
+
+P2 empty profile-metadata truthiness bypass found and closed using explicit
+presence checks and two regression cases. No remaining code blocker.
+Metadata references remain unopened/unprinted; authority false. Frozen source
+binding covers the enumerated list, not all checkout/deployment bytes.
+Occupancy fixture explicitly binds only its synthetic company/branch group.
+
+Artifact review: no blocking inconsistencies. Metadata preflight INCOMPLETE,
+seven missing fields, NOT_ISSUED, matching digests. All 39 HTTP/broker source
+hashes match checkout and exact Git blobs; binding digest valid.
+3 dialogs / 4 turns; 21 expected source preflights; 2 canned transports.
+Two explicit C9 turns return AVAILABLE with zero model calls.
+App/broker request hashes and reserves agree; max 93222 < 98304 bytes.
+Both ledgers closed, broker/PG stopped, PG pid file absent.
+Reserved $0.26632056 is historical bookkeeping, not expenditure.
+
+Narrow offline mechanics, synthetic domain-port fixtures. Not full corpus,
+native YCLIENTS, real model/language/provider, paid or C10 acceptance.
+Reviewer changed no files, ran no tests and started no services.
