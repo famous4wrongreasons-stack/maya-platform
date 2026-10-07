@@ -1,0 +1,463 @@
+✔ receipt restoration uses one bounded read and discards a late old-session result (10.599125ms)
+✔ receipt forbidden does not create authority or block restored text chat (1.352875ms)
+✔ receipt no_connection does not create authority or block restored text chat (0.392166ms)
+✔ receipt server_error does not create authority or block restored text chat (0.357833ms)
+✔ receipt tenant_unbound cannot publish unbound text or strand the composer (0.343875ms)
+✔ receipt reader_rejects cannot publish unbound text or strand the composer (0.220791ms)
+✔ receipt reader_throws cannot publish unbound text or strand the composer (0.366125ms)
+✔ receipt sink_throws cannot publish unbound text or strand the composer (0.322459ms)
+✔ an older server missing the additive history route remains usable with a visible limitation (0.3355ms)
+✔ server continuation waits before send, restores text only, excludes unfinished work from context (0.645042ms)
+✔ logout aborts restoration; an old session result never enters the next conversation (0.375375ms)
+✔ history failure is visible; next send retries only the read and keeps the draft until context is restored (0.85825ms)
+✖ submitUserTurn is the sole path: only it (and retry of its own turn) calls Transport.chat (3.460125ms)
+✔ typed and spoken turns are byte-identical on the wire; the modality stays on the item (0.114167ms)
+✔ the user text: NFC and trimmed, 1..2000 units, refused visibly and never truncated; one turn in flight (0.818ms)
+✔ D6: after the 3 500-unit reply fixture every history item is ≤ 2000, the pair is not split, and the next turns are accepted (0.867667ms)
+✔ history: only sent user turns and real replies, the last 11 plus the new message (DTO 1..12) (1.072958ms)
+✔ same-requestId retry only after 429 / 502 / network / abort / 503 — never after 409 or an unknown outcome (1.144ms)
+✔ 409 is terminal for its id; an older failed turn loses its same-id retry once the conversation moves on (0.576667ms)
+✔ approval_required: the reply, then the approval_not_here notice; the next turn carries the reply and never the notice (0.584667ms)
+✔ 402 / 403 / tenant_required / 400: a conversation notice, the composer state, and none of it in history (0.465291ms)
+✔ sign-out empties the timeline and aborts the turn in flight; nothing crosses into the next session (0.249208ms)
+✔ display cap: 200 items on screen, older ones dropped and disclosed, never silently (5.399209ms)
+✔ subscribers see every state change, in order, and can unsubscribe (0.613042ms)
+✔ over the real net client: the long reply and the approval shape end in DTO-valid next turns (fetch replaced) (17.737458ms)
+✔ TURN-ID carries only the server conversation reference, preserves retry identity, and clears it on logout (0.433666ms)
+✔ history erasure net: canonical path, exact body, current bearer and allowlisted original completion (11.590834ms)
+✔ history erasure net: invalid UUIDs and getters are refused before authorization or fetch (0.320125ms)
+✔ history erasure net: completion needs exact contract, canonical echoes and a real UTC timestamp (0.1845ms)
+✔ history erasure net: malformed 2xx is unknown and never resends (0.624541ms)
+✔ history erasure net: finite HTTP failures disclose no response content and never resend (0.975834ms)
+✔ history erasure net: lost result stays unknown until an explicit same-request retry returns persisted completion (0.198708ms)
+✔ history erasure net: timeout and caller abort after dispatch are unknown, with no retry (6.163791ms)
+✔ history erasure net: signed-out, unavailable auth and pre-abort dispatch nothing (0.1755ms)
+✔ history erasure net: one current-auth 401 refresh preserves the exact frozen request (0.2905ms)
+✔ history erasure net: second 401 ends the session without a third dispatch (0.176167ms)
+✔ history erasure net: revocation or lost refresh after 401 cannot dispatch again (0.147167ms)
+✔ history erasure ratchet: only the exact UUID-guarded encoded suffix is admitted (4288.28025ms)
+✔ the vault: tokens by item and intent ref; lookups only, no enumeration; drop and clear (1.005ms)
+✔ FBE2E-1: live submission uses only widget intent/resolve and returns the authorized successor or receipt line (1.383459ms)
+✔ FBE2E-1: a drawn selector can submit only one server-declared option/ref value (0.437625ms)
+✔ FBE2E-1/3: successor replaces the selector and only a server terminal receipt enters conversation (13.79775ms)
+✔ ingest: H7 on the full envelope for all 40 fixtures; display follows the lifecycle and on_expiry quietly (21.415333ms)
+✔ L7 replace in place: the successor takes the predecessor's position and item id; P-25: a repeated widget_id renders once (1.476875ms)
+✔ a late outcome for a replaced emission draws nothing on its successor (4.663417ms)
+✔ F60: a NONE escape dismisses locally — 0 transport calls, 0 submissions — and nothing else stays activatable (5.492375ms)
+✔ D9: every drawn control of every live fixture ends in a state change or a sentence — silent outcomes 0, requests 0 (40.526125ms)
+ℹ activations 129: submitted 69, dismissed 15, sentence without a submission 45
+✔ the submission is the contract WidgetIntentSubmission: exact members, the vault token, nothing else (0.62575ms)
+✔ the submission literal is checked against the closed contract type: an extra member does not compile (4702.494458ms)
+✔ outcomes: each SubmissionOutcome and a rejection end in a neutral sentence; one activation in flight per item (3.31325ms)
+✔ NAVIGATE(detail): PROGRESS while the submission runs; the P1 binding closes it, returns to the opener and leaves a sentence (0.529ms)
+✔ R3.3.4 / R7-E3: a detail opens only for the envelope's own fullscreen_detail key, only for the nine fs.* keys, never from inside a detail (5.932583ms)
+✔ shell targets: a class-s route resolves through the registry before anything is sent; the route switch waits for an outcome (2.153458ms)
+✔ expiry on screen follows on_expiry quietly; a collapsed item gives up its tokens (1.437917ms)
+✔ an environment change redraws every item; sign-out releases every item and token (1.118875ms)
+✔ the display cap releases a dropped item's tokens but keeps P-25: the same emission redelivered still renders once (1.194834ms)
+✔ intentRefFor: an action names its intent; a choice names the intent it selects; anything else names none (0.255834ms)
+✔ I-SRC-1 — activating the SCHEDULE entry reaches the submission boundary (0.35475ms)
+✔ I-SRC-1 — a ref the server did not map to an intent is REFUSED, and never sent (0.375208ms)
+✔ I-SRC-1 — a ref outside the sealed reading order is REFUSED before anything else (0.3185ms)
+✔ I-SRC-1 — the fix did not make a schema-bearing intent accept an entry ref (0.413375ms)
+✔ I-SRC-1 NAVIGATE: live fs.calendar response resolves PROGRESS to fullscreen, without a timeline insertion or history bounce (1.211125ms)
+✔ I-SRC-1 NAVIGATE: undeclared route is route_refused before transport (0.532208ms)
+✔ I-SRC-1 NAVIGATE: forged route is route_refused before transport (0.5375ms)
+✔ I-SRC-1 NAVIGATE: unknown route is route_refused before transport (0.514542ms)
+✔ I-SRC-1 NAVIGATE: substituted parent is refused without fullscreen or timeline pollution (0.562541ms)
+✔ I-SRC-1 NAVIGATE: missing parent is refused without fullscreen or timeline pollution (0.529ms)
+✔ I-SRC-1 NAVIGATE: same widget is refused without fullscreen or timeline pollution (0.500625ms)
+✔ I-SRC-1 NAVIGATE: wrong tenant is refused without fullscreen or timeline pollution (0.508792ms)
+✔ I-SRC-1 NAVIGATE: wrong principal is refused without fullscreen or timeline pollution (0.568583ms)
+✔ I-SRC-1 NAVIGATE: wrong turn is refused without fullscreen or timeline pollution (0.515459ms)
+✔ I-SRC-1 NAVIGATE: wrong profile is refused without fullscreen or timeline pollution (0.494709ms)
+✔ I-SRC-1 NAVIGATE: wrong profile version is refused without fullscreen or timeline pollution (0.508292ms)
+✔ I-SRC-1 NAVIGATE: substituted route is refused without fullscreen or timeline pollution (0.52075ms)
+✔ I-SRC-1 NAVIGATE: missing returned route is refused without fullscreen or timeline pollution (0.511625ms)
+✔ I-SRC-1 NAVIGATE: tampered detail is refused without fullscreen or timeline pollution (0.62525ms)
+✔ I-SRC-1 NAVIGATE: expired detail is refused without fullscreen or timeline pollution (0.764458ms)
+✔ I-SRC-1 NAVIGATE: terminal detail is refused without fullscreen or timeline pollution (0.740583ms)
+✔ I-SRC-1 NAVIGATE: canonical server widget_principal_mismatch refusal never opens a detail (0.439583ms)
+✔ I-SRC-1 NAVIGATE: canonical server tenant_mismatch refusal never opens a detail (0.380083ms)
+✔ I-SRC-1 NAVIGATE: close while pending prevents a late response from taking chrome ownership (0.633167ms)
+✔ I-SRC-1 NAVIGATE: back while pending prevents a late response from taking chrome ownership (0.621834ms)
+✔ I-SRC-1 NAVIGATE: navigate while pending prevents a late response from taking chrome ownership (0.638833ms)
+✔ I-SRC-1 NAVIGATE: sign-out while pending prevents a late response from taking chrome ownership (0.418958ms)
+✔ I-SRC-1 NAVIGATE: another-detail while pending prevents a late response from taking chrome ownership (0.879958ms)
+✔ I-SRC-1 NAVIGATE: ordinary non-detail advanced response keeps timeline semantics even with fs.calendar in its payload (0.6875ms)
+✔ I-SRC-1 NAVIGATE: refused principal even with an attached envelope cannot open fullscreen (0.4185ms)
+✔ I-SRC-1 NAVIGATE: refused tenant even with an attached envelope cannot open fullscreen (0.411125ms)
+✔ I-SRC-1 NAVIGATE: missing acceptance cannot open fullscreen (0.415458ms)
+✔ I-SRC-1 NAVIGATE: verification required cannot open fullscreen (0.399ms)
+✔ I-SRC-1 NAVIGATE: expired successor cannot open fullscreen (0.400708ms)
+✔ NS-1: parent → detail → parent, where the parent on the timeline is the server-returned `resolved_widget` (1.6795ms)
+✔ NS-1: a return with no `resolved_widget` fails closed — nothing is reconstructed and no parent is restored (1.262791ms)
+✔ NS-1: substituted parent widget is refused, with the detail closed and no parent restored (1.160541ms)
+✔ NS-1: the detail itself returned as its own parent is refused, with the detail closed and no parent restored (1.080917ms)
+✔ NS-1: wrong tenant is refused, with the detail closed and no parent restored (1.078167ms)
+✔ NS-1: wrong principal is refused, with the detail closed and no parent restored (1.09425ms)
+✔ NS-1: wrong turn is refused, with the detail closed and no parent restored (1.146667ms)
+✔ NS-1: wrong profile is refused, with the detail closed and no parent restored (1.120042ms)
+✔ NS-1: wrong profile version is refused, with the detail closed and no parent restored (1.136833ms)
+✔ NS-1: tampered parent body is refused, with the detail closed and no parent restored (1.270042ms)
+✔ NS-1: stale parent: expired is refused, with the detail closed and no parent restored (1.404375ms)
+✔ NS-1: stale parent: superseded is refused, with the detail closed and no parent restored (1.370167ms)
+✔ NS-1: stale parent: consumed is refused, with the detail closed and no parent restored (1.341291ms)
+✔ NS-1: a parent return is admitted only from an open detail, and only for a NAVIGATE to a re-resolved widget (8.225292ms)
+✔ NS-1: ordinary ACCEPTED responses are unchanged — the reread still settles, and a successor still advances (2.65475ms)
+✔ historical booking outcomes share live receipt dedupe without holding controls or tokens (0.659042ms)
+✖ L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one receipt and ONE visible terminal outcome (1.4455ms)
+✖ L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed (0.473042ms)
+✖ L27: two genuinely different terminal outcomes both remain representable (0.514333ms)
+✔ L27: identity is the canonical reference, never the sentence — in BOTH directions (0.874333ms)
+✔ L27: an ordinary assistant message and a terminal outcome never deduplicate each other, in either order (4.379292ms)
+✖ L27: UNKNOWN → reconciliation → CONFIRMED keeps the later canonical transition visible (0.532375ms)
+✖ L27: retry and refusal paths are unchanged (0.54275ms)
+✔ L27: a successor emission carrying its predecessor's confirmation states it once (0.742458ms)
+✖ L27: the record survives the display cap, on the path where that is reachable (1.005333ms)
+✔ L27: one canonical receipt is stated once ACROSS widgets, even after the first statement is evicted (0.926666ms)
+✔ L27: a cleared conversation starts again (0.449625ms)
+✖ L27: a settled submission whose thread page failed loses nothing — the next one writes the outcome (0.370792ms)
+✔ L27: two identical lines inside ONE response are one outcome, and two different ones are two (0.290666ms)
+✔ L27: a reference identifies an outcome only on the line class the contract gives it to (0.303042ms)
+✔ L25: tap alone never observes rendering; explicit mounted callback is bounded, idempotent and gates selector REFINE (1.153833ms)
+✔ L25: refused render evidence never opens selector submission and can be retried only after a new mounted observation (0.390042ms)
+✔ schedule owner failure reads its canonical terminal line without treating it as authority denial (0.185ms)
+✔ stale source witness: canonical superseded response projects the refusal without receipt read or acceptance (0.214333ms)
+✔ stale source witness: missing, unknown or noncanonical reason remains generic and never reads or claims success (0.151ms)
+✔ stale source witness: submitted booking confirmation displays the canonical sentence and consumes its control once (0.36ms)
+✔ booking selection pending: exact closed projection emits only the date discriminator and performs no receipt read (0.068291ms)
+✔ booking selection pending: wrong next/reply and contradictory receipt/result/successor refuse projection (0.207917ms)
+✔ booking selection pending: injected contradictory projection cannot advance, accept or trigger a receipt read (0.159833ms)
+✔ booking selection pending: exact staff REFINE displays only canonical date question and consumes control across redraw (0.89425ms)
+✔ booking selection pending: wrong selector kind/effect/capability/template never displays date acknowledgement (2.053166ms)
+✔ personal receiver follows real Widgets integrity/expiry and survives accessibility redraw (1.378125ms)
+✔ PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line (75.16125ms)
+✖ typed methods only: the two widget methods are explicit; no generic request or token accessor (0.829833ms)
+✔ widget transport sends only typed bodies and retains only authorized response members (9.352375ms)
+✔ NS-1: `resolved_widget` survives projection in its envelope shape only; every other shape is null, never a rejection (2.667666ms)
+✔ email start keeps {next_step} only — debug_code never survives (0.304167ms)
+✔ email verify (one business): tokens + TOP-LEVEL tenant.name + user.name; every other key dropped (0.500125ms)
+✔ email verify (select_business): businesses[].role dropped, slug echoed verbatim at re-verify (0.230958ms)
+✔ password login: body keys exactly {tenantSlug, email, password}; tenant NESTED at user.tenant; null name → "" (0.321792ms)
+✔ signInPassword refuses an empty business address before any request (V2-6) (0.096958ms)
+✔ refresh: tokens + session only → grant; display stays what sign-in set (0.489167ms)
+✔ malformed success bodies are unexpected_response, never a partial sign-in (0.3275ms)
+✔ the password path never tells an existing account from a wrong password: /auth/login 401, 403 (either body) and 404 are one state (0.135333ms)
+✔ §1.4 sign-in failure table: every row maps to its named state; silent login outcomes = 0 (1.358708ms)
+✔ row 9 client-side: the same field state before sending, 0 requests (IsEmail shape, 4..8 digits, MinLength 8) (0.073375ms)
+✔ row 10: a sign-in request that times out is no_connection (27.111333ms)
+✔ row 11: /ai/chat → 403 tenant_required is its own named failure (0.501458ms)
+✔ /ai/chat request: exactly {surface, requestId, messages}, surface "web", Bearer, omit, no-store; no audience or tenant on the wire (0.245125ms)
+✔ approval_required: action_status copies action.status only — never action.approval (V2-5) (0.196083ms)
+✔ B4: /ai/chat retains one exact SH-19 authorized envelope and rejects an incomplete substitute (0.553459ms)
+✔ /ai/chat taxonomy: 402, 403×3, 429, 400, 503 modelFailure, 409, 502/network, 5xx, unexpected — one named failure each (1.03175ms)
+✔ /ai/chat timeout (80 s in production) is no_connection; a caller abort is aborted (34.143584ms)
+✔ 401 → one refresh → one retry with the new bearer (0.51675ms)
+✔ two or more parallel 401s produce exactly one /auth/refresh (single flight); every call retried with the new bearer (21.362708ms)
+✔ a 401 that arrives after another call already refreshed reuses the new grant (no second refresh) (6.947625ms)
+✔ proactive refresh within 30 s of expiry: parallel calls share one refresh (12.805375ms)
+✔ terminal refresh codes end the session with that reason, notify once, and send no retry (0.918333ms)
+✔ refresh that cannot complete now keeps the session: 429 → rate_limited, network → no_connection (0.702833ms)
+✔ refresh 400 validation, 401 without a code and a malformed 2xx each end the session (no silent loop) (0.652792ms)
+✔ a 401 on the retry after a successful refresh ends the session (session_revoked); never a loop (0.265083ms)
+✔ a lapsed refresh token ends the session as session_expired with 0 requests (0.08675ms)
+✔ aborting a turn while it waits on a shared refresh returns aborted at once; the refresh still lands (12.342292ms)
+✔ /ai/transcribe: body exactly {audioBase64}; {transcript} kept; failures mapped (§1.9) (27.269583ms)
+✔ never signed in: view reason null; chat and transcribe answer signed_out with 0 requests (0.148958ms)
+✔ signOut: signed out locally at once, then /auth/logout with the bearer; later calls send nothing (0.376125ms)
+✔ signOut never throws when logout fails, and a failing subscriber does not stop the others (12.910042ms)
+✔ signOut with an expired access token refreshes once to revoke; the refreshed grant is never installed (0.449833ms)
+✔ signOut after the refresh token lapsed sends nothing: there is no server session left to revoke (0.127333ms)
+✔ signOut during an in-flight refresh: logout uses the refreshed bearer; the waiting turn ends signed_out (5.660916ms)
+✔ a grant from a later sign-in is never handed to a call made under the earlier one (6.962958ms)
+✔ the purity gates admit src/net/** as written (fetch shape, PATHS, surface, audience, globals, imports, collisions) (3629.258375ms)
+✔ the gates are not vacuous over these files: a tenth path, a second fetch, a storage read and surface "voice" are refused (227.553ms)
+✔ createNet() is structurally SessionPort + Transport (shell/ports.ts, frozen in S0) with no adapter (186.648291ms)
+✔ no storage, no document, no cookie: never touched at runtime, never named in src/net (0.550125ms)
+✔ the finder: one GET to the allowlisted path, the term percent-encoded, no body and no content type (0.332875ms)
+✔ the finder refuses a one-character term before any request, and names the server's own minimum (0.039125ms)
+✔ Telegram start: the web body names this page's callback, the native body names none, and only Telegram's own URL is followed (0.488084ms)
+✔ the landing signs in: body exactly {state, code}, the login projection reused verbatim, is_new_user carried (0.262041ms)
+✔ a callback nobody here asked for is refused before any request — the whole defence against a delivered pair (0.111292ms)
+✔ one login, one landing: the second delivery of the same callback is refused without spending a request (0.131042ms)
+✔ the two carriers land the same callback: an object from the native shim, this page’s fragment on the web (0.373833ms)
+✔ a fragment that is not exactly a callback is not one: no mark, a repeated key, a bad escape, a route (0.328375ms)
+✔ the provider said no: error=access_denied is its own state and sends nothing (0.065625ms)
+✔ every completion failure the server can answer is a named state, and each one restarts the login (0.944208ms)
+✔ a 2xx that is not a login does not sign anyone in (0.288958ms)
+✔ conversation history is authenticated GET with no selector/body, refreshes once, and strips action authority (0.555125ms)
+✔ every request of this suite went to an approved URL, and all approved URLs were exercised (0.047375ms)
+✔ a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names (14.44875ms)
+✔ only explicit confirmation for a server-owned current conversation sends erasure (3.894958ms)
+✔ lost response freezes actions; manual retry preserves the same tuple and fresh turn has no deleted history (0.905166ms)
+✔ inflight chat, retained receipt read and stale timeline callbacks cannot resurrect content (1.084708ms)
+✔ all widget capabilities including detail-only entries are released, and late submission is ignored (10.871958ms)
+✔ pending render observation cannot start after erasure cleared its entry (1.2025ms)
+✔ privacy explicitly cancels committed voice transcription; delayed transcript never submits a new turn (0.637875ms)
+✔ logout/new login invalidates erasure continuation; late completion cannot clear the next session (0.477ms)
+✔ definite forbidden never claims completion or revives old controls (0.435167ms)
+✔ definite unavailable never claims completion or revives old controls (0.501875ms)
+✔ definite conflict never claims completion or revives old controls (0.338042ms)
+✔ definite invalid_request never claims completion or revives old controls (0.207958ms)
+✔ mismatched completion remains uncertain and cannot unlock the conversation (0.254583ms)
+✔ initial state: the conversation is open, the primary route is shell.root, nothing is fullscreen (0.651959ms)
+✔ pure transitions: only the five base routes are primary; one detail at a time; closing always works (0.190917ms)
+✔ no route key or URL opens a fullscreen: the module has no key-based opener (0.388916ms)
+✔ PROGRESS → OPEN → close: one history entry for the current address, popped once; the opener is kept for focus return (0.234416ms)
+✔ Back closes the detail without popping another entry; Esc/Close pops the entry it pushed (0.085625ms)
+✔ closeProgress closes only a PROGRESS detail for that item; navigate closes any detail (P-06: the conversation is one action away) (0.082334ms)
+✔ presentDetail refuses without a source, without a timeline opener, and when the source refuses (0.069167ms)
+✔ sign-out closes the detail and returns to the root route (0.123333ms)
+✔ signed out, the primary route stays the root (SH-04); a route landed while signed out applies at sign-in (0.198458ms)
+✔ the runtime: one widget port for the DOM, a real detail at SHEET density, and the fragment landed without a request (13.380125ms)
+✔ P-B4: a successful chat resolution reaches the existing H7/vault/renderer path without a second transport (1.34325ms)
+✔ login restores only bounded booking terminal prose through the existing reader, without widget activation (0.793084ms)
+✔ personal receiver survives normal detail redraw and is removed by frozen/expired result (0.312458ms)
+✔ personal child expiring during preparation never mounts a receiver (0.080667ms)
+✔ personal catalog receiver requires exact kind/source and live verified detail (0.086667ms)
+✔ 1 V1/G8: a spoken turn and a typed turn with the same text produce byte-identical /ai/chat bodies (21.16425ms)
+✔ 1b D2: no client-side resolution — escape words, ordinals and affirmations reach the chat verbatim (199.586125ms)
+✔ 1c V1/G8 on THE conversation: spoken and typed turns through src/shell/conversation.ts give byte-identical DTO-valid /ai/chat bodies (no alias, ordinal or modality on the wire) (17.397292ms)
+✔ 2 no readback: a spoken turn builds no readback or affirmation and never a voice surface (7.115709ms)
+✔ 3 V6: a PII lock refuses arming with the neutral Cell and 0 getUserMedia calls (1.097041ms)
+✔ 3b V6 at commit: a lock that arrives while listening drops the clip — 0 requests, tracks ended (1.125542ms)
+✔ 4 V7: capture refuses to arm without a genuine, unspent GestureProof (0.216ms)
+✔ 4b V7: the machine ignores arm/send without a proof; the control mints proofs only from trusted clicks (2.076084ms)
+✔ 4c V7 lint: getUserMedia appears once in the bundle, as navigator.mediaDevices.getUserMedia inside a GestureProof function (25.597334ms)
+✔ 5 V11: every unavailability cause yields exactly the one Cell, and the composer stays first (8.635833ms)
+✔ 6 encoder: the 44-byte header and the file equal the backend spec fixture for a known PCM input (19.217ms)
+✔ 6b encoder cross-check: the backend AiSpeechService parser accepts 1 s and 20 s and refuses 33 s (114.544416ms)
+✔ 7 cap: at 20 s the state is held, capture stopped, 0 requests — and nothing is ever auto-sent (5.041ms)
+✔ 7b cancel from arming, listening or held (and Esc, hidden, route change, sign-out) makes 0 requests and stops every track (14.082333ms)
+✔ 7c cancel while transcribing aborts the request and submits nothing; hidden does not abort a committed clip (2.589542ms)
+✔ 7d short clips, timeouts and failures: neutral notices, no retry, no chat turn (14.812333ms)
+✔ 8 V8/A-9: listening and recording differ in non-motion glyph and label; the meter is three discrete steps (0.286584ms)
+✔ 9 A-12: one polite live region, written on state or notice change only; no role="alert" anywhere (3.048583ms)
+✔ 9b focus never falls out of the control: a hidden focused control hands focus to the next one (0.399ms)
+✔ 9c WCAG 2.5.3 label in name: every voice control’s accessible name begins with the words it shows, in every state (0.241917ms)
+✔ 10 hygiene: the voice modules hold no console, storage, object URL, playback or network API (61.0755ms)
+ℹ tests 238
+ℹ suites 0
+ℹ pass 229
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4979.777791
+
+✖ failing tests:
+
+test at test/conversation.test.mjs:252:1
+✖ submitUserTurn is the sole path: only it (and retry of its own turn) calls Transport.chat (3.460125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'dispose',
+  +   'erasureTarget',
+  +   'finishErasure',
+  +   'freezeForErasure',
+      'retry',
+      'submitUserTurn',
+      'subscribe',
+      'timeline',
+      'view'
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/conversation.test.mjs:262:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view' ],
+    expected: [ 'dispose', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1225:1
+✖ L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one receipt and ONE visible terminal outcome (1.4455ms)
+  AssertionError [ERR_ASSERTION]: Dismiss
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1247:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1269:1
+✖ L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed (0.473042ms)
+  AssertionError [ERR_ASSERTION]: press 0
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1280:12)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1287:1
+✖ L27: two genuinely different terminal outcomes both remain representable (0.514333ms)
+  AssertionError [ERR_ASSERTION]: the new outcome class is written; the old one is not rewritten
+  + actual - expected
+  
+    [
+      'Запрос принят. Подтверждение ожидается.',
+  -   'Запись подтверждена.'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1298:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Запрос принят. Подтверждение ожидается.' ],
+    expected: [ 'Запрос принят. Подтверждение ожидается.', 'Запись подтверждена.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1400:1
+✖ L27: UNKNOWN → reconciliation → CONFIRMED keeps the later canonical transition visible (0.532375ms)
+  AssertionError [ERR_ASSERTION]: the transition is visible, in order
+  + actual - expected
+  
+    [
+      'Запрос принят. Подтверждение ожидается.',
+  -   'Запись подтверждена.'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1413:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Запрос принят. Подтверждение ожидается.' ],
+    expected: [ 'Запрос принят. Подтверждение ожидается.', 'Запись подтверждена.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1421:1
+✖ L27: retry and refusal paths are unchanged (0.54275ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   outcome: 'dismissed'
+  -   outcome: 'sentence',
+  -   sentence: 'no_connection',
+  -   submitted: true
+    }
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1434:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'dismissed' },
+    expected: { outcome: 'sentence', sentence: 'no_connection', submitted: true },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1480:1
+✖ L27: the record survives the display cap, on the path where that is reachable (1.005333ms)
+  AssertionError [ERR_ASSERTION]: and can still submit
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1501:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1546:1
+✖ L27: a settled submission whose thread page failed loses nothing — the next one writes the outcome (0.370792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/intents.test.mjs:1561:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/net.test.mjs:351:1
+✖ typed methods only: the two widget methods are explicit; no generic request or token accessor (0.829833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'chat',
+      'conversation',
+  +   'eraseConversation',
+      'personalBranches',
+      'personalCreate',
+      'personalPreview',
+      'personalResults',
+      'personalServices',
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/net.test.mjs:363:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'chat', 'conversation', 'eraseConversation', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent' ],
+    expected: [ 'chat', 'conversation', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,177 @@
+✖ L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one receipt and ONE visible terminal outcome (10.797792ms)
+✖ L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed (1.090542ms)
+✖ L27: two genuinely different terminal outcomes both remain representable (1.184584ms)
+✔ L27: identity is the canonical reference, never the sentence — in BOTH directions (2.226167ms)
+✔ L27: an ordinary assistant message and a terminal outcome never deduplicate each other, in either order (3.551709ms)
+✖ L27: UNKNOWN → reconciliation → CONFIRMED keeps the later canonical transition visible (1.007333ms)
+✖ L27: retry and refusal paths are unchanged (0.919125ms)
+✔ L27: a successor emission carrying its predecessor's confirmation states it once (1.721708ms)
+✖ L27: the record survives the display cap, on the path where that is reachable (2.721959ms)
+✔ L27: one canonical receipt is stated once ACROSS widgets, even after the first statement is evicted (2.509667ms)
+✔ L27: a cleared conversation starts again (1.154875ms)
+✖ L27: a settled submission whose thread page failed loses nothing — the next one writes the outcome (0.596833ms)
+✔ L27: two identical lines inside ONE response are one outcome, and two different ones are two (0.501125ms)
+✔ L27: a reference identifies an outcome only on the line class the contract gives it to (0.48775ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 7
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.51025
+
+✖ failing tests:
+
+test at test/intents.test.mjs:1225:1
+✖ L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one receipt and ONE visible terminal outcome (10.797792ms)
+  AssertionError [ERR_ASSERTION]: Dismiss
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1247:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1269:1
+✖ L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed (1.090542ms)
+  AssertionError [ERR_ASSERTION]: press 0
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1280:12)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1287:1
+✖ L27: two genuinely different terminal outcomes both remain representable (1.184584ms)
+  AssertionError [ERR_ASSERTION]: the new outcome class is written; the old one is not rewritten
+  + actual - expected
+  
+    [
+      'Запрос принят. Подтверждение ожидается.',
+  -   'Запись подтверждена.'
+    ]
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1298:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Запрос принят. Подтверждение ожидается.' ],
+    expected: [ 'Запрос принят. Подтверждение ожидается.', 'Запись подтверждена.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1400:1
+✖ L27: UNKNOWN → reconciliation → CONFIRMED keeps the later canonical transition visible (1.007333ms)
+  AssertionError [ERR_ASSERTION]: the transition is visible, in order
+  + actual - expected
+  
+    [
+      'Запрос принят. Подтверждение ожидается.',
+  -   'Запись подтверждена.'
+    ]
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1413:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Запрос принят. Подтверждение ожидается.' ],
+    expected: [ 'Запрос принят. Подтверждение ожидается.', 'Запись подтверждена.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1421:1
+✖ L27: retry and refusal paths are unchanged (0.919125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   outcome: 'dismissed'
+  -   outcome: 'sentence',
+  -   sentence: 'no_connection',
+  -   submitted: true
+    }
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1434:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'dismissed' },
+    expected: { outcome: 'sentence', sentence: 'no_connection', submitted: true },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1480:1
+✖ L27: the record survives the display cap, on the path where that is reachable (2.721959ms)
+  AssertionError [ERR_ASSERTION]: and can still submit
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1501:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/intents.test.mjs:1546:1
+✖ L27: a settled submission whose thread page failed loses nothing — the next one writes the outcome (0.596833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   outcome: 'ignored',
+  +   reason: 'not_drawn'
+  -   outcome: 'dismissed'
+    }
+  
+      at TestContext.<anonymous> (file:///private/tmp/maya-history-erasure-ui-20261007-unit/baseline/maya-chat-shell/test/intents.test.mjs:1561:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { outcome: 'ignored', reason: 'not_drawn' },
+    expected: { outcome: 'dismissed' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

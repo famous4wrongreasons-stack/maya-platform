@@ -1,5 +1,7 @@
 # History erasure: local privacy owner checkpoint, 2026-10-07
 
+**Subsequent local checkpoint:** [current React privacy and separate Node/PostgreSQL restart](MAYA-HISTORY-ERASURE-UI-CHECKPOINT-20261007.md) now prove explicit confirmation, local clearing, uncertain/offline/manual retry and no text resurrection. The backend evidence below remains historical; populated RT7 preservation and full RT8 discharge are still open.
+
 **Useful result:** the current local privacy endpoint erases the selected conversation under current tenant/user authority, preserves an immutable completion across application restart, and prevents late writers from restoring its content. **17/17 actual HTTP/PostgreSQL tests, 247 targeted unit/architecture tests, K3 10/10, scoped lint and widgets-live types passed.** The working website and real user data were untouched. This is a ready local backend contract; `GAP-HISTORY-ERASE`, UI acceptance and overall MAYA/C10 completion remain open.
 
 Code: `6b4a89b19dc940cb147c885be6ee79bb80a5b12f`, from `c3e37e2447b552bf64d42c1462a3988370535ad0`, isolated branch `codex/maya-development-integration-20261006`. No push/merge/deployment. [Evidence manifest](evidence/maya-development-integration-20261006/history-erasure-owner/manifest.json), SHA-256 `9950e8f258a6195e228ecb9637cd9b82556216b6ceb7979ebc6868c4cf5deb37`, binds four committed source trees and 23 copied artifacts. Installed dependencies and aggregate release gates are outside this binding.

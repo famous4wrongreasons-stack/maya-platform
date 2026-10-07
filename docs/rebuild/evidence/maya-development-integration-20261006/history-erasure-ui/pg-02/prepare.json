@@ -1,0 +1,18 @@
+{
+  "contract": "maya.history-erasure-compiled-react/1",
+  "stage": "prepare",
+  "status": "failed",
+  "actualCompiledEntry": "dist/src/main.js",
+  "nodeEnvironment": "test",
+  "syntheticFixtures": true,
+  "debugEmail": true,
+  "modelProvider": "safe",
+  "productionConfiguration": false,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "externalEgressMeasured": false,
+  "backendPid": 19507,
+  "probePid": 19450,
+  "pgStarted": "2026-10-07T23:36:39.524Z",
+  "backendStopped": true
+}

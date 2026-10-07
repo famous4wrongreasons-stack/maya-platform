@@ -1,0 +1,4 @@
+The expression evaluated to a falsy value:
+
+  assert.ok(await hasText(page, 'Удаление пока не подтверждено. Повторите тот же запрос вручную.'))
+

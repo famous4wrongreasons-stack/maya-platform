@@ -1,0 +1,54 @@
+{
+  "contract": "maya.history-erasure-react-browser/1",
+  "stage": "prepare",
+  "status": "failed",
+  "actualReact": true,
+  "actualHttp": true,
+  "authentication": "existing synthetic debug email",
+  "backend": "compiled production entry, NODE_ENV=test",
+  "fixtureCoverage": "synthetic text conversations and local unsent draft; no populated historical widget or receipt fixture",
+  "realModelAcceptance": false,
+  "productionConfiguration": false,
+  "screenshots": [
+    "before-erasure.png",
+    "confirmation.png"
+  ],
+  "checks": {},
+  "failure": "The expression evaluated to a falsy value:\n\n  assert.ok(await hasText(page, 'Удаление пока не подтверждено. Повторите тот же запрос вручную.'))\n",
+  "guard": {
+    "blocked": [],
+    "errors": []
+  },
+  "http": [
+    {
+      "path": "/api/auth/email/start",
+      "method": "POST",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "path": "/api/auth/email/verify",
+      "method": "POST",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "path": "/api/widgets/resolve",
+      "method": "POST",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "path": "/api/privacy/conversations/4ef9e070-2a35-4f2e-9bea-b5e3d94f48fa/erasure",
+      "method": "POST",
+      "status": 200,
+      "failed": false
+    }
+  ]
+}

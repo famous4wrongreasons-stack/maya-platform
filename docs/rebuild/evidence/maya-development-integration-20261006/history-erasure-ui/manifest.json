@@ -1,0 +1,731 @@
+{
+  "contract": "maya.history-erasure-ui-checkpoint/1",
+  "status": "local-functional-proof-passed-with-qualifications",
+  "baseCommit": "119cfecb47b3e50eed6bad9a204cd2a7570d970b",
+  "runtimeCommit": "e9b916c3cb2a08ab508a49f8080077ee160e806a",
+  "proofCommit": "dff8ec0962df0346f3e5c1f706cfa7be1fdceb05",
+  "sourceTrees": {
+    "maya-saas-backend": "30e77e510d9e5f2a87275cd63517af5517ed1347",
+    "maya-carrier-react": "6a6602543f99ba77e57b30e90b03d173b06b39e4",
+    "maya-chat-shell": "321ebe912cb052e20468ca163bbc963042959174"
+  },
+  "sourceBindings": [
+    {
+      "path": "maya-carrier-react/package.json",
+      "sha256": "7676c2f1d56322d0bd724cb3c49c803c047948f1a24dd22bf145be5f5b06d7bd",
+      "bytes": 976,
+      "gitBlob": "be46ddbfd72a16a42a8ab22e077eb8e34944a4f9"
+    },
+    {
+      "path": "maya-carrier-react/src/chat/ChatScreen.tsx",
+      "sha256": "7f27304549cb1e8b4765a29d1ba25735fb217fbca7d62e7e46bf90c2a4f6ebdc",
+      "bytes": 39570,
+      "gitBlob": "a8f5b149bae7fbc0325cffac4e83f8dad743b319"
+    },
+    {
+      "path": "maya-carrier-react/src/chat/PrivacyPanel.tsx",
+      "sha256": "bd79cb4dc45e68f08862b1732fb19ec83696bd30bd1cc4ce2be97dc284ae5bd8",
+      "bytes": 4636,
+      "gitBlob": "11b3059e41653f48ce3587fcaa64f1ab634caeea"
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/compose.ts",
+      "sha256": "e7c0f2cb6bc78f50ff546377bb2667745c81ca79d5a3dc5a1b389a601d4297c5",
+      "bytes": 9719,
+      "gitBlob": "9aa4a7ed1cca790eddda38568a58562b202a10f0"
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/copy.ts",
+      "sha256": "4bd1989b0faa6eb1c6063ac93d2aaaeba25f086034d3a0fd193cbf3325a0ee7c",
+      "bytes": 18157,
+      "gitBlob": "ef78b3b9856fe5cfa5e59de882fa5a5476c7a9bb"
+    },
+    {
+      "path": "maya-carrier-react/test/history-erasure-browser-guard.mjs",
+      "sha256": "2ff29a2f7fc61a6cde9469041cf7e4026425b9c75d94c005f2530ebb036db38b",
+      "bytes": 2507,
+      "gitBlob": "ecd3a79f01fd97c7cc812c6871e2e76874e97909"
+    },
+    {
+      "path": "maya-carrier-react/test/history-erasure-browser-guard.test.mjs",
+      "sha256": "3f672dd961e9db57291d503b3f72c06a3ffdbe7e92c9bfaa5b716de5b3b52ef8",
+      "bytes": 2555,
+      "gitBlob": "bd530c274ecb48e2883b290dc83a141e5785300f"
+    },
+    {
+      "path": "maya-carrier-react/test/history-erasure-browser-probe.mjs",
+      "sha256": "73c8546b5d3ce4da415b5122ecda9b6bb492ad78898af25d344ffd43290782d3",
+      "bytes": 16288,
+      "gitBlob": "fdec7288e0baea9d1416540725b373acc0e8d053"
+    },
+    {
+      "path": "maya-carrier-react/test/personal-owner-proof-server.mjs",
+      "sha256": "1e2ca95cbf493ed22079dc3d68d95003adc61feac00c9476390086d369698bbc",
+      "bytes": 4808,
+      "gitBlob": "4a7dc4a71dfa2b5ad5be0e534cfc898a41edcccd"
+    },
+    {
+      "path": "maya-carrier-react/test/privacy.test.mjs",
+      "sha256": "658bd1b306d6f27255c7ad07e607e079bc9e3158d7b28f7dc8a0d92b3a36ce77",
+      "bytes": 5942,
+      "gitBlob": "7b0ff288d1ec732f51a053b0ce5cdbed90f2993b"
+    },
+    {
+      "path": "maya-chat-shell/build.mjs",
+      "sha256": "bf1f6237423638b48bf3132baa15f7026f466d086643cdff49e023fb37224663",
+      "bytes": 147237,
+      "gitBlob": "d530aece0af0f7df509d1a31f7315f161b97a3ae"
+    },
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "a9f725fc215d1a62e63954e56e9f2a5cfeadf62196384053099b80707b8b7be7",
+      "bytes": 12569,
+      "gitBlob": "ea2df0a81ce898421c93f230f766aee5dbf97fad"
+    },
+    {
+      "path": "maya-chat-shell/entry/main.ts",
+      "sha256": "fd713dc3ed022557b2e4a4720fe73c571d9c73fd2c93993ed698759925563503",
+      "bytes": 10191,
+      "gitBlob": "67a34a47838b437a22d4b9917347180b69dd9bfe"
+    },
+    {
+      "path": "maya-chat-shell/src/dom/composer.ts",
+      "sha256": "af38548943112846aa17db0862ab5d86c7345167faa2f2ea914fb2e6a2366511",
+      "bytes": 7542,
+      "gitBlob": "c333521f1b5cfa6d8100c073a18ad7547a9f6cff"
+    },
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "e9dd7459913cf6990695c07924b5fccc9d0bfe3314008a203be8aecff0d22c2e",
+      "bytes": 38555,
+      "gitBlob": "63c54c2165415791ed47c5b84a6f4696c0df2560"
+    },
+    {
+      "path": "maya-chat-shell/src/net/project.ts",
+      "sha256": "c102e2341a007212a7f13fa6305768d0bee0fbb578685701abe1128a2960f7c7",
+      "bytes": 23845,
+      "gitBlob": "9c0c67ba12e6a751a0ee5af0762d3f4239f17015"
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "cc712fe7a776cd8a370fd643baa63da6dbb4fa76a36336ef4c0a9fa3e87bb617",
+      "bytes": 18245,
+      "gitBlob": "b7aca7daff5fa679d75c1ab5647824a9e7fe15c4"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/conversation.ts",
+      "sha256": "f9e97d426b66106686ffa2097a7f2d3066901fe6bd6289d968ad53f5d26f5352",
+      "bytes": 24349,
+      "gitBlob": "e3ae3be58eca7c8965c9bd7dde06ca1258537e3a"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/intents.ts",
+      "sha256": "095698e3285df50439ca980be5cb7b196fb13225462ac6f52267f49f7a073e37",
+      "bytes": 60189,
+      "gitBlob": "6be00231bd72075f9d07cec1bb2c807ae23985f2"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/ports.ts",
+      "sha256": "3d886d5b18d8c92f505f9a57ec2e75bd0df35d254ce6b53e5101a5b91bfa91be",
+      "bytes": 17043,
+      "gitBlob": "e4fd394fd2c3d13a10aac51178f2f79fed8b8b8c"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/privacy.ts",
+      "sha256": "8ff143b7fb5ca548df9d14f82f20f4cc9c22f81bf7d7773594325f788ccb67a5",
+      "bytes": 6375,
+      "gitBlob": "4dd28dc19072ad7dfa86f9ae63027c9f4ef43f4f"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/shell.ts",
+      "sha256": "bd1e2452ceedbeace5ca4d08f73e452196bd5ddfab94aa9f654477dbdd90e370",
+      "bytes": 16020,
+      "gitBlob": "2690fe1aea85512f5d639e801904634eb60811b2"
+    },
+    {
+      "path": "maya-chat-shell/test/conversation.test.mjs",
+      "sha256": "93805d1fd0f2b905e7afa47c028008b87d9b4662d21f678783c266f039011bc7",
+      "bytes": 35923,
+      "gitBlob": "6432ea7c7c96284b0b37b12689cf57e193b77e9c"
+    },
+    {
+      "path": "maya-chat-shell/test/history-erasure-net.test.mjs",
+      "sha256": "cde48890b01797ffebca438c5fce68a58a99f8cf0a5aa071e515d6ba0719d1b8",
+      "bytes": 13479,
+      "gitBlob": "babde938abde3d81521560518c308ff2bd8fe91d"
+    },
+    {
+      "path": "maya-chat-shell/test/net.test.mjs",
+      "sha256": "4b4355a402e697d89e9e50d400442f5f52930258717c2cf4e580676a8d00d421",
+      "bytes": 87440,
+      "gitBlob": "8502f630322ba4556aa24887c9bb0780cec62824"
+    },
+    {
+      "path": "maya-chat-shell/test/privacy.test.mjs",
+      "sha256": "23c12ba4e9d06b832c4ddfd11a6df5fb477361043fc955c364b00ca793eeb904",
+      "bytes": 16441,
+      "gitBlob": "d65beef227a9106e30e5c9cedfd150e409b489a8"
+    },
+    {
+      "path": "maya-saas-backend/scripts/history-erasure-react-proof.mjs",
+      "sha256": "7d906cfd91292423dc6ba911283aabd8c9cf07a022fb1fb5cbb3a6eadb724396",
+      "bytes": 8928,
+      "gitBlob": "ebadb3a51719f2550f95950e5d6322da56797c34"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/history-erasure-react.probe-spec.ts",
+      "sha256": "084c89feed43f6a0fd61356ebefe3496cafa7c894de861277b03c3e1a26e84b5",
+      "bytes": 17438,
+      "gitBlob": "8978cf13b461ef52b005d43be8d5e520a201825c"
+    }
+  ],
+  "runtimeUnchangedAfterRuntimeCommit": true,
+  "testOnlyFollowupPaths": [
+    "maya-carrier-react/test/history-erasure-browser-probe.mjs",
+    "maya-carrier-react/test/personal-owner-proof-server.mjs",
+    "maya-saas-backend/test/widgets-live/history-erasure-react.probe-spec.ts"
+  ],
+  "passed": {
+    "targetedRuntimeNetConversationShellVoiceTests": 147,
+    "reactAndBrowserGuardTests": 8,
+    "separateProcessHttpPgStages": 2,
+    "shellBuild": true,
+    "reactTypecheck": true,
+    "widgetsLiveTypecheck": true,
+    "probeScopedEslint": true
+  },
+  "finalValidation": {
+    "commandExit": 0,
+    "typescriptLog": "unit/probe-types-candidate.log",
+    "eslintLog": "unit/probe-lint-candidate.log",
+    "scope": "Final committed HTTP probe; new mjs files received syntax checks, not ESLint acceptance"
+  },
+  "attempts": [
+    {
+      "path": "unit/local-loopback-admission.json",
+      "outcome": "Initial loopback denied before services; next local proof explicitly admitted by sandbox review"
+    },
+    {
+      "path": "pg-02/manifest.json",
+      "outcome": "failed: synthetic tenant missing widgets.runtime; fixed only fixture"
+    },
+    {
+      "path": "pg-03/manifest.json",
+      "outcome": "failed: pre-header drop allowed browser transparent retry; fault changed to truncate actual committed body after headers"
+    },
+    {
+      "path": "pg-04/manifest.json",
+      "outcome": "passed: actual current React, compiled Node and PostgreSQL restart"
+    }
+  ],
+  "knownBaselineFailures": {
+    "count": 7,
+    "scope": "Unchanged L27 repeated-Dismiss expectations against readonly terminal receipts; baseline 119cfecb proves same failures",
+    "evidence": [
+      "unit/runtime.log",
+      "unit/baseline-l27.log",
+      "unit/baseline-binding.json"
+    ],
+    "aggregateAccepted": false
+  },
+  "limits": [
+    "Only synthetic text history and unsent local draft in browser; no populated historical widget/receipt fixture or all RT7 owners",
+    "Compiled production entry runs NODE_ENV=test and safe model; not production configuration or real provider/model qualification",
+    "Offline and same-operation retry are runtime memory scoped; no persisted client retry journal",
+    "Seven screenshots retained; incomplete headless paint in uncertain/completed and differing serif font exclude full visual/design acceptance",
+    "External egress expected zero but not independently measured",
+    "GAP-HISTORY-ERASE/RT8 and overall MAYA/C10 remain open; no new schema/retention/background authority",
+    "No working website, foreign design, device, SSH, real subject, production, push, merge or deployment"
+  ],
+  "cleanupEvidence": "unit/cleanup-verified.json",
+  "independentReview": {
+    "path": "independent-review.json",
+    "bytes": 2785,
+    "sha256": "a82846beee210022e95104a7ed47c6d69ad003a32031748e99e2c38ed4017500",
+    "status": "qualified-local-checkpoint-accepted",
+    "rawArtifactCount": 80,
+    "reviewedPreMetadataManifestSha256": "309b3ea764642d5d24dbce653c8692b4b4d9b6f6bc5d726f15a56fb35bbdc71a"
+  },
+  "files": [
+    {
+      "path": "unit/baseline-binding.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/baseline-binding.json",
+      "bytes": 946,
+      "sha256": "2541755e8d80b733476183c565c243c9bd1f0e095a17333ab06687ef5e182b5b"
+    },
+    {
+      "path": "unit/baseline-l27.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/baseline-l27.log",
+      "bytes": 7789,
+      "sha256": "5d0f5a1375584d921171a8bcb232a6317cd64e6803ef41edc8d7fc4af2e633ff"
+    },
+    {
+      "path": "unit/cleanup-verified.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/cleanup-verified.json",
+      "bytes": 869,
+      "sha256": "06b9eeb49512ff758d07c17863bcfc1b44fe4b665b53c3d7910f7f99305bdc57"
+    },
+    {
+      "path": "unit/local-loopback-admission.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/local-loopback-admission.json",
+      "bytes": 596,
+      "sha256": "f3948332cfec136679e1be8253255262a9762e502be4b892d5882e710374f156"
+    },
+    {
+      "path": "unit/privacy-final.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/privacy-final.log",
+      "bytes": 1428,
+      "sha256": "4fac817d8fad19113c8b414bab9c07daa7676afe2bd3fa0cf2b2e40ec4f9cf02"
+    },
+    {
+      "path": "unit/privacy-reviewed.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/privacy-reviewed.log",
+      "bytes": 1740,
+      "sha256": "2082089db3b778747a506bb8d19ab14922a1d25d01a6a8b2ee9318536c6d3a91"
+    },
+    {
+      "path": "unit/probe-lint-candidate.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/probe-lint-candidate.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "unit/probe-lint-final.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/probe-lint-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "unit/probe-lint.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/probe-lint.log",
+      "bytes": 1606,
+      "sha256": "04a011b75e3a2ab35c7d71be71977e9100d28b799395ab938e00c7cd26c8f5de"
+    },
+    {
+      "path": "unit/probe-types-candidate.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/probe-types-candidate.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "unit/probe-types-final.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/probe-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "unit/probe-types.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/probe-types.log",
+      "bytes": 293,
+      "sha256": "19d8ee3ce7b7f2c7eea853a620eaad1df8899326a03570fc74b7639d75baeb73"
+    },
+    {
+      "path": "unit/react-guard-final.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/react-guard-final.log",
+      "bytes": 877,
+      "sha256": "3bb8f80d9f4e2aea2d34103608b85fc2c5c7ae752fbaff7f1d512da7c924eefd"
+    },
+    {
+      "path": "unit/react-privacy.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/react-privacy.log",
+      "bytes": 625,
+      "sha256": "e6e91edfb468c64b8eec3c1e0c016e526c1d1f5c7ac79739b2e77264e1494729"
+    },
+    {
+      "path": "unit/react-types-final.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/react-types-final.log",
+      "bytes": 126,
+      "sha256": "891d39d877b60dcb45c297a08c4ff2a31bf26abfaa46c911278a765a62d5d03b"
+    },
+    {
+      "path": "unit/react-types.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/react-types.log",
+      "bytes": 126,
+      "sha256": "891d39d877b60dcb45c297a08c4ff2a31bf26abfaa46c911278a765a62d5d03b"
+    },
+    {
+      "path": "unit/runtime-final.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/runtime-final.log",
+      "bytes": 15910,
+      "sha256": "2ef7c323fe39dbd633c562ce8c92a0516d79a9b00c55a3f21f724e689ae12f90"
+    },
+    {
+      "path": "unit/runtime-reviewed.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/runtime-reviewed.log",
+      "bytes": 16370,
+      "sha256": "304c8b7ee3e1ad7bc1656e659df09f4e5dad360a54a14b1bec6576636f98b03d"
+    },
+    {
+      "path": "unit/runtime.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/runtime.log",
+      "bytes": 35770,
+      "sha256": "61daac5c8fe250db4eb9bc3557aba33c2a12836a7c14d3748240e8a22bf1d338"
+    },
+    {
+      "path": "unit/shell-build-reviewed.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/shell-build-reviewed.log",
+      "bytes": 1010,
+      "sha256": "fbc202a577f2e74d64c5d0908c1bec3a63def8c56c1e7f33fd9c2f29c173749d"
+    },
+    {
+      "path": "unit/shell-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/shell-build.log",
+      "bytes": 1010,
+      "sha256": "899e0f9e07371742b198f6e855171f17f66b9c1a8cbef1359fb8add426f63d15"
+    },
+    {
+      "path": "unit/shell-types.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-unit/shell-types.log",
+      "bytes": 253,
+      "sha256": "721685683e094cd638b1cdd218a80dcaf5085ef78fd509c94a5c115e2fbd7e2b"
+    },
+    {
+      "path": "pg-02/artifact-hashes.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/artifact-hashes.json",
+      "bytes": 353973,
+      "sha256": "d83e2b5bfbc64a38bd78c86115234c8f26e08981ca7e6c18ea2d3e890660a0c0"
+    },
+    {
+      "path": "pg-02/backend-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-02/createdb.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-02/initdb.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/initdb.log",
+      "bytes": 948,
+      "sha256": "5d8fb7c2a6f19ab46f3a8df919ddf4042b88e25bf09dd10fa03d569d725aa310"
+    },
+    {
+      "path": "pg-02/manifest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/manifest.json",
+      "bytes": 1435,
+      "sha256": "d2660ea92476744b6e4761bb555783f1d200dc0440f6ddf61437930e3d418c3c"
+    },
+    {
+      "path": "pg-02/migrations.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/migrations.log",
+      "bytes": 14720,
+      "sha256": "91ad73d42926f39f10b6ceb220896f84912fd09ae957a52b9710ce642a007d3e"
+    },
+    {
+      "path": "pg-02/pg-start.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "pg-02/pg-stop.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "pg-02/prepare-browser/report.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/prepare-browser/report.json",
+      "bytes": 601,
+      "sha256": "b8881010da32f469f7a8ea88470df9738f7409e9aba28c22bd7f9e09489bf176"
+    },
+    {
+      "path": "pg-02/prepare-browser.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/prepare-browser.log",
+      "bytes": 42,
+      "sha256": "c62fd723c71d28407552c694a20cec4a93fcfb5aa52ff899ed18e712d41c5cbd"
+    },
+    {
+      "path": "pg-02/prepare-jest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/prepare-jest.json",
+      "bytes": 2473,
+      "sha256": "9066312438e3b1580abc6289b19ab433fd7556ddabc25722d91a3a282fcfebc0"
+    },
+    {
+      "path": "pg-02/prepare.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/prepare.json",
+      "bytes": 509,
+      "sha256": "c3cfa86d811a0917a2e9891d68d3c888c915460e7315bc2804a097bb41228b7b"
+    },
+    {
+      "path": "pg-02/prepare.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/prepare.log",
+      "bytes": 1582,
+      "sha256": "70a1890a96b16bab82981048c28d6b80a3f97c4f465bbcebb493951a17cdbe96"
+    },
+    {
+      "path": "pg-02/react-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-02/react-build.log",
+      "bytes": 185,
+      "sha256": "7add548f897ddb0c6403ad156752674ffa6042c1fd37086f4cd00afd79adc2ee"
+    },
+    {
+      "path": "pg-03/artifact-hashes.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/artifact-hashes.json",
+      "bytes": 353973,
+      "sha256": "d83e2b5bfbc64a38bd78c86115234c8f26e08981ca7e6c18ea2d3e890660a0c0"
+    },
+    {
+      "path": "pg-03/backend-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-03/createdb.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-03/initdb.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/initdb.log",
+      "bytes": 948,
+      "sha256": "b42c305ac3a84ab6ee075ba62a10a411575e4b535c41670b8db838cd6465e80c"
+    },
+    {
+      "path": "pg-03/manifest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/manifest.json",
+      "bytes": 1435,
+      "sha256": "39f43234fc5b36dc620a4324dd036f8d990f747fa39846c9f7dc6e2ca48745c9"
+    },
+    {
+      "path": "pg-03/migrations.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/migrations.log",
+      "bytes": 14720,
+      "sha256": "76eb6e02cf1e42dd436136bbabc1306be73a728e2f14f28017f933ec5d20d5b1"
+    },
+    {
+      "path": "pg-03/pg-start.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "pg-03/pg-stop.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "pg-03/prepare-browser/before-erasure.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare-browser/before-erasure.png",
+      "bytes": 42256,
+      "sha256": "676ca857a7e6afae10caaa2815968516c632083c21f9323bc6853e64ffaa9902"
+    },
+    {
+      "path": "pg-03/prepare-browser/confirmation.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare-browser/confirmation.png",
+      "bytes": 57831,
+      "sha256": "16ed3fc62901753931e81eb5f0e6dffe778696e1d2aab3d1ae4f2f9af7c3ce43"
+    },
+    {
+      "path": "pg-03/prepare-browser/report.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare-browser/report.json",
+      "bytes": 1471,
+      "sha256": "bed25b0640326d56031353ef342770150dd3028e2f842ddf3c46f134726ecf23"
+    },
+    {
+      "path": "pg-03/prepare-browser.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare-browser.log",
+      "bytes": 198,
+      "sha256": "62f8c6c25450697b94acbf5aec97712532afa74c3629de3dc465da862fc977ce"
+    },
+    {
+      "path": "pg-03/prepare-jest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare-jest.json",
+      "bytes": 2473,
+      "sha256": "b280715c3da68b607100d41e719f11554023e01f5a96e2ec4a2340b56cd2e8f6"
+    },
+    {
+      "path": "pg-03/prepare.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare.json",
+      "bytes": 509,
+      "sha256": "34e6b7f7a13fb0f34d91e9a243bd8fbc937c33739f2dc36cd28d40a318ac119c"
+    },
+    {
+      "path": "pg-03/prepare.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/prepare.log",
+      "bytes": 1598,
+      "sha256": "097d10fab0950904637d671fd250149cfa41205989ebf0cfa440b9e94fa28e9e"
+    },
+    {
+      "path": "pg-03/react-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-03/react-build.log",
+      "bytes": 185,
+      "sha256": "7add548f897ddb0c6403ad156752674ffa6042c1fd37086f4cd00afd79adc2ee"
+    },
+    {
+      "path": "pg-04/artifact-hashes.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/artifact-hashes.json",
+      "bytes": 353973,
+      "sha256": "d83e2b5bfbc64a38bd78c86115234c8f26e08981ca7e6c18ea2d3e890660a0c0"
+    },
+    {
+      "path": "pg-04/backend-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-04/createdb.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-04/initdb.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/initdb.log",
+      "bytes": 948,
+      "sha256": "e3fe61eef9ae6d563bffb7da187debfe7b073317339b734317ae8bf412490e55"
+    },
+    {
+      "path": "pg-04/manifest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/manifest.json",
+      "bytes": 1568,
+      "sha256": "9139b855521d4f5e1a3042565d32d2b6a2c2aba0b5273024b7bb14e043f1fa77"
+    },
+    {
+      "path": "pg-04/migrations.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/migrations.log",
+      "bytes": 14720,
+      "sha256": "ebf951c0e054f8e128a5d63f30d28c35e85a7cf72331e23c0310cc26f461be63"
+    },
+    {
+      "path": "pg-04/pg-start-after-restart.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/pg-start-after-restart.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "pg-04/pg-start.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "pg-04/pg-stop-for-restart.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/pg-stop-for-restart.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "pg-04/pg-stop.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "pg-04/prepare-browser/before-erasure.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/before-erasure.png",
+      "bytes": 42256,
+      "sha256": "676ca857a7e6afae10caaa2815968516c632083c21f9323bc6853e64ffaa9902"
+    },
+    {
+      "path": "pg-04/prepare-browser/completed.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/completed.png",
+      "bytes": 48219,
+      "sha256": "e374f85cff6e0ad7d9a37a0015d0e34ccbb1719ed6988e8d4d562a044277a146"
+    },
+    {
+      "path": "pg-04/prepare-browser/confirmation.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/confirmation.png",
+      "bytes": 57831,
+      "sha256": "16ed3fc62901753931e81eb5f0e6dffe778696e1d2aab3d1ae4f2f9af7c3ce43"
+    },
+    {
+      "path": "pg-04/prepare-browser/offline-retry-uncertain.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/offline-retry-uncertain.png",
+      "bytes": 55558,
+      "sha256": "b2e96ec76fe0f607728de61786be7f966b65d8a9afac64ba3b6ef5ba360e7b24"
+    },
+    {
+      "path": "pg-04/prepare-browser/reloaded.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/reloaded.png",
+      "bytes": 40443,
+      "sha256": "1640d3b4c888be67ac5f166cb403928338a678b32a54e9ce0515e45629273100"
+    },
+    {
+      "path": "pg-04/prepare-browser/report.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/report.json",
+      "bytes": 3136,
+      "sha256": "4a2c556ea6b41f7ba4cb5f0548fc3c36c91e232553e1ca5acd494d03e7163ee3"
+    },
+    {
+      "path": "pg-04/prepare-browser/uncertain.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser/uncertain.png",
+      "bytes": 55558,
+      "sha256": "b2e96ec76fe0f607728de61786be7f966b65d8a9afac64ba3b6ef5ba360e7b24"
+    },
+    {
+      "path": "pg-04/prepare-browser.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-browser.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-04/prepare-jest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare-jest.json",
+      "bytes": 1378,
+      "sha256": "2389c1e5e478133139f9455bb88dd2ae00ea673f05084c87e8abb450f51116ee"
+    },
+    {
+      "path": "pg-04/prepare.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare.json",
+      "bytes": 595,
+      "sha256": "5dda500174491477811e331757c060f59319fb5653d783629c8aa813cae75362"
+    },
+    {
+      "path": "pg-04/prepare.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/prepare.log",
+      "bytes": 984,
+      "sha256": "38b1305bd1b1d4ca0cc85f882973eaad29ebb6adfd7c43e21d56ab6b7d21cf30"
+    },
+    {
+      "path": "pg-04/react-build.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/react-build.log",
+      "bytes": 185,
+      "sha256": "7add548f897ddb0c6403ad156752674ffa6042c1fd37086f4cd00afd79adc2ee"
+    },
+    {
+      "path": "pg-04/resume-browser/new-login-after-node-pg-restart.png",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/resume-browser/new-login-after-node-pg-restart.png",
+      "bytes": 40443,
+      "sha256": "1640d3b4c888be67ac5f166cb403928338a678b32a54e9ce0515e45629273100"
+    },
+    {
+      "path": "pg-04/resume-browser/report.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/resume-browser/report.json",
+      "bytes": 1351,
+      "sha256": "db34ccfe391a102ce9c3a217f5ac4d89ce1e3a352ed1491077fee7bf641a37bb"
+    },
+    {
+      "path": "pg-04/resume-browser.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/resume-browser.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pg-04/resume-jest.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/resume-jest.json",
+      "bytes": 1378,
+      "sha256": "9075712e32eb517458c211f82ca60e24f0d229a7ffb5f15a8c44501df10fa3be"
+    },
+    {
+      "path": "pg-04/resume.json",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/resume.json",
+      "bytes": 781,
+      "sha256": "601d78cd40fe9316d57c342975edd9feed9e8125381ea774fd5b474f979b0bfd"
+    },
+    {
+      "path": "pg-04/resume.log",
+      "source": "/tmp/maya-history-erasure-ui-20261007-pg-04/resume.log",
+      "bytes": 983,
+      "sha256": "f69d7cd8ff827bdc509391755ba1af1e46dcd456cc50919bfbef7d175d40249b"
+    }
+  ]
+}

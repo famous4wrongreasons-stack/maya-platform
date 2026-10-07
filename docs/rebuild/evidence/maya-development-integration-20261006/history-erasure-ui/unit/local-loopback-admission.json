@@ -1,0 +1,13 @@
+{
+  "directSandboxAttempt": {
+    "output": "/tmp/maya-history-erasure-ui-20261007-pg-01",
+    "status": "blocked_before_service_start",
+    "reason": "listen EPERM: operation not permitted 127.0.0.1"
+  },
+  "approvedLocalRetry": {
+    "output": "/tmp/maya-history-erasure-ui-20261007-pg-02",
+    "status": "automatic_approval_allowed_and_started",
+    "scope": "Owned loopback React/HTTP/Node/PostgreSQL restart proof on synthetic fixtures; no SSH, provider, real subject or production access"
+  },
+  "remoteMetadataSsh": "Still rejected/pending explicit owner permission; not retried or run"
+}

@@ -1,0 +1,19 @@
+{
+  "contract": "maya.history-erasure-react-browser/1",
+  "stage": "prepare",
+  "status": "failed",
+  "actualReact": true,
+  "actualHttp": true,
+  "authentication": "existing synthetic debug email",
+  "backend": "compiled production entry, NODE_ENV=test",
+  "fixtureCoverage": "synthetic text conversations and local unsent draft; no populated historical widget or receipt fixture",
+  "realModelAcceptance": false,
+  "productionConfiguration": false,
+  "screenshots": [],
+  "checks": {},
+  "failure": "Timed out: actual historical receipt read",
+  "guard": {
+    "blocked": [],
+    "errors": []
+  }
+}

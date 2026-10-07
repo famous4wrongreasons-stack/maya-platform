@@ -1,0 +1,10 @@
+{
+  "contract": "maya.independent-checkpoint-review/1",
+  "reviewer": "/root/independent_review",
+  "mode": "read-only; no edits, tests, services or SSH",
+  "reviewedManifestSha256": "309b3ea764642d5d24dbce653c8692b4b4d9b6f6bc5d726f15a56fb35bbdc71a",
+  "status": "qualified-local-checkpoint-accepted",
+  "artifactReview": "Архив проверен: несоответствий не найдено.\n\n- 80/80 артефактов: размеры, SHA-256 и байты исходных копий совпадают.\n- 28/28 source bindings, три Git tree и 2890 backend + 8 React build hashes соответствуют dff8ec09.\n- Подтверждены 147 runtime tests, 8 React/guard tests и оба process stages.\n- Backend PID изменился 22014 → 22630; PostgreSQL start time — 23:40:50.457Z → 23:41:57.202Z.\n- Replay сохранил completion и не добавил tombstones. Cleanup evidence: статус PostgreSQL 3, PID-файл отсутствует, оба backend-процесса остановлены.\n- Private restart receipt и backend-private logs в архив не включены.\n\nЭто квалифицированный локальный функциональный checkpoint. Семь baseline L27 failures сохранены; populated RT7 owners и RT8 не закрыты. Browser fixture текстовый. Неполная отрисовка двух screenshots и serif-шрифт исключают полную визуальную приёмку. Внешний egress независимо не измерен.",
+  "documentReview": "Четыре документа согласованы с проверенным кодом и evidence. Блокирующих неточностей не найдено.\n\n- PrivacyPort/PrivacyView и правила handoff соответствуют реализации.\n- Исторический backend checkpoint корректно отделён от нового UI/process/PG proof; тестовые counts не складываются.\n- L27, text-only fixture, populated RT7/RT8, visual и egress ограничения сохранены.\n- SSH blocker точно воспроизводит отказ automatic review; запуск, повтор или обход не заявлены. SHA collector совпадает.\n- Относительные ссылки нового checkpoint исправны.\n\nДопускаю docs/evidence checkpoint в указанной локальной квалификации. Только read-only; никаких изменений, тестов, сервисов или SSH.",
+  "transcription": "Formatting normalized from the two final collaboration messages; statements and qualifications retained."
+}

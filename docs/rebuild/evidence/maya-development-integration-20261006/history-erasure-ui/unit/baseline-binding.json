@@ -1,0 +1,26 @@
+{
+  "commit": "119cfecb47b3e50eed6bad9a204cd2a7570d970b",
+  "scope": "Read-only git archive, L27-only test selection; same seven existing failing tests before the privacy UI changes",
+  "files": [
+    {
+      "path": "maya-chat-shell/src/shell/intents.ts",
+      "sha256": "979b37598853b880ee1c21f9d4fed4082f99930e20f94cc1fe2227793ddf6415",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "maya-chat-shell/src/shell/shell.ts",
+      "sha256": "99b3782129f2d0b671339792604b10f191de132c3aa0ffacf89c42f2ff4839d3",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "maya-chat-shell/src/shell/conversation.ts",
+      "sha256": "dd97e10a03404229c9e84477b75b10344064492065cfe62162f2ce1a9533fcd9",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "maya-chat-shell/test/intents.test.mjs",
+      "sha256": "ab2728d3133a51e57e661401ba1b2f3220a71986fb09de9abe5bb0b710cbac97",
+      "byteIdenticalToBase": true
+    }
+  ]
+}

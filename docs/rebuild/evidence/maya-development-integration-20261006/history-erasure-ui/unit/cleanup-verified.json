@@ -1,0 +1,45 @@
+[
+  {
+    "run": "/tmp/maya-history-erasure-ui-20261007-pg-02",
+    "status": "failed",
+    "clusterStopped": true,
+    "pgCtlStatus": 3,
+    "postmasterPidExists": false,
+    "backendProcesses": [
+      {
+        "pid": 19507,
+        "alive": false
+      }
+    ]
+  },
+  {
+    "run": "/tmp/maya-history-erasure-ui-20261007-pg-03",
+    "status": "failed",
+    "clusterStopped": true,
+    "pgCtlStatus": 3,
+    "postmasterPidExists": false,
+    "backendProcesses": [
+      {
+        "pid": 20845,
+        "alive": false
+      }
+    ]
+  },
+  {
+    "run": "/tmp/maya-history-erasure-ui-20261007-pg-04",
+    "status": "passed",
+    "clusterStopped": true,
+    "pgCtlStatus": 3,
+    "postmasterPidExists": false,
+    "backendProcesses": [
+      {
+        "pid": 22014,
+        "alive": false
+      },
+      {
+        "pid": 22630,
+        "alive": false
+      }
+    ]
+  }
+]

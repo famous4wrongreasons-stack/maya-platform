@@ -1,0 +1,16 @@
+✔ admits only the exact explicit privacy scope and closed request ID (0.641ms)
+✔ admits current assets, real login and read-only history without booking/model routes (0.148916ms)
+✔ admits only the existing bounded thread receipt read (0.368959ms)
+✔ privacy limits deletion to the current conversation and retains audit/business records (3.325708ms)
+✔ privacy requires a distinct explicit confirmation, carrying no target or event arguments (0.582875ms)
+✔ uncertain permits only manual same-request retry even when no new target is available (0.176334ms)
+✔ refusal never offers a new deletion or retry, and gives a sign-out exit (0.736959ms)
+✔ only canonical completed declares deletion; every phase has an accessible status and no sinks (0.875209ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.302

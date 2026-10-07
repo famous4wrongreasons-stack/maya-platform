@@ -1,0 +1,2 @@
+gate: PASS (23 source files, 0 refusals)
+typecheck: PASS (23 carrier files + 24 runtime modules, contract 201 exports, 5.9.3)

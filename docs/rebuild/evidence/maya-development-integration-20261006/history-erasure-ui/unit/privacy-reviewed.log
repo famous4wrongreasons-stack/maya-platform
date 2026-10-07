@@ -1,0 +1,24 @@
+✔ only explicit confirmation for a server-owned current conversation sends erasure (3.430541ms)
+✔ lost response freezes actions; manual retry preserves the same tuple and fresh turn has no deleted history (0.659042ms)
+✔ inflight chat, retained receipt read and stale timeline callbacks cannot resurrect content (0.671708ms)
+✔ all widget capabilities including detail-only entries are released, and late submission is ignored (9.453417ms)
+✔ pending render observation cannot start after erasure cleared its entry (0.989666ms)
+✔ privacy closes the real personal receiver, drops selections and ignores a late personal read (2.000625ms)
+✔ privacy explicitly cancels committed voice transcription; delayed transcript never submits a new turn (0.529875ms)
+✔ logout/new login invalidates erasure continuation; late completion cannot clear the next session (0.9065ms)
+✔ replacement session during synchronous voice cancellation cannot dispatch the old target (0.282958ms)
+✔ replacement session during synchronous conversation freeze cannot dispatch the old target (0.244208ms)
+✔ replacement session during synchronous retry publication cannot dispatch the old target (0.223ms)
+✔ definite forbidden never claims completion or revives old controls (0.14625ms)
+✔ definite unavailable never claims completion or revives old controls (0.210292ms)
+✔ definite conflict never claims completion or revives old controls (0.192416ms)
+✔ definite invalid_request never claims completion or revives old controls (0.154959ms)
+✔ mismatched completion remains uncertain and cannot unlock the conversation (0.164167ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.14875
