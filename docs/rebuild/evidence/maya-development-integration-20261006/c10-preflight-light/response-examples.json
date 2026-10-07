@@ -1,0 +1,119 @@
+{
+  "kind": "synthetic-pure-agent-and-presenter-check",
+  "fullHttpProof": false,
+  "modelCalls": 0,
+  "invalidPartialFixtureRejected": "c9_missingness_required",
+  "initialProbeCorrection": "The first ad hoc partial BI fixture omitted source limitations and was rejected. Fixture fixed; production missingness guard unchanged.",
+  "bi": {
+    "contract": "AgentResult@1",
+    "agent_id": "BUSINESS_INTELLIGENCE",
+    "intent": "synthetic.check",
+    "findings": [
+      {
+        "statement": "Опубликованный финансовый снимок, версия 2.\nПериод: 01.05.2035, 00:00 GMT+3 — 10.05.2035, 00:00 GMT+3 (конец не включён; Europe/Moscow).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 10.05.2035, 08:00 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nЧистая прибыль: не измерено.",
+        "evidence_refs": [
+          "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ]
+      }
+    ],
+    "facts_used": [
+      {
+        "capability": "c7.measurement.read",
+        "status": "measured_incomplete",
+        "as_of": "2035-05-10T08:00:00.000Z",
+        "evidence_refs": [
+          "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "completeness": {
+          "status": "PARTIAL",
+          "requestedScopeHash": "81c264825dbac126ac63088f3ea2c3178ff252d4e0bf86fc2af46867b96d7ca6",
+          "returnedCount": 1,
+          "totalCount": 1,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "cash_unavailable"
+          ]
+        }
+      }
+    ],
+    "confidence": "low",
+    "limitations": [
+      "cash_unavailable"
+    ],
+    "proposed_action_intents": [],
+    "completeness": {
+      "status": "PARTIAL",
+      "requestedScopeHash": "81c264825dbac126ac63088f3ea2c3178ff252d4e0bf86fc2af46867b96d7ca6",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": [
+        "cash_unavailable"
+      ]
+    },
+    "evidence_refs": [
+      "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ]
+  },
+  "lifecycle": {
+    "contract": "AgentResult@1",
+    "agent_id": "CLIENT_LIFECYCLE",
+    "intent": "synthetic.check",
+    "findings": [
+      {
+        "statement": "По оценке на 09.05.2035, 00:00 (UTC) условие давности визитов по правилу бизнеса (версия 1) не выполнено. Исходные данные неполные.",
+        "evidence_refs": [
+          "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ]
+      }
+    ],
+    "facts_used": [
+      {
+        "capability": "c8.result.read",
+        "status": "measured_incomplete",
+        "as_of": "2035-05-09T00:00:00.000Z",
+        "evidence_refs": [
+          "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "completeness": {
+          "status": "PARTIAL",
+          "requestedScopeHash": "981d0823e134d2366fa16fe351b15b785ceed131c7bfeab0b5072eee32cfb016",
+          "returnedCount": 1,
+          "totalCount": 1,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": []
+        }
+      }
+    ],
+    "confidence": "low",
+    "limitations": [
+      "population_coverage_unknown"
+    ],
+    "proposed_action_intents": [],
+    "completeness": {
+      "status": "PARTIAL",
+      "requestedScopeHash": "981d0823e134d2366fa16fe351b15b785ceed131c7bfeab0b5072eee32cfb016",
+      "returnedCount": 1,
+      "totalCount": null,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": [
+        "population_coverage_unknown"
+      ]
+    },
+    "evidence_refs": [
+      "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ]
+  },
+  "truncated": {
+    "statement": "Опубликованный финансовый снимок, версия 2.\nПериод: 01.05.2035, 00:00 GMT+3 — 10.05.2035, 00:00 GMT+3 (конец не включён; Europe/Moscow).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 10.05.2035, 08:00 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nЧистая прибыль: не измерено.\nСтоимость записанных услуг: 123,45 $.\nЧистая прибыль: не измерено.\nСтоимость записанных услуг: 123,45 €.\nЧистая прибыль: не измерено.\nСтоимость записанных услуг: 123,45 £. Показана часть показателей; остальные не приняты за ноль.",
+    "truncated": true
+  }
+}

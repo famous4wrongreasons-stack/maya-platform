@@ -1,4 +1,5 @@
 import { C9Object, c9Object } from './c9.contract';
+import { sourceInstantText } from '../common/source-instant-text';
 
 /** A bounded explicit READ command, never a marketing instruction or a background trigger. */
 export function isExplicitClientReturnRequest(text: string): boolean {
@@ -43,6 +44,6 @@ export function lifecycleSignal(
 export function lifecycleStatement(fact: C9Object): string {
   const signal = lifecycleSignal(fact);
   return signal
-    ? `По оценке на ${signal.asOf} условие ${signal.key} (версия ${signal.version}) ${signal.value ? 'выполнено' : 'не выполнено'}. Полнота исходных данных: ${String(fact.completeness)}.`
+    ? `По оценке на ${sourceInstantText(signal.asOf)} (UTC) условие давности визитов по правилу бизнеса (версия ${signal.version}) ${signal.value ? 'выполнено' : 'не выполнено'}. ${fact.completeness === 'COMPLETE' ? 'Исходные данные полные.' : 'Исходные данные неполные.'}`
     : 'Подтверждённая оценка давности недоступна; состояние гостя не установлено.';
 }

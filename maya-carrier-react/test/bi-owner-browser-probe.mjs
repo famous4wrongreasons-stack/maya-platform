@@ -202,7 +202,9 @@ async function main() {
     assert.ok(!visible.includes(input.stage === 'prepare' ? '543,21 ₽' : '123,45 ₽'));
     assert.match(first.reply, /Причина изменения выручки не установлена/);
     assert.match(first.reply, /без пересчёта текущего состояния/);
-    assert.match(first.reply, /сообщения не отправлялись/);
+    assert.equal(first.analysis.noSideEffects, true);
+    assert.match(first.reply, /Данные на \d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}(?::\d{2}(?:,\d{3})?)? \(UTC\)/);
+    assert.ok(first.reply.includes('\n\n'));
     if (input.stage === 'resume') assert.notEqual(first.reply, input.firstReply, 'New explicit request selects the new published source');
     report.observations.initial = first;
     await capture(page, 'initial');

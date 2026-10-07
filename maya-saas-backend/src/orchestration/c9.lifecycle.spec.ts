@@ -179,7 +179,9 @@ describe('explicit C9 Lifecycle (synthetic durable adapter)', () => {
   it('uses actual refs, one bounded read, agent, saved READ/NO_ACTION proposal, unknown population and no identifiers in response', async () => {
     const f = fixture();
     const response = await f.create().checkClientReturn(f.turn);
-    expect(response.reply).toContain('По оценке на 2035-05-09');
+    expect(response.reply).toContain('По оценке на 09.05.2035, 00:00 (UTC)');
+    expect(response.reply).not.toContain('c8.dormancy/');
+    expect(response.reply).toContain('\n\n');
     expect(response.reply).toContain('не список уникальных клиентов');
     expect(response.recommendation.agent).toMatchObject({
       agent_id: 'CLIENT_LIFECYCLE',
@@ -404,6 +406,7 @@ describe('explicit C9 Lifecycle (synthetic durable adapter)', () => {
       values: [{ key: 'cadence', value: false }],
     });
     expect(text).toContain('не выполнено');
+    expect(text).toContain('Исходные данные неполные');
     expect(text).not.toContain('активен');
   });
   it('accepts only the bounded explicit request and never a compound send instruction', () => {

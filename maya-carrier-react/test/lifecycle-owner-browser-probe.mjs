@@ -196,7 +196,10 @@ async function main() {
     assert.equal(first.recommendation.canContact, false);
     assert.match(first.reply, /По оценке на/);
     assert.match(first.reply, /до трёх оценок/);
-    assert.match(first.reply, /Полный охват базы не установлен/);
+    assert.match(first.reply, /Охват всей базы не подтверждён/);
+    assert.doesNotMatch(first.reply, /c8\.dormancy\//);
+    assert.match(first.reply, /По оценке на \d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}(?::\d{2}(?:,\d{3})?)? \(UTC\)/);
+    assert.ok(first.reply.includes('\n\n'));
     assert.match(first.reply, /Предложение сохранено, версия 1/);
     assert.match(first.reply, /сообщения не отправлялись/);
     report.observations.initial = first;

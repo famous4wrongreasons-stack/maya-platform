@@ -1,0 +1,16 @@
+{
+  "kind": "syntax-transpile-only",
+  "typeCheck": false,
+  "files": [
+    "src/common/source-instant-text.ts",
+    "src/common/source-instant-text.spec.ts",
+    "src/measurement/measurement.presentation.ts",
+    "src/orchestration/c9.bi-presentation.ts",
+    "src/orchestration/c9.bi.spec.ts",
+    "src/orchestration/c9.lifecycle-presentation.ts",
+    "src/orchestration/c9.lifecycle.spec.ts",
+    "src/orchestration/c9.orchestrator.ts",
+    "test/widgets-live/c9-occupancy-restart.probe-spec.ts"
+  ],
+  "diagnostics": []
+}

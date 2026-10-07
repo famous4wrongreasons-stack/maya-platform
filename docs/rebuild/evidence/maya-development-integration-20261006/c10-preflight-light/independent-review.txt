@@ -1,0 +1,11 @@
+Read-only independent review by /root/independent_review, 2026-10-07.
+
+Initial findings (fixed):
+1. Probe expected bare SHA-256; canonical C5 resolution fingerprint has resolution-evidence_ prefix. Assertion corrected only.
+2. Existing launcher lacked SIGINT/SIGTERM cancellation and bounded TERM/KILL fallback. Owned child cancellation and cleanup exception added.
+3. Readable date formatter initially hid seconds/milliseconds and DST offsets. Precision and offsets added; then local seconds derived from target-zone formatToParts, including old second offsets.
+
+Reviewer final response after local-seconds fix:
+«Изменение корректно: секунды определяются в целевой зоне, миллисекунды и offset сохраняются. Regression для исторического Europe/Paris покрывает прежний край. Новых blockers нет. Только прочитал файлы; тестов не запускал. Полные types/unit/HTTP validations остаются pending.»
+
+Prior re-review confirmed: native C5 prefix; launcher denies stages after cancel, bounded TERM/KILL and cleanup; proposal-only C10 brief; no C6 admission claim.

@@ -104,6 +104,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
     unexpectedEdges: string[] = [];
   const observations: Record<string, unknown> = {};
   const touchedTenants: string[] = [];
+  const unavailableTenants = new Set<string>();
   let model: jest.SpyInstance;
   beforeAll(async () => {
     db = await bootFixtureContext();
@@ -129,6 +130,8 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
             expect(requested).toBe(tenantId);
             expect(staffId).toBe('c9-synthetic-staff');
             reads.push('schedule:' + tenantId);
+            if (unavailableTenants.has(tenantId))
+              return Promise.reject(new Error('Synthetic source unavailable'));
             return Promise.resolve({
               staff_id: staffId,
               date,
@@ -222,6 +225,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
       'booking',
       'booking.customer_app',
       'crm.integration',
+      'analytics.business',
     ] as const)
       await fx.grantFeature(tenant, feature);
     await db.prisma.tenant.update({
@@ -338,6 +342,137 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
       salon.owner.email,
       salon.owner.password,
     );
+  }
+  /** Exercise the existing C5 system hook. It may persist C5 state, never admit a C9 request. */
+  async function observeLifecycle(
+    name: string,
+    salon: Salon,
+    sourceCompleteness: 'complete' | 'partial' = 'complete',
+  ) {
+    const where = { tenantId: salon.tenant.id };
+    const beforeRuns = await db.prisma.c9Run.count({ where });
+    const readMark = reads.length;
+    const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+      where: { tenantId: salon.tenant.id },
+    });
+    const config = http.app.get(ConfigService);
+    config.set('OPPORTUNITY_LIFECYCLE_ENABLED', 'true');
+    config.set(
+      'OPPORTUNITY_LIFECYCLE_CUTOVER_AT',
+      integration.watchStartedAt!.toISOString(),
+    );
+    let result;
+    try {
+      result = await http.app
+        .get(TenantContextService)
+        .runAsSystemTenant(salon.tenant.id, () =>
+          http.app.get(OpportunityLifecycleRunner).run({
+            tenantId: salon.tenant.id,
+            asOf: new Date(),
+            sourceCompleteness,
+          }),
+        );
+    } finally {
+      config.set('OPPORTUNITY_LIFECYCLE_ENABLED', 'false');
+    }
+    expect(result).toMatchObject({
+      status: 'ran',
+      actionIntentsExecuted: 0,
+      externalSideEffects: 0,
+    });
+    const opportunities = await db.prisma.opportunity.findMany({ where });
+    const tasks = await db.prisma.agentTask.findMany({ where });
+    expect(opportunities).toHaveLength(1);
+    expect(tasks).toHaveLength(1);
+    expect(opportunities[0].id).toBe(salon.opportunityId);
+    expect(tasks[0].id).toBe(salon.taskId);
+    const afterRuns = await db.prisma.c9Run.count({ where });
+    expect(afterRuns).toBe(beforeRuns);
+    expect(reads.length - readMark).toBeLessThanOrEqual(2);
+    expect(await db.prisma.actionExecution.count({ where })).toBe(0);
+    observations[name] = {
+      lifecycle: result,
+      opportunity: {
+        id: opportunities[0].id,
+        revision: opportunities[0].revision,
+        status: opportunities[0].status,
+        terminalAt: opportunities[0].terminalAt,
+        terminalReasonCode: opportunities[0].terminalReasonCode,
+        terminalEvidenceFingerprint:
+          opportunities[0].terminalEvidenceFingerprint,
+      },
+      task: {
+        id: tasks[0].id,
+        status: tasks[0].status,
+        autonomy: tasks[0].autonomyLevel,
+      },
+      c9RunsBefore: beforeRuns,
+      c9RunsAfter: afterRuns,
+      sourceReadCalls: reads.length - readMark,
+      actionExecutions: 0,
+    };
+    return { result, opportunity: opportunities[0], task: tasks[0] };
+  }
+  /** Real authorized C7 live observation; no invented MeasurementRevision or recovery attribution. */
+  async function measureShadow(
+    name: string,
+    salon: Salon,
+    accessToken: string,
+    status: 'active' | 'resolved' | 'expired',
+  ) {
+    const before = await businessState(salon.tenant.id);
+    const now = new Date();
+    const response = await request(http.app.getHttpServer())
+      .get('/api/analytics/measurements')
+      .set('authorization', `Bearer ${accessToken}`)
+      .query({
+        kind: 'execution_funnel',
+        from: new Date(now.getTime() - 7 * 86_400_000).toISOString(),
+        to: new Date(now.getTime() + 86_400_000).toISOString(),
+      });
+    expect(response.status).toBe(200);
+    const view = response.body as {
+      metrics: Array<{ key: string; value: unknown; state: string }>;
+      limitations: string[];
+    };
+    expect(view).toMatchObject({
+      contract: 'c7.measurement.read/1',
+      mode: 'live',
+      revisionId: null,
+      completeness: 'PARTIAL',
+      attribution: 'NOT_APPLICABLE',
+    });
+    const metric = (key: string, value: number) =>
+      expect(view.metrics.filter((m) => m.key === key)).toEqual([
+        expect.objectContaining({ value: String(value), state: 'COMPLETE' }),
+      ]);
+    metric('opportunity_revision_count', 1);
+    metric('opportunity_logical_count', 1);
+    for (const candidate of ['active', 'resolved', 'expired', 'superseded'])
+      metric(`opportunity_${candidate}_count`, candidate === status ? 1 : 0);
+    metric('task_assignment_count', 1);
+    metric('task_current_count', status === 'active' ? 1 : 0);
+    metric('task_invalidated_count', status === 'active' ? 0 : 1);
+    for (const key of [
+      'action_admitted_count',
+      'action_dry_run_count',
+      'action_real_success_count',
+      'execution_attempt_count',
+    ])
+      metric(key, 0);
+    expect(view.limitations).toEqual(
+      expect.arrayContaining([
+        'proposal_admission_denominator_unavailable',
+        'incremental_revenue_not_measured',
+      ]),
+    );
+    expect(await businessState(salon.tenant.id)).toBe(before);
+    expect(
+      await db.prisma.measurementRevision.count({
+        where: { tenantId: salon.tenant.id },
+      }),
+    ).toBe(0);
+    observations[name] = view;
   }
   async function businessState(tenantId: string) {
     const where = { tenantId };
@@ -653,6 +788,11 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
       const salon = await makeSalon(),
         accessToken = await login(salon),
         requestId = randomUUID();
+      const duplicate = await observeLifecycle('same_event_repeat', salon);
+      expect(duplicate.result.duplicateAttemptsCollapsed).toBe(1);
+      expect(duplicate.opportunity.status).toBe('active');
+      expect(duplicate.task.status).toBe('current');
+      await measureShadow('c7_detected', salon, accessToken, 'active');
       reads.length = 0;
       const first = await checkedChat(salon, accessToken, requestId);
       expect(first.recommendation.outcome).toBe('AVAILABLE');
@@ -706,6 +846,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         persisted,
       );
       expect(reads).toEqual([]);
+      await measureShadow('c7_proposed', salon, accessToken, 'active');
       saved = {
         contract: 'maya.c9-occupancy-private-restart/1',
         database: database.database,
@@ -771,6 +912,17 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         ),
       ).toEqual([saved.first.reply, replay.reply]);
       observations.persistedHistory = history;
+      const restarted = await observeLifecycle(
+        'same_event_after_restart',
+        salon,
+      );
+      expect(restarted.result.duplicateAttemptsCollapsed).toBe(1);
+      expect(restarted.opportunity.status).toBe('active');
+      await measureShadow('c7_after_restart', salon, accessToken, 'active');
+      expect(await graph(salon.tenant.id, replay.coordination.run_id)).toBe(
+        saved.graph,
+      );
+      reads.length = 0;
       // Simulate later provider state, not a booking action by MAYA. Only this
       // fixture client inserts the occupied interval; the next HTTP request reads it.
       await db.prisma.appointment.create({
@@ -796,6 +948,53 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         occupied.recommendation.options.map((option) => option.key),
       ).toEqual(['c9.no_action']);
       expect(reads).toHaveLength(2);
+      const partial = await observeLifecycle(
+        'occupied_partial_source',
+        salon,
+        'partial',
+      );
+      expect(partial.result).toMatchObject({
+        completeness: 'partial',
+        resolved: 0,
+      });
+      expect(partial.opportunity.status).toBe('active');
+      expect(partial.task.status).toBe('current');
+      unavailableTenants.add(salon.tenant.id);
+      try {
+        const unavailable = await observeLifecycle(
+          'occupied_source_unavailable',
+          salon,
+        );
+        expect(unavailable.result).toMatchObject({
+          completeness: 'provider_failure',
+          resolved: 0,
+        });
+        expect(unavailable.opportunity.status).toBe('active');
+      } finally {
+        unavailableTenants.delete(salon.tenant.id);
+      }
+      const resolved = await observeLifecycle(
+        'occupied_complete_source',
+        salon,
+      );
+      expect(resolved.result.resolved).toBe(1);
+      expect(resolved.opportunity).toMatchObject({
+        status: 'resolved',
+        terminalReasonCode: 'provider_schedule_or_available_slot_absent',
+        terminalEvidenceFingerprint: expect.stringMatching(
+          /^resolution-evidence_[a-f0-9]{64}$/,
+        ),
+      });
+      expect(resolved.task.status).toBe('invalidated');
+      await measureShadow('c7_resolved', salon, accessToken, 'resolved');
+      reads.length = 0;
+      expect(
+        (await checkedChat(salon, accessToken)).recommendation.outcome,
+      ).toBe('CLOSED');
+      expect(reads).toEqual([]);
+      expect(await graph(salon.tenant.id, replay.coordination.run_id)).toBe(
+        saved.graph,
+      );
       const expired = await makeSalon(true),
         expiredToken = await login(expired);
       reads.length = 0;
@@ -803,6 +1002,22 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         (await checkedChat(expired, expiredToken)).recommendation.outcome,
       ).toBe('EXPIRED');
       expect(reads).toEqual([]);
+      const expiredState = await observeLifecycle(
+        'expired_current_source',
+        expired,
+      );
+      expect(expiredState.result.expired).toBe(1);
+      expect(expiredState.opportunity).toMatchObject({
+        status: 'expired',
+        terminalReasonCode: 'family_expiry_reached',
+      });
+      expect(expiredState.task.status).toBe('invalidated');
+      await measureShadow('c7_expired', expired, expiredToken, 'expired');
+      const repeatedExpiry = await observeLifecycle('expired_repeat', expired);
+      expect(repeatedExpiry.result).toMatchObject({
+        expired: 0,
+        currentTasks: 0,
+      });
       const foreign = await request(http.app.getHttpServer())
         .get(`/api/orchestration/runs/${replay.coordination.run_id}`)
         .set('authorization', `Bearer ${expiredToken}`);
@@ -850,6 +1065,11 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
           postgresStarted: await postgresStarted(),
           database: database.database,
           syntheticCrmAdapter: true,
+          c10AutonomousAdmission: false,
+          c6ShadowAdmission: false,
+          c7Measurement:
+            'existing execution_funnel live read, no stored revision',
+          c9Initiator: 'explicit authenticated owner chat only',
           externalProviderAcceptance: false,
           modelCalls: model.mock.calls.length,
           browserAcceptance: false,

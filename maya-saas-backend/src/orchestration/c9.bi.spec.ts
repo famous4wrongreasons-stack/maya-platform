@@ -135,8 +135,9 @@ describe('explicit BI published snapshot explanation', () => {
     const r = await f.create().explainFinancialReport(f.turn);
     expect(r.reply).toContain('123,45');
     expect(r.reply).toContain('Стоимость записанных услуг');
-    expect(r.reply).toContain('2035-05-01');
-    expect(r.reply).toContain('часовой пояс UTC');
+    expect(r.reply).toContain('01.05.2035, 00:00');
+    expect(r.reply).toContain('конец не включён; UTC');
+    expect(r.reply).toContain('\n\n');
     expect(r.reply).toContain('Чистую прибыль не подтверждаю');
     expect(r.reply).toContain('Причина изменения выручки не установлена');
     expect(r.analysis).toMatchObject({
@@ -252,13 +253,30 @@ describe('explicit BI published snapshot explanation', () => {
     const findings = r.analysis.agent.findings as C9Object[];
     expect(findings).toHaveLength(1);
     expect(String(findings[0].statement).length).toBeLessThanOrEqual(800);
-    expect(r.reply).toContain('2035-05-10T08:00:00.000Z');
+    expect(r.reply).toContain('Данные на 10.05.2035, 08:00 (UTC)');
     expect(r.reply).toContain('Данные неполные');
     expect(r.reply).toContain('Чистую прибыль не подтверждаю');
     expect(r.reply).toContain('без пересчёта текущего состояния');
     expect(r.reply).toContain('Причина изменения выручки не установлена');
     expect(r.reply).toContain('Показана часть показателей');
     expect(r.analysis.agent.limitations).toContain('financial_display_bound');
+  });
+  it('formats source period in its timezone while retaining the exact asOf in evidence', async () => {
+    const f = fixture();
+    const source = f.projection.facts[0];
+    source.period = {
+      from: '2035-04-30T21:00:00.000Z',
+      toExclusive: '2035-05-09T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    };
+    const r = await f.create().explainFinancialReport(f.turn);
+    expect(r.reply).toContain(
+      '01.05.2035, 00:00 GMT+3 — 10.05.2035, 00:00 GMT+3',
+    );
+    expect(r.reply).toContain('Europe/Moscow');
+    expect(r.analysis.agent.facts_used).toEqual([
+      expect.objectContaining({ as_of: source.asOf }),
+    ]);
   });
   it('empty replay reports only the stored search result, never a fabricated snapshot or link', async () => {
     const f = fixture();

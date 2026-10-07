@@ -1,0 +1,53 @@
+{
+  "contract": "maya.c10-preflight-light-checkpoint/1",
+  "baseCommit": "3f0dd856e7c5d8d148299619f54e43adcbb8787f",
+  "status": "PREPARED_HEAVY_VALIDATION_PENDING",
+  "scope": "Existing C5 system lifecycle, explicit owner C9 request, existing C7 live execution_funnel proof preparation; readable BI/Lifecycle copy",
+  "passed": {
+    "driverTests": 6,
+    "syntaxTranspiledFiles": 9,
+    "datePrecisionAndTimezoneCases": 4,
+    "pureC9AgentResultValidation": [
+      "BUSINESS_INTELLIGENCE",
+      "CLIENT_LIFECYCLE"
+    ],
+    "independentReadOnlyReview": "no remaining blocker"
+  },
+  "pending": [
+    "targeted Jest",
+    "production TypeScript",
+    "scoped lint",
+    "owned HTTP/PostgreSQL restart proof",
+    "current browser follow-up"
+  ],
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "newBackgroundAuthority": false,
+  "c6ShadowAdmission": false,
+  "c10Complete": false,
+  "certificate": "NOT_ISSUED",
+  "resourceState": "Heavy slot released to website; no heavy MAYA process launched in this follow-up",
+  "sourceHashes": {
+    "maya-carrier-react/test/bi-owner-browser-probe.mjs": "a4a341b4f69e32e41d00674bc520d668fcf00844d606b124b6683a09b0790375",
+    "maya-carrier-react/test/lifecycle-owner-browser-probe.mjs": "327cec12de2692c54bbe271478961fdcafae9c038f165e191baf513b36d235e0",
+    "maya-saas-backend/scripts/c9-occupancy-proof.mjs": "742437cb7514a3e70eb156ccb2d31e14d4edb5591602396c5ebdc4eef11402ac",
+    "maya-saas-backend/scripts/c9-occupancy-proof.test.mjs": "aa91e3c85238046b19ccf36aca21de7b6f2fbd39ccfb2855646a321daa563aef",
+    "maya-saas-backend/src/common/source-instant-text.spec.ts": "ba22e18b2abdfc0253489d18ab90d33d7dd6a0d3640027433b680aaef3525740",
+    "maya-saas-backend/src/common/source-instant-text.ts": "08e15da3a4a39e0d1e14f5f82f7c7783c7a87f1b26c4288d2fd73c386320c6a6",
+    "maya-saas-backend/src/measurement/measurement.presentation.ts": "91de832c2f788f033430ae095a33ae132958ccf898b8f18c7140341f0bd5bd62",
+    "maya-saas-backend/src/orchestration/c9.bi-presentation.ts": "00d92419647b6a4ab25a2a7894d5024d0a887be15b4bd61599b34ed5bfef767d",
+    "maya-saas-backend/src/orchestration/c9.bi.spec.ts": "1748aaa28ac13b7c96a56f7ad2a2446305abadfcd9d3fe97345f3789ad148664",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts": "93498eaf9c46f943da6808c41fae782fc83bda22e2183bed1d5e0c7c3708fb2d",
+    "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts": "e3398d8d527fd3357e2f37dc540ddf83b70cde91411f7e1409193ee5d0782993",
+    "maya-saas-backend/src/orchestration/c9.orchestrator.ts": "3f1505f4acbbe10749d58add492a36d94e7ad497f5e9d1cbc73f6d224fb765ff",
+    "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts": "028362b14444c66f57f59eeac6cc7858be28e06d2db95058a2921b21a744089c"
+  },
+  "evidenceHashes": {
+    "README.md": "b672b0a66684e5684d8eebb2f7052b56484351c111adc236ef7c364b97a74ed8",
+    "driver-tests.log": "64df72134657f67fbee69883831d8f2998e7f7431f6e2c634a19bb2ca3dd058b",
+    "independent-review.txt": "bffc610fe65bf3576a62a31566f66678b1509327e7ab383ffebe30f2ee135966",
+    "response-examples.json": "a745722ecf8833cb300df9d268ca97224a378afe71203d8b70991d27380b1ca1",
+    "source-date-cases.json": "d6dd2b41d61e3c76a4341ef7094d5b7174f497e4ca4743236c238beb09c0167e",
+    "syntax-check.json": "1b3d5f1f1ef33460054865b03f770b62987a0a24ce4ef257e4c43ba17b993a14"
+  }
+}

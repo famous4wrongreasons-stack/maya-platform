@@ -3,6 +3,7 @@ import {
   type MeasurementPresentation,
 } from '../measurement/measurement.presentation';
 import { C9Object, c9Object } from './c9.contract';
+import { sourceInstantText } from '../common/source-instant-text';
 
 export function isExplicitFinancialReportRequest(text: string): boolean {
   return /^(?:объясни|покажи) последний опубликованный финансовый отчет[?!.]*$/u.test(
@@ -59,10 +60,10 @@ export function biReportExplanation(fact: C9Object): {
   } as unknown as MeasurementPresentation;
   const parts = measurementTextParts(view);
   const mandatory = [
-    `Опубликованный финансовый снимок, версия ${String(fact.revision)}. Период ${period.from} — ${period.toExclusive} (конец не включён), часовой пояс ${period.timezone}.`,
+    `Опубликованный финансовый снимок, версия ${String(fact.revision)}.\nПериод: ${sourceInstantText(period.from as string, period.timezone as string)} — ${sourceInstantText(period.toExclusive as string, period.timezone as string)} (конец не включён; ${period.timezone}).`,
     ...parts.qualifications,
     'Это сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.',
-  ].join(' ');
+  ].join('\n');
   const warning = ' Показана часть показателей; остальные не приняты за ноль.';
   const displayed: string[] = [];
   for (const line of parts.metrics) {
@@ -72,7 +73,7 @@ export function biReportExplanation(fact: C9Object): {
   }
   const truncated = displayed.length < parts.metrics.length;
   const statement =
-    [mandatory, ...displayed].join(' ') + (truncated ? warning : '');
+    [mandatory, ...displayed].join('\n') + (truncated ? warning : '');
   return statement.length <= 800
     ? { statement, truncated }
     : {

@@ -1,0 +1,25 @@
+{
+  "kind": "synthetic-pure-date-check",
+  "results": [
+    {
+      "instant": "2035-05-10T09:00:59.900Z",
+      "timezone": "UTC",
+      "actual": "10.05.2035, 09:00:59,900"
+    },
+    {
+      "instant": "2026-11-01T05:30:00.000Z",
+      "timezone": "America/New_York",
+      "actual": "01.11.2026, 01:30 GMT-4"
+    },
+    {
+      "instant": "2026-11-01T06:30:00.000Z",
+      "timezone": "America/New_York",
+      "actual": "01.11.2026, 01:30 GMT-5"
+    },
+    {
+      "instant": "1900-01-01T00:00:00.000Z",
+      "timezone": "Europe/Paris",
+      "actual": "01.01.1900, 00:09:21 GMT+0:09:21"
+    }
+  ]
+}

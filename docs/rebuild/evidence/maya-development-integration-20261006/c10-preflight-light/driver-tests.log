@@ -1,0 +1,18 @@
+(node:39518) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/support/c9-occupancy-fixture-edge.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ synthetic CRM adapter survives actual Promise assimilation and refuses any extra method (0.585125ms)
+✔ driver environment excludes inherited provider/model and shared DB authority (0.137917ms)
+✔ driver refuses shared, nonlocal, redirected or foreign database names (1.79025ms)
+✔ plan has sequential fresh processes around PG restart and a private restart receipt (0.172458ms)
+✔ browser plan builds the actual web carrier, reuses owned HTTP/PG probe and omits old SSR/restart stages (0.121875ms)
+✔ cancellation bounds a TERM-ignoring owned child and still permits cleanup only (5060.826167ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5122.785083

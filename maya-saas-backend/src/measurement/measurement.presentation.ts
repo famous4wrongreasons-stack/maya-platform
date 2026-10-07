@@ -1,4 +1,5 @@
 import { compareMeasurementPeriods } from './measurement.period';
+import { sourceInstantText } from '../common/source-instant-text';
 import type { MeasurementRevision } from '@prisma/client';
 import {
   MeasurementIntent,
@@ -222,13 +223,13 @@ export function measurementTextParts(view: MeasurementPresentation) {
   const qualifications: string[] = [];
   if (!measurementMoney(view, 'net_profit').length)
     qualifications.push(
-      'Чистую прибыль не подтверждаю: нужны подтверждённые поступления, возвраты и полная сопоставимая база расходов. Неизвестное не принимается за ноль.',
+      'Чистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.',
     );
   if (view.completeness !== 'COMPLETE')
     qualifications.push(
-      'Данные неполные: доступные значения сохраняют своё основание и не заменяют недостающие факты.',
+      'Данные неполные; суммы относятся только к указанным источникам.',
     );
-  qualifications.push(`Состояние данных: ${view.asOf}.`);
+  qualifications.push(`Данные на ${sourceInstantText(view.asOf)} (UTC).`);
   return { metrics: lines, qualifications };
 }
 
