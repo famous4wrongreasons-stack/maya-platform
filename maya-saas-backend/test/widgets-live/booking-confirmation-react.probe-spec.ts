@@ -395,6 +395,7 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
             } else if (s.key === 'revoked') {
               expect(await db.prisma.actionExecution.count({ where })).toBe(0);
               expect(await db.prisma.appointment.count({ where })).toBe(0);
+              observations[m.name] = { actionExecutions: 0, appointments: 0 };
             } else {
               expect(await db.prisma.actionExecution.count({ where })).toBe(1);
               const execution =

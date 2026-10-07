@@ -117,6 +117,9 @@ async function main() {
   process.once('SIGTERM', terminate);
   process.once('disconnect', terminate);
   async function capture(page, name) {
+    // Re-authentication revisits earlier tabs. A background target's DOM may
+    // be current while Chrome has not painted its text into the screenshot.
+    await page.send('Page.bringToFront');
     // textContent includes the accessibility copy before the visible typewriter
     // finishes. Wait for actual reveal, then frame the latest text for pixels.
     assert.ok(await page.waitFor('!document.querySelector(".maya-typewriter-caret")'));
