@@ -90,6 +90,8 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     qualification: 'NOT_ISSUED',
     transport: 'FINITE_IN_PROCESS_SYNTHETIC_NATIVE_YCLIENTS',
     modelCalls: 0,
+    bookingActionCapability: 'crm.appointment.create.v1',
+    setupActionsExcludedFromBookingEffectCounts: true,
   };
   const scenarios: Scenario[] = [];
   beforeAll(async () => {
@@ -351,6 +353,18 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     observations.syntheticPostCompanies = posts;
     observations.forbidden = forbidden;
     observations.pid = process.pid;
+    if (db)
+      observations.setupActionCounts = await Promise.all(
+        scenarios.map(async (s) => ({
+          scenario: s.mode ? `${s.mode}-${s.key}` : s.key,
+          count: await db.prisma.actionExecution.count({
+            where: {
+              tenantId: s.tenantId,
+              capability: { not: 'crm.appointment.create.v1' },
+            },
+          }),
+        })),
+      );
     writeFileSync(reportPath, JSON.stringify(observations, null, 2) + '\n', {
       mode: 0o600,
     });
@@ -496,7 +510,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     ).toBe(200);
     expect(
       await db.prisma.actionExecution.count({
-        where: { tenantId: s.tenantId },
+        where: {
+          tenantId: s.tenantId,
+          capability: 'crm.appointment.create.v1',
+        },
       }),
     ).toBe(0);
     return confirmation;
@@ -511,7 +528,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     expect(await ledgerCount(s)).toBe(0);
     expect(
       await db.prisma.actionExecution.count({
-        where: { tenantId: s.tenantId },
+        where: {
+          tenantId: s.tenantId,
+          capability: 'crm.appointment.create.v1',
+        },
       }),
     ).toBe(0);
     expect(
@@ -669,7 +689,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
             } else {
               expect(await ledgerCount(s)).toBe(1);
               const executions = await db.prisma.actionExecution.findMany({
-                where: { tenantId: s.tenantId },
+                where: {
+                  tenantId: s.tenantId,
+                  capability: 'crm.appointment.create.v1',
+                },
               });
               expect(executions).toHaveLength(1);
               expect(executions[0]).toMatchObject({
@@ -692,6 +715,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
                 );
               }
               observations[String(message.name)] = {
+                bookingActionExecutions: 1,
                 state: executions[0].state,
                 executionAttempts: 1,
                 syntheticPosts: 1,
@@ -743,7 +767,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         };
         writeFileSync(receiptPath, JSON.stringify(receipt), { mode: 0o600 });
         checkpoints.push(
-          'A17 activated exact bindings; canonical Client links; branch-local MINTED confirmations persisted with zero AE/provider effects',
+          'A17 activated exact bindings; canonical Client links; branch-local MINTED confirmations persisted with zero booking AE/provider booking effects',
         );
         observations.restartState =
           'MINTED_WIDGET_CONFIRMATION_NOT_READY_ACTION_EXECUTION';
@@ -766,7 +790,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
           );
           expect(await ledgerCount(s)).toBe(1);
           const executions = await db.prisma.actionExecution.findMany({
-            where: { tenantId: s.tenantId },
+            where: {
+              tenantId: s.tenantId,
+              capability: 'crm.appointment.create.v1',
+            },
           });
           expect(executions).toHaveLength(1);
           expect(executions[0]).toMatchObject({
@@ -799,6 +826,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
               );
           }
           observations[s.key] = {
+            bookingActionExecutions: 1,
             state: executions[0].state,
             executionAttemptCount: executions[0].executionAttemptCount,
             syntheticPosts: await ledgerCount(s),
@@ -878,7 +906,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
             code: result.code,
             stoppedAtGate: result.stopped_at_gate,
             syntheticPosts: 0,
-            actionExecutions: 0,
+            bookingActionExecutions: 0,
           };
           checkpoints.push(change + ' refuses before AE/provider POST');
         }

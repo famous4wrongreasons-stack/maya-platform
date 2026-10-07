@@ -125,7 +125,7 @@
       },
       {
         "path": "src/shell/personal-booking.ts",
-        "sha256": "062e02462f0a567a71e9b35b0df84821171030c8eb75b8f0a535d28f491d6fa0"
+        "sha256": "496a632a9719b3c14be71d74062040bf0179d9ee07c59e1325a1f78ef957755e"
       },
       {
         "path": "src/shell/ports.ts",
@@ -145,8 +145,8 @@
       }
     ]
   },
-  "bytes": 514870,
-  "digest": "28eb4dcbd07ca32e585af84c427f2ef067577fad0e0a4a2ebb998389ca09fc0d",
+  "bytes": 516693,
+  "digest": "9ee6648e3550c22cfe48870492b0753c53c536934580536bd4697e033750ca67",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -154,8 +154,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "95a92d2fc5b82c774d263044c3095ad297242d0588535be8235cfbc65910f8d1",
-    "modulePath": "m/95a92d2fc5b82c77/",
+    "digest": "1264732607c5579c8346d5bb70b084c52cf8f43ee7e5309838eb0b41b2909322",
+    "modulePath": "m/1264732607c5579c/",
     "files": [
       {
         "path": "entry/main.js",
@@ -294,8 +294,8 @@
       },
       {
         "path": "src/shell/personal-booking.js",
-        "sha256": "d72279d39d175b4882562be894c9fd0cd296ce0c57a3da36f4d8ce05226f44ff",
-        "bytes": 10619
+        "sha256": "354de1f62f550519c0540c66cc0940b19802260368e9cfa0f65ae92c93171179",
+        "bytes": 12451
       },
       {
         "path": "src/shell/ports.js",
@@ -333,7 +333,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "2390cc26af8860fd48a3ef70b8521dca27b4e4ec93e698f0b73a6db23a938e3b",
+      "sha256": "94b8b7050aeace0de07c1704a44bf6cc241a23ebbc340419db95300d06ea101e",
       "bytes": 1344
     },
     "assets": [

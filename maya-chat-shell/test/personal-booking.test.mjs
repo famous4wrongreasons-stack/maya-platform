@@ -89,6 +89,50 @@ test('branch projection keeps only server list display fields and rejects invali
   assert.equal(projectPersonalBranches([valid, valid]), null);
   assert.equal(projectPersonalBranches([{ ...valid, id: '' }]), null);
 });
+test('timezone changed after open refreshes metadata and preserves selection for one explicit fresh slot read', async () => {
+  let branches = [{ id: 'branch', name: 'Филиал', timezone: 'Europe/Moscow' }];
+  const f = setup(); f.transport.personalBranches = async () => ok(branches);
+  f.show(); await flush(); f.port.chooseBranch('branch'); f.port.chooseService('service'); f.port.chooseStaff('staff'); f.port.date('2026-10-15');
+  branches = [{ ...branches[0], timezone: 'Asia/Yekaterinburg' }];
+  await f.port.slots();
+  assert.equal(f.calls.filter(c => c[0] === 'slots').length, 0);
+  assert.equal(f.port.view().phase, 'choose'); assert.equal(f.port.view().busy, false);
+  assert.equal(f.port.view().slots.length, 0); assert.equal(f.port.view().preview, null);
+  assert.equal(f.port.view().branches[0].timezone, 'Asia/Yekaterinburg'); assert.match(f.port.view().notice, /Сведения о филиале изменились/);
+  assert.deepEqual([f.port.view().branchId, f.port.view().serviceId, f.port.view().staffId, f.port.view().date], ['branch', 'service', 'staff', '2026-10-15']);
+  await f.port.slots(); assert.equal(f.calls.filter(c => c[0] === 'slots').length, 1);
+  assert.equal(f.port.view().phase, 'slots'); assert.match(f.port.view().notice, /Asia\/Yekaterinburg/); f.port.dispose();
+});
+test('timezone drift during the slot read discards mixed facts without retry or confirmation', async () => {
+  let branches = [{ id: 'branch', name: 'Филиал', timezone: 'Europe/Moscow' }], slotReads = 0;
+  const f = setup(); f.transport.personalBranches = async () => ok(branches);
+  f.transport.personalSlots = async () => { slotReads++; branches = [{ ...branches[0], timezone: 'Asia/Yekaterinburg' }]; return ok([{ start, staffId: 'staff', branchId: 'branch' }]); };
+  f.show(); await flush(); f.port.chooseBranch('branch'); f.port.chooseService('service'); f.port.chooseStaff('staff'); f.port.date('2026-10-15');
+  await f.port.slots(); await f.port.preview(0); await f.port.confirm();
+  assert.equal(slotReads, 1); assert.equal(f.port.view().phase, 'choose'); assert.equal(f.port.view().slots.length, 0);
+  assert.equal(f.port.view().branches[0].timezone, 'Asia/Yekaterinburg');
+  assert.equal(f.calls.some(c => c[0] === 'preview' || c[0] === 'create'), false);
+  assert.deepEqual([f.port.view().branchId, f.port.view().serviceId, f.port.view().staffId, f.port.view().date], ['branch', 'service', 'staff', '2026-10-15']);
+  await f.port.slots(); assert.equal(slotReads, 2); assert.equal(f.port.view().phase, 'slots'); f.port.dispose();
+});
+test('removed selected branch cannot silently fall back to unscoped availability', async () => {
+  let branches = [{ id: 'branch', name: 'Филиал', timezone: 'Europe/Moscow' }], slotReads = 0;
+  const f = setup(); f.transport.personalBranches = async () => ok(branches);
+  f.transport.personalSlots = async () => { slotReads++; branches = []; return ok([{ start, staffId: 'staff', branchId: 'branch' }]); };
+  f.show(); await flush(); f.port.chooseBranch('branch'); f.port.chooseService('service'); f.port.chooseStaff('staff'); f.port.date('2026-10-15');
+  await f.port.slots(); await f.port.slots(); await f.port.preview(0); await f.port.confirm();
+  assert.equal(slotReads, 1); assert.equal(f.port.view().phase, 'choose'); assert.deepEqual(f.port.view().branches, []);
+  assert.equal(f.port.view().branchId, 'branch'); assert.equal(f.port.view().serviceId, 'service'); assert.equal(f.port.view().staffId, 'staff');
+  assert.match(f.port.view().notice, /Выбранный филиал больше недоступен/);
+  assert.equal(f.calls.some(c => c[0] === 'preview' || c[0] === 'create'), false); f.port.dispose();
+});
+test('an initially unscoped form requires explicit choice if a branch appears before slots', async () => {
+  const f = setup(); f.show(); await flush(); f.port.chooseService('service'); f.port.chooseStaff('staff'); f.port.date('2026-10-15');
+  f.transport.personalBranches = async () => ok([{ id: 'branch', name: 'Филиал', timezone: 'Europe/Moscow' }]);
+  await f.port.slots(); await f.port.slots();
+  assert.equal(f.calls.filter(c => c[0] === 'slots').length, 0); assert.equal(f.port.view().branchId, '');
+  f.port.chooseBranch('branch'); await f.port.slots(); assert.equal(f.calls.find(c => c[0] === 'slots')[1].branchId, 'branch'); f.port.dispose();
+});
 test('double confirmation sends exact frozen selection once; only same canonical selection SUCCEEDED confirms', async () => {
   const f = setup(); await ready(f); f.exact({ ...preview, existing: true, requestState: 'SUCCEEDED' });
   await Promise.all([f.port.confirm(), f.port.confirm()]);

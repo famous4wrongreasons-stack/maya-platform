@@ -19,6 +19,11 @@ export interface PersonalBookingPort {
 }
 const empty = (): PersonalBookingView => ({ phase: 'closed', busy: false, branches: [], branchId: '', services: [], staff: [], serviceId: '', staffId: '', date: '', slots: [], preview: null, results: null, notice: '' });
 const uncertain = 'Результат записи пока не подтверждён. Повторно запрос не отправляем. Можно проверить сохранённый результат.';
+const sameBranchTimezone = (before: readonly PersonalBranch[], after: readonly PersonalBranch[], branchId: string): boolean => {
+  if (!branchId) return before.length === 0 && after.length === 0;
+  const previous = before.find((branch) => branch.id === branchId), next = after.find((branch) => branch.id === branchId);
+  return previous !== undefined && next !== undefined && previous.timezone === next.timezone;
+};
 const message = (failure: PersonalFailure) => failure.reason === 'forbidden' ? 'Личная запись недоступна: подтверждённая связь или доступ изменились.' : failure.reason === 'conflict' ? 'Предложение изменилось. Проверьте записи и выберите время заново.' : failure.reason === 'branch_unavailable' ? 'Источник записи для выбранного филиала недоступен. Проверьте привязку филиала к CRM. Запись не подтверждена.' : failure.reason === 'facts_unavailable' ? 'Цена или длительность услуги пока не подтверждены. Уточните их в салоне перед записью.' : 'Не удалось прочитать актуальные данные. Запись не подтверждена.';
 export function createPersonalBooking(deps: { transport: PersonalTransport; widgets: Pick<WidgetPort, 'view' | 'subscribe'>; session: Pick<SessionPort, 'view' | 'subscribe'>; newAbort: () => AbortController }): PersonalBookingPort {
   let current = empty(), item: string | null = null, serial = 0, abort = deps.newAbort();
@@ -58,6 +63,7 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
   const offWidgets = deps.widgets.subscribe(watch), offSession = deps.session.subscribe(watch);
   const editable = () => item !== null && !current.busy && ['choose', 'slots', 'preview'].includes(current.phase);
   const invalidate = (patch: Partial<PersonalBookingView>) => { selection = null; publish({ ...patch, phase: 'choose', slots: [], preview: null, notice: '' }); };
+  const branchChanged = (branches: readonly PersonalBranch[]) => publish({ phase: 'choose', busy: false, branches, slots: [], preview: null, notice: current.branchId && !branches.some((branch) => branch.id === current.branchId) ? 'Выбранный филиал больше недоступен. Выберите другой филиал, чтобы проверить свободное время.' : 'Сведения о филиале изменились. Проверьте филиал и снова запросите свободное время.' });
   const refresh = async () => {
     if (item === null || current.busy || !['outcome', 'unavailable'].includes(current.phase)) return;
     const version = serial;
@@ -75,17 +81,27 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
     chooseStaff(id) { if (editable() && current.staff.some((s) => s.id === id)) invalidate({ staffId: id }); },
     date(value) { if (editable()) invalidate({ date: value.slice(0, 10) }); },
     async slots() {
-      if (!editable() || (current.branches.length > 0 && !current.branchId) || !current.serviceId || !current.staffId || !/^\d{4}-\d{2}-\d{2}$/.test(current.date)) return;
+      if (!editable() || (current.branches.length > 0 && !current.branchId) || (current.branchId && !current.branches.some((branch) => branch.id === current.branchId)) || !current.serviceId || !current.staffId || !/^\d{4}-\d{2}-\d{2}$/.test(current.date)) return;
       const day = Date.parse(current.date + 'T00:00:00Z');
       if (!Number.isFinite(day) || new Date(day).toISOString().slice(0, 10) !== current.date) { publish({ notice: 'Введите существующую дату в формате ГГГГ-ММ-ДД.' }); return; }
       const version = serial;
       selection = null; publish({ busy: true, preview: null, slots: [] });
+      // A branch list is display metadata, never proof that a CRM mapping works.
+      // Its timezone must nevertheless match both sides of this finite slot read.
+      const before = await deps.transport.personalBranches(abort.signal);
+      if (!active(version)) return;
+      if (!before.ok) { fail(before.failure); return; }
+      if (!sameBranchTimezone(current.branches, before.value, current.branchId)) { branchChanged(before.value); return; }
       const result = await deps.transport.personalSlots(current.date, current.serviceId, current.staffId, abort.signal, current.branchId || undefined);
       if (!active(version)) return;
       if (!result.ok) { fail(result.failure); return; }
+      const after = await deps.transport.personalBranches(abort.signal);
+      if (!active(version)) return;
+      if (!after.ok) { fail(after.failure); return; }
+      if (!sameBranchTimezone(before.value, after.value, current.branchId)) { branchChanged(after.value); return; }
       const slots = result.value.filter((slot) => slot.staffId === current.staffId && (!current.branchId || slot.branchId === current.branchId));
-      const timezone = current.branches.find((branch) => branch.id === current.branchId)?.timezone;
-      publish({ phase: 'slots', busy: false, slots, notice: slots.length ? timezone ? `Время филиала: ${timezone}. Окно будет проверено ещё раз перед записью.` : 'Время ниже указано в UTC. Часовой пояс салона будет показан в предложении.' : 'Доступных окон на выбранную дату нет.' });
+      const timezone = after.value.find((branch) => branch.id === current.branchId)?.timezone;
+      publish({ phase: 'slots', busy: false, branches: after.value, slots, notice: slots.length ? timezone ? `Время филиала: ${timezone}. Окно будет проверено ещё раз перед записью.` : 'Время ниже указано в UTC. Часовой пояс салона будет показан в предложении.' : 'Доступных окон на выбранную дату нет.' });
     },
     async preview(index) {
       if (current.phase !== 'slots' || current.busy || !Number.isInteger(index)) return;
