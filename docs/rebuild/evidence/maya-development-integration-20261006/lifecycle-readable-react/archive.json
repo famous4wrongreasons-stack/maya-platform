@@ -1,0 +1,40 @@
+{
+  "contract": "maya.lifecycle-readable-react-followup/1",
+  "baseCommit": "617d8d79",
+  "status": "PASSED",
+  "checkpoints": 5,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "syntheticC8Facts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "separateBackendProcesses": true,
+  "postgresRestart": true,
+  "semanticLifecycleBrowser": false,
+  "ownedClusterStopped": true,
+  "certificate": "NOT_ISSUED",
+  "sourceHashes": {
+    "maya-carrier-react/test/lifecycle-owner-browser-probe.mjs": "327cec12de2692c54bbe271478961fdcafae9c038f165e191baf513b36d235e0",
+    "maya-saas-backend/test/widgets-live/lifecycle-owner-react.probe-spec.ts": "22e5d033da07ac5880a44717a9ec8fa5664c124467e4c5e76854d9e24c8d99a9",
+    "maya-saas-backend/scripts/lifecycle-react-proof.mjs": "4caa6effe129f4a88942f9aa3888bbc58e0098e8d847574bfa7e1910ec22fde7",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts": "93498eaf9c46f943da6808c41fae782fc83bda22e2183bed1d5e0c7c3708fb2d",
+    "maya-saas-backend/src/common/source-instant-text.ts": "08e15da3a4a39e0d1e14f5f82f7c7783c7a87f1b26c4288d2fd73c386320c6a6",
+    "maya-saas-backend/src/orchestration/c9.orchestrator.ts": "3f1505f4acbbe10749d58add492a36d94e7ad497f5e9d1cbc73f6d224fb765ff"
+  },
+  "evidenceHashes": {
+    "har13-jest.json": "ab47932a548361927f63e7f5819378fde9071fc590f282603967f141628c291b",
+    "manifest.json": "141e0c1924561b729770b7793acb129c1189927af2f54fc2eca3847e43899d4f",
+    "prepare-browser.json": "762f0946cba957f1dd56435f0ba12cb099ae70a99eb42abf228361b23176208b",
+    "prepare-initial.png": "163add3436f488307a797469efecbed56ec519a0da3db30114390d32d31cf63d",
+    "prepare-jest.json": "6c0aa1ed3564d868be26741a2ea39c27e5ca621a88e8c048d738149c9f1acc05",
+    "prepare-observations.json": "7f19ea3a300928bd54e6f998a8f814f6a44582001abe99802a182f0be56f0718",
+    "prepare-reload-restored.png": "151be7e4378ed0eaa8d64f0131626e5a3c193129671491f215a1c6c45c495b6c",
+    "resume-browser.json": "7db9d16c3e71e1b3201886ed43d5c097576cc04746eaf5064d3d58209569cfd4",
+    "resume-initial.png": "8c76d5334d5ab0449bd15faf34c46840d623e449483287b6f072e9ef803be22e",
+    "resume-jest.json": "603630895727e495eed972dc8c475e09c31e703e2b8b602823c07a7c2fd7847b",
+    "resume-observations.json": "fe1d7c58edd095142304e92731b0fea0adb5864679088c53139bab913c5fced4",
+    "resume-restart-restored.png": "151be7e4378ed0eaa8d64f0131626e5a3c193129671491f215a1c6c45c495b6c",
+    "resume-unavailable.png": "1f0bef3094df75a9f7c1b7d2dd7c89c60a0bcc08ea85496ccf141b65ab0fcf25"
+  },
+  "sourceCommit": "617d8d79"
+}

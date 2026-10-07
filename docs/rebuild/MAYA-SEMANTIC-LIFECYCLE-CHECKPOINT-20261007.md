@@ -1,0 +1,15 @@
+# Existing semantic Lifecycle: qualification and readable answers
+
+The ordinary owner question «Кто давно не приходил?» still uses semantic selection of `clients.dormant.list`, the existing C9 conversation READ and the C8 source owner. Its formatter now reuses `lifecycleSignal` / `lifecycleStatement` from the explicit Lifecycle path instead of accepting the first boolean with a matching rule key.
+
+Only current, available, VERIFIED policy signals with known completeness, valid rule/version/date and exactly one boolean value yield a finding. Missing qualification, conflicting or duplicate values, unknown completeness and invalid date/version yield an unavailable explanation. Numbered evaluations replace raw `result_*` / rule IDs; their source dates and completeness remain visible. The result explicitly avoids claiming unique customers, full population coverage, return probability, contact authority or readiness to return. Truncation remains bounded at the existing 20-result source READ; the separate explicit C9 command remains bounded at three evaluations. No source computation or mutation is added.
+
+## Evidence
+
+- 212 targeted tests across the existing core/Lifecycle and Admin presentation suites pass. Production TypeScript passes; scoped lint has no errors and retains two earlier schedule-fixture warnings.
+- Two real HTTP/C8/PostgreSQL cases pass in the [semantic/explicit HTTP package](evidence/maya-development-integration-20261006/semantic-lifecycle/manifest.json). The semantic case reads an actual published C8 revision built from synthetic fixture facts, preserves replay without a second source call, refuses foreign access (404) and revoked membership (401), and reports unavailable after a synthetic attendance correction. Four scripted selections, three source reads across owner/foreign/corrected requests, zero fetch calls. C8 revisions stay at one; AE count stays 1 → 1 (the existing A22 fixture setup).
+- The explicit HTTP case reopens the app in the same process and preserves its immutable proposal/source refs. That HTTP package does not prove semantic restart or PostgreSQL restart.
+- A separate [existing explicit Lifecycle React proof](evidence/maya-development-integration-20261006/lifecycle-readable-react/archive.json) passes five UI checkpoints, real new backend processes and PostgreSQL restart with the readable copy. History restores without new work; a fresh request rechecks current sources, and a changed fixture fact produces UNAVAILABLE. Model/provider calls are zero. Initial/unavailable screenshots were visually inspected. This is explicit Lifecycle browser evidence, not a browser test of semantic selection.
+- Independent read-only review found no blocking issue. Every owned cluster/browser was stopped. Evidence manifests bind source and artifact hashes.
+
+Source facts and semantic model choices remain synthetic. No real-model/provider, autonomous C10, new contact permission or production acceptance is claimed. The earlier [Admin checkpoint](MAYA-ADMIN-INTEGRATION-STATUS-CHECKPOINT-20261007.md) remains separately qualified. `NOT_ISSUED`.

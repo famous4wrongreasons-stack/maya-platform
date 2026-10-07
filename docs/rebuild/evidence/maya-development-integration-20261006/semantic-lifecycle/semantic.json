@@ -1,0 +1,179 @@
+{
+  "contract": "maya.semantic-lifecycle-qualification/1",
+  "syntheticSourceFacts": true,
+  "scriptedModelSelections": 4,
+  "externalModelCalls": 0,
+  "fetchCalls": 0,
+  "sourceCalls": 3,
+  "initial": {
+    "request_id": "ef6c96d3-8661-4a84-808e-645fdecf2979",
+    "coordination": {
+      "run_id": "686ff8c5-c1ca-4d98-8509-3818239c7b94",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "5f753f90-0718-4084-a654-908500594bf9",
+      "conversationId": "d5fa5ea3-c3dc-44e2-9e2b-1f057c23ba14"
+    },
+    "reply": "Результаты по подтверждённым правилам давности:\n\nОценка 1: По оценке на 07.10.2026, 06:26:00,675 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПоказаны оценки, а не список уникальных клиентов. Давность визита не означает готовность гостя вернуться. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.\n\nРезультаты не подтверждают полный охват клиентской базы.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "clients.dormant.list",
+        "status": "completed",
+        "execution_id": "cmuxq4uy6000ihlc9mlgi5gmm"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "client_retention",
+      "required_tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "customers.count",
+        "clients.dormant.list",
+        "clients.retention.scan"
+      ],
+      "evidence_tools": [
+        "clients.dormant.list"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "replay": {
+    "request_id": "ef6c96d3-8661-4a84-808e-645fdecf2979",
+    "coordination": {
+      "run_id": "686ff8c5-c1ca-4d98-8509-3818239c7b94",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "5f753f90-0718-4084-a654-908500594bf9",
+      "conversationId": "d5fa5ea3-c3dc-44e2-9e2b-1f057c23ba14"
+    },
+    "reply": "Результаты по подтверждённым правилам давности:\n\nОценка 1: По оценке на 07.10.2026, 06:26:00,675 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПоказаны оценки, а не список уникальных клиентов. Давность визита не означает готовность гостя вернуться. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.\n\nРезультаты не подтверждают полный охват клиентской базы.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "clients.dormant.list",
+        "status": "completed",
+        "execution_id": "cmuxq4uy6000ihlc9mlgi5gmm"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "client_retention",
+      "required_tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "customers.count",
+        "clients.dormant.list",
+        "clients.retention.scan"
+      ],
+      "evidence_tools": [
+        "clients.dormant.list"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "empty": {
+    "request_id": "47d413cb-9c2a-41d9-82c2-3b2a0e6a636d",
+    "coordination": {
+      "run_id": "810d0051-e9eb-4b23-b55a-a21e44d8830d",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "a9eaf08d-8a07-4f4f-a27f-d7c3f411c0e0",
+      "conversationId": "7a71733d-e3c5-473d-84ad-3e227eb8237f"
+    },
+    "reply": "Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "clients.dormant.list",
+        "status": "completed",
+        "execution_id": "cmuxq4v0s000ohlc9i68kub25"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "client_retention",
+      "required_tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "customers.count",
+        "clients.dormant.list",
+        "clients.retention.scan"
+      ],
+      "evidence_tools": [
+        "clients.dormant.list"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "stale": {
+    "request_id": "46352e57-da8e-424a-af86-e7d5126485d5",
+    "coordination": {
+      "run_id": "dc16d8ee-f762-4165-b148-4763795d0e5b",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "418552bd-ec9d-49b6-a618-cc1a3d18bd43",
+      "conversationId": "c6d25d76-7a35-4c00-8665-b0585f796f84"
+    },
+    "reply": "Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "clients.dormant.list",
+        "status": "completed",
+        "execution_id": "cmuxq4v1w000thlc9xyvqpr7s"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "client_retention",
+      "required_tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "customers.count",
+        "clients.dormant.list",
+        "clients.retention.scan"
+      ],
+      "evidence_tools": [
+        "clients.dormant.list"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "foreignStatus": 404,
+  "revokedStatus": 401,
+  "c8Revisions": 1,
+  "effectsBefore": 1,
+  "effectsAfter": 1,
+  "newContactAuthority": false,
+  "browserAcceptance": false
+}

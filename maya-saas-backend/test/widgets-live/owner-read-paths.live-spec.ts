@@ -316,15 +316,23 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       kind: 'POLICY_SIGNAL',
     });
     const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
-    select('clients.dormant.list');
+    const model = select('clients.dormant.list');
+    const network = jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
+      throw new Error('No network in the semantic Lifecycle proof');
+    });
     const before = await db.prisma.actionExecution.count({
       where: { tenantId: f.tenant.id },
     });
     const requestId = randomUUID();
     const response = await f.chat('Кто давно не приходил?', requestId);
     expect(response.status).toBe(201);
-    expect(payload(response).reply).toContain('c8.dormancy/barber_cadence');
-    expect(payload(response).reply).toContain('PARTIAL');
+    expect(payload(response).reply).toContain(
+      'условие давности визитов по правилу бизнеса',
+    );
+    expect(payload(response).reply).toContain('Исходные данные неполные');
+    expect(payload(response).reply).toContain('не список уникальных клиентов');
+    expect(payload(response).reply).not.toMatch(/c8.dormancy|PARTIAL|result_1/);
+    expect(model).toHaveBeenCalledTimes(1);
     expect(payload(response).reply).not.toContain(client.id);
     expect(payload(response).coordination).toMatchObject({
       state: 'COMPLETED',
@@ -369,7 +377,42 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       where: { userId_tenantId: { userId: f.user.id, tenantId: f.tenant.id } },
       data: { status: 'suspended' },
     });
-    expect((await f.chat('Кто давно не приходил?')).status).toBe(401);
+    const revoked = await f.chat('Кто давно не приходил?');
+    expect(revoked.status).toBe(401);
+    expect(network).not.toHaveBeenCalled();
+    const after = await db.prisma.actionExecution.count({
+      where: { tenantId: f.tenant.id },
+    });
+    expect(after).toBe(before);
+    const output = process.env.JEST_LIFECYCLE_OUTPUT;
+    if (output)
+      writeFileSync(
+        join(output, 'semantic-lifecycle-observations.json'),
+        JSON.stringify(
+          {
+            contract: 'maya.semantic-lifecycle-qualification/1',
+            syntheticSourceFacts: true,
+            scriptedModelSelections: model.mock.calls.length,
+            externalModelCalls: 0,
+            fetchCalls: network.mock.calls.length,
+            sourceCalls: source.mock.calls.length,
+            initial: response.body as unknown,
+            replay: replay.body as unknown,
+            empty: empty.body as unknown,
+            stale: stale.body as unknown,
+            foreignStatus: denied.status,
+            revokedStatus: revoked.status,
+            c8Revisions: 1,
+            effectsBefore: before,
+            effectsAfter: after,
+            newContactAuthority: false,
+            browserAcceptance: false,
+          },
+          null,
+          2,
+        ) + '\n',
+        { flag: 'wx', mode: 0o600 },
+      );
   });
 
   it('explicit Lifecycle uses actual C8 revisions, saves one bounded proposal and rechecks after app restart', async () => {
@@ -500,7 +543,10 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       };
     };
     expect(response.reply).toContain('По оценке на');
-    expect(response.reply).toContain('c8.dormancy/barber_cadence');
+    expect(response.reply).toContain(
+      'условие давности визитов по правилу бизнеса',
+    );
+    expect(response.reply).not.toContain('c8.dormancy/');
     expect(response.recommendation).toMatchObject({
       outcome: 'PARTIAL',
       canContact: false,
@@ -567,7 +613,7 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       outcome: 'STALE',
       agent: { findings: [] },
     });
-    expect(payload(stale).reply).not.toContain('условие c8.dormancy');
+    expect(payload(stale).reply).not.toContain('условие давности визитов');
     expect(
       (
         await db.prisma.c9StrategyRevision.findUniqueOrThrow({

@@ -1,0 +1,328 @@
+{
+  "contract": "maya.explicit-lifecycle-proof/1",
+  "qualification": "NOT_ISSUED",
+  "syntheticSourceFacts": true,
+  "modelCalls": 0,
+  "externalProviderAcceptance": false,
+  "appRestart": true,
+  "postgresRestart": false,
+  "initial": {
+    "request_id": "71fe0cb6-c99e-494a-8ab9-3883b3445a11",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "PARTIAL",
+      "agent": {
+        "contract": "AgentResult@1",
+        "agent_id": "CLIENT_LIFECYCLE",
+        "intent": "c9.client_return",
+        "findings": [
+          {
+            "statement": "По оценке на 07.10.2026, 06:26:01,224 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.",
+            "evidence_refs": [
+              "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+            ]
+          }
+        ],
+        "facts_used": [
+          {
+            "capability": "c8.result.read",
+            "status": "measured_incomplete",
+            "as_of": "2026-10-07T06:26:01.224Z",
+            "evidence_refs": [
+              "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+            ],
+            "completeness": {
+              "status": "PARTIAL",
+              "requestedScopeHash": "67e2b6af321111441910a844ef0a4395eb1c30a66037fa94a3c98b9aee4932fc",
+              "returnedCount": 1,
+              "totalCount": 1,
+              "hasMore": false,
+              "cursorRef": null,
+              "truncated": false,
+              "reasonCodes": [
+                "confirmed_dormancy_rule_met"
+              ]
+            },
+            "basis": "proven_attendance_policy"
+          }
+        ],
+        "confidence": "low",
+        "limitations": [
+          "population_coverage_unknown",
+          "confirmed_dormancy_rule_met"
+        ],
+        "proposed_action_intents": [],
+        "completeness": {
+          "status": "PARTIAL",
+          "requestedScopeHash": "67e2b6af321111441910a844ef0a4395eb1c30a66037fa94a3c98b9aee4932fc",
+          "returnedCount": 1,
+          "totalCount": null,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "population_coverage_unknown",
+            "confirmed_dormancy_rule_met"
+          ]
+        },
+        "evidence_refs": [
+          "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+        ]
+      },
+      "evidence": {
+        "workReceiptId": "f08d1d96-9913-48fa-8a84-fec00b8e0adf",
+        "checkedAt": "2026-10-07T06:26:01.273Z",
+        "sourceHandles": [
+          "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+        ]
+      },
+      "options": [
+        {
+          "key": "review_later",
+          "title": "По новому запросу проверить актуальность оценок"
+        },
+        {
+          "key": "c9.no_action",
+          "title": "Ничего не делать"
+        }
+      ],
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false,
+      "reasoning": "deterministic"
+    },
+    "coordination": {
+      "run_id": "86d1d196-adc6-41a0-a0ab-ca1f94557ac5",
+      "scope": "explicit_lifecycle",
+      "state": "PROPOSED",
+      "revision_id": "396435cd-d86d-4e9a-83b8-7636d61533f9",
+      "revision": 1,
+      "replayed": false,
+      "current": true
+    },
+    "user_turn": {
+      "turnId": "70198e82-00c8-4c0d-aeec-db6528783c71",
+      "conversationId": "360c0634-7513-4ef0-b694-4e2bd8677e3b"
+    },
+    "reply": "Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 07.10.2026, 06:26:01,224 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "replay": {
+    "request_id": "71fe0cb6-c99e-494a-8ab9-3883b3445a11",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "HISTORICAL",
+      "agent": {
+        "contract": "AgentResult@1",
+        "agent_id": "CLIENT_LIFECYCLE",
+        "intent": "c9.client_return",
+        "findings": [
+          {
+            "statement": "По оценке на 07.10.2026, 06:26:01,224 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.",
+            "evidence_refs": [
+              "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+            ]
+          }
+        ],
+        "facts_used": [
+          {
+            "capability": "c8.result.read",
+            "status": "measured_incomplete",
+            "as_of": "2026-10-07T06:26:01.224Z",
+            "evidence_refs": [
+              "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+            ],
+            "completeness": {
+              "status": "PARTIAL",
+              "requestedScopeHash": "67e2b6af321111441910a844ef0a4395eb1c30a66037fa94a3c98b9aee4932fc",
+              "returnedCount": 1,
+              "totalCount": 1,
+              "hasMore": false,
+              "cursorRef": null,
+              "truncated": false,
+              "reasonCodes": [
+                "confirmed_dormancy_rule_met"
+              ]
+            },
+            "basis": "proven_attendance_policy"
+          }
+        ],
+        "confidence": "low",
+        "limitations": [
+          "population_coverage_unknown",
+          "confirmed_dormancy_rule_met"
+        ],
+        "proposed_action_intents": [],
+        "completeness": {
+          "status": "PARTIAL",
+          "requestedScopeHash": "67e2b6af321111441910a844ef0a4395eb1c30a66037fa94a3c98b9aee4932fc",
+          "returnedCount": 1,
+          "totalCount": null,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "population_coverage_unknown",
+            "confirmed_dormancy_rule_met"
+          ]
+        },
+        "evidence_refs": [
+          "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+        ]
+      },
+      "evidence": {
+        "workReceiptId": "f08d1d96-9913-48fa-8a84-fec00b8e0adf",
+        "checkedAt": "2026-10-07T06:26:01.273Z",
+        "sourceHandles": [
+          "h_50b885f6e980f459f1829dc0d3835fd29376dbe69ef2d57888a1dd0236189c82"
+        ]
+      },
+      "options": [
+        {
+          "key": "review_later",
+          "title": "По новому запросу проверить актуальность оценок"
+        },
+        {
+          "key": "c9.no_action",
+          "title": "Ничего не делать"
+        }
+      ],
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false,
+      "reasoning": "deterministic"
+    },
+    "coordination": {
+      "run_id": "86d1d196-adc6-41a0-a0ab-ca1f94557ac5",
+      "scope": "explicit_lifecycle",
+      "state": "PROPOSED",
+      "revision_id": "396435cd-d86d-4e9a-83b8-7636d61533f9",
+      "revision": 1,
+      "replayed": true,
+      "current": false
+    },
+    "user_turn": {
+      "turnId": "70198e82-00c8-4c0d-aeec-db6528783c71",
+      "conversationId": "360c0634-7513-4ef0-b694-4e2bd8677e3b"
+    },
+    "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nОценка 1: По оценке на 07.10.2026, 06:26:01,224 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "stale": {
+    "request_id": "71fe0cb6-c99e-494a-8ab9-3883b3445a11",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "STALE",
+      "agent": {
+        "contract": "AgentResult@1",
+        "agent_id": "CLIENT_LIFECYCLE",
+        "intent": "c9.client_return",
+        "findings": [],
+        "facts_used": [],
+        "confidence": "low",
+        "limitations": [
+          "population_coverage_unknown",
+          "no_permitted_qualified_evidence"
+        ],
+        "proposed_action_intents": [],
+        "completeness": {
+          "status": "UNAVAILABLE",
+          "requestedScopeHash": "9661fd0cd0ff084962127dedd339f45a2a3ac6d9f291dc24859e123e8214d742",
+          "returnedCount": 0,
+          "totalCount": null,
+          "hasMore": false,
+          "cursorRef": null,
+          "truncated": false,
+          "reasonCodes": [
+            "population_coverage_unknown",
+            "no_permitted_qualified_evidence"
+          ]
+        },
+        "evidence_refs": []
+      },
+      "evidence": {
+        "workReceiptId": "f08d1d96-9913-48fa-8a84-fec00b8e0adf",
+        "checkedAt": "2026-10-07T06:26:01.273Z",
+        "sourceHandles": []
+      },
+      "options": [
+        {
+          "key": "review_later",
+          "title": "По новому запросу проверить актуальность оценок"
+        },
+        {
+          "key": "c9.no_action",
+          "title": "Ничего не делать"
+        }
+      ],
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false,
+      "reasoning": "deterministic"
+    },
+    "coordination": {
+      "run_id": "86d1d196-adc6-41a0-a0ab-ca1f94557ac5",
+      "scope": "explicit_lifecycle",
+      "state": "PROPOSED",
+      "revision_id": "396435cd-d86d-4e9a-83b8-7636d61533f9",
+      "revision": 1,
+      "replayed": true,
+      "current": false
+    },
+    "user_turn": {
+      "turnId": "70198e82-00c8-4c0d-aeec-db6528783c71",
+      "conversationId": "360c0634-7513-4ef0-b694-4e2bd8677e3b"
+    },
+    "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nВ сохранённой версии нет доступных оценок; для новой проверки нужен новый запрос.\n\nЧасть источников изменилась или недоступна; прежние выводы не используются.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "revokedStatus": 403,
+  "foreignStatus": 400,
+  "revisions": 1,
+  "c8Revisions": 1,
+  "originalRevisionHash": "a299750a9d4acfd693f6f7044ab9a11c211513984f78837c5da728fa7d92a542",
+  "immutableRevisionHashUnchanged": true,
+  "effectCountBefore": 1,
+  "effectCountAfter": 1,
+  "workReceiptHasClientRefs": false,
+  "sourceExpiryCapsRevisionRetention": true
+}

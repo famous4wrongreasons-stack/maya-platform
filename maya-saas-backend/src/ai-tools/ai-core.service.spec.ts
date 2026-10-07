@@ -145,6 +145,7 @@ describe('AiCoreService', () => {
       values: [{ key: 'cadence', value: true }],
       asOf: '2026-10-05T10:00:00.000Z',
       completeness: 'PARTIAL',
+      qualification: 'VERIFIED',
     };
     const payload = {
       contract: 'c8.valuation.ai/1',
@@ -153,9 +154,11 @@ describe('AiCoreService', () => {
       moreAvailable: true,
     };
     const reply = render(payload);
-    expect(reply).toContain('result_1');
-    expect(reply).toContain('c8.dormancy/cadence');
-    expect(reply).toContain('PARTIAL');
+    expect(reply).toContain('Оценка 1:');
+    expect(reply).toContain('05.10.2026, 10:00 (UTC)');
+    expect(reply).toContain('Исходные данные неполные');
+    expect(reply).toContain('не список уникальных клиентов');
+    expect(reply).not.toMatch(/c8.dormancy|result_1|PARTIAL/);
     expect(reply).toContain('не разрешение на контакт');
     expect(reply).toContain('не весь список');
     for (const unavailable of [
@@ -163,6 +166,27 @@ describe('AiCoreService', () => {
       { ...payload, items: [] },
       { ...payload, items: [{ ...item, available: false }] },
       { ...payload, items: [{ ...item, current: false }] },
+      { ...payload, items: [{ ...item, qualification: 'UNVERIFIED' }] },
+      { ...payload, items: [{ ...item, qualification: undefined }] },
+      { ...payload, items: [{ ...item, completeness: 'UNKNOWN' }] },
+      { ...payload, items: [{ ...item, asOf: 'unknown' }] },
+      { ...payload, items: [{ ...item, rule: null }] },
+      { ...payload, items: [{ ...item, rule: 'unknown' }] },
+      { ...payload, items: [{ ...item, rule: [] }] },
+      { ...payload, items: [{ ...item, rule: { ...item.rule, version: 0 } }] },
+      {
+        ...payload,
+        items: [{ ...item, values: [...item.values, ...item.values] }],
+      },
+      {
+        ...payload,
+        items: [
+          {
+            ...item,
+            values: [...item.values, { key: 'cadence', value: false }],
+          },
+        ],
+      },
     ]) {
       expect(render(unavailable)).toContain('недоступ');
       expect(render(unavailable)).not.toContain('база активна');

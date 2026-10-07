@@ -39,5 +39,6 @@
     "types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "unit-jest.json": "40f35f12d399b124ca15458d08d59bf6f008d63769660c5053c50f7b418d6662",
     "unit-red.json": "21ae3c9f591930d0101bad75cca73eaef5c3e2f42bce15a591cc20c318857c8b"
-  }
+  },
+  "sourceCommit": "617d8d79"
 }

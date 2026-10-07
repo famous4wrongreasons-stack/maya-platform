@@ -23,7 +23,7 @@ await new Promise((resolve) => portServer.close(resolve));
 const database = 'maya_widget_gate_proof_lifecycleowner_' + randomBytes(6).toString('hex');
 const env = { DATABASE_URL: `postgresql://lifecycle_owner_proof@127.0.0.1:${port}/${database}`, NODE_ENV: 'test', NODE_OPTIONS: '--max-old-space-size=3072', LANG: 'C', TZ: 'UTC' };
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
-const manifest = { kind: 'lifecycle-owner-http-local-proof', browserRun: false, appRestart: true, postgresRestart: false, cluster, database, port, status: 'running', completed: [], modelCalled: false, syntheticC8SourceFacts: true, providerCalled: false, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 0 } };
+const manifest = { kind: 'lifecycle-owner-http-local-proof', browserRun: false, appRestart: true, postgresRestart: false, cluster, database, port, status: 'running', completed: [], modelSelection: 'scripted for semantic route; none for explicit route', syntheticC8SourceFacts: true, providerCalled: false, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 0 } };
 const save = () => fs.writeFileSync(path.join(values.output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 let cancelled = null, activeChild = null, activeCleanup = false;
 const cancel = (signal) => {
@@ -71,7 +71,7 @@ async function run(name, command, args, extra = {}, cwd = backend) {
   } finally { fs.closeSync(fd); }
 }
 const pg = (name) => path.join(pgBin, name), pgArgs = ['-D', cluster, '-w', '-t', '30'];
-const probe = () => run('http-lifecycle', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/owner-read-paths.live-spec.ts', '--testNamePattern', 'explicit Lifecycle', '--json', '--outputFile=' + path.join(values.output, 'http-lifecycle-jest.json')], { JEST_LIFECYCLE_OUTPUT: values.output });
+const probe = () => run('http-lifecycle', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/owner-read-paths.live-spec.ts', '--testNamePattern', 'real C8 result|explicit Lifecycle', '--json', '--outputFile=' + path.join(values.output, 'http-lifecycle-jest.json')], { JEST_LIFECYCLE_OUTPUT: values.output });
 let startAttempted = false;
 save();
 try {

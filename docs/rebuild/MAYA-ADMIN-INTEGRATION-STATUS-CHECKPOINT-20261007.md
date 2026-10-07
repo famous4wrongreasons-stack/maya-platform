@@ -1,5 +1,7 @@
 # Admin: qualified stored integration status, 2026-10-07
 
+Implementation and evidence checkpoint: `617d8d79`.
+
 The existing semantic tool selection now yields a deterministic, source-qualified answer for `support.integration-status.read`: saved connection state, calendar source, exact saved check/sync/verification dates and the existing source-owned next action. The response always states that current CRM reachability was not tested. A historical verification never overrides a saved error; missing, invalid or unknown dates/actions are not invented. Stale results suppress the suggested next step.
 
 The tool remains the same ADMIN capability through `C9Orchestrator.conversationRead` → current runtime/policy → `CrmService.getIntegrationStatus` (local database only). The source handler, roles, feature gates, actor/tenant scope and capability registry are unchanged. Server composition adds no agent, orchestrator, provider probe, regex command, schema, retention or execution authority. C9 retains its existing metadata receipt; no artificial C7 revision is created. No CRM mutation or outbound notification is introduced.

@@ -1,6 +1,10 @@
 import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
 import { integrationStatusReply } from './integration-status-presentation';
-import { isExplicitClientReturnRequest } from '../orchestration/c9.lifecycle-presentation';
+import {
+  isExplicitClientReturnRequest,
+  lifecycleSignal,
+  lifecycleStatement,
+} from '../orchestration/c9.lifecycle-presentation';
 import { isExplicitCancellationWindowRequest } from '../orchestration/c9.occupancy-presentation';
 import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
 import {
@@ -3282,44 +3286,35 @@ export class AiCoreService {
       'Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.';
     if (data.configured !== true) return unavailable;
     const rows = Array.isArray(data.items) ? data.items : [];
-    const lines = rows.slice(0, 20).flatMap((raw) => {
-      const row = this.record(raw),
-        rule = this.record(row.rule);
+    const boundedRows = rows.slice(0, 20);
+    const lines = boundedRows.flatMap((raw, index) => {
+      const row = this.record(raw);
       if (
-        row.kind !== 'POLICY_SIGNAL' ||
-        row.current !== true ||
-        row.available !== true ||
         typeof row.handle !== 'string' ||
         !/^result_[0-9]+$/.test(row.handle) ||
-        typeof rule.key !== 'string' ||
-        !rule.key.startsWith('c8.dormancy/')
+        !row.rule ||
+        typeof row.rule !== 'object' ||
+        Array.isArray(row.rule) ||
+        Object.getPrototypeOf(row.rule) !== Object.prototype ||
+        !lifecycleSignal(row)
       )
         return [];
-      const values = Array.isArray(row.values) ? row.values : [];
-      const signal = values
-        .map((v) => this.record(v))
-        .find(
-          (v) => v.key === (rule.key as string).slice('c8.dormancy/'.length),
-        );
-      if (typeof signal?.value !== 'boolean') return [];
-      return [
-        `${row.handle}: условие ${rule.key} (версия ${String(rule.version)}) ${signal.value ? 'выполнено' : 'не выполнено'}. На ${String(row.asOf)}; полнота данных: ${String(row.completeness)}.`,
-      ];
+      return [`Оценка ${index + 1}: ${lifecycleStatement(row)}`];
     });
     if (!lines.length) return unavailable;
     return [
       'Результаты по подтверждённым правилам давности:',
       ...lines,
-      'Метки result обозначают результаты оценки, а не имена гостей. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.',
-      data.moreAvailable === true
+      'Показаны оценки, а не список уникальных клиентов. Давность визита не означает готовность гостя вернуться. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.',
+      data.moreAvailable === true || rows.length > 20
         ? 'Показана ограниченная часть результатов, не весь список.'
         : 'Результаты не подтверждают полный охват клиентской базы.',
-      ...(lines.length < rows.length
+      ...(lines.length < boundedRows.length
         ? [
             'Часть результатов недоступна или не подтверждена; она не отнесена к активным или спящим гостям.',
           ]
         : []),
-    ].join('\n');
+    ].join('\n\n');
   }
 
   private deterministicReplyForTool(

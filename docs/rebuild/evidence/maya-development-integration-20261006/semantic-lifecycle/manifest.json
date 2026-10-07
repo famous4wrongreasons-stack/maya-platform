@@ -1,0 +1,47 @@
+{
+  "contract": "maya.semantic-lifecycle-checkpoint/1",
+  "baseCommit": "617d8d79",
+  "status": "LOCAL_QUALIFIED",
+  "targetedTestsPassed": 212,
+  "httpTestsPassed": 2,
+  "productionTypes": "PASS",
+  "scopedLint": "PASS; two pre-existing warnings",
+  "semanticScriptedModelCalls": 4,
+  "externalModelCalls": 0,
+  "fetchCalls": 0,
+  "semanticSourceReads": 3,
+  "semanticAE": [
+    1,
+    1
+  ],
+  "semanticC8Revisions": 1,
+  "semanticRestart": false,
+  "explicitAppCloseBoot": true,
+  "postgresRestart": false,
+  "browserAcceptance": false,
+  "separateExplicitBrowserEvidence": "../lifecycle-readable-react/archive.json",
+  "ownedServicesStopped": true,
+  "independentReview": "no blocking finding",
+  "backgroundAuthority": false,
+  "c10Complete": false,
+  "certificate": "NOT_ISSUED",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "25e7a6641fa3625c986b9f73d5af903b094e53b89525ae60c8de3ed2558cec20",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "0f31162927509b0db543922acad54c97d9cf77b5d72717e2340cfa415044139c",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts": "93498eaf9c46f943da6808c41fae782fc83bda22e2183bed1d5e0c7c3708fb2d",
+    "maya-saas-backend/test/widgets-live/owner-read-paths.live-spec.ts": "eab3207427fec36c1e43328765e8db320304d911991386449bef75c7e73c9982",
+    "maya-saas-backend/scripts/lifecycle-owner-proof.mjs": "c59ffbd8b74ee63811fc7300984fba579aeca4591d9d11cedbf474b968aced72"
+  },
+  "evidenceHashes": {
+    "explicit.json": "63ccf250312a51c58ff5068b62e27375238f1f80d948090be168e6383d7f7da0",
+    "http-jest.json": "c81a4b3865e0c0ff7277b22f41f07f8a81411eb8a2d027c79ea0a4f4b1b2bbf1",
+    "http-manifest.json": "d2146e0aeda5244f43a8922a6e9d67a182b616fe28e15da398324ba58e1efbaf",
+    "independent-review.txt": "7a4292ed7c5e7c87d4bdfcada1db89c66ae1c6eeb0bdb6aa0c23a6b4fb40498f",
+    "lint.txt": "ec5112afed49f29f526489c5ccf1d8d9f3513e75697851bf12c4a091f007b0f3",
+    "semantic.json": "1ad0a1850ed93362e90b296ce3940af225c25ea4db05ec2046cc37816a0733c5",
+    "types.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit-jest.json": "f3874010a212d9e4b3eafa4eca7e9bb869998f48222f5a00f155e96ec30b4698",
+    "final-independent-review.txt": "d97733ea5a56a0f5fe7c9129bcb1cf5e244679f05bb5f04b84c8cf7cee21a9de"
+  },
+  "sourceTree": "Committed alongside this manifest"
+}

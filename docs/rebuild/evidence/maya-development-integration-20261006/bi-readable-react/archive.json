@@ -1,0 +1,38 @@
+{
+  "contract": "maya.bi-readable-react-followup/1",
+  "baseCommit": "617d8d79",
+  "status": "PASSED",
+  "checkpoints": 4,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "syntheticC7Facts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "separateBackendProcesses": true,
+  "postgresRestart": true,
+  "ownedClusterStopped": true,
+  "certificate": "NOT_ISSUED",
+  "sourceHashes": {
+    "maya-carrier-react/test/bi-owner-browser-probe.mjs": "a4a341b4f69e32e41d00674bc520d668fcf00844d606b124b6683a09b0790375",
+    "maya-saas-backend/test/widgets-live/bi-owner-react.probe-spec.ts": "619084f010ca0940e419db85887ed77bc88f715575ece829601afb25a72c543e",
+    "maya-saas-backend/scripts/bi-react-proof.mjs": "2db482b236b15757ac8576382c9f8e575eeca0e9b200e982902899252272bd8f",
+    "maya-saas-backend/src/orchestration/c9.bi-presentation.ts": "9d9b5eb9c5f7978239c9f53c95eef650566de00e72ecfa96c392af322fad5ab7",
+    "maya-saas-backend/src/measurement/measurement.presentation.ts": "91de832c2f788f033430ae095a33ae132958ccf898b8f18c7140341f0bd5bd62",
+    "maya-saas-backend/src/common/source-instant-text.ts": "08e15da3a4a39e0d1e14f5f82f7c7783c7a87f1b26c4288d2fd73c386320c6a6",
+    "maya-saas-backend/src/orchestration/c9.orchestrator.ts": "3f1505f4acbbe10749d58add492a36d94e7ad497f5e9d1cbc73f6d224fb765ff"
+  },
+  "evidenceHashes": {
+    "manifest.json": "8e3f7f54fce8ff30e220002d9451ee096d578276cd52f4cd75bae7f7ab02491d",
+    "prepare-browser.json": "4466b9d1b77010e9ac97ce4ef0c74ebfe0272f7d38e7788912d0dcae05f5ac34",
+    "prepare-initial.png": "dff1663b9fb78e8b666afc489a665c95f37b60ea149a7a790201541e84e73a00",
+    "prepare-jest.json": "cf5be78bf8d3fce043ac3f6ade385ff2b49db63e56ad4f5633e0ffebbe582ace",
+    "prepare-observations.json": "581ab26a00324ca1f5cc3f49c93593017d43fc64faeeaf86e85c9a6a9073461e",
+    "prepare-reload-restored.png": "c7ada61c6543b893e5821e86e866c91f9cbd166bb3b5dd7177f2702e1fe5b066",
+    "resume-browser.json": "f2f56e3b0b61f4001a267fd251889ad9edd2c8e2c47e7e861b5a25a86ac615cb",
+    "resume-initial.png": "2439fedc274cfbb7b1adb03d4170bc406b38ad1fc5d3ade8a8b82f487ddfeca3",
+    "resume-jest.json": "cd8e3e7ff8b2e80651fa00e0f12597cf849274586c81716d40b17629b8fa487d",
+    "resume-observations.json": "a5498501a1609e414aaea0ba4244e74476defa6be45e7fc81f10d581ca968071",
+    "resume-restart-restored.png": "c7ada61c6543b893e5821e86e866c91f9cbd166bb3b5dd7177f2702e1fe5b066"
+  },
+  "sourceCommit": "617d8d79"
+}

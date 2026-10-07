@@ -1,0 +1,233 @@
+{
+  "contract": "maya.bi-owner-browser/1",
+  "status": "passed",
+  "syntheticC7Facts": true,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "restart-restored": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nОбъясни последний опубликованный финансовый отчёт\nMAYA:\nНайден последний доступный опубликованный финансовый отчёт на начало запроса.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 06.10.2026, 00:00 — 07.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 07.10.2026, 06:21:44,810 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): не измерено.\nПодтверждённые начисления зарплаты: не измерено.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nФакт чтения и ссылка на источник сохранены.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "initial": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nОбъясни последний опубликованный финансовый отчёт\nMAYA:\nНайден последний доступный опубликованный финансовый отчёт на начало запроса.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 06.10.2026, 00:00 — 07.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 07.10.2026, 06:21:44,810 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): не измерено.\nПодтверждённые начисления зарплаты: не измерено.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nФакт чтения и ссылка на источник сохранены.\nВы:\nОбъясни последний опубликованный финансовый отчёт\nMAYA:\nНайден последний доступный опубликованный финансовый отчёт на начало запроса.\n\nОпубликованный финансовый снимок, версия 2.\nПериод: 06.10.2026, 00:00 — 07.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 07.10.2026, 06:23:03,042 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 543,21 ₽.\nОборот операций по данным CRM (не подтверждённая касса): не измерено.\nПодтверждённые начисления зарплаты: не измерено.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nФакт чтения и ссылка на источник сохранены.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "initial": {
+      "request_id": "d472c0f2-7355-415a-b9ee-c585535f3b59",
+      "analysis": {
+        "contract": "maya.c9-bi-report-response/1",
+        "mode": "as_reported",
+        "outcome": "PARTIAL",
+        "agent": {
+          "contract": "AgentResult@1",
+          "agent_id": "BUSINESS_INTELLIGENCE",
+          "intent": "c9.business_overview",
+          "findings": [
+            {
+              "statement": "Опубликованный финансовый снимок, версия 2.\nПериод: 06.10.2026, 00:00 — 07.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 07.10.2026, 06:23:03,042 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 543,21 ₽.\nОборот операций по данным CRM (не подтверждённая касса): не измерено.\nПодтверждённые начисления зарплаты: не измерено.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.",
+              "evidence_refs": [
+                "h_3dd1b9853602746bfdd02af7bb47e8d8680f6a122938dba6fcfe0f2af06b8c48"
+              ]
+            }
+          ],
+          "facts_used": [
+            {
+              "capability": "c7.measurement.read",
+              "status": "measured_incomplete",
+              "as_of": "2026-10-07T06:23:03.042Z",
+              "evidence_refs": [
+                "h_3dd1b9853602746bfdd02af7bb47e8d8680f6a122938dba6fcfe0f2af06b8c48"
+              ],
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "8827dad3f54000b743932a38f23d6695dd78f9387900832fe4c36eff49e96c78",
+                "returnedCount": 1,
+                "totalCount": 1,
+                "hasMore": false,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "canonical_booked_history_coverage_not_proven_complete",
+                  "expense_period_completeness_not_declared",
+                  "financial_source_unavailable",
+                  "fiscal_cash_not_proven",
+                  "net_requires_complete_cash_refund_and_expense_evidence",
+                  "refund_coverage_not_supported",
+                  "source_observations_are_not_historical_reconstruction"
+                ]
+              }
+            }
+          ],
+          "confidence": "low",
+          "limitations": [
+            "canonical_booked_history_coverage_not_proven_complete",
+            "expense_period_completeness_not_declared",
+            "financial_source_unavailable",
+            "fiscal_cash_not_proven",
+            "net_requires_complete_cash_refund_and_expense_evidence",
+            "refund_coverage_not_supported",
+            "source_observations_are_not_historical_reconstruction"
+          ],
+          "proposed_action_intents": [],
+          "completeness": {
+            "status": "PARTIAL",
+            "requestedScopeHash": "8827dad3f54000b743932a38f23d6695dd78f9387900832fe4c36eff49e96c78",
+            "returnedCount": 1,
+            "totalCount": 1,
+            "hasMore": false,
+            "cursorRef": null,
+            "truncated": false,
+            "reasonCodes": [
+              "canonical_booked_history_coverage_not_proven_complete",
+              "expense_period_completeness_not_declared",
+              "financial_source_unavailable",
+              "fiscal_cash_not_proven",
+              "net_requires_complete_cash_refund_and_expense_evidence",
+              "refund_coverage_not_supported",
+              "source_observations_are_not_historical_reconstruction"
+            ]
+          },
+          "evidence_refs": [
+            "h_3dd1b9853602746bfdd02af7bb47e8d8680f6a122938dba6fcfe0f2af06b8c48"
+          ]
+        },
+        "evidence": {
+          "workReceiptId": "0365ec17-e234-44c4-8583-698e91966f32",
+          "sourceHandles": [
+            "h_3dd1b9853602746bfdd02af7bb47e8d8680f6a122938dba6fcfe0f2af06b8c48"
+          ]
+        },
+        "noSideEffects": true,
+        "executionAuthority": false,
+        "reasoning": "deterministic"
+      },
+      "coordination": {
+        "run_id": "eaa7a96a-5ac0-4dfc-b178-b539fd457dd3",
+        "scope": "explicit_bi_report",
+        "state": "DRAFT",
+        "replayed": false,
+        "current": false
+      },
+      "user_turn": {
+        "turnId": "b7e365c9-7e75-4b1a-afcd-085e9112d5f1",
+        "conversationId": "b7ecfd13-f79b-48ec-a532-7db36af419ca"
+      },
+      "reply": "Найден последний доступный опубликованный финансовый отчёт на начало запроса.\n\nОпубликованный финансовый снимок, версия 2.\nПериод: 06.10.2026, 00:00 — 07.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 07.10.2026, 06:23:03,042 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 543,21 ₽.\nОборот операций по данным CRM (не подтверждённая касса): не измерено.\nПодтверждённые начисления зарплаты: не измерено.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nФакт чтения и ссылка на источник сохранены.",
+      "source": "safe_fallback",
+      "redacted_input": true,
+      "action": null,
+      "tools_used": [],
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:59352",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/RGYTJPHA/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}
