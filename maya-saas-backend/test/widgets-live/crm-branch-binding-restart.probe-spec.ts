@@ -341,6 +341,10 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
         },
         targetRef: 'create/source-proof',
         evidenceRefs: [],
+        callerIdempotency: {
+          scope: 'appointments.client.create.v1',
+          key: randomUUID(),
+        },
         bookingIntent: {
           contract: CLIENT_BOOKING_INTENT_CONTRACT,
           calendarTarget: {
@@ -450,6 +454,10 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
         },
         targetRef: 'create/second-source-proof',
         evidenceRefs: [],
+        callerIdempotency: {
+          scope: 'appointments.client.create.v1',
+          key: randomUUID(),
+        },
         bookingIntent: {
           contract: CLIENT_BOOKING_INTENT_CONTRACT,
           calendarTarget: {
