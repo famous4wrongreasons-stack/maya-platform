@@ -76,9 +76,9 @@ export const progressState = (state: ShellState, opener: DetailOpener): ShellSta
   opener,
 });
 
-export const openState = (state: ShellState, opener: DetailOpener, itemId: string, result: RenderResult): ShellState => ({
+export const openState = (state: ShellState, opener: DetailOpener, itemId: string, result: RenderResult, receiver?: 'personal_booking'): ShellState => ({
   ...state,
-  fullscreen: { phase: 'open', itemId, result },
+  fullscreen: { phase: 'open', itemId, result, ...(receiver === undefined ? {} : { receiver }) },
   opener,
 });
 
@@ -180,7 +180,8 @@ export const createShell = (deps: ShellDeps): ShellController => {
     const opened = source.openDetail(envelope, opener);
     if (opened === null) return { presented: false, reason: 'refused' };
     ensureHistoryEntry();
-    set(openState(state, opener, opened.itemId, opened.result));
+    const receiver = opened.result.mode !== 'frozen_prose' && ['MINTED', 'DELIVERED', 'LIVE'].includes(opened.result.lifecycle?.state) && opened.result.lifecycle.input_lock === 'none' && envelope.kind === 'SCHEDULE' && envelope.provenance?.source_capability === 'appointments.own.list' && envelope.presentation?.fullscreen_detail?.route_key === 'fs.booking' ? 'personal_booking' : undefined;
+    set(openState(state, opener, opened.itemId, opened.result, receiver));
     return { presented: true, itemId: opened.itemId };
   };
 
@@ -233,7 +234,8 @@ export const createShell = (deps: ShellDeps): ShellController => {
     updateDetail(itemId, result) {
       const open = state.fullscreen;
       if (open?.phase !== 'open' || open.itemId !== itemId || state.opener === null) return;
-      set(openState(state, state.opener, itemId, result));
+      const receiver = result.mode !== 'frozen_prose' && ['MINTED', 'DELIVERED', 'LIVE'].includes(result.lifecycle?.state) && result.lifecycle.input_lock === 'none' ? open.receiver : undefined;
+      set(openState(state, state.opener, itemId, result, receiver));
     },
     closeDetail,
     closeProgress(itemId) {

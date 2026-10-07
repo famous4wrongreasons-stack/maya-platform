@@ -4,6 +4,7 @@ import type { InteractiveRefKey } from '../../../maya-chat-shell/src/contract.ts
 import { widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import type { Tokens } from '../identity/tokens.ts';
+import { PersonalBooking } from './PersonalBooking.tsx';
 import { DetailSheet } from './DetailSheet.tsx';
 
 export function FullscreenDetail({
@@ -22,6 +23,7 @@ export function FullscreenDetail({
       rendered={widgets.rendered}
       close={() => widgets.closeDetail()}
       focusFallback={focusFallback}
+      personalContent={<PersonalBooking t={t} />}
     />
   );
 }

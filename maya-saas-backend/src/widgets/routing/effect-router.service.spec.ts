@@ -133,6 +133,7 @@ const fixture = () => {
     emit: jest.fn().mockResolvedValue({
       envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w-nav' },
     }),
+    emitPersonalSchedule: jest.fn(),
     emitJournalDetail: jest.fn(),
     emitServicePriceDetail: jest
       .fn<

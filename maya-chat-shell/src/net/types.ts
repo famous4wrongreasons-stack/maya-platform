@@ -324,3 +324,26 @@ export type TranscribeFailure =
 export type Outcome<T, F> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly failure: F };
+
+// Explicit personal booking: request-local, already verified profile.
+export interface PersonalChoice { readonly id: string; readonly name: string }
+export interface PersonalSlot { readonly start: string; readonly staffId: string; readonly branchId: string | null }
+export interface PersonalSelection { readonly staffId: string; readonly serviceIds: readonly string[]; readonly start: string; readonly branchId?: string }
+export interface PersonalPreview {
+  readonly services: readonly { readonly name: string; readonly price: number | null; readonly currency: string | null; readonly durationMinutes: number | null }[];
+  readonly staff: string; readonly start: string; readonly timezone: string | null;
+  readonly source: string; readonly asOf: string; readonly existing: boolean; readonly requestState: string | null;
+}
+export interface PersonalResults {
+  readonly results: readonly { readonly id: string; readonly state: string; readonly recordedAt: string }[];
+  readonly hasPending: boolean; readonly hasMore: boolean;
+}
+export type PersonalFailure = { readonly reason: 'forbidden' | 'unavailable' | 'unknown' | 'conflict' | 'aborted' };
+export interface PersonalTransport {
+  personalServices(signal: AbortSignal): Promise<Outcome<readonly PersonalChoice[], PersonalFailure>>;
+  personalStaff(signal: AbortSignal): Promise<Outcome<readonly PersonalChoice[], PersonalFailure>>;
+  personalSlots(date: string, serviceId: string, staffId: string, signal: AbortSignal): Promise<Outcome<readonly PersonalSlot[], PersonalFailure>>;
+  personalPreview(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<PersonalPreview, PersonalFailure>>;
+  personalResults(signal: AbortSignal): Promise<Outcome<PersonalResults, PersonalFailure>>;
+  personalCreate(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>>;
+}

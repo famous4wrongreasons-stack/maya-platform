@@ -163,10 +163,13 @@ export class WidgetEmitterService {
     request: MintRequest,
     source: PersonalScheduleSource,
     now = new Date(),
+    parentWidgetId: string | null = null,
   ): Promise<SealedEmission> {
     if (
       request.kind !== 'SCHEDULE' ||
-      request.composerInput.capability !== 'appointments.own.list'
+      request.composerInput.capability !== 'appointments.own.list' ||
+      (parentWidgetId !== null &&
+        request.composerInput.correlation_refs.parent_id !== parentWidgetId)
     )
       throw new IntentTemplateRefusal('personal_schedule_source_required');
     await source.revalidate();
@@ -174,6 +177,7 @@ export class WidgetEmitterService {
       request.tenantId,
       source,
       (identity) => this.seals.mintNounHandles([identity])[identity.noun],
+      parentWidgetId !== null,
     );
     return this.emitInternal(
       {
@@ -191,6 +195,10 @@ export class WidgetEmitterService {
       null,
       null,
       source,
+      null,
+      null,
+      null,
+      parentWidgetId,
     );
   }
 
@@ -507,6 +515,7 @@ export class WidgetEmitterService {
     servicePrice: ServicePriceApprovalEmissionContext | null = null,
     servicePriceParentWidgetId: string | null = null,
     schedule: BookingConfirmationEmissionContext | null = null,
+    personalParentWidgetId: string | null = null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
     if (
@@ -549,6 +558,18 @@ export class WidgetEmitterService {
         input.source.capability !== 'operations.journal.read')
     )
       throw new IntentTemplateRefusal('journal_navigation_source_required');
+
+    if (
+      input.intent_proposals.some(
+        (p) => p.intent_template_key === 'navigate.personal-booking@1',
+      ) &&
+      (request.kind !== 'SCHEDULE' ||
+        personalSchedule === null ||
+        input.capability !== 'appointments.own.list' ||
+        input.source.from !== 'capability_envelope' ||
+        input.source.capability !== 'appointments.own.list')
+    )
+      throw new IntentTemplateRefusal('personal_navigation_source_required');
 
     const resolved = input.intent_proposals.map((proposal) => {
       if (proposal.intent_template_key === SCHEDULE_TEMPLATE) {
@@ -696,6 +717,7 @@ export class WidgetEmitterService {
     const profile = profileFor(request.deliveryChannel);
     if (!profile) throw new IntentTemplateRefusal('carrier_unknown');
     const unsignedEnvelope = buildEnvelopeWithoutSeal({
+      personalDetail: personalParentWidgetId !== null,
       widgetId,
       tenantId: request.tenantId,
       turnId: request.turnId,
@@ -858,6 +880,41 @@ export class WidgetEmitterService {
           ))
         )
           throw new IntentTemplateRefusal('journal_parent_unavailable');
+      }
+      if (personalParentWidgetId !== null) {
+        const parent = await tx.widgetEmission.findFirst({
+          where: {
+            tenantId: request.tenantId,
+            widgetId: personalParentWidgetId,
+            erasedAt: null,
+            expiresAt: { gt: now },
+            retentionUntil: { gt: now },
+            turnId: request.turnId,
+            turn: {
+              principalProofHash: principal.proofHash,
+              conversationId: request.conversationId,
+            },
+            intentRecords: {
+              some: {
+                principalProofHash: principal.proofHash,
+                effect: 'NAVIGATE',
+                sourceCapabilitySpace: 'C9',
+                sourceCapabilityKey: 'appointments.own.list',
+                targetJson: { equals: { class: 'detail', ref: 'fs.booking' } },
+              },
+            },
+          },
+        });
+        if (
+          parent === null ||
+          !(await this.verifySeal(request.tenantId, personalParentWidgetId)) ||
+          !(await this.releaseAccess.canProject(
+            request.tenantId,
+            personalParentWidgetId,
+            tx,
+          ))
+        )
+          throw new IntentTemplateRefusal('personal_parent_unavailable');
       }
       if (personalSchedule !== null) await personalSchedule.revalidate();
       if (servicePrice !== null) await servicePrice.revalidate();

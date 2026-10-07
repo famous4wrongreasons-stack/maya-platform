@@ -342,3 +342,25 @@ test('login restores only bounded booking terminal prose through the existing re
   assert.deepEqual(runtime.widgets.lockSources(), []);
   runtime.dispose();
 });
+test('personal receiver survives normal detail redraw and is removed by frozen/expired result', () => {
+  const { port } = makeHistory(), shell = createShell({ history: port });
+  const { source } = makeSource(); shell.connect(source);
+  const opener = { itemId: 'w1', ref: 'intent:i1' };
+  const child = { kind: 'SCHEDULE', provenance: { source_capability: 'appointments.own.list' }, presentation: { fullscreen_detail: { route_key: 'fs.booking' } } };
+  source.openDetail = () => ({ itemId: 'personal-child', result: { ...RESULT('read'), mode: 'structured', lifecycle: { state: 'LIVE', input_lock: 'none' } } });
+  shell.presentDetail(child, opener);
+  const id = shell.view().fullscreen.itemId;
+  assert.equal(shell.view().fullscreen.receiver, 'personal_booking');
+  shell.updateDetail(id, { ...RESULT('read'), mode: 'structured', lifecycle: { state: 'LIVE', input_lock: 'none' } });
+  assert.equal(shell.view().fullscreen.receiver, 'personal_booking');
+  shell.updateDetail(id, { ...RESULT('expired'), mode: 'frozen_prose', lifecycle: { state: 'EXPIRED', input_lock: 'hard' } });
+  assert.equal(shell.view().fullscreen.receiver, undefined); shell.dispose();
+});
+test('personal child expiring during preparation never mounts a receiver', () => {
+  const { port } = makeHistory(), shell = createShell({ history: port });
+  const { source } = makeSource();
+  source.openDetail = () => ({ itemId: 'expired-child', result: { ...RESULT('expired'), mode: 'frozen_prose', lifecycle: { state: 'EXPIRED', input_lock: 'hard' } } });
+  shell.connect(source);
+  shell.presentDetail({ kind: 'SCHEDULE', provenance: { source_capability: 'appointments.own.list' }, presentation: { fullscreen_detail: { route_key: 'fs.booking' } } }, { itemId: 'w1', ref: 'intent:i1' });
+  assert.equal(shell.view().fullscreen.receiver, undefined); shell.dispose();
+});

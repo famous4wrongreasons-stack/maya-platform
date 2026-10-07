@@ -228,6 +228,13 @@ export const P1_PATHS = [
   '/mobile/pwa/search',
   '/widgets/intent',
   '/widgets/resolve',
+  '/services',
+  '/staff',
+  '/available-slots',
+  '/personal-client/appointments/preview',
+  '/personal-client/appointments/results',
+  '/personal-client/appointments',
+
 ];
 export const TARGETS = {
   web: { apiBase: '/api', connectSrc: "'self'" },

@@ -333,7 +333,8 @@ test('PATHS holds exactly the approved literals; one fetch call site; API_BASE i
     '/mobile/pwa/search',
     '/widgets/intent',
     '/widgets/resolve',
-  ]);
+    '/services', '/staff', '/available-slots', '/personal-client/appointments', '/personal-client/appointments/preview', '/personal-client/appointments/results',
+  ].sort());
   const { P1_PATHS } = await import('../build.mjs');
   assert.deepEqual(values, [...P1_PATHS].sort());
 
@@ -358,7 +359,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
   const net = createNet();
   assert.deepEqual(Object.keys(net).sort(), ['session', 'transport']);
   assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
-  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'resolveWidgets', 'transcribe', 'widgetIntent']);
+  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent']);
 });
 
 test('widget transport sends only typed bodies and retains only authorized response members', async () => {

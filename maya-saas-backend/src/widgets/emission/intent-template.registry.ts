@@ -30,6 +30,7 @@ export type IntentTemplateKey =
   | 'none.passive@1'
   | 'navigate.account@1'
   | 'navigate.schedule@1'
+  | 'navigate.personal-booking@1'
   | 'navigate.journal.detail@1'
   | 'navigate.journal.parent@1'
   | 'refine.measurement@1'
@@ -205,6 +206,26 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     label: 'Open schedule',
     utteranceTemplate: 'Open schedule',
     speechAliases: ['open schedule', 'show schedule'],
+    allowedArgumentHandles: [],
+    sourceSubject: false,
+  }),
+  'navigate.personal-booking@1': row({
+    key: 'navigate.personal-booking@1',
+    version: 1,
+    effect: 'NAVIGATE',
+    kinds: ['SCHEDULE'],
+    roles: ['primary'],
+    subject: null,
+    target: { class: 'detail', ref: 'fs.booking' },
+    inputSchema: null,
+    selectionDomain: {},
+    selectionDomainLabels: {},
+    priority: 1,
+    singleUse: false,
+    ttlSeconds: 600,
+    label: 'Записаться для себя',
+    utteranceTemplate: 'Открыть личную запись',
+    speechAliases: ['открыть личную запись'],
     allowedArgumentHandles: [],
     sourceSubject: false,
   }),

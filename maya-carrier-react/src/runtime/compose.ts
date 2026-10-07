@@ -17,6 +17,7 @@
 // `completeTelegram` would read null in the other, and every login would fail as
 // `callback_unsolicited`. The shell composes at module scope and so does this.
 
+import { createPersonalBooking } from '../../../maya-chat-shell/src/shell/personal-booking.ts';
 import { createNet } from '../../../maya-chat-shell/src/net/session.ts';
 import { createShellRuntime } from '../../../maya-chat-shell/src/shell/shell.ts';
 import { createLiveSubmission } from '../../../maya-chat-shell/src/shell/intents.ts';
@@ -189,6 +190,7 @@ export const voice = voiceMachine;
 export const session = net.session;
 export const conversation = runtime.conversation;
 export const widgets = runtime.widgetPort;
+export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });
 
 /**
  * Deep links append a NOTICE to the timeline, so this must run after the presentation has
@@ -197,6 +199,7 @@ export const widgets = runtime.widgetPort;
 export const landFragment = (): void => void runtime.landFragment();
 
 export const dispose = (): void => {
+  personalBooking.dispose();
   voiceMachine.dispose();
   runtime.dispose();
 };

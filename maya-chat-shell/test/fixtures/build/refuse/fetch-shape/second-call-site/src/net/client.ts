@@ -14,6 +14,13 @@ const PATHS = {
   transcribe: '/ai/transcribe',
   widgetIntent: '/widgets/intent',
   widgetResolve: '/widgets/resolve',
+  personal0: '/services',
+  personal1: '/staff',
+  personal2: '/available-slots',
+  personal3: '/personal-client/appointments/preview',
+  personal4: '/personal-client/appointments/results',
+  personal5: '/personal-client/appointments',
+
 } as const;
 
 export const chat = (signal: AbortSignal): Promise<Response> => fetch(API_BASE + PATHS.chat, { method: 'POST', signal });

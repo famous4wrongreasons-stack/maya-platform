@@ -11,6 +11,8 @@
 // outcome, and nothing here holds a session: the bearer arrives through an `Authorizer`, which
 // only `session.ts` implements.
 
+import { projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
+import type { PersonalSelection, PersonalFailure } from './types.ts';
 import { API_BASE } from './endpoint.ts';
 import {
   errorCode,
@@ -71,6 +73,12 @@ const PATHS = {
   transcribe: '/ai/transcribe',
   widgetIntent: '/widgets/intent',
   widgetResolve: '/widgets/resolve',
+  personalServices: '/services',
+  personalStaff: '/staff',
+  personalSlots: '/available-slots',
+  personalPreview: '/personal-client/appointments/preview',
+  personalResults: '/personal-client/appointments/results',
+  personalCreate: '/personal-client/appointments',
 } as const;
 
 type Endpoint = keyof typeof PATHS;
@@ -83,6 +91,7 @@ export const TRANSCRIBE_TIMEOUT_MS = 30_000;
 export const DEFAULT_RETRY_AFTER_SEC = 60;
 
 type RequestBody =
+  | PersonalSelection
   | EmailStartRequest
   | EmailVerifyRequest
   | PasswordLoginRequest
@@ -136,7 +145,7 @@ const parseRetryAfter = (value: string | null): number | null => {
  * The one request site. A caller's abort and the timeout both abort the fetch; they are told apart,
  * because an abort is the shell's own decision and a timeout is a lost connection.
  */
-async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null): Promise<Exchange> {
+async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null, slots: { date: string; serviceId: string; staffId: string } | null = null): Promise<Exchange> {
   if (signal !== null && signal.aborted) return { kind: 'aborted' };
   const controller = new AbortController();
   let timedOut = false;
@@ -148,12 +157,14 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   if (signal !== null) signal.addEventListener('abort', onAbort, { once: true });
   // A `search` term makes this a GET that carries the term in the query string, and a GET sends no
   // body and declares no content type — which also keeps it a simple request, with no preflight.
-  const reading = search !== null || endpoint === 'conversation';
+  const reading = search !== null || endpoint === 'conversation' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
   const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
-  const headers: Readonly<Record<string, string>> = reading ? auth : { ...auth, 'Content-Type': 'application/json' };
+  const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
+  const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
+  const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...(reading ? {} : { 'Content-Type': 'application/json' }) };
   const path = PATHS[endpoint];
   try {
-    const response = await fetch(API_BASE + path + (search === null ? '' : `?q=${encodeURIComponent(search)}`), {
+    const response = await fetch(API_BASE + path + (slots !== null ? `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}` : search === null ? '' : `?q=${encodeURIComponent(search)}`), {
       method: reading ? 'GET' : 'POST',
       headers,
       body: reading ? null : JSON.stringify(body),
@@ -466,16 +477,16 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'transcribe' | 'widgetIntent' | 'widgetResolve', body: RequestBody, signal: AbortSignal, timeoutMs: number): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string } | null = null): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
-  const ex = await exchange(endpoint, body, first.bearer, signal, timeoutMs);
+  const ex = await exchange(endpoint, body, first.bearer, signal, timeoutMs, null, slots);
   if (ex.kind !== 'response' || ex.status !== 401) return ex;
   const second = await unlessAborted(auth.reauthorize(first.serial), signal);
   if (second === null) return { kind: 'aborted' };
   if (second.kind !== 'bearer') return second;
-  const retried = await exchange(endpoint, body, second.bearer, signal, timeoutMs);
+  const retried = await exchange(endpoint, body, second.bearer, signal, timeoutMs, null, slots);
   if (retried.kind === 'response' && retried.status === 401) {
     auth.refused(second.serial);
     return { kind: 'signed_out', reason: 'session_revoked' };
@@ -550,9 +561,32 @@ export function transcribeFailure(ex: Exchange): TranscribeFailure {
   }
 }
 
+const personalBody = (s: PersonalSelection): PersonalSelection => ({ staffId: s.staffId, serviceIds: [...s.serviceIds], start: s.start, ...(s.branchId === undefined ? {} : { branchId: s.branchId }) });
+const personalOutcome = <T>(ex: AuthorizedExchange, project: (raw: unknown) => T | null): Outcome<T, PersonalFailure> => {
+  if (ex.kind === 'response' && isSuccess(ex.status)) { const value = project(ex.body); return value === null ? fail({ reason: 'unavailable' }) : { ok: true, value }; }
+  if (ex.kind === 'aborted') return fail({ reason: 'aborted' });
+  if (ex.kind === 'signed_out' || (ex.kind === 'response' && [401, 403].includes(ex.status))) return fail({ reason: 'forbidden' });
+  if (ex.kind === 'response' && ex.status === 409) return fail({ reason: 'conflict' });
+  return fail({ reason: 'unavailable' });
+};
+
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */
 export function createTransport(auth: Authorizer, timeouts: Timeouts = { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS }) {
   return {
+    async personalServices(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalServices', {}, signal, timeouts.requestMs), projectPersonalChoices); },
+    async personalStaff(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalStaff', {}, signal, timeouts.requestMs), projectPersonalChoices); },
+    async personalSlots(date: string, serviceId: string, staffId: string, signal: AbortSignal) {
+      return personalOutcome(await authorizedExchange(auth, 'personalSlots', {}, signal, timeouts.requestMs, { date, serviceId, staffId }), projectPersonalSlots);
+    },
+    async personalPreview(selection: PersonalSelection, signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalPreview', personalBody(selection), signal, timeouts.requestMs), projectPersonalPreview); },
+    async personalResults(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalResults', {}, signal, timeouts.requestMs), projectPersonalResults); },
+    async personalCreate(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>> {
+      // No network/timeout retry. Only the shared pre-dispatch 401 refresh is eligible.
+      const ex = await authorizedExchange(auth, 'personalCreate', personalBody(selection), signal, timeouts.requestMs);
+      if (ex.kind === 'response' && isSuccess(ex.status)) return { ok: true, value: true };
+      if (ex.kind === 'signed_out' || (ex.kind === 'response' && [400, 401, 403, 409].includes(ex.status))) return personalOutcome(ex, () => true as const);
+      return fail({ reason: 'unknown' });
+    },
     async conversation(signal: AbortSignal): Promise<Outcome<ConversationHistoryProjection, ChatFailure>> {
       const ex = await authorizedExchange(auth, 'conversation', {}, signal, timeouts.requestMs);
       if (ex.kind === 'signed_out') return fail({ reason: 'signed_out', signedOut: ex.reason });

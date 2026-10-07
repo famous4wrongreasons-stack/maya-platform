@@ -1,3 +1,4 @@
+import type { PersonalScheduleSource } from '../owner-ports/personal-schedule.port';
 import type { RoutingInput } from './routing-input';
 import type { ResolvedNouns } from '../gate.types';
 import type { PrincipalView } from '../gate.types';
@@ -21,6 +22,12 @@ export const EFFECT_ROUTE_AUDIT = 'EFFECT_ROUTE_AUDIT';
  */
 export interface NavigateWidgetMinterPort {
   emit(request: MintRequest, now?: Date): Promise<SealedEmission>;
+  emitPersonalSchedule(
+    request: MintRequest,
+    source: PersonalScheduleSource,
+    now?: Date,
+    parentWidgetId?: string | null,
+  ): Promise<SealedEmission>;
   emitJournalDetail(
     request: MintRequest,
     parentWidgetId: string,

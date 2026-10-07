@@ -1,3 +1,5 @@
+import type { PersonalSchedulePort } from '../owner-ports/personal-schedule.port';
+import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
 import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
 import type { ScheduleApprovalAdapter } from '../owner-ports/schedule-approval.adapter';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
@@ -130,6 +132,9 @@ export class EffectRouterService {
     @Optional()
     @Inject(SCHEDULE_APPROVAL_OWNER)
     private readonly schedule?: ScheduleApprovalAdapter,
+    @Optional()
+    @Inject(PERSONAL_SCHEDULE_SOURCE)
+    private readonly personalSchedules?: PersonalSchedulePort,
   ) {}
 
   async route(
@@ -392,6 +397,20 @@ export class EffectRouterService {
         );
         return admitted({ nextEnvelope: minted.envelope });
       }
+      const personal =
+        input.record.sourceCapabilitySpace === 'C9' &&
+        input.record.sourceCapabilityKey === 'appointments.own.list';
+      if (
+        personal &&
+        (target.class !== 'detail' ||
+          target.ref !== 'fs.booking' ||
+          input.record.widgetKind !== 'SCHEDULE' ||
+          !this.personalSchedules)
+      )
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
       const projected = await this.projector.composeNavigate(
         projectionPlan(ctx, input.record),
       );
@@ -463,13 +482,29 @@ export class EffectRouterService {
             }
           : {}),
       };
-      const minted = journal
-        ? await this.emitter.emitJournalDetail(
-            request,
-            input.record.widgetId,
-            input.now,
-          )
-        : await this.emitter.emit(request, input.now);
+      const personalSource = personal
+        ? await this.personalSchedules!.resolve(ctx.actor, projected.source)
+        : null;
+      if (personal && personalSource === null)
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
+      const minted =
+        personalSource !== null
+          ? await this.emitter.emitPersonalSchedule(
+              request,
+              personalSource,
+              input.now,
+              input.record.widgetId,
+            )
+          : journal
+            ? await this.emitter.emitJournalDetail(
+                request,
+                input.record.widgetId,
+                input.now,
+              )
+            : await this.emitter.emit(request, input.now);
       return admitted({ nextEnvelope: minted.envelope });
     };
   }

@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import { render } from '../src/renderer/render.ts';
 import { bodyHash } from '../src/integrity/h7.ts';
+import { createPersonalBooking } from '../src/shell/personal-booking.ts';
 import { createShellRuntime } from '../src/shell/shell.ts';
 import {
   createLiveSubmission,
@@ -1643,4 +1644,27 @@ test('schedule owner failure reads its canonical terminal line without treating 
     resolveWidgets: async () => ({ok:true,value:{tenant_bound:true,widgets:[{envelope:source,terminal_lines:lines,reread_intent:null}]}}),
   });
   assert.deepEqual(await port.submit({widget_id:source.widget_id},new AbortController().signal),{status:'settled',lines});
+});
+test('personal receiver follows real Widgets integrity/expiry and survives accessibility redraw', async () => {
+  const { source, detail } = detailPair();
+  for (const e of [source, detail]) {
+    e.provenance.source_capability = 'appointments.own.list';
+    e.presentation.fullscreen_detail.route_key = 'fs.booking';
+    e.intents[0].target = { class: 'detail', ref: 'fs.booking' };
+    e.lifecycle.expires_at = new Date(NOW + 5000).toISOString(); reseal(e);
+  }
+  const s = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: detail, accepted: true }) } });
+  const personal = createPersonalBooking({ widgets: s.runtime.widgetPort, session: { view: () => ({ signedIn: true }), subscribe: () => () => {} }, newAbort: () => new AbortController(), transport: {
+    personalResults: async () => ({ ok: true, value: { results: [], hasPending: false, hasMore: false } }),
+    personalServices: async () => ({ ok: true, value: [{ id: 's', name: 'Service' }] }),
+    personalStaff: async () => ({ ok: true, value: [{ id: 'p', name: 'Staff' }] }),
+  } });
+  await openDetailFrom(s, source); await flush(); personal.chooseService('s');
+  assert.equal(personal.view().phase, 'choose');
+  s.setA11y({ ...A11Y, reduced_motion: true });
+  assert.equal(personal.view().serviceId, 's');
+  s.advance(5001); await flush();
+  assert.equal(s.runtime.shell.view().fullscreen.receiver, undefined);
+  assert.equal(personal.view().phase, 'closed'); assert.equal(personal.view().services.length, 0);
+  personal.dispose(); s.runtime.dispose();
 });

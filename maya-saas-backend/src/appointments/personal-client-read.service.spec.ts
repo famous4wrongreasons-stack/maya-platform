@@ -130,11 +130,12 @@ describe('Personal booking read projections', () => {
     const f = fixture();
     f.quote.services[0].price = Number.NaN;
     f.quote.services[0].duration_minutes = 0;
-    f.quote.previous = { executionId: 'old' };
+    f.quote.previous = { id: 'old' };
     expect(
       await f.service.preview(f.user, 'personal_client', f.dto),
     ).toMatchObject({
       availability: 'existing_request',
+      requestState: 'UNKNOWN',
       services: [{ price: null, durationMinutes: null }],
     });
   });

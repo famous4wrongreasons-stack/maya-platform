@@ -13,6 +13,7 @@ const TOOL_READS = new Set([
   'catalog.services.read',
   'catalog.staff.read',
   'booking.availability.read',
+  'appointments.own.list',
   'company.business-hours.read',
   'operations.journal.read',
 ]);

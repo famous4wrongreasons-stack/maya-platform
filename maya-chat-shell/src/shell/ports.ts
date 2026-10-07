@@ -282,7 +282,7 @@ export type PrimaryRoute = Extract<ShellRoute, { param: null }>['route'];
 
 export type FullscreenView =
   | { readonly phase: 'progress'; readonly itemId: string }
-  | { readonly phase: 'open'; readonly itemId: string; readonly result: RenderResult };
+  | { readonly phase: 'open'; readonly itemId: string; readonly result: RenderResult; readonly receiver?: 'personal_booking' };
 
 export interface ShellView {
   readonly primary: PrimaryRoute;

@@ -1,3 +1,4 @@
+import { UserRole } from '../../common/domain.enums';
 import { Injectable } from '@nestjs/common';
 import { PersonalClientContextService } from '../../appointments/personal-client-context.service';
 import { ClientAppointmentReadService } from '../../crm/client-appointment-read.service';
@@ -76,6 +77,8 @@ export class PersonalScheduleAdapter implements PersonalSchedulePort {
     }
     await personal.revalidate();
     return {
+      canManageAsClient:
+        actor.role === UserRole.CLIENT || actor.role === UserRole.CUSTOMER,
       appointmentId: row.id,
       start: row.start_at.toISOString(),
       end: row.end_at.toISOString(),

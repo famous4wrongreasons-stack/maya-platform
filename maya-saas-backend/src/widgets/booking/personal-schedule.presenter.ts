@@ -22,6 +22,7 @@ export function presentPersonalSchedule(
   tenantId: string,
   source: PersonalScheduleSource,
   mint: MintSelectorHandle,
+  detail = false,
 ): { body: ScheduleBody; proposals: IntentProposal[] } {
   const appointment = mint({
     tenantId,
@@ -29,19 +30,22 @@ export function presentPersonalSchedule(
     ownerKind: 'appointment',
     ownerRef: source.appointmentId,
   });
-  const proposals: IntentProposal[] = [
-    {
-      intent_template_key: 'refine.booking.cancel@1',
-      capability: { space: 'C9', key: 'appointments.own.cancel' },
-      role: 'primary',
-      argument_handles: { appointment },
-    },
-  ];
+  const canManage = !detail && source.canManageAsClient !== false;
+  const proposals: IntentProposal[] = canManage
+    ? [
+        {
+          intent_template_key: 'refine.booking.cancel@1',
+          capability: { space: 'C9', key: 'appointments.own.cancel' },
+          role: 'primary',
+          argument_handles: { appointment },
+        },
+      ]
+    : [];
   const slot =
     source.rescheduleStart === null
       ? null
       : encodeBookingSlotOwnerRef(source.rescheduleStart);
-  const movable = slot !== null && source.serviceId !== null;
+  const movable = canManage && slot !== null && source.serviceId !== null;
   if (movable)
     proposals.push({
       intent_template_key: 'refine.booking.reschedule@1',
@@ -69,6 +73,12 @@ export function presentPersonalSchedule(
         }),
       },
     });
+  const bookingIntent = `i${proposals.length + 1}`;
+  if (!detail)
+    proposals.push({
+      intent_template_key: 'navigate.personal-booking@1',
+      role: 'primary',
+    });
   proposals.push({
     intent_template_key: 'control.dismiss@1',
     capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
@@ -88,16 +98,16 @@ export function presentPersonalSchedule(
         bucket_span: ['current', 'current'],
         title: known(source.title),
         subtitle: movable ? known(`Перенос: ${source.rescheduleStart}`) : null,
-        state: known('BOOKED' as const),
+        state: known('BOOKED' as const, 'Запланирована'),
         pii_masked: false,
-        detail_intent: 'i1',
+        detail_intent: canManage ? 'i1' : null,
         move_intent: movable ? 'i2' : null,
         move_targets: null,
       },
     ],
     gaps: [],
-    // The existing renderer exposes this body-level action; the entry retains cancel.
-    detail_intent: movable ? 'i2' : 'i1',
+    // The explicit personal form is navigation. Cancel/move retain their own current gates.
+    detail_intent: bookingIntent,
   };
   return { body, proposals };
 }

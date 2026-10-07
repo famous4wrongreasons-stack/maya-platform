@@ -44,10 +44,12 @@ export function DetailSheet({
   rendered,
   close,
   focusFallback,
+  personalContent,
 }: {
   /** The shell's own `ShellView.fullscreen`. A detail opens from this and from nothing else. */
   readonly view: FullscreenView | null;
   readonly t: Tokens;
+  readonly personalContent?: React.ReactNode;
   readonly rendered?: (itemId: string) => void;
   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
   /** ALWAYS the shell's `closeDetail`. Never `dialog.close()`. */
@@ -118,8 +120,8 @@ export function DetailSheet({
     if (dialog === null) return;
     // Rebuilt from the live DOM each time, which is the shell's `isConnected && !hidden` filter by
     // another route. Close is FIRST, so it is the wrap-around target.
-    const reachable = Array.from(dialog.querySelectorAll('.fullscreen-close, [data-ref]')).filter(
-      (el): el is HTMLElement => el instanceof HTMLElement,
+    const reachable = Array.from(dialog.querySelectorAll('.fullscreen-close, [data-ref], [data-personal-control]')).filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && !el.hasAttribute('disabled') && !el.hidden,
     );
     const first = reachable.at(0);
     const last = reachable.at(-1);
@@ -245,6 +247,7 @@ export function DetailSheet({
             rendered={rendered}
           />
         )}
+        {view?.phase === 'open' && view.receiver === 'personal_booking' ? personalContent : null}
       </div>
     </dialog>
   );

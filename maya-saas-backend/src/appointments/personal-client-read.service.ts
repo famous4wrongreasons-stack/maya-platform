@@ -53,6 +53,16 @@ export class PersonalClientReadService {
       };
     });
     if (!quote.staff || quote.staff.id !== dto.staffId) this.unavailable();
+    const requestState = quote.previous
+      ? (
+          await this.creator.executionResult(
+            personalContext.tenantId,
+            'executionId' in quote.previous
+              ? quote.previous.executionId
+              : quote.previous.id,
+          )
+        ).state
+      : null;
     await personalContext.revalidate();
     return {
       contract: 'maya.personal-booking.preview/1' as const,
@@ -62,6 +72,7 @@ export class PersonalClientReadService {
       timezone: quote.timezone,
       source: quote.source,
       asOf: new Date().toISOString(),
+      requestState,
       availability: quote.previous
         ? ('existing_request' as const)
         : ('available_at_read' as const),
