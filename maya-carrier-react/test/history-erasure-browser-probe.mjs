@@ -54,7 +54,8 @@ async function login(page, email) {
   delete delivery.debug_code;
   await click(page, 'Войти');
   await until(() => page.apiRequests('/ai/conversation').slice(beforeHistory).find(r => r.finishedAt && r.status === 200), 'actual restored conversation');
-  await until(() => page.apiRequests('/widgets/resolve').slice(beforeReceipts).find(r => r.finishedAt && r.status === 200), 'actual historical receipt read');
+  const receipts = await until(() => page.apiRequests('/widgets/resolve').slice(beforeReceipts).find(r => r.finishedAt), 'actual historical receipt read');
+  assert.equal(receipts.status, 200, 'Fixture must grant the existing widgets.runtime read feature');
   return nextLoginAt;
 }
 
@@ -218,6 +219,8 @@ async function main() {
   } finally {
     try {
       report.guard = guard ? { blocked: guard.blocked, errors: guard.errors } : null;
+      // Status metadata only: never archive login bodies, headers, OTPs or bearer values.
+      report.http = page ? page.apiRequests('').map(r => ({ path: new URL(r.url).pathname, method: r.method, status: r.status ?? null, failed: Boolean(r.failed) })) : [];
       fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
     } finally {
       try { await cleanup(); }

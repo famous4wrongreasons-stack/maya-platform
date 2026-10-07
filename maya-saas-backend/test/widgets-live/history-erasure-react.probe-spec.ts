@@ -179,6 +179,7 @@ describe('history erasure current React and separate compiled entry restart [syn
         'history erasure React binary',
         CalendarSource.INTERNAL,
       );
+      await fx.grantFeature(tenant, 'widgets.runtime');
       const user = await fx.user(tenant, UserRole.TENANT_OWNER);
       const actor = await fx.actor(tenant, user);
       const principalProofHash = await fx.principalProofHash(actor);
