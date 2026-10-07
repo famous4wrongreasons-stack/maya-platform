@@ -1,0 +1,5 @@
+Test Suites: 5 passed, 5 total
+Tests:       352 passed, 352 total
+Snapshots:   0 total
+Time:        1.908 s, estimated 2 s
+Ran all test suites within paths "src/crm/yclients-goods-read.spec.ts", "src/crm/crm.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/appointments/appointments.service.spec.ts".

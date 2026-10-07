@@ -1,0 +1,17 @@
+✔ refuses unapproved calls and foreign endpoints before transport (61.668042ms)
+✔ fsync reservation precedes dispatch; failures retain spend and secret/content never enter ledger (55.062916ms)
+✔ enforces spend cap, request count, timeout horizon, turn/dialog ceilings and request spacing (3245.493709ms)
+✔ refuses concurrent dispatch and unexpected model/output contract (33.639709ms)
+✔ provider requests require an active counted turn, and dialogs cannot overlap it (30.28825ms)
+✔ explicit resume retains failed-call reservation, lifetime and counters with exclusive lock (80.795833ms)
+✔ resume rejects truncated or altered budgets and never creates a replacement ledger (42.454917ms)
+✔ broker compatibility handoff must bind the exact prior ledger and carried reserve (59.43925ms)
+✔ broker preflight admits canonical request within 96KiB and refuses excess UTF8 bytes (0.882542ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3690.075209

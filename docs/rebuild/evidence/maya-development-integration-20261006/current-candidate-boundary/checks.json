@@ -1,0 +1,27 @@
+{
+  "productionTypeScript": "PASS",
+  "widgetsLiveTypeScript": "PASS (complete test/tsconfig.widgets-live.json)",
+  "scopedEslint": {
+    "errors": 0,
+    "warnings": 2,
+    "note": "Existing ai-core.service.spec.ts:129 any arguments; same line in 849d4b6d"
+  },
+  "gitDiffCheck": "PASS",
+  "sourceOverlay": "NONE: runtime and harness files committed before HTTP proof",
+  "resources": {
+    "runnerHeapMb": 256,
+    "brokerHeapMb": 256,
+    "jestBackendHeapMb": 3072,
+    "unitHeapMb": 1536,
+    "typecheckHeapMb": 4096,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "commands": [
+    "node --test --test-concurrency=1 scripts/conversation-qualification/current-candidate.test.mjs scripts/conversation-qualification/current-candidate-dry-broker.test.mjs scripts/conversation-qualification/owned-child-cleanup.test.mjs",
+    "node --test --test-concurrency=1 scripts/conversation-qualification/budget-gate.test.mjs scripts/conversation-qualification/proof-broker-contract.test.mjs",
+    "node scripts/conversation-qualification/current-candidate-http.mjs --run --groups admin,staff_config,goods --broker-preflight --output /tmp/maya-candidate-boundary-20261007-01"
+  ]
+}

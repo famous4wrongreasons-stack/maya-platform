@@ -1,0 +1,41 @@
+✔ separate keyless broker boots, binds exact source/corpus, reserves before canned response and stops (147.19075ms)
+✔ rejects wrong-binding with zero dispatch (55.542167ms)
+✔ rejects oversize with zero dispatch (56.853917ms)
+✔ rejects authorization with zero dispatch (39.387208ms)
+✔ rejects wrong-model with zero dispatch (61.379958ms)
+✔ rejects foreign-case with zero dispatch (64.544166ms)
+✔ no paid switch or credential environment is admitted (68.668458ms)
+✔ TTL destroys active partial-body and exits without dispatch (1057.866125ms)
+✔ TTL destroys active partial-headers and exits without dispatch (1067.882292ms)
+✔ TTL aborts a request in budget spacing before its reservation or response (1581.49ms)
+✔ dry lifetime cannot extend the one-hour ceiling (49.345709ms)
+✔ offline binding is mandatory, no default/live transport or old ledger resume (25.518667ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (58.831167ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (44.569417ms)
+✔ short writes are completed before dispatch and zero progress fails closed (65.750958ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (55.354916ms)
+✔ early wakeup cannot dispatch before the minimum interval (47.809958ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (1063.503333ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (1234.339416ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (33.213417ms)
+✔ 24 dialog and 64 turn caps apply independently (587.191917ms)
+✔ wall time and clock reversal cannot reopen budget (54.977709ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (69.666334ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (39.077083ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (50.511917ms)
+✔ oversized output is unresolved, with full reservation kept (49.500542ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (6.773834ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (2.848ms)
+✔ existing replay rejects tampered manifest before opening a dialog (3.916833ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (903.25825ms)
+✔ spawn error without exit settles cleanup (0.5635ms)
+✔ live child gets TERM then KILL and settles on close (5.190125ms)
+✔ unconfirmed child termination rejects within a bound (11.903458ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8778.659167

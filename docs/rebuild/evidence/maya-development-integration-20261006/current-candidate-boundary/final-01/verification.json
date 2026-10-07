@@ -1,0 +1,27 @@
+{
+  "candidateCommit": "7d902e1700884f3e60e9fd79d311a4a8b9485996",
+  "bindingManifestSha256": "eea5255511d98b9578abb6073ad76925efb7ebf4dcf3afcbfe68488723826b68",
+  "sourceHashesVerified": 36,
+  "appAndBrokerRequestHashesAndBytesIdentical": true,
+  "appAndBrokerCountersIdentical": true,
+  "closedLedgers": [
+    "ledger.jsonl",
+    "broker-ledger.jsonl"
+  ],
+  "brokerStopped": true,
+  "clusterStopped": true,
+  "postmasterPidFileAbsent": true,
+  "actualPaidCalls": 0,
+  "upstreamCalls": 0,
+  "providerWrites": 0,
+  "selectedDialogs": 9,
+  "selectedTurns": 12,
+  "sourcePreflights": 25,
+  "httpTests": 1,
+  "har13Tests": 2,
+  "har13Skipped": 143,
+  "unitTests": 352,
+  "unitSuites": 5,
+  "nodeTests": 42,
+  "qualification": "OFFLINE_MECHANICS_ONLY_NOT_LANGUAGE_ACCEPTANCE"
+}

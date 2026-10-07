@@ -1,0 +1,58 @@
+{
+  "contract": "maya.current-candidate-pricing-proposal/1",
+  "checkedDateUtc": "2026-10-07",
+  "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "verification": "OFFICIAL_PUBLIC_DOCUMENTATION_ONLY",
+  "model": "deepseek-v4-pro",
+  "documentedVersion": "DeepSeek-V4-Pro-0813",
+  "modality": "text",
+  "ratesUsdPerMillion": {
+    "inputPeakCacheMiss": "1.32",
+    "outputPeak": "3.96"
+  },
+  "discountAssumptions": "NONE; no cache-hit or off-peak discount relied upon",
+  "authorizedPaidCalls": 0,
+  "brokerRearmed": false,
+  "status": "PROPOSAL_ONLY_NOT_AN_EXECUTABLE_PERMIT",
+  "limits": {
+    "dialogs": 24,
+    "turns": 64,
+    "attempts": 96,
+    "reservedInputTokens": 8000000,
+    "outputTokens": 196608,
+    "outputTokensPerAttempt": 2048,
+    "spendCeilingNanoUsd": 12000000000,
+    "requestBytes": 98304,
+    "responseBytes": 1048576,
+    "durationMs": 3600000,
+    "timeoutMs": 30000,
+    "minimumIntervalMs": 6000,
+    "concurrency": 1
+  },
+  "worstCaseAtTokenCeilings": {
+    "inputNanoUsd": 10560000000,
+    "outputNanoUsd": 778567680,
+    "totalNanoUsd": 11338567680,
+    "totalUsd": "11.33856768"
+  },
+  "reservation": "full serialized UTF-8 request body bytes + 4096; local conservative bound, not tokenizer/provider measured tokens",
+  "admission": "All limits apply jointly; a limit can stop the batch before all dialogs finish. Unknown usage is not refunded. No old permit/ledger reuse. A fresh explicit paid authorization and admitted broker are still required.",
+  "candidate": {
+    "exactCodeCommit": "7d902e1700884f3e60e9fd79d311a4a8b9485996",
+    "sourceCorpusSha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+    "targetedBindingManifestSha256": "eea5255511d98b9578abb6073ad76925efb7ebf4dcf3afcbfe68488723826b68",
+    "targetedOfflineDialogs": 9,
+    "targetedOfflineTurns": 12,
+    "targetedMaximumRequestBytes": 79774,
+    "fullCorpusAtThisCommitExecuted": false,
+    "historicalFullCorpusCheckpoint": "MAYA-CURRENT-CANDIDATE-OFFLINE-HTTP-CHECKPOINT-20261007.md",
+    "offlineReservationIsActualSpend": false
+  },
+  "dryBroker": "Fresh separate keyless NO_UPSTREAM_ONLY process passed; no paid/upstream implementation is admitted",
+  "remainingPrerequisites": [
+    "Fresh explicit owner approval for exact code/corpus and joint limits",
+    "Separately implemented/reviewed/admitted credential broker and upstream transport; current dry broker intentionally has neither",
+    "Authorized account model availability check, fresh exact full paid-run binding manifest and isolated database",
+    "Real-model evaluation of domain selection, corrected turns, synthesis and helpfulness; synthetic proof does not establish these"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "kind": "current-candidate-boundary-offline-checkpoint",
+  "candidateCommit": "7d902e1700884f3e60e9fd79d311a4a8b9485996",
+  "previousCheckpointCommit": "849d4b6d6bf3e7131dab7979c17fc0d78e17e59d",
+  "rawRun": "/tmp/maya-candidate-boundary-20261007-01",
+  "status": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+  "sourceCorpusUnchanged": true,
+  "selection": "TARGETED_AFFECTED_BOUNDARIES",
+  "files": {
+    "checks.json": "476c8e6d9d5878a0fd61a0bfd0781628151661c1219cbf84c5409f04fa7e157c",
+    "final-01/broker-ledger.jsonl": "7451100e3089eb4a5af4a6d6162e72ef8e3a6541aca6b9f97e271c1d1f23b57b",
+    "final-01/broker-report.json": "fd7fd3833b015f41f2edae4a3b2e34f1313cf4f58d592bb6dc3552d142f2c7cf",
+    "final-01/candidate-manifest.json": "100de71ee0da6366d13d913083196b16e76a1a358f8b044214cade6f3b6e4e54",
+    "final-01/har13-jest-summary.json": "6001bd83451b8f90d53e0f2513751655e7f9875605a81d28dc3ceeaf60cc004d",
+    "final-01/http-report.json": "6ff0ecf0cac4dc7e4ac37702e96f433593c719e6f5b6efa978abdfc897f9775c",
+    "final-01/jest-summary.json": "6508af1cad7016d6e2297c09ae4ae88c6fa6b906637744c31fa9810bd98ed3e2",
+    "final-01/ledger.jsonl": "bc64ba5395e4baf98c9fef1c830dfda08642fca5746a47981d18f519b7d7dcd3",
+    "final-01/manifest.json": "64956d394efc025da9dce6dbe16aa423d6af61cfd68d2fd43d193b22fee09588",
+    "final-01/source-preflights.json": "ac6eb3dc42f47eddfe3f8b0d384c9169409f6dfa5845076d8d78a544ec70f41a",
+    "final-01/verification.json": "3774d9971c67c62d3ff82975c76b843eae6b0c846c1213256402585c2359f68b",
+    "independent-review.txt": "4fb763b66f59bb96b8dd6893bc7fa0699a99646b0549b579bf0603e9b3d7b38d",
+    "node-broker-tests.txt": "46a3c21377872c0ecd0dd88ad92a65abe2cced193e8f5b8c08c0f932ff78cafc",
+    "node-budget-contract-tests.txt": "4850458e11869c1f5a4bb1983d0e2a87ee31ff0efbca41ed6d6ba85825ae58e5",
+    "pricing-proposal.json": "f022bcecd22a7437c1f789fd806b1b63b802af575d8850b9e64832cf5065f3f8",
+    "unit-summary.txt": "9ab314643ec02cec17c2ba252c84d7d1ae7e6f17c736e9cb1bf3dbd0a5947c39"
+  },
+  "independentReview": "PASS_WITH_OFFLINE_SCOPE_QUALIFIERS"
+}

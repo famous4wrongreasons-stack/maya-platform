@@ -1,0 +1,114 @@
+{
+  "contract": "maya.current-candidate-dry-broker/1",
+  "mode": "NO_UPSTREAM_ONLY",
+  "candidate": "7d902e1700884f3e60e9fd79d311a4a8b9485996",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "startedAt": "2026-10-07T14:08:27.302Z",
+  "expiresAt": "2026-10-07T15:08:27.302Z",
+  "lifetimeMs": 3600000,
+  "requests": [
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "bytes": 77633,
+      "bodySha256": "1c44e1a5147f2c1765c4532e3dd0cf42f31b68a21f0a636ddc9f03cb41cb865d",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "bytes": 77833,
+      "bodySha256": "ac88c7ff31910d6df2ebe80b695cafe6e6ac5bbefe36b55f9b50d7a61008b0c5",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "bytes": 78868,
+      "bodySha256": "414c4c4d41bce766c551ed1fade33de523e81eacd2d3e3154d8e968d33968d74",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-negative",
+      "turn": 1,
+      "bytes": 77883,
+      "bodySha256": "384963cc7f127111b654ee84535011140cd218cdd8683cf3be8a281d8d266dcc",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-ordinary",
+      "turn": 1,
+      "bytes": 74209,
+      "bodySha256": "76d94f337de1e6ed9b23c6b1a7c71c0fe160cba02ad1402d0e942ba9e9d44138",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "bytes": 78797,
+      "bodySha256": "30e25a131b3856269d1b53b89ebebde0299eb9d0cbd82ca10951bfab28e5accd",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "bytes": 79774,
+      "bodySha256": "e61fc30232a5684e69a044608b5d19670ae445b4b18d5767b384f7adb5358de7",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "bytes": 78582,
+      "bodySha256": "0923cd6d50ecc9ad5c9788fffaf5903fcf396cf74f62072dcc7bd679d0216aba",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-ordinary",
+      "turn": 1,
+      "bytes": 73350,
+      "bodySha256": "060fdb9d479fd7809b4d70c8da20669ecae707fb03dd05e3d4780d1fa385f8c4",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "bytes": 73306,
+      "bodySha256": "2cf8fd3b723e4c0456d7d7a054ade6a409a2767b77447865000b02bc942bf27c",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "bytes": 74305,
+      "bodySha256": "1b374b1650e7303e3f1252d6aa57b959f5201e20ebf9b9b05caba2ca12268cbb",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-negative",
+      "turn": 1,
+      "bytes": 73376,
+      "bodySha256": "887171ef4bf49058d1299aeb5051e061a0103f97d36b004300f0a2147d125e7f",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "bindingManifestSha256": "eea5255511d98b9578abb6073ad76925efb7ebf4dcf3afcbfe68488723826b68",
+  "verifiedSourcePaths": 36,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-07T14:09:39.486Z",
+  "stats": {
+    "dialogs": 9,
+    "turns": 12,
+    "attempts": 12,
+    "inputTokens": 967068,
+    "outputTokens": 14400,
+    "reservedNanoUsd": 1333553760,
+    "halted": false
+  }
+}
