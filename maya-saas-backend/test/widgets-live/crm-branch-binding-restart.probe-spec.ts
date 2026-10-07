@@ -3,11 +3,10 @@
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import path from 'node:path';
 import { readFileSync, writeFileSync } from 'node:fs';
 import request from 'supertest';
-import { ActionEngineKernel } from '../../src/action-engine/action-engine.kernel';
-import { CLIENT_BOOKING_INTENT_CONTRACT } from '../../src/action-engine/client-booking-intent.contract';
-import { ACTION_EXECUTION_REQUEST_CONTRACT } from '../../src/action-engine/action-engine.contract';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
   CalendarSource,
@@ -24,6 +23,7 @@ import {
 } from './support/http-bootstrap';
 import { assertProofDatabase } from './support/proof-db-guard';
 
+const nativeRequire = createRequire(__filename);
 const stage = process.env.JEST_C9_OCCUPANCY_STAGE;
 const receiptPath = process.env.JEST_C9_OCCUPANCY_RECEIPT!;
 const reportPath = process.env.JEST_C9_OCCUPANCY_REPORT!;
@@ -208,13 +208,23 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
       },
     });
   };
-  const kernel = () =>
-    new ActionEngineKernel(db.prisma, {
+  const kernel = () => {
+    const { ActionEngineKernel } = nativeRequire(
+      path.resolve('src/action-engine/action-engine.kernel'),
+    ) as typeof import('../../src/action-engine/action-engine.kernel');
+    return new ActionEngineKernel(db.prisma, {
       identitySecret: 'branch-proof-identity'.repeat(4),
       payloadEncryptionSecret: 'branch-proof-payload'.repeat(4),
       controlledFixtureMode: true,
     });
+  };
   it('stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL', async () => {
+    const { ACTION_EXECUTION_REQUEST_CONTRACT } = nativeRequire(
+      path.resolve('src/action-engine/action-engine.contract'),
+    ) as typeof import('../../src/action-engine/action-engine.contract');
+    const { CLIENT_BOOKING_INTENT_CONTRACT } = nativeRequire(
+      path.resolve('src/action-engine/client-booking-intent.contract'),
+    ) as typeof import('../../src/action-engine/client-booking-intent.contract');
     const fx = fixturesForHttp(db, http);
     if (stage === 'prepare') {
       const tenant = await fx.tenant(
