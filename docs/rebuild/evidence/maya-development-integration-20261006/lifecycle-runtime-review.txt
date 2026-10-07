@@ -1,0 +1,8 @@
+Independent read-only runtime evidence review: /root/independent_review
+Code checkpoint: 706035ee0f2300232954b3f41700a500efcfacd9
+
+No blocking discrepancy found. Verified 16 current source hashes and 52 archived files. HTTP-r2 has one targeted PASS and six unrelated skipped cases; saved unit evidence is 263 + 7 PASS. Exact-version HISTORICAL replay after Nest close/boot, STALE without findings after source change, customers.core revocation 403, observed foreign run read 400, AE count 1 to 1, and owned PostgreSQL shutdown are supported by the artifact/assertions.
+
+Limits: application close/boot remains in one OS process; no PostgreSQL restart or Lifecycle React proof. Zero AE delta supports no new AE executions, not a complete census of every business/outbound write. Real model/provider quality, autonomous operation and C10 are not qualified. NOT_ISSUED remains.
+
+Reviewer provenance: read-only review; no code changes, file writes, tests or services were performed by the reviewer. The final direct attestation reran the same 270 targeted checks plus scoped lint and production types after the code review.
