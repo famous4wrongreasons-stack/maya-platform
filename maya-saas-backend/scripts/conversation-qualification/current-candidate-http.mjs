@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { localProofProfile } from './current-candidate-local-profile.mjs';
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 const backend = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -19,8 +20,23 @@ const { values } = parseArgs({
     output: { type: 'string' },
     groups: { type: 'string' },
     'broker-preflight': { type: 'boolean' },
+    'pg-bin': { type: 'string' },
+    preflight: { type: 'boolean' },
   },
 });
+if (values.preflight) {
+  assert.ok(
+    !values.run &&
+      !values.output &&
+      !values.groups &&
+      !values['broker-preflight'],
+    'candidate_profile_mode_conflict',
+  );
+  console.log(
+    JSON.stringify(localProofProfile({ pgBin: values['pg-bin'] }), null, 2),
+  );
+  process.exit(0);
+}
 const groups = values.groups?.split(',');
 assert.ok(
   !groups ||
@@ -53,12 +69,13 @@ assert.ok(
 );
 for (const name of ['.env', '.env.local'])
   assert.equal(fs.existsSync(path.join(backend, name)), false);
+const localProfile = localProofProfile({ pgBin: values['pg-bin'] });
 fs.mkdirSync(values.output, { mode: 0o700 });
 const privateRoot = fs.mkdtempSync(
   path.join(os.tmpdir(), 'maya-candidate-http-'),
 );
 const cluster = path.join(privateRoot, 'pg'),
-  pgBin = '/opt/homebrew/opt/postgresql@16/bin';
+  pgBin = localProfile.pgBin;
 const portServer = net.createServer();
 await new Promise((resolve, reject) => {
   portServer.once('error', reject);
@@ -79,6 +96,7 @@ for (const key of ['PATH', 'HOME', 'TMPDIR'])
   if (process.env[key]) env[key] = process.env[key];
 const manifest = {
   kind: 'current-candidate-authenticated-http-offline-mechanics',
+  localProfile,
   cluster,
   database,
   port,

@@ -420,6 +420,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       'scripts/conversation-qualification/current-candidate-http.mjs',
       'scripts/conversation-qualification/current-candidate-dry-broker.mjs',
       'scripts/conversation-qualification/owned-child-cleanup.mjs',
+      'scripts/conversation-qualification/current-candidate-local-profile.mjs',
       'src/ai-tools/planner-wire-context.ts',
       'src/conversation-intelligence/conversation-intelligence.service.ts',
       'src/widgets/composition/chat-read.trigger.ts',
@@ -1272,6 +1273,16 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         role: s.item.role,
         grantedFeatures: s.features,
         effectiveFeatures: featureReads.get(s.tenant.id) ?? [],
+        availabilityEvidence: [
+          'booking',
+          'personal',
+          'bi',
+          'lifecycle',
+        ].includes(s.item.group)
+          ? 'ACTUAL_INTERNAL_CALENDAR_SYNTHETIC_FACTS'
+          : s.item.id === 'current-admin-ordinary'
+            ? 'NATIVE_YCLIENTS_AVAILABILITY_FINITE_SYNTHETIC_TRANSPORT'
+            : 'SYNTHETIC_DOMAIN_PORT_NOT_YCLIENTS_BRANCH_MAPPING_ACCEPTANCE',
         sourceRefs: s.sourceRefs.map((r) => ({
           owner: r.owner,
           idSha256: hash(r.id),
@@ -1294,6 +1305,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         'Known goods source unavailability returns HTTP 503 with a stable error code; unexpected program errors remain errors, not empty goods facts.',
         'Authored absolute October remains an open period at the real fixture date; no full-month result is claimed.',
         'Zero-model deterministic paths contribute zero model coverage; no real model or provider acceptance.',
+        'Occupancy positive fixtures use a synthetic branch-qualified domain port. They exercise C5/C9 mechanics, not success of the native branch-scoped YCLIENTS adapter, which refuses unavailable mapping.',
       ],
     });
     expect(preflights.filter((p) => !p.expectedStatusMatched)).toEqual([]);
