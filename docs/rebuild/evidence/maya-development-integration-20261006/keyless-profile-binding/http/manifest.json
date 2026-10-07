@@ -1,0 +1,92 @@
+{
+  "kind": "current-candidate-authenticated-http-offline-mechanics",
+  "localProfile": {
+    "contract": "maya.current-candidate-local-proof-profile/1",
+    "mode": "NO_UPSTREAM_ONLY",
+    "observedAt": "2026-10-07T20:43:59.929Z",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": {
+      "path": "/usr/local/bin/node",
+      "version": "24.15.0"
+    },
+    "pgBin": "/opt/homebrew/Cellar/postgresql@16/16.14/bin",
+    "binaries": {
+      "postgres": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/postgres",
+        "version": "16.14",
+        "sha256": "7774d7dc870dc00cac08729d745b5ed179b6a69149dfd6330869583259814643"
+      },
+      "initdb": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/initdb",
+        "version": "16.14",
+        "sha256": "016469b455ab979367b94e1be6ff53eca62fd3f90de60798d05f57b25f6ad88a"
+      },
+      "pg_ctl": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/pg_ctl",
+        "version": "16.14",
+        "sha256": "31de671ccba3a8420add4b0a347bd8c6dc4d48843a13654f59d471179e6954c6"
+      },
+      "createdb": {
+        "path": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/createdb",
+        "version": "16.14",
+        "sha256": "1dc3d525f372d3144cff2f4849c412dc12822c2c1a60adc470b9f17346ed7bde"
+      }
+    },
+    "resources": {
+      "runnerHeapMb": 256,
+      "brokerHeapMb": 256,
+      "backendJestHeapMb": 3072,
+      "jestWorkers": 1,
+      "pgSharedBuffersMb": 64,
+      "pgWorkMemMb": 4,
+      "pgMaxConnections": 30,
+      "observedTotalMemoryBytes": 137438953472,
+      "observedFreeMemoryBytes": 42148511744,
+      "memoryQualification": "OBSERVATION_ONLY_NOT_PEAK_RSS_OR_ADMISSION"
+    },
+    "paidAuthorized": false,
+    "remoteServerQualified": false,
+    "credentialsRead": false,
+    "resourcesCreated": false
+  },
+  "keylessProfileSha256": "c44d1f0edda7890e1be4fc73d71f83fab73a2415248886010f63f90b1d8c5c4b",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-candidate-http-UdG7g2/pg",
+  "database": "maya_widget_gate_proof_candidate_02d3a04e0055",
+  "port": 49296,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "har13-diagnostic-placement",
+    "candidate-http",
+    "pg-stop"
+  ],
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "photoParser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "sourceProvider": "SYNTHETIC_READS_ONLY",
+  "externalFetchCalls": 0,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1
+  },
+  "broker": {
+    "mode": "NO_UPSTREAM_ONLY",
+    "pid": 20459,
+    "port": 49301,
+    "heapMb": 256,
+    "credentialsLoaded": false,
+    "upstreamCalls": 0
+  },
+  "corpusStatus": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+  "unexecutedTurns": 0,
+  "qualification": "OFFLINE_MECHANICS_ONLY_NOT_LANGUAGE_ACCEPTANCE",
+  "brokerStopped": true,
+  "clusterStopped": true
+}

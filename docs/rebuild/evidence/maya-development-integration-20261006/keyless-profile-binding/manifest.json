@@ -1,0 +1,308 @@
+{
+  "contract": "maya.keyless-profile-binding-evidence/1",
+  "candidateCommit": "f49837166abc529ea6f699f028392dce30a20292",
+  "sourceRunDirectory": "/tmp/maya-keyless-occupancy-f4983716-01",
+  "bindingManifestSha256": "c7101fd222690d6218db8c6ebea3cb35eda00d3a6e8c49ef103ae71c367d1818",
+  "keylessProfileSha256": "c44d1f0edda7890e1be4fc73d71f83fab73a2415248886010f63f90b1d8c5c4b",
+  "corpusSha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+  "scope": {
+    "selection": "TARGETED_OCCUPANCY_ONLY",
+    "dialogs": 3,
+    "turns": 4,
+    "sourcePreflights": 21,
+    "cannedTransports": 2,
+    "fullCorpusAtCandidateExecuted": false
+  },
+  "qualification": "LOCAL_SYNTHETIC_KEYLESS_ONLY_NOT_LANGUAGE_OR_PROVIDER_ACCEPTANCE",
+  "artifactPolicy": "Explicit safe reports, source preflights, manifests, profile binding, ledgers and 18-PASS Node log only; no raw auth/private receipts/environment or server logs.",
+  "files": {
+    "http/broker-ledger.jsonl": {
+      "sha256": "a9ef3b49901615fed8852b4fed9367d1ae233e8747bc715160f344b950114eaf",
+      "bytes": 1336
+    },
+    "http/broker-report.json": {
+      "sha256": "afe5e026189883e634c1e9e9ad5818194e2101aa1e421e2e9ca0c1506841cacb",
+      "bytes": 1357
+    },
+    "http/candidate-manifest.json": {
+      "sha256": "bfe74120f5fb4cc64c1949d7bdf6455d37305594ec4027d54225602d327f9163",
+      "bytes": 42923
+    },
+    "http/http-report.json": {
+      "sha256": "1e17fe8f3b19a58bae1ea8e0625e46f63b6551a16468bf989d5a8a4145996465",
+      "bytes": 62901
+    },
+    "http/keyless-profile-binding.json": {
+      "sha256": "8ee57d4594ee50ea8ab1a1a8d4cc1621209ca8c9d3bb76384ed9fe97bfc5bf2a",
+      "bytes": 3513
+    },
+    "http/ledger.jsonl": {
+      "sha256": "444928ac77843786cad39707dce3627b6f66829376372b74f96efd49054044c8",
+      "bytes": 1422
+    },
+    "http/manifest.json": {
+      "sha256": "0bb69e1bb486251bc40a30b73291c00fd596bf53075b0b7221597444e14cf77c",
+      "bytes": 3010
+    },
+    "http/source-preflights.json": {
+      "sha256": "035d311638e1e8880e40bd44cda6ffce72c255449f22d7f0cd594455e60415b5",
+      "bytes": 12289
+    },
+    "node-focused-checks.txt": {
+      "sha256": "3de306444d957d1b70146f6281a01d4167d4a3a89a2f34cc9d1f59c9e80fee17",
+      "bytes": 1797
+    },
+    "verification.json": {
+      "sha256": "0487626deb93f0943c77029fda014370680a3365bf60e0d9336d0c2475455f38",
+      "bytes": 3291
+    }
+  },
+  "gitBlobSourceBinding": [
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "capturedSha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+      "gitBlobContentSha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json",
+      "capturedSha256": "48de10c63c0ffc8140d035c3f65f16d00ca97ab47b12e5b9bc63f56597d23c09",
+      "gitBlobContentSha256": "48de10c63c0ffc8140d035c3f65f16d00ca97ab47b12e5b9bc63f56597d23c09",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.mjs",
+      "capturedSha256": "9a29db67245f1c6e028b65d114f2d956334131b1bb309cec38f7dc5a8764792e",
+      "gitBlobContentSha256": "9a29db67245f1c6e028b65d114f2d956334131b1bb309cec38f7dc5a8764792e",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-dry-broker.mjs",
+      "capturedSha256": "2e2951eb3a87c962eb6aa59054bb2777a8ca91c8ff8f7dc1c5df9be8d190832a",
+      "gitBlobContentSha256": "2e2951eb3a87c962eb6aa59054bb2777a8ca91c8ff8f7dc1c5df9be8d190832a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-http.mjs",
+      "capturedSha256": "88e56443043fd77f21162b3cfdab4fd91ac8f9802b4c392bd56b3a9fa1e6cbc7",
+      "gitBlobContentSha256": "88e56443043fd77f21162b3cfdab4fd91ac8f9802b4c392bd56b3a9fa1e6cbc7",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-keyless-profile.mjs",
+      "capturedSha256": "9ca894f9660fad0b8d2e3e9d5467336818cf78ca6d800d61f91f54b7d5d6ba0a",
+      "gitBlobContentSha256": "9ca894f9660fad0b8d2e3e9d5467336818cf78ca6d800d61f91f54b7d5d6ba0a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-local-profile.mjs",
+      "capturedSha256": "72c2739cf57c50c02c9b23efa38d6440b55d1e1582628e822097dd63843369d0",
+      "gitBlobContentSha256": "72c2739cf57c50c02c9b23efa38d6440b55d1e1582628e822097dd63843369d0",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-offline.mjs",
+      "capturedSha256": "80241d5f31369a11acdf9472f8608bcf68f6114852f02b20a41970f8316f5e1a",
+      "gitBlobContentSha256": "80241d5f31369a11acdf9472f8608bcf68f6114852f02b20a41970f8316f5e1a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-profile-metadata.mjs",
+      "capturedSha256": "38d854daa27fd966f35b214e524833e74c802709503dbf8a3eaf6ed222c378cb",
+      "gitBlobContentSha256": "38d854daa27fd966f35b214e524833e74c802709503dbf8a3eaf6ed222c378cb",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-serializer.ts",
+      "capturedSha256": "77c0e1d79fbf46a976e1429b3b82203600d1ab42e372005f06b5c8eeb8f454b9",
+      "gitBlobContentSha256": "77c0e1d79fbf46a976e1429b3b82203600d1ab42e372005f06b5c8eeb8f454b9",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate.mjs",
+      "capturedSha256": "843171000921576e17042e3c7f5da435288c40c3668018de012efe416675132a",
+      "gitBlobContentSha256": "843171000921576e17042e3c7f5da435288c40c3668018de012efe416675132a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/owned-child-cleanup.mjs",
+      "capturedSha256": "8b5877961b402f6187aed49d167fedf9fff6884fd9db5a1d212b9b324eb52855",
+      "gitBlobContentSha256": "8b5877961b402f6187aed49d167fedf9fff6884fd9db5a1d212b9b324eb52855",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/replay.mjs",
+      "capturedSha256": "eb78c93e70336ebf91ff19aac6364e421bc5dfc4977988c74f5b16dfaf98418b",
+      "gitBlobContentSha256": "eb78c93e70336ebf91ff19aac6364e421bc5dfc4977988c74f5b16dfaf98418b",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "capturedSha256": "e67808e01bd52ba6197ec845bc5a202cb3daf5d0e6cd5bdf720005a25b447937",
+      "gitBlobContentSha256": "e67808e01bd52ba6197ec845bc5a202cb3daf5d0e6cd5bdf720005a25b447937",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "capturedSha256": "87289cc143fe41e44fd4229e9cde44a993855ce2f37b2db303a06f5a523365df",
+      "gitBlobContentSha256": "87289cc143fe41e44fd4229e9cde44a993855ce2f37b2db303a06f5a523365df",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+      "capturedSha256": "0b912bf4f01037262e14855af50fc32f565dafde73ced3a5880e02f8f7aacfdd",
+      "gitBlobContentSha256": "0b912bf4f01037262e14855af50fc32f565dafde73ced3a5880e02f8f7aacfdd",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "capturedSha256": "8b472bfb6210b62438a585bcaf0ef64d976697b275ee2ef4c8c703c1dee57d8a",
+      "gitBlobContentSha256": "8b472bfb6210b62438a585bcaf0ef64d976697b275ee2ef4c8c703c1dee57d8a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "capturedSha256": "b0d1c86ccd18a24bfb2e685ac58526e6c12fe9adc2f7904a1abc18b2706ec29b",
+      "gitBlobContentSha256": "b0d1c86ccd18a24bfb2e685ac58526e6c12fe9adc2f7904a1abc18b2706ec29b",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/planner-wire-context.ts",
+      "capturedSha256": "08d31518d414e902f3b09043bfac71ef7370a438dead0e8151bd54f703280f85",
+      "gitBlobContentSha256": "08d31518d414e902f3b09043bfac71ef7370a438dead0e8151bd54f703280f85",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/appointments.service.ts",
+      "capturedSha256": "c6e2ef4b4bfb0fd6de8c6f8deac6a4afbf7cb51e25f0e35aa9c6d5799178af9b",
+      "gitBlobContentSha256": "c6e2ef4b4bfb0fd6de8c6f8deac6a4afbf7cb51e25f0e35aa9c6d5799178af9b",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts",
+      "capturedSha256": "c3bc6b609121ba51cfd2ce4442cdb80d6dc8a616d95e03a0886bb9133f9e1db9",
+      "gitBlobContentSha256": "c3bc6b609121ba51cfd2ce4442cdb80d6dc8a616d95e03a0886bb9133f9e1db9",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts",
+      "capturedSha256": "5b0dbac9a87f84e7dbeb0d19553f50d7810d1695f6dedf8566e4ae1eb00b6b9b",
+      "gitBlobContentSha256": "5b0dbac9a87f84e7dbeb0d19553f50d7810d1695f6dedf8566e4ae1eb00b6b9b",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "capturedSha256": "a113f5f1bfffed97a476a5fa8ebdcc67ccad527e48c35a066c1f6e514d02d1bb",
+      "gitBlobContentSha256": "a113f5f1bfffed97a476a5fa8ebdcc67ccad527e48c35a066c1f6e514d02d1bb",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-request.errors.ts",
+      "capturedSha256": "696270478426c7048519c8d136b5e7ce96baf45a4f3d26aad24a4b08bc48907e",
+      "gitBlobContentSha256": "696270478426c7048519c8d136b5e7ce96baf45a4f3d26aad24a4b08bc48907e",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "capturedSha256": "ea952aa71dd1db77dc8950cd45f77b5bc042b39e9c17c8868a6e1ce112d7a197",
+      "gitBlobContentSha256": "ea952aa71dd1db77dc8950cd45f77b5bc042b39e9c17c8868a6e1ce112d7a197",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/yclients-goods-read.ts",
+      "capturedSha256": "0e6e7cc172450dbcfcd9f19a5b7a709922596ed81925f023203f5c744a80615a",
+      "gitBlobContentSha256": "0e6e7cc172450dbcfcd9f19a5b7a709922596ed81925f023203f5c744a80615a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.registry.ts",
+      "capturedSha256": "0bcfad059ce8cca96d4a573077d297cc1d1c099e61914dcfe3fd2c6cd77a1845",
+      "gitBlobContentSha256": "0bcfad059ce8cca96d4a573077d297cc1d1c099e61914dcfe3fd2c6cd77a1845",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/composition/chat-read.trigger.ts",
+      "capturedSha256": "4f5fa8e93bbea764136a1b86d9a4e5e6a5b75d4eef7e64f93cb9066ab66c4a0b",
+      "gitBlobContentSha256": "4f5fa8e93bbea764136a1b86d9a4e5e6a5b75d4eef7e64f93cb9066ab66c4a0b",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/jest-current-candidate-http.json",
+      "capturedSha256": "b7271995f185906345667d1596b34f2f1f79a1838cf70e922ceadb5c24c17505",
+      "gitBlobContentSha256": "b7271995f185906345667d1596b34f2f1f79a1838cf70e922ceadb5c24c17505",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/bi-owner-react.probe-spec.ts",
+      "capturedSha256": "c7ad086de676da615264d01884d54c4e255074ee645335e1ad469ffbe1dcbd0a",
+      "gitBlobContentSha256": "c7ad086de676da615264d01884d54c4e255074ee645335e1ad469ffbe1dcbd0a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts",
+      "capturedSha256": "a37cbf2d55eb1cc4d20325f7527ab464205e424820d10f713c5677ab8e44c4c1",
+      "gitBlobContentSha256": "a37cbf2d55eb1cc4d20325f7527ab464205e424820d10f713c5677ab8e44c4c1",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+      "capturedSha256": "050549e5e73b3b0ee51e5a5f30a5fffb7224473fa0562d162b2190ecb9e679ac",
+      "gitBlobContentSha256": "050549e5e73b3b0ee51e5a5f30a5fffb7224473fa0562d162b2190ecb9e679ac",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "capturedSha256": "2d6cdd870699af3c91b1d8bc2d9e93bc398ceb5e7ff7392999271820756884a7",
+      "gitBlobContentSha256": "2d6cdd870699af3c91b1d8bc2d9e93bc398ceb5e7ff7392999271820756884a7",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/current-candidate-http.probe-spec.ts",
+      "capturedSha256": "1d955767a37add1c06114e7866dd9d76ca853afc8f00b8211fa2d5f9edbd9a4a",
+      "gitBlobContentSha256": "1d955767a37add1c06114e7866dd9d76ca853afc8f00b8211fa2d5f9edbd9a4a",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/goods-vertical.probe-spec.ts",
+      "capturedSha256": "335ce4dd3f5f39f0a9d3812ca0d01514e949a1c1511cf3f9f1a968a3a9d41f51",
+      "gitBlobContentSha256": "335ce4dd3f5f39f0a9d3812ca0d01514e949a1c1511cf3f9f1a968a3a9d41f51",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/lifecycle-owner-react.probe-spec.ts",
+      "capturedSha256": "e03436aecf4d7525e32b3aad3e6dffcc2bfb8d5565c4226b12f32daec384e4db",
+      "gitBlobContentSha256": "e03436aecf4d7525e32b3aad3e6dffcc2bfb8d5565c4226b12f32daec384e4db",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/own-schedule-restart.probe-spec.ts",
+      "capturedSha256": "4020a6689639ffc82b9bb639a1133b335873d4d3427783de83570ec0cd1314be",
+      "gitBlobContentSha256": "4020a6689639ffc82b9bb639a1133b335873d4d3427783de83570ec0cd1314be",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+      "capturedSha256": "1f20ff3a618d8fa8aaa6a4c27406f4c1c57f38d31d529c8a9a93d1183d10c4ee",
+      "gitBlobContentSha256": "1f20ff3a618d8fa8aaa6a4c27406f4c1c57f38d31d529c8a9a93d1183d10c4ee",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/current-candidate-mjs-transform.cjs",
+      "capturedSha256": "8cd947f4ca0c78c774a45a6e6f2ce12ec0ffa4da062ad7195a4bb5202383e20f",
+      "gitBlobContentSha256": "8cd947f4ca0c78c774a45a6e6f2ce12ec0ffa4da062ad7195a4bb5202383e20f",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts",
+      "capturedSha256": "ec61d1768ae49e00bdb0ecd45e0cd1d19a3264df2b71257b916dfac99d6c6bb9",
+      "gitBlobContentSha256": "ec61d1768ae49e00bdb0ecd45e0cd1d19a3264df2b71257b916dfac99d6c6bb9",
+      "match": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/synthetic-yclients-availability.ts",
+      "capturedSha256": "931c4702999cffeba825513e59079f8955c72eeda6d5079e6811cb09cf2bb2e4",
+      "gitBlobContentSha256": "931c4702999cffeba825513e59079f8955c72eeda6d5079e6811cb09cf2bb2e4",
+      "match": true
+    }
+  ]
+}

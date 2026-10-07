@@ -1,0 +1,46 @@
+{
+  "contract": "maya.current-candidate-dry-broker/1",
+  "mode": "NO_UPSTREAM_ONLY",
+  "candidate": "f49837166abc529ea6f699f028392dce30a20292",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "keylessProfileSha256": "c44d1f0edda7890e1be4fc73d71f83fab73a2415248886010f63f90b1d8c5c4b",
+  "keylessProfileVerified": true,
+  "startedAt": "2026-10-07T20:44:03.161Z",
+  "expiresAt": "2026-10-07T21:44:03.161Z",
+  "lifetimeMs": 3600000,
+  "requests": [
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "bytes": 93222,
+      "bodySha256": "14258dfed71972919234510cd0be9c3919e57c5773aab55cbf9bfa21fa727945",
+      "status": 200
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "bytes": 93144,
+      "bodySha256": "60c787b41f732c1e542d7abc18191017fa75511f0fbeeaaa3671d6a1eae24c8a",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "bindingManifestSha256": "c7101fd222690d6218db8c6ebea3cb35eda00d3a6e8c49ef103ae71c367d1818",
+  "verifiedSourcePaths": 41,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-07T20:44:15.452Z",
+  "stats": {
+    "dialogs": 2,
+    "turns": 2,
+    "attempts": 2,
+    "inputTokens": 194558,
+    "outputTokens": 2400,
+    "reservedNanoUsd": 266320560,
+    "halted": false
+  }
+}

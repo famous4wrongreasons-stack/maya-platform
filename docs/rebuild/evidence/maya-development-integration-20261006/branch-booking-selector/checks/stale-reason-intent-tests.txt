@@ -1,0 +1,15 @@
+✔ FBE2E-1: live submission uses only widget intent/resolve and returns the authorized successor or receipt line (1.818833ms)
+✔ FBE2E-1: a drawn selector can submit only one server-declared option/ref value (0.65ms)
+✔ FBE2E-1/3: successor replaces the selector and only a server terminal receipt enters conversation (13.824792ms)
+✔ schedule owner failure reads its canonical terminal line without treating it as authority denial (0.634ms)
+✔ stale source witness: canonical superseded response projects the refusal without receipt read or acceptance (0.24225ms)
+✔ stale source witness: missing, unknown or noncanonical reason remains generic and never reads or claims success (0.214334ms)
+✔ stale source witness: submitted booking confirmation displays the canonical sentence and consumes its control once (0.82ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 107.132416

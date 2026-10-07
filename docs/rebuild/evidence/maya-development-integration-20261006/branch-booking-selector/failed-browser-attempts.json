@@ -1,0 +1,20 @@
+{
+  "contract": "maya.finite-failed-proof-summary/1",
+  "attempts": [
+    {
+      "attempt": "browser-01",
+      "status": "FAILED",
+      "launcherHeadMetadataOnly": "180ee1ced789452e64c581ee10b5ea1613a46728",
+      "sourceAcceptance": "NONE_FAILED_RUN",
+      "reason": "Actual Gate11 superseded/handle_stale response passed but shell dropped its canonical stale reason and displayed generic forbidden. Fixed finite shell projection without weakening the browser assertion.",
+      "rawDirectory": "/tmp/maya-branch-selector-browser-20261007-01",
+      "rawManifestSha256": "6ed8d7504d4697314ec006347eeabde634dc303544c0ebcd384b9738c8e3ca6d",
+      "rawReactReportSha256": "1c559bb40d414060d5faabf0a937316f5c718fe056e2f3fe9969885a5afd18c5",
+      "rawFailureLogSha256": "da675d4ff31a7b70559f7c6c3925aaf8767a736c9348f9229c8681f1ccaf1ae3",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true,
+      "guardViolations": 0
+    }
+  ],
+  "rawAuthOrPrivateReceiptCopied": false
+}

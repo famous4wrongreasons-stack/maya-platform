@@ -1,0 +1,31 @@
+{
+  "contract": "maya.branch-booking-selector-owned-cluster/1",
+  "mode": "current-react-native-synthetic",
+  "candidateCommit": "a4e6c5434d3170edb28b901440eff8cdae24213b",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "sourceSha256": "0f61f17741bb7d1b419f93cedc8c2b29b20e6b82af85aa7cf16d3fbc0021fa00",
+  "database": "maya_widget_gate_proof_c9occ_fbb09ad20563",
+  "port": 51611,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-branch-selector-tbMJq3/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "browser"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "NOT_ISSUED",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "sourceUnchanged": true,
+  "clusterStopped": true
+}

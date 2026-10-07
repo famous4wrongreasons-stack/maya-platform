@@ -1,0 +1,46 @@
+{
+  "contract": "maya.branch-booking-selector-http-checkpoint/1",
+  "status": "HTTP_COMPLETE_BROWSER_PENDING",
+  "candidateCommit": "180ee1ced789452e64c581ee10b5ea1613a46728",
+  "artifactCount": 9,
+  "artifacts": {
+    "failed-http-attempts.json": {
+      "sha256": "e4af793243878c165ccfe1a6cb81beec81174fcfdd97620ca6ea687c7941d98e",
+      "bytes": 2932
+    },
+    "http-05/git-blob-binding.json": {
+      "sha256": "82ebbb4410004ca3dcdbead05483a95641b00cc07af74e161e23825fa53e497b",
+      "bytes": 372134
+    },
+    "http-05/manifest.json": {
+      "sha256": "74d988579f5f550830317fadfe28dfc20a6f73c549aee45ecd8faff9774ad365",
+      "bytes": 936
+    },
+    "http-05/prepare-jest.json": {
+      "sha256": "c2622b14f2c07d0f72921e1c33fddef48ef175a9bc5c24ad84eecc0cbe089e8c",
+      "bytes": 1463
+    },
+    "http-05/prepare.json": {
+      "sha256": "631606d4bc4ca1bbbf4cc843f1b5a3443e79f90f4466ddc66b74661229474475",
+      "bytes": 2774
+    },
+    "http-05/resume-jest.json": {
+      "sha256": "a6a2fc150e0a0b9778872508b095a20803ae7965647efb769ae30e674457fc3c",
+      "bytes": 1464
+    },
+    "http-05/resume.json": {
+      "sha256": "e4727dd1691538f0bac35725fc5f0ee6f247aa4a6b0efdb958b66f87db35286f",
+      "bytes": 10251
+    },
+    "http-05/source-hashes.json": {
+      "sha256": "a6bdface472928d22859b5997ccd2a9519e0861fab21d0191cf2d22857dc84cb",
+      "bytes": 199180
+    },
+    "http-evidence-review.json": {
+      "sha256": "236d0b81ab68e2cce82ca985cc73567fcbccbdc011d6c48a8c48285fb258fa74",
+      "bytes": 1375
+    }
+  },
+  "qualification": "NOT_ISSUED",
+  "finalCombinedManifestOwner": "parent"
+}

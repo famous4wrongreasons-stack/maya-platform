@@ -1,0 +1,39 @@
+{
+  "candidateCommit": "180ee1ced789452e64c581ee10b5ea1613a46728",
+  "qualification": "NOT_ISSUED",
+  "httpStatus": "PASS",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "processRestart": {
+    "preparePid": 26276,
+    "resumePid": 26332
+  },
+  "postgresRestart": {
+    "prepareStart": "2026-10-07T20:53:02.427Z",
+    "resumeStart": "2026-10-07T20:53:06.127Z"
+  },
+  "restartState": "MINTED_WIDGET_CONFIRMATION_NOT_READY_ACTION_EXECUTION",
+  "providerGetCount": {
+    "prepare": 72,
+    "resume": 260
+  },
+  "syntheticBookingPostCount": 2,
+  "syntheticReadOnlySearchPostCount": 3,
+  "bookingOutcomeCounts": {
+    "SUCCEEDED": 1,
+    "UNKNOWN": 1
+  },
+  "replayCountPerOutcome": 3,
+  "sourcePathsVerifiedAgainstCommit": 1644,
+  "ownedClusterStopped": true,
+  "postmasterPidAbsentAtArchive": true,
+  "limits": [
+    "Finite in-process synthetic native YCLIENTS transport, no real upstream/model acceptance.",
+    "Only MINTED widget confirmation crosses process/PG restart; no READY ActionExecution restart claim.",
+    "COMMIT/replay occurs after restart; UNKNOWN is not itself restarted by this HTTP proof.",
+    "A17 setup actions excluded from booking-effect assertions and reported separately.",
+    "Browser result pending; HTTP archive claims no React acceptance."
+  ],
+  "privateReceiptCopied": false,
+  "rawAuthOrProviderPayloadCopied": false
+}

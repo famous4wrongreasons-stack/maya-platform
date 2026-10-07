@@ -1,0 +1,26 @@
+✔ keyless binding captures exact candidate without requiring operator input or authority (1.244917ms)
+✔ a declared wrong candidate is not repaired and incomplete input is not normalized into validity (0.288833ms)
+✔ metadata and installation changes refuse an earlier launch pin (0.945791ms)
+✔ changed code, corpus or limits cannot reuse a profile binding (0.73525ms)
+✔ a recomputed digest cannot admit authority, omit live blockers or attach extra fields (1.460625ms)
+✔ declared credential and evidence references are not opened or emitted by binding (0.277458ms)
+✔ bounded binding reader refuses symlinks, oversized and malformed files without disclosure (3.522209ms)
+✔ new CLI flag is keyless-run-only and malformed input creates no output (142.734958ms)
+✔ Jest ESM adapter admits only the four exact qualification modules (86.763625ms)
+✔ unknown profile reports exact missing metadata and never admits a run (0.778166ms)
+✔ fully declared metadata remains unverified, references unopened, all authority false (0.258ms)
+✔ declared candidate drift and tampered frozen manifest refuse (0.370708ms)
+✔ metadata and observed install digests change independently (0.348125ms)
+✔ secret-shaped extras and malformed values fail without echoing input (0.202208ms)
+✔ metadata cannot enable any authority or bless a live local observation (0.390166ms)
+✔ CLI produces bounded metadata preflight without creating DB/output/ledger or opening references (1809.445959ms)
+✔ CLI refuses run mode and malformed metadata without input disclosure or resources (166.133167ms)
+✔ CLI refuses oversized and symlinked metadata before installed-binary reads (60.659959ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2359.1135

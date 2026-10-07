@@ -1,0 +1,33 @@
+{
+  "candidateCommit": "a4e6c5434d3170edb28b901440eff8cdae24213b",
+  "status": "PASS",
+  "checkpoints": [
+    "typed-success-preview",
+    "typed-success-result",
+    "typed-removed-preview",
+    "typed-removed-result",
+    "typed-unknown-preview",
+    "typed-unknown-result",
+    "personal-success-preview",
+    "personal-success-result",
+    "personal-changed-preview",
+    "personal-changed-result",
+    "typed-success-reload",
+    "typed-removed-reload",
+    "typed-unknown-reload",
+    "personal-success-reload",
+    "personal-changed-reload"
+  ],
+  "sourcePathsVerifiedAgainstCommit": 1707,
+  "screenshots": 15,
+  "model": "SCRIPTED_SYNTHETIC",
+  "nativeProvider": "FINITE_SYNTHETIC_TRANSPORT_ONLY",
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "browserProof": "CURRENT_REACT_ACTUAL_HTTP_RELOAD_RELOGIN_NOT_PROCESS_PG_RESTART",
+  "ownedClusterStopped": true,
+  "postmasterPidAbsentAtArchive": true,
+  "guardViolations": 0,
+  "safeArchiveScanFindings": 0,
+  "certificate": "NOT_ISSUED"
+}

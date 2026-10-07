@@ -1,0 +1,32 @@
+{
+  "contract": "maya.branch-booking-selector-owned-cluster/1",
+  "mode": "http-pg-restart-native-synthetic",
+  "candidateCommit": "180ee1ced789452e64c581ee10b5ea1613a46728",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "sourceSha256": "52cff778ddbb35bb16312eb5bbcf9da9fe6e646d9b684e52a1ab5ba256f434ce",
+  "database": "maya_widget_gate_proof_c9occ_3f86b1265a91",
+  "port": 50453,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-branch-selector-KDiFPZ/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "prepare",
+    "pg-restart",
+    "resume"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "NOT_ISSUED",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "sourceUnchanged": true,
+  "clusterStopped": true
+}

@@ -1,0 +1,53 @@
+{
+  "contract": "maya.finite-failed-proof-summary/1",
+  "attempts": [
+    {
+      "attempt": "http-01",
+      "status": "NOT_STARTED_NO_MANIFEST",
+      "rawDirectory": "/tmp/maya-branch-selector-http-20261007-01",
+      "reason": "Sandbox denied loopback listen before initdb: listen EPERM operation not permitted 127.0.0.1. Output directory existed but no cluster/manifest was started. A later require_escalated local loopback run was allowed; this was not an automatic approval review rejection.",
+      "sourceAcceptance": "NONE"
+    },
+    {
+      "attempt": "http-02",
+      "status": "FAILED",
+      "failedStage": "prepare",
+      "reason": "Harness sent rendered observation for TIME_SLOT_SELECTOR; owner admits observations only for SERVICE/STAFF_SELECTOR. HTTP403 widget_render_evidence_refused.",
+      "rawDirectory": "/tmp/maya-branch-selector-http-20261007-02",
+      "launcherHeadMetadataOnly": "f49837166abc529ea6f699f028392dce30a20292",
+      "sourceAcceptance": "NONE_FAILED_RUN_LAUNCHER_HEAD_DOES_NOT_BIND_DIRTY_WORKTREE",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true,
+      "rawManifestSha256": "48530c031ffb500268fad413db453e86c74dbeb953dd9863bb62e2a8cc34bf2d",
+      "rawFailureLogSha256": "8d0d604b76e5b896fdd16a67f5b56a1c5fc65165899e312cccdaa6ae1ce5872f"
+    },
+    {
+      "attempt": "http-03",
+      "status": "FAILED",
+      "failedStage": "prepare",
+      "reason": "Harness counted all tenant ActionExecutions, including three A17 setup actions. Expected zero booking effects; assertion was incorrectly unscoped.",
+      "rawDirectory": "/tmp/maya-branch-selector-http-20261007-03",
+      "launcherHeadMetadataOnly": "fddadaacda879f237bfec97858f29417af3e8632",
+      "sourceAcceptance": "NONE_FAILED_RUN_LAUNCHER_HEAD_DOES_NOT_BIND_DIRTY_WORKTREE",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true,
+      "rawManifestSha256": "bbe0a81303efd2bbe4e115ad4821df9fcf88ac6d7691986f9266b5ced2c3c81c",
+      "rawFailureLogSha256": "0529208dea79833d01469b19da47d74d5384bb60ad6108535858847ad0fe0566"
+    },
+    {
+      "attempt": "http-04",
+      "status": "FAILED",
+      "failedStage": "resume",
+      "reason": "All booking/replay/drift cases passed before final assertion. Tool foreign-branch read correctly returned503; harness expected the authenticated public endpoint404 instead.",
+      "rawDirectory": "/tmp/maya-branch-selector-http-20261007-04",
+      "launcherHeadMetadataOnly": "fddadaacda879f237bfec97858f29417af3e8632",
+      "sourceAcceptance": "NONE_FAILED_RUN_LAUNCHER_HEAD_DOES_NOT_BIND_DIRTY_WORKTREE",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true,
+      "rawManifestSha256": "b1afb0c98892343d7a3052b2411cbf145666ffcf34c233235bced54935de05ba",
+      "rawFailureLogSha256": "ea9ed2ef4f67c158085f0438d595c7413d094934a59f5b12bb6d8b22bda80135"
+    }
+  ],
+  "privateReceiptCopied": false,
+  "rawLogsCopied": false
+}

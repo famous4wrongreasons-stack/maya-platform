@@ -1,0 +1,14 @@
+✔ guard admits exact owned UI login and fully scoped explicit chat, strips no authority checks (0.752334ms)
+✔ branch availability admits exact declared query and refuses missing, duplicate, foreign or raw authority (0.54025ms)
+✔ preview/create require selected owned branch and exact personal payload without raw identity (0.244334ms)
+✔ widget admission preserves sealed opaque controls and bounded observed/history read (0.166708ms)
+✔ external origins, unrelated effects, routes, cookies, unsafe local origins all refuse (2.479875ms)
+✔ guard operates at request stage and never fulfills a response or records body/query/auth (0.392708ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40.047416

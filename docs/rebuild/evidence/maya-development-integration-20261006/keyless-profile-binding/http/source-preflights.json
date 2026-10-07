@@ -1,0 +1,454 @@
+[
+  {
+    "caseId": "current-booking-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "timezone",
+      "booking_selection",
+      "slots"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "9b700636ff241ab510b67fcc1d5765f44bc13a78225410ef9f457e8a58a43fd2",
+    "appointments": null,
+    "services": null,
+    "slots": 6,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-booking-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "timezone",
+      "booking_selection",
+      "slots"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "742281abb4f9c83c11cb8670b42f16024dd1e667ca5c355f9a900376338d7ded",
+    "appointments": null,
+    "services": null,
+    "slots": 6,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-booking-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 404,
+    "expectedHttpStatus": 404,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": null,
+    "keys": [
+      "message",
+      "error",
+      "statusCode"
+    ],
+    "error": "Not Found",
+    "contract": null,
+    "resultSha256": "37c233d514580fa78eeb3123851076acbcf224ab428f40e719010245e9281467",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-booking-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 404,
+    "expectedHttpStatus": 404,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": null,
+    "keys": [
+      "message",
+      "error",
+      "statusCode"
+    ],
+    "error": "Not Found",
+    "contract": null,
+    "resultSha256": "37c233d514580fa78eeb3123851076acbcf224ab428f40e719010245e9281467",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "timezone",
+      "booking_selection",
+      "slots"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "687db671f2b56f3ec638e694e02ce84cf8161b3d8a395cd3d9465e8d0343a843",
+    "appointments": null,
+    "services": null,
+    "slots": 1,
+    "widgetEmitted": true
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "availability.slots.http",
+    "httpStatus": 503,
+    "expectedHttpStatus": 503,
+    "expectedStatusMatched": true,
+    "qualification": "KNOWN_SOURCE_UNAVAILABLE_HTTP_503_NO_FACTS_NO_EFFECT",
+    "status": null,
+    "keys": [
+      "message",
+      "error"
+    ],
+    "error": {
+      "code": "booking_branch_source_unavailable"
+    },
+    "contract": null,
+    "resultSha256": "30f8ac24ba84239833dab41355c095238bf81e1b631a9a0443556426ba639a56",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "availability.slots.http",
+    "httpStatus": 503,
+    "expectedHttpStatus": 503,
+    "expectedStatusMatched": true,
+    "qualification": "KNOWN_SOURCE_UNAVAILABLE_HTTP_503_NO_FACTS_NO_EFFECT",
+    "status": null,
+    "keys": [
+      "message",
+      "error"
+    ],
+    "error": {
+      "code": "booking_branch_source_unavailable"
+    },
+    "contract": null,
+    "resultSha256": "30f8ac24ba84239833dab41355c095238bf81e1b631a9a0443556426ba639a56",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "availability.slots.http",
+    "httpStatus": 404,
+    "expectedHttpStatus": 404,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": null,
+    "keys": [
+      "message",
+      "error",
+      "statusCode"
+    ],
+    "error": "Not Found",
+    "contract": null,
+    "resultSha256": "37c233d514580fa78eeb3123851076acbcf224ab428f40e719010245e9281467",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "availability.slots.http",
+    "httpStatus": 404,
+    "expectedHttpStatus": 404,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": null,
+    "keys": [
+      "message",
+      "error",
+      "statusCode"
+    ],
+    "error": "Not Found",
+    "contract": null,
+    "resultSha256": "37c233d514580fa78eeb3123851076acbcf224ab428f40e719010245e9281467",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 503,
+    "expectedHttpStatus": 503,
+    "expectedStatusMatched": true,
+    "qualification": "KNOWN_SOURCE_UNAVAILABLE_HTTP_503_NO_FACTS_NO_EFFECT",
+    "status": null,
+    "keys": [
+      "message",
+      "error"
+    ],
+    "error": {
+      "code": "booking_branch_source_unavailable"
+    },
+    "contract": null,
+    "resultSha256": "71175a7b505c77aa54989c29aae8aa759717f60e030e85518f3203b81963fa3f",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "booking.group-availability.read",
+    "httpStatus": 503,
+    "expectedHttpStatus": 503,
+    "expectedStatusMatched": true,
+    "qualification": "KNOWN_SOURCE_UNAVAILABLE_HTTP_503_NO_FACTS_NO_EFFECT",
+    "status": null,
+    "keys": [
+      "message",
+      "error"
+    ],
+    "error": {
+      "code": "booking_branch_source_unavailable"
+    },
+    "contract": null,
+    "resultSha256": "30f8ac24ba84239833dab41355c095238bf81e1b631a9a0443556426ba639a56",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-admin-ordinary",
+    "name": "availability.days.http",
+    "httpStatus": 503,
+    "expectedHttpStatus": 503,
+    "expectedStatusMatched": true,
+    "qualification": "KNOWN_SOURCE_UNAVAILABLE_HTTP_503_NO_FACTS_NO_EFFECT",
+    "status": null,
+    "keys": [
+      "message",
+      "error"
+    ],
+    "error": {
+      "code": "booking_branch_source_unavailable"
+    },
+    "contract": null,
+    "resultSha256": "71175a7b505c77aa54989c29aae8aa759717f60e030e85518f3203b81963fa3f",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-occupancy-ordinary",
+    "name": "catalog.services.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "contract",
+      "source",
+      "scope",
+      "as_of",
+      "catalog_exhaustive",
+      "services"
+    ],
+    "error": null,
+    "contract": "maya.service-catalog.read/1",
+    "resultSha256": "0be68ca5a1efe115484775ce90ea440b5c60900bda3fd33d2f3ad68a3f136493",
+    "appointments": null,
+    "services": 1,
+    "slots": null,
+    "widgetEmitted": true
+  },
+  {
+    "caseId": "current-occupancy-ordinary",
+    "name": "catalog.staff.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "salon",
+      "staff"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-occupancy-ordinary",
+    "name": "booking.availability.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "timezone",
+      "booking_selection",
+      "slots"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "7cb9aadcb36a3b3576dc394dfdd07bb425bb1005a731b15cd2e63503230b1969",
+    "appointments": null,
+    "services": null,
+    "slots": 1,
+    "widgetEmitted": true
+  },
+  {
+    "caseId": "current-occupancy-correction",
+    "name": "catalog.services.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "contract",
+      "source",
+      "scope",
+      "as_of",
+      "catalog_exhaustive",
+      "services"
+    ],
+    "error": null,
+    "contract": "maya.service-catalog.read/1",
+    "resultSha256": "d8b9aa306a91e7acb0835fa4b58dcc9537b5c3b5ca673b61fe5dcd4428e4cca3",
+    "appointments": null,
+    "services": 1,
+    "slots": null,
+    "widgetEmitted": true
+  },
+  {
+    "caseId": "current-occupancy-correction",
+    "name": "catalog.staff.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "salon",
+      "staff"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-occupancy-correction",
+    "name": "booking.availability.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "timezone",
+      "booking_selection",
+      "slots"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "502bfc389d411fb789c83e6cfbd53d56bfae9345ebbcbae25e8ce7df144878ec",
+    "appointments": null,
+    "services": null,
+    "slots": 1,
+    "widgetEmitted": true
+  },
+  {
+    "caseId": "current-occupancy-negative",
+    "name": "catalog.services.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "contract",
+      "source",
+      "scope",
+      "as_of",
+      "catalog_exhaustive",
+      "services"
+    ],
+    "error": null,
+    "contract": "maya.service-catalog.read/1",
+    "resultSha256": "1ef2ae81a0943e605c8f4053911355a6b9475bde93010b67d088d47eba276cac",
+    "appointments": null,
+    "services": 1,
+    "slots": null,
+    "widgetEmitted": true
+  },
+  {
+    "caseId": "current-occupancy-negative",
+    "name": "catalog.staff.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "salon",
+      "staff"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "6dc635712dd943c0a374dac4eff62b0311810b9222be2d85e0a8758a6f7462c7",
+    "appointments": null,
+    "services": null,
+    "slots": null,
+    "widgetEmitted": false
+  },
+  {
+    "caseId": "current-occupancy-negative",
+    "name": "booking.availability.read",
+    "httpStatus": 201,
+    "expectedHttpStatus": 201,
+    "expectedStatusMatched": true,
+    "qualification": "AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL",
+    "status": "completed",
+    "keys": [
+      "timezone",
+      "booking_selection",
+      "slots"
+    ],
+    "error": null,
+    "contract": null,
+    "resultSha256": "4b7e8d5ee09adc5edb8272fb5d8951d6d234178f7c834b09ac421a4d75397481",
+    "appointments": null,
+    "services": null,
+    "slots": 0,
+    "widgetEmitted": false
+  }
+]

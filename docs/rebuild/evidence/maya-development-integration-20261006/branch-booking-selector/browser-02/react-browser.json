@@ -1,0 +1,1573 @@
+{
+  "contract": "maya.branch-booking-selector-browser/1",
+  "status": "passed",
+  "nativeYclientsAdapter": true,
+  "syntheticProviderTransport": true,
+  "syntheticA18Verifier": true,
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "typed-success-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nПроверка записи\n\nУслуга\n\nСинтетическая стрижка\n\n9 окт. 2026 г., 10:00 (Europe/Moscow) По данным системы записи\nСинтетический мастер\n30 мин По данным системы записи\n1000 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-success-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nПроверка записи\n\nУслуга\n\nСинтетическая стрижка\n\n9 окт. 2026 г., 10:00 (Europe/Moscow) По данным системы записи\n\nСинтетический мастер\n\n30 мин По данным системы записи\n\n1000 RUB По данным системы записи\n\nMAYA:\nЗапись подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-removed-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nПроверка записи\n\nУслуга\n\nСинтетическая стрижка\n\n9 окт. 2026 г., 10:00 (Europe/Moscow) По данным системы записи\nСинтетический мастер\n30 мин По данным системы записи\n1000 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-removed-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nПроверка записи\n\nУслуга\n\nСинтетическая стрижка\n\n9 окт. 2026 г., 10:00 (Europe/Moscow) По данным системы записи\n\nСинтетический мастер\n\n30 мин По данным системы записи\n\n1000 RUB По данным системы записи\n\nДанные изменились с момента показа. Откройте актуальную версию.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-unknown-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nПроверка записи\n\nУслуга\n\nСинтетическая стрижка\n\n9 окт. 2026 г., 10:00 (Europe/Moscow) По данным системы записи\nСинтетический мастер\n30 мин По данным системы записи\n1000 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить запись"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-unknown-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nПроверка записи\n\nУслуга\n\nСинтетическая стрижка\n\n9 окт. 2026 г., 10:00 (Europe/Moscow) По данным системы записи\n\nСинтетический мастер\n\n30 мин По данным системы записи\n\n1000 RUB По данным системы записи\n\nMAYA:\nРезультат пока не подтверждён. Не отправляйте повторно.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "personal-success-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑\nВыберите услугу\nЗакрыть окно\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАКРЫТЬ\nЗапись для себя\n\nОкно проверено на момент предложения. Запись появится только после подтверждённого результата.\n\nПроверьте запись\n\nФилиал: Синтетический филиал\n\nИзменить выбор\n\nСинтетическая борода · 800 RUB · 30 мин\n\nДругой синтетический мастер\n\n10 октября 2026 г. в 10:00 (Europe/Moscow)\n\nИсточник: CRM. Проверено: 07.10.2026, 20:58 UTC.\n\nПодтвердить личную запись",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Записаться для себя"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть окно"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Изменить выбор"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить личную запись"
+        }
+      ]
+    },
+    "personal-success-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑\nВыберите услугу\nЗакрыть окно\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАКРЫТЬ\nЗапись для себя\n\nЗапись подтверждена.\n\nЗапись подтверждена · 07.10.2026, 20:58 UTC\n\nПроверить результат",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Записаться для себя"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть окно"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Проверить результат"
+        }
+      ]
+    },
+    "personal-changed-preview": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑\nВыберите услугу\nЗакрыть окно\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАКРЫТЬ\nЗапись для себя\n\nОкно проверено на момент предложения. Запись появится только после подтверждённого результата.\n\nПроверьте запись\n\nФилиал: Синтетический филиал\n\nИзменить выбор\n\nСинтетическая борода · 800 RUB · 30 мин\n\nДругой синтетический мастер\n\n10 октября 2026 г. в 10:00 (Europe/Moscow)\n\nИсточник: CRM. Проверено: 07.10.2026, 20:58 UTC.\n\nПодтвердить личную запись",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Записаться для себя"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть окно"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Изменить выбор"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Подтвердить личную запись"
+        }
+      ]
+    },
+    "personal-changed-result": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑\nВыберите услугу\nЗакрыть окно\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАКРЫТЬ\nЗапись для себя\n\nПредложение изменилось. Проверьте записи и выберите время заново.\n\nПроверить результат",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Записаться для себя"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть окно"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Проверить результат"
+        }
+      ]
+    },
+    "typed-success-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапись подтверждена.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-removed-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "typed-unknown-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПокажи свободное время: Синтетический филиал, Синтетический мастер, Синтетическая стрижка, 2026-10-09\nMAYA:\nВыберите время для записи.\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nРезультат пока не подтверждён. Не отправляйте повторно.\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "personal-success-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВы:\nОткрыть личную запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑\nВыберите услугу\nЗакрыть окно\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАКРЫТЬ\nЗапись для себя\n\nЗапись для вашего подтверждённого клиентского профиля. Роль в компании не меняется.\n\nФилиал\nСинтетический филиал · Europe/MoscowДругой синтетический филиал · Europe/Moscow\nУслуга\nСинтетическая стрижкаСинтетическая борода\nМастер\nСинтетический мастерДругой синтетический мастер\nДата (ГГГГ-ММ-ДД)\nПоказать свободное время",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Записаться для себя"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть окно"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетический филиал · Europe/Moscow"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Другой синтетический филиал · Europe/Moscow"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетический мастер"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Другой синтетический мастер"
+        },
+        {
+          "tag": "INPUT",
+          "name": "Дата (ГГГГ-ММ-ДД)"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Показать свободное время"
+        }
+      ]
+    },
+    "personal-changed-reload": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВы:\nОткрыть личную запись\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nВы:\nХочу записаться\nMAYA:\nВыберите время для записи.\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\nСообщение для MAYA\n↑\nВыберите услугу\nЗакрыть окно\nВыберите услугу\n\nВыберите услугу\n\nСинтетическая стрижка\n30 мин По данным системы записи\n1000 RUB По данным системы записи\nНет данных\nНет данных\nСинтетическая борода\n30 мин По данным системы записи\n800 RUB По данным системы записи\nНет данных\nНет данных\nЗАКРЫТЬ\nЗапись для себя\n\nЗапись для вашего подтверждённого клиентского профиля. Роль в компании не меняется.\n\nФилиал\nСинтетический филиал · Europe/MoscowДругой синтетический филиал · Europe/Moscow\nУслуга\nСинтетическая стрижкаСинтетическая борода\nМастер\nСинтетический мастерДругой синтетический мастер\nДата (ГГГГ-ММ-ДД)\nПоказать свободное время",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Записаться для себя"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть окно"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетический филиал · Europe/Moscow"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Другой синтетический филиал · Europe/Moscow"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая стрижка"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетическая борода"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Синтетический мастер"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Другой синтетический мастер"
+        },
+        {
+          "tag": "INPUT",
+          "name": "Дата (ГГГГ-ММ-ДД)"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Показать свободное время"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "typed-successPreview": {
+      "branchName": "Синтетический филиал",
+      "timezone": "Europe/Moscow",
+      "staffName": "Синтетический мастер",
+      "serviceName": "Синтетическая стрижка",
+      "selectedStart": "2026-10-09T07:00:00.000Z"
+    },
+    "typed-successResult": {
+      "outcome": "terminate",
+      "code": null,
+      "stoppedAtGate": "13",
+      "receiptOutcome": "ACCEPTED",
+      "ownerState": "SUCCEEDED",
+      "hasSuccessor": false
+    },
+    "typed-removedPreview": {
+      "branchName": "Синтетический филиал",
+      "timezone": "Europe/Moscow",
+      "staffName": "Синтетический мастер",
+      "serviceName": "Синтетическая стрижка",
+      "selectedStart": "2026-10-09T07:00:00.000Z"
+    },
+    "typed-removedResult": {
+      "outcome": "superseded",
+      "code": "handle_stale",
+      "stoppedAtGate": "11",
+      "receiptOutcome": null,
+      "ownerState": null,
+      "hasSuccessor": false
+    },
+    "typed-unknownPreview": {
+      "branchName": "Синтетический филиал",
+      "timezone": "Europe/Moscow",
+      "staffName": "Синтетический мастер",
+      "serviceName": "Синтетическая стрижка",
+      "selectedStart": "2026-10-09T07:00:00.000Z"
+    },
+    "typed-unknownResult": {
+      "outcome": "terminate",
+      "code": null,
+      "stoppedAtGate": "13",
+      "receiptOutcome": "ACCEPTED",
+      "ownerState": "UNKNOWN",
+      "hasSuccessor": false
+    },
+    "personal-successPreview": {
+      "branchName": "Синтетический филиал",
+      "timezone": "Europe/Moscow",
+      "serviceName": "Синтетическая борода",
+      "staffName": "Другой синтетический мастер",
+      "date": "2026-10-10",
+      "preservedEachOtherParameter": true,
+      "priorPreviewDiscarded": true
+    },
+    "personal-successResult": {
+      "status": 201,
+      "errorCode": null,
+      "stateSummary": "CORRELATED_SUCCEEDED"
+    },
+    "personal-changedPreview": {
+      "branchName": "Синтетический филиал",
+      "timezone": "Europe/Moscow",
+      "serviceName": "Синтетическая борода",
+      "staffName": "Другой синтетический мастер",
+      "date": "2026-10-10",
+      "preservedEachOtherParameter": true,
+      "priorPreviewDiscarded": true
+    },
+    "personal-changedResult": {
+      "status": 409,
+      "errorCode": "booking_preview_stale",
+      "stateSummary": "STALE_PREVIEW_REFUSED"
+    },
+    "typed-successReload": {
+      "noCreateReplay": true,
+      "noAutomaticIntent": true,
+      "currentFormHasNoOldConfirmation": true
+    },
+    "typed-removedReload": {
+      "noCreateReplay": true,
+      "noAutomaticIntent": true,
+      "currentFormHasNoOldConfirmation": true
+    },
+    "typed-unknownReload": {
+      "noCreateReplay": true,
+      "noAutomaticIntent": true,
+      "currentFormHasNoOldConfirmation": true
+    },
+    "personal-successReload": {
+      "noCreateReplay": true,
+      "noAutomaticIntent": true,
+      "currentFormHasNoOldConfirmation": true
+    },
+    "personal-changedReload": {
+      "noCreateReplay": true,
+      "noAutomaticIntent": true,
+      "currentFormHasNoOldConfirmation": true
+    }
+  },
+  "carrierOrigin": "http://127.0.0.1:51655",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/available-slots",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments/preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/available-slots",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments/preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments/preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/available-slots",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments/preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/available-slots",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments/preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/personal-client/appointments",
+      "status": 409,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CRSPZBIV/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/intent",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/personal-client/appointments/results",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/services",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/staff",
+      "status": 200,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    },
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

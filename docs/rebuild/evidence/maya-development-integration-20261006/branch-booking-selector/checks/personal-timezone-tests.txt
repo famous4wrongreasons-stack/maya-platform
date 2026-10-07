@@ -1,0 +1,24 @@
+✔ only admitted personal child opens; closing/sign-out/expiry invalidation drops form and ignores late reads (0.793042ms)
+✔ selection invalidates preview, unknown choices cannot alter it, confirmation requires a fresh preview (1.084041ms)
+✔ explicit branch selection preserves all other choices, filters exact branch and binds preview/create (0.706416ms)
+✔ empty branch list preserves unscoped flow; selected unbound branch surfaces server failure without dispatch (0.255625ms)
+✔ branch projection keeps only server list display fields and rejects invalid/duplicate zones or identities (8.248083ms)
+✔ timezone changed after open refreshes metadata and preserves selection for one explicit fresh slot read (0.250791ms)
+✔ timezone drift during the slot read discards mixed facts without retry or confirmation (0.157667ms)
+✔ removed selected branch cannot silently fall back to unscoped availability (0.128291ms)
+✔ an initially unscoped form requires explicit choice if a branch appears before slots (0.157541ms)
+✔ double confirmation sends exact frozen selection once; only same canonical selection SUCCEEDED confirms (0.19125ms)
+✔ unrelated success cannot confirm UNKNOWN; refresh and recreated runtime never dispatch (0.242917ms)
+✔ revocation at preview prevents create; a pending older result blocks new booking even outside page (0.133667ms)
+✔ wire projection rejects malformed pending/result states and strips private preview extras (0.260708ms)
+✔ fixed personal wire adds literal header only on personal routes, encodes query and drops identity fields (9.916583ms)
+✔ forbidden at result read clears prior private facts even after exact succeeded (0.221666ms)
+✔ material fact refusal stays distinct from unknown after a transport or provider failure (0.448083ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.387875

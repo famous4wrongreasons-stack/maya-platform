@@ -1,0 +1,186 @@
+{
+  "contract": "maya.branch-booking-selector-evidence/1",
+  "status": "LOCAL_SYNTHETIC_QUALIFIED_CHECKPOINT",
+  "httpCandidateCommit": "180ee1ced789452e64c581ee10b5ea1613a46728",
+  "browserCandidateCommit": "a4e6c5434d3170edb28b901440eff8cdae24213b",
+  "httpSourcePaths": 1644,
+  "browserSourcePaths": 1707,
+  "backendTargetedTests": 501,
+  "backendTargetedSuites": 17,
+  "browserCheckpoints": 15,
+  "artifactCount": 41,
+  "files": {
+    "browser-02/browser-jest.json": {
+      "sha256": "4f5e81f4a675a69baeeb0748e282a486b4d20422f7d2b3d29cb1334ba43054dc",
+      "bytes": 1465
+    },
+    "browser-02/browser.json": {
+      "sha256": "e5d99744b8145fc811589b56fd80c752f4b2bb0d59330249aefaceba332dae1e",
+      "bytes": 8233
+    },
+    "browser-02/git-blob-binding.json": {
+      "sha256": "63270aecfb82c6afc3a095adae532d56584d59eb4a117cc7f5532a3aa9330fdc",
+      "bytes": 384743
+    },
+    "browser-02/manifest.json": {
+      "sha256": "2b9b27a4faf47c2472c85da06042cc555ed160721b7b3fe6a716af16b8a66f5c",
+      "bytes": 925
+    },
+    "browser-02/react-browser.json": {
+      "sha256": "d6bed9f194085e9d08a874c1725855da1e1ac6b968bd346434af48b6c697fd3b",
+      "bytes": 55981
+    },
+    "browser-02/screenshots/personal-changed-preview.png": {
+      "sha256": "c3f39190f5bc79727f66c913c372bd8ceb44977e8435358214135232df73f2b7",
+      "bytes": 128340
+    },
+    "browser-02/screenshots/personal-changed-reload.png": {
+      "sha256": "7c089070f00bac447f2a80036e3b25ce1fbdef94539a5f712c17150dab708878",
+      "bytes": 135907
+    },
+    "browser-02/screenshots/personal-changed-result.png": {
+      "sha256": "31c03546b5ce676a5eaa0768bc5fa1476aebabbbf66c464f0591dc1ab997d547",
+      "bytes": 95955
+    },
+    "browser-02/screenshots/personal-success-preview.png": {
+      "sha256": "f085432f73c9afbb4a73382d0a7917ec24aec68cfd93cb9b371bfe6ad6b123cf",
+      "bytes": 128345
+    },
+    "browser-02/screenshots/personal-success-reload.png": {
+      "sha256": "7c089070f00bac447f2a80036e3b25ce1fbdef94539a5f712c17150dab708878",
+      "bytes": 135907
+    },
+    "browser-02/screenshots/personal-success-result.png": {
+      "sha256": "0bb4d408d05932e195404942a4a13d1d2cd35ce934237473fada4a4dd63d719c",
+      "bytes": 97697
+    },
+    "browser-02/screenshots/typed-removed-preview.png": {
+      "sha256": "29c06f155e03df3eaffd34af239ea5e1630ca2dd4ebb5fd7364350d3f2405d90",
+      "bytes": 61522
+    },
+    "browser-02/screenshots/typed-removed-reload.png": {
+      "sha256": "d70ec82944730f7c6f49bc4097b956cbb5ddac4801fcda36cc1e5ea819f2698f",
+      "bytes": 50879
+    },
+    "browser-02/screenshots/typed-removed-result.png": {
+      "sha256": "1469a5becb15c86e1ccc0238cff76d6c1974b026bbcf2e049b6592bb6c7889e9",
+      "bytes": 62238
+    },
+    "browser-02/screenshots/typed-success-preview.png": {
+      "sha256": "19bfe8cf471273feb4d1a7a3b27d3bec1b7099d365eddaebf74249e61c821677",
+      "bytes": 61492
+    },
+    "browser-02/screenshots/typed-success-reload.png": {
+      "sha256": "74be6b38fd1a68cf1b627646081dd9b224458a478ea56f5f254572f91fec86bb",
+      "bytes": 57983
+    },
+    "browser-02/screenshots/typed-success-result.png": {
+      "sha256": "8c07fbe7b2bf5e09d1b59b366d9c3b2fdb5845d6debc873291988635d4f22d98",
+      "bytes": 59964
+    },
+    "browser-02/screenshots/typed-unknown-preview.png": {
+      "sha256": "19bfe8cf471273feb4d1a7a3b27d3bec1b7099d365eddaebf74249e61c821677",
+      "bytes": 61492
+    },
+    "browser-02/screenshots/typed-unknown-reload.png": {
+      "sha256": "abdd64bae7f81b65bcaf7564815b213751ed29535af0b0901352c96dc3ed4d2f",
+      "bytes": 60830
+    },
+    "browser-02/screenshots/typed-unknown-result.png": {
+      "sha256": "9c9f1ec76a0d27bdc99b334657dcea07fc6a4ac9e83b6c080bbb70e96a89c459",
+      "bytes": 62798
+    },
+    "browser-02/source-hashes.json": {
+      "sha256": "ebeadfb766a2931fadd0b2a25a62644860d67d50655d16ca2303d819ea1b0044",
+      "bytes": 206497
+    },
+    "browser-evidence-review.json": {
+      "sha256": "69864d04c141c2d6b49b8ba8106e2f369860f8eb8deab8859eb3b9edbed5e520",
+      "bytes": 1017
+    },
+    "checks/backend-lint.txt": {
+      "sha256": "87487021757bd6f855e8c0688b6863d685bab8e6971abc02bf3b03d9e7590d5c",
+      "bytes": 461
+    },
+    "checks/backend-targeted-tests.txt": {
+      "sha256": "a2a30c0bcb453faa7344fb0f4a32526d3137b82c074ad7db2283f9d579e2fe30",
+      "bytes": 1470
+    },
+    "checks/backend-types.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "checks/browser-guard-tests.txt": {
+      "sha256": "09bb0dfa49ed05c51afd15d2ddfb73b76aa06401560e86878cf8e003dbe8f4fd",
+      "bytes": 765
+    },
+    "checks/personal-timezone-tests.txt": {
+      "sha256": "d3c5e912e7af861b542fdaab5dec36216afbbee464097845ad9e79a407481099",
+      "bytes": 1914
+    },
+    "checks/react-typecheck.txt": {
+      "sha256": "9356222294f29ea60e87a096d594ba0defee4059f5b67768ff2c8d731e80cb2a",
+      "bytes": 126
+    },
+    "checks/shell-build.txt": {
+      "sha256": "795293e808c63d886aa3afe1b87ddcd3f676096bf2e942b5441fff32249ddc4f",
+      "bytes": 1010
+    },
+    "checks/stale-reason-intent-tests.txt": {
+      "sha256": "7eeca61c51bebc0e1d04887bb679b3f546f302045cab18517ef775605d332253",
+      "bytes": 942
+    },
+    "failed-browser-attempts.json": {
+      "sha256": "a53fbad90c7f7fb9c695dfcb353ed885b5a22a217f480a5c06510e1e220ced99",
+      "bytes": 994
+    },
+    "failed-http-attempts.json": {
+      "sha256": "e4af793243878c165ccfe1a6cb81beec81174fcfdd97620ca6ea687c7941d98e",
+      "bytes": 2932
+    },
+    "http-05/git-blob-binding.json": {
+      "sha256": "82ebbb4410004ca3dcdbead05483a95641b00cc07af74e161e23825fa53e497b",
+      "bytes": 372134
+    },
+    "http-05/manifest.json": {
+      "sha256": "74d988579f5f550830317fadfe28dfc20a6f73c549aee45ecd8faff9774ad365",
+      "bytes": 936
+    },
+    "http-05/prepare-jest.json": {
+      "sha256": "c2622b14f2c07d0f72921e1c33fddef48ef175a9bc5c24ad84eecc0cbe089e8c",
+      "bytes": 1463
+    },
+    "http-05/prepare.json": {
+      "sha256": "631606d4bc4ca1bbbf4cc843f1b5a3443e79f90f4466ddc66b74661229474475",
+      "bytes": 2774
+    },
+    "http-05/resume-jest.json": {
+      "sha256": "a6a2fc150e0a0b9778872508b095a20803ae7965647efb769ae30e674457fc3c",
+      "bytes": 1464
+    },
+    "http-05/resume.json": {
+      "sha256": "e4727dd1691538f0bac35725fc5f0ee6f247aa4a6b0efdb958b66f87db35286f",
+      "bytes": 10251
+    },
+    "http-05/source-hashes.json": {
+      "sha256": "a6bdface472928d22859b5997ccd2a9519e0861fab21d0191cf2d22857dc84cb",
+      "bytes": 199180
+    },
+    "http-checkpoint.json": {
+      "sha256": "d95d0c2387eb3ff8b9940c2e9d1b166b729f81acaa5afec084e8d90f9346dade",
+      "bytes": 1602
+    },
+    "http-evidence-review.json": {
+      "sha256": "236d0b81ab68e2cce82ca985cc73567fcbccbdc011d6c48a8c48285fb258fa74",
+      "bytes": 1375
+    }
+  },
+  "limitations": [
+    "Synthetic provider transport and scripted semantic selection only; no live model/provider acceptance.",
+    "HTTP restart crosses MINTED confirmation; no READY or already UNKNOWN ActionExecution restart acceptance.",
+    "Browser proof covers current React reload/relogin separately from HTTP/PG restart.",
+    "Exact source paths are Git-bound, not the entire deployment image/dependency installation.",
+    "Generic service-first typed chain still lacks original-turn branch/date context; partial branch chat clarifies instead."
+  ],
+  "qualification": "NOT_ISSUED"
+}

@@ -1,0 +1,95 @@
+{
+  "contract": "maya.keyless-profile-binding-artifact-verification/1",
+  "verificationScope": "EXISTING_SAFE_ARTIFACTS_AND_COMMITTED_GIT_BLOBS_ONLY_NO_RUNTIME_EXECUTION",
+  "verifiedAtUtc": "2026-10-07T20:47:54.096824+00:00",
+  "candidateCommit": "f49837166abc529ea6f699f028392dce30a20292",
+  "bindingManifestSha256": "c7101fd222690d6218db8c6ebea3cb35eda00d3a6e8c49ef103ae71c367d1818",
+  "keylessProfileSha256": "c44d1f0edda7890e1be4fc73d71f83fab73a2415248886010f63f90b1d8c5c4b",
+  "sourcePathsVerifiedAgainstGitBlobs": 41,
+  "fullManifestDigestVerified": true,
+  "keylessProfileDigestVerified": true,
+  "localObservationDigestVerified": true,
+  "appBrokerRequestHashesAndBytesMatch": true,
+  "appBrokerReservationCountersMatch": true,
+  "appLedgerScope": {
+    "dialogs": 3,
+    "turns": 4,
+    "attempts": 2
+  },
+  "brokerLedgerScope": {
+    "dialogs": 2,
+    "turns": 2,
+    "attempts": 2
+  },
+  "ledgerScopeQualification": "Broker sees only model-using dialogs/turns; zero-model explicit C9 turns are counted by the app ledger only.",
+  "sharedReservation": {
+    "inputTokens": 194558,
+    "outputTokens": 2400,
+    "reservedNanoUsd": 266320560
+  },
+  "reservationIsActualSpend": false,
+  "closedLedgers": [
+    "ledger.jsonl",
+    "broker-ledger.jsonl"
+  ],
+  "selectedDialogs": 3,
+  "selectedTurns": 4,
+  "sourcePreflights": 21,
+  "preflightStatuses": {
+    "201": 12,
+    "404": 4,
+    "503": 5
+  },
+  "selectedHttpStatuses": {
+    "201": 4
+  },
+  "deterministicExplicitC9Turns": 2,
+  "cannedTransports": 2,
+  "actualPaidCalls": 0,
+  "upstreamCalls": 0,
+  "externalFetchCalls": 0,
+  "providerWrites": 0,
+  "modelQuality": "NOT_EVALUATED",
+  "sourceProvider": "SYNTHETIC_READS_ONLY",
+  "occupancySourceQualification": "SYNTHETIC_BRANCH_QUALIFIED_DOMAIN_PORT_NOT_NATIVE_PROVIDER_ACCEPTANCE",
+  "maxRequestBytes": 93222,
+  "requestByteCap": 98304,
+  "brokerStopped": true,
+  "clusterStopped": true,
+  "postmasterPidFileAbsent": true,
+  "brokerActiveConnectionsAtStop": 0,
+  "brokerActiveRequestsAtStop": 0,
+  "cleanupEvidence": "Runner/broker reports and artifact-time postmaster.pid absence; no fresh process probe was executed.",
+  "nodeFocusedChecks": {
+    "passed": 18,
+    "failed": 0,
+    "skipped": 0,
+    "previousDirtyCandidatePositiveCliNowPassed": true
+  },
+  "metadataStatus": "INCOMPLETE",
+  "missingMetadata": [
+    "TARGET_PROFILE_UNKNOWN",
+    "PROCESS_PRINCIPALS_UNKNOWN",
+    "CREDENTIAL_REFERENCE_OWNER_READER_UNKNOWN",
+    "ISOLATION_INVENTORY_EVIDENCE_UNKNOWN",
+    "ISOLATION_EGRESS_EVIDENCE_UNKNOWN",
+    "ISOLATION_CREDENTIAL_ACCESS_EVIDENCE_UNKNOWN"
+  ],
+  "requiredBeforeLive": [
+    "TARGET_INVENTORY_PRINCIPALS_AND_ISOLATION_NOT_VERIFIED",
+    "TARGET_RESOURCE_HEADROOM_NOT_MEASURED",
+    "LIVE_BROKER_AND_PROFILE_BINDING_NOT_IMPLEMENTED",
+    "FINAL_TARGET_FULL_KEYLESS_PROOF_REQUIRED",
+    "CURRENT_PRICE_AND_ACCOUNT_MODEL_UNCHECKED",
+    "FRESH_OWNER_AUTHORIZATION_REQUIRED"
+  ],
+  "safeArchiveChecks": {
+    "credentialFieldNamesFound": 0,
+    "bearerJwtPrivateKeyValuesFound": 0,
+    "rawAuthOrEnvironmentFilesCopied": false,
+    "rawRequestBodiesCopied": false,
+    "rawServerLogsCopied": false,
+    "syntheticProviderAndModelMarkersVerified": true
+  },
+  "qualification": "NARROW_LOCAL_KEYLESS_PROFILE_BINDING_NOT_FULL_CORPUS_OR_MODEL_ACCEPTANCE"
+}

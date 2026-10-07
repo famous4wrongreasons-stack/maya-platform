@@ -1,0 +1,9 @@
+[Nest] 25639  - 10/07/2026, 11:52:12 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 25639  - 10/07/2026, 11:52:12 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 25639  - 10/07/2026, 11:52:12 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+[Nest] 25639  - 10/07/2026, 11:52:12 PM     LOG [WidgetMintProvenance] {"contract":"maya.widget-mint-provenance/1","trigger":"T-2b","route":"POST /api/ai/tools/:toolName/execute","request_id":null,"intent_token_hash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","widget_id":"33333333-3333-4333-8333-333333333333"}
+
+Test Suites: 17 passed, 17 total
+Tests:       501 passed, 501 total
+Snapshots:   0 total
+Time:        2.286 s, estimated 3 s
