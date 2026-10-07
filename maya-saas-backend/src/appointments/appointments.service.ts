@@ -483,8 +483,15 @@ export class AppointmentsService {
     };
   }
 
-  getAvailableSlots(tenantId: string, query: AvailableSlotsQueryDto) {
+  async getAvailableSlots(tenantId: string, query: AvailableSlotsQueryDto) {
     this.tenantContext.assertTenantId(tenantId);
+    // Same public visibility as available-days: selected branch must belong to
+    // this tenant. This is not a membership.branchId permission restriction.
+    if (query.branchId)
+      await this.tenantsService.assertBranchBelongsToTenant(
+        query.branchId,
+        tenantId,
+      );
     return this.crmService.getAvailableSlots(tenantId, query);
   }
 

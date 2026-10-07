@@ -1,3 +1,24 @@
+import { ServiceUnavailableException } from '@nestjs/common';
+
+/** The existing HTTP error envelope, not a completed/empty goods result. */
+export function goodsReadUnavailable(
+  code:
+    | 'goods_read_source_unavailable'
+    | 'goods_read_identity_unavailable'
+    | 'goods_read_provider_rejected'
+    | 'goods_read_item_unavailable',
+  cause?: unknown,
+): never {
+  throw new ServiceUnavailableException(
+    {
+      message:
+        'Актуальные сведения о товаре из CRM недоступны. Это не означает нулевой остаток.',
+      error: { code },
+    },
+    { cause },
+  );
+}
+
 /** Request-local catalog facts for the existing CRM owner. No stock receipt,
  * OCR confidence, mutation authority or persistent document is created here. */
 export interface GoodsItemRead {
@@ -74,10 +95,10 @@ export function observedGoodsItem(
     typeof rows[0] !== 'object' ||
     Array.isArray(rows[0])
   )
-    throw new Error('goods_read_source_unavailable');
+    goodsReadUnavailable('goods_read_source_unavailable');
   const row = rows[0] as Record<string, unknown>;
-  if (goodsId(row.good_id) !== expectedId || !text(row.title))
-    throw new Error('goods_read_identity_unavailable');
+  if (optionalId(row.good_id) !== expectedId || !text(row.title))
+    goodsReadUnavailable('goods_read_identity_unavailable');
   const currency =
     typeof configuredCurrency === 'string' &&
     /^[A-Z]{3}$/.test(configuredCurrency)

@@ -2,7 +2,13 @@ import {
   BadRequestException,
   ForbiddenException,
   UnauthorizedException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
+import {
+  CrmOutcomeUnknownError,
+  CrmProviderResponseError,
+  CrmRecordGoneError,
+} from './crm-request.errors';
 
 import {
   CrmIntegrationStatus,
@@ -365,11 +371,40 @@ describe('CrmService', () => {
     expect(findUnique).not.toHaveBeenCalled();
     await expect(read()).resolves.toEqual(result);
     expect(readGoodsItem).toHaveBeenCalledWith('tenant-a', '123');
+    for (const [cause, code] of [
+      [
+        new CrmOutcomeUnknownError('private provider transport detail'),
+        'goods_read_source_unavailable',
+      ],
+      [
+        new CrmProviderResponseError('private provider rejection', 403),
+        'goods_read_provider_rejected',
+      ],
+      [
+        new CrmRecordGoneError('private provider 404'),
+        'goods_read_item_unavailable',
+      ],
+    ] as const) {
+      readGoodsItem.mockRejectedValueOnce(cause);
+      const error = await read().catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(ServiceUnavailableException);
+      expect(error).toMatchObject({ cause, response: { error: { code } } });
+      expect(
+        JSON.stringify((error as ServiceUnavailableException).getResponse()),
+      ).not.toContain('private provider');
+    }
+    for (const cause of [
+      new Error('unexpected implementation error'),
+      new ForbiddenException('actor revoked'),
+    ]) {
+      readGoodsItem.mockRejectedValueOnce(cause);
+      await expect(read()).rejects.toBe(cause);
+    }
     delete adapter.readGoodsItem;
     await expect(read()).rejects.toThrow('qualified_goods_catalog_unavailable');
     calendarSource = 'internal';
     await expect(read()).rejects.toThrow('external_goods_catalog_unavailable');
-    expect(readGoodsItem).toHaveBeenCalledTimes(1);
+    expect(readGoodsItem).toHaveBeenCalledTimes(6);
   });
 
   it('requires a fresh token when switching from mock to a real provider', async () => {

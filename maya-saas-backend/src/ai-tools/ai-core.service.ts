@@ -2839,7 +2839,12 @@ export class AiCoreService {
     // салона мимо роли не отдаём — это и роль, и деньги сразу.
     const moneyWithoutAnalytics =
       (MONEY_INTENTS.has(brain.intent) ||
-        hintedDataTools.some((name) => name.startsWith('analytics.'))) &&
+        (hintedDataTools.some((name) => name.startsWith('analytics.')) &&
+          // A mixed hint is not financial authority. An allowed public/source
+          // alternative must reach semantic planning under current policy.
+          !hintedDataTools.some(
+            (name) => !name.startsWith('analytics.') && allowedNames.has(name),
+          ))) &&
       !analyticsEvidenceTool;
     // Третий и последний отказ: спросили про ЧУВСТВИТЕЛЬНУЮ семью — чужой
     // график, точный журнал дня, досье клиента, свои визиты или баллы, — а ни

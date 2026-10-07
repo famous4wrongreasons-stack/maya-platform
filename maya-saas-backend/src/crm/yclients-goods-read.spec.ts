@@ -1,4 +1,5 @@
 import { goodsId, observedGoodsItem } from './yclients-goods-read';
+import { ServiceUnavailableException } from '@nestjs/common';
 
 describe('YCLIENTS goods READ facts (synthetic documentation-shaped payload)', () => {
   const row = {
@@ -136,7 +137,9 @@ describe('YCLIENTS goods READ facts (synthetic documentation-shaped payload)', (
     [{ good_id: '456', title: 'Чужой товар' }],
     [{ good_id: '123', title: '' }],
   ])('rejects unavailable or mismatching exact source identity', (rows) => {
-    expect(() => observedGoodsItem(rows, '123', '5', 'RUB')).toThrow();
+    expect(() => observedGoodsItem(rows, '123', '5', 'RUB')).toThrow(
+      ServiceUnavailableException,
+    );
   });
   it.each(['../other', '0', '-1', '123?company_id=9', '', null, {}, 1.5])(
     'rejects invalid route ID %j',

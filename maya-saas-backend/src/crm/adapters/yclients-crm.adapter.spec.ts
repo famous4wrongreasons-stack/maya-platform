@@ -1,6 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { CrmProvider } from '../../common/domain.enums';
-import { CrmOutcomeUnknownError } from '../crm-request.errors';
+import {
+  CrmOutcomeUnknownError,
+  CrmProviderResponseError,
+} from '../crm-request.errors';
 import { YclientsCRMAdapter } from './yclients-crm.adapter';
 
 describe('YclientsCRMAdapter', () => {
@@ -30,6 +33,51 @@ describe('YclientsCRMAdapter', () => {
     process.env.YCLIENTS_PARTNER_TOKEN = originalPartnerToken;
     jest.useRealTimers();
     jest.restoreAllMocks();
+  });
+
+  it('classifies goods raw-body interruption and malformed envelopes without hiding program errors', async () => {
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic',
+      settings: { companyId: 5 },
+    });
+    const read = () => adapter.readGoodsItem('tenant', '123');
+    global.fetch = jest.fn().mockResolvedValue(new Response('null'));
+    await expect(read()).rejects.toMatchObject({
+      response: { error: { code: 'goods_read_source_unavailable' } },
+    });
+    for (const [status, meta] of [
+      [403, {}],
+      [200, []],
+    ] as const) {
+      global.fetch = jest.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: false,
+            meta: { message: meta },
+          }),
+          { status },
+        ),
+      );
+      await expect(read()).rejects.toBeInstanceOf(CrmProviderResponseError);
+    }
+    for (const name of ['AbortError', 'TypeError']) {
+      const cause = Object.assign(new Error('synthetic body interrupted'), {
+        name,
+      });
+      global.fetch = jest
+        .fn()
+        .mockResolvedValue({ text: () => Promise.reject(cause) });
+      await expect(read()).rejects.toMatchObject({
+        name: 'CrmOutcomeUnknownError',
+        cause,
+      });
+    }
+    const bug = new Error('unexpected body implementation defect');
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ text: () => Promise.reject(bug) });
+    await expect(read()).rejects.toBe(bug);
   });
 
   it('reads exact goods metadata fresh through one existing authenticated GET without writes or catalog fallback', async () => {
@@ -64,13 +112,13 @@ describe('YclientsCRMAdapter', () => {
       '120.00',
     );
     rows = [{ good_id: '456', title: 'Неверный товар' }];
-    await expect(adapter.readGoodsItem('tenant', '123')).rejects.toThrow(
-      'goods_read_identity_unavailable',
-    );
+    await expect(adapter.readGoodsItem('tenant', '123')).rejects.toMatchObject({
+      response: { error: { code: 'goods_read_identity_unavailable' } },
+    });
     rows = null;
-    await expect(adapter.readGoodsItem('tenant', '123')).rejects.toThrow(
-      'goods_read_source_unavailable',
-    );
+    await expect(adapter.readGoodsItem('tenant', '123')).rejects.toMatchObject({
+      response: { error: { code: 'goods_read_source_unavailable' } },
+    });
     await expect(adapter.readGoodsItem('tenant', '../123')).rejects.toThrow(
       'goods_read_invalid_id',
     );

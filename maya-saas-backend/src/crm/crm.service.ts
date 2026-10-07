@@ -12,7 +12,11 @@ import {
   GOODS_RECEIPT_TOOL,
   GOODS_RECEIPT_CAPABILITY,
 } from './goods-receipt.contract';
-import { goodsId, type GoodsItemRead } from './yclients-goods-read';
+import {
+  goodsId,
+  goodsReadUnavailable,
+  type GoodsItemRead,
+} from './yclients-goods-read';
 import {
   observedServiceCatalog,
   requireBookableServiceFacts,
@@ -141,6 +145,7 @@ import {
 import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
+  CrmProviderResponseError,
 } from './crm-request.errors';
 
 export type AppointmentActionInvocation = {
@@ -948,7 +953,19 @@ export class CrmService {
       throw new ServiceUnavailableException(
         'qualified_goods_catalog_unavailable',
       );
-    return adapter.readGoodsItem(scopedTenantId, exactId);
+    try {
+      return await adapter.readGoodsItem(scopedTenantId, exactId);
+    } catch (error) {
+      // Only known external READ failures become the existing 503 envelope.
+      // Preserve the cause; authorization, conflicts and program errors pass through.
+      if (error instanceof CrmOutcomeUnknownError)
+        goodsReadUnavailable('goods_read_source_unavailable', error);
+      if (error instanceof CrmRecordGoneError)
+        goodsReadUnavailable('goods_read_item_unavailable', error);
+      if (error instanceof CrmProviderResponseError)
+        goodsReadUnavailable('goods_read_provider_rejected', error);
+      throw error;
+    }
   }
 
   /** Explicit current actor scope for the external goods ingress. A branch

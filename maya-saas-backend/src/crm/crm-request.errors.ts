@@ -26,6 +26,18 @@ export class CrmRecordGoneError extends Error {
   }
 }
 
+/** A provider response rejected the request. Preserves the existing message;
+ * typed READ consumers can distinguish this from an unexpected program error. */
+export class CrmProviderResponseError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'CrmProviderResponseError';
+  }
+}
+
 /**
  * Исход неизвестен: ответа не было.
  *

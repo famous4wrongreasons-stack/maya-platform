@@ -14,6 +14,7 @@ import { AiToolPolicyService } from '../../src/ai-tools/ai-tool-policy.service';
 import { EntitlementsService } from '../../src/entitlements/entitlements.service';
 import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
 import type { CRMAdapter } from '../../src/crm/crm-adapter.interface';
+import { CrmOutcomeUnknownError } from '../../src/crm/crm-request.errors';
 import { observedGoodsItem } from '../../src/crm/yclients-goods-read';
 import { observedServiceCatalog } from '../../src/crm/service-catalog-read';
 import { servicePriceSnapshot } from '../../src/crm/yclients-service-price.contract';
@@ -40,6 +41,14 @@ const { CandidateBudgetGate, CANDIDATE_LIMITS } = nativeRequire(
   ),
 ) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
 const output = process.env.JEST_CANDIDATE_HTTP_OUTPUT!;
+// Only an owned keyless loopback broker may be contacted by this prerequisite.
+const loopbackFetch = globalThis.fetch;
+const brokerUrl = process.env.JEST_CANDIDATE_DRY_BROKER;
+if (
+  brokerUrl &&
+  !/^http:\/\/127\.0\.0\.1:\d{1,5}\/chat\/completions$/.test(brokerUrl)
+)
+  throw new Error('candidate_dry_broker_destination');
 if (
   !output ||
   !path.isAbsolute(output) ||
@@ -225,7 +234,11 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
             read('goods', tenantId);
             expect(goodsId).toBe('123');
             if (source.item.variant === 'negative')
-              return Promise.reject(new Error('synthetic_goods_unavailable'));
+              return Promise.reject(
+                new CrmOutcomeUnknownError(
+                  'synthetic_goods_transport_unavailable',
+                ),
+              );
             return Promise.resolve(
               observedGoodsItem(
                 [
@@ -382,12 +395,20 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       encoding: 'utf8',
     }).trim();
     const base = freezeCurrentCandidate(process.cwd(), candidate);
+    const groups = process.env.JEST_CANDIDATE_GROUPS?.split(',');
+    if (groups?.some((g) => !base.cases.some((c) => c.group === g)))
+      throw new Error('candidate_group_selection_invalid');
+    const selectedCases = base.cases.filter(
+      (c) => !groups || groups.includes(c.group),
+    );
     const bindingSources = [
       'test/jest-current-candidate-http.json',
       'test/widgets-live/support/current-candidate-mjs-transform.cjs',
       'test/widgets-live/current-candidate-http.probe-spec.ts',
       'test/widgets-live/support/current-candidate-sources.ts',
       'scripts/conversation-qualification/current-candidate-http.mjs',
+      'scripts/conversation-qualification/current-candidate-dry-broker.mjs',
+      'scripts/conversation-qualification/owned-child-cleanup.mjs',
       'src/ai-tools/planner-wire-context.ts',
       'src/conversation-intelligence/conversation-intelligence.service.ts',
       'src/widgets/composition/chat-read.trigger.ts',
@@ -399,6 +420,10 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         bindingSources.map((f) => [f, hash(readFileSync(f))]),
       ),
       sourceCorpusUnchanged: true,
+      selectedCaseIds: selectedCases.map((c) => c.id),
+      selection: groups
+        ? 'TARGETED_AFFECTED_BOUNDARIES'
+        : 'FULL_DEVELOPMENT_CORPUS',
     };
     const manifestSha256 = hash(JSON.stringify(manifest));
     write('candidate-manifest.json', {
@@ -410,11 +435,24 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       manifestSha256,
       candidateCommit: candidate,
       mode: 'OFFLINE_SYNTHETIC_ONLY',
-      transport: (_url, init) => {
+      transport: async (_url, init) => {
         transportCalls++;
         expect(init?.headers).toBeUndefined();
         if (typeof init?.body !== 'string')
           throw new Error('candidate_transport_body_missing');
+        if (brokerUrl)
+          return loopbackFetch(brokerUrl, {
+            method: 'POST',
+            body: init.body,
+            redirect: 'error',
+            signal: init.signal,
+            headers: {
+              'content-type': 'application/json',
+              'x-candidate-manifest': manifestSha256,
+              'x-candidate-case': active!.item.id,
+              'x-candidate-turn': String(currentTurn),
+            },
+          });
         const body = JSON.parse(init.body) as {
           response_format?: unknown;
         };
@@ -465,6 +503,13 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       await bindCandidateSource(db, http, fx, item, sources);
     const foreign = await fx.tenant('Separate foreign corpus tenant');
     const foreignUser = await fx.user(foreign, UserRole.CLIENT);
+    const foreignBranch = await db.prisma.branch.create({
+      data: {
+        tenantId: foreign.id,
+        name: 'Synthetic foreign branch',
+        timezone: 'Europe/Moscow',
+      },
+    });
     await db.prisma.internalProvider.create({
       data: {
         id: 'foreign-staff',
@@ -502,6 +547,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       name: string,
       args: Record<string, unknown> = {},
       endpoint?: string,
+      expectedOverride?: number,
     ) => {
       const response = endpoint
         ? await request(http.app.getHttpServer())
@@ -515,21 +561,41 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
           );
       const body = response.body as Record<string, unknown>;
       const result = (body.result ?? body) as Record<string, unknown>;
+      if (
+        name === 'inventory.goods.read' &&
+        source.item.variant === 'negative'
+      ) {
+        expect(response.status).toBe(503);
+        expect(body.error).toEqual({ code: 'goods_read_source_unavailable' });
+        expect(body.message).toContain('не означает нулевой остаток');
+        expect(body.result).toBeUndefined();
+        expect(body.resolution).toBeUndefined();
+        expect(JSON.stringify(body)).not.toContain('synthetic_goods_transport');
+        const failed = await db.prisma.aiToolExecution.findFirstOrThrow({
+          where: { tenantId: source.tenant.id, toolName: name },
+          orderBy: { createdAt: 'desc' },
+        });
+        expect(failed.status).toBe('failed');
+        expect(failed.errorCode).toBe('goods_read_source_unavailable');
+        expect(failed.encryptedResult).toBeNull();
+      }
       const revoked =
         source.item.group === 'lifecycle' && source.item.variant === 'negative';
-      const expectedStatus = revoked
-        ? 401
-        : name.includes('.foreign.snapshot')
-          ? 404
-          : endpoint
-            ? 200
-            : name === 'inventory.goods.read' &&
-                source.item.variant === 'negative'
-              ? 500
-              : name === 'catalog.service.price.update' &&
+      const expectedStatus =
+        expectedOverride ??
+        (revoked
+          ? 401
+          : name.includes('.foreign.snapshot')
+            ? 404
+            : endpoint
+              ? 200
+              : name === 'inventory.goods.read' &&
                   source.item.variant === 'negative'
-                ? 403
-                : 201;
+                ? 503
+                : name === 'catalog.service.price.update' &&
+                    source.item.variant === 'negative'
+                  ? 403
+                  : 201);
       preflights.push({
         caseId: source.item.id,
         name,
@@ -541,8 +607,8 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
           source.item.variant === 'negative' &&
           name === 'booking.availability.read'
             ? 'OBSERVATION_ONLY_PUBLIC_READ_DOES_NOT_PROVE_BRANCH_DENIAL'
-            : expectedStatus === 500
-              ? 'SOURCE_UNAVAILABLE_FAILS_CLOSED_WITH_CURRENT_HTTP_500_NOT_UX_ACCEPTANCE'
+            : expectedStatus === 503
+              ? 'KNOWN_SOURCE_FAILURE_HTTP_503_NO_GOODS_FACTS_NO_EFFECT'
               : 'AUTHENTICATED_SOURCE_OR_EXPECTED_REFUSAL',
         status: body.status ?? null,
         keys: Object.keys(result),
@@ -573,7 +639,101 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         expect(body.resolution).toBeUndefined();
       return result;
     };
-    for (const source of sources.values()) {
+    // Public INTERNAL availability admits another same-tenant branch. Current
+    // membership branch is not public catalog authority; foreign tenant is.
+    const publicSource = sources.get(
+      [...sources.values()].find(
+        (s) => s.item.id === 'current-booking-ordinary',
+      )!.tenant.id,
+    )!;
+    active = publicSource;
+    const otherBranch = await db.prisma.branch.create({
+      data: {
+        tenantId: publicSource.tenant.id,
+        name: 'Synthetic second public branch',
+        timezone: 'Europe/Moscow',
+      },
+    });
+    publicSource.privateValues.push(otherBranch.id, foreignBranch.id);
+    await db.prisma.membership.update({
+      where: {
+        userId_tenantId: {
+          userId: publicSource.user.id,
+          tenantId: publicSource.tenant.id,
+        },
+      },
+      data: { branchId: publicSource.branchId },
+    });
+    const publicStaff = await db.prisma.internalProvider.findMany({
+      where: { tenantId: publicSource.tenant.id },
+    });
+    for (const staff of publicStaff)
+      await db.prisma.internalProvider.update({
+        where: { id: staff.id },
+        data: {
+          branchId:
+            staff.displayName === 'Артём'
+              ? publicSource.branchId
+              : otherBranch.id,
+        },
+      });
+    const publicService = await db.prisma.internalService.findFirstOrThrow({
+      where: { tenantId: publicSource.tenant.id },
+    });
+    const branchEvidence: Record<string, unknown>[] = [];
+    for (const [branchId, expectedStatus] of [
+      [publicSource.branchId, 201],
+      [otherBranch.id, 201],
+      [foreignBranch.id, 404],
+      [randomUUID(), 404],
+    ] as const) {
+      const result = await preflight(
+        publicSource,
+        'booking.availability.read',
+        {
+          date: publicSource.startsAt,
+          service_ids: [publicService.id],
+          branch_id: branchId,
+        },
+        undefined,
+        expectedStatus,
+      );
+      if (expectedStatus === 201) {
+        const slots = result.slots as Array<{
+          branch_id: string;
+          staff_id: string;
+        }>;
+        expect(slots.length).toBeGreaterThan(0);
+        expect(slots.every((s) => s.branch_id === branchId)).toBe(true);
+        const allowedStaff = publicStaff
+          .filter(
+            (s) =>
+              (s.displayName === 'Артём'
+                ? publicSource.branchId
+                : otherBranch.id) === branchId,
+          )
+          .map((s) => s.id);
+        expect(slots.every((s) => allowedStaff.includes(s.staff_id))).toBe(
+          true,
+        );
+      } else expect(result.slots).toBeUndefined();
+      branchEvidence.push({
+        kind:
+          branchId === publicSource.branchId
+            ? 'MEMBERSHIP_BRANCH'
+            : branchId === otherBranch.id
+              ? 'OTHER_SAME_TENANT_BRANCH_ALLOWED'
+              : branchId === foreignBranch.id
+                ? 'FOREIGN_TENANT_REJECTED'
+                : 'UNKNOWN_BRANCH_REJECTED',
+        expectedStatus,
+        source: 'ACTUAL_INTERNAL_CALENDAR',
+      });
+    }
+    const selectedSources = [...sources.values()].filter((s) =>
+      selectedCases.some((c) => c.id === s.item.id),
+    );
+    for (const source of selectedSources) {
       active = source;
       currentTurn = 0;
       const group = source.item.group;
@@ -617,17 +777,8 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
         await preflight(source, 'staff.schedule.own.read', {
           date: source.startsAt.slice(0, 10),
         });
-      if (group === 'staff_config' && source.item.variant === 'negative') {
-        const denied = source.sourceRefs.find(
-          (r) => r.owner === 'MEMBERSHIP_BRANCH_SCOPE',
-        )!;
-        await preflight(source, 'booking.availability.read', {
-          date: source.startsAt,
-          branch_id: denied.id,
-          staff_id: '71',
-          service_ids: ['81'],
-        });
-      }
+      // External configured-company fixtures do not prove a Maya branch mapping.
+      // Cross-branch public visibility is qualified with INTERNAL sources above.
       if (group === 'bi') {
         const own = source.sourceRefs.find((r) => r.owner === 'C7')!;
         const other = [...sources.values()].find(
@@ -686,7 +837,7 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
     expect(modelInputs).toEqual([]);
     expect(requests).toEqual([]);
     write('source-preflights.json', preflights);
-    for (const source of sources.values()) {
+    for (const source of selectedSources) {
       active = source;
       if (!admissionFailure) gate.dialog();
       const tools = await request(http.app.getHttpServer())
@@ -872,6 +1023,20 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
             expect(modelInputs.length).toBe(beforeModel);
             expect(source.reads.length).toBe(beforeReads);
           }
+          if (
+            !admissionFailure &&
+            source.item.id === 'current-admin-correction' &&
+            index === 0
+          ) {
+            expect(modelInputs.length).toBeGreaterThan(beforeModel);
+            expect(body.grounding?.status).not.toBe('blocked');
+            expect(modelInputs.at(-1)?.actualTools).toContain(
+              'catalog.staff.read',
+            );
+            expect(modelInputs.at(-1)?.actualTools).not.toContain(
+              'analytics.business.query',
+            );
+          }
           const explicitOccupancyTurn =
             source.item.group === 'occupancy' &&
             ['ordinary', 'correction'].includes(source.item.variant) &&
@@ -929,6 +1094,9 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       ),
       transportCalls,
       actualPaidCalls: 0,
+      brokerMode: brokerUrl
+        ? 'SEPARATE_PROCESS_NO_UPSTREAM_ONLY'
+        : 'IN_PROCESS_CANNED_ONLY',
       externalFetchCalls: 0,
       providerWrites: 0,
       modelQuality: 'NOT_EVALUATED',
@@ -956,11 +1124,15 @@ describe('Current corpus actual authenticated HTTP / canned transport mechanics'
       })),
       authWithoutToken: unauth.status,
       sourceCorpusUnchanged: true,
+      selectedCaseIds: selectedCases.map((c) => c.id),
+      selectedDialogs: selectedCases.length,
+      selectedTurns: selectedCases.reduce((n, c) => n + c.userTurns.length, 0),
+      branchEvidence,
       fixtureSourceLanguageAcceptance: false,
       qualificationLimits: [
         'Fixed canned clarification does not select or explain domain sources; source preflight is separate.',
-        'Public availability has no membership-branch denial contract; scoped price preparation refusal is tested separately.',
-        'Current goods source unavailability returns HTTP 500; no substitute item or effect is authorized.',
+        'Public INTERNAL availability allows another same-tenant branch and rejects foreign/unknown branch; YCLIENTS configured-company-to-Maya-branch mapping remains unqualified.',
+        'Known goods source unavailability returns HTTP 503 with a stable error code; unexpected program errors remain errors, not empty goods facts.',
         'Authored absolute October remains an open period at the real fixture date; no full-month result is claimed.',
         'Zero-model deterministic paths contribute zero model coverage; no real model or provider acceptance.',
       ],

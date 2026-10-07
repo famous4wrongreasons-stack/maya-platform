@@ -18,6 +18,7 @@ import {
 import {
   goodsId,
   observedGoodsItem,
+  goodsReadUnavailable,
   type GoodsItemRead,
 } from '../yclients-goods-read';
 import {
@@ -44,6 +45,7 @@ import {
   CRM_REQUEST_TIMEOUT_MS,
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
+  CrmProviderResponseError,
   isUnknownOutcomeCause,
 } from '../crm-request.errors';
 import {
@@ -4134,7 +4136,17 @@ export class YclientsCRMAdapter implements CRMAdapter {
     let payload: YclientsResponse<TData> = {};
 
     if (typeof response.text === 'function') {
-      const rawText = await response.text();
+      let rawText: string;
+      try {
+        rawText = await response.text();
+      } catch (error) {
+        if (isUnknownOutcomeCause(error))
+          throw new CrmOutcomeUnknownError(
+            `YClients response body was interrupted (${init?.method || 'GET'} ${path})`,
+            error,
+          );
+        throw error;
+      }
 
       if (rawText.trim().length > 0) {
         // 🔴 Тело не всегда JSON. Защитный экран или страница ошибки отдают
@@ -4163,8 +4175,17 @@ export class YclientsCRMAdapter implements CRMAdapter {
       payload = (await response.json()) as YclientsResponse<TData>;
     }
 
+    if (
+      init?.preserveGoodsNumbers &&
+      (!payload || typeof payload !== 'object' || Array.isArray(payload))
+    )
+      goodsReadUnavailable('goods_read_source_unavailable');
+
     if (!response.ok) {
-      const providerMessage = payload.meta?.message?.trim();
+      const providerMessage =
+        typeof payload.meta?.message === 'string'
+          ? payload.meta.message.trim()
+          : undefined;
       const message = providerMessage
         ? `YClients request failed with status ${response.status}: ${providerMessage}`
         : `YClients request failed with status ${response.status}`;
@@ -4177,7 +4198,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         throw new CrmRecordGoneError(message);
       }
 
-      throw new Error(message);
+      throw new CrmProviderResponseError(message, response.status);
     }
 
     // 🔴 YClients отказывает СТАТУСОМ 200. Тело при этом несёт
@@ -4187,11 +4208,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
     // была бонусная карта, а владелец видел ноль баллов и считал, что
     // карты не существует. Отказ обязан звучать как отказ.
     if (payload.success === false) {
-      const providerMessage = payload.meta?.message?.trim();
-      throw new Error(
+      const providerMessage =
+        typeof payload.meta?.message === 'string'
+          ? payload.meta.message.trim()
+          : undefined;
+      throw new CrmProviderResponseError(
         providerMessage
           ? `YClients rejected the request: ${providerMessage}`
           : 'YClients rejected the request without a reason',
+        response.status,
       );
     }
 

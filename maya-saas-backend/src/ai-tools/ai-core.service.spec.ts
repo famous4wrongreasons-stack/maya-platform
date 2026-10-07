@@ -1323,6 +1323,72 @@ describe('AiCoreService', () => {
     },
   );
 
+  it.each([UserRole.ADMINISTRATOR, UserRole.TENANT_OWNER])(
+    'lets %s ask a public staff question without analytics entitlement',
+    async (role) => {
+      const mocks = createService(['catalog.staff.read']);
+      mocks.model.decide.mockResolvedValueOnce(
+        decision({
+          reply: null,
+          toolCall: { name: 'catalog.staff.read', arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'employees.list_public',
+                  entities: {},
+                  confidence: 0.99,
+                },
+              ],
+            },
+            role,
+            ['catalog.staff.read'],
+          ),
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValueOnce({
+        status: 'completed',
+        execution_id: 'public-source',
+        result: { staff: [{ name: 'Тестовый мастер', title: 'Барбер' }] },
+      });
+      const out = await mocks.service.chat(
+        { ...user, role },
+        {
+          ...dto,
+          messages: [{ role: 'user', content: 'Какие мастера работают?' }],
+        },
+      );
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(out.grounding).toMatchObject({
+        status: 'verified',
+        domain: 'staff_catalog',
+      });
+      expect(out.reply).toContain('Тестовый мастер');
+    },
+  );
+
+  it.each([
+    'Какая выручка бизнеса за месяц?',
+    'Какой график у мастера завтра?',
+  ])(
+    'does not let a public staff tool substitute protected evidence: %s',
+    async (content) => {
+      const mocks = createService(['catalog.staff.read']);
+      const out = await mocks.service.chat(
+        { ...user, role: UserRole.ADMINISTRATOR },
+        {
+          ...dto,
+          messages: [{ role: 'user', content }],
+        },
+      );
+      expect(out.grounding).toMatchObject({ status: 'blocked' });
+      expect(mocks.model.decide).not.toHaveBeenCalled();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    },
+  );
+
   it('keeps a compound public catalog plan in its existing continuation', async () => {
     const mocks = createService([
       'catalog.staff.read',
