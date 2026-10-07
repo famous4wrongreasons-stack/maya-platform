@@ -353,11 +353,12 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
             }
             expect(m.type).toBe('checkpoint');
             expect(m.name).toBe(
-              scenarios.flatMap((s) =>
-                ['preview', 'result', 'reload'].map(
-                  (stage) => s.key + '-' + stage,
+              [
+                ...scenarios.flatMap((s) =>
+                  ['preview', 'result'].map((stage) => s.key + '-' + stage),
                 ),
-              )[checkpoints.length],
+                ...scenarios.map((s) => s.key + '-reload'),
+              ][checkpoints.length],
             );
             const s = scenarios.find((s) => m.name.startsWith(s.key + '-'))!;
             const where = { tenantId: s.tenant.id };

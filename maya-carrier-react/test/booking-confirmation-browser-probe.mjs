@@ -185,9 +185,10 @@ async function main() {
       const ref = effect === 'DRAFT' ? 'slot:' + selected : 'option:' + selected;
       return clickRef(page, ref);
     };
+    const reloads = [];
     for (const scenario of input.scenarios) {
       const page = await newPage(origin);
-      await login(page, scenario.email);
+      const nextLoginAt = await login(page, scenario.email);
       const before = page.apiRequests('/ai/chat').length;
       await sendClientRequest(page, PROMPTS.catalog);
       const response = await answer(page, before);
@@ -224,8 +225,14 @@ async function main() {
       if (scenario.key === 'unknown') assert.equal(result.owner_decision?.state, 'UNKNOWN');
       await capture(page, scenario.key + '-result');
       await checkpoint(scenario.key + '-result', { result });
+      reloads.push({ page, scenario, commit, expectedText, nextLoginAt });
+    }
+    // The current web carrier keeps its grant in memory. A reload requires real
+    // UI authentication again; respect the existing email cooldown unchanged.
+    for (const { page, scenario, commit, expectedText, nextLoginAt } of reloads) {
+      while (Date.now() < nextLoginAt) await pause(Math.min(1000, nextLoginAt - Date.now()));
       await page.goto(origin + '/');
-      assert.ok(await page.waitFor('!!Q.composer()'));
+      await login(page, scenario.email);
       if (expectedText) assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(expectedText)})`));
       if (scenario.key !== 'success') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
       if (scenario.key === 'unknown') {
