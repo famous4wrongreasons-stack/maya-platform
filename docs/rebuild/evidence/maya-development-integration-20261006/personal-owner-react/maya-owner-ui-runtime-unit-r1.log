@@ -1,0 +1,15 @@
+✔ only admitted personal child opens; closing/sign-out/expiry invalidation drops form and ignores late reads (0.696ms)
+✔ selection invalidates preview, unknown choices cannot alter it, confirmation requires a fresh preview (0.956125ms)
+✔ double confirmation sends exact frozen selection once; only same canonical selection SUCCEEDED confirms (0.475ms)
+✔ unrelated success cannot confirm UNKNOWN; refresh and recreated runtime never dispatch (0.332958ms)
+✔ revocation at preview prevents create; a pending older result blocks new booking even outside page (0.166ms)
+✔ wire projection rejects malformed pending/result states and strips private preview extras (7.408125ms)
+✔ fixed personal wire adds literal header only on personal routes, encodes query and drops identity fields (8.812291ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 78.979167

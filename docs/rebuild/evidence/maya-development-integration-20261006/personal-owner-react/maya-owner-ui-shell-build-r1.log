@@ -1,0 +1,8 @@
+contract: #contract -> 270 declarations in os.tmpdir(); 201 exports (+1 pending name) in the collision set
+baseline: 0 live entries (build-baseline/routes.json absent, build-baseline/renderer.json absent); 0 refused sites admitted by it
+BUILD REFUSED — 5 refusal(s):
+  import-allowlist   src/shell/personal-booking.ts:3  shell/ may not import net (§1.2)
+  pure-typecheck     src/net/personal.ts:55  Variable 'results' implicitly has type 'any[]' in some locations where its type cannot be determined.
+  pure-typecheck     src/net/personal.ts:56  Variable 'results' implicitly has an 'any[]' type.
+  typecheck          src/net/personal.ts:55  Variable 'results' implicitly has type 'any[]' in some locations where its type cannot be determined.
+  typecheck          src/net/personal.ts:56  Variable 'results' implicitly has an 'any[]' type.

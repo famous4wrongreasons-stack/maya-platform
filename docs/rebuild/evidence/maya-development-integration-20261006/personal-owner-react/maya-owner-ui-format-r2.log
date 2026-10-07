@@ -1,0 +1,12 @@
+src/appointments/personal-client-read.service.ts 28ms
+src/appointments/personal-client-read.service.spec.ts 13ms (unchanged)
+src/widgets/booking/personal-schedule.presenter.ts 5ms
+src/widgets/booking/personal-schedule.presenter.spec.ts 1ms
+src/widgets/emission/emitter.service.ts 27ms
+src/widgets/emission/envelope.factory.ts 22ms
+src/widgets/emission/intent-template.registry.ts 16ms (unchanged)
+src/widgets/owner-ports/personal-schedule.adapter.ts 4ms
+src/widgets/owner-ports/personal-schedule.port.ts 1ms (unchanged)
+src/widgets/routing/effect-router.ports.ts 4ms
+src/widgets/routing/effect-router.service.ts 19ms
+test/widgets-live/personal-owner-react.probe-spec.ts 14ms

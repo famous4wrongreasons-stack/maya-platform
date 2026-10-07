@@ -1,0 +1,25 @@
+PASS src/widgets/booking/personal-schedule.presenter.spec.ts
+FAIL src/widgets/emission/envelope.factory.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/emission/envelope.factory.spec.ts'
+
+      at runTestInternal (../node_modules/jest-runner/build/index.js:133:27)
+
+FAIL src/widgets/emission/emitter.service.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/widgets/emission/emitter.service.spec.ts'
+
+      at runTestInternal (../node_modules/jest-runner/build/index.js:133:27)
+
+PASS src/appointments/personal-client-read.service.spec.ts
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+PASS src/widgets/routing/effect-router.service.spec.ts
+
+Test Suites: 2 failed, 4 passed, 6 total
+Tests:       48 passed, 48 total
+Snapshots:   0 total
+Time:        0.703 s, estimated 1 s
+Ran all test suites within paths "src/appointments/personal-client-read.service.spec.ts", "src/widgets/booking/personal-schedule.presenter.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/emission/emitter.service.spec.ts", "src/widgets/emission/envelope.factory.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-owner-ui-backend-unit-r2.json

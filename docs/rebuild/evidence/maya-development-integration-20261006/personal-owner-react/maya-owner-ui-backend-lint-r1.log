@@ -1,0 +1,9 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/appointments/personal-client-read.service.ts
+  60:13  warning  Unsafe argument of type error typed assigned to a parameter of type `string`  @typescript-eslint/no-unsafe-argument
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/personal-owner-react.probe-spec.ts
+  3:8  error  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (1 error, 1 warning)
+

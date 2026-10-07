@@ -1,0 +1,120 @@
+✔ PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line (66.267167ms)
+✖ typed methods only: the two widget methods are explicit; no generic request or token accessor (0.782583ms)
+✔ widget transport sends only typed bodies and retains only authorized response members (9.102083ms)
+✔ NS-1: `resolved_widget` survives projection in its envelope shape only; every other shape is null, never a rejection (2.58975ms)
+✔ email start keeps {next_step} only — debug_code never survives (0.284375ms)
+✔ email verify (one business): tokens + TOP-LEVEL tenant.name + user.name; every other key dropped (0.467083ms)
+✔ email verify (select_business): businesses[].role dropped, slug echoed verbatim at re-verify (0.218ms)
+✔ password login: body keys exactly {tenantSlug, email, password}; tenant NESTED at user.tenant; null name → "" (0.316417ms)
+✔ signInPassword refuses an empty business address before any request (V2-6) (0.0905ms)
+✔ refresh: tokens + session only → grant; display stays what sign-in set (0.4665ms)
+✔ malformed success bodies are unexpected_response, never a partial sign-in (0.289042ms)
+✔ the password path never tells an existing account from a wrong password: /auth/login 401, 403 (either body) and 404 are one state (0.096416ms)
+✔ §1.4 sign-in failure table: every row maps to its named state; silent login outcomes = 0 (1.134416ms)
+✔ row 9 client-side: the same field state before sending, 0 requests (IsEmail shape, 4..8 digits, MinLength 8) (0.06025ms)
+✔ row 10: a sign-in request that times out is no_connection (27.175375ms)
+✔ row 11: /ai/chat → 403 tenant_required is its own named failure (0.424375ms)
+✔ /ai/chat request: exactly {surface, requestId, messages}, surface "web", Bearer, omit, no-store; no audience or tenant on the wire (0.241375ms)
+✔ approval_required: action_status copies action.status only — never action.approval (V2-5) (0.220375ms)
+✔ B4: /ai/chat retains one exact SH-19 authorized envelope and rejects an incomplete substitute (0.584625ms)
+✔ /ai/chat taxonomy: 402, 403×3, 429, 400, 503 modelFailure, 409, 502/network, 5xx, unexpected — one named failure each (1.027833ms)
+✔ /ai/chat timeout (80 s in production) is no_connection; a caller abort is aborted (32.08725ms)
+✔ 401 → one refresh → one retry with the new bearer (0.459125ms)
+✔ two or more parallel 401s produce exactly one /auth/refresh (single flight); every call retried with the new bearer (20.809333ms)
+✔ a 401 that arrives after another call already refreshed reuses the new grant (no second refresh) (5.431375ms)
+✔ proactive refresh within 30 s of expiry: parallel calls share one refresh (12.359792ms)
+✔ terminal refresh codes end the session with that reason, notify once, and send no retry (0.703125ms)
+✔ refresh that cannot complete now keeps the session: 429 → rate_limited, network → no_connection (0.3735ms)
+✔ refresh 400 validation, 401 without a code and a malformed 2xx each end the session (no silent loop) (0.508958ms)
+✔ a 401 on the retry after a successful refresh ends the session (session_revoked); never a loop (0.207209ms)
+✔ a lapsed refresh token ends the session as session_expired with 0 requests (0.079917ms)
+✔ aborting a turn while it waits on a shared refresh returns aborted at once; the refresh still lands (11.991375ms)
+✔ /ai/transcribe: body exactly {audioBase64}; {transcript} kept; failures mapped (§1.9) (27.07575ms)
+✔ never signed in: view reason null; chat and transcribe answer signed_out with 0 requests (0.115792ms)
+✔ signOut: signed out locally at once, then /auth/logout with the bearer; later calls send nothing (0.290541ms)
+✔ signOut never throws when logout fails, and a failing subscriber does not stop the others (12.917083ms)
+✔ signOut with an expired access token refreshes once to revoke; the refreshed grant is never installed (0.438333ms)
+✔ signOut after the refresh token lapsed sends nothing: there is no server session left to revoke (0.16175ms)
+✔ signOut during an in-flight refresh: logout uses the refreshed bearer; the waiting turn ends signed_out (5.930583ms)
+✔ a grant from a later sign-in is never handed to a call made under the earlier one (7.381625ms)
+✔ the purity gates admit src/net/** as written (fetch shape, PATHS, surface, audience, globals, imports, collisions) (2883.714708ms)
+✔ the gates are not vacuous over these files: a tenth path, a second fetch, a storage read and surface "voice" are refused (186.721375ms)
+✔ createNet() is structurally SessionPort + Transport (shell/ports.ts, frozen in S0) with no adapter (145.023417ms)
+✔ no storage, no document, no cookie: never touched at runtime, never named in src/net (0.476708ms)
+✔ the finder: one GET to the allowlisted path, the term percent-encoded, no body and no content type (0.309166ms)
+✔ the finder refuses a one-character term before any request, and names the server's own minimum (0.033917ms)
+✔ Telegram start: the web body names this page's callback, the native body names none, and only Telegram's own URL is followed (0.400792ms)
+✔ the landing signs in: body exactly {state, code}, the login projection reused verbatim, is_new_user carried (0.221542ms)
+✔ a callback nobody here asked for is refused before any request — the whole defence against a delivered pair (0.09775ms)
+✔ one login, one landing: the second delivery of the same callback is refused without spending a request (0.13875ms)
+✔ the two carriers land the same callback: an object from the native shim, this page’s fragment on the web (0.383166ms)
+✔ a fragment that is not exactly a callback is not one: no mark, a repeated key, a bad escape, a route (0.326334ms)
+✔ the provider said no: error=access_denied is its own state and sends nothing (0.065375ms)
+✔ every completion failure the server can answer is a named state, and each one restarts the login (0.899333ms)
+✔ a 2xx that is not a login does not sign anyone in (0.268542ms)
+✔ conversation history is authenticated GET with no selector/body, refreshes once, and strips action authority (0.516041ms)
+✔ every request of this suite went to an approved URL, and all approved URLs were exercised (0.0435ms)
+✔ a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names (15.0225ms)
+✔ only admitted personal child opens; closing/sign-out/expiry invalidation drops form and ignores late reads (0.709709ms)
+✔ selection invalidates preview, unknown choices cannot alter it, confirmation requires a fresh preview (1.122833ms)
+✔ double confirmation sends exact frozen selection once; only same canonical selection SUCCEEDED confirms (0.540917ms)
+✔ unrelated success cannot confirm UNKNOWN; refresh and recreated runtime never dispatch (0.34925ms)
+✔ revocation at preview prevents create; a pending older result blocks new booking even outside page (0.193708ms)
+✔ wire projection rejects malformed pending/result states and strips private preview extras (8.182209ms)
+✔ fixed personal wire adds literal header only on personal routes, encodes query and drops identity fields (10.447917ms)
+✔ initial state: the conversation is open, the primary route is shell.root, nothing is fullscreen (0.607084ms)
+✔ pure transitions: only the five base routes are primary; one detail at a time; closing always works (0.180208ms)
+✔ no route key or URL opens a fullscreen: the module has no key-based opener (0.394083ms)
+✔ PROGRESS → OPEN → close: one history entry for the current address, popped once; the opener is kept for focus return (0.220666ms)
+✔ Back closes the detail without popping another entry; Esc/Close pops the entry it pushed (0.08ms)
+✔ closeProgress closes only a PROGRESS detail for that item; navigate closes any detail (P-06: the conversation is one action away) (0.078291ms)
+✔ presentDetail refuses without a source, without a timeline opener, and when the source refuses (0.076875ms)
+✔ sign-out closes the detail and returns to the root route (0.100625ms)
+✔ signed out, the primary route stays the root (SH-04); a route landed while signed out applies at sign-in (0.091334ms)
+✔ the runtime: one widget port for the DOM, a real detail at SHEET density, and the fragment landed without a request (12.968959ms)
+✔ P-B4: a successful chat resolution reaches the existing H7/vault/renderer path without a second transport (1.177416ms)
+✔ login restores only bounded booking terminal prose through the existing reader, without widget activation (0.53925ms)
+ℹ tests 76
+ℹ suites 0
+ℹ pass 75
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3606.24375
+
+✖ failing tests:
+
+test at maya-chat-shell/test/net.test.mjs:350:1
+✖ typed methods only: the two widget methods are explicit; no generic request or token accessor (0.782583ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'chat',
+      'conversation',
+  +   'personalCreate',
+  +   'personalPreview',
+  +   'personalResults',
+  +   'personalServices',
+  +   'personalSlots',
+  +   'personalStaff',
+      'resolveWidgets',
+      'transcribe',
+      'widgetIntent'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/net.test.mjs:362:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'chat', 'conversation', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent' ],
+    expected: [ 'chat', 'conversation', 'resolveWidgets', 'transcribe', 'widgetIntent' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

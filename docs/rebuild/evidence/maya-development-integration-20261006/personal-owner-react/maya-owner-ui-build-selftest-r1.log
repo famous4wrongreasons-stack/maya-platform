@@ -1,0 +1,18 @@
+✔ self-test: every refuse fixture refused with its named rule, every admit fixture admitted (4968.606542ms)
+✔ self-test is not vacuous: a planted admit, an empty refuse and a misnamed rule each fail (2745.163041ms)
+✔ a planted fetch in the renderer is refused while the baseline is live (the K5 mutation, on a virtual copy) (2620.481833ms)
+✔ reflection cannot reach a sink, a page object or a store: the reflection row is required and refused 13/13 (integration finding: Reflect bypass) (2898.446959ms)
+✔ every shell source under src/ and entry/ is text: no NUL or other C0 control character (5.109792ms)
+✔ the build refuses a raw control character in a source (k5-text) and admits its escape (3013.157458ms)
+✔ write guard: nothing is written outside outDir, directly or by a tsc emit that resolves there (211.564166ms)
+✔ the emitted module graph imports in Node (every module outside entry/) (3778.227958ms)
+✔ digests are identical under LANG=en_US.UTF-8 and LANG=et_EE.UTF-8, and the locale really differed (7906.275458ms)
+✔ the build prints the live baseline count, and it never exceeds the eight admissible entries (3900.152958ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32196.111333

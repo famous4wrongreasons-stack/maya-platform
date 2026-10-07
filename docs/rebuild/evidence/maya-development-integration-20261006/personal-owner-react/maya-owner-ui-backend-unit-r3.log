@@ -1,0 +1,13 @@
+PASS src/appointments/personal-client-read.service.spec.ts
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/widgets/routing/effect-router.service.spec.ts
+PASS src/widgets/booking/personal-schedule.presenter.spec.ts
+PASS src/widgets/emission/intent-template.registry.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       77 passed, 77 total
+Snapshots:   0 total
+Time:        0.687 s, estimated 1 s
+Ran all test suites within paths "src/appointments/personal-client-read.service.spec.ts", "src/widgets/booking/personal-schedule.presenter.spec.ts", "src/widgets/routing/effect-router.service.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-owner-ui-backend-unit-r3.json
