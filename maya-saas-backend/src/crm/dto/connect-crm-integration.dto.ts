@@ -25,6 +25,8 @@ export class ConnectCrmIntegrationDto {
 
   @ApiPropertyOptional({
     type: Object,
+    description:
+      'Optional branchBinding: { contract: "maya.crm-branch-binding/1", companyId, branchId }. Explicit tenant-owned pair only; null clears binding. Changes stage pending activation.',
     example: { companyId: 123456, activeMasterIds: [111, 222] },
   })
   @IsOptional()

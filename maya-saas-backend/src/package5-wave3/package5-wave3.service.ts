@@ -43,6 +43,7 @@ import {
 } from '../crm/client-consent-authority';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { normalizeCrmBranchBinding } from '../crm/crm-provider-settings';
 
 type Tx = Prisma.TransactionClient;
 type Mode = 'shadow' | 'execute';
@@ -631,6 +632,19 @@ export class Package5Wave3ShadowService {
       };
     }
     if (command.operation === 'install_crm_credentials') {
+      const binding = normalizeCrmBranchBinding(
+        command.settingsJson?.branchBinding,
+        command.settingsJson?.companyId,
+      );
+      if (
+        binding &&
+        (!['yclients', 'altegio'].includes(command.provider) ||
+          !(await db.branch.findFirst({
+            where: { id: binding.branchId, tenantId },
+            select: { id: true },
+          })))
+      )
+        throw new NotFoundException('CRM branch binding target not found');
       if (
         !/^[0-9a-f]{64}$/.test(command.credentialFingerprint) ||
         !command.encryptedApiToken.trim()
@@ -649,7 +663,15 @@ export class Package5Wave3ShadowService {
         existing?.provider === command.provider &&
         existing.status === 'pending_activation' &&
         existingSettings.canonicalCredentialFingerprint ===
-          command.credentialFingerprint
+          command.credentialFingerprint &&
+        (existing.baseUrl ?? null) === (command.baseUrl ?? null) &&
+        wave3Hash(
+          Object.fromEntries(
+            Object.entries(existingSettings).filter(
+              ([key]) => key !== 'canonicalCredentialFingerprint',
+            ),
+          ),
+        ) === wave3Hash(command.settingsJson ?? {})
       )
         throw new ConflictException('Credential version already installed');
       const desired = {
@@ -1048,7 +1070,10 @@ export class Package5Wave3ExecutableService {
         return this.restore(locked);
       this.assertExecutable(locked, registration.actionClass);
       await this.assertActor(tx, locked, input);
-      if (prepared.command.operation === 'record_client_consent') {
+      if (
+        prepared.command.operation === 'record_client_consent' ||
+        prepared.command.operation === 'install_crm_credentials'
+      ) {
         await this.planner.assertStillCurrent(
           execution.tenantId,
           prepared.actor,

@@ -77,3 +77,12 @@ test('cancellation bounds a TERM-ignoring owned child and still permits cleanup 
     fs.rmSync(output, { recursive: true });
   }
 });
+
+
+test('branch binding uses the same owned serial restart driver without a carrier build', () => {
+ const args={pgBin:'/owned/bin',cluster:'/tmp/owned/pg',log:'/tmp/evidence/pg.log',port:45678,database:'maya_widget_gate_proof_c9occ_abcdef',receipt:'/tmp/private/receipt.json',output:'/tmp/evidence',branchBinding:true};
+ const plan=proofCommands(args);
+ assert.deepEqual(plan.map(s=>s.name),['initdb','pg-start','createdb','migrations','prepare','pg-restart','resume']);
+ assert.ok(plan[4].args.includes('test/widgets-live/crm-branch-binding-restart.probe-spec.ts'));
+ assert.throws(()=>proofCommands({...args,browser:true}),/exclusive/);
+});

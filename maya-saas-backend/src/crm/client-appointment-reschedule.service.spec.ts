@@ -159,6 +159,8 @@ function setup(options: Options = {}) {
       : options.slots,
   );
   const crm = {
+    readBranchAvailabilityRevision: jest.fn().mockResolvedValue('a'.repeat(64)),
+    assertClientAppointmentBranchOrigin: jest.fn().mockResolvedValue(undefined),
     executeInternalAppointmentRescheduleWithReceipt: executeInternal,
     executeRescheduleAppointmentWithReceipt: executeCrm,
     getServices: jest.fn().mockResolvedValue([
@@ -524,5 +526,20 @@ describe('U-OWN read-only reschedule quote', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(tx.appointment.findFirst).not.toHaveBeenCalled();
     expect(executeInternal).not.toHaveBeenCalled();
+  });
+});
+
+describe('branch-qualified Client reschedule source', () => {
+  it('refuses a requested cross-branch move before availability or mutation', async () => {
+    const f = setup();
+    await expect(
+      f.service.forAccount('tenant-1', 'user-1', 'appt-1', {
+        ...dto,
+        branchId: 'other-branch',
+      }),
+    ).rejects.toThrow('Cross-branch');
+    expect(f.getAvailableSlots).not.toHaveBeenCalled();
+    expect(f.executeCrm).not.toHaveBeenCalled();
+    expect(f.executeInternal).not.toHaveBeenCalled();
   });
 });

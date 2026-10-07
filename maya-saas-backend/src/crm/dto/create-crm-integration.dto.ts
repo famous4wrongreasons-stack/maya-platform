@@ -41,7 +41,7 @@ export class CreateCrmIntegrationDto {
   @ApiPropertyOptional({
     type: Object,
     description:
-      'Provider-specific settings. For yclients/altegio include at least companyId and optionally activeMasterIds.',
+      'For yclients/altegio: companyId, optional activeMasterIds and explicit branchBinding { contract: "maya.crm-branch-binding/1", companyId, branchId }. Branch must belong to this tenant; null clears binding. Install stages pending activation.',
     example: {
       companyId: 123456,
       activeMasterIds: [111, 222],

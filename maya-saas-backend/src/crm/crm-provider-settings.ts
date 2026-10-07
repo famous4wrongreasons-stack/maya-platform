@@ -5,6 +5,38 @@ import { CrmProvider } from '../common/domain.enums';
 const MAX_SETTINGS_BYTES = 16 * 1024;
 const MAX_ACTIVE_MASTER_IDS = 500;
 
+export const CRM_BRANCH_BINDING_CONTRACT = 'maya.crm-branch-binding/1';
+export type CrmBranchBinding = {
+  contract: typeof CRM_BRANCH_BINDING_CONTRACT;
+  branchId: string;
+  companyId: number;
+};
+
+/** An explicit pair for the integration's single company; never an ID guess. */
+export function normalizeCrmBranchBinding(
+  input: unknown,
+  companyId: unknown,
+): CrmBranchBinding | null | undefined {
+  if (input === undefined || input === null) return input;
+  const value = asRecord(input);
+  if (
+    Object.keys(value).sort().join(',') !== 'branchId,companyId,contract' ||
+    value.contract !== CRM_BRANCH_BINDING_CONTRACT ||
+    typeof value.branchId !== 'string' ||
+    !/^[A-Za-z0-9_-]{1,128}$/.test(value.branchId) ||
+    !['number', 'string'].includes(typeof value.companyId) ||
+    !/^[1-9][0-9]*$/.test(String(value.companyId)) ||
+    !Number.isSafeInteger(Number(value.companyId)) ||
+    Number(value.companyId) !== Number(companyId)
+  )
+    throw new BadRequestException('Exact CRM company/branch binding required');
+  return {
+    contract: CRM_BRANCH_BINDING_CONTRACT,
+    branchId: value.branchId,
+    companyId: Number(value.companyId),
+  };
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {};
@@ -37,6 +69,11 @@ export function normalizeCrmProviderSettings(
     const normalized: Record<string, unknown> = {
       companyId: positiveInteger(settings.companyId, 'settingsJson.companyId'),
     };
+    if (settings.branchBinding !== undefined)
+      normalized.branchBinding = normalizeCrmBranchBinding(
+        settings.branchBinding,
+        normalized.companyId,
+      );
 
     if (settings.activeMasterIds !== undefined) {
       if (
@@ -119,6 +156,16 @@ export function serializePublicCrmSettings(
     }
     if (typeof settings.currency === 'string') {
       result.currency = settings.currency;
+    }
+    // Persisted invalid/legacy material must not be presented as a binding.
+    try {
+      const binding = normalizeCrmBranchBinding(
+        settings.branchBinding,
+        settings.companyId,
+      );
+      if (binding !== undefined) result.branchBinding = binding;
+    } catch {
+      result.branchBinding = null;
     }
     return result;
   }

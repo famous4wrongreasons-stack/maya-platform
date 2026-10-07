@@ -23,18 +23,31 @@ describe('Package5Wave3CanonicalCutoverService', () => {
       decrypt: jest.fn((value: string) => value.replace('encrypted:', '')),
       opaqueReference: jest.fn(() => 'a'.repeat(64)),
     };
+    const branchFindFirst = jest.fn().mockResolvedValue({ id: 'branch-1' });
+    const integrationFindUnique = jest.fn().mockResolvedValue(null);
     const service = new Package5Wave3CanonicalCutoverService(
       { build } as unknown as Package5Wave3ShadowService,
       { execute, resume } as unknown as Package5Wave3ExecutableService,
       tenantContext,
       {
-        crmIntegration: { findUnique: jest.fn().mockResolvedValue(null) },
+        crmIntegration: { findUnique: integrationFindUnique },
+        branch: { findFirst: branchFindFirst },
       } as never,
       encryption as never,
       crm as never,
       {} as Package5Wave3ProductionGatewayService,
     );
-    return { service, tenantContext, build, execute, resume, crm, encryption };
+    return {
+      service,
+      tenantContext,
+      build,
+      execute,
+      resume,
+      crm,
+      encryption,
+      branchFindFirst,
+      integrationFindUnique,
+    };
   };
 
   it('crosses canonical ingress and resumes the same execution', async () => {
@@ -91,6 +104,75 @@ describe('Package5Wave3CanonicalCutoverService', () => {
     expect(planned.credentialFingerprint).toBe('a'.repeat(64));
     expect(planned).not.toHaveProperty('apiToken');
     expect(fixture.execute).toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    'checks exact tenant branch before preview; foreign=%s',
+    async (foreign) => {
+      const f = buildService();
+      f.build.mockResolvedValue({ existingExecution: null });
+      f.branchFindFirst.mockResolvedValue(foreign ? null : { id: 'branch-1' });
+      const binding = {
+        contract: 'maya.crm-branch-binding/1',
+        branchId: 'branch-1',
+        companyId: 42,
+      };
+      const result = f.service.installCrmCredentials(
+        'tenant-1',
+        { userId: 'owner-1' },
+        {
+          provider: 'yclients' as never,
+          apiToken: 'synthetic',
+          settingsJson: { companyId: 42, branchBinding: binding },
+        },
+        'binding-request-one',
+      );
+      if (foreign) {
+        await expect(result).rejects.toThrow('binding target not found');
+        expect(f.crm.previewCredentials).not.toHaveBeenCalled();
+        expect(f.build).not.toHaveBeenCalled();
+      } else {
+        await result;
+        expect(f.build).toHaveBeenCalledWith(
+          'tenant-1',
+          { userId: 'owner-1' },
+          expect.objectContaining({
+            settingsJson: { companyId: 42, branchBinding: binding },
+          }),
+          'execute',
+        );
+      }
+      expect(f.branchFindFirst).toHaveBeenCalledWith({
+        where: { id: 'branch-1', tenantId: 'tenant-1' },
+        select: { id: true },
+      });
+    },
+  );
+
+  it('company change cannot silently inherit a former branch binding', async () => {
+    const f = buildService();
+    f.integrationFindUnique.mockResolvedValue({
+      provider: 'yclients',
+      encryptedApiToken: 'encrypted:synthetic',
+      settingsJson: {
+        companyId: 42,
+        branchBinding: {
+          contract: 'maya.crm-branch-binding/1',
+          branchId: 'branch-1',
+          companyId: 42,
+        },
+      },
+    });
+    await expect(
+      f.service.installCrmCredentials(
+        'tenant-1',
+        { userId: 'owner-1' },
+        { settingsJson: { companyId: 43 } },
+        'change-company-one',
+      ),
+    ).rejects.toThrow('Exact CRM company/branch binding required');
+    expect(f.crm.previewCredentials).not.toHaveBeenCalled();
+    expect(f.build).not.toHaveBeenCalled();
   });
 
   it('rejects missing bounded idempotency identity', () => {

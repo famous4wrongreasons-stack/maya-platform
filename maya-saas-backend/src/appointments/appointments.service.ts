@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   ServiceUnavailableException,
@@ -514,6 +515,13 @@ export class AppointmentsService {
       this.assertRequestedServicesExist(serviceIds, services);
     }
 
+    const calendarSource = await this.crmService.getCalendarSource(tenantId);
+    const branchRevision = query.branchId
+      ? await this.crmService.readBranchAvailabilityRevision(
+          tenantId,
+          query.branchId,
+        )
+      : null;
     const days = this.buildAvailableDaysRange(query.from, query.to);
     const availableDays: string[] = [];
 
@@ -541,6 +549,20 @@ export class AppointmentsService {
       );
     }
 
+    if ((await this.crmService.getCalendarSource(tenantId)) !== calendarSource)
+      throw new ConflictException(
+        'CRM calendar source changed during available-days read',
+      );
+    if (
+      branchRevision !== null &&
+      (await this.crmService.readBranchAvailabilityRevision(
+        tenantId,
+        query.branchId!,
+      )) !== branchRevision
+    )
+      throw new ConflictException(
+        'CRM branch source changed during available-days read',
+      );
     return {
       days: availableDays,
     };

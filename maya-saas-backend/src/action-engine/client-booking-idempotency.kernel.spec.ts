@@ -31,6 +31,7 @@ function setup() {
     );
   const tx = {
     actionExecution: {
+      findMany: jest.fn(),
       findUnique: jest.fn(({ where }: { where: Record<string, unknown> }) =>
         Promise.resolve(executions.find((row) => matches(row, where)) ?? null),
       ),
@@ -211,4 +212,57 @@ describe('B31 canonical kernel immutable caller aliases', () => {
     expect(h.executions()).toHaveLength(0);
     expect(h.bindings()).toHaveLength(0);
   });
+});
+
+describe('bounded native branch Appointment origin proof', () => {
+  it.each([
+    'valid',
+    'missing',
+    'ambiguous',
+    'foreign-client',
+    'tampered',
+  ] as const)(
+    'checks existing immutable canonical create evidence: %s',
+    async (kind) => {
+      const h = setup();
+      const row = await h.create('origin-key');
+      h.tx.actionExecution.findMany.mockResolvedValue(
+        kind === 'missing'
+          ? []
+          : kind === 'ambiguous'
+            ? [row, row]
+            : [
+                {
+                  ...row,
+                  ...(kind === 'tampered'
+                    ? { bookingIntentHash: 'a'.repeat(64) }
+                    : {}),
+                },
+              ],
+      );
+      const result = h.kernel.readClientAppointmentOrigin(
+        'tenant-a',
+        kind === 'foreign-client' ? 'foreign-client' : 'client-a',
+        '501',
+      );
+      if (kind === 'valid')
+        await expect(result).resolves.toMatchObject({
+          calendarTarget: { source: 'internal' },
+        });
+      else
+        await expect(result).rejects.toMatchObject({
+          code: 'ACTION_IDEMPOTENCY_CONFLICT',
+        });
+      expect(h.tx.actionExecution.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            tenantId: 'tenant-a',
+            state: 'SUCCEEDED',
+            safeResultSummaryJson: { path: ['externalId'], equals: '501' },
+          }) as unknown,
+          take: 2,
+        }),
+      );
+    },
+  );
 });

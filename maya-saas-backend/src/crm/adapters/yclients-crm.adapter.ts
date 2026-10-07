@@ -1,3 +1,4 @@
+import { normalizeCrmBranchBinding } from '../crm-provider-settings';
 import {
   GoodsPreDispatchError,
   goodsRefuse,
@@ -114,6 +115,7 @@ import {
 
 interface YclientsSettings {
   companyId?: number | string;
+  branchBinding?: unknown;
   activeMasterIds?: Array<number | string>;
   currency?: string;
 }
@@ -996,11 +998,25 @@ export class YclientsCRMAdapter implements CRMAdapter {
     serviceIds?: string[];
     branchId?: string;
   }): Promise<AvailableSlot[]> {
-    void params.tenantId;
-    // The integration owns one company; no canonical Maya Branch mapping is
-    // stored. Never label that company's slots with a caller-selected branch,
-    // even when it is the tenant's only branch or resembles the company ID.
-    if (params.branchId != null)
+    let qualifiedBranch: string | null = null;
+    if (params.branchId != null) {
+      let binding;
+      try {
+        binding = normalizeCrmBranchBinding(
+          this.settings.branchBinding,
+          this.settings.companyId,
+        );
+      } catch {
+        // Malformed historical settings are unavailable, never empty slots.
+      }
+      if (
+        binding &&
+        this.config.tenantId === params.tenantId &&
+        binding.branchId === params.branchId
+      )
+        qualifiedBranch = binding.branchId;
+    }
+    if (params.branchId != null && qualifiedBranch === null)
       throw new ServiceUnavailableException({
         message:
           'Не удалось подтвердить расписание выбранного филиала в CRM. Это не означает, что свободных окон нет.',
@@ -1037,7 +1053,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           if (!Array.isArray(response.data))
             throw new Error('booking_slot_facts_unavailable');
           return response.data.map((slot) =>
-            this.mapSlot(date, staffId, slot, params.timezone),
+            this.mapSlot(date, staffId, slot, params.timezone, qualifiedBranch),
           );
         } catch (error) {
           // YClients book_times returns 422 "Дата недоступна" for days off /
@@ -1110,6 +1126,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           },
         ],
       };
+      await params.assertSourceCurrent?.();
       const response = await this.request<
         Array<Record<string, unknown>> | Record<string, unknown>
       >(`book_record/${this.getCompanyId()}`, {
@@ -1192,6 +1209,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       comment: params.notes || '',
     };
 
+    await params.assertSourceCurrent?.();
     const response = await this.request<
       Record<string, unknown> | Array<Record<string, unknown>>
     >(`records/${this.getCompanyId()}`, {
@@ -1258,6 +1276,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   async rescheduleAppointment(params: {
+    assertSourceCurrent?: () => Promise<void>;
     tenantId: string;
     timezone: string;
     externalId: string;
@@ -1395,6 +1414,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       comment: params.notes ?? record.comment ?? '',
     };
 
+    await params.assertSourceCurrent?.();
     const response = await this.request<Record<string, unknown>>(
       `record/${this.getCompanyId()}/${externalId}`,
       {
@@ -4456,6 +4476,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     staffId: number,
     slot: YclientsSlotApiItem,
     timezone: string,
+    qualifiedBranch: string | null,
   ): AvailableSlot {
     if (
       !slot ||
@@ -4488,7 +4509,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       start: startDate.toISOString(),
       end: endDate.toISOString(),
       staff_id: String(staffId),
-      branch_id: null,
+      branch_id: qualifiedBranch,
     };
   }
 }

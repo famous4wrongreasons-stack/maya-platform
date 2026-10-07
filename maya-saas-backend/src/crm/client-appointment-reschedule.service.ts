@@ -48,6 +48,7 @@ type OwnedRescheduleTarget = {
     mayaClientId: string | null;
     branchId: string | null;
     crmExternalId: string | null;
+    crmProvider: string | null;
     source: string;
     staffExternalId: string;
     serviceIds: Prisma.JsonValue;
@@ -147,6 +148,23 @@ export class ClientAppointmentRescheduleService {
       );
     }
     const branchId = dto.branchId ?? target.appointment.branchId ?? undefined;
+    if (dto.branchId && dto.branchId !== target.appointment.branchId)
+      throw new ConflictException('Cross-branch reschedule is not supported');
+    const branchSourceRevision =
+      branchId && target.appointment.source !== 'internal'
+        ? await this.crm.readBranchAvailabilityRevision(
+            target.tenantId,
+            branchId,
+          )
+        : null;
+    if (branchSourceRevision)
+      await this.crm.assertClientAppointmentBranchOrigin(
+        target.tenantId,
+        target.clientId,
+        target.appointment.crmExternalId!,
+        branchId!,
+        target.appointment.crmProvider,
+      );
     if (branchId) {
       const branch = await this.prisma.branch.findFirst({
         where: { id: branchId, tenantId: target.tenantId },
@@ -190,6 +208,16 @@ export class ClientAppointmentRescheduleService {
       serviceIds,
       branchId,
     });
+    if (
+      branchSourceRevision !== null &&
+      (await this.crm.readBranchAvailabilityRevision(
+        target.tenantId,
+        branchId!,
+      )) !== branchSourceRevision
+    )
+      throw new ConflictException(
+        'CRM branch source changed during availability read',
+      );
     const matchedSlot = findMatchingSlotByLocalStart(
       slots,
       requestedStart,
@@ -213,6 +241,7 @@ export class ClientAppointmentRescheduleService {
       serviceIds,
       notes: dto.notes ?? target.appointment.notes ?? undefined,
       branchId: branchId ?? matchedSlot.branch_id ?? undefined,
+      branchSourceRevision,
     };
   }
 
@@ -227,6 +256,8 @@ export class ClientAppointmentRescheduleService {
       staffId: string;
       serviceIds: string[];
       notes?: string | null;
+      branchId?: string;
+      branchSourceRevision?: string | null;
     },
     invocation: AppointmentActionInvocation,
   ) {
@@ -247,6 +278,8 @@ export class ClientAppointmentRescheduleService {
     const ownedInvocation: AppointmentActionInvocation = {
       sourceType: 'authenticated_request',
       sourceRef: `client-channel-link:${target.linkId}`,
+      branchSourceRevision: prepared.branchSourceRevision ?? undefined,
+      appointmentTimezone: prepared.timezone,
       clientPrincipal: {
         linkId: target.linkId,
         appointmentId: target.appointment.id,
@@ -256,11 +289,22 @@ export class ClientAppointmentRescheduleService {
         key: identity,
       },
       authorizationCheck: async () => {
-        await this.resolveOwnedTarget(
+        const current = await this.resolveOwnedTarget(
           target.tenantId,
           userId,
           target.appointment.id,
         );
+        if (
+          current.appointment.branchId !== target.appointment.branchId ||
+          (prepared.branchSourceRevision &&
+            (await this.crm.readBranchAvailabilityRevision(
+              target.tenantId,
+              prepared.branchId!,
+            )) !== prepared.branchSourceRevision)
+        )
+          throw new ConflictException(
+            'Current appointment branch source changed',
+          );
       },
     };
     const params = {
@@ -268,7 +312,7 @@ export class ClientAppointmentRescheduleService {
         target.appointment.source === 'internal'
           ? target.appointment.id
           : target.appointment.crmExternalId!,
-      start: prepared.requestedStart,
+      start: prepared.start,
       staffId: prepared.staffId,
       serviceIds: prepared.serviceIds,
       notes: prepared.notes ?? undefined,

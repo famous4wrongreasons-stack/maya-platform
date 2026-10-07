@@ -270,6 +270,18 @@ export class ActionEngineRuntimeService {
     return this.kernel.resolveClientBookingRetry(tenantId, clientId, key);
   }
 
+  readClientAppointmentOrigin(
+    tenantId: string,
+    clientId: string,
+    externalId: string,
+  ) {
+    return this.kernel.readClientAppointmentOrigin(
+      tenantId,
+      clientId,
+      externalId,
+    );
+  }
+
   async executeWithReceipt<T>(
     request: TrustedActionExecutionRequestV1,
     handlers: ActionRuntimeHandlers<T>,

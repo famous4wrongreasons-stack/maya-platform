@@ -2208,6 +2208,48 @@ export class ActionEngineKernel {
     return { ...snapshot, executionId: execution.id };
   }
 
+  /** Finite source proof for an already authorized Client Appointment. Never
+   * infer company ownership from a provider-local external id alone. */
+  async readClientAppointmentOrigin(
+    tenantId: string,
+    clientId: string,
+    externalId: string,
+  ) {
+    const rows = await this.prisma.actionExecution.findMany({
+      where: {
+        tenantId,
+        capability: 'crm.appointment.create.v1',
+        state: 'SUCCEEDED',
+        bookingIntentContract: CLIENT_BOOKING_INTENT_CONTRACT,
+        safeResultSummaryJson: { path: ['externalId'], equals: externalId },
+      },
+      take: 2,
+      select: { bookingIntentEncrypted: true, bookingIntentHash: true },
+    });
+    if (rows.length !== 1 || !rows[0].bookingIntentEncrypted)
+      throw new ActionConflictError(
+        'Appointment source provenance unavailable',
+      );
+    const snapshot = JSON.parse(
+      this.identity.decryptNormalizedPayload(rows[0].bookingIntentEncrypted),
+    ) as ClientBookingSnapshot;
+    if (
+      snapshot.descriptor.tenantId !== tenantId ||
+      snapshot.descriptor.mayaClientId !== clientId ||
+      this.identity.hmac(
+        CLIENT_BOOKING_INTENT_CONTRACT,
+        snapshot.descriptor,
+      ) !== rows[0].bookingIntentHash
+    )
+      throw new ActionConflictError(
+        'Appointment source provenance integrity failed',
+      );
+    return {
+      calendarTarget: snapshot.descriptor.calendarTarget,
+      branchId: snapshot.descriptor.branchId,
+    };
+  }
+
   private async resolveDuplicate(
     request: TrustedActionExecutionRequestV1,
     normalized: NormalizedActionExecutionV1,

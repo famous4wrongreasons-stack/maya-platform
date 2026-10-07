@@ -331,6 +331,7 @@ describe('AppointmentsService', () => {
         findUnique: tenantFindUniqueMock,
       },
     };
+    const branchRevisionMock = jest.fn().mockResolvedValue(null);
     const crmService: Pick<
       CrmService,
       | 'cancelAppointment'
@@ -339,6 +340,7 @@ describe('AppointmentsService', () => {
       | 'getExternalProviderKey'
       | 'getClientAppointments'
       | 'getAvailableSlots'
+      | 'readBranchAvailabilityRevision'
       | 'getServices'
       | 'getStaff'
       | 'rescheduleAppointment'
@@ -350,6 +352,7 @@ describe('AppointmentsService', () => {
       getExternalProviderKey: getExternalProviderKeyMock,
       getClientAppointments: getClientAppointmentsMock,
       getAvailableSlots: getAvailableSlotsMock,
+      readBranchAvailabilityRevision: branchRevisionMock,
       getServices: getServicesMock,
       getStaff: getStaffMock,
       rescheduleAppointment: rescheduleAppointmentMock,
@@ -448,6 +451,7 @@ describe('AppointmentsService', () => {
         } as never,
       ),
       mocks: {
+        branchRevisionMock,
         assertLiveBookingEnabledMock,
         auditLogMock,
         appointmentFindFirstMock,
@@ -658,6 +662,25 @@ describe('AppointmentsService', () => {
       days: ['2026-07-05', '2026-07-07'],
     });
     expect(getAvailableSlotsMock).toHaveBeenCalledTimes(4);
+  });
+  it('withholds the entire available-days result if binding changes between batches', async () => {
+    const {
+      service,
+      mocks: { branchRevisionMock, getAvailableSlotsMock },
+    } = createService();
+    branchRevisionMock
+      .mockResolvedValueOnce('initial')
+      .mockResolvedValue('changed');
+    getAvailableSlotsMock.mockResolvedValue([]);
+    await expect(
+      service.getAvailableDays('tenant-1', {
+        from: '2026-07-05',
+        to: '2026-07-12',
+        staffId: 'staff-1',
+        branchId: 'branch-1',
+      }),
+    ).rejects.toThrow('source changed');
+    expect(getAvailableSlotsMock).toHaveBeenCalledTimes(8);
   });
   it('does not turn unavailable CRM slot facts into an empty available-days calendar', async () => {
     const {

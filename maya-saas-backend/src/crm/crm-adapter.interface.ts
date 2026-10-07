@@ -24,6 +24,8 @@ import type {
 } from '../domain';
 
 export interface CrmAdapterConfig {
+  /** Set by the stored integration owner, never by a provider response. */
+  tenantId?: string;
   provider: CrmProvider;
   apiToken: string;
   baseUrl?: string | null;
@@ -75,6 +77,8 @@ export interface ApplyStaffScheduleDayChangeParams {
 export type AppliedStaffScheduleDayChange = AppliedWorkDayChange;
 
 export interface CreateAppointmentParams {
+  /** Server-only guard immediately before a provider write; never DTO data. */
+  assertSourceCurrent?: () => Promise<void>;
   /** Server-generated correlation, not a provider idempotency guarantee. */
   providerRequestId?: string;
   tenantId: string;
@@ -581,6 +585,8 @@ export interface CRMAdapter {
     externalId: string;
   }): Promise<CancelledAppointment>;
   rescheduleAppointment(params: {
+    /** Server-only guard immediately before a provider write. */
+    assertSourceCurrent?: () => Promise<void>;
     tenantId: string;
     timezone: string;
     externalId: string;

@@ -122,6 +122,7 @@ import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
 import {
   normalizeCrmProviderSettings,
+  normalizeCrmBranchBinding,
   serializePublicCrmSettings,
 } from './crm-provider-settings';
 import type { StaffId, VisitAttendance } from '../domain';
@@ -153,6 +154,10 @@ export type AppointmentActionInvocation = {
   expectedBookingFactsHash?: string;
   /** Server-observed terms persisted once as evidence on a new canonical create. */
   bookingFactsHash?: string;
+  /** Immutable server source witness for a new verified Client reschedule. */
+  branchSourceRevision?: string;
+  /** Server-resolved timezone of a verified Client reschedule preview. */
+  appointmentTimezone?: string;
   /** SB-1 server-resolved explicit personal context; never copied from a DTO. */
   personalContext?: import('../appointments/personal-client-context.service').PersonalClientContext;
   /** Server-resolved channel and canonical target; never copied from a DTO. */
@@ -1638,13 +1643,53 @@ export class CrmService {
       });
     }
 
+    const branch =
+      query.branchId != null
+        ? await this.prisma.branch.findFirst({
+            where: { id: query.branchId, tenantId: scopedTenantId },
+            select: { id: true, timezone: true },
+          })
+        : null;
+    if (query.branchId != null && !branch)
+      throw new NotFoundException('CRM branch binding target not found');
+    const before = branch
+      ? await this.getStoredIntegration(scopedTenantId)
+      : null;
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    const timezone = await this.tenantTimezone(scopedTenantId);
-    return adapter.getAvailableSlots({
+    const timezone = await this.bookingTimezone(scopedTenantId, branch);
+    const slots = await adapter.getAvailableSlots({
       tenantId: scopedTenantId,
       timezone,
       ...query,
     });
+    if (before) {
+      const after = await this.getStoredIntegration(scopedTenantId);
+      const currentBranch = await this.prisma.branch.findFirst({
+        where: { id: query.branchId, tenantId: scopedTenantId },
+        select: { id: true, timezone: true },
+      });
+      const revision = (value: StoredCrmIntegration) =>
+        JSON.stringify([
+          value.id,
+          value.provider,
+          value.status,
+          value.updatedAt,
+          value.baseUrl,
+          value.settingsJson,
+        ]);
+      if (
+        (await this.getCalendarSource(scopedTenantId)) !==
+          CalendarSource.EXTERNAL ||
+        revision(before) !== revision(after) ||
+        JSON.stringify(branch) !== JSON.stringify(currentBranch) ||
+        timezone !== (await this.bookingTimezone(scopedTenantId, currentBranch))
+      )
+        throw new ServiceUnavailableException({
+          message: 'CRM branch source changed during availability read',
+          error: { code: 'booking_branch_source_unavailable' },
+        });
+    }
+    return slots;
   }
 
   async previewStaffScheduleDayChange(
@@ -1755,7 +1800,10 @@ export class CrmService {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
-    const timezone = await this.tenantTimezone(scopedTenantId);
+    const timezone =
+      verifiedCanonicalClient && invocation.bookingIntent
+        ? invocation.bookingIntent.timezone
+        : await this.tenantTimezone(scopedTenantId);
     const actionInput: CreateAppointmentRequest = {
       ...params,
       ...(invocation.sourceType === 'public_booking'
@@ -1806,11 +1854,55 @@ export class CrmService {
         dispatch: async (input) => {
           await invocation.authorizationCheck?.();
           const durable = this.createAppointmentInput(input);
+          const branchRevision =
+            verifiedCanonicalClient && durable.branchId
+              ? await this.readBranchAvailabilityRevision(
+                  scopedTenantId,
+                  durable.branchId,
+                )
+              : null;
+          const assertSourceCurrent = verifiedCanonicalClient
+            ? async () => {
+                await invocation.authorizationCheck?.();
+                if (durable.branchId) {
+                  if (
+                    (await this.readBranchAvailabilityRevision(
+                      scopedTenantId,
+                      durable.branchId,
+                    )) !== branchRevision
+                  )
+                    throw new ConflictException(
+                      'CRM branch source changed before dispatch',
+                    );
+                  await this.assertBookingBranchTimezone(
+                    scopedTenantId,
+                    durable.branchId,
+                    timezone,
+                  );
+                }
+                if (
+                  (await this.getAdapterForTenant(scopedTenantId)) !== adapter
+                )
+                  throw new ConflictException(
+                    'CRM source changed before dispatch',
+                  );
+              }
+            : undefined;
+          await assertSourceCurrent?.();
           const value = await adapter.createAppointment({
             tenantId: scopedTenantId,
             timezone,
             ...durable,
+            assertSourceCurrent,
           });
+          try {
+            await assertSourceCurrent?.();
+          } catch (error) {
+            throw new CrmOutcomeUnknownError(
+              'CRM source changed after create dispatch',
+              error,
+            );
+          }
           return { value, safeResult: this.createdAppointmentSafe(value) };
         },
         reconcile: async (input) => {
@@ -1819,11 +1911,51 @@ export class CrmService {
             return { outcome: 'STILL_UNKNOWN' };
           const durable = this.createAppointmentInput(input);
           if (!durable.clientPhone) return { outcome: 'STILL_UNKNOWN' };
+          let branchRevision: string | null = null;
+          const assertCurrent = async () => {
+            if (!verifiedCanonicalClient) return;
+            await this.assertExternalSource(scopedTenantId);
+            if ((await this.getAdapterForTenant(scopedTenantId)) !== adapter)
+              throw new ConflictException(
+                'CRM source changed during reconciliation',
+              );
+            if (durable.branchId) {
+              await this.assertBookingBranchTimezone(
+                scopedTenantId,
+                durable.branchId,
+                timezone,
+              );
+              if (
+                (await this.readBranchAvailabilityRevision(
+                  scopedTenantId,
+                  durable.branchId,
+                )) !== branchRevision
+              )
+                throw new ConflictException(
+                  'CRM branch source changed during reconciliation',
+                );
+            }
+          };
+          try {
+            if (verifiedCanonicalClient && durable.branchId)
+              branchRevision = await this.readBranchAvailabilityRevision(
+                scopedTenantId,
+                durable.branchId,
+              );
+            await assertCurrent();
+          } catch {
+            return { outcome: 'STILL_UNKNOWN' };
+          }
           const candidates = await adapter.getClientAppointments({
             tenantId: scopedTenantId,
             phone: durable.clientPhone,
             timezone,
           });
+          try {
+            await assertCurrent();
+          } catch {
+            return { outcome: 'STILL_UNKNOWN' };
+          }
           const matches = candidates.filter(
             (candidate) =>
               !isCanceledStatus(candidate.status) &&
@@ -1923,6 +2055,19 @@ export class CrmService {
         error: { code: 'booking_preview_refresh_required' },
       });
     const durable = this.createAppointmentInput(input);
+    // READY retries retain their old quote; current source binding is still
+    // required in prepare, before a provider dispatch can cross the boundary.
+    if (
+      durable.branchId &&
+      (await this.getCalendarSource(tenantId)) === CalendarSource.EXTERNAL
+    ) {
+      await this.readBranchAvailabilityRevision(tenantId, durable.branchId);
+      await this.assertBookingBranchTimezone(
+        tenantId,
+        durable.branchId,
+        invocation.bookingIntent.timezone,
+      );
+    }
     const services = await this.readBookableServices(
       tenantId,
       durable.serviceIds,
@@ -1944,6 +2089,171 @@ export class CrmService {
         error: { code: 'booking_preview_stale' },
       });
     return services;
+  }
+
+  private async assertBookingBranchTimezone(
+    tenantId: string,
+    branchId: string,
+    timezone: string,
+  ) {
+    const branch = await this.prisma.branch.findFirst({
+      where: { id: branchId, tenantId },
+      select: { timezone: true },
+    });
+    if (!branch || (await this.bookingTimezone(tenantId, branch)) !== timezone)
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+  }
+
+  async readBranchAvailabilityRevision(
+    tenantId: string,
+    branchId: string,
+  ): Promise<string | null> {
+    this.tenantContext.assertTenantId(tenantId);
+    if ((await this.getCalendarSource(tenantId)) === CalendarSource.INTERNAL)
+      return null;
+    const integration = await this.getStoredIntegration(tenantId);
+    if (!['yclients', 'altegio'].includes(integration.provider)) return null;
+    let binding;
+    const settings = (integration.settingsJson ?? {}) as Record<
+      string,
+      unknown
+    >;
+    try {
+      binding = normalizeCrmBranchBinding(
+        settings.branchBinding,
+        settings.companyId,
+      );
+    } catch {
+      // Refuse malformed stored source attribution before dispatch.
+    }
+    const branch = await this.prisma.branch.findFirst({
+      where: { id: branchId, tenantId },
+      select: { id: true, timezone: true },
+    });
+    if (
+      integration.status !== 'active' ||
+      binding?.branchId !== branchId ||
+      !branch
+    )
+      throw new ServiceUnavailableException({
+        message: 'Current CRM branch binding unavailable',
+        error: { code: 'booking_branch_source_unavailable' },
+      });
+    return createHash('sha256')
+      .update(
+        JSON.stringify([
+          tenantId,
+          integration.id,
+          integration.provider,
+          integration.status,
+          integration.updatedAt,
+          integration.baseUrl,
+          settings,
+          branch,
+          await this.bookingTimezone(tenantId, branch),
+        ]),
+      )
+      .digest('hex');
+  }
+
+  async assertClientAppointmentBranchOrigin(
+    tenantId: string,
+    clientId: string,
+    externalId: string,
+    branchId: string,
+    provider: string | null,
+  ) {
+    this.tenantContext.assertTenantId(tenantId);
+    try {
+      const origin = await this.actionEngineRuntime.readClientAppointmentOrigin(
+        tenantId,
+        clientId,
+        externalId,
+      );
+      if (
+        !provider ||
+        origin.calendarTarget.source !== 'external' ||
+        origin.calendarTarget.provider !== provider ||
+        origin.branchId !== branchId ||
+        stableActionJson(origin.calendarTarget) !==
+          stableActionJson(await this.canonicalClientBookingTarget(tenantId))
+      )
+        throw new Error('Appointment source target changed');
+    } catch {
+      throw new ConflictException({
+        error: { code: 'booking_appointment_source_unproven' },
+      });
+    }
+  }
+
+  private async assertRescheduleBranchWitness(
+    tenantId: string,
+    invocation: AppointmentActionInvocation,
+    executionId: string,
+  ) {
+    if (!invocation.clientPrincipal?.appointmentId) return;
+    const row = await this.prisma.actionExecution.findFirst({
+      where: {
+        id: executionId,
+        tenantId,
+        capability: 'crm.appointment.reschedule.v1',
+      },
+      select: { evidenceRefsJson: true },
+    });
+    const prefix = 'crm-branch-source/1:';
+    const refs = Array.isArray(row?.evidenceRefsJson)
+      ? row.evidenceRefsJson.filter(
+          (r) => typeof r === 'string' && r.startsWith(prefix),
+        )
+      : [];
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id: invocation.clientPrincipal.appointmentId, tenantId },
+      select: {
+        branchId: true,
+        mayaClientId: true,
+        crmExternalId: true,
+        crmProvider: true,
+        source: true,
+      },
+    });
+    if (!appointment) throw new NotFoundException('Appointment source missing');
+    if (!appointment.branchId) {
+      if (refs.length)
+        throw new ConflictException({
+          error: { code: 'booking_branch_source_stale' },
+        });
+      return;
+    }
+    const revision = await this.readBranchAvailabilityRevision(
+      tenantId,
+      appointment.branchId,
+    );
+    if (revision === null) {
+      if (refs.length)
+        throw new ConflictException({
+          error: { code: 'booking_branch_source_stale' },
+        });
+      return;
+    }
+    if (
+      appointment.source !== 'external' ||
+      !appointment.mayaClientId ||
+      !appointment.crmExternalId
+    )
+      throw new ConflictException({
+        error: { code: 'booking_appointment_source_unproven' },
+      });
+    await this.assertClientAppointmentBranchOrigin(
+      tenantId,
+      appointment.mayaClientId,
+      appointment.crmExternalId,
+      appointment.branchId,
+      appointment.crmProvider,
+    );
+    if (refs.length !== 1 || refs[0] !== prefix + revision)
+      throw new ConflictException({
+        error: { code: 'booking_branch_source_stale' },
+      });
   }
 
   async canonicalClientBookingTarget(
@@ -2055,6 +2365,16 @@ export class CrmService {
             return result;
           },
           reconcile: async (durable, prepared, context) => {
+            try {
+              await this.confirmedBookingServices(
+                tenantId,
+                durable,
+                invocation,
+                context?.executionId,
+              );
+            } catch {
+              return { outcome: 'STILL_UNKNOWN' };
+            }
             const result = await plan.handlers.reconcile(
               durable,
               prepared,
@@ -2923,7 +3243,11 @@ export class CrmService {
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     const crmProvider = await this.providerOfTenant(scopedTenantId);
-    const timezone = await this.tenantTimezone(scopedTenantId);
+    const timezone =
+      invocation.clientPrincipal?.appointmentId &&
+      invocation.appointmentTimezone
+        ? invocation.appointmentTimezone
+        : await this.tenantTimezone(scopedTenantId);
     const actionInput: RescheduleAppointmentRequest = {
       ...params,
       start: canonicalAppointmentInstant(params.start, timezone),
@@ -2938,11 +3262,18 @@ export class CrmService {
         invocation,
       }),
       handlers: {
-        prepare: async (input) => {
+        prepare: async (input, context) => {
+          await invocation.authorizationCheck?.();
+          await this.assertRescheduleBranchWitness(
+            scopedTenantId,
+            invocation,
+            context.executionId,
+          );
           const durable = this.rescheduleAppointmentInput(input);
           const detail = await this.loadAppointmentDetail(
             scopedTenantId,
             durable.externalId,
+            invocation.clientPrincipal?.appointmentId ? timezone : undefined,
           );
           return {
             externalId: durable.externalId,
@@ -2952,14 +3283,38 @@ export class CrmService {
             serviceIds: normalizedServiceIds(detail.service_ids),
           } satisfies AppointmentStateEvidence;
         },
-        dispatch: async (input) => {
-          await invocation.authorizationCheck?.();
+        dispatch: async (input, _key, context) => {
+          const assertSourceCurrent = async () => {
+            await invocation.authorizationCheck?.();
+            await this.assertRescheduleBranchWitness(
+              scopedTenantId,
+              invocation,
+              context.executionId,
+            );
+            if (
+              invocation.clientPrincipal?.appointmentId &&
+              (await this.getAdapterForTenant(scopedTenantId)) !== adapter
+            )
+              throw new ConflictException('CRM source changed before dispatch');
+          };
+          await assertSourceCurrent();
           const durable = this.rescheduleAppointmentInput(input);
           const value = await adapter.rescheduleAppointment({
             tenantId: scopedTenantId,
             timezone,
             ...durable,
+            ...(invocation.clientPrincipal?.appointmentId
+              ? { assertSourceCurrent }
+              : {}),
           });
+          try {
+            await assertSourceCurrent();
+          } catch (error) {
+            throw new CrmOutcomeUnknownError(
+              'CRM source changed after reschedule dispatch',
+              error,
+            );
+          }
           await this.persistRescheduledAppointmentMirror(
             scopedTenantId,
             crmProvider,
@@ -2969,12 +3324,36 @@ export class CrmService {
           );
           return { value, safeResult: this.rescheduledAppointmentSafe(value) };
         },
-        reconcile: async (input, previous) => {
+        reconcile: async (input, previous, context) => {
+          if (invocation.clientPrincipal?.appointmentId) {
+            try {
+              if (!context?.executionId) return { outcome: 'STILL_UNKNOWN' };
+              await this.assertRescheduleBranchWitness(
+                scopedTenantId,
+                invocation,
+                context.executionId,
+              );
+            } catch {
+              return { outcome: 'STILL_UNKNOWN' };
+            }
+          }
           const durable = this.rescheduleAppointmentInput(input);
           const detail = await this.loadAppointmentDetail(
             scopedTenantId,
             durable.externalId,
+            invocation.clientPrincipal?.appointmentId ? timezone : undefined,
           );
+          if (invocation.clientPrincipal?.appointmentId) {
+            try {
+              await this.assertRescheduleBranchWitness(
+                scopedTenantId,
+                invocation,
+                context!.executionId,
+              );
+            } catch {
+              return { outcome: 'STILL_UNKNOWN' };
+            }
+          }
           const current = this.appointmentEvidence(detail);
           if (this.matchesDesiredAppointment(current, durable)) {
             await this.persistRescheduledAppointmentMirror(
@@ -3543,6 +3922,9 @@ export class CrmService {
               input.invocation.clientPrincipal.appointmentId,
             ),
             ...(input.invocation.personalContext?.evidenceRefs ?? []),
+            ...(input.invocation.branchSourceRevision
+              ? ['crm-branch-source/1:' + input.invocation.branchSourceRevision]
+              : []),
             ...(input.invocation.bookingFactsHash
               ? [
                   BOOKING_FACTS_EVIDENCE_PREFIX +
@@ -4336,6 +4718,7 @@ export class CrmService {
   private async loadAppointmentDetail(
     tenantId: string,
     externalId: string,
+    timezone?: string,
   ): Promise<CrmAppointmentDetail> {
     const adapter = await this.getVisitCapableAdapter(
       tenantId,
@@ -4346,7 +4729,7 @@ export class CrmService {
     return adapter.getAppointmentDetail({
       tenantId,
       externalId,
-      timezone: await this.tenantTimezone(tenantId),
+      timezone: timezone ?? (await this.tenantTimezone(tenantId)),
     });
   }
 
@@ -4880,6 +5263,8 @@ export class CrmService {
       integration.updatedAt instanceof Date
         ? integration.updatedAt.getTime()
         : String(integration.updatedAt ?? ''),
+      integration.baseUrl ?? '',
+      JSON.stringify(integration.settingsJson ?? null),
     ].join('|');
     const cached = this.adapterCache.get(scopedTenantId);
     if (
@@ -4993,6 +5378,7 @@ export class CrmService {
     integration: StoredCrmIntegration,
   ): CrmAdapterConfig {
     return {
+      tenantId: integration.tenantId,
       provider: integration.provider as CrmProvider,
       apiToken: this.encryptionService.decrypt(integration.encryptedApiToken),
       baseUrl: integration.baseUrl,

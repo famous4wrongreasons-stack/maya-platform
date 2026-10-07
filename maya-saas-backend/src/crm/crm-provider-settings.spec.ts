@@ -50,3 +50,47 @@ describe('CRM provider settings', () => {
     });
   });
 });
+
+describe('explicit CRM branch binding settings', () => {
+  const binding = {
+    contract: 'maya.crm-branch-binding/1',
+    branchId: 'branch-a',
+    companyId: 42,
+  };
+  it.each([CrmProvider.YCLIENTS, CrmProvider.ALTEGIO])(
+    'normalizes, publishes and explicitly removes %s binding',
+    (provider) => {
+      const settings = normalizeCrmProviderSettings(provider, {
+        companyId: '42',
+        branchBinding: binding,
+      });
+      expect(settings).toEqual({ companyId: 42, branchBinding: binding });
+      expect(serializePublicCrmSettings(provider, settings)).toEqual(settings);
+      expect(
+        normalizeCrmProviderSettings(provider, {
+          companyId: 42,
+          branchBinding: null,
+        }),
+      ).toEqual({ companyId: 42, branchBinding: null });
+    },
+  );
+  it.each([
+    {},
+    { ...binding, companyId: 43 },
+    { ...binding, companyId: true },
+    { ...binding, branchId: '' },
+    { ...binding, branchId: '../foreign' },
+    { ...binding, tenantId: 'foreign' },
+    { ...binding, contract: 'untrusted' },
+  ])('refuses malformed or mismatched binding %#', (branchBinding) => {
+    expect(() =>
+      normalizeCrmProviderSettings(CrmProvider.YCLIENTS, {
+        companyId: 42,
+        branchBinding,
+      }),
+    ).toThrow(BadRequestException);
+    expect(
+      serializePublicCrmSettings('yclients', { companyId: 42, branchBinding }),
+    ).toEqual({ companyId: 42, branchBinding: null });
+  });
+});

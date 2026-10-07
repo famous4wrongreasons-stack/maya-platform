@@ -34,6 +34,7 @@ export interface AiToolPrincipal {
     membershipStatus: string | null;
     branchId: string | null;
     personalScopeHash?: string;
+    sourceScopeHash?: string;
   };
 }
 

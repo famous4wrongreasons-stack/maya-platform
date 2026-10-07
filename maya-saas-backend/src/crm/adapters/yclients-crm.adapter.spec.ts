@@ -1255,6 +1255,61 @@ describe('YclientsCRMAdapter', () => {
     },
   );
 
+  it.each([CrmProvider.YCLIENTS, CrmProvider.ALTEGIO])(
+    'reads the explicit branch through the exact %s company only',
+    async (provider) => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({ data: [{ time: '09:00', seance_length: 3600 }] }),
+      });
+      const settings = {
+        companyId: 123,
+        branchBinding: {
+          contract: 'maya.crm-branch-binding/1',
+          companyId: 123,
+          branchId: 'branch-a',
+        },
+      };
+      const adapter = new YclientsCRMAdapter({
+        tenantId: 'tenant-a',
+        provider,
+        apiToken: 'synthetic',
+        settings,
+      });
+      const request = {
+        tenantId: 'tenant-a',
+        branchId: 'branch-a',
+        staffId: '15',
+        timezone: 'Europe/Moscow',
+        date: '2026-07-05',
+      };
+      await expect(adapter.getAvailableSlots(request)).resolves.toEqual([
+        {
+          start: '2026-07-05T06:00:00.000Z',
+          end: '2026-07-05T07:00:00.000Z',
+          staff_id: '15',
+          branch_id: 'branch-a',
+        },
+      ]);
+      const fetchMock = global.fetch as jest.Mock;
+      expect(String((fetchMock.mock.calls[0] as unknown[])[0])).toContain(
+        '/book_times/123/15/2026-07-05',
+      );
+      for (const changed of [
+        { ...request, tenantId: 'foreign' },
+        { ...request, branchId: 'branch-b' },
+      ])
+        await expect(adapter.getAvailableSlots(changed)).rejects.toMatchObject({
+          status: 503,
+        });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await expect(
+        adapter.getAvailableSlots({ ...request, branchId: undefined }),
+      ).resolves.toEqual([expect.objectContaining({ branch_id: null })]);
+    },
+  );
+
   it('normalizes ISO datetime query and maps slots', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,

@@ -1527,7 +1527,10 @@ export class AiToolHandlerService {
     const [services, staff, timezone] = await Promise.all([
       this.crmService.getServices(tenantId),
       this.staffService.listStaff(tenantId),
-      this.reportingTimezone(tenantId),
+      this.reportingTimezone(
+        tenantId,
+        typeof args.branch_id === 'string' ? args.branch_id : undefined,
+      ),
     ]);
     const serviceIds = this.stringArray(args.service_ids);
     const selection =

@@ -366,6 +366,121 @@ describe('AiToolRuntimeService', () => {
     );
   });
 
+  describe.each([
+    'booking.availability.read',
+    'booking.group-availability.read',
+  ])('current branch-binding READ identity %s', (toolName) => {
+    const input = {
+      surface: 'web' as const,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      arguments: {
+        branch_id: 'maya-branch',
+        date: '2026-10-08T09:00:00Z',
+        ...(toolName === 'booking.group-availability.read'
+          ? { party_size: 2 }
+          : {}),
+      },
+    };
+    const actor = { ...customer, role: UserRole.TENANT_OWNER };
+    function fixture() {
+      const h = createHarness();
+      let row: Record<string, unknown> | null = null;
+      h.executionFindUnique.mockImplementation(() => Promise.resolve(row));
+      h.executionCreate.mockImplementation((v: unknown) => {
+        row = { ...record(record(v).data), id: 'binding-read' };
+        return Promise.resolve(row);
+      });
+      h.executionUpdate.mockImplementation((v: unknown) => {
+        row = { ...row, ...record(record(v).data) };
+        return Promise.resolve(row);
+      });
+      h.handlerExecute.mockResolvedValue({ slots: [] });
+      const run = (replay = false) =>
+        h.tenantContext.runAsSystemTenant('tenant-a', () =>
+          replay
+            ? h.runtime.replayCompletedRead(
+                actor,
+                toolName,
+                input,
+                'binding-read',
+                { suppressWidgetTrigger: true },
+              )
+            : h.runtime.execute(actor, toolName, input, {
+                suppressWidgetTrigger: true,
+              }),
+        );
+      return { ...h, run };
+    }
+    it.each([false, true])(
+      'rejects cached source after mapping/credential revision change, replay=%s',
+      async (replay) => {
+        const h = fixture();
+        await h.run();
+        h.availabilityIntegration.mockResolvedValue({
+          id: 'crm',
+          provider: 'yclients',
+          status: 'active',
+          updatedAt: new Date('2026-10-07T01:00:00Z'),
+          settingsJson: { companyId: 43 },
+        });
+        await expect(h.run(replay)).rejects.toThrow(ConflictException);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      },
+    );
+    it.each(['updatedAt', 'baseUrl'])(
+      'invalidates replay when only %s changes',
+      async (field) => {
+        const h = fixture();
+        const before = {
+          id: 'crm',
+          provider: 'yclients',
+          status: 'active',
+          updatedAt: new Date('2026-10-07T00:00:00Z'),
+          baseUrl: null,
+          settingsJson: { companyId: 42 },
+        };
+        h.availabilityIntegration.mockResolvedValue(before);
+        await h.run();
+        h.availabilityIntegration.mockResolvedValue({
+          ...before,
+          [field]:
+            field === 'updatedAt'
+              ? new Date('2026-10-07T01:00:00Z')
+              : 'https://synthetic-other.invalid',
+        });
+        await expect(h.run(true)).rejects.toThrow(ConflictException);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('invalidates cached fallback branch time after tenant timezone changes', async () => {
+      const h = fixture();
+      h.availabilityBranch.mockResolvedValue({
+        id: 'maya-branch',
+        timezone: null,
+      });
+      h.availabilityTenant.mockResolvedValue({
+        calendarSource: 'external',
+        defaultTimezone: 'UTC',
+      });
+      await h.run();
+      h.availabilityTenant.mockResolvedValue({
+        calendarSource: 'external',
+        defaultTimezone: 'Europe/Moscow',
+      });
+      await expect(h.run(true)).rejects.toThrow(ConflictException);
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+    it('withholds response if selected branch disappears in flight', async () => {
+      const h = fixture();
+      h.handlerExecute.mockImplementation(() => {
+        h.availabilityBranch.mockResolvedValue(null);
+        return Promise.resolve({ slots: [] });
+      });
+      await expect(h.run()).rejects.toThrow(ConflictException);
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('SH-19 attaches the authorized widget resolution to a completed model-free read', async () => {
     const afterCompletedRead: jest.MockedFunction<
       AiReadWidgetTriggerPort['afterCompletedRead']
@@ -738,7 +853,23 @@ function createHarness(
     revalidate: personalRevalidate,
   };
   const personalSelect = jest.fn().mockResolvedValue(personal);
+  const availabilityTenant = jest
+    .fn()
+    .mockResolvedValue({ calendarSource: 'external' });
+  const availabilityIntegration = jest.fn().mockResolvedValue({
+    id: 'crm',
+    provider: 'yclients',
+    status: 'active',
+    updatedAt: new Date('2026-10-07T00:00:00Z'),
+    settingsJson: { companyId: 42 },
+  });
+  const availabilityBranch = jest
+    .fn()
+    .mockResolvedValue({ id: 'maya-branch', timezone: 'Europe/Moscow' });
   const prisma = {
+    tenant: { findUnique: availabilityTenant },
+    crmIntegration: { findUnique: availabilityIntegration },
+    branch: { findFirst: availabilityBranch },
     aiApprovalRequest: {
       findUnique: approvalFindUnique,
       create: approvalCreate,
@@ -847,6 +978,9 @@ function createHarness(
     executionUpdate,
     membershipFindUnique,
     clientFindMany,
+    availabilityTenant,
+    availabilityIntegration,
+    availabilityBranch,
     personalSelect,
     personalRevalidate,
     personal,

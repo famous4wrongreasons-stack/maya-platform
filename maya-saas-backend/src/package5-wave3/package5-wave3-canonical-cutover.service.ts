@@ -14,7 +14,10 @@ import { CrmService } from '../crm/crm.service';
 import type { ConnectCrmIntegrationDto } from '../crm/dto/connect-crm-integration.dto';
 import type { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import type { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
-import { normalizeCrmProviderSettings } from '../crm/crm-provider-settings';
+import {
+  normalizeCrmBranchBinding,
+  normalizeCrmProviderSettings,
+} from '../crm/crm-provider-settings';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -148,6 +151,18 @@ export class Package5Wave3CanonicalCutoverService {
       ...(providerChanged ? {} : previousSettings),
       ...(dto.settingsJson ?? {}),
     });
+    const binding = normalizeCrmBranchBinding(
+      settings.branchBinding,
+      settings.companyId,
+    );
+    if (
+      binding &&
+      !(await this.prisma.branch.findFirst({
+        where: { id: binding.branchId, tenantId },
+        select: { id: true },
+      }))
+    )
+      throw new NotFoundException('CRM branch binding target not found');
     const baseUrl =
       ('baseUrl' in dto ? dto.baseUrl : undefined) ??
       (providerChanged ? null : (existing?.baseUrl ?? null));

@@ -265,6 +265,11 @@ export class AiToolRuntimeService {
       principal,
       validated,
     );
+    const revalidateAvailability = await this.bindAvailabilityReadScope(
+      principal,
+      definition,
+      args,
+    );
     const inputHash = this.inputHash(toolName, args, principal);
 
     if (definition.approvalPolicy !== 'none') {
@@ -303,6 +308,7 @@ export class AiToolRuntimeService {
       approval: null,
     });
     await personal?.revalidate();
+    await revalidateAvailability?.();
     if (internal.suppressWidgetTrigger === true) return completed;
     const output = await this.attachReadWidget(
       user,
@@ -316,6 +322,7 @@ export class AiToolRuntimeService {
       internal.userTurn,
     );
     await personal?.revalidate();
+    await revalidateAvailability?.();
     return output;
   }
 
@@ -342,6 +349,11 @@ export class AiToolRuntimeService {
       toolName,
       principal,
       validated,
+    );
+    const revalidateAvailability = await this.bindAvailabilityReadScope(
+      principal,
+      definition,
+      args,
     );
     const inputHash = this.inputHash(toolName, args, principal);
     const execution = await this.prisma.aiToolExecution.findUnique({
@@ -388,6 +400,7 @@ export class AiToolRuntimeService {
           replayed: true,
         };
     await personal?.revalidate();
+    await revalidateAvailability?.();
     if (internal.suppressWidgetTrigger === true) return completed;
     const output = await this.attachReadWidget(
       user,
@@ -401,6 +414,7 @@ export class AiToolRuntimeService {
       internal.userTurn,
     );
     await personal?.revalidate();
+    await revalidateAvailability?.();
     return output;
   }
 
@@ -2348,7 +2362,7 @@ export class AiToolRuntimeService {
                     : toolName === 'booking.availability.read' ||
                         toolName === 'booking.group-availability.read'
                       ? {
-                          source_projection: 'maya.availability-source-scope/1',
+                          source_projection: 'maya.availability-source-scope/2',
                         }
                       : {}),
               role: principal.role,
@@ -2364,6 +2378,74 @@ export class AiToolRuntimeService {
       });
     }
     return createHash('sha256').update(canonical).digest('hex');
+  }
+
+  /** READ identity follows the current calendar/integration and selected branch. */
+  private async bindAvailabilityReadScope(
+    principal: AiToolPrincipal,
+    definition: AiToolDefinition,
+    args: ValidatedAiToolArguments,
+  ): Promise<(() => Promise<void>) | undefined> {
+    if (
+      ![
+        'booking.availability.read',
+        'booking.group-availability.read',
+      ].includes(definition.name)
+    )
+      return;
+    const readHash = async () => {
+      const tenant = await this.prisma.tenant.findUnique({
+        where: { id: principal.tenantId },
+        select: { calendarSource: true, defaultTimezone: true },
+      });
+      const integration =
+        tenant?.calendarSource === 'external'
+          ? await this.prisma.crmIntegration.findUnique({
+              where: { tenantId: principal.tenantId },
+              select: {
+                id: true,
+                provider: true,
+                status: true,
+                updatedAt: true,
+                baseUrl: true,
+                settingsJson: true,
+              },
+            })
+          : null;
+      const branch =
+        typeof args.branch_id === 'string'
+          ? await this.prisma.branch.findFirst({
+              where: { id: args.branch_id, tenantId: principal.tenantId },
+              select: { id: true, timezone: true },
+            })
+          : null;
+      return createHash('sha256')
+        .update(
+          this.canonicalJson({
+            tenant,
+            integration: integration
+              ? {
+                  ...integration,
+                  updatedAt: integration.updatedAt.toISOString(),
+                }
+              : null,
+            branch,
+          }),
+        )
+        .digest('hex');
+    };
+    const sourceScopeHash = await readHash();
+    principal.readAuthority = {
+      membershipId: principal.readAuthority?.membershipId ?? null,
+      membershipStatus: principal.readAuthority?.membershipStatus ?? null,
+      branchId: principal.readAuthority?.branchId ?? null,
+      ...principal.readAuthority,
+      sourceScopeHash,
+    };
+    return async () => {
+      if ((await readHash()) !== sourceScopeHash)
+        this.executionConflict('ai_tool_availability_source_changed');
+    };
   }
 
   /** Personal cache results must follow the current source identity mapping. */
