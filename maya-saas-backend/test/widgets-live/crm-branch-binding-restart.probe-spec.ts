@@ -218,6 +218,27 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
       controlledFixtureMode: true,
     });
   };
+  const finishSyntheticOrigin = async (executionId: string) => {
+    const owner = kernel();
+    const claim = await owner.claimExecution({
+      tenantId: saved.tenantId,
+      executionId,
+      workerId: 'synthetic_origin_fixture',
+    });
+    const attempt = {
+      tenantId: saved.tenantId,
+      executionId,
+      attemptId: claim.attempt.id,
+      leaseToken: claim.leaseToken,
+    };
+    await owner.markDispatchMayHaveCrossed(attempt);
+    await owner.markDispatchAcknowledged(attempt);
+    await owner.finalizeSuccess({
+      ...attempt,
+      outcomeCode: 'synthetic_fixture_only',
+      safeResult: { externalId: '501' },
+    });
+  };
   it('stages and activates explicit ownership, restores persisted binding, revokes cached reads and checks origin SQL', async () => {
     const { ACTION_EXECUTION_REQUEST_CONTRACT } = nativeRequire(
       path.resolve('src/action-engine/action-engine.contract'),
@@ -368,13 +389,7 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
         },
       });
       saved.originExecutionId = execution.id;
-      await db.prisma.actionExecution.update({
-        where: { id: execution.id },
-        data: {
-          state: 'SUCCEEDED',
-          safeResultSummaryJson: { externalId: '501' },
-        },
-      });
+      await finishSyntheticOrigin(execution.id);
       expect(
         await kernel().readClientAppointmentOrigin(
           saved.tenantId,
@@ -475,31 +490,7 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
           start: saved.day + 'T08:00:00.000Z',
         },
       });
-      await db.prisma.actionExecution.update({
-        where: { id: second.id },
-        data: {
-          state: 'SUCCEEDED',
-          safeResultSummaryJson: { externalId: '501' },
-        },
-      });
-      await expect(
-        kernel().readClientAppointmentOrigin(
-          saved.tenantId,
-          saved.clientId,
-          '501',
-        ),
-      ).rejects.toThrow();
-      await db.prisma.actionExecution.update({
-        where: { id: second.id },
-        data: { state: 'UNKNOWN' },
-      });
-      checkpoints.push(
-        'actual PG origin lookup refuses two matching SUCCEEDED fixtures',
-      );
-      await db.prisma.actionExecution.update({
-        where: { id: saved.originExecutionId },
-        data: { state: 'UNKNOWN' },
-      });
+      await finishSyntheticOrigin(second.id);
       await expect(
         kernel().readClientAppointmentOrigin(
           saved.tenantId,
@@ -508,7 +499,7 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
         ),
       ).rejects.toThrow();
       checkpoints.push(
-        'restarted origin lookup refuses foreign client and UNKNOWN source',
+        'actual PG origin lookup refuses foreign client and two matching SUCCEEDED fixtures',
       );
       expect((await connect(token, null)).status).toBe(201);
       expect((await slots(token, saved.readKey)).status).toBe(409);
