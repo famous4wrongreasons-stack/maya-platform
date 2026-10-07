@@ -797,7 +797,13 @@ export class AiCoreService {
     const signatures = new Set<string>();
     const maxToolSteps = this.maxToolSteps();
     let activeSemanticPlan: ConversationSemanticPlan | null =
-      await this.previousSemanticPlan(user, dto, tools, toolUser.role);
+      await this.previousSemanticPlan(
+        user,
+        dto,
+        tools,
+        toolUser.role,
+        sanitized.retainAcceptedBookingServices,
+      );
     // let, а не const: смысловой план приходит от модели ПОЗЖЕ и может снять
     // требование источника — см. ниже про болтовню.
     let requirement = this.groundingRequirement(
@@ -2942,6 +2948,7 @@ export class AiCoreService {
     dto: AiCoreChatDto,
     tools: AiCoreToolDescriptor[],
     effectiveRole: UserRole,
+    retainAcceptedBookingServices?: (ids: readonly string[]) => void,
   ): Promise<ConversationSemanticPlan | null> {
     if (dto.surface !== 'web' || !dto.conversationId || !this.moduleRef)
       return null;
@@ -3055,6 +3062,7 @@ export class AiCoreService {
         if (!sameSource) return null;
         if (sameSource) {
           bookingSelectionMerged = true;
+          retainAcceptedBookingServices?.(selected.services);
           if (configured)
             this.bookingPreferenceSources.set(dto, {
               branchId: configured.id,
@@ -6055,6 +6063,7 @@ export class AiCoreService {
     messages: AiCoreMessage[];
     redacted: boolean;
     nameReferences: ReadonlyMap<string, string>;
+    retainAcceptedBookingServices: (ids: readonly string[]) => void;
     project: <T>(value: T, catalog?: boolean) => T;
     resolveReferences: <T>(value: T, semantic?: boolean) => T;
     present: (value: string) => string;
@@ -6109,10 +6118,21 @@ export class AiCoreService {
     // encrypted semantic owner unchanged and revalidate selections in its tenant.
     const references = new Map<string, string | number>();
     const serviceLabels = new Map<string, string>();
+    // Only the current principal's accepted, source-revalidated selection reader may
+    // register these IDs. They survive the privacy roundtrip as preferences for a
+    // fresh catalog bind, never as model-visible values or execution authority.
+    const acceptedBookingServices = new Set<string>();
+    const acceptedBookingServiceAliases = new Map<string, string>();
     const alias = (value: string, names: boolean) => {
       if (/^\[name removed\]@[a-f0-9]{32}_\d+$/.test(value)) return value;
       const map = names ? nameReferences : references;
-      for (const [token, raw] of map) if (raw === value) return token;
+      for (const [token, raw] of map) {
+        if (
+          raw === value &&
+          (names || !acceptedBookingServiceAliases.has(token))
+        )
+          return token;
+      }
       const token = `[${names ? 'name' : 'reference'} removed]@${nonce}_${++mention}`;
       map.set(token, value);
       return token;
@@ -6210,6 +6230,17 @@ export class AiCoreService {
       }
       if (typeof value === 'string') {
         if (
+          ['service', 'services'].includes(key) &&
+          acceptedBookingServices.has(value)
+        ) {
+          for (const [token, id] of acceptedBookingServiceAliases)
+            if (id === value) return token;
+          const token = `[reference removed]@${nonce}_${++mention}`;
+          references.set(token, value);
+          acceptedBookingServiceAliases.set(token, value);
+          return token;
+        }
+        if (
           /^(employee|staff_name|employee_name|provider_name|client_name|display_name)$/.test(
             key,
           ) ||
@@ -6241,15 +6272,19 @@ export class AiCoreService {
     const restore = (value: unknown, semantic: boolean, key = ''): unknown => {
       if (typeof value === 'string') {
         const raw = references.get(value);
-        // Persist service meaning, not provider IDs. Use only this request's
-        // canonical catalog; the next booking bind rechecks label uniqueness.
-        // A reference from another source is not a service selection.
+        // Prefer current public catalog meaning. A recovered accepted service may
+        // precede that READ; retain its exact private ID only until the fresh bind.
+        // Other private references never become a service preference.
         if (
           raw !== undefined &&
           semantic &&
           ['service', 'services'].includes(key)
         )
-          return serviceLabels.get(String(raw)) ?? '[reference unavailable]';
+          return (
+            serviceLabels.get(String(raw)) ??
+            acceptedBookingServiceAliases.get(value) ??
+            '[reference unavailable]'
+          );
         return raw ?? value;
       }
       if (Array.isArray(value))
@@ -6267,6 +6302,12 @@ export class AiCoreService {
       messages: trimmed,
       redacted,
       nameReferences,
+      retainAcceptedBookingServices: (ids: readonly string[]) => {
+        for (const id of ids.slice(0, 1)) {
+          if (/^[A-Za-z0-9_:-]{1,256}$/.test(id))
+            acceptedBookingServices.add(id);
+        }
+      },
       project: <T>(value: T, catalog = false): T => {
         if (catalog && Array.isArray(value)) {
           for (const entry of value as AiCoreToolResult[]) {

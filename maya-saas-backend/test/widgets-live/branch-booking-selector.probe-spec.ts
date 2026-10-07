@@ -854,7 +854,16 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         messages: [{ role: 'user', content: prompt }],
       });
     expect(response.status).toBe(201);
-    return object(response.body);
+    const body = object(response.body);
+    const trace = (observations.ordinaryReplies ??= []) as unknown[];
+    trace.push({
+      // Finite synthetic dialogue only. No headers, identifiers, tokens or raw body.
+      reply: typeof body.reply === 'string' ? body.reply.slice(0, 2000) : null,
+      source: typeof body.source === 'string' ? body.source : null,
+      hasResolution: body.resolution !== undefined,
+      hasAction: body.action != null,
+    });
+    return body;
   }
   const chatEnvelope = (body: Record<string, unknown>) =>
     object(object(object(body.resolution).receipt).envelope);

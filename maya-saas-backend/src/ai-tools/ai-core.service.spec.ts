@@ -53,7 +53,7 @@ describe('AiCoreService', () => {
       services: ['Стрижка'],
       date_or_period: 'tomorrow',
     };
-    function bookingFixture() {
+    function bookingFixture(numericIds = false) {
       const mocks = createService(names, {}, 'UTC');
       const branches = [
         { id: 'branch-a', name: 'Центральный', timezone: 'Europe/Moscow' },
@@ -112,15 +112,15 @@ describe('AiCoreService', () => {
             name === 'catalog.staff.read'
               ? {
                   staff: [
-                    { id: 'staff-a', name: 'Антон' },
-                    { id: 'staff-b', name: 'Борис' },
+                    { id: numericIds ? '71' : 'staff-a', name: 'Антон' },
+                    { id: numericIds ? '72' : 'staff-b', name: 'Борис' },
                   ],
                 }
               : name === 'catalog.services.read'
                 ? {
                     services: [
-                      { id: 'service-a', name: 'Стрижка' },
-                      { id: 'service-b', name: 'Борода' },
+                      { id: numericIds ? '81' : 'service-a', name: 'Стрижка' },
+                      { id: numericIds ? '82' : 'service-b', name: 'Борода' },
                     ],
                   }
                 : { slots: [] },
@@ -310,6 +310,65 @@ describe('AiCoreService', () => {
       ]);
       expect(response.reply).toContain('Данные филиала изменились');
       expect(response.action).toBeNull();
+    });
+
+    it('restores accepted numeric service 81 through the private model placeholder before fresh catalog binding', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T10:00:00Z'));
+      try {
+        const f = bookingFixture(true);
+        const sourceRevision = 'a'.repeat(64);
+        f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
+          sourceRevision,
+        });
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
+        await f.turn({}, {}, 'booking.prepare_personal');
+        f.timeline.readBookingSelection.mockResolvedValue({
+          selectedAt: '2026-10-07T10:00:01Z',
+          services: ['81'],
+          employee: '71',
+          branch: 'branch-a',
+          sourceRevision,
+        });
+        jest.setSystemTime(new Date('2026-10-07T10:00:02Z'));
+        f.runtime.execute.mockClear();
+        await f.turn({ date_or_period: '2026-10-09' });
+        const modelContext = f.model.decide.mock.calls.at(-1)?.[0]
+          .conversationPlan as {
+          tasks: { entities: { services: string[] } }[];
+        };
+        expect(modelContext.tasks[0].entities.services[0]).toMatch(
+          /^\[reference removed\]@[a-f0-9]{32}_\d+$/,
+        );
+        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+          'catalog.services.read',
+          'catalog.staff.read',
+          'booking.availability.read',
+        ]);
+        expect(f.availabilityArgs()).toEqual([
+          {
+            branch_id: 'branch-a',
+            service_ids: ['81'],
+            staff_id: '71',
+            date: '2026-10-09',
+          },
+        ]);
+        expect(
+          f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0],
+        ).toMatchObject({
+          semanticContext: {
+            plan: {
+              tasks: [
+                { entities: { services: ['Стрижка'], employee: 'Антон' } },
+              ],
+            },
+          },
+        });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('retains every other choice across date, service, staff and branch corrections and intent transition', async () => {
@@ -5676,6 +5735,47 @@ describe('AiCoreService', () => {
     } finally {
       transport.mockRestore();
     }
+  });
+
+  it('restores only registered accepted service preferences and rejects foreign or forged private references', () => {
+    const { service } = createService();
+    const privacy = service['sanitizeMessages']([
+      { role: 'user', content: 'Продолжим запись' },
+    ]);
+    privacy.retainAcceptedBookingServices(['81']);
+    const projected = privacy.project({
+      services: ['81'],
+      branch: '81',
+      appointment_id: '91',
+      goods_id: '92',
+    });
+    expect(projected.services[0]).toMatch(/^\[reference removed\]@/);
+    expect(
+      privacy.resolveReferences({ services: projected.services }, true),
+    ).toEqual({ services: ['81'] });
+    expect(
+      privacy.resolveReferences({ services: [projected.branch] }, true),
+    ).toEqual({ services: ['[reference unavailable]'] });
+    expect(projected.services[0]).not.toBe(projected.branch);
+    for (const unrelated of [projected.appointment_id, projected.goods_id]) {
+      expect(
+        privacy.resolveReferences({ services: [unrelated] }, true),
+      ).toEqual({ services: ['[reference unavailable]'] });
+    }
+    const forged = projected.services[0] + '_forged';
+    expect(privacy.resolveReferences({ services: [forged] }, true)).not.toEqual(
+      { services: ['81'] },
+    );
+    const otherRequest = service['sanitizeMessages']([
+      { role: 'user', content: 'Продолжим запись' },
+    ]);
+    expect(
+      otherRequest.resolveReferences({ services: projected.services }, true),
+    ).not.toEqual({ services: ['81'] });
+    const unregistered = otherRequest.project({ services: ['81'] });
+    expect(otherRequest.resolveReferences(unregistered, true)).toEqual({
+      services: ['[reference unavailable]'],
+    });
   });
 
   it('keeps nonnumeric catalog service IDs out of serialized resumed semantic context', async () => {
