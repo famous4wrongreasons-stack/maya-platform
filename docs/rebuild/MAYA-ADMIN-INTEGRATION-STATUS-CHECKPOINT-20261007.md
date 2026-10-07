@@ -1,5 +1,8 @@
 # Admin: qualified stored integration status, 2026-10-07
 
+Ordinary semantic React follow-up: [five-checkpoint archive](evidence/maya-development-integration-20261006/semantic-admin-lifecycle-react/archive.json), jointly with Lifecycle. Actual UI login/HTTP/C9/PG proves initial stored status, history reload without new work and a fresh answer after a fixture status/date change. Model choices and source facts are synthetic; four scripted selections total, external model/fetch zero, no new AE/strategy. No process/PG restart or live YCLIENTS connectivity is claimed. Screenshots and independent review pass; owned services stopped.
+
+
 Implementation and evidence checkpoint: `617d8d79`.
 
 The existing semantic tool selection now yields a deterministic, source-qualified answer for `support.integration-status.read`: saved connection state, calendar source, exact saved check/sync/verification dates and the existing source-owned next action. The response always states that current CRM reachability was not tested. A historical verification never overrides a saved error; missing, invalid or unknown dates/actions are not invented. Stale results suppress the suggested next step.

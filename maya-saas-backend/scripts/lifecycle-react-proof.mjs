@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' } } });
+const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, semantic: { type: 'boolean' } } });
 assert.equal(values.run, true, 'Explicit --run and parent heavy-slot authorization required');
 assert.ok(values.output && path.isAbsolute(values.output) && !fs.existsSync(values.output), 'New absolute output required');
 for (const name of ['.env', '.env.local']) assert.equal(fs.existsSync(path.join(backend, name)), false);
@@ -23,7 +23,7 @@ await new Promise((resolve) => portServer.close(resolve));
 const database = 'maya_widget_gate_proof_lifecyclereact_' + randomBytes(6).toString('hex');
 const env = { DATABASE_URL: `postgresql://lifecycle_react_proof@127.0.0.1:${port}/${database}`, NODE_ENV: 'test', NODE_OPTIONS: '--max-old-space-size=3072', LANG: 'C', TZ: 'UTC' };
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
-const manifest = { kind: 'lifecycle-owner-react-http-pg-restart-local-proof', cluster, database, port, status: 'running', completed: [], modelCalls: 0, syntheticC8Facts: true, providerCalls: 0, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
+const manifest = { kind: values.semantic ? 'semantic-admin-lifecycle-react-local-proof' : 'lifecycle-owner-react-http-pg-restart-local-proof', cluster, database, port, status: 'running', completed: [], modelSelection: values.semantic ? 'SCRIPTED_SYNTHETIC' : 'NONE', syntheticC8Facts: true, providerCalls: 0, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
 const save = () => fs.writeFileSync(path.join(values.output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 let cancelled = null, activeChild = null, activeCleanup = false;
 const cancel = (signal) => {
@@ -84,9 +84,12 @@ try {
   await run('createdb', pg('createdb'), ['--host=127.0.0.1', '--port=' + port, '--username=lifecycle_react_proof', database]);
   await run('migrations', process.execPath, ['node_modules/prisma/build/index.js', 'migrate', 'deploy']);
   await run('har13-diagnostic-placement', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/harness.live-spec.ts', '--testNamePattern', 'HAR-13 refuses the actual synthetic diagnostic helper', '--json', '--outputFile=' + path.join(values.output, 'har13-jest.json')]);
-  await stage('prepare');
-  await run('pg-restart', pg('pg_ctl'), [...pgArgs, '-m', 'fast', 'restart']);
-  await stage('resume');
+  if (values.semantic) await stage('semantic');
+  else {
+    await stage('prepare');
+    await run('pg-restart', pg('pg_ctl'), [...pgArgs, '-m', 'fast', 'restart']);
+    await stage('resume');
+  }
   manifest.status = 'passed';
 } catch (e) { manifest.status = 'failed'; throw e; }
 finally {

@@ -7,6 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import request from 'supertest';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
+import { AiToolHandlerService } from '../../src/ai-tools/ai-tool-handler.service';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
   Package5Wave1ExecutableService,
@@ -25,7 +26,11 @@ import { assertProofDatabase } from './support/proof-db-guard';
 const stage = process.env.JEST_LIFECYCLE_REACT_STAGE;
 const receipt = process.env.JEST_LIFECYCLE_REACT_RECEIPT!;
 const output = process.env.JEST_LIFECYCLE_REACT_OUTPUT!;
-if (!['prepare', 'resume'].includes(stage ?? '') || !receipt || !output)
+if (
+  !['prepare', 'resume', 'semantic'].includes(stage ?? '') ||
+  !receipt ||
+  !output
+)
   throw new Error('Use scripts/lifecycle-react-proof.mjs');
 const database = assertProofDatabase();
 if (
@@ -91,8 +96,27 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
     config.set('EMAIL_AUTH_PROVIDER', 'debug');
     model = jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation(() => {
-        throw new Error('Lifecycle explicit READ admits no model call');
+      .mockImplementation((input) => {
+        if (stage !== 'semantic')
+          throw new Error('Lifecycle explicit READ admits no model call');
+        const text = input.messages
+          .filter((m) => m.role === 'user')
+          .at(-1)?.content;
+        const name =
+          text === 'Как состояние подключения?'
+            ? 'support.integration-status.read'
+            : text === 'Кто давно не приходил?'
+              ? 'clients.dormant.list'
+              : null;
+        if (!name || input.toolResults.length)
+          throw new Error('Unexpected semantic model turn');
+        return Promise.resolve({
+          reply: null,
+          toolCall: { name, arguments: {} },
+          provider: 'openai',
+          model: 'SCRIPTED_SYNTHETIC_SEMANTIC_SELECTION',
+          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+        });
       });
     external = jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
       throw new Error('Lifecycle proof admits no external fetch');
@@ -292,136 +316,336 @@ describe('Lifecycle current React [synthetic C8 source, actual HTTP and PG resta
     await unchanged();
     return revision.snapshotHash;
   }
-  it('restores historical response without work, then rechecks exact current sources on a new explicit UI turn', async () => {
-    if (stage === 'prepare') saved = await seed();
-    else {
-      expect(saved.database).toBe(database.database);
-      expect(saved.pid).not.toBe(process.pid);
-      expect(saved.pgStarted).not.toBe(await pgStarted());
-      observations.processRestart = true;
-      observations.postgresRestart = true;
-    }
-    let expectedRuns = stage === 'prepare' ? 0 : 1;
-    const checkpoints: string[] = [];
-    const browserOutput = path.join(output, stage + '-browser');
-    mkdirSync(browserOutput);
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn(
-        process.execPath,
-        [
-          path.resolve(
-            '../maya-carrier-react/test/lifecycle-owner-browser-probe.mjs',
-          ),
-        ],
-        { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] },
-      );
-      let failure: Error | undefined,
-        stderr = '',
-        pending = Promise.resolve(),
-        killTimer: NodeJS.Timeout | undefined;
-      const fail = (e: unknown) => {
-        failure ??= e instanceof Error ? e : new Error(String(e));
-        child.kill('SIGTERM');
-        killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
-      };
-      const timer = setTimeout(
-        () => fail(new Error('Lifecycle browser timed out')),
-        200000,
-      );
-      child.stderr!.on('data', (b: Buffer) => {
-        stderr += b.toString();
-      });
-      child.on('message', (raw: unknown) => {
-        pending = pending
-          .then(async () => {
-            const m = raw as {
-              type: string;
-              name: string;
-              response?: ChatBody;
-              notBefore?: number;
-            };
-            if (m.type === 'ready')
-              child.send({
-                type: 'start',
-                backendOrigin: await http.listenLoopback(),
-                output: browserOutput,
-                stage,
-                email: saved.user.email,
-                notBefore: saved.notBefore,
-                firstReply: saved.first?.reply,
-              });
-            else if (m.type === 'checkpoint') {
-              if (m.name === 'initial' || m.name === 'unavailable') {
-                const response = m.response!;
-                const hash = await assertRead(response, m.name === 'initial');
-                expectedRuns++;
-                if (stage === 'prepare') {
-                  saved.first = response;
-                  saved.firstHash = hash;
+  (stage === 'semantic' ? it.skip : it)(
+    'restores historical response without work, then rechecks exact current sources on a new explicit UI turn',
+    async () => {
+      if (stage === 'prepare') saved = await seed();
+      else {
+        expect(saved.database).toBe(database.database);
+        expect(saved.pid).not.toBe(process.pid);
+        expect(saved.pgStarted).not.toBe(await pgStarted());
+        observations.processRestart = true;
+        observations.postgresRestart = true;
+      }
+      let expectedRuns = stage === 'prepare' ? 0 : 1;
+      const checkpoints: string[] = [];
+      const browserOutput = path.join(output, stage + '-browser');
+      mkdirSync(browserOutput);
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          [
+            path.resolve(
+              '../maya-carrier-react/test/lifecycle-owner-browser-probe.mjs',
+            ),
+          ],
+          { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] },
+        );
+        let failure: Error | undefined,
+          stderr = '',
+          pending = Promise.resolve(),
+          killTimer: NodeJS.Timeout | undefined;
+        const fail = (e: unknown) => {
+          failure ??= e instanceof Error ? e : new Error(String(e));
+          child.kill('SIGTERM');
+          killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
+        };
+        const timer = setTimeout(
+          () => fail(new Error('Lifecycle browser timed out')),
+          200000,
+        );
+        child.stderr!.on('data', (b: Buffer) => {
+          stderr += b.toString();
+        });
+        child.on('message', (raw: unknown) => {
+          pending = pending
+            .then(async () => {
+              const m = raw as {
+                type: string;
+                name: string;
+                response?: ChatBody;
+                notBefore?: number;
+              };
+              if (m.type === 'ready')
+                child.send({
+                  type: 'start',
+                  backendOrigin: await http.listenLoopback(),
+                  output: browserOutput,
+                  stage,
+                  email: saved.user.email,
+                  notBefore: saved.notBefore,
+                  firstReply: saved.first?.reply,
+                });
+              else if (m.type === 'checkpoint') {
+                if (m.name === 'initial' || m.name === 'unavailable') {
+                  const response = m.response!;
+                  const hash = await assertRead(response, m.name === 'initial');
+                  expectedRuns++;
+                  if (stage === 'prepare') {
+                    saved.first = response;
+                    saved.firstHash = hash;
+                  }
+                  if (stage === 'resume' && m.name === 'initial') {
+                    expect(response.coordination.run_id).not.toBe(
+                      saved.first!.coordination.run_id,
+                    );
+                    // Synthetic fixture transition only; no runtime action is invoked.
+                    await db.prisma.appointment.update({
+                      where: { id: saved.appointmentId },
+                      data: { attendance: 'no_show' },
+                    });
+                  }
+                  observations[m.name] = {
+                    response,
+                    sourceCount: 1,
+                    actionCount: saved.actionCount,
+                  };
                 }
-                if (stage === 'resume' && m.name === 'initial') {
-                  expect(response.coordination.run_id).not.toBe(
-                    saved.first!.coordination.run_id,
+                if (m.notBefore) saved.notBefore = m.notBefore;
+                await unchanged();
+                expect(
+                  await db.prisma.c9StrategyRevision.count({
+                    where: { tenantId: saved.tenant.id },
+                  }),
+                ).toBe(expectedRuns);
+                expect(
+                  await db.prisma.c9WorkReceipt.count({
+                    where: { tenantId: saved.tenant.id },
+                  }),
+                ).toBe(expectedRuns);
+                checkpoints.push(m.name);
+                child.send({ type: 'continue:' + m.name });
+              }
+            })
+            .catch(fail);
+        });
+        child.once('error', fail);
+        child.once('close', (code) => {
+          clearTimeout(timer);
+          clearTimeout(killTimer);
+          void pending.then(
+            () =>
+              failure
+                ? reject(failure)
+                : code !== 0
+                  ? reject(new Error('Lifecycle browser failed: ' + stderr))
+                  : resolve(),
+            reject,
+          );
+        });
+      });
+      expect(checkpoints).toEqual(
+        stage === 'prepare'
+          ? ['initial', 'reload-restored']
+          : ['restart-restored', 'initial', 'unavailable'],
+      );
+      if (stage === 'prepare')
+        writeFileSync(receipt, JSON.stringify(saved), {
+          mode: 0o600,
+          flag: 'wx',
+        });
+      observations.checkpoints = checkpoints;
+      observations.c8ResultCount = 1;
+      observations.actionCountBefore = saved.actionCount;
+      observations.actionCountAfter = saved.actionCount;
+      observations.strategyRevisions = expectedRuns;
+    },
+    210000,
+  );
+  (stage === 'semantic' ? it : it.skip)(
+    'ordinary semantic Admin and Lifecycle complete through the current React carrier',
+    async () => {
+      saved = await seed();
+      await fx.grantFeature(saved.tenant, 'crm.integration');
+      const integration = await db.prisma.crmIntegration.create({
+        data: {
+          tenantId: saved.tenant.id,
+          provider: 'yclients',
+          status: 'error',
+          encryptedApiToken: 'SYNTHETIC_NEVER_DECRYPT',
+          verifiedAt: new Date('2026-10-05T08:00:00.000Z'),
+          lastCheckedAt: new Date('2026-10-06T09:00:00.000Z'),
+          lastSyncAt: null,
+          lastErrorCode: 'PRIVATE_SOURCE_ERROR',
+        },
+      });
+      const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+      const browserOutput = path.join(output, 'semantic-browser');
+      mkdirSync(browserOutput);
+      const checkpoints: string[] = [];
+      let reads = 0;
+      let expectedIntegration = integration;
+      type ReadBody = {
+        reply: string;
+        action: unknown;
+        tools_used: { name: string }[];
+        recommendation?: unknown;
+        coordination: { run_id: string; scope: string; state: string };
+      };
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          [
+            path.resolve(
+              '../maya-carrier-react/test/semantic-owner-browser-probe.mjs',
+            ),
+          ],
+          { stdio: ['ignore', 'ignore', 'pipe', 'ipc'] },
+        );
+        let failure: Error | undefined,
+          stderr = '',
+          pending = Promise.resolve(),
+          killTimer: NodeJS.Timeout | undefined;
+        const fail = (error: unknown) => {
+          failure ??= error instanceof Error ? error : new Error(String(error));
+          child.kill('SIGTERM');
+          killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
+        };
+        const timer = setTimeout(
+          () => fail(new Error('Semantic browser timed out')),
+          200000,
+        );
+        child.stderr!.on('data', (b: Buffer) => {
+          stderr += b.toString();
+        });
+        child.on('message', (raw: unknown) => {
+          pending = pending
+            .then(async () => {
+              const m = raw as {
+                type: string;
+                name: string;
+                response?: ReadBody;
+              };
+              if (m.type === 'ready')
+                child.send({
+                  type: 'start',
+                  backendOrigin: await http.listenLoopback(),
+                  output: browserOutput,
+                  email: saved.user.email,
+                });
+              else if (m.type === 'checkpoint') {
+                if (m.response) {
+                  reads++;
+                  const response = m.response;
+                  const capability = m.name.startsWith('admin-')
+                    ? 'support.integration-status.read'
+                    : 'clients.dormant.list';
+                  expect(response.coordination).toMatchObject({
+                    scope: 'deterministic_reads',
+                    state: 'COMPLETED',
+                  });
+                  expect(response.action).toBeNull();
+                  expect(response.recommendation).toBeUndefined();
+                  expect(response.tools_used).toHaveLength(1);
+                  expect(response.tools_used[0].name).toBe(capability);
+                  expect(JSON.stringify(response)).not.toContain(
+                    saved.clientId,
                   );
-                  // Synthetic fixture transition only; no runtime action is invoked.
+                  const work = await db.prisma.c9WorkReceipt.findMany({
+                    where: { runId: response.coordination.run_id },
+                  });
+                  expect(work).toHaveLength(1);
+                  expect(work[0]).toMatchObject({
+                    taskKey: capability,
+                    kind: 'TOOL_READ',
+                    state: 'SETTLED',
+                    domain: capability.startsWith('support.')
+                      ? 'ADMIN'
+                      : 'CLIENT_LIFECYCLE',
+                  });
+                  expect(JSON.stringify(work[0].resultJson)).not.toMatch(
+                    /PRIVATE|last_checked_at|c8.dormancy/,
+                  );
+                  observations[m.name] = response;
+                }
+                expect(model).toHaveBeenCalledTimes(reads);
+                expect(source).toHaveBeenCalledTimes(reads);
+                for (const call of source.mock.calls)
+                  expect(call[1]).toMatchObject({
+                    tenantId: saved.tenant.id,
+                    userId: saved.user.id,
+                    role: UserRole.TENANT_OWNER,
+                  });
+                expect(external).not.toHaveBeenCalled();
+                expect(
+                  await db.prisma.actionExecution.count({
+                    where: { tenantId: saved.tenant.id },
+                  }),
+                ).toBe(saved.actionCount);
+                expect(
+                  await db.prisma.c8ResultRevision.count({
+                    where: { tenantId: saved.tenant.id },
+                  }),
+                ).toBe(1);
+                expect(
+                  await db.prisma.c9StrategyRevision.count({
+                    where: { tenantId: saved.tenant.id },
+                  }),
+                ).toBe(0);
+                expect(
+                  await db.prisma.c9WorkReceipt.count({
+                    where: { tenantId: saved.tenant.id },
+                  }),
+                ).toBe(reads);
+                expect(
+                  await db.prisma.crmIntegration.findUniqueOrThrow({
+                    where: { id: integration.id },
+                  }),
+                ).toEqual(expectedIntegration);
+                if (m.name === 'reload-restored') {
+                  // Synthetic source corrections, never chat-initiated changes.
                   await db.prisma.appointment.update({
                     where: { id: saved.appointmentId },
                     data: { attendance: 'no_show' },
                   });
+                  expectedIntegration = await db.prisma.crmIntegration.update({
+                    where: { id: integration.id },
+                    data: {
+                      status: 'active',
+                      lastCheckedAt: new Date('2026-10-06T10:00:00.000Z'),
+                      lastErrorCode: null,
+                    },
+                  });
                 }
-                observations[m.name] = {
-                  response,
-                  sourceCount: 1,
-                  actionCount: saved.actionCount,
-                };
+                checkpoints.push(m.name);
+                child.send({ type: 'continue:' + m.name });
               }
-              if (m.notBefore) saved.notBefore = m.notBefore;
-              await unchanged();
-              expect(
-                await db.prisma.c9StrategyRevision.count({
-                  where: { tenantId: saved.tenant.id },
-                }),
-              ).toBe(expectedRuns);
-              expect(
-                await db.prisma.c9WorkReceipt.count({
-                  where: { tenantId: saved.tenant.id },
-                }),
-              ).toBe(expectedRuns);
-              checkpoints.push(m.name);
-              child.send({ type: 'continue:' + m.name });
-            }
-          })
-          .catch(fail);
+            })
+            .catch(fail);
+        });
+        child.once('error', fail);
+        child.once('close', (code) => {
+          clearTimeout(timer);
+          clearTimeout(killTimer);
+          void pending.then(
+            () =>
+              failure
+                ? reject(failure)
+                : code !== 0
+                  ? reject(new Error('Semantic browser failed: ' + stderr))
+                  : resolve(),
+            reject,
+          );
+        });
       });
-      child.once('error', fail);
-      child.once('close', (code) => {
-        clearTimeout(timer);
-        clearTimeout(killTimer);
-        void pending.then(
-          () =>
-            failure
-              ? reject(failure)
-              : code !== 0
-                ? reject(new Error('Lifecycle browser failed: ' + stderr))
-                : resolve(),
-          reject,
-        );
-      });
-    });
-    expect(checkpoints).toEqual(
-      stage === 'prepare'
-        ? ['initial', 'reload-restored']
-        : ['restart-restored', 'initial', 'unavailable'],
-    );
-    if (stage === 'prepare')
-      writeFileSync(receipt, JSON.stringify(saved), {
-        mode: 0o600,
-        flag: 'wx',
-      });
-    observations.checkpoints = checkpoints;
-    observations.c8ResultCount = 1;
-    observations.actionCountBefore = saved.actionCount;
-    observations.actionCountAfter = saved.actionCount;
-    observations.strategyRevisions = expectedRuns;
-  }, 210000);
+      expect(checkpoints).toEqual([
+        'admin-initial',
+        'lifecycle-initial',
+        'reload-restored',
+        'admin-source-changed',
+        'lifecycle-unavailable',
+      ]);
+      observations.checkpoints = checkpoints;
+      observations.scriptedModelSelection = true;
+      observations.externalModelCalls = 0;
+      observations.sourceReads = reads;
+      observations.c8ResultCount = 1;
+      observations.actionCountBefore = saved.actionCount;
+      observations.actionCountAfter = saved.actionCount;
+      observations.strategyRevisions = 0;
+      observations.appRestart = false;
+      observations.postgresRestart = false;
+    },
+    210000,
+  );
 });

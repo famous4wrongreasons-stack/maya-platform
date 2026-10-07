@@ -1,0 +1,183 @@
+{
+  "stage": "semantic",
+  "syntheticC8Facts": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "admin-initial": {
+    "request_id": "1e37f7aa-0972-48c9-a167-4bc4d2bb6919",
+    "coordination": {
+      "run_id": "a2b0dc9d-fbbf-41ce-b4ef-7dab52c39173",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "1f7254c5-aa38-40da-a1f9-f6ed091026b2",
+      "conversationId": "ef0d33be-659b-4d81-93a5-0393e98fa296"
+    },
+    "reply": "Сохранённый статус интеграции YCLIENTS: ошибка подключения.\n\nИсточником календаря выбран внутренний календарь MAYA.\n\nПоследняя сохранённая проверка: 06.10.2026, 09:00 (UTC).\n\nПоследняя сохранённая синхронизация: дата недоступна.\n\nПодключение было подтверждено 05.10.2026, 08:00 (UTC); это историческая отметка.\n\nТекущая доступность CRM не подтверждена: проверка соединения не выполнялась.\n\nСледующий шаг из сохранённого статуса: переподключить CRM.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "support.integration-status.read",
+        "status": "completed",
+        "execution_id": "cmuxqitg5000esec9itx8e7kt"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "integration_status",
+      "required_tools": [
+        "support.integration-status.read"
+      ],
+      "evidence_tools": [
+        "support.integration-status.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "lifecycle-initial": {
+    "request_id": "da9b7199-9282-4bb0-b7e7-45bb126ccb1c",
+    "coordination": {
+      "run_id": "ef4b3970-fd43-453f-8b08-585b2e5b085c",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "5c1eac9b-edad-4920-a747-c97fce0bf6eb",
+      "conversationId": "ef0d33be-659b-4d81-93a5-0393e98fa296"
+    },
+    "reply": "Результаты по подтверждённым правилам давности:\n\nОценка 1: По оценке на 07.10.2026, 06:36:51,044 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПоказаны оценки, а не список уникальных клиентов. Давность визита не означает готовность гостя вернуться. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.\n\nРезультаты не подтверждают полный охват клиентской базы.",
+    "source": "safe_fallback",
+    "redacted_input": true,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "clients.dormant.list",
+        "status": "completed",
+        "execution_id": "cmuxqitmx000jsec9zu9jt69h"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "client_retention",
+      "required_tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "customers.count",
+        "clients.dormant.list",
+        "clients.retention.scan",
+        "support.integration-status.read"
+      ],
+      "evidence_tools": [
+        "clients.dormant.list"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "admin-source-changed": {
+    "request_id": "b913c264-5b6b-4740-ab51-06e3210f2f3d",
+    "coordination": {
+      "run_id": "27ebcc73-d02f-4a3f-b9b4-27551ef91f1b",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "ce851c3a-0c64-4c84-a29d-571736f4ebc6",
+      "conversationId": "ef0d33be-659b-4d81-93a5-0393e98fa296"
+    },
+    "reply": "Сохранённый статус интеграции YCLIENTS: активна.\n\nИсточником календаря выбран внутренний календарь MAYA.\n\nПоследняя сохранённая проверка: 06.10.2026, 10:00 (UTC).\n\nПоследняя сохранённая синхронизация: дата недоступна.\n\nПодключение было подтверждено 05.10.2026, 08:00 (UTC); это историческая отметка.\n\nТекущая доступность CRM не подтверждена: проверка соединения не выполнялась.\n\nСледующий шаг в сохранённом статусе не указан.",
+    "source": "safe_fallback",
+    "redacted_input": true,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "support.integration-status.read",
+        "status": "completed",
+        "execution_id": "cmuxqk4qk000psec95wt78f5g"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "integration_status",
+      "required_tools": [
+        "support.integration-status.read"
+      ],
+      "evidence_tools": [
+        "support.integration-status.read"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "lifecycle-unavailable": {
+    "request_id": "4861797f-21ea-4bed-9aee-df25b8bbb0cb",
+    "coordination": {
+      "run_id": "e2c86ef7-5def-4865-a157-7865d2de7d02",
+      "scope": "deterministic_reads",
+      "state": "COMPLETED"
+    },
+    "user_turn": {
+      "turnId": "1e25361b-f4e8-4ced-a403-8c2ab28ea3e7",
+      "conversationId": "ef0d33be-659b-4d81-93a5-0393e98fa296"
+    },
+    "reply": "Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.",
+    "source": "safe_fallback",
+    "redacted_input": true,
+    "action": null,
+    "tools_used": [
+      {
+        "name": "clients.dormant.list",
+        "status": "completed",
+        "execution_id": "cmuxqk4wx000usec9bv3lfe7v"
+      }
+    ],
+    "grounding": {
+      "status": "verified",
+      "domain": "client_retention",
+      "required_tools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "customers.count",
+        "clients.dormant.list",
+        "clients.retention.scan",
+        "support.integration-status.read"
+      ],
+      "evidence_tools": [
+        "clients.dormant.list"
+      ]
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  },
+  "checkpoints": [
+    "admin-initial",
+    "lifecycle-initial",
+    "reload-restored",
+    "admin-source-changed",
+    "lifecycle-unavailable"
+  ],
+  "scriptedModelSelection": true,
+  "externalModelCalls": 0,
+  "sourceReads": 4,
+  "c8ResultCount": 1,
+  "actionCountBefore": 1,
+  "actionCountAfter": 1,
+  "strategyRevisions": 0,
+  "appRestart": false,
+  "postgresRestart": false,
+  "modelCalls": 4,
+  "externalFetchCalls": 0
+}
