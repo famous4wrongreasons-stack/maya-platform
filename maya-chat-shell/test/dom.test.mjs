@@ -798,7 +798,7 @@ test('session-not-active 401 (a bearer after logout or revocation): one refresh,
     dom.key(composer, 'Enter');
     await flush(40);
     scheduler.flush();
-    assert.deepEqual(calls, ['/api/auth/login', '/api/ai/conversation', '/api/ai/chat', '/api/auth/refresh']);
+    assert.deepEqual(calls, ['/api/auth/login', '/api/ai/conversation', '/api/widgets/resolve', '/api/ai/chat', '/api/auth/refresh']);
     assert.match(dom.visibleText(), /Вход в MAYA/);
     assert.match(dom.visibleText(), /Сессия завершена — войдите снова\./);
     assert.equal(dom.find((el) => el.localName === 'textarea'), null);

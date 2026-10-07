@@ -49,6 +49,8 @@ export const noticeSentence = (notice: NoticeKind): string => {
       return 'Версия MAYA устарела — обновите страницу';
     case 'display_capped':
       return 'Ранние сообщения скрыты: на экране остаются последние 200.';
+    case 'booking_outcomes_restored':
+      return 'Сохранённые результаты недавних действий с записями:';
     case 'history_restored':
       return 'Предыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.';
     case 'history_truncated':

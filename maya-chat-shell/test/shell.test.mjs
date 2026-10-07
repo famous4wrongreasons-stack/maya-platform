@@ -309,3 +309,36 @@ test('P-B4: a successful chat resolution reaches the existing H7/vault/renderer 
   assert.ok(runtime.widgets.heldTokens() > 0, 'the one existing token vault owns the envelope tokens');
   runtime.dispose();
 });
+
+test('login restores only bounded booking terminal prose through the existing reader, without widget activation', async () => {
+  const { port } = makeHistory();
+  let reads = 0, mutations = 0;
+  const line = { outcome: 'SUBMITTED', text: 'Запрос принят. Подтверждение ожидается.', action_receipt_ref: null };
+  const runtime = createShellRuntime({
+    transport: {
+      conversation: async () => ({ ok: true, value: { conversationId: null, turns: [], truncated: false, interrupted: false } }),
+      resolveWidgets: async request => {
+        assert.deepEqual(request, { thread_page: { limit: 20 } }); reads++;
+        return { ok: true, value: { tenant_bound: true, widgets: [
+          { envelope: envelope('kind-booking-confirmation'), terminal_lines: [line], reread_intent: null },
+          { envelope: envelope('kind-schedule'), terminal_lines: [{ ...line, text: 'Other domain outside this restore' }], reread_intent: null },
+        ] } };
+      },
+      chat: () => { mutations++; throw Error('No new chat turn'); },
+      widgetIntent: () => { mutations++; throw Error('No intent'); },
+    },
+    session: { view: () => ({ signedIn: true, display: { userName: 'Стас', tenantName: null } }), subscribe: () => () => undefined },
+    render,
+    environment: { a11y: () => A11Y, onA11yChange: () => () => undefined, fragment: () => '' },
+    scheduler: { now: () => Date.parse(INDEX.now), after: () => () => undefined },
+    history: port,
+    newAbort: () => new AbortController(),
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(reads, 1); assert.equal(mutations, 0);
+  assert.deepEqual(runtime.conversation.view().items.map(i => i.kind), ['notice', 'assistant']);
+  assert.equal(runtime.conversation.view().items[1].text, line.text);
+  assert.equal(runtime.widgets.heldTokens(), 0);
+  assert.deepEqual(runtime.widgets.lockSources(), []);
+  runtime.dispose();
+});

@@ -20,7 +20,7 @@
 // Memory only (A6). A signed-in → signed-out transition empties the timeline and aborts the turn in
 // flight, so no history crosses to another session or tenant (D7 B).
 
-import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, ConversationHistoryProjection, Outcome } from '../net/types.ts';
+import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, ConversationHistoryProjection, Outcome, WidgetResolveProjection } from '../net/types.ts';
 import type {
   Cancel,
   ComposerState,
@@ -72,13 +72,15 @@ export interface TimelineWriter {
 }
 
 export interface ConversationDeps {
-  readonly transport: Pick<Transport, 'chat' | 'conversation'>;
+  readonly transport: Pick<Transport, 'chat' | 'conversation'> & Partial<Pick<Transport, 'resolveWidgets'>>;
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly scheduler: Pick<Scheduler, 'now'>;
   readonly newAbort: () => AbortHandle;
   /** B4: pass one server-authorized envelope to the existing widget owner after the turn settles.
    * The optional receipt describes presentation only; it grants no approval authority. */
   readonly ingestResolution?: (resolution: ChatWidgetResolution) => 'approval_presented' | void;
+  /** Current-authority historical receipts only; never re-ingest old controls. */
+  readonly restoreBookingOutcomes?: (page: WidgetResolveProjection) => void;
   /** `crypto.randomUUID()` by default: 36 chars of `[0-9a-f-]`, inside the DTO's `^[A-Za-z0-9_-]{8,128}$`. */
   readonly newRequestId?: () => string;
 }
@@ -417,8 +419,8 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     emit();
     const settleHistory = (outcome: Outcome<ConversationHistoryProjection, ChatFailure>): void => {
       if (!signedIn || generation !== restoreGeneration || restoring !== abort) return;
-      restoring = null;
       if (!outcome.ok) {
+        restoring = null;
         // Older servers predate this additive read route. Keep their existing
         // chat usable and disclose the missing capability; never apply this
         // compatibility path to authentication failures or network outages.
@@ -449,7 +451,26 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
           if (!turn.completed) append({ kind: 'notice', id: nextId('n'), notice: 'history_interrupted' });
         }
       }
-      emit();
+      const finish = (page: WidgetResolveProjection | null): void => {
+        if (!signedIn || generation !== restoreGeneration || restoring !== abort) return;
+        try {
+          if (page?.tenant_bound === true) deps.restoreBookingOutcomes?.(page);
+        } catch {
+          // Historical presentation is optional; it cannot strand the composer.
+        } finally {
+          restoring = null;
+          emit();
+        }
+      };
+      if (deps.restoreBookingOutcomes && deps.transport.resolveWidgets) {
+        // One bounded existing read after login. A denied/unavailable widget
+        // reader grants nothing and must not prevent ordinary text chat.
+        try {
+          deps.transport.resolveWidgets({ thread_page: { limit: 20 } }, abort.signal)
+            .then(page => finish(page.ok ? page.value : null))
+            .catch(() => finish(null));
+        } catch { finish(null); }
+      } else finish(null);
     };
     try {
       deps.transport.conversation(abort.signal).then(settleHistory, () => settleHistory({ ok: false, failure: { reason: 'unexpected_response', status: 0 } }));

@@ -1195,6 +1195,31 @@ const terminalStore = () => {
 
 const serverLines = (s) => s.items().filter((i) => i.kind === 'assistant').map((i) => i.text);
 
+test('historical booking outcomes share live receipt dedupe without holding controls or tokens', async () => {
+  const card = terminalCard(), store = terminalStore();
+  store.put(card, [confirmed()]);
+  const s = setup({ submission: store.port() });
+  const pending = { outcome: 'SUBMITTED', text: 'Запрос принят. Подтверждение ожидается.', action_receipt_ref: null };
+  const history = [
+    { widgetId: card.widget_id, lines: [confirmed(), confirmed()] },
+    { widgetId: 'another-widget', lines: [pending] },
+  ];
+  s.runtime.widgets.restoreBookingOutcomes(history);
+  s.runtime.widgets.restoreBookingOutcomes(history);
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT, pending.text]);
+  assert.equal(s.items().filter(i => i.notice === 'booking_outcomes_restored').length, 1);
+  assert.equal(s.items().some(i => i.kind === 'widget'), false);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  assert.equal(s.runtime.widgets.counters().submissions, 0);
+  const { itemId } = s.runtime.widgets.ingest(card);
+  await s.runtime.widgets.activate(itemId, 'intent:i1');
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT, pending.text], 'a current live read of the same receipt does not duplicate it');
+  s.signOut();
+  assert.deepEqual(serverLines(s), []);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  s.runtime.dispose();
+});
+
 test('L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one receipt and ONE visible terminal outcome', async () => {
   const card = terminalCard();
   const store = terminalStore();

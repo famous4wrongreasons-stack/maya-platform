@@ -95,6 +95,7 @@ const makeSession = (initial = SIGNED_IN) => {
 const setup = (options = {}) => {
   const t = makeTransport();
   if (options.conversation) t.transport.conversation = options.conversation;
+  if (options.resolveWidgets) t.transport.resolveWidgets = options.resolveWidgets;
   const session = makeSession(options.session);
   let now = T0;
   let ids = 0;
@@ -109,12 +110,74 @@ const setup = (options = {}) => {
       return handle;
     },
     newRequestId: () => `turn-${String(++ids).padStart(8, '0')}`,
+    restoreBookingOutcomes: options.restoreBookingOutcomes,
   });
   return { ...t, session, conversation, aborts, advance: (ms) => (now += ms), items: () => conversation.view().items };
 };
 
 const TYPED = { modality: 'typed' };
 const SPOKEN = { modality: 'spoken' };
+
+test('receipt restoration uses one bounded read and discards a late old-session result', async () => {
+  const reads = [], restored = [];
+  const s = setup({
+    conversation: async () => ({ ok: true, value: { conversationId: null, turns: [], truncated: false, interrupted: false } }),
+    resolveWidgets: (request, signal) => new Promise(resolve => reads.push({ request, signal, resolve })),
+    restoreBookingOutcomes: page => restored.push(page),
+  });
+  await flush();
+  assert.deepEqual(reads[0].request, { thread_page: { limit: 20 } });
+  assert.equal(s.conversation.view().inFlight, true);
+  assert.equal(s.calls.length, 0);
+  s.session.set({ signedIn: false, reason: 'signed_out' });
+  assert.equal(reads[0].signal.aborted, true);
+  s.session.set({ signedIn: true, display: { userName: 'Другой', tenantName: 'Другой салон' } });
+  await flush();
+  reads[0].resolve({ ok: true, value: { tenant_bound: true, widgets: ['private old receipt'] } });
+  await flush();
+  assert.deepEqual(restored, []);
+  assert.equal(reads.length, 2);
+  reads[1].resolve({ ok: true, value: { tenant_bound: true, widgets: [] } });
+  await flush();
+  assert.deepEqual(restored, [{ tenant_bound: true, widgets: [] }]);
+  assert.equal(s.conversation.view().inFlight, false);
+  assert.equal(s.calls.length, 0);
+  s.conversation.dispose();
+});
+
+for (const reason of ['forbidden', 'no_connection', 'server_error']) test(`receipt ${reason} does not create authority or block restored text chat`, async () => {
+  let restored = 0;
+  const s = setup({
+    conversation: async () => ({ ok: true, value: { conversationId: null, turns: [], truncated: false, interrupted: false } }),
+    resolveWidgets: async () => ({ ok: false, failure: { reason } }),
+    restoreBookingOutcomes: () => restored++,
+  });
+  await flush();
+  assert.equal(restored, 0);
+  assert.equal(s.conversation.view().inFlight, false);
+  assert.equal(s.conversation.submitUserTurn('Новый вопрос', TYPED).accepted, true);
+  assert.equal(s.calls.length, 1);
+  s.conversation.dispose();
+});
+
+for (const mode of ['tenant_unbound', 'reader_rejects', 'reader_throws', 'sink_throws']) test(`receipt ${mode} cannot publish unbound text or strand the composer`, async () => {
+  let restored = 0;
+  const s = setup({
+    conversation: async () => ({ ok: true, value: { conversationId: null, turns: [], truncated: false, interrupted: false } }),
+    resolveWidgets: () => {
+      if (mode === 'reader_throws') throw Error('Reader unavailable');
+      if (mode === 'reader_rejects') return Promise.reject(Error('Reader rejected'));
+      return Promise.resolve({ ok: true, value: { tenant_bound: mode !== 'tenant_unbound', widgets: [] } });
+    },
+    restoreBookingOutcomes: () => { restored++; throw Error('Presentation unavailable'); },
+  });
+  await flush();
+  assert.equal(restored, mode === 'sink_throws' ? 1 : 0);
+  assert.equal(s.conversation.view().inFlight, false);
+  assert.equal(s.conversation.submitUserTurn('Новый вопрос', TYPED).accepted, true);
+  assert.equal(s.calls.length, 1);
+  s.conversation.dispose();
+});
 
 test('an older server missing the additive history route remains usable with a visible limitation', async () => {
   const s = setup({ conversation: async () => ({ ok: false, failure: { reason: 'unexpected_response', status: 404 } }) });

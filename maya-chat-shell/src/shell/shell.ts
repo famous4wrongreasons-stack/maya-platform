@@ -298,6 +298,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   // B4 is transport plumbing only. The late-bound sink exists because the conversation owns the
   // timeline and the existing widget store consumes it; it never interprets or repairs an envelope.
   let ingestAuthorizedEnvelope: ((resolution: ChatWidgetResolution) => 'approval_presented' | void) | null = null;
+  let restoreBookingOutcomes: Widgets['restoreBookingOutcomes'] | null = null;
   const conversation = createConversation({
     transport: deps.transport,
     session: deps.session,
@@ -305,6 +306,9 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     newAbort: deps.newAbort,
     newRequestId: newId,
     ingestResolution: (resolution) => ingestAuthorizedEnvelope?.(resolution),
+    restoreBookingOutcomes: (page) => restoreBookingOutcomes?.(page.widgets
+      .filter(widget => widget.envelope.kind === 'BOOKING_CONFIRMATION')
+      .map(widget => ({ widgetId: widget.envelope.widget_id, lines: widget.terminal_lines }))),
   });
   const shell = createShell({ history: deps.history, session: deps.session });
   const observations = createRenderObserver(deps.transport, deps.newAbort);
@@ -323,6 +327,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     widgets.ingest(resolution.receipt.envelope);
     if (widgets.hasPresentedApproval(resolution.receipt.envelope)) return 'approval_presented';
   };
+  restoreBookingOutcomes = widgets.restoreBookingOutcomes;
   const disconnect = shell.connect(widgets);
   const widgetPort: WidgetPort = {
     rendered: widgets.rendered,
@@ -344,6 +349,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
       }),
     dispose() {
       ingestAuthorizedEnvelope = null;
+      restoreBookingOutcomes = null;
       disconnect();
       observations.dispose();
       widgets.dispose();

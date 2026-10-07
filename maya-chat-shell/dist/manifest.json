@@ -102,7 +102,7 @@
       },
       {
         "path": "src/shell/conversation.ts",
-        "sha256": "725cb951847f6285681401148aad458f863c3ecf4a3507bec5a29e18821d8286"
+        "sha256": "cb8a301facbbd48bceb3285b0d3689aad92330bd6e405ba5240e456c1dfeaf67"
       },
       {
         "path": "src/shell/deeplink.ts",
@@ -110,15 +110,15 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "1743b3622afde9d59016f28bf8110250c57e919ea3b041399c867903d201475a"
+        "sha256": "b1bcf04e819a35fd63c902b6973258b06f8f78c20e7f1982c602cb7a91887bf2"
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "98c3040109550ba177bf6771868138d717cf396932b135d571c69fc73ba5b7b6"
+        "sha256": "71994d7d6a3c875bd2296d58a4318b709e237115cbe48a36c256af2b04663dc5"
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "a7b5cb6939a9bc4d65e2c7910f5885131b2fc3cb037e15b5f5e6d861bf39e868"
+        "sha256": "5fa7ef49927077a19e94ca12835bf1e4e64d135b2602872e13bd411b1e17ad51"
       },
       {
         "path": "src/shell/view.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 477399,
-  "digest": "80dd0a239c2667efa281082665995cd6c47c6db61df036dfa7a70e9eaabb511b",
+  "bytes": 480109,
+  "digest": "f604021b3d07613c12972ba41b821fc22af59a995a2d7c1c2c8ae6aa95da7028",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "2334e477d10c668c64027e2cded891dc2f0fefb4ace4ff3beca0c30ec9c4c8fe",
-    "modulePath": "m/2334e477d10c668c/",
+    "digest": "ae1e75529888b4f7c3f6a4d710770cb8e59f3d7023f8e76a7c1e3b9965c08a5e",
+    "modulePath": "m/ae1e75529888b4f7/",
     "files": [
       {
         "path": "entry/main.js",
@@ -179,8 +179,8 @@
       },
       {
         "path": "src/dom/timeline.js",
-        "sha256": "f089047e7916cb820ef47b8d04174d7d71e13c63e6b83f590f04fd62cc1325c9",
-        "bytes": 13786
+        "sha256": "33687c9f4d423f064c823c32e1671980885a3f14bb7e5246d6e4cf5e75cc1a21",
+        "bytes": 13949
       },
       {
         "path": "src/dom/voice-control.js",
@@ -249,8 +249,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "9539d0ba0d0fcea597763510b7da95b894ad88455a07043f13b275644eb977a9",
-        "bytes": 15057
+        "sha256": "8fad78e3e3fe78359066f0aae87f0e4a67b37d83eec54a70ace19be6a179797f",
+        "bytes": 15999
       },
       {
         "path": "src/shell/deeplink.js",
@@ -264,8 +264,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "a98a86bb1cca72a4c11343ef4addf4da89e26edddf04f9f50a4b308ef99adfdd",
-        "bytes": 33915
+        "sha256": "41d46079b6571e79693884d02d2ec1d3844661dfb34b0e48ab727144e8a36d57",
+        "bytes": 34557
       },
       {
         "path": "src/shell/ports.js",
@@ -274,8 +274,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "2f4b957d9aa7a7e0e606375a4268d81aa859c5188e2b787b390d4b3ed5b5224d",
-        "bytes": 7789
+        "sha256": "0867e675b15ef002b757ef033dc0cd833c7b23076098be82992466c35d64263a",
+        "bytes": 8193
       },
       {
         "path": "src/shell/view.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "b20e90d4f9e802977e6ef5f6f9a10418460cddd6953ef62e371513fc700b07f2",
+      "sha256": "d40d01ca5a264240cbb2dec30241b705c9727b005392fdc57a0881123d84f7ca",
       "bytes": 1344
     },
     "assets": [

@@ -204,6 +204,7 @@ export type NoticeKind =
   | 'outdated_client'
   | 'display_capped'
   | 'history_restored'
+  | 'booking_outcomes_restored'
   | 'history_interrupted'
   | 'history_unavailable'
   | 'history_not_supported'

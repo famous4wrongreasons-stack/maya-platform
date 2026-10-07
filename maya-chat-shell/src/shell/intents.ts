@@ -165,6 +165,8 @@ export interface WidgetsDeps {
 }
 
 export interface Widgets extends DetailSource {
+  /** Reuse canonical outcome dedupe without restoring envelopes or tokens. */
+  restoreBookingOutcomes(outcomes: readonly { readonly widgetId: string; readonly lines: readonly TerminalLine[] }[]): void;
   rendered(itemId: string): void;
   ingest(envelope: WidgetEnvelope): IngestOutcome;
   /** Presentation evidence only: H7 passed and the standard approval control is drawn live. */
@@ -453,6 +455,13 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
    * would not recover it — it would assert an old fact as a new one.
    */
   const published = new Set<string>();
+  const publishOutcome = (widgetId: string, line: TerminalLine): void => {
+    if (line.text.trim().length === 0) return;
+    const key = outcomeKey(widgetId, line);
+    if (published.has(key)) return;
+    published.add(key);
+    deps.timeline.appendServerLine(line.text);
+  };
   let serial = 0;
   let counters = { activations: 0, stateChanges: 0, sentences: 0, submissions: 0 };
 
@@ -904,10 +913,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
         // by `submission.widget_id`, and the emission guard above has already returned if this
         // entry's envelope changed while the submission ran — so the submitted id is the id these
         // lines are about.
-        const key = outcomeKey(submission.widget_id, line);
-        if (published.has(key)) continue;
-        published.add(key);
-        deps.timeline.appendServerLine(line.text);
+        publishOutcome(submission.widget_id, line);
       }
       entry.display = 'terminal';
       entry.sentence = null;
@@ -944,6 +950,16 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   });
 
   return {
+    restoreBookingOutcomes(outcomes) {
+      const fresh = outcomes.flatMap(({ widgetId, lines }) => lines
+        .filter(line => line.text.trim().length > 0 && !published.has(outcomeKey(widgetId, line)))
+        .map(line => ({ widgetId, line })));
+      if (fresh.length === 0) return;
+      // Thread-page is bounded across this principal's history, not restricted
+      // to the newest conversation. Label that scope instead of implying a new effect.
+      deps.timeline.appendNotice('booking_outcomes_restored');
+      for (const { widgetId, line } of fresh) publishOutcome(widgetId, line);
+    },
     ingest,
     hasPresentedApproval,
     rendered,
