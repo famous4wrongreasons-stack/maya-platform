@@ -8,8 +8,6 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { ConfigService } from '@nestjs/config';
 import { ServiceUnavailableException } from '@nestjs/common';
-import { ActionEngineRuntimeService } from '../../src/action-engine/action-engine.runtime';
-import { CanonicalActionIngressService } from '../../src/action-engine/action-engine.ingress';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
@@ -27,6 +25,10 @@ import {
   fixturesForHttp,
   type HttpHarness,
 } from './support/http-bootstrap';
+// Load the existing application module graph before these additional proof-only tokens.
+// Importing runtime first exposes the pre-existing expense-reminder → AE barrel cycle.
+import { ActionEngineRuntimeService } from '../../src/action-engine/action-engine.runtime';
+import { CanonicalActionIngressService } from '../../src/action-engine/action-engine.ingress';
 import { assertProofDatabase } from './support/proof-db-guard';
 import type { Fixtures } from './support/fixtures';
 import {
