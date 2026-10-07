@@ -1,0 +1,25 @@
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+  AiToolRuntimeService
+    ✓ executes read-only tools directly and stores only encrypted results (1 ms)
+    ✓ SH-19 attaches the authorized widget resolution to a completed model-free read (1 ms)
+    ✓ D-17 binds a T-2b mint to the current server request trace when the caller supplies no internal trace
+    ✓ returns the latest verified analytics snapshot when the CRM read fails (1 ms)
+    ✓ creates an approval without executing a write tool
+    ✓ executes an actor-approved write exactly once (2 ms)
+    ✓ blocks approval when the immutable payload hash is changed
+    ✓ rejects reusing an approval key for a different payload
+    ✓ replays a completed approved result without a second domain call
+    ✓ fails closed on cross-tenant principals before policy or handlers (1 ms)
+    current verified personal READ context
+      ✓ refuses revoked verified linkage before cached payload on replay=false even without Client.userId (8 ms)
+      ✓ refuses revoked verified linkage before cached payload on replay=true even without Client.userId
+      ✓ keeps the business actor and binds the read to the server-selected Client (1 ms)
+      ✓ refuses a changed verified Client episode instead of replaying the previous personal result
+      ✓ revalidates after a source read and withholds the response if linkage changed in flight (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       15 passed, 15 total
+Snapshots:   0 total
+Time:        0.552 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-runtime.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-personal-read-context-green.json

@@ -1,0 +1,679 @@
+{
+  "kind": "qualified-personal-owner-read-http-pg-restart",
+  "head": "f8e6f9d44ce90c68c700912f8e2cb0fa4917f280",
+  "qualification": "NOT_ISSUED",
+  "finalAttempt": "r7",
+  "actualApplicationAndPostgresRestart": true,
+  "actualHttpAuthC9ActionEngine": true,
+  "reactOwnerEntryAcceptance": false,
+  "syntheticA18Verifier": true,
+  "scriptedModelTransport": true,
+  "fullSerializedModelBodies": 4,
+  "syntheticLocalProvider": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "outboundExternalNetworkCalls": 0,
+  "targetedUnits": 85,
+  "productionTypesHeapMb": 4096,
+  "productionTypes": "PASS",
+  "scopedEslint": "PASS",
+  "fullProjectTypes": "NOT_QUALIFIED",
+  "servicesStopped": true,
+  "sourceHashes": [
+    {
+      "path": "maya-saas-backend/scripts/personal-owner-proof.mjs",
+      "sha256": "877ad07d018646d2c84c958c7322ef114f8ec27a7ff5a56129ada1781eba0e02"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/appointments.module.ts",
+      "sha256": "76898bec9cba87b9d32ee9e49c3fe0174cf0c1b42beb1e3fcd8967a1c79024ac"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client-read.service.spec.ts",
+      "sha256": "7e8153f293deebd75bb57127be3b26a251632cfc55a914c54556110977c22e4a"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client-read.service.ts",
+      "sha256": "655309d3b8d38f5437a0430f18aa08414d31267afccbb4edffbc5f1d159a2196"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client.controller.ts",
+      "sha256": "8edf39663ae844b11a669763f15c19077fc3c1b75730f3c378c70a6eedd1e3a9"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+      "sha256": "1f20ff3a618d8fa8aaa6a4c27406f4c1c57f38d31d529c8a9a93d1183d10c4ee"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/personal-client-context.service.ts",
+      "sha256": "fc9b6e686bc592e595f39c287d7764c7e0cc099e10667222aab7353776cec862"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.ts",
+      "sha256": "1464ae1f6429c25172df3d52c925304d7f01e1c639082442c4e71ccb072c5a31"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "6b05040fb65a27dc76065809c4a414078c0fb424236899095d14f8aac25d257a"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "sha256": "9650bb113564c943e2e8bf0ebb8653a85fdecc19fa8e28d0207a3a30daec51d5"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/client-reverification-candidate.service.ts",
+      "sha256": "be25268afb866480db4e0d555610de162f5e93495d70c6dd09c191fc479dcfc4"
+    },
+    {
+      "path": "docs/rebuild/widget-release-programme/sb1-v2/CONTRACT.md",
+      "sha256": "9d7f8166c4fd0c6254e55697ad80ecfec0b4dd7153321f38f8122cba2c2fad68"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup.json",
+      "sha256": "87c6477ebe60280f72db7501d05c396104413f6d635bc8970c99a40ff1548316",
+      "bytes": 1242
+    },
+    {
+      "path": "independent-review.txt",
+      "sha256": "01f99b54491519a31e6774bd3aa32193a69daa354dc4b429bcfe014f44907421",
+      "bytes": 1556
+    },
+    {
+      "path": "maya-personal-read-context-cohort.json",
+      "sha256": "15293af86bfa52f4d6a632ae5848ced31190e05bce70835985cc7c967a28d136",
+      "bytes": 63304
+    },
+    {
+      "path": "maya-personal-read-context-cohort.log",
+      "sha256": "9837607f2a23421e0205728b7b9e131af34cbdbe4ff44d037d089a72e2d55789",
+      "bytes": 910
+    },
+    {
+      "path": "maya-personal-read-context-final.json",
+      "sha256": "1a07a392c187536ac878752feccd61d384a3c24ec4233642a960ebfa3df51b66",
+      "bytes": 80981
+    },
+    {
+      "path": "maya-personal-read-context-final.log",
+      "sha256": "5e2d720d9d3715da1f576d803bdf3744011cf06d6f79569e9398ba5784610188",
+      "bytes": 1014
+    },
+    {
+      "path": "maya-personal-read-context-green.json",
+      "sha256": "cb2a504c6ac2932f696618b3962b36935cf240a40c69b650eaac95d6aa47a5e5",
+      "bytes": 7532
+    },
+    {
+      "path": "maya-personal-read-context-green.log",
+      "sha256": "74002a6cf47661ca22d7ae533766a72bb3c163a48b750799c81f262ea6f04584",
+      "bytes": 1708
+    },
+    {
+      "path": "maya-personal-read-context-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-context-lint2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-context-lint3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-context-red.json",
+      "sha256": "f1b633d8ee0e63efd8706d0d98bd25ec2a101b25f0fc87b491dbed99677879fc",
+      "bytes": 19908
+    },
+    {
+      "path": "maya-personal-read-context-red.log",
+      "sha256": "423cacf356ee79c6ff69cd7fef4aba6f20944aa1869d1560ae3c50ea5380ed70",
+      "bytes": 6613
+    },
+    {
+      "path": "maya-personal-read-lint1.log",
+      "sha256": "2e8faeade103ab7a8eb9f4be424e9f56946b37d6a8ff32a6e54d86e498fdc055",
+      "bytes": 623
+    },
+    {
+      "path": "maya-personal-read-lint2.log",
+      "sha256": "f3a86f10f52d39881f6aee4cb3b865a52e9d52ce81cf09872b361a1ce2929ce6",
+      "bytes": 368
+    },
+    {
+      "path": "maya-personal-read-lint3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-lint4.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-routing-green.json",
+      "sha256": "716eda7169c83437f97d5e06963b04e695b6f87f71d745b9a167e06595cfa1ba",
+      "bytes": 38139
+    },
+    {
+      "path": "maya-personal-read-routing-green.log",
+      "sha256": "78965d342548412ef1e369df6105d9fdc826733aef160fb77f7c0131103e5fe5",
+      "bytes": 5404
+    },
+    {
+      "path": "maya-personal-read-routing.json",
+      "sha256": "1b43c42691c6dbcef8af8ace43a6129cd0ea6df3d066853a19e0e534c569132e",
+      "bytes": 42153
+    },
+    {
+      "path": "maya-personal-read-routing.log",
+      "sha256": "12d53e19286d900847ae96fee3d4b33084321bde3996a8a39b1b97cbc93a0bd8",
+      "bytes": 8175
+    },
+    {
+      "path": "maya-personal-read-types1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-types2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-personal-read-unit1.json",
+      "sha256": "826bb84304b5c044d570ba912ce72870ea4e5544c558d5d2cbd82c1f47939096",
+      "bytes": 39943
+    },
+    {
+      "path": "maya-personal-read-unit1.log",
+      "sha256": "fa86be5783a8d9ea2ef7e262a204dea7776e201a0d275aa035251b70c69590d0",
+      "bytes": 601
+    },
+    {
+      "path": "maya-personal-read-unit3.json",
+      "sha256": "b6a9ef07dad123b87446f8aab04546b7a9f2d19d83ad82e6692dcb52af9301db",
+      "bytes": 39943
+    },
+    {
+      "path": "maya-personal-read-unit3.log",
+      "sha256": "aea0bcbefc3de984b248e882edc350549570905cd1e4f129e4a89b782a3e1903",
+      "bytes": 602
+    },
+    {
+      "path": "maya-personal-read-unit4.json",
+      "sha256": "5bbc783380dac21fcc5656a87f7b1f15940895409d18b418be61926ed7e28def",
+      "bytes": 40397
+    },
+    {
+      "path": "maya-personal-read-unit4.log",
+      "sha256": "2ff35550bc41664c1ce68dc4872ec7c8cc9c5814d2dca7c59dbb00ed09dd424d",
+      "bytes": 602
+    },
+    {
+      "path": "r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r1/initdb.log",
+      "sha256": "9b21984bef208f8c9446e0df74ab09ff2094b9dd2364c198ab1b2a11661d4299",
+      "bytes": 950
+    },
+    {
+      "path": "r1/manifest.json",
+      "sha256": "cf384f57733224559dd02bd6ef889ac06e4c49a44a9ee57d3c147414148b73a1",
+      "bytes": 704
+    },
+    {
+      "path": "r1/migrations.log",
+      "sha256": "e965732499b1a3eeecdd913b2453b4a596ae8158eecd985c9abcd1117e2bc5ed",
+      "bytes": 14728
+    },
+    {
+      "path": "r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r1/postgres.log",
+      "sha256": "5333ca2f0309123b30597e569a96c0d3c5c8083ba97bde857728e15c841d0444",
+      "bytes": 1246
+    },
+    {
+      "path": "r1/prepare-jest.json",
+      "sha256": "cdb943cc2ab0ef030cb750dd24751fba0b4bfcc67045d176b8859b63d01f1212",
+      "bytes": 2917
+    },
+    {
+      "path": "r1/prepare-observations.json",
+      "sha256": "3e45674b41fd4d4d45bef9a76b6025060384e0ad94bc1c76267b3c34388f68bc",
+      "bytes": 364
+    },
+    {
+      "path": "r1/prepare-serialized-model-requests.json",
+      "sha256": "5dc49714371db7ba5ee872e10bd87072931f1ebf6a197c60f54ec68207e23b4e",
+      "bytes": 84
+    },
+    {
+      "path": "r1/prepare.log",
+      "sha256": "af736ae2aa402ca56356bca8f032c104c8700bc306d1397fad87391a60d1c53e",
+      "bytes": 2443
+    },
+    {
+      "path": "r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r2/initdb.log",
+      "sha256": "802bbf64fba12e42426576bb7d7635d157971777f0c37c6bf5c6851425259a19",
+      "bytes": 950
+    },
+    {
+      "path": "r2/manifest.json",
+      "sha256": "ec1f96fecc9805fa967adbe68e66ebf30afa37f7fef73ec3ccc4f356b15eab5c",
+      "bytes": 704
+    },
+    {
+      "path": "r2/migrations.log",
+      "sha256": "a956c37ae511428f96e42341780db918bf20215b13f523c4d5af8eb62b8a2418",
+      "bytes": 14728
+    },
+    {
+      "path": "r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r2/postgres.log",
+      "sha256": "aa5bd6ecdfdea9e472a54f7e79c29d62c4508924047061b2428c16c0ad785e76",
+      "bytes": 1246
+    },
+    {
+      "path": "r2/prepare-jest.json",
+      "sha256": "5f2518710d2c6f1f8bf78f5dd35bd9eab202f7c3f380894fa848dffb92701267",
+      "bytes": 2812
+    },
+    {
+      "path": "r2/prepare-observations.json",
+      "sha256": "0a9a33b3cfa0f025d28ead62184c157d139c5ed3564639b2bd7e65d49f5078b6",
+      "bytes": 431
+    },
+    {
+      "path": "r2/prepare-serialized-model-requests.json",
+      "sha256": "5dc49714371db7ba5ee872e10bd87072931f1ebf6a197c60f54ec68207e23b4e",
+      "bytes": 84
+    },
+    {
+      "path": "r2/prepare.log",
+      "sha256": "bf84e6ad75c6596f48db061387ae129368d59ddca76efd25ab1f977a07d4a4aa",
+      "bytes": 2354
+    },
+    {
+      "path": "r3/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r3/initdb.log",
+      "sha256": "9b2039822634eeb12c97937730e4fbd55c142df7060b5786cb347679311bafdd",
+      "bytes": 950
+    },
+    {
+      "path": "r3/manifest.json",
+      "sha256": "20372710179100a027591a0470ad476f5db1ff18b9c91f0e30e59f5255b49739",
+      "bytes": 709
+    },
+    {
+      "path": "r3/migrations.log",
+      "sha256": "3bef12a5c108817a41f0896db08c72fb773fae57a2e51a7f2de59f9dd685f5e7",
+      "bytes": 14728
+    },
+    {
+      "path": "r3/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r3/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r3/postgres.log",
+      "sha256": "aff12130f2ecad07223d79f4cc26c9eb16ec1cffd0dc66fd26ba73060cb17f62",
+      "bytes": 1246
+    },
+    {
+      "path": "r3/prepare-jest.json",
+      "sha256": "4f2ebf0c897b6e6d76a322d466c44ffdc7f25c6dcf9fff1544a0ae6f53631bce",
+      "bytes": 2864
+    },
+    {
+      "path": "r3/prepare-observations.json",
+      "sha256": "e4df73eba09e70b1571ddd914fa5334815b898a7a7c88a31216b5a832ec71450",
+      "bytes": 545
+    },
+    {
+      "path": "r3/prepare-serialized-model-requests.json",
+      "sha256": "5dc49714371db7ba5ee872e10bd87072931f1ebf6a197c60f54ec68207e23b4e",
+      "bytes": 84
+    },
+    {
+      "path": "r3/prepare.log",
+      "sha256": "37425843fdfa5b950960ecc79082c81d7189616c2d6e38ce6f1e486fc47bdafd",
+      "bytes": 3742
+    },
+    {
+      "path": "r4/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r4/initdb.log",
+      "sha256": "290f5eadc1a356e460c49b7a58a10ecf6f90502131ca1f9717cc71e26773ac6a",
+      "bytes": 950
+    },
+    {
+      "path": "r4/manifest.json",
+      "sha256": "60b2475016e914a4c2e03b7dd5c44774b4f1e0e919de26063657324c140d111e",
+      "bytes": 709
+    },
+    {
+      "path": "r4/migrations.log",
+      "sha256": "34a88816605666408bf10a522ea580997fa25b4fb5b453d2be916f1130b096af",
+      "bytes": 14728
+    },
+    {
+      "path": "r4/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r4/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r4/postgres.log",
+      "sha256": "a2dd308a2ce32cfd53b93f67e2b06f1246e9a81123a69aec6b6a44f12adcffdf",
+      "bytes": 1246
+    },
+    {
+      "path": "r4/prepare-jest.json",
+      "sha256": "6dfa7602ad35e2e5282e906d318f4bc207fb8465e4ce60041d0121fd8c788b77",
+      "bytes": 3579
+    },
+    {
+      "path": "r4/prepare-observations.json",
+      "sha256": "e4df73eba09e70b1571ddd914fa5334815b898a7a7c88a31216b5a832ec71450",
+      "bytes": 545
+    },
+    {
+      "path": "r4/prepare-serialized-model-requests.json",
+      "sha256": "b3e51febdc9ed084922e980e97b7b95593b8e3418f968a5fd6a2be582b3e92a2",
+      "bytes": 139297
+    },
+    {
+      "path": "r4/prepare.log",
+      "sha256": "50dfd9410ba3d05cc3c6098892723425eb07badfe17084a0a7a894cbe54abd07",
+      "bytes": 2591
+    },
+    {
+      "path": "r5/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r5/initdb.log",
+      "sha256": "da7cd6ac7910c32dc6265917b74a1c082bf2cacfecb14b178d21c87b889a8a64",
+      "bytes": 950
+    },
+    {
+      "path": "r5/manifest.json",
+      "sha256": "111b4c7c96370a5d739ddb90d6af54ae71ce44eec05d055fd12e00b8df1bd702",
+      "bytes": 742
+    },
+    {
+      "path": "r5/migrations.log",
+      "sha256": "d8b5931b00150c2c2a6165ab9b18c5f3a9d578d9d9f087c1d4848532536c30a5",
+      "bytes": 14728
+    },
+    {
+      "path": "r5/pg-restart.log",
+      "sha256": "a238ff187af0391a985408d9bfeefb48bcd40cfe941e523d5bad5570d9bcb6c4",
+      "bytes": 1343
+    },
+    {
+      "path": "r5/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r5/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r5/postgres.log",
+      "sha256": "a76bdce97c2e87e81568b7724287857f77f21b25ee2fce9fbfa9d38e3da2f85f",
+      "bytes": 1246
+    },
+    {
+      "path": "r5/prepare-jest.json",
+      "sha256": "f7659da178ca90ad9bd22ef0f3587565141983341bace382129fa056a7ec311b",
+      "bytes": 1506
+    },
+    {
+      "path": "r5/prepare-observations.json",
+      "sha256": "70e4e158aa65a50fb78ca824b50f364aa1cfaa81b60adb713138e63071cdd983",
+      "bytes": 573
+    },
+    {
+      "path": "r5/prepare-serialized-model-requests.json",
+      "sha256": "bbadb8a6fb4d09595332627108f1efd7b9f1ea6aa782a10a629826dc210dd554",
+      "bytes": 280742
+    },
+    {
+      "path": "r5/prepare.log",
+      "sha256": "7734727ea97ce297d355c5c949e40d43e11b9e440dc8deb490b365d32d7c0b5b",
+      "bytes": 1580
+    },
+    {
+      "path": "r5/resume-jest.json",
+      "sha256": "bb954d2ea0836513fad3ba2c4d9d3ae199647fc822cd3e3d2045b962e8bc24ef",
+      "bytes": 4191
+    },
+    {
+      "path": "r5/resume-observations.json",
+      "sha256": "d5af35dd54cf9ab48cbdaf1aa412209bffa2fc05669b83aa019855c437e3863f",
+      "bytes": 551
+    },
+    {
+      "path": "r5/resume-serialized-model-requests.json",
+      "sha256": "dbfea4f940883c3e048c148223bd863da3610e1cbc06545c7f8d4c4347f03b88",
+      "bytes": 141531
+    },
+    {
+      "path": "r5/resume.log",
+      "sha256": "8781d0324cee643d04af76cb47a34b08f220ee2c5271efc72a95cf228443000b",
+      "bytes": 2656
+    },
+    {
+      "path": "r6/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r6/initdb.log",
+      "sha256": "7b09139b43645e227904c727183df2836044c1fe26f85cdb6e711a3a25e034e9",
+      "bytes": 950
+    },
+    {
+      "path": "r6/manifest.json",
+      "sha256": "6d3f1e278271b22c899cbce1fb057816f8d66749cc5f75b82e60e38de6af955b",
+      "bytes": 742
+    },
+    {
+      "path": "r6/migrations.log",
+      "sha256": "f2357c6dfd114f43f835b654d7264994f0557b95815d2f167746225258250cf8",
+      "bytes": 14728
+    },
+    {
+      "path": "r6/pg-restart.log",
+      "sha256": "ca1f69fbe39d89cd0b5903acf6d6ac8dc9ed96e53d72c07cd0892180529b5141",
+      "bytes": 1345
+    },
+    {
+      "path": "r6/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r6/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r6/postgres.log",
+      "sha256": "d81c65aeb4b6e8569b8550e51bfff06713e542378be1e02e34be56672b91f4f7",
+      "bytes": 1246
+    },
+    {
+      "path": "r6/prepare-jest.json",
+      "sha256": "49296fdb20168caa235ee7005fb00fc37371fdabd2001d647d6ba360567e14f0",
+      "bytes": 1506
+    },
+    {
+      "path": "r6/prepare-observations.json",
+      "sha256": "70e4e158aa65a50fb78ca824b50f364aa1cfaa81b60adb713138e63071cdd983",
+      "bytes": 573
+    },
+    {
+      "path": "r6/prepare-serialized-model-requests.json",
+      "sha256": "5514d9b5044643c241ac74cbafd8218826f146f894e292fcdef05d3cfe4b4baa",
+      "bytes": 280742
+    },
+    {
+      "path": "r6/prepare.log",
+      "sha256": "7331dad017fa9af397e895e3f77f42da09a69810b512e59e03b62c2aaa1efa36",
+      "bytes": 1580
+    },
+    {
+      "path": "r6/resume-jest.json",
+      "sha256": "9a9b2da73c3117a56ee68924eb4093e9c4ba3e3133cc8a8941b994c98f90fb1b",
+      "bytes": 5485
+    },
+    {
+      "path": "r6/resume-observations.json",
+      "sha256": "23367e618abef1156ab58da37cfa92c76f7c62004a4c73d633c819c3336cd271",
+      "bytes": 708
+    },
+    {
+      "path": "r6/resume-serialized-model-requests.json",
+      "sha256": "c20111de8385949c5cd236ef84072c636ccef70cfe8fcee0dc29753b810a7f9e",
+      "bytes": 282976
+    },
+    {
+      "path": "r6/resume.log",
+      "sha256": "a4ddb5ac663de751b82edf7ca52923383c1b0c1a946370dfdb7994db02edf3f8",
+      "bytes": 3467
+    },
+    {
+      "path": "r7/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "r7/initdb.log",
+      "sha256": "aa75d2bb65b468e96b42d2149ba26e3be298158ee0e2dad9f3eecbfaa6cd7660",
+      "bytes": 950
+    },
+    {
+      "path": "r7/manifest.json",
+      "sha256": "e0e6d65b7da4d0d00ef1c25460f277c4be6a83d418c1edbddbeca494040cd2d2",
+      "bytes": 756
+    },
+    {
+      "path": "r7/migrations.log",
+      "sha256": "9470be7ada2011148da1c8d383abad18cb36f1406a4dab1862545744142dce62",
+      "bytes": 14728
+    },
+    {
+      "path": "r7/pg-restart.log",
+      "sha256": "c3490f0660e07c62e6cce7ab5853f22731494b97a411bf284f0426899d215760",
+      "bytes": 1345
+    },
+    {
+      "path": "r7/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "r7/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "r7/postgres.log",
+      "sha256": "97dbd0cabf2587a0a6d9e240a3d15c7d30f44d45a936d09342e62bf3830b36f5",
+      "bytes": 1246
+    },
+    {
+      "path": "r7/prepare-jest.json",
+      "sha256": "acb30f39bf5f3e610ead9b4dcc7e5da2e29b6350477cc5838e2a209c4145ae73",
+      "bytes": 1506
+    },
+    {
+      "path": "r7/prepare-observations.json",
+      "sha256": "70e4e158aa65a50fb78ca824b50f364aa1cfaa81b60adb713138e63071cdd983",
+      "bytes": 573
+    },
+    {
+      "path": "r7/prepare-serialized-model-requests.json",
+      "sha256": "087f06625d3da70ca5916d21ea1f1311383385bea932c6e92f2848307e5491d7",
+      "bytes": 280742
+    },
+    {
+      "path": "r7/prepare.log",
+      "sha256": "541b365106a1c6cc1771624123c9031a6e20222b945ed754c45df9239454833c",
+      "bytes": 1580
+    },
+    {
+      "path": "r7/resume-jest.json",
+      "sha256": "5af9b6757af1ab78def5d4044bb41331eec50647b04336b9877bed416925ad6a",
+      "bytes": 1505
+    },
+    {
+      "path": "r7/resume-observations.json",
+      "sha256": "8539dfb44410f2375c50f586f986bf22a01b6283b76224b8ff21f73f2f0b2fe8",
+      "bytes": 820
+    },
+    {
+      "path": "r7/resume-serialized-model-requests.json",
+      "sha256": "669d6743d9ce10d85a6694306bce3791f9fe154b2546cf74705a6869aca661c1",
+      "bytes": 282976
+    },
+    {
+      "path": "r7/resume.log",
+      "sha256": "3a2e488196252b7824710dfa6b02f0a69da43e9489bb7c51f73548c5a6bf2a6b",
+      "bytes": 1578
+    }
+  ]
+}

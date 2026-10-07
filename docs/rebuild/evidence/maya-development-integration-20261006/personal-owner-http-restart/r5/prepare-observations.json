@@ -1,0 +1,29 @@
+{
+  "stage": "prepare",
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "success": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 1,
+    "readOnlyResults": true
+  },
+  "unknown": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 0,
+    "readOnlyResults": true
+  },
+  "providerLedgerCount": 1,
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 1,
+    "reconciliations": 3
+  },
+  "unexpected": []
+}

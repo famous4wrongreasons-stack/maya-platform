@@ -1,0 +1,7 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/appointments/personal-client-read.service.spec.ts
+  45:26  error  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+  50:27  error  '_args' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (2 errors, 0 warnings)
+

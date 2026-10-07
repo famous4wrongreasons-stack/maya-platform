@@ -1,0 +1,9 @@
+Independent review /root/independent_review, 2026-10-07. Read-only review; reviewer did not run tools that mutate the app or launch services.
+
+No blocking findings for the current preview/results HTTP/PG checkpoint. The services select and revalidate canonical personal context. Results restrict tenant, current link, actual user and membership evidence before the bounded AE read. preview uses the same live-booking admission as create.
+
+r7 artifacts inspected: prepare/resume PASS, actual app/PG restart, cluster stopped. SUCCEEDED/UNKNOWN attempt 1 and one provider ledger row persist; resume dispatch/reconciliation zero. Revoked link refuses all three personal routes; membership suspended gives 401 with no additional model request. Scoped preview/results Prisma writes are empty. Four full serialized model bodies contain user messages only and no tested private service/time/count/contact-name/identity facts.
+
+Qualification: synthetic A18, scripted model transport and local provider; no UI, actual identity/SMS/YCLIENTS/model acceptance or C10 certificate. Production types/lint were run by the implementation agent separately.
+
+Navigation review correction: LIMITATION with denied appointments.own.create source cannot open fs.booking because Gate6 re-authorizes the retained source (R3.9.6). Do not substitute c9.no_action or an unrelated READ. A finite entry from an actually completed own.list/SCHEDULE for an already linked principal is a separate permissible implementation slice. Denied/unlinked entry and first binding remain unresolved.

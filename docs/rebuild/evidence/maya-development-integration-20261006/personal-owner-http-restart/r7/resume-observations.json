@@ -1,0 +1,38 @@
+{
+  "stage": "resume",
+  "qualification": "NOT_ISSUED",
+  "syntheticA18Verifier": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "applicationAndPostgresRestart": true,
+  "successAfterRestart": {
+    "state": "SUCCEEDED",
+    "attempts": 1,
+    "appointments": 1
+  },
+  "unknownAfterRestart": {
+    "state": "UNKNOWN",
+    "attempts": 1,
+    "appointments": 0
+  },
+  "revocation": {
+    "readRefused": true,
+    "createRefused": true,
+    "effectsUnchanged": true,
+    "nextSerializedRequestPrivateFactsAbsent": true
+  },
+  "membershipRevocation": {
+    "httpStatus": 401,
+    "addedModelRequests": 0
+  },
+  "providerLedgerCount": 1,
+  "readServiceWrites": {
+    "preview": [],
+    "results": []
+  },
+  "provider": {
+    "dispatches": 0,
+    "reconciliations": 0
+  },
+  "unexpected": []
+}

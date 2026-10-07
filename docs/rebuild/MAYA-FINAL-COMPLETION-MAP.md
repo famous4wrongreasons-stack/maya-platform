@@ -826,3 +826,27 @@ does not prove application/PG restart, real model/provider, owner-personal-clien
 carrier activation or polished UX; technical labels and interrupted widget-turn
 notices remain. See [checkpoint and preserved RED/green evidence](MAYA-BOOKING-CONFIRMATION-OUTCOMES-20261007.md).
 No new autonomy, schema, retention or C10 completion; `NOT_ISSUED`.
+
+### Readable booking and verified owner backend — 2026-10-07
+
+Presentation `6900dfcf` removes technical English booking labels and duplicate
+service/history text while preserving UNKNOWN, completeness, warnings and source
+basis. Fresh r10 passes actual HTTP and nine React checkpoints for successful
+booking, revoked-link refusal, UNKNOWN and reauthentication without redispatch.
+See [presentation follow-up](MAYA-BOOKING-CONFIRMATION-OUTCOMES-20261007.md).
+
+Personal READ projections `f8e6f9d4` use existing PersonalClientContext, canonical
+quote, live-booking admission and AE result owners. Fresh r7 proves actual
+HTTP/app/PG restart with the owner role unchanged, SUCCEEDED/UNKNOWN attempt 1,
+one provider ledger row and no second dispatch. Four complete serialized model
+requests exclude prior private assistant facts, including after revocation;
+suspended membership yields 401/no model. Preview/results scoped Prisma writes
+are zero. Units 85/85, production types and scoped lint pass; independent review
+has no blocker for this backend qualification. Services stopped.
+
+Owner React entry is still unimplemented. Denied own.create cannot authorize an
+fs.booking detail through its retained source; an actually completed own.list
+may support a separate verified-user entry. SB-1 V2 has no first-binding issuer.
+See [exact boundaries, results and preserved evidence](MAYA-PERSONAL-OWNER-READ-CHECKPOINT-20261007.md).
+Synthetic identities/model transport/provider are not real acceptance or C10;
+no new schema/retention/autonomy decision. `NOT_ISSUED`.

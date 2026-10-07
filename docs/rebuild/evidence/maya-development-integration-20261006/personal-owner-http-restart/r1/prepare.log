@@ -1,0 +1,31 @@
+widgets-live: proof database maya_widget_gate_proof_personalowner_a40464f227f2 on 127.0.0.1:52929 (local)
+[31m[Nest] 81433  - [39m10/07/2026, 12:55:30 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 81433  - [39m10/07/2026, 12:55:30 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[33m[Nest] 81433  - [39m10/07/2026, 12:55:30 AM [33m   WARN[39m [38;5;3m[AppointmentsService] [39m[33mnew_appointment inbox failed: R06 exact canonical Appointment/Client/branch required[39m
+FAIL test/widgets-live/personal-owner-restart.probe-spec.ts
+  Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALIZED SCRIPTED MODEL / OWN PROVIDER]
+    ✕ keeps actual owner authority; confirms only canonical success; restart reads and replay never redispatch UNKNOWN (585 ms)
+
+  ● Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALIZED SCRIPTED MODEL / OWN PROVIDER] › keeps actual owner authority; confirms only canonical success; restart reads and replay never redispatch UNKNOWN
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 503
+    Received: 403
+
+      433 |         ).toMatchObject({ results: [], hasPending: false });
+      434 |         const created = await personal(token, 'appointments', s.dto);
+    > 435 |         expect(created.status).toBe(s === saved.success ? 201 : 503);
+          |                                ^
+      436 |         const after = await state(s);
+      437 |         expect(after.rows).toHaveLength(1);
+      438 |         expect(after.rows[0]).toMatchObject({
+
+      at Object.<anonymous> (widgets-live/personal-owner-restart.probe-spec.ts:435:32)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        4.44 s
+Ran all test suites within paths "test/widgets-live/personal-owner-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-personal-owner-http-restart-20261007-r1/prepare-jest.json

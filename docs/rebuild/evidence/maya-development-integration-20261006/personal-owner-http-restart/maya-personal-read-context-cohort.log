@@ -1,0 +1,13 @@
+PASS src/widgets/widget-import-graph.architecture.spec.ts (19.757 s)
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/ai-tool-canonical-receipt.spec.ts
+PASS src/widgets/owner-ports/personal-schedule.adapter.spec.ts
+PASS src/crm/client-appointment-read.service.spec.ts
+PASS src/appointments/personal-client-context.service.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       114 passed, 114 total
+Snapshots:   0 total
+Time:        20.656 s
+Ran all test suites within paths "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-canonical-receipt.spec.ts", "src/appointments/personal-client-context.service.spec.ts", "src/crm/client-appointment-read.service.spec.ts", "src/widgets/owner-ports/personal-schedule.adapter.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-personal-read-context-cohort.json

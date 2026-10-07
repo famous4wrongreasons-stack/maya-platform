@@ -1,0 +1,44 @@
+[
+  {
+    "run": 1,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-5HS1vd/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  },
+  {
+    "run": 2,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-xeTKGU/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  },
+  {
+    "run": 3,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-tMJ3zD/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  },
+  {
+    "run": 4,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-9Ohgw3/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  },
+  {
+    "run": 5,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-agLTYW/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  },
+  {
+    "run": 6,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-nGZZah/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  },
+  {
+    "run": 7,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-owner-DJnQ31/pg",
+    "exit": 3,
+    "output": "pg_ctl: no server running"
+  }
+]
