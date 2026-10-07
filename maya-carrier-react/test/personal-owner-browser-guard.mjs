@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-export const PROMPTS = Object.freeze({ own: 'Покажи мои личные записи', again: 'Проверь мои личные записи ещё раз' });
+export const PROMPTS = Object.freeze({ prepare: 'Хочу записаться', own: 'Покажи мои личные записи', again: 'Проверь мои личные записи ещё раз' });
 
 export function localOrigin(raw) {
   const url = new URL(raw);

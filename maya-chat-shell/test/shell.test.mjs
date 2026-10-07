@@ -364,3 +364,18 @@ test('personal child expiring during preparation never mounts a receiver', () =>
   shell.presentDetail({ kind: 'SCHEDULE', provenance: { source_capability: 'appointments.own.list' }, presentation: { fullscreen_detail: { route_key: 'fs.booking' } } }, { itemId: 'w1', ref: 'intent:i1' });
   assert.equal(shell.view().fullscreen.receiver, undefined); shell.dispose();
 });
+
+test('personal catalog receiver requires exact kind/source and live verified detail', () => {
+  for (const [kind, capability, accepted] of [
+    ['SERVICE_SELECTOR', 'catalog.services.read', true],
+    ['SERVICE_SELECTOR', 'appointments.own.list', false],
+    ['SCHEDULE', 'catalog.services.read', false],
+  ]) {
+    const { port } = makeHistory(), shell = createShell({ history: port });
+    const { source } = makeSource(); shell.connect(source);
+    source.openDetail = () => ({ itemId: 'catalog-child', result: { ...RESULT('read'), mode: 'structured', lifecycle: { state: 'LIVE', input_lock: 'none' } } });
+    shell.presentDetail({ kind, provenance: { source_capability: capability }, presentation: { fullscreen_detail: { route_key: 'fs.booking' } } }, { itemId: 'w1', ref: 'intent:i1' });
+    assert.equal(shell.view().fullscreen.receiver, accepted ? 'personal_booking' : undefined);
+    shell.dispose();
+  }
+});

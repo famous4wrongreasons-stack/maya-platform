@@ -15,6 +15,10 @@ export class PersonalScheduleAdapter implements PersonalSchedulePort {
     private readonly owner: ClientAppointmentReadService,
     private readonly runtime: AiToolRuntimeService,
   ) {}
+  async prepare(actor: Parameters<PersonalSchedulePort['prepare']>[0]) {
+    const personal = await this.contexts.select(actor, 'personal_client');
+    return { revalidate: () => personal.revalidate() };
+  }
   async resolve(
     actor: Parameters<PersonalSchedulePort['resolve']>[0],
     completed: unknown,

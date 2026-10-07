@@ -180,7 +180,8 @@ export const createShell = (deps: ShellDeps): ShellController => {
     const opened = source.openDetail(envelope, opener);
     if (opened === null) return { presented: false, reason: 'refused' };
     ensureHistoryEntry();
-    const receiver = opened.result.mode !== 'frozen_prose' && ['MINTED', 'DELIVERED', 'LIVE'].includes(opened.result.lifecycle?.state) && opened.result.lifecycle.input_lock === 'none' && envelope.kind === 'SCHEDULE' && envelope.provenance?.source_capability === 'appointments.own.list' && envelope.presentation?.fullscreen_detail?.route_key === 'fs.booking' ? 'personal_booking' : undefined;
+    const personalSource = (envelope.kind === 'SCHEDULE' && envelope.provenance?.source_capability === 'appointments.own.list') || (envelope.kind === 'SERVICE_SELECTOR' && envelope.provenance?.source_capability === 'catalog.services.read');
+    const receiver = opened.result.mode !== 'frozen_prose' && ['MINTED', 'DELIVERED', 'LIVE'].includes(opened.result.lifecycle?.state) && opened.result.lifecycle.input_lock === 'none' && personalSource && envelope.presentation?.fullscreen_detail?.route_key === 'fs.booking' ? 'personal_booking' : undefined;
     set(openState(state, opener, opened.itemId, opened.result, receiver));
     return { presented: true, itemId: opened.itemId };
   };

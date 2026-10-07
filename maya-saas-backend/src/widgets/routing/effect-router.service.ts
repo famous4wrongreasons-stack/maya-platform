@@ -5,7 +5,13 @@ import type { ScheduleApprovalAdapter } from '../owner-ports/schedule-approval.a
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import { presentJournalSchedule } from '../composition/journal-schedule.presenter';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
+import { IntentTemplateRefusal } from '../emission/intent-template.registry';
 import {
   SERVICE_PRICE_APPROVAL_OWNER,
   parseServicePriceApprovalRef,
@@ -400,6 +406,20 @@ export class EffectRouterService {
       const personal =
         input.record.sourceCapabilitySpace === 'C9' &&
         input.record.sourceCapabilityKey === 'appointments.own.list';
+      const personalCatalog =
+        input.record.sourceCapabilitySpace === 'C9' &&
+        input.record.sourceCapabilityKey === 'catalog.services.read' &&
+        target.class === 'detail' &&
+        target.ref === 'fs.booking';
+      if (
+        personalCatalog &&
+        (input.record.widgetKind !== 'SERVICE_SELECTOR' ||
+          !this.personalSchedules)
+      )
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
       if (
         personal &&
         (target.class !== 'detail' ||
@@ -411,6 +431,20 @@ export class EffectRouterService {
           receiptOutcome: 'REFUSED',
           refusalCode: 'effect_not_admissible',
         });
+      let personalContext: Awaited<
+        ReturnType<PersonalSchedulePort['prepare']>
+      > | null = null;
+      if (personalCatalog) {
+        try {
+          personalContext = await this.personalSchedules!.prepare(ctx.actor);
+        } catch (error) {
+          if (!(error instanceof ForbiddenException)) throw error;
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'insufficient_authority',
+          });
+        }
+      }
       const projected = await this.projector.composeNavigate(
         projectionPlan(ctx, input.record),
       );
@@ -490,6 +524,35 @@ export class EffectRouterService {
           receiptOutcome: 'REFUSED',
           refusalCode: 'effect_not_admissible',
         });
+      if (personalContext !== null) {
+        try {
+          const minted = await this.emitter.emitPersonalCatalogDetail(
+            request,
+            personalContext,
+            input.record.widgetId,
+            input.now,
+          );
+          return admitted({ nextEnvelope: minted.envelope });
+        } catch (error) {
+          if (error instanceof ForbiddenException)
+            return admitted({
+              receiptOutcome: 'REFUSED',
+              refusalCode: 'insufficient_authority',
+            });
+          if (
+            error instanceof IntentTemplateRefusal &&
+            [
+              'personal_parent_unavailable',
+              'booking_selector_source_unavailable',
+            ].includes(error.code)
+          )
+            return admitted({
+              receiptOutcome: 'REFUSED',
+              refusalCode: 'effect_not_admissible',
+            });
+          throw error;
+        }
+      }
       const minted =
         personalSource !== null
           ? await this.emitter.emitPersonalSchedule(

@@ -535,6 +535,7 @@ export const envelopeBodyHash = (
 export const buildEnvelopeWithoutSeal = (args: {
   /** Only the current-context, exact-parent personal minter supplies this. */
   personalDetail?: boolean;
+  personalCatalogDetail?: boolean;
   widgetId: string;
   tenantId: string;
   turnId: string;
@@ -713,34 +714,44 @@ export const buildEnvelopeWithoutSeal = (args: {
         accessible_names: interactive.names,
       },
       fullscreen_detail:
-        args.kind === 'SCHEDULE' &&
-        args.input.capability === 'appointments.own.list' &&
-        (args.personalDetail === true ||
+        args.kind === 'SERVICE_SELECTOR' &&
+        args.input.capability === 'catalog.services.read' &&
+        (args.personalCatalogDetail === true ||
           args.intents.some(
-            (intent) =>
-              intent.effect === 'NAVIGATE' &&
-              intent.target?.class === 'detail' &&
-              intent.target.ref === 'fs.booking',
+            (i) =>
+              i.effect === 'NAVIGATE' &&
+              i.target?.class === 'detail' &&
+              i.target.ref === 'fs.booking',
           ))
           ? { route_key: 'fs.booking', reason: 'exceeds_chat_density' }
-          : args.kind === 'APPROVAL' &&
-              args.intents.some(
-                (intent) =>
-                  intent.effect === 'NAVIGATE' &&
-                  intent.target?.class === 'detail' &&
-                  intent.target.ref === 'fs.catalogue',
-              )
-            ? { route_key: 'fs.catalogue', reason: 'audit' }
-            : args.kind === 'SCHEDULE' &&
-                args.input.capability === 'operations.journal.read' &&
+          : args.kind === 'SCHEDULE' &&
+              args.input.capability === 'appointments.own.list' &&
+              (args.personalDetail === true ||
                 args.intents.some(
                   (intent) =>
                     intent.effect === 'NAVIGATE' &&
                     intent.target?.class === 'detail' &&
-                    intent.target.ref === 'fs.calendar',
+                    intent.target.ref === 'fs.booking',
+                ))
+            ? { route_key: 'fs.booking', reason: 'exceeds_chat_density' }
+            : args.kind === 'APPROVAL' &&
+                args.intents.some(
+                  (intent) =>
+                    intent.effect === 'NAVIGATE' &&
+                    intent.target?.class === 'detail' &&
+                    intent.target.ref === 'fs.catalogue',
                 )
-              ? { route_key: 'fs.calendar', reason: 'exceeds_chat_density' }
-              : null,
+              ? { route_key: 'fs.catalogue', reason: 'audit' }
+              : args.kind === 'SCHEDULE' &&
+                  args.input.capability === 'operations.journal.read' &&
+                  args.intents.some(
+                    (intent) =>
+                      intent.effect === 'NAVIGATE' &&
+                      intent.target?.class === 'detail' &&
+                      intent.target.ref === 'fs.calendar',
+                  )
+                ? { route_key: 'fs.calendar', reason: 'exceeds_chat_density' }
+                : null,
     },
     render: {
       contract: 'maya.render.receipt/1',

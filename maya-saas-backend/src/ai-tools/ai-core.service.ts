@@ -1765,14 +1765,21 @@ export class AiCoreService {
         // 🔴 Условие теперь по ФАКТИЧЕСКИ вызванному инструменту, а не по
         // угаданной теме: инструмент нельзя «не угадать» — он либо отработал,
         // либо нет. Раньше промах темы означал бы утечку истории визитов.
+        const personalPreparation =
+          decision.toolCall.name === 'catalog.services.read' &&
+          activeSemanticPlan?.tasks.length === 1 &&
+          activeSemanticPlan.tasks[0].intent === 'booking.prepare_personal' &&
+          activeSemanticPlan.tasks[0].permission.status === 'allowed';
         if (
           this.requiresServerComposedReply(
             decision.toolCall.name,
             this.contextualUserText(sanitized.messages),
-          )
+          ) ||
+          personalPreparation
         ) {
-          const sourceReply =
-            decision.toolCall.name === 'staff.schedule.own.read'
+          const sourceReply = personalPreparation
+            ? this.personalCatalogPreparationReply(execution)
+            : decision.toolCall.name === 'staff.schedule.own.read'
               ? this.deterministicOwnStaffScheduleReply(
                   execution.result,
                   hardenedArguments.date,
@@ -2502,6 +2509,46 @@ export class AiCoreService {
       },
     });
     return completion;
+  }
+
+  private personalCatalogPreparationReply(
+    execution: Readonly<Record<string, unknown>>,
+  ): {
+    reply: string;
+    status: 'verified' | 'blocked';
+  } {
+    const services = this.record(execution.result).services;
+    const resolution = this.record(execution.resolution);
+    const envelope = this.record(this.record(resolution.receipt).envelope);
+    const intents = Array.isArray(envelope.intents) ? envelope.intents : [];
+    const entry =
+      execution.stale !== true &&
+      Array.isArray(services) &&
+      services.length > 0 &&
+      resolution.matched === true &&
+      envelope.kind === 'SERVICE_SELECTOR' &&
+      this.record(envelope.provenance).source_capability ===
+        'catalog.services.read' &&
+      intents.some((value: unknown) => {
+        const intent = this.record(value),
+          target = this.record(intent.target);
+        return (
+          intent.effect === 'NAVIGATE' &&
+          target.class === 'detail' &&
+          target.ref === 'fs.booking'
+        );
+      });
+    return entry
+      ? {
+          reply:
+            'Показываю каталог услуг. Для личной записи откройте форму «Записаться для себя».',
+          status: 'verified',
+        }
+      : {
+          reply:
+            'Сейчас не удалось открыть форму личной записи. Попробуйте повторить запрос позже.',
+          status: 'blocked',
+        };
   }
 
   private widgetResolution(execution: Readonly<Record<string, unknown>>): {

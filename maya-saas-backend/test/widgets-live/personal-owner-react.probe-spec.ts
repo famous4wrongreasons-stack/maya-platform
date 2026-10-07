@@ -28,6 +28,8 @@ import type { Fixtures, TenantFixture, UserFixture } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
 
 const stage = process.env.JEST_PERSONAL_OWNER_STAGE;
+const catalogEntry = process.env.JEST_PERSONAL_OWNER_ENTRY === 'catalog';
+const seedCount = catalogEntry ? 0 : 1;
 const receipt = process.env.JEST_PERSONAL_OWNER_RECEIPT!;
 const output = process.env.JEST_PERSONAL_OWNER_OUTPUT!;
 if (!['prepare', 'resume'].includes(stage ?? '') || !receipt || !output)
@@ -53,7 +55,7 @@ type Saved = {
   schema: string;
   success: Salon;
   unknown: Salon;
-  foreign: Salon;
+  navRevoked: Salon;
   revoked: Salon;
   notBefore: number;
   conversationId: string;
@@ -69,6 +71,8 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
     reconciliations = 0;
   const observations: Record<string, unknown> = {
     stage,
+    entrySource: catalogEntry ? 'catalog' : 'schedule',
+    initialAppointments: seedCount,
     qualification: 'NOT_ISSUED',
     syntheticA18Verifier: true,
     realModelAcceptance: false,
@@ -155,12 +159,14 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         throw new Error('External network forbidden');
       }
       requests.push(init.body);
-      expect(requests.length).toBeLessThanOrEqual(stage === 'prepare' ? 6 : 2);
+      expect(requests.length).toBeLessThanOrEqual(
+        stage === 'prepare' ? (catalogEntry ? 10 : 6) : 2,
+      );
       expect(init.body).not.toMatch(
         /PRIVATE_OWNER_VISIT|PRIVATE_PERSONAL_BRANCH|Предстоящих: 1|12:00|Release proof client/,
       );
       if (saved)
-        for (const s of [saved.success, saved.unknown, saved.foreign]) {
+        for (const s of [saved.success, saved.unknown, saved.navRevoked]) {
           for (const value of [
             s.tenant.id,
             s.user.id,
@@ -181,15 +187,19 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         true,
       );
       expect(planRequest.tool_results).toEqual([]);
+      const prepare =
+        planRequest.conversation.at(-1)?.content === 'Хочу записаться';
       const plan = {
         semantic_plan: {
-          parent_request: 'Покажи мои личные записи',
+          parent_request: prepare
+            ? 'Хочу записаться'
+            : 'Покажи мои личные записи',
           language: 'ru',
           dialogue_act: 'question',
           tasks: [
             {
               id: 'own',
-              intent: 'booking.list_own',
+              intent: prepare ? 'booking.prepare_personal' : 'booking.list_own',
               entities_json: '{}',
               depends_on: [],
               confidence: 1,
@@ -203,7 +213,10 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
             unresolved_references: [],
           },
         },
-        tool_call: { name: 'appointments.own.list', arguments_json: '{}' },
+        tool_call: {
+          name: prepare ? 'catalog.services.read' : 'appointments.own.list',
+          arguments_json: '{}',
+        },
       };
       return Promise.resolve(
         new Response(
@@ -346,21 +359,22 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
     const priorStart = new Date(Date.now() + 2 * 86400_000);
     priorStart.setUTCHours(9, 0, 0, 0);
     const priorEnd = new Date(priorStart.getTime() + 1800000);
-    await db.prisma.appointment.create({
-      data: {
-        tenantId: tenant.id,
-        mayaClientId: client.id,
-        branchId: branch.id,
-        source: external ? 'external' : 'internal',
-        staffExternalId: staffId,
-        serviceIds: [serviceId],
-        startAt: priorStart,
-        endAt: priorEnd,
-        blockedStartAt: priorStart,
-        blockedEndAt: priorEnd,
-        status: 'confirmed',
-      },
-    });
+    if (!catalogEntry)
+      await db.prisma.appointment.create({
+        data: {
+          tenantId: tenant.id,
+          mayaClientId: client.id,
+          branchId: branch.id,
+          source: external ? 'external' : 'internal',
+          staffExternalId: staffId,
+          serviceIds: [serviceId],
+          startAt: priorStart,
+          endAt: priorEnd,
+          blockedStartAt: priorStart,
+          blockedEndAt: priorEnd,
+          status: 'confirmed',
+        },
+      });
     const date = new Date(Date.now() + 86400_000).toISOString().slice(0, 10);
     return {
       tenant,
@@ -431,7 +445,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         schema,
         success: await salon(),
         unknown: await salon(true),
-        foreign: await salon(),
+        navRevoked: await salon(),
         revoked: await salon(),
         conversationId: '',
         privateReply: '',
@@ -443,9 +457,20 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
       expect(saved.pgStarted).not.toBe(pg.rows[0].started);
       observations.applicationAndPostgresRestart = true;
     }
+    if (stage === 'prepare') {
+      for (const key of ['success', 'revoked', 'unknown'] as const) {
+        expect(await state(saved[key])).toEqual({
+          rows: [],
+          appointments: seedCount,
+        });
+      }
+      observations.initialStateVerified = true;
+    }
     const keys =
       stage === 'prepare'
-        ? (['success', 'revoked', 'unknown'] as const)
+        ? catalogEntry
+          ? (['success', 'revoked', 'unknown', 'navRevoked'] as const)
+          : (['success', 'revoked', 'unknown'] as const)
         : (['success', 'unknown'] as const);
     const checkpoints: string[] = [];
     const browserOutput = path.join(output, stage + '-browser');
@@ -488,6 +513,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                 backendOrigin: await http.listenLoopback(),
                 output: browserOutput,
                 stage,
+                entrySource: catalogEntry ? 'catalog' : 'schedule',
                 notBefore: stage === 'resume' ? saved.notBefore : 0,
                 scenarios: keys.map((key) => ({
                   key,
@@ -503,12 +529,15 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
               });
             } else if (m.type === 'checkpoint') {
               const key = m.name.split('-')[0] as
-                'success' | 'revoked' | 'unknown';
+                'success' | 'revoked' | 'unknown' | 'navRevoked';
               const salon = saved[key],
                 snapshot = await state(salon);
-              if (m.name.endsWith('-preview')) {
+              if (m.name.endsWith('-before-nav')) {
+                expect(snapshot).toEqual({ rows: [], appointments: 0 });
+                await revoke(salon);
+              } else if (m.name.endsWith('-preview')) {
                 expect(snapshot.rows).toHaveLength(0);
-                expect(snapshot.appointments).toBe(1);
+                expect(snapshot.appointments).toBe(seedCount);
                 expect(m.selectedStart).toBeTruthy();
                 salon.dto.start = m.selectedStart!;
                 // Slot branch belongs to the fresh canonical availability, not the seed row.
@@ -516,8 +545,10 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                   delete (salon.dto as { branchId?: string }).branchId;
                 if (key === 'revoked') await revoke(salon);
               } else {
-                expect(snapshot.rows).toHaveLength(key === 'revoked' ? 0 : 1);
-                if (key !== 'revoked') {
+                expect(snapshot.rows).toHaveLength(
+                  ['revoked', 'navRevoked'].includes(key) ? 0 : 1,
+                );
+                if (!['revoked', 'navRevoked'].includes(key)) {
                   expect(snapshot.rows[0]).toMatchObject({
                     state: key === 'success' ? 'SUCCEEDED' : 'UNKNOWN',
                     executionAttemptCount: 1,
@@ -531,13 +562,30 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                     ]),
                   );
                 }
-                expect(snapshot.appointments).toBe(key === 'success' ? 2 : 1);
+                expect(snapshot.appointments).toBe(
+                  seedCount + (key === 'success' ? 1 : 0),
+                );
                 observations[m.name] = {
                   state: snapshot.rows[0]?.state ?? 'REFUSED',
                   attempts: snapshot.rows[0]?.executionAttemptCount ?? 0,
                   appointments: snapshot.appointments,
                   membershipUnchanged: true,
                 };
+              }
+              if (m.name === 'navRevoked-result') {
+                const refused = await db.prisma.widgetIntentReceipt.findMany({
+                  where: {
+                    tenantId: salon.tenant.id,
+                    outcome: 'REFUSED',
+                    refusalCode: 'insufficient_authority',
+                  },
+                });
+                expect(refused).toHaveLength(1);
+                const children = await db.prisma.widgetEmission.count({
+                  where: { tenantId: salon.tenant.id },
+                });
+                expect(children).toBe(1); // only the public catalog parent
+                observations.personalNavigationRefusedDurably = true;
               }
               checkpoints.push(m.name);
               child.send({ type: 'continue:' + m.name });
@@ -563,7 +611,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         flag: 'wx',
       });
       expect(dispatches).toBe(1);
-      expect(requests).toHaveLength(6);
+      expect(requests).toHaveLength(catalogEntry ? 10 : 6);
     } else {
       expect(dispatches).toBe(0);
       expect(requests).toHaveLength(2);

@@ -79,8 +79,8 @@ describe('ConversationIntelligenceService', () => {
     const encoded = JSON.stringify(contract);
 
     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
-    // 85 existing intents + staff-only A22 read + the explicit C9 Occupancy vertical.
-    expect(contract.intents).toHaveLength(87);
+    // 85 existing intents + A22 read + explicit Occupancy + personal catalog preparation.
+    expect(contract.intents).toHaveLength(88);
     expect(
       contract.intents.find(
         (item) => item.intent === 'schedule.review_cancellation_windows',
@@ -103,6 +103,44 @@ describe('ConversationIntelligenceService', () => {
     expect(Buffer.byteLength(encoded, 'utf8')).toBeLessThan(60_000);
     expect(contract.intents[0]).not.toHaveProperty('permission');
     expect(contract.intents[0]).not.toHaveProperty('response_rule');
+  });
+
+  it('allows owner catalog preparation without promoting the role or repurposing a denied create', () => {
+    const contract = service.plannerContract(UserRole.TENANT_OWNER, [
+      'catalog.services.read',
+      'appointments.own.create',
+    ]);
+    expect(
+      contract.intents.find(
+        (item) => item.intent === 'booking.prepare_personal',
+      ),
+    ).toMatchObject({
+      allowed_for_role: true,
+      action: 'read',
+      ready_tools: ['catalog.services.read'],
+      required_slots: [],
+    });
+    expect(
+      contract.intents.find((item) => item.intent === 'booking.create_own'),
+    ).toMatchObject({ allowed_for_role: false });
+    for (const [intent, status, tool] of [
+      ['booking.prepare_personal', 'allowed', 'catalog.services.read'],
+      ['booking.create_own', 'denied', null],
+    ] as const) {
+      const plan = service.validatePlan(
+        {
+          parent_request: 'Хочу записаться',
+          tasks: [{ intent, entities: {}, confidence: 1 }],
+        },
+        UserRole.TENANT_OWNER,
+        ['catalog.services.read', 'appointments.own.create'],
+      );
+      expect(plan?.tasks[0]).toMatchObject({
+        intent,
+        permission: { status },
+        tool: { name: tool },
+      });
+    }
   });
 
   it('server-clamps a forbidden finance request instead of trusting the model', () => {

@@ -265,6 +265,92 @@ describe('AiCoreService', () => {
     },
   );
 
+  it.each([
+    'ready',
+    'empty',
+    'malformed',
+    'stale',
+    'no-resolution',
+    'refused-resolution',
+    'wrong-source',
+    'no-navigation',
+  ])(
+    'personal preparation announces a form only for a fresh actually minted catalog entry: %s',
+    async (caseName) => {
+      const mocks = createService(['catalog.services.read']);
+      const semanticPlan = new ConversationIntelligenceService().validatePlan(
+        {
+          parent_request: 'Хочу записаться',
+          tasks: [
+            { intent: 'booking.prepare_personal', entities: {}, confidence: 1 },
+          ],
+        },
+        user.role,
+        ['catalog.services.read'],
+      );
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: '',
+          toolCall: { name: 'catalog.services.read', arguments: {} },
+          semanticPlan,
+        }),
+      );
+      const result =
+        caseName === 'empty'
+          ? { services: [] }
+          : caseName === 'malformed'
+            ? {}
+            : { services: [{ id: 'service', name: 'Service' }] };
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        stale: caseName === 'stale',
+        result,
+        ...(caseName === 'no-resolution'
+          ? {}
+          : {
+              resolution: {
+                matched: caseName !== 'refused-resolution',
+                receipt: {
+                  envelope: {
+                    kind: 'SERVICE_SELECTOR',
+                    provenance: {
+                      source_capability:
+                        caseName === 'wrong-source'
+                          ? 'foreign.read'
+                          : 'catalog.services.read',
+                    },
+                    intents:
+                      caseName === 'no-navigation'
+                        ? []
+                        : [
+                            {
+                              effect: 'NAVIGATE',
+                              target: { class: 'detail', ref: 'fs.booking' },
+                            },
+                          ],
+                  },
+                },
+              },
+            }),
+      });
+      const answer = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Хочу записаться' }],
+      });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(answer.grounding?.status).toBe(
+        caseName === 'ready' ? 'verified' : 'blocked',
+      );
+      if (caseName === 'ready')
+        expect(answer.reply).toContain('Записаться для себя');
+      else {
+        expect(answer.reply).toContain('не удалось открыть');
+        expect(answer.reply).not.toContain('Показываю');
+      }
+    },
+  );
+
   it('does not substitute a heuristic analytics read when semantic planning is unavailable', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.model.decide.mockRejectedValue(

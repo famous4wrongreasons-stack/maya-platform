@@ -140,6 +140,25 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       examples: ['Покажи мои записи', 'Когда я записан в следующий раз?'],
     }),
     intent(
+      'booking.prepare_personal',
+      'booking',
+      'Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        permission: 'catalog.services.read',
+        tools: ['catalog.services.read'],
+        responseRule:
+          'Offer the explicit personal booking form; its existing server contract separately requires a verified Client context. Do not change business role or infer Client identity from appointment history.',
+        synonyms: [
+          'хочу записаться',
+          'записаться для себя',
+          'открыть личную запись',
+        ],
+        examples: ['Хочу записаться', 'Открой форму личной записи'],
+      },
+    ),
+    intent(
       'booking.create_own',
       'booking',
       'Create an appointment for the actor.',

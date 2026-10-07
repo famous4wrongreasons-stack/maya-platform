@@ -1,3 +1,5 @@
+import { IntentTemplateRefusal } from '../emission/intent-template.registry';
+import { ForbiddenException } from '@nestjs/common';
 import type { NavigateWidgetMinterPort } from './effect-router.ports';
 import type { GateContext, PrincipalView } from '../gate.types';
 import { ctx, rec } from '../gates/gate-fixtures.spec-helper.spec';
@@ -114,6 +116,13 @@ const fixture = () => {
       values: new Map(),
     }),
   };
+  const personalContext = {
+    revalidate: jest.fn().mockResolvedValue(undefined),
+  };
+  const personalSchedules = {
+    prepare: jest.fn().mockResolvedValue(personalContext),
+    resolve: jest.fn().mockResolvedValue(null),
+  };
   const bookingSelectors = { advance: jest.fn().mockResolvedValue(null) };
   const bookingMinter = {
     mint: jest.fn().mockResolvedValue({
@@ -134,6 +143,9 @@ const fixture = () => {
       envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w-nav' },
     }),
     emitPersonalSchedule: jest.fn(),
+    emitPersonalCatalogDetail: jest
+      .fn()
+      .mockResolvedValue({ envelope: { widget_id: 'personal-catalog-child' } }),
     emitJournalDetail: jest.fn(),
     emitServicePriceDetail: jest
       .fn<
@@ -192,6 +204,7 @@ const fixture = () => {
     bookingPropose,
     bookingSelectors,
     bookingMinter,
+    personalSchedules,
     router: new EffectRouterService(
       stores,
       controls as never,
@@ -215,6 +228,7 @@ const fixture = () => {
       },
       priceApprovals,
       schedule as never,
+      personalSchedules,
     ),
   };
 };
@@ -466,6 +480,129 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     expect(emitter.emit).toHaveBeenCalledTimes(1);
     expect(successors.mint).not.toHaveBeenCalled();
   });
+
+  it('personal catalog navigation verifies Client independently before the current read and bounded child', async () => {
+    const h = fixture();
+    const input = ctx(
+      rec({
+        effect: 'NAVIGATE',
+        targetJson: { class: 'detail', ref: 'fs.booking' },
+        sourceCapabilitySpace: 'C9',
+        sourceCapabilityKey: 'catalog.services.read',
+        widgetKind: 'SERVICE_SELECTOR',
+      }),
+      { principal: PRINCIPAL },
+    );
+    await expect(routeEffect(h.router, input)).resolves.toMatchObject({
+      route: { next_envelope: { widget_id: 'personal-catalog-child' } },
+    });
+    expect(h.personalSchedules.prepare).toHaveBeenCalledWith(input.actor);
+    expect(
+      h.personalSchedules.prepare.mock.invocationCallOrder[0],
+    ).toBeLessThan(h.projector.composeNavigate.mock.invocationCallOrder[0]);
+    expect(h.personalSchedules.resolve).not.toHaveBeenCalled();
+    expect(h.emitter.emitPersonalCatalogDetail).toHaveBeenCalledTimes(1);
+    expect(h.emitter.emit).not.toHaveBeenCalled();
+    expect(h.commits.commit).not.toHaveBeenCalled();
+  });
+  it('revoked Client refuses catalog navigation before catalog reread or mint', async () => {
+    const h = fixture();
+    h.personalSchedules.prepare.mockRejectedValue(
+      new ForbiddenException('personal_client_context_changed'),
+    );
+    const input = ctx(
+      rec({
+        effect: 'NAVIGATE',
+        targetJson: { class: 'detail', ref: 'fs.booking' },
+        sourceCapabilitySpace: 'C9',
+        sourceCapabilityKey: 'catalog.services.read',
+        widgetKind: 'SERVICE_SELECTOR',
+      }),
+      { principal: PRINCIPAL },
+    );
+    await expect(routeEffect(h.router, input)).resolves.toMatchObject({
+      route: { receipt_outcome: 'REFUSED', next_envelope: null },
+    });
+    expect(h.stores.writeReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: 'REFUSED',
+        refusalCode: 'insufficient_authority',
+      }),
+      input.now,
+    );
+    expect(h.projector.composeNavigate).not.toHaveBeenCalled();
+    expect(h.emitter.emitPersonalCatalogDetail).not.toHaveBeenCalled();
+    expect(h.commits.commit).not.toHaveBeenCalled();
+  });
+
+  it('a changed Client at child mint persists the refusal; infrastructure errors stay errors', async () => {
+    const h = fixture();
+    const input = ctx(
+      rec({
+        effect: 'NAVIGATE',
+        targetJson: { class: 'detail', ref: 'fs.booking' },
+        sourceCapabilitySpace: 'C9',
+        sourceCapabilityKey: 'catalog.services.read',
+        widgetKind: 'SERVICE_SELECTOR',
+      }),
+      { principal: PRINCIPAL },
+    );
+    h.emitter.emitPersonalCatalogDetail.mockRejectedValue(
+      new ForbiddenException('personal_client_context_changed'),
+    );
+    await expect(routeEffect(h.router, input)).resolves.toMatchObject({
+      route: { receipt_outcome: 'REFUSED', next_envelope: null },
+    });
+    expect(h.stores.writeReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: 'REFUSED',
+        refusalCode: 'insufficient_authority',
+      }),
+      input.now,
+    );
+    h.emitter.emitPersonalCatalogDetail.mockRejectedValue(
+      new Error('database unavailable'),
+    );
+    await expect(routeEffect(h.router, input)).rejects.toThrow(
+      'database unavailable',
+    );
+    expect(h.stores.writeReceipt).toHaveBeenCalledTimes(1);
+    expect(h.commits.commit).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    'personal_parent_unavailable',
+    'booking_selector_source_unavailable',
+  ])(
+    'persists bounded refusal when retained parent or current catalog changes: %s',
+    async (code) => {
+      const h = fixture();
+      const input = ctx(
+        rec({
+          effect: 'NAVIGATE',
+          targetJson: { class: 'detail', ref: 'fs.booking' },
+          sourceCapabilitySpace: 'C9',
+          sourceCapabilityKey: 'catalog.services.read',
+          widgetKind: 'SERVICE_SELECTOR',
+        }),
+        { principal: PRINCIPAL },
+      );
+      h.emitter.emitPersonalCatalogDetail.mockRejectedValue(
+        new IntentTemplateRefusal(code),
+      );
+      await expect(routeEffect(h.router, input)).resolves.toMatchObject({
+        route: { receipt_outcome: 'REFUSED', next_envelope: null },
+      });
+      expect(h.stores.writeReceipt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          outcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        }),
+        input.now,
+      );
+      expect(h.commits.commit).not.toHaveBeenCalled();
+    },
+  );
 
   it('G13-P02-W returns the exact stored sealed envelope after current authority', async () => {
     const { router, threadPage, projector, emitter } = fixture();

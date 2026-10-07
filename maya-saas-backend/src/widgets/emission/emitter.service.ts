@@ -217,6 +217,61 @@ export class WidgetEmitterService {
     return this.emitInternal(request, now, null, null, null, parentWidgetId);
   }
 
+  /** Public catalog remains the READ source; SB-1 independently verifies personal context. */
+  async emitPersonalCatalogDetail(
+    request: MintRequest,
+    context: { revalidate(): Promise<void> },
+    parentWidgetId: string,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      request.kind !== 'SERVICE_SELECTOR' ||
+      request.composerInput.capability !== 'catalog.services.read' ||
+      request.composerInput.source.from !== 'capability_envelope' ||
+      request.composerInput.source.capability !== 'catalog.services.read' ||
+      request.composerInput.correlation_refs.parent_id !== parentWidgetId
+    )
+      throw new IntentTemplateRefusal('personal_catalog_source_required');
+    await context.revalidate();
+    const shown = presentBookingSelector({
+      tenantId: request.tenantId,
+      kind: 'SERVICE_SELECTOR',
+      source: request.body,
+      mint: (identity) => this.seals.mintNounHandles([identity])[identity.noun],
+    });
+    if (!shown)
+      throw new IntentTemplateRefusal('booking_selector_source_unavailable');
+    // The public options retain the passive i1 reference; no selectable recipe or nested opener.
+    return this.emitInternal(
+      {
+        ...request,
+        body: shown.body as unknown as Record<string, unknown>,
+        composerInput: {
+          ...request.composerInput,
+          intent_proposals: [
+            { intent_template_key: 'none.passive@1', role: 'secondary' },
+            {
+              intent_template_key: 'control.dismiss@1',
+              capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+              role: 'escape',
+            },
+          ],
+        },
+      },
+      now,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      { parentWidgetId, revalidate: () => context.revalidate() },
+    );
+  }
+
   /** FBE2E-2: server-owned canonical facts become a strict selector and closed-domain intent. */
   async emitBookingSelector(
     request: MintRequest,
@@ -295,6 +350,14 @@ export class WidgetEmitterService {
           argument_handles: inheritedHandles ?? {},
           role: 'primary',
         },
+        ...(request.kind === 'SERVICE_SELECTOR'
+          ? [
+              {
+                intent_template_key: 'navigate.personal-catalog@1',
+                role: 'secondary' as const,
+              },
+            ]
+          : []),
         {
           intent_template_key: 'control.dismiss@1',
           capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
@@ -516,6 +579,10 @@ export class WidgetEmitterService {
     servicePriceParentWidgetId: string | null = null,
     schedule: BookingConfirmationEmissionContext | null = null,
     personalParentWidgetId: string | null = null,
+    personalCatalog: {
+      parentWidgetId: string;
+      revalidate(): Promise<void>;
+    } | null = null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
     if (
@@ -570,6 +637,17 @@ export class WidgetEmitterService {
         input.source.capability !== 'appointments.own.list')
     )
       throw new IntentTemplateRefusal('personal_navigation_source_required');
+
+    if (
+      input.intent_proposals.some(
+        (p) => p.intent_template_key === 'navigate.personal-catalog@1',
+      ) &&
+      (request.kind !== 'SERVICE_SELECTOR' ||
+        input.capability !== 'catalog.services.read' ||
+        input.source.from !== 'capability_envelope' ||
+        input.source.capability !== 'catalog.services.read')
+    )
+      throw new IntentTemplateRefusal('personal_catalog_source_required');
 
     const resolved = input.intent_proposals.map((proposal) => {
       if (proposal.intent_template_key === SCHEDULE_TEMPLATE) {
@@ -718,6 +796,7 @@ export class WidgetEmitterService {
     if (!profile) throw new IntentTemplateRefusal('carrier_unknown');
     const unsignedEnvelope = buildEnvelopeWithoutSeal({
       personalDetail: personalParentWidgetId !== null,
+      personalCatalogDetail: personalCatalog !== null,
       widgetId,
       tenantId: request.tenantId,
       turnId: request.turnId,
@@ -881,11 +960,13 @@ export class WidgetEmitterService {
         )
           throw new IntentTemplateRefusal('journal_parent_unavailable');
       }
-      if (personalParentWidgetId !== null) {
+      const entryParent =
+        personalCatalog?.parentWidgetId ?? personalParentWidgetId;
+      if (entryParent !== null) {
         const parent = await tx.widgetEmission.findFirst({
           where: {
             tenantId: request.tenantId,
-            widgetId: personalParentWidgetId,
+            widgetId: entryParent,
             erasedAt: null,
             expiresAt: { gt: now },
             retentionUntil: { gt: now },
@@ -899,7 +980,10 @@ export class WidgetEmitterService {
                 principalProofHash: principal.proofHash,
                 effect: 'NAVIGATE',
                 sourceCapabilitySpace: 'C9',
-                sourceCapabilityKey: 'appointments.own.list',
+                sourceCapabilityKey:
+                  personalCatalog === null
+                    ? 'appointments.own.list'
+                    : 'catalog.services.read',
                 targetJson: { equals: { class: 'detail', ref: 'fs.booking' } },
               },
             },
@@ -907,16 +991,17 @@ export class WidgetEmitterService {
         });
         if (
           parent === null ||
-          !(await this.verifySeal(request.tenantId, personalParentWidgetId)) ||
+          !(await this.verifySeal(request.tenantId, entryParent)) ||
           !(await this.releaseAccess.canProject(
             request.tenantId,
-            personalParentWidgetId,
+            entryParent,
             tx,
           ))
         )
           throw new IntentTemplateRefusal('personal_parent_unavailable');
       }
       if (personalSchedule !== null) await personalSchedule.revalidate();
+      if (personalCatalog !== null) await personalCatalog.revalidate();
       if (servicePrice !== null) await servicePrice.revalidate();
       await this.releaseAccess.bindMint(
         request.tenantId,

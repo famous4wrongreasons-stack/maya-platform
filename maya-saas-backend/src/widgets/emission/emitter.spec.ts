@@ -132,7 +132,15 @@ const composerFor = (
   kind_proposal: kind,
   capability,
   capability_version: C9_REGISTRY_HASH,
-  source: { from: 'action_execution', execution_id: 'execution-1' },
+  source:
+    capability === 'catalog.services.read'
+      ? {
+          from: 'capability_envelope',
+          capability,
+          capability_version: C9_REGISTRY_HASH,
+          fact_index: 0,
+        }
+      : { from: 'action_execution', execution_id: 'execution-1' },
   correlation_refs: { turn_id: 'turn-1' },
   origin: {
     trigger: 'system_reply',
@@ -297,6 +305,98 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     expect(revalidate).toHaveBeenCalledTimes(2);
   });
 
+  it('catalog personal child retains a sealed exact parent and no recursive navigation or mutation recipe', async () => {
+    const { emitter, prisma } = make();
+    const now = new Date('2035-05-10T09:00:00Z');
+    const parentWidgetId = 'catalog-parent';
+    const lookup = jest
+      .spyOn(prisma.widgetEmission, 'findFirst')
+      .mockImplementation(() => ({ widgetId: parentWidgetId }));
+    jest.spyOn(emitter, 'verifySeal').mockResolvedValue(true);
+    const revalidate = jest.fn().mockResolvedValue(undefined);
+    const input = {
+      ...req(),
+      kind: 'SERVICE_SELECTOR' as const,
+      body: {
+        services: [
+          {
+            id: 'service',
+            name: 'Service',
+            duration_minutes: 30,
+            price: 1000,
+            currency: 'RUB',
+          },
+        ],
+      },
+      composerInput: {
+        ...composerFor('SERVICE_SELECTOR', 'catalog.services.read', []),
+        correlation_refs: { turn_id: 'turn-1', parent_id: parentWidgetId },
+      },
+    };
+    const minted = await emitter.emitPersonalCatalogDetail(
+      input,
+      { revalidate },
+      parentWidgetId,
+      now,
+    );
+    expect(minted.envelope).toMatchObject({
+      kind: 'SERVICE_SELECTOR',
+      correlation: { parent_widget_id: parentWidgetId },
+      provenance: { source_capability: 'catalog.services.read' },
+      presentation: { fullscreen_detail: { route_key: 'fs.booking' } },
+    });
+    expect(prisma.records.map((r) => r.effect)).toEqual(['CONTROL']);
+    expect(
+      (minted.envelope as { intents: Array<{ effect: string }> }).intents.map(
+        (i) => i.effect,
+      ),
+    ).toEqual(['NONE', 'CONTROL']);
+    expect(lookup).toHaveBeenCalledWith({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      where: expect.objectContaining({
+        tenantId: 't1',
+        widgetId: parentWidgetId,
+        erasedAt: null,
+        expiresAt: { gt: now },
+        retentionUntil: { gt: now },
+        turnId: 'turn-1',
+        turn: {
+          principalProofHash: principal().proofHash,
+          conversationId: 'c1',
+        },
+        intentRecords: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          some: expect.objectContaining({
+            sourceCapabilityKey: 'catalog.services.read',
+            targetJson: { equals: { class: 'detail', ref: 'fs.booking' } },
+          }),
+        },
+      }),
+    });
+    expect(revalidate).toHaveBeenCalledTimes(2);
+    lookup.mockReturnValue(null);
+    await expect(
+      emitter.emitPersonalCatalogDetail(
+        input,
+        { revalidate },
+        parentWidgetId,
+        now,
+      ),
+    ).rejects.toThrow('personal_parent_unavailable');
+    expect(prisma.emissions).toHaveLength(1);
+    lookup.mockImplementation(() => ({ widgetId: parentWidgetId }));
+    revalidate.mockRejectedValue(new Error('personal_client_context_changed'));
+    await expect(
+      emitter.emitPersonalCatalogDetail(
+        input,
+        { revalidate },
+        parentWidgetId,
+        now,
+      ),
+    ).rejects.toThrow('personal_client_context_changed');
+    expect(prisma.emissions).toHaveLength(1);
+  });
+
   it('FBE2E-2 mints a strict service selector and a closed server-owned transition domain', async () => {
     const { prisma, emitter } = make();
     const minted = await emitter.emitBookingSelector(
@@ -324,7 +424,7 @@ describe('K3 emission — mint, compose, fit, seal', () => {
       },
       new Date('2026-10-01T09:00:00.000Z'),
     );
-    expect(prisma.records).toHaveLength(2);
+    expect(prisma.records).toHaveLength(3);
     expect(
       prisma.records.find((record) => record.effect === 'REFINE'),
     ).toMatchObject({
@@ -364,6 +464,7 @@ describe('K3 emission — mint, compose, fit, seal', () => {
         k: 'option',
         id: 'opaque:service:catalog_service:service-1',
       },
+      expect.objectContaining({ k: 'intent' }),
       expect.objectContaining({ k: 'intent' }),
     ]);
     expect(envelope.presentation.a11y.reading_order).not.toContainEqual({

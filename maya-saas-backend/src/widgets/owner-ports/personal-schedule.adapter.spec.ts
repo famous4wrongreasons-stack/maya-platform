@@ -47,6 +47,35 @@ const harness = () => {
   };
 };
 describe('BS-1 exact personal schedule source', () => {
+  it('prepares the existing personal context with no appointment or availability prerequisite', async () => {
+    const h = harness();
+    h.owner.forAccount.mockResolvedValue([]);
+    const context = await h.adapter.prepare(actor as never);
+    expect(h.contexts.select).toHaveBeenCalledWith(actor, 'personal_client');
+    expect(h.owner.forAccount).not.toHaveBeenCalled();
+    expect(h.runtime.execute).not.toHaveBeenCalled();
+    await context.revalidate();
+    h.personal.revalidate.mockRejectedValue(
+      new Error('personal_client_context_changed'),
+    );
+    await expect(context.revalidate()).rejects.toThrow(
+      'personal_client_context_changed',
+    );
+    expect(
+      await h.adapter.resolve(actor as never, { appointments: [] }),
+    ).toBeNull();
+  });
+  it('refuses unbound personal catalog preparation before any domain read', async () => {
+    const h = harness();
+    h.contexts.select.mockRejectedValue(
+      new Error('new_verified_maya_user_binding_required'),
+    );
+    await expect(h.adapter.prepare(actor as never)).rejects.toThrow(
+      'new_verified',
+    );
+    expect(h.owner.forAccount).not.toHaveBeenCalled();
+    expect(h.runtime.execute).not.toHaveBeenCalled();
+  });
   it('BS-IDENTITY requires canonical personal context and exact completed owner id, never a matching time', async () => {
     const h = harness();
     expect(

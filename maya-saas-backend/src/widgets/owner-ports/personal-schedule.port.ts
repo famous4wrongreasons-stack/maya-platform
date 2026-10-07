@@ -14,6 +14,10 @@ export interface PersonalScheduleSource {
   revalidate(): Promise<void>;
 }
 export interface PersonalSchedulePort {
+  /** SB-1 request-local identity check; independent of appointment history. */
+  prepare(
+    actor: Readonly<AuthenticatedUser>,
+  ): Promise<{ revalidate(): Promise<void> }>;
   resolve(
     actor: Readonly<AuthenticatedUser>,
     completed: unknown,

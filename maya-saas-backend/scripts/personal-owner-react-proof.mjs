@@ -9,7 +9,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' } } });
+const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, entry: { type: 'string', default: 'schedule' } } });
+assert.ok(['catalog', 'schedule'].includes(values.entry));
 assert.equal(values.run, true, 'Explicit --run and parent heavy-slot authorization required');
 assert.ok(values.output && path.isAbsolute(values.output) && !fs.existsSync(values.output), 'New absolute output required');
 for (const name of ['.env', '.env.local']) assert.equal(fs.existsSync(path.join(backend, name)), false);
@@ -23,7 +24,7 @@ await new Promise((resolve) => portServer.close(resolve));
 const database = 'maya_widget_gate_proof_personalowner_' + randomBytes(6).toString('hex');
 const env = { DATABASE_URL: `postgresql://personal_owner_proof@127.0.0.1:${port}/${database}`, NODE_ENV: 'test', NODE_OPTIONS: '--max-old-space-size=3072', LANG: 'C', TZ: 'UTC' };
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
-const manifest = { kind: 'personal-owner-react-http-pg-restart-local-proof', cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticCanonicalAppointments: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
+const manifest = { entrySource: values.entry, initialAppointments: values.entry === 'catalog' ? 0 : 1, kind: 'personal-owner-react-http-pg-restart-local-proof', cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticCanonicalAppointments: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
 const save = () => fs.writeFileSync(path.join(values.output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 let cancelled = null, activeChild = null, activeCleanup = false;
 const cancel = (signal) => {
@@ -72,7 +73,7 @@ async function run(name, command, args, extra = {}, cwd = backend) {
   } finally { fs.closeSync(fd); }
 }
 const pg = (name) => path.join(pgBin, name), pgArgs = ['-D', cluster, '-w', '-t', '30'];
-const stage = (name) => run(name, process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', 'personal-owner-react\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', 'test/widgets-live/personal-owner-react.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, name + '-jest.json')], { JEST_PERSONAL_OWNER_STAGE: name, JEST_PERSONAL_OWNER_RECEIPT: path.join(privateRoot, 'private-restart.json'), JEST_PERSONAL_OWNER_OUTPUT: values.output });
+const stage = (name) => run(name, process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', 'personal-owner-react\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', 'test/widgets-live/personal-owner-react.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, name + '-jest.json')], { JEST_PERSONAL_OWNER_ENTRY: values.entry, JEST_PERSONAL_OWNER_STAGE: name, JEST_PERSONAL_OWNER_RECEIPT: path.join(privateRoot, 'private-restart.json'), JEST_PERSONAL_OWNER_OUTPUT: values.output });
 let startAttempted = false;
 save();
 try {

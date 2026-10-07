@@ -2,12 +2,14 @@
 // Candidate identity only; a new certificate and evidence are still required.
 const snapshot = {
   registryDigest:
-    '7cd61f802cc7f021842a70f9bdd126108f50769543868d60bff950d2ccbf2122',
+    'a5073a8276f4aa1c9ebcaca09334cf2882057f05d7e79f808f9b712b3d5c254d',
   unavailableKinds: ['SETTINGS_DRAFT'],
   templates: [
     'none.passive@1',
     'navigate.account@1',
     'navigate.schedule@1',
+    'navigate.personal-booking@1',
+    'navigate.personal-catalog@1',
     'navigate.journal.detail@1',
     'navigate.journal.parent@1',
     'refine.measurement@1',
@@ -85,6 +87,28 @@ const snapshot = {
             route: 'shell.root',
             param: null,
           },
+        },
+        inputSchemaHash: null,
+        sourceSubject: false,
+      },
+      'navigate.personal-booking@1': {
+        effect: 'NAVIGATE',
+        kinds: ['SCHEDULE'],
+        subject: null,
+        target: {
+          class: 'detail',
+          ref: 'fs.booking',
+        },
+        inputSchemaHash: null,
+        sourceSubject: false,
+      },
+      'navigate.personal-catalog@1': {
+        effect: 'NAVIGATE',
+        kinds: ['SERVICE_SELECTOR'],
+        subject: null,
+        target: {
+          class: 'detail',
+          ref: 'fs.booking',
         },
         inputSchemaHash: null,
         sourceSubject: false,

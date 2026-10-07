@@ -22,6 +22,12 @@ export const EFFECT_ROUTE_AUDIT = 'EFFECT_ROUTE_AUDIT';
  */
 export interface NavigateWidgetMinterPort {
   emit(request: MintRequest, now?: Date): Promise<SealedEmission>;
+  emitPersonalCatalogDetail(
+    request: MintRequest,
+    context: { revalidate(): Promise<void> },
+    parentWidgetId: string,
+    now?: Date,
+  ): Promise<SealedEmission>;
   emitPersonalSchedule(
     request: MintRequest,
     source: PersonalScheduleSource,

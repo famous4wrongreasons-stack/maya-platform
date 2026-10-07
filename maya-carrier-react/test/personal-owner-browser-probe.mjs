@@ -48,6 +48,12 @@ async function clickNamed(page, name) {
   assert.ok(view.controls.some((control) => control.tag === 'BUTTON' && control.name === name), 'Visible control missing: ' + name);
   assert.equal(await page.click(`Q.all('button').find(el => Q.visible(el) && Q.name(el) === ${JSON.stringify(name)})`), true);
 }
+async function clickPersonalChoice(page, name) {
+  const expression = `Q.all('dialog[open] button[data-personal-control]').find(el => Q.visible(el) && !el.disabled && Q.name(el) === ${JSON.stringify(name)})`;
+  assert.ok(await page.waitFor('!!(' + expression + ')'), 'Enabled personal choice missing: ' + name);
+  assert.equal(await page.click(expression), true);
+  assert.ok(await page.waitFor('(' + expression + ')?.getAttribute("aria-pressed") === "true"'));
+}
 async function login(page, email) {
   const beforeHistory = page.apiRequests('/ai/conversation').length;
   assert.ok(await page.waitFor('!!Q.byName("button", /^Войти по email$/)'));
@@ -187,20 +193,42 @@ async function main() {
       assert.equal(request.status, 200);
       return JSON.parse(await page.responseBody(request.requestId));
     }
-    const openPersonal = async (page) => {
+    const catalogEntry = input.entrySource === 'catalog';
+    const openPersonal = async (page, scenarioKey) => {
       const before = page.apiRequests('/ai/chat').length;
-      await sendClientRequest(page, PROMPTS.own);
+      await sendClientRequest(page, catalogEntry ? PROMPTS.prepare : PROMPTS.own);
       const reply = await answer(page, before);
       const envelope = reply.resolution?.receipt?.envelope;
-      assert.equal(envelope?.kind, 'SCHEDULE', JSON.stringify({reply: reply.reply, resolution: reply.resolution}));
+      assert.equal(envelope?.kind, catalogEntry ? 'SERVICE_SELECTOR' : 'SCHEDULE', JSON.stringify({reply: reply.reply, resolution: reply.resolution}));
       const intent = envelope.intents.find(i => i.effect === 'NAVIGATE' && i.target?.ref === 'fs.booking');
-      assert.ok(intent, 'Real completed own.list must publish personal navigation');
+      assert.ok(intent, 'Real completed approved read must publish personal navigation');
       assert.equal(envelope.intents.some(i => i.effect === 'COMMIT' || i.effect === 'DRAFT'), false);
-      const child = await clickRef(page, 'intent:' + intent.intent_ref);
+      if (catalogEntry && scenarioKey === 'navRevoked') await checkpoint('navRevoked-before-nav');
+      let child = await clickRef(page, 'intent:' + intent.intent_ref);
+      if (catalogEntry && scenarioKey === 'navRevoked') {
+        assert.equal(child.receipt_outcome, 'REFUSED');
+        assert.equal(child.next_envelope, null);
+        assert.equal(await page.eval('!!Q.all("dialog[open] section").find(el => el.getAttribute("aria-label") === "Личная запись")'), false);
+        assert.equal(page.apiRequests('/personal-client/appointments/results').length, 0);
+        await capture(page, 'navRevoked-nav-refused');
+        await checkpoint('navRevoked-result');
+        return null;
+      }
+      if (catalogEntry && scenarioKey === 'success' && input.stage === 'prepare') {
+        const firstChild = child.next_envelope.widget_id;
+        assert.ok(await page.waitFor('!!document.querySelector("dialog[open]")'));
+        assert.ok(await page.waitFor('document.body.innerText.includes("Запись для вашего подтверждённого")'));
+        await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+        await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+        assert.ok(await page.waitFor('!document.querySelector("dialog[open]")'));
+        child = await clickRef(page, 'intent:' + intent.intent_ref);
+        assert.notEqual(child.next_envelope.widget_id, firstChild);
+        report.repeatedCatalogNavigation = true;
+      }
       assert.equal(child.receipt_outcome, 'ACCEPTED', JSON.stringify(child));
       assert.equal(child.next_envelope.correlation.parent_widget_id, envelope.widget_id);
-      assert.equal(child.next_envelope.provenance.source_capability, 'appointments.own.list');
-      assert.equal(child.next_envelope.intents.some(i => i.effect === 'NAVIGATE' || i.effect === 'DRAFT' || i.effect === 'COMMIT'), false, 'Child cannot open another form or carry CLIENT mutation recipes');
+      assert.equal(child.next_envelope.provenance.source_capability, catalogEntry ? 'catalog.services.read' : 'appointments.own.list');
+      assert.equal(child.next_envelope.intents.some(i => i.effect === 'NAVIGATE' || i.effect === 'REFINE' || i.effect === 'DRAFT' || i.effect === 'COMMIT'), false, 'Child cannot open another form or carry CLIENT mutation recipes');
       assert.ok(await page.waitFor('!!Q.all("dialog[open] section").find(el => Q.visible(el) && el.getAttribute("aria-label") === "Личная запись")'));
       return { page, envelope, child: child.next_envelope };
     };
@@ -208,7 +236,8 @@ async function main() {
     for (const scenario of input.scenarios) {
       const page = await newPage(origin); activePage = page;
       await login(page, scenario.email);
-      await openPersonal(page);
+      const opened = await openPersonal(page, scenario.key);
+      if (opened === null) continue;
       if (input.stage === 'resume') {
         if (scenario.key === 'unknown') {
           assert.ok(await page.waitFor('document.body.innerText.includes("Результат записи пока не подтверждён")'));
@@ -227,7 +256,7 @@ async function main() {
         continue;
       }
       assert.ok(await page.waitFor('document.body.innerText.includes("Запись для вашего подтверждённого")'));
-      await clickNamed(page, scenario.serviceName); await clickNamed(page, scenario.staffName);
+      await clickPersonalChoice(page, scenario.serviceName); await clickPersonalChoice(page, scenario.staffName);
       assert.equal(await page.fill('Q.all("input[data-personal-control]").find(Q.visible)', scenario.date), true);
       await clickNamed(page, 'Показать свободное время');
       const slotsRequest = await until(() => page.apiRequests('/available-slots').find(r => r.finishedAt), 'live availability');
@@ -258,6 +287,11 @@ async function main() {
       const beforeAgain = page.apiRequests('/ai/chat').length;
       await sendClientRequest(page, PROMPTS.again); await answer(page, beforeAgain);
       await capture(page, scenario.key + '-chat-again');
+      if (catalogEntry) {
+        const beforePrivateRoundtrip = page.apiRequests('/ai/chat').length;
+        await sendClientRequest(page, PROMPTS.again);
+        await answer(page, beforePrivateRoundtrip);
+      }
     }
     for (const guard of guards) { assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []); }
     report.observations = { stage: input.stage, actualReactAndHttp: true, privateFormNeverAddedToModelHistory: true, guards: guards.map(g => ({ blocked: g.blocked, errors: g.errors })) };
