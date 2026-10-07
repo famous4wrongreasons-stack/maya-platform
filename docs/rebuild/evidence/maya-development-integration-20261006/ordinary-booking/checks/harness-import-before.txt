@@ -1,0 +1,1 @@
+{"mode":"early-runtime","metadataOnly":true,"nestInstances":0,"connections":0,"providers":["ActionCapabilityRegistry","CanonicalActionPolicyRegistry","CanonicalActionPolicyResolver","undefined",null,null],"undefinedProviderIndices":[4,5]}

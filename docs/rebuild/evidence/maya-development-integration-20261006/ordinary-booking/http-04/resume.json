@@ -1,0 +1,211 @@
+{
+  "stage": "resume",
+  "ordinary": true,
+  "scriptedModel": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "qualification": "NOT_ISSUED",
+  "transport": "FINITE_IN_PROCESS_SYNTHETIC_NATIVE_YCLIENTS",
+  "modelCalls": 0,
+  "bookingActionCapability": "crm.appointment.create.v1",
+  "setupActionsExcludedFromBookingEffectCounts": true,
+  "pgStart": "2026-10-07T22:08:12.191Z",
+  "scriptedModelCalls": 2,
+  "ordinaryReplies": [
+    {
+      "reply": "Выберите подходящее время. Затем проверьте детали и подтвердите запись.",
+      "source": "safe_fallback",
+      "hasResolution": true,
+      "hasAction": false
+    },
+    {
+      "reply": "Выберите подходящее время. Затем проверьте детали и подтвердите запись.",
+      "source": "safe_fallback",
+      "hasResolution": true,
+      "hasAction": false
+    }
+  ],
+  "unfinished-selection": {
+    "initialState": "STAFF_SELECTED_DATE_REQUIRED",
+    "state": "FRESH_TIME_SLOT_AFTER_EXPLICIT_DAY",
+    "canonicalAcceptedPreferences": 2,
+    "originalAuditSha256": "3b3c3be1252ff9a86348f52d93fb22c844cf9bbf9ace55bcde1beecc1de7e8e5",
+    "originalAuditUnchanged": true,
+    "selectedStaffId": "71",
+    "freshProviderReads": 5,
+    "sourceBranchRevalidated": true,
+    "unboundSiblingSelected": false,
+    "bookingActionExecutions": 0,
+    "syntheticBookingPosts": 0
+  },
+  "concurrent-selection": {
+    "initialState": "STAFF_SELECTED_DATE_REQUIRED",
+    "state": "FRESH_TIME_SLOT_AFTER_EXPLICIT_DAY",
+    "canonicalAcceptedPreferences": 2,
+    "originalAuditSha256": "a1c46d9ee335a83b111d86ba461f7f9bd4bdae8d4be59bdcb84b289cbc1ca7be",
+    "originalAuditUnchanged": true,
+    "selectedStaffId": "71",
+    "freshProviderReads": 5,
+    "sourceBranchRevalidated": true,
+    "unboundSiblingSelected": false,
+    "bookingActionExecutions": 0,
+    "syntheticBookingPosts": 0
+  },
+  "admissionCountBasis": "DISTINCT_CANONICAL_BOOKING_ACTION_ROWS_NOT_HTTP_RETRY_CALLS",
+  "historyErasure": {
+    "status": "BLOCKED_MISSING_CANONICAL_OWNER_ROUTE",
+    "gap": "GAP-HISTORY-ERASE",
+    "fixtureErasureUsed": false
+  },
+  "readySeam": "SB1_PERSONAL_HTTP_REAL_AUTHORIZED_CANONICAL_ADMISSION_THEN_SYNTHETIC_FAILURE_BEFORE_CLAIM_NOT_PRODUCTION_CRASH_EQUIVALENCE",
+  "ready-current": {
+    "initialState": "READY",
+    "state": "SUCCEEDED",
+    "initialSyntheticBookingPosts": 0,
+    "totalSyntheticBookingPosts": 1,
+    "resumeSyntheticBookingPosts": 1,
+    "durableBookingAdmissions": 1,
+    "idempotencyBindings": 1,
+    "approvalRequests": 0,
+    "executionAttempts": 1,
+    "originalSourceEvidenceUnchanged": true,
+    "originalEvidenceSha256": "69068460a3219fdd1102f1f2255baefb2919c2ce2998bd284ba6f74974b20c3c",
+    "retryStatus": 201
+  },
+  "ready-stale": {
+    "initialState": "READY",
+    "state": "FAILED",
+    "initialSyntheticBookingPosts": 0,
+    "totalSyntheticBookingPosts": 0,
+    "resumeSyntheticBookingPosts": 0,
+    "durableBookingAdmissions": 1,
+    "idempotencyBindings": 1,
+    "approvalRequests": 0,
+    "executionAttempts": 1,
+    "originalSourceEvidenceUnchanged": true,
+    "originalEvidenceSha256": "38135846c2a5b26c6e857fa5418537d553ea6b87d8ea008e99f7c402685b627c",
+    "retryStatus": 409
+  },
+  "ready-timezone": {
+    "initialState": "READY",
+    "state": "FAILED",
+    "initialSyntheticBookingPosts": 0,
+    "totalSyntheticBookingPosts": 0,
+    "resumeSyntheticBookingPosts": 0,
+    "durableBookingAdmissions": 1,
+    "idempotencyBindings": 1,
+    "approvalRequests": 0,
+    "executionAttempts": 1,
+    "originalSourceEvidenceUnchanged": true,
+    "originalEvidenceSha256": "7d7735bc78b022e3cc0690708a0bafec95d0ceb11b55acb39cf9ed134599eca2",
+    "retryStatus": 409
+  },
+  "ready-price": {
+    "initialState": "READY",
+    "state": "FAILED",
+    "initialSyntheticBookingPosts": 0,
+    "totalSyntheticBookingPosts": 0,
+    "resumeSyntheticBookingPosts": 0,
+    "durableBookingAdmissions": 1,
+    "idempotencyBindings": 1,
+    "approvalRequests": 0,
+    "executionAttempts": 1,
+    "originalSourceEvidenceUnchanged": true,
+    "originalEvidenceSha256": "73b372538a3b8ea920bd7706e7936c83d46daa5b0a27ae89bf05280a69c5d456",
+    "retryStatus": 409
+  },
+  "ready-revoked": {
+    "initialState": "READY",
+    "state": "READY",
+    "initialSyntheticBookingPosts": 0,
+    "totalSyntheticBookingPosts": 0,
+    "resumeSyntheticBookingPosts": 0,
+    "durableBookingAdmissions": 1,
+    "idempotencyBindings": 1,
+    "approvalRequests": 0,
+    "executionAttempts": 0,
+    "originalSourceEvidenceUnchanged": true,
+    "originalEvidenceSha256": "795b5cd5a44c5d3c7bca84ba98c9f29fd5261702126b2d7f9ba77f3fb24fbc27",
+    "retryStatus": 403
+  },
+  "unknown-restart": {
+    "initialState": "UNKNOWN",
+    "state": "UNKNOWN",
+    "initialSyntheticBookingPosts": 1,
+    "totalSyntheticBookingPosts": 1,
+    "resumeSyntheticBookingPosts": 0,
+    "durableBookingAdmissions": 1,
+    "idempotencyBindings": 1,
+    "approvalRequests": 0,
+    "executionAttempts": 1,
+    "originalSourceEvidenceUnchanged": true,
+    "originalEvidenceSha256": "4486668ec3d298c60e23188e605e64973edc421ec1fc9e66a1aa1dc03ed1371c",
+    "retryStatus": 503
+  },
+  "checkpoints": [
+    "Ordinary closed selection persists as preferences only; fresh explicit day revalidates the same bound branch after restart",
+    "Restart READ is inert; explicit retry rechecks original source and Client authority; UNKNOWN sends no second booking POST"
+  ],
+  "providerReads": [
+    "book_services/420001",
+    "company/420001/staff",
+    "book_times/420001/71/2026-10-09",
+    "book_services/420001",
+    "service_categories/420001",
+    "book_services/420002",
+    "company/420002/staff",
+    "book_times/420002/71/2026-10-09",
+    "book_services/420002",
+    "service_categories/420002",
+    "book_services/420003",
+    "book_services/420003",
+    "book_services/420003",
+    "book_services/420004",
+    "book_services/420005",
+    "book_services/420006",
+    "book_services/420006",
+    "book_services/420008",
+    "book_services/420008",
+    "book_services/420008",
+    "book_services/420008"
+  ],
+  "syntheticPostCompanies": [
+    420003
+  ],
+  "forbidden": [],
+  "pid": 69913,
+  "setupActionCounts": [
+    {
+      "scenario": "unfinished-selection",
+      "count": 3
+    },
+    {
+      "scenario": "concurrent-selection",
+      "count": 3
+    },
+    {
+      "scenario": "ready-current",
+      "count": 3
+    },
+    {
+      "scenario": "ready-stale",
+      "count": 3
+    },
+    {
+      "scenario": "ready-timezone",
+      "count": 3
+    },
+    {
+      "scenario": "ready-price",
+      "count": 3
+    },
+    {
+      "scenario": "ready-revoked",
+      "count": 3
+    },
+    {
+      "scenario": "unknown-restart",
+      "count": 3
+    }
+  ]
+}

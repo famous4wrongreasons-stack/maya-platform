@@ -1,0 +1,22 @@
+{
+  "contract": "maya.finite-failed-proof-summary/1",
+  "attempts": [
+    {
+      "attempt": "browser-01",
+      "status": "FAILED",
+      "candidateCommitMetadata": "d86f36cb0a100a89032c28c2f95252479b68ae69",
+      "sourceAcceptance": "NONE_FAILED_ATTEMPT",
+      "reason": "The scripted model only recognized the original synthetic staff name. Existing privacy projection transformed a staff correction after selection/resume/date/service-edit; the finite stub refused and chat returned no successful response. A later harness-only correction uses a distinct synthetic name and consumes the exact request-local private mention. No production privacy bypass or weakened browser assertion.",
+      "rawDirectory": "/tmp/maya-ordinary-booking-browser-20261007-01",
+      "manifestSha256": "33f714522f1f5aefbf7487454dd802153f949214156855ecb572bccfc174c79d",
+      "failureLogSha256": "2b6d0bdf09fe345588202091eb4bab27c9e89b42f42f2f501b04eb2cec247520",
+      "parentReportSha256": "c7aa26d0a5ae5dcd4daf1dc8c5b65758dec9e9bc3ae386331346176580b67b7f",
+      "reactReportAvailable": true,
+      "partialScreenshotCount": 7,
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true
+    }
+  ],
+  "rawAuthOrPrivateReceiptCopied": false,
+  "rawFailureLogsCopied": false
+}

@@ -1,0 +1,1 @@
+{"mode":"baseline-first","metadataOnly":true,"nestInstances":0,"connections":0,"providers":["ActionCapabilityRegistry","CanonicalActionPolicyRegistry","CanonicalActionPolicyResolver","ActionEngineKernel","CanonicalActionIngressService","ActionEngineRuntimeService"],"undefinedProviderIndices":[]}

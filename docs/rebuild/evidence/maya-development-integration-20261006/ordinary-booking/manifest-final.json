@@ -1,0 +1,279 @@
+{
+  "contract": "maya.ordinary-booking-evidence/1",
+  "status": "LOCAL_SYNTHETIC_QUALIFIED_CHECKPOINT",
+  "runtimeCandidateCommit": "d86f36cb0a100a89032c28c2f95252479b68ae69",
+  "httpCandidateCommit": "d86f36cb0a100a89032c28c2f95252479b68ae69",
+  "browserCandidateCommit": "db2cd1a45edb1df49667213b17058561020bd006",
+  "productionRuntimeIdenticalBetweenProofCandidates": true,
+  "httpSourcePaths": 1647,
+  "browserSourcePaths": 1712,
+  "browserScenarios": 3,
+  "browserCheckpoints": 27,
+  "browserScreenshots": 27,
+  "scriptedModelDecisions": {
+    "httpPrepare": 2,
+    "httpResume": 2,
+    "browser": 18
+  },
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "syntheticBookingPosts": {
+    "httpPrepare": 1,
+    "httpResume": 1,
+    "browser": 2
+  },
+  "syntheticReadOnlySearchPosts": {
+    "httpPrepare": 3,
+    "browser": 3
+  },
+  "readySeam": "REAL_SB1_HTTP_AUTHORIZATION_AND_CANONICAL_ADMISSION_THEN_SYNTHETIC_STOP_BEFORE_CLAIM_NOT_WIDGET_CRASH_EQUIVALENCE",
+  "allOwnedClustersStopped": true,
+  "rawPrivateReceiptsOrAuthPayloadsCopied": false,
+  "safeArchiveScanFindings": 0,
+  "artifactCount": 58,
+  "files": {
+    "browser-02/browser-jest.json": {
+      "sha256": "c5edb134e36079742351302355e460c550c1cbcebb9b140b81de0d0788e0760f",
+      "bytes": 1480
+    },
+    "browser-02/browser.json": {
+      "sha256": "0e6927a6d4df05a1e1b3d41ef57079d3f24aba497db79801c858455933fb1d14",
+      "bytes": 9963
+    },
+    "browser-02/git-blob-binding.json": {
+      "sha256": "31a9ff491760c957658f1327f0e7d56838b03a49e8ae98387940eca927804ff4",
+      "bytes": 385895
+    },
+    "browser-02/manifest.json": {
+      "sha256": "209cb0cf1b10b8b4fdc3c7581b8ec969a5552acac54ebdf8d597f32df7023956",
+      "bytes": 945
+    },
+    "browser-02/react-browser.json": {
+      "sha256": "fa7949b23cc035947760f1470d9e28968472065e31bf4187810e1155e0aea5b9",
+      "bytes": 124002
+    },
+    "browser-02/screenshots/stale-date.png": {
+      "sha256": "abaf24edbf67dd96c880da4b7eeeae1873749f9cd09aa1e1833b761d856d1427",
+      "bytes": 99194
+    },
+    "browser-02/screenshots/stale-day-edit.png": {
+      "sha256": "b4372c80be04bea1d656f9db536b22ad1abb11fe51a3c0b049ec3424df920dec",
+      "bytes": 93902
+    },
+    "browser-02/screenshots/stale-preview.png": {
+      "sha256": "dd77c196b8388cd59beb7ba7055e78b1eec4d6b6f5241d40708a60826bc20d7d",
+      "bytes": 87817
+    },
+    "browser-02/screenshots/stale-reload.png": {
+      "sha256": "0e1877147cb82999c44a9564b06d2e4e5a8a7bde869473cc72a9bbe50e90f4f3",
+      "bytes": 88120
+    },
+    "browser-02/screenshots/stale-result.png": {
+      "sha256": "63758290a91a944baaa39eb42729b9a7c60070531b855ec4cf7b3b2eabeb0d1f",
+      "bytes": 94367
+    },
+    "browser-02/screenshots/stale-resumed.png": {
+      "sha256": "f2fd69e9094740f9bd9b7148706c8b5077541e2b694793b988dd014ebd5c11eb",
+      "bytes": 73152
+    },
+    "browser-02/screenshots/stale-selection.png": {
+      "sha256": "8ca8b83dbaed4254a00b36d49a3b32da81db5206795df87203c888b77cb59fc7",
+      "bytes": 48918
+    },
+    "browser-02/screenshots/stale-service-edit.png": {
+      "sha256": "d24ca4cc8a3563c43e4fe2a821b63fa58aac87b5ca681687cfdd5abcd19eb2b9",
+      "bytes": 94769
+    },
+    "browser-02/screenshots/stale-staff-edit.png": {
+      "sha256": "778a99296b652456653c0c725f2ea9ac32dfdf8e7f367ce82d4140a5b464f9a1",
+      "bytes": 93687
+    },
+    "browser-02/screenshots/success-date.png": {
+      "sha256": "200dcb5f4a7c7bfa3dfac1b1a98ab77e6b6ceb77a4341ecaebc74f191130f345",
+      "bytes": 99195
+    },
+    "browser-02/screenshots/success-day-edit.png": {
+      "sha256": "84f6b8dfb1707537d991b1ee92bbcf4f9de0bc15759ac2ee61268d2243d67af3",
+      "bytes": 93933
+    },
+    "browser-02/screenshots/success-preview.png": {
+      "sha256": "dd77c196b8388cd59beb7ba7055e78b1eec4d6b6f5241d40708a60826bc20d7d",
+      "bytes": 87817
+    },
+    "browser-02/screenshots/success-reload.png": {
+      "sha256": "1b10ad00c7d65b803ff4587e8c43d508a824cc22a442399e67b0af25bda2665b",
+      "bytes": 94792
+    },
+    "browser-02/screenshots/success-result.png": {
+      "sha256": "73d170eb0f4f9ebed4c2fb3d7dc3d10623a531cddc78f05909a702081032e536",
+      "bytes": 93923
+    },
+    "browser-02/screenshots/success-resumed.png": {
+      "sha256": "d5d3c1301b0f4b548b6b01b11649fad4e7a5080068a787f242fda8b4c547b0d6",
+      "bytes": 73197
+    },
+    "browser-02/screenshots/success-selection.png": {
+      "sha256": "0ff7847a24f2373d3ec11593e5c8c0f48b807600fd581e93cb5aebf28feae7b8",
+      "bytes": 48904
+    },
+    "browser-02/screenshots/success-service-edit.png": {
+      "sha256": "bf7d2fde4305b2f5116218530e8156124083e6e18c4c92a363d98f0cfbe85956",
+      "bytes": 94792
+    },
+    "browser-02/screenshots/success-staff-edit.png": {
+      "sha256": "66d85331993dea0f6d4c2f34cd5dc686692502bb15108f2564acd6c6c52dd9e8",
+      "bytes": 93695
+    },
+    "browser-02/screenshots/unknown-date.png": {
+      "sha256": "200dcb5f4a7c7bfa3dfac1b1a98ab77e6b6ceb77a4341ecaebc74f191130f345",
+      "bytes": 99195
+    },
+    "browser-02/screenshots/unknown-day-edit.png": {
+      "sha256": "686e218c52b9536010a3e0977e97f25e93c1d6a194200fe4761a8043593c8b72",
+      "bytes": 93930
+    },
+    "browser-02/screenshots/unknown-preview.png": {
+      "sha256": "e5b71c194c37ec534439c71a59e8b3da706bc488b76f3cc6d706faf7cddca017",
+      "bytes": 87815
+    },
+    "browser-02/screenshots/unknown-reload.png": {
+      "sha256": "de949236e0865b92c7e476bf3102bc6e5eebe31d55ba74c9bebfa371850c1e8b",
+      "bytes": 97274
+    },
+    "browser-02/screenshots/unknown-result.png": {
+      "sha256": "fb0aedee8539e00c5cdb745338323b511b27fca06bebb268d870a12df76e8f99",
+      "bytes": 96545
+    },
+    "browser-02/screenshots/unknown-resumed.png": {
+      "sha256": "9272d9ff053b2d85b4482c7461fa575b9463af8a0404c2fc1d16660b23fc75c8",
+      "bytes": 74429
+    },
+    "browser-02/screenshots/unknown-selection.png": {
+      "sha256": "5e03d4e5580f38d8dfa333b13f635127b9a00f475d1604aa40fa016421519431",
+      "bytes": 50104
+    },
+    "browser-02/screenshots/unknown-service-edit.png": {
+      "sha256": "8143179e3244f13b3dd70ddd874526a4a06c67e220ce4f8811579a6ce8eb549d",
+      "bytes": 94789
+    },
+    "browser-02/screenshots/unknown-staff-edit.png": {
+      "sha256": "778a99296b652456653c0c725f2ea9ac32dfdf8e7f367ce82d4140a5b464f9a1",
+      "bytes": 93687
+    },
+    "browser-02/source-hashes.json": {
+      "sha256": "cea63e4780fbb04703372c0667be70b7ccf8cb7641b84b6cab2f9350f3191664",
+      "bytes": 207166
+    },
+    "checks/browser-candidate-backend-types.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "checks/browser-fixture-lint.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "checks/browser-guard-5-tests.txt": {
+      "sha256": "b7ed03642f5e26bbe13ca5357d09fe7ece4d47ed6b8b9c8a4291f4678a8d1bc7",
+      "bytes": 663
+    },
+    "checks/driver-5-tests.txt": {
+      "sha256": "d25af9fb04ed5872f0351b450242879a8aea16a648fbdc90ed50c419fd375443",
+      "bytes": 568
+    },
+    "checks/final-aicore-194-tests.txt": {
+      "sha256": "dbabd0860c736941b3f71b1ab686550e023e71c8f1247c44e8933fad72ecd0aa",
+      "bytes": 196
+    },
+    "checks/final-backend-types.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "checks/final-numeric-scoped-lint.txt": {
+      "sha256": "08a16cc2f8351e833f12100874fa5a44b753e7a6cbda02873d7bd43a495b9287",
+      "bytes": 461
+    },
+    "checks/harness-import-after.txt": {
+      "sha256": "b45715cdac5599aefe4887d4d75fb41d97fb6ac10e1e1ad9abe5fb4dd0e6528c",
+      "bytes": 297
+    },
+    "checks/harness-import-before.txt": {
+      "sha256": "53584a5e03dca392d30654268386f7a7f43760ef3073cee6a596616356cc9eb9",
+      "bytes": 239
+    },
+    "checks/index.json": {
+      "sha256": "763590cfd2f1514fb707a56eae05c9341aa64a8ab8e0f1fc6656b0ab5972880e",
+      "bytes": 2992
+    },
+    "checks/numeric-reference-345-tests-6-suites.txt": {
+      "sha256": "3f1a263740b0897bf271d18d14cfdb12df706f7018e6bf59635f29e3f8768dec",
+      "bytes": 465
+    },
+    "checks/pending-intents-12-tests.txt": {
+      "sha256": "1c49a0945c52ffc29947e19b39c428f71c6578199aeb7a9fb1e3693b39faa899",
+      "bytes": 1587
+    },
+    "checks/react-types.txt": {
+      "sha256": "9356222294f29ea60e87a096d594ba0defee4059f5b67768ff2c8d731e80cb2a",
+      "bytes": 126
+    },
+    "checks/scoped-backend-lint.txt": {
+      "sha256": "0fdfd9bc078daa3f961317bc84c78acfeda65646544ede1c6145df63dd1bf593",
+      "bytes": 461
+    },
+    "checks/shell-build.txt": {
+      "sha256": "b45888a4d8ba9f01b1fb17f39a3a5432e19c1195202f8b41c119bfb88ac3d8f9",
+      "bytes": 1010
+    },
+    "checks/targeted-backend-620-tests-19-suites.txt": {
+      "sha256": "97bc8f16d96484827ceeffac3bc96ce0b944f7c17689f2af684746e7b1e403cf",
+      "bytes": 2507
+    },
+    "failed-browser-attempts.json": {
+      "sha256": "ea39db67ae08a7f9d0a3c02c899b0087a0de6b5d69e82e85a5d6c0fabc223ea0",
+      "bytes": 1277
+    },
+    "failed-http-attempts.json": {
+      "sha256": "3d57c262b5a927482147a05bbc70e82e861b7dec7e03a7ebbec3553837618482",
+      "bytes": 2518
+    },
+    "http-04/git-blob-binding.json": {
+      "sha256": "980a244987d1604b00681e467ece1b7e7c70ec30719dbf2d767f52a918b22a11",
+      "bytes": 372830
+    },
+    "http-04/manifest.json": {
+      "sha256": "4ed092fc297880138a6cd2083803a410a21003ae0e15787fbedb3c79857c87cd",
+      "bytes": 956
+    },
+    "http-04/prepare-jest.json": {
+      "sha256": "34bbd8adaae0a900e58c0fce0326df09820ae0975ce75b4d1f9bf302db8fec53",
+      "bytes": 1478
+    },
+    "http-04/prepare.json": {
+      "sha256": "5f271f38bddc34b589ddb3760e794f12cf8c36433e32cfb03d371566ed00b2f7",
+      "bytes": 12221
+    },
+    "http-04/resume-jest.json": {
+      "sha256": "7156a0140da08f33da837594f9af5015c5eb165bbc1af7f8b430ff47013c0c83",
+      "bytes": 1478
+    },
+    "http-04/resume.json": {
+      "sha256": "ab7dd4744f2fee7a318bcd2b28af65861b17f486c933b75df937f2224395efee",
+      "bytes": 6783
+    },
+    "http-04/source-hashes.json": {
+      "sha256": "07221735d047dc844132ea9212751915418980e0b639edb57bb8c7ee013edf86",
+      "bytes": 199561
+    }
+  },
+  "limitations": [
+    "Synthetic verifier establishes an already verified Client; real initial binding remains separate.",
+    "Native adapter uses finite synthetic transport; model decisions are scripted and prove no real language/provider quality.",
+    "Browser reload/relogin is separate from actual HTTP process/PG restart.",
+    "No callable canonical history erasure route; GAP-HISTORY-ERASE remains unproved over HTTP.",
+    "Time is selected via widget; semantic exact-time filtering is not accepted.",
+    "Existing mixed legacy raw catalog/scoped slot selectors safely refuse; fresh request required.",
+    "Source-path binding is not whole deployment image or receiving-branch aggregate certification.",
+    "No production/site/device change, autonomous C10 admission, outbound notification, push or merge."
+  ],
+  "qualification": "NOT_ISSUED"
+}

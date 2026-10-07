@@ -1,0 +1,68 @@
+{
+  "contract": "maya.finite-local-checks/1",
+  "broadTargetedCandidate": "d614e888ceb2bf647dc6033e35490ab3d5373207",
+  "finalCandidate": "d86f36cb0a100a89032c28c2f95252479b68ae69",
+  "broadTargetedTests": 620,
+  "broadTargetedSuites": 19,
+  "finalAffectedAicoreTests": 194,
+  "numericAffectedSuitesTests": 345,
+  "numericAffectedSuites": 6,
+  "lintErrors": 0,
+  "existingTestHelperWarnings": 2,
+  "fullAggregateGatesRun": false,
+  "files": {
+    "targeted-backend-620-tests-19-suites.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-targeted-03.log",
+      "sha256": "97bc8f16d96484827ceeffac3bc96ce0b944f7c17689f2af684746e7b1e403cf"
+    },
+    "numeric-reference-345-tests-6-suites.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-numeric-ref-units-01.log",
+      "sha256": "3f1a263740b0897bf271d18d14cfdb12df706f7018e6bf59635f29e3f8768dec"
+    },
+    "final-aicore-194-tests.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-numeric-ref-units-02.log",
+      "sha256": "dbabd0860c736941b3f71b1ab686550e023e71c8f1247c44e8933fad72ecd0aa"
+    },
+    "final-backend-types.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-backend-types-04.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scoped-backend-lint.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-eslint-02.log",
+      "sha256": "0fdfd9bc078daa3f961317bc84c78acfeda65646544ede1c6145df63dd1bf593"
+    },
+    "final-numeric-scoped-lint.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-numeric-eslint-01.log",
+      "sha256": "08a16cc2f8351e833f12100874fa5a44b753e7a6cbda02873d7bd43a495b9287"
+    },
+    "pending-intents-12-tests.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-pending-intents-02.log",
+      "sha256": "1c49a0945c52ffc29947e19b39c428f71c6578199aeb7a9fb1e3693b39faa899"
+    },
+    "browser-guard-5-tests.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-browser-guard-02.log",
+      "sha256": "b7ed03642f5e26bbe13ca5357d09fe7ece4d47ed6b8b9c8a4291f4678a8d1bc7"
+    },
+    "driver-5-tests.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-driver-tests-01.log",
+      "sha256": "d25af9fb04ed5872f0351b450242879a8aea16a648fbdc90ed50c419fd375443"
+    },
+    "shell-build.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-shell-build-02.log",
+      "sha256": "b45888a4d8ba9f01b1fb17f39a3a5432e19c1195202f8b41c119bfb88ac3d8f9"
+    },
+    "react-types.txt": {
+      "rawPath": "/tmp/maya-ordinary-booking-react-types-01.log",
+      "sha256": "9356222294f29ea60e87a096d594ba0defee4059f5b67768ff2c8d731e80cb2a"
+    },
+    "harness-import-before.txt": {
+      "rawPath": "/tmp/maya-booking-import-metadata-before.log",
+      "sha256": "53584a5e03dca392d30654268386f7a7f43760ef3073cee6a596616356cc9eb9"
+    },
+    "harness-import-after.txt": {
+      "rawPath": "/tmp/maya-booking-import-metadata-after.log",
+      "sha256": "b45715cdac5599aefe4887d4d75fb41d97fb6ac10e1e1ad9abe5fb4dd0e6528c"
+    }
+  },
+  "qualification": "LOCAL_TARGETED_ONLY"
+}

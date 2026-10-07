@@ -1,0 +1,6 @@
+
+Test Suites: 6 passed, 6 total
+Tests:       345 passed, 345 total
+Snapshots:   0 total
+Time:        6.974 s, estimated 7 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/widgets/booking/booking-selection-preferences.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts", "src/widgets/validation/f88-walk.spec.ts", "src/widgets/gates/gate-antecedents.inv30.spec.ts", "src/widgets/lowering/gate9-lowering.architecture.spec.ts".

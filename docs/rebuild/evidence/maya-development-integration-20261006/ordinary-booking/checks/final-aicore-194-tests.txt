@@ -1,0 +1,5 @@
+Test Suites: 1 passed, 1 total
+Tests:       194 passed, 194 total
+Snapshots:   0 total
+Time:        0.637 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".

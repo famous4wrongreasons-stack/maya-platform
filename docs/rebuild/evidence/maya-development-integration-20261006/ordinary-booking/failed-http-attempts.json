@@ -1,0 +1,46 @@
+{
+  "contract": "maya.finite-failed-proof-summary/1",
+  "attempts": [
+    {
+      "attempt": "http-01",
+      "status": "FAILED",
+      "candidateCommitMetadata": "d614e888ceb2bf647dc6033e35490ab3d5373207",
+      "sourceAcceptance": "NONE_FAILED_ATTEMPT",
+      "failedStage": "prepare",
+      "reason": "Proof-only early runtime import exposed existing Action Engine barrel cycle before fixture setup. No provider/model/booking effects.",
+      "rawDirectory": "/tmp/maya-ordinary-booking-http-20261007-01",
+      "manifestSha256": "307e7145eec152cf208cc78f237567ca859977b9c428931ec3ce8692e408bebb",
+      "failureLogSha256": "7ff2751d4590a8b43841015169f1ec180465e793b0b5fd12ca6ffa89738ab4f1",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true
+    },
+    {
+      "attempt": "http-02",
+      "status": "FAILED",
+      "candidateCommitMetadata": "03d83fa13837bd7f6b29ab5e02af25ee67a1cd23",
+      "sourceAcceptance": "NONE_FAILED_ATTEMPT",
+      "failedStage": "prepare",
+      "reason": "Harness audit query retained obsolete canonical-booking-selection profile filter while runtime correctly retained actual pwa.default metadata. Query fixed to retained widget identity; assertions preserved.",
+      "rawDirectory": "/tmp/maya-ordinary-booking-http-20261007-02",
+      "manifestSha256": "5bda536c8ec5936bb0f3f35878199e9e42fa1785ac82ca5215e152a6d663331c",
+      "failureLogSha256": "679d70a7d03b7e45d54d5a101498d60a2763aa8b99e2ebb3df967f29ed0135b6",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true
+    },
+    {
+      "attempt": "http-03",
+      "status": "FAILED",
+      "candidateCommitMetadata": "5317b40ca469878d4fd95d0cb5a2c95d8807223d",
+      "sourceAcceptance": "NONE_FAILED_ATTEMPT",
+      "failedStage": "resume",
+      "reason": "Actual post-restart date turn lost numeric service preference through model privacy projection before current catalog labels were available. Fixed narrow accepted-selection request-local alias roundtrip, with collision/foreign/forged-reference guards. Prepare READY/UNKNOWN checks had passed; full attempt failed.",
+      "rawDirectory": "/tmp/maya-ordinary-booking-http-20261007-03",
+      "manifestSha256": "e3e9a91cdc326d34e496ae145de74dc445b0833283cad5ade360775633f9f1f1",
+      "failureLogSha256": "e42ae18e939090ea655b51be519e7cb4d76f8b4d664e976d9a4bbded028455d6",
+      "clusterStopped": true,
+      "postmasterPidAbsentAtArchive": true
+    }
+  ],
+  "rawAuthOrPrivateReceiptCopied": false,
+  "rawFailureLogsCopied": false
+}

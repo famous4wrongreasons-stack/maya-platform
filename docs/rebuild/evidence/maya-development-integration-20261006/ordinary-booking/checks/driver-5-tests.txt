@@ -1,0 +1,13 @@
+✔ branch selector driver retains guarded sterile environment (3.046584ms)
+✔ branch selector plan is serial native HTTP across fresh process/PG restart (0.274834ms)
+✔ driver refuses unknown live/network flags and non-absolute evidence before resources (0.584875ms)
+✔ browser uses five-case probe with bounded720s supervisor and actual Reactbuild (0.162416ms)
+✔ ordinary mode is an explicit finite flag on the same serial owner driver (0.112541ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.4665
