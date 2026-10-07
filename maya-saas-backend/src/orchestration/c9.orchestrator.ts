@@ -263,25 +263,36 @@ export class C9Orchestrator {
     });
     const replayed = receipt.state === 'SETTLED';
     let projection: OccupancyProjection;
+    let savedRevisionId: string;
+    let revalidate: (() => Promise<boolean>) | undefined;
     if (replayed) {
       projection = receipt.resultJson as unknown as OccupancyProjection;
-      if (projection.contract !== 'maya.c9-occupancy-read/1')
+      const prior = c9Object(receipt.resultJson);
+      if (
+        projection.contract !== 'maya.c9-occupancy-read/1' ||
+        typeof prior.revisionId !== 'string'
+      )
         c9Deny('source_read_receipt');
+      savedRevisionId = prior.revisionId;
     } else {
       if (receipt.state !== 'RESERVED')
         c9Deny('read_work_in_progress_or_unknown');
       const lease = await this.work.claim(root.id, receipt.id);
       if (!lease) c9Deny('read_work_in_progress_or_unknown');
       try {
-        projection = await this.occupancy.read(root.id);
+        const current = await this.occupancy.readForExposure(root.id);
+        projection = current.projection;
+        revalidate = current.revalidate;
         // Save the exact proposal before settlement. SETTLED therefore always
         // has one immutable version; a concurrent replay cannot win a different
         // no-action proposal. Interrupted DISPATCHED work stays held, never retried.
-        await this.saveOccupancyProposal(root, projection);
+        const saved = await this.saveOccupancyProposal(root, projection);
+        savedRevisionId = saved.id;
         await this.work.settle(
           lease,
           {
             ...projection,
+            revisionId: saved.id,
             window: null,
             sourceDigest: c9Hash('occupancy-source/1', [projection]),
           },
@@ -304,8 +315,15 @@ export class C9Orchestrator {
     // Restart never redispatches a settled read or turns its historical evidence
     // into current availability. A new user turn is required for another check.
     const snapshot = await this.store.snapshot(root.id);
-    const revision = snapshot.revisions.at(-1);
+    const revision = snapshot.revisions.find((r) => r.id === savedRevisionId);
     if (!revision) c9Deny('source_read_receipt');
+    if (revalidate && !(await revalidate()))
+      projection = {
+        ...projection,
+        outcome: 'STALE',
+        reason: 'source_changed_before_exposure',
+        window: null,
+      };
     await this.occupancy.authorize(root.id);
     const handle =
       'h_' + c9Hash('occupancy-evidence/1', [root.id, receipt.id, projection]);

@@ -128,7 +128,7 @@ function rejectingReadDeadline(node: ts.CallExpression, source: ts.SourceFile) {
     ancestor = ancestor.parent;
   return (
     !!ancestor &&
-    ancestor.name?.getText(source) === 'read' &&
+    ancestor.name?.getText(source) === 'readProjection' &&
     ts.isClassDeclaration(ancestor.parent) &&
     ancestor.parent.name?.text === 'C9OccupancySource'
   );
@@ -161,8 +161,8 @@ describe('c9 release gate', () => {
       'automatic constructor deadline',
       (s: string) =>
         s.replace(
-          'async read(runId: string)',
-          'async constructor(runId: string)',
+          'private async readProjection(',
+          'private async constructor(',
         ),
     ],
   ])('deadline fence rejects %s', (_label, mutate) => {

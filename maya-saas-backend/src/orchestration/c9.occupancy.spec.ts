@@ -105,9 +105,16 @@ function fixture() {
       return Promise.resolve();
     }),
   };
+  const revalidate = jest.fn().mockResolvedValue(true);
+  const read = jest.fn(() => Promise.resolve(structuredClone(projection)));
   const source = {
     authorize: jest.fn().mockResolvedValue({}),
-    read: jest.fn(() => Promise.resolve(structuredClone(projection))),
+    read,
+    revalidate,
+    readForExposure: jest.fn(async () => ({
+      projection: await read(),
+      revalidate,
+    })),
   };
   const agents = new C9Agents();
   const answer = jest.spyOn(agents, 'answer');
@@ -285,4 +292,65 @@ describe('one C9 explicit Occupancy vertical (in-memory durable adapter proof)',
       expect(response.recommendation.agent.evidence_refs).toEqual([]);
     }
   });
+});
+
+it('replays the exact saved revision even after a newer owner revision exists', async () => {
+  const f = fixture();
+  await f.create().checkCancellationWindows(f.turn);
+  const original = await f.store.snapshot();
+  f.store.snapshot.mockResolvedValue({
+    ...original,
+    revisions: [
+      ...original.revisions,
+      {
+        id: 'newer',
+        revision: 2,
+        alternativesJson: [{ key: 'wrong', title: 'Wrong version' }],
+      },
+    ],
+  });
+  const replay = await f.create().checkCancellationWindows(f.turn);
+  expect(replay.coordination).toMatchObject({
+    revision_id: 'revision',
+    revision: 1,
+    replayed: true,
+    current: false,
+  });
+  expect(replay.reply).not.toContain('Wrong version');
+  expect(f.source.read).toHaveBeenCalledTimes(1);
+});
+it('denies an old or missing exact-version receipt without falling back to latest', async () => {
+  const f = fixture();
+  await f.create().checkCancellationWindows(f.turn);
+  delete (f.receipt.resultJson as Record<string, unknown>).revisionId;
+  await expect(f.create().checkCancellationWindows(f.turn)).rejects.toThrow(
+    'source_read_receipt',
+  );
+  expect(f.source.read).toHaveBeenCalledTimes(1);
+});
+it('withholds current availability when source changes after settlement without changing saved version', async () => {
+  const f = fixture();
+  f.source.revalidate.mockResolvedValue(false);
+  const reply = await f.create().checkCancellationWindows(f.turn);
+  expect(reply.coordination.current).toBe(false);
+  expect(reply.recommendation.outcome).toBe('STALE');
+  expect(reply.reply).not.toContain('CRM подтвердила');
+  expect(f.receipt.resultJson).toMatchObject({
+    outcome: 'AVAILABLE',
+    revisionId: 'revision',
+  });
+  expect(f.store.revision).toHaveBeenCalledTimes(1);
+  expect(f.source.read).toHaveBeenCalledTimes(1);
+});
+
+it('rechecks authority after the final metadata verifier', async () => {
+  const f = fixture();
+  f.source.revalidate.mockImplementation(async () => {
+    f.source.authorize.mockRejectedValue(new Error('revoked'));
+    return true;
+  });
+  await expect(f.create().checkCancellationWindows(f.turn)).rejects.toThrow(
+    'revoked',
+  );
+  expect(f.answer).not.toHaveBeenCalled();
 });

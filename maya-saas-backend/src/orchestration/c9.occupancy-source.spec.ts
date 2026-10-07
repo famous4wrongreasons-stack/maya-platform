@@ -104,6 +104,9 @@ function fixture() {
     readCancellationCandidates: jest.fn().mockResolvedValue([op]),
   };
   const crm = {
+    readCapacitySource: jest
+      .fn()
+      .mockResolvedValue({ timezone: 'Europe/Moscow', revision: 'source-1' }),
     getStaffScheduleDay: jest.fn().mockResolvedValue({
       staff_id: 'staff',
       date: '2035-05-10',
@@ -302,7 +305,7 @@ describe('explicit Occupancy current-source projection (synthetic CRM, no model)
         end: f.appointment.blockedEndAt.toISOString(),
       },
     ]);
-    expect(await f.source.read('run')).toMatchObject({ outcome: 'OCCUPIED' });
+    expect(await f.source.read('run')).toMatchObject({ outcome: 'INCOMPLETE' });
   });
   it('reports schedule identity mismatch as incomplete', async () => {
     const f = fixture();
@@ -342,4 +345,94 @@ describe('explicit Occupancy current-source projection (synthetic CRM, no model)
     );
     expect(f.crm.getAvailableSlots).not.toHaveBeenCalled();
   });
+});
+
+it('uses branch timezone across local midnight, independently of tenant timezone', async () => {
+  const f = fixture();
+  f.tx.tenant.findUnique.mockResolvedValue({ defaultTimezone: 'UTC' });
+  f.appointment.blockedStartAt = new Date('2035-05-10T22:00:00Z');
+  f.appointment.blockedEndAt = new Date('2035-05-10T23:00:00Z');
+  f.op.expiresAt = f.task.expiresAt = f.appointment.blockedEndAt;
+  f.op.evidenceRefsJson.items[0].ref = opportunityShadowIntervalRef({
+    tenantId: f.p.tenantId,
+    appointmentId: f.appointment.id,
+    blockedStartAt: f.appointment.blockedStartAt.toISOString(),
+    blockedEndAt: f.appointment.blockedEndAt.toISOString(),
+  });
+  f.crm.getStaffScheduleDay.mockResolvedValue({
+    staff_id: 'staff',
+    date: '2035-05-11',
+    is_working: true,
+    slots: [{ from: '01:00', to: '02:00' }],
+    revision: 'midnight',
+  });
+  f.crm.getAvailableSlots.mockResolvedValue([
+    {
+      staff_id: 'staff',
+      branch_id: 'branch',
+      start: f.appointment.blockedStartAt.toISOString(),
+      end: f.appointment.blockedEndAt.toISOString(),
+    },
+  ]);
+  const result = await f.source.read('run');
+  expect(result.outcome).toBe('AVAILABLE');
+  expect(result.window?.timezone).toBe('Europe/Moscow');
+  expect(f.crm.getStaffScheduleDay).toHaveBeenCalledWith('tenant-1', {
+    staffId: 'staff',
+    date: '2035-05-11',
+  });
+});
+it('withholds mixed-source schedule/slots and does not retry the provider', async () => {
+  const f = fixture();
+  f.crm.getStaffScheduleDay.mockImplementation(() => {
+    f.crm.readCapacitySource.mockResolvedValue({
+      timezone: 'Europe/Moscow',
+      revision: 'changed',
+    });
+    return Promise.resolve({
+      staff_id: 'staff',
+      date: '2035-05-10',
+      is_working: true,
+      slots: [{ from: '12:00', to: '13:00' }],
+      revision: 'schedule-1',
+    });
+  });
+  expect(await f.source.read('run')).toMatchObject({
+    outcome: 'INCOMPLETE',
+    reason: 'capacity_source_changed_during_read',
+    window: null,
+  });
+  expect(f.crm.getAvailableSlots).toHaveBeenCalledTimes(1);
+});
+it.each(['binding', 'timezone', 'appointment', 'task', 'opportunity'])(
+  'invalidates the transient exposure witness after %s drift without another CRM fetch',
+  async (kind) => {
+    const f = fixture();
+    const read = await f.source.readForExposure('run');
+    expect(await read.revalidate()).toBe(true);
+    if (kind === 'binding')
+      f.crm.readCapacitySource.mockRejectedValue(new Error('binding removed'));
+    if (kind === 'timezone')
+      f.crm.readCapacitySource.mockResolvedValue({
+        timezone: 'UTC',
+        revision: 'changed',
+      });
+    if (kind === 'appointment') f.appointment.status = 'confirmed';
+    if (kind === 'task') f.task.status = 'invalidated';
+    if (kind === 'opportunity') f.op.status = 'resolved';
+    expect(await read.revalidate()).toBe(false);
+    expect(f.crm.getAvailableSlots).toHaveBeenCalledTimes(1);
+  },
+);
+it('does not accept unscoped slots as evidence for a selected branch', async () => {
+  const f = fixture();
+  f.crm.getAvailableSlots.mockResolvedValue([
+    {
+      staff_id: 'staff',
+      branch_id: null as unknown as string,
+      start: f.appointment.blockedStartAt.toISOString(),
+      end: f.appointment.blockedEndAt.toISOString(),
+    },
+  ]);
+  expect((await f.source.read('run')).outcome).toBe('INCOMPLETE');
 });

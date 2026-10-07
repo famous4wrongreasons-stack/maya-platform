@@ -585,15 +585,19 @@ export async function readOpportunityCurrentCapacity(
     tenantId: string;
     timezone: string;
     appointment: AppointmentRead;
+    source?: Awaited<ReturnType<CrmService['readCapacitySource']>>;
   },
 ): Promise<NonNullable<OpportunityShadowAppointmentV1['currentCapacity']>> {
+  const source =
+    input.source ??
+    (await crm.readCapacitySource(input.tenantId, input.appointment.branchId));
   const localStart = localDateTime(
     input.appointment.blockedStartAt,
-    input.timezone,
+    source.timezone,
   );
   const localEnd = localDateTime(
     input.appointment.blockedEndAt,
-    input.timezone,
+    source.timezone,
   );
   if (localStart.date !== localEnd.date) {
     return {
@@ -628,6 +632,17 @@ export async function readOpportunityCurrentCapacity(
         : {}),
     }),
   ]);
+  const current = await crm.readCapacitySource(
+    input.tenantId,
+    input.appointment.branchId,
+  );
+  if (current.revision !== source.revision)
+    return {
+      availability: 'unknown',
+      completeness: 'unknown',
+      scheduleRef: null,
+      basis: 'capacity_source_changed_during_read',
+    };
   if (
     schedule.staff_id !== input.appointment.staffExternalId ||
     schedule.date !== localStart.date
@@ -639,6 +654,17 @@ export async function readOpportunityCurrentCapacity(
       basis: 'provider_schedule_identity_mismatch',
     };
   }
+
+  if (
+    input.appointment.branchId &&
+    availableSlots.some((slot) => slot.branch_id !== input.appointment.branchId)
+  )
+    return {
+      availability: 'unknown',
+      completeness: 'unknown',
+      scheduleRef: null,
+      basis: 'provider_slot_branch_identity_incomplete',
+    };
 
   const scheduleRef = opportunityShadowScheduleRef({
     tenantId: input.tenantId,
@@ -657,7 +683,6 @@ export async function readOpportunityCurrentCapacity(
       !Number.isNaN(end.getTime()) &&
       slot.staff_id === input.appointment.staffExternalId &&
       (!input.appointment.branchId ||
-        !slot.branch_id ||
         slot.branch_id === input.appointment.branchId) &&
       start.getTime() <= input.appointment.blockedStartAt.getTime() &&
       end.getTime() >= input.appointment.blockedEndAt.getTime()

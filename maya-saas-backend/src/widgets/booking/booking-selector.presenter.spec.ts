@@ -245,3 +245,49 @@ describe('FBE2E-2 — booking selector presentation', () => {
     ).toBeNull();
   });
 });
+
+it('refuses a bound slot selector before minting an ISO-only noun that would lose branch scope', () => {
+  const mint = jest.fn();
+  expect(
+    presentBookingSelector({
+      tenantId: 'tenant-a',
+      kind: 'TIME_SLOT_SELECTOR',
+      inherited: { staff: 'opaque-staff', service: 'opaque-service' },
+      source: {
+        timezone: 'Europe/Moscow',
+        slots: [
+          {
+            branch_id: 'branch-a',
+            start: '2035-01-01T07:00:00Z',
+            end: '2035-01-01T08:00:00Z',
+          },
+        ],
+      },
+      mint,
+    }),
+  ).toBeNull();
+  expect(mint).not.toHaveBeenCalled();
+});
+
+it('preserves INTERNAL provider-owned selection when the emitter confirms the source', () => {
+  const mint = jest.fn(() => 'opaque-slot');
+  expect(
+    presentBookingSelector({
+      tenantId: 'tenant-a',
+      kind: 'TIME_SLOT_SELECTOR',
+      internalCalendar: true,
+      inherited: { staff: 'opaque-staff', service: 'opaque-service' },
+      source: {
+        timezone: 'Europe/Moscow',
+        slots: [
+          {
+            branch_id: 'branch-a',
+            start: '2035-01-01T07:00:00Z',
+            end: '2035-01-01T08:00:00Z',
+          },
+        ],
+      },
+      mint,
+    })?.kind,
+  ).toBe('TIME_SLOT_SELECTOR');
+});

@@ -2104,6 +2104,74 @@ export class CrmService {
       throw new ConflictException({ error: { code: 'booking_preview_stale' } });
   }
 
+  /** Metadata witness for one coherent schedule + availability read. No provider I/O. */
+  async readCapacitySource(tenantId: string, branchId: string | null) {
+    this.tenantContext.assertTenantId(tenantId);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        calendarSource: true,
+        defaultTimezone: true,
+        branches: {
+          where: { id: branchId ?? '' },
+          select: { id: true, timezone: true },
+          take: 1,
+        },
+        crmIntegration: {
+          select: {
+            id: true,
+            provider: true,
+            status: true,
+            updatedAt: true,
+            baseUrl: true,
+            settingsJson: true,
+          },
+        },
+      },
+    });
+    const branch = tenant?.branches[0] ?? null;
+    if (!tenant || (branchId && !branch))
+      throw new NotFoundException('Capacity source branch not found');
+    const integration = tenant.crmIntegration;
+    if (tenant.calendarSource === CalendarSource.EXTERNAL) {
+      let bound = !branchId;
+      if (
+        integration &&
+        !['yclients', 'altegio'].includes(integration.provider)
+      )
+        bound = true;
+      else if (integration && branchId) {
+        const settings = (integration.settingsJson ?? {}) as Record<
+          string,
+          unknown
+        >;
+        try {
+          bound =
+            normalizeCrmBranchBinding(
+              settings.branchBinding,
+              settings.companyId,
+            )?.branchId === branchId;
+        } catch {
+          /* Malformed attribution is unavailable. */
+        }
+      }
+      if (!integration || integration.status !== 'active' || !bound)
+        throw new ServiceUnavailableException({
+          error: { code: 'booking_branch_source_unavailable' },
+        });
+    }
+    const timezone = resolveSalonTimezone({
+      branchTimezone: branch?.timezone,
+      tenantTimezone: tenant.defaultTimezone,
+    });
+    return {
+      timezone,
+      revision: createHash('sha256')
+        .update(JSON.stringify([tenantId, branchId, tenant, timezone]))
+        .digest('hex'),
+    };
+  }
+
   async readBranchAvailabilityRevision(
     tenantId: string,
     branchId: string,

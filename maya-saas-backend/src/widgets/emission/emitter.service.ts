@@ -333,11 +333,31 @@ export class WidgetEmitterService {
             },
           ])
         : undefined);
+    const hasBranchSlots =
+      source &&
+      Array.isArray(source.slots) &&
+      source.slots.some(
+        (slot: unknown) =>
+          slot &&
+          typeof slot === 'object' &&
+          'branch_id' in slot &&
+          slot.branch_id != null,
+      );
+    const internalCalendar =
+      request.kind === 'TIME_SLOT_SELECTOR' && hasBranchSlots
+        ? (
+            await this.prisma.tenant.findUnique({
+              where: { id: request.tenantId },
+              select: { calendarSource: true },
+            })
+          )?.calendarSource === 'internal'
+        : false;
     const presented = presentBookingSelector({
       tenantId: request.tenantId,
       kind: request.kind,
       source: selector.source,
       inherited: inheritedHandles,
+      internalCalendar,
       mint: (identity: OwnerNounIdentity) =>
         this.seals.mintNounHandles([identity])[identity.noun],
     });

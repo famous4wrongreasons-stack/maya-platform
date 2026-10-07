@@ -95,6 +95,22 @@ export class C9OccupancySource {
   }
 
   async read(runId: string): Promise<OccupancyProjection> {
+    return (await this.readForExposure(runId)).projection;
+  }
+
+  /** Transient verifier; no new durable identity or retention owner. */
+  async readForExposure(runId: string) {
+    let revalidate: () => Promise<boolean> = async () => true;
+    const projection = await this.readProjection(runId, (verify) => {
+      revalidate = verify;
+    });
+    return { projection, revalidate };
+  }
+
+  private async readProjection(
+    runId: string,
+    witness: (verify: () => Promise<boolean>) => void,
+  ): Promise<OccupancyProjection> {
     const principal = await this.authorize(runId);
     const initial = await this.store.transaction(
       undefined,
@@ -257,7 +273,59 @@ export class C9OccupancySource {
     if (!initial.appointment || !initial.op || !initial.task)
       return initial.base;
     let capacity: Awaited<ReturnType<typeof readOpportunityCurrentCapacity>>;
+    let source: Awaited<ReturnType<CrmService['readCapacitySource']>>;
     try {
+      source = await this.crm.readCapacitySource(
+        principal.tenantId,
+        initial.appointment.branchId,
+      );
+      witness(async () => {
+        // Metadata only; never redispatch providers or renew the proposal.
+        const valid = await this.store.transaction(
+          undefined,
+          async (tx, p, now) => {
+            await this.store.lock(tx, p, runId, true, now);
+            const op = await tx.opportunity.findFirst({
+              where: { tenantId: p.tenantId, id: initial.op.id },
+            });
+            const task = await tx.agentTask.findFirst({
+              where: { tenantId: p.tenantId, id: initial.task.id },
+            });
+            const appointment = await tx.appointment.findFirst({
+              where: { tenantId: p.tenantId, id: initial.appointment.id },
+              select: {
+                id: true,
+                tenantId: true,
+                branchId: true,
+                staffExternalId: true,
+                serviceIds: true,
+                blockedStartAt: true,
+                blockedEndAt: true,
+                status: true,
+              },
+            });
+            return (
+              !!op &&
+              !!task &&
+              op.status === 'active' &&
+              op.expiresAt > now &&
+              initial.appointment.blockedStartAt > now &&
+              task.status === 'current' &&
+              task.expiresAt > now &&
+              task.opportunityId === op.id &&
+              task.taskFingerprint === initial.task.taskFingerprint &&
+              op.evidenceFingerprint === initial.op.evidenceFingerprint &&
+              c9Hash('occupancy-appointment/1', [appointment]) ===
+                c9Hash('occupancy-appointment/1', [initial.appointment])
+            );
+          },
+        );
+        if (!valid) return false;
+        return this.crm
+          .readCapacitySource(principal.tenantId, initial.appointment.branchId)
+          .then((current) => current.revision === source.revision)
+          .catch(() => false);
+      });
       let timeout: ReturnType<typeof setTimeout> | undefined;
       try {
         capacity = await Promise.race([
@@ -265,6 +333,7 @@ export class C9OccupancySource {
             tenantId: principal.tenantId,
             timezone: initial.timezone,
             appointment: initial.appointment,
+            source,
           }),
           new Promise<never>((_resolve, reject) => {
             // Leave room for source revalidation/settlement within the existing
@@ -354,7 +423,7 @@ export class C9OccupancySource {
         window: {
           start: appointment!.blockedStartAt.toISOString(),
           end: appointment!.blockedEndAt.toISOString(),
-          timezone: initial.timezone,
+          timezone: source.timezone,
           branchRef: appointment!.branchId
             ? c9Hash('occupancy-branch/1', [p.tenantId, appointment!.branchId])
             : null,

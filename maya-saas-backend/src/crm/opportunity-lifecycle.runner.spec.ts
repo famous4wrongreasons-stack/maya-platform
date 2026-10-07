@@ -142,6 +142,9 @@ function build(
     ],
   );
   const crm = {
+    readCapacitySource: jest
+      .fn()
+      .mockResolvedValue({ timezone: 'Europe/Moscow', revision: 'source-1' }),
     getStaffScheduleDay,
     getAvailableSlots,
   } as unknown as CrmService;

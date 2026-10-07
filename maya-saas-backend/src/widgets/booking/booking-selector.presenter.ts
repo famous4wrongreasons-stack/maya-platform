@@ -95,6 +95,8 @@ export const presentBookingSelector = (input: {
   source: unknown;
   mint: MintSelectorHandle;
   inherited?: Readonly<Record<string, string>>;
+  /** Resolved by the emitter from tenant state, never from source/model input. */
+  internalCalendar?: boolean;
 }): PresentedSelector | null => {
   if (input.kind === 'SERVICE_SELECTOR') return presentServices(input);
   if (input.kind === 'STAFF_SELECTOR') return presentStaff(input);
@@ -240,6 +242,14 @@ const presentSlots = (
     return null;
   }
   const slots = list(record(input.source)?.slots);
+  // The sealed slot_iso noun cannot retain a branch. Do not lower a bound
+  // availability read into an unscoped booking preview. The READ remains usable.
+  if (
+    !input.internalCalendar &&
+    (record(input.source)?.branch_id != null ||
+      slots.some((slot) => slot.branch_id != null))
+  )
+    return null;
   const rendered: TimeSlotSelectorBody['groups'][number]['slots'] = [];
   for (const slot of slots) {
     const start = str(slot.start);

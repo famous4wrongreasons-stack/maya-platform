@@ -11,7 +11,7 @@ import {
   UserRole,
 } from '../../src/common/domain.enums';
 import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
-import type { CRMAdapter } from '../../src/crm/crm-adapter.interface';
+import { YclientsCRMAdapter } from '../../src/crm/adapters/yclients-crm.adapter';
 import { OpportunityLifecycleRunner } from '../../src/crm/opportunity-lifecycle.runner';
 import { DOMAIN_EVENT_TYPE } from '../../src/domain';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
@@ -24,7 +24,6 @@ import {
 } from './support/http-bootstrap';
 import type { Fixtures, TenantFixture, UserFixture } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
-import { occupancyFixtureEdge } from './support/c9-occupancy-fixture-edge';
 
 // Mandatory two-process proof, never an in-memory "restart" fallback. The driver
 // creates its own cluster/database, runs prepare, restarts PG, then runs resume.
@@ -98,8 +97,9 @@ type Saved = {
   graph: string;
 };
 
-describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synthetic CRM adapter only, zero model]', () => {
+describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]', () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures, saved: Saved;
+  const providerReads: string[] = [];
   const reads: string[] = [],
     unexpectedEdges: string[] = [];
   const observations: Record<string, unknown> = {};
@@ -110,8 +110,8 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
     db = await bootFixtureContext();
     http = await bootHttp();
     fx = fixturesForHttp(db, http);
-    // The factory edge is replaced, not CrmService, the current-capacity reader,
-    // C5, C9, auth/policy, TimelineStore or any business persistence owner.
+    // Actual native adapter, only its finite transport is synthetic.
+    expect(process.env.YCLIENTS_PARTNER_TOKEN).toBeUndefined();
     jest
       .spyOn(http.app.get(CrmAdapterFactory), 'create')
       .mockImplementation((provider, config) => {
@@ -119,71 +119,95 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         expect(config.apiToken).toBe(
           'c9-occupancy-synthetic-no-provider-credential',
         );
-        const tenantId = config.settings?.syntheticTenantId;
-        if (typeof tenantId !== 'string')
-          throw new Error('Synthetic tenant binding missing');
-        const adapter: Pick<
-          CRMAdapter,
-          'getStaffScheduleDay' | 'getAvailableSlots'
-        > = {
-          getStaffScheduleDay: ({ tenantId: requested, staffId, date }) => {
-            expect(requested).toBe(tenantId);
-            expect(staffId).toBe('c9-synthetic-staff');
-            reads.push('schedule:' + tenantId);
-            if (unavailableTenants.has(tenantId))
-              return Promise.reject(new Error('Synthetic source unavailable'));
-            return Promise.resolve({
-              staff_id: staffId,
-              date,
-              is_working: true,
-              slots: [{ from: '12:00', to: '13:00' }],
-              revision: 'synthetic-schedule-v1',
-            });
-          },
-          getAvailableSlots: async ({
-            tenantId: requested,
-            staffId,
-            date,
-            branchId,
-            serviceIds,
-          }) => {
-            expect(requested).toBe(tenantId);
-            expect(staffId).toBe('c9-synthetic-staff');
-            expect(serviceIds).toEqual(['c9-synthetic-service']);
-            reads.push('availability:' + tenantId);
-            const appointment = await db.prisma.appointment.findFirstOrThrow({
-              where: { tenantId, status: 'canceled' },
-            });
-            expect(branchId).toBe(appointment.branchId);
-            expect(date).toBe(appointment.startAt.toISOString().slice(0, 10));
-            const filled = await db.prisma.appointment.count({
-              where: {
-                tenantId,
-                staffExternalId: staffId,
-                status: 'confirmed',
-                blockedStartAt: { lt: appointment.blockedEndAt },
-                blockedEndAt: { gt: appointment.blockedStartAt },
-              },
-            });
-            return filled
-              ? []
-              : [
-                  {
-                    staff_id: staffId!,
-                    branch_id: appointment.branchId,
-                    start: appointment.blockedStartAt.toISOString(),
-                    end: appointment.blockedEndAt.toISOString(),
-                  },
-                ];
-          },
-        };
-        return occupancyFixtureEdge(adapter as CRMAdapter, (key) =>
-          unexpectedEdges.push(key),
-        );
+        expect(touchedTenants).toContain(config.tenantId);
+        process.env.YCLIENTS_PARTNER_TOKEN = 'SYNTHETIC_C9_PARTNER';
+        try {
+          return new YclientsCRMAdapter({
+            ...config,
+            baseUrl: `https://${config.tenantId}.synthetic-occupancy.invalid/api/v1`,
+          });
+        } finally {
+          delete process.env.YCLIENTS_PARTNER_TOKEN;
+        }
       });
-    jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
-      unexpectedEdges.push('fetch');
-      throw new Error('External I/O forbidden in explicit occupancy proof');
+    jest.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = new URL(
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url,
+      );
+      const tenantId = url.hostname.replace('.synthetic-occupancy.invalid', '');
+      if (
+        !touchedTenants.includes(tenantId) ||
+        url.hostname !== tenantId + '.synthetic-occupancy.invalid' ||
+        init?.method !== 'GET' ||
+        init.body !== undefined
+      ) {
+        unexpectedEdges.push('external-or-provider-write');
+        throw new Error('Unexpected transport');
+      }
+      const appointment = await db.prisma.appointment.findFirstOrThrow({
+        where: { tenantId, status: 'canceled' },
+      });
+      const route = url.pathname.replace('/api/v1/', '');
+      providerReads.push(route);
+      const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+        where: { tenantId },
+      });
+      const company = (integration.settingsJson as { companyId: number })
+        .companyId;
+      expect([424242, 424243]).toContain(company);
+      const day = appointment.startAt.toISOString().slice(0, 10);
+      let data: unknown;
+      if (route === `schedule/${company}/71/${day}/${day}`) {
+        reads.push('schedule:' + tenantId);
+        if (unavailableTenants.has(tenantId))
+          throw new Error('Synthetic source unavailable');
+        data = [
+          {
+            date: day,
+            is_working: true,
+            slots: [{ from: '12:00', to: '13:00' }],
+          },
+        ];
+      } else if (route === `book_times/${company}/71/${day}`) {
+        reads.push('availability:' + tenantId);
+        expect(url.searchParams.getAll('service_ids[]')).toEqual(['81']);
+        const filled = await db.prisma.appointment.count({
+          where: {
+            tenantId,
+            staffExternalId: '71',
+            status: 'confirmed',
+            blockedStartAt: { lt: appointment.blockedEndAt },
+            blockedEndAt: { gt: appointment.blockedStartAt },
+          },
+        });
+        data = filled ? [] : [{ time: '12:00', seance_length: 3600 }];
+      } else if (route === `book_services/${company}`) {
+        data = {
+          services: [
+            {
+              id: 81,
+              title: 'Synthetic service',
+              price_min: 1000,
+              price_max: 1000,
+              seance_length: 3600,
+            },
+          ],
+        };
+      } else if (route === `company/${company}/staff`) {
+        data = [{ id: 71, name: 'Synthetic master', bookable: true }];
+      } else if (route === `service_categories/${company}`) {
+        data = [];
+      } else {
+        unexpectedEdges.push('unknown-provider-read');
+        throw new Error('Unexpected synthetic read: ' + route);
+      }
+      return new Response(JSON.stringify({ success: true, data }), {
+        status: 200,
+      });
     });
     model = jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
@@ -205,6 +229,116 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
     await http?.close();
     await db?.close();
   });
+  async function branchPreviewNegatives() {
+    const salon = await makeSalon();
+    await fx.bookingSource(salon.tenant, salon.owner, true);
+    const token = await login(salon);
+    const dto = {
+      staffId: '71',
+      serviceIds: ['81'],
+      start: salon.start,
+      branchId: salon.branchId,
+    };
+    const personal = (route: string, body: object) =>
+      request(http.app.getHttpServer())
+        .post('/api/personal-client/' + route)
+        .set('authorization', 'Bearer ' + token)
+        .set('x-maya-authority-context', 'personal_client')
+        .set('idempotency-key', randomUUID())
+        .send(body);
+    const preview = await personal('appointments/preview', dto);
+    expect({ status: preview.status, body: preview.body }).toMatchObject({
+      status: 201,
+      body: {
+        timezone: 'Europe/Moscow',
+        start: salon.start,
+        availability: 'available_at_read',
+      },
+    });
+    const factsHash = (preview.body as { factsHash: string }).factsHash;
+    const settings = (companyId: number, present: boolean) => ({
+      companyId,
+      currency: 'RUB',
+      branchBinding: present
+        ? {
+            contract: 'maya.crm-branch-binding/1',
+            companyId,
+            branchId: salon.branchId,
+          }
+        : null,
+    });
+    const available = await checkedChat(salon, token);
+    const graphBefore = await graph(
+      salon.tenant.id,
+      available.coordination.run_id,
+    );
+    // Controlled changes of owned synthetic source state, not A17 owner acceptance.
+    await db.prisma.crmIntegration.update({
+      where: { tenantId: salon.tenant.id },
+      data: { settingsJson: settings(424243, true) },
+    });
+    const changed = await personal('appointments', {
+      ...dto,
+      previewFactsHash: factsHash,
+    });
+    expect({ status: changed.status, body: changed.body }).toMatchObject({
+      status: 409,
+      body: { error: { code: 'booking_preview_stale' } },
+    });
+    await db.prisma.crmIntegration.update({
+      where: { tenantId: salon.tenant.id },
+      data: { settingsJson: settings(424243, false) },
+    });
+    const removed = await personal('appointments', {
+      ...dto,
+      previewFactsHash: factsHash,
+    });
+    expect({ status: removed.status, body: removed.body }).toMatchObject({
+      status: 503,
+      body: { error: { code: 'booking_branch_source_unavailable' } },
+    });
+    const mark = providerReads.length;
+    const historical = await checkedChat(salon, token, available.request_id);
+    expect(historical.coordination).toMatchObject({
+      revision_id: available.coordination.revision_id,
+      replayed: true,
+      current: false,
+    });
+    expect(await graph(salon.tenant.id, available.coordination.run_id)).toBe(
+      graphBefore,
+    );
+    const unavailable = await checkedChat(salon, token);
+    expect(unavailable.recommendation.outcome).toBe('UNAVAILABLE');
+    expect(unavailable.coordination.current).toBe(false);
+    expect(providerReads.length).toBe(mark);
+    expect(
+      await db.prisma.actionExecution.count({
+        where: { tenantId: salon.tenant.id },
+      }),
+    ).toBe(0);
+    expect(
+      await db.prisma.appointment.count({
+        where: { tenantId: salon.tenant.id },
+      }),
+    ).toBe(1);
+    const lifecycle = await observeLifecycle('removed_binding_source', salon);
+    expect(lifecycle.result).toMatchObject({
+      completeness: 'provider_failure',
+      resolved: 0,
+    });
+    observations.branchPreview = {
+      previewStatus: preview.status,
+      branchTimezone: preview.body.timezone,
+      companyChangeStatus: changed.status,
+      removalStatus: removed.status,
+      historicalRevision: historical.coordination.revision,
+      historicalCurrent: false,
+      newRequestOutcome: unavailable.recommendation.outcome,
+      providerReadsAfterRemoval: providerReads.length - mark,
+      actionExecutions: 0,
+      providerWrites: 0,
+    };
+  }
   async function postgresStarted() {
     const rows = await db.prisma.$queryRaw<
       Array<{ started: string }>
@@ -230,7 +364,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
       await fx.grantFeature(tenant, feature);
     await db.prisma.tenant.update({
       where: { id: tenant.id },
-      data: { defaultTimezone: 'Europe/Moscow' },
+      data: { defaultTimezone: 'UTC' },
     });
     const branch = await db.prisma.branch.create({
       data: {
@@ -256,15 +390,23 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
           'c9-occupancy-synthetic-no-provider-credential',
         ),
         watchStartedAt,
-        settingsJson: { syntheticTenantId: tenant.id },
+        settingsJson: {
+          companyId: 424242,
+          currency: 'RUB',
+          branchBinding: {
+            contract: 'maya.crm-branch-binding/1',
+            companyId: 424242,
+            branchId: branch.id,
+          },
+        },
       },
     });
     const appointment = await db.prisma.appointment.create({
       data: {
         tenantId: tenant.id,
         branchId: branch.id,
-        staffExternalId: 'c9-synthetic-staff',
-        serviceIds: ['c9-synthetic-service'],
+        staffExternalId: '71',
+        serviceIds: ['81'],
         status: 'canceled',
         startAt: start,
         endAt: end,
@@ -764,9 +906,15 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
           pid: process.pid,
           postgresStarted: await postgresStarted(),
           database: database.database,
-          syntheticCrmAdapter: true,
+          syntheticCrmAdapter: false,
+          nativeYclientsAdapter: true,
+          syntheticProviderTransport: true,
+          tenantTimezone: 'UTC',
+          selectedBranchTimezone: 'Europe/Moscow',
           externalProviderAcceptance: false,
           realModelAcceptance: false,
+          providerReadCalls: providerReads.length,
+          providerWriteCalls: 0,
           modelCalls: model.mock.calls.length,
           businessWrites: writes.length,
           browserAcceptance: true,
@@ -929,8 +1077,8 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         data: {
           tenantId: salon.tenant.id,
           branchId: salon.branchId,
-          staffExternalId: 'c9-synthetic-staff',
-          serviceIds: ['c9-synthetic-service'],
+          staffExternalId: '71',
+          serviceIds: ['81'],
           status: 'confirmed',
           startAt: salon.start,
           endAt: salon.end,
@@ -1018,6 +1166,8 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
         expired: 0,
         currentTasks: 0,
       });
+      await branchPreviewNegatives();
+      reads.length = 0;
       const foreign = await request(http.app.getHttpServer())
         .get(`/api/orchestration/runs/${replay.coordination.run_id}`)
         .set('authorization', `Bearer ${expiredToken}`);
@@ -1064,13 +1214,19 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [synt
           pid: process.pid,
           postgresStarted: await postgresStarted(),
           database: database.database,
-          syntheticCrmAdapter: true,
+          syntheticCrmAdapter: false,
+          nativeYclientsAdapter: true,
+          syntheticProviderTransport: true,
+          tenantTimezone: 'UTC',
+          selectedBranchTimezone: 'Europe/Moscow',
           c10AutonomousAdmission: false,
           c6ShadowAdmission: false,
           c7Measurement:
             'existing execution_funnel live read, no stored revision',
           c9Initiator: 'explicit authenticated owner chat only',
           externalProviderAcceptance: false,
+          providerReadCalls: providerReads.length,
+          providerWriteCalls: 0,
           modelCalls: model.mock.calls.length,
           browserAcceptance: false,
           observations,
