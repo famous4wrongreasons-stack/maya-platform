@@ -1,0 +1,28 @@
+{
+  "stage": "resume",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "parser": "SYNTHETIC_NOT_OCR_ACCEPTANCE",
+  "provider": "SYNTHETIC_ADAPTER",
+  "certificate": "NOT_ISSUED",
+  "processRestart": true,
+  "postgresRestart": true,
+  "outcomes": {
+    "restored_history": true,
+    "completed_replayed_without_dispatch": true,
+    "unknown_preserved_without_dispatch": true,
+    "pending_executed_once": true,
+    "unknown_attempts": 1,
+    "unconfirmed_acknowledgment_persisted": true
+  },
+  "modelCalls": 0,
+  "parserCalls": 0,
+  "externalCalls": 0,
+  "sourceStates": [
+    {
+      "company": "5",
+      "readCount": 0,
+      "contextReads": 2,
+      "writeCount": 1
+    }
+  ]
+}

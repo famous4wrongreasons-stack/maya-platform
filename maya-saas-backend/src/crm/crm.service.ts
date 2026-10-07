@@ -1,3 +1,4 @@
+import { YclientsGoodsReceiptUnknownError } from './yclients-goods-receipt';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import {
   goodsProposal,
@@ -1107,6 +1108,7 @@ export class CrmService {
     const photoRef = `goods-photo:${goodsHash({ photo: args.photo_sha256, line: args.source_line })}`;
     const sourceRef = `${photoRef}:${approval.id}`;
     const targetRef = `yclients-goods/${String(args.company_id)}/${String(args.goods_id)}/store/${String(args.store_id)}`;
+    let lastObservedFacts: Record<string, unknown> | undefined;
     const observe = async () => {
       await authorize(true);
       const current = await context.adapter.readGoodsReceiptContext!(
@@ -1119,6 +1121,7 @@ export class CrmService {
         goodsRefuse('goods_preview_stale');
       // The provider read is awaited: recheck after it, before any write.
       await authorize(true);
+      lastObservedFacts = facts;
       return facts;
     };
     const receipt = await this.prisma.$transaction(
@@ -1172,6 +1175,7 @@ export class CrmService {
                 tenantId,
                 args,
                 deadlineAt,
+                () => authorize(true),
               );
               const result = confirmedReceipt(received, args);
               return { value: result, safeResult: result };
@@ -1189,6 +1193,22 @@ export class CrmService {
                 !(error instanceof GoodsPreDispatchError)
                   ? 'goods_receipt_outcome_unknown'
                   : 'goods_receipt_predispatch_refused',
+              ...(error instanceof YclientsGoodsReceiptUnknownError
+                ? {
+                    safeResult: {
+                      ...(lastObservedFacts
+                        ? { preDispatch: lastObservedFacts }
+                        : {}),
+                      providerObservation: {
+                        contract: 'maya.yclients-goods-receipt-observation/1',
+                        company_id: args.company_id,
+                        acknowledged_document_id: error.acknowledgedDocumentId,
+                        receipt_verified: false,
+                        reconciliation: 'manual_required',
+                      },
+                    },
+                  }
+                : {}),
               errorClass:
                 error instanceof Error ? error.constructor.name : 'Error',
             }),

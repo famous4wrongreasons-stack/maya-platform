@@ -8,6 +8,8 @@ Status: **PROPOSED / NOT ADMITTED**. Product goods/photo work is already authori
 
 ## Minimal proposed addition
 
+Proposed separately named type: **`inventory_receipt_purchase_cost`**. It does not reuse or broaden `catalogue_price_configuration`. This name and every bound below remain a proposal pending the parent's exact normative decision.
+
 Add one separately named, exact inventory receipt descriptor to FR-6d and the canonical APPROVAL-owner/pairing clauses. Preserve `MONEY(cap)` and the `financial` risk facet. Proposed pair: `C9:inventory.goods.receipt.prepare` (PROPOSE_ONLY) → `AE:crm.goods.receipt.create.v1`; action `create_crm_goods_receipt`, target `crm_goods_receipt`. No generic financial widget template or arbitrary provider endpoint.
 
 | Dimension | Exact bound |

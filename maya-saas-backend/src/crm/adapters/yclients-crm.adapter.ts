@@ -1,4 +1,21 @@
 import {
+  GoodsPreDispatchError,
+  goodsRefuse,
+  preparedGoods,
+  type GoodsReceiptContext,
+  type GoodsReceiptResult,
+} from '../goods-receipt.contract';
+import {
+  parseGoodsResponseJson,
+  type YclientsGoodsReceiptBody,
+  YclientsGoodsReceiptUnknownError,
+  receiptObject,
+  yclientsReceiptContext,
+  yclientsReceiptBody,
+  yclientsReceiptDocument,
+  yclientsReceiptReadback,
+} from '../yclients-goods-receipt';
+import {
   goodsId,
   observedGoodsItem,
   type GoodsItemRead,
@@ -484,6 +501,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       companyId = String(this.getCompanyId());
     const response = await this.request<unknown>(
       `goods/${companyId}/${exactId}`,
+      { preserveGoodsNumbers: true },
     );
     return observedGoodsItem(
       response.data,
@@ -491,6 +509,128 @@ export class YclientsCRMAdapter implements CRMAdapter {
       companyId,
       this.settings.currency,
     );
+  }
+
+  /** Current provider facts. Undefined selected-store/type semantics remain a
+   * concrete blocker, never an implicit all-stores grant from the sample []. */
+  async readGoodsReceiptContext(
+    tenantId: string,
+    id: string,
+    storeId: string,
+    deadlineAt = Date.now() + 20000,
+  ): Promise<GoodsReceiptContext> {
+    void tenantId;
+    const company = goodsId(this.settings.companyId),
+      good = goodsId(id),
+      store = goodsId(storeId);
+    const read = async (route: string) => {
+      const timeoutMs = deadlineAt - Date.now();
+      if (timeoutMs <= 0) goodsRefuse('yclients_receipt_read_deadline');
+      const result = await this.request<unknown>(route, {
+        timeoutMs,
+        preserveGoodsNumbers: true,
+      });
+      if (result.success !== true)
+        goodsRefuse('yclients_receipt_unverified_source');
+      return result.data;
+    };
+    const permissions = await read(`user/permissions/${company}`);
+    const stores = await read(`storages/${company}`);
+    const goods = observedGoodsItem(
+      await read(`goods/${company}/${good}`),
+      good,
+      company,
+      this.settings.currency,
+    );
+    return yclientsReceiptContext(goods, stores, permissions, company, store);
+  }
+
+  /** Real one-POST implementation, currently fail-closed on undocumented
+   * provider store/type scopes. No alternate endpoint or retry key is guessed. */
+  async createGoodsReceipt(
+    tenantId: string,
+    value: Record<string, unknown>,
+    deadlineAt: number,
+    beforeDispatch: () => Promise<void>,
+  ): Promise<GoodsReceiptResult> {
+    const args = preparedGoods(value),
+      company = goodsId(this.settings.companyId);
+    if (args.company_id !== company || typeof beforeDispatch !== 'function')
+      goodsRefuse('yclients_receipt_exact_owner_context_required');
+    let body: YclientsGoodsReceiptBody;
+    try {
+      const context = await this.readGoodsReceiptContext(
+        tenantId,
+        String(args.goods_id),
+        String(args.store_id),
+        deadlineAt,
+      );
+      body = yclientsReceiptBody(args, context);
+    } catch (error) {
+      if (error instanceof GoodsPreDispatchError) throw error;
+      goodsRefuse('yclients_receipt_predispatch_source_unavailable');
+    }
+    // A fresh provider read is asynchronous. The existing CRM owner rechecks its
+    // live actor/integration/approval after it; the adapter does not mint authority.
+    try {
+      await beforeDispatch();
+    } catch {
+      goodsRefuse('yclients_receipt_owner_revoked_before_dispatch');
+    }
+    const timeoutMs = deadlineAt - Date.now();
+    if (timeoutMs <= 0) goodsRefuse('yclients_receipt_predispatch_deadline');
+    let acknowledgedDocumentId: string | null = null;
+    try {
+      const response = await this.request<unknown>(
+        `storage_operations/operation/${company}`,
+        {
+          method: 'POST',
+          timeoutMs,
+          preserveGoodsNumbers: true,
+          body: JSON.stringify(body),
+        },
+      );
+      if (response.success !== true)
+        throw new Error('yclients_receipt_unverified_ack');
+      const documentId = yclientsReceiptDocument(
+        receiptObject(response.data).document,
+        args,
+      );
+      acknowledgedDocumentId = documentId;
+      const read = async (route: string) => {
+        const remaining = deadlineAt - Date.now();
+        if (remaining <= 0)
+          throw new Error('yclients_receipt_readback_deadline');
+        const result = await this.request<unknown>(route, {
+          timeoutMs: remaining,
+          preserveGoodsNumbers: true,
+        });
+        if (result.success !== true)
+          throw new Error('yclients_receipt_unverified_readback');
+        return result;
+      };
+      const document = await read(
+        `storage_operations/documents/${company}/${documentId}`,
+      );
+      const lines = await read(
+        `storage_operations/documents/goods_transactions/${documentId}`,
+      );
+      // The provider's total must independently confirm completeness; a single
+      // returned row can still be a partial document. Never infer this from data.
+      if (receiptObject(lines.meta).count !== '1')
+        throw new Error('yclients_receipt_transaction_count_unqualified');
+      return yclientsReceiptReadback(
+        document.data,
+        lines.data,
+        documentId,
+        args,
+        body.goods_transactions[0].operation_unit_type,
+      );
+    } catch (error) {
+      // POST may have crossed even on 4xx/5xx, timeout or missing readback. There
+      // is no documented remote idempotency/CAS or proof authorizing a resend.
+      throw new YclientsGoodsReceiptUnknownError(acknowledgedDocumentId, error);
+    }
   }
 
   /** One fresh public READ; no cached/defaulted ServiceOffering or management fallback. */
@@ -3939,6 +4079,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       body?: string;
       query?: URLSearchParams;
       timeoutMs?: number;
+      preserveGoodsNumbers?: true;
     },
   ): Promise<YclientsResponse<TData>> {
     const url = new URL(`${this.baseUrl}/${path}`);
@@ -3959,6 +4100,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
     try {
       response = await fetch(url, {
         method: init?.method || 'GET',
+        // Goods permits one exact destination; 307/308 must never resend a POST.
+        ...(init?.preserveGoodsNumbers ? { redirect: 'error' as const } : {}),
         headers: {
           Authorization: `Bearer ${this.partnerToken}, User ${this.config.apiToken}`,
           Accept: 'application/vnd.yclients.v2+json',
@@ -4003,7 +4146,11 @@ export class YclientsCRMAdapter implements CRMAdapter {
         // providerMessage из payload.meta — это поведение закреплено тестом
         // на 403 «Недостаточно прав».
         try {
-          payload = JSON.parse(rawText) as YclientsResponse<TData>;
+          payload = (
+            init?.preserveGoodsNumbers
+              ? parseGoodsResponseJson(rawText)
+              : JSON.parse(rawText)
+          ) as YclientsResponse<TData>;
         } catch {
           payload = {};
         }
@@ -4011,6 +4158,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
         payload = { success: true };
       }
     } else if (typeof response.json === 'function') {
+      if (init?.preserveGoodsNumbers)
+        throw new Error('yclients_goods_raw_json_required');
       payload = (await response.json()) as YclientsResponse<TData>;
     }
 

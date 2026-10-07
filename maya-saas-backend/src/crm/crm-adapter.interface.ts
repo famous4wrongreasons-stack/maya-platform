@@ -507,8 +507,8 @@ export interface CRMAdapter {
   /** Fresh observed catalog facts, before legacy numeric defaults. Not a mutation quote. */
   readServiceCatalog?(tenantId: string): Promise<ServiceCatalogRead>;
   /** Exact goods metadata, separate price meanings/units; not stock or a write quote. */
-  /** Finite receipt port. Actual Yclients writer intentionally unimplemented
-   * pending payload/rights/readback qualification; local proofs inject only this edge. */
+  /** Finite receipt port. YCLIENTS transport is implemented but its undocumented
+   * selected-store/type permission scopes remain fail-closed. Never a generic write port. */
   readGoodsReceiptContext?(
     tenantId: string,
     goodsId: string,
@@ -518,6 +518,7 @@ export interface CRMAdapter {
     tenantId: string,
     args: Record<string, unknown>,
     deadlineAt: number,
+    beforeDispatch: () => Promise<void>,
   ): Promise<GoodsReceiptResult>;
   readGoodsItem?(tenantId: string, goodsId: string): Promise<GoodsItemRead>;
   /** Exact management read; the public booking catalog cannot authorize pricing. */

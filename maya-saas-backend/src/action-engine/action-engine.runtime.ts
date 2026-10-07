@@ -37,6 +37,8 @@ export interface ActionReconciliationDecision {
 }
 
 export interface ActionFailureClassification {
+  /** Owner-sanitized observation for the existing attempt audit; never success. */
+  safeResult?: Record<string, unknown>;
   kind: 'definitive' | 'unknown';
   outcomeCode: string;
   errorClass: string;
@@ -493,6 +495,7 @@ export class ActionEngineRuntimeService {
           ...claimInput,
           outcomeCode: failure.outcomeCode,
           errorClass: failure.errorClass,
+          ...(failure.safeResult ? { safeResult: failure.safeResult } : {}),
         });
         return (await this.kernel.getAudit(execution.tenantId, execution.id))
           .execution;

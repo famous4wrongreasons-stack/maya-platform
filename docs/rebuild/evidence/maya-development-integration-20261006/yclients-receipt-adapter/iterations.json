@@ -1,0 +1,29 @@
+{
+  "initialUnitIteration": {
+    "passedTests": 197,
+    "failedTests": 1,
+    "cause": "Jest.each array row treated as callback; table wrapped as object, corrected"
+  },
+  "secondUnitIteration": {
+    "passedTests": 338,
+    "passedSuites": 14,
+    "failedSuites": 1,
+    "cause": "Misspelled runtime concurrency test filename; no failed assertion, corrected"
+  },
+  "thirdUnitIteration": {
+    "passedTests": 343,
+    "passedSuites": 15,
+    "status": "PASS before further independent-review fixes"
+  },
+  "finalUnitIteration": {
+    "passedTests": 351,
+    "passedSuites": 15,
+    "status": "PASS"
+  },
+  "lintIteration": {
+    "cause": "test helper inferred return omitted indexed property; explicit Record return added",
+    "final": "PASS"
+  },
+  "httpIterations": 1,
+  "httpFinal": "PASS"
+}

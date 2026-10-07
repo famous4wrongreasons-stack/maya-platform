@@ -1,0 +1,4 @@
+Read-only review by /root/independent_review, 2026-10-07.
+Official capture SHA and six selected method nodes/six schemas/storagePermissions matched after removing examples.
+P2 redirect resends fixed with goods-only redirect:error. P2 discarded meta.count fixed by preserving envelope and requiring exact scalar count=1. Related array coercion in discriminants/day counts closed. Negative assertions added.
+Final disposition: both findings closed, no new blocking finding in this delta. Actual provider scope admission remains blocked; provider acceptance not established. Reviewer did not run tests, services or edit files.

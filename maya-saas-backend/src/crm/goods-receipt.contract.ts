@@ -146,12 +146,14 @@ export function preparedGoods(value: unknown): Record<string, unknown> {
   };
 }
 
-/** Trusted provider port, not a model-authored authority object. There is no
- * real YCLIENTS receipt writer until its payload/rights/readback is qualified. */
+/** Trusted provider port, never a model-authored authority object. Provider
+ * qualification blockers cannot be turned into permission by presentation. */
 export type GoodsReceiptContext = {
   goods: GoodsItemRead;
   store: { id: string; name: string; company_id: string };
   can_receive: boolean;
+  permission_revision?: string;
+  blockers?: readonly string[];
 };
 export type GoodsReceiptResult = {
   receipt_id: string;
@@ -172,6 +174,7 @@ export function receiptContextFacts(
   proposal: Record<string, unknown>,
   companyId: string,
 ) {
+  if (context.blockers?.length) goodsRefuse(context.blockers[0]);
   const goods = context.goods;
   if (
     context.can_receive !== true ||
@@ -207,6 +210,9 @@ export function receiptContextFacts(
       currency: goods.currency,
       store: context.store,
       can_receive: context.can_receive,
+      ...(context.permission_revision
+        ? { permission_revision: context.permission_revision }
+        : {}),
     }),
   };
 }
@@ -242,7 +248,7 @@ export function confirmedReceipt(
     receipt_id: value.receipt_id,
     ...observed,
     operation: 'stock_receipt',
-    catalog_price_changed: false,
-    absolute_stock_assigned: false,
+    catalog_price_change_requested: false,
+    absolute_stock_assignment_requested: false,
   };
 }

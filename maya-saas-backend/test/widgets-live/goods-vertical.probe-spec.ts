@@ -1,3 +1,4 @@
+import { YclientsGoodsReceiptUnknownError } from '../../src/crm/yclients-goods-receipt';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -58,6 +59,7 @@ type Source = {
   stock: string;
   canReceive: boolean;
   loseReply: boolean;
+  loseReadback?: boolean;
   writeCount: number;
   readCount: number;
   contextReads: number;
@@ -186,6 +188,11 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
             expect(deadline).toBeGreaterThan(Date.now());
             s.writeCount++;
             s.writes.push({ ...args });
+            if (s.loseReadback)
+              throw new YclientsGoodsReceiptUnknownError(
+                '900',
+                new Error('Synthetic lost readback'),
+              );
             if (s.loseReply)
               throw new Error('Synthetic lost reply after receipt commit');
             const observed = Object.fromEntries(
@@ -334,6 +341,8 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
         pg: string;
         success: Approval;
         unknown: Approval;
+        acknowledged: Approval;
+        acknowledgedExecution: string;
         pending: Approval;
         request: Record<string, unknown>;
         runId: string;
@@ -365,6 +374,23 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
       check(unknown, 201, 'unknown restart replay');
       expect(parsed(unknown).status).toBe('unknown');
       expect(s.writeCount).toBe(0);
+      const acknowledged = await approve(token, saved.acknowledged);
+      check(acknowledged, 201, 'acknowledged unknown restart replay');
+      expect(parsed(acknowledged).status).toBe('unknown');
+      const ackAttempt = await db.prisma.actionAttempt.findFirstOrThrow({
+        where: {
+          actionExecutionId: saved.acknowledgedExecution,
+          kind: 'EXECUTION',
+        },
+      });
+      expect(ackAttempt.safeResultJson).toMatchObject({
+        providerObservation: {
+          acknowledged_document_id: '900',
+          receipt_verified: false,
+          reconciliation: 'manual_required',
+        },
+      });
+      expect(s.writeCount).toBe(0);
       const pendingResult = await approve(token, saved.pending);
       check(pendingResult, 201, 'pending restart confirm');
       expect(parsed(pendingResult).status).toBe('completed');
@@ -383,6 +409,7 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
         unknown_preserved_without_dispatch: true,
         pending_executed_once: true,
         unknown_attempts: unknownRow.executionAttemptCount,
+        unconfirmed_acknowledgment_persisted: true,
       };
       expect(parserCalls).toBe(0);
       expect(externalCalls).toBe(0);
@@ -783,6 +810,26 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
     s.loseReply = false;
     const unknownExecution = parsed(lost).canonical_actions?.[0].executionId;
     expect(unknownExecution).toBeDefined();
+    const acknowledged = await pending(owner.token);
+    s.loseReadback = true;
+    const ackLost = await approve(owner.token, acknowledged.a);
+    check(ackLost, 201, 'acknowledged document with unknown readback');
+    expect(parsed(ackLost).status).toBe('unknown');
+    expect(s.writeCount).toBe(3);
+    s.loseReadback = false;
+    const acknowledgedExecution =
+      parsed(ackLost).canonical_actions![0].executionId;
+    const ackAttempt = await db.prisma.actionAttempt.findFirstOrThrow({
+      where: { actionExecutionId: acknowledgedExecution, kind: 'EXECUTION' },
+    });
+    expect(ackAttempt.safeResultJson).toMatchObject({
+      preDispatch: { company_id: '5' },
+      providerObservation: {
+        acknowledged_document_id: '900',
+        receipt_verified: false,
+        reconciliation: 'manual_required',
+      },
+    });
     const restartPending = await pending(owner.token);
     const args = (
       await db.prisma.aiApprovalRequest.findMany({
@@ -830,6 +877,7 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
       rejection_no_effect: true,
       ended_review_after_identity_wait_rejected: true,
       unknown_without_retry: true,
+      unconfirmed_acknowledgment_persisted: true,
       no_team_attachment: true,
     };
     writeFileSync(
@@ -842,6 +890,8 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
         pg,
         success: a2,
         unknown: unknown.a,
+        acknowledged: acknowledged.a,
+        acknowledgedExecution,
         pending: restartPending.a,
         request: requestBody,
         runId: chatBody.coordination.run_id,

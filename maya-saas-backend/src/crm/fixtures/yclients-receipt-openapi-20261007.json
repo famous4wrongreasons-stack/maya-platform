@@ -1,0 +1,1429 @@
+{
+  "source": "https://developers.yclients.com/ru/",
+  "capturedOn": "2026-10-07",
+  "sourceSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+  "openapi": "3.0.3",
+  "selection": "Exact schema nodes, examples excluded; receipt implementation is not live-provider acceptance.",
+  "paths": {
+    "/api/v1/user/permissions/{company_id}": {
+      "get": {
+        "tags": [
+          "Пользователь"
+        ],
+        "summary": "Получить список прав",
+        "description": "+ Параметр\r\n    + company_id (required, number, `1`) - ID компании",
+        "operationId": "Получить список прав",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user_permissions_response_data_types"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      }
+    },
+    "/api/v1/storages/{company_id}": {
+      "get": {
+        "tags": [
+          "Склады"
+        ],
+        "summary": "Получить склады компании",
+        "description": "Объект склада компании имеет следующие поля:\r\n\r\n| Поле  | Тип | Описание |\r\n| ------------- | ------------- | ------------- |\r\n|  id  |  number   | ID  склада  |\r\n|  title  | string  | Название  |\r\n|  for_services  | number  | 1 - если используется для автоматического списания расходников |\r\n|  for_sale  | number  | 1 - если склад по умолчанию для продажи товаров |\r\n|  comment  | string  | Описание к складу |",
+        "operationId": "Получить склады компании",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/storage_response_data_types"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      }
+    },
+    "/api/v1/goods/{company_id}/{good_id}": {
+      "get": {
+        "tags": [
+          "Товары"
+        ],
+        "summary": "Получить товары",
+        "description": "+ term: Наименование, артикул или штрих-код\n\n+ page (number, `1`) - Номер страницы (не используется, если передан good_id)\n\n+ count (number, `25`) - Количество товаров на странице (не используется, если передан good_id)\n\n+ category_id (number, `777`) - Id категории товаров (не используется, если передан good_id)\n\n+ changed_after (string) - фильтрация товаров, измененных/созданных начиная с конкретной даты и времени (не используется, если передан good_id)\n\n+ changed_before (string) - фильтрация товаров, измененных/созданных до конкретной даты и времени (не используется, если передан good_id)",
+        "operationId": "Получить товары",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "good_id",
+            "in": "path",
+            "description": "ID товара (если нужно получить конкретный товар)",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "term",
+            "in": "query",
+            "description": "наименование, артикул или штрих-код",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "номер страницы",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "количество товаров на странице",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "description": "Id категории товаров",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "changed_after",
+            "in": "query",
+            "description": "фильтрация товаров, измененных/созданных начиная с конкретной даты и времени",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "changed_before",
+            "in": "query",
+            "description": "фильтрация товаров, измененных/созданных до конкретной даты и времени",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/goods_company_goods_id_response200_data_types"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      }
+    },
+    "/api/v1/storage_operations/operation/{company_id}": {
+      "post": {
+        "tags": [
+          "Складские операции"
+        ],
+        "summary": "Создание складской операции",
+        "description": "Создание складской операции предполагает создание документа и нескольких товарных транзакций в рамках одного запроса к API.",
+        "operationId": "Создание складской операции",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/storage_operation_operation_request_data_types"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/storage_operation_operation_response_data_types"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
+    "/api/v1/storage_operations/documents/{company_id}/{document_id}": {
+      "get": {
+        "tags": [
+          "Документы складских операций"
+        ],
+        "summary": "Получить документ",
+        "operationId": "Получить документ",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "document_id",
+            "in": "path",
+            "description": "ID документа",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/storage_operation_documents_response_data_types"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      }
+    },
+    "/api/v1/storage_operations/documents/goods_transactions/{document_id}": {
+      "get": {
+        "tags": [
+          "Документы складских операций"
+        ],
+        "summary": "Получить товарные транзакции документа",
+        "operationId": "Получить товарные транзакции документа",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "description": "ID документа",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/storage_operation_good_transaction_response_data_types"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      }
+    }
+  },
+  "schemas": {
+    "storage_operation_operation_request_data_types": {
+      "title": "Root Type for storage_operation_operation_request_data_types",
+      "required": [
+        "create_date",
+        "goods_transactions",
+        "storage_id",
+        "type_id"
+      ],
+      "type": "object",
+      "properties": {
+        "type_id": {
+          "type": "number",
+          "description": "Тип документа (1 продажа, 3 приход, 4 списание, 5 перемещение)"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий"
+        },
+        "create_date": {
+          "type": "string",
+          "description": "Дата создания документа",
+          "format": "date-time"
+        },
+        "master_id": {
+          "type": "number",
+          "description": "Идентификатор мастера"
+        },
+        "storage_id": {
+          "type": "number",
+          "description": "Идентификатор склада"
+        },
+        "goods_transactions": {
+          "type": "array",
+          "description": "Массив объектов содержащих параметры транзакций, аналогично запросу на создание товарной транзакции",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Создание складской операции"
+    },
+    "storage_operation_good_transaction_request_data_types": {
+      "title": "Root Type for storage_operation_good_transaction_request_data_types",
+      "required": [
+        "amount",
+        "cost",
+        "cost_per_unit",
+        "discount",
+        "document_id",
+        "good_id",
+        "operation_unit_type"
+      ],
+      "type": "object",
+      "properties": {
+        "document_id": {
+          "type": "number",
+          "description": "Идентификатор документа",
+          "format": "float"
+        },
+        "good_id": {
+          "type": "number",
+          "description": "Идентификатор товара"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Количество"
+        },
+        "cost_per_unit": {
+          "type": "number",
+          "description": "Стоимость за единицу товара",
+          "format": "float"
+        },
+        "discount": {
+          "type": "number",
+          "description": "Скидка в %"
+        },
+        "cost": {
+          "type": "number",
+          "description": "Итоговая сумма транзакции",
+          "format": "float"
+        },
+        "operation_unit_type": {
+          "type": "number",
+          "description": "тип единицы измерения: 1 - для продажи, 2 - для списания"
+        },
+        "good_special_number": {
+          "type": "string",
+          "description": "Код абонемента\\сертификата, если товар является абонементом или сертификатом"
+        },
+        "master_id": {
+          "type": "number",
+          "description": "Идентификатор мастера, продавшего товар"
+        },
+        "client_id": {
+          "type": "number",
+          "description": "Идентификатор клиента, купившего товар"
+        },
+        "supplier_id": {
+          "type": "number",
+          "description": "Идентификатор поставщика"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий"
+        }
+      },
+      "description": "Создать транзакцию"
+    },
+    "storage_operation_operation_response_data_types": {
+      "title": "Root Type for storage_operation_operation_response_data_types",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Статус успешности выполнения (true)"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "document": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Идентификатор документа"
+                },
+                "type_id": {
+                  "type": "number",
+                  "description": "Идентификатор типа документа"
+                },
+                "type": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "description": "Идентификатор типа документа"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Название типа документа"
+                    }
+                  },
+                  "description": "Тип документа"
+                },
+                "storage_id": {
+                  "type": "number",
+                  "description": "Идентификатор склада"
+                },
+                "user_id": {
+                  "type": "number",
+                  "description": "Идентификатор пользователя"
+                },
+                "company_id": {
+                  "type": "number",
+                  "description": "Идентификатор компании"
+                },
+                "number": {
+                  "type": "number",
+                  "description": "Номер документа"
+                },
+                "comment": {
+                  "type": "string",
+                  "description": "Комментарий"
+                },
+                "create_date": {
+                  "type": "string",
+                  "description": "Дата создания",
+                  "format": "date-time"
+                },
+                "storage": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "description": "Идентификатор склада"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Название склада"
+                    }
+                  },
+                  "description": "Склад"
+                },
+                "company": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "description": "Идентификатор компании"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Название компании"
+                    },
+                    "country_id": {
+                      "type": "number",
+                      "description": "Идентификатор страны"
+                    },
+                    "city_id": {
+                      "type": "number",
+                      "description": "Идентификатор города"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "description": "Таймзона",
+                      "format": "date-time"
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "Адрес компании"
+                    },
+                    "coordinate_lat": {
+                      "type": "string",
+                      "description": "Широта"
+                    },
+                    "coordinate_lon": {
+                      "type": "string",
+                      "description": "Долгота"
+                    },
+                    "logo": {
+                      "type": "string",
+                      "description": "Пусть, по которому расположен логотип компании"
+                    },
+                    "zip": {
+                      "type": "string",
+                      "description": "Почтовый индекс"
+                    },
+                    "phones": {
+                      "type": "array",
+                      "description": "Телефон компании",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "site": {
+                      "type": "string",
+                      "description": "Сайт компании"
+                    }
+                  },
+                  "description": "Компания"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "description": "Идентификатор пользователя"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Имя пользователя"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "description": "Номер телефона пользователя"
+                    }
+                  },
+                  "description": "Пользователь"
+                }
+              },
+              "description": "Документ"
+            },
+            "transactions": {
+              "type": "array",
+              "description": "Транзакция",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "Идентификатор транзакции"
+                  },
+                  "document_id": {
+                    "type": "number",
+                    "description": "Идентификатор документа"
+                  },
+                  "type_id": {
+                    "type": "number",
+                    "description": "Идентификатор типа документа"
+                  },
+                  "type": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "description": "Идентификатор типа документа"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Название типа документа"
+                      }
+                    },
+                    "description": "Тип документа"
+                  },
+                  "company_id": {
+                    "type": "number",
+                    "description": "Идентификатор компании"
+                  },
+                  "good_id": {
+                    "type": "number",
+                    "description": "Идентификатор товара"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "description": "Количество"
+                  },
+                  "cost_per_unit": {
+                    "type": "number",
+                    "description": "Цена за единицы",
+                    "format": "float"
+                  },
+                  "discount": {
+                    "type": "number",
+                    "description": "Скдика",
+                    "format": "float"
+                  },
+                  "cost": {
+                    "type": "number",
+                    "description": "Итоговая цена",
+                    "format": "float"
+                  },
+                  "unit_id": {
+                    "type": "number",
+                    "description": "Идентификатор единпиы измерения"
+                  },
+                  "storage_id": {
+                    "type": "number",
+                    "description": "Идентификатор склада"
+                  },
+                  "supplier_id": {
+                    "type": "number",
+                    "description": "Идентификатор поставщика"
+                  },
+                  "client_id": {
+                    "type": "number",
+                    "description": "Идентификатор клиента"
+                  },
+                  "master_id": {
+                    "type": "number",
+                    "description": "Идентификатор мастера"
+                  },
+                  "create_date": {
+                    "type": "string",
+                    "description": "Дата создания",
+                    "format": "date-time"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "description": "Комментарий"
+                  },
+                  "deleted": {
+                    "type": "boolean",
+                    "description": "Удалена ли транзакция"
+                  },
+                  "good": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "description": "Идентификатор товара"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Название товара"
+                      }
+                    },
+                    "description": "Товар"
+                  },
+                  "storage": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "description": "Идентификатор склада"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Название склада"
+                      }
+                    },
+                    "description": "Склад"
+                  },
+                  "supplier": {
+                    "type": "array",
+                    "description": "Поставщик",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "client": {
+                    "type": "array",
+                    "description": "Клиент",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "master": {
+                    "type": "array",
+                    "description": "Мастер",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "unit": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "description": "Идентификатор единицы измерения"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Название единицы измерения"
+                      }
+                    },
+                    "description": "Единицы измерения"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Объект с данными"
+        },
+        "meta": {
+          "type": "array",
+          "description": "Метаданные (пустой массив)",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Создание складской операции"
+    },
+    "storage_operation_documents_response_data_types": {
+      "title": "Root Type for storage_operation_documents_response_data_types",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Статус успешности выполнения (true)"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Идентификатор документа"
+            },
+            "type_id": {
+              "type": "number",
+              "description": "Идентификатор типа документа"
+            },
+            "type": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Идентификатор типа документа"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Название типа документа"
+                }
+              },
+              "description": "Тип документа"
+            },
+            "storage_id": {
+              "type": "number",
+              "description": "Идентификатор склада"
+            },
+            "user_id": {
+              "type": "number",
+              "description": "Идентификатор пользователя"
+            },
+            "company_id": {
+              "type": "number",
+              "description": "Идентификатор компании"
+            },
+            "number": {
+              "type": "number",
+              "description": "Номер документа"
+            },
+            "comment": {
+              "type": "string",
+              "description": "Комментарий"
+            },
+            "create_date": {
+              "type": "string",
+              "description": "Дата создания",
+              "format": "date-time"
+            },
+            "storage": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Идентификатор склада"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Название склада"
+                }
+              },
+              "description": "Склад"
+            },
+            "company": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Идентификатор компании"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Название компании"
+                },
+                "country_id": {
+                  "type": "number",
+                  "description": "Идентификатор страны"
+                },
+                "city_id": {
+                  "type": "number",
+                  "description": "Идентификатор города"
+                },
+                "timezone": {
+                  "type": "string",
+                  "description": "Таймзона",
+                  "format": "date-time"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Адрес компании"
+                },
+                "coordinate_lat": {
+                  "type": "string",
+                  "description": "Широта"
+                },
+                "coordinate_lon": {
+                  "type": "string",
+                  "description": "Долгота"
+                },
+                "logo": {
+                  "type": "string",
+                  "description": "Пусть, по которому расположен логотип компании"
+                },
+                "zip": {
+                  "type": "string",
+                  "description": "Почтовый индекс"
+                },
+                "phones": {
+                  "type": "array",
+                  "description": "Телефон компании",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "site": {
+                  "type": "string",
+                  "description": "Сайт компании"
+                }
+              },
+              "description": "Компания"
+            },
+            "user": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Идентификатор пользователя"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Имя пользователя"
+                },
+                "phone": {
+                  "type": "string",
+                  "description": "Телефон пользователя"
+                }
+              },
+              "description": "Пользователь"
+            }
+          },
+          "description": "Объект с данными"
+        },
+        "meta": {
+          "type": "array",
+          "description": "Метаданные (пустой массив)",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Создать документ"
+    },
+    "storage_operation_good_transaction_response_data_types": {
+      "title": "Root Type for storage_operation_good_transaction_response_data_types",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Статус успешности выполнения (true)"
+        },
+        "data": {
+          "type": "array",
+          "description": "Массив объектов с данными",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Идентификатор транзакции"
+              },
+              "document_id": {
+                "type": "number",
+                "description": "Идентификатор документа"
+              },
+              "type_id": {
+                "type": "number",
+                "description": "Идентификатор типа транзакции"
+              },
+              "company_id": {
+                "type": "number",
+                "description": "Идентификатор компании"
+              },
+              "good_id": {
+                "type": "number",
+                "description": "Идентификатор товара"
+              },
+              "amount": {
+                "type": "number",
+                "description": "Количество товара"
+              },
+              "cost_per_unit": {
+                "type": "number",
+                "description": "Цена за единицу товара",
+                "format": "float"
+              },
+              "discount": {
+                "type": "number",
+                "description": "Скидка",
+                "format": "float"
+              },
+              "cost": {
+                "type": "number",
+                "description": "Итоговая стоимость товара",
+                "format": "float"
+              },
+              "unit_id": {
+                "type": "number",
+                "description": "Идентификатор единицы измерения"
+              },
+              "operation_unit_type": {
+                "type": "number",
+                "description": "Тип единицы измерения: 1 - для продажи, 2 - для списания"
+              },
+              "storage_id": {
+                "type": "number",
+                "description": "Идентификатор склада"
+              },
+              "supplier_id": {
+                "type": "number",
+                "description": "Идентификатор поставщика"
+              },
+              "record_id": {
+                "type": "number",
+                "description": "Идентификатор записи"
+              },
+              "client_id": {
+                "type": "number",
+                "description": "Идентификатор клиента"
+              },
+              "master_id": {
+                "type": "number",
+                "description": "Идентификатор сотрудника"
+              },
+              "create_date": {
+                "type": "string",
+                "description": "Дата создания",
+                "format": "date-time"
+              },
+              "comment": {
+                "type": "string",
+                "description": "Комментарий"
+              },
+              "service_id": {
+                "type": "number",
+                "description": "Идентификатор услуги"
+              },
+              "user_id": {
+                "type": "number",
+                "description": "Идентификатор пользователя"
+              },
+              "deleted": {
+                "type": "boolean",
+                "description": "Удалена ли транзакция"
+              },
+              "pkg_amount": {
+                "type": "number",
+                "description": "Количество в упаковке"
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "description": "Метаданные (количество найденных транзакций)"
+        }
+      },
+      "description": "Получить товарные транзакции документа"
+    },
+    "storage_response_data_types": {
+      "title": "Root Type for storage_response_data_types",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Статус успешности выполнения (true)"
+        },
+        "data": {
+          "type": "array",
+          "description": "Массив объектов с данными",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Идентификатор склада"
+              },
+              "title": {
+                "type": "string",
+                "description": "Название склада"
+              },
+              "for_service": {
+                "type": "number",
+                "description": "1 - если используется для автоматического списания расходников"
+              },
+              "for_sale": {
+                "type": "number",
+                "description": "1 - если склад по умолчанию для продажи товаров"
+              },
+              "comment": {
+                "type": "string",
+                "description": "Описание к складу"
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "array",
+          "description": "Метаданные (пустой массив)",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Получить склады компании"
+    }
+  },
+  "storagePermissions": {
+    "type": "object",
+    "properties": {
+      "storages_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к складу, false - нет доступа"
+      },
+      "storages_ids": {
+        "type": "array",
+        "description": "true - есть доступ к выбранным складам, false - нет доступа",
+        "items": {
+          "type": "object"
+        }
+      },
+      "storages_transactions_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к просмотру движений товаров, false - нет доступа"
+      },
+      "storages_last_days_count": {
+        "type": "number",
+        "description": "-1 - есть доступ к просмотру движений товаров за все время, >= 0 - доступ к просмотру движений товаров за указанное количество дней прошлое"
+      },
+      "storages_move_goods_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к перемещение товаров между складами, false - нет доступа"
+      },
+      "storages_create_transactions_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к созданию товарных транзакций, false - нет доступа"
+      },
+      "storages_create_last_days_count": {
+        "type": "number",
+        "description": "-1 - есть доступ к создание товарных транзакций за все время, >= 0 - доступ к создание товарных транзакций за указанное количество дней прошлое"
+      },
+      "storages_create_transactions_buy_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к оформлению прихода товаров, false - нет доступа"
+      },
+      "storages_create_transactions_sale_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к оформлению продаж товаров, false - нет доступа"
+      },
+      "storages_edit_transactions_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к редактированию товарных транзакций, false - нет доступа"
+      },
+      "storages_edit_last_days_count": {
+        "type": "number",
+        "description": "-1 - есть доступ к редактированию товарных транзакций за все время, >= 0 - доступ к редактированию товарных транзакций за указанное количество дней прошлое"
+      },
+      "storages_edit_transactions_buy_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к оформлению прихода товаров, false - нет доступа"
+      },
+      "storages_edit_transactions_sale_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к оформлению продаж товаров, false - нет доступа"
+      },
+      "storages_delete_transactions_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к удалению товарных транзакций, false - нет доступа"
+      },
+      "storages_transactions_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке движений товаров в Excel, false - нет доступа"
+      },
+      "storages_transactions_types": {
+        "type": "array",
+        "description": "true - есть доступ к выгрузке движений товаров в Excel, false - нет доступа",
+        "items": {
+          "type": "object"
+        }
+      },
+      "storages_inventory_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к инвентаризации, false - нет доступа"
+      },
+      "storages_inventory_create_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к созданию и редактированию инвентаризации, false - нет доступа"
+      },
+      "storages_inventory_delete_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к удалению инвентаризации, false - нет доступа"
+      },
+      "storages_inventory_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке инвентаризации в Excel, false - нет доступа"
+      },
+      "storages_remnants_report_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к отчету остатков на складе, false - нет доступа"
+      },
+      "storages_remnants_report_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке остатков в Excel, false - нет доступа"
+      },
+      "storages_sales_report_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к отчету по продажам, false - нет доступа"
+      },
+      "storages_sales_report_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке отчета по продажам в Excel, false - нет доступа"
+      },
+      "storages_consumable_report_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к отчету по списанию расходников, false - нет доступа"
+      },
+      "storages_consumable_report_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке отчета по списанию расходников в Excel, false - нет доступа"
+      },
+      "storages_write_off_report_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к отчету по списанию товаров, false - нет доступа"
+      },
+      "storages_write_off_report_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке отчета по списанию товаров в Excel, false - нет доступа"
+      },
+      "storages_turnover_report_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к отчету по оборачиваемости, false - нет доступа"
+      },
+      "storages_turnover_report_excel_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к выгрузке отчета по оборачиваемости в Excel, false - нет доступа"
+      },
+      "storages_goods_crud_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к управлению товарами, false - нет доступа"
+      },
+      "storages_goods_create_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к созданию товаров, false - нет доступа"
+      },
+      "storages_goods_update_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к изменению товаров, false - нет доступа"
+      },
+      "storages_goods_title_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к названию, Артикул, Штрих-код, false - нет доступа"
+      },
+      "storages_goods_category_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к категориям, false - нет доступа"
+      },
+      "storages_goods_selling_price_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к ценам продажи, false - нет доступа"
+      },
+      "storages_goods_cost_price_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к себестоимости, false - нет доступа"
+      },
+      "storages_goods_units_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к единицам измерения, false - нет доступа"
+      },
+      "storages_goods_critical_balance_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к критичным остаткам, Желаемый остаток, false - нет доступа"
+      },
+      "storages_goods_masses_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к массе, false - нет доступа"
+      },
+      "storages_goods_comment_edit_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к комментариям, false - нет доступа"
+      },
+      "storages_goods_archive_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к архивации и восстановлению товаров, false - нет доступа"
+      },
+      "storages_goods_delete_access": {
+        "type": "boolean",
+        "description": "true - есть доступ к удалению товаров, false - нет доступа"
+      }
+    },
+    "description": "Раздел Склад"
+  }
+}

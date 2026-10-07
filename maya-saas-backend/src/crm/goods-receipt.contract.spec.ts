@@ -151,8 +151,8 @@ describe('single photo line goods receipt facts, independent AE and no rounding'
       confirmedReceipt({ receipt_id: 'receipt1', observed }, p),
     ).toMatchObject({
       operation: 'stock_receipt',
-      catalog_price_changed: false,
-      absolute_stock_assigned: false,
+      catalog_price_change_requested: false,
+      absolute_stock_assignment_requested: false,
     });
     for (const receipt_id of [undefined, null, 123, '', {}, []])
       expect(() =>
@@ -169,8 +169,8 @@ describe('single photo line goods receipt facts, independent AE and no rounding'
       receipt_id: 'receipt1',
       ...observed,
       operation: 'stock_receipt',
-      catalog_price_changed: false,
-      absolute_stock_assigned: false,
+      catalog_price_change_requested: false,
+      absolute_stock_assignment_requested: false,
     });
     expect(() =>
       confirmedReceipt(

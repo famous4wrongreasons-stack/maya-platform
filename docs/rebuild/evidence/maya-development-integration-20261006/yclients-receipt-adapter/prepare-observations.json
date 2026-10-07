@@ -1,0 +1,157 @@
+{
+  "stage": "prepare",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "parser": "SYNTHETIC_NOT_OCR_ACCEPTANCE",
+  "provider": "SYNTHETIC_ADAPTER",
+  "certificate": "NOT_ISSUED",
+  "outcomes": {
+    "chat_c9": {
+      "request_id": "821592af-361f-44ca-80a6-a22e7c9c06fa",
+      "coordination": {
+        "run_id": "ea5df335-1eab-4b3c-8faf-4a47e3301f91",
+        "scope": "deterministic_reads",
+        "state": "COMPLETED"
+      },
+      "user_turn": {
+        "turnId": "93990024-277c-4bec-a0de-0a607792d2aa",
+        "conversationId": "0eee221d-63ad-4141-8116-c2f506411016"
+      },
+      "reply": "Товар в YCLIENTS: Синтетический шампунь.\n\nПродажная цена: 100 RUB.\n\nСебестоимость: 40 RUB; себестоимость единицы: 4 RUB.\n\nЕдиница продажи: флакон; единица списания: мл.\n\nСоотношение единиц в каталоге: 10.\n\nКоличество по складам, полученное из CRM:\nСклад 9: 1.250\n\nЕдиница этих остатков в ответе не указана; пересчёт и количество нового прихода по ним не определяются.",
+      "source": "safe_fallback",
+      "redacted_input": false,
+      "action": null,
+      "tools_used": [
+        {
+          "name": "inventory.goods.read",
+          "status": "completed",
+          "execution_id": "cmuxw9oso000lcnc9b3g49rx0"
+        }
+      ],
+      "grounding": {
+        "status": "verified",
+        "domain": "goods_catalog",
+        "required_tools": [
+          "inventory.goods.read"
+        ],
+        "evidence_tools": [
+          "inventory.goods.read"
+        ]
+      },
+      "brain": {
+        "persona": "director",
+        "intent": "general"
+      }
+    },
+    "read_dedupe": true,
+    "current_fractional_stock": true,
+    "photo_original_cleared": true,
+    "parser_low_confidence_preserved": true,
+    "provisional_not_persisted": true,
+    "review_versions": [
+      "cmuxw9oy3000vcnc9i6gop1q9",
+      "cmuxw9oz4000ycnc9dro8gznw"
+    ],
+    "fractional_receipt": {
+      "goods_id": "123",
+      "store_id": "9",
+      "quantity": "2.5",
+      "unit_id": "11",
+      "unit_cost": "11",
+      "currency": "RUB",
+      "price_kind": "receipt_purchase_unit",
+      "received_at": "2026-10-07T09:00:00Z",
+      "photo_sha256": "0a97501e18a664a7d7ee7a1aeea061759a8833e1dbe6b6259d4b7c7746a4506c",
+      "source_line": 1,
+      "review_version": 2,
+      "company_id": "5",
+      "integration_revision": "f670db7142d9e47c5f6c4621220d857e5bb26a6998aa8f1d8c58d15d743ae52c",
+      "current_revision": "25faf80977f864060ab504ed0eb0bbb596c42521a9f07486707bb0699463ca7b",
+      "goods_name": "Синтетический шампунь",
+      "store_name": "Синтетический склад",
+      "unit_label": "флакон",
+      "line_total": "27.5"
+    },
+    "version_vs_approval_races": [
+      {
+        "review": 409,
+        "decision": 201,
+        "old": "completed"
+      },
+      {
+        "review": 409,
+        "decision": 201,
+        "old": "completed"
+      },
+      {
+        "review": 409,
+        "decision": 201,
+        "old": "completed"
+      }
+    ],
+    "tenant_wide_photo_no_second_effect": true,
+    "concurrent_statuses": [
+      {
+        "http": 201,
+        "status": "completed"
+      },
+      {
+        "http": 201,
+        "status": "completed"
+      }
+    ],
+    "synthetic_provider_writes": 3,
+    "foreign_tenant_rejected": true,
+    "branch_scope_rejected": true,
+    "revocation_rejected": true,
+    "revocation_during_source_read": [
+      "membership",
+      "expiry",
+      "integration",
+      "feature"
+    ],
+    "missing_feature_rejected": true,
+    "client_rejected": true,
+    "stale_rejected": true,
+    "expired_rejected": true,
+    "rejection_no_effect": true,
+    "ended_review_after_identity_wait_rejected": true,
+    "unknown_without_retry": true,
+    "unconfirmed_acknowledgment_persisted": true,
+    "no_team_attachment": true
+  },
+  "modelCalls": 3,
+  "parserCalls": 1,
+  "externalCalls": 0,
+  "sourceStates": [
+    {
+      "company": "5",
+      "readCount": 2,
+      "contextReads": 32,
+      "writeCount": 3
+    },
+    {
+      "company": "6",
+      "readCount": 0,
+      "contextReads": 0,
+      "writeCount": 0
+    },
+    {
+      "company": "9",
+      "readCount": 0,
+      "contextReads": 12,
+      "writeCount": 3
+    },
+    {
+      "company": "7",
+      "readCount": 0,
+      "contextReads": 0,
+      "writeCount": 0
+    },
+    {
+      "company": "8",
+      "readCount": 0,
+      "contextReads": 0,
+      "writeCount": 0
+    }
+  ]
+}
