@@ -1,0 +1,19 @@
+# Current candidate HTTP bindings: interruption checkpoint
+
+Status: **RESEARCH ONLY / HTTP BINDINGS NOT IMPLEMENTED**. Source checkpoint is `c89f2a080ac21727b31779e1d4a7ab66922051a3`; its 24-dialog, 8-group, 33-turn offline corpus and finite budget harness remain intact. Work pauses here to implement the owner's separately approved goods receipt carrier exception. No HTTP/PG process, model transport, external business call or schema migration was started for this continuation.
+
+The previous serializer-only negative measurement remains authoritative: an Admin planner body was 124,386 bytes with role-only/all-features descriptors, exceeding the unchanged **98,304-byte** ceiling. That measurement did not exercise authenticated HTTP or current feature filtering. Actual binding must call through `AiCoreService` → `runtime.listTools` → `policy.listAllowed(tenant, actor, role, surface)` and the actual `AiCoreModelService` serializer, with only the provider transport canned. Do not substitute the earlier all-features descriptor list for runtime evidence.
+
+## Resume work
+
+Bind the existing frozen turns for booking, personal Client, Admin public reads, staff/configuration, BI, lifecycle, Occupancy and goods to owned synthetic tenants and the existing authenticated `bootHttp`/`fixturesForHttp` infrastructure. Record actual features, allowed tool names, source projections and serialized section sizes. Keep provider writes and notification edges rejecting. Seed canonical C7/C8/Opportunity owners through existing fixture seams; raw live CRM facts are not fabricated C7/C8 references. Bind relative dates explicitly without silently editing the corpus's authored fixture clock. Zero-model deterministic paths contribute zero model coverage.
+
+Some corpus prose does not match the exact deterministic C7/C8 entry commands. The price-update tool exists, but a matching canonical taxonomy route was not established in this research. Resolve these against current source and preserve unsupported-route outcomes; do not change user turns or inject new intent mappings simply to report PASS. No binding or product-quality result is claimed yet.
+
+Independent read-only review identified a possible lossless serialization seam in `AiCoreModelService.plannerModelInput`, after current runtime filtering. If actual HTTP measurement justifies it, intern identical complete tool `input_schema` values, retaining every tool name, description, risk tier and approval policy. If necessary, encode all canonical intent rows as a table with explicit columns, retaining every value, denied/planned intent, readiness note, slot alias, language hint and policy. Require round-trip equality and all eight group regressions. Do not hide capabilities or permissions, add a planner, or raise the byte ceiling. No serializer change has been made and no byte saving measured.
+
+## Public model configuration check
+
+Read-only official documentation was checked on 2026-10-07: [DeepSeek pricing](https://api-docs.deepseek.com/quick_start/pricing/) lists `deepseek-v4-pro` as `DeepSeek-V4-Pro-0813`, text-only, with peak cache-miss input USD 1.32/M and output USD 3.96/M. These match the proposal's conservative historical rates. [The model-list API documentation](https://api-docs.deepseek.com/api/list-models/) also documents that identifier. This confirms public documentation only: no authenticated model-list call, account/broker availability, provider debit, paid authorization or real-model acceptance was observed. A future runnable manifest still needs a frozen current pricing/source record.
+
+Goods UI authorization does not authorize a paid model batch, real OCR, initial Client binding, real provider effects or background C10. Existing offline evidence and ledgers must not be rewritten or reused as a new permit.
