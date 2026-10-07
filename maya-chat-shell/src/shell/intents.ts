@@ -103,6 +103,14 @@ export const createLiveSubmission = (
       envelope: sent.value.next_envelope,
       accepted: sent.value.outcome === 'terminate' && sent.value.code === null && sent.value.receipt_outcome === 'ACCEPTED',
     };
+    // Gate 11 rejects a moved source before an owner receipt exists. Preserve
+    // its exact canonical projection without reading a receipt or granting retry.
+    if (sent.value.outcome === 'superseded' && sent.value.code === 'handle_stale'
+      && sent.value.receipt_outcome === null && sent.value.owner_decision == null
+      && sent.value.reason_text?.phrase_key === 'widget.refusal.handle_stale'
+      && sent.value.reason_text.rendered === 'Данные изменились с момента показа. Откройте актуальную версию.') {
+      return { status: 'refused', sentence: 'booking_stale' };
+    }
     const reason: BookingRefusalSentence | null = sent.value.reason_text === undefined ? null
       : sent.value.code === 'handle_stale' ? 'booking_stale'
       : sent.value.code === 'booking_confirmation_required' ? 'booking_confirmation_required'

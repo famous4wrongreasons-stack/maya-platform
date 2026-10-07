@@ -121,7 +121,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "73ada6e9767b9cfe6d5dcbeb01f3a3a17229d90534be4185e56ae274da910b41"
+        "sha256": "156872dce21015ecdce52001295069895940e98c20455846f3e8e68563951d61"
       },
       {
         "path": "src/shell/personal-booking.ts",
@@ -145,8 +145,8 @@
       }
     ]
   },
-  "bytes": 516693,
-  "digest": "9ee6648e3550c22cfe48870492b0753c53c536934580536bd4697e033750ca67",
+  "bytes": 517334,
+  "digest": "ddc3c8ccdc271c4364e6bb2361c2f28cedbeae7626a16947ab6b10895b66a695",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -154,8 +154,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "1264732607c5579c8346d5bb70b084c52cf8f43ee7e5309838eb0b41b2909322",
-    "modulePath": "m/1264732607c5579c/",
+    "digest": "ba85acd490e4705742935033ad236afe71d1941f43613e1c02bf220817dc8498",
+    "modulePath": "m/ba85acd490e47057/",
     "files": [
       {
         "path": "entry/main.js",
@@ -289,8 +289,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "bf6f25d37d4f43da3e663562742dc06ecb2d493e746cf801a405e9f2659e7c0f",
-        "bytes": 40146
+        "sha256": "0668d326f6e4d4a9dbb363a4878b7a8809dcbc1c259aabf5e101503a746edc6c",
+        "bytes": 40657
       },
       {
         "path": "src/shell/personal-booking.js",
@@ -333,7 +333,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "94b8b7050aeace0de07c1704a44bf6cc241a23ebbc340419db95300d06ea101e",
+      "sha256": "3d920f733483b5d4f0ccc1e618c6e574f5b5226148adb7982cbf22191925af3b",
       "bytes": 1344
     },
     "assets": [

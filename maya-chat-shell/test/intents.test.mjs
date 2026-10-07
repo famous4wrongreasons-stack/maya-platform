@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { render } from '../src/renderer/render.ts';
 import { bodyHash } from '../src/integrity/h7.ts';
 import { createPersonalBooking } from '../src/shell/personal-booking.ts';
+import { projectWidgetIntent } from '../src/net/project.ts';
 import { createShellRuntime } from '../src/shell/shell.ts';
 import {
   createLiveSubmission,
@@ -1644,6 +1645,44 @@ test('schedule owner failure reads its canonical terminal line without treating 
     resolveWidgets: async () => ({ok:true,value:{tenant_bound:true,widgets:[{envelope:source,terminal_lines:lines,reread_intent:null}]}}),
   });
   assert.deepEqual(await port.submit({widget_id:source.widget_id},new AbortController().signal),{status:'settled',lines});
+});
+const staleSourceRefusal = () => ({
+  contract: 'maya.widget.intent/1', outcome: 'superseded', code: 'handle_stale',
+  next_envelope: null, resolved_widget: null, receipt_outcome: null, owner_decision: null,
+  reason_text: { phrase_key: 'widget.refusal.handle_stale', rendered: 'Данные изменились с момента показа. Откройте актуальную версию.' },
+});
+test('stale source witness: canonical superseded response projects the refusal without receipt read or acceptance', async () => {
+  const value = projectWidgetIntent(staleSourceRefusal()); assert.ok(value);
+  let submissions = 0, reads = 0;
+  const port = createLiveSubmission({ widgetIntent: async () => { submissions++; return { ok: true, value }; }, resolveWidgets: async () => { reads++; throw new Error('No receipt exists before dispatch'); } });
+  assert.deepEqual(await port.submit({ widget_id: 'synthetic-widget' }, new AbortController().signal), { status: 'refused', sentence: 'booking_stale' });
+  assert.equal(submissions, 1); assert.equal(reads, 0);
+});
+test('stale source witness: missing, unknown or noncanonical reason remains generic and never reads or claims success', async () => {
+  const cases = [
+    { reason_text: undefined }, { reason_text: null },
+    { reason_text: { phrase_key: 'widget.refusal.other', rendered: staleSourceRefusal().reason_text.rendered } },
+    { reason_text: { phrase_key: 'widget.refusal.handle_stale', rendered: 'Invented reason' } },
+    { code: 'other_refusal' }, { outcome: 'refuse' },
+    { owner_decision: { state: 'UNKNOWN' } }, { receipt_outcome: 'ACCEPTED' },
+  ];
+  let reads = 0;
+  for (const patch of cases) {
+    const value = projectWidgetIntent({ ...staleSourceRefusal(), ...patch }); assert.ok(value);
+    const port = createLiveSubmission({ widgetIntent: async () => ({ ok: true, value }), resolveWidgets: async () => { reads++; throw new Error('Unknown refusal has no receipt authority'); } });
+    assert.deepEqual(await port.submit({ widget_id: 'synthetic-widget' }, new AbortController().signal), { status: 'forbidden' });
+  }
+  assert.equal(reads, 0);
+});
+test('stale source witness: submitted booking confirmation displays the canonical sentence and consumes its control once', async () => {
+  let submissions = 0, reads = 0;
+  const value = projectWidgetIntent(staleSourceRefusal()); assert.ok(value);
+  const s = setup({ submission: createLiveSubmission({ widgetIntent: async () => { submissions++; return { ok: true, value }; }, resolveWidgets: async () => { reads++; throw new Error('No post-dispatch receipt'); } }) });
+  const { itemId } = s.runtime.widgets.ingest(envelope('kind-booking-confirmation'));
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
+  assert.equal(s.item(itemId).sentence, 'booking_stale'); assert.equal(s.item(itemId).display, 'terminal');
+  await s.runtime.widgets.activate(itemId, 'intent:i1');
+  assert.equal(submissions, 1); assert.equal(reads, 0); s.runtime.dispose();
 });
 test('personal receiver follows real Widgets integrity/expiry and survives accessibility redraw', async () => {
   const { source, detail } = detailPair();
