@@ -81,61 +81,6 @@
       "bytes": 1556
     },
     {
-      "path": "maya-personal-read-context-cohort.json",
-      "sha256": "15293af86bfa52f4d6a632ae5848ced31190e05bce70835985cc7c967a28d136",
-      "bytes": 63304
-    },
-    {
-      "path": "maya-personal-read-context-cohort.log",
-      "sha256": "9837607f2a23421e0205728b7b9e131af34cbdbe4ff44d037d089a72e2d55789",
-      "bytes": 910
-    },
-    {
-      "path": "maya-personal-read-context-final.json",
-      "sha256": "1a07a392c187536ac878752feccd61d384a3c24ec4233642a960ebfa3df51b66",
-      "bytes": 80981
-    },
-    {
-      "path": "maya-personal-read-context-final.log",
-      "sha256": "5e2d720d9d3715da1f576d803bdf3744011cf06d6f79569e9398ba5784610188",
-      "bytes": 1014
-    },
-    {
-      "path": "maya-personal-read-context-green.json",
-      "sha256": "cb2a504c6ac2932f696618b3962b36935cf240a40c69b650eaac95d6aa47a5e5",
-      "bytes": 7532
-    },
-    {
-      "path": "maya-personal-read-context-green.log",
-      "sha256": "74002a6cf47661ca22d7ae533766a72bb3c163a48b750799c81f262ea6f04584",
-      "bytes": 1708
-    },
-    {
-      "path": "maya-personal-read-context-lint.log",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "bytes": 0
-    },
-    {
-      "path": "maya-personal-read-context-lint2.log",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "bytes": 0
-    },
-    {
-      "path": "maya-personal-read-context-lint3.log",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "bytes": 0
-    },
-    {
-      "path": "maya-personal-read-context-red.json",
-      "sha256": "f1b633d8ee0e63efd8706d0d98bd25ec2a101b25f0fc87b491dbed99677879fc",
-      "bytes": 19908
-    },
-    {
-      "path": "maya-personal-read-context-red.log",
-      "sha256": "423cacf356ee79c6ff69cd7fef4aba6f20944aa1869d1560ae3c50ea5380ed70",
-      "bytes": 6613
-    },
-    {
       "path": "maya-personal-read-lint1.log",
       "sha256": "2e8faeade103ab7a8eb9f4be424e9f56946b37d6a8ff32a6e54d86e498fdc055",
       "bytes": 623
@@ -154,26 +99,6 @@
       "path": "maya-personal-read-lint4.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
-    },
-    {
-      "path": "maya-personal-read-routing-green.json",
-      "sha256": "716eda7169c83437f97d5e06963b04e695b6f87f71d745b9a167e06595cfa1ba",
-      "bytes": 38139
-    },
-    {
-      "path": "maya-personal-read-routing-green.log",
-      "sha256": "78965d342548412ef1e369df6105d9fdc826733aef160fb77f7c0131103e5fe5",
-      "bytes": 5404
-    },
-    {
-      "path": "maya-personal-read-routing.json",
-      "sha256": "1b43c42691c6dbcef8af8ace43a6129cd0ea6df3d066853a19e0e534c569132e",
-      "bytes": 42153
-    },
-    {
-      "path": "maya-personal-read-routing.log",
-      "sha256": "12d53e19286d900847ae96fee3d4b33084321bde3996a8a39b1b97cbc93a0bd8",
-      "bytes": 8175
     },
     {
       "path": "maya-personal-read-types1.log",
@@ -675,5 +600,8 @@
       "sha256": "3a2e488196252b7824710dfa6b02f0a69da43e9489bb7c51f73548c5a6bf2a6b",
       "bytes": 1578
     }
-  ]
+  ],
+  "finalUnitEvidence": "maya-personal-read-unit4.json",
+  "finalProductionTypesEvidence": "maya-personal-read-types2.log",
+  "finalLintEvidence": "maya-personal-read-lint4.log"
 }
