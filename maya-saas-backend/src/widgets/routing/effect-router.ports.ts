@@ -52,6 +52,12 @@ export interface NavigateWidgetMinterPort {
 }
 
 export interface EffectRouteAuditPort {
+  readonly readBookingCreateFactsHash: (
+    tenantId: string,
+    draftRef: string,
+    principalProofHash: string,
+    now: Date,
+  ) => Promise<string | null>;
   readonly claimIntentRecord: (input: {
     tenantId: string;
     intentTokenHash: string;
@@ -133,6 +139,8 @@ export interface HandoffSignerPort {
 }
 
 export interface ActuatingRoutingInput {
+  /** Non-authority quote precondition read from the live audit-retained draft ref. */
+  readonly expectedBookingFactsHash?: string;
   readonly routing: RoutingInput;
   readonly actorUserId: string;
   readonly resolvedNouns: ResolvedNouns;

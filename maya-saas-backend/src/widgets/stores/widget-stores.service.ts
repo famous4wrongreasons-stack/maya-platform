@@ -22,6 +22,7 @@
 // of a submission, not of a booking; the timeline is what was said, not what was done.
 
 import { Inject, Injectable, Optional } from '@nestjs/common';
+import { bookingCreateFactsHashOf } from '../booking/booking-create-facts-ref';
 import { CHAT_REPLY_CIPHER } from '../di-tokens';
 import type { ChatReplyCipher } from '../owner-ports/chat-reply-cipher.port';
 
@@ -187,6 +188,31 @@ export class WidgetStoresService {
         expiresAt: true,
       },
     });
+  }
+
+  /** F15: COMMIT reads only an audit-retained reference, never draft content. */
+  async readBookingCreateFactsHash(
+    tenantId: string,
+    draftRef: string,
+    principalProofHash: string,
+    now = new Date(),
+  ): Promise<string | null> {
+    const hash = bookingCreateFactsHashOf(draftRef);
+    if (hash === null || !principalProofHash) return null;
+    const row = await this.prisma.widgetDraft.findFirst({
+      where: scoped(tenantId, {
+        draftRef,
+        principalProofHash,
+        draftClass: 'task',
+        ownerCapabilitySpace: 'C9',
+        ownerCapabilityKey: 'c9.booking.propose',
+        consumedAt: null,
+        erasedAt: null,
+        expiresAt: { gt: now },
+      }),
+      select: { draftRef: true },
+    });
+    return row?.draftRef === draftRef ? hash : null;
   }
 
   // ── 5. FREE-INPUT LEDGER ────────────────────────────────────────────────────────────────────

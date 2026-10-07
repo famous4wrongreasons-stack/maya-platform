@@ -13,6 +13,7 @@ const input = (
   key: unknown = 'server-confirmation-key',
 ): ActuatingRoutingInput =>
   ({
+    expectedBookingFactsHash: 'a'.repeat(64),
     routing: {
       tenantId: 'tenant-1',
       record: {
@@ -93,6 +94,13 @@ const fixture = () => {
 };
 
 describe('U13c booking COMMIT owner port', () => {
+  it('does not invoke create without the server draft facts precondition', async () => {
+    const h = fixture();
+    await expect(
+      h.adapter.commit({ ...input(), expectedBookingFactsHash: undefined }),
+    ).resolves.toMatchObject({ receiptOutcome: 'REFUSED' });
+    expect(h.create.forAccount).not.toHaveBeenCalled();
+  });
   it.each([
     ['crm.appointment.create.v1', 'create'],
     ['crm.appointment.cancel.v1', 'cancel'],
@@ -116,6 +124,9 @@ describe('U13c booking COMMIT owner port', () => {
       expect(built[ownerName].forAccount).toHaveBeenCalledTimes(1);
       const invocation = built.observedInvocation();
       expect(invocation).toEqual({
+        ...(capability === 'crm.appointment.create.v1'
+          ? { expectedBookingFactsHash: 'a'.repeat(64) }
+          : {}),
         sourceType: 'authenticated_request',
         callerIdempotency: {
           scope: 'maya.widgets.booking.commit.v1',

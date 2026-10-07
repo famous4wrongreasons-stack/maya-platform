@@ -46,6 +46,7 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
 
   const harness = () => {
     const quoted = {
+      factsHash: 'a'.repeat(64),
       start: '2026-10-02T10:00:00.000Z',
       timezone: 'UTC',
       staff: { id: 'staff-1', name: 'Александр' },
@@ -111,6 +112,9 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
         kind: 'booking_preview',
         preview: {
           subject: 'create',
+          draftRef: expect.stringMatching(
+            /^booking-create:v1:[a-f0-9-]{36}:a{64}$/,
+          ) as string,
           sourceCapabilityKey: 'appointments.own.create',
           frozenArgumentHandles: input.handles,
           when: '2026-10-02T10:00:00.000Z',

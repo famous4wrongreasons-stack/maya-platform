@@ -240,7 +240,12 @@ export class EffectRouterService {
         }
         return ctx.record?.widgetKind === 'APPROVAL'
           ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)
-          : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);
+          : bookingCommitDestination(
+              ctx,
+              resolvedNouns,
+              this.bookingCommit,
+              this.stores,
+            );
     }
   }
 

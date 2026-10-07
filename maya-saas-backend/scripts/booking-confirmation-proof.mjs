@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' } } });
+const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, 'browser-only': {type: 'boolean', default: false} } });
 assert.equal(values.run, true, 'Explicit --run and parent heavy-slot authorization required');
 assert.ok(values.output && path.isAbsolute(values.output) && !fs.existsSync(values.output), 'New absolute output required');
 for (const name of ['.env', '.env.local']) assert.equal(fs.existsSync(path.join(backend, name)), false);
@@ -23,7 +23,7 @@ await new Promise((resolve) => portServer.close(resolve));
 const database = 'maya_widget_gate_proof_bookingconfirmation_' + randomBytes(6).toString('hex');
 const env = { DATABASE_URL: `postgresql://booking_confirmation_proof@127.0.0.1:${port}/${database}`, NODE_ENV: 'test', NODE_OPTIONS: '--max-old-space-size=3072', LANG: 'C', TZ: 'UTC' };
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
-const manifest = { kind: 'booking-confirmation-http-react-local-proof', cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticInternalCatalog: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
+const manifest = { kind: 'booking-confirmation-http-react-local-proof', browserOnly: values['browser-only'], cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticInternalCatalog: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
 const save = () => fs.writeFileSync(path.join(values.output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 let cancelled = null, activeChild = null, activeCleanup = false;
 const cancel = (signal) => {
@@ -82,7 +82,7 @@ try {
   await run('createdb', pg('createdb'), ['--host=127.0.0.1', '--port=' + port, '--username=booking_confirmation_proof', database]);
   await run('migrations', process.execPath, ['node_modules/prisma/build/index.js', 'migrate', 'deploy']);
   await run('react-web-build', process.execPath, ['build.mjs', '--target=web'], {}, path.resolve(backend, '../maya-carrier-react'));
-  await run('http-booking', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/chat-catalog-booking.live-spec.ts', 'test/widgets-live/provider-unknown.live-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'http-booking-jest.json')]);
+  if (!values['browser-only']) await run('http-booking', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/chat-catalog-booking.live-spec.ts', 'test/widgets-live/provider-unknown.live-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'http-booking-jest.json')]);
   await probe();
   manifest.status = 'passed';
 } catch (e) { manifest.status = 'failed'; throw e; }

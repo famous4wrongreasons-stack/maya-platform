@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import { mintBookingCreateFactsRef } from '../booking/booking-create-facts-ref';
 
 import { ClientAppointmentCreateService } from '../../appointments/client-appointment-create.service';
 import { ClientAppointmentCancelService } from '../../crm/client-appointment-cancel.service';
@@ -119,7 +119,7 @@ export class BookingPreviewAdapter
       );
       if (!service || !quoted.staff || quoted.staff.id !== staffId)
         return refused();
-      const draftRef = randomUUID();
+      const draftRef = mintBookingCreateFactsRef(quoted.factsHash);
       return accepted({
         subject: 'create',
         sourceCapabilityKey: 'appointments.own.create',
@@ -203,7 +203,7 @@ export class BookingPreviewAdapter
       );
       if (!service || !quoted.staff || quoted.staff.id !== staffId)
         return { outcome: refused(), values: new Map() };
-      const draftRef = randomUUID();
+      const draftRef = mintBookingCreateFactsRef(quoted.factsHash);
       return {
         outcome: accepted({
           subject: 'create',

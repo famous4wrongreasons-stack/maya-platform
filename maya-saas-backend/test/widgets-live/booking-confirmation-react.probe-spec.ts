@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
@@ -15,6 +16,8 @@ import { MockCRMAdapter } from '../../src/crm/adapters/mock-crm.adapter';
 import { ClientChannelLinkService } from '../../src/crm/client-channel-link.service';
 import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
 import { CrmOutcomeUnknownError } from '../../src/crm/crm-request.errors';
+import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
+import { mintBookingCreateFactsRef } from '../../src/widgets/booking/booking-create-facts-ref';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -34,7 +37,7 @@ if (
 )
   throw new Error('Fresh owned booking-confirmation database required');
 type Scenario = {
-  key: 'success' | 'revoked' | 'unknown';
+  key: 'success' | 'revoked' | 'unknown' | 'changed';
   tenant: TenantFixture;
   user: UserFixture;
   clientId: string;
@@ -124,6 +127,25 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
       provider: CrmProvider.MOCK,
       apiToken: 'synthetic-no-credential',
     });
+    const syntheticSlots = adapter.getAvailableSlots.bind(adapter);
+    adapter.getAvailableSlots = async (params) => {
+      const slots = await syntheticSlots(params);
+      const services = (await adapter.getServices(params.tenantId)).filter(
+        (service) => params.serviceIds?.includes(service.id),
+      );
+      if (services.length !== params.serviceIds?.length)
+        throw new Error('Synthetic selected services incomplete');
+      const duration = services.reduce(
+        (sum, service) => sum + service.duration_minutes,
+        0,
+      );
+      return slots.map((slot) => ({
+        ...slot,
+        end: new Date(
+          new Date(slot.start).getTime() + duration * 60000,
+        ).toISOString(),
+      }));
+    };
     adapter.createAppointment = async (params) => {
       try {
         await fetch(providerUrl + '/bookings', {
@@ -166,7 +188,7 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
         expect(
           input.messages.filter((m) => m.role === 'user').at(-1)?.content,
         ).toBe('Покажи услуги для записи');
-        if (modelCalls > 6) throw new Error('Unbounded model loop');
+        if (modelCalls > 8) throw new Error('Unbounded model loop');
         return Promise.resolve({
           reply: input.toolResults.length
             ? 'Выберите услугу для записи.'
@@ -300,8 +322,68 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
     const scenarios: Scenario[] = [];
     // Canonical link creation uses serializable transactions; prepare the
     // three owned fixtures serially as well as the browser scenarios.
-    for (const key of ['success', 'revoked', 'unknown'] as const)
+    for (const key of ['success', 'revoked', 'unknown', 'changed'] as const)
       scenarios.push(await scenario(key));
+    const stores = new WidgetStoresService(db.prisma);
+    const tenantId = scenarios[0].tenant.id;
+    const reference = mintBookingCreateFactsRef('a'.repeat(64));
+    const now = new Date();
+    const read = (
+      tenant = tenantId,
+      principal = 'd'.repeat(64),
+      ref = reference,
+      at = now,
+    ) =>
+      db.tenantContext.runAsSystemTenant(tenant, () =>
+        stores.readBookingCreateFactsHash(tenant, ref, principal, at),
+      );
+    const draft = await db.tenantContext.runAsSystemTenant(tenantId, () =>
+      stores.putDraft(
+        {
+          tenantId,
+          draftRef: reference,
+          draftClass: 'task',
+          ownerCapabilitySpace: 'C9',
+          ownerCapabilityKey: 'c9.booking.propose',
+          principalProofHash: 'd'.repeat(64),
+          diff: { syntheticContentMustNotBeRead: true },
+          ttlSeconds: 900,
+        },
+        now,
+      ),
+    );
+    expect(await read()).toBe('a'.repeat(64));
+    expect(await read(scenarios[1].tenant.id)).toBeNull();
+    expect(await read(tenantId, 'e'.repeat(64))).toBeNull();
+    expect(
+      await read(
+        tenantId,
+        'd'.repeat(64),
+        mintBookingCreateFactsRef('a'.repeat(64)),
+      ),
+    ).toBeNull();
+    expect(
+      await read(
+        tenantId,
+        'd'.repeat(64),
+        reference,
+        new Date(now.getTime() + 900000),
+      ),
+    ).toBeNull();
+    await db.prisma.widgetDraft.update({
+      where: { id: draft.id },
+      data: { erasedAt: now, diffJson: Prisma.DbNull },
+    });
+    expect(await read()).toBeNull();
+    observations.draftFactsRead = {
+      actualPostgres: true,
+      foreignTenantRefused: true,
+      foreignPrincipalRefused: true,
+      mismatchedRefRefused: true,
+      expiredRefused: true,
+      erasedRefused: true,
+      conversationContentNeeded: false,
+    };
     const selectedStarts = new Map<string, string>();
     await new Promise<void>((resolve, reject) => {
       const child = spawn(
@@ -368,6 +450,11 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
               expect(m.confirmation.body.staff_label.value).toBe(s.staffName);
               selectedStarts.set(s.key, m.selectedStart);
               if (s.key === 'revoked') await revoke(s);
+              if (s.key === 'changed')
+                await db.prisma.internalService.update({
+                  where: { id: s.serviceId },
+                  data: { price: { increment: 1 } },
+                });
             } else if (s.key === 'success') {
               expect(await db.prisma.actionExecution.count({ where })).toBe(1);
               const execution =
@@ -392,7 +479,7 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
               );
               expect(appointment.serviceIds).toEqual([s.serviceId]);
               expect(await db.prisma.appointment.count({ where })).toBe(1);
-            } else if (s.key === 'revoked') {
+            } else if (s.key === 'revoked' || s.key === 'changed') {
               expect(await db.prisma.actionExecution.count({ where })).toBe(0);
               expect(await db.prisma.appointment.count({ where })).toBe(0);
               observations[m.name] = { actionExecutions: 0, appointments: 0 };
@@ -437,6 +524,6 @@ describe('Current React canonical booking confirmation [SCRIPTED MODEL / SYNTHET
         );
       });
     });
-    expect(checkpoints).toHaveLength(9);
+    expect(checkpoints).toHaveLength(12);
   }, 180000);
 });

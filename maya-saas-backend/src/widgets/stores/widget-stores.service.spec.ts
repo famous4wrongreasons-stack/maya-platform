@@ -842,6 +842,7 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
         'liveCandidates',
         'lowerToUserTurn',
         'putDraft',
+        'readBookingCreateFactsHash',
         'readDraft',
         'readTimeline',
         'reconcileAcceptedReceipt',

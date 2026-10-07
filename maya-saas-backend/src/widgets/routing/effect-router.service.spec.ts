@@ -26,6 +26,7 @@ const PRINCIPAL: PrincipalView = {
 
 const fixture = () => {
   const stores = {
+    readBookingCreateFactsHash: jest.fn().mockResolvedValue('a'.repeat(64)),
     claimIntentRecord: jest.fn().mockResolvedValue(true),
     writeReceipt: jest.fn().mockResolvedValue({ id: 'receipt-1' }),
     reconcileAcceptedReceipt: jest.fn().mockResolvedValue(true),
@@ -375,6 +376,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
             capabilitySpace: 'AE',
             capabilityKey: 'crm.appointment.create.v1',
             confirmationIdempotencyKey: 'server-key',
+            confirmationOfRef: 'draft-ref',
           }),
           {
             principal: PRINCIPAL,
@@ -387,6 +389,40 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       route: { receipt_outcome: 'ACCEPTED' },
     });
     expect(commits.commit).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses a missing live draft witness before calling the canonical creator', async () => {
+    const h = fixture();
+    h.stores.readBookingCreateFactsHash.mockResolvedValue(null);
+    const input = ctx(
+      rec({
+        effect: 'COMMIT',
+        widgetKind: 'BOOKING_CONFIRMATION',
+        capabilitySpace: 'AE',
+        capabilityKey: 'crm.appointment.create.v1',
+        confirmationIdempotencyKey: 'server-key',
+        confirmationOfRef: 'sealed-draft-ref',
+      }),
+      { principal: PRINCIPAL, facts: { resolvedNouns: RESOLVED } },
+    );
+    await expect(routeEffect(h.router, input)).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: {
+        receipt_outcome: 'REFUSED',
+      },
+    });
+    expect(h.commits.commit).not.toHaveBeenCalled();
+    expect(h.stores.writeReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({ refusalCode: 'booking_confirmation_required' }),
+      input.now,
+    );
+    expect(h.stores.readBookingCreateFactsHash).toHaveBeenCalledTimes(1);
+    expect(h.stores.readBookingCreateFactsHash).toHaveBeenCalledWith(
+      input.actor.tenantId,
+      'sealed-draft-ref',
+      PRINCIPAL.proofHash,
+      input.now,
+    );
   });
 
   it('G13-P08 routes APPROVAL COMMIT by the server-owned approvalDecision', async () => {

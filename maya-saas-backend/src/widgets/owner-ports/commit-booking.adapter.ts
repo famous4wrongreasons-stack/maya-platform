@@ -125,6 +125,11 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
     };
     switch (record.capabilityKey) {
       case 'crm.appointment.create.v1': {
+        if (
+          !input.expectedBookingFactsHash ||
+          !/^[a-f0-9]{64}$/.test(input.expectedBookingFactsHash)
+        )
+          return Promise.reject(new Error('BOOKING_FACTS_REQUIRED'));
         const staffId = nouns.get('staff');
         const serviceId = nouns.get('service');
         const start = nouns.get('slot') ?? nouns.get('start');
@@ -139,7 +144,10 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
             start,
             ...(nouns.get('branch') ? { branchId: nouns.get('branch') } : {}),
           },
-          invocation,
+          {
+            ...invocation,
+            expectedBookingFactsHash: input.expectedBookingFactsHash,
+          },
         );
       }
       case 'crm.appointment.cancel.v1': {
