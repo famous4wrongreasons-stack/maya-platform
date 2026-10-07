@@ -2,7 +2,7 @@
 
 Status: **PLAN ONLY / NOT AUTHORIZED / NOT EXECUTED**. One future candidate, one immutable corpus/fixture/rubric manifest, one budget ledger. The old paid pilot is closed; its permit, counters, fixtures and TTL are not reused. This plan does not establish that the owner's app, YCLIENTS integration, OCR or current model work in real use.
 
-Offline continuation: [the new bounded harness and corpus are implemented](MAYA-CURRENT-CANDIDATE-OFFLINE-CHECKPOINT-20261007.md). Actual serializer probing found a 124,386-byte Admin planner body against the proposed 98,304-byte cap with role-only/all-features descriptors. HTTP fixture bindings and exact feature filtering are still pending. This negative prerequisite result does not admit a paid batch or justify silently raising its limit.
+Current continuation: the [full authenticated offline HTTP corpus](MAYA-CURRENT-CANDIDATE-OFFLINE-HTTP-CHECKPOINT-20261007.md) resolved the historical serializer-size and HTTP-binding gaps; the [keyless broker/read-boundary checkpoint](MAYA-CURRENT-CANDIDATE-BOUNDARY-PREREQUISITES-20261007.md) and [native YC branch-source correction](MAYA-YCLIENTS-BRANCH-AVAILABILITY-CHECKPOINT-20261007.md) qualify affected subsets. These do not admit paid execution. The [current exact prerequisites](MAYA-REAL-MODEL-PREREQUISITES-20261007.md) supersede the historical setup gaps below: server/profile and credential reference remain unknown; the current broker/gate is offline-only, and full-corpus dry proof is pending for the latest branch candidate.
 
 ## Reusable evidence and actual gaps
 
@@ -29,7 +29,7 @@ Each group has three dialogs: ordinary use, clarification/correction, and a nega
 
 Each fixture pins actor role, tenant/branch, Client linkage if applicable, features, integration/source revision, allowed outcome and forbidden claims. Expected labels and gold text never enter model input. Zero-model deterministic paths remain product regression cases and contribute zero to real-model coverage.
 
-**Excluded and reported BLOCKED/NOT_TESTED:** goods UI money COMMIT until its exact contract decision, real receipt admission until provider scope semantics are qualified, real OCR, provider writes, never-linked Client bootstrap, broad external staff/service management and background C10. An expected refusal proves the boundary, not the missing function. Goods catalog create/update and stock receipt are different operations.
+**Excluded and reported BLOCKED/NOT_TESTED:** real goods receipt execution (the exact F32b/F74b UI decision is already approved and locally implemented), real receipt admission until provider scope semantics are qualified, real OCR, provider writes, never-linked Client bootstrap, broad external staff/service management and background C10. An expected refusal proves the boundary, not the missing function. Goods catalog create/update and stock receipt are different operations.
 
 ## Proposed maximums, subject to a fresh explicit decision
 
@@ -44,7 +44,7 @@ Each fixture pins actor role, tenant/branch, Client linkage if applicable, featu
 | Request timeout / whole batch | 30 seconds / 60 minutes |
 | Serialized request body | 96 KiB |
 
-All ceilings apply simultaneously. Exceeding any ceiling stops the batch; remaining cases are UNEXECUTED, not PASS. One user turn can invoke up to three tool steps and two attempts per model stage, so turn count is not upstream request count. The old gate does **not** implement the new aggregate token ceilings: implementing and offline-testing that enforcement is a prerequisite, not a completed item.
+All ceilings apply simultaneously. Exceeding any ceiling stops the batch; remaining cases are UNEXECUTED, not PASS. One user turn can invoke up to three tool steps and two attempts per model stage, so turn count is not upstream request count. The historical gate did not implement aggregate token ceilings. The current offline candidate gate now does, with archived tests; its mode remains OFFLINE_SYNTHETIC_ONLY and this does not authorize or implement paid dispatch.
 
 Candidate model identity must be frozen with the final runnable manifest. The current local pilot configuration names `deepseek-v4-pro`; that is a candidate identifier, not new paid authorization or proof of present provider availability. The repository's historical 2026-10-05 rates are USD 1.32/M input and 3.96/M output. At those historical rates the proposed token ceilings reserve USD 11.33856768. This is a calculation from saved configuration, not current price verification or an account-debit claim. Verify official current pricing and freeze its source/hash before proposing the final paid scope; if it exceeds USD 12, reduce scope or seek a changed ceiling, never silently raise it.
 

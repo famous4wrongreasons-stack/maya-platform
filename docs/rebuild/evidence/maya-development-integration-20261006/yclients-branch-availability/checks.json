@@ -1,0 +1,16 @@
+{
+  "unitTests": 213,
+  "unitSuites": 6,
+  "unitAttempt01": "171 tests in four suites passed; requested fifth suite path was misspelled and absent; corrected complete six-suite invocation is attempt02",
+  "productionTypeScript": "PASS",
+  "completeWidgetsLiveTypeScript": "PASS",
+  "scopedEslint": "PASS zero errors/warnings",
+  "diffCheck": "PASS",
+  "httpTests": 1,
+  "har13Passed": 2,
+  "har13Skipped": 143,
+  "runtimeCodeCommit": "7547f32ea268acc2e65e73fd6ccc1df25c075cbf",
+  "testedCommit": "8c8b9657ebdab83ae9d25744b7b49c661496c6a1",
+  "fixtureOnlyFollowup": "JSON value comparison across Jest realms",
+  "heavyRun": "serial own cluster; no aggregate gates"
+}

@@ -1,0 +1,19 @@
+{
+  "candidateCommit": "8c8b9657ebdab83ae9d25744b7b49c661496c6a1",
+  "bindingManifestSha256": "0b0cdeff8d0c958a2ad2f6e4e32a0c13dd9b23f4e3eb68bd3accfd69493d753f",
+  "verifiedSourcePaths": 38,
+  "sourceHashesMatchCurrentCode": true,
+  "requestTuplesAndBudgetMatch": true,
+  "ledgersClosed": true,
+  "brokerStopped": true,
+  "clusterStopped": true,
+  "postmasterPidFileAbsent": true,
+  "selectedDialogs": 3,
+  "selectedTurns": 5,
+  "sourcePreflights": 21,
+  "nativeYclientsSyntheticReads": 1,
+  "nativeYclientsNetworkCalls": 0,
+  "paidCalls": 0,
+  "providerWrites": 0,
+  "qualification": "OFFLINE_MECHANICS_ONLY_NOT_MODEL_OR_LIVE_PROVIDER_ACCEPTANCE"
+}

@@ -1,0 +1,19 @@
+{
+  "contract": "maya.current-candidate-dry-broker/1",
+  "mode": "NO_UPSTREAM_ONLY",
+  "candidate": "7547f32ea268acc2e65e73fd6ccc1df25c075cbf",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "startedAt": "2026-10-07T14:34:08.616Z",
+  "expiresAt": "2026-10-07T15:34:08.616Z",
+  "lifetimeMs": 3600000,
+  "requests": [],
+  "rejections": [],
+  "stopped": true,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-07T14:34:14.059Z",
+  "stats": null
+}

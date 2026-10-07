@@ -1,0 +1,65 @@
+{
+  "contract": "maya.current-candidate-dry-broker/1",
+  "mode": "NO_UPSTREAM_ONLY",
+  "candidate": "8c8b9657ebdab83ae9d25744b7b49c661496c6a1",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "startedAt": "2026-10-07T14:35:45.239Z",
+  "expiresAt": "2026-10-07T15:35:45.239Z",
+  "lifetimeMs": 3600000,
+  "requests": [
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 1,
+      "bytes": 66968,
+      "bodySha256": "c4d7e53a5d0b7c7b93522b053acabbab858168d2852e984086cd9ed90e97cb61",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-ordinary",
+      "turn": 2,
+      "bytes": 67799,
+      "bodySha256": "f8f974c0913f50454ec0c3b1db66d558a4371f97609c30676d5ba873654520f5",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 1,
+      "bytes": 66968,
+      "bodySha256": "18d1d8302e65a366868dd047731ab11883a299621892e1866d2fd0a2d24da39a",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-correction",
+      "turn": 2,
+      "bytes": 67851,
+      "bodySha256": "320fa3b16a6096fe689b097bf1857a6c9b8ca2081a7a1d0a221caf2033704587",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "bytes": 66809,
+      "bodySha256": "afc9949ba5effbad052ac05d94696f9672b56437c69c471935cfa0abc6fab380",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "bindingManifestSha256": "0b0cdeff8d0c958a2ad2f6e4e32a0c13dd9b23f4e3eb68bd3accfd69493d753f",
+  "verifiedSourcePaths": 38,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-07T14:36:14.451Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 356875,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 494835000,
+    "halted": false
+  }
+}

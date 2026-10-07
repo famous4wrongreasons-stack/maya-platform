@@ -1,0 +1,11 @@
+{
+  "status": "FAILED_FIXTURE_ASSERTION_NOT_PRODUCT_ACCEPTANCE",
+  "reason": "node:assert deepStrictEqual compared URLSearchParams arrays from different Jest realms; values matched but prototypes differed",
+  "fix": "Exact JSON value/order comparison; same finite method, destination, path and query contract retained",
+  "candidate": "7547f32ea268acc2e65e73fd6ccc1df25c075cbf",
+  "modelDispatches": 0,
+  "upstreamCalls": 0,
+  "brokerStopped": true,
+  "clusterStopped": true,
+  "fullHttpReportWritten": false
+}

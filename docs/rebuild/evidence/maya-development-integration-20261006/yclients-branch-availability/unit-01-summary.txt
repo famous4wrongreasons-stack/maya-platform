@@ -1,0 +1,7 @@
+FAIL src/orchestration/c9-occupancy.service.spec.ts
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9-occupancy.service.spec.ts'
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       171 passed, 171 total
+Snapshots:   0 total
+Time:        1.117 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/appointments/appointments.service.spec.ts", "src/crm/opportunity-lifecycle.runner.spec.ts", "src/orchestration/c9-occupancy.service.spec.ts".

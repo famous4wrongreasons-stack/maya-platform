@@ -1,0 +1,35 @@
+{
+  "kind": "native-yclients-branch-availability-offline-checkpoint",
+  "testedCodeCommit": "8c8b9657ebdab83ae9d25744b7b49c661496c6a1",
+  "runtimeChangeCommit": "7547f32ea268acc2e65e73fd6ccc1df25c075cbf",
+  "rawRuns": [
+    "/tmp/maya-candidate-yc-branch-20261007-01",
+    "/tmp/maya-candidate-yc-branch-20261007-02"
+  ],
+  "status": "OFFLINE_MECHANICS_PASS_WITH_QUALIFIERS",
+  "failedAttemptPreserved": true,
+  "files": {
+    "checks.json": "f9507392b572f0235058ea77d7c0d5705123ba929e249ec6ca9669a0c16003f1",
+    "failed-01/broker-report.json": "77c6a93146c19095b7ea0f9244a8806db41e652f6dc2bd3d227c786933e61a4f",
+    "failed-01/candidate-manifest.json": "e9146555017fecae70203c237283a0c4fe7278e447f5ce0fd53b3483ef2b047d",
+    "failed-01/failure.json": "5059f44ef2151f60d90508bcde885330ff0b131ef2630481e5b163a36b5631b7",
+    "failed-01/har13-jest-summary.json": "2bb0aae5868c6b9dd6e9492bf5c0e88283c34db6c5f6b9951e6008c74c8ce35c",
+    "failed-01/jest-summary.json": "280a8e7d4c32521117109fdc907d62dc9c5cb14f59823b816eb88bc471f60303",
+    "failed-01/ledger.jsonl": "d8a6349e2cfd51552c4d30413d12ae48d1f80a93eb82df77e3c17618fdf5e3b9",
+    "failed-01/manifest.json": "f612f06c3e0c7f5ef8c9cfd6fea14e4cd9ec8bd77df334558f7339e38b15a080",
+    "final-02/broker-ledger.jsonl": "8d75a46e75dff2f239e45b9c83c087d453037602328bdb6a7902eaf4d9ec3336",
+    "final-02/broker-report.json": "3fba3e02bce2fb207e349d57873e1cea2045b39e3e737bf49a344ce608416f39",
+    "final-02/candidate-manifest.json": "c2f1fcfc3ab88616b6fd295643790b3403b0300c8229fd1fcd658a76fb7ce61f",
+    "final-02/har13-jest-summary.json": "35467b1b614cbbbec71ad6d36a42cbd5e5f0ab0f89adf42882feda076539d182",
+    "final-02/http-report.json": "e16b940942ffc00daf3608f872780012363f48c1d7be808fe90bd73c7e3f569e",
+    "final-02/jest-summary.json": "d8c2530b51e134830d6c8cc238c69706d7e58e5228b440ea448dacbac4826f48",
+    "final-02/ledger.jsonl": "e3023866ee67139ada3e1a07070528ee2c46808e184ba0a4b083c0614a777b40",
+    "final-02/manifest.json": "51ff541075ed89de706cb383c980bf5759eba6b60a9ccb574de17289ea049253",
+    "final-02/source-preflights.json": "b7ec645e66c226f528b53d8c607f8eb2a008920e0c781ea03f1d4f523c95272d",
+    "final-02/verification.json": "0f0bbd0227d625af539f664b96fd1be19efdb863f23cab9093c6789f4fbdd58e",
+    "independent-review.txt": "13d9e521440bb15911a60282de8bcbff9ee0ebb49aa7a5106294e807be7212d6",
+    "unit-01-summary.txt": "942649c70a6ba3432fcae0f91b49015eab45f2380ae445ab3cb787f1f5a99780",
+    "unit-02-summary.txt": "290e50507e67987e12a99af4f3fbfbdaf4083cbbc29ca2aacc3fe7b708c5ccc9"
+  },
+  "independentReview": "PASS_WITH_OFFLINE_SCOPE_QUALIFIERS"
+}

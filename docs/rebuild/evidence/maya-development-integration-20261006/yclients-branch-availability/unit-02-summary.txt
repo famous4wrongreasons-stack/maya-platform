@@ -1,0 +1,5 @@
+Test Suites: 6 passed, 6 total
+Tests:       213 passed, 213 total
+Snapshots:   0 total
+Time:        0.973 s, estimated 2 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/appointments/appointments.service.spec.ts", "src/crm/opportunity-lifecycle.runner.spec.ts", "src/orchestration/c9.occupancy-source.spec.ts", "src/orchestration/c9.occupancy.spec.ts".
