@@ -1,3 +1,5 @@
+import { GoodsPhotoService, GoodsPhotoParser } from './goods-photo.service';
+import { GoodsPhotoController } from './goods-photo.controller';
 import { C9Module } from '../orchestration/c9.module';
 import { C8Module } from '../valuation/c8.module';
 import { MeasurementModule } from '../measurement/measurement.module';
@@ -65,8 +67,10 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
     Package5Wave1Module,
     RecoveryModule,
   ],
-  controllers: [AiCoreController, AiToolsController],
+  controllers: [AiCoreController, AiToolsController, GoodsPhotoController],
   providers: [
+    GoodsPhotoService,
+    GoodsPhotoParser,
     MayaBrainRouterService,
     ConversationIntelligenceService,
     AiCoreModelService,

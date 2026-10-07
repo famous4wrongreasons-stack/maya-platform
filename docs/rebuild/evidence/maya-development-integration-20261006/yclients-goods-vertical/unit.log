@@ -1,0 +1,24 @@
+PASS src/entitlements/widget-release-profile.contract.spec.ts
+PASS src/ai-tools/goods-photo.service.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/crm/crm.service.spec.ts
+PASS src/action-engine/action-engine.registry.spec.ts
+[33m[Nest] 32158  - [39m10/07/2026, 11:33:31 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM preview failed provider=yclients operation=connection_check status=unknown[39m
+[33m[Nest] 32158  - [39m10/07/2026, 11:33:31 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token[39m
+[33m[Nest] 32158  - [39m10/07/2026, 11:33:31 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured[39m
+[33m[Nest] 32158  - [39m10/07/2026, 11:33:31 AM [33m   WARN[39m [38;5;3m[CrmService] [39m[33mCRM team access synchronization deferred tenant=tenant-1: unavailable[39m
+PASS src/domain/boundary.spec.ts
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/crm/goods-receipt.contract.spec.ts
+PASS src/widgets/emission/intent-template.registry.spec.ts
+PASS src/orchestration/c9.registry.architecture.spec.ts
+PASS src/ai-tools/goods-presentation.spec.ts
+PASS src/crm/yclients-goods-read.spec.ts
+
+Test Suites: 13 passed, 13 total
+Tests:       294 passed, 294 total
+Snapshots:   0 total
+Time:        1.787 s, estimated 2 s
+Ran all test suites within paths "src/crm/goods-receipt.contract.spec.ts", "src/ai-tools/goods-photo.service.spec.ts", "src/ai-tools/goods-presentation.spec.ts", "src/crm/yclients-goods-read.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/crm/crm.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/domain/boundary.spec.ts", "src/orchestration/c9.registry.architecture.spec.ts", "src/action-engine/action-engine.registry.spec.ts", "src/entitlements/widget-release-profile.contract.spec.ts", "src/widgets/emission/intent-template.registry.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-vertical-unit.json

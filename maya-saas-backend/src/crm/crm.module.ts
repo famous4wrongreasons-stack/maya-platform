@@ -1,3 +1,4 @@
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { AvailabilityCalendarService } from './availability-calendar.service';
 import { ClientReverificationController } from './client-reverification.controller';
 import { ClientReverificationService } from './client-reverification.service';
@@ -76,6 +77,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 
 @Module({
   imports: [
+    EntitlementsModule,
     NativeFeedbackFoundationModule,
     ClientProfileReadModule,
     ActionEngineModule,

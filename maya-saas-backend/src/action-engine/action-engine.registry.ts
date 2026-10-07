@@ -1,3 +1,4 @@
+import { goodsReceiptCapability } from './goods-receipt.contract';
 import { nativeFeedbackCapabilities } from '../native-feedback/native-feedback.contract';
 import { servicePriceCapability } from './service-price.contract';
 import {
@@ -3449,6 +3450,7 @@ function provenCommunicationCapability(input: {
 
 const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   servicePriceCapability,
+  goodsReceiptCapability,
   {
     ...provenCommunicationCapability({
       capability: BULK_ROOT_CAPABILITY,

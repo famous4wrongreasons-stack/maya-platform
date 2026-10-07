@@ -1,3 +1,7 @@
+import {
+  GOODS_RECEIPT_TOOL,
+  goodsProposal,
+} from '../crm/goods-receipt.contract';
 import { SERVICE_CATALOG_READ_CONTRACT } from '../crm/service-catalog-read';
 import {
   ConflictException,
@@ -157,6 +161,50 @@ export class AiToolRuntimeService {
       principal,
       definition,
     );
+    // Goods retry keeps the exact approved source version. New OCR/current
+    // source state cannot regenerate the old effect under its retry key.
+    if (toolName === GOODS_RECEIPT_TOOL && dto.idempotencyKey) {
+      const saved = await this.prisma.aiApprovalRequest.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: principal.tenantId,
+            idempotencyKey: dto.idempotencyKey,
+          },
+        },
+      });
+      if (saved) {
+        if (
+          saved.status === APPROVAL_STATUS.PENDING &&
+          saved.expiresAt <= new Date()
+        ) {
+          await this.markExpired(saved);
+          this.approvalConflict('goods_proposal_expired');
+        }
+        const savedArgs = this.registry.validateArguments(
+          toolName,
+          this.parseJson(this.encryption.decrypt(saved.encryptedArguments)),
+        );
+        if (
+          this.canonicalJson(goodsProposal(savedArgs)) !==
+          this.canonicalJson(goodsProposal(validated))
+        )
+          this.approvalConflict('ai_approval_idempotency_conflict');
+        await this.handler.normalizeArguments(
+          'inventory.goods.read',
+          principal,
+          { goods_id: savedArgs.goods_id },
+        );
+        if (['rejected', 'expired', 'failed'].includes(saved.status))
+          this.approvalConflict('goods_proposal_no_longer_pending');
+        return this.requestApproval(
+          principal,
+          definition,
+          savedArgs,
+          this.inputHash(toolName, savedArgs, principal),
+          dto.idempotencyKey,
+        );
+      }
+    }
     // A retry carries the same user proposal, not a newly observed before-state.
     // Never regenerate an already approved mutation from today's provider price.
     if (toolName === SERVICE_PRICE_TOOL && dto.idempotencyKey) {
@@ -778,6 +826,16 @@ export class AiToolRuntimeService {
       this.assertSurface(approval.surface),
     );
     const definition = this.registry.get(approval.toolName);
+    if (approval.toolName === GOODS_RECEIPT_TOOL) {
+      await this.policy.assertCanExecute(principal, definition);
+      const savedArgs = this.registry.validateArguments(
+        approval.toolName,
+        this.parseJson(this.encryption.decrypt(approval.encryptedArguments)),
+      );
+      await this.handler.normalizeArguments('inventory.goods.read', principal, {
+        goods_id: savedArgs.goods_id,
+      });
+    }
     this.policy.assertCanDecide(
       definition,
       approval.requestedByUserId,
@@ -1084,6 +1142,128 @@ export class AiToolRuntimeService {
     );
   }
 
+  private async admitGoodsApproval(
+    data: Prisma.AiApprovalRequestUncheckedCreateInput,
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw(
+        Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:goods-review:${principal.userId}:${String(args.photo_sha256)}:${String(args.source_line)}`},0))`,
+      );
+      const raced = await tx.aiApprovalRequest.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: principal.tenantId,
+            idempotencyKey: data.idempotencyKey,
+          },
+        },
+      });
+      if (raced) {
+        this.assertSameApproval(
+          raced,
+          this.registry.get(GOODS_RECEIPT_TOOL),
+          principal,
+          data.payloadHash,
+        );
+        return raced;
+      }
+      const where: Prisma.AiApprovalRequestWhereInput = {
+        tenantId: principal.tenantId,
+        requestedByUserId: principal.userId,
+        toolName: GOODS_RECEIPT_TOOL,
+        AND: [
+          {
+            payloadPreviewJson: {
+              path: ['photo_sha256'],
+              equals: String(args.photo_sha256),
+            },
+          },
+          {
+            payloadPreviewJson: {
+              path: ['source_line'],
+              equals: Number(args.source_line),
+            },
+          },
+        ],
+      };
+      // Serialize supersession with the existing approval CAS, which locks the
+      // same rows. A replacement cannot stay pending after an older effect starts.
+      await tx.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "AiApprovalRequest"
+        WHERE "tenantId" = ${principal.tenantId}
+          AND "requestedByUserId" = ${principal.userId}
+          AND "toolName" = ${GOODS_RECEIPT_TOOL}
+          AND "payloadPreviewJson"->>'photo_sha256' = ${String(args.photo_sha256)}
+          AND "payloadPreviewJson"->>'source_line' = ${String(args.source_line)}
+        ORDER BY "id" FOR UPDATE
+      `);
+      const previous = await tx.aiApprovalRequest.findMany({
+        where,
+        select: { status: true, payloadPreviewJson: true },
+      });
+      if (
+        previous.some((row) =>
+          ['approved', 'executing', 'completed'].includes(row.status),
+        )
+      )
+        this.approvalConflict('goods_previous_receipt_unresolved_or_completed');
+      const version = previous.reduce(
+        (max, row) =>
+          Math.max(
+            max,
+            Number(
+              (row.payloadPreviewJson as Record<string, unknown>)
+                .review_version,
+            ) || 0,
+          ),
+        0,
+      );
+      if (Number(args.review_version) !== version + 1)
+        this.approvalConflict('goods_review_version_conflict');
+      await tx.aiApprovalRequest.updateMany({
+        where: { ...where, status: APPROVAL_STATUS.PENDING },
+        data: {
+          status: APPROVAL_STATUS.REJECTED,
+          errorCode: 'goods_proposal_superseded',
+        },
+      });
+      return tx.aiApprovalRequest.create({ data });
+    });
+  }
+
+  private async projectGoodsApproval(
+    approval: ApprovalRecord,
+    replayed: boolean,
+  ) {
+    // Source/authority reads and admission waits may outlive a user decision.
+    // Project the persisted state after those waits, never the earlier snapshot.
+    const current = await this.prisma.aiApprovalRequest.findUniqueOrThrow({
+      where: { id_tenantId: { id: approval.id, tenantId: approval.tenantId } },
+    });
+    if (
+      current.status === APPROVAL_STATUS.PENDING &&
+      current.expiresAt <= new Date()
+    ) {
+      await this.markExpired(current);
+      this.approvalConflict('goods_proposal_expired');
+    }
+    if (current.status === APPROVAL_STATUS.COMPLETED)
+      return this.replayCompletedApproval(current);
+    if (
+      current.status === APPROVAL_STATUS.APPROVED ||
+      current.status === APPROVAL_STATUS.EXECUTING
+    )
+      return this.executeApproved(current);
+    if (current.status !== APPROVAL_STATUS.PENDING)
+      this.approvalConflict('goods_proposal_no_longer_pending');
+    return {
+      status: 'approval_required',
+      approval: this.serializeApproval(current),
+      replayed,
+    };
+  }
+
   private async requestApproval(
     principal: AiToolPrincipal,
     definition: AiToolDefinition,
@@ -1101,6 +1281,8 @@ export class AiToolRuntimeService {
     });
     if (existing) {
       this.assertSameApproval(existing, definition, principal, inputHash);
+      if (definition.name === GOODS_RECEIPT_TOOL)
+        return this.projectGoodsApproval(existing, true);
       if (
         definition.name === SERVICE_PRICE_TOOL &&
         (existing.status === APPROVAL_STATUS.REJECTED ||
@@ -1135,32 +1317,34 @@ export class AiToolRuntimeService {
         now,
       );
       approval =
-        definition.name === SERVICE_PRICE_TOOL
-          ? await this.prisma.$transaction(async (tx) => {
-              await tx.$executeRaw(
-                Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:service-price-proposal:${principal.userId}:${String(args.service_id)}`}, 0))`,
-              );
-              // Only pending proposals for this exact actor/service are superseded.
-              // Approved or dispatched actions retain their durable AE outcome.
-              await tx.aiApprovalRequest.updateMany({
-                where: {
-                  tenantId: principal.tenantId,
-                  requestedByUserId: principal.userId,
-                  toolName: SERVICE_PRICE_TOOL,
-                  status: APPROVAL_STATUS.PENDING,
-                  payloadPreviewJson: {
-                    path: ['service_id'],
-                    equals: String(args.service_id),
+        definition.name === GOODS_RECEIPT_TOOL
+          ? await this.admitGoodsApproval(data, principal, args)
+          : definition.name === SERVICE_PRICE_TOOL
+            ? await this.prisma.$transaction(async (tx) => {
+                await tx.$executeRaw(
+                  Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:service-price-proposal:${principal.userId}:${String(args.service_id)}`}, 0))`,
+                );
+                // Only pending proposals for this exact actor/service are superseded.
+                // Approved or dispatched actions retain their durable AE outcome.
+                await tx.aiApprovalRequest.updateMany({
+                  where: {
+                    tenantId: principal.tenantId,
+                    requestedByUserId: principal.userId,
+                    toolName: SERVICE_PRICE_TOOL,
+                    status: APPROVAL_STATUS.PENDING,
+                    payloadPreviewJson: {
+                      path: ['service_id'],
+                      equals: String(args.service_id),
+                    },
                   },
-                },
-                data: {
-                  status: APPROVAL_STATUS.REJECTED,
-                  errorCode: 'service_price_proposal_superseded',
-                },
-              });
-              return tx.aiApprovalRequest.create({ data });
-            })
-          : await this.prisma.aiApprovalRequest.create({ data });
+                  data: {
+                    status: APPROVAL_STATUS.REJECTED,
+                    errorCode: 'service_price_proposal_superseded',
+                  },
+                });
+                return tx.aiApprovalRequest.create({ data });
+              })
+            : await this.prisma.aiApprovalRequest.create({ data });
     } catch (error) {
       if (!this.isUniqueConstraintError(error)) {
         throw error;
@@ -1193,6 +1377,9 @@ export class AiToolRuntimeService {
         surface: principal.surface,
       },
     });
+
+    if (definition.name === GOODS_RECEIPT_TOOL)
+      return this.projectGoodsApproval(approval, false);
 
     return {
       status: 'approval_required',
@@ -1859,10 +2046,14 @@ export class AiToolRuntimeService {
               contract: 'maya.read-authority/1',
               ...(toolName === 'catalog.services.read'
                 ? { source_projection: SERVICE_CATALOG_READ_CONTRACT }
-                : toolName === 'catalog.staff.read'
-                  ? // READ cache identity only; rejects legacy name-derived facts.
-                    { source_projection: 'maya.public-catalog-source-facts/1' }
-                  : {}),
+                : toolName === 'inventory.goods.read'
+                  ? { source_projection: 'maya.goods-item.read/2' }
+                  : toolName === 'catalog.staff.read'
+                    ? // READ cache identity only; rejects legacy name-derived facts.
+                      {
+                        source_projection: 'maya.public-catalog-source-facts/1',
+                      }
+                    : {}),
               role: principal.role,
               ...principal.readAuthority,
             },

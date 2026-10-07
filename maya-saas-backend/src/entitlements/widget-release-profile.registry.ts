@@ -409,6 +409,8 @@ const snapshot = {
       'expenses.create',
       'expenses.period.complete',
       'expenses.read',
+      'inventory.goods.read',
+      'inventory.goods.receipt.prepare',
       'inventory.stock.read',
       'loyalty.internal.adjust',
       'loyalty.own.read',

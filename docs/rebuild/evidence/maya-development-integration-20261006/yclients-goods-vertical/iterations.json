@@ -1,0 +1,26 @@
+[
+  {
+    "attempt": 1,
+    "status": "failed",
+    "clusterStopped": true,
+    "note": "Probe expected execution_id instead of canonical executionId; earlier assertions including UNKNOWN passed."
+  },
+  {
+    "attempt": 2,
+    "status": "passed",
+    "clusterStopped": true,
+    "note": "Full prepare/restart/resume PASS before final state-projection fix and added race cases."
+  },
+  {
+    "attempt": 3,
+    "status": "failed",
+    "clusterStopped": true,
+    "note": "New cross-owner probe expected failed; canonical pre-admission outcome correctly not_executed; fixed assertion. Probe types also exposed a narrow string-union assertion, corrected before final run."
+  },
+  {
+    "attempt": 4,
+    "status": "passed",
+    "clusterStopped": true,
+    "note": "Final expanded prepare/restart/resume PASS; only formatting changed afterwards."
+  }
+]

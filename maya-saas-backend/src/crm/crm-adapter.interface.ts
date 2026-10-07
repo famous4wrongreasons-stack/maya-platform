@@ -1,3 +1,7 @@
+import type {
+  GoodsReceiptContext,
+  GoodsReceiptResult,
+} from './goods-receipt.contract';
 import type { GoodsItemRead } from './yclients-goods-read';
 import type { ServiceCatalogRead } from './service-catalog-read';
 import { CrmProvider } from '../common/domain.enums';
@@ -503,6 +507,18 @@ export interface CRMAdapter {
   /** Fresh observed catalog facts, before legacy numeric defaults. Not a mutation quote. */
   readServiceCatalog?(tenantId: string): Promise<ServiceCatalogRead>;
   /** Exact goods metadata, separate price meanings/units; not stock or a write quote. */
+  /** Finite receipt port. Actual Yclients writer intentionally unimplemented
+   * pending payload/rights/readback qualification; local proofs inject only this edge. */
+  readGoodsReceiptContext?(
+    tenantId: string,
+    goodsId: string,
+    storeId: string,
+  ): Promise<GoodsReceiptContext>;
+  createGoodsReceipt?(
+    tenantId: string,
+    args: Record<string, unknown>,
+    deadlineAt: number,
+  ): Promise<GoodsReceiptResult>;
   readGoodsItem?(tenantId: string, goodsId: string): Promise<GoodsItemRead>;
   /** Exact management read; the public booking catalog cannot authorize pricing. */
   getServicePriceSnapshot?(

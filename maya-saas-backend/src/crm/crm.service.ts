@@ -1,3 +1,16 @@
+import { EntitlementsService } from '../entitlements/entitlements.service';
+import {
+  goodsProposal,
+  preparedGoods,
+  receiptContextFacts,
+  confirmedReceipt,
+  goodsRefuse,
+  goodsHash,
+  lineTotal,
+  GoodsPreDispatchError,
+  GOODS_RECEIPT_TOOL,
+  GOODS_RECEIPT_CAPABILITY,
+} from './goods-receipt.contract';
 import { goodsId, type GoodsItemRead } from './yclients-goods-read';
 import {
   observedServiceCatalog,
@@ -373,6 +386,7 @@ export class CrmService {
     private readonly internalCalendarService: InternalCalendarService,
     private readonly clientIdentityService: ClientIdentityService,
     private readonly actionEngineRuntime: ActionEngineRuntimeService,
+    private readonly goodsEntitlements?: EntitlementsService,
   ) {}
 
   async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
@@ -934,6 +948,259 @@ export class CrmService {
         'qualified_goods_catalog_unavailable',
       );
     return adapter.readGoodsItem(scopedTenantId, exactId);
+  }
+
+  /** Explicit current actor scope for the external goods ingress. A branch
+   * membership cannot read a configured company's catalog without a canonical
+   * company-to-branch binding; no provider ID is treated as Maya BranchId. */
+  async assertGoodsActor(tenantId: string, userId: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    if (this.tenantContext.get()?.userId !== userId)
+      throw new ForbiddenException('goods_principal_mismatch');
+    const membership = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { userId, tenantId } },
+      include: { user: true },
+    });
+    if (
+      !membership ||
+      membership.status !== 'active' ||
+      membership.user.status !== 'active' ||
+      membership.branchId ||
+      ![UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        membership.role as UserRole,
+      )
+    )
+      throw new ForbiddenException('goods_current_unscoped_owner_required');
+    if (!this.goodsEntitlements)
+      throw new ForbiddenException('goods_current_features_unavailable');
+    for (const feature of [
+      'ai.owner',
+      'commerce.store',
+      'crm.integration',
+    ] as const)
+      await this.goodsEntitlements.assertFeature(tenantId, feature);
+    await this.assertExternalSource(tenantId);
+  }
+
+  private async goodsContext(tenantId: string, userId: string) {
+    await this.assertGoodsActor(tenantId, userId);
+    const integration = await this.getStoredIntegration(tenantId);
+    if (integration.provider !== 'yclients' || integration.status !== 'active')
+      throw new ConflictException('goods_yclients_integration_required');
+    const settings = integration.settingsJson as Record<string, unknown>;
+    const companyId = goodsId(settings.companyId);
+    const revision = servicePriceHash({
+      tenantId,
+      id: integration.id,
+      provider: integration.provider,
+      settings: integration.settingsJson,
+      baseUrl: integration.baseUrl,
+      credential: this.encryptionService.opaqueReference(
+        'goods-integration',
+        integration.encryptedApiToken,
+      ),
+    });
+    const adapter = await this.getAdapterForTenant(tenantId);
+    return { adapter, revision, companyId };
+  }
+
+  async goodsReadIdentity(tenantId: string, userId: string) {
+    return (await this.goodsContext(tenantId, userId)).revision;
+  }
+
+  async readGoodsForActor(
+    tenantId: string,
+    userId: string,
+    id: string,
+    expectedRevision: string,
+  ) {
+    const before = await this.goodsContext(tenantId, userId);
+    if (before.revision !== expectedRevision)
+      throw new ConflictException('goods_source_changed');
+    const result = await this.readGoodsItem(tenantId, id);
+    const after = await this.goodsContext(tenantId, userId);
+    if (
+      after.revision !== before.revision ||
+      result.company_id !== before.companyId
+    )
+      throw new ConflictException('goods_source_changed');
+    return result;
+  }
+
+  async prepareGoodsReceipt(tenantId: string, userId: string, value: unknown) {
+    const proposal = goodsProposal(value),
+      context = await this.goodsContext(tenantId, userId);
+    if (
+      !context.adapter.readGoodsReceiptContext ||
+      !context.adapter.createGoodsReceipt
+    )
+      goodsRefuse('goods_receipt_provider_not_qualified');
+    const source = await context.adapter.readGoodsReceiptContext(
+      tenantId,
+      String(proposal.goods_id),
+      String(proposal.store_id),
+    );
+    const facts = receiptContextFacts(source, proposal, context.companyId);
+    if (
+      (await this.goodsContext(tenantId, userId)).revision !== context.revision
+    )
+      goodsRefuse('goods_integration_changed');
+    return preparedGoods({
+      ...proposal,
+      ...facts,
+      integration_revision: context.revision,
+      line_total: lineTotal(
+        String(proposal.quantity),
+        String(proposal.unit_cost),
+      ),
+    });
+  }
+
+  async applyGoodsReceipt(
+    tenantId: string,
+    userId: string,
+    value: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<Record<string, unknown>> {
+    const args = preparedGoods(value),
+      context = await this.goodsContext(tenantId, userId);
+    if (
+      !args.current_revision ||
+      !context.adapter.readGoodsReceiptContext ||
+      !context.adapter.createGoodsReceipt
+    )
+      goodsRefuse('goods_receipt_provider_not_qualified');
+    const approval = await this.prisma.aiApprovalRequest.findUnique({
+      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+    });
+    const authorize = async (beforeDispatch = false) => {
+      const fresh = await this.goodsContext(tenantId, userId);
+      const row =
+        approval &&
+        (await this.prisma.aiApprovalRequest.findUnique({
+          where: { id_tenantId: { id: approval.id, tenantId } },
+        }));
+      if (
+        !row ||
+        row.toolName !== GOODS_RECEIPT_TOOL ||
+        row.requestedByUserId !== userId ||
+        row.requestedByTenantId !== tenantId ||
+        row.decidedByUserId !== userId ||
+        row.decidedByTenantId !== tenantId ||
+        !row.decidedAt ||
+        row.decidedAt > row.expiresAt ||
+        !['approved', 'executing', 'completed'].includes(row.status) ||
+        (beforeDispatch && row.expiresAt <= new Date()) ||
+        stableActionJson(
+          JSON.parse(this.encryptionService.decrypt(row.encryptedArguments)),
+        ) !== stableActionJson(args)
+      )
+        goodsRefuse('goods_exact_approval_required');
+      if (
+        fresh.revision !== args.integration_revision ||
+        fresh.companyId !== args.company_id
+      )
+        goodsRefuse('goods_integration_changed');
+    };
+    await authorize();
+    if (!approval) goodsRefuse('goods_exact_approval_required');
+    const photoRef = `goods-photo:${goodsHash({ photo: args.photo_sha256, line: args.source_line })}`;
+    const sourceRef = `${photoRef}:${approval.id}`;
+    const targetRef = `yclients-goods/${String(args.company_id)}/${String(args.goods_id)}/store/${String(args.store_id)}`;
+    const observe = async () => {
+      await authorize(true);
+      const current = await context.adapter.readGoodsReceiptContext!(
+        tenantId,
+        String(args.goods_id),
+        String(args.store_id),
+      );
+      const facts = receiptContextFacts(current, args, context.companyId);
+      if (facts.current_revision !== args.current_revision)
+        goodsRefuse('goods_preview_stale');
+      // The provider read is awaited: recheck after it, before any write.
+      await authorize(true);
+      return facts;
+    };
+    const receipt = await this.prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw(
+          Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:${photoRef}`},0))`,
+        );
+        await authorize();
+        const prior = await tx.actionExecution.findFirst({
+          where: {
+            tenantId,
+            capability: GOODS_RECEIPT_CAPABILITY,
+            sourceRef: { startsWith: photoRef + ':' },
+          },
+          select: { sourceRef: true },
+        });
+        if (prior && prior.sourceRef !== sourceRef)
+          goodsRefuse('goods_photo_line_already_admitted');
+        let deadlineAt = 0;
+        return this.actionEngineRuntime.executeWithReceipt(
+          {
+            contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+            tenantId,
+            capability: GOODS_RECEIPT_CAPABILITY,
+            source: {
+              type: 'authenticated_request',
+              occurrenceScope: 'crm-goods-receipt-v1',
+              sourceRef,
+              actorUserId: userId,
+            },
+            targetRef,
+            input: { ...args, approval_id: approval.id },
+            evidenceRefs: [],
+            callerIdempotency: {
+              scope: 'crm-goods-receipt-v1',
+              key: photoRef,
+            },
+          },
+          {
+            prepare: async () => {
+              deadlineAt = Date.now() + 20000;
+              return observe();
+            },
+            dispatch: async () => {
+              await observe().catch(() =>
+                goodsRefuse('goods_predispatch_source_or_authority_changed'),
+              );
+              if (Date.now() >= deadlineAt)
+                goodsRefuse('goods_predispatch_deadline');
+              const received = await context.adapter.createGoodsReceipt!(
+                tenantId,
+                args,
+                deadlineAt,
+              );
+              const result = confirmedReceipt(received, args);
+              return { value: result, safeResult: result };
+            },
+            reconcile: () => Promise.resolve({ outcome: 'STILL_UNKNOWN' }),
+            restore: (result) => result,
+            classifyError: (error, phase) => ({
+              kind:
+                phase === 'dispatch' &&
+                !(error instanceof GoodsPreDispatchError)
+                  ? 'unknown'
+                  : 'definitive',
+              outcomeCode:
+                phase === 'dispatch' &&
+                !(error instanceof GoodsPreDispatchError)
+                  ? 'goods_receipt_outcome_unknown'
+                  : 'goods_receipt_predispatch_refused',
+              errorClass:
+                error instanceof Error ? error.constructor.name : 'Error',
+            }),
+          },
+        );
+      },
+      { maxWait: 1000, timeout: 120000 },
+    );
+    return {
+      ...receipt.value,
+      action_execution_id: receipt.execution.executionId,
+    };
   }
 
   async readBookableServices(tenantId: string, serviceIds: readonly string[]) {

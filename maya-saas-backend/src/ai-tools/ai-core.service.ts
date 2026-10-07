@@ -1,3 +1,4 @@
+import { goodsReadReply } from './goods-presentation';
 import { publicConsultationReply } from './public-consultation-presentation';
 import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
 import { integrationStatusReply } from './integration-status-presentation';
@@ -419,6 +420,7 @@ const GROUNDING_SMALL_METRIC_PATTERN =
  * доказательством: всё остальное (запись, отмена, начисление) — действие.
  */
 const DATA_TOOL_DOMAINS: Record<string, string> = {
+  'inventory.goods.read': 'goods_catalog',
   'analytics.business.query': 'business_query',
   'analytics.employee.query': 'employee_query',
   'analytics.business.profit': 'business_profit',
@@ -1690,6 +1692,7 @@ export class AiCoreService {
         // Public consultation consumes the existing semantic intent, not a
         // phrase fastpath. Catalog reads supporting booking/compound plans keep
         // their existing continuation; this presentation grants no authority.
+        const goodsRead = decision.toolCall.name === 'inventory.goods.read';
         const publicConsultation =
           decision.toolCall.name === 'catalog.staff.read' &&
           activeSemanticPlan?.tasks.length === 1 &&
@@ -1719,7 +1722,9 @@ export class AiCoreService {
               {
                 widgetTrigger: 'T-2a',
                 // Consultation is a READ answer, not a booking selector.
-                ...(publicConsultation ? { suppressWidgetTrigger: true } : {}),
+                ...(publicConsultation || goodsRead
+                  ? { suppressWidgetTrigger: true }
+                  : {}),
                 requestId: dto.requestId,
                 userTurn: this.persistedUserTurns.get(dto),
               },
@@ -1754,7 +1759,10 @@ export class AiCoreService {
             decisions,
             {
               reply:
-                decision.toolCall.name === 'catalog.service.price.update' &&
+                [
+                  'catalog.service.price.update',
+                  'inventory.goods.receipt.prepare',
+                ].includes(decision.toolCall.name) &&
                 typeof approval.summary === 'string'
                   ? approval.summary
                   : 'Действие подготовлено и ждёт вашего подтверждения.',
@@ -1846,41 +1854,45 @@ export class AiCoreService {
             this.contextualUserText(sanitized.messages),
           ) ||
           personalPreparation ||
+          goodsRead ||
           publicConsultation
         ) {
-          const sourceReply = publicConsultation
-            ? publicConsultationReply(
-                execution.result,
-                activeSemanticPlan!.tasks[0].intent === 'employees.list_public'
-                  ? 'staff'
-                  : 'salon',
-                execution.stale === true,
-              )
-            : personalPreparation
-              ? this.personalCatalogPreparationReply(execution)
-              : decision.toolCall.name === 'staff.schedule.own.read'
-                ? this.deterministicOwnStaffScheduleReply(
-                    execution.result,
-                    hardenedArguments.date,
-                    execution.stale === true,
-                  )
-                : decision.toolCall.name === 'company.business-hours.read'
-                  ? this.deterministicCompanyProfileReply(
+          const sourceReply = goodsRead
+            ? goodsReadReply(execution.result, execution.stale === true)
+            : publicConsultation
+              ? publicConsultationReply(
+                  execution.result,
+                  activeSemanticPlan!.tasks[0].intent ===
+                    'employees.list_public'
+                    ? 'staff'
+                    : 'salon',
+                  execution.stale === true,
+                )
+              : personalPreparation
+                ? this.personalCatalogPreparationReply(execution)
+                : decision.toolCall.name === 'staff.schedule.own.read'
+                  ? this.deterministicOwnStaffScheduleReply(
                       execution.result,
+                      hardenedArguments.date,
                       execution.stale === true,
                     )
-                  : decision.toolCall.name === 'appointments.own.list'
-                    ? this.deterministicOwnAppointmentsReply(
+                  : decision.toolCall.name === 'company.business-hours.read'
+                    ? this.deterministicCompanyProfileReply(
                         execution.result,
                         execution.stale === true,
                       )
-                    : decision.toolCall.name ===
-                        'support.integration-status.read'
-                      ? integrationStatusReply(
+                    : decision.toolCall.name === 'appointments.own.list'
+                      ? this.deterministicOwnAppointmentsReply(
                           execution.result,
                           execution.stale === true,
                         )
-                      : null;
+                      : decision.toolCall.name ===
+                          'support.integration-status.read'
+                        ? integrationStatusReply(
+                            execution.result,
+                            execution.stale === true,
+                          )
+                        : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(

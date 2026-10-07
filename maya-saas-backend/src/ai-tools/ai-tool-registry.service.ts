@@ -1,4 +1,9 @@
 import {
+  preparedGoods,
+  GOODS_RECEIPT_TOOL,
+} from '../crm/goods-receipt.contract';
+import { goodsId } from '../crm/yclients-goods-read';
+import {
   BadRequestException,
   Injectable,
   NotFoundException,
@@ -316,6 +321,11 @@ export class AiToolRegistryService {
               }),
         };
       }
+      case GOODS_RECEIPT_TOOL:
+        return preparedGoods(args);
+      case 'inventory.goods.read':
+        this.assertAllowedKeys(args, ['goods_id']);
+        return { goods_id: goodsId(args.goods_id) };
       case 'inventory.stock.read':
         this.assertAllowedKeys(args, ['low_stock_only']);
         if (
@@ -582,6 +592,29 @@ export class AiToolRegistryService {
           target_user_id: args.target_user_id,
           delta: args.delta,
           reason: args.reason,
+        },
+      };
+    }
+    if (toolName === GOODS_RECEIPT_TOOL) {
+      const p = preparedGoods(args);
+      if (!p.current_revision)
+        this.invalidArguments('authoritative goods preparation required');
+      return {
+        summary: `Подтвердить приход товара «${String(p.goods_name)}» на склад «${String(p.store_name)}»: ${String(p.quantity)} ${String(p.unit_label)} × ${String(p.unit_cost)} ${String(p.currency)} за единицу; сумма ${String(p.line_total)} ${String(p.currency)}. Цена продажи и абсолютный остаток не изменяются этим действием.`,
+        payload: {
+          operation: 'stock_receipt',
+          goods: p.goods_name,
+          store: p.store_name,
+          quantity: p.quantity,
+          unit: p.unit_label,
+          unit_cost: p.unit_cost,
+          line_total: p.line_total,
+          currency: p.currency,
+          received_at: p.received_at,
+          price_kind: p.price_kind,
+          source_line: p.source_line,
+          photo_sha256: p.photo_sha256,
+          review_version: p.review_version,
         },
       };
     }

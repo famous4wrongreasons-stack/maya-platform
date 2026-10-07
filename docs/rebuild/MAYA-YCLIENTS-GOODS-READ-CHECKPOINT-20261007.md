@@ -1,5 +1,7 @@
 # YCLIENTS goods: exact current source port
 
+Historical source-port checkpoint at `3e85b9d2`. The subsequent [goods chat/photo/review/AE development checkpoint](MAYA-YCLIENTS-GOODS-VERTICAL-CHECKPOINT-20261007.md) adds `/2` facts and bounded ingress; the evidence below remains pinned to the earlier implementation.
+
 The existing `CrmService` and `YclientsCRMAdapter` now expose a bounded internal `readGoodsItem` port. It performs one current exact-ID GET, requires one matching item, and keeps sale price, cost price, per-unit cost, sale/write-off units and their ratio separate as decimal strings. Missing currency/prices/units remain unknown; no cached/search/local-inventory fallback, stock balance, supplier, OCR confidence or mutation is inferred. Current tenant scope and active external adapter are required. An internal-calendar tenant refuses this external source path.
 
 This is useful source groundwork for the already requested photo-goods workflow, not a chat-reachable completed feature. No AI tool/controller/action, schema, persistent draft/photo, new store or authority was registered. Future ingress must enforce current actor/feature/branch rights. `as_of` is read observation time, not the provider's modification time. The provider goods endpoint can also return certificate/subscription items: item kind is not qualified for a future physical-goods write by this projection.

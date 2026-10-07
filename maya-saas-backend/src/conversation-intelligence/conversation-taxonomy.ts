@@ -856,6 +856,23 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       synonyms: ['продажи товаров', 'косметика', 'розница'],
       examples: ['Какие товары продаются лучше?'],
     }),
+    intent(
+      'inventory.goods',
+      'inventory',
+      'Read one exact YCLIENTS goods item and qualified stock quantities.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+        permission: 'inventory.read',
+        tools: ['inventory.goods.read'],
+        requiredSlots: ['goods_id'],
+        synonyms: ['товар YCLIENTS', 'цена товара', 'единица товара'],
+        examples: ['Покажи товар 123 из YCLIENTS'],
+        responseRule:
+          'Keep sale price, cost and stock quantity separate; never infer the stock-unit basis.',
+      },
+    ),
     intent('inventory.stock', 'inventory', 'Read current inventory stock.', {
       action: 'read',
       dataClass: 'C',

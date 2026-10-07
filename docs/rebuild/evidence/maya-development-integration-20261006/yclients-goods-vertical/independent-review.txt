@@ -1,0 +1,4 @@
+Independent review: /root/independent_review, read-only; no test/service/network execution.
+Initial findings fixed and re-reviewed: after-source-read revocation; review/approval CAS row locking; string receipt_id; closed acknowledgment projection; ended saved/raced approval projection.
+Final: no remaining blocking code findings. Read-only prepare/resume inspection supports the bounded HTTP proof, not real provider/OCR/model/React acceptance. Three simultaneous version/approve runs observed only approve winning; all interleavings are not proved. Prepare synthetic dispatch total 5 across tenants, resume 1. Owned cluster manifest stopped and postmaster.pid absent.
+Archive/source hash binding validated separately after this code review.

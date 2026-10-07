@@ -15,6 +15,8 @@ const domains: Record<string, readonly C9Domain[]> = {
   'analytics.branches.compare': ['BUSINESS_INTELLIGENCE'],
   'reports.recovered': ['BUSINESS_INTELLIGENCE'],
   'catalog.staff.read': ['OCCUPANCY', 'ADMIN'],
+  'inventory.goods.receipt.prepare': ['ADMIN'],
+  'inventory.goods.read': ['ADMIN'],
   'inventory.stock.read': ['BUSINESS_INTELLIGENCE'],
   'commerce.certificates.read': ['ADMIN'],
   'commerce.memberships.read': ['ADMIN'],

@@ -33,10 +33,61 @@ describe('YCLIENTS goods READ facts (synthetic documentation-shaped payload)', (
         unit_ratio: '10',
       },
     });
-    expect(out.limitations).toContain('catalog_not_stock_balance_or_receipt');
+    expect(out.limitations).toContain('catalog_not_stock_receipt');
     expect(JSON.stringify(out)).not.toMatch(
-      /actual_amounts|supplier_id|PRIVATE|quantity/,
+      /actual_amounts|supplier_id|PRIVATE/,
     );
+  });
+  it('preserves fractional per-store quantities without inventing the stock unit or physical item kind', () => {
+    const out = observedGoodsItem(
+      [{ ...row, actual_amounts: [{ storage_id: '99', amount: '-1.250' }] }],
+      '123',
+      '5',
+      'RUB',
+    );
+    expect(out.stock).toEqual({
+      status: 'observed',
+      rows: [{ store_id: '99', quantity: '-1.250' }],
+      unit_basis: 'not_provided',
+      exhaustive: false,
+    });
+    expect(out.item_kind).toBe('unknown');
+    expect(
+      observedGoodsItem(
+        [
+          {
+            ...row,
+            loyalty_abonement_type_id: 0,
+            loyalty_certificate_type_id: 0,
+          },
+        ],
+        '123',
+        '5',
+        'RUB',
+      ).item_kind,
+    ).toBe('physical');
+    expect(
+      observedGoodsItem(
+        [
+          {
+            ...row,
+            loyalty_abonement_type_id: 1,
+            loyalty_certificate_type_id: 0,
+          },
+        ],
+        '123',
+        '5',
+        'RUB',
+      ).item_kind,
+    ).toBe('loyalty');
+    expect(
+      observedGoodsItem(
+        [{ ...row, actual_amounts: [{ storage_id: '99', amount: '1,25' }] }],
+        '123',
+        '5',
+        'RUB',
+      ).stock.status,
+    ).toBe('unavailable');
   });
   it('retains unknowns rather than manufacturing zero prices, currency or 1:1 units', () => {
     const out = observedGoodsItem(

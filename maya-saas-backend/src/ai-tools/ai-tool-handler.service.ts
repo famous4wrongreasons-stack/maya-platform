@@ -1,3 +1,4 @@
+import { GOODS_RECEIPT_TOOL } from '../crm/goods-receipt.contract';
 import { C8ReadService } from '../valuation/c8.read';
 import { MeasurementReadService } from '../measurement/measurement.read.service';
 import {
@@ -227,6 +228,13 @@ export class AiToolHandlerService {
     idempotencyKey: string,
   ): Promise<unknown> {
     switch (toolName) {
+      case GOODS_RECEIPT_TOOL:
+        return this.crmService.applyGoodsReceipt(
+          principal.tenantId,
+          principal.userId,
+          args,
+          idempotencyKey,
+        );
       case 'catalog.service.price.update':
         return this.crmService.applyServicePriceChange(
           principal.tenantId,
@@ -279,6 +287,13 @@ export class AiToolHandlerService {
         return this.readAvailability(principal.tenantId, args);
       case 'booking.group-availability.read':
         return this.readGroupAvailability(principal.tenantId, args);
+      case 'inventory.goods.read':
+        return this.crmService.readGoodsForActor(
+          principal.tenantId,
+          principal.userId,
+          String(args.goods_id),
+          String(args.source_revision),
+        );
       case 'inventory.stock.read':
         return this.requireBusinessContentService().listCatalog(
           principal.tenantId,
@@ -2214,6 +2229,21 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ): Promise<ValidatedAiToolArguments> {
+    if (toolName === GOODS_RECEIPT_TOOL)
+      return this.crmService.prepareGoodsReceipt(
+        principal.tenantId,
+        principal.userId,
+        args,
+      );
+    if (toolName === 'inventory.goods.read') {
+      return {
+        goods_id: args.goods_id,
+        source_revision: await this.crmService.goodsReadIdentity(
+          principal.tenantId,
+          principal.userId,
+        ),
+      };
+    }
     if (toolName === 'catalog.service.price.update') {
       return this.crmService.prepareServicePriceChange(
         principal.tenantId,
