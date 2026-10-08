@@ -47,6 +47,10 @@ function fixture(t, mode = 'ADMITTED_MODEL_HTTP') {
     workDirectory: fs.realpathSync(process.cwd()),
     brokerUid: process.getuid(),
     runnerUid: process.getuid() + 1,
+    brokerSocket: {
+      path: path.join(dir, 'dedicated-socket', 'model.sock'),
+      gid: process.getgid(),
+    },
   };
   const credentialSource = {
     kind: 'file',
@@ -181,6 +185,78 @@ test('declaration cannot be forged in memory, repinned to another scope, or used
   ])
     denied(() => claimCorePermit(options));
   assert.equal(fs.existsSync(f.options.claimPath), false);
+});
+test('live target requires a closed Unix socket declaration in a dedicated direct parent', (t) => {
+  const f = fixture(t);
+  const changes = [
+    (target) => {
+      delete target.brokerSocket;
+    },
+    (target) => {
+      target.brokerSocket.path = 'relative/model.sock';
+    },
+    (target) => {
+      target.brokerSocket.path = 'http://127.0.0.1:8080';
+    },
+    (target) => {
+      target.brokerSocket.path = '/model.sock';
+    },
+    (target) => {
+      target.brokerSocket.path = path.join(target.workDirectory, 'model.sock');
+    },
+    (target) => {
+      target.brokerSocket.path += '/';
+    },
+    (target) => {
+      target.brokerSocket.path += '/../other.sock';
+    },
+    (target) => {
+      target.brokerSocket.gid = -1;
+    },
+    (target) => {
+      target.brokerSocket.gid = 1.5;
+    },
+    (target) => {
+      target.brokerSocket.gid = '123';
+    },
+    (target) => {
+      target.brokerSocket.port = 8080;
+    },
+    (target) => {
+      target.brokerUrl = 'http://127.0.0.1:8080';
+    },
+  ];
+  for (const change of changes) {
+    const raw = structuredClone(f.raw);
+    change(raw.admissionContext.target);
+    const pin = f.write(f.manifestPath, raw);
+    denied(() => readCoreManifest(f.manifestPath, pin));
+  }
+});
+test('permit and consumer must use the exact socket path and group pinned in the manifest', (t) => {
+  const f = fixture(t);
+  for (const socket of [
+    {
+      ...f.options.target.brokerSocket,
+      path: path.join(f.dir, 'other-socket', 'model.sock'),
+    },
+    {
+      ...f.options.target.brokerSocket,
+      gid: f.options.target.brokerSocket.gid + 1,
+    },
+  ]) {
+    denied(() =>
+      claimCorePermit({
+        ...f.options,
+        target: { ...f.options.target, brokerSocket: socket },
+      }),
+    );
+    const permit = structuredClone(f.permit);
+    permit.target.brokerSocket = socket;
+    const pin = f.write(f.options.path, permit);
+    denied(() => claimCorePermit({ ...f.options, sha256: pin }));
+    assert.equal(fs.existsSync(f.options.claimPath), false);
+  }
 });
 test('closed manifest rejects old contracts, widened limits, altered cases and malformed sources', (t) => {
   const f = fixture(t);

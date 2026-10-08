@@ -228,7 +228,13 @@ export function readCoreManifest(file, sha256) {
   }
 }
 function validateTarget(target) {
-  record(target, ['host', 'workDirectory', 'brokerUid', 'runnerUid']);
+  record(target, [
+    'host',
+    'workDirectory',
+    'brokerUid',
+    'runnerUid',
+    'brokerSocket',
+  ]);
   label(target.host);
   absolute(target.workDirectory);
   requireThat(
@@ -237,6 +243,20 @@ function validateTarget(target) {
     ),
   );
   requireThat(target.brokerUid !== target.runnerUid);
+  record(target.brokerSocket, ['path', 'gid']);
+  absolute(target.brokerSocket.path);
+  requireThat(
+    !target.brokerSocket.path.endsWith('/') &&
+      path.dirname(target.brokerSocket.path) !==
+        path.parse(target.brokerSocket.path).root &&
+      path.dirname(target.brokerSocket.path) !== target.workDirectory,
+  );
+  requireThat(
+    Number.isSafeInteger(target.brokerSocket.gid) &&
+      target.brokerSocket.gid >= 0,
+  );
+  // This pins only the socket declaration. The broker separately verifies the
+  // dedicated direct parent, actual socket type, ownership and access modes.
 }
 function validateCredential(source) {
   record(source, ['kind', 'reference', 'owner', 'reader']);
@@ -298,7 +318,10 @@ function configuration(options) {
   // Capture caller metadata; subsequent mutation cannot change the scope.
   return freeze({
     ...options,
-    target: { ...options.target },
+    target: {
+      ...options.target,
+      brokerSocket: { ...options.target.brokerSocket },
+    },
     credentialSource: { ...options.credentialSource },
     manifestPin,
   });

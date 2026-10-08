@@ -14,6 +14,8 @@ export function serveCandidateBroker({
   onResponse,
   statusExtra,
   allowFinish = false,
+  listenTarget,
+  onListen,
 }) {
   const hash = (value) => createHash('sha256').update(value).digest('hex');
   let gate,
@@ -210,17 +212,32 @@ export function serveCandidateBroker({
   process.on('disconnect', () => {
     void stop('parent_disconnect');
   });
-  server.listen(0, '127.0.0.1', () => {
+  const listening = () => {
     if (stopped || Date.now() >= expiresAt) {
       server.close();
       void stop('ttl');
       return;
     }
+    try {
+      onListen?.();
+    } catch {
+      void stop('listen_binding_refused');
+      return;
+    }
     const address = server.address();
+    const location =
+      typeof address === 'string'
+        ? { socketPath: address }
+        : { port: address.port };
     if (process.connected)
-      process.send?.({ type: 'ready', port: address.port, mode: report.mode });
-    onReady?.({ port: address.port, mode: report.mode });
+      process.send?.({ type: 'ready', ...location, mode: report.mode });
+    onReady?.({ ...location, mode: report.mode });
+  };
+  server.once('error', () => {
+    void stop('listen_failed');
   });
+  if (listenTarget) server.listen(listenTarget, listening);
+  else server.listen(0, '127.0.0.1', listening);
 
   return { stop };
 }

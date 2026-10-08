@@ -39,14 +39,43 @@ const scopes = [
   'maya-carrier-react',
   'maya-chat-shell',
 ];
-const git = (args) =>
+const git = (args, repository = coreRepo) =>
   execFileSync('git', args, {
-    cwd: coreRepo,
+    cwd: repository,
     encoding: 'utf8',
     timeout: 10000,
     maxBuffer: 8 * 1024 * 1024,
   });
+// Refuse additions as well as changed known files, before migrate deploy or model I/O.
+export function assertCoreInventory(
+  candidateCommit,
+  files,
+  repository = coreRepo,
+) {
+  assert.equal(
+    git(['rev-parse', 'HEAD'], repository).trim(),
+    candidateCommit,
+    'core_candidate_changed',
+  );
+  assert.equal(
+    git(
+      ['status', '--porcelain', '--untracked-files=all', '--', ...scopes],
+      repository,
+    ),
+    '',
+    'core_sources_uncommitted',
+  );
+  const actual = git(['ls-files', '-z', '--', ...scopes], repository)
+    .split('\0')
+    .filter(Boolean)
+    .sort();
+  assert.deepEqual(actual, [...files].sort(), 'core_source_inventory_changed');
+}
 export function assertCoreSources(manifest) {
+  assertCoreInventory(
+    manifest.candidateCommit,
+    Object.keys(manifest.sourceHashes),
+  );
   assert.ok(
     manifest.sourceHashes && Object.keys(manifest.sourceHashes).length > 1000,
     'core_source_binding_required',

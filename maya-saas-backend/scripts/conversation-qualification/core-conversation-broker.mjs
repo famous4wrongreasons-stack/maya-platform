@@ -14,6 +14,7 @@ import {
   readCoreManifest,
   claimCorePermit,
 } from './core-conversation-admission.mjs';
+import { assertCoreSocket } from './core-conversation-socket.mjs';
 import { serveCandidateBroker } from './candidate-broker-server.mjs';
 import { assertCoreSources, coreHash } from './core-conversation-source.mjs';
 const { values } = parseArgs({
@@ -58,6 +59,7 @@ assert.ok(
 );
 let admission;
 if (live) {
+  assertCoreSocket(pinned.admissionContext.target, { beforeListen: true });
   assert.ok(
     values.permit && values['permit-sha256'] && values['owner-approval-ref'],
     'core_broker_explicit_permit',
@@ -236,6 +238,7 @@ const transport = async (url, init) => {
   assertCoreSources(pinned);
   if (!live) return canned();
   admission(binding);
+  assertCoreSocket(pinned.admissionContext.target);
   const key = readCredential();
   // Recheck after credential I/O, before the only external edge in this profile.
   admission(binding);
@@ -280,8 +283,20 @@ serveCandidateBroker({
   reserve: (url, init) =>
     candidateReservation(url, init, CORE_DIAGNOSTIC_PROFILE),
   allowFinish: true,
+  ...(live
+    ? {
+        listenTarget: pinned.admissionContext.target.brokerSocket.path,
+        onListen: () => {
+          fs.chmodSync(pinned.admissionContext.target.brokerSocket.path, 0o660);
+          assertCoreSocket(pinned.admissionContext.target);
+        },
+      }
+    : {}),
   statusExtra: () => {
-    if (live) admission(binding);
+    if (live) {
+      admission(binding);
+      assertCoreSocket(pinned.admissionContext.target);
+    }
     return {
       manifestSha256: pinned.manifestSha256,
       runId: pinned.runId,
@@ -290,14 +305,15 @@ serveCandidateBroker({
       expiresAt: report.expiresAt,
     };
   },
-  onReady: ({ port }) => {
-    report.port = port;
+  onReady: ({ port, socketPath }) => {
+    if (live) report.socketPath = socketPath;
+    else report.port = port;
     save();
     if (!process.connected)
       console.log(
         JSON.stringify({
           mode: report.mode,
-          port,
+          ...(live ? { socketPath } : { port }),
           manifestSha256: pinned.manifestSha256,
           expiresAt: report.expiresAt,
         }),

@@ -18,6 +18,7 @@ import {
   readCoreManifest,
   assertCoreAdmission,
 } from './core-conversation-admission.mjs';
+import { socketRequest } from './core-conversation-socket.mjs';
 import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
 import { runOwnedStage, trackOwnedChild } from './owned-child-cleanup.mjs';
@@ -33,7 +34,6 @@ const { values } = parseArgs({
     permit: { type: 'string' },
     'permit-sha256': { type: 'string' },
     'owner-approval-ref': { type: 'string' },
-    'broker-url': { type: 'string' },
     'pg-bin': { type: 'string' },
   },
   strict: true,
@@ -63,16 +63,12 @@ if (!live)
     !values.permit &&
       !values['permit-sha256'] &&
       !values['owner-approval-ref'] &&
-      !values['broker-url'] &&
       !values['admission-context'],
     'core_runner_dry_authority',
   );
 if (values.prepare)
   assert.ok(
-    !values.permit &&
-      !values['permit-sha256'] &&
-      !values['owner-approval-ref'] &&
-      !values['broker-url'],
+    !values.permit && !values['permit-sha256'] && !values['owner-approval-ref'],
     'core_runner_preparation_only',
   );
 fs.mkdirSync(values.output, { mode: 0o700 });
@@ -127,21 +123,12 @@ if (values.prepare) {
   );
   process.exit(0);
 }
-let admission,
-  brokerUrl = values['broker-url'];
+let admission, brokerUrl;
 if (live) {
   assert.ok(
-    values.permit &&
-      values['permit-sha256'] &&
-      values['owner-approval-ref'] &&
-      brokerUrl,
+    values.permit && values['permit-sha256'] && values['owner-approval-ref'],
     'core_runner_live_prerequisites',
   );
-  const url = new URL(brokerUrl);
-  assert.equal(url.origin, brokerUrl);
-  assert.equal(url.protocol, 'http:');
-  assert.equal(url.hostname, '127.0.0.1');
-  assert.ok(url.port);
   admission = assertCoreAdmission({
     path: values.permit,
     sha256: values['permit-sha256'],
@@ -226,10 +213,14 @@ for (const signal of ['SIGTERM', 'SIGINT'])
 save();
 try {
   if (live) {
-    const status = await fetch(brokerUrl + '/status', {
-      redirect: 'error',
-      signal: AbortSignal.timeout(5000),
-    }).then((r) => r.json());
+    const status = await socketRequest(
+      manifest.admissionContext.target,
+      '/status',
+      {
+        redirect: 'error',
+        signal: AbortSignal.timeout(5000),
+      },
+    ).then((r) => r.json());
     assert.equal(status.manifestSha256, manifestSha256);
     assert.equal(status.runId, manifest.runId);
     assert.equal(status.paidAuthorized, true);
@@ -326,7 +317,9 @@ try {
   const probeEnv = {
     JEST_CORE_CONVERSATION_MODE: live ? 'live' : 'dry',
     JEST_CORE_CONVERSATION_OUTPUT: output,
-    JEST_CORE_CONVERSATION_BROKER_URL: brokerUrl + '/chat/completions',
+    ...(!live
+      ? { JEST_CORE_CONVERSATION_BROKER_URL: brokerUrl + '/chat/completions' }
+      : {}),
     JEST_CORE_CONVERSATION_MANIFEST_PATH: manifestPath,
     JEST_CORE_CONVERSATION_MANIFEST_SHA256: manifestSha256,
     JEST_CORE_CONVERSATION_SOURCE_HEAD: manifest.candidateCommit,
@@ -383,14 +376,18 @@ try {
       report.status = 'failed-broker-cleanup';
       process.exitCode = 1;
     }
-  } else if (boundLiveBroker && brokerUrl) {
+  } else if (boundLiveBroker) {
     try {
-      const stopped = await fetch(brokerUrl + '/finish', {
-        method: 'POST',
-        headers: { 'x-candidate-manifest': manifestSha256 },
-        redirect: 'error',
-        signal: AbortSignal.timeout(5000),
-      });
+      const stopped = await socketRequest(
+        manifest.admissionContext.target,
+        '/finish',
+        {
+          method: 'POST',
+          headers: { 'x-candidate-manifest': manifestSha256 },
+          redirect: 'error',
+          signal: AbortSignal.timeout(5000),
+        },
+      );
       report.brokerStopRequested = stopped.ok;
     } catch {
       report.brokerStopRequested = false;

@@ -51,6 +51,11 @@ const { readCoreManifest, assertCoreAdmission } = nativeRequire(
     'scripts/conversation-qualification/core-conversation-admission.mjs',
   ),
 ) as typeof import('../../scripts/conversation-qualification/core-conversation-admission.mjs');
+const { socketRequest } = nativeRequire(
+  path.resolve(
+    'scripts/conversation-qualification/core-conversation-socket.mjs',
+  ),
+) as typeof import('../../scripts/conversation-qualification/core-conversation-socket.mjs');
 const mode = process.env.JEST_CORE_CONVERSATION_MODE;
 const output = process.env.JEST_CORE_CONVERSATION_OUTPUT;
 const brokerUrl = process.env.JEST_CORE_CONVERSATION_BROKER_URL;
@@ -72,9 +77,13 @@ if (
   !/^[a-f0-9]{64}$/.test(manifestSha256 ?? '') ||
   !/^[a-f0-9]{40}$/.test(sourceHead ?? '') ||
   !/^[a-f0-9]{64}$/.test(sourceDigest ?? '') ||
-  !brokerUrl ||
-  !/^http:\/\/127\.0\.0\.1:[1-9]\d{0,4}\/chat\/completions$/.test(brokerUrl) ||
-  Number(new URL(brokerUrl).port) > 65535
+  (mode === 'dry' &&
+    (!brokerUrl ||
+      !/^http:\/\/127\.0\.0\.1:[1-9]\d{0,4}\/chat\/completions$/.test(
+        brokerUrl,
+      ) ||
+      Number(new URL(brokerUrl).port) > 65535)) ||
+  (mode === 'live' && brokerUrl !== undefined)
 )
   throw new Error(
     'Use the owned core conversation HTTP runner with exact fresh bindings',
@@ -240,7 +249,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           throw new Error('core_active_serialized_turn_required');
         expect(init.headers).toBeUndefined();
         brokerCalls++;
-        const response = await rawFetch(brokerUrl, {
+        const relayInit: RequestInit = {
           method: 'POST',
           body: init.body,
           redirect: 'error',
@@ -251,7 +260,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             'x-candidate-case': active.item.id,
             'x-candidate-turn': String(turn),
           },
-        });
+        };
+        const response =
+          mode === 'live'
+            ? await socketRequest(
+                verifiedManifest.admissionContext!.target,
+                '/chat/completions',
+                relayInit,
+              )
+            : await rawFetch(brokerUrl!, relayInit);
         // Capture the actual synthetic-dialog model output before any parser or
         // diagnostic assertion. The bounded gate owns the response-size limit.
         return response;

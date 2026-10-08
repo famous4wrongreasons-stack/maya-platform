@@ -9,6 +9,10 @@ export type CoreTarget = Readonly<{
   workDirectory: string;
   brokerUid: number;
   runnerUid: number;
+  brokerSocket: Readonly<{
+    path: string;
+    gid: number;
+  }>;
 }>;
 export type CoreCredentialReference = Readonly<{
   kind: 'file';
