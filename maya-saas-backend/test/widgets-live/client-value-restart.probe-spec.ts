@@ -808,7 +808,6 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
       .set('Authorization', `Bearer ${token}`)
       .send({
         surface: 'web',
-        audience: 'owner',
         requestId,
         ...(conversationId ? { conversationId } : {}),
         messages: [{ role: 'user', content: prompts.overview }],
@@ -1223,7 +1222,10 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
           conversationId: saved.conversationId,
           messages: [{ role: 'user', content: prompts.overview }],
         });
-      expect(revoked.status).toBe(403);
+      expect(revoked.status).toBe(401);
+      expect(revoked.body).toMatchObject({
+        message: 'Active tenant membership is required',
+      });
       expect(
         (revoked.body as { recommendation?: unknown }).recommendation,
       ).toBeUndefined();
@@ -1232,7 +1234,8 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
       assertNoBusinessWrites(mark);
       expect(await businessState(saved.salon.tenant.id)).toBe(before);
       observations.revocation = {
-        status: 403,
+        status: 401,
+        code: 'Active tenant membership is required',
         modelSelections: 0,
         providerReads: 0,
         factsExposed: false,
