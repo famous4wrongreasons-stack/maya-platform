@@ -1,0 +1,107 @@
+{
+  "contract": "maya.core-conversation-runner/1",
+  "status": "passed-ungraded",
+  "mode": "DRY_HTTP",
+  "runId": "7a6208be-51f8-4508-bb54-00108d2f6a18",
+  "candidateCommit": "ac3c4142be3cb4c3e1770300a224d0eb4e57bf7d",
+  "manifestSha256": "2433f1bdb140a7a822355c4c7757b7794ef4ddfd4079fd6e050e7f71f72e0c76",
+  "profile": "core-diagnostic-20261008/1",
+  "cluster": "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-core-conversation-Wyty12/pg",
+  "database": "maya_widget_gate_proof_c9occ_03fb7a6193ab",
+  "port": 62704,
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "conversation"
+  ],
+  "groups": {
+    "initdb": {
+      "detached": true,
+      "pid": 57572,
+      "pgid": 57572,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-start": {
+      "detached": true,
+      "pid": 57586,
+      "pgid": 57586,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "createdb": {
+      "detached": true,
+      "pid": 57597,
+      "pgid": 57597,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "migrations": {
+      "detached": true,
+      "pid": 57600,
+      "pgid": 57600,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "conversation": {
+      "detached": true,
+      "pid": 57615,
+      "pgid": 57615,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-stop": {
+      "detached": true,
+      "pid": 57911,
+      "pgid": 57911,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "resources": {
+    "nodeHeapMb": 3072,
+    "brokerHeapMb": 256,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "qualification": "DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY",
+  "brokerPid": 57614,
+  "brokerClosed": true,
+  "clusterStopped": true,
+  "postmasterPidAbsent": true,
+  "sourcesUnchanged": true
+}

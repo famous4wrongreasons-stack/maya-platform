@@ -1,0 +1,67 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "7a6208be-51f8-4508-bb54-00108d2f6a18",
+  "candidateCommit": "ac3c4142be3cb4c3e1770300a224d0eb4e57bf7d",
+  "manifestSha256": "2433f1bdb140a7a822355c4c7757b7794ef4ddfd4079fd6e050e7f71f72e0c76",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-08T16:55:51.448Z",
+  "expiresAt": "2026-10-08T17:05:51.448Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68497,
+      "bodySha256": "be979a2c1b1ad9d50339ad1912f796fd3ff7e3cf149e8e1642ab5a7b7b8b8ba8",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 69339,
+      "bodySha256": "1889915cd85f0e1ecfd527e2d42a12edc462321fc2a684be2d218a4c7a028ead",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 95860,
+      "bodySha256": "53ccbbad979331107d5b3804ba0fdb78aed38e7f4736f4a15ff7351b2e8bff16",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 97200,
+      "bodySha256": "bcfe2e4e7b1fab3da03a6796a772fc6154e196c1bedb8c02ed69d2c97428693a",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80120,
+      "bodySha256": "93c1cad7fdef2a66aba98d625512021c9331cc9269edfb497cc9732c92a63dd8",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "CANNED_WIRING_ONLY_NOT_MODEL_QUALITY",
+  "port": 62710,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-08T16:56:21.120Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 431496,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 593334720,
+    "halted": false
+  }
+}

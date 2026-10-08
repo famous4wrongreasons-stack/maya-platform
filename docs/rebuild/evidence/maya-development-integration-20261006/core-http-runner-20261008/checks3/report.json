@@ -1,0 +1,89 @@
+{
+  "contract": "maya.core-runner-checks/1",
+  "status": "passed",
+  "commands": [
+    {
+      "name": "node-tests",
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "scripts/conversation-qualification/current-candidate.test.mjs",
+        "scripts/conversation-qualification/core-conversation-admission.test.mjs",
+        "scripts/conversation-qualification/core-conversation-source.test.mjs",
+        "scripts/conversation-qualification/current-candidate-dry-broker.test.mjs",
+        "scripts/conversation-qualification/owned-child-cleanup.test.mjs",
+        "scripts/conversation-qualification/proof-broker-contract.test.mjs",
+        "scripts/conversation-qualification/replay.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    }
+  ],
+  "completed": [
+    "node-tests"
+  ],
+  "sourceHashes": {
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-source.test.mjs": "9959b1e602374655d8e0476d49283238eb1753a2fcbc9e4a82eb382af2225505",
+    "maya-saas-backend/scripts/conversation-qualification/README.md": "18d175ac26959308af978d0297c4bdeefcb7b3c8fcf812766fdf5623dacf91b1",
+    "maya-saas-backend/scripts/conversation-qualification/budget-gate.d.mts": "46471fb068cb9c0877d516feaffd487f8728ce2d784fe86bec71914a533ae389",
+    "maya-saas-backend/scripts/conversation-qualification/budget-gate.mjs": "fc0838779cc8b242e60b227b65a38bdd74020d1b29a2e3e131a191361890ecfa",
+    "maya-saas-backend/scripts/conversation-qualification/budget-gate.test.mjs": "8a2476576df3a23bdfdb481b1d73202c12c713ca83a297254bb597f568fca182",
+    "maya-saas-backend/scripts/conversation-qualification/candidate-broker-server.mjs": "26307109ea96ccad9be3979307996aff2f4497438c3a15554807626e875516ca",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-admission.d.mts": "e7e554477f0bee65d15b23168f5d313171d35611a8a901d467ba836c41aedc48",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-admission.mjs": "eba765e3e73fd1b36ccf6ffb588a7a6c85b80919eecee53e4de2d617977c2974",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-admission.test.mjs": "40ddb1a5ed3c3093a3daba8875240f2434bd183bdaef5e89225f50f57f005eb4",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-broker.mjs": "eeaec610b37a45e80ffe05a9e2be19929d4c3e4cae0ffcdde5ba74ef9fc46413",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-runner.mjs": "507474c945b372b0d5a83586dce7c93b1cc4a7a1db586709c6aa70f497e80fcd",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-source.mjs": "52847b514c8882eab026e6f27881b3c4746c78be8698ded10fb12a26da1be658",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.d.mts": "dffc691fe46243e21d6f35a74209823d78b0797497dd4524ce04bb6e3b3f4a9e",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.mjs": "1013816b31116b9b9b5601f87f28115dfddc838fc61918cecbfdb16807004ae6",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-dry-broker.mjs": "ed483d3576ce335b5d6df9f47fc5b6ebead48d15c518126ebfae820bb18f4e50",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-dry-broker.test.mjs": "85eb5028d9fd42ea1170388b926f94ad44e512309edd1b2092862ea36ad12f51",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-http.mjs": "88e56443043fd77f21162b3cfdab4fd91ac8f9802b4c392bd56b3a9fa1e6cbc7",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-keyless-profile.d.mts": "f5d838eed8c2ecb346839c02ba14ec0eb10d669c21a3850076ec7fd9a28c73bb",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-keyless-profile.mjs": "9ca894f9660fad0b8d2e3e9d5467336818cf78ca6d800d61f91f54b7d5d6ba0a",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-keyless-profile.test.mjs": "93d7da834779a4845f182bf272f8e9674cb40d0c2805841a8c2b5ed0365ee81a",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-local-profile.mjs": "72c2739cf57c50c02c9b23efa38d6440b55d1e1582628e822097dd63843369d0",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-local-profile.test.mjs": "c215977aeec460a3aaba23df6ac2a77a9f5fc0c4230ce6561d33e5101e6a67bf",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-offline.mjs": "80241d5f31369a11acdf9472f8608bcf68f6114852f02b20a41970f8316f5e1a",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-profile-metadata.example.json": "d05fa699d2b9267cf047227d76771b0006d1e8340b93cdeb80ca45b76c67191b",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-profile-metadata.mjs": "38d854daa27fd966f35b214e524833e74c802709503dbf8a3eaf6ed222c378cb",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-profile-metadata.test.mjs": "d17b55e00aee3685fdf19d7ba1bd839701b7cbf96b0eee4ffa4d22b85c8086a4",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate-serializer.ts": "77c0e1d79fbf46a976e1429b3b82203600d1ab42e372005f06b5c8eeb8f454b9",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate.d.mts": "7a6f4d10f640d48a124a3aeed50094ead1155d022e0a29e80926d7ec1e36cd0e",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate.mjs": "a4e7c0c4cd004464b789d088fd941df2d83a994c22272aa1cf66b538d64194c6",
+    "maya-saas-backend/scripts/conversation-qualification/current-candidate.test.mjs": "727c85da2aba96d4d810632c2a194d52305d1f0bdd66fcd3c25d28c74094f05d",
+    "maya-saas-backend/scripts/conversation-qualification/diagnostic-readonly-inventory.py": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+    "maya-saas-backend/scripts/conversation-qualification/diagnostic-readonly-inventory.test.py": "cdcbbd30cfccc8a86f61582ab60470a9e9d37d79c8d8f88cfd58bf4078ae57d0",
+    "maya-saas-backend/scripts/conversation-qualification/dry-run.mjs": "f2030bc19cc1aabe809142c1b6ff195480dac47213d6cf98e3e28e2b50c8b9df",
+    "maya-saas-backend/scripts/conversation-qualification/http-dry-run.ts": "ef7acc891a27a930a72fd82b8913c36f2b69f4071aded9af91f9d91d44f15e70",
+    "maya-saas-backend/scripts/conversation-qualification/http-live-pilot.ts": "6938ab0d98198d2b88a63401ae6b3af9cd202cb6abb861e30eee8d6212d691d8",
+    "maya-saas-backend/scripts/conversation-qualification/owned-child-cleanup.mjs": "d8b054becd20696726229fd2db4af7b1808a4693d0fc540183b29f1c0f66e480",
+    "maya-saas-backend/scripts/conversation-qualification/owned-child-cleanup.test.mjs": "0b6da0c8552599093eb59b856513790a8c0d6b4d92d0dc0c17bf3893d09d53f9",
+    "maya-saas-backend/scripts/conversation-qualification/proof-broker-contract.d.mts": "5024ba99e332ba6c9177f73353ee0838b21d8e3cc4132a47d0a6bd49b5a80f73",
+    "maya-saas-backend/scripts/conversation-qualification/proof-broker-contract.mjs": "8e541ec098254b3c82fb9c549a7b6b3d77a39f5ac6e692297dfd33749500c3dd",
+    "maya-saas-backend/scripts/conversation-qualification/proof-broker-contract.test.mjs": "7db3fbc03d76ccc04bb6eca60c4d47a68d3e43aa16b6bd21e16afbb98b2a3069",
+    "maya-saas-backend/scripts/conversation-qualification/replay.d.mts": "4a2a37de1805bdac501f6fa0ed86211d18c20c81fd5e6100a42feed7a8308824",
+    "maya-saas-backend/scripts/conversation-qualification/replay.mjs": "2743112c4ab780cb4ce85f6a51813c7364b4c10c7badcdc71e54c2dbf92c551b",
+    "maya-saas-backend/scripts/conversation-qualification/replay.test.mjs": "c01931d7959e926ffd4f5522af98682d542762fab3b61f235b0173e527f301d5",
+    "maya-saas-backend/test/jest-core-conversation-http.json": "2b4241e13869a5a9342126f260d98213c8dedb729571dfb495a15443266843a6",
+    "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts": "0e820a46eacada7724aa52b1f9c6ac5cf5fc81ec775b6305377d5b4c1664ea53",
+    "maya-saas-backend/test/widgets-live/support/core-conversation-mjs-transform.cjs": "e3ec5f3a89c12fa11a55ffa7784c35a2e487039cee7b45e4ff38e87a05026fc0"
+  },
+  "groups": {
+    "node-tests": {
+      "detached": true,
+      "pid": 58598,
+      "pgid": 58598,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourcesUnchanged": true
+}

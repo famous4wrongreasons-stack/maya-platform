@@ -1,0 +1,8 @@
+{
+  "contract": "maya.core-http-independent-code-review/1",
+  "reviewer": "/root/receipt_read_shell",
+  "mode": "READ_ONLY_NO_EXECUTION",
+  "result": "PASS_WITH_LIVE_PLACEMENT_BLOCKERS",
+  "reviewed": ["exact HEAD/inventory/dirty source refusal", "live Unix only and dry TCP", "finite routes/headers/bytes/timeout/abort", "bound broker finish and cleanup", "credential fd nonblocking metadata checks", "owned Unix scratch guard"],
+  "limits": ["unknown current GID and full group/ACL membership", "unknown scalar credential reference/owner/reader", "credential reader isolation requires separate placement evidence", "cross-UID isolation and real model quality not exercised"]
+}

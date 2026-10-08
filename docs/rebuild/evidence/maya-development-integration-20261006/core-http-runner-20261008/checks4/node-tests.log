@@ -1,0 +1,202 @@
+✔ dry manifest has no admission authority and needs no permit (3.120458ms)
+✔ broker exclusively claims once; separate runner observes the same claim without another ledger (8.893625ms)
+✔ declaration cannot be forged in memory, repinned to another scope, or used by another principal (1.818917ms)
+✔ live target requires a closed Unix socket declaration in a dedicated direct parent (3.318292ms)
+✔ permit and consumer must use the exact socket path and group pinned in the manifest (1.316125ms)
+✔ closed manifest rejects old contracts, widened limits, altered cases and malformed sources (2.482542ms)
+✔ fresh permit must bind every scope and current bounded pricing attestation (4.671916ms)
+✔ revocation after claim refuses the next dispatch permanently, including after restoring bytes (7.535041ms)
+✔ same-byte replacement of pinned manifest refuses before dispatch (7.158125ms)
+✔ claim deletion and alternate binding never reset admission (7.79925ms)
+✔ expiry and backwards wall clock stop the existing admission (8.0395ms)
+✔ backwards time and expiry during the synchronous file validation refuse (9.188917ms)
+✔ symlink, hardlink, writable metadata, missing SHA and oversized file refuse (1.829834ms)
+✔ noncanonical duplicate keys and parent symlinks refuse without echoing private input (1.052375ms)
+✔ fresh direct parent admits only an absent socket, without creating it (1.669583ms)
+✔ parent permission, owner, group, canonical path and reader UID are exact (1.208209ms)
+✔ existing socket refuses restart and requires exact socket mode and ownership (2.033834ms)
+✔ a socket symlink is refused even when the target socket is correctly owned (1.210667ms)
+✖ POST preserves exact serialized UTF8 bytes and status; GET and finish stay on the same Unix path (3.419834ms)
+✔ finite route, request, timeout and credential-header refusals dispatch nothing (1.476792ms)
+✖ redirect status is preserved without following Location (2.052041ms)
+✖ response size limit covers chunked bytes and declared oversized length (1.073208ms)
+✖ pre-aborted signal dispatches nothing; active abort closes its owned request (1.258792ms)
+✖ absolute deadline covers unfinished response and clears the owned connection (0.89675ms)
+✔ truncated response never becomes a completed WHATWG Response (0.851541ms)
+✔ source inventory admits the exact committed candidate (249.59175ms)
+✔ an added untracked migration refuses while all previously frozen hashes remain unchanged (94.2865ms)
+✔ a clean new commit or an omitted tracked runtime file cannot reuse the manifest (117.527417ms)
+✔ separate keyless broker boots, binds exact source/corpus, reserves before canned response and stops (134.245209ms)
+✔ rejects wrong-binding with zero dispatch (56.519042ms)
+✔ rejects oversize with zero dispatch (57.848708ms)
+✔ rejects authorization with zero dispatch (40.807625ms)
+✔ rejects wrong-model with zero dispatch (54.244ms)
+✔ rejects foreign-case with zero dispatch (61.475625ms)
+✔ no paid switch or credential environment is admitted (69.304125ms)
+✔ TTL destroys active partial-body and exits without dispatch (1048.2355ms)
+✔ TTL destroys active partial-headers and exits without dispatch (1062.832375ms)
+✔ TTL aborts a request in budget spacing before its reservation or response (1570.87225ms)
+✔ dry lifetime cannot extend the one-hour ceiling (55.504542ms)
+✔ broker verifies launch-pinned keyless profile before its first reservation (88.909666ms)
+✔ broker refuses changed-profile before creating a budget ledger (49.156917ms)
+✔ broker refuses wrong-launch-pin before creating a budget ledger (41.900458ms)
+✔ broker refuses missing-launch-pin before creating a budget ledger (42.396417ms)
+✔ broker refuses missing-profile before creating a budget ledger (43.91125ms)
+✔ offline binding is mandatory, no default/live transport or old ledger resume (24.308958ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (62.896917ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (41.534917ms)
+✔ short writes are completed before dispatch and zero progress fails closed (62.245292ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (54.243ms)
+✔ early wakeup cannot dispatch before the minimum interval (38.056708ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (961.840625ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (1170.829542ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (31.239583ms)
+✔ 24 dialog and 64 turn caps apply independently (525.841875ms)
+✔ wall time and clock reversal cannot reopen budget (51.26675ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (65.763583ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (35.02975ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (44.955542ms)
+✔ oversized output is unresolved, with full reservation kept (41.238916ms)
+✔ core profile is closed, frozen and restrictive; the existing offline defaults stay unchanged (51.00275ms)
+✔ core independently caps three dialogs and five turns (58.625833ms)
+✔ core reserves every retry, admits at most twelve full-size attempts and stays below two dollars (172.855792ms)
+✔ core expiry uses ten minutes and aborts the complete pending response body (68.876333ms)
+✔ core remains single-flight through response-body consumption and halts after cancellation (40.811083ms)
+✔ admitted mode refuses missing/foreign admission and custom clocks before creating any ledger (8.3295ms)
+✔ synthetic admitted callback receives exact immutable binding at construction and immediately before transport (39.4305ms)
+✔ a synthetic permit for another candidate or manifest refuses before ledger creation (2.985583ms)
+✔ revoked synthetic admission stops before reservation and cannot reopen by restoring a callback flag (22.811125ms)
+✔ revocation during durable reservation dispatches nothing, retains charge and cannot reuse a closed ledger (39.911708ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (8.840709ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (2.010708ms)
+✔ existing replay rejects tampered manifest before opening a dialog (4.086792ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (837.460791ms)
+✔ spawn error without exit settles cleanup (0.517667ms)
+✔ live child gets TERM then KILL and settles on close (7.394209ms)
+✔ unconfirmed child termination rejects within a bound (13.037833ms)
+✔ broker preflight admits canonical request within 96KiB and refuses excess UTF8 bytes (0.721333ms)
+✔ freezes reproducible balanced dev selection, identifies correlated families, and keeps test holdout untouched (18.975166ms)
+✔ replays only real assistant responses with canonical body, no labels or gold responses (3.126166ms)
+✔ unknown result stops without retry, closes fixture and does not serialize exception secrets (3.339792ms)
+✔ tampered manifest refuses before opening fixture (2.85675ms)
+✔ missing or changed conversation correlation stops before any follow-up or retry (18.93775ms)
+✔ retains the current 3500-character reply in actual history and refuses an oversized response (5.499167ms)
+✔ client-first slice covers only booking groups and keeps independent families visible (2.537834ms)
+ℹ tests 84
+ℹ suites 0
+ℹ pass 79
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9929.677459
+
+✖ failing tests:
+
+test at scripts/conversation-qualification/core-conversation-socket.test.mjs:169:1
+✖ POST preserves exact serialized UTF8 bytes and status; GET and finish stay on the same Unix path (3.419834ms)
+  Error: core_socket_transport_failed
+      at error (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:29:25)
+      at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:286:12
+      at new Promise (<anonymous>)
+      at socketRequest (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:175:10)
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:190:26)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7)
+
+test at scripts/conversation-qualification/core-conversation-socket.test.mjs:268:1
+✖ redirect status is preserved without following Location (2.052041ms)
+  Error: core_socket_transport_failed
+      at error (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:29:25)
+      at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:286:12
+      at new Promise (<anonymous>)
+      at socketRequest (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:175:10)
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:276:26)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7)
+
+test at scripts/conversation-qualification/core-conversation-socket.test.mjs:283:1
+✖ response size limit covers chunked bytes and declared oversized length (1.073208ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /core_socket_response_limit/. Input:
+  
+  'Error: core_socket_transport_failed'
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:296:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: core_socket_transport_failed
+        at error (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:29:25)
+        at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:286:12
+        at new Promise (<anonymous>)
+        at socketRequest (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:175:10)
+        at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:297:5)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Test.run (node:internal/test_runner/test:1208:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    expected: /core_socket_response_limit/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/conversation-qualification/core-conversation-socket.test.mjs:305:1
+✖ pre-aborted signal dispatches nothing; active abort closes its owned request (1.258792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    Comparison {
+  +   message: 'core_socket_transport_failed',
+  +   name: 'Error'
+  -   message: 'core_socket_aborted',
+  -   name: 'AbortError'
+    }
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:323:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: core_socket_transport_failed
+        at error (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:29:25)
+        at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:286:12
+        at new Promise (<anonymous>)
+        at socketRequest (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:175:10)
+        at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:324:7)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Test.run (node:internal/test_runner/test:1208:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    expected: { name: 'AbortError', message: 'core_socket_aborted' },
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/conversation-qualification/core-conversation-socket.test.mjs:331:1
+✖ absolute deadline covers unfinished response and clears the owned connection (0.89675ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /core_socket_timeout/. Input:
+  
+  'Error: core_socket_transport_failed'
+  
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:337:3)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: core_socket_transport_failed
+        at error (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:29:25)
+        at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:286:12
+        at new Promise (<anonymous>)
+        at socketRequest (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs:175:10)
+        at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.test.mjs:338:5)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async Test.run (node:internal/test_runner/test:1208:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    expected: /core_socket_timeout/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

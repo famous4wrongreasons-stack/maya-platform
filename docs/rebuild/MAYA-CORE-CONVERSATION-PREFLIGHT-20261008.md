@@ -1,5 +1,8 @@
 # Core conversation preparation — 2026-10-08
 
+Later executable work: [HTTP runner checkpoint](MAYA-CORE-CONVERSATION-HTTP-CHECKPOINT-20261008.md).
+This document retains the earlier preparation state.
+
 **Prepared, not a model run.** Candidate
 `4b86ba27ef01001838d09c371e5018f77b892ce0` binds **2,404 committed app/backend,
 fixture, corpus and runner files**. Diagnostic manifest digest:

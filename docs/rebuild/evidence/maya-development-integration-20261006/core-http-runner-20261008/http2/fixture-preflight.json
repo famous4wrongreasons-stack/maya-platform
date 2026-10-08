@@ -1,0 +1,64 @@
+{
+  "preflights": [
+    {
+      "caseId": "core-client-create-followup",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-08T17:08:02.246Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-09",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-08T17:08:02.533Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-09",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    }
+  ],
+  "unauthenticatedStatus": 401,
+  "modelCalls": 0,
+  "brokerCalls": 0,
+  "sourceQualification": "FINITE_SYNTHETIC_FACTS_WITH_CANONICAL_OWNERS",
+  "financeReads": [
+    {
+      "route": "transactions/88101",
+      "company": "88101"
+    },
+    {
+      "route": "company/88101/staff",
+      "company": "88101"
+    },
+    {
+      "route": "records/88101",
+      "company": "88101"
+    },
+    {
+      "route": "company/88101/salary/calculation/staff/71",
+      "company": "88101"
+    }
+  ]
+}
