@@ -433,12 +433,14 @@ describe('K13 — no C10 autonomy', () => {
       'inventory.goods.read',
       'inventory.goods.receipt.prepare',
     ];
-    const beforeGoods = rows.filter((c) => !goodsKeys.includes(c.capabilityKey));
+    const beforeGoods = rows.filter(
+      (c) => !goodsKeys.includes(c.capabilityKey),
+    );
     expect(beforeGoods).toHaveLength(58);
     expect(beforeGoods.filter((c) => c.mode === 'READ')).toHaveLength(42);
-    expect(
-      beforeGoods.filter((c) => c.mode === 'PROPOSE_ONLY'),
-    ).toHaveLength(14);
+    expect(beforeGoods.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(
+      14,
+    );
     expect(
       rows
         .filter((c) => goodsKeys.includes(c.capabilityKey))

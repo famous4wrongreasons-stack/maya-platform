@@ -639,6 +639,7 @@ describe('КОРПУС: роли остались на своих данных',
 
   it('клиент: «свободные окна завтра» — реальные слоты', async () => {
     const harness = createHarness(CLIENT);
+    const auditFailure = jest.spyOn(harness.auditLog, 'tryLog');
     const answer = await harness.ask('Свободные окна завтра есть?');
 
     expect(answer.tools_used).toHaveLength(1);
@@ -655,7 +656,7 @@ describe('КОРПУС: роли остались на своих данных',
       },
     ]);
     expect(answer.grounding.domain).toBe('booking_availability');
-    expect(harness.auditLog.tryLog).not.toHaveBeenCalled();
+    expect(auditFailure).not.toHaveBeenCalled();
   });
 
   it('мастер: «сколько у меня записей» — личная аналитика, а не отказ', async () => {

@@ -100,14 +100,12 @@ it('AR-FR6D-SCOPE pins only the approved price and goods subtypes and retains ev
     'crm.goods.receipt.create.v1',
     'crm.service.fixed-price.update.v1',
   ]);
-  expect(RUNTIME_ALLOWLIST['crm.service.fixed-price.update.v1']).toMatchObject(
-    {
-      family: 'catalogue_price_configuration',
-      confirmation_kind: 'APPROVAL',
-      min_verification: 'SESSION_VERIFIED',
-      propose: { space: 'C9', key: 'catalog.service.price.update' },
-    },
-  );
+  expect(RUNTIME_ALLOWLIST['crm.service.fixed-price.update.v1']).toMatchObject({
+    family: 'catalogue_price_configuration',
+    confirmation_kind: 'APPROVAL',
+    min_verification: 'SESSION_VERIFIED',
+    propose: { space: 'C9', key: 'catalog.service.price.update' },
+  });
   expect(RUNTIME_ALLOWLIST['crm.goods.receipt.create.v1']).toEqual({
     family: 'inventory_receipt_purchase_cost',
     confirmation_kind: 'APPROVAL',
