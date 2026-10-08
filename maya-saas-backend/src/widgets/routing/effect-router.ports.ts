@@ -175,6 +175,13 @@ export interface ApprovalRequestOwnerPort {
 
 export interface CommitBookingOwnerPort {
   commit(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
+  readStatus?(input: {
+    tenantId: string;
+    actorUserId: string;
+    capabilityKey: string;
+    confirmationIdempotencyKey: string;
+    revalidate: () => Promise<void>;
+  }): Promise<{ executionId: string; state: string } | null>;
 }
 
 export interface BookingProposeOwnerPort {

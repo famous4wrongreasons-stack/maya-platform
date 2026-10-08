@@ -8,6 +8,8 @@ export const ordinaryPrompts = scenario => ({
   serviceCorrection: `Лучше ${scenario.otherServiceName}`,
   staffCorrection: `Лучше к ${scenario.otherStaffName}`,
   dayCorrection: `Лучше на ${scenario.alternateDay}`,
+  exactTime: 'В 14:30',
+  timeCorrection: 'Нет, в 15:00',
 });
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const text = (value, max = 8192) => typeof value === 'string' && value.length > 0 && value.length <= max;
@@ -39,9 +41,13 @@ export function admitted(request, origin, scope) {
     if (url.pathname === '/api/auth/email/verify') return keys(body, ['email', 'code']) && scope.emails.includes(body.email) && /^\d{4,8}$/.test(body.code);
     if (url.pathname === '/api/auth/refresh') return keys(body, ['refreshToken']) && text(body.refreshToken);
     if (url.pathname === '/api/widgets/resolve') {
-      if (!keys(body, ['thread_page'], ['rendered'])) return false;
+      if (!keys(body, ['thread_page'], ['rendered', 'booking_receipt'])) return false;
       const page = body.thread_page;
       if (!keys(page, ['limit'], ['before']) || !Number.isInteger(page.limit) || page.limit < 1 || page.limit > 50 || (page.before !== undefined && !uuid(page.before))) return false;
+      if (body.booking_receipt !== undefined) {
+        return !Object.hasOwn(body, 'rendered') && keys(page, ['limit']) && page.limit === 20
+          && keys(body.booking_receipt, ['widget_id']) && uuid(body.booking_receipt.widget_id);
+      }
       const rendered = body.rendered;
       return rendered === undefined || (keys(rendered, ['widget_id', 'body_hash', 'envelope_seal']) && uuid(rendered.widget_id) && hash(rendered.body_hash) && text(rendered.envelope_seal));
     }

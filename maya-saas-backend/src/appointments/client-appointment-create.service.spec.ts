@@ -558,11 +558,13 @@ describe('B31 verified Client create initiator and canonical executor', () => {
     ]);
     expect(
       (
-        await h.context.runAsSystemTenant('tenant-1', () =>
-          h.plans[0].handlers.reconcile(h.plans[0].input, undefined, {
-            tenantId: 'tenant-1',
-            executionId: 'execution-1',
-          }),
+        await h.context.runAsAuthPrincipal(
+          { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+          () =>
+            h.plans[0].handlers.reconcile(h.plans[0].input, undefined, {
+              tenantId: 'tenant-1',
+              executionId: 'execution-1',
+            }),
         )
       ).outcome,
     ).toBe('PROVEN_SUCCEEDED');
@@ -589,11 +591,13 @@ describe('B31 verified Client create initiator and canonical executor', () => {
     ).toBe('unknown');
     h.provider.getClientAppointments.mockResolvedValue([]);
     const reconcile = () =>
-      h.context.runAsSystemTenant('tenant-1', () =>
-        plan.handlers.reconcile(plan.input, undefined, {
-          tenantId: 'tenant-1',
-          executionId: 'execution-1',
-        }),
+      h.context.runAsAuthPrincipal(
+        { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+        () =>
+          plan.handlers.reconcile(plan.input, undefined, {
+            tenantId: 'tenant-1',
+            executionId: 'execution-1',
+          }),
       );
     expect((await reconcile()).outcome).toBe('PROVEN_NOT_EXECUTED');
     h.provider.getClientAppointments.mockResolvedValue([

@@ -373,10 +373,74 @@ export class ClientAppointmentRescheduleService {
     };
   }
 
+  async readStatusForAccount(
+    tenantId: string,
+    userId: string,
+    key: string,
+    revalidate: () => Promise<void>,
+  ) {
+    this.context.assertTenantId(tenantId);
+    if (!userId || this.context.get()?.userId !== userId)
+      throw new ForbiddenException('Authenticated account required');
+    await revalidate();
+    const original = await this.crm.readClientRescheduleStatusTarget(
+      tenantId,
+      key,
+    );
+    if (!original) return null;
+    const target = await this.resolveOwnedTarget(
+      tenantId,
+      userId,
+      original.appointmentId,
+      true,
+    );
+    // Internal actions settle transactionally; this finite recovery is external only.
+    if (
+      target.appointment.source !== 'external' ||
+      !target.appointment.crmExternalId
+    )
+      return null;
+    const timezone = await this.resolveTimezone(
+      target,
+      target.appointment.branchId ?? undefined,
+    );
+    const authorize = async () => {
+      await revalidate();
+      const current = await this.resolveOwnedTarget(
+        tenantId,
+        userId,
+        target.appointment.id,
+        true,
+      );
+      if (
+        current.linkId !== target.linkId ||
+        current.clientId !== target.clientId ||
+        current.appointment.crmExternalId !==
+          target.appointment.crmExternalId ||
+        current.appointment.branchId !== target.appointment.branchId ||
+        (await this.resolveTimezone(
+          current,
+          current.appointment.branchId ?? undefined,
+        )) !== timezone
+      )
+        throw new ForbiddenException('Original Client appointment required');
+    };
+    return this.crm.readClientRescheduleStatus({
+      tenantId,
+      linkId: target.linkId,
+      appointmentId: target.appointment.id,
+      externalId: target.appointment.crmExternalId,
+      key,
+      timezone,
+      authorize,
+    });
+  }
+
   private resolveOwnedTarget(
     tenantId: string,
     userId: string,
     appointmentId: string,
+    statusRead = false,
   ) {
     return this.prisma.$transaction(
       async (tx) => {
@@ -440,6 +504,7 @@ export class ClientAppointmentRescheduleService {
           );
         }
         if (
+          !statusRead &&
           !isCanceledOutcome(appointment.status) &&
           appointment.startAt.getTime() <= Date.now()
         ) {

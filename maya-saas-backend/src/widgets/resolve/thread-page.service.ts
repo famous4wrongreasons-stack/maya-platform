@@ -1,11 +1,21 @@
 import { reasonTextOrNull } from '../rendering/reason-text';
-import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
+import { SCHEDULE_APPROVAL_OWNER, COMMIT_BOOKING_OWNER } from '../di-tokens';
+import {
+  EFFECT_ROUTE_AUDIT,
+  type EffectRouteAuditPort,
+  type CommitBookingOwnerPort,
+} from '../routing/effect-router.ports';
 import type { ScheduleApprovalAdapter } from '../owner-ports/schedule-approval.adapter';
 import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
 import { SCHEDULE_AE } from '../emission/schedule-intent-template';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
@@ -44,7 +54,113 @@ export class WidgetThreadPageService {
     @Optional()
     @Inject(SCHEDULE_APPROVAL_OWNER)
     private readonly schedule?: ScheduleApprovalAdapter,
+    @Optional()
+    @Inject(COMMIT_BOOKING_OWNER)
+    private readonly booking?: CommitBookingOwnerPort,
+    @Optional()
+    @Inject(EFFECT_ROUTE_AUDIT)
+    private readonly audit?: EffectRouteAuditPort,
   ) {}
+
+  /** Explicit status check for one already accepted original COMMIT. The
+   * widget id is a locator only; authority and caller key come from storage. */
+  async refreshBookingReceipt(widgetId: string): Promise<void> {
+    if (!this.booking?.readStatus || !this.audit) return;
+    const readSource = () =>
+      this.prisma.$transaction(async (tx) => {
+        const principal = await this.principals.resolve(tx);
+        if (!principal?.authority.userId) return null;
+        const tenantId = principal.authority.tenantId;
+        const records = await tx.widgetIntentRecord.findMany({
+          where: {
+            tenantId,
+            widgetId,
+            principalProofHash: principal.proofHash,
+            widgetKind: 'BOOKING_CONFIRMATION',
+            effect: 'COMMIT',
+            capabilitySpace: 'AE',
+            capabilityKey: {
+              in: [
+                'crm.appointment.create.v1',
+                'crm.appointment.reschedule.v1',
+              ],
+            },
+            consumedAt: { not: null },
+            erasedAt: null,
+            emission: {
+              erasedAt: null,
+              retentionUntil: { gt: new Date() },
+              turn: { erasedAt: null, principalProofHash: principal.proofHash },
+            },
+          },
+          take: 2,
+          select: {
+            ...RELEASE_RECORD_SELECT,
+            confirmationJson: true,
+            receipts: {
+              where: { tenantId, outcome: 'ACCEPTED', erasedAt: null },
+              select: { actionReceiptRef: true },
+              take: 2,
+            },
+          },
+        });
+        if (records.length !== 1 || records[0].receipts.length !== 1)
+          return null;
+        const record = records[0];
+        if (
+          !(await this.seals.verify(record.intentTokenHash, { tenantId }, tx))
+            .ok ||
+          !(await this.releaseAccess.admits(tenantId, record, tx))
+        )
+          return null;
+        const confirmation = record.confirmationJson;
+        if (
+          !isRecord(confirmation) ||
+          typeof confirmation.idempotency_key !== 'string' ||
+          !confirmation.idempotency_key ||
+          !record.capabilityKey
+        )
+          return null;
+        return {
+          tenantId,
+          actorUserId: principal.authority.userId,
+          principalProofHash: principal.proofHash,
+          intentTokenHash: record.intentTokenHash,
+          capabilityKey: record.capabilityKey,
+          confirmationIdempotencyKey: confirmation.idempotency_key,
+          actionReceiptRef: record.receipts[0].actionReceiptRef,
+        };
+      });
+    const source = await readSource();
+    if (!source) return;
+    const revalidate = async () => {
+      const current = await readSource();
+      if (
+        !current ||
+        current.tenantId !== source.tenantId ||
+        current.actorUserId !== source.actorUserId ||
+        current.principalProofHash !== source.principalProofHash ||
+        current.intentTokenHash !== source.intentTokenHash ||
+        current.confirmationIdempotencyKey !==
+          source.confirmationIdempotencyKey ||
+        current.capabilityKey !== source.capabilityKey
+      )
+        throw new ForbiddenException('widget_receipt_unavailable');
+    };
+    const result = await this.booking.readStatus({ ...source, revalidate });
+    if (result?.state !== 'SUCCEEDED') return;
+    if (source.actionReceiptRef !== null) {
+      if (source.actionReceiptRef !== result.executionId)
+        throw new ForbiddenException('widget_receipt_mismatch');
+      return;
+    }
+    await revalidate();
+    await this.audit.reconcileAcceptedReceipt({
+      tenantId: source.tenantId,
+      intentTokenHash: source.intentTokenHash,
+      actionReceiptRef: result.executionId,
+    });
+  }
 
   async read(request: ThreadPageRequest): Promise<readonly HistorisedWidget[]> {
     return this.prisma.$transaction(async (tx) => {

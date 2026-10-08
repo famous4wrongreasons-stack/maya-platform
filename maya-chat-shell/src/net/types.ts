@@ -75,6 +75,8 @@ export type WidgetIntentRequest = WidgetIntentSubmission;
 
 export interface WidgetResolveRequest {
   readonly rendered?: { readonly widget_id: string; readonly body_hash: string; readonly envelope_seal: string };
+  /** Explicit status-button locator only; the backend resolves current principal and action authority. */
+  readonly booking_receipt?: { readonly widget_id: string };
   readonly thread_page: { readonly limit: number; readonly before?: string };
 }
 

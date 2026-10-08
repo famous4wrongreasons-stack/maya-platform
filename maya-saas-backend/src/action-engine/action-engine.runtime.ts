@@ -23,6 +23,11 @@ import {
 } from './action-engine.errors';
 import { CanonicalActionIngressService } from './action-engine.ingress';
 import { ActionEngineKernel } from './action-engine.kernel';
+import {
+  readClientActionPrincipal,
+  type ClientActionPrincipal,
+} from './client-action-principal.contract';
+import { CLIENT_BOOKING_INTENT_CONTRACT } from './client-booking-intent.contract';
 
 export type ActionRuntimePhase = 'prepare' | 'dispatch';
 
@@ -34,6 +39,16 @@ export interface ActionDispatchSuccess<T> {
 export interface ActionReconciliationDecision {
   outcome: ReconciliationOutcome;
   safeResult?: Record<string, unknown>;
+}
+
+/** Explicit status observation of an already admitted Client action. No executor. */
+export interface ClientAppointmentStatusHandlers {
+  authorize(): Promise<void>;
+  reconcile(
+    normalizedInput: Record<string, unknown>,
+    preDispatchContext: Record<string, unknown> | undefined,
+    context: ActionRuntimeContextV1,
+  ): Promise<ActionReconciliationDecision>;
 }
 
 export interface ActionFailureClassification {
@@ -214,6 +229,159 @@ export class ActionEngineRuntimeService {
     return this.kernel.getExecutionResult(tenantId, executionId);
   }
 
+  /** Caller must first resolve its current Client and exact server-owned alias. */
+  async readClientAppointmentStatusSource(
+    tenantId: string,
+    executionId: string,
+  ): Promise<{
+    execution: ActionExecution;
+    input: Record<string, unknown>;
+    principal: ClientActionPrincipal;
+  }> {
+    const execution = (await this.kernel.getAudit(tenantId, executionId))
+      .execution;
+    if (
+      execution.tenantId !== tenantId ||
+      execution.id !== executionId ||
+      !this.clientAppointmentStatusCandidate(execution)
+    )
+      throw new ActionContractError(
+        'Exact admitted Client appointment required',
+      );
+    const input = await this.kernel.readTrustedNormalizedInput(
+      tenantId,
+      executionId,
+    );
+    const principal = readClientActionPrincipal({
+      capability: execution.capability,
+      sourceType: execution.sourceType,
+      targetRef: execution.targetRef,
+      input,
+      evidenceRefs: execution.evidenceRefsJson as string[],
+      hasBookingIntent:
+        execution.bookingIntentContract === CLIENT_BOOKING_INTENT_CONTRACT &&
+        Boolean(execution.bookingIntentEncrypted),
+    });
+    if (
+      !principal ||
+      execution.sourceRef !== `client-channel-link:${principal.linkId}`
+    )
+      throw new ActionContractError('Client appointment attribution mismatch');
+    return { execution, input, principal };
+  }
+
+  resolveClientRescheduleCallerAlias(tenantId: string, key: string) {
+    return this.kernel.resolveClientRescheduleCallerAlias(tenantId, key);
+  }
+
+  /** One explicit readback only. Even PROVEN_NOT_EXECUTED -> READY cannot dispatch here. */
+  async resolveClientAppointmentStatus(
+    tenantId: string,
+    executionId: string,
+    handlers: ClientAppointmentStatusHandlers,
+  ): Promise<ExecutionResultV1> {
+    await handlers.authorize();
+    const source = await this.readClientAppointmentStatusSource(
+      tenantId,
+      executionId,
+    );
+    let execution = source.execution;
+    const input = source.input;
+    await handlers.authorize();
+    if (
+      execution.state === ActionExecutionState.UNKNOWN &&
+      execution.reconciliationState === ActionReconciliationState.IN_PROGRESS &&
+      execution.leaseExpiresAt &&
+      execution.leaseExpiresAt < new Date()
+    ) {
+      try {
+        execution = await this.kernel.recoverExpiredClaim({
+          tenantId,
+          executionId,
+        });
+      } catch (error) {
+        if (
+          !(error instanceof ActionClaimError) ||
+          error.code !== 'LEASE_NOT_EXPIRED'
+        )
+          throw error;
+        // A concurrent worker may already have recovered or settled this claim.
+        await handlers.authorize();
+        return this.kernel.getExecutionResult(tenantId, executionId);
+      }
+      await handlers.authorize();
+    }
+    if (
+      execution.state !== ActionExecutionState.UNKNOWN ||
+      execution.reconciliationState !== ActionReconciliationState.REQUIRED
+    )
+      return this.kernel.getExecutionResult(tenantId, executionId);
+    const previous = await this.kernel.readLatestPreDispatchContext(
+      tenantId,
+      executionId,
+    );
+    await handlers.authorize();
+    let claim;
+    try {
+      claim = await this.kernel.claimReconciliation({
+        tenantId,
+        executionId,
+        workerId: this.workerId,
+      });
+    } catch (error) {
+      if (
+        error instanceof ActionClaimError &&
+        error.code === 'RECONCILIATION_NOT_REQUIRED'
+      ) {
+        await handlers.authorize();
+        return this.kernel.getExecutionResult(tenantId, executionId);
+      }
+      throw error;
+    }
+    let decision: ActionReconciliationDecision = { outcome: 'STILL_UNKNOWN' };
+    let authorizationFailure: { error: unknown } | null = null;
+    try {
+      await handlers.authorize();
+      try {
+        decision = await handlers.reconcile(input, previous, {
+          tenantId,
+          executionId,
+        });
+      } catch {
+        // A failed read proves neither absence nor failure of the original effect.
+      }
+      await handlers.authorize();
+    } catch (error) {
+      authorizationFailure = { error };
+      decision = { outcome: 'STILL_UNKNOWN' };
+    }
+    const result = await this.kernel.finalizeReconciliation({
+      tenantId,
+      executionId,
+      attemptId: claim.attempt.id,
+      leaseToken: claim.leaseToken,
+      outcome: decision.outcome,
+      safeResult: decision.safeResult,
+    });
+    if (authorizationFailure) throw authorizationFailure.error;
+    return result;
+  }
+
+  private clientAppointmentStatusCandidate(
+    execution: ActionExecution,
+  ): boolean {
+    return (
+      execution.sourceType === 'authenticated_request' &&
+      typeof execution.sourceRef === 'string' &&
+      execution.sourceRef.startsWith('client-channel-link:') &&
+      ['crm.appointment.create.v1', 'crm.appointment.reschedule.v1'].includes(
+        execution.capability,
+      ) &&
+      Array.isArray(execution.evidenceRefsJson) &&
+      execution.evidenceRefsJson.every((ref) => typeof ref === 'string')
+    );
+  }
+
   /** A positive canonical read may settle this exact guest create. This method has no dispatch path. */
   async resolvePublicBookingFromReadback(
     tenantId: string,
@@ -387,7 +555,18 @@ export class ActionEngineRuntimeService {
           continue;
         }
         if (execution.state === ActionExecutionState.UNKNOWN) {
+          const clientStatus = this.clientAppointmentStatusCandidate(execution);
+          if (clientStatus)
+            await this.readClientAppointmentStatusSource(
+              execution.tenantId,
+              execution.id,
+            );
           execution = await this.reconcile(execution, handlers);
+          if (clientStatus && execution.state === ActionExecutionState.UNKNOWN)
+            throw new ActionExecutionUncertainError(
+              'ACTION_RECONCILIATION_REQUIRED',
+              'Client appointment outcome remains unknown after one readback',
+            );
           continue;
         }
         if (execution.state !== ActionExecutionState.READY) {

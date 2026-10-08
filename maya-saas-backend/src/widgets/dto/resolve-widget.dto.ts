@@ -1,9 +1,11 @@
 import {
   IsObject,
   IsOptional,
+  ValidateIf,
   Validate,
   ValidatorConstraint,
   type ValidatorConstraintInterface,
+  type ValidationArguments,
 } from 'class-validator';
 
 /** SH-12: the sole resolve request is a bounded principal thread page. */
@@ -54,10 +56,33 @@ class SelectorRenderEvidenceConstraint implements ValidatorConstraintInterface {
   }
 }
 
+@ValidatorConstraint({ name: 'BookingReceiptRead', async: false })
+class BookingReceiptReadConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown, args: ValidationArguments): boolean {
+    if (typeof value !== 'object' || value === null || Array.isArray(value))
+      return false;
+    const v = value as Record<string, unknown>;
+    const request = args.object as ResolveWidgetDto;
+    return (
+      Object.keys(v).join(',') === 'widget_id' &&
+      typeof v.widget_id === 'string' &&
+      UUID.test(v.widget_id) &&
+      request.rendered === undefined &&
+      request.thread_page?.limit === 20 &&
+      request.thread_page?.before === undefined
+    );
+  }
+}
+
 export class ResolveWidgetDto {
   @IsObject()
   @Validate(WidgetThreadPageConstraint)
   thread_page!: WidgetThreadPageDto;
+
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsObject()
+  @Validate(BookingReceiptReadConstraint)
+  booking_receipt?: { widget_id: string };
 
   @IsOptional()
   @IsObject()

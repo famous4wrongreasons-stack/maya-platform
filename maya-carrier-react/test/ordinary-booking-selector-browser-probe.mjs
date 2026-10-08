@@ -186,7 +186,7 @@ async function main() {
       const view = await page.eval('Q.all("button[data-ref]").filter(Q.visible).map(el => ({ref:el.dataset.ref,name:Q.name(el)}))');
       assert.ok(view.some(button => button.ref === ref), 'Server-selected control must be visibly rendered');
       const before = page.apiRequests('/widgets/intent').length;
-      assert.equal(await page.click(`Q.all('button[data-ref]').find(el => Q.visible(el) && el.dataset.ref === ${JSON.stringify(ref)})`), true);
+      assert.equal(await page.click(`Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled && el.dataset.ref === ${JSON.stringify(ref)}).at(-1)`), true);
       const request = await until(() => page.apiRequests('/widgets/intent').slice(before).find(r => r.finishedAt), 'real widget intent');
       assert.equal(request.status, 200);
       return JSON.parse(await page.responseBody(request.requestId));
@@ -199,6 +199,10 @@ async function main() {
       const replies = await page.eval('Q.all(\'[data-chat-message="maya"]\').length');
       await sendClientRequest(page, prompt);
       const result = await answer(page, before);
+      const calls = page.apiRequests('/ai/chat').slice(before);
+      assert.equal(calls.length, 1, 'One typed correction makes one actual chat request');
+      const sent = JSON.parse(await page.postData(calls[0]));
+      assert.deepEqual(sent.messages.at(-1), { role: 'user', content: prompt });
       assert.ok(await page.waitFor(`Q.all('[data-chat-message="maya"]').length === ${replies + 1}`));
       return result;
     }
@@ -212,17 +216,37 @@ async function main() {
       const parts = new Intl.DateTimeFormat('en', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(start));
       return ['year', 'month', 'day'].map(key => parts.find(part => part.type === key).value).join('-');
     };
-    async function times(page, scenario, prompt, day, step) {
+    const localClock = (start, timezone) => new Intl.DateTimeFormat('en-GB', {
+      timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }).format(new Date(start));
+    async function times(page, scenario, prompt, day, step, requestedTime) {
       const result = await ask(page, prompt), envelope = replyEnvelope(result);
       assert.equal(envelope?.kind, 'TIME_SLOT_SELECTOR', 'Fresh complete preferences must reach current availability');
       assert.equal(envelope.body.timezone, scenario.timezone);
       const slots = envelope.body.groups.flatMap(group => group.slots); assert.ok(slots.length > 0);
       assert.ok(slots.every(slot => localDay(slot.start.value, scenario.timezone) === day));
+      if (requestedTime !== undefined) assert.ok(slots.every(slot => localClock(slot.start.value, scenario.timezone) === requestedTime), 'Every returned source slot must honor the current exact clock');
       assert.ok(await page.waitFor(`Q.all('button[data-ref]').some(el => Q.visible(el) && el.dataset.ref === ${JSON.stringify('slot:' + slots[0].slot_ref)})`));
+      if (requestedTime !== undefined) {
+        const firstRef = JSON.stringify('slot:' + slots[0].slot_ref);
+        assert.ok(await page.waitFor(`(() => {
+          const card=Q.all('button[data-ref]').filter(el=>Q.visible(el) && !el.disabled && el.dataset.ref===${firstRef}).at(-1)?.closest('article');
+          const refs=card ? [...card.querySelectorAll('button[data-ref]')].filter(el=>Q.visible(el) && el.dataset.ref.startsWith('slot:')).map(el=>el.dataset.ref).sort() : [];
+          return JSON.stringify(refs)===${JSON.stringify(JSON.stringify(slots.map(slot=>'slot:'+slot.slot_ref).sort()))};
+        })()`), 'The fresh selector with the returned source slots must render');
+        const visibleSlots = await page.eval(`(() => {
+          const card = Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled && el.dataset.ref === ${firstRef}).at(-1)?.closest('article');
+          return card ? [...card.querySelectorAll('button[data-ref]')].filter(el => Q.visible(el) && el.dataset.ref.startsWith('slot:')).map(el => ({ ref:el.dataset.ref, name:Q.name(el) })) : [];
+        })()`);
+        assert.deepEqual(visibleSlots.map(slot => slot.ref).sort(), slots.map(slot => 'slot:' + slot.slot_ref).sort(), 'Actual rendered selector exposes exactly the returned source slots');
+        assert.ok(visibleSlots.every(slot => slot.name.includes(requestedTime)), 'The visible controls show the corrected local time');
+      }
       const name = scenario.key + '-' + step;
       await capture(page, name);
-      report.observations[name] = { currentSourceRead: true, timezone: scenario.timezone, day, slotCount: slots.length };
-      await checkpoint(name, { widgetId: envelope.widget_id, selectedStart: slots[0].start.value });
+      report.observations[name] = { currentSourceRead: true, timezone: scenario.timezone, day, slotCount: slots.length,
+        ...(requestedTime === undefined ? {} : { requestedTime, renderedSlotsMatchSource: true, typedChatRequests: 1 }) };
+      await checkpoint(name, { widgetId: envelope.widget_id, selectedStart: slots[0].start.value,
+        ...(requestedTime === undefined ? {} : { requestedTime }) });
       return envelope;
     }
     const sessions = [];
@@ -267,15 +291,19 @@ async function main() {
       await times(page, scenario, prompts.day, scenario.day, 'date');
       await times(page, scenario, prompts.serviceCorrection, scenario.day, 'service-edit');
       await times(page, scenario, prompts.staffCorrection, scenario.day, 'staff-edit');
-      const time = await times(page, scenario, prompts.dayCorrection, scenario.alternateDay, 'day-edit');
+      await times(page, scenario, prompts.dayCorrection, scenario.alternateDay, 'day-edit');
+      await times(page, scenario, prompts.exactTime, scenario.alternateDay, 'time-exact', '14:30');
+      const time = await times(page, scenario, prompts.timeCorrection, scenario.alternateDay, 'time-correction', '15:00');
       const slot = time.body.groups.flatMap(group => group.slots)[0];
       const draft = await clickRef(page, 'slot:' + slot.slot_ref), confirmation = draft.next_envelope;
       assert.equal(draft.receipt_outcome, 'ACCEPTED'); assert.equal(confirmation?.kind, 'BOOKING_CONFIRMATION');
       assert.equal(confirmation.body.staff_label.value, scenario.otherStaffName);
       assert.ok(await page.waitFor(`Q.all('article.widget--live').some(el => Q.visible(el) && el.innerText.includes(${JSON.stringify(scenario.otherStaffName)}) && el.innerText.includes(${JSON.stringify(scenario.otherServiceName)}) && el.innerText.includes(${JSON.stringify(scenario.timezone)}))`));
       assert.equal(localDay(confirmation.body.when.value, scenario.timezone), scenario.alternateDay);
+      assert.equal(new Date(confirmation.body.when.value).toISOString(), new Date(slot.start.value).toISOString());
+      assert.equal(localClock(confirmation.body.when.value, scenario.timezone), '15:00');
       await capture(page, scenario.key + '-preview');
-      report.observations[scenario.key + 'Preview'] = { serviceName: scenario.otherServiceName, staffName: scenario.otherStaffName, day: scenario.alternateDay, timezone: scenario.timezone, eachCorrectionPreservesOtherPreferences: true };
+      report.observations[scenario.key + 'Preview'] = { serviceName: scenario.otherServiceName, staffName: scenario.otherStaffName, day: scenario.alternateDay, timezone: scenario.timezone, localTime: '15:00', previousLocalTime: '14:30', eachCorrectionPreservesOtherPreferences: true };
       await checkpoint(scenario.key + '-preview', { confirmation, selectedStart: slot.start.value });
       const commit = confirmation.intents.find(intent => intent.effect === 'COMMIT'); assert.ok(commit);
       const result = await clickRef(page, 'intent:' + commit.intent_ref);
@@ -302,22 +330,53 @@ async function main() {
       assert.equal(await page.click(receiptButton), true);
       assert.ok(await page.waitFor('document.body.innerText.includes("Не удалось проверить результат. Попробуйте ещё раз.")'));
       await page.send('Network.emulateNetworkConditions', { offline:false, latency:0, downloadThroughput:-1, uploadThroughput:-1 });
-      const beforeRead = requests(page, '/widgets/resolve').length;
-      assert.equal(await page.click(receiptButton), true);
-      await until(() => requests(page, '/widgets/resolve').slice(beforeRead).some(row => row.finishedAt && row.status === 200), 'manual current receipt READ');
-      assert.ok(await page.waitFor(`!!(${receiptButton}) && !(${receiptButton}).disabled`));
-      const repeated = requests(page, '/widgets/resolve').length;
-      assert.equal(await page.click(receiptButton), true);
-      await until(() => requests(page, '/widgets/resolve').slice(repeated).some(row => row.finishedAt && row.status === 200), 'repeat receipt READ');
-      assert.ok(await page.waitFor(`!!(${receiptButton}) && !(${receiptButton}).disabled`));
+      let onlineReads = 0;
+      async function readReceipt(label) {
+        const before = requests(page, '/widgets/resolve').length;
+        assert.equal(await page.click(receiptButton), true);
+        const current = await until(() => requests(page, '/widgets/resolve').slice(before).find(row => row.finishedAt && row.status === 200), label);
+        const calls = requests(page, '/widgets/resolve').slice(before);
+        assert.equal(calls.length, 1, 'An explicit status check makes one bounded receipt request');
+        assert.deepEqual(JSON.parse(await page.postData(current)), {
+          thread_page: { limit: 20 }, booking_receipt: { widget_id: confirmation.widget_id },
+        });
+        const resolved = JSON.parse(await page.responseBody(current.requestId));
+        assert.equal(resolved.tenant_bound, true);
+        const matching = resolved.widgets.filter(row => row.envelope.widget_id === confirmation.widget_id);
+        assert.equal(matching.length, 1, 'The receipt belongs to the original confirmation widget');
+        assert.ok(await page.waitFor(`!!(${receiptButton}) && !(${receiptButton}).disabled`));
+        onlineReads++;
+        return matching[0].terminal_lines;
+      }
+      const firstLines = await readReceipt('manual current receipt READ');
+      if (scenario.key === 'unknown') {
+        assert.equal(firstLines.some(line => line.outcome === 'CONFIRMED'), false, 'Inconclusive source cannot confirm the action');
+        assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
+        assert.ok(await page.waitFor('document.body.innerText.includes("Результат пока не подтверждён. Не отправляйте повторно.")'));
+        await capture(page, 'unknown-before');
+        await checkpoint('unknown-readback-ready', { widgetId: confirmation.widget_id });
+      }
+      const repeatedLines = await readReceipt('repeat receipt READ');
+      if (scenario.key === 'unknown') {
+        const confirmed = repeatedLines.filter(line => line.outcome === 'CONFIRMED');
+        assert.equal(confirmed.length, 1, 'Authoritative source readback produces exactly one canonical confirmation');
+        assert.equal(typeof confirmed[0].action_receipt_ref, 'string');
+        assert.ok(confirmed[0].action_receipt_ref.length > 0);
+        assert.ok(await page.waitFor('document.body.innerText.split("Запись подтверждена.").length - 1 === 1'));
+        await capture(page, 'unknown-confirmed');
+        const settledLines = await readReceipt('settled receipt READ without provider redispatch');
+        assert.deepEqual(settledLines.filter(line => line.outcome === 'CONFIRMED'), confirmed, 'Repeated READ preserves the same canonical action receipt');
+        assert.equal(await page.eval('document.body.innerText.split("Запись подтверждена.").length - 1'), 1);
+      }
       assert.equal(requests(page, '/widgets/intent').length, intentCount);
       assert.equal(requests(page, '/ai/chat').length, chatCount);
       assert.equal(await page.eval(`Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), false);
       if (scenario.key === 'success') assert.equal(await page.eval('document.body.innerText.split("Запись подтверждена.").length - 1'), 1);
-      if (scenario.key === 'unknown') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
-      report.observations[scenario.key + 'ReceiptRefresh'] = {offlineRefusal:true, currentReceiptReads:2, automaticRequests:0, newCommit:0, newChat:0, oldControlRestored:false};
+      report.observations[scenario.key + 'ReceiptRefresh'] = {offlineRefusal:true, currentReceiptReads:onlineReads, newCommit:0, newChat:0, oldControlRestored:false,
+        ...(scenario.key === 'unknown' ? { beforeAuthoritativeReadback: 'UNKNOWN', afterAuthoritativeReadback: 'CONFIRMED', confirmationStatements: 1, repeatedCanonicalReceipt: true } : {})};
       report.observations[scenario.key + 'Result'] = publicResult(result);
-      await capture(page, scenario.key + '-result'); await checkpoint(scenario.key + '-result', { result: publicResult(result) });
+      await capture(page, scenario.key + '-result'); await checkpoint(scenario.key + '-result', { result: publicResult(result),
+        ...(scenario.key === 'unknown' ? { receiptState: 'CONFIRMED' } : {}) });
       reloads.push({ page, scenario, nextLoginAt, commitRef: 'intent:' + commit.intent_ref });
     }
     for (const { page, scenario, nextLoginAt, commitRef } of reloads) {
@@ -327,10 +386,11 @@ async function main() {
       await page.goto(origin + '/'); await login(page, scenario.email);
       assert.equal(requests(page, '/widgets/intent').length, before, 'Reload does not repeat selection or COMMIT');
       assert.equal(await page.eval(`Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled).some(el => el.dataset.ref === ${JSON.stringify(commitRef)})`), false);
-      if (scenario.key === 'success') assert.ok(await page.waitFor('document.body.innerText.includes("Запись подтверждена.")'));
+      if (scenario.key === 'success' || scenario.key === 'unknown') {
+        assert.ok(await page.waitFor('document.body.innerText.split("Запись подтверждена.").length - 1 === 1'));
+      }
       else {
         assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
-        if (scenario.key === 'unknown') assert.ok(await page.waitFor('document.body.innerText.includes("Результат пока не подтверждён")'));
       }
       report.observations[scenario.key + 'Reload'] = { noAutomaticIntent: true, noOldConfirmation: true, noInventedSuccess: true };
       await capture(page, scenario.key + '-reload'); await checkpoint(scenario.key + '-reload');

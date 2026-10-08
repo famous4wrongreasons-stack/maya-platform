@@ -1108,7 +1108,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     if (!active()) return;
     let lines: readonly TerminalLine[] | null = null;
     try {
-      const page = await deps.transport.resolveWidgets({ thread_page: { limit: 20 } }, abort.signal);
+      const page = await deps.transport.resolveWidgets({ thread_page: { limit: 20 }, booking_receipt: { widget_id: widgetId } }, abort.signal);
       if (page.ok && page.value.tenant_bound && typeof tenant === 'string' && tenant.length > 0 && typeof principal === 'string' && principal.length > 0) {
         const candidates = page.value.widgets.filter(widget => widget.envelope.widget_id === widgetId);
         const current = candidates.length === 1 ? candidates[0] : undefined;

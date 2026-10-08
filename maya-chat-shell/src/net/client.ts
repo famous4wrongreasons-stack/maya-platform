@@ -672,6 +672,9 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
 
     async resolveWidgets(request: WidgetResolveRequest, signal: AbortSignal) {
       const body: WidgetResolveRequest = {
+        ...(request.booking_receipt === undefined ? {} : { booking_receipt: {
+          widget_id: request.booking_receipt.widget_id,
+        } }),
         ...(request.rendered === undefined ? {} : { rendered: {
           widget_id: request.rendered.widget_id, body_hash: request.rendered.body_hash,
           envelope_seal: request.rendered.envelope_seal,

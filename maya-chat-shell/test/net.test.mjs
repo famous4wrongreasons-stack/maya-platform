@@ -408,6 +408,26 @@ test('widget transport sends only typed bodies and retains only authorized respo
   });
 });
 
+test('explicit booking receipt transport projects only the widget locator; passive reads never inherit it', async () => {
+  const { net } = await signedIn();
+  const widgetId = '483ed7f8-6c1a-4f52-9b3d-70e2a5c81d94';
+  serve({ [U.widgetResolve]: json(200, { contract: 'maya.widget.resolve/1', widgets: [], tenant_bound: true }) });
+  const signal = new AbortController().signal;
+  await net.transport.resolveWidgets({
+    thread_page: { limit: 20, tenant_id: 'must-not-survive' },
+    booking_receipt: { widget_id: widgetId, action_id: 'must-not-survive', actor_id: 'must-not-survive' },
+    tenant_id: 'must-not-survive',
+  }, signal);
+  await net.transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
+  const rendered = { widget_id: widgetId, body_hash: 'a'.repeat(64), envelope_seal: 'synthetic-seal' };
+  await net.transport.resolveWidgets({ thread_page: { limit: 1 }, rendered }, signal);
+  assert.deepEqual(calls(U.widgetResolve).map(call => call.body), [
+    { thread_page: { limit: 20 }, booking_receipt: { widget_id: widgetId } },
+    { thread_page: { limit: 20 } },
+    { thread_page: { limit: 1 }, rendered },
+  ]);
+});
+
 // ── NS-1: the canonical parent return crosses the projection ───────────────────────────────────
 //
 // `resolved_widget` is the widget the server RE-RESOLVED for an intent — for a journal detail's

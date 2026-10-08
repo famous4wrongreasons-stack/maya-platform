@@ -1162,7 +1162,11 @@ const terminalStore = () => {
   const envelopes = new Map();
   let rereads = 0;
   const read = async (request) => {
-    assert.deepEqual(request, { thread_page: { limit: 20 } });
+    if (request.booking_receipt === undefined) assert.deepEqual(request, { thread_page: { limit: 20 } });
+    else {
+      assert.ok(envelopes.has(request.booking_receipt.widget_id));
+      assert.deepEqual(request, { thread_page: { limit: 20 }, booking_receipt: { widget_id: request.booking_receipt.widget_id } });
+    }
     rereads += 1;
     return { ok: true, value: {
       tenant_bound: true,
@@ -1550,7 +1554,8 @@ test('L27: ACCEPTED plus failed first page recovers through explicit READ withou
   let pages = 0;
   let intents = 0;
   const read = async (request) => {
-    assert.deepEqual(request, { thread_page: { limit: 20 } });
+    assert.deepEqual(request, pages === 0 ? { thread_page: { limit: 20 } }
+      : { thread_page: { limit: 20 }, booking_receipt: { widget_id: card.widget_id } });
     return (pages += 1) === 1
       ? { ok: false, failure: { reason: 'server_error' } }
       : { ok: true, value: { tenant_bound: true, widgets: [{ envelope: card, terminal_lines: [confirmed()], reread_intent: null }] } };
@@ -1608,7 +1613,7 @@ test('L27: only a spent booking admits refresh, and concurrent clicks perform on
   const card = terminalCard();
   let reads = 0, complete;
   const s = setup({ submission: { submit: async () => ({ status: 'accepted' }) }, receiptRead: (request) => {
-    assert.deepEqual(request, { thread_page: { limit: 20 } });
+    assert.deepEqual(request, { thread_page: { limit: 20 }, booking_receipt: { widget_id: card.widget_id } });
     reads++; return new Promise(resolve => { complete = resolve; });
   } });
   const { itemId } = s.runtime.widgets.ingest(card);

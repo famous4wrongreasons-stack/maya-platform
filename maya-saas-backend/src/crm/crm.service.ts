@@ -1,3 +1,4 @@
+import { decodeCrmAppointmentKey } from '../domain/appointment-key';
 import { YclientsGoodsReceiptUnknownError } from './yclients-goods-receipt';
 import { EntitlementsService } from '../entitlements/entitlements.service';
 import {
@@ -2125,6 +2126,7 @@ export class CrmService {
           let branchRevision: string | null = null;
           const assertCurrent = async () => {
             if (!verifiedCanonicalClient) return;
+            await invocation.authorizationCheck?.();
             await this.assertExternalSource(scopedTenantId);
             if ((await this.getAdapterForTenant(scopedTenantId)) !== adapter)
               throw new ConflictException(
@@ -2726,6 +2728,190 @@ export class CrmService {
     );
   }
 
+  /** Exact stored Client action status. This path never quotes availability,
+   * enters AE ingress, or dispatches a provider mutation. */
+  async readClientCreateStatus(input: {
+    tenantId: string;
+    clientId: string;
+    linkId: string;
+    key: string;
+    authorize: () => Promise<void>;
+  }): Promise<ExecutionResultV1 | null> {
+    this.tenantContext.assertTenantId(input.tenantId);
+    await input.authorize();
+    const bound = await this.resolveCanonicalClientBookingRetry(
+      input.tenantId,
+      input.clientId,
+      input.key,
+    );
+    if (!bound) return null;
+    const source =
+      await this.actionEngineRuntime.readClientAppointmentStatusSource(
+        input.tenantId,
+        bound.executionId,
+      );
+    const authorize = async () => {
+      await input.authorize();
+      if (
+        source.execution.capability !== 'crm.appointment.create.v1' ||
+        source.principal.linkId !== input.linkId ||
+        source.principal.target.kind !== 'create_appointment' ||
+        source.principal.target.clientId !== input.clientId
+      )
+        throw new ForbiddenException('Original Client action required');
+      if (source.execution.state !== 'SUCCEEDED') {
+        if (
+          stableActionJson(
+            await this.canonicalClientBookingTarget(input.tenantId),
+          ) !== stableActionJson(bound.descriptor.calendarTarget)
+        )
+          throw new ConflictException('Original calendar source changed');
+        if (bound.descriptor.branchId) {
+          await this.confirmedCreateBranchRevision(
+            input.tenantId,
+            bound.descriptor.branchId,
+            bound.executionId,
+            source.execution.evidenceRefsJson,
+          );
+          await this.assertBookingBranchTimezone(
+            input.tenantId,
+            bound.descriptor.branchId,
+            bound.resolutionContext.timezone,
+          );
+        }
+      }
+    };
+    await authorize();
+    const invocation: AppointmentActionInvocation = {
+      sourceType: 'authenticated_request',
+      sourceRef: `client-channel-link:${input.linkId}`,
+      clientPrincipal: { linkId: input.linkId },
+      bookingIntent: {
+        contract: 'maya.client-appointment-create-intent/1',
+        calendarTarget: bound.descriptor.calendarTarget,
+        timezone: bound.resolutionContext.timezone,
+      },
+      authorizationCheck: authorize,
+    };
+    // A completed result needs no provider, current catalogue, or new quote.
+    if (source.execution.state === 'SUCCEEDED') {
+      await authorize();
+      return this.getAppointmentActionExecutionResult(
+        input.tenantId,
+        bound.executionId,
+      );
+    }
+    if (
+      stableActionJson(
+        await this.canonicalClientBookingTarget(input.tenantId),
+      ) !== stableActionJson(bound.descriptor.calendarTarget)
+    )
+      throw new ConflictException('Original calendar source changed');
+    const plan = await this.canonicalClientCreatePlan(
+      input.tenantId,
+      this.createAppointmentInput(source.input),
+      invocation,
+    );
+    return this.actionEngineRuntime.resolveClientAppointmentStatus(
+      input.tenantId,
+      bound.executionId,
+      { authorize, reconcile: (...args) => plan.handlers.reconcile(...args) },
+    );
+  }
+
+  async readClientRescheduleStatusTarget(tenantId: string, key: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    const execution =
+      await this.actionEngineRuntime.resolveClientRescheduleCallerAlias(
+        tenantId,
+        key,
+      );
+    if (!execution) return null;
+    const source =
+      await this.actionEngineRuntime.readClientAppointmentStatusSource(
+        tenantId,
+        execution.id,
+      );
+    return source.principal.target.kind === 'appointment'
+      ? {
+          executionId: execution.id,
+          appointmentId: source.principal.target.appointmentId,
+        }
+      : null;
+  }
+
+  async readClientRescheduleStatus(input: {
+    tenantId: string;
+    linkId: string;
+    appointmentId: string;
+    externalId: string;
+    key: string;
+    timezone: string;
+    authorize: () => Promise<void>;
+  }): Promise<ExecutionResultV1 | null> {
+    this.tenantContext.assertTenantId(input.tenantId);
+    await input.authorize();
+    const execution =
+      await this.actionEngineRuntime.resolveClientRescheduleCallerAlias(
+        input.tenantId,
+        input.key,
+      );
+    if (!execution) return null;
+    const source =
+      await this.actionEngineRuntime.readClientAppointmentStatusSource(
+        input.tenantId,
+        execution.id,
+      );
+    const authorize = async () => {
+      await input.authorize();
+      const principal = source.principal;
+      if (
+        principal.linkId !== input.linkId ||
+        principal.target.kind !== 'appointment' ||
+        principal.target.appointmentId !== input.appointmentId ||
+        principal.target.externalId !== input.externalId
+      )
+        throw new ForbiddenException('Original Client action required');
+      if (execution.state !== 'SUCCEEDED')
+        await this.assertRescheduleBranchWitness(
+          input.tenantId,
+          {
+            clientPrincipal: {
+              linkId: input.linkId,
+              appointmentId: input.appointmentId,
+            },
+          },
+          execution.id,
+        );
+    };
+    await authorize();
+    if (execution.state === 'SUCCEEDED')
+      return this.getAppointmentActionExecutionResult(
+        input.tenantId,
+        execution.id,
+      );
+    const invocation: AppointmentActionInvocation = {
+      sourceType: 'authenticated_request',
+      sourceRef: `client-channel-link:${input.linkId}`,
+      clientPrincipal: {
+        linkId: input.linkId,
+        appointmentId: input.appointmentId,
+      },
+      appointmentTimezone: input.timezone,
+      authorizationCheck: authorize,
+    };
+    const plan = await this.rescheduleAppointmentActionPlan(
+      input.tenantId,
+      this.rescheduleAppointmentInput(source.input),
+      invocation,
+    );
+    return this.actionEngineRuntime.resolveClientAppointmentStatus(
+      input.tenantId,
+      execution.id,
+      { authorize, reconcile: (...args) => plan.handlers.reconcile(...args) },
+    );
+  }
+
   async findCanonicalClientCreate(
     tenantId: string,
     params: CreateAppointmentRequest,
@@ -2809,19 +2995,22 @@ export class CrmService {
               prepared,
               context,
             );
-            if (result.outcome === 'PROVEN_SUCCEEDED' && result.safeResult)
+            if (result.outcome === 'PROVEN_SUCCEEDED' && result.safeResult) {
+              const services = await this.confirmedBookingServices(
+                tenantId,
+                durable,
+                invocation,
+                context?.executionId,
+              );
+              await invocation.authorizationCheck?.();
               await this.persistCanonicalClientCreate(
                 tenantId,
                 this.createAppointmentInput(durable),
                 this.restoreCreatedAppointment(result.safeResult),
                 provider,
-                await this.confirmedBookingServices(
-                  tenantId,
-                  durable,
-                  invocation,
-                  context?.executionId,
-                ),
+                services,
               );
+            }
             return result;
           },
         },
@@ -3785,6 +3974,7 @@ export class CrmService {
           }
           const current = this.appointmentEvidence(detail);
           if (this.matchesDesiredAppointment(current, durable)) {
+            await invocation.authorizationCheck?.();
             await this.persistRescheduledAppointmentMirror(
               scopedTenantId,
               crmProvider,
@@ -4709,7 +4899,7 @@ export class CrmService {
     detail: CrmAppointmentDetail,
   ): AppointmentStateEvidence {
     return {
-      externalId: detail.id,
+      externalId: decodeCrmAppointmentKey(detail.id),
       status: detail.status,
       start: detail.start_at,
       staffId: String(detail.provider.id),
@@ -4722,6 +4912,8 @@ export class CrmService {
     desired: RescheduleAppointmentInput,
   ): boolean {
     return (
+      current.externalId === desired.externalId &&
+      !isCanceledStatus(current.status) &&
       sameInstant(current.start, desired.start) &&
       (desired.staffId === undefined || current.staffId === desired.staffId) &&
       (desired.serviceIds === undefined ||

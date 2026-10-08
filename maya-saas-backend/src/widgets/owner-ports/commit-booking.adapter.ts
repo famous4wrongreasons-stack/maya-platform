@@ -143,6 +143,32 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
       : rejected();
   }
 
+  async readStatus(input: {
+    tenantId: string;
+    actorUserId: string;
+    capabilityKey: string;
+    confirmationIdempotencyKey: string;
+    revalidate: () => Promise<void>;
+  }) {
+    const owner =
+      input.capabilityKey === 'crm.appointment.create.v1'
+        ? this.create
+        : input.capabilityKey === 'crm.appointment.reschedule.v1'
+          ? this.reschedule
+          : null;
+    if (!owner) return null;
+    await input.revalidate();
+    const result = await owner.readStatusForAccount(
+      input.tenantId,
+      input.actorUserId,
+      input.confirmationIdempotencyKey,
+      input.revalidate,
+    );
+    return result
+      ? { executionId: result.executionId, state: result.state }
+      : null;
+  }
+
   private invoke(input: ActuatingRoutingInput): Promise<unknown> {
     const record = input.routing.record;
     const nouns = input.resolvedNouns.values;

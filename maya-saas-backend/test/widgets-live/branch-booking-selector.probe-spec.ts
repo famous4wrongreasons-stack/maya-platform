@@ -40,6 +40,16 @@ import {
   submit,
 } from './support/release-booking-flow';
 import { ConversationIntelligenceService } from '../../src/conversation-intelligence/conversation-intelligence.service';
+import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
+import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
+import { C9_REGISTRY_HASH } from '../../src/orchestration/c9.registry';
+import type { PrincipalView } from '../../src/widgets/gate.types';
+import { SealService } from '../../src/widgets/emission/seal.service';
+import {
+  BOOKING_NOUN_OWNERS,
+  encodeBookingSlotOwnerRef,
+  encodeBookingCatalogOwnerRef,
+} from '../../src/widgets/booking/booking-noun-identity';
 import { openWidgetNounHandle } from '../../src/widgets/emission/seal.service';
 import { asHandle } from '../../src/widgets/noun-resolution/noun-handles';
 import {
@@ -84,6 +94,10 @@ type Scenario = {
   requestKey?: string;
   previewFactsHash?: string;
   syntheticServicePrice?: number;
+  readbackReady?: boolean;
+  moveExecutionId?: string;
+  moveAppointmentId?: string;
+  moveEvidenceHash?: string;
   originalAction?: {
     id: string;
     evidenceRefs: unknown;
@@ -135,6 +149,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     setupActionsExcludedFromBookingEffectCounts: true,
   };
   const scenarios: Scenario[] = [];
+  const principals = new Map<string, PrincipalView>();
   beforeAll(async () => {
     db = await bootFixtureContext();
     http = await bootHttp();
@@ -143,6 +158,9 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       // Test-only provider ledger in the freshly owned proof DB; no product migration.
       await db.prisma.$executeRawUnsafe(
         'CREATE TABLE branch_selector_synthetic_posts (id bigserial primary key, company_id integer not null, payload jsonb not null)',
+      );
+      await db.prisma.$executeRawUnsafe(
+        'CREATE TABLE branch_selector_synthetic_puts (id bigserial primary key, company_id integer not null, record_id integer not null, payload jsonb not null)',
       );
     } else {
       receipt = JSON.parse(readFileSync(receiptPath, 'utf8')) as Receipt;
@@ -204,6 +222,8 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
           if (prompt === `На ${s.day}`) entities.date_or_period = s.day;
           else if (prompt === `Лучше на ${alternateDay}`)
             entities.date_or_period = alternateDay;
+          else if (prompt === 'В 14:30') entities.time = '14:30';
+          else if (prompt === 'Нет, в 15:00') entities.time_of_day = '15:00';
           else if (prompt === 'Лучше Синтетическая борода')
             entities.services = ['Синтетическая борода'];
           else if (staffCorrection) {
@@ -224,7 +244,9 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
                   {
                     intent: initial
                       ? 'booking.prepare_personal'
-                      : 'booking.find_availability',
+                      : prompt === 'Нет, в 15:00'
+                        ? 'booking.create_own'
+                        : 'booking.find_availability',
                     entities,
                     confidence: 0.99,
                   },
@@ -338,6 +360,27 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
           throw new TypeError('fetch failed after synthetic ledger persisted');
         data = [{ id: 1, record_id: Number(rows[0].id) + 5000 }];
       } else if (
+        method === 'PUT' &&
+        s?.key === 'reschedule-restart' &&
+        route.startsWith(`record/${companyId}/`)
+      ) {
+        const recordId = Number(route.split('/')[2]);
+        assert.equal(typeof init?.body, 'string');
+        const payload = JSON.parse(init!.body as string) as Record<
+          string,
+          unknown
+        >;
+        expect(payload).toMatchObject({
+          datetime: s.day + 'T11:00:00',
+          staff_id: 71,
+          save_if_busy: false,
+          send_sms: false,
+        });
+        await db.prisma
+          .$executeRaw`INSERT INTO branch_selector_synthetic_puts(company_id,record_id,payload)
+          VALUES (${companyId},${recordId},${JSON.stringify(payload)}::jsonb)`;
+        throw new TypeError('synthetic PUT persisted; response lost');
+      } else if (
         method === 'POST' &&
         route === `company/${companyId}/clients/search` &&
         s &&
@@ -356,13 +399,28 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         });
         observations.syntheticReadOnlySearchPosts =
           Number(observations.syntheticReadOnlySearchPosts ?? 0) + 1;
-        return new Response(
-          JSON.stringify({
-            success: false,
-            meta: { message: 'synthetic reconciliation unavailable' },
-          }),
-          { status: 503 },
-        );
+        if (!s.readbackReady) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              meta: { message: 'synthetic reconciliation unavailable' },
+            }),
+            { status: 503 },
+          );
+        }
+        const ledger = await db.prisma.$queryRaw<
+          { payload: Record<string, unknown> }[]
+        >`
+          SELECT payload FROM branch_selector_synthetic_posts WHERE company_id = ${companyId}`;
+        expect(ledger).toHaveLength(1);
+        // Authoritative synthetic provider state comes from the durable POST ledger.
+        data = [
+          {
+            id: 901,
+            name: ledger[0].payload.fullname,
+            phone: ledger[0].payload.phone,
+          },
+        ];
       } else if (method === 'GET' && init?.body === undefined) {
         reads.push(route);
         const company = {
@@ -429,23 +487,109 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
             `^book_times/${companyId}/(?:71|72)/\\d{4}-\\d{2}-\\d{2}$`,
           ).test(route)
         )
-          data = [
-            { time: '10:00', seance_length: 1800 },
-            { time: '11:00', seance_length: 1800 },
-          ];
+          data =
+            s.key === 'reschedule-restart' && (await moveCount(s)) > 0
+              ? []
+              : [
+                  { time: '10:00', seance_length: 1800 },
+                  { time: '11:00', seance_length: 1800 },
+                  { time: '14:30', seance_length: 1800 },
+                  { time: '15:00', seance_length: 1800 },
+                ];
         else if (
+          s?.key === 'reschedule-restart' &&
+          route.startsWith(`record/${companyId}/`)
+        ) {
+          const posts = await db.prisma.$queryRaw<
+            {
+              id: bigint;
+              payload: {
+                phone: string;
+                fullname: string;
+                appointments: {
+                  datetime: string;
+                  staff_id: number;
+                  services: number[];
+                }[];
+              };
+            }[]
+          >`
+            SELECT id,payload FROM branch_selector_synthetic_posts WHERE company_id=${companyId}`;
+          expect(posts).toHaveLength(1);
+          const recordId = Number(posts[0].id) + 5000;
+          expect(route).toBe(`record/${companyId}/${recordId}`);
+          const moves = await db.prisma.$queryRaw<
+            { payload: Record<string, unknown> }[]
+          >`
+            SELECT payload FROM branch_selector_synthetic_puts WHERE company_id=${companyId}`;
+          if (moves.length && !s.readbackReady)
+            return new Response(JSON.stringify({ success: false }), {
+              status: 503,
+            });
+          expect(moves.length).toBeLessThanOrEqual(1);
+          const slot = posts[0].payload.appointments[0];
+          data = {
+            id: recordId,
+            company_id: companyId,
+            datetime: slot.datetime,
+            seance_length: 1800,
+            staff_id: slot.staff_id,
+            staff: { id: slot.staff_id, name: 'Синтетический мастер' },
+            client: {
+              id: 901,
+              name: posts[0].payload.fullname,
+              phone: posts[0].payload.phone,
+            },
+            deleted: false,
+            attendance: 0,
+            services: slot.services.map((id) => ({
+              id,
+              cost: 1000,
+              first_cost: 1000,
+              discount: 0,
+            })),
+            ...(moves[0]?.payload ?? {}),
+          };
+        } else if (
           s &&
           route === `records/${companyId}` &&
           ['unknown', 'unknown-restart'].includes(s.key)
-        )
-          return new Response(
-            JSON.stringify({
-              success: false,
-              meta: { message: 'synthetic reconciliation unavailable' },
-            }),
-            { status: 503 },
-          );
-        else {
+        ) {
+          if (!s.readbackReady)
+            return new Response(JSON.stringify({ success: false }), {
+              status: 503,
+            });
+          expect(url.searchParams.get('client_id')).toBe('901');
+          const ledger = await db.prisma.$queryRaw<
+            {
+              id: bigint;
+              payload: {
+                appointments: {
+                  datetime: string;
+                  staff_id: number;
+                  services: number[];
+                }[];
+              };
+            }[]
+          >`
+            SELECT id,payload FROM branch_selector_synthetic_posts WHERE company_id = ${companyId}`;
+          expect(ledger).toHaveLength(1);
+          const slot = ledger[0].payload.appointments[0];
+          data = [
+            {
+              id: Number(ledger[0].id) + 5000,
+              datetime: slot.datetime,
+              seance_length: 1800,
+              staff_id: slot.staff_id,
+              deleted: false,
+              attendance: 0,
+              services: slot.services.map((id) => ({
+                id,
+                cost: id === 82 ? 800 : 1000,
+              })),
+            },
+          ];
+        } else {
           forbidden.push('unknown-provider-read:' + route);
           throw new Error('Unexpected synthetic provider read: ' + route);
         }
@@ -539,6 +683,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       day: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
     };
     scenarios.push(s);
+    principals.set(s.key, await fx.principalView(await fx.actor(tenant, user)));
     const token = await http.login(tenant.slug, owner.email, owner.password);
     const connect = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/connect')
@@ -1085,7 +1230,14 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         syntheticBookingPosts: 0,
       };
     } else if (
-      ['date', 'service-edit', 'staff-edit', 'day-edit'].includes(name)
+      [
+        'date',
+        'service-edit',
+        'staff-edit',
+        'day-edit',
+        'time-exact',
+        'time-correction',
+      ].includes(name)
     ) {
       await assertNoEffect(s);
       const service = name === 'date' ? '81' : '82',
@@ -1094,16 +1246,56 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         kind: 'TIME_SLOT_SELECTOR',
         service,
         staff,
-        day: name === 'day-edit' ? day : s.day,
+        day: ['day-edit', 'time-exact', 'time-correction'].includes(name)
+          ? day
+          : s.day,
         selectedStart: message.selectedStart,
       });
+      if (name === 'time-exact' || name === 'time-correction') {
+        const wanted = name === 'time-exact' ? '14:30' : '15:00';
+        expect(message.requestedTime).toBe(wanted);
+        expect(
+          new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Europe/Moscow',
+            hour: '2-digit',
+            minute: '2-digit',
+          }).format(new Date(String(message.selectedStart))),
+        ).toBe(wanted);
+      }
       observations[String(message.name)] = {
         serviceId: service,
         staffId: staff,
-        day: name === 'day-edit' ? day : s.day,
+        day: ['day-edit', 'time-exact', 'time-correction'].includes(name)
+          ? day
+          : s.day,
         exactBoundBranchPreserved: true,
         bookingActionExecutions: 0,
         syntheticBookingPosts: 0,
+      };
+    } else if (name === 'readback-ready') {
+      expect(s.key).toBe('unknown');
+      expect(await ledgerCount(s)).toBe(1);
+      const before = await bookingSnapshot(s);
+      expect(before).toMatchObject({
+        state: 'UNKNOWN',
+        executionAttemptCount: 1,
+      });
+      const attempts = await db.prisma.actionAttempt.count({
+        where: {
+          tenantId: s.tenantId,
+          actionExecutionId: before.id,
+          kind: 'RECONCILIATION',
+        },
+      });
+      expect(attempts).toBe(2);
+      expect(
+        await db.prisma.appointment.count({ where: { tenantId: s.tenantId } }),
+      ).toBe(0);
+      s.readbackReady = true;
+      observations[String(message.name)] = {
+        initialState: 'UNKNOWN',
+        mutationDispatches: 1,
+        inconclusiveReads: 2,
       };
     } else if (name === 'preview') {
       await assertNoEffect(s);
@@ -1145,14 +1337,14 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         expect(await ledgerCount(s)).toBe(1);
         const execution = await bookingSnapshot(s);
         expect(execution).toMatchObject({
-          state: s.key === 'unknown' ? 'UNKNOWN' : 'SUCCEEDED',
+          state: 'SUCCEEDED',
           executionAttemptCount: 1,
         });
         const appointments = await db.prisma.appointment.findMany({
           where: { tenantId: s.tenantId },
         });
-        expect(appointments).toHaveLength(s.key === 'unknown' ? 0 : 1);
-        if (s.key === 'success') {
+        expect(appointments).toHaveLength(1);
+        if (['success', 'unknown'].includes(s.key)) {
           expect(appointments[0]).toMatchObject({
             branchId: s.branchId,
             mayaClientId: s.clientId,
@@ -1172,6 +1364,303 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       }
     }
   }
+  async function moveCount(s: Scenario) {
+    const rows = await db.prisma.$queryRaw<
+      { count: bigint }[]
+    >`SELECT count(*) FROM branch_selector_synthetic_puts WHERE company_id=${s.companyId}`;
+    return Number(rows[0].count);
+  }
+  async function nativeRescheduleRestart() {
+    const s =
+      stage === 'prepare'
+        ? await createScenario('reschedule-restart')
+        : scenarios.find((row) => row.key === 'reschedule-restart')!;
+    const token = await login(s);
+    if (stage === 'prepare') {
+      const create = await preview(s, token);
+      expect(await submit(http, token, create, 'COMMIT')).toMatchObject({
+        receipt_outcome: 'ACCEPTED',
+        owner_decision: { state: 'SUCCEEDED' },
+      });
+      const appointment = await db.prisma.appointment.findFirstOrThrow({
+        where: { tenantId: s.tenantId, mayaClientId: s.clientId },
+      });
+      s.moveAppointmentId = appointment.id;
+      const revision = await http.app
+        .get(TenantContextService)
+        .runAsSystemTenant(s.tenantId, () =>
+          http.app
+            .get(CrmService)
+            .readBranchAvailabilityRevision(s.tenantId, s.branchId),
+        );
+      assert.ok(revision);
+      const seals = http.app.get(SealService);
+      // Reschedule resolves its branch from the owned original appointment.
+      // Create selector scoped handles are intentionally not reschedule authority.
+      const handles = seals.mintNounHandles([
+        {
+          tenantId: s.tenantId,
+          noun: 'appointment',
+          ownerKind: 'appointment',
+          ownerRef: appointment.id,
+        },
+        {
+          tenantId: s.tenantId,
+          noun: 'service',
+          ownerKind: BOOKING_NOUN_OWNERS.service,
+          ownerRef: encodeBookingCatalogOwnerRef('81')!,
+        },
+        {
+          tenantId: s.tenantId,
+          noun: 'staff',
+          ownerKind: BOOKING_NOUN_OWNERS.staff,
+          ownerRef: encodeBookingCatalogOwnerRef('71')!,
+        },
+        {
+          tenantId: s.tenantId,
+          noun: 'slot',
+          ownerKind: BOOKING_NOUN_OWNERS.slot,
+          ownerRef: encodeBookingSlotOwnerRef(s.day + 'T08:00:00.000Z')!,
+        },
+      ]);
+      const principal = principals.get(s.key)!;
+      const conversationId = randomUUID();
+      const turn = await http.app.get(WidgetStoresService).appendTurn({
+        tenantId: s.tenantId,
+        conversationId,
+        turnIndex: 0,
+        role: 'assistant',
+        principalProofHash: principal.proofHash,
+        channel: 'pwa',
+      });
+      // Synthetic schedule source uses production emitter and real owner preview/gates.
+      // It is not a real model/schedule-read projection acceptance claim.
+      const source = await http.app.get(WidgetEmitterService).emit({
+        tenantId: s.tenantId,
+        conversationId,
+        turnId: turn.id,
+        kind: 'SCHEDULE',
+        principalProofHash: principal.proofHash,
+        deliveryChannel: 'pwa',
+        body: { synthetic: 'native-reschedule-restart' },
+        ttlSeconds: 600,
+        freshnessClass: 'live',
+        principal,
+        composerInput: {
+          kind_proposal: 'SCHEDULE',
+          capability: 'operations.journal.read',
+          capability_version: C9_REGISTRY_HASH,
+          source: {
+            from: 'capability_envelope',
+            capability: 'operations.journal.read',
+            capability_version: C9_REGISTRY_HASH,
+            fact_index: 0,
+          },
+          correlation_refs: { turn_id: turn.id },
+          origin: {
+            trigger: 'system_reply',
+            emitter: 'capability_read',
+            moment_key: null,
+            proactive_provenance: null,
+          },
+          facts: [
+            {
+              capability: 'operations.journal.read',
+              status: 'measured',
+              as_of: new Date().toISOString(),
+              evidence_refs: ['synthetic:original-native-appointment'],
+              completeness: {
+                status: 'COMPLETE',
+                requestedScopeHash: hash('native-reschedule'),
+                returnedCount: 1,
+                totalCount: 1,
+                hasMore: false,
+                cursorRef: null,
+                truncated: false,
+                reasonCodes: [],
+              },
+            },
+          ],
+          facts_origin: ['copied'],
+          slots: {},
+          limitation_codes: [],
+          locale: 'en',
+          intent_proposals: [
+            {
+              intent_template_key: 'refine.booking.reschedule@1',
+              capability: { space: 'C9', key: 'appointments.own.reschedule' },
+              argument_handles: handles,
+              role: 'primary',
+            },
+            {
+              intent_template_key: 'control.dismiss@1',
+              capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+              role: 'escape',
+            },
+          ],
+        },
+      });
+      const proposed = await submit(http, token, source.envelope, 'REFINE');
+      assert.equal(
+        proposed.receipt_outcome,
+        'ACCEPTED',
+        JSON.stringify({
+          outcome: proposed.outcome,
+          code: proposed.code,
+          gate: proposed.stopped_at_gate,
+        }),
+      );
+      s.confirmation = object(proposed.next_envelope);
+      const committed = await submit(http, token, s.confirmation, 'COMMIT');
+      expect(committed).toMatchObject({
+        receipt_outcome: 'ACCEPTED',
+        owner_decision: { state: 'UNKNOWN' },
+      });
+      const execution = await db.prisma.actionExecution.findFirstOrThrow({
+        where: {
+          tenantId: s.tenantId,
+          capability: 'crm.appointment.reschedule.v1',
+        },
+      });
+      expect(execution.evidenceRefsJson).toContain(
+        'crm-branch-source/1:' + revision,
+      );
+      s.moveExecutionId = execution.id;
+      s.moveEvidenceHash = hash(
+        JSON.stringify([
+          execution.evidenceRefsJson,
+          execution.normalizedInputHash,
+          execution.identityFingerprint,
+        ]),
+      );
+      expect(execution).toMatchObject({
+        state: 'UNKNOWN',
+        executionAttemptCount: 1,
+        reconciliationState: 'REQUIRED',
+      });
+    } else {
+      // Restart does not make authority. The old receipt is re-authorized by the current session.
+      const read = () =>
+        http.resolveWidgets(token, {
+          thread_page: { limit: 20 },
+          booking_receipt: { widget_id: s.confirmation!.widget_id },
+        });
+      const passive = await http.resolveWidgets(token, {
+        thread_page: { limit: 20 },
+      });
+      expect(passive.status).toBe(200);
+      const before = await db.prisma.actionExecution.findFirstOrThrow({
+        where: { tenantId: s.tenantId, id: s.moveExecutionId },
+      });
+      expect(before.state).toBe('UNKNOWN');
+      expect(
+        hash(
+          JSON.stringify([
+            before.evidenceRefsJson,
+            before.normalizedInputHash,
+            before.identityFingerprint,
+          ]),
+        ),
+      ).toBe(s.moveEvidenceHash);
+      const foreign = scenarios.find(
+        (row) => row.tenantId !== s.tenantId && row.key === 'ready-current',
+      )!;
+      const foreignToken = await login(foreign);
+      const readsBeforeForeign = reads.length;
+      const foreignRead = await http.resolveWidgets(foreignToken, {
+        thread_page: { limit: 20 },
+        booking_receipt: { widget_id: s.confirmation!.widget_id },
+      });
+      expect(foreignRead.status).toBe(200);
+      expect(
+        list(object(foreignRead.body).widgets)
+          .map(object)
+          .some(
+            (row) =>
+              object(row.envelope).widget_id === s.confirmation!.widget_id,
+          ),
+      ).toBe(false);
+      expect(reads.length).toBe(readsBeforeForeign);
+      const uncertain = await read();
+      expect(uncertain.status).toBe(200);
+      const unresolved = list(object(uncertain.body).widgets)
+        .map(object)
+        .find(
+          (row) => object(row.envelope).widget_id === s.confirmation!.widget_id,
+        );
+      expect(
+        list(unresolved?.terminal_lines).some(
+          (line) => object(line).outcome === 'CONFIRMED',
+        ),
+      ).toBe(false);
+      s.readbackReady = true;
+      let completedReads: number | undefined;
+      for (let i = 0; i < 3; i++) {
+        const response = await read();
+        expect(response.status).toBe(200);
+        const row = list(object(response.body).widgets)
+          .map(object)
+          .find(
+            (row) =>
+              object(row.envelope).widget_id === s.confirmation!.widget_id,
+          );
+        expect(row?.terminal_lines).toEqual([
+          {
+            outcome: 'CONFIRMED',
+            text: 'Запись подтверждена.',
+            action_receipt_ref: s.moveExecutionId,
+          },
+        ]);
+        if (completedReads === undefined) completedReads = reads.length;
+        else expect(reads.length).toBe(completedReads);
+      }
+      const final = await db.prisma.actionExecution.findFirstOrThrow({
+        where: { tenantId: s.tenantId, id: s.moveExecutionId },
+      });
+      expect(final).toMatchObject({
+        state: 'SUCCEEDED',
+        executionAttemptCount: 1,
+      });
+      const mirror = await db.prisma.appointment.findFirstOrThrow({
+        where: { tenantId: s.tenantId, id: s.moveAppointmentId },
+      });
+      expect(mirror.startAt.toISOString()).toBe(s.day + 'T08:00:00.000Z');
+      // Current availability is occupied. The status path must not enter a new quote.
+      expect((await slots(s, token)).status).toBe(201);
+      await revoke(s);
+      const readsBeforeRevoked = reads.length;
+      const revoked = await read();
+      expect(revoked.status).toBe(403);
+      expect(reads.length).toBe(readsBeforeRevoked);
+      // Neither a revoked original actor nor a foreign tenant can trigger another READ/mutation.
+    }
+    expect(await ledgerCount(s)).toBe(1);
+    expect(await moveCount(s)).toBe(1);
+    expect(
+      await db.prisma.actionExecution.count({
+        where: {
+          tenantId: s.tenantId,
+          capability: 'crm.appointment.reschedule.v1',
+        },
+      }),
+    ).toBe(1);
+    observations['native-reschedule-restart'] = {
+      state: stage === 'prepare' ? 'UNKNOWN' : 'SUCCEEDED',
+      originalActionEvidenceSha256: s.moveEvidenceHash,
+      syntheticCreatePosts: 1,
+      syntheticReschedulePuts: 1,
+      executionAttempts: 1,
+      originalReceiptReused: true,
+      scriptedScheduleSource: true,
+      repeatedCompletedReadsProviderFree: stage === 'resume',
+      foreignAndRevokedReadProviderFree: stage === 'resume',
+      realProviderAcceptance: false,
+    };
+    checkpoints.push(
+      'Native reschedule original UNKNOWN survives app/PG restart and explicit receipt READ never redispatches PUT',
+    );
+  }
+
   async function ordinaryActionRestart() {
     observations.admissionCountBasis =
       'DISTINCT_CANONICAL_BOOKING_ACTION_ROWS_NOT_HTTP_RETRY_CALLS';
@@ -1488,7 +1977,10 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
                       'service-edit',
                       'staff-edit',
                       'day-edit',
+                      'time-exact',
+                      'time-correction',
                       'preview',
+                      ...(s.key === 'unknown' ? ['readback-ready'] : []),
                       'result',
                     ].map((name) => `${s.key}-${name}`),
                   ),
@@ -1605,7 +2097,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         );
       });
     });
-    expect(checkpoints).toHaveLength(ordinary ? 27 : 15);
+    expect(checkpoints).toHaveLength(ordinary ? 34 : 15);
     if (ordinary) expect(observations.staffCorrectionPrivateAliases).toBe(3);
   }
   it(
@@ -1624,6 +2116,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         }
         await ordinarySelectionRestart();
         await ordinaryActionRestart();
+        await nativeRescheduleRestart();
         if (stage === 'prepare') {
           receipt = {
             scenarios,

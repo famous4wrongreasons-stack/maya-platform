@@ -8,6 +8,8 @@ const scope = { emails: ['synthetic@example.invalid'], prompts: [...INITIAL_REQU
 const post = (path, body) => ({ url: origin + path, method: 'POST', postData: JSON.stringify(body) });
 const chat = content => ({ surface: 'web', requestId: id, messages: [{ role: 'user', content }] });
 test('ordinary guard admits exact ordinary/paraphrase, finite correction and explicit resume chat', () => {
+  assert.equal(prompts.exactTime, 'В 14:30');
+  assert.equal(prompts.timeCorrection, 'Нет, в 15:00');
   for (const prompt of scope.prompts) assert.equal(admitted(post('/api/ai/chat', chat(prompt)), origin, scope), true);
   for (const prompt of ['Запиши другого клиента', 'Покажи свободное время', 'Повтори оплату']) assert.equal(admitted(post('/api/ai/chat', chat(prompt)), origin, scope), false);
   for (const extra of [{ tenantId: id }, { role: 'admin' }, { staff_id: '72' }, { service_ids: ['82'] }, { branchId: id }]) assert.equal(admitted(post('/api/ai/chat', { ...chat(prompts.initial), ...extra }), origin, scope), false);
@@ -30,6 +32,26 @@ test('ordinary guard admits only existing sealed selector/confirmation control i
   for (const inputs of [{ date: '2026-10-10' }, { service_id: '81' }, { branchId: id }, { service_ref: 'a', staff_ref: 'b' }]) assert.equal(admitted(post('/api/widgets/intent', { ...intent, inputs }), origin, scope), false);
   assert.equal(admitted(post('/api/widgets/intent', { ...intent, authority: 'synthetic' }), origin, scope), false);
   assert.equal(admitted(post('/api/widgets/resolve', { thread_page: { limit: 1 }, rendered: { widget_id: id, body_hash: 'a'.repeat(64), envelope_seal: 'synthetic-seal' } }), origin, scope), true);
+});
+test('ordinary guard admits only an explicit bounded booking receipt locator without observation or authority fields', () => {
+  const receipt = { thread_page: { limit: 20 }, booking_receipt: { widget_id: id } };
+  const allowed = body => admitted(post('/api/widgets/resolve', body), origin, scope);
+  assert.equal(allowed(receipt), true);
+  for (const body of [
+    { ...receipt, rendered: { widget_id: id, body_hash: 'a'.repeat(64), envelope_seal: 'synthetic-seal' } },
+    { ...receipt, rendered: null },
+    { ...receipt, tenant_id: id },
+    { ...receipt, action_id: id },
+    { ...receipt, actor_id: id },
+    { ...receipt, booking_receipt: null },
+    { ...receipt, booking_receipt: [] },
+    { ...receipt, booking_receipt: {} },
+    { ...receipt, booking_receipt: { widget_id: 'not-a-uuid' } },
+    { ...receipt, booking_receipt: { widget_id: id, action_id: id } },
+    { ...receipt, thread_page: { limit: 1 } },
+    { ...receipt, thread_page: { limit: 21 } },
+    { ...receipt, thread_page: { limit: 20, before: id } },
+  ]) assert.equal(allowed(body), false);
 });
 test('ordinary guard refuses personal form, availability/API tools shortcuts and every external origin', () => {
   for (const path of ['/api/branches', '/api/services', '/api/staff', '/api/available-slots', '/api/personal-client/appointments/results']) assert.equal(admitted({ url: origin + path, method: 'GET' }, origin, scope), false);

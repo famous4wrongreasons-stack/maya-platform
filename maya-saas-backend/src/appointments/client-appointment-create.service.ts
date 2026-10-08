@@ -120,6 +120,32 @@ export class ClientAppointmentCreateService {
     }
   }
 
+  async readStatusForAccount(
+    tenantId: string,
+    userId: string,
+    key: string,
+    revalidate: () => Promise<void>,
+  ) {
+    const link = await this.resolveAccount(tenantId, userId);
+    const authorize = async () => {
+      await revalidate();
+      const current = await this.resolveAccount(tenantId, userId);
+      if (
+        current.id !== link.id ||
+        current.clientId !== link.clientId ||
+        current.verificationEvidenceHash !== link.verificationEvidenceHash
+      )
+        throw new ForbiddenException('Original Client binding required');
+    };
+    return this.crm.readClientCreateStatus({
+      tenantId,
+      clientId: link.clientId,
+      linkId: link.id,
+      key,
+      authorize,
+    });
+  }
+
   /** U13c narrow read of the canonical execution result; no provider edge. */
   executionResult(tenantId: string, executionId: string) {
     return this.crm.getAppointmentActionExecutionResult(tenantId, executionId);

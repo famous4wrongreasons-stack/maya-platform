@@ -2153,6 +2153,52 @@ export class ActionEngineKernel {
   }
 
   /** Called only after the initiator's verified Client authorization. */
+  async resolveClientRescheduleCallerAlias(
+    tenantId: string,
+    key: string,
+  ): Promise<ActionExecution | null> {
+    if (!key.trim())
+      throw new ActionContractError('Caller idempotency key is blank');
+    const scope = 'maya.widgets.booking.commit.v1';
+    const execution = await this.prisma.actionExecution.findUnique({
+      where: {
+        tenantId_idempotencyScope_requestIdempotencyKeyHash: {
+          tenantId,
+          idempotencyScope: scope,
+          requestIdempotencyKeyHash: this.identity.callerIdempotencyHash({
+            tenantId,
+            scope,
+            key,
+          }),
+        },
+      },
+    });
+    if (!execution) return null;
+    if (
+      execution.tenantId !== tenantId ||
+      execution.capability !== 'crm.appointment.reschedule.v1' ||
+      execution.sourceType !== 'authenticated_request' ||
+      !Array.isArray(execution.evidenceRefsJson) ||
+      !execution.evidenceRefsJson.every((ref) => typeof ref === 'string')
+    )
+      throw new ActionConflictError('Caller key is not a Client reschedule');
+    const principal = readClientActionPrincipal({
+      capability: execution.capability,
+      sourceType: execution.sourceType,
+      targetRef: execution.targetRef,
+      input: await this.readTrustedNormalizedInput(tenantId, execution.id),
+      evidenceRefs: execution.evidenceRefsJson,
+      hasBookingIntent: false,
+    });
+    if (
+      !principal ||
+      execution.sourceRef !== `client-channel-link:${principal.linkId}`
+    )
+      throw new ActionConflictError('Caller key has no Client attribution');
+    return execution;
+  }
+
+  /** Called only after the initiator's verified Client authorization. */
   async resolveClientBookingRetry(
     tenantId: string,
     clientId: string,

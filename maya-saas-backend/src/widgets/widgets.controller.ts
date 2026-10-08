@@ -53,7 +53,8 @@ export class WidgetsController {
 
   /**
    * Resolve — read current state. L25 optionally records a mounted-selector observation through
-   * the lifecycle/audit owners. It grants no authority and calls zero capabilities.
+   * the lifecycle/audit owners. An explicit booking_receipt check reads the original
+   * accepted action through its owner; it never dispatches a mutation.
    */
   @Post('resolve')
   @HttpCode(200)
@@ -64,6 +65,10 @@ export class WidgetsController {
   ) {
     if (dto.rendered && !(await this.lifecycle.rendered(dto.rendered)))
       throw new ForbiddenException('widget_render_evidence_refused');
+    if (dto.booking_receipt)
+      await this.threadPage.refreshBookingReceipt(
+        dto.booking_receipt.widget_id,
+      );
     const widgets = await this.threadPage.read(dto.thread_page);
     return {
       contract: 'maya.widget.resolve/1',
