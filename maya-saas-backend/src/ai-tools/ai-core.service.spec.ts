@@ -599,6 +599,76 @@ describe('AiCoreService', () => {
       ]);
     });
 
+    it('replaces an earlier exact clock with the current time_of_day correction when preparing a booking', async () => {
+      const f = bookingFixture();
+      await f.turn({
+        ...initial,
+        date_or_period: '2026-10-11',
+        time_of_day: '14:30',
+      });
+      f.runtime.execute.mockClear();
+      const response = await f.turn(
+        { time_of_day: '15:00' },
+        {},
+        'booking.create_own',
+      );
+      expect(f.availabilityArgs()).toEqual([
+        {
+          date: '2026-10-11',
+          time: '15:00',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+        },
+      ]);
+      expect(response.reply).toContain('2026-10-11 в 15:00');
+      expect(response.action).toBeNull();
+      expect(
+        f.runtime.execute.mock.calls.every(
+          (call) => !call[1].startsWith('appointments.'),
+        ),
+      ).toBe(true);
+      expect(f.model.decide).toHaveBeenCalledTimes(2);
+    });
+
+    it('clarifies a compound daypart correction instead of reusing the old clock, then retains the corrected day and service', async () => {
+      const f = bookingFixture();
+      await f.turn({
+        ...initial,
+        date_or_period: '2026-10-11',
+        time_of_day: '14:30',
+      });
+      f.runtime.execute.mockClear();
+      const clarification = await f.turn(
+        {
+          services: ['Борода'],
+          date: '2026-10-12',
+          time_of_day: 'evening',
+        },
+        {},
+        'booking.create_own',
+      );
+      expect(clarification.reply).toContain('Во сколько вам удобно?');
+      expect(clarification.action).toBeNull();
+      expect(f.availabilityArgs()).toEqual([]);
+      await f.turn({ time: '19:00' });
+      expect(f.availabilityArgs()).toEqual([
+        {
+          date: '2026-10-12',
+          time: '19:00',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-b'],
+        },
+      ]);
+      expect(
+        f.runtime.execute.mock.calls.every(
+          (call) => !call[1].startsWith('appointments.'),
+        ),
+      ).toBe(true);
+      expect(f.model.decide).toHaveBeenCalledTimes(3);
+    });
+
     it('carries exact time corrections into fresh READs without losing branch/staff/date and gives an honest empty result', async () => {
       const f = bookingFixture();
       await f.turn({ ...initial, date_or_period: '2026-10-11', time: '14:30' });

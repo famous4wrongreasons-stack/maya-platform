@@ -682,6 +682,56 @@ describe('booking time preference carry across intents', () => {
     expect(third?.tasks[0].entities.time).toBe('18:30');
     expect(third?.tasks[0].requires_clarification).toBe(false);
   });
+  it.each([
+    ['booking.find_availability', 'time_of_day', 'booking.create_own', 'time'],
+    ['booking.create_own', 'time', 'booking.find_availability', 'time_of_day'],
+  ])(
+    'normalizes a current correction before carrying from %s into %s',
+    (previousIntent, previousKey, currentIntent, currentKey) => {
+      const first = ci.validatePlan(
+        plan(previousIntent, {
+          date: '2026-10-11',
+          services: ['Борода'],
+          employee: 'Стас',
+          [previousKey]: '14:30',
+        }),
+        UserRole.CLIENT,
+        tools,
+      );
+      const snapshot = JSON.stringify(first);
+      const second = ci.validatePlan(
+        plan(currentIntent, { [previousKey]: '15:00' }),
+        UserRole.CLIENT,
+        tools,
+        first,
+      );
+      expect(second?.tasks[0].entities[currentKey]).toBe('15:00');
+      expect(second?.tasks[0].entities).not.toHaveProperty(previousKey);
+      expect(second?.context.replaced_slots).toContain(currentKey);
+      expect(second?.context.carried_slots).not.toContain(currentKey);
+      expect(JSON.stringify(first)).toBe(snapshot);
+    },
+  );
+  it.each([
+    'booking.prepare_personal',
+    'booking.find_availability',
+    'booking.create_own',
+  ])('rejects contradictory current clock fields in %s', (intent) => {
+    expect(() =>
+      ci.validatePlan(
+        plan(intent, { time: '14:30', time_of_day: '15:00' }),
+        UserRole.CLIENT,
+        tools,
+      ),
+    ).toThrow('conversation_entity_alias_conflict');
+    const matching = ci.validatePlan(
+      plan(intent, { time: '15:00', time_of_day: '15:00' }),
+      UserRole.CLIENT,
+      tools,
+    );
+    const key = intent === 'booking.create_own' ? 'time' : 'time_of_day';
+    expect(matching?.tasks[0].entities).toEqual({ [key]: '15:00' });
+  });
   it('does not upgrade a vague daypart to an executable clock time', () => {
     const first = ci.validatePlan(
       plan('booking.find_availability', {

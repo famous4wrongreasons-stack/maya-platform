@@ -153,6 +153,29 @@ export class ConversationIntelligenceService {
         this.sanitizeEntities(rawTask.entities),
         [...definition.requiredSlots, ...definition.optionalSlots],
       );
+      // Normalize this turn before carrying old booking preferences. Otherwise
+      // a current time_of_day correction can lose to an earlier exact `time`
+      // when find_availability becomes create_own (or the reverse).
+      if (
+        [
+          'booking.prepare_personal',
+          'booking.find_availability',
+          'booking.create_own',
+        ].includes(definition.id)
+      ) {
+        const timeKey =
+          definition.id === 'booking.create_own' ? 'time' : 'time_of_day';
+        const alias = timeKey === 'time' ? 'time_of_day' : 'time';
+        if (Object.hasOwn(entities, alias)) {
+          const value = entities[alias];
+          if (typeof value !== 'string' || !value)
+            throw new Error('conversation_entity_alias_invalid');
+          if (Object.hasOwn(entities, timeKey) && entities[timeKey] !== value)
+            throw new Error('conversation_entity_alias_conflict');
+          entities[timeKey] = value;
+          delete entities[alias];
+        }
+      }
       const previous =
         previousPlan?.tasks.length === 1 && candidate.tasks.length === 1
           ? previousPlan.tasks[0]
