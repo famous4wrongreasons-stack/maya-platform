@@ -577,6 +577,28 @@ describe('AiCoreService', () => {
       }
     });
 
+    it('retains the exact clock through an early missing-service clarification', async () => {
+      const f = bookingFixture();
+      const first = await f.turn({
+        employee: 'Антон',
+        branch: 'Центральный',
+        date_or_period: '2026-10-11',
+        time: '14:30',
+      });
+      expect(first.reply).toBe('Выберите услугу для записи.');
+      expect(f.availabilityArgs()).toEqual([]);
+      await f.turn({ services: ['Стрижка'] });
+      expect(f.availabilityArgs()).toEqual([
+        {
+          date: '2026-10-11',
+          time: '14:30',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+        },
+      ]);
+    });
+
     it('carries exact time corrections into fresh READs without losing branch/staff/date and gives an honest empty result', async () => {
       const f = bookingFixture();
       await f.turn({ ...initial, date_or_period: '2026-10-11', time: '14:30' });

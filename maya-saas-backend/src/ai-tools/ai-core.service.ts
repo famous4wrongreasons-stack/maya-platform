@@ -1360,6 +1360,16 @@ export class AiCoreService {
             // Persist the selected local day, so changing service/staff/branch on
             // a later turn cannot reinterpret yesterday's "tomorrow" as a new day.
             if (date) task.entities[dateKey] = date;
+            // Find/prepare retain their time preference under the declared
+            // time_of_day slot. A model may supply the exact clock as `time`;
+            // normalize it before any early service/staff clarification is saved.
+            if (
+              task.intent !== 'booking.create_own' &&
+              task.entities.time !== undefined
+            ) {
+              task.entities.time_of_day = task.entities.time;
+              delete task.entities.time;
+            }
             const readCatalog = async (
               name: string,
               emit = false,
