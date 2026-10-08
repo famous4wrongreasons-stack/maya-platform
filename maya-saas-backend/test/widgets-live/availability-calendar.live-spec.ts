@@ -2,6 +2,7 @@ import {
   envelopeBodyHash,
   envelopeBodyHashTerms,
 } from '../../src/widgets/emission/envelope.factory';
+import { randomUUID } from 'node:crypto';
 import { stableActionJson } from '../../src/action-engine/action-engine.identity';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
@@ -110,10 +111,12 @@ describe('L5/L24 local calendar through availability → envelope → carrier �
         where: { id: s.tenant.id },
         data: { defaultTimezone: useBranch ? 'UTC' : timezone },
       });
+      let branchId: string | undefined;
       if (useBranch) {
         const branch = await db.prisma.branch.create({
           data: { tenantId: s.tenant.id, name: 'Calendar proof', timezone },
         });
+        branchId = branch.id;
         await db.prisma.internalProvider.update({
           where: { id: s.source.staffId },
           data: { branchId: branch.id },
@@ -132,10 +135,54 @@ describe('L5/L24 local calendar through availability → envelope → carrier �
         ).next_envelope,
       );
       await observe(http, s.token, staff);
-      const slot = object(
-        (await submit(http, s.token, staff, 'REFINE', firstOption(staff)))
-          .next_envelope,
+      const pending = await submit(
+        http,
+        s.token,
+        staff,
+        'REFINE',
+        firstOption(staff),
       );
+      expect(pending.receipt_outcome).toBe('ACCEPTED');
+      expect(pending.next_envelope).toBeNull();
+      expect(pending.owner_decision).toEqual({
+        kind: 'booking_selection_pending',
+        next: 'date',
+        reply: 'На какую дату проверить время у выбранного мастера?',
+      });
+      // Preserve every original calendar-boundary case. The selected date is
+      // explicit now; this no longer claims an automatic next-day continuation.
+      const trace = randomUUID();
+      const availability = await http.executeTool(
+        s.token,
+        'booking.availability.read',
+        {
+          surface: 'web',
+          arguments: {
+            date: expectedDate,
+            staff_id: s.source.staffId,
+            service_ids: [s.source.serviceId],
+            ...(branchId ? { branch_id: branchId } : {}),
+          },
+        },
+        trace,
+      );
+      expect(availability.status).toBe(201);
+      const slot = object(
+        object(object(object(availability.body).resolution).receipt).envelope,
+      );
+      expect(object(slot.provenance).source_capability).toBe(
+        'booking.availability.read',
+      );
+      expect(
+        http
+          .mintProvenance()
+          .some(
+            (mint) =>
+              mint.widget_id === slot.widget_id &&
+              mint.trigger === 'T-2b' &&
+              mint.request_id === trace,
+          ),
+      ).toBe(true);
       expect(slot.kind).toBe('TIME_SLOT_SELECTOR');
       expect(object(slot.body)).toMatchObject({
         timezone,

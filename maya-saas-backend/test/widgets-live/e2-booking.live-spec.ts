@@ -5,6 +5,7 @@
 // WidgetEmitter → 13 gates → Gate 14 → Action Engine path.
 
 import { randomUUID } from 'node:crypto';
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
@@ -138,6 +139,11 @@ const runShellBookingFlow = async (input: {
   readonly accessToken: string;
   readonly tenantName: string;
   readonly envelope: Envelope;
+  readonly availabilityRequest: {
+    readonly date: string;
+    readonly staff_id: string;
+    readonly service_ids: readonly string[];
+  };
 }): Promise<{
   readonly confirmationWidgetId: string;
   readonly assistantLines: readonly string[];
@@ -295,13 +301,8 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP] [Postgre
         serviceId: service.id,
       },
     });
-    // The salon opens midday in its own timezone (the tenant default, Europe/Moscow), not at
-    // 00:00. The selector asks the internal calendar for the UTC calendar date of now + 24 h and
-    // then drops every candidate closer than the industry preset's 120-minute minimum notice, so a
-    // window at the very start of the local day is empty for every wall clock after 20:30 UTC and
-    // the walk below would refuse with `booking_selector_source_unavailable`. A midday window is
-    // between 9 h and 33 h ahead of `now` at every hour, and stays two hours wide so the selector
-    // envelope keeps the same four candidate slots (a full open day exceeds its size cap).
+    // The explicit date below is two local days ahead, beyond minimum notice.
+    // Keep the source window finite so its real selector stays below the size cap.
     await db.prisma.internalAvailabilityRule.createMany({
       data: Array.from({ length: 7 }, (_, weekday) => ({
         tenantId: tenant.id,
@@ -320,8 +321,9 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP] [Postgre
       user.password,
     );
     // FBE2E-4 / BOOK-1: the real read-tool HTTP path mints the first selector. The shell can send
-    // only the selected opaque value under the server-declared field; every successor comes from
-    // the existing server transition owner and returns through the existing shell transport.
+    // only the selected opaque value under the server-declared field. STAFF REFINE asks for a
+    // date; the test driver then sends a new explicit registered READ for the chosen source
+    // date. This is a headless shell/HTTP proof, not semantic conversation-resume acceptance.
     const trace = `fbe2e-${randomUUID()}`;
     const catalog = await http.executeTool(
       accessToken,
@@ -343,6 +345,14 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP] [Postgre
       accessToken,
       tenantName: 'E2 booking',
       envelope: createSource,
+      availabilityRequest: {
+        date: localCalendarDate(
+          'Europe/Moscow',
+          new Date(Date.now() + 2 * 86_400_000),
+        ),
+        staff_id: provider.id,
+        service_ids: [service.id],
+      },
     });
     expect(shell.assistantLines).toContain('Запись подтверждена.');
     expect(shell.counters).toMatchObject({

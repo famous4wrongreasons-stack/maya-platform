@@ -61,6 +61,7 @@ const failure = (status) =>
         : { ok: false, failure: { reason: 'unexpected_response' } };
 
 const input = await readInput();
+let lastIntentBody = null;
 const transport = {
   async widgetIntent(request) {
     const response = await post(
@@ -69,6 +70,7 @@ const transport = {
       '/api/widgets/intent',
       request,
     );
+    lastIntentBody = response.body;
     const value = projectWidgetIntent(response.body);
     return (response.status === 200 || response.status === 201) &&
       value !== null
@@ -136,7 +138,7 @@ try {
   const ingested = runtime.widgets.ingest(input.envelope);
   if (ingested.ingested === 'duplicate')
     throw new Error('first selector was duplicate');
-  const itemId = ingested.itemId;
+  let itemId = ingested.itemId;
   const current = (label) => {
     const active = runtime.widgets.lockSources();
     if (active.length !== 1)
@@ -152,19 +154,68 @@ try {
   };
 
   if (input.envelope.kind === 'SERVICE_SELECTOR') {
-  const service = first(
-    object(input.envelope.body, 'service body').options,
-    'service options',
-  );
-  await activate(`option:${opaque(service.option_id, 'service option')}`);
-  const staffEnvelope = current('staff selector');
-  if (staffEnvelope.kind !== 'STAFF_SELECTOR')
-    throw new Error('staff successor kind mismatch');
-  const staff = first(
-    object(staffEnvelope.body, 'staff body').options,
-    'staff options',
-  );
-  await activate(`option:${opaque(staff.option_id, 'staff option')}`);
+    const service = first(
+      object(input.envelope.body, 'service body').options,
+      'service options',
+    );
+    await activate(`option:${opaque(service.option_id, 'service option')}`);
+    const staffEnvelope = current('staff selector');
+    if (staffEnvelope.kind !== 'STAFF_SELECTOR')
+      throw new Error('staff successor kind mismatch');
+    const staff = first(
+      object(staffEnvelope.body, 'staff body').options,
+      'staff options',
+    );
+    await activate(`option:${opaque(staff.option_id, 'staff option')}`);
+    const pending = object(lastIntentBody, 'staff reply');
+    const decision = object(pending.owner_decision, 'staff owner decision');
+    if (
+      pending.receipt_outcome !== 'ACCEPTED' ||
+      pending.next_envelope != null ||
+      decision.kind !== 'booking_selection_pending' ||
+      decision.next !== 'date' ||
+      decision.reply !==
+        'На какую дату проверить время у выбранного мастера?' ||
+      runtime.widgets.lockSources().length !== 0
+    )
+      throw new Error(
+        'Staff selection must ask for an explicit date without a slot',
+      );
+    // A new explicit test-driver READ, not an automatic day chosen by the shell.
+    const availability = await post(
+      input.baseUrl,
+      input.accessToken,
+      '/api/ai/tools/booking.availability.read/execute',
+      {
+        surface: 'web',
+        arguments: object(
+          input.availabilityRequest,
+          'explicit availability request',
+        ),
+      },
+    );
+    if (![200, 201].includes(availability.status))
+      throw new Error('Explicit availability READ failed');
+    const next = object(
+      object(
+        object(
+          object(availability.body, 'availability reply').resolution,
+          'availability resolution',
+        ).receipt,
+        'availability receipt',
+      ).envelope,
+      'availability envelope',
+    );
+    if (
+      next.kind !== 'TIME_SLOT_SELECTOR' ||
+      object(next.provenance, 'availability provenance').source_capability !==
+        'booking.availability.read'
+    )
+      throw new Error('Expected current registered availability selector');
+    const resumed = runtime.widgets.ingest(next);
+    if (resumed.ingested === 'duplicate')
+      throw new Error('Explicit availability selector was duplicate');
+    itemId = resumed.itemId;
   }
   const slotEnvelope = current('slot selector');
   if (slotEnvelope.kind !== 'TIME_SLOT_SELECTOR')
@@ -174,7 +225,10 @@ try {
     'slot groups',
   );
   const slot = input.selectedStart
-    ? group.slots.find(candidate => Date.parse(candidate.start.value) === Date.parse(input.selectedStart))
+    ? group.slots.find(
+        (candidate) =>
+          Date.parse(candidate.start.value) === Date.parse(input.selectedStart),
+      )
     : first(group.slots, 'slot options');
   if (!slot) throw new Error('requested slot is absent');
   await activate(`slot:${opaque(slot.slot_ref, 'slot option')}`);
@@ -182,9 +236,17 @@ try {
   if (confirmation.kind !== 'BOOKING_CONFIRMATION')
     throw new Error('confirmation successor kind mismatch');
   if (input.expectedStaffLabel) {
-    const staffLabel = object(object(confirmation.body, 'confirmation body').staff_label, 'staff label');
-    if (staffLabel.state !== 'KNOWN' || staffLabel.value !== input.expectedStaffLabel)
-      throw new Error('Confirmation must show the current selected public staff name before COMMIT');
+    const staffLabel = object(
+      object(confirmation.body, 'confirmation body').staff_label,
+      'staff label',
+    );
+    if (
+      staffLabel.state !== 'KNOWN' ||
+      staffLabel.value !== input.expectedStaffLabel
+    )
+      throw new Error(
+        'Confirmation must show the current selected public staff name before COMMIT',
+      );
   }
   const commit = confirmation.intents.find(
     (candidate) => candidate.effect === 'COMMIT',
@@ -204,5 +266,6 @@ try {
     }),
   );
 } finally {
-  unmountDrawer(); runtime.dispose();
+  unmountDrawer();
+  runtime.dispose();
 }

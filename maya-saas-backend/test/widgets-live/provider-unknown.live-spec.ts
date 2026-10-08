@@ -1,3 +1,7 @@
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
+// Explicit registered READ over the synthetic MOCK catalog and controlled transport.
+// This proves canonical AE UNKNOWN/no redispatch, not native YCLIENTS branch binding,
+// native selector acceptance, or semantic conversation continuation.
 import { ClientAppointmentCreateService } from '../../src/appointments/client-appointment-create.service';
 import { createServer, type Server } from 'node:http';
 import { randomUUID } from 'node:crypto';
@@ -25,12 +29,13 @@ import type { Fixtures } from './support/fixtures';
 import {
   firstOption,
   firstSlot,
+  list,
   object,
   observe,
   submit,
 } from './support/release-booking-flow';
 
-describe('L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provider PostgreSQL]', () => {
+describe('L20 registered-READ synthetic MOCK lost-response → canonical UNKNOWN [HTTP] [test provider PostgreSQL]', () => {
   let db: FixtureContext,
     http: HttpHarness,
     fx: Fixtures,
@@ -188,20 +193,86 @@ describe('L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provid
       object(object(object(catalog.body).resolution).receipt).envelope,
     );
     await observe(http, token, service);
-    const staff = object(
-      (await submit(http, token, service, 'REFINE', firstOption(service)))
-        .next_envelope,
+    const refused = await submit(
+      http,
+      token,
+      service,
+      'REFINE',
+      firstOption(service),
     );
-    await observe(http, token, staff);
+    expect(refused).toMatchObject({
+      code: 'effect_not_admissible',
+      receipt_outcome: 'REFUSED',
+      next_envelope: null,
+    });
+    expect(dispatches).toBe(0);
+    expect(
+      await db.prisma.actionExecution.count({ where: { tenantId: tenant.id } }),
+    ).toBe(0);
+    // The native selector correctly refuses this unsupported external source.
+    // This separate READ is already admitted by the registered MOCK source path.
+    // Select actual current catalog facts; do not relabel MOCK as a native company.
+    const serviceFact = list(object(object(catalog.body).result).services)
+      .map(object)
+      .find((item) => item.duration_minutes === 60);
+    if (!serviceFact || typeof serviceFact.id !== 'string')
+      throw new Error('L20 requires an actual 60-minute synthetic service');
+    const staffRead = await http.executeTool(
+      token,
+      'catalog.staff.read',
+      { arguments: {}, surface: 'web' },
+      randomUUID(),
+    );
+    expect(staffRead.status).toBe(201);
+    const staffFact = object(
+      list(object(object(staffRead.body).result).staff)[0],
+    );
+    if (typeof staffFact.id !== 'string')
+      throw new Error('L20 current staff identity absent');
+    const trace = randomUUID();
+    const availability = await http.executeTool(
+      token,
+      'booking.availability.read',
+      {
+        surface: 'web',
+        arguments: {
+          date: localCalendarDate(
+            'Europe/Moscow',
+            new Date(Date.now() + 2 * 86_400_000),
+          ),
+          staff_id: staffFact.id,
+          service_ids: [serviceFact.id],
+        },
+      },
+      trace,
+    );
+    expect(availability.status).toBe(201);
     const slots = object(
-      (await submit(http, token, staff, 'REFINE', firstOption(staff)))
-        .next_envelope,
+      object(object(object(availability.body).resolution).receipt).envelope,
     );
+    expect(slots.kind).toBe('TIME_SLOT_SELECTOR');
+    expect(object(slots.provenance).source_capability).toBe(
+      'booking.availability.read',
+    );
+    expect(
+      http
+        .mintProvenance()
+        .some(
+          (mint) =>
+            mint.widget_id === slots.widget_id &&
+            mint.trigger === 'T-2b' &&
+            mint.request_id === trace,
+        ),
+    ).toBe(true);
     const confirmation = object(
       (await submit(http, token, slots, 'DRAFT', firstSlot(slots).slot_ref))
         .next_envelope,
     );
     expect(confirmation.kind).toBe('BOOKING_CONFIRMATION');
+    expect(dispatches).toBe(0);
+    expect(
+      await db.prisma.actionExecution.count({ where: { tenantId: tenant.id } }),
+    ).toBe(0);
     const owner = http.app.get(ClientAppointmentCreateService);
     const run = owner.forAccount.bind(owner);
     let ownerError: string | null = null;
@@ -253,6 +324,21 @@ describe('L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provid
       where: { tenantId: tenant.id, widgetId: String(confirmation.widget_id) },
     });
     expect(emission.terminalLinesJson).toEqual([
+      {
+        outcome: 'SUBMITTED',
+        action_receipt_ref: null,
+      },
+    ]);
+    const page = await http.resolveWidgets(token, {
+      thread_page: { limit: 20 },
+    });
+    expect(page.status).toBe(200);
+    const presented = list(object(page.body).widgets)
+      .map(object)
+      .find(
+        (item) => object(item.envelope).widget_id === confirmation.widget_id,
+      );
+    expect(presented?.terminal_lines).toEqual([
       {
         outcome: 'SUBMITTED',
         text: 'Запрос принят. Подтверждение ожидается.',

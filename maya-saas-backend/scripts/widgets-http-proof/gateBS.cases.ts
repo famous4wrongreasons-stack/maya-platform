@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
 import type {
   HttpProofContext,
   WidgetsHttpProofCase,
@@ -24,7 +25,7 @@ export async function personalSource(
     CalendarSource.INTERNAL,
   );
   const user = await ctx.fixtures.user(tenant, UserRole.CLIENT);
-  await ctx.fixtures.bookingSource(tenant, user);
+  const source = await ctx.fixtures.bookingSource(tenant, user);
   for (const feature of [
     'ai.consultant',
     'booking',
@@ -55,10 +56,14 @@ export async function personalSource(
       },
       body: JSON.stringify(body),
     });
-  const read = async (name: string, trace = randomUUID()) => {
+  const read = async (
+    name: string,
+    trace = randomUUID(),
+    args: Record<string, unknown> = {},
+  ) => {
     const res = await post(
       `/ai/tools/${name}/execute`,
-      { surface: 'web', arguments: {} },
+      { surface: 'web', arguments: args },
       trace,
     );
     assert.equal(res.status, 201, JSON.stringify(res.body));
@@ -117,7 +122,42 @@ export async function personalSource(
     );
     if (field === null)
       assert.equal(object(result.owner_decision).state, 'SUCCEEDED');
-    else envelope = object(result.next_envelope);
+    else if (field === 'staff_ref') {
+      assert.equal(result.next_envelope, null);
+      assert.deepEqual(result.owner_decision, {
+        kind: 'booking_selection_pending',
+        next: 'date',
+        reply: 'На какую дату проверить время у выбранного мастера?',
+      });
+      const pending = await ctx.fixtures.bookingProofState(tenant);
+      assert.equal(pending.appointments.length, 0);
+      assert.equal(pending.executions.length, 0);
+      // Explicit new source read, not an inferred day or restored authority.
+      const trace = randomUUID();
+      envelope = await read('booking.availability.read', trace, {
+        date: localCalendarDate(
+          'Europe/Moscow',
+          new Date(Date.now() + 2 * 86_400_000),
+        ),
+        staff_id: source.staffId,
+        service_ids: [source.serviceId],
+      });
+      assert.equal(envelope.kind, 'TIME_SLOT_SELECTOR');
+      assert.equal(
+        object(envelope.provenance).source_capability,
+        'booking.availability.read',
+      );
+      assert(
+        ctx
+          .mintProvenance()
+          .some(
+            (mint) =>
+              mint.widget_id === envelope.widget_id &&
+              mint.trigger === 'T-2b' &&
+              mint.request_id === trace,
+          ),
+      );
+    } else envelope = object(result.next_envelope);
   }
   const before = await ctx.fixtures.bookingProofState(tenant);
   assert.equal(before.appointments.length, 1);

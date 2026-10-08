@@ -10,12 +10,13 @@ import { observe } from './support/release-booking-flow';
 // in PostgreSQL, in `/api/widgets/resolve` and in the conversation, while the appointment stayed
 // `confirmed` and the Action Engine execution stayed SUCCEEDED.
 //
-// The whole create path below is the certified E2/FBE2E-4 one, unchanged: the real read tool mints the
-// first selector over HTTP and every successor comes from the existing server transition owner. Only
-// the last submission is new — the same confirmation's escape token, pressed after a successful
-// COMMIT, exactly as the production renderer's Dismiss button submits it.
+// The existing create flow starts with the registered read tool over HTTP; the selected day
+// is a separate explicit availability READ. Preview and confirmation come from the existing
+// server transition owner. After COMMIT, the test submits the same confirmation's escape
+// token, as the production renderer's Dismiss button does.
 
 import { createHash, randomUUID } from 'node:crypto';
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
 import { Prisma } from '@prisma/client';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
 
@@ -252,10 +253,7 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
           serviceId: service.id,
         },
       });
-      // 10:00–13:00 local on every weekday: six bookable slots. The selector owner reads availability
-      // for tomorrow, so a midday window always clears the industry preset's minimum notice whatever
-      // the hour of the run — a window at midnight (E2's 00:00–02:00 fixture) does not, and a whole-day
-      // window mints an oversize envelope. This defect has nothing to do with either.
+      // Six slots on the explicitly requested future local day. No automatic day inference.
       await db.prisma.internalAvailabilityRule.createMany({
         data: Array.from({ length: 7 }, (_, weekday) => ({
           tenantId: tenant.id,
@@ -299,13 +297,62 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
         label: 'service',
       });
       expect(staffSelector).toMatchObject({ kind: 'STAFF_SELECTOR' });
-      const slotSelector = await step({
+      await observe(http, accessToken, staffSelector);
+      const staffIntent = intentOf(staffSelector, 'REFINE');
+      const staffField = selectionFieldOf(staffIntent);
+      if (!staffField) throw new Error('H2 staff selection has no field');
+      const pending = await submit(
         accessToken,
-        envelope: staffSelector,
-        effect: 'REFINE',
-        option: firstOption(staffSelector, 'staff'),
-        label: 'staff',
+        staffSelector,
+        staffIntent,
+        'staff',
+        { [staffField]: firstOption(staffSelector, 'staff') },
+      );
+      expect(pending.receipt_outcome).toBe('ACCEPTED');
+      expect(pending.next_envelope).toBeNull();
+      expect(pending.owner_decision).toEqual({
+        kind: 'booking_selection_pending',
+        next: 'date',
+        reply: 'На какую дату проверить время у выбранного мастера?',
       });
+      const trace = `h2-day-${randomUUID()}`;
+      const availability = await http.executeTool(
+        accessToken,
+        'booking.availability.read',
+        {
+          surface: 'web',
+          arguments: {
+            date: localCalendarDate(
+              'Europe/Moscow',
+              new Date(Date.now() + 2 * 86_400_000),
+            ),
+            staff_id: provider.id,
+            service_ids: [service.id],
+          },
+        },
+        trace,
+      );
+      expect(availability.status).toBe(201);
+      const slotSelector = object(
+        object(
+          object(
+            object(availability.body, 'availability').resolution,
+            'resolution',
+          ).receipt,
+          'receipt',
+        ).envelope,
+        'availability selector',
+      );
+      expect(
+        http
+          .mintProvenance()
+          .some(
+            (mint) =>
+              mint.widget_id === slotSelector.widget_id &&
+              mint.trigger === 'T-2b' &&
+              mint.request_id === trace,
+          ),
+      ).toBe(true);
       expect(slotSelector).toMatchObject({ kind: 'TIME_SLOT_SELECTOR' });
       const confirmation = await step({
         accessToken,
@@ -371,6 +418,12 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
         },
         select: { actionReceiptRef: true },
       });
+      const retainedLine = [
+        {
+          outcome: 'CONFIRMED',
+          action_receipt_ref: adjudicated.actionReceiptRef,
+        },
+      ];
       const confirmedLine = [
         {
           outcome: 'CONFIRMED',
@@ -379,7 +432,7 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
         },
       ];
       expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
-        confirmedLine,
+        retainedLine,
       );
       expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
         confirmedLine,
@@ -398,7 +451,7 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
 
       // ...and it adjudicated only itself. The COMMIT's line is the COMMIT's.
       expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
-        confirmedLine,
+        retainedLine,
       );
       expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
         confirmedLine,
@@ -464,7 +517,7 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
         actionReceiptRef: 'injected-second-reference',
       });
       expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
-        confirmedLine,
+        retainedLine,
       );
       expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
         confirmedLine,

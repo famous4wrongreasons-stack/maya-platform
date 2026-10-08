@@ -1,6 +1,7 @@
 // SB-1 HTTP/BIN proof. Synthetic link fixture proves context consumption only;
 // it is never evidence that a production re-verification issuer exists.
 import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
+import { localCalendarDate } from '../../../src/owner-reports/owner-reports.time';
 import type { HttpProofContext } from './http-proof-contract';
 import { requireProof } from './release-booking-proof';
 export async function personalClientProof(ctx: HttpProofContext) {
@@ -27,7 +28,10 @@ export async function personalClientProof(ctx: HttpProofContext) {
   });
   const token = (login.body as { access_token: string }).access_token;
   requireProof(typeof token === 'string', 'SB-1 login');
-  const date = new Date(Date.now() + 86400_000).toISOString().slice(0, 10);
+  const date = localCalendarDate(
+    'Europe/Moscow',
+    new Date(Date.now() + 2 * 86_400_000),
+  );
   const dto = {
     staffId: source.staffId,
     serviceIds: [source.serviceId],
@@ -67,9 +71,48 @@ export async function personalClientProof(ctx: HttpProofContext) {
     before.executions.length === 0 && before.appointments.length === 0,
     'SB-1 denied requests have no effects',
   );
-  const created = await post(
+  const missingPreview = await post(
     '/personal-client/appointments',
     dto,
+    'personal_client',
+  );
+  requireProof(
+    missingPreview.status === 409,
+    'SB-1 current preview is required',
+  );
+  const preview = await post(
+    '/personal-client/appointments/preview',
+    dto,
+    'personal_client',
+  );
+  requireProof(preview.status === 201, 'SB-1 canonical preview');
+  const facts = preview.body as {
+    contract?: string;
+    factsHash?: unknown;
+    availability?: string;
+  };
+  requireProof(
+    facts.contract === 'maya.personal-booking.preview/1' &&
+      facts.availability === 'available_at_read' &&
+      typeof facts.factsHash === 'string' &&
+      /^[a-f0-9]{64}$/.test(facts.factsHash),
+    'SB-1 current source facts hash',
+  );
+  const forged = await post(
+    '/personal-client/appointments',
+    { ...dto, previewFactsHash: '0'.repeat(64) },
+    'personal_client',
+  );
+  requireProof(forged.status === 409, 'SB-1 forged preview facts refused');
+  const pending = await ctx.fixtures.bookingProofState(tenant);
+  requireProof(
+    pending.executions.length === 0 && pending.appointments.length === 0,
+    'SB-1 preview and refused hashes have no effects',
+  );
+  const confirmedDto = { ...dto, previewFactsHash: facts.factsHash };
+  const created = await post(
+    '/personal-client/appointments',
+    confirmedDto,
     'personal_client',
   );
   requireProof(
@@ -110,7 +153,7 @@ export async function personalClientProof(ctx: HttpProofContext) {
   );
   const replay = await post(
     '/personal-client/appointments',
-    dto,
+    confirmedDto,
     'personal_client',
   );
   requireProof(

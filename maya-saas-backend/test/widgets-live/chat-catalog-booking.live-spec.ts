@@ -40,6 +40,14 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     );
     const user = await fx.user(tenant, UserRole.CLIENT);
     const source = await fx.bookingSource(tenant, user, true);
+    // The semantic privacy marker must name a real tenant-owned source branch.
+    const branch = await db.prisma.branch.create({
+      data: {
+        tenantId: tenant.id,
+        name: 'private-branch-synthetic',
+        timezone: 'Europe/Moscow',
+      },
+    });
     await db.prisma.internalService.update({
       where: { id: source.serviceId },
       data: { name: 'Борода' },
@@ -54,12 +62,13 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     });
     await db.prisma.internalProvider.update({
       where: { id: source.staffId },
-      data: { displayName: 'Стас' },
+      data: { displayName: 'Стас', branchId: branch.id },
     });
     const other = await db.prisma.internalProvider.create({
       data: {
         tenantId: tenant.id,
         displayName: 'Александр',
+        branchId: branch.id,
         active: true,
         slotIntervalMinutes: 30,
       },
@@ -216,14 +225,13 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       };
       conversationId = body.user_turn.conversationId;
       expect(body.action).toBeNull();
-      if (index === 1 || index === 6 || index === 9) {
+      if (index === 1) {
+        expect(body.resolution?.receipt.envelope.kind).toBe('SERVICE_SELECTOR');
+        expect(body.reply).toBe('Выберите услугу для записи.');
+      } else if (index === 6 || index === 9) {
         expect(Boolean(body.resolution)).toBe(false);
         expect(body.reply).toContain(
-          index === 1
-            ? 'Какую услугу и на какую дату'
-            : index === 6
-              ? 'только на одну услугу'
-              : 'Во сколько вам удобно?',
+          index === 6 ? 'только на одну услугу' : 'Во сколько вам удобно?',
         );
       } else {
         expect(body.resolution?.receipt.envelope.kind).toBe(
@@ -248,6 +256,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       expect(data.includes('private-branch-synthetic')).toBe(false);
       for (const id of [
         source.staffId,
+        branch.id,
         other.id,
         source.serviceId,
         tenant.id,
@@ -544,6 +553,8 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
   it.each([
     'foreign_staff',
     'foreign_service',
+    'foreign_branch',
+    'missing_branch',
     'duplicate_name',
     'stale_alias',
   ] as const)(
@@ -569,6 +580,20 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       );
       const foreignUser = await fx.user(foreignTenant, UserRole.CLIENT);
       const foreign = await fx.bookingSource(foreignTenant, foreignUser);
+      const branchPreference =
+        scenario === 'foreign_branch'
+          ? (
+              await db.prisma.branch.create({
+                data: {
+                  tenantId: foreignTenant.id,
+                  name: 'Foreign synthetic branch',
+                  timezone: 'Europe/Moscow',
+                },
+              })
+            ).name
+          : scenario === 'missing_branch'
+            ? 'Missing synthetic branch'
+            : undefined;
       if (scenario === 'duplicate_name')
         await db.prisma.internalProvider.create({
           data: { tenantId: tenant.id, displayName: 'Антон', active: true },
@@ -618,6 +643,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         date_or_period: 'tomorrow',
         employee,
         services,
+        ...(branchPreference ? { branch: branchPreference } : {}),
       });
       output.tool_call.arguments_json = JSON.stringify({
         date: '2026-10-06T00:00:00+03:00',
@@ -630,6 +656,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
             date_or_period: 'tomorrow',
             employee: currentMention,
             services,
+            ...(branchPreference ? { branch: branchPreference } : {}),
           });
         return Promise.resolve(
           new Response(
@@ -669,9 +696,11 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         });
       expect(response.status).toBe(201);
       expect((response.body as { reply: string }).reply).toContain(
-        scenario === 'foreign_service'
-          ? 'Уточните услугу'
-          : 'Уточните точное имя мастера',
+        branchPreference
+          ? 'Уточните филиал салона'
+          : scenario === 'foreign_service'
+            ? 'Уточните одну услугу из каталога салона'
+            : 'Уточните точное имя мастера',
       );
       expect(
         handler.mock.calls.some((c) => c[0] === 'booking.availability.read'),

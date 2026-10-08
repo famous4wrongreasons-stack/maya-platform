@@ -244,6 +244,15 @@ describe('history erasure current React and separate compiled entry restart [syn
         },
       });
       const populated = await populateHistoryErasureFixture({
+        setupEntitlements: async (ownedFixtures, ownedTenant) => {
+          for (const feature of [
+            'widgets.runtime',
+            'booking',
+            'booking.customer_app',
+            'loyalty',
+          ] as const)
+            await ownedFixtures.grantFeature(ownedTenant, feature);
+        },
         ctx: db,
         gateway,
         fixtures: fx,

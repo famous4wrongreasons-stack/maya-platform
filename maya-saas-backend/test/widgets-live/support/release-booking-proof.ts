@@ -1,6 +1,7 @@
 // Shared backend journey: actual HTTP requests; widgets/actions are production-minted.
 // The one declared E-TAMPER probe changes only confirmationJson and restores it.
 import { randomUUID } from 'node:crypto';
+import { localCalendarDate } from '../../../src/owner-reports/owner-reports.time';
 import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
 import type { HttpProofContext } from './http-proof-contract';
 import type { TenantFixture } from './fixtures';
@@ -39,7 +40,7 @@ export async function releaseBookingProof(
     CalendarSource.INTERNAL,
   );
   const user = await ctx.fixtures.user(tenant, UserRole.CLIENT);
-  await ctx.fixtures.bookingSource(tenant, user);
+  const source = await ctx.fixtures.bookingSource(tenant, user);
   for (const feature of [
     'widgets.runtime',
     'ai.consultant',
@@ -72,6 +73,11 @@ export async function releaseBookingProof(
       body: JSON.stringify(body),
     });
   const trace = `wr-${randomUUID()}`;
+  const availabilityTrace = `wr-day-${randomUUID()}`;
+  const requestedDate = localCalendarDate(
+    'Europe/Moscow',
+    new Date(Date.now() + 2 * 86_400_000),
+  );
   const catalog = await post(
     '/ai/tools/catalog.services.read/execute',
     { arguments: {}, surface: 'web' },
@@ -238,8 +244,10 @@ export async function releaseBookingProof(
         .find((m) => m.intent_token_hash === record?.intentTokenHash);
       requireProof(mint, `${effect} exact mint record`);
       requireProof(
-        mint.predecessor_widget_id,
-        `${effect} predecessor provenance`,
+        effect === 'DRAFT'
+          ? mint.trigger === 'T-2b' && mint.request_id === availabilityTrace
+          : mint.predecessor_widget_id,
+        `${effect} explicit read or predecessor provenance`,
       );
       proofs.push({
         testId: `WR-${effect}-CREATE`,
@@ -267,7 +275,49 @@ export async function releaseBookingProof(
         claim: 'L',
       });
     }
-    next = value.next_envelope;
+    if (field === 'staff_ref') {
+      // No date is authorized by choosing a staff member. This proof makes a
+      // separate explicit registered READ; it does not claim semantic resume.
+      requireProof(
+        value.next_envelope == null &&
+          JSON.stringify(value.owner_decision) ===
+            JSON.stringify({
+              kind: 'booking_selection_pending',
+              next: 'date',
+              reply: 'На какую дату проверить время у выбранного мастера?',
+            }),
+        'staff selection asks for a date without minting a slot',
+      );
+      const pending = await ctx.fixtures.bookingProofState(tenant);
+      requireProof(
+        pending.appointments.length === 0 && pending.executions.length === 0,
+        'pending date has no booking effect',
+      );
+      const availability = await post(
+        '/ai/tools/booking.availability.read/execute',
+        {
+          surface: 'web',
+          arguments: {
+            date: requestedDate,
+            staff_id: source.staffId,
+            service_ids: [source.serviceId],
+          },
+        },
+        availabilityTrace,
+      );
+      requireProof(
+        [200, 201].includes(availability.status),
+        'availability HTTP status',
+      );
+      next = object(
+        object(object(availability.body).resolution).receipt,
+      ).envelope;
+      requireProof(
+        object(object(next).provenance).source_capability ===
+          'booking.availability.read',
+        'fresh registered availability source',
+      );
+    } else next = value.next_envelope;
   }
   const state = await ctx.fixtures.bookingProofState(tenant);
   requireProof(

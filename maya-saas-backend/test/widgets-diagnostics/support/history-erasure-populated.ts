@@ -100,6 +100,11 @@ export interface PopulatedHistorySetup {
   readonly ctx: FixtureContext;
   readonly gateway: GatewayHarness;
   readonly fixtures: Fixtures;
+  /** The canonical proof caller owns the finite entitlement setup. */
+  readonly setupEntitlements: (
+    fixtures: Fixtures,
+    tenant: TenantFixture,
+  ) => Promise<void>;
   readonly tenant: TenantFixture;
   readonly user: UserFixture;
   readonly actor: Readonly<AuthenticatedUser>;
@@ -167,13 +172,7 @@ export async function populateHistoryErasureFixture(
       .calendarSource,
     'internal',
   );
-  for (const feature of [
-    'widgets.runtime',
-    'booking',
-    'booking.customer_app',
-    'loyalty',
-  ] as const)
-    await fixtures.grantFeature(tenant, feature);
+  await input.setupEntitlements(fixtures, tenant);
   const now = new Date();
   const contentMarker = `Синтетическая сохранённая запись ${randomUUID().slice(0, 8)}`;
 
