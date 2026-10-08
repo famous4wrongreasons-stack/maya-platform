@@ -97,3 +97,8 @@ output/playwright/
 
 # --- локальные артефакты генерации (PDF/PNG превью) ---
 tmp/
+
+# Verified OCR assets are fetched separately at build/developer preparation time.
+maya-saas-backend/ocr-assets/
+maya-saas-backend/.ocr-assets-stage-*/
+maya-saas-backend/.ocr-assets.lock

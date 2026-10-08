@@ -1,6 +1,6 @@
 /**
  * Deterministic, deliberately narrow OCR structurer. Input is measured top-left
- * normalized Vision word boxes, never an LLM answer or prebuilt invoice rows.
+ * normalized local OCR word boxes, never an LLM answer or prebuilt invoice rows.
  *
  * Supported scope: one horizontal five-column header, 1..20 single-line item
  * rows and an optional final Итого/Total footer. Text above the header is ignored.
@@ -31,7 +31,7 @@ export interface GoodsPhotoOcrRow {
   readonly unit_price: string | null;
   readonly line_total: string | null;
   readonly price_kind: null;
-  /** Vision measures words, not a complete row. No derived probability. */
+  /** Engines measure words, not a complete row. No derived probability. */
   readonly confidence: null;
 }
 export interface GoodsPhotoOcrRowsResult {
@@ -54,6 +54,22 @@ interface GeometryLine {
 const MAX_WORDS = 4000;
 const MAX_TEXT = 256;
 const MAX_ROWS = 20;
+// Literal transcription only. Unrecognized abbreviations remain unknown: never
+// repair Latin n/Kr into Cyrillic л/кг or infer a catalog unit/conversion.
+const TESSERACT_UNIT_LABELS = new Set([
+  'шт',
+  'шт.',
+  'л',
+  'мл',
+  'кг',
+  'г',
+  'pcs',
+  'pc',
+  'l',
+  'ml',
+  'kg',
+  'g',
+]);
 const MAX_GEOMETRY_LINES = 128;
 const EPSILON = 1e-9;
 const CONTROL = /[\p{Cc}\u202a-\u202e\u2066-\u2069]/u;
@@ -131,23 +147,29 @@ function closedArray(value: unknown, max: number): unknown[] {
   }
   return values;
 }
-function measuredWords(input: unknown): Word[] {
+function measuredWords(input: unknown): { words: Word[]; tesseract: boolean } {
   const root = closedRecord(input, ROOT_KEYS);
   const languages = closedArray(root.languages, 2),
     words = closedArray(root.words, MAX_WORDS);
+  const supportedEngine =
+    (root.contract === 'maya.local-vision.words/1' &&
+      root.revision === 3 &&
+      languages[0] === 'ru-RU' &&
+      languages[1] === 'en-US') ||
+    (root.contract === 'maya.tesseract.words/1' &&
+      root.revision === 1 &&
+      languages[0] === 'rus' &&
+      languages[1] === 'eng');
   if (
-    root.contract !== 'maya.local-vision.words/1' ||
-    root.revision !== 3 ||
+    !supportedEngine ||
     !Number.isSafeInteger(root.image_width) ||
     Number(root.image_width) <= 0 ||
     !Number.isSafeInteger(root.image_height) ||
     Number(root.image_height) <= 0 ||
-    languages.length !== 2 ||
-    languages[0] !== 'ru-RU' ||
-    languages[1] !== 'en-US'
+    languages.length !== 2
   )
     invalid();
-  return words.map((value) => {
+  const projected = words.map((value) => {
     const row = closedRecord(value, WORD_KEYS);
     if (
       typeof row.text !== 'string' ||
@@ -171,6 +193,10 @@ function measuredWords(input: unknown): Word[] {
       invalid();
     return word;
   });
+  return {
+    words: projected,
+    tesseract: root.contract === 'maya.tesseract.words/1',
+  };
 }
 const centerX = (word: Word): number => word.left + word.width / 2;
 const centerY = (word: Word): number => word.top + word.height / 2;
@@ -289,7 +315,13 @@ function footer(line: GeometryLine): boolean {
 export function structureGoodsPhotoOcrRows(
   input: unknown,
 ): GoodsPhotoOcrRowsResult {
-  const words = measuredWords(input);
+  const { words, tesseract } = measuredWords(input);
+  // Tesseract scores are uncalibrated OCR measurements, never success probabilities.
+  // Weak cells remain unknown; this does not certify the remaining text as correct.
+  const numeric = (cell: readonly Word[]) =>
+    tesseract && cell.some((word) => word.confidence < 0.7)
+      ? null
+      : decimal(cell);
   if (words.length === 0) fail('goods_photo_ocr_rows_unavailable');
   const lines = geometryLines(words);
   const candidates = lines
@@ -310,6 +342,8 @@ export function structureGoodsPhotoOcrRows(
     header.columns.some((column, index) => column !== index)
   )
     fail('goods_photo_ocr_table_unsupported');
+  if (tesseract && header.line.words.some((word) => word.confidence < 0.5))
+    fail('goods_photo_ocr_table_unsupported');
   const boundaries = tableBoundaries(header.line),
     rows: GoodsPhotoOcrRow[] = [];
   let ended = false;
@@ -324,6 +358,7 @@ export function structureGoodsPhotoOcrRows(
       unit = label(columns[2]);
     if (
       !name ||
+      (tesseract && columns[0].some((word) => word.confidence < 0.5)) ||
       name.length > 240 ||
       !/\p{L}/u.test(name) ||
       unit.length > 240 ||
@@ -333,10 +368,15 @@ export function structureGoodsPhotoOcrRows(
     if (rows.length >= MAX_ROWS) fail('goods_photo_ocr_table_unsupported');
     rows.push({
       name,
-      quantity: decimal(columns[1]),
-      unit_label: unit || null,
-      unit_price: decimal(columns[3]),
-      line_total: decimal(columns[4]),
+      quantity: numeric(columns[1]),
+      unit_label:
+        tesseract &&
+        (columns[2].some((word) => word.confidence < 0.5) ||
+          !TESSERACT_UNIT_LABELS.has(unit.toLowerCase()))
+          ? null
+          : unit || null,
+      unit_price: numeric(columns[3]),
+      line_total: numeric(columns[4]),
       price_kind: null,
       confidence: null,
     });

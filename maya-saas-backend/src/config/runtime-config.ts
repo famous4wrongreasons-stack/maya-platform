@@ -91,8 +91,10 @@ export function validateRuntimeConfig(
   validateConfiguredPolicies(config, environment, issues);
   validateAiCoreProvider(config.AI_CORE_PROVIDER, issues);
   const photoOcr = stringValue(config.GOODS_PHOTO_OCR_PROVIDER);
-  if (photoOcr && !['disabled', 'apple_vision'].includes(photoOcr))
-    issues.push('GOODS_PHOTO_OCR_PROVIDER must be disabled or apple_vision');
+  if (photoOcr && !['disabled', 'apple_vision', 'tesseract'].includes(photoOcr))
+    issues.push(
+      'GOODS_PHOTO_OCR_PROVIDER must be disabled, apple_vision or tesseract',
+    );
 
   if (environment === 'production') {
     validateProductionConfig(config, issues);

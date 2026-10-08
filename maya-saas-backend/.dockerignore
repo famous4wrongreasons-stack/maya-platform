@@ -5,3 +5,6 @@ coverage
 .gitignore
 .env
 npm-debug.log
+ocr-assets
+.ocr-assets-stage-*
+.ocr-assets.lock

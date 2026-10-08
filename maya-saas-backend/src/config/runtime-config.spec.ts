@@ -52,7 +52,7 @@ describe('runtime config validation', () => {
   });
 
   it('admits only disabled or explicit local image OCR, never a remote provider URL', () => {
-    for (const provider of ['disabled', 'apple_vision'])
+    for (const provider of ['disabled', 'apple_vision', 'tesseract'])
       expect(
         validateRuntimeConfig({
           NODE_ENV: 'development',
@@ -64,7 +64,9 @@ describe('runtime config validation', () => {
         NODE_ENV: 'development',
         GOODS_PHOTO_OCR_PROVIDER: 'https://ocr.example.test',
       }),
-    ).toThrow('GOODS_PHOTO_OCR_PROVIDER must be disabled or apple_vision');
+    ).toThrow(
+      'GOODS_PHOTO_OCR_PROVIDER must be disabled, apple_vision or tesseract',
+    );
   });
 
   it('refuses to start when the environment is not stated', () => {

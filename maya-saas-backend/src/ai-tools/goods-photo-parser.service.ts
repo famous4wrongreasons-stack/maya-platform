@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { structureGoodsPhotoOcrRows } from './goods-photo-ocr-rows';
+import { runGoodsPhotoTesseract } from './goods-photo-tesseract';
 
 const MAX_INPUT = 2 * 1024 * 1024;
 const MAX_PIXELS = 12_000_000;
@@ -98,21 +99,25 @@ export class GoodsPhotoParser {
   constructor(@Optional() private readonly config?: ConfigService) {}
 
   parse(bytes: Uint8Array): Promise<unknown> {
+    const provider = this.config?.get<string>('GOODS_PHOTO_OCR_PROVIDER');
     if (
-      this.config?.get<string>('GOODS_PHOTO_OCR_PROVIDER') !== 'apple_vision' ||
-      process.platform !== 'darwin'
+      (provider !== 'tesseract' && provider !== 'apple_vision') ||
+      (provider === 'apple_vision' && process.platform !== 'darwin')
     )
       throw unavailable('goods_photo_parser_not_configured');
     if (processing) throw unavailable('goods_photo_ocr_busy');
     if (!bytes.length || bytes.length > MAX_INPUT)
       throw new BadRequestException('goods_photo_image_invalid');
     processing = true;
-    return this.recognize(bytes).finally(() => {
+    return this.recognize(bytes, provider).finally(() => {
       processing = false;
     });
   }
 
-  private async recognize(bytes: Uint8Array) {
+  private async recognize(
+    bytes: Uint8Array,
+    provider: 'apple_vision' | 'tesseract',
+  ) {
     const input = Buffer.from(bytes);
     let png: Buffer | undefined;
     try {
@@ -148,7 +153,10 @@ export class GoodsPhotoParser {
       } catch {
         throw new BadRequestException('goods_photo_image_invalid');
       }
-      const words = await runGoodsPhotoVision(png);
+      const words =
+        provider === 'tesseract'
+          ? await runGoodsPhotoTesseract(png)
+          : await runGoodsPhotoVision(png);
       try {
         return structureGoodsPhotoOcrRows(words);
       } catch {
