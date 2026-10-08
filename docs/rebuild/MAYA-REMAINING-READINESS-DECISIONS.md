@@ -3,7 +3,8 @@
 ## Текущие отдельные вопросы — 2026-10-08
 
 Это обновление списка решений для текущей development-ветки, **не их одобрение**.
-Карточка графика добавлена рядом с тремя уже ожидающими ответами. Работа над
+Карточка графика и повторно проверенный прежний FK-вопрос перечислены рядом
+с остальными ожидающими ответами. Работа над
 безопасными локальными сценариями продолжается независимо; перечисление не
 разрешает identity binding, фоновые запуски, SSH или production effects.
 
@@ -13,8 +14,9 @@
 | Scoped C10 Occupancy shadow | Назвать один tenant и начало pilot, принять либо исправить [точный proposed envelope](MAYA-C10-SCOPED-SHADOW-DECISION-BRIEF-20261007.md#минимальный-пакет-решения-владельца): одна новая current C5 Opportunity revision → proposal-only C9, без CRM mutations/outbound/model calls. Предлагаемые 10 admissions/день не являются утверждённым лимитом. Нельзя обновлять user event от имени scheduler. | **PENDING**; explicit-request L0/L1/L2.5 продолжается. |
 | Read-only SSH inventory | Разрешить только уже рассмотренный metadata collector: `botadmin@api.mayaos.ru` через существующий `mocine3388@prime.beget.com`, `python3 - --collect`, reviewed bytes на stdin, ≤10 минут, $0; без secret contents, setup, service/permission changes или paid calls. Exact argv, pin и [automatic-review rejection](MAYA-REAL-MODEL-PREREQUISITES-20261007.md#concrete-read-only-inventory-collector--not-executed-on-target) остаются прежними. | **REJECTED / PENDING exact permission**; процесс не создан, SSH/collector не выполнялись, retry/workaround не разрешён. |
 | Карточка однодневного графика в текущем closed profile | **Разрешить только для графика одного мастера за один день исправление обычным сообщением в чате вместо обязательного отдельного редактора; после правки заново показать текущие/новые интервалы и потребовать новое подтверждение?** Рекомендуется этот узкий вариант. Он относится только к `schedule_rule` / существующему A15; остальные SETTINGS_DRAFT и HANDOFF остаются закрыты. [Точная нормативная поправка и неизменные fences](MAYA-DEVELOPMENT-PROFILE-CHOICE-20261006.md#minimal-owner-choice). | **PROPOSED — NOT APPROVED**; до ответа текущая карточка недоступна в closed profile. |
+| Три FK гостевой записи PublicBooking | **Запретить служебную замену связанного родителя с тем же ключом в одном SQL-операторе и привести три FK новой forward-миграцией к объявленному RESTRICT?** Рекомендация — да. Исходные migration bytes, ключи, данные, retention и product API не меняются; fresh/upgrade PG qualification после выбора. [Точное current/expected и исходный provenance](MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md#повторная-проверка--2026-10-08). | **PENDING**; SQL NO ACTION и Prisma RESTRICT семантически различны. Условное разрешение на однозначный fix не выбирает поведение; dependent migration не выполняется, schema gate FAIL. |
 
-Последний вопрос меняет ровно продуктовую обязанность non-chat fallback из
+Вопрос карточки графика меняет ровно продуктовую обязанность non-chat fallback из
 SETTINGS.4. Это не повторное разрешение на управление графиком и не новое
 разрешение AE/роли. [Нативный source checkpoint](MAYA-NATIVE-SCHEDULE-SOURCE-CHECKPOINT-20261008.md)
 доказывает backend/full-scope synthetic путь, но не closed-profile доступность.
@@ -22,7 +24,7 @@ SETTINGS.4. Это не повторное разрешение на управ�
 HANDOFF-редактор потребует отдельной конкретной receiver/profile квалификации;
 его нельзя включить переименованием в NAVIGATE или REFINE.
 
-Ни один ответ не подразумевает принятие остальных трёх вопросов. Этот документ
+Ни один ответ не подразумевает принятие остальных четырёх вопросов. Этот документ
 не меняет normative/generated contract, runtime, физическую схему, retention,
 права, credential access или release trust. **NOT_ISSUED.**
 

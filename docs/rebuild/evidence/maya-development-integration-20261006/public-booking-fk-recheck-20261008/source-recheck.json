@@ -1,0 +1,111 @@
+{
+  "contract": "maya.public-booking-fk-source-recheck/1",
+  "candidate": "e5113addc422de7f5ced655ab438d0415b4c2681",
+  "originCommit": "b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64",
+  "method": "Read-only Git/source and preserved executed local evidence; no new PG run, no DDL and no schema edit",
+  "migrationFiles": [
+    {
+      "path": "maya-saas-backend/prisma/migrations/20261005160000_public_booking_guest/migration.sql",
+      "introducedCommit": "b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64",
+      "sha256": "e02cd1b34c3c1a70e2c038e77e800926776aaa5b837a78dfe646c59a52366a42",
+      "unchangedSinceIntroduction": true
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20261005160100_public_booking_rejected_intent/migration.sql",
+      "introducedCommit": "b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64",
+      "sha256": "85ee849ad4bcbce80c582b8f0a3b562d4e48812c85f609e3c5a463f1bacb752a",
+      "unchangedSinceIntroduction": true
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20261005160200_public_booking_action_source/migration.sql",
+      "introducedCommit": "b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64",
+      "sha256": "8c7fab5a9bef40d719d2c7bb164609bbfafb072402fbee046552f4bfa9cc6766",
+      "unchangedSinceIntroduction": true
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20261005160300_public_booking_utc_clock/migration.sql",
+      "introducedCommit": "b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64",
+      "sha256": "678d2accbbef88a17b3f766bd39aa41143fb872ae7d7d0d8d75beaa4d7edca52",
+      "unchangedSinceIntroduction": true
+    }
+  ],
+  "relations": [
+    {
+      "model": "PublicBookingSession",
+      "originalAndCurrentRelation": "tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: NoAction)",
+      "declaredDelete": "RESTRICT",
+      "declaredUpdate": "NO ACTION",
+      "migrationDelete": "NO ACTION",
+      "migrationUpdate": "NO ACTION",
+      "nondeferrable": true
+    },
+    {
+      "model": "PublicBookingQuote",
+      "originalAndCurrentRelation": "session PublicBookingSession @relation(fields: [sessionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: NoAction)",
+      "declaredDelete": "RESTRICT",
+      "declaredUpdate": "NO ACTION",
+      "migrationDelete": "NO ACTION",
+      "migrationUpdate": "NO ACTION",
+      "nondeferrable": true
+    },
+    {
+      "model": "PublicBookingAttempt",
+      "originalAndCurrentRelation": "quote PublicBookingQuote @relation(fields: [quoteId, sessionId, tenantId], references: [id, sessionId, tenantId], onDelete: Restrict, onUpdate: NoAction)",
+      "declaredDelete": "RESTRICT",
+      "declaredUpdate": "NO ACTION",
+      "migrationDelete": "NO ACTION",
+      "migrationUpdate": "NO ACTION",
+      "nondeferrable": true
+    }
+  ],
+  "references": [
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/release-qualification/fk-semantics.sql",
+      "sha256": "e7acef5b5fe4b470cc07e5292765977d56d448e00058a11c7674c6de1fcb2636"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/release-qualification/fk-semantics-attempt2.txt",
+      "sha256": "ce0eab1dfd21523e31fe81dc0c020c5e21926804b20ed15d5283627cf84d1d54"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/release-qualification/fk-catalog.txt",
+      "sha256": "798b2022e34ed485f505b322ecdb4f4fba5c6aa0e6cfb413a2e361367cd4a083"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/unified-regression-20261008/schema-diff.txt",
+      "sha256": "fe8599bb04f9e4ef3919b17b166e716f37c3b25ff8b8079fd1c0c57fd5fb9a03"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/unified-regression-20261008/gates/reports/pg-attempt6.json",
+      "sha256": "1332ca16b55591cc0d27bccb02274c9d3debc2f09cc5316cacf12af15e2f7782"
+    },
+    {
+      "path": "docs/rebuild/WEBSITE-GUEST-BOOKING-RELEASE-GATES.md",
+      "sha256": "befe0c4d958a922477279ab6b66f8763cd158c925a43a72d183873bbddaba7df"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/public-booking.repository.ts",
+      "sha256": "f62560f095794eb1ee5a36825d22813b16a21cc0477b73a31c22d99caae7be5d"
+    },
+    {
+      "path": "maya-saas-backend/src/tenants/tenants.service.ts",
+      "sha256": "27ccec88fe094e5d3e114fd2ea9d8ae337b44a87250ab6d12823c40928b29b35"
+    }
+  ],
+  "decision": "PENDING_EXPLICIT_PARENT_REPLACEMENT_SEMANTICS",
+  "finding": "Schema and migration disagree from their common original commit. NO ACTION permits a same-statement delete/reinsert of referenced parent keys; RESTRICT refuses. Existing product APIs never do this; rollback retention contract does not select that behavior. Conditional permission to correct an unambiguous inconsistency does not select one semantic option.",
+  "recommendation": "Approve prohibiting same-statement replacement of referenced parents for these three FKs, then add one forward migration to ON DELETE RESTRICT ON UPDATE NO ACTION, preserving original migration bytes.",
+  "notExecuted": [
+    "new migration",
+    "fresh/upgrade migration qualification",
+    "production DB",
+    "working website",
+    "SSH",
+    "provider/model calls"
+  ],
+  "independentReview": {
+    "reviewer": "/root/independent_review",
+    "mode": "read-only source and preserved-evidence review; no execution",
+    "verdict": "Semantic choice confirmed; do not migrate until the exact parent-replacement behavior is selected. Existing conditional instruction does not select a variant."
+  }
+}
