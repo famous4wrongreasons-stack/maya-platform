@@ -240,7 +240,7 @@ describe('Tesseract runner [synthetic process/assets/digest contract only]', () 
       for (const model of MODELS) {
         expect(openSync).toHaveBeenCalledWith(
           resolve(directory(), model.name),
-          constants.O_RDONLY | constants.O_NOFOLLOW,
+          constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
         );
         expect(closeSync).toHaveBeenCalledWith(model.fd);
         expect(reads.filter((read) => read.fd === model.fd)).toEqual([
@@ -332,6 +332,24 @@ describe('Tesseract runner [synthetic process/assets/digest contract only]', () 
       expect(spawn).not.toHaveBeenCalled();
     },
   );
+
+  it('opens without blocking and refuses a non-regular model before reading or spawning', async () => {
+    jest.mocked(fstatSync).mockReturnValueOnce({
+      ...fileStat(MODELS[0].bytes),
+      isFile: () => false,
+    });
+    await refused(
+      runGoodsPhotoTesseract(normalizedHeader()),
+      'goods_photo_parser_not_configured',
+    );
+    expect(openSync).toHaveBeenCalledWith(
+      resolve(directory(), MODELS[0].name),
+      constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+    );
+    expect(readSync).not.toHaveBeenCalled();
+    expect(closeSync).toHaveBeenCalledWith(MODELS[0].fd);
+    expect(spawn).not.toHaveBeenCalled();
+  });
 
   it('refuses a digest mismatch on the second model and closes both descriptors', async () => {
     mismatchedDigestSize = MODELS[1].bytes;

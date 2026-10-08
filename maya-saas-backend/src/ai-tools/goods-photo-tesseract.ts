@@ -46,7 +46,7 @@ function modelsDirectory(): string {
     for (const model of MODEL_FILES) {
       const fd = openSync(
         resolve(directory, model.name),
-        constants.O_RDONLY | constants.O_NOFOLLOW,
+        constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
       );
       try {
         const stat = fstatSync(fd);
