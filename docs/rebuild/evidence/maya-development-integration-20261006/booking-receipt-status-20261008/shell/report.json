@@ -1,0 +1,41 @@
+{
+  "runtimeCommit": "da9db9e27fc891d566d2361fa7f5a15ac0f9cb34",
+  "gates": [
+    {
+      "name": "shell-tests",
+      "cwd": "maya-chat-shell",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/net.test.mjs",
+        "test/intents.test.mjs",
+        "test/conversation.test.mjs"
+      ],
+      "exitCode": 0,
+      "sha256": "a2fbe52eabf5e7d290b8c9d0a602e3db5c9c51b7c7e3e7b4d49819c75025e9ae"
+    },
+    {
+      "name": "guard-tests",
+      "cwd": "maya-carrier-react",
+      "command": [
+        "node",
+        "--test",
+        "test/ordinary-booking-selector-browser-guard.test.mjs"
+      ],
+      "exitCode": 0,
+      "sha256": "fe15c60e9bcf2cb23249b1619294a13139287e1526f9321122ebb816f6eea342"
+    },
+    {
+      "name": "shell-typecheck",
+      "cwd": "maya-chat-shell",
+      "command": [
+        "node",
+        "build.mjs",
+        "--typecheck"
+      ],
+      "exitCode": 0,
+      "sha256": "721685683e094cd638b1cdd218a80dcaf5085ef78fd509c94a5c115e2fbd7e2b"
+    }
+  ]
+}

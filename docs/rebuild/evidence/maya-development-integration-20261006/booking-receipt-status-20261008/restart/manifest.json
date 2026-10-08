@@ -1,0 +1,73 @@
+{
+  "contract": "maya.branch-booking-selector-owned-cluster/1",
+  "ordinary": true,
+  "mode": "http-pg-restart-native-synthetic",
+  "candidateCommit": "da9db9e27fc891d566d2361fa7f5a15ac0f9cb34",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "004d058789fb7c66e3dc75f8e1454c461c33fefc7c1dd85440970367744c2dc3",
+  "sourceSha256": "eee3df05fe6e0497141be02d746f96cc5d2dff94ff77478ebcb2cfc32ffe4f12",
+  "database": "maya_widget_gate_proof_c9occ_e5b858b1c4ad",
+  "port": 51635,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-branch-selector-Vh3q3N/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "prepare",
+    "pg-restart",
+    "resume"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "NOT_ISSUED",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 40048,
+      "pgid": 40048,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "prepare": {
+      "detached": true,
+      "pid": 40058,
+      "pgid": 40058,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "resume": {
+      "detached": true,
+      "pid": 40140,
+      "pgid": 40140,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceUnchanged": true,
+  "clusterStopped": true
+}

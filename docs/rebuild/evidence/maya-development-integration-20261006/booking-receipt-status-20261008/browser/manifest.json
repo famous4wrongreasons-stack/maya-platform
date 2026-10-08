@@ -1,0 +1,85 @@
+{
+  "contract": "maya.branch-booking-selector-owned-cluster/1",
+  "ordinary": true,
+  "mode": "current-react-native-synthetic",
+  "candidateCommit": "da9db9e27fc891d566d2361fa7f5a15ac0f9cb34",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "004d058789fb7c66e3dc75f8e1454c461c33fefc7c1dd85440970367744c2dc3",
+  "sourceSha256": "31c29ed4fae05374c8108aab332ce56ec769b3c7a3ad0184e19e4e5ac1c57d0a",
+  "database": "maya_widget_gate_proof_c9occ_cf990fd2e239",
+  "port": 51842,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-branch-selector-O8JpyI/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "shell-runtime-build",
+    "react-web-build",
+    "browser"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "NOT_ISSUED",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 40653,
+      "pgid": 40653,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "shell-runtime-build": {
+      "detached": true,
+      "pid": 40674,
+      "pgid": 40674,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 40720,
+      "pgid": 40720,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "browser": {
+      "detached": true,
+      "pid": 40751,
+      "pgid": 40751,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceUnchanged": true,
+  "clusterStopped": true
+}

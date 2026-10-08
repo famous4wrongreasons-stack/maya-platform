@@ -1,0 +1,164 @@
+{
+  "contract": "maya.exact-time-local-gates/1",
+  "source": "17a4639361ecc328fbfffcb14e2503b6db003a8f",
+  "tree": "50e60b9d094dc159d236ef02458b9d4980146bbc",
+  "base": "17a4639361ecc328fbfffcb14e2503b6db003a8f",
+  "started": "2026-10-08T05:31:19.684Z",
+  "status": "FAIL",
+  "commands": [
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/widgets/resolve/booking-receipt-read.spec.ts",
+        "src/widgets/resolve/thread-page.service.spec.ts",
+        "src/widgets/owner-ports/commit-booking.adapter.spec.ts",
+        "src/appointments/client-appointment-create.service.spec.ts",
+        "src/crm/client-appointment-reschedule.service.spec.ts",
+        "src/crm/crm.service.spec.ts",
+        "src/action-engine/action-engine.runtime-concurrency.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-receipt-status-20261008/local-attempt1/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-typescript-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/action-engine/action-engine.kernel.ts",
+        "src/action-engine/action-engine.runtime.ts",
+        "src/appointments/client-appointment-create.service.ts",
+        "src/crm/client-appointment-reschedule.service.ts",
+        "src/crm/crm.service.ts",
+        "src/widgets/dto/resolve-widget.dto.ts",
+        "src/widgets/owner-ports/commit-booking.adapter.ts",
+        "src/widgets/resolve/thread-page.service.ts",
+        "src/widgets/routing/effect-router.ports.ts",
+        "src/widgets/widgets.controller.ts",
+        "test/widgets-live/branch-booking-selector.probe-spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [],
+  "failures": [
+    {
+      "error": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n"
+    }
+  ],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "0c0cf567a24c3b0db2b06cac572cfaf1382a08e7b94d05b9937cb57d2c96c78f",
+    "maya-saas-backend/src/action-engine/action-engine.runtime.ts": "0c07cb7bf7b98450cdb48d1f71185d2b0a7501e17d0cf9f6688f2964c8f59c87",
+    "maya-saas-backend/src/appointments/client-appointment-create.service.ts": "378fc2cd1caa4dc357c51ba89e65230b81f97fd0794dabbae389caaaaae04453",
+    "maya-saas-backend/src/crm/client-appointment-reschedule.service.ts": "926ac58fe6d057c256e8844c9d05ccf9be553f2ff0a169e120dce306ebefd2d8",
+    "maya-saas-backend/src/crm/crm.service.ts": "8e4b0b3fdd9b946c471ebdb389e6089f4ecd6bf77c8da4f08bf4ab0f9c0e0e93",
+    "maya-saas-backend/src/widgets/dto/resolve-widget.dto.ts": "5e332ae2af7c9a7ad68e840e928c65d60a31d7419eabd2cf49b0444539e31572",
+    "maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.ts": "1eb4d4597156833edc0a5e62fe64bde64d2fd06aab61970d8cd41a38d8f6a2f6",
+    "maya-saas-backend/src/widgets/resolve/thread-page.service.ts": "804baefe04ecef1cb763aab14e9f5ab02347f5de7fc07c3c96d8bca3f25aef90",
+    "maya-saas-backend/src/widgets/routing/effect-router.ports.ts": "197929a435ae606b27d5177d08ace7dfc1242519a955e49e4903c86350ef8990",
+    "maya-saas-backend/src/widgets/widgets.controller.ts": "8fa971e1d88d101b782b82bbe4b084384c172d5828a93bca09f883f8127c4d91",
+    "maya-saas-backend/test/widgets-live/branch-booking-selector.probe-spec.ts": "9acbdd52976c2b2ece54ff74c77b1f4d23cd49c61dbfcf8c5a23e84edfe7e30b"
+  },
+  "launcherSha256": "8d0cdcfc4cfb83770f092663ecc928ccb27920216af2d0404430b205f625fb29",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "targeted-unit": {
+      "detached": true,
+      "pid": 23730,
+      "pgid": 23730,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "17a4639361ecc328fbfffcb14e2503b6db003a8f",
+  "treeAtEnd": "50e60b9d094dc159d236ef02458b9d4980146bbc",
+  "dirtyAtEnd": "M maya-carrier-react/test/ordinary-booking-selector-browser-guard.mjs\n M maya-carrier-react/test/ordinary-booking-selector-browser-guard.test.mjs\n M maya-carrier-react/test/ordinary-booking-selector-browser-probe.mjs\n M maya-chat-shell/src/net/client.ts\n M maya-chat-shell/src/net/types.ts\n M maya-chat-shell/src/shell/intents.ts\n M maya-chat-shell/test/intents.test.mjs\n M maya-chat-shell/test/net.test.mjs\n M maya-saas-backend/src/action-engine/action-engine.kernel.ts\n M maya-saas-backend/src/action-engine/action-engine.runtime.ts\n M maya-saas-backend/src/appointments/client-appointment-create.service.ts\n M maya-saas-backend/src/crm/client-appointment-reschedule.service.ts\n M maya-saas-backend/src/crm/crm.service.ts\n M maya-saas-backend/src/widgets/dto/resolve-widget.dto.ts\n M maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.ts\n M maya-saas-backend/src/widgets/resolve/thread-page.service.ts\n M maya-saas-backend/src/widgets/routing/effect-router.ports.ts\n M maya-saas-backend/src/widgets/widgets.controller.ts\n M maya-saas-backend/test/widgets-live/branch-booking-selector.probe-spec.ts\n?? maya-saas-backend/src/action-engine/client-appointment-status.runtime.spec.ts\n?? maya-saas-backend/src/action-engine/client-reschedule-alias.kernel.spec.ts\n?? maya-saas-backend/src/widgets/resolve/booking-receipt-read.spec.ts",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "8d0cdcfc4cfb83770f092663ecc928ccb27920216af2d0404430b205f625fb29",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T05:31:21.049Z"
+}

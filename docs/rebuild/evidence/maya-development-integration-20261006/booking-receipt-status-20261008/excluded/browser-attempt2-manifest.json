@@ -1,0 +1,57 @@
+{
+  "contract": "maya.branch-booking-selector-owned-cluster/1",
+  "ordinary": true,
+  "mode": "current-react-native-synthetic",
+  "candidateCommit": "17a4639361ecc328fbfffcb14e2503b6db003a8f",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "cd7225e0b11963948e229a3c36f8fcdc41511a78b0d1cd97f2f3cd1a8957f0de",
+  "sourceSha256": "82090702cf61fded24f17eebc810ee36d3cab0d93c52e802f33c90b81eebd657",
+  "database": "maya_widget_gate_proof_c9occ_b5a9102ee57e",
+  "port": 49429,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-branch-selector-Vv41gP/pg",
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "NOT_ISSUED",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 29695,
+      "pgid": 29695,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 29709,
+      "pgid": 29709,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "clusterStopped": true
+}
