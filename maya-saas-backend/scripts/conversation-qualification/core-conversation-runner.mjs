@@ -22,6 +22,7 @@ import { socketRequest } from './core-conversation-socket.mjs';
 import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
 import { runOwnedStage, trackOwnedChild } from './owned-child-cleanup.mjs';
+import { coreConversationResources } from './core-conversation-resources.mjs';
 const { values } = parseArgs({
   options: {
     prepare: { type: 'boolean' },
@@ -35,8 +36,14 @@ const { values } = parseArgs({
     'permit-sha256': { type: 'string' },
     'owner-approval-ref': { type: 'string' },
     'pg-bin': { type: 'string' },
+    'node-heap-mb': { type: 'string' },
+    'broker-heap-mb': { type: 'string' },
   },
   strict: true,
+});
+const resources = coreConversationResources({
+  nodeHeapMb: values['node-heap-mb'],
+  brokerHeapMb: values['broker-heap-mb'],
 });
 assert.ok(
   values.prepare !== values.run && Boolean(values.prepare || values.run),
@@ -119,6 +126,10 @@ if (values.prepare) {
       manifestSha256,
       candidateCommit: manifest.candidateCommit,
       paidAuthorized: false,
+      resources: {
+        nodeHeapMb: resources.nodeHeapMb,
+        brokerHeapMb: resources.brokerHeapMb,
+      },
     }),
   );
   process.exit(0);
@@ -167,6 +178,7 @@ const env = proofEnvironment(
   process.env,
   `postgresql://c9_proof@127.0.0.1:${port}/${database}`,
 );
+env.NODE_OPTIONS = resources.nodeOptions;
 const report = {
   contract: 'maya.core-conversation-runner/1',
   status: 'running',
@@ -181,8 +193,8 @@ const report = {
   completed: [],
   groups: {},
   resources: {
-    nodeHeapMb: 3072,
-    brokerHeapMb: 256,
+    nodeHeapMb: resources.nodeHeapMb,
+    brokerHeapMb: resources.brokerHeapMb,
     jestWorkers: 1,
     pgSharedBuffersMb: 64,
     pgWorkMemMb: 4,
@@ -280,7 +292,7 @@ try {
           HOME: process.env.HOME,
           TMPDIR: process.env.TMPDIR,
           TZ: 'UTC',
-          NODE_OPTIONS: '--max-old-space-size=256',
+          NODE_OPTIONS: resources.brokerNodeOptions,
         },
         stdio: ['ignore', brokerFd, brokerFd, 'ipc'],
       },

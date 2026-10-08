@@ -1,0 +1,50 @@
+{
+  "contract": "maya.core-remote-input/1",
+  "observation": {
+    "kind": "ILLUSTRATIVE_NOT_OBSERVED",
+    "at": "2000-01-01T00:00:00.000Z",
+    "evidenceRef": "EXAMPLE_NOT_SERVER_FACTS",
+    "availableMemoryMb": 2048,
+    "hostReserveMb": 256,
+    "freeDiskMb": 2048,
+    "socketGroupMemberUids": [
+      1997
+    ]
+  },
+  "runId": "00000000-0000-4000-8000-000000000001",
+  "host": "api.mayaos.ru",
+  "candidateCommit": "1111111111111111111111111111111111111111",
+  "checkout": "/srv/maya-core-candidates/1111111111111111111111111111111111111111",
+  "binaries": {
+    "node": "/opt/node-v24/bin/node",
+    "pgBin": "/usr/lib/postgresql/16/bin",
+    "bpftool": "/usr/sbin/bpftool"
+  },
+  "users": {
+    "runnerUid": 1997,
+    "runnerGid": 1997,
+    "brokerUid": 1996,
+    "brokerGid": 1996
+  },
+  "resources": {
+    "runnerHeapMb": 768,
+    "runnerMemoryMaxMb": 1024,
+    "brokerHeapMb": 64,
+    "brokerMemoryMaxMb": 128,
+    "runnerTasksMax": 192,
+    "brokerTasksMax": 32,
+    "runnerCpuPercent": 100,
+    "brokerCpuPercent": 50
+  },
+  "network": {
+    "providerIpv4": [
+      "192.0.2.11"
+    ]
+  },
+  "credential": {
+    "kind": "file",
+    "reference": "/etc/maya-core-provider-example.key",
+    "owner": 0,
+    "reader": 1996
+  }
+}
