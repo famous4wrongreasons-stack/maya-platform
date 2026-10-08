@@ -1,0 +1,50 @@
+{
+  "contract": "maya.local-model-profile-checkpoint/1",
+  "runtimeCommit": "01f5f9238719a1f30bf32f7256d840b4333ebc5b",
+  "qualification": "LOCAL_CODE_AND_MECHANICS_ONLY_NOT_REAL_MODEL_ACCEPTANCE",
+  "verification": {
+    "targetedTests": 53,
+    "passed": 53,
+    "failed": 0,
+    "skipped": 0,
+    "widgetsTypesExit": 0,
+    "probeLintExit": 0,
+    "syntaxModules": 7,
+    "independentReview": "qualified static PASS",
+    "realLocalPrepare": "PREPARED_NOT_AUTHORIZED",
+    "realMissingPermitCli": "refused before terminal or credential"
+  },
+  "externalEffects": {
+    "modelCalls": 0,
+    "credentialValuesRead": 0,
+    "yclientsCalls": 0,
+    "productionChanges": 0,
+    "heavyHttpPgRuns": 0
+  },
+  "sourceSha256": {
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-admission.d.mts": "d8cff12ebfc165b368afcf8b668d4386244a0b41b661ce8a5aef885faacf114f",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-admission.mjs": "4a1e8af504be9dfa54f593e23bd80aea29337bd6db8776eebddccacdd35c32ff",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-admission.test.mjs": "4c13ae148a3b7bf4c668d77b55bb91d31b1b0ce3960af8d215d514a48f5102e6",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-broker.mjs": "8a80df9ba93193fb023ee15bff95daf5fc99f32a60342886fe37c0d78b71dcdc",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-runner.mjs": "59ea849093908e97e375670ccc2054e640fd77d7345c8052f8792d344f203664",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.d.mts": "afe9fae5bc1330468279d7022042bcdbd4b22f97db3678daef80228e1c49cf19",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-socket.mjs": "92aa1218a23cfbbbf2338265880b6faafb46b29f32ba91812b4f08e4646e411b",
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-source.mjs": "4b4a51b2901ace9d1368efa921fb8a47706b1b4249e73f85526c0703f45345b3",
+    "maya-saas-backend/scripts/conversation-qualification/core-local-prepare.mjs": "20c4ba4f349119bffdf47e4873b097c4b9ca43005c431ecf3b04ee0d3a7342c0",
+    "maya-saas-backend/scripts/conversation-qualification/core-local-socket.test.mjs": "857c79a06273bda49ae45aef6a18a7be073fea3a681ba978216e8c50ec4b6846",
+    "maya-saas-backend/scripts/conversation-qualification/core-local-terminal-credential.mjs": "9bf5f2a7e0bf7633bb806b4491c235921429791051b01341d59cf855a6e589cb",
+    "maya-saas-backend/scripts/conversation-qualification/core-local-terminal-credential.test.mjs": "8c3acafc0ab8bbcaa06535b6ab1405501aa02b46bbe8d76a9f6a978771206f0f",
+    "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts": "6963bf8e707b7a9a97b5611dde5b091da1b70cacd3b874f699f25f7ec6f6a5a4"
+  },
+  "artifacts": {
+    "independent-review.json": "3a68cc43943cb1de636180b85ec542ce0940f34536ec24e5e6a07e7a893276ed",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metadata-presence.json": "ad167f7888042fde2b51f804013b5b06edb24f2765afe5fe98b3e07ba4aa2e38",
+    "missing-permit-refusal.json": "00bd15fd2331cc40366a21755f17747bc5dd7e7db5d1505559c30479249d4e67",
+    "prepared-candidate-manifest.json": "9bb3f2fd4f544d35834d9e7035f9c707a117b45ef59de318db9c2f51ab3c64fc",
+    "prepared-plan.json": "131f29090863417120bb08a2074a1638e40ede09ad433e005f00a8fc7b4d8472",
+    "typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit-tests-final.log": "fc15e380f973dff3745cfc11333db7a2b71867cbd0ca788fc12eaf02d8516499"
+  },
+  "preparedManifestScope": "Historical preparation proof for runtimeCommit only; reprepare on the selected clean candidate before any future approved run."
+}

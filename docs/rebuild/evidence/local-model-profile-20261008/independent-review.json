@@ -1,0 +1,23 @@
+{
+  "reviewer": "/root/checkpoint_review",
+  "result": "QUALIFIED_STATIC_PASS",
+  "executedTests": false,
+  "findingsResolved": [
+    "Runner SIGHUP enters the existing cancellation and finally cleanup path",
+    "Fresh local channel gets the owner UID/GID before metadata checks"
+  ],
+  "scope": [
+    "explicit local vs remote admission",
+    "permit then claim then terminal input",
+    "root/channel0700 socket0600",
+    "expiry revocation and replay refusal",
+    "UNKNOWN rejection queues broker stop",
+    "no key in argv env IPC reports"
+  ],
+  "limits": [
+    "same UID trusts owner processes",
+    "JS strings cannot be securely zeroized",
+    "no actual TTY/model or local-profile HTTP/PG acceptance",
+    "active upstream uses existing attempt timeout and absolute broker deadline"
+  ]
+}

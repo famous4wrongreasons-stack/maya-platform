@@ -1,0 +1,11 @@
+{
+  "qualification": "REAL_CLI_MISSING_PERMIT_REFUSAL_ONLY",
+  "candidateCommit": "01f5f9238719a1f30bf32f7256d840b4333ebc5b",
+  "exitCode": 1,
+  "explicitPermitRefused": true,
+  "terminalPromptSeen": false,
+  "claimAbsent": true,
+  "brokerArtifacts": [],
+  "credentialsRead": false,
+  "upstreamCalls": 0
+}

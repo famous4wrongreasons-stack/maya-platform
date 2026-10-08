@@ -1,0 +1,43 @@
+{
+  "platform": "Darwin",
+  "machine": "arm64",
+  "uid": 501,
+  "gid": 20,
+  "namedEnvironmentPresence": {
+    "DEEPSEEK_API_KEY": false,
+    "DEEPSEEK_TOKEN": false,
+    "MAYA_DEEPSEEK_API_KEY": false,
+    "OPENAI_API_KEY": false
+  },
+  "knownFileReferenceMetadata": {
+    "backendEnv": {
+      "present": false
+    },
+    "backendEnvLocal": {
+      "present": false
+    },
+    "workspaceEnv": {
+      "present": false
+    },
+    "workspaceEnvLocal": {
+      "present": false
+    },
+    "codexSessionReference": {
+      "present": true,
+      "type": "regular",
+      "uid": 501,
+      "gid": 20,
+      "mode": "0o600",
+      "contentsRead": false
+    }
+  },
+  "executablePresence": {
+    "node": true,
+    "sandbox-exec": true,
+    "security": true,
+    "psql": true
+  },
+  "providerCalls": 0,
+  "keyValuesRead": false,
+  "credentialReuseAuthorized": false
+}
