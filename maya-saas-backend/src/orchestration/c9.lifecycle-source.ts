@@ -155,4 +155,26 @@ export class C9LifecycleSource {
     await this.authorize(runId);
     return selection;
   }
+
+  /** Final exposure fence for already selected refs, never another discovery.
+   * Publication metadata alone does not establish current C8 dependencies/policy.
+   * The caller holds the C9/source locks and supplies its current principal.
+   */
+  async assertCurrent(
+    tenantId: string,
+    userId: string,
+    refs: readonly C9Object[],
+  ) {
+    if (refs.length > 3) c9Deny('array_bounds');
+    for (const ref of refs) {
+      if (ref.tenantId !== tenantId || ref.sourceType !== 'C8ResultRevision')
+        c9Deny('source_qualification');
+      const snapshot = await this.valuation.snapshot(
+        tenantId,
+        userId,
+        ref.id as string,
+      );
+      if (!lifecycleSignal(snapshot)) c9Deny('source_changed');
+    }
+  }
 }

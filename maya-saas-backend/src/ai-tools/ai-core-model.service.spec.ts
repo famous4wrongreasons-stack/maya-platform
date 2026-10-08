@@ -60,6 +60,45 @@ describe('AiCoreModelService', () => {
     ).toThrow('ai_core_required_tool_missing');
   });
   it.each([{}, { period: 'today' }])(
+    'BI + Lifecycle uses one scripted provider response and no natural responder: %j',
+    async (entities) => {
+      const plan = semanticPlan('analytics.business_summary', entities);
+      plan.tasks.push({
+        ...semanticPlan('clients.dormant_list', {}).tasks[0],
+        id: 'return',
+      });
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(
+          deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+        );
+      const service = createService({
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'synthetic-only-key',
+      });
+      const result = await service.decide({
+        ...input,
+        principalRole: UserRole.TENANT_OWNER,
+        tools: [
+          ...input.tools,
+          { ...input.tools[0], name: 'clients.dormant.list' },
+        ],
+      });
+      expect(result?.toolCall).toBeNull();
+      expect(result?.semanticPlan?.tasks.map((t) => t.intent)).toEqual([
+        'analytics.business_summary',
+        'clients.dormant_list',
+      ]);
+      expect(result?.reply).toContain('давности визитов');
+      expect(result?.reply).not.toContain('отмен');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const body = fetchMock.mock.calls[0][1]?.body;
+      expect(typeof body).toBe('string');
+      if (typeof body !== 'string') throw new Error('scripted_wire_body');
+      expect(JSON.parse(body)).toHaveProperty('messages');
+    },
+  );
+  it.each([{}, { period: 'today' }])(
     'finite owner review uses one mocked planner call and no final model stage: %j',
     async (entities) => {
       const plan = semanticPlan('analytics.business_summary', entities);

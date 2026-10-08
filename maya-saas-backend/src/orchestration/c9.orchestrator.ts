@@ -440,6 +440,15 @@ export class C9Orchestrator {
       turn.intentHash,
       'lifecycle',
     );
+    return (await this.prepareClientReturn(root, turn.intentHash)).expose();
+  }
+
+  private async prepareClientReturn(
+    root: ConversationRoot,
+    intentHash: string,
+  ) {
+    if (!this.lifecycle || !this.strategy)
+      c9Deny('context_fact_source_unavailable');
     await this.lifecycle.authorize(root.id);
     const cap = c9Capability('clients.dormant.list', 'CLIENT_LIFECYCLE');
     const receipt = await this.work.reserve(root.id, {
@@ -447,7 +456,7 @@ export class C9Orchestrator {
       domain: 'CLIENT_LIFECYCLE',
       kind: 'TOOL_READ',
       taskKey: cap.capabilityKey,
-      inputHash: c9Hash('lifecycle-request/1', [turn.intentHash]),
+      inputHash: c9Hash('lifecycle-request/1', [intentHash]),
       evidenceRefs: [],
       reservation: {
         contract: 'maya.c9-reservation/1',
@@ -504,7 +513,11 @@ export class C9Orchestrator {
           validUntil: new Date(
             Math.min(
               root.validUntil.getTime(),
-              ...refs.map((r) => Date.parse(r.validUntil as string)),
+              ...refs.flatMap((r) =>
+                [r.validUntil, r.retentionUntil]
+                  .filter((value): value is string => typeof value === 'string')
+                  .map((value) => Date.parse(value)),
+              ),
             ),
           ).toISOString(),
           scopeRefs: refs,
@@ -572,75 +585,80 @@ export class C9Orchestrator {
         savedSourceDigest !== c9Hash('lifecycle-source/1', [selection]))
     )
       c9Deny('source_read_receipt');
-    // Every exposure (including replay) repeats current subject/policy checks for these exact refs.
-    // This is not another discovery, compute, or dispatch; saved version/evidence never changes.
-    const qualified = await this.lifecycleContext(root.id, selection);
-    const answer = this.agents.answer(
-      'CLIENT_LIFECYCLE',
-      'c9.client_return',
-      qualified.context,
-      new Set(['c8.result.read']),
-      qualified.handles,
-    );
-    const findings = (answer.result.findings as C9Object[]).map((f) =>
-      String(f.statement),
-    );
-    const alternatives = revision.alternativesJson as unknown as C9Object[];
     return {
-      reply: [
-        replayed
-          ? `Сохранённая версия ${revision.revision}; новые оценки не запрашивались. Проверена доступность её источников.`
-          : 'Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.',
-        ...findings.map((line, i) => `Оценка ${i + 1}: ${line}`),
-        !findings.length
-          ? replayed
-            ? 'В сохранённой версии нет доступных оценок; для новой проверки нужен новый запрос.'
-            : 'Подтверждённые оценки сейчас недоступны. Отсутствие оценки не означает, что гости активны или спят.'
-          : '',
-        qualified.stale || selection.withheld
-          ? 'Часть источников изменилась или недоступна; прежние выводы не используются.'
-          : '',
-        'Проверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.',
-        'Давность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.',
-        'Варианты: ' +
-          alternatives.map((a) => String(a.title)).join('; ') +
-          '.',
-        `Предложение сохранено, версия ${revision.revision}. Клиентские записи не менялись, сообщения не отправлялись.`,
-      ]
-        .filter(Boolean)
-        .join('\n\n'),
-      coordination: {
-        run_id: root.id,
-        scope: 'explicit_lifecycle' as const,
-        state: 'PROPOSED',
-        revision_id: revision.id,
-        revision: revision.revision,
-        replayed,
-        current: !replayed && !qualified.stale && findings.length > 0,
-      },
-      recommendation: {
-        contract: 'maya.c9-lifecycle-response/1',
-        outcome:
-          replayed && !qualified.stale
-            ? 'HISTORICAL'
-            : qualified.stale
-              ? 'STALE'
-              : !selection.configured
-                ? 'UNCONFIGURED'
-                : findings.length
-                  ? 'PARTIAL'
-                  : 'UNAVAILABLE',
-        agent: answer.result,
-        evidence: {
-          workReceiptId: receipt.id,
-          checkedAt: selection.asOf,
-          sourceHandles: [...qualified.handles],
-        },
-        options: alternatives.map((a) => ({ key: a.key, title: a.title })),
-        noSideEffects: true,
-        executionAuthority: false,
-        canContact: false,
-        reasoning: 'deterministic',
+      refs: selection.refs,
+      expose: async () => {
+        // Every exposure (including replay) repeats current subject/policy checks for these exact refs.
+        // This is not another discovery, compute, or dispatch; saved version/evidence never changes.
+        const qualified = await this.lifecycleContext(root.id, selection);
+        const answer = this.agents.answer(
+          'CLIENT_LIFECYCLE',
+          'c9.client_return',
+          qualified.context,
+          new Set(['c8.result.read']),
+          qualified.handles,
+        );
+        const findings = (answer.result.findings as C9Object[]).map((f) =>
+          String(f.statement),
+        );
+        const alternatives = revision.alternativesJson as unknown as C9Object[];
+        return {
+          reply: [
+            replayed
+              ? `Сохранённая версия ${revision.revision}; новые оценки не запрашивались. Проверена доступность её источников.`
+              : 'Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.',
+            ...findings.map((line, i) => `Оценка ${i + 1}: ${line}`),
+            !findings.length
+              ? replayed
+                ? 'В сохранённой версии нет доступных оценок; для новой проверки нужен новый запрос.'
+                : 'Подтверждённые оценки сейчас недоступны. Отсутствие оценки не означает, что гости активны или спят.'
+              : '',
+            qualified.stale || selection.withheld
+              ? 'Часть источников изменилась или недоступна; прежние выводы не используются.'
+              : '',
+            'Проверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.',
+            'Давность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.',
+            'Варианты: ' +
+              alternatives.map((a) => String(a.title)).join('; ') +
+              '.',
+            `Предложение сохранено, версия ${revision.revision}. Клиентские записи не менялись, сообщения не отправлялись.`,
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
+          coordination: {
+            run_id: root.id,
+            scope: 'explicit_lifecycle' as const,
+            state: 'PROPOSED',
+            revision_id: revision.id,
+            revision: revision.revision,
+            replayed,
+            current: !replayed && !qualified.stale && findings.length > 0,
+          },
+          recommendation: {
+            contract: 'maya.c9-lifecycle-response/1',
+            outcome:
+              replayed && !qualified.stale
+                ? 'HISTORICAL'
+                : qualified.stale
+                  ? 'STALE'
+                  : !selection.configured
+                    ? 'UNCONFIGURED'
+                    : findings.length
+                      ? 'PARTIAL'
+                      : 'UNAVAILABLE',
+            agent: answer.result,
+            evidence: {
+              workReceiptId: receipt.id,
+              checkedAt: selection.asOf,
+              sourceHandles: [...qualified.handles],
+            },
+            options: alternatives.map((a) => ({ key: a.key, title: a.title })),
+            noSideEffects: true,
+            executionAuthority: false,
+            canContact: false,
+            reasoning: 'deterministic',
+          },
+        };
       },
     };
   }
@@ -863,6 +881,93 @@ export class C9Orchestrator {
         },
         analysis: bi.analysis,
         recommendation: occupancy.recommendation,
+      };
+    } catch (error) {
+      turn.failed = true;
+      throw error;
+    }
+  }
+
+  /** Existing BI + Lifecycle route; the saved proposal belongs to Lifecycle only. */
+  async reviewBusinessAndClientReturn(turn: C9ConversationReads) {
+    try {
+      if (!this.bi || !this.lifecycle || !this.strategy)
+        c9Deny('context_fact_source_unavailable');
+      const root = await this.store.conversationReadRun(
+        turn.turn,
+        turn.intentHash,
+        'client_value',
+      );
+      turn.runId = root.id;
+      const manifest = c9Object(root.budgetManifestJson);
+      const domains = this.route('c9.client_value', manifest);
+      if ((manifest.toolCallsMax as number) < 2) c9Deny('route_domain_budget');
+      await this.bi.authorize(root.id);
+      await this.lifecycle.authorize(root.id);
+      const financial = await this.prepareFinancialReport(
+        root,
+        turn.intentHash,
+      );
+      const clientReturn = await this.prepareClientReturn(
+        root,
+        turn.intentHash,
+      );
+      const bi = await financial.expose();
+      const lifecycle = await clientReturn.expose();
+      await this.bi.authorize(root.id);
+      await this.lifecycle.authorize(root.id);
+      // A withheld/stale C8 projection contributes no facts; do not revive it.
+      const exposedClientRefs = (
+        lifecycle.recommendation.agent.findings as C9Object[]
+      ).length
+        ? clientReturn.refs
+        : [];
+      const exposedRefs = [...financial.refs, ...exposedClientRefs];
+      await this.store.transaction(undefined, async (tx, principal, now) => {
+        await this.store.lock(tx, principal, root.id, true, now);
+        await this.store.validateRefs(tx, principal, exposedRefs, now);
+        if (!principal.userId) c9Deny('source_reader_authority');
+        // C8 can remain PUBLISHED while its policy/dependencies are no longer current.
+        // Recheck that source-owned qualification after both domains finish.
+        await this.lifecycle!.assertCurrent(
+          principal.tenantId,
+          principal.userId,
+          exposedClientRefs,
+        );
+        const exposedAt = Date.now();
+        if (
+          root.validUntil.getTime() <= exposedAt ||
+          exposedRefs.some((ref) =>
+            ['validUntil', 'retentionUntil'].some(
+              (key) =>
+                typeof ref[key] === 'string' &&
+                Date.parse(ref[key]) <= exposedAt,
+            ),
+          )
+        )
+          c9Deny('source_expired');
+      });
+      const findings = (bi.analysis.agent.findings as C9Object[]).map((f) =>
+        String(f.statement),
+      );
+      return {
+        reply: [
+          'Объединила опубликованный финансовый отчёт и доступные оценки давности визитов. У этих источников разные периоды наблюдения.',
+          findings.length
+            ? findings.join('\n')
+            : 'Опубликованный финансовый снимок недоступен. Это не означает нулевую выручку или прибыль; финансовая часть обзора неполна.',
+          lifecycle.reply,
+          'Сохранённое предложение относится только к проверке оценок давности. Финансовый отчёт не устанавливает ценность этих гостей, причину изменения выручки или вероятность возврата. Отдельный следующий шаг — по новому запросу проверить актуальность оценок; аудитория и рассылка не создавались.',
+        ].join('\n\n'),
+        coordination: {
+          ...lifecycle.coordination,
+          scope: 'explicit_business_lifecycle' as const,
+          domains,
+          current: false,
+          replayed: bi.coordination.replayed && lifecycle.coordination.replayed,
+        },
+        analysis: bi.analysis,
+        recommendation: lifecycle.recommendation,
       };
     } catch (error) {
       turn.failed = true;

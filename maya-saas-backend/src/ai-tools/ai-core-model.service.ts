@@ -1,7 +1,8 @@
 import { mutationClarification } from './mutation-response';
 import {
   ownerReviewPlanState,
-  OWNER_REVIEW_QUESTION,
+  ownerReviewClarification,
+  ownerReviewKind,
 } from './owner-review-plan';
 import {
   plannerWireContext,
@@ -744,8 +745,10 @@ export class AiCoreModelService {
         return {
           reply:
             ownerReview === 'clarify'
-              ? OWNER_REVIEW_QUESTION
-              : 'Проверяю последний опубликованный общий отчёт и сохранённую возможность после отмены.',
+              ? ownerReviewClarification(plan.semanticPlan).question
+              : ownerReviewKind(plan.semanticPlan) === 'lifecycle'
+                ? 'Проверяю последний опубликованный общий отчёт и доступные оценки давности визитов.'
+                : 'Проверяю последний опубликованный общий отчёт и сохранённую возможность после отмены.',
           toolCall: null,
           semanticPlan: plan.semanticPlan,
           provider,
@@ -1045,6 +1048,7 @@ export class AiCoreModelService {
       'arguments_json must be a string containing one valid JSON object.',
       'A non-null tool_call must belong to ready_tools of an allowed task that has no unresolved required slot.',
       'EXAMPLE JSON OUTPUT WITHOUT A TOOL: {"semantic_plan":{"parent_request":"Привет","language":"ru","dialogue_act":"greeting","tasks":[{"id":"task_1","intent":"small_talk.greeting","entities_json":"{}","depends_on":[],"confidence":0.99,"requires_clarification":false,"clarification_question":null}],"context":{"carried_slots":[],"replaced_slots":[],"unresolved_references":[]}},"tool_call":null}',
+      'A web owner compound analytics.business_summary + clients.dormant_list (optional analytics.recommendations) is also delegated to existing C9 with tool_call=null. Its only scope is the last published tenant-wide financial snapshot plus up to three existing C8 dormancy evaluations, not a customer list or campaign. Preserve every requested period, branch, threshold and other constraint; the server asks about this bounded alternative. Retain the saved clarification and original slots until explicit acceptance or correction. Never substitute clients.retention.scan or claim customer value, return probability, causal revenue effect or contact permission from these evaluations.',
     ]
       .filter(Boolean)
       .join('\n');

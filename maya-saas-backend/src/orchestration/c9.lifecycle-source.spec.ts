@@ -49,6 +49,7 @@ function fixture() {
     ),
   };
   const valuation = {
+    snapshot: jest.fn(() => Promise.resolve(item)),
     readiness: jest.fn().mockResolvedValue({ configured: true }),
     list: jest.fn().mockResolvedValue({ items: [item], nextCursor: null }),
   };
@@ -75,6 +76,42 @@ function fixture() {
 }
 
 describe('C9 Lifecycle exact published C8 source selection', () => {
+  it.each(['current', 'available'] as const)(
+    'final exact source fence rejects %s false even with unchanged published metadata',
+    async (key) => {
+      const f = fixture();
+      const selected = await f.source.select('run');
+      await f.source.assertCurrent('tenant', 'owner', selected.refs);
+      expect(f.valuation.snapshot).toHaveBeenLastCalledWith(
+        'tenant',
+        'owner',
+        'source',
+      );
+      f.item[key] = false;
+      await expect(
+        f.source.assertCurrent('tenant', 'owner', selected.refs),
+      ).rejects.toThrow('c9_source_changed');
+      expect(f.valuation.list).toHaveBeenCalledTimes(1);
+    },
+  );
+  it('refuses a foreign or non-C8 ref before a final source read and propagates revocation', async () => {
+    const f = fixture();
+    const selected = await f.source.select('run');
+    for (const change of [
+      { tenantId: 'foreign' },
+      { sourceType: 'MeasurementRevision' },
+    ])
+      await expect(
+        f.source.assertCurrent('tenant', 'owner', [
+          { ...selected.refs[0], ...change },
+        ]),
+      ).rejects.toThrow('c9_source_qualification');
+    expect(f.valuation.snapshot).not.toHaveBeenCalled();
+    f.valuation.snapshot.mockRejectedValue(new ForbiddenException('revoked'));
+    await expect(
+      f.source.assertCurrent('tenant', 'owner', selected.refs),
+    ).rejects.toThrow('revoked');
+  });
   it('keeps existing tool and C8 authority, bounded list and exact actual revision metadata', async () => {
     const f = fixture();
     const selected = await f.source.select('run');

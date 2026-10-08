@@ -3,6 +3,7 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
 import {
   isOwnerReviewClarification,
   isOwnerReviewTaskSet,
+  CLIENT_VALUE_CLARIFICATION,
   OWNER_REVIEW_CLARIFICATION,
   OWNER_REVIEW_QUESTION,
   ownerReviewPlanState,
@@ -93,5 +94,55 @@ describe('finite owner review plan boundary', () => {
       }),
     ).toBe(false);
     expect(isOwnerReviewClarification(null)).toBe(false);
+  });
+  it('admits the existing BI + Lifecycle pair and preserves its own bounded question', () => {
+    const lifecycle = ci.validatePlan(
+      {
+        tasks: [
+          {
+            id: 'finance',
+            intent: 'analytics.business_summary',
+            entities: {},
+            confidence: 0.99,
+          },
+          {
+            id: 'return',
+            intent: 'clients.dormant_list',
+            entities: {},
+            confidence: 0.99,
+          },
+        ],
+      },
+      UserRole.TENANT_OWNER,
+      ['analytics.business.query', 'clients.dormant.list'],
+    )!;
+    expect(ownerReviewPlanState(lifecycle, 'web', UserRole.TENANT_OWNER)).toBe(
+      'ready',
+    );
+    lifecycle.tasks[1].entities.period = 'today';
+    expect(ownerReviewPlanState(lifecycle, 'web', UserRole.TENANT_OWNER)).toBe(
+      'clarify',
+    );
+    const clarified = withOwnerReviewClarification(lifecycle);
+    expect(clarified.tasks[0].clarification_question).toContain('трёх оценок');
+    expect(clarified.tasks[0].clarification_question).not.toContain('отмен');
+    expect(clarified.tasks[1].entities).toEqual({ period: 'today' });
+    expect(
+      clarified.tasks[0].clarification_question!.length,
+    ).toBeLessThanOrEqual(300);
+    expect(
+      isOwnerReviewClarification(CLIENT_VALUE_CLARIFICATION, lifecycle),
+    ).toBe(true);
+    expect(
+      isOwnerReviewClarification(OWNER_REVIEW_CLARIFICATION, lifecycle),
+    ).toBe(false);
+    expect(isOwnerReviewClarification(CLIENT_VALUE_CLARIFICATION, plan())).toBe(
+      false,
+    );
+    lifecycle.tasks.push(plan().tasks[1]);
+    expect(isOwnerReviewTaskSet(lifecycle)).toBe(false);
+    expect(
+      isOwnerReviewClarification(CLIENT_VALUE_CLARIFICATION, lifecycle),
+    ).toBe(false);
   });
 });

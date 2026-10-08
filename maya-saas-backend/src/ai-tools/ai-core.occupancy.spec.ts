@@ -54,6 +54,12 @@ function fixture(entities: Record<string, string> = {}) {
     listTools: jest.fn().mockResolvedValue({
       tools: [
         {
+          name: 'clients.dormant.list',
+          risk_tier: 'read',
+          approval_policy: 'none',
+          input_schema: {},
+        },
+        {
           name: 'analytics.business.query',
           risk_tier: 'read',
           approval_policy: 'none',
@@ -92,6 +98,23 @@ function fixture(entities: Record<string, string> = {}) {
       .mockResolvedValue(undefined),
   };
   const orchestration = {
+    reviewBusinessAndClientReturn: jest.fn().mockResolvedValue({
+      reply:
+        'SYNTHETIC: опубликованный отчёт и до трёх оценок давности; без контактов.',
+      coordination: {
+        run_id: 'client-value-run',
+        scope: 'explicit_business_lifecycle',
+        state: 'PROPOSED',
+        revision: 1,
+      },
+      analysis: { contract: 'maya.c9-bi-report-response/1', synthetic: true },
+      recommendation: {
+        contract: 'maya.c9-lifecycle-response/1',
+        canContact: false,
+        noSideEffects: true,
+        executionAuthority: false,
+      },
+    }),
     reviewBusinessAndCancellationWindows: jest.fn().mockResolvedValue({
       reply:
         'SYNTHETIC: последний опубликованный общий отчёт и одно окно; ограниченная рекомендация.',
@@ -206,6 +229,139 @@ const compoundDecision = (entities: Record<string, string> = {}) => ({
   toolCall: null,
   semanticPlan: compoundPlan(entities),
   usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+});
+
+function clientValueDecision(entities: Record<string, string> = {}) {
+  const decision = compoundDecision();
+  decision.semanticPlan = new ConversationIntelligenceService().validatePlan(
+    {
+      parent_request: 'Последний финансовый отчёт и давно не приходившие гости',
+      tasks: [
+        {
+          id: 'summary',
+          intent: 'analytics.business_summary',
+          entities,
+          confidence: 0.99,
+        },
+        {
+          id: 'return',
+          intent: 'clients.dormant_list',
+          entities: {},
+          confidence: 0.99,
+        },
+      ],
+    },
+    user.role,
+    ['analytics.business.query', 'clients.dormant.list'],
+  );
+  return decision;
+}
+
+describe('explicit BI + Lifecycle in current chat (scripted planning only)', () => {
+  it('delegates one complete response to C9 without generic source dispatch or another model stage', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(clientValueDecision());
+    const out = await f.service.chat(
+      user,
+      dto(
+        'Покажи последний финансовый отчёт и проверь, что известно о давно не приходивших гостях',
+      ),
+    );
+    expect(f.orchestration.reviewBusinessAndClientReturn).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+    expect(out).toMatchObject({
+      action: null,
+      coordination: { run_id: 'client-value-run' },
+      analysis: { synthetic: true },
+      recommendation: { canContact: false },
+    });
+  });
+  it('restores the distinct question and original period into a new service before a fresh explicit continuation', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(
+      clientValueDecision({ period: 'today', branch: 'named' }),
+    );
+    const question = await f.service.chat(
+      user,
+      dto('Покажи отчёт за сегодня по филиалу и кого пора вернуть'),
+    );
+    expect(question.reply).toContain('до трёх оценок');
+    expect(question.reply).not.toContain('отмен');
+    expect(
+      f.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    const saved =
+      f.timeline.persistAssistantReply.mock.calls[0][0].semanticContext;
+    expect(saved).toHaveProperty(
+      'ownerReviewClarification.scope',
+      'last_published_tenant_finance_and_three_c8_evaluations',
+    );
+    expect(saved).toHaveProperty('plan.tasks.0.entities', {
+      period: 'today',
+      branch: 'named',
+    });
+    const restarted = fixture();
+    restarted.timeline.readConversationContext.mockResolvedValue(saved);
+    restarted.model.decide.mockResolvedValue(clientValueDecision());
+    const out = await restarted.service.chat(user, {
+      ...dto('Да, такой ограниченный обзор'),
+      conversationId: 'conversation',
+    });
+    expect(restarted.model.decide.mock.calls).toHaveProperty(
+      '0.0.conversationPlan.tasks',
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'summary',
+          entities: {
+            period: 'today',
+            branch: expect.stringMatching(/^\[reference removed\]@/) as unknown,
+          },
+          clarification_question: question.reply,
+          requires_clarification: true,
+        }),
+      ]),
+    );
+    expect(out.coordination).toMatchObject({ run_id: 'client-value-run' });
+    expect(
+      restarted.orchestration.reviewBusinessAndClientReturn,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      restarted.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+  });
+  it('withholds both parts when C9 holds the combined request', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(clientValueDecision());
+    f.orchestration.reviewBusinessAndClientReturn.mockImplementation(
+      (...args: unknown[]) => {
+        Object.assign(args[0], {
+          runId: 'client-value-run',
+          failed: true,
+        });
+        return Promise.reject(new Error('synthetic current source drift'));
+      },
+    );
+    f.orchestration.finishConversationReads.mockResolvedValue({
+      run_id: 'client-value-run',
+      state: 'UNCONFIRMED',
+    });
+    const out = await f.service.chat(
+      user,
+      dto('Покажи отчёт и проверь давность визитов'),
+    );
+    expect(out.reply).toContain('Подтверждённого ответа пока нет');
+    expect(out).not.toHaveProperty('analysis');
+    expect(out).not.toHaveProperty('recommendation');
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+  });
 });
 describe('finite owner review compound ingress (synthetic, not real model acceptance)', () => {
   it('delegates the finite plan once to the existing C9 owner and preserves one coherent completion', async () => {

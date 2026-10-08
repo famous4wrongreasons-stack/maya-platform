@@ -10,8 +10,8 @@ import { ownTasksReply } from './own-tasks-presentation';
 import {
   isOwnerReviewClarification,
   isOwnerReviewTaskSet,
-  OWNER_REVIEW_CLARIFICATION,
-  OWNER_REVIEW_QUESTION,
+  ownerReviewClarification,
+  ownerReviewKind,
   ownerReviewPlanState,
   withOwnerReviewClarification,
 } from './owner-review-plan';
@@ -234,7 +234,10 @@ type GroundingReport = {
 
 type AiCoreCompletion = {
   ownerReview?: Awaited<
-    ReturnType<C9Orchestrator['reviewBusinessAndCancellationWindows']>
+    ReturnType<
+      | C9Orchestrator['reviewBusinessAndCancellationWindows']
+      | C9Orchestrator['reviewBusinessAndClientReturn']
+    >
   >;
   ownerReviewClarification?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
@@ -1130,7 +1133,7 @@ export class AiCoreService {
                 toolsUsed,
                 decisions,
                 {
-                  reply: OWNER_REVIEW_QUESTION,
+                  reply: ownerReviewClarification(activeSemanticPlan).question,
                   source: 'safe_fallback',
                   action: null,
                   ownerReviewClarification: true,
@@ -1140,9 +1143,11 @@ export class AiCoreService {
             const turn = this.readTurns.get(dto);
             if (!turn) this.modelFailure('conversation_history_unavailable');
             const ownerReview =
-              await this.orchestrator.reviewBusinessAndCancellationWindows(
-                turn,
-              );
+              ownerReviewKind(activeSemanticPlan) === 'lifecycle'
+                ? await this.orchestrator.reviewBusinessAndClientReturn(turn)
+                : await this.orchestrator.reviewBusinessAndCancellationWindows(
+                    turn,
+                  );
             return this.complete(
               user,
               dto,
@@ -3111,7 +3116,10 @@ export class AiCoreService {
               version: 'maya.chat-semantic-context/1',
               ...(response.ownerReviewClarification &&
               isOwnerReviewTaskSet(lastPlan)
-                ? { ownerReviewClarification: OWNER_REVIEW_CLARIFICATION }
+                ? {
+                    ownerReviewClarification:
+                      ownerReviewClarification(lastPlan),
+                  }
                 : {}),
               ...(lastPlan.tasks.length === 1 &&
               [
@@ -3351,7 +3359,7 @@ export class AiCoreService {
     );
     const ownerReviewClarification =
       isOwnerReviewTaskSet(plan) &&
-      isOwnerReviewClarification(saved.ownerReviewClarification);
+      isOwnerReviewClarification(saved.ownerReviewClarification, plan);
     const retainedSource = this.record(saved.bookingSource);
     if (
       plan.tasks.length === 1 &&
