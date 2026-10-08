@@ -572,16 +572,14 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
         'booking.create_own',
       );
       expect(decisions[1].toolCall?.name).toBe('appointments.own.create');
-      expect(read.mock.calls.map(([name]) => name)).toEqual(
-        missing === 'service'
-          ? ['catalog.services.read', 'catalog.services.read']
-          : [
-              'catalog.services.read',
-              'catalog.staff.read',
-              'catalog.services.read',
-              'catalog.staff.read',
-            ],
-      );
+      // Even a rejected service needs a current staff read to retain an
+      // unambiguous preference; neither clarification reads availability or writes.
+      expect(read.mock.calls.map(([name]) => name)).toEqual([
+        'catalog.services.read',
+        'catalog.staff.read',
+        'catalog.services.read',
+        'catalog.staff.read',
+      ]);
       expect(index).toBe(2);
       expect(
         await db.prisma.actionExecution.count({

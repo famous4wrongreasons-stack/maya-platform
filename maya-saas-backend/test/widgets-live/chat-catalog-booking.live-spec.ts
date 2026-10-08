@@ -305,7 +305,8 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         {
           entities: {
             date_or_period: day,
-            services: ['Стрижка', 'Борода'],
+            // Rejected multi-service input remains a preference, not selected catalog facts.
+            services: ['стрижка', 'борода'],
           },
         },
       ],
