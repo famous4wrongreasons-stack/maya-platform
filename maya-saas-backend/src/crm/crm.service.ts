@@ -26,6 +26,7 @@ import {
 } from './service-catalog-read';
 import { resolveAvailabilityCalendar } from './availability-calendar.service';
 import { createHash } from 'node:crypto';
+import { staffScheduleSourceRevision } from './staff-schedule.utils';
 import {
   SERVICE_PRICE_CAPABILITY,
   SERVICE_PRICE_TOOL,
@@ -340,6 +341,15 @@ function sameInstant(left: string, right: string): boolean {
 function isCanceledStatus(status: string): boolean {
   return ['cancelled', 'canceled', 'deleted'].includes(status.toLowerCase());
 }
+
+export type StaffScheduleSource = {
+  provider: string;
+  staffId: string;
+  branchId: string;
+  externalStaffId: string;
+  timezone: string;
+  sourceHash: string;
+};
 
 type StoredCrmIntegration = {
   id: string;
@@ -1692,35 +1702,198 @@ export class CrmService {
     return slots;
   }
 
+  /** Exact current company/branch/staff witness; no provider I/O. */
+  async resolveStaffScheduleSource(
+    tenantId: string,
+    externalStaffId: string,
+    expected: Partial<StaffScheduleSource> = {},
+  ): Promise<StaffScheduleSource> {
+    this.tenantContext.assertTenantId(tenantId);
+    const snapshot = async () => {
+      await this.assertExternalSource(tenantId);
+      const integration = await this.getStoredIntegration(tenantId);
+      const links = await this.prisma.staffProviderLink.findMany({
+        where: {
+          tenantId,
+          provider: integration.provider,
+          externalId: externalStaffId,
+          unlinkedAt: null,
+        },
+        take: 2,
+        select: {
+          id: true,
+          tenantId: true,
+          provider: true,
+          externalId: true,
+          staffId: true,
+          staff: {
+            select: { id: true, tenantId: true, branchId: true, active: true },
+          },
+        },
+      });
+      const link = links[0];
+      if (
+        links.length !== 1 ||
+        !link?.staff.active ||
+        !link.staff.branchId ||
+        link.tenantId !== tenantId ||
+        link.staff.tenantId !== tenantId
+      )
+        throw this.staffScheduleSourceUnavailable();
+      const capacity = await this.readCapacitySource(
+        tenantId,
+        link.staff.branchId,
+      );
+      const identity = {
+        provider: integration.provider,
+        staffId: link.staffId,
+        branchId: link.staff.branchId,
+        externalStaffId,
+        timezone: capacity.timezone,
+      };
+      // The integration projection also detects a provider switch between link and capacity reads.
+      const integrationIdentity = (value: StoredCrmIntegration) =>
+        JSON.stringify([
+          value.id,
+          value.provider,
+          value.status,
+          value.updatedAt,
+          value.baseUrl,
+          value.settingsJson,
+        ]);
+      const after = await this.getStoredIntegration(tenantId);
+      if (integrationIdentity(integration) !== integrationIdentity(after))
+        throw this.staffScheduleSourceUnavailable();
+      return {
+        ...identity,
+        sourceHash: createHash('sha256')
+          .update(
+            JSON.stringify([
+              'staff-schedule-source/1',
+              tenantId,
+              identity,
+              link,
+              capacity.revision,
+              integrationIdentity(integration),
+            ]),
+          )
+          .digest('hex'),
+      };
+    };
+    const before = await snapshot();
+    const after = await snapshot();
+    if (
+      before.sourceHash !== after.sourceHash ||
+      Object.entries(expected).some(
+        ([key, value]) =>
+          value !== undefined &&
+          after[key as keyof StaffScheduleSource] !== value,
+      )
+    )
+      throw this.staffScheduleSourceUnavailable();
+    return after;
+  }
+
+  private staffScheduleSourceUnavailable() {
+    return new ConflictException({
+      error: { code: 'staff_schedule_source_unavailable' },
+    });
+  }
+
+  private async assertStaffScheduleSource(
+    tenantId: string,
+    source: StaffScheduleSource,
+    staffId: string,
+    adapter?: CRMAdapter,
+  ) {
+    if (!source || source.externalStaffId !== staffId)
+      throw this.staffScheduleSourceUnavailable();
+    await this.resolveStaffScheduleSource(tenantId, staffId, source);
+    // Metadata alone must not qualify a captured adapter for a different configuration.
+    if (adapter && (await this.getAdapterForTenant(tenantId)) !== adapter)
+      throw this.staffScheduleSourceUnavailable();
+  }
+
   async previewStaffScheduleDayChange(
     tenantId: string,
-    params: { staffId: string; date: string; slots: StaffScheduleSlot[] },
+    params: {
+      staffId: string;
+      date: string;
+      slots: StaffScheduleSlot[];
+      source?: StaffScheduleSource;
+    },
   ): Promise<StaffScheduleChangePreview> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (params.source)
+      await this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+      );
     const adapter = await this.getScheduleCapableAdapter(
       scopedTenantId,
       'previewStaffScheduleDayChange',
     );
-    return adapter.previewStaffScheduleDayChange({
+    if (params.source)
+      await this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+        adapter,
+      );
+    const result = await adapter.previewStaffScheduleDayChange({
       tenantId: scopedTenantId,
-      ...params,
-      timezone: await this.tenantTimezone(scopedTenantId),
+      staffId: params.staffId,
+      date: params.date,
+      slots: params.slots,
+      timezone:
+        params.source?.timezone ?? (await this.tenantTimezone(scopedTenantId)),
     });
+    if (params.source)
+      await this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+        adapter,
+      );
+    return result;
   }
 
   async getStaffScheduleDay(
     tenantId: string,
-    params: { staffId: string; date: string },
+    params: { staffId: string; date: string; source?: StaffScheduleSource },
   ): Promise<StaffScheduleDay> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (params.source)
+      await this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+      );
     const adapter = await this.getScheduleCapableAdapter(
       scopedTenantId,
       'getStaffScheduleDay',
     );
-    return adapter.getStaffScheduleDay({
+    if (params.source)
+      await this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+        adapter,
+      );
+    const result = await adapter.getStaffScheduleDay({
       tenantId: scopedTenantId,
-      ...params,
+      staffId: params.staffId,
+      date: params.date,
     });
+    if (params.source)
+      await this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+        adapter,
+      );
+    return result;
   }
 
   async applyStaffScheduleDayChange(
@@ -1730,18 +1903,55 @@ export class CrmService {
       date: string;
       slots: StaffScheduleSlot[];
       expectedRevision: string;
+      source: StaffScheduleSource;
     },
   ): Promise<AppliedStaffScheduleDayChange> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    await this.assertStaffScheduleSource(
+      scopedTenantId,
+      params.source,
+      params.staffId,
+    );
     const adapter = await this.getScheduleCapableAdapter(
       scopedTenantId,
       'applyStaffScheduleDayChange',
     );
-    return adapter.applyStaffScheduleDayChange({
+    const assertSourceCurrent = () =>
+      this.assertStaffScheduleSource(
+        scopedTenantId,
+        params.source,
+        params.staffId,
+        adapter,
+      );
+    if (!adapter.getStaffScheduleDay)
+      throw this.staffScheduleSourceUnavailable();
+    await assertSourceCurrent();
+    const current = await adapter.getStaffScheduleDay({
       tenantId: scopedTenantId,
-      ...params,
-      timezone: await this.tenantTimezone(scopedTenantId),
+      staffId: params.staffId,
+      date: params.date,
     });
+    await assertSourceCurrent();
+    if (
+      staffScheduleSourceRevision(
+        current.revision,
+        params.source.sourceHash,
+      ) !== params.expectedRevision
+    )
+      throw new ConflictException({
+        error: { code: 'staff_schedule_revision_stale' },
+      });
+    const result = await adapter.applyStaffScheduleDayChange({
+      tenantId: scopedTenantId,
+      staffId: params.staffId,
+      date: params.date,
+      slots: params.slots,
+      expectedRevision: current.revision,
+      timezone: params.source.timezone,
+      assertSourceCurrent,
+    });
+    await assertSourceCurrent();
+    return result;
   }
 
   async createAppointment(

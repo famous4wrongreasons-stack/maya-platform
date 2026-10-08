@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
 import { CrmService } from '../crm/crm.service';
+import { staffScheduleSourceRevision } from '../crm/staff-schedule.utils';
 import { EncryptionService } from '../encryption/encryption.service';
 import {
   type Package5Wave3ProviderGateway,
@@ -22,14 +23,21 @@ export class Package5Wave3ProductionGatewayService implements Package5Wave3Provi
     branchId: string;
     externalStaffId: string;
     localDate: string;
+    sourceIdentityHash?: string;
   }) {
+    const source = await this.scheduleSource(input);
     const day = await this.crm.getStaffScheduleDay(input.tenantId, {
       staffId: input.externalStaffId,
       date: input.localDate,
+      source,
     });
     return {
-      revision: day.revision,
-      stateHash: this.staffDayHash(input, day.slots),
+      revision: staffScheduleSourceRevision(day.revision, source.sourceHash),
+      sourceIdentityHash: source.sourceHash,
+      stateHash: this.staffDayHash(
+        { ...input, sourceIdentityHash: source.sourceHash },
+        day.slots,
+      ),
     };
   }
 
@@ -43,12 +51,22 @@ export class Package5Wave3ProductionGatewayService implements Package5Wave3Provi
     slots: StaffDaySlot[];
     expectedProviderRevision: string;
     requestIdentityHash: string;
+    sourceIdentityHash: string | null;
   }) {
+    if (!input.sourceIdentityHash)
+      throw new ConflictException(
+        'Original staff schedule source witness missing',
+      );
+    const source = await this.scheduleSource({
+      ...input,
+      sourceIdentityHash: input.sourceIdentityHash,
+    });
     const applied = await this.crm.applyStaffScheduleDayChange(input.tenantId, {
       staffId: input.externalStaffId,
       date: input.localDate,
       slots: input.slots,
       expectedRevision: input.expectedProviderRevision,
+      source,
     });
     return { stateHash: this.staffDayHash(input, applied.slots) };
   }
@@ -62,9 +80,22 @@ export class Package5Wave3ProductionGatewayService implements Package5Wave3Provi
     localDate: string;
     desiredStateHash: string;
     expectedProviderRevision: string;
-    requestIdentityHash: string;
+    requestIdentityHash: string | null;
+    sourceIdentityHash: string | null;
   }) {
-    const current = await this.readStaffDay(input);
+    // Never qualify a historical UNKNOWN against today's source or re-dispatch it.
+    if (!input.sourceIdentityHash) return 'STILL_UNKNOWN' as const;
+    let current: Awaited<
+      ReturnType<Package5Wave3ProductionGatewayService['readStaffDay']>
+    >;
+    try {
+      current = await this.readStaffDay({
+        ...input,
+        sourceIdentityHash: input.sourceIdentityHash,
+      });
+    } catch {
+      return 'STILL_UNKNOWN' as const;
+    }
     if (current.stateHash === input.desiredStateHash)
       return 'PROVEN_SUCCEEDED' as const;
     if (current.revision === input.expectedProviderRevision)
@@ -134,6 +165,7 @@ export class Package5Wave3ProductionGatewayService implements Package5Wave3Provi
       staffId: string;
       branchId: string;
       localDate: string;
+      sourceIdentityHash?: string | null;
     },
     slots: StaffDaySlot[],
   ) {
@@ -141,10 +173,33 @@ export class Package5Wave3ProductionGatewayService implements Package5Wave3Provi
       staffId: input.staffId,
       branchId: input.branchId,
       localDate: input.localDate,
+      sourceIdentityHash: input.sourceIdentityHash,
       slots: [...slots].sort((left, right) =>
         left.from.localeCompare(right.from),
       ),
     });
+  }
+
+  private scheduleSource(input: {
+    tenantId: string;
+    provider: string;
+    staffId: string;
+    branchId: string;
+    externalStaffId: string;
+    sourceIdentityHash?: string;
+  }) {
+    return this.crm.resolveStaffScheduleSource(
+      input.tenantId,
+      input.externalStaffId,
+      {
+        provider: input.provider,
+        staffId: input.staffId,
+        branchId: input.branchId,
+        ...(input.sourceIdentityHash
+          ? { sourceHash: input.sourceIdentityHash }
+          : {}),
+      },
+    );
   }
 
   private assertProvider(expected: string, actual: string) {

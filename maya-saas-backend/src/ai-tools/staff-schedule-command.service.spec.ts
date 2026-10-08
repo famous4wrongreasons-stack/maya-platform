@@ -7,7 +7,10 @@ import type {
   StaffScheduleSlot,
 } from '../crm/crm-adapter.interface';
 import { CrmService } from '../crm/crm.service';
-import { staffScheduleRevision } from '../crm/staff-schedule.utils';
+import {
+  staffScheduleRevision,
+  staffScheduleSourceRevision,
+} from '../crm/staff-schedule.utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
@@ -33,6 +36,95 @@ describe('StaffScheduleCommandService', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('uses the resolved branch day rather than the tenant day at midnight', async () => {
+    jest.setSystemTime(new Date('2026-08-05T22:30:00.000Z'));
+    const mocks = createService();
+    const source = scheduleSource('7', 'America/Los_Angeles');
+    mocks.crm.resolveStaffScheduleSource.mockResolvedValue(source);
+
+    const result = await mocks.service.tryHandle(
+      user,
+      chat('web', 'Закрой Антону завтра'),
+    );
+
+    expect(mocks.crm.resolveStaffScheduleSource).toHaveBeenCalledWith(
+      'tenant-a',
+      '7',
+    );
+    expect(mocks.crm.getStaffScheduleDay).toHaveBeenCalledWith('tenant-a', {
+      staffId: '7',
+      date: '2026-08-06',
+      source,
+    });
+    expect(mocks.crm.previewStaffScheduleDayChange).toHaveBeenCalledWith(
+      'tenant-a',
+      { staffId: '7', date: '2026-08-06', slots: [], source },
+    );
+    expect(result?.reply).toContain('06.08.2026');
+    expect(result?.reply).toContain('America/Los_Angeles');
+    expect(mocks.runtime.execute.mock.calls[0][2].arguments).toMatchObject({
+      source_hash: source.sourceHash,
+      local_staff_id: source.staffId,
+      date: '2026-08-06',
+      current_revision: staffScheduleSourceRevision(
+        staffScheduleRevision('7', '2026-08-06', [
+          { from: '10:00', to: '20:00' },
+        ]),
+        source.sourceHash,
+      ),
+    });
+  });
+
+  it('refuses an unavailable schedule source before reading a provider day', async () => {
+    const mocks = createService();
+    mocks.crm.resolveStaffScheduleSource.mockRejectedValue(
+      new Error('staff_schedule_source_unavailable'),
+    );
+    const result = await mocks.service.tryHandle(
+      user,
+      chat('web', 'Закрой Антону завтра'),
+    );
+    expect(result?.action).toBeNull();
+    expect(result?.reply).toContain('источник графика');
+    expect(mocks.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+    expect(mocks.crm.previewStaffScheduleDayChange).not.toHaveBeenCalled();
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
+  it.each(['read', 'preview'] as const)(
+    'refuses a source changed during %s without creating approval',
+    async (stage) => {
+      const mocks = createService();
+      const changed = new Error('staff_schedule_source_changed');
+      if (stage === 'read')
+        mocks.crm.getStaffScheduleDay.mockRejectedValue(changed);
+      else mocks.crm.previewStaffScheduleDayChange.mockRejectedValue(changed);
+      const result = await mocks.service.tryHandle(
+        user,
+        chat('web', 'Закрой Антону завтра'),
+      );
+      expect(mocks.crm.resolveStaffScheduleSource).toHaveBeenCalledTimes(1);
+      expect(result?.action).toBeNull();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it('refuses when the current slots changed between planning and preview', async () => {
+    const mocks = createService();
+    mocks.crm.previewStaffScheduleDayChange.mockResolvedValue({
+      current: scheduleDay('7', '2026-08-06', [{ from: '09:00', to: '21:00' }]),
+      proposed: scheduleDay('7', '2026-08-06', []),
+      conflict_times: [],
+    });
+    const result = await mocks.service.tryHandle(
+      user,
+      chat('web', 'Закрой Антону завтра'),
+    );
+    expect(result?.action).toBeNull();
+    expect(result?.reply).toContain('График изменился');
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
   it.each(['native', 'web'] as const)(
@@ -184,15 +276,15 @@ describe('StaffScheduleCommandService', () => {
           requestId: 'clarification-123456',
           messages,
         });
-      expect((await turn())?.reply).toBe('На какую дату изменить график?');
-      messages.push(
-        { role: 'assistant', content: 'На какую дату изменить график?' },
-        { role: 'user', content: 'Завтра' },
-      );
       expect((await turn())?.reply).toBe('Какому мастеру изменить график?');
       messages.push(
         { role: 'assistant', content: 'Какому мастеру изменить график?' },
         { role: 'user', content: 'Антону' },
+      );
+      expect((await turn())?.reply).toBe('На какую дату изменить график?');
+      messages.push(
+        { role: 'assistant', content: 'На какую дату изменить график?' },
+        { role: 'user', content: 'Завтра' },
       );
       expect((await turn())?.reply).toContain('Укажите время перерыва');
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
@@ -348,6 +440,9 @@ describe('StaffScheduleCommandService', () => {
     currentSlots: StaffScheduleSlot[] = [{ from: '10:00', to: '20:00' }],
   ) {
     const crm = {
+      resolveStaffScheduleSource: jest.fn((...args: [string, string]) =>
+        Promise.resolve(scheduleSource(args[1])),
+      ),
       getStaff: jest.fn().mockResolvedValue([
         { id: '7', name: 'Антон Соколов' },
         { id: '8', name: 'Станислав Мосин' },
@@ -520,6 +615,17 @@ describe('StaffScheduleCommandService', () => {
       is_working: slots.length > 0,
       slots,
       revision: staffScheduleRevision(staffId, date, slots),
+    };
+  }
+
+  function scheduleSource(externalStaffId: string, timezone = 'Europe/Moscow') {
+    return {
+      provider: 'yclients' as const,
+      staffId: `local-${externalStaffId}`,
+      branchId: 'branch-a',
+      externalStaffId,
+      timezone,
+      sourceHash: 'a'.repeat(64),
     };
   }
 

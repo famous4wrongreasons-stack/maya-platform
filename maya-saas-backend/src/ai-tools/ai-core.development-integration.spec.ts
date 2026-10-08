@@ -46,6 +46,14 @@ function fixture() {
     getStaff: jest
       .fn()
       .mockResolvedValue([{ id: 'staff-a', name: 'Антон Тестовый' }]),
+    resolveStaffScheduleSource: jest.fn().mockResolvedValue({
+      provider: 'yclients',
+      staffId: 'local-staff-a',
+      branchId: 'branch-a',
+      externalStaffId: 'staff-a',
+      timezone: 'UTC',
+      sourceHash: 'a'.repeat(64),
+    }),
     getStaffScheduleDay: jest.fn().mockResolvedValue(current),
     previewStaffScheduleDayChange: jest.fn().mockResolvedValue({
       current,

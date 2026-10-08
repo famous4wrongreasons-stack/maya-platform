@@ -961,6 +961,22 @@ export const MAYA_AI_TOOL_CATALOG = [
         'slots',
       ],
       properties: {
+        local_staff_id: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 128,
+          pattern: '^[A-Za-z0-9_-]{1,128}$',
+          description:
+            'Local Staff identity from the same server-resolved source witness; required together with source_hash, never actor authority.',
+        },
+        source_hash: {
+          type: 'string',
+          minLength: 64,
+          maxLength: 64,
+          pattern: '^[a-f0-9]{64}$',
+          description:
+            'Current CRM schedule source binding metadata; never approval or execution authority.',
+        },
         staff_id: { type: 'string', minLength: 1, maxLength: 128 },
         date: { type: 'string', format: 'date' },
         operation: {

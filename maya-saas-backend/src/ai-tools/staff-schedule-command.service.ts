@@ -15,6 +15,7 @@ import {
   normalizeScheduleSlots,
   scheduleMinutesLabel,
   scheduleTimeMinutes,
+  staffScheduleSourceRevision,
 } from '../crm/staff-schedule.utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
@@ -182,17 +183,6 @@ export class StaffScheduleCommandService {
     )
       return null;
 
-    const timezone = await this.tenantTimezone(user.tenantId);
-    const parsed: ParsedScheduleIntent = {
-      operation,
-      date: this.parseDate(normalizedText, timezone),
-      range: this.parseTimeRange(normalizedText),
-      end: this.parseEndTime(normalizedText),
-    };
-    if (!parsed.date) {
-      return this.replyOnly('На какую дату изменить график?');
-    }
-
     const staff =
       clarificationStaff ?? (await this.crmService.getStaff(user.tenantId));
     const match = this.resolveStaff(normalizedText, staff);
@@ -203,11 +193,36 @@ export class StaffScheduleCommandService {
       return this.replyOnly(`Уточните мастера: ${match.names.join(', ')}.`);
     }
 
+    let source: Awaited<ReturnType<CrmService['resolveStaffScheduleSource']>>;
+    try {
+      source = await this.crmService.resolveStaffScheduleSource(
+        user.tenantId,
+        match.staff.id,
+      );
+      if (source.externalStaffId !== match.staff.id)
+        throw new Error('staff_schedule_source_changed');
+    } catch {
+      return this.replyOnly(
+        'Не смогла подтвердить актуальный источник графика и часовой пояс филиала. Ничего не изменила.',
+      );
+    }
+    const timezone = source.timezone;
+    const parsed: ParsedScheduleIntent = {
+      operation,
+      date: this.parseDate(normalizedText, timezone),
+      range: this.parseTimeRange(normalizedText),
+      end: this.parseEndTime(normalizedText),
+    };
+    if (!parsed.date) {
+      return this.replyOnly('На какую дату изменить график?');
+    }
+
     let current: StaffScheduleDay;
     try {
       current = await this.crmService.getStaffScheduleDay(user.tenantId, {
         staffId: match.staff.id,
         date: parsed.date,
+        source,
       });
     } catch {
       return this.replyOnly(
@@ -228,11 +243,25 @@ export class StaffScheduleCommandService {
           staffId: match.staff.id,
           date: parsed.date,
           slots: planned.slots,
+          source,
         },
       );
     } catch {
       return this.replyOnly(
         'Не смогла безопасно проверить записи на этот день. График не изменён.',
+      );
+    }
+    if (
+      current.staff_id !== match.staff.id ||
+      current.date !== parsed.date ||
+      preview.current.staff_id !== match.staff.id ||
+      preview.current.date !== parsed.date ||
+      preview.proposed.staff_id !== match.staff.id ||
+      preview.proposed.date !== parsed.date ||
+      preview.current.revision !== current.revision
+    ) {
+      return this.replyOnly(
+        'График изменился во время проверки. Повторите запрос, чтобы подготовить актуальное подтверждение. Ничего не изменила.',
       );
     }
     if (preview.conflict_times.length > 0) {
@@ -248,7 +277,12 @@ export class StaffScheduleCommandService {
           staff_id: match.staff.id,
           date: preview.current.date,
           operation: parsed.operation,
-          current_revision: preview.current.revision,
+          source_hash: source.sourceHash,
+          local_staff_id: source.staffId,
+          current_revision: staffScheduleSourceRevision(
+            preview.current.revision,
+            source.sourceHash,
+          ),
           current_slots: preview.current.slots,
           slots: preview.proposed.slots,
         },
@@ -267,7 +301,8 @@ export class StaffScheduleCommandService {
 
     return {
       reply:
-        `${match.staff.name}, ${this.displayDate(preview.current.date)}: ` +
+        `${match.staff.name}, ${this.displayDate(preview.current.date)} ` +
+        `(часовой пояс филиала: ${timezone}): ` +
         `сейчас ${this.slotsText(preview.current.slots)}, ` +
         `после изменения ${this.slotsText(preview.proposed.slots)}. ` +
         'Существующие записи сохранятся. Подтвердите изменение.',

@@ -1,11 +1,29 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 import { UserRole } from '../common/domain.enums';
-import { staffScheduleRevision } from '../crm/staff-schedule.utils';
+import {
+  staffScheduleRevision,
+  staffScheduleSourceRevision,
+} from '../crm/staff-schedule.utils';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 
 describe('AiToolRegistryService', () => {
   const service = new AiToolRegistryService();
+  const expectInvalidArgument = (
+    validate: () => unknown,
+    detail: string,
+  ): void => {
+    try {
+      validate();
+    } catch (error) {
+      if (!(error instanceof BadRequestException)) throw error;
+      expect(error.getResponse()).toMatchObject({
+        error: { code: 'ai_tool_arguments_invalid', detail },
+      });
+      return;
+    }
+    throw new Error('Expected invalid tool arguments');
+  };
 
   it('fails closed for unknown tools and unknown arguments', () => {
     expect(() => service.get('database.query')).toThrow(NotFoundException);
@@ -444,6 +462,149 @@ describe('AiToolRegistryService', () => {
         slots: [],
       }),
     ).toThrow(BadRequestException);
+  });
+
+  it('validates source-bound schedule revision while preserving the existing approval card', () => {
+    const currentSlots = [{ from: '10:00', to: '20:00' }];
+    const rawRevision = staffScheduleRevision('7', '2026-08-06', currentSlots);
+    const sourceHash = 'a'.repeat(64);
+    const legacy = {
+      staff_id: '7',
+      date: '2026-08-06',
+      operation: 'close_day',
+      current_revision: rawRevision,
+      current_slots: currentSlots,
+      slots: [],
+    };
+    const bound = {
+      ...legacy,
+      source_hash: sourceHash,
+      local_staff_id: 'local-7',
+      current_revision: staffScheduleSourceRevision(rawRevision, sourceHash),
+    };
+    expect(service.validateArguments('staff.schedule.update', bound)).toEqual(
+      bound,
+    );
+    expect(
+      service.buildApprovalPreview('staff.schedule.update', bound),
+    ).toEqual(service.buildApprovalPreview('staff.schedule.update', legacy));
+  });
+
+  it.each([
+    null,
+    undefined,
+    '',
+    'a'.repeat(63),
+    'a'.repeat(65),
+    'A'.repeat(64),
+    `${'a'.repeat(64)}\n`,
+    {},
+  ])('rejects malformed supplied schedule source_hash: %j', (sourceHash) => {
+    expectInvalidArgument(
+      () =>
+        service.validateArguments('staff.schedule.update', {
+          staff_id: '7',
+          date: '2026-08-06',
+          operation: 'close_day',
+          source_hash: sourceHash,
+          local_staff_id: 'local-7',
+          current_revision: staffScheduleRevision('7', '2026-08-06', []),
+          current_slots: [],
+          slots: [],
+        }),
+      'source_hash is invalid',
+    );
+  });
+
+  it.each([
+    { current_slots: [{ from: '09:00', to: '20:00' }] },
+    { source_hash: 'b'.repeat(64) },
+    { staff_id: '8' },
+    { date: '2026-08-07' },
+  ])('rejects a changed field in a source-bound preview: %j', (changed) => {
+    const currentSlots = [{ from: '10:00', to: '20:00' }];
+    expectInvalidArgument(
+      () =>
+        service.validateArguments('staff.schedule.update', {
+          staff_id: '7',
+          date: '2026-08-06',
+          operation: 'close_day',
+          source_hash: 'a'.repeat(64),
+          local_staff_id: 'local-7',
+          current_revision: staffScheduleSourceRevision(
+            staffScheduleRevision('7', '2026-08-06', currentSlots),
+            'a'.repeat(64),
+          ),
+          current_slots: currentSlots,
+          slots: [],
+          ...changed,
+        }),
+      'current_revision does not match the schedule preview',
+    );
+  });
+
+  it('refuses a raw revision paired with source metadata', () => {
+    expectInvalidArgument(
+      () =>
+        service.validateArguments('staff.schedule.update', {
+          staff_id: '7',
+          date: '2026-08-06',
+          operation: 'close_day',
+          source_hash: 'a'.repeat(64),
+          local_staff_id: 'local-7',
+          current_revision: staffScheduleRevision('7', '2026-08-06', []),
+          current_slots: [],
+          slots: [],
+        }),
+      'current_revision does not match the schedule preview',
+    );
+  });
+
+  it.each([{ source_hash: 'a'.repeat(64) }, { local_staff_id: 'local-7' }])(
+    'requires the complete immutable source pair: %j',
+    (source) => {
+      expectInvalidArgument(
+        () =>
+          service.validateArguments('staff.schedule.update', {
+            staff_id: '7',
+            date: '2026-08-06',
+            operation: 'close_day',
+            current_revision: staffScheduleRevision('7', '2026-08-06', []),
+            current_slots: [],
+            slots: [],
+            ...source,
+          }),
+        'source_hash and local_staff_id must be supplied together',
+      );
+    },
+  );
+
+  it.each([
+    null,
+    undefined,
+    '',
+    'a'.repeat(129),
+    '../staff',
+    'local 7',
+    'local-7\n',
+  ])('rejects malformed local staff identity: %j', (localStaffId) => {
+    expectInvalidArgument(
+      () =>
+        service.validateArguments('staff.schedule.update', {
+          staff_id: '7',
+          local_staff_id: localStaffId,
+          source_hash: 'a'.repeat(64),
+          date: '2026-08-06',
+          operation: 'close_day',
+          current_revision: staffScheduleSourceRevision(
+            staffScheduleRevision('7', '2026-08-06', []),
+            'a'.repeat(64),
+          ),
+          current_slots: [],
+          slots: [],
+        }),
+      'local_staff_id is invalid',
+    );
   });
 
   it('validates bounded group availability without accepting tenant scope', () => {

@@ -3148,6 +3148,264 @@ describe('YclientsCRMAdapter', () => {
     expect(attemptedScheduleWrite).toBe(false);
   });
 
+  describe('native single-day schedule write safety', () => {
+    const date = '2026-08-06';
+    const initialSlots = [{ from: '10:00', to: '20:00' }];
+    const divergentSlots = [{ from: '12:00', to: '18:00' }];
+    function source(
+      options: {
+        incomplete?: 'page_limit' | 'repeated_page';
+        recordsResponse?: string;
+        failure?: 'divergent' | 'write_timeout' | 'readback_timeout';
+      } = {},
+    ) {
+      const state = {
+        slots: [...initialSlots],
+        puts: 0,
+        scheduleReads: 0,
+        recordPages: 0,
+      };
+      const timeout = Object.assign(new Error('Synthetic response lost'), {
+        name: 'AbortError',
+      });
+      const json = (data: unknown) =>
+        Promise.resolve(
+          new Response(JSON.stringify({ success: true, data }), {
+            status: 200,
+          }),
+        );
+      global.fetch = jest.fn(
+        (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+          const url = new URL(requestUrl(input));
+          if (
+            url.pathname.endsWith(`/schedule/123/7/${date}/${date}`) &&
+            init?.method === 'GET'
+          ) {
+            state.scheduleReads++;
+            if (state.puts && options.failure === 'readback_timeout')
+              return Promise.reject(timeout);
+            return json([
+              { date, is_working: state.slots.length > 0, slots: state.slots },
+            ]);
+          }
+          if (url.pathname.endsWith('/records/123') && init?.method === 'GET') {
+            const page = Number(url.searchParams.get('page'));
+            expect(Object.fromEntries(url.searchParams)).toEqual({
+              start_date: date,
+              end_date: date,
+              staff_id: '7',
+              count: '200',
+              page: String(page),
+            });
+            state.recordPages++;
+            if (options.recordsResponse !== undefined)
+              return Promise.resolve(
+                new Response(options.recordsResponse, { status: 200 }),
+              );
+            expect(page).toBe(state.recordPages);
+            expect(state.recordPages).toBeLessThanOrEqual(25);
+            // Every observed item is legitimately excluded from conflicts. Only
+            // incomplete pagination, not a known conflicting visit, must stop us.
+            return json(
+              options.incomplete
+                ? Array.from({ length: 200 }, (_, index) => ({
+                    id:
+                      (options.incomplete === 'repeated_page' ? 0 : page) *
+                        200 +
+                      index +
+                      1,
+                    deleted: true,
+                  }))
+                : [],
+            );
+          }
+          if (
+            url.pathname.endsWith('/company/123/staff/schedule') &&
+            init?.method === 'PUT'
+          ) {
+            state.puts++;
+            expect(requestJsonBody(init)).toEqual({
+              schedules_to_set: [],
+              schedules_to_delete: [{ staff_id: 7, dates: [date] }],
+            });
+            state.slots =
+              options.failure === 'divergent' ? [...divergentSlots] : [];
+            // The provider may have committed even when the HTTP reply is lost.
+            if (options.failure === 'write_timeout')
+              return Promise.reject(timeout);
+            return json({});
+          }
+          throw new Error('Unapproved synthetic schedule transport');
+        },
+      );
+      const adapter = journalAdapter();
+      const apply = async (assertSourceCurrent?: () => Promise<void>) => {
+        const current = await adapter.getStaffScheduleDay({
+          tenantId: 'tenant-1',
+          staffId: '7',
+          date,
+        });
+        return adapter.applyStaffScheduleDayChange({
+          tenantId: 'tenant-1',
+          staffId: '7',
+          date,
+          slots: [],
+          expectedRevision: current.revision,
+          timezone: 'Europe/Moscow',
+          assertSourceCurrent,
+        });
+      };
+      return { state, timeout, adapter, apply };
+    }
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-06T09:00:00.000Z'));
+    });
+    it.each([
+      ['blank', ''],
+      ['html', '<html>failure</html>'],
+      ['absent', '{"success":true}'],
+      ['null', '{"data":null}'],
+      ['object', '{"data":{}}'],
+      [
+        'boolean-duration',
+        JSON.stringify({
+          data: [{ id: 1, datetime: date + 'T17:00:00', length: true }],
+        }),
+      ],
+      [
+        'array-duration',
+        JSON.stringify({
+          data: [{ id: 1, datetime: date + 'T17:00:00', length: [3600] }],
+        }),
+      ],
+      ['false-string', JSON.stringify({ data: [{ id: 1, deleted: 'false' }] })],
+      [
+        'missing-duration',
+        JSON.stringify({ data: [{ id: 1, datetime: date + 'T17:00:00' }] }),
+      ],
+      [
+        'zero-duration',
+        JSON.stringify({
+          data: [{ id: 1, datetime: date + 'T17:00:00', length: 0 }],
+        }),
+      ],
+    ])(
+      'rejects an unproven %s conflict response before PUT',
+      async (_label, recordsResponse) => {
+        const f = source({ recordsResponse });
+        await expect(
+          f.adapter.previewStaffScheduleDayChange({
+            tenantId: 'tenant-1',
+            staffId: '7',
+            date,
+            slots: [{ from: '10:00', to: '18:00' }],
+            timezone: 'Europe/Moscow',
+          }),
+        ).rejects.toThrow();
+        await expect(f.apply()).rejects.toThrow();
+        expect(f.state.puts).toBe(0);
+      },
+    );
+    it('forbids automatic redirect replay for the single schedule PUT', async () => {
+      const f = source();
+      await f.apply();
+      const calls = (global.fetch as jest.MockedFunction<typeof fetch>).mock
+        .calls;
+      expect(calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(
+        1,
+      );
+      expect(
+        calls.find(([, init]) => init?.method === 'PUT')?.[1]?.redirect,
+      ).toBe('error');
+    });
+    it.each(['page_limit', 'repeated_page'] as const)(
+      'refuses an incomplete %s conflict source during preview and before a write',
+      async (incomplete) => {
+        const preview = source({ incomplete });
+        await expect(
+          preview.adapter.previewStaffScheduleDayChange({
+            tenantId: 'tenant-1',
+            staffId: '7',
+            date,
+            slots: [],
+            timezone: 'Europe/Moscow',
+          }),
+        ).rejects.toMatchObject({
+          response: { error: { code: 'staff_schedule_records_incomplete' } },
+        });
+        expect(preview.state.puts).toBe(0);
+        expect(preview.state.recordPages).toBe(
+          incomplete === 'page_limit' ? 25 : 2,
+        );
+        const dispatch = source({ incomplete });
+        await expect(dispatch.apply()).rejects.toMatchObject({
+          response: { error: { code: 'staff_schedule_records_incomplete' } },
+        });
+        expect(dispatch.state.puts).toBe(0);
+        expect(dispatch.state.slots).toEqual(initialSlots);
+        expect(dispatch.state.recordPages).toBe(
+          incomplete === 'page_limit' ? 25 : 2,
+        );
+      },
+    );
+    it('leaves divergent readback unverified after exactly one PUT without compensation or rollback claim', async () => {
+      const f = source({ failure: 'divergent' });
+      await expect(f.apply()).rejects.toMatchObject({
+        response: {
+          message:
+            'YClients не подтвердил новый график. Результат изменения неизвестен.',
+          error: { code: 'staff_schedule_update_unverified' },
+        },
+      });
+      expect(f.state.puts).toBe(1);
+      expect(f.state.scheduleReads).toBe(3);
+      expect(f.state.slots).toEqual(divergentSlots);
+    });
+    it.each(['before_put', 'after_readback'] as const)(
+      'propagates source drift %s with no additional PUT',
+      async (failureAt) => {
+        const f = source();
+        const drift = new Error('Synthetic source binding changed');
+        const phases: Array<{ puts: number; scheduleReads: number }> = [];
+        const assertSourceCurrent = jest.fn(() => {
+          phases.push({
+            puts: f.state.puts,
+            scheduleReads: f.state.scheduleReads,
+          });
+          return failureAt === 'before_put' || phases.length === 2
+            ? Promise.reject(drift)
+            : Promise.resolve();
+        });
+        await expect(f.apply(assertSourceCurrent)).rejects.toBe(drift);
+        expect(phases).toEqual(
+          failureAt === 'before_put'
+            ? [{ puts: 0, scheduleReads: 2 }]
+            : [
+                { puts: 0, scheduleReads: 2 },
+                { puts: 1, scheduleReads: 3 },
+              ],
+        );
+        expect(f.state.puts).toBe(failureAt === 'before_put' ? 0 : 1);
+        expect(f.state.slots).toEqual(
+          failureAt === 'before_put' ? initialSlots : [],
+        );
+      },
+    );
+    it.each(['write_timeout', 'readback_timeout'] as const)(
+      'preserves UNKNOWN on %s after one PUT without retry',
+      async (failure) => {
+        const f = source({ failure });
+        await expect(f.apply()).rejects.toMatchObject({
+          name: 'CrmOutcomeUnknownError',
+          cause: f.timeout,
+        });
+        expect(f.state.puts).toBe(1);
+        expect(f.state.slots).toEqual([]);
+        expect(f.state.scheduleReads).toBe(failure === 'write_timeout' ? 2 : 3);
+      },
+    );
+  });
+
   it('confirms recovered revenue only from positive service transactions with matching record ids', async () => {
     global.fetch = jest.fn<typeof fetch>((input) => {
       const url = String(input);

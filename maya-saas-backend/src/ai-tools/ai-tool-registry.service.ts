@@ -14,6 +14,7 @@ import { priceMinor } from '../crm/yclients-service-price.contract';
 import {
   normalizeScheduleSlots,
   staffScheduleRevision,
+  staffScheduleSourceRevision,
 } from '../crm/staff-schedule.utils';
 import {
   MANUAL_EXPENSE_CATEGORY_SLUGS,
@@ -460,6 +461,8 @@ export class AiToolRegistryService {
           'current_revision',
           'current_slots',
           'slots',
+          'source_hash',
+          'local_staff_id',
         ]);
         const staffId = this.assertExternalId(args.staff_id, 'staff_id');
         const date = this.assertDateKey(args.date, 'date');
@@ -472,8 +475,24 @@ export class AiToolRegistryService {
         const currentRevision = this.assertScheduleRevision(
           args.current_revision,
         );
+        if ('source_hash' in args !== 'local_staff_id' in args) {
+          this.invalidArguments(
+            'source_hash and local_staff_id must be supplied together',
+          );
+        }
+        const sourceHash =
+          'source_hash' in args
+            ? this.assertScheduleRevision(args.source_hash, 'source_hash')
+            : undefined;
+        const localStaffId = sourceHash
+          ? this.assertScheduleLocalStaffId(args.local_staff_id)
+          : undefined;
+        const rawRevision = staffScheduleRevision(staffId, date, currentSlots);
         if (
-          currentRevision !== staffScheduleRevision(staffId, date, currentSlots)
+          currentRevision !==
+          (sourceHash
+            ? staffScheduleSourceRevision(rawRevision, sourceHash)
+            : rawRevision)
         ) {
           this.invalidArguments(
             'current_revision does not match the schedule preview',
@@ -484,6 +503,9 @@ export class AiToolRegistryService {
           date,
           operation,
           current_revision: currentRevision,
+          ...(sourceHash
+            ? { source_hash: sourceHash, local_staff_id: localStaffId }
+            : {}),
           current_slots: currentSlots,
           slots,
         };
@@ -1154,9 +1176,28 @@ export class AiToolRegistryService {
     ]);
   }
 
-  private assertScheduleRevision(value: unknown): string {
-    if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
-      this.invalidArguments('current_revision is invalid');
+  private assertScheduleRevision(
+    value: unknown,
+    field = 'current_revision',
+  ): string {
+    if (
+      typeof value !== 'string' ||
+      value.length !== 64 ||
+      !/^[a-f0-9]{64}$/.test(value)
+    ) {
+      this.invalidArguments(`${field} is invalid`);
+    }
+    return value;
+  }
+
+  private assertScheduleLocalStaffId(value: unknown): string {
+    if (
+      typeof value !== 'string' ||
+      value.length < 1 ||
+      value.length > 128 ||
+      /[^A-Za-z0-9_-]/.test(value)
+    ) {
+      this.invalidArguments('local_staff_id is invalid');
     }
     return value;
   }

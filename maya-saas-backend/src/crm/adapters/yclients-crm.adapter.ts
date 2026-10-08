@@ -2493,8 +2493,15 @@ export class YclientsCRMAdapter implements CRMAdapter {
       startDate: params.date,
       endDate: params.date,
       staffId: this.toNumericId(params.staffId, 'staffId'),
+      requireProgress: true,
     });
-    this.warnOnTruncatedRecords(fetchedDay, 'previewStaffScheduleDayChange');
+    if (fetchedDay.completeness !== 'complete') {
+      throw new ConflictException({
+        message:
+          'Не удалось подтвердить полноту записей на этот день. График не изменён.',
+        error: { code: 'staff_schedule_records_incomplete' },
+      });
+    }
     const conflictTimes = this.staffScheduleConflictTimes(
       fetchedDay.items,
       params.date,
@@ -2533,6 +2540,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
       });
     }
 
+    // The trusted CRM owner pins provider/company/branch identity. Never accept
+    // this callback from the model or the provider payload.
+    await params.assertSourceCurrent?.();
     await this.writeStaffScheduleDay(
       params.staffId,
       params.date,
@@ -2542,19 +2552,14 @@ export class YclientsCRMAdapter implements CRMAdapter {
       params.staffId,
       params.date,
     );
+    await params.assertSourceCurrent?.();
 
     if (verified.revision !== preview.proposed.revision) {
-      try {
-        await this.writeStaffScheduleDay(
-          params.staffId,
-          params.date,
-          preview.current.slots,
-        );
-      } catch {
-        // The failed verification is reported below; recovery is best effort.
-      }
+      // One approval authorizes one PUT. Divergence may reflect another actor's
+      // change; retain uncertainty for the canonical owner, never overwrite it.
       throw new ConflictException({
-        message: 'YClients не подтвердил новый график. Изменение откачено.',
+        message:
+          'YClients не подтвердил новый график. Результат изменения неизвестен.',
         error: { code: 'staff_schedule_update_unverified' },
       });
     }
@@ -2624,7 +2629,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         };
     const response = await this.request<unknown>(
       `company/${this.getCompanyId()}/staff/schedule`,
-      { method: 'PUT', body: JSON.stringify(payload) },
+      { method: 'PUT', body: JSON.stringify(payload), redirect: 'error' },
     );
     if (response.success === false) {
       throw new Error('YClients did not accept the staff schedule update');
@@ -2640,13 +2645,30 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const conflicts = new Set<string>();
     const now = new Date();
     for (const record of records) {
+      // A missing duration or a truthy string is not evidence of free time.
+      // Keep this strictness at the schedule mutation boundary; journal display
+      // retains its separate historical fallback behavior.
       if (
-        record.deleted ||
+        !record ||
+        typeof record !== 'object' ||
+        (record.deleted !== undefined &&
+          ![true, false, 0, 1].includes(record.deleted))
+      )
+        throw new Error('YClients schedule conflict record is incomplete');
+      if (
+        record.deleted === true ||
+        record.deleted === 1 ||
         record.attendance === -1 ||
         record.visit_attendance === -1
-      ) {
+      )
         continue;
-      }
+      const duration = record.length ?? record.seance_length;
+      if (
+        typeof duration !== 'number' ||
+        !Number.isFinite(duration) ||
+        duration <= 0
+      )
+        throw new Error('YClients schedule conflict duration is incomplete');
       const timing = this.recordTiming(record, timezone);
       if (timing.end.getTime() <= now.getTime()) {
         continue;
@@ -3287,6 +3309,8 @@ export class YclientsCRMAdapter implements CRMAdapter {
         `records/${this.getCompanyId()}`,
         { query },
       );
+      if (params.requireProgress && !Array.isArray(response.data))
+        throw new Error('YClients record list is incomplete');
       const batch = response.data || [];
       let appended = 0;
 
@@ -4112,6 +4136,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       query?: URLSearchParams;
       timeoutMs?: number;
       preserveGoodsNumbers?: true;
+      redirect?: 'error';
     },
   ): Promise<YclientsResponse<TData>> {
     const url = new URL(`${this.baseUrl}/${path}`);
@@ -4132,8 +4157,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
     try {
       response = await fetch(url, {
         method: init?.method || 'GET',
-        // Goods permits one exact destination; 307/308 must never resend a POST.
-        ...(init?.preserveGoodsNumbers ? { redirect: 'error' as const } : {}),
+        // Exact write destinations must not follow 307/308 and resend a mutation.
+        ...(init?.preserveGoodsNumbers || init?.redirect === 'error'
+          ? { redirect: 'error' as const }
+          : {}),
         headers: {
           Authorization: `Bearer ${this.partnerToken}, User ${this.config.apiToken}`,
           Accept: 'application/vnd.yclients.v2+json',

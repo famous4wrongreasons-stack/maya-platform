@@ -66,6 +66,8 @@ export type StaffScheduleDay = WorkDay;
 export type StaffScheduleChangePreview = WorkDayChangePreview;
 
 export interface ApplyStaffScheduleDayChangeParams {
+  /** Server-only source/configuration fence; never DTO authority. */
+  assertSourceCurrent?: () => Promise<void>;
   tenantId: string;
   staffId: string;
   date: string;

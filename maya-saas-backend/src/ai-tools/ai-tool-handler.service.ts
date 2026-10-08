@@ -1740,6 +1740,10 @@ export class AiToolHandlerService {
         principal,
         {
           externalStaffId: this.requiredString(args.staff_id),
+          localStaffId:
+            typeof args.local_staff_id === 'string'
+              ? args.local_staff_id
+              : undefined,
           localDate: this.requiredString(args.date),
           slots: this.scheduleSlots(args.slots),
           expectedProviderRevision: this.requiredString(args.current_revision),
@@ -1752,6 +1756,7 @@ export class AiToolHandlerService {
       is_working: result.is_working,
       slots: result.slots,
       verified: true,
+      verification_basis: result.verification_basis,
       existing_appointments_preserved: true,
     };
   }

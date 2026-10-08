@@ -4,6 +4,9 @@ import { Package5Wave3ProductionGatewayService } from './package5-wave3-producti
 import {
   Package5Wave3ExecutableService,
   Package5Wave3ShadowService,
+  type Package5Wave3Command,
+  type StaffDaySlot,
+  wave3Hash,
 } from './package5-wave3.service';
 
 describe('Package5Wave3CanonicalCutoverService', () => {
@@ -17,6 +20,9 @@ describe('Package5Wave3CanonicalCutoverService', () => {
       getIntegrationStatus: jest.fn().mockResolvedValue({
         connection: { id: 'crm-1', provider: 'yclients' },
       }),
+      getStaffScheduleDay: jest
+        .fn()
+        .mockRejectedValue(new Error('CRM unavailable')),
     };
     const encryption = {
       encrypt: jest.fn((value: string) => `encrypted:${value}`),
@@ -25,6 +31,9 @@ describe('Package5Wave3CanonicalCutoverService', () => {
     };
     const branchFindFirst = jest.fn().mockResolvedValue({ id: 'branch-1' });
     const integrationFindUnique = jest.fn().mockResolvedValue(null);
+    const staffLinksFindMany = jest
+      .fn()
+      .mockResolvedValue([{ staffId: 'staff-1' }]);
     const service = new Package5Wave3CanonicalCutoverService(
       { build } as unknown as Package5Wave3ShadowService,
       { execute, resume } as unknown as Package5Wave3ExecutableService,
@@ -32,6 +41,7 @@ describe('Package5Wave3CanonicalCutoverService', () => {
       {
         crmIntegration: { findUnique: integrationFindUnique },
         branch: { findFirst: branchFindFirst },
+        staffProviderLink: { findMany: staffLinksFindMany },
       } as never,
       encryption as never,
       crm as never,
@@ -47,8 +57,252 @@ describe('Package5Wave3CanonicalCutoverService', () => {
       encryption,
       branchFindFirst,
       integrationFindUnique,
+      staffLinksFindMany,
     };
   };
+
+  // Real replay planner/executor with a stored successful receipt. Any fresh
+  // source lookup is a failure, rather than a permissive empty mock response.
+  const scheduleReplay = (slots: StaffDaySlot[]) => {
+    const fixture = buildService();
+    const command: Package5Wave3Command = {
+      operation: 'update_staff_schedule_day',
+      sourceIntentRef: 'schedule-replay-one',
+      staffId: 'staff-1',
+      localDate: '2026-10-10',
+      expectedProviderRevision: 'a'.repeat(64),
+      slots,
+    };
+    const value = {
+      actionClass: 'update_external_staff_schedule_day',
+      actionExecutionId: 'ae-1',
+      targetRef: 'staff-1:2026-10-10',
+      targetGeneration: 1,
+      businessMutations: 1,
+      providerWrites: 1,
+      unknownApplicable: true,
+    };
+    const stored = {
+      id: 'ae-1',
+      tenantId: 'tenant-1',
+      state: 'SUCCEEDED',
+      targetRef: value.targetRef,
+      safeResultSummaryJson: value,
+    };
+    const db = {
+      membership: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'membership-1',
+          role: 'tenant_owner',
+          status: 'active',
+          user: { status: 'active' },
+        }),
+      },
+      actionExecution: { findMany: jest.fn().mockResolvedValue([stored]) },
+      staffProviderLink: {
+        findFirst: jest
+          .fn()
+          .mockRejectedValue(new Error('Current link unavailable')),
+      },
+    };
+    const material = {
+      operation: command.operation,
+      staffId: command.staffId,
+      localDate: command.localDate,
+      expectedProviderRevision: command.expectedProviderRevision,
+      slots: command.slots,
+    };
+    const kernel = {
+      readTrustedNormalizedInput: jest.fn().mockResolvedValue({
+        operation: command.operation,
+        targetGeneration: 1,
+        requestMaterialHash: wave3Hash(material),
+        actorIdentityHash: wave3Hash({
+          tenantId: 'tenant-1',
+          userId: 'owner-1',
+          role: 'tenant_owner',
+        }),
+        sourceIdentityHash: 'b'.repeat(64),
+      }),
+    };
+    const provider = {
+      readStaffDay: jest
+        .fn()
+        .mockRejectedValue(new Error('Current source unavailable')),
+      replaceStaffDay: jest.fn().mockRejectedValue(new Error('No redispatch')),
+    };
+    const runtime = {
+      execute: jest.fn().mockRejectedValue(new Error('No execution attempt')),
+    };
+    const planner = new Package5Wave3ShadowService(
+      {} as never,
+      db as never,
+      fixture.tenantContext,
+      kernel as never,
+      provider as never,
+    );
+    const executor = new Package5Wave3ExecutableService(
+      db as never,
+      {} as never,
+      kernel as never,
+      runtime as never,
+      planner,
+      provider as never,
+    );
+    fixture.build.mockImplementation(planner.build.bind(planner));
+    fixture.resume.mockImplementation(executor.resume.bind(executor));
+    fixture.integrationFindUnique.mockRejectedValue(
+      new Error('Current integration unavailable'),
+    );
+    fixture.staffLinksFindMany.mockRejectedValue(
+      new Error('Current link unavailable'),
+    );
+    const input = {
+      externalStaffId: 'provider-staff-1',
+      localStaffId: command.staffId,
+      localDate: command.localDate,
+      expectedProviderRevision: command.expectedProviderRevision,
+      slots,
+    };
+    const run = () =>
+      fixture.tenantContext.runAsSystemTenant('tenant-1', () =>
+        fixture.service.updateExternalStaffScheduleDay(
+          'tenant-1',
+          { userId: 'owner-1' },
+          input,
+          command.sourceIntentRef,
+        ),
+      );
+    return {
+      ...fixture,
+      db,
+      kernel,
+      provider,
+      runtime,
+      input,
+      stored,
+      value,
+      run,
+    };
+  };
+
+  it.each([
+    { slots: [] as StaffDaySlot[], normalized: [] as StaffDaySlot[] },
+    {
+      slots: [
+        { from: '13:00', to: '17:00' },
+        { from: '09:00', to: '12:00' },
+      ],
+      normalized: [
+        { from: '09:00', to: '12:00' },
+        { from: '13:00', to: '17:00' },
+      ],
+    },
+  ])(
+    'replays confirmed schedule material without current CRM dependencies: %j',
+    async ({ slots, normalized }) => {
+      const f = scheduleReplay(slots);
+      await expect(f.run()).resolves.toEqual({
+        result: f.value,
+        verified: {
+          date: '2026-10-10',
+          is_working: normalized.length > 0,
+          slots: normalized,
+          verification_basis: 'confirmed_execution',
+        },
+      });
+      expect(f.resume).toHaveBeenCalledWith(
+        expect.objectContaining({ existingExecution: f.stored }),
+      );
+      expect(f.kernel.readTrustedNormalizedInput).toHaveBeenCalledWith(
+        'tenant-1',
+        'ae-1',
+      );
+      expect(f.db.membership.findUnique).toHaveBeenCalledTimes(1);
+      expect(f.integrationFindUnique).not.toHaveBeenCalled();
+      expect(f.staffLinksFindMany).not.toHaveBeenCalled();
+      expect(f.db.staffProviderLink.findFirst).not.toHaveBeenCalled();
+      expect(f.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+      expect(f.provider.readStaffDay).not.toHaveBeenCalled();
+      expect(f.provider.replaceStaffDay).not.toHaveBeenCalled();
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+      expect(f.execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it('keeps the existing planner refusal for changed slots on the same successful source', async () => {
+    const f = scheduleReplay([{ from: '09:00', to: '12:00' }]);
+    f.input.slots = [{ from: '10:00', to: '12:00' }];
+    await expect(f.run()).rejects.toThrow(
+      'Source identity reused with changed material',
+    );
+    expect(f.resume).not.toHaveBeenCalled();
+    expect(f.execute).not.toHaveBeenCalled();
+    expect(f.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+  });
+
+  it('rechecks current account authority before returning the successful replay', async () => {
+    const f = scheduleReplay([]);
+    f.db.membership.findUnique.mockResolvedValue(null);
+    await expect(f.run()).rejects.toThrow('Active tenant membership required');
+    expect(f.db.actionExecution.findMany).not.toHaveBeenCalled();
+    expect(f.resume).not.toHaveBeenCalled();
+    expect(f.integrationFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('never projects confirmed slots when the existing owner leaves the outcome unknown', async () => {
+    const f = scheduleReplay([]);
+    f.stored.state = 'UNKNOWN';
+    f.resume.mockRejectedValue(new Error('staff_day_dispatch_ambiguous'));
+    await expect(f.run()).rejects.toThrow('staff_day_dispatch_ambiguous');
+    expect(f.resume).toHaveBeenCalledTimes(1);
+    expect(f.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+    expect(f.execute).not.toHaveBeenCalled();
+  });
+
+  it('preserves bounded legacy identity lookup only when original local identity is absent', async () => {
+    const f = buildService();
+    f.integrationFindUnique.mockResolvedValue({ provider: 'yclients' });
+    f.build.mockResolvedValue({ existingExecution: null });
+    const observed = await f.service.updateExternalStaffScheduleDay(
+      'tenant-1',
+      { userId: 'owner-1' },
+      {
+        externalStaffId: 'provider-staff-1',
+        localDate: '2026-10-10',
+        expectedProviderRevision: 'a'.repeat(64),
+        slots: [],
+      },
+      'legacy-schedule-one',
+    );
+    expect(f.staffLinksFindMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        provider: 'yclients',
+        externalId: 'provider-staff-1',
+        unlinkedAt: null,
+      },
+      take: 2,
+      select: { staffId: true },
+    });
+    expect(observed.verified.verification_basis).toBe('confirmed_execution');
+    expect(f.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+    expect(f.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['', ' staff-1', 'staff/1', 'staff-1\n', 'a'.repeat(129)])(
+    'does not fall back to current identity for malformed original local ID %j',
+    async (localStaffId) => {
+      const f = scheduleReplay([]);
+      f.input.localStaffId = localStaffId;
+      await expect(f.run()).rejects.toThrow(
+        'Exact local staff identity required',
+      );
+      expect(f.integrationFindUnique).not.toHaveBeenCalled();
+      expect(f.build).not.toHaveBeenCalled();
+    },
+  );
 
   it('crosses canonical ingress and resumes the same execution', async () => {
     const fixture = buildService();
@@ -184,8 +438,16 @@ describe('Package5Wave3CanonicalCutoverService', () => {
 describe('Package5Wave3ProductionGatewayService', () => {
   it('does not call a provider again while reconciliation is still ambiguous', async () => {
     const crm = {
+      resolveStaffScheduleSource: jest.fn().mockResolvedValue({
+        provider: 'yclients',
+        staffId: 'staff-1',
+        externalStaffId: 'provider-staff-1',
+        branchId: 'branch-1',
+        timezone: 'Europe/Moscow',
+        sourceHash: 'e'.repeat(64),
+      }),
       getStaffScheduleDay: jest.fn().mockResolvedValue({
-        revision: 'changed-revision',
+        revision: 'c'.repeat(64),
         slots: [{ from: '11:00', to: '12:00' }],
       }),
     };
@@ -202,10 +464,21 @@ describe('Package5Wave3ProductionGatewayService', () => {
         externalStaffId: 'provider-staff-1',
         localDate: '2026-09-03',
         desiredStateHash: 'a'.repeat(64),
-        expectedProviderRevision: 'expected-revision',
+        expectedProviderRevision: 'd'.repeat(64),
         requestIdentityHash: 'b'.repeat(64),
+        sourceIdentityHash: 'e'.repeat(64),
       }),
     ).resolves.toBe('STILL_UNKNOWN');
     expect(crm.getStaffScheduleDay).toHaveBeenCalledTimes(1);
+    expect(crm.resolveStaffScheduleSource).toHaveBeenCalledWith(
+      'tenant-1',
+      'provider-staff-1',
+      {
+        provider: 'yclients',
+        staffId: 'staff-1',
+        branchId: 'branch-1',
+        sourceHash: 'e'.repeat(64),
+      },
+    );
   });
 });

@@ -82,3 +82,21 @@ export function scheduleSlotsContain(
       toMinutes <= scheduleTimeMinutes(slot.to),
   );
 }
+
+/** A provider revision is meaningful only within its original source. */
+export function staffScheduleSourceRevision(
+  rawRevision: string,
+  sourceHash: string,
+): string {
+  if (
+    ![rawRevision, sourceHash].every(
+      (value) => value.length === 64 && /^[a-f0-9]{64}$/.test(value),
+    )
+  )
+    throw new Error('Invalid staff schedule source revision');
+  return createHash('sha256')
+    .update(
+      JSON.stringify(['staff-schedule-source/1', rawRevision, sourceHash]),
+    )
+    .digest('hex');
+}

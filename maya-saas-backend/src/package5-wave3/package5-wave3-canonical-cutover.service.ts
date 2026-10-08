@@ -11,6 +11,7 @@ import type { Prisma } from '@prisma/client';
 import { clientChannelSubjectHash } from '../crm/client-channel-subject';
 import type { CurrentClientChannel } from '../crm/client-channel-authenticator.service';
 import { CrmService } from '../crm/crm.service';
+import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
 import type { ConnectCrmIntegrationDto } from '../crm/dto/connect-crm-integration.dto';
 import type { CreateCrmIntegrationDto } from '../crm/dto/create-crm-integration.dto';
 import type { UpdateCrmIntegrationDto } from '../crm/dto/update-crm-integration.dto';
@@ -73,45 +74,68 @@ export class Package5Wave3CanonicalCutoverService {
     actor: Package5Wave3Actor,
     input: {
       externalStaffId: string;
+      /** Original local identity from the immutable server-owned approval. */
+      localStaffId?: string;
       localDate: string;
       expectedProviderRevision: string;
       slots: StaffDaySlot[];
     },
     idempotencyKey?: string,
   ) {
-    const integration = await this.prisma.crmIntegration.findUnique({
-      where: { tenantId },
-      select: { provider: true },
-    });
-    if (!integration) throw new NotFoundException('CRM integration missing');
-    const links = await this.prisma.staffProviderLink.findMany({
-      where: {
-        tenantId,
-        provider: integration.provider,
-        externalId: input.externalStaffId,
-        unlinkedAt: null,
-      },
-      take: 2,
-      select: { staffId: true },
-    });
-    if (links.length !== 1)
-      throw new ConflictException('Exact provider staff identity unresolved');
+    const { externalStaffId, localDate } = input;
+    const commandSlots = input.slots.map((slot) => ({ ...slot }));
+    let staffId = input.localStaffId;
+    if (staffId === undefined) {
+      // Compatibility for historical unqualified callers only. A qualified
+      // retry must reach the existing durable owner before current CRM lookup.
+      const integration = await this.prisma.crmIntegration.findUnique({
+        where: { tenantId },
+        select: { provider: true },
+      });
+      if (!integration) throw new NotFoundException('CRM integration missing');
+      const links = await this.prisma.staffProviderLink.findMany({
+        where: {
+          tenantId,
+          provider: integration.provider,
+          externalId: externalStaffId,
+          unlinkedAt: null,
+        },
+        take: 2,
+        select: { staffId: true },
+      });
+      if (links.length !== 1)
+        throw new ConflictException('Exact provider staff identity unresolved');
+      staffId = links[0].staffId;
+    } else if (
+      typeof staffId !== 'string' ||
+      staffId.length < 1 ||
+      staffId.length > 128 ||
+      /[^A-Za-z0-9_-]/.test(staffId)
+    ) {
+      throw new BadRequestException('Exact local staff identity required');
+    }
     const result = await this.execute(
       tenantId,
       { userId: actor.userId },
       {
         operation: 'update_staff_schedule_day',
-        staffId: links[0].staffId,
-        localDate: input.localDate,
+        staffId,
+        localDate,
         expectedProviderRevision: input.expectedProviderRevision,
-        slots: input.slots,
+        slots: commandSlots,
       },
       idempotencyKey,
     );
-    const verified = await this.crm.getStaffScheduleDay(tenantId, {
-      staffId: input.externalStaffId,
-      date: input.localDate,
-    });
+    // The executor resolves only a canonical successful receipt; its planner
+    // checks exact request material on replay. This is the confirmed command,
+    // not a fresh observation of a potentially different CRM configuration.
+    const slots = normalizeScheduleSlots(commandSlots);
+    const verified = {
+      date: localDate,
+      is_working: slots.length > 0,
+      slots,
+      verification_basis: 'confirmed_execution' as const,
+    };
     return { result, verified };
   }
 

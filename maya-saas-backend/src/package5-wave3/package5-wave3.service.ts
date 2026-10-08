@@ -127,7 +127,11 @@ export interface Package5Wave3ProviderGateway {
     branchId: string;
     externalStaffId: string;
     localDate: string;
-  }): Promise<{ revision: string; stateHash: string }>;
+  }): Promise<{
+    revision: string;
+    stateHash: string;
+    sourceIdentityHash?: string;
+  }>;
   replaceStaffDay(input: {
     tenantId: string;
     provider: string;
@@ -138,6 +142,7 @@ export interface Package5Wave3ProviderGateway {
     slots: StaffDaySlot[];
     expectedProviderRevision: string;
     requestIdentityHash: string;
+    sourceIdentityHash: string | null;
   }): Promise<{ stateHash: string }>;
   reconcileStaffDay(input: {
     tenantId: string;
@@ -149,6 +154,7 @@ export interface Package5Wave3ProviderGateway {
     desiredStateHash: string;
     expectedProviderRevision: string;
     requestIdentityHash: string;
+    sourceIdentityHash: string | null;
   }): Promise<'PROVEN_SUCCEEDED' | 'PROVEN_NOT_EXECUTED' | 'STILL_UNKNOWN'>;
   verifyCrm(input: {
     tenantId: string;
@@ -477,6 +483,7 @@ export class Package5Wave3ShadowService {
     const beforeHash = facts.before === null ? null : wave3Hash(facts.before);
     if (
       beforeHash !== input.beforeStateHash ||
+      facts.sourceIdentityHash !== input.sourceIdentityHash ||
       wave3Hash(facts.desired) !== input.desiredStateHash ||
       facts.targetRef !== input.targetRef ||
       this.requestMaterialHash(command) !== input.requestMaterialHash
@@ -607,6 +614,9 @@ export class Package5Wave3ShadowService {
         branchId: staff.branchId,
         localDate: command.localDate,
         slots,
+        ...(current.sourceIdentityHash
+          ? { sourceIdentityHash: current.sourceIdentityHash }
+          : {}),
       };
       const desiredStateHash = wave3Hash(desired);
       if (current.stateHash === desiredStateHash)
@@ -620,6 +630,7 @@ export class Package5Wave3ShadowService {
         desired,
         changedFields: ['schedule_slots'],
         expectedProviderRevision: current.revision,
+        sourceIdentityHash: current.sourceIdentityHash ?? null,
         providerRequestIdentityHash: wave3Hash({
           contract: 'package5.wave3.staff-day-request/1',
           tenantId,
@@ -1151,6 +1162,10 @@ export class Package5Wave3ExecutableService {
           slots: command.slots,
           expectedProviderRevision: this.text(input.expectedProviderRevision),
           requestIdentityHash: this.text(input.providerRequestIdentityHash),
+          sourceIdentityHash:
+            typeof input.sourceIdentityHash === 'string'
+              ? input.sourceIdentityHash
+              : null,
         });
         if (result.stateHash !== input.desiredStateHash)
           throw new Package5Wave3AmbiguousDispatchError(
@@ -1178,6 +1193,10 @@ export class Package5Wave3ExecutableService {
           desiredStateHash: this.text(input.desiredStateHash),
           expectedProviderRevision: this.text(input.expectedProviderRevision),
           requestIdentityHash: this.text(input.providerRequestIdentityHash),
+          sourceIdentityHash:
+            typeof input.sourceIdentityHash === 'string'
+              ? input.sourceIdentityHash
+              : null,
         });
         if (outcome === 'STILL_UNKNOWN') return { outcome };
         if (outcome === 'PROVEN_NOT_EXECUTED') return { outcome };

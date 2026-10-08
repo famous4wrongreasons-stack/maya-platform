@@ -16,7 +16,10 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
 import { AiCoreController } from './ai-core.controller';
-import { staffScheduleRevision } from '../crm/staff-schedule.utils';
+import {
+  staffScheduleRevision,
+  staffScheduleSourceRevision,
+} from '../crm/staff-schedule.utils';
 import { AiMemoryService } from './ai-memory.service';
 import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
@@ -692,6 +695,14 @@ describe('AiCoreService', () => {
           .mockResolvedValue([
             { id: 'synthetic-staff', name: 'Антон Тестовый' },
           ]),
+        resolveStaffScheduleSource: jest.fn().mockResolvedValue({
+          provider: 'yclients',
+          staffId: 'local-staff-a',
+          branchId: 'branch-a',
+          externalStaffId: 'synthetic-staff',
+          timezone: 'UTC',
+          sourceHash: 'a'.repeat(64),
+        }),
         getStaffScheduleDay: jest.fn().mockResolvedValue(current),
         previewStaffScheduleDayChange: jest.fn().mockResolvedValue({
           current,
@@ -709,8 +720,9 @@ describe('AiCoreService', () => {
         } as never,
         mocks.runtime as never,
       );
-      mocks.staffScheduleCommand.tryHandle.mockImplementation((actor, input) =>
-        command.tryHandle(actor, input),
+      mocks.staffScheduleCommand.tryHandle.mockImplementation(
+        (...args: Parameters<StaffScheduleCommandService['tryHandle']>) =>
+          command.tryHandle(...args),
       );
       mocks.runtime.execute.mockResolvedValue({
         status: 'approval_required',
@@ -738,7 +750,10 @@ describe('AiCoreService', () => {
           surface,
           arguments: expect.objectContaining({
             staff_id: 'synthetic-staff',
-            current_revision: current.revision,
+            current_revision: staffScheduleSourceRevision(
+              current.revision,
+              'a'.repeat(64),
+            ),
             slots: [],
           }) as unknown,
         }),
