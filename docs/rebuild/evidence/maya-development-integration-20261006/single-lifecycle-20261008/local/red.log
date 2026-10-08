@@ -1,0 +1,24 @@
+FAIL src/ai-tools/ai-core.occupancy.spec.ts
+  ● single Lifecycle semantic ingress (scripted selection, not source or model acceptance) › routes one validated Lifecycle paraphrase to one C9 without BI or generic tool dispatch
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      306 |       dto('Посмотри, кто давно не записывался'),
+      307 |     );
+    > 308 |     expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+          |                                               ^
+      309 |     expect(f.orchestration.checkClientReturn).toHaveBeenCalledWith(
+      310 |       expect.objectContaining({
+      311 |         turn: { turnId: 'turn', conversationId: 'conversation' },
+
+      at Object.<anonymous> (ai-tools/ai-core.occupancy.spec.ts:308:47)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 23 skipped, 24 total
+Snapshots:   0 total
+Time:        0.572 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.occupancy.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-single-lifecycle-20261008/red-jest.json

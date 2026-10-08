@@ -1,0 +1,11 @@
+# Independent review — single Lifecycle semantic request
+
+Reviewer: `/root/checkpoint_review`, read-only independent agent. Qualified static, functional evidence and final archive/docs PASS. No reviewer test/service runs or edits.
+
+All 2,217 HTTP source hashes and 13 local source hashes match Git `6d92799f2b4ca1f185c7d1685c6a19e8cc8eae79`; three harness and eight React bundle artifacts match their bindings. 190 tests/nine suites, six browser guards, production and focused proof/spec types, scoped lint, HTTP prepare/resume pass. Initial single response has one Lifecycle receipt, no BI work, current=true; eight UI checkpoints include the unchanged compound actual restart and exact replay proof. All nine HTTP and nine supervised local groups closed/absent; owned PG PID files absent and browser/profile/dev cleanup confirmed.
+
+Admission remains owner/web, one allowed/ready Lifecycle task and first step before tools/run. Every requested entity or unresolved reference requires its bounded alternative. A plan-bound single marker cannot be interchanged with compound markers. Current C9 tenant/member/features/source qualification remains authoritative. The narrow local delegation flag preserves source/turn errors without fake CRM-connectivity fallback or another read; other paths retain their behavior. No schema, source store, effect/contact or background authority was added.
+
+The exact browser prompt and IPC sequence are bound. It uses actual debug-email UI login and the real response, with no token injection or fulfillment. Model selection/native source facts are synthetic. All 64 retained copied files match originals; bounded privacy scan found no credentials/private receipt/auth email/JWT. One packaging issue was closed by excluding the still-being-written archive.log; verification records that curation. Runtime and failed test evidence were preserved.
+
+Docs accurately distinguish the new initial single HTTP/React result from compound restart/replay. Single scoped continuation and failure propagation are unit-qualified only. Natural HTTP expiry, HELD, late transactional drift, real model/provider and aggregate C10 completion remain unqualified. No blockers remain for this bounded development checkpoint.

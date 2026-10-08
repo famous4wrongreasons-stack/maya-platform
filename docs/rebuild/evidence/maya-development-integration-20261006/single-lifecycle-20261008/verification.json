@@ -1,0 +1,36 @@
+{
+  "contract": "maya.single-lifecycle-verification/1",
+  "sourceHead": "6d92799f2b4ca1f185c7d1685c6a19e8cc8eae79",
+  "status": "qualified-local-pass",
+  "certificate": "NOT_ISSUED",
+  "unitTests": 190,
+  "unitSuites": 9,
+  "browserGuardTests": 6,
+  "productionTypes": true,
+  "focusedProofAndSpecTypes": true,
+  "scopedLint": true,
+  "currentReactCheckpoints": 8,
+  "singleLifecycleInitialHttpReact": true,
+  "standaloneSingleClarificationRestartHttp": false,
+  "standaloneSingleExactReplayHttp": false,
+  "compoundActualProcessPgRestartReplay": true,
+  "noRequestBusinessWrites": true,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "qualifiedLimits": [
+    "Single scoped clarification/continuation, held and revocation error propagation use local synthetic port tests.",
+    "Current React extra step proves initial single semantic request, not a standalone single restart/replay proof.",
+    "Natural source expiry, HELD and late transaction drift HTTP cases remain unexecuted.",
+    "No live provider/model, schema, background authority or aggregate C10 acceptance."
+  ],
+  "failedLocalAttempts": {
+    "red": "Missing single Lifecycle dispatch reproduced: expected one C9 call, observed zero.",
+    "green1": "187 pass/3 failed: generic catch mislabelled missing turn/HELD/source revocation as CRM connectivity. Narrow delegation now preserves original refusal.",
+    "green2": "190 tests and production types/lint passed; focused test types found three fixture typing errors. Typed tables/object narrowing corrected; no production change.",
+    "green3": "190/9 plus production/focused types and lint pass."
+  },
+  "privacy": "Private restart receipt, credentials, database files and Chrome profiles excluded.",
+  "packagingExcluded": [
+    "http/archive.log: transient packaging log was still being written while copied; excluded from curated evidence."
+  ]
+}

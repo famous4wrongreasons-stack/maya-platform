@@ -1,0 +1,13 @@
+src/ai-tools/ai-core.occupancy.spec.ts(348,64): error TS2345: Argument of type '{ period: string; branch?: undefined; date_or_period?: undefined; days_since_last_visit?: undefined; employee?: undefined; custom_constraint?: undefined; } | { branch: string; period?: undefined; date_or_period?: undefined; days_since_last_visit?: undefined; employee?: undefined; custom_constraint?: undefined; } | {...' is not assignable to parameter of type 'Record<string, string> | undefined'.
+  Type '{ period: string; branch?: undefined; date_or_period?: undefined; days_since_last_visit?: undefined; employee?: undefined; custom_constraint?: undefined; }' is not assignable to type 'Record<string, string>'.
+    Property 'branch' is incompatible with index signature.
+      Type 'undefined' is not assignable to type 'string'.
+src/ai-tools/ai-core.occupancy.spec.ts(713,23): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(target: {}, source: { runId: string; failed: boolean; }): { runId: string; failed: boolean; }', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '{}'.
+  Overload 2 of 4, '(target: object, ...sources: any[]): any', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'object'.
+src/ai-tools/ai-core.occupancy.spec.ts(840,55): error TS2345: Argument of type '{ branch: string; date_or_period?: undefined; employee?: undefined; goal?: undefined; custom_constraint?: undefined; } | { date_or_period: string; branch?: undefined; employee?: undefined; goal?: undefined; custom_constraint?: undefined; } | { ...; } | { ...; } | { ...; }' is not assignable to parameter of type 'Record<string, string> | undefined'.
+  Type '{ branch: string; date_or_period?: undefined; employee?: undefined; goal?: undefined; custom_constraint?: undefined; }' is not assignable to type 'Record<string, string>'.
+    Property 'date_or_period' is incompatible with index signature.
+      Type 'undefined' is not assignable to type 'string'.

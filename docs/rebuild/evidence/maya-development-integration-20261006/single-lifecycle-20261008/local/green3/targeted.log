@@ -1,0 +1,38 @@
+PASS src/ai-tools/ai-core.occupancy.spec.ts
+PASS src/orchestration/c9.business-lifecycle.spec.ts
+PASS src/orchestration/c9.business-occupancy.spec.ts
+PASS src/orchestration/c9.lifecycle.spec.ts
+PASS src/ai-tools/ai-core-model.service.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 10664  - [39m10/08/2026, 3:37:45 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m
+PASS src/orchestration/c9.context-and-bi.spec.ts
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+PASS src/ai-tools/owner-review-plan.spec.ts
+
+Test Suites: 9 passed, 9 total
+Tests:       190 passed, 190 total
+Snapshots:   0 total
+Time:        1.071 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/owner-review-plan.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts", "src/orchestration/c9.business-lifecycle.spec.ts", "src/orchestration/c9.business-occupancy.spec.ts", "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.context-and-bi.spec.ts", "src/orchestration/c9.occupancy.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-single-lifecycle-20261008/green3/targeted-jest.json

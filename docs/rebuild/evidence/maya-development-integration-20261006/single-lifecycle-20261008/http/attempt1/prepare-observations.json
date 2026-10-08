@@ -1,0 +1,134 @@
+{
+  "contract": "maya.client-value-http-proof/1",
+  "stage": "prepare",
+  "status": "passed",
+  "sourceHead": "6d92799f2b4ca1f185c7d1685c6a19e8cc8eae79",
+  "sourceDigest": "1955644eaa36fde507b6bffe61ca16bb5f47357a5a59027cfef0b52959cdc755",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "realModelCalls": 0,
+  "providerTransport": "FINITE_SYNTHETIC_NATIVE_YCLIENTS_GET",
+  "realProviderCalls": 0,
+  "integrationSetup": "SYNTHETIC_ACTIVE_BINDING_NOT_A17_ACCEPTANCE",
+  "businessEffectAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "proofGaps": [
+    {
+      "case": "expired-source-http",
+      "executed": false,
+      "reason": "Existing published source expiry cannot be rewritten without bypassing canonical DB invariants.",
+      "c7": "prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql:76 C7_measurement_retention_ck; :202 C7 snapshot immutable; :263 C7_measurement_publication_guard_trg",
+      "c8": "prisma/migrations/20260913093000_chapter8_valuation_foundation/migration.sql:142 C8_result_time_ck; :299-300 C8 immutable result/history; :497 C8_result_write_trg",
+      "qualification": "No expiry/admission/period/hash rewrite, trigger disabling, clock mock or substituted reader. Existing unit checks remain separate."
+    },
+    {
+      "case": "held-work-http",
+      "executed": false,
+      "reason": "No C9/work-store fault injection in this proof."
+    }
+  ],
+  "canonicalPolicySetup": {
+    "revision": 1,
+    "hash": "08a9e3ea6f9c84b29719dc06d6ee3d1e3fac370470bcd9b23bb8be74863bffe7",
+    "executionHash": "fa53c62d8f95967a1fd60867bdcbc9213d20cdf8ad26e5552b3a0e958830d3c9"
+  },
+  "initial": {
+    "reply": "Объединила опубликованный финансовый отчёт и доступные оценки давности визитов. У этих источников разные периоды наблюдения.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 15:39:34,778 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nПроверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 08.10.2026, 15:39:35,003 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.\n\nСохранённое предложение относится только к проверке оценок давности. Финансовый отчёт не устанавливает ценность этих гостей, причину изменения выручки или вероятность возврата. Отдельный следующий шаг — по новому запросу проверить актуальность оценок; аудитория и рассылка не создавались.",
+    "runHash": "963ef57e55f7ac489e0c9e9e192f12688bb8372a5fd89fa3e840babd3058f08a",
+    "revisionHash": "9aa8876bda2613111be26916730999bb1ce29dc378a77b3b73547ca27409f739",
+    "graphHash": "a082667cbdd6a6f645c5e90c0152311615a4ac3b640fb034cdf305e7207a0f8d",
+    "analysis": {
+      "contract": "maya.c9-bi-report-response/1",
+      "mode": "as_reported",
+      "outcome": "PARTIAL",
+      "agentId": "BUSINESS_INTELLIGENCE",
+      "findingsCount": 1,
+      "evidenceCount": 1,
+      "noSideEffects": true,
+      "executionAuthority": false
+    },
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "PARTIAL",
+      "agentId": "CLIENT_LIFECYCLE",
+      "findingsCount": 1,
+      "evidenceCount": 1,
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false
+    }
+  },
+  "singleLifecycle": {
+    "reply": "Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 08.10.2026, 15:39:35,003 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+    "graphHash": "03a2727e1834e602a39c01d1eafb697f5186f7f6b92de4a30add85e11663b8bb",
+    "runHash": "18bd4554035f92a6fac19b98aeeaa7a9515f340dc714a2fc3a42880706fc7bf2",
+    "revisionHash": "cf75b9452ffd619c86d223d044b83b0dc7674b695370b5346bd91d1805cef0ac",
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "PARTIAL",
+      "agentId": "CLIENT_LIFECYCLE",
+      "findingsCount": 1,
+      "evidenceCount": 1,
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false
+    },
+    "workReceipts": 1,
+    "financialWork": 0
+  },
+  "scoped": {
+    "reply": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?",
+    "runStarted": false
+  },
+  "corrected": {
+    "reply": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?",
+    "runStarted": false
+  },
+  "checkpoints": [
+    "initial",
+    "single-lifecycle",
+    "scoped",
+    "corrected",
+    "reload-restored"
+  ],
+  "boundaries": {
+    "missingFinancialSource": true,
+    "remainingLifecycleAvailable": true,
+    "unconfiguredLifecycle": true,
+    "foreignRunStatus": 400,
+    "foreignRunCode": "c9_run_authority",
+    "clientRoleStatuses": [
+      403,
+      403
+    ],
+    "unexpectedSourceReads": 0,
+    "separateCanonicalPolicySetup": {
+      "revision": 1,
+      "hash": "08a9e3ea6f9c84b29719dc06d6ee3d1e3fac370470bcd9b23bb8be74863bffe7",
+      "executionHash": "865ea4db18143563f5f9218c8a6a0ad86620cadf855980614ecda996787f267f"
+    }
+  },
+  "restartReceiptPrivate": true,
+  "runtimeBusinessWrites": 0,
+  "outboundNotifications": 0,
+  "modelSelections": 6,
+  "syntheticProviderReads": [
+    {
+      "tenantHash": "aaab1088e8b1de57f4a13e785e00d911a2dadd980333274011964b7131ac27e6",
+      "route": "transactions/424242"
+    },
+    {
+      "tenantHash": "aaab1088e8b1de57f4a13e785e00d911a2dadd980333274011964b7131ac27e6",
+      "route": "company/424242/staff"
+    },
+    {
+      "tenantHash": "aaab1088e8b1de57f4a13e785e00d911a2dadd980333274011964b7131ac27e6",
+      "route": "records/424242"
+    },
+    {
+      "tenantHash": "aaab1088e8b1de57f4a13e785e00d911a2dadd980333274011964b7131ac27e6",
+      "route": "company/424242/salary/calculation/staff/71"
+    }
+  ],
+  "syntheticTransportCalls": 4,
+  "forbiddenEdges": []
+}
