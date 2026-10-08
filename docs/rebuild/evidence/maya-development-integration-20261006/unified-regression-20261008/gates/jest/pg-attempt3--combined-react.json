@@ -1,0 +1,52 @@
+{
+  "counts": {
+    "numFailedTestSuites": 1,
+    "numFailedTests": 1,
+    "numPassedTestSuites": 0,
+    "numPassedTests": 0,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 1,
+    "numTotalTests": 1
+  },
+  "id": "pg-attempt3/combined-react.json",
+  "identityPolicy": "SHA256(repo-relative suite path + NUL + fullName), per-suite duplicate occurrence; no names or failure payloads copied",
+  "qualificationNote": null,
+  "rawArtifact": "combined-react.json",
+  "rawCopied": false,
+  "reportedStatus": "FAIL",
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": "",
+    "head": "aeb987b43a2663aef6b49e8aa77774311ddf4d46",
+    "headAtEnd": "aeb987b43a2663aef6b49e8aa77774311ddf4d46",
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": true,
+    "sameAsFinalHead": false,
+    "sourceHashStability": null,
+    "tree": "ddf177babd87138579a51727b4eb0dc0a76a36e4",
+    "treeAtEnd": null
+  },
+  "stage": "pg-attempt3",
+  "status": "FAIL",
+  "suites": [
+    {
+      "countsByStatus": {
+        "failed": 1
+      },
+      "ordinal": 0,
+      "path": "maya-saas-backend/test/widgets-live/development-integration.browser-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "8a6f7489bb7bd013d44775e7ed6603825fcf1f0601d7ea0a945938d52a233f99",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "failed"
+        }
+      ]
+    }
+  ]
+}

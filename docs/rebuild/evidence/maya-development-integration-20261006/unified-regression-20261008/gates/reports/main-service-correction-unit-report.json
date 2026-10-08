@@ -1,0 +1,43 @@
+{
+  "stage": "service-correction-unit",
+  "source": "e4f4991cee481ccc0e60fb5560a291607229b787",
+  "tree": "407571a21d52f46befcf4176c8bfdcd1edbe4032",
+  "node": "v24.15.0",
+  "started": "2026-10-08T03:31:19.878Z",
+  "status": "PASS",
+  "launcherSha256": "4aed59e0d56a63db39d59263837bd9b793b1f1b3458ff89183a64af19aa5e200",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 6144,
+  "workerCount": "existing-command-default",
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "service-correction-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-unified-regression-20261008/service-correction-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "service-correction-unit",
+      "durationMs": 1335
+    }
+  ],
+  "sourceAtEnd": "e4f4991cee481ccc0e60fb5560a291607229b787",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T03:31:21.262Z"
+}

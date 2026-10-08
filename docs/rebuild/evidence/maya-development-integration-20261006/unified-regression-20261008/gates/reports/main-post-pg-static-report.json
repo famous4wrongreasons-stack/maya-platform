@@ -1,0 +1,144 @@
+{
+  "stage": "post-pg-static",
+  "source": "93fa219c9d527af45e8fafe0101aeea26021ba42",
+  "tree": "f0587b6651ee61953930475a714b6fc2c42bed6b",
+  "node": "v24.15.0",
+  "started": "2026-10-08T03:02:23.543Z",
+  "status": "FAIL",
+  "launcherSha256": "5444733165997a0b7c1ac595869becb7964b8e4011e979647e10d2c38ad05034",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 6144,
+  "workerCount": "existing-command-default",
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "approval-tx-regressions",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/widgets/emission/emitter.spec.ts",
+        "src/widgets/pricing/service-price-approval-trigger.service.spec.ts",
+        "src/widgets/inventory/goods-receipt-widget.contract.spec.ts",
+        "src/widgets/consent/history-erasure.owner.spec.ts",
+        "src/widgets/composition/typed-step0.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-unified-regression-20261008/approval-tx-regressions.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types-post-pg",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check-post-pg",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types-post-pg",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "scripts-types-post-pg",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "widgets-live-types-post-pg",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "backend-lint-post-pg",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "k3-post-pg",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "approval-tx-regressions",
+      "durationMs": 1003
+    },
+    {
+      "name": "contract-types-post-pg",
+      "durationMs": 2650
+    },
+    {
+      "name": "contract-check-post-pg",
+      "durationMs": 659
+    },
+    {
+      "name": "backend-types-post-pg",
+      "durationMs": 5677
+    },
+    {
+      "name": "scripts-types-post-pg",
+      "durationMs": 12935
+    },
+    {
+      "name": "widgets-live-types-post-pg",
+      "durationMs": 6701
+    },
+    {
+      "name": "backend-lint-post-pg",
+      "durationMs": 42530
+    }
+  ],
+  "error": "k3-post-pg exited 1; inspect its log",
+  "sourceAtEnd": "93fa219c9d527af45e8fafe0101aeea26021ba42",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T03:03:38.620Z"
+}

@@ -1,0 +1,138 @@
+{
+  "stage": "candidate-final-static-2",
+  "source": "4baefee28c78cad2a4d7a2de955c2802f15523a7",
+  "tree": "bc97a2ab2c056fb7c69d525bbd18af2e1f742a9c",
+  "node": "v24.15.0",
+  "started": "2026-10-08T03:31:59.538Z",
+  "status": "PASS",
+  "launcherSha256": "4aed59e0d56a63db39d59263837bd9b793b1f1b3458ff89183a64af19aa5e200",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 6144,
+  "workerCount": "existing-command-default",
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "contract-types-candidate-final-2",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check-candidate-final-2",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types-candidate-final-2",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "scripts-types-candidate-final-2",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "widgets-live-types-candidate-final-2",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "backend-lint-candidate-final-2",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "k3-candidate-final-2",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-build-candidate-final-2",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    }
+  ],
+  "completed": [
+    {
+      "name": "contract-types-candidate-final-2",
+      "durationMs": 2623
+    },
+    {
+      "name": "contract-check-candidate-final-2",
+      "durationMs": 656
+    },
+    {
+      "name": "backend-types-candidate-final-2",
+      "durationMs": 5664
+    },
+    {
+      "name": "scripts-types-candidate-final-2",
+      "durationMs": 12885
+    },
+    {
+      "name": "widgets-live-types-candidate-final-2",
+      "durationMs": 6640
+    },
+    {
+      "name": "backend-lint-candidate-final-2",
+      "durationMs": 42370
+    },
+    {
+      "name": "k3-candidate-final-2",
+      "durationMs": 2891
+    },
+    {
+      "name": "backend-build-candidate-final-2",
+      "durationMs": 16967
+    }
+  ],
+  "sourceAtEnd": "4baefee28c78cad2a4d7a2de955c2802f15523a7",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T03:33:30.291Z"
+}

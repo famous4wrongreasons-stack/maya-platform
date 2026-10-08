@@ -1,0 +1,1167 @@
+{
+  "baseline": "3febab1755bb6d6410c4f08600d42c8806e182ce",
+  "binding": "Committed Git blob metadata only; no tracked source/environment content opened",
+  "changedTrackedPaths": [
+    {
+      "baseline": {
+        "blob": "80494eff52f082961db61d77b9b23739f94b22ce",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "3f23e3061eaa1e615db1d2b7ce0d43990e9af826",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/MAYA-DEVELOPMENT-PROFILE-CHOICE-20261006.md"
+    },
+    {
+      "baseline": {
+        "blob": "fb6e131c7b4fae4b38f65b3dc10c2fb4e0001ff0",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "68dd71f84d727551e512bdeeb1bdb61d7685f80e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/MAYA-REMAINING-READINESS-DECISIONS.md"
+    },
+    {
+      "baseline": {
+        "blob": "e440987a9b61b56ca20b97bbae8f03f402a71e10",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "cae8169194eeb3c8b256ed94602c4be26b412321",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json"
+    },
+    {
+      "baseline": {
+        "blob": "d18506840a8fcd40a98d8d2a9f42c123fd92d751",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "ea3a7c102c80e8140701a3f6a385ce074d70c9a5",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json"
+    },
+    {
+      "baseline": {
+        "blob": "0836dafd797da98977b584692a26ced566a7d0e3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "e415915c6ef439b693b9870f7364e151761097e9",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/README.md"
+    },
+    {
+      "baseline": {
+        "blob": "b8e8d88061425f1f1a34bae33cd4981da7f8b3c7",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "de36ec7524b49f85c2ccee8d0608995db8db8e43",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/e1-u-proofs.json"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "29a8da5368264d7d3942a42c425a00b80825c0e3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/README.md.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "3e35cf4f7f18fb04188011924418475c46706b19",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/manifest.json"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "c39339a1e29c470db702cb9dcb024fec65a0d1ca",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/prepare-audit.mjs.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "a1bfa9e16b5a2a598cfa97a7fc48da5cda3a4e34",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/prepare-audit.test.mjs.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "bee63e27fae546c2c145e14e114881f6a1656ddb",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/v14-audit.json.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "98a0294aa4eaf3a943284a720f745536e0f61459",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/v14-contract.md.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "85c4c2784877a7e2184e35b54032d20767e7b0dc",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/v14-e1-u-proofs.json.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "7ee75d6ee1b28ef746a67e14b4cde19d05d00998",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/v14-inventory.json.gz"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "cc72e5efb13b45d378a61d23e1451d0378599f4a",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/v14-u-proofs.json.gz"
+    },
+    {
+      "baseline": {
+        "blob": "1a0cd82bcf1f9c24a4047dd548359f85f10206c3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "198baf3b7e4d77c09b3cb40cb7ed0ff4cb648ea8",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/prepare-audit.mjs"
+    },
+    {
+      "baseline": {
+        "blob": "4d9b2459e0a1d2b9a44a88e3aca5f8142b6ebc1f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "b3c039c91fa1d6d450e8803de773f586a0ea3d58",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/prepare-audit.test.mjs"
+    },
+    {
+      "baseline": {
+        "blob": "639fa8af0fe0b6a5b88c5ee586d2ee9e638a6610",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "8029cf7503cfff299b6572e5268c7db989a5ee9b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "docs/rebuild/widget-release-programme/development-v14/u-proofs.json"
+    },
+    {
+      "baseline": {
+        "blob": "eb9df1df8ee2ab42df986af4517f773647d860ab",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "37ae1d0583730a6e2aca836cb932ba87e45df240",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/admit/fetch-shape/declared-query/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "c548b32d39988748581db0c6eb6c463f310e4bec",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "93bb37215e418736f135f439dac99a5ad8eac4ef",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/admit/fetch-shape/keyed-single-site/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "8ce6486b9d7e9f5c24534fb885f7b55fc013b076",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "e007d758b1965d9b36c10152590b4d64b3c8e0cb",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/admit/retired-paths/api-base-plus-paths/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "c07c1804651e2174e409ec68498583c8eb4a8b5f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "67654f6ceb76847a375ed481c718e513a064de97",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/refuse/audience/client-body/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "613196cfce88cb5dea53189919d00b445438b059",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "6077b66694740ff94bff2fca402a11406008c9ad",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/query-concatenated/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "51b854a85e79f88548229c8189cd3c896e8f62f3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "a99808e7f39aeb0dece1c72c254332a216efdc8d",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/query-raw-interpolation/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "57822c770464056c211680997dc68e84f5fea638",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "c0984ee5673bd4bed321422e036d44f99363bf8f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/second-call-site/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "273c762ef7de97526092af922a12ee1c5b7f4975",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "f26ac6d748a1a5e11ebce2163328dba1b21cb857",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/string-path/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "044826a4fdde8aa20113a95eebe8b65db15acdea",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "e58b2b63b75e69c0c115d08124e9d797827771c1",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/widgets-path-added/src/net/client.ts"
+    },
+    {
+      "baseline": {
+        "blob": "66014a217a65e471804a341c79f449f4dec169f6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "03064172efbf633453ff93889cb5633e515b031c",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/scripts/widget-contract-check.mjs"
+    },
+    {
+      "baseline": {
+        "blob": "9d8c7a300068652ac361217eb841f3e5f39bd645",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "70fd71bc1da1b52154f2a17527ed0f524212240a",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/scripts/widget-contract/registry-probe.js"
+    },
+    {
+      "baseline": {
+        "blob": "53f6667a724044fbb25f16dabeaef0b0da8aeec9",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "924126b8d339c60783ac92d3adc71494465c2859",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/scripts/widgets-http-proof/gateBS.cases.ts"
+    },
+    {
+      "baseline": {
+        "blob": "837ae2f42e46e36ae37737960e1da140e52bd485",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "2e5bcd2530d5427c343d72ca7f82a302e3d0bb35",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/scripts/widgets-http-proof/gateTURN.cases.ts"
+    },
+    {
+      "baseline": {
+        "blob": "c75f1e483988b789d0cf12b9b3c973f89c99b2dd",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "709c4558cd18925b240357fdd8eea1cc8d0e5e1f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs"
+    },
+    {
+      "baseline": {
+        "blob": "cd417564bc3939a5508a75d47d48cb6d7d82a8a6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "d49a89d735efb38666d9c64db909c02f458f88b7",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "7d14c5dc04633485b17faf9ab28d4ef30a0c95e3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "841f76415c876ea5399148b4326758b4092e620e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/action-engine/package5-b19-remediation.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "32c525006a9061e67664639ffc26f5c45095f793",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "7c4df8e98ee19ae25b7f5fd17a8f9384a9b41b25",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "f4f96406a80dd8e0f2215644664b5135b787fec3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "523d6fc78233e3d0b262bd2891d6fe62f9a59c7e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts"
+    },
+    {
+      "baseline": {
+        "blob": "f02f0a0f5f1ea92f68db9f32d02ea08a14fbb84b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "aa4f6eafe3022bf63690112fafea86c82afd4db8",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/ai-tools/goods-presentation.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "d6b7e0326c0b347a00bf306cd9d7bcbe70dc1b2b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "63e8ff13e6f0eac93eff105bd777527ed9c086b4",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/ai-tools/planner-wire-context.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "a0d479a7d9127d781833a78c38c0934e04d9ae92",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "12bdd281e0af6871b774a64f06cb69b61362d0ea",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/ai-tools/planner-wire-context.ts"
+    },
+    {
+      "baseline": {
+        "blob": "325ad73eecc43469f1a9ba47ecadca23bf69db2d",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "fe17d7a3030f58e6dc878bae33477c1e6d0ae17a",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/ai-tools/routing-regression.acceptance.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "a2b9da29e1e29199a34e5c270bae8caffbf439ba",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "a7885adb7fe660bde598d84a68eff79fac9a0f22",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/crm/availability-calendar.service.ts"
+    },
+    {
+      "baseline": {
+        "blob": "62cd9000648fac8d04d6c1981ed39389c6dd291f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "e2f8d755b847f1603ceb4693de78cb9f16160fe6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/crm/availability-day.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "5226d9223ac01c43855bf95771837b59356810e0",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "21ecc4aed4d4afa8dec3344ba130f0c87282fac9",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/crm/crm.module.ts"
+    },
+    {
+      "baseline": {
+        "blob": "e7b31263a637deb9b5a7ee98822d5ab54d580716",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "8670c9fd35c70a0448e29992943cdca0c236cf27",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/entitlements/widget-release-profile.contract.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "d3fa096785057417a04b4afe6df4565f8668e0d3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "1c3acbf993e14042e89b1876993e221be08592b9",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "444afed32a223194cc880526ace5e5226ca6cad9",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "7154317780dd238ae2760256c7ca6d837608d049",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/booking/booking-selection-preferences.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "1fa286c2edaef7d4d73cb5e0862ba5dc26d191f2",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "63144004119239f6b42d8156729408bc7feaa799",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/booking/booking-selection-preferences.ts"
+    },
+    {
+      "baseline": {
+        "blob": "01cddba1caa13f7529185265cdc3ff2ab0ca6f7e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "d83bc06222ef02aa6d063b70554438ff73622df3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/booking/booking.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "a912fadb6384f76a8cf9d3fc677ef69f203b48e4",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "1d4040a60a6d6a87f96e1a385d23ed7dd38faeac",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/composition/typed-step0.ts"
+    },
+    {
+      "baseline": {
+        "blob": "002d3669f8883aebc6717e01d414bfb983945513",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "6ba98f1f0bafe0b9c024d0c356ab76c2d47d315c",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/consent/erasure.job.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "d335db97bafdcb6894981932df3d679bb3182c9a",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "14a8329e132a10e14b731321dd92db78d6bd2cba",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/consent/erasure.job.ts"
+    },
+    {
+      "baseline": {
+        "blob": "153730065121f3d7e61c253e156e75474f6ff08d",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "3acb5feca25bed9dce2938e4d017d3640018fa98",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/consent/history-erasure.owner.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "9f1dcf378b3cc456f36cb2ede37dd692426df1da",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "514a2ad76e8eb706f651b692c2597aeb482d1985",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/consent/history-erasure.owner.ts"
+    },
+    {
+      "baseline": {
+        "blob": "c92911cd1c5a6a543062c1005ab9546f3669d550",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "d61cebddd6a54419f0b0b8a7716bf7c380db133e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/emission/emitter.service.ts"
+    },
+    {
+      "baseline": {
+        "blob": "d641b570f334199562c6c20d072cb47fa17c098c",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "603ec243a33b7b08785bdde5a380832b3b889df9",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/emission/emitter.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "fe4d0cbe86e163482704ef3bfb518ae84a6a1a10",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "7920f046804a267add82675f8402f10f65bd5f62",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/emission/seal-h6.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "c88d4a1be2419a1836a1d05599cdb40b3736afc6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "77fa6c06c28a819c7ccc346c065231ed9248d0bb",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/gate-slots.spec-helper.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "1435bcf340548c090e609fc50883c87b63207271",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "11bda541b352a2254f907aca3bfaa95f486d3fc7",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/gates/facts.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "864fc6b6f569393b97b172438fa182500d5148a8",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "c4e23bf36434bd5fbb7b2a4ed3673a78f60fd182",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/gates/gate6.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "a7773203449714e9627649a903f8f094bb2d96a6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "2b15f487e6d8f92c5f029911c60d2462165c5ac1",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/gates/release-evidence.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "e9b181e0b73ebab3f789e9a578ad1217f6776dcf",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "85baf59a7ee83f28e2597389c834589fc47515dc",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/inventory/goods-receipt-approval-trigger.service.ts"
+    },
+    {
+      "baseline": {
+        "blob": "9ddc3bd6756534c850f0c4e4907e2e21a9b7d9b7",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "4e5cb01dfa742add1ec4b994c1c02352511e4bbd",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/inventory/goods-receipt-terminal.presenter.ts"
+    },
+    {
+      "baseline": {
+        "blob": "4c1fc45304223bcd4e896e7b87037f751421991b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "3fa7a3a7a7b6f5a77ec99fc4e0d4844db9040c93",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/lowering/gate9-lowering.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "0b10563cefc0753d7faa4949d78d18ae88fa3a2c",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "a2d5556b37f8a773e7af7142d695977b58cb7914",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "f9a891ec38f21b73f7238e9e9c85b67daaf789b1",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "09d168ca828e45435f0300f7cf4e64ee45fc4829",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "c06ac94d285c95d051aae3560187683d0008cfc5",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/presentation-audit.spec-helper.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "bb892a6271dc4119452f43ca34b0690b538b3ecc",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "50163abd9e8a2560600c359f951112b3b49493fa",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/pricing/service-price-approval-trigger.service.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "65016ac3e45abb572a3cb701f1827eab3bfbe98e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "ebf89b823ffbeb297a58cde0bd5bdb6779378685",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/pricing/service-price-approval-trigger.service.ts"
+    },
+    {
+      "baseline": {
+        "blob": "1023b0fd3c597b1da870ca7dfa514e3c5b79894e",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "5fce13201cbc7d716534e8a87376f0b821415ece",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/proactive/proactive.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "8483d7e8afd8568c4b442b71c02a980cf3c5eb5b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "3fa9023555f27297a563820c70fa282b8b410a9d",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/projection/projector-fences.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "5249696f44519b9261f3794545b5527d3dd6759b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "5cecc109474ca0afc2d3c39ded228ed3241cca51",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/stores/timeline.store.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "d30d54be9938e01d619caee21f7acd82692a8bdc",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "84d7e37be780a944f6e8129ea97f96bda699e185",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/stores/timeline.store.ts"
+    },
+    {
+      "baseline": {
+        "blob": "955ef8d82b9fbdb298a5a51a9c8a0f82e5a1ff46",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "dbf0536f8e2a88c361bab67fe85fd3930ab03c2c",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/validation/f88-walk.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "85984b28274e5ddd446b66062f348520b24c7ce4",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "22af6cef1bc8f1f0c8237223c06a1da0baa760d2",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/src/widgets/widget-import-graph.architecture.spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "bffb677be42847022c2ccb8f9056636c205f96f6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "f8a3008fa743f038d145f47c8efabd9e31b07c58",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-diagnostics/support/development-integration-fixture.ts"
+    },
+    {
+      "baseline": null,
+      "final": {
+        "blob": "859fc26317b0ab5c495e597de6122f6ac9fc96f3",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-diagnostics/support/history-erasure-populated.ts"
+    },
+    {
+      "baseline": {
+        "blob": "2abd2017012c1087e35be0a835b0d7b66a466ad1",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "7c9505db3eb6d440d4f7e2cfd22ceb61dc415188",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/availability-calendar.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "1e34f7d7292319493fe0bff1c3739d2ef13ba8de",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "7f7686828ae3dadcb109e528cddd918d3bd4c241",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "b04d7b304420fcd224a99002fd33e0d778dc0538",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "51261f29b6111e949a50d5f19090d8597ff51a90",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/crm-branch-binding-restart.probe-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "5e0e4580728980516fc9d550e3260ad22260a9cf",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "05d625b4e01b8d8bc7f9c78a0268b8f69640c3be",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "960f03bf437ddf718a28c1b8479e1ece2dcffd9c",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "e5f7f94e59d5d8b5391d3c477da20fc65bbb279f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/gate1-5.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "c7a075a268a2b1f2a9a3a5fa136c32f43e814484",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "550e430b5a8a95710ff462a5f4aaccae87bc706b",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "5459964973b1d18826427a8e8e953d3609369c3f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "ce06b97682d26c17c127a1ccc7272e1c7de579a2",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/harness.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "75da3f4100c7b9e788919479001d9b131b6d9e15",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "d7254376745606807acccfb23a67b8261e17fb68",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/history-erasure-react.probe-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "ee46e688e74d119163a21c306cbf4bde39972804",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "b1a919b3bdaca5c6ded54f860b007d787ffdd71f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/owner-read-paths.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "29fbb1189533e8238312b870da53aba05bad93e2",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "513ded2782aab74619c314ae2d7ba9fdf9127c25",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "3c56ac773f0ccd3faef66c4e73bef275d04583c6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "ef2d37c4bc915f184e519127ea03588c72672c58",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/schedule-chat.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "707504a5f5219470d023a74cb5976bdef4014fc8",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "1272c747706912f9a9b4fafe42b4dca56265d0d6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/semantic-slot-captures.live-spec.ts"
+    },
+    {
+      "baseline": {
+        "blob": "6e245c7c6f68f83a50b009ac8db91fe90c96490f",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": null,
+      "path": "maya-saas-backend/test/widgets-live/support/history-erasure-populated.ts"
+    },
+    {
+      "baseline": {
+        "blob": "9250c35303f1e12d0ee24f6e9ff4845805202d96",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "e7c432df1de9659fcf46c15851ddb691802101c8",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/support/personal-client-proof.ts"
+    },
+    {
+      "baseline": {
+        "blob": "d1207e647199e1f2bf85b49c064421dab35d282a",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "3cf8c3993a241e567dcc5ec3e7674d79086a59a8",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/support/release-booking-proof.ts"
+    },
+    {
+      "baseline": {
+        "blob": "e25ea4dc30b0b409cac9b051e45cd8babd324826",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "final": {
+        "blob": "10ca7ab74e849eb4473bce4542c0896d0fe45dd6",
+        "kind": "blob",
+        "mode": "100644"
+      },
+      "path": "maya-saas-backend/test/widgets-live/support/shell-booking-flow.mjs"
+    }
+  ],
+  "changedWebsiteNativePaths": [],
+  "head": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "originalIsAncestor": true,
+  "originalSource": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+  "protectedPrefixes": [
+    "maya-os-site/",
+    "сайт и приложение/",
+    "maya-ios-carrier/"
+  ],
+  "protectedScopeQualification": "Tracked Git path diff only; no external-side-effect claim",
+  "trackedClean": true,
+  "tree": "79c41647c1e3c8a142e65621c2074b946d6f1bc1",
+  "untrackedPathCount": 0
+}

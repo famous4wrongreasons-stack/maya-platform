@@ -1,0 +1,141 @@
+{
+  "counts": {
+    "cancelled": 0,
+    "duration_ms": 22566.648708,
+    "fail": 0,
+    "pass": 18,
+    "skipped": 0,
+    "suites": 0,
+    "tests": 18,
+    "todo": 0
+  },
+  "id": "main-g2-resume-report/react-release-tests.log",
+  "projectionStatus": "COMPLETE",
+  "qualification": "Reporter projection only; launcher command status is retained separately",
+  "rawCopied": false,
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": null,
+    "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+    "headAtEnd": null,
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": false,
+    "sameAsFinalHead": false,
+    "sourceHashStability": null,
+    "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+    "treeAtEnd": null
+  },
+  "stage": "main-g2-resume-report",
+  "status": "PASS",
+  "suites": [],
+  "tests": [
+    {
+      "identitySha256": "8be567d522879b8d0e4777007c48c5391d2a94f9732b3c0ed685852b28883bab",
+      "occurrence": 1,
+      "ordinal": 0,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "314b73fd82d0c1204fd94c51e749476d741975010061caa11213af0229193dda",
+      "occurrence": 1,
+      "ordinal": 1,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "15d2f5aa7126db2327675edc87def5ac91a2c1625b711ac280125579cb093a98",
+      "occurrence": 1,
+      "ordinal": 2,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "03592c148fdb36e28340bcad48e0a535d6b054f68f29546c05bc4adfa1c316ca",
+      "occurrence": 1,
+      "ordinal": 3,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "90c0b01ab5c9a474161dc127d44a59380a4e2ff9785815e0d3abf69185bc0466",
+      "occurrence": 1,
+      "ordinal": 4,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "135873b1c7d8009827d063a0d2c3540880690df38084a5fcb3fa992da3b94888",
+      "occurrence": 1,
+      "ordinal": 5,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "521d8391c84d7444218b7ad36779918af51f89fe57221c7cfdd3a89bf9e03ad7",
+      "occurrence": 1,
+      "ordinal": 6,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "99faf55c78d03b42e30c4f53951e51a270cd691e5d45058867c154dd2d83a01c",
+      "occurrence": 1,
+      "ordinal": 7,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "7a69a35854468c1d22dc4fa2878fcdd7ff7eb82416a4fa9b54bfef203fea0054",
+      "occurrence": 1,
+      "ordinal": 8,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "c6dd6bd1e2d1a09803b92a025244fe3cb1633c951b5780e980efea554abe4f29",
+      "occurrence": 1,
+      "ordinal": 9,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "058d1fcecfd3b05b9e7714ecfc5895d0841ac7f1f2161a2dfd5e9d71439c7a76",
+      "occurrence": 1,
+      "ordinal": 10,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "0e5e2a93615ef545ff5e4798128fbd22325925e8efc424dfae4257154e23de49",
+      "occurrence": 1,
+      "ordinal": 11,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "f54fb5ed993c121f37adb08d0b3d1add68673dcb328e86e459c541854d16365f",
+      "occurrence": 1,
+      "ordinal": 12,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "7ae2a48124ee785dfa3c7927b0a275f57f614acd3854bd6169f835451f2d407a",
+      "occurrence": 1,
+      "ordinal": 13,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "8aca4b72c4ebd6d0580882c02c350d456e52e1db70fae3ab6799ae716742d7ec",
+      "occurrence": 1,
+      "ordinal": 14,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "e75e816ed07f5cb9b551f3710ad8ef9d2360330f192eb5192ef9574f1813f344",
+      "occurrence": 1,
+      "ordinal": 15,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "a64a93eb6449f4b737a77f65d0b69acba7b89db5d295e7a330c3425b48adfa47",
+      "occurrence": 1,
+      "ordinal": 16,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "ce5034ef5ed39c5d2f979ad9cf1f3d9a318744ce5901998d19b73810e2e1624b",
+      "occurrence": 1,
+      "ordinal": 17,
+      "status": "passed"
+    }
+  ]
+}

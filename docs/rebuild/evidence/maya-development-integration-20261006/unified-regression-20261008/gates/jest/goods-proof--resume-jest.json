@@ -1,0 +1,53 @@
+{
+  "counts": {
+    "numFailedTestSuites": 0,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 1,
+    "numPassedTests": 1,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 1,
+    "numTotalTests": 1
+  },
+  "id": "goods-proof/resume-jest.json",
+  "identityPolicy": "SHA256(repo-relative suite path + NUL + fullName), per-suite duplicate occurrence; no names or failure payloads copied",
+  "qualificationNote": null,
+  "rawArtifact": "resume-jest.json",
+  "rawCopied": false,
+  "reportedStatus": "PASS",
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": "",
+    "head": "4023c4d547884a65923f22b9f9d33e044f347595",
+    "headAtEnd": "4023c4d547884a65923f22b9f9d33e044f347595",
+    "qualification": "Wrapper source/end attestations over the exact output directory; fixture-scoped counters only",
+    "reportedStableAndClean": true,
+    "sameAsFinalHead": true,
+    "sourceHashStability": null,
+    "tree": "79c41647c1e3c8a142e65621c2074b946d6f1bc1",
+    "treeAtEnd": null,
+    "viaStage": "goods-wrapper"
+  },
+  "stage": "goods-proof",
+  "status": "PASS",
+  "suites": [
+    {
+      "countsByStatus": {
+        "passed": 1
+      },
+      "ordinal": 0,
+      "path": "maya-saas-backend/test/widgets-live/goods-ui.probe-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "e0c03dfe9220e28b64be3f45df8e92959a6e365528b38b431e30ef4d6161b677",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

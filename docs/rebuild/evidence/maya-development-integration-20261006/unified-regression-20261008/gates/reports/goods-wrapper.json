@@ -1,0 +1,27 @@
+{
+  "source": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "tree": "79c41647c1e3c8a142e65621c2074b946d6f1bc1",
+  "status": "PASS",
+  "started": "2026-10-08T03:48:43.404Z",
+  "output": "/tmp/maya-unified-goods-ui-20261008",
+  "launcherSha256": "dba12f623484968e44678b978d69988d3a183cf54454aa174e9b1378fd18bc96",
+  "runnerSha256": "9b68ce8af2c9b66a70d0d8187e80cc5ebe52bed67aa35b3cdf4685d5c08bb195",
+  "qualification": "Existing goods React/HTTP/PG restart probe with synthetic adapter and scripted model. Harness counters are scoped to fixtures; no global egress count or real provider/model acceptance.",
+  "command": {
+    "name": "goods-ui",
+    "command": "/usr/local/bin/node",
+    "args": [
+      "scripts/goods-ui-proof.mjs",
+      "--run",
+      "--output=/tmp/maya-unified-goods-ui-20261008"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+    "timeoutMs": 720000
+  },
+  "proofStatus": "passed",
+  "clusterStopped": true,
+  "pidfileAbsent": true,
+  "sourceAtEnd": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T03:51:09.806Z"
+}

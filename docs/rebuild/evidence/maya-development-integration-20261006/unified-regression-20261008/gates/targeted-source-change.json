@@ -1,0 +1,9 @@
+{
+  "qualifiedStatus": "DIAGNOSTIC_ONLY_SOURCE_CHANGED_DURING_RUN",
+  "initialSource": "b00099d6",
+  "paths": [
+    "maya-saas-backend/src/widgets/gates/facts.architecture.spec.ts",
+    "maya-saas-backend/src/widgets/inventory/goods-receipt-terminal.presenter.ts"
+  ],
+  "cause": "final agent import-graph correction arrived after root freeze; rerun required at clean commit"
+}

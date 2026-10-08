@@ -1,0 +1,14 @@
+Loaded Prisma config from prisma.config.ts.
+
+
+[*] Changed the `PublicBookingAttempt` table
+  [-] Removed foreign key on columns (quoteId, sessionId, tenantId)
+  [+] Added foreign key on columns (quoteId, sessionId, tenantId)
+
+[*] Changed the `PublicBookingQuote` table
+  [-] Removed foreign key on columns (sessionId, tenantId)
+  [+] Added foreign key on columns (sessionId, tenantId)
+
+[*] Changed the `PublicBookingSession` table
+  [-] Removed foreign key on columns (tenantId)
+  [+] Added foreign key on columns (tenantId)

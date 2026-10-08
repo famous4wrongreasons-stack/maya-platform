@@ -1,0 +1,52 @@
+{
+  "stage": "resume",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "parser": "FORBIDDEN_UNUSED_NOT_OCR_ACCEPTANCE",
+  "provider": "SYNTHETIC_ADAPTER",
+  "certificate": "NOT_ISSUED",
+  "persistedExecutionStates": [
+    {
+      "state": "UNKNOWN",
+      "executionAttemptCount": 1
+    },
+    {
+      "state": "SUCCEEDED",
+      "executionAttemptCount": 1
+    }
+  ],
+  "restart": {
+    "process": true,
+    "postgres": true,
+    "successResends": 0,
+    "unknownResends": 0,
+    "pendingWrites": 1
+  },
+  "browserCheckpoints": [
+    "prepare-success",
+    "success",
+    "prepare-reject",
+    "reject",
+    "prepare-unknown",
+    "unknown",
+    "reload"
+  ],
+  "modelCalls": 3,
+  "parserCalls": 0,
+  "externalCalls": 0,
+  "sourceStates": [
+    {
+      "company": "77101",
+      "readCount": 0,
+      "contextReads": 18,
+      "writeCount": 3
+    }
+  ],
+  "projection": {
+    "sourceSha256": "ce34bb37e18dc3aac900dd3d815c030befacdbb561e4fd03791f9392749e9b03",
+    "omitted": [
+      "persistedExecutionStates[].id",
+      "persistedExecutionStates[].sourceRef"
+    ],
+    "qualification": "Synthetic restart state/count projection only; raw source remains unchanged"
+  }
+}

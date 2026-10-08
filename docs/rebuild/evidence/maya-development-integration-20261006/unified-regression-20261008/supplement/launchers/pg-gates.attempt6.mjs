@@ -1,0 +1,49 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import net from 'node:net';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+const root='/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration';
+const backend=path.join(root,'maya-saas-backend');
+const output='/tmp/maya-unified-pg-20261008-attempt6';
+const require=createRequire(path.join(backend,'package.json'));
+require('ts-node').register({transpileOnly:true,project:path.join(backend,'tsconfig.json')});
+const {WIDGETS_LIVE_TEST_LITERALS}=require(path.join(backend,'test/widgets-live/support/environment.ts'));
+const {runCommand}=await import(path.join(backend,'scripts/c9-occupancy-proof.mjs'));
+assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}),'');
+for(const file of ['.env','.env.local'])assert.equal(fs.existsSync(path.join(backend,file)),false);
+const pgBin='/opt/homebrew/opt/postgresql@16/bin';
+const cluster=path.join(output,'pg');assert.equal(fs.existsSync(cluster),false);
+async function freePort(){const server=net.createServer();await new Promise((r,j)=>{server.once('error',j);server.listen(0,'127.0.0.1',r);});const port=server.address().port;await new Promise((r,j)=>server.close(e=>e?j(e):r()));assert.ok(![5432,55611,4177].includes(port));return port;}
+const port=await freePort();
+const baseEnv={LC_ALL:'C',LANG:'C',PATH:process.env.PATH,HOME:process.env.HOME,TMPDIR:process.env.TMPDIR,...WIDGETS_LIVE_TEST_LITERALS,NODE_OPTIONS:`--max-old-space-size=3072 --require=${output}/loopback-only.cjs`,PRISMA_HIDE_UPDATE_MESSAGE:'1',CHECKPOINT_DISABLE:'1'};
+const dbs=['maya_widget_gate_proof_unified'];
+const dbEnv=db=>({...baseEnv,DATABASE_URL:`postgresql://maya_gate@127.0.0.1:${port}/${db}`,...(db.startsWith('maya_widget')?{WIDGET_GATEWAY_PG:'required'}:{})});
+const report={source:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),tree:execFileSync('git',['rev-parse','HEAD^{tree}'],{cwd:root,encoding:'utf8'}).trim(),status:'RUNNING',started:new Date().toISOString(),port,cluster,databases:dbs,externalNodeNetwork:'loopback-only preload',launcherSha256:createHash('sha256').update(fs.readFileSync(new URL(import.meta.url))).digest('hex'),nodeFenceSha256:createHash('sha256').update(fs.readFileSync(path.join(output,'loopback-only.cjs'))).digest('hex'),heapMb:3072,pgSharedBuffersMb:64,pgWorkMemMb:4,pgMaxConnections:30,commands:[],completed:[],failures:[]};
+const reportPath=path.join(output,'pg-report.json');assert.equal(fs.existsSync(reportPath),false);
+const save=()=>fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+'\n',{mode:0o600});
+const control={cancelled:null,terminateActive:null,activeCleanup:false};
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{control.cancelled??=signal;if(!control.activeCleanup)control.terminateActive?.();});
+const node=(name,args,timeoutMs=180000)=>({name,command:process.execPath,args,cwd:backend,timeoutMs});
+async function run(spec,env=baseEnv,allowFailure=false){report.commands.push(spec);save();process.stdout.write('START '+spec.name+'\n');const start=Date.now();try{await runCommand(spec,env,output,control);report.completed.push({name:spec.name,durationMs:Date.now()-start});process.stdout.write('PASS '+spec.name+'\n');}catch(e){report.failures.push({name:spec.name,error:e.message,durationMs:Date.now()-start});process.stdout.write('FAIL '+spec.name+'\n');if(!allowFailure)throw e;}finally{save();}}
+const pg=(name,cmd,args)=>({name,command:path.join(pgBin,cmd),args,cwd:backend,timeoutMs:90000});
+let startAttempted=false;save();
+
+try{
+ await run(pg('pg-init','initdb',['-D',cluster,'--auth=trust','--username=maya_gate','--encoding=UTF8','--locale=C']));
+ startAttempted=true;
+ await run(pg('pg-start','pg_ctl',['-D',cluster,'-w','-t','30','-l',path.join(output,'postgres-private.log'),'-o',`-h 127.0.0.1 -p ${port} -k '' -c shared_buffers=64MB -c work_mem=4MB -c max_connections=30`,'start']));
+ for(const db of dbs){await run(pg(db+'-create','createdb',['-h','127.0.0.1','-p',String(port),'-U','maya_gate',db]));
+  for(const [suffix,args] of [['validate',['validate']],['migrate',['migrate','deploy']],['status',['migrate','status']],['diff',['migrate','diff','--from-config-datasource','--to-schema','prisma/schema.prisma','--exit-code']]])await run(node(db+'-'+suffix,['node_modules/prisma/build/index.js',...args]),dbEnv(db),suffix==='diff');
+ }
+ const sql={migrations:'SELECT migration_name,checksum,finished_at IS NOT NULL AS finished,rolled_back_at IS NULL AS active FROM "_prisma_migrations" ORDER BY migration_name',constraints:"SELECT c.relname,t.conname,pg_get_constraintdef(t.oid) FROM pg_constraint t JOIN pg_class c ON c.oid=t.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' ORDER BY 1,2",indexes:"SELECT tablename,indexname,indexdef FROM pg_indexes WHERE schemaname='public' ORDER BY 1,2",triggers:"SELECT c.relname,t.tgname,pg_get_triggerdef(t.oid) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND NOT t.tgisinternal ORDER BY 1,2",functions:"SELECT p.proname,pg_get_function_identity_arguments(p.oid),pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' ORDER BY 1,2"};
+ for(const [name,query]of Object.entries(sql))await run(pg('schema-'+name,'psql',['-h','127.0.0.1','-p',String(port),'-U','maya_gate','-d',dbs[0],'-X','-v','ON_ERROR_STOP=1','-Atc',query]));
+ await run(node('carrier-harness',['../maya-carrier-react/test/build-harness.mjs']),dbEnv(dbs[0]));
+ await run(node('booking-and-capture-target',['node_modules/jest/bin/jest.js','--config','test/jest-widgets-live.json','--maxWorkers=1','--workerIdleMemoryLimit=768MB','--runTestsByPath','test/widgets-live/chat-catalog-booking.live-spec.ts','test/widgets-live/semantic-slot-captures.live-spec.ts','--json','--outputFile='+output+'/booking-and-capture-target.json'],180000),dbEnv(dbs[0]));
+ await run(node('widgets-live',['node_modules/jest/bin/jest.js','--config','test/jest-widgets-live.json','--maxWorkers=1','--workerIdleMemoryLimit=768MB','--json','--outputFile='+output+'/widgets-live.json'],720000),dbEnv(dbs[0]),true);
+ await run(node('combined-react',['node_modules/jest/bin/jest.js','--config','test/jest-widgets-live.json','--runInBand','--testRegex','widgets-live/development-integration[.]browser-spec[.]ts$','--runTestsByPath','test/widgets-live/development-integration.browser-spec.ts','--json','--outputFile='+output+'/combined-react.json','--testTimeout=240000'],300000),{...dbEnv(dbs[0]),JEST_COMBINED_BROWSER_OUTPUT:output+'/combined-react-output'},true);
+ report.status=report.failures.length?'FAIL':'PASS';
+}catch(e){report.status='FAIL';report.error=e.message;process.exitCode=1;}
+finally{if(startAttempted){try{await run(pg('pg-stop','pg_ctl',['-D',cluster,'-m','fast','-w','-t','30','stop']));report.clusterStopped=!fs.existsSync(path.join(cluster,'postmaster.pid'));}catch(e){report.clusterStopped=false;report.error=e.message;report.status='FAIL';}}report.sourceAtEnd=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();report.dirtyAtEnd=execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'});if(report.sourceAtEnd!==report.source||report.dirtyAtEnd){report.status='FAIL_SOURCE_CHANGED';process.exitCode=1;}report.finished=new Date().toISOString();save();if(report.status!=='PASS')process.exitCode=1;}

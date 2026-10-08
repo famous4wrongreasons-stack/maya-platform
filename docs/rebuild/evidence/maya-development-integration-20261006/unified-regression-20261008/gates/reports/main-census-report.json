@@ -1,0 +1,37 @@
+{
+  "stage": "census",
+  "source": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+  "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+  "node": "v24.15.0",
+  "started": "2026-10-08T01:59:04.676Z",
+  "status": "FAIL",
+  "heapMb": 3072,
+  "workerCount": 1,
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "backend-full",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--logHeapUsage",
+        "--json",
+        "--outputFile=/tmp/maya-unified-regression-20261008/backend-full.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000,
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=3072 --require=/tmp/maya-unified-regression-20261008/loopback-only.cjs"
+      }
+    }
+  ],
+  "completed": [],
+  "error": "backend-full exited 1; inspect its log",
+  "finished": "2026-10-08T02:04:16.276Z"
+}

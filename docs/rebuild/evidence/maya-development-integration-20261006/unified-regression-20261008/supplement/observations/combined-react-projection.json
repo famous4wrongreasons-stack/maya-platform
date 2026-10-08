@@ -1,0 +1,40 @@
+{
+  "contract": "maya.development-integration-browser/1",
+  "status": "passed",
+  "syntheticCrmAdapter": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "checkpoints": [
+    "general",
+    "occupancy",
+    "price",
+    "approved",
+    "schedule",
+    "history",
+    "retry",
+    "revoked"
+  ],
+  "occupancySnapshot": {
+    "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЗдравствуйте\nMAYA:\nЗдравствуйте. Чем помочь?\nВы:\nПроверь окна после отмен\nMAYA:\nПосле снятия записи сохранилось окно 10.10.2026, 12:00 — 10.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСообщение для MAYA\n↑",
+    "controls": [
+      {
+        "tag": "BUTTON",
+        "name": "Приватность и данные"
+      },
+      {
+        "tag": "TEXTAREA",
+        "name": "Сообщение для MAYA"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Сказать голосом"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Отправить"
+      }
+    ]
+  },
+  "sourceSha256": "3634aad84790d3912823f6b1fba023c3d4c6d0a25134ca6fe3a19e3bdbe2ca3e",
+  "qualification": "Selected public synthetic DOM observation; not a model-language acceptance or new run receipt"
+}

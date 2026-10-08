@@ -1,0 +1,65 @@
+{
+  "stage": "g1-final-tail",
+  "source": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+  "node": "v24.15.0",
+  "started": "2026-10-08T02:28:50.004Z",
+  "status": "PASS",
+  "launcherSha256": "25fe489508836deb8d812243ee25c569302dcc8e8da8c3d68d61d4640716c700",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 6144,
+  "workerCount": "existing-command-default",
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "backend-lint-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "k3-final",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-build-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    }
+  ],
+  "completed": [
+    {
+      "name": "backend-lint-final",
+      "durationMs": 41871
+    },
+    {
+      "name": "k3-final",
+      "durationMs": 2887
+    },
+    {
+      "name": "backend-build-final",
+      "durationMs": 16746
+    }
+  ],
+  "sourceAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T02:29:51.560Z"
+}

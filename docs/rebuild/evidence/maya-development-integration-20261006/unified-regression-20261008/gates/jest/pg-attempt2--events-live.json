@@ -1,0 +1,70 @@
+{
+  "counts": {
+    "numFailedTestSuites": 0,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 1,
+    "numPassedTests": 4,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 1,
+    "numTotalTests": 4
+  },
+  "id": "pg-attempt2/events-live.json",
+  "identityPolicy": "SHA256(repo-relative suite path + NUL + fullName), per-suite duplicate occurrence; no names or failure payloads copied",
+  "qualificationNote": null,
+  "rawArtifact": "events-live.json",
+  "rawCopied": false,
+  "reportedStatus": "PASS",
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": "",
+    "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+    "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": true,
+    "sameAsFinalHead": false,
+    "sourceHashStability": null,
+    "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+    "treeAtEnd": null
+  },
+  "stage": "pg-attempt2",
+  "status": "PASS",
+  "suites": [
+    {
+      "countsByStatus": {
+        "passed": 4
+      },
+      "ordinal": 0,
+      "path": "maya-saas-backend/test/events-live/domain-event-append.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "45d5a1cf676cf8d0b6354da9cadc994dd23d177f6af45340c01e9c3c215dc623",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "254d0960a7c7102fe490b75f1004b5489727a2df968016efc7b0ebd931016428",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "b47e0d84dbbae99fa1c2b39b872125b88b290748b00380774bc209ec382857de",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9ed2354d8d93d8bbf910ff2d0b018d57b943bc8eba93205688fff9ce6378081e",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

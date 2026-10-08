@@ -1,0 +1,45 @@
+{
+  "stage": "g2",
+  "source": "c8235e76e77e08980cfc66409dff52b38f3673a4",
+  "tree": "3f300e364bc01bdbc320f19bc46c2beec8df5d6b",
+  "node": "v24.15.0",
+  "started": "2026-10-08T01:54:43.978Z",
+  "status": "FAIL",
+  "heapMb": 6144,
+  "workerCount": 1,
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "shell-typecheck",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "shell-self-test",
+      "command": "npm",
+      "args": [
+        "run",
+        "self-test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell",
+      "timeoutMs": 720000
+    }
+  ],
+  "completed": [
+    {
+      "name": "shell-typecheck",
+      "durationMs": 3769
+    }
+  ],
+  "error": "shell-self-test exited 1; inspect its log",
+  "finished": "2026-10-08T01:54:52.829Z"
+}

@@ -1,0 +1,123 @@
+{
+  "contract": "maya.unified-public-supplement/1",
+  "source": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "files": [
+    {
+      "path": "launchers/static-gates.candidate-census.mjs",
+      "source": "/tmp/maya-unified-regression-20261008/static-gates.candidate-census.mjs",
+      "sourceSha256": "8036234e778b69eb90d0c891b3f330cd01098d3ed6ae1fe58fcc05ed17729d0a",
+      "sha256": "8036234e778b69eb90d0c891b3f330cd01098d3ed6ae1fe58fcc05ed17729d0a",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/static-gates.service-correction.mjs",
+      "source": "/tmp/maya-unified-regression-20261008/static-gates.service-correction.mjs",
+      "sourceSha256": "4aed59e0d56a63db39d59263837bd9b793b1f1b3458ff89183a64af19aa5e200",
+      "sha256": "4aed59e0d56a63db39d59263837bd9b793b1f1b3458ff89183a64af19aa5e200",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/static-gates.last-fixtures.mjs",
+      "source": "/tmp/maya-unified-regression-20261008/static-gates.last-fixtures.mjs",
+      "sourceSha256": "72a1d2f5823747424dc8d6f7111975e1783f6c3087fa9e25cba31558120a4de5",
+      "sha256": "72a1d2f5823747424dc8d6f7111975e1783f6c3087fa9e25cba31558120a4de5",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/branch-binding-gates.attempt2.mjs",
+      "source": "/tmp/maya-unified-regression-20261008/branch-binding-gates.attempt2.mjs",
+      "sourceSha256": "f27611eedf7fd7d1c4913e39dc0a56b186fa8846ceafa992791d32382d9d098b",
+      "sha256": "f27611eedf7fd7d1c4913e39dc0a56b186fa8846ceafa992791d32382d9d098b",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/goods-ui-wrapper.mjs",
+      "source": "/tmp/maya-unified-regression-20261008/goods-ui-wrapper.mjs",
+      "sourceSha256": "dba12f623484968e44678b978d69988d3a183cf54454aa174e9b1378fd18bc96",
+      "sha256": "dba12f623484968e44678b978d69988d3a183cf54454aa174e9b1378fd18bc96",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/smoke-only-gates.attempt4.mjs",
+      "source": "/tmp/maya-unified-regression-20261008/smoke-only-gates.attempt4.mjs",
+      "sourceSha256": "fb05565d7bf677cae5108b21cf18e0f050e1bd4f6492307abbf7ce4bc55c39cc",
+      "sha256": "fb05565d7bf677cae5108b21cf18e0f050e1bd4f6492307abbf7ce4bc55c39cc",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/loopback-only.cjs",
+      "source": "/tmp/maya-unified-regression-20261008/loopback-only.cjs",
+      "sourceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "launchers/pg-gates.attempt6.mjs",
+      "source": "/tmp/maya-unified-pg-20261008-attempt6/pg-gates.mjs",
+      "sourceSha256": "ecf310a79cfc6441a8e68ac049abb5908c037f6395201d59a672e5d0a7905643",
+      "sha256": "ecf310a79cfc6441a8e68ac049abb5908c037f6395201d59a672e5d0a7905643",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "observations/branch-prepare.json",
+      "source": "/tmp/maya-unified-branch-binding-20261008-attempt2/prepare.json",
+      "sourceSha256": "08f93c8dafd82961db07c072acf30c454a04ec0a27aecd182d57e768289cb778",
+      "sha256": "08f93c8dafd82961db07c072acf30c454a04ec0a27aecd182d57e768289cb778",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "observations/branch-resume.json",
+      "source": "/tmp/maya-unified-branch-binding-20261008-attempt2/resume.json",
+      "sourceSha256": "2f9304f02a5284dfc2f1b01659c66b03449f37cc181a20aa3abc62ddf2af3ead",
+      "sha256": "2f9304f02a5284dfc2f1b01659c66b03449f37cc181a20aa3abc62ddf2af3ead",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "observations/goods-prepare-observations.json",
+      "source": "/tmp/maya-unified-goods-ui-20261008/prepare-observations.json",
+      "sourceSha256": "4e612b3130f6badb56ac3c2a05d1261276137c59d3a9857a0cbad1367b328e63",
+      "sha256": "4e612b3130f6badb56ac3c2a05d1261276137c59d3a9857a0cbad1367b328e63",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "observations/goods-restore-observations.json",
+      "source": "/tmp/maya-unified-goods-ui-20261008/restore-observations.json",
+      "sourceSha256": "6342e18941319cb1edc0a2caa3b58e71eb9f7fb48fca2af9f070b2316093aa0e",
+      "sha256": "6342e18941319cb1edc0a2caa3b58e71eb9f7fb48fca2af9f070b2316093aa0e",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "observations/goods-resume-projection.json",
+      "source": "/tmp/maya-unified-goods-ui-20261008/resume-observations.json",
+      "sourceSha256": "ce34bb37e18dc3aac900dd3d815c030befacdbb561e4fd03791f9392749e9b03",
+      "sha256": "c55dedd911af94cea14f662dc64d6c197bf2f32a565efb6e2f656d85ef9a27ca",
+      "mode": "authored explicit projection"
+    },
+    {
+      "path": "observations/combined-react-projection.json",
+      "source": "/tmp/maya-unified-pg-20261008-attempt6/combined-react-output/output/playwright/browser.json",
+      "sourceSha256": "3634aad84790d3912823f6b1fba023c3d4c6d0a25134ca6fe3a19e3bdbe2ca3e",
+      "sha256": "c45ab7797ca9463b247c44140c666f7fa267d076d82be08b0288c909d1f67c9f",
+      "mode": "authored explicit projection"
+    },
+    {
+      "path": "screenshots/occupancy.png",
+      "source": "/tmp/maya-unified-pg-20261008-attempt6/combined-react-output/output/playwright/occupancy.png",
+      "sourceSha256": "9df7c322e5bc378afb8c0076fbbb2d24e5dcf5cd6ad1ec436e80dcd4111771e4",
+      "sha256": "9df7c322e5bc378afb8c0076fbbb2d24e5dcf5cd6ad1ec436e80dcd4111771e4",
+      "mode": "byte-exact reviewed public artifact"
+    },
+    {
+      "path": "screenshots/goods-success-outcome.png",
+      "source": "/tmp/maya-unified-goods-ui-20261008/output/playwright/success-outcome.png",
+      "sourceSha256": "6accfda0637e8bd6a593fb9408d717718b10017b8d852f4af2f92cd436131c50",
+      "sha256": "6accfda0637e8bd6a593fb9408d717718b10017b8d852f4af2f92cd436131c50",
+      "mode": "byte-exact reviewed public artifact"
+    }
+  ],
+  "limits": [
+    "Raw launchers preserve historical absolute paths and referenced inputs; they are execution provenance, not portable commands. Reproduction needs a fresh owned output/cluster and original referenced inputs.",
+    "The two screenshots were visually inspected. Occupancy explanation and goods outcome are visible; inherited floating-header overlap remains a design limitation.",
+    "All model/provider data are synthetic. No private restart/auth receipt, raw auth log, PG data or environment file is copied."
+  ]
+}

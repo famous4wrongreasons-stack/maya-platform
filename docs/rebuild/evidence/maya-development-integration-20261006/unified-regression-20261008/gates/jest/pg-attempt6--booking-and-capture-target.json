@@ -1,0 +1,128 @@
+{
+  "counts": {
+    "numFailedTestSuites": 0,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 2,
+    "numPassedTests": 12,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 2,
+    "numTotalTests": 12
+  },
+  "id": "pg-attempt6/booking-and-capture-target.json",
+  "identityPolicy": "SHA256(repo-relative suite path + NUL + fullName), per-suite duplicate occurrence; no names or failure payloads copied",
+  "qualificationNote": null,
+  "rawArtifact": "booking-and-capture-target.json",
+  "rawCopied": false,
+  "reportedStatus": "PASS",
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": "",
+    "head": "4023c4d547884a65923f22b9f9d33e044f347595",
+    "headAtEnd": "4023c4d547884a65923f22b9f9d33e044f347595",
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": true,
+    "sameAsFinalHead": true,
+    "sourceHashStability": null,
+    "tree": "79c41647c1e3c8a142e65621c2074b946d6f1bc1",
+    "treeAtEnd": null
+  },
+  "stage": "pg-attempt6",
+  "status": "PASS",
+  "suites": [
+    {
+      "countsByStatus": {
+        "passed": 8
+      },
+      "ordinal": 0,
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "921c8716f2e74396a51ad52432521667db47e1926c1c3f990ed94e630b8c363c",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "801ae75eb29465e58969fa3d9bedcdefc3250f445b5566fecdfd7768ee5cfb12",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8e247d2879013ef2a7fd0ab37716e42c4cea7a26b7fa72c5c43f03af6ec7a064",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "3229512990fed11fb7659065413990ea24c752864b386d7949a351bf454bd9f0",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "71013985417957427c0800f8af711904e69a73e9d7004756b8b65cc6fa46aa07",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "7d6d39d7fa02ef65efa1967d45872499bb357f70b5b231b31d1604869064a0cd",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ccb9d4866ad700911a2980d41c8d9decdd68db757a34d1f62f9386650a0741c8",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "cbad11d9f988a36d464aa1c641dea677b27036236dea846bff5135d9784e7277",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 4
+      },
+      "ordinal": 1,
+      "path": "maya-saas-backend/test/widgets-live/semantic-slot-captures.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "c9915775fbecd1f0ec3a7c2b29c69d847c5ce9a18c573336e059f7dc734bc271",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "f16ba2237b7e26c74792b7d6067913d0fa476aea6eb790c9ae0a7933796a9f47",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "215f461b97f8128927fd2789f31c2fac21f3b438584ce00f1d69e06b828c6a01",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "6d6dd0c95f70348cb1cbf79bbb231e2be6b092741798cd0dacfab152eace0b67",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

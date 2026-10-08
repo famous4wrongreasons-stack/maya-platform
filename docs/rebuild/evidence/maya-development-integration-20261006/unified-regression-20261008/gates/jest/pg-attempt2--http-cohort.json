@@ -1,0 +1,752 @@
+{
+  "counts": {
+    "numFailedTestSuites": 6,
+    "numFailedTests": 16,
+    "numPassedTestSuites": 7,
+    "numPassedTests": 81,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 13,
+    "numTotalTests": 97
+  },
+  "id": "pg-attempt2/http-cohort.json",
+  "identityPolicy": "SHA256(repo-relative suite path + NUL + fullName), per-suite duplicate occurrence; no names or failure payloads copied",
+  "qualificationNote": null,
+  "rawArtifact": "http-cohort.json",
+  "rawCopied": false,
+  "reportedStatus": "FAIL",
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": "",
+    "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+    "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": true,
+    "sameAsFinalHead": false,
+    "sourceHashStability": null,
+    "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+    "treeAtEnd": null
+  },
+  "stage": "pg-attempt2",
+  "status": "FAIL",
+  "suites": [
+    {
+      "countsByStatus": {
+        "failed": 1,
+        "passed": 15
+      },
+      "ordinal": 0,
+      "path": "maya-saas-backend/test/widgets-live/schedule-chat.live-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "eeda69724601324b69023a45bb1bbd9fdcd2de5a0584919c6e3176441d9faa84",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2003c4dacd7f58c868ac315d7ad35348335f21a94201829e6c020afeb4ce2364",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "0ceefb80cd265988882b597a0a3cabb405dcf5d3d11bcf71a3219749ccec94bc",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "7889fdd39e60c423f00c178b4e3efdedbea228e2114d2ef7627e953fa9541a81",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "9d86835ef77b5aadbc52f3332722147bdd7b6d583e7e860b961fa367a7f6247f",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "886caad7a5bca9284d8db494796d0a9fb6c52a72cdaa195bebedbc5fcb21ad1e",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8eb0dd10354b1142fb9ec7f08704fd47fca8c1eab9f1ba1157c0b56d11b3400a",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "6d90f0e3b5b2e9226efce7a5ecc6fba4939703d0191865654bc52a6c903e42d2",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "596ebcad68310bb26279337e3301b13123ffa30e59cefcd6664cca8a6ef84c90",
+          "occurrence": 1,
+          "ordinal": 8,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ca041566375c777f3a71d433959900efeccee2d014cd43889545f48ed49c6aec",
+          "occurrence": 1,
+          "ordinal": 9,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "6d4d911e423e19bb2c5d69aa0968291daa25ea708400749336efa7a486e15dc2",
+          "occurrence": 1,
+          "ordinal": 10,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e24043e9dbed01bb410769f9c984b1374569e63f8b9d484d3ccee54a4ee96405",
+          "occurrence": 1,
+          "ordinal": 11,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "7f63d66b5241da67cce71e8038b897261b5883a7d0923309adc66469d4db057c",
+          "occurrence": 1,
+          "ordinal": 12,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ba6add2d1b829a895cb835622bf51c5e63d2972c9284c291eb56370c2f5caf97",
+          "occurrence": 1,
+          "ordinal": 13,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "a395acf24f843defbf9dbd9c9d9b0f65f198a81adb95045bde5382623474d2ee",
+          "occurrence": 1,
+          "ordinal": 14,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d5f4daa5a33d1e57594eac8039b1231880f94153d7815a0a855f6c034290fe26",
+          "occurrence": 1,
+          "ordinal": 15,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "failed": 9,
+        "passed": 14
+      },
+      "ordinal": 1,
+      "path": "maya-saas-backend/test/widgets-live/service-price.live-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "bb2501f72cdf2ea21db06291b3e4ecc669d2d4fa8a9c38a458fa98b70d5c50ed",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "44472fa31f9359ab1c6fae663e1a57696a20527bedaa782c4872a0420e9d40ad",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "ae24b34a743e74a5aade8de99404c00d35f44ab48f49aaa63584ee70d291a5e2",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "65e9abcef4fb309d37b2595e166d8c880b7ac2219bfa96a01a65367ccb905917",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "60af6fb0c4cce79a3517d0346364b44f24b2c277072808cc334f50a2b429cc87",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "126700eeaa32fb51bfea495d83cd7c13f27b13aaa58cefdbcea675fc89c85952",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "9d0acbd250e8251384ca41e5474572498c1981169197eb7771ebe75e10edc31b",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "6a24929372c1e793ddc9ca96fde750f8f416b3f11f6b2853b5b6709b74e3cfe8",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "b1c5908c3d33a5ed09b8e1a7443274c4898781948ff2124ce29c52f9d4bd9bf5",
+          "occurrence": 1,
+          "ordinal": 8,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "f0fd369eebd2819aaa99c98dc2f537afed0f6cb0d913ac79938d5a71e8e75fd1",
+          "occurrence": 1,
+          "ordinal": 9,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "f8eb5ae8ab1a47e4fb9effcc6c480e388e81ff65d411fada62cd58f45ba458c3",
+          "occurrence": 1,
+          "ordinal": 10,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e8527f0eacfc97c44b28ff2ee80d339cdb161be7544f485144d54fbb4fd29dc5",
+          "occurrence": 1,
+          "ordinal": 11,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "1f14476a5a7c027864ba412e22f908fa4f8ad55ff6fb28d699385303a372e63e",
+          "occurrence": 1,
+          "ordinal": 12,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2765f17780a95fad82d63955d19c010a0803f9696705cce9c7c58cd2c5ded33d",
+          "occurrence": 1,
+          "ordinal": 13,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "c345c72c5ccaa0c50d8bf6b1cc52b7426aa124cd8eb37a548606a637b3b8b0bd",
+          "occurrence": 1,
+          "ordinal": 14,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ae0749af4d367729047ecdc658445f4ceaef388151eb36ad4e23c5f072b2f20f",
+          "occurrence": 1,
+          "ordinal": 15,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8fa453a555a5c2cc6b08f0a31df80dfc9eeb4b5ed90f7a955d800b9d63781f65",
+          "occurrence": 1,
+          "ordinal": 16,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "4fc6284653be39bacdae5829b0bc1ccd23e8d73514986588a5204c4616635d0f",
+          "occurrence": 1,
+          "ordinal": 17,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e6ac89de0a2e7ba64f12e41e02ceec0965012e6954d9914c5c34a5acf1b44249",
+          "occurrence": 1,
+          "ordinal": 18,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9151711970cc3ee8d8d35f57b5ea4c0c394a735a019398c2c0f308c5243f4f2a",
+          "occurrence": 1,
+          "ordinal": 19,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "81107302876e00b49978c43f6ed7f431d51e6d736cfb6708521721c8aceec58a",
+          "occurrence": 1,
+          "ordinal": 20,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "c988aa4fcf89737fa22b0e4558b08dd3bf157af332856b3901e2a278fbfd06a4",
+          "occurrence": 1,
+          "ordinal": 21,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "7588a9136aee86cffbb49c62af7c72f17eabfcde9d5472901fd3d94495d797db",
+          "occurrence": 1,
+          "ordinal": 22,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "failed": 2,
+        "passed": 7
+      },
+      "ordinal": 2,
+      "path": "maya-saas-backend/test/widgets-live/profile-isolation.live-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "4849920ec04d5d9d2910db9ea18ce74d616bca9b4f63e9348533e18a0d10a23a",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "858b3c349b64ad687145084309dc5e9f2748a0c1392e8244dfd6ea139c4c2a29",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "b7cef631d4d662dc93c60cab6ed94c9a1e604085cd18a978b9c84f7a26c1f58b",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ee8f6b8508176c5530ff494ccd5136a04f27984481c992aef5617a98a362a9db",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "fb8f76203e563e61d223b3c91252cefcc4f71cee9503da142dfd5299476acd85",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "b15ace32673ad7292fe1de0a3ae93825908ebc324407c6f83e70fc41abde9a44",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9f011bea1124f37df575498ece6c5f36fff86ac7355710526c143825b1b49247",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "491c6477c96473910aae34625b4b0dfb6716591dada03aff691cb066b6772891",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ab56f7ff9257d9af7ff03f76e807bb980092396cb883a730735a2013403f80ce",
+          "occurrence": 1,
+          "ordinal": 8,
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "failed": 2,
+        "passed": 4
+      },
+      "ordinal": 3,
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "921c8716f2e74396a51ad52432521667db47e1926c1c3f990ed94e630b8c363c",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "801ae75eb29465e58969fa3d9bedcdefc3250f445b5566fecdfd7768ee5cfb12",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8e247d2879013ef2a7fd0ab37716e42c4cea7a26b7fa72c5c43f03af6ec7a064",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "3229512990fed11fb7659065413990ea24c752864b386d7949a351bf454bd9f0",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "failed"
+        },
+        {
+          "identitySha256": "ccb9d4866ad700911a2980d41c8d9decdd68db757a34d1f62f9386650a0741c8",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "cbad11d9f988a36d464aa1c641dea677b27036236dea846bff5135d9784e7277",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 5
+      },
+      "ordinal": 4,
+      "path": "maya-saas-backend/test/widgets-live/history-erasure-http.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "f13acd5ca419a9dfa6cd3c3fc9b608051d266beb509caeea94959fb946fc7d9b",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "1199f738c6f76a85ec936cd6e6b14b69692f207009ac56ed277d8bc72d48fb8e",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "c19d33b0dd98028418971a399fb8f2da7dc6b7581aae8b6261d51a0b0274a8e4",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ac8bb8ea9c2e7037dc421cb4b80bc321fcf3adcaf6fd554c273d369a4924292e",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "1e80628e8979a838b1816eafbbb6567f326e21f04449b8f128a4746382b5bcfa",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 7
+      },
+      "ordinal": 5,
+      "path": "maya-saas-backend/test/widgets-live/gate4-tenant.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "c90f6304bc778a9af412a92d3e49b123478f582f64fa7a5b57b4c11fb82593c6",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "90183de6ba46c479240245294680c25d263dcd1df220d8b1cd9e07a949132a7f",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "f6f63088402bfdeae6cd9e04e6f8131b9315244eecb61d09c2ef26ff4d784d9b",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8489f5f2724d2c6bae39a08fbc3416250f04d3d015dcc3465244ee129058cec6",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "325cb971ab89cd90f80982eb3512fa81bb40b89b70e02de1315b9793749d59bd",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2dcd34f3eb0ed6fe3f9f1f9cbddf17bf88d04baea155aa8c08847961532f1b85",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8892236765059e4bbde0d34ee45f9ac3b255d94bb42c9edf569ab27cc58508eb",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 2
+      },
+      "ordinal": 6,
+      "path": "maya-saas-backend/test/widgets-live/business-rules.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "1fdb95a0e4119f2b07cb0051fe8b24b103811a13b012e69fd161e7277294d2cf",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "aacbb4149446ad1d88bd1d8ab932f78a3fce19f6619fc70e1ee48e772e8a00ad",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 6
+      },
+      "ordinal": 7,
+      "path": "maya-saas-backend/test/widgets-live/admin-booking.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "2f7c7b18198ed1cebadbf8fd64e4996611045771d387e034e92978f99f41a73d",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "5f088c3f2f7e2d8a1109a46dfd73faf33e8e41df844fcc0e3d8d0374289bf306",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e2ed06ccf1c56122e628ff93f0f28c26702f1280e9ca0dcf7659d0d611e5f5ab",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "55577de17733c5f5dae5bd7801104c0884811077f62bfad4d2209dbe37a02c1a",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "129096f75ffee2908fa1cb60054815a415a6d250901fcb842ee737a552bd04a4",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d0bff72865d02934a0347e244d14c9ce8d07768f33e7b059c625c00c9e7385eb",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 13
+      },
+      "ordinal": 8,
+      "path": "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "1a17258fcadb5c50c625201b802b3e9c0254cefc6a5ac1c472bfd31b12171fc3",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "c24ef81be8deec5bb25864a8292d81ce5ef2e123c9050df01e914a5498465ff1",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d552546954dc8e45b2d6a7b4b878ede44cc0d0bd12edccd6371421fd6c61dc70",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "a0315bac7ba7219950410d8e79fa20e05e06ebf5e9dabd8ed3515d00705652bf",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8638b98a35860db046b49859effc73aa8d3b967140f94ce84804ede917882224",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "3b3a60fea00c4de3f7ba38ccf0745b61f73bbf569212b85a0e7024c9224bbb50",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8457856eb565cffce3aab373379d50aa1be67e10e47ca4d66117e312ea36b469",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "df18117033609a99c6fac28582052253393c8f2cd320b7eac1616808606da254",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "1ca4074408f7f4ddb1b8b13f0d0a861a331f1220f345310819a54f7c3dee1fb5",
+          "occurrence": 1,
+          "ordinal": 8,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "fc633dad30e4d98f610fb11694e25a8386a3e2554fe905c0b71483cf64c6b51d",
+          "occurrence": 1,
+          "ordinal": 9,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "87a0daaf44d876306612a4dcfcd2ee8d8271b507c70a9abe117688ec4545b441",
+          "occurrence": 1,
+          "ordinal": 10,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "c14262d6135089b601aa14bf5ca5583fcba109aa01f6e548c3f93c3ddc0fe5fd",
+          "occurrence": 1,
+          "ordinal": 11,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "68b67268eea6996d0e2c9eeae87e162f7d03618f786612e2351774dadbd4de5b",
+          "occurrence": 1,
+          "ordinal": 12,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "failed": 1
+      },
+      "ordinal": 9,
+      "path": "maya-saas-backend/test/widgets-live/development-integration.live-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "8899e3f8490b9b7f484e541efcb4cffe6d20b82422c690c99c63d8aca5995e09",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "failed": 1
+      },
+      "ordinal": 10,
+      "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+      "status": "failed",
+      "tests": [
+        {
+          "identitySha256": "5775882bd6806170b6a5ecb20ca727ad5b415e3ae04f41c244aabc7851a18e68",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 3
+      },
+      "ordinal": 11,
+      "path": "maya-saas-backend/test/widgets-live/conversation-history.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "d88b285814317eb27d35764a66a7b694e4faa2841bbc4a2df2159c8a183b9264",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "17d1d4194fdc6a5aad15234fb36b203b5fb0bfe626b642e464923c48a91f605e",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "42f928ac09d5b9d76a3b25b8968bd34db0aef916a4b6a6b453579c7a4e2c6351",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 5
+      },
+      "ordinal": 12,
+      "path": "maya-saas-backend/test/widgets-live/history-erasure-writers.live-spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "91e5d2b05bc590b444fbe083229e9fe33adb690e0a79afab9302c9270cb4911e",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "4bfe47fa45084d347e9e3b4401f6021d9edc85d0488268034a4703cda756ce3a",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "5d79281ef083a2a3d5f88252928def0f5dac736cced1836bed7908f1c07d5638",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "dc972698738347e0643220febdda2060e8c5c881fd5e6eae9682afc74a0a20d3",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "39ba1fbebaff098980728136266b0362cd8bac7e595509115bdd275493586a92",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

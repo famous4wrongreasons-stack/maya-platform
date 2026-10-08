@@ -2,6 +2,12 @@
 
 Date: 2026-10-05. Verified base: `dff728e85a97841dd72bd290992b888344780780` on `codex/maya-controlled-integration-20260930`; current local completion branch: `codex/maya-final-completion-20261005`. The rows include the local changes described below. This is a product completion map, not release authorization.
 
+## Latest qualified development checkpoint — 2026-10-08
+
+On isolated `codex/maya-development-integration-20261006`, source `4023c4d5`, the [unified checkpoint](MAYA-UNIFIED-REGRESSION-CHECKPOINT-20261008.md) records **7,237 backend tests / 645 suites** and **562 HTTP/PG tests / 57 suites PASS**, current React, canonical smoke and separate branch/goods PostgreSQL restart proofs. Explicit tenant-owned YCLIENTS binding, one C9 and AE authority remain. Repairs cover finite calendar projections, history/store composition, planner encoding, price/goods approval transaction locking and staff preference through service clarification.
+
+The PG runner remains **FAIL for exactly three PublicBooking foreign-key schema differences**; migration readiness is not asserted. One company/branch pair is locally qualified, with synthetic provider facts and scripted model selections. Multi-company UI, real provider/model acceptance and scoped background C10 remain open. The working website/native source was untouched by this continuation; nothing was deployed. All lower dated statements retain their historical qualification. Use the [approved-domain gap map](MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md) for current remaining work.
+
 ## Provenance and evidence standard
 
 - **VERIFIED FROM CODE:** inspected base and completion branch files. **VERIFIED FROM EXECUTED TEST:** commands run in a separate writable checkout on 2026-10-05, listed below. **REPORTED BY HISTORICAL DOCUMENT:** dated reports and archival receipts, not rerun production observations. **NOT REVERIFIED:** production and real user behavior without a fresh observation. No backend completion change is release-authorized or deployed by this work. The owner separately authorized a Personal Team Debug install on their iPhone; that installation is recorded below and is not a platform release.

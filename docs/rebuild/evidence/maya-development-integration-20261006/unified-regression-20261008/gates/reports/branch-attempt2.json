@@ -1,0 +1,132 @@
+{
+  "source": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "tree": "79c41647c1e3c8a142e65621c2074b946d6f1bc1",
+  "status": "PASS",
+  "started": "2026-10-08T03:47:08.101Z",
+  "port": 54923,
+  "database": "maya_widget_gate_proof_c9occ_4baefee2",
+  "cluster": "/tmp/maya-unified-branch-binding-20261008-attempt2/pg",
+  "launcherSha256": "f27611eedf7fd7d1c4913e39dc0a56b186fa8846ceafa992791d32382d9d098b",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "runnerSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "qualification": "Existing finite native branch-binding HTTP/PG restart proof with synthetic provider transport; no real provider/model acceptance",
+  "externalNodeNetwork": "loopback-only TCP preload; not a measured external call count",
+  "commands": [
+    {
+      "name": "initdb",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/initdb",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-branch-binding-20261008-attempt2/pg",
+        "--auth=trust",
+        "--username=c9_proof",
+        "--encoding=UTF8",
+        "--locale=C"
+      ]
+    },
+    {
+      "name": "pg-start",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-branch-binding-20261008-attempt2/pg",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/tmp/maya-unified-branch-binding-20261008-attempt2/postgres-private.log",
+        "-o",
+        "-h 127.0.0.1 -p 54923 -k '' -c shared_buffers=64MB -c work_mem=4MB -c max_connections=30",
+        "start"
+      ]
+    },
+    {
+      "name": "createdb",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "--host=127.0.0.1",
+        "--port=54923",
+        "--username=c9_proof",
+        "maya_widget_gate_proof_c9occ_4baefee2"
+      ]
+    },
+    {
+      "name": "migrations",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ]
+    },
+    {
+      "name": "prepare",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--testRegex",
+        "crm-branch-binding-restart\\.probe-spec\\.ts$",
+        "--runInBand",
+        "--runTestsByPath",
+        "test/widgets-live/crm-branch-binding-restart.probe-spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-unified-branch-binding-20261008-attempt2/prepare-jest.json"
+      ],
+      "env": {
+        "JEST_C9_OCCUPANCY_STAGE": "prepare",
+        "JEST_C9_OCCUPANCY_RECEIPT": "/tmp/maya-unified-branch-binding-20261008-attempt2/private-restart.json",
+        "JEST_C9_OCCUPANCY_REPORT": "/tmp/maya-unified-branch-binding-20261008-attempt2/prepare.json"
+      }
+    },
+    {
+      "name": "pg-restart",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-branch-binding-20261008-attempt2/pg",
+        "-w",
+        "-t",
+        "30",
+        "-m",
+        "fast",
+        "restart"
+      ]
+    },
+    {
+      "name": "resume",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--testRegex",
+        "crm-branch-binding-restart\\.probe-spec\\.ts$",
+        "--runInBand",
+        "--runTestsByPath",
+        "test/widgets-live/crm-branch-binding-restart.probe-spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-unified-branch-binding-20261008-attempt2/resume-jest.json"
+      ],
+      "env": {
+        "JEST_C9_OCCUPANCY_STAGE": "resume",
+        "JEST_C9_OCCUPANCY_RECEIPT": "/tmp/maya-unified-branch-binding-20261008-attempt2/private-restart.json",
+        "JEST_C9_OCCUPANCY_REPORT": "/tmp/maya-unified-branch-binding-20261008-attempt2/resume.json"
+      }
+    }
+  ],
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "prepare",
+    "pg-restart",
+    "resume"
+  ],
+  "clusterStopped": true,
+  "sourceAtEnd": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T03:47:13.038Z"
+}

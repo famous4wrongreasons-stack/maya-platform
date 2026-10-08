@@ -1,0 +1,85 @@
+{
+  "contract": "maya.unified-independent-review/1",
+  "candidate": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "recordKind": "Root-authored faithful summary of independent read-only reviewer messages; not a verbatim transcript or certificate",
+  "reviewer": "/root/independent_review",
+  "status": "QUALIFIED_LOCAL_PROOF_NO_NEW_BLOCKERS",
+  "sourceCodeReview": "gates/code-review-record.json",
+  "verified": {
+    "backend": {
+      "tests": 7237,
+      "suites": 645,
+      "status": "PASS",
+      "skips": 0
+    },
+    "httpPg": {
+      "tests": 562,
+      "suites": 57,
+      "status": "PASS",
+      "skips": 0,
+      "focused12AreSubset": true
+    },
+    "combinedReact": {
+      "tests": 1,
+      "checkpoints": 8,
+      "status": "PASS"
+    },
+    "branch": {
+      "prepareTests": 1,
+      "resumeTests": 1,
+      "sourceHashChecks": 28,
+      "actualPgRestart": true,
+      "status": "PASS"
+    },
+    "goods": {
+      "prepareTests": 1,
+      "resumeTests": 1,
+      "restoreTests": 1,
+      "actualPgRestarts": 2,
+      "terminalRestoreUnchangedExecutions": true,
+      "terminalRestoreActiveCommit": 0,
+      "status": "PASS"
+    },
+    "har13": {
+      "passed": 2,
+      "filteredPending": 145,
+      "qualification": "finite name-filtered subset"
+    },
+    "smoke": {
+      "status": "PASS",
+      "sourceHashesMatched": 6,
+      "sourceAndEntryAndLauncherUnchanged": true,
+      "exitCode": 0,
+      "processGroupClosedAndAbsent": true,
+      "pgStoppedAndPidfileAbsent": true
+    },
+    "publicBundle": {
+      "boundFiles": 77,
+      "inventorySelfExcluded": true,
+      "boundBytes": 8079315,
+      "rawHashesVerified": 306,
+      "exactMetadataCopies": 38,
+      "jestProjections": 32,
+      "nodeCountProjections": 4,
+      "gitPathBindings": 92,
+      "inventorySha256": "6047d88c82db2a7a5688ebc24383867df9a294cbd0043b51c4cd8246ca883dc3"
+    },
+    "supplement": {
+      "boundFiles": 16,
+      "exactCopies": 14,
+      "authoredProjections": 2,
+      "manifestSha256": "72e2c640c1f3353795c9c0cc91b36c7ab9458344b3bed6f1ceb16f2f1c7a88f9"
+    }
+  },
+  "qualifications": [
+    "Final PG runner remains FAIL solely for the three PublicBooking FK schema differences.",
+    "No aggregate test total: focused and historical repeated cohorts overlap.",
+    "Goods synthetic writes are prepare 5/resume 3/restore 0; scripted selections are 16/3/0. Negative and replay assertions qualify zero deltas, not global zero effects.",
+    "Terminal goods restore observes zero provider reads/writes/model calls; no live provider/model/OCR acceptance.",
+    "Compiled entry hash is not a whole-build attestation; build qualification remains separately source-bound.",
+    "Two retained screenshots were reviewed; inherited goods floating-header overlap remains a design limitation.",
+    "Raw inventory convenience http-smoke.log NOT_RUN means that filename is absent. Executed smoke writes excluded http-smoke-private.log; its manifest and stage correctly report PASS.",
+    "Two historical overwritten scratch launcher hashes remain mismatched and are not replay-verified.",
+    "No release, C10, real-language, provider or model acceptance; reviewer performed reads only, no edits or gate executions."
+  ]
+}

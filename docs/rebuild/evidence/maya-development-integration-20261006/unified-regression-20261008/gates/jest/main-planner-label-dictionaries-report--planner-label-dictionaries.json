@@ -1,0 +1,409 @@
+{
+  "counts": {
+    "numFailedTestSuites": 0,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 2,
+    "numPassedTests": 58,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 2,
+    "numTotalTests": 58
+  },
+  "id": "main-planner-label-dictionaries-report/planner-label-dictionaries.json",
+  "identityPolicy": "SHA256(repo-relative suite path + NUL + fullName), per-suite duplicate occurrence; no names or failure payloads copied",
+  "qualificationNote": null,
+  "rawArtifact": "planner-label-dictionaries.json",
+  "rawCopied": false,
+  "reportedStatus": "PASS",
+  "source": {
+    "contentHashesOnly": {
+      "src/ai-tools/ai-core-model.service.spec.ts": "cd6ba399cd40b483f34a03cd05f15bf80522eadedef0c553e6d8953e1d2e2b7a",
+      "src/ai-tools/ai-core-model.service.ts": "2aa719a4320cc7e4a6107115639c9dfbd91403885df9134dfba984f48838be68",
+      "src/ai-tools/planner-wire-context.spec.ts": "b6bb4f6c078ff876c6165ea723644942c5373b577bc17ce7c8a96704223a98b0",
+      "src/ai-tools/planner-wire-context.ts": "301d7fd00b2bd4debe721b81c27897d20288f3ff39c74b265d1158eb9af6a131"
+    },
+    "dirtyAtEnd": null,
+    "head": null,
+    "headAtEnd": null,
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": false,
+    "sameAsFinalHead": false,
+    "sourceHashStability": true,
+    "tree": null,
+    "treeAtEnd": null
+  },
+  "stage": "main-planner-label-dictionaries-report",
+  "status": "PASS",
+  "suites": [
+    {
+      "countsByStatus": {
+        "passed": 28
+      },
+      "ordinal": 0,
+      "path": "maya-saas-backend/src/ai-tools/planner-wire-context.spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "8508440516200c719aa11585b4086d90d7f370f0b206d02dd659bf23a5dba1d6",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "b0ed4aca705407fdc3fb542037b21131080601453165446b91bf9071ec31565d",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "7b0fe9ca55db6ace313d3b20722d53d26bbf41cf09eefaa7894f2041c5b40118",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d288928b3e26f5d4739268c0afb4264172f148051d9acc82527745ea569bb8ef",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e7e3eea1bcc1b19507ca49ec09d80e48225244ff456086fe3adb14fb46e17e64",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "01a63a37a81a564a2f8515a5c5e0dbd13e38ca8cc1ef5dc4eee75daaa10b5730",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "432068e5345d5b087a009d2aa3978cd87625b7e03be04620b2e96eb7bf885df3",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "1892a0f144ebd4ca63c8804e2ce77bd43746c81a729102baa3dd5ca40b6187c8",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "bbfdfbc109f542fb66f3609e58b402bdc9456e99f07821c9bff7fe9033e6dfe6",
+          "occurrence": 1,
+          "ordinal": 8,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "0437c8686b07a2177e239f7d34407088c32e2ed6264d5f19f5d60e778939636f",
+          "occurrence": 1,
+          "ordinal": 9,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "fd2378c1a8e3e6d1a88e601b3193c2062efa42d8c41abde45e3d9c2b39de380c",
+          "occurrence": 1,
+          "ordinal": 10,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "0b1b742be052a74bd03f1a21a5531072f8f8a2d868e63c5ddf073e444eb7b8a2",
+          "occurrence": 1,
+          "ordinal": 11,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "085fc1caafa23c291eb76112add86c6ee9a7382578619e8f3e5a5eb668184e97",
+          "occurrence": 1,
+          "ordinal": 12,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "0088332dd778817574ab155dcb8bb80267f5e3c1b803e01c723407fe350f82b1",
+          "occurrence": 1,
+          "ordinal": 13,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d19b8ab91e0333b3af558704ebe1b3435362e7dff4240729fbdd0e18143b5067",
+          "occurrence": 1,
+          "ordinal": 14,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "54470c5159b74b4a43f231230255ad91487b7f7267c92f77423039eb2da4e202",
+          "occurrence": 1,
+          "ordinal": 15,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e75d1827dd664afcc5dac0a80a1f26b3d4bc4845313b567dd9707e14f4bb7734",
+          "occurrence": 1,
+          "ordinal": 16,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2569bef297831b9357cb673ea77299ead19b86a2d17dd9bd09e9ff4c264c0104",
+          "occurrence": 1,
+          "ordinal": 17,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "32611f090e8bd6da0ff308021e0a8b06e883bf89ef0e7b6ad6525d9aa8e11f1d",
+          "occurrence": 1,
+          "ordinal": 18,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "19d735ad807346356c4c74907bc5f598e34c94f120900b77c10a4ac946c56eef",
+          "occurrence": 1,
+          "ordinal": 19,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "3b3d02a902f4c778380e5da50ca2af80d0cc87cf4c0bb343d2b93dbc7d9407bf",
+          "occurrence": 1,
+          "ordinal": 20,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9bdd90b1ffc869d228c425c04fd9ecf069f309b717c12bb16f0bb829b85ce44b",
+          "occurrence": 1,
+          "ordinal": 21,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "32f83aa93f0e471ba65fab9486e64c9acba5da5eaa865f47fd3a4e1a38717671",
+          "occurrence": 1,
+          "ordinal": 22,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "fe5444d510856e0e45bebeaa631b83c4f15aadcb046af50685d1b188aa1085ae",
+          "occurrence": 1,
+          "ordinal": 23,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "13ad08ef83ebf15b72216c6059b138f31d9965867d131926bb751ea8ee1e5fef",
+          "occurrence": 1,
+          "ordinal": 24,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "da83d3b24d79dff1061e6bb2aa77fb32049ad23169e2955087d90e14b09ae31e",
+          "occurrence": 1,
+          "ordinal": 25,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "c550edfb90f6a7b137e728069e89fd409571a04b0464e1ecd8615c631d77699e",
+          "occurrence": 1,
+          "ordinal": 26,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d1e3ecd7465245fb101115b24233fd14fc37602eee157d19031e2dc756c23115",
+          "occurrence": 1,
+          "ordinal": 27,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "countsByStatus": {
+        "passed": 30
+      },
+      "ordinal": 1,
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "identitySha256": "39752d35be6f2838bd96b85dc5da296a18c61a484cf745b512d7cfaab1faa71d",
+          "occurrence": 1,
+          "ordinal": 0,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "609e4a5375c8ec8db16f4c0b66354b0f8ba98970a4f116222892a3db38f37666",
+          "occurrence": 1,
+          "ordinal": 1,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "5ab5860067aff54ffacb55364fdf0a8feee8f99021dcb3d1a8b3a9d98ea778c1",
+          "occurrence": 1,
+          "ordinal": 2,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "4f2d0cfbe06178de9aec0f8529c6b3b3ab2fc042b537b30e7ba48721285e3134",
+          "occurrence": 1,
+          "ordinal": 3,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "164291139c556dfa6a54ca18a8be29b0e965fce095f5f4b3be89f75abef020cc",
+          "occurrence": 1,
+          "ordinal": 4,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8587f81fa197c796c2856d9f3986a705d0f3d1920c6d988be870b46f22a54436",
+          "occurrence": 1,
+          "ordinal": 5,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "b233c9338f39f8a1e719e8b9d318fcefd5711e167f6f07ed7268366d3546fe43",
+          "occurrence": 1,
+          "ordinal": 6,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "db493f1feaf616d6da3267069db35b6c54f392a1b7b9ed1e58f5aea4aceec563",
+          "occurrence": 1,
+          "ordinal": 7,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e09b34ef7ba6fcfb181fb342d6047e4ada5c9dfc5a67ef56f9e05440cae4d890",
+          "occurrence": 1,
+          "ordinal": 8,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9cca9fc065a4f0388aef759d08bbfb1c3ffe4bd4891e5ee566e29a5fa2422976",
+          "occurrence": 1,
+          "ordinal": 9,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "5cbd755dd7076642f8e292c03cd94014b3dd8e1ea53c2e56b91dd424ec35b2d4",
+          "occurrence": 1,
+          "ordinal": 10,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "96a20991aae71bea35d57fae775e8707fae2c8ada08800e73640de1107680195",
+          "occurrence": 1,
+          "ordinal": 11,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "6285b9abb0a3a2238a86d139fe362717138bc50479e086a8cdabcc5779b836b4",
+          "occurrence": 1,
+          "ordinal": 12,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "dfddfb4af2e3104397d14f16c5822d1583b93a389b307831b99a269136f028ea",
+          "occurrence": 1,
+          "ordinal": 13,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "fa2163142d3decf9837bb5b8a71a6a699ce427d2d8064fdf2eaf55c27663b144",
+          "occurrence": 1,
+          "ordinal": 14,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2c7485c0c9b92912a2f0614fc708cc7c49012549ff8482397334602e4f151655",
+          "occurrence": 1,
+          "ordinal": 15,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d4a4da1896a16e32dc7e0792ac904d5319eb81f3ceedcba90e56cfa228d4c165",
+          "occurrence": 1,
+          "ordinal": 16,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "f686b99b3a9908a51d8a36b600c03ac61cf81e40da9670900d70cee5d487a2b2",
+          "occurrence": 1,
+          "ordinal": 17,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e5aa8dd22483babb0bfa9bb667405db4607252be5e568b64451d70cf9328181b",
+          "occurrence": 1,
+          "ordinal": 18,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "3d2e2b258762bd47648c390df7eea0560dd610d12bb7d02fc136fef31d0ebb76",
+          "occurrence": 1,
+          "ordinal": 19,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2ca20ed4b32b209c4dee92764b6790ce7215c8c391d50d1fe0ecd1f933d88cec",
+          "occurrence": 1,
+          "ordinal": 20,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "dafea0f54a980542b478730a9144fe62ec2e60cf91b456050b16fad70c872ab6",
+          "occurrence": 1,
+          "ordinal": 21,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "195455f539fd83cc8b529cd9374ea70bd4a36c6950986b1d91b6778dbda0ae7d",
+          "occurrence": 1,
+          "ordinal": 22,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "7f0bd0994739a7cb0722ef5e364c8c761ca5d71ed66cb54ca94a99face52ce85",
+          "occurrence": 1,
+          "ordinal": 23,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "439cdc342e7e951b304602851200c2461db4d9282428e0a489fbaacc1b973813",
+          "occurrence": 1,
+          "ordinal": 24,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "857ba0e31621a28c7e0bee19607f110b7a30f45ac031fc343aab87a272e50378",
+          "occurrence": 1,
+          "ordinal": 25,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "ef27dd8fff88460df2a3b11912f58f3238469e7a193a0f090f31571b10082fea",
+          "occurrence": 1,
+          "ordinal": 26,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "e1273652cc07bdc28d6850b685ca2cef495fdb11902da2a53ace2299218faf5e",
+          "occurrence": 1,
+          "ordinal": 27,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "a04f8b4281bf13118786c458bc57b6e9d00845ec24e5715de92f8efeb9942882",
+          "occurrence": 1,
+          "ordinal": 28,
+          "status": "passed"
+        },
+        {
+          "identitySha256": "d1e0c9a2f9de6a6cbb3343765974df80cb25dc745e46495ef1f470e802bea6eb",
+          "occurrence": 1,
+          "ordinal": 29,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

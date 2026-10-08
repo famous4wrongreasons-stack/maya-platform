@@ -1,0 +1,69 @@
+{
+  "counts": {
+    "cancelled": 0,
+    "duration_ms": 142.416875,
+    "fail": 0,
+    "pass": 6,
+    "skipped": 0,
+    "suites": 0,
+    "tests": 6,
+    "todo": 0
+  },
+  "id": "main-har5-preparation-report/har5-prepare-tests.log",
+  "projectionStatus": "COMPLETE",
+  "qualification": "Reporter projection only; launcher command status is retained separately",
+  "rawCopied": false,
+  "source": {
+    "contentHashesOnly": null,
+    "dirtyAtEnd": " M docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json\n M docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json\n M docs/rebuild/widget-release-programme/development-v14/README.md\n M docs/rebuild/widget-release-programme/development-v14/e1-u-proofs.json\n M docs/rebuild/widget-release-programme/development-v14/prepare-audit.mjs\n M docs/rebuild/widget-release-programme/development-v14/prepare-audit.test.mjs\n M docs/rebuild/widget-release-programme/development-v14/u-proofs.json\n?? docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/\n",
+    "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+    "headAtEnd": null,
+    "qualification": "No missing source/end binding is inferred from the final candidate",
+    "reportedStableAndClean": false,
+    "sameAsFinalHead": false,
+    "sourceHashStability": null,
+    "tree": null,
+    "treeAtEnd": null
+  },
+  "stage": "main-har5-preparation-report",
+  "status": "PASS",
+  "suites": [],
+  "tests": [
+    {
+      "identitySha256": "aff9faae48188dd66727b9e84a0132ea645a3531b6e82395a6327074f0c1e5f4",
+      "occurrence": 1,
+      "ordinal": 0,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "cbc8f6263cca99c0eded9cc44351e3060b7469dea1b518a3c93130474b49f926",
+      "occurrence": 1,
+      "ordinal": 1,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "6766fa40a5878876f80756825b00572f7a8226c00bdac5570467e406d2eaf422",
+      "occurrence": 1,
+      "ordinal": 2,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "2a36df70efe69e8c3904ce99554439b62360e469d6c88e2d394232f072527bfd",
+      "occurrence": 1,
+      "ordinal": 3,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "14f27bd65790685e9e0f6a70ace4522b5711947d5a47e425b9b04ceccfc1490a",
+      "occurrence": 1,
+      "ordinal": 4,
+      "status": "passed"
+    },
+    {
+      "identitySha256": "85b9413a47f555dbba2421dc9b02edd9ad3a37c5d3d4e7e9ddb7538b5ab7900e",
+      "occurrence": 1,
+      "ordinal": 5,
+      "status": "passed"
+    }
+  ]
+}

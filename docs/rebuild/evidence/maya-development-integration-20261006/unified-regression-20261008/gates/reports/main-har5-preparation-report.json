@@ -1,0 +1,50 @@
+{
+  "qualification": "Unqualified source reconciliation checks only; dirty docs tree explicitly recorded",
+  "source": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "commands": [
+    {
+      "name": "har5-prepare",
+      "args": [
+        "node",
+        "docs/rebuild/widget-release-programme/development-v14/prepare-audit.mjs",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 48,
+      "sha256": "626295c3b7730ecf8c96a1a2a4d36c65e6c44548f7f4afdfc1d2b3507a21a07e"
+    },
+    {
+      "name": "har5-prepare-tests",
+      "args": [
+        "node",
+        "--test",
+        "docs/rebuild/widget-release-programme/development-v14/prepare-audit.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 210,
+      "sha256": "a5e4ec743b28715ef454ccfa4de928d1a3efbfb732ece686f487ac463b3e1d1f"
+    },
+    {
+      "name": "har5-checker",
+      "args": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 48,
+      "sha256": "088e2e9fdf3909d330a9a3630dc731fff135845f019ace32bb0c803a60e3ea8e"
+    },
+    {
+      "name": "har5-checker-self-test",
+      "args": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "elapsedMs": 48,
+      "sha256": "79bc1871bfe1450765327b3a9be06451f0d1ca30ee26a1be6b2884b95bf3b718"
+    }
+  ],
+  "dirtyAtEnd": " M docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json\n M docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json\n M docs/rebuild/widget-release-programme/development-v14/README.md\n M docs/rebuild/widget-release-programme/development-v14/e1-u-proofs.json\n M docs/rebuild/widget-release-programme/development-v14/prepare-audit.mjs\n M docs/rebuild/widget-release-programme/development-v14/prepare-audit.test.mjs\n M docs/rebuild/widget-release-programme/development-v14/u-proofs.json\n?? docs/rebuild/widget-release-programme/development-v14/history/pre-goods-20261007/\n"
+}

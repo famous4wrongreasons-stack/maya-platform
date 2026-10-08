@@ -1,0 +1,146 @@
+{
+  "stage": "g1",
+  "source": "04e45f4e4d716512596e5f118863f335f633783e",
+  "tree": "695021ab53bd517e666d6bb999d7527905dac84c",
+  "node": "v24.15.0",
+  "started": "2026-10-08T01:48:59.444Z",
+  "status": "FAIL",
+  "heapMb": 6144,
+  "workerCount": 1,
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "prisma-generate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "generate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "prisma-validate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "build-tables",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract/build-tables.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "emit-runtime-floor",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract/emit-runtime-floor.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "emit-confirmation-guard",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract/emit-confirmation-guard.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "emit-ledgers",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract/emit-ledgers.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "emit-f88",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract/emit-f88.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "prisma-generate",
+      "durationMs": 1722
+    },
+    {
+      "name": "prisma-validate",
+      "durationMs": 359
+    },
+    {
+      "name": "build-tables",
+      "durationMs": 115
+    },
+    {
+      "name": "emit-runtime-floor",
+      "durationMs": 22
+    },
+    {
+      "name": "emit-confirmation-guard",
+      "durationMs": 21
+    },
+    {
+      "name": "emit-ledgers",
+      "durationMs": 116
+    },
+    {
+      "name": "emit-f88",
+      "durationMs": 79
+    },
+    {
+      "name": "contract-types",
+      "durationMs": 2624
+    }
+  ],
+  "error": "contract-check exited 1; inspect its log",
+  "finished": "2026-10-08T01:49:05.176Z"
+}

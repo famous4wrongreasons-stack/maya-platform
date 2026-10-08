@@ -1,0 +1,2161 @@
+{
+  "contract": "maya.unified-previous-gates-inventory/1",
+  "generatedAt": "2026-10-08T03:16:36.924400+00:00",
+  "status": "SUPPORTING_INVENTORY_ONLY",
+  "acceptance": false,
+  "scope": "Completed historical gates in two exact directories; source-qualified, no new execution",
+  "currentGateResultsIncluded": false,
+  "aggregateTotals": null,
+  "countingRule": "Each run is independent. No summed total across overlapping corpora, retries, UI layers or source candidates.",
+  "stages": [
+    {
+      "id": "g1",
+      "status": "FAIL",
+      "report": "/tmp/maya-unified-regression-20261008/g1-report.json",
+      "source": {
+        "head": "04e45f4e4d716512596e5f118863f335f633783e",
+        "tree": "695021ab53bd517e666d6bb999d7527905dac84c",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:48:59.444Z",
+        "finished": "2026-10-08T01:49:05.176Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": 1,
+        "externalNodeNetwork": "loopback-only preload"
+      },
+      "commands": [
+        {
+          "name": "prisma-generate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 1722,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/prisma-generate.log"
+        },
+        {
+          "name": "prisma-validate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 359,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/prisma-validate.log"
+        },
+        {
+          "name": "build-tables",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 115,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/build-tables.log"
+        },
+        {
+          "name": "emit-runtime-floor",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 22,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/emit-runtime-floor.log"
+        },
+        {
+          "name": "emit-confirmation-guard",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 21,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/emit-confirmation-guard.log"
+        },
+        {
+          "name": "emit-ledgers",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 116,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/emit-ledgers.log"
+        },
+        {
+          "name": "emit-f88",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 79,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/emit-f88.log"
+        },
+        {
+          "name": "contract-types",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 2624,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/contract-types.log"
+        },
+        {
+          "name": "contract-check",
+          "status": "FAIL",
+          "timeoutMs": 180000,
+          "durationMs": null,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-regression-20261008/contract-check.log"
+        }
+      ]
+    },
+    {
+      "id": "g1-resume",
+      "status": "PASS",
+      "report": "/tmp/maya-unified-regression-20261008/g1-resume-report.json",
+      "source": {
+        "head": "c8235e76e77e08980cfc66409dff52b38f3673a4",
+        "tree": "3f300e364bc01bdbc320f19bc46c2beec8df5d6b",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:53:01.858Z",
+        "finished": "2026-10-08T01:54:28.302Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": 1,
+        "externalNodeNetwork": "loopback-only preload"
+      },
+      "commands": [
+        {
+          "name": "contract-check-attempt2",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 653,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/contract-check-attempt2.log"
+        },
+        {
+          "name": "backend-types",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 5590,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-types.log"
+        },
+        {
+          "name": "scripts-types",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 12721,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/scripts-types.log"
+        },
+        {
+          "name": "widgets-live-types",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 6447,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/widgets-live-types.log"
+        },
+        {
+          "name": "backend-lint",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 41621,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-lint.log"
+        },
+        {
+          "name": "k3",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 2483,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/k3.log"
+        },
+        {
+          "name": "backend-build",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 16926,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-build.log"
+        }
+      ]
+    },
+    {
+      "id": "g1-after-fixes",
+      "status": "FAIL",
+      "report": "/tmp/maya-unified-regression-20261008/g1-after-fixes-report.json",
+      "source": {
+        "head": "6b565434a428697baa1cee4bf3e53ee6c5a43e83",
+        "tree": "0c67c6bcf8dc3ce48ec756ea696b0d3521ce3e42",
+        "headAtEnd": "6b565434a428697baa1cee4bf3e53ee6c5a43e83",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:25:17.386Z",
+        "finished": "2026-10-08T02:26:28.018Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": "existing-command-default",
+        "externalNodeNetwork": "loopback-only preload",
+        "launcherSha256": "fd6124dde497464647c6b2b8ff9f94db428aa3548a7cf52d7f01bbb1f3f71ca2",
+        "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+      },
+      "commands": [
+        {
+          "name": "contract-types-after-fixes",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 2600,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/contract-types-after-fixes.log"
+        },
+        {
+          "name": "contract-check-after-fixes",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 655,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/contract-check-after-fixes.log"
+        },
+        {
+          "name": "backend-types-after-fixes",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 5706,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-types-after-fixes.log"
+        },
+        {
+          "name": "scripts-types-after-fixes",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 12957,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/scripts-types-after-fixes.log"
+        },
+        {
+          "name": "widgets-live-types-after-fixes",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 6640,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/widgets-live-types-after-fixes.log"
+        },
+        {
+          "name": "backend-lint-after-fixes",
+          "status": "FAIL",
+          "timeoutMs": 720000,
+          "durationMs": null,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-lint-after-fixes.log"
+        }
+      ]
+    },
+    {
+      "id": "g1-final-tail",
+      "status": "PASS",
+      "report": "/tmp/maya-unified-regression-20261008/g1-final-tail-report.json",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:28:50.004Z",
+        "finished": "2026-10-08T02:29:51.560Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": "existing-command-default",
+        "externalNodeNetwork": "loopback-only preload",
+        "launcherSha256": "25fe489508836deb8d812243ee25c569302dcc8e8da8c3d68d61d4640716c700",
+        "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+      },
+      "commands": [
+        {
+          "name": "backend-lint-final",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 41871,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-lint-final.log"
+        },
+        {
+          "name": "k3-final",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 2887,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/k3-final.log"
+        },
+        {
+          "name": "backend-build-final",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 16746,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-build-final.log"
+        }
+      ]
+    },
+    {
+      "id": "g2",
+      "status": "FAIL",
+      "report": "/tmp/maya-unified-regression-20261008/g2-report.json",
+      "source": {
+        "head": "c8235e76e77e08980cfc66409dff52b38f3673a4",
+        "tree": "3f300e364bc01bdbc320f19bc46c2beec8df5d6b",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:54:43.978Z",
+        "finished": "2026-10-08T01:54:52.829Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": 1,
+        "externalNodeNetwork": "loopback-only preload"
+      },
+      "commands": [
+        {
+          "name": "shell-typecheck",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 3769,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/shell-typecheck.log"
+        },
+        {
+          "name": "shell-self-test",
+          "status": "FAIL",
+          "timeoutMs": 720000,
+          "durationMs": null,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-regression-20261008/shell-self-test.log"
+        }
+      ]
+    },
+    {
+      "id": "g2-resume",
+      "status": "PASS",
+      "report": "/tmp/maya-unified-regression-20261008/g2-resume-report.json",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:56:58.961Z",
+        "finished": "2026-10-08T01:58:34.704Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": 1,
+        "externalNodeNetwork": "loopback-only preload"
+      },
+      "commands": [
+        {
+          "name": "shell-self-test-attempt2",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 5002,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/shell-self-test-attempt2.log"
+        },
+        {
+          "name": "shell-test",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 33433,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/shell-test.log"
+        },
+        {
+          "name": "shell-build",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 4059,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/shell-build.log"
+        },
+        {
+          "name": "react-types",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 3711,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/react-types.log"
+        },
+        {
+          "name": "react-tests",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 263,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/react-tests.log"
+        },
+        {
+          "name": "react-release-build",
+          "status": "PASS",
+          "timeoutMs": 300000,
+          "durationMs": 19068,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/react-release-build.log"
+        },
+        {
+          "name": "react-release-verify",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 7542,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/react-release-verify.log"
+        },
+        {
+          "name": "react-release-tests",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 22661,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/react-release-tests.log"
+        }
+      ]
+    },
+    {
+      "id": "census",
+      "status": "FAIL",
+      "report": "/tmp/maya-unified-regression-20261008/census-report.json",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:59:04.676Z",
+        "finished": "2026-10-08T02:04:16.276Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 3072,
+        "workerCount": 1,
+        "externalNodeNetwork": "loopback-only preload"
+      },
+      "commands": [
+        {
+          "name": "backend-full",
+          "status": "FAIL",
+          "timeoutMs": 720000,
+          "durationMs": null,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-full.log"
+        }
+      ]
+    },
+    {
+      "id": "census-after-fixes",
+      "status": "FAIL",
+      "report": "/tmp/maya-unified-regression-20261008/census-after-fixes-report.json",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:32:31.894Z",
+        "finished": "2026-10-08T02:37:46.322Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": "existing-command-default",
+        "externalNodeNetwork": "loopback-only preload",
+        "launcherSha256": "25fe489508836deb8d812243ee25c569302dcc8e8da8c3d68d61d4640716c700",
+        "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+      },
+      "commands": [
+        {
+          "name": "backend-full-after-fixes",
+          "status": "FAIL",
+          "timeoutMs": 720000,
+          "durationMs": null,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-full-after-fixes.log"
+        }
+      ]
+    },
+    {
+      "id": "census-loopback",
+      "status": "PASS",
+      "report": "/tmp/maya-unified-regression-20261008/census-loopback-report.json",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:38:30.609Z",
+        "finished": "2026-10-08T02:43:42.830Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": "existing-command-default",
+        "externalNodeNetwork": "loopback-only preload",
+        "launcherSha256": "55d70a0100474d5353c2b02c8d5519a3c3124277830d401499cf5996ea01f09b",
+        "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+      },
+      "commands": [
+        {
+          "name": "backend-full-loopback",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 312175,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-full-loopback.log"
+        }
+      ]
+    },
+    {
+      "id": "e2e",
+      "status": "PASS",
+      "report": "/tmp/maya-unified-regression-20261008/e2e-report.json",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:44:03.464Z",
+        "finished": "2026-10-08T02:44:04.129Z"
+      },
+      "budgets": {
+        "node": "v24.15.0",
+        "heapMb": 6144,
+        "workerCount": 1,
+        "externalNodeNetwork": "loopback-only preload",
+        "launcherSha256": "55d70a0100474d5353c2b02c8d5519a3c3124277830d401499cf5996ea01f09b",
+        "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+      },
+      "commands": [
+        {
+          "name": "backend-e2e",
+          "status": "PASS",
+          "timeoutMs": 720000,
+          "durationMs": 615,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-regression-20261008/backend-e2e.log"
+        }
+      ]
+    },
+    {
+      "id": "pg-attempt2",
+      "status": "FAIL",
+      "report": "/tmp/maya-unified-pg-20261008-attempt2/pg-report.json",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:45:06.589Z",
+        "finished": "2026-10-08T02:53:58.717Z"
+      },
+      "budgets": {
+        "heapMb": 3072,
+        "externalNodeNetwork": "loopback-only preload",
+        "launcherSha256": "ada8940d016b32bbf8fd6293a22b5eec19300c6d13f25b9e203b3a4ca41d9542",
+        "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+        "pgSharedBuffersMb": 64,
+        "pgWorkMemMb": 4,
+        "pgMaxConnections": 30
+      },
+      "commands": [
+        {
+          "name": "pg-init",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 310,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/pg-init.log"
+        },
+        {
+          "name": "pg-start",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 117,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/pg-start.log"
+        },
+        {
+          "name": "maya_widget_gate_proof_unified-create",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 63,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-create.log"
+        },
+        {
+          "name": "maya_widget_gate_proof_unified-validate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 671,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-validate.log"
+        },
+        {
+          "name": "maya_widget_gate_proof_unified-migrate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 823,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-migrate.log"
+        },
+        {
+          "name": "maya_widget_gate_proof_unified-status",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 335,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-status.log"
+        },
+        {
+          "name": "maya_widget_gate_proof_unified-diff",
+          "status": "FAIL",
+          "timeoutMs": 180000,
+          "durationMs": 481,
+          "exitCode": 2,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-diff.log"
+        },
+        {
+          "name": "maya_events_proof_unified-create",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 46,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-create.log"
+        },
+        {
+          "name": "maya_events_proof_unified-validate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 355,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-validate.log"
+        },
+        {
+          "name": "maya_events_proof_unified-migrate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 808,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-migrate.log"
+        },
+        {
+          "name": "maya_events_proof_unified-status",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 356,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-status.log"
+        },
+        {
+          "name": "maya_events_proof_unified-diff",
+          "status": "FAIL",
+          "timeoutMs": 180000,
+          "durationMs": 475,
+          "exitCode": 2,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-diff.log"
+        },
+        {
+          "name": "maya_gates_smoke_unified-create",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 47,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-create.log"
+        },
+        {
+          "name": "maya_gates_smoke_unified-validate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 361,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-validate.log"
+        },
+        {
+          "name": "maya_gates_smoke_unified-migrate",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 813,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-migrate.log"
+        },
+        {
+          "name": "maya_gates_smoke_unified-status",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 337,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-status.log"
+        },
+        {
+          "name": "maya_gates_smoke_unified-diff",
+          "status": "FAIL",
+          "timeoutMs": 180000,
+          "durationMs": 477,
+          "exitCode": 2,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-diff.log"
+        },
+        {
+          "name": "schema-migrations",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 481,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/schema-migrations.log"
+        },
+        {
+          "name": "schema-constraints",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 29,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/schema-constraints.log"
+        },
+        {
+          "name": "schema-indexes",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 29,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/schema-indexes.log"
+        },
+        {
+          "name": "schema-triggers",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 15,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/schema-triggers.log"
+        },
+        {
+          "name": "schema-functions",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 14,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/schema-functions.log"
+        },
+        {
+          "name": "events-live",
+          "status": "PASS",
+          "timeoutMs": 300000,
+          "durationMs": 636,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/events-live.log"
+        },
+        {
+          "name": "smoke-seed",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 417,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list"
+        },
+        {
+          "name": "http-smoke",
+          "status": "FAIL",
+          "timeoutMs": 300000,
+          "durationMs": 233,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/http-smoke.log"
+        },
+        {
+          "name": "carrier-harness",
+          "status": "PASS",
+          "timeoutMs": 180000,
+          "durationMs": 53,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/carrier-harness.log"
+        },
+        {
+          "name": "http-cohort",
+          "status": "FAIL",
+          "timeoutMs": 720000,
+          "durationMs": 227104,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/http-cohort.log"
+        },
+        {
+          "name": "widgets-live",
+          "status": "FAIL",
+          "timeoutMs": 720000,
+          "durationMs": 291432,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/widgets-live.log"
+        },
+        {
+          "name": "combined-react",
+          "status": "FAIL",
+          "timeoutMs": 300000,
+          "durationMs": 4520,
+          "exitCode": 1,
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/combined-react.log"
+        },
+        {
+          "name": "pg-stop",
+          "status": "PASS",
+          "timeoutMs": 90000,
+          "durationMs": 226,
+          "exitCode": 0,
+          "exitCodeBasis": "launcher completed list",
+          "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/pg-stop.log"
+        }
+      ]
+    }
+  ],
+  "jestRuns": [
+    {
+      "id": "backend-initial-census",
+      "status": "FAIL",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:59:04.676Z",
+        "finished": "2026-10-08T02:04:16.276Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/census-report.json",
+      "jestJson": "/tmp/maya-unified-regression-20261008/backend-full.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/backend-full.log",
+      "counts": {
+        "numTotalTestSuites": 644,
+        "numPassedTestSuites": 629,
+        "numFailedTestSuites": 15,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 7196,
+        "numPassedTests": 7174,
+        "numFailedTests": 22,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [
+        {
+          "path": "maya-saas-backend/src/widgets/lowering/gate9-lowering.architecture.spec.ts",
+          "status": "failed",
+          "failedAssertions": 3
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/package5-b19-remediation.architecture.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/entitlements/widget-release-profile.contract.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/projection/projector-fences.architecture.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/ai-tools/planner-wire-context.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/emission/seal-h6.architecture.spec.ts",
+          "status": "failed",
+          "failedAssertions": 3
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/gates/facts.architecture.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/proactive/proactive.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/gates/gate6.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/gates/release-evidence.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/ai-tools/routing-regression.acceptance.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/booking/booking.spec.ts",
+          "status": "failed",
+          "failedAssertions": 4
+        },
+        {
+          "path": "maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/src/ai-tools/goods-presentation.spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        }
+      ],
+      "qualification": "Historical mixed runtime/architecture/fixture failures; not erased by later fixes"
+    },
+    {
+      "id": "backend-sandbox-after-fixes",
+      "status": "FAIL",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:32:31.894Z",
+        "finished": "2026-10-08T02:37:46.322Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/census-after-fixes-report.json",
+      "jestJson": "/tmp/maya-unified-regression-20261008/backend-full-after-fixes.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/backend-full-after-fixes.log",
+      "counts": {
+        "numTotalTestSuites": 645,
+        "numPassedTestSuites": 641,
+        "numFailedTestSuites": 4,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 7230,
+        "numPassedTests": 7190,
+        "numFailedTests": 40,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [
+        {
+          "path": "maya-saas-backend/src/admin/admin.controller.spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/src/bootstrap/configure-http-app.spec.ts",
+          "status": "failed",
+          "failedAssertions": 7
+        },
+        {
+          "path": "maya-saas-backend/src/package5-wave1/operational-work.http.spec.ts",
+          "status": "failed",
+          "failedAssertions": 9
+        },
+        {
+          "path": "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts",
+          "status": "failed",
+          "failedAssertions": 22
+        }
+      ],
+      "qualification": "Failed sandbox attempt; never relabelled PASS",
+      "sandboxDiagnosis": {
+        "failedAssertionsContainingListenEPERM": 40,
+        "classification": "All 40 failed assertions contain listen EPERM on 127.0.0.1; raw FAIL retained; later loopback run is separate"
+      }
+    },
+    {
+      "id": "backend-loopback-census",
+      "status": "PASS",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:38:30.609Z",
+        "finished": "2026-10-08T02:43:42.830Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/census-loopback-report.json",
+      "jestJson": "/tmp/maya-unified-regression-20261008/backend-full-loopback.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/backend-full-loopback.log",
+      "counts": {
+        "numTotalTestSuites": 645,
+        "numPassedTestSuites": 645,
+        "numFailedTestSuites": 0,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 7230,
+        "numPassedTests": 7230,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [],
+      "qualification": "7230 tests / 645 suites PASS for exact clean 1bb1b2ab source, not current later source"
+    },
+    {
+      "id": "backend-e2e",
+      "status": "PASS",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:44:03.464Z",
+        "finished": "2026-10-08T02:44:04.129Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/e2e-report.json",
+      "jestJson": "/tmp/maya-unified-regression-20261008/backend-e2e.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/backend-e2e.log",
+      "counts": {
+        "numTotalTestSuites": 1,
+        "numPassedTestSuites": 1,
+        "numFailedTestSuites": 0,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 1,
+        "numPassedTests": 1,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [],
+      "qualification": "One separate backend e2e; not a live business acceptance corpus"
+    },
+    {
+      "id": "http-cohort-attempt2",
+      "status": "FAIL",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:45:06.589Z",
+        "finished": "2026-10-08T02:53:58.717Z"
+      },
+      "report": "/tmp/maya-unified-pg-20261008-attempt2/pg-report.json",
+      "jestJson": "/tmp/maya-unified-pg-20261008-attempt2/http-cohort.json",
+      "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/http-cohort.log",
+      "counts": {
+        "numTotalTestSuites": 13,
+        "numPassedTestSuites": 7,
+        "numFailedTestSuites": 6,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 97,
+        "numPassedTests": 81,
+        "numFailedTests": 16,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [
+        {
+          "path": "maya-saas-backend/test/widgets-live/schedule-chat.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/service-price.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 9
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/profile-isolation.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/development-integration.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        }
+      ],
+      "qualification": "Subset repeats tests in widgets-live; do not add counts"
+    },
+    {
+      "id": "widgets-live-attempt2",
+      "status": "FAIL",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:45:06.589Z",
+        "finished": "2026-10-08T02:53:58.717Z"
+      },
+      "report": "/tmp/maya-unified-pg-20261008-attempt2/pg-report.json",
+      "jestJson": "/tmp/maya-unified-pg-20261008-attempt2/widgets-live.json",
+      "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/widgets-live.log",
+      "counts": {
+        "numTotalTestSuites": 57,
+        "numPassedTestSuites": 40,
+        "numFailedTestSuites": 17,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 557,
+        "numPassedTests": 516,
+        "numFailedTests": 41,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [
+        {
+          "path": "maya-saas-backend/test/widgets-live/service-price.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 9
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/schedule-chat.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/profile-isolation.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/development-integration.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/gate1-5.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/availability-calendar.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 8
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/owner-read-paths.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/personal-source.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/semantic-slot-captures.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 3
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/harness.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 3
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/wr-release.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 2
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/release-revocation.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        },
+        {
+          "path": "maya-saas-backend/test/widgets-live/user-turn-canonical.live-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        }
+      ],
+      "qualification": "Actual frozen HTTP/PG FAIL retained with 41 failed assertions across17 suites"
+    },
+    {
+      "id": "events-live-attempt2",
+      "status": "PASS",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:45:06.589Z",
+        "finished": "2026-10-08T02:53:58.717Z"
+      },
+      "report": "/tmp/maya-unified-pg-20261008-attempt2/pg-report.json",
+      "jestJson": "/tmp/maya-unified-pg-20261008-attempt2/events-live.json",
+      "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/events-live.log",
+      "counts": {
+        "numTotalTestSuites": 1,
+        "numPassedTestSuites": 1,
+        "numFailedTestSuites": 0,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 4,
+        "numPassedTests": 4,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [],
+      "qualification": "Four local events tests only"
+    },
+    {
+      "id": "combined-react-attempt2",
+      "status": "FAIL",
+      "source": {
+        "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+        "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+        "dirtyAtEnd": "",
+        "reportedStableAndClean": true,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T02:45:06.589Z",
+        "finished": "2026-10-08T02:53:58.717Z"
+      },
+      "report": "/tmp/maya-unified-pg-20261008-attempt2/pg-report.json",
+      "jestJson": "/tmp/maya-unified-pg-20261008-attempt2/combined-react.json",
+      "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/combined-react.log",
+      "counts": {
+        "numTotalTestSuites": 1,
+        "numPassedTestSuites": 0,
+        "numFailedTestSuites": 1,
+        "numPendingTestSuites": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTotalTests": 1,
+        "numPassedTests": 0,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "failedSuites": [
+        {
+          "path": "maya-saas-backend/test/widgets-live/development-integration.browser-spec.ts",
+          "status": "failed",
+          "failedAssertions": 1
+        }
+      ],
+      "qualification": "Failed scripted synthetic current React scenario; no combined/browser acceptance"
+    }
+  ],
+  "uiTestRuns": [
+    {
+      "id": "shell-test",
+      "status": "PASS",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:56:58.961Z",
+        "finished": "2026-10-08T01:58:34.704Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/g2-resume-report.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/shell-test.log",
+      "counts": {
+        "tests": 629,
+        "suites": 8,
+        "pass": 622,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 7,
+        "todo": 0,
+        "duration_ms": 33335.340041
+      }
+    },
+    {
+      "id": "react-tests",
+      "status": "PASS",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:56:58.961Z",
+        "finished": "2026-10-08T01:58:34.704Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/g2-resume-report.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/react-tests.log",
+      "counts": {
+        "tests": 101,
+        "suites": 0,
+        "pass": 101,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 134.037209
+      }
+    },
+    {
+      "id": "react-release-tests",
+      "status": "PASS",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:56:58.961Z",
+        "finished": "2026-10-08T01:58:34.704Z"
+      },
+      "report": "/tmp/maya-unified-regression-20261008/g2-resume-report.json",
+      "rawLog": "/tmp/maya-unified-regression-20261008/react-release-tests.log",
+      "counts": {
+        "tests": 18,
+        "suites": 0,
+        "pass": 18,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 22566.648708
+      }
+    }
+  ],
+  "shellRatchetAttempts": [
+    {
+      "id": "shell-self-test",
+      "status": "FAIL",
+      "source": {
+        "head": "c8235e76e77e08980cfc66409dff52b38f3673a4",
+        "tree": "3f300e364bc01bdbc320f19bc46c2beec8df5d6b",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:54:43.978Z",
+        "finished": "2026-10-08T01:54:52.829Z"
+      },
+      "rawLog": "/tmp/maya-unified-regression-20261008/shell-self-test.log",
+      "ratchetCounts": {
+        "refuse": {
+          "passed": 67,
+          "total": 68
+        },
+        "admit": {
+          "passed": 21,
+          "total": 24
+        },
+        "coverage": {
+          "passed": 31,
+          "total": 31
+        },
+        "writeGuard": {
+          "passed": 2,
+          "total": 2
+        },
+        "pwaContract": {
+          "passed": 51,
+          "total": 51
+        },
+        "bypassProbes": {
+          "passed": 8,
+          "total": 8
+        }
+      }
+    },
+    {
+      "id": "shell-self-test-attempt2",
+      "status": "PASS",
+      "source": {
+        "head": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a",
+        "tree": "3a9d8d0555caa034edfbd91ba7fd1f8b3bdad718",
+        "headAtEnd": null,
+        "dirtyAtEnd": null,
+        "reportedStableAndClean": false,
+        "binding": "launcher report; no current-candidate substitution",
+        "started": "2026-10-08T01:56:58.961Z",
+        "finished": "2026-10-08T01:58:34.704Z"
+      },
+      "rawLog": "/tmp/maya-unified-regression-20261008/shell-self-test-attempt2.log",
+      "ratchetCounts": {
+        "refuse": {
+          "passed": 68,
+          "total": 68
+        },
+        "admit": {
+          "passed": 24,
+          "total": 24
+        },
+        "coverage": {
+          "passed": 31,
+          "total": 31
+        },
+        "writeGuard": {
+          "passed": 2,
+          "total": 2
+        },
+        "pwaContract": {
+          "passed": 51,
+          "total": 51
+        },
+        "bypassProbes": {
+          "passed": 8,
+          "total": 8
+        }
+      }
+    }
+  ],
+  "overlap": [
+    {
+      "left": "http-cohort-attempt2",
+      "right": "widgets-live-attempt2",
+      "sharedSuites": 13,
+      "sharedTestIdentifiers": 97,
+      "leftIsSubset": true,
+      "aggregateAllowed": false
+    },
+    {
+      "runs": [
+        "backend-initial-census",
+        "backend-sandbox-after-fixes",
+        "backend-loopback-census"
+      ],
+      "relation": "successive census attempts, different source for initial; do not add totals",
+      "aggregateAllowed": false
+    }
+  ],
+  "schemaDiff": {
+    "source": {
+      "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+      "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "dirtyAtEnd": "",
+      "reportedStableAndClean": true,
+      "binding": "launcher report; no current-candidate substitution",
+      "started": "2026-10-08T02:45:06.589Z",
+      "finished": "2026-10-08T02:53:58.717Z"
+    },
+    "observations": [
+      {
+        "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-diff.log",
+        "status": "FAIL",
+        "exitCode": 2,
+        "changedTables": [
+          "PublicBookingAttempt",
+          "PublicBookingQuote",
+          "PublicBookingSession"
+        ],
+        "removedForeignKeys": 3,
+        "addedForeignKeys": 3
+      },
+      {
+        "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-diff.log",
+        "status": "FAIL",
+        "exitCode": 2,
+        "changedTables": [
+          "PublicBookingAttempt",
+          "PublicBookingQuote",
+          "PublicBookingSession"
+        ],
+        "removedForeignKeys": 3,
+        "addedForeignKeys": 3
+      },
+      {
+        "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-diff.log",
+        "status": "FAIL",
+        "exitCode": 2,
+        "changedTables": [
+          "PublicBookingAttempt",
+          "PublicBookingQuote",
+          "PublicBookingSession"
+        ],
+        "removedForeignKeys": 3,
+        "addedForeignKeys": 3
+      }
+    ],
+    "interpretation": "Three PublicBooking FK definitions differ in every proof DB; migrate/status PASS is not schema-diff PASS",
+    "pendingDecisionDocument": "docs/rebuild/MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md",
+    "changedByInventory": false
+  },
+  "invalidSmokeInvocation": {
+    "source": {
+      "head": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+      "headAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "dirtyAtEnd": "",
+      "reportedStableAndClean": true,
+      "binding": "launcher report; no current-candidate substitution",
+      "started": "2026-10-08T02:45:06.589Z",
+      "finished": "2026-10-08T02:53:58.717Z"
+    },
+    "status": "FAIL_INVALID_INVOCATION",
+    "rawLog": "/tmp/maya-unified-pg-20261008-attempt2/http-smoke.log",
+    "exitCode": 1,
+    "errorCode": "http_smoke_failed",
+    "guard": "maya-saas-backend/scripts/http-smoke-fixtures.ts:28",
+    "reason": "HTTP_SMOKE_EXTERNAL_SERVER=true was refused by the disposable-fixture guard before smoke assertions",
+    "noProductAcceptanceResult": true
+  },
+  "buildLimits": {
+    "reactBuildMode": "production endpoint embedded in local artifact; build/verify is not deployment or network acceptance",
+    "nativeVerified": false,
+    "shellBuildSources": 38,
+    "reactArtifactFiles": 8,
+    "source": "796ec93fcb8a6c04dfed3283d70f90b1e61af89a"
+  },
+  "resourceLimits": {
+    "heapIsCeilingNotMeasuredRss": true,
+    "previousPgClusterStoppedAsReported": true,
+    "providerAndModelQualification": false,
+    "newTestsRun": false,
+    "newServicesStarted": false,
+    "sourceEdited": false
+  },
+  "privacy": {
+    "rawLogsCopied": false,
+    "environmentValuesCopied": false,
+    "authOrPrivateLogsIncluded": false,
+    "pgDataFilesRead": false,
+    "failuresRewritten": false
+  },
+  "rawArtifacts": [
+    {
+      "path": "/tmp/maya-unified-regression-20261008/g1-report.json",
+      "bytes": 4206,
+      "sha256": "5521adb0172ddebebf4cd8038175cfe3cc80482cd767a01a811ec1d5ae73b501",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/g1-resume-report.json",
+      "bytes": 3058,
+      "sha256": "e6d87ea018bc822cff731aedb2fa0ef21e6c167c68fb2dfb417c07fbbfc46896",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/g1-after-fixes-report.json",
+      "bytes": 3268,
+      "sha256": "d38a19978f2358af7b8bcc6a47b27071c697b02cbf4ac641c8cd6b64ba90405b",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/g1-final-tail-report.json",
+      "bytes": 1937,
+      "sha256": "dd7449c39a7233b525338cb86bf423d40aceccdd9364ebadd66ad3b9cc5449a0",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/g2-report.json",
+      "bytes": 1265,
+      "sha256": "6cbf1f78f4f8b93be03bfcf99b72ecc8d30308537d6de1b281f664a05dd01fba",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/g2-resume-report.json",
+      "bytes": 3425,
+      "sha256": "012ec3283265160c18c639d7b502bae259da8dd896fa79f7ec9e83771de082e4",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/census-report.json",
+      "bytes": 1273,
+      "sha256": "4422fd7ae72cfef1194a60a4e88ef9997bde63c1e67606cba324a428f74017a4",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/census-after-fixes-report.json",
+      "bytes": 1604,
+      "sha256": "638e388ad7a063029960a15170c64958c20455787b1b4031ab1c09b9b71bb5f6",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/census-loopback-report.json",
+      "bytes": 1611,
+      "sha256": "8712272fc264f62b1a4a6ccaae3acc14a915a1427ef2e71f6079f77ca5acb3c5",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/e2e-report.json",
+      "bytes": 1321,
+      "sha256": "d345c7206988f875aac801be2b07bafb90d567346d0e67aec8038202fff786d2",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/pg-report.json",
+      "bytes": 18706,
+      "sha256": "b82ecbe67ac2ab1844002a042db0d135e132f5e59abe4543f6ddb1cd353e297b",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/prisma-generate.log",
+      "bytes": 256,
+      "sha256": "686c5ad1d95d0560af0b92cbede48cb88af62f5ebc02b705b6be8fb1b3780355",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/prisma-validate.log",
+      "bytes": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/build-tables.log",
+      "bytes": 214,
+      "sha256": "03084928a4b68dc58944cd4de17ac928a1ff929628064168958b31b2efb3d22b",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/emit-runtime-floor.log",
+      "bytes": 52,
+      "sha256": "ff22c52034ae9e86eda0b55b91ed18f2f8a6b60824e063e78e93efb268a4a066",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/emit-confirmation-guard.log",
+      "bytes": 63,
+      "sha256": "6416bd672f5f1d05e25edef8d4c9b3ca835c554bbdffc12189ce04b6ebda7198",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/emit-ledgers.log",
+      "bytes": 265,
+      "sha256": "47faa9df88f9612d16a8f83a89f9ce29c6be4bfe02201c665ea34f03b7d0a7d5",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/emit-f88.log",
+      "bytes": 97,
+      "sha256": "c83960bcdd7eb70d747a83d83941333ab8ebad6c3286591db299935ee33813e4",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/contract-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/contract-check.log",
+      "bytes": 6293,
+      "sha256": "e81618889b6129eec52bb399e72176dd032c2269cba99b55567fb5c106262231",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/contract-check-attempt2.log",
+      "bytes": 6539,
+      "sha256": "4b4dcd3635a38a0dd137894ec21039362f726930d49a98fb954105d63a16fe21",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-types.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/scripts-types.log",
+      "bytes": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/widgets-live-types.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-lint.log",
+      "bytes": 2625,
+      "sha256": "35073c728b762d37dae8a7385e41ab2d7e91c37952e914d8d299e56b14a6c6df",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/k3.log",
+      "bytes": 7947,
+      "sha256": "30e5bf5957dfc6eb5e2e328fab5d336c6564fdb19eb5889d959bdfdc33d8c2f6",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-build.log",
+      "bytes": 158,
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/contract-types-after-fixes.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/contract-check-after-fixes.log",
+      "bytes": 6539,
+      "sha256": "4b4dcd3635a38a0dd137894ec21039362f726930d49a98fb954105d63a16fe21",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-types-after-fixes.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/scripts-types-after-fixes.log",
+      "bytes": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/widgets-live-types-after-fixes.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-lint-after-fixes.log",
+      "bytes": 4365,
+      "sha256": "9aceb03acefed6f921897cb7c1ad288c984d0c55b2d5d3b1a5dc596c3eb239e3",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-lint-final.log",
+      "bytes": 2625,
+      "sha256": "35073c728b762d37dae8a7385e41ab2d7e91c37952e914d8d299e56b14a6c6df",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/k3-final.log",
+      "bytes": 7873,
+      "sha256": "ac417a602e6a928bfc26d6082fe1bd715f735be5a31d917a44d5895f8ba216f1",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-build-final.log",
+      "bytes": 158,
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/shell-typecheck.log",
+      "bytes": 318,
+      "sha256": "f690ee9ad625a45d88c3474a5a02c0fa4b92a7d7b544088da349e4b896c6e471",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/shell-self-test.log",
+      "bytes": 14773,
+      "sha256": "f9cc2fadc8fd2b90666db1d4cff1ef25d510e48aad7e325c96039cbaa7a30e90",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/shell-self-test-attempt2.log",
+      "bytes": 12523,
+      "sha256": "79407a3bac8d527ac3e4029b95520d06064176b911badd393d4d44d244948a81",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/shell-test.log",
+      "bytes": 68381,
+      "sha256": "e6114aeabee8f7ff034116cc45a8e8a61b3351af6542fa8a1a830156093e76f6",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/shell-build.log",
+      "bytes": 1010,
+      "sha256": "53500138e8c8d38698966fb99078b7165be5604a37850a458d08ee43f36bf3b1",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/react-types.log",
+      "bytes": 194,
+      "sha256": "fc58430eedc0850ec05acb3e9d7675c0ffded4240b7e89958713faa763f508ec",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/react-tests.log",
+      "bytes": 7246,
+      "sha256": "300ba45cfd8fc0d62a537078d9e04d8d99e18984eadbc1cba502a52bc9d9fa3b",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/react-release-build.log",
+      "bytes": 2288,
+      "sha256": "c7ac67aacee1ea4161f95b27de6b2d1d2b71e73c265b7eed85171168627738dc",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/react-release-verify.log",
+      "bytes": 732,
+      "sha256": "b4ed0c332b7901918d467347055646bfdb6af5c042bc626f577633dd65fc7ad8",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/react-release-tests.log",
+      "bytes": 1470,
+      "sha256": "5061ccb646da212656ef5ddd0948685b862658bbfabce2dc461b5dea94801621",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-full.log",
+      "bytes": 1488080,
+      "sha256": "38354d1dd7dd38db4c946dfdf1539b42c89884189754e758723ae25b04ba6b74",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-full-after-fixes.log",
+      "bytes": 1409465,
+      "sha256": "bc03f4d241bcf58604c38c4d910c0970f52770d41746b35140dac854b81680d6",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-full-loopback.log",
+      "bytes": 1392834,
+      "sha256": "741d7667ac8b2ab2b38633f0b5a3bf5a29d5aed95be64a84c8e6c51292395d5f",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-e2e.log",
+      "bytes": 487,
+      "sha256": "db6f22bbb502f40ed2ee94eba6725406c34cbf1a7465b75e09b1eae2410d3bbb",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/pg-init.log",
+      "bytes": 886,
+      "sha256": "dc63341cb1fbf6c0a86d1202dc5f2d575c2e6e9b2788e7edb11ac1fc251f2220",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-create.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-validate.log",
+      "bytes": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-migrate.log",
+      "bytes": 14709,
+      "sha256": "d0cd8b4f23e87f82a2ab867115a889575bbb0ab808697a159d20d27039c95511",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-status.log",
+      "bytes": 276,
+      "sha256": "9812047bf2f52ffdb9f42c7e633f4c0fdfbc0687387799d4b530f836bd045433",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_widget_gate_proof_unified-diff.log",
+      "bytes": 525,
+      "sha256": "fe8599bb04f9e4ef3919b17b166e716f37c3b25ff8b8079fd1c0c57fd5fb9a03",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-create.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-validate.log",
+      "bytes": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-migrate.log",
+      "bytes": 14704,
+      "sha256": "ec08a05ba9633d07a8a8ccef87ce1be0696a0d4fa6a536bf9be1d8a28348aac8",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-status.log",
+      "bytes": 271,
+      "sha256": "8b33d2c60c7eeb94d7e8d799e3ec712f9fc8741099ce2a025026525644fb2d51",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_events_proof_unified-diff.log",
+      "bytes": 525,
+      "sha256": "fe8599bb04f9e4ef3919b17b166e716f37c3b25ff8b8079fd1c0c57fd5fb9a03",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-create.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-validate.log",
+      "bytes": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-migrate.log",
+      "bytes": 14703,
+      "sha256": "b5ac1aaa63c73c198f15655ff0b68987484fc0807f99e6ea7590a883b81a6fa2",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-status.log",
+      "bytes": 270,
+      "sha256": "8ef40c3e735d34c360d14c0d84b1c1606f46f74111b4b96e0c99a26ff7ac62a8",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/maya_gates_smoke_unified-diff.log",
+      "bytes": 525,
+      "sha256": "fe8599bb04f9e4ef3919b17b166e716f37c3b25ff8b8079fd1c0c57fd5fb9a03",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/schema-migrations.log",
+      "bytes": 11483,
+      "sha256": "7a5326714a7d8e67e06b41b13d3a451f8edabfe0e8699dbcbc2b6c75a3e70aa8",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/schema-constraints.log",
+      "bytes": 172084,
+      "sha256": "76a14682f99fce74c4393b8627e1e9c59d7169bbe68b65e150bde4205ee7c94b",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/schema-indexes.log",
+      "bytes": 124013,
+      "sha256": "323b67a244dc933d4fc2102a09599eea58ff737120db2f86e7a3596e82dad3c2",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/schema-triggers.log",
+      "bytes": 36903,
+      "sha256": "e65f1155ed16831e20361bc5e0901abda2e46bab28e157e79d764dec123bdd25",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/schema-functions.log",
+      "bytes": 330476,
+      "sha256": "f3579d4bd4b5b4a2839b2431d74463921b604b66f4b3dbeb17004e99af048543",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/events-live.log",
+      "bytes": 887,
+      "sha256": "ebc5ea3bcb13437a34ee8f730eb58ab9675ce147e2ed20b9e9038666d2208e2f",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/http-smoke.log",
+      "bytes": 1384,
+      "sha256": "b256f95fa39f83a231aa3909985f8f62b8262238c4e42213fbd40b527692921b",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/carrier-harness.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/http-cohort.log",
+      "bytes": 56223,
+      "sha256": "d553305f5f188e30f7359272e0f9d1408ea870ae5d8cbb1e023368bc63d49158",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/widgets-live.log",
+      "bytes": 164662,
+      "sha256": "62b42ce0c3ceecb8d946c17e4c4b5d530a704b9a3923149c448c9332428563c3",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/combined-react.log",
+      "bytes": 2212,
+      "sha256": "cae6a19abd17b1e7468d422b30b5c28ebba6104c636fa02da22c9633738fdbfa",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-full.json",
+      "bytes": 3830401,
+      "sha256": "ded390350610b0845f77796e143788063e916268fbebd6f85d2895301c1e5f73",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-full-after-fixes.json",
+      "bytes": 3663288,
+      "sha256": "fc1f8172ebf9cf3b03e3ec0b7426e1a779ed16a33b1216bbedff65b50b808961",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-full-loopback.json",
+      "bytes": 3641907,
+      "sha256": "f028eee4173903a6d9ae88f4b6831447ad48f33f49337d8275a0a1e60c3ea3b6",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-regression-20261008/backend-e2e.json",
+      "bytes": 1109,
+      "sha256": "478b39816cba3ce8208374af669edb48ccdad591cbb0b9927816de003cf6efea",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/http-cohort.json",
+      "bytes": 84925,
+      "sha256": "ac531fb30ada535d12fa6c10b721123d8935ff22a6d932467e156b73f2bfd5d3",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/widgets-live.json",
+      "bytes": 412915,
+      "sha256": "b4d142d568f7181f41d7e1af911cabc44f1cf7d1cf8be1458a64bc15cbda013d",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/events-live.json",
+      "bytes": 3346,
+      "sha256": "5737a1d3af3b479c87c2c1c76e2eb033f44fe2931dac2ca729293b98614bdc02",
+      "rawCopied": false
+    },
+    {
+      "path": "/tmp/maya-unified-pg-20261008-attempt2/combined-react.json",
+      "bytes": 3307,
+      "sha256": "5e37eb8f6e1ead6463767f0a11f6b7126cc3e68c6abfffe3c652f2f49cff0281",
+      "rawCopied": false
+    }
+  ]
+}

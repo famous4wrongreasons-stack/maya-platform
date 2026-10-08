@@ -1,0 +1,17 @@
+{
+  "scope": "planner source files only; development tree dirty, not aggregate evidence",
+  "before": {
+    "src/ai-tools/planner-wire-context.ts": "301d7fd00b2bd4debe721b81c27897d20288f3ff39c74b265d1158eb9af6a131",
+    "src/ai-tools/planner-wire-context.spec.ts": "b6bb4f6c078ff876c6165ea723644942c5373b577bc17ce7c8a96704223a98b0",
+    "src/ai-tools/ai-core-model.service.ts": "2aa719a4320cc7e4a6107115639c9dfbd91403885df9134dfba984f48838be68",
+    "src/ai-tools/ai-core-model.service.spec.ts": "cd6ba399cd40b483f34a03cd05f15bf80522eadedef0c553e6d8953e1d2e2b7a"
+  },
+  "status": "PASS",
+  "after": {
+    "src/ai-tools/planner-wire-context.ts": "301d7fd00b2bd4debe721b81c27897d20288f3ff39c74b265d1158eb9af6a131",
+    "src/ai-tools/planner-wire-context.spec.ts": "b6bb4f6c078ff876c6165ea723644942c5373b577bc17ce7c8a96704223a98b0",
+    "src/ai-tools/ai-core-model.service.ts": "2aa719a4320cc7e4a6107115639c9dfbd91403885df9134dfba984f48838be68",
+    "src/ai-tools/ai-core-model.service.spec.ts": "cd6ba399cd40b483f34a03cd05f15bf80522eadedef0c553e6d8953e1d2e2b7a"
+  },
+  "sourceStable": true
+}

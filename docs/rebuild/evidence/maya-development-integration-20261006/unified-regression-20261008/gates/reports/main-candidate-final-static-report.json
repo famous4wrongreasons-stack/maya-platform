@@ -1,0 +1,138 @@
+{
+  "stage": "candidate-final-static",
+  "source": "419e627f7bc4e1afd9e60a088c0da3b3cfb22621",
+  "tree": "17a770774bbe21023a2f9eb9ecfce09784bc1f3b",
+  "node": "v24.15.0",
+  "started": "2026-10-08T03:25:21.158Z",
+  "status": "PASS",
+  "launcherSha256": "b43510f7d0ca47da4280c457f264fc5eb1bfa3a58acc7f5de5bfcbba1f31d53b",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 6144,
+  "workerCount": "existing-command-default",
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "contract-types-candidate-final",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check-candidate-final",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types-candidate-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "scripts-types-candidate-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "widgets-live-types-candidate-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "backend-lint-candidate-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "k3-candidate-final",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-build-candidate-final",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    }
+  ],
+  "completed": [
+    {
+      "name": "contract-types-candidate-final",
+      "durationMs": 2613
+    },
+    {
+      "name": "contract-check-candidate-final",
+      "durationMs": 647
+    },
+    {
+      "name": "backend-types-candidate-final",
+      "durationMs": 5582
+    },
+    {
+      "name": "scripts-types-candidate-final",
+      "durationMs": 12808
+    },
+    {
+      "name": "widgets-live-types-candidate-final",
+      "durationMs": 6739
+    },
+    {
+      "name": "backend-lint-candidate-final",
+      "durationMs": 42409
+    },
+    {
+      "name": "k3-candidate-final",
+      "durationMs": 2820
+    },
+    {
+      "name": "backend-build-candidate-final",
+      "durationMs": 16758
+    }
+  ],
+  "sourceAtEnd": "419e627f7bc4e1afd9e60a088c0da3b3cfb22621",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T03:26:51.592Z"
+}

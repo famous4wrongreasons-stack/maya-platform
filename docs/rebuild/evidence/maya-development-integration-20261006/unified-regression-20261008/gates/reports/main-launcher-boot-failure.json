@@ -1,0 +1,1 @@
+{"status":"FAIL_BEFORE_CHILD","source":"c8235e76","cause":"scratch launcher ts-node resolved tsconfig from repository root; TS5109","fix":"pin existing backend tsconfig explicitly; no product source changed","appOrDatabaseProcessStarted":false}

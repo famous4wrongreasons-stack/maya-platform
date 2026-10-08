@@ -1,0 +1,616 @@
+{
+  "source": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+  "status": "FAIL",
+  "started": "2026-10-08T02:45:06.589Z",
+  "port": 55612,
+  "httpPort": 55613,
+  "cluster": "/tmp/maya-unified-pg-20261008-attempt2/pg",
+  "databases": [
+    "maya_widget_gate_proof_unified",
+    "maya_events_proof_unified",
+    "maya_gates_smoke_unified"
+  ],
+  "externalNodeNetwork": "loopback-only preload",
+  "launcherSha256": "ada8940d016b32bbf8fd6293a22b5eec19300c6d13f25b9e203b3a4ca41d9542",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 3072,
+  "pgSharedBuffersMb": 64,
+  "pgWorkMemMb": 4,
+  "pgMaxConnections": 30,
+  "commands": [
+    {
+      "name": "pg-init",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/initdb",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-pg-20261008-attempt2/pg",
+        "--auth=trust",
+        "--username=maya_gate",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "pg-start",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-pg-20261008-attempt2/pg",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/tmp/maya-unified-pg-20261008-attempt2/postgres-private.log",
+        "-o",
+        "-h 127.0.0.1 -p 55612 -k '' -c shared_buffers=64MB -c work_mem=4MB -c max_connections=30",
+        "start"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-create",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "maya_widget_gate_proof_unified"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-validate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-migrate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-status",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "status"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-diff",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "diff",
+        "--from-config-datasource",
+        "--to-schema",
+        "prisma/schema.prisma",
+        "--exit-code"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_events_proof_unified-create",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "maya_events_proof_unified"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "maya_events_proof_unified-validate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_events_proof_unified-migrate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_events_proof_unified-status",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "status"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_events_proof_unified-diff",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "diff",
+        "--from-config-datasource",
+        "--to-schema",
+        "prisma/schema.prisma",
+        "--exit-code"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_gates_smoke_unified-create",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "maya_gates_smoke_unified"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "maya_gates_smoke_unified-validate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_gates_smoke_unified-migrate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_gates_smoke_unified-status",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "status"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "maya_gates_smoke_unified-diff",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "diff",
+        "--from-config-datasource",
+        "--to-schema",
+        "prisma/schema.prisma",
+        "--exit-code"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "schema-migrations",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/psql",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "-d",
+        "maya_widget_gate_proof_unified",
+        "-X",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-Atc",
+        "SELECT migration_name,checksum,finished_at IS NOT NULL AS finished,rolled_back_at IS NULL AS active FROM \"_prisma_migrations\" ORDER BY migration_name"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "schema-constraints",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/psql",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "-d",
+        "maya_widget_gate_proof_unified",
+        "-X",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-Atc",
+        "SELECT c.relname,t.conname,pg_get_constraintdef(t.oid) FROM pg_constraint t JOIN pg_class c ON c.oid=t.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' ORDER BY 1,2"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "schema-indexes",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/psql",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "-d",
+        "maya_widget_gate_proof_unified",
+        "-X",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-Atc",
+        "SELECT tablename,indexname,indexdef FROM pg_indexes WHERE schemaname='public' ORDER BY 1,2"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "schema-triggers",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/psql",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "-d",
+        "maya_widget_gate_proof_unified",
+        "-X",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-Atc",
+        "SELECT c.relname,t.tgname,pg_get_triggerdef(t.oid) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND NOT t.tgisinternal ORDER BY 1,2"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "schema-functions",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/psql",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "55612",
+        "-U",
+        "maya_gate",
+        "-d",
+        "maya_widget_gate_proof_unified",
+        "-X",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-Atc",
+        "SELECT p.proname,pg_get_function_identity_arguments(p.oid),pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' ORDER BY 1,2"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "events-live",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-events-live.json",
+        "--runInBand",
+        "--json",
+        "--outputFile=/tmp/maya-unified-pg-20261008-attempt2/events-live.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 300000
+    },
+    {
+      "name": "smoke-seed",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/ts-node/dist/bin.js",
+        "--transpile-only",
+        "prisma/seed.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-smoke",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/ts-node/dist/bin.js",
+        "--project",
+        "tsconfig.scripts.json",
+        "--transpile-only",
+        "scripts/http-smoke.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 300000
+    },
+    {
+      "name": "carrier-harness",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "../maya-carrier-react/test/build-harness.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-cohort",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "test/widgets-live/service-price.live-spec.ts",
+        "test/widgets-live/schedule-chat.live-spec.ts",
+        "test/widgets-live/c9-chat-reads.live-spec.ts",
+        "test/widgets-live/conversation-history.live-spec.ts",
+        "test/widgets-live/business-rules.live-spec.ts",
+        "test/widgets-live/profile-isolation.live-spec.ts",
+        "test/widgets-live/development-integration.live-spec.ts",
+        "test/widgets-live/chat-catalog-booking.live-spec.ts",
+        "test/widgets-live/e2-booking.live-spec.ts",
+        "test/widgets-live/admin-booking.live-spec.ts",
+        "test/widgets-live/gate4-tenant.live-spec.ts",
+        "test/widgets-live/history-erasure-writers.live-spec.ts",
+        "test/widgets-live/history-erasure-http.live-spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-unified-pg-20261008-attempt2/http-cohort.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "widgets-live",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--json",
+        "--outputFile=/tmp/maya-unified-pg-20261008-attempt2/widgets-live.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "combined-react",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--runInBand",
+        "--testRegex",
+        "widgets-live/development-integration[.]browser-spec[.]ts$",
+        "--runTestsByPath",
+        "test/widgets-live/development-integration.browser-spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-unified-pg-20261008-attempt2/combined-react.json",
+        "--testTimeout=240000"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 300000
+    },
+    {
+      "name": "pg-stop",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-pg-20261008-attempt2/pg",
+        "-m",
+        "fast",
+        "-w",
+        "-t",
+        "30",
+        "stop"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    }
+  ],
+  "completed": [
+    {
+      "name": "pg-init",
+      "durationMs": 310
+    },
+    {
+      "name": "pg-start",
+      "durationMs": 117
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-create",
+      "durationMs": 63
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-validate",
+      "durationMs": 671
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-migrate",
+      "durationMs": 823
+    },
+    {
+      "name": "maya_widget_gate_proof_unified-status",
+      "durationMs": 335
+    },
+    {
+      "name": "maya_events_proof_unified-create",
+      "durationMs": 46
+    },
+    {
+      "name": "maya_events_proof_unified-validate",
+      "durationMs": 355
+    },
+    {
+      "name": "maya_events_proof_unified-migrate",
+      "durationMs": 808
+    },
+    {
+      "name": "maya_events_proof_unified-status",
+      "durationMs": 356
+    },
+    {
+      "name": "maya_gates_smoke_unified-create",
+      "durationMs": 47
+    },
+    {
+      "name": "maya_gates_smoke_unified-validate",
+      "durationMs": 361
+    },
+    {
+      "name": "maya_gates_smoke_unified-migrate",
+      "durationMs": 813
+    },
+    {
+      "name": "maya_gates_smoke_unified-status",
+      "durationMs": 337
+    },
+    {
+      "name": "schema-migrations",
+      "durationMs": 481
+    },
+    {
+      "name": "schema-constraints",
+      "durationMs": 29
+    },
+    {
+      "name": "schema-indexes",
+      "durationMs": 29
+    },
+    {
+      "name": "schema-triggers",
+      "durationMs": 15
+    },
+    {
+      "name": "schema-functions",
+      "durationMs": 14
+    },
+    {
+      "name": "events-live",
+      "durationMs": 636
+    },
+    {
+      "name": "smoke-seed",
+      "durationMs": 417
+    },
+    {
+      "name": "carrier-harness",
+      "durationMs": 53
+    },
+    {
+      "name": "pg-stop",
+      "durationMs": 226
+    }
+  ],
+  "failures": [
+    {
+      "name": "maya_widget_gate_proof_unified-diff",
+      "error": "maya_widget_gate_proof_unified-diff exited 2; inspect its log",
+      "durationMs": 481
+    },
+    {
+      "name": "maya_events_proof_unified-diff",
+      "error": "maya_events_proof_unified-diff exited 2; inspect its log",
+      "durationMs": 475
+    },
+    {
+      "name": "maya_gates_smoke_unified-diff",
+      "error": "maya_gates_smoke_unified-diff exited 2; inspect its log",
+      "durationMs": 477
+    },
+    {
+      "name": "http-smoke",
+      "error": "http-smoke exited 1; inspect its log",
+      "durationMs": 233
+    },
+    {
+      "name": "http-cohort",
+      "error": "http-cohort exited 1; inspect its log",
+      "durationMs": 227104
+    },
+    {
+      "name": "widgets-live",
+      "error": "widgets-live exited 1; inspect its log",
+      "durationMs": 291432
+    },
+    {
+      "name": "combined-react",
+      "error": "combined-react exited 1; inspect its log",
+      "durationMs": 4520
+    }
+  ],
+  "smokeServer": {
+    "source": "dist/src/main",
+    "host": "127.0.0.1",
+    "port": 55613,
+    "stopped": true,
+    "pid": 30263,
+    "exitCode": null,
+    "signal": "SIGTERM"
+  },
+  "clusterStopped": true,
+  "sourceAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T02:53:58.717Z"
+}

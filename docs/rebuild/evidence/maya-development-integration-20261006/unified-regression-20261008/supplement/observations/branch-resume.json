@@ -1,0 +1,67 @@
+{
+  "contract": "maya.crm-branch-binding-http-pg-proof/1",
+  "stage": "resume",
+  "candidateCommit": "4023c4d547884a65923f22b9f9d33e044f347595",
+  "sourceHashes": {
+    "src/ai-tools/ai-tool-handler.service.ts": "3c24f195971925dc2427e691f589459a3ad1bff8667e9d78a39c8f53057b4902",
+    "src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+    "src/crm/crm-adapter.interface.ts": "02e2cf04c5393cd1d6da6e156388a193595356a92b74a15f8475c0daeb7ea9f6",
+    "src/crm/adapters/yclients-crm.adapter.ts": "4f0e199f71f1fbc29df25cbb53f4edf641e9dc7890bf15e66b18a083bb95032f",
+    "src/crm/crm.service.ts": "9493726adfd873b4ca903abb9fcbf67155b2711c2d8af15daf9b6f4af3a1f65b",
+    "src/crm/client-appointment-reschedule.service.ts": "1415f600552ae79ab0ec3393e3be499312411ccfe59ed2fb5a3c8e6dd6fb2e89",
+    "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3b7e2878566f75bf4bc94619d0fb162f7bdbd88a86623880f995674a4f876734",
+    "src/package5-wave3/package5-wave3.service.ts": "049634634c8c78c8552ed41fbc0d9bafdacc8bac2a9350e457c19816d511507d",
+    "src/action-engine/action-engine.kernel.ts": "2a21a5200d5558c36555318ecdea79d7a5d0cf20682767418d8259a3a1878f46",
+    "src/action-engine/action-engine.runtime.ts": "7c035d4c12fb17329907cfc450fce6e81d2233ce78baa87be4ed489c663b9c3d",
+    "src/ai-tools/ai-tool-runtime.service.ts": "a2a3ab398f535e8c7f20eab754738bd0ad2d95cbba413ad5deb6abec1eafdcd0",
+    "src/appointments/appointments.service.ts": "c6e2ef4b4bfb0fd6de8c6f8deac6a4afbf7cb51e25f0e35aa9c6d5799178af9b",
+    "scripts/c9-occupancy-proof.mjs": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+    "test/widgets-live/crm-branch-binding-restart.probe-spec.ts": "95f51876d6baccb5cadd9e0beaefaad354252ce286f35fe61842c5436ec65692"
+  },
+  "checkpoints": [
+    "fresh app and PG restart restore binding and exact cached READ",
+    "actual PG origin lookup refuses foreign client and two matching SUCCEEDED fixtures",
+    "explicit binding removal invalidates persisted READ and prevents native read"
+  ],
+  "branchBindingHash": "d8c767b30b5478c3962dd32b8e4b05065c0fd46150e01d8d36393bbbf8d85025",
+  "actions": [
+    {
+      "capability": "package5.wave3.install-crm-credentials.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.activate-crm-integration.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.confirm-crm-import.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "crm.appointment.create.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "crm.appointment.create.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.install-crm-credentials.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.activate-crm-integration.execute.v1",
+      "state": "SUCCEEDED"
+    },
+    {
+      "capability": "package5.wave3.confirm-crm-import.execute.v1",
+      "state": "SUCCEEDED"
+    }
+  ],
+  "providerReadCount": 34,
+  "providerWrites": 0,
+  "modelCalls": 0,
+  "externalCalls": 0,
+  "forbidden": [],
+  "qualification": "LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; canonical origin fixture is not a provider booking; no live acceptance"
+}

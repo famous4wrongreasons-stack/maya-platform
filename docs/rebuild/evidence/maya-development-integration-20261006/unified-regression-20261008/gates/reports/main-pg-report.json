@@ -1,0 +1,94 @@
+{
+  "source": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "tree": "1fa344a7757f4936a5090680478ff16e2782be91",
+  "status": "FAIL",
+  "started": "2026-10-08T02:44:25.223Z",
+  "port": 55535,
+  "httpPort": 55536,
+  "cluster": "/tmp/maya-unified-regression-20261008/pg",
+  "databases": [
+    "maya_widget_gate_proof_unified",
+    "maya_events_proof_unified",
+    "maya_gates_smoke_unified"
+  ],
+  "externalNodeNetwork": "loopback-only preload",
+  "launcherSha256": "229ef94a9c1615366a890d149ef10c328f4cbe6692f4210d5c21bd713eddb484",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "heapMb": 3072,
+  "pgSharedBuffersMb": 64,
+  "pgWorkMemMb": 4,
+  "pgMaxConnections": 30,
+  "commands": [
+    {
+      "name": "pg-init",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/initdb",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-regression-20261008/pg",
+        "--auth=trust",
+        "--username=maya_gate",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "pg-start",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-regression-20261008/pg",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/tmp/maya-unified-regression-20261008/postgres-private.log",
+        "-o",
+        "-h 127.0.0.1 -p 55535 -k '' -c shared_buffers=64MB -c work_mem=4MB -c max_connections=30",
+        "start"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "pg-stop",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-regression-20261008/pg",
+        "-m",
+        "fast",
+        "-w",
+        "-t",
+        "30",
+        "stop"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    }
+  ],
+  "completed": [
+    {
+      "name": "pg-init",
+      "durationMs": 357
+    }
+  ],
+  "failures": [
+    {
+      "name": "pg-start",
+      "error": "pg-start exited 1; inspect its log",
+      "durationMs": 128
+    },
+    {
+      "name": "pg-stop",
+      "error": "pg-stop exited 1; inspect its log",
+      "durationMs": 8
+    }
+  ],
+  "error": "pg-stop exited 1; inspect its log",
+  "clusterStopped": false,
+  "sourceAtEnd": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "dirtyAtEnd": "",
+  "finished": "2026-10-08T02:44:25.765Z"
+}

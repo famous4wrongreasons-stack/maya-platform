@@ -1,0 +1,116 @@
+{
+  "stage": "g1-resume",
+  "source": "c8235e76e77e08980cfc66409dff52b38f3673a4",
+  "tree": "3f300e364bc01bdbc320f19bc46c2beec8df5d6b",
+  "node": "v24.15.0",
+  "started": "2026-10-08T01:53:01.858Z",
+  "status": "PASS",
+  "heapMb": 6144,
+  "workerCount": 1,
+  "externalNodeNetwork": "loopback-only preload",
+  "lockfiles": {
+    "maya-saas-backend": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+    "maya-carrier-react": "8029a96610667f1b60dff09f177448ca30837c43c9ec5107323e253e434ecae0"
+  },
+  "commands": [
+    {
+      "name": "contract-check-attempt2",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "scripts-types",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "backend-lint",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-build",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 720000
+    }
+  ],
+  "completed": [
+    {
+      "name": "contract-check-attempt2",
+      "durationMs": 653
+    },
+    {
+      "name": "backend-types",
+      "durationMs": 5590
+    },
+    {
+      "name": "scripts-types",
+      "durationMs": 12721
+    },
+    {
+      "name": "widgets-live-types",
+      "durationMs": 6447
+    },
+    {
+      "name": "backend-lint",
+      "durationMs": 41621
+    },
+    {
+      "name": "k3",
+      "durationMs": 2483
+    },
+    {
+      "name": "backend-build",
+      "durationMs": 16926
+    }
+  ],
+  "finished": "2026-10-08T01:54:28.302Z"
+}

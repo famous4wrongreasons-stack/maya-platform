@@ -1,0 +1,223 @@
+{
+  "contract": "maya.local-canonical-smoke-rerun/1",
+  "status": "PASS",
+  "source": "aeb987b43a2663aef6b49e8aa77774311ddf4d46",
+  "tree": "ddf177babd87138579a51727b4eb0dc0a76a36e4",
+  "started": "2026-10-08T03:15:21.376Z",
+  "output": "/tmp/maya-unified-smoke-20261008-attempt3",
+  "cluster": "/tmp/maya-unified-smoke-20261008-attempt3/pg",
+  "port": 62486,
+  "httpPort": 62487,
+  "database": "maya_gates_smoke_unified_attempt3",
+  "caps": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "pgStageMs": 90000,
+    "nodeStageMs": 180000,
+    "smokeMs": 300000,
+    "smokeTermGraceMs": 3000,
+    "smokeKillWaitMs": 1000,
+    "pgCleanupMs": 45000
+  },
+  "launcherSha256": "fe3e7f83fee6b15e94387e6ac895922e58f5b908b4f07cd68d5ea387d00f6643",
+  "nodeFenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceHashes": {
+    "scripts/http-smoke.ts": "17658ae7b6c13e1ee0fde618a6f7546c80d610764b928d7e31a89ab13936cb61",
+    "scripts/http-smoke-fixtures.ts": "6aa36791558c5a5e63ec9edeabcd7a4e1d1ed406e0ec37ad235f3d9727ef3184",
+    "scripts/c9-occupancy-proof.mjs": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+    "test/widgets-live/support/environment.ts": "4d25a97539e69ef59d6d7283e31eb68cf9b1922aad60ce4e837314bf73115ffe",
+    "prisma/schema.prisma": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977",
+    "prisma/seed.ts": "66738c5a2704e252ae7f8e3fda1938855efc6cc264ea342a02e679af1e7826b5"
+  },
+  "compiledEntrySha256": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+  "compiledEntryBinding": "byte hash only; source build qualification is separate",
+  "qualification": "Canonical local smoke only; no schema-diff, release, language, real-model or real-provider acceptance",
+  "externalNodeNetwork": "loopback-only TCP preload; not a measured external call count",
+  "commands": [
+    {
+      "name": "pg-init",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/initdb",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-smoke-20261008-attempt3/pg",
+        "--auth=trust",
+        "--username=maya_gate",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "pg-start",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-smoke-20261008-attempt3/pg",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/tmp/maya-unified-smoke-20261008-attempt3/postgres-private.log",
+        "-o",
+        "-h 127.0.0.1 -p 62486 -k '' -c shared_buffers=64MB -c work_mem=4MB -c max_connections=30",
+        "start"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "db-create",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "62486",
+        "-U",
+        "maya_gate",
+        "maya_gates_smoke_unified_attempt3"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 90000
+    },
+    {
+      "name": "prisma-validate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "prisma-migrate",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "prisma-status",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "status"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "smoke-seed",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/ts-node/dist/bin.js",
+        "--transpile-only",
+        "prisma/seed.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-smoke",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/ts-node/dist/bin.js",
+        "--project",
+        "tsconfig.scripts.json",
+        "--transpile-only",
+        "scripts/http-smoke.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 300000
+    },
+    {
+      "name": "pg-stop",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/tmp/maya-unified-smoke-20261008-attempt3/pg",
+        "-m",
+        "fast",
+        "-w",
+        "-t",
+        "30",
+        "stop"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 45000
+    }
+  ],
+  "completed": [
+    {
+      "name": "pg-init",
+      "elapsedMs": 313
+    },
+    {
+      "name": "pg-start",
+      "elapsedMs": 115
+    },
+    {
+      "name": "db-create",
+      "elapsedMs": 56
+    },
+    {
+      "name": "prisma-validate",
+      "elapsedMs": 368
+    },
+    {
+      "name": "prisma-migrate",
+      "elapsedMs": 818
+    },
+    {
+      "name": "prisma-status",
+      "elapsedMs": 339
+    },
+    {
+      "name": "smoke-seed",
+      "elapsedMs": 406
+    },
+    {
+      "name": "http-smoke",
+      "elapsedMs": 6273
+    },
+    {
+      "name": "pg-stop",
+      "elapsedMs": 117
+    }
+  ],
+  "failures": [],
+  "clusterStopped": true,
+  "smokeGroup": {
+    "detached": true,
+    "pid": 48978,
+    "pgid": 48978,
+    "closed": true,
+    "groupAbsent": true,
+    "exitCode": 0,
+    "signal": null,
+    "error": null,
+    "termSent": false,
+    "killSent": false
+  },
+  "pidfileAbsent": true,
+  "sourceAtEnd": "aeb987b43a2663aef6b49e8aa77774311ddf4d46",
+  "treeAtEnd": "ddf177babd87138579a51727b4eb0dc0a76a36e4",
+  "dirtyAtEnd": "",
+  "compiledEntrySha256AtEnd": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+  "launcherSha256AtEnd": "fe3e7f83fee6b15e94387e6ac895922e58f5b908b4f07cd68d5ea387d00f6643",
+  "nodeFenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceUnchanged": true,
+  "compiledEntryUnchanged": true,
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T03:15:30.242Z"
+}
