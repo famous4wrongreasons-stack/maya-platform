@@ -1,5 +1,36 @@
 # MAYA — решения для следующего шага
 
+## Текущие отдельные вопросы — 2026-10-08
+
+Это обновление списка решений для текущей development-ветки, **не их одобрение**.
+Карточка графика добавлена рядом с тремя уже ожидающими ответами. Работа над
+безопасными локальными сценариями продолжается независимо; перечисление не
+разрешает identity binding, фоновые запуски, SSH или production effects.
+
+| Вопрос | Точное предлагаемое решение и граница | Текущий статус |
+|---|---|---|
+| Первая привязка Client без прежнего verified channel | Разрешить initial-only A18 branch для единственной существующей цепочки account → Client → exact CRM card после успешного OTP на номер, свежо прочитанный из этой карточки. Это откроет личные записи/историю; владение номером не исключает shared/reissued number. Нет поиска/слияния по телефону, подмены V2 predecessor или допуска неоднозначной цепочки. [Полный исходный вопрос и риск](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md#decision-brief-smallest-reuse-of-an-existing-trusted-proof-owner). | **PENDING**; существующий verified Client path не требует повторного разрешения. |
+| Scoped C10 Occupancy shadow | Назвать один tenant и начало pilot, принять либо исправить [точный proposed envelope](MAYA-C10-SCOPED-SHADOW-DECISION-BRIEF-20261007.md#минимальный-пакет-решения-владельца): одна новая current C5 Opportunity revision → proposal-only C9, без CRM mutations/outbound/model calls. Предлагаемые 10 admissions/день не являются утверждённым лимитом. Нельзя обновлять user event от имени scheduler. | **PENDING**; explicit-request L0/L1/L2.5 продолжается. |
+| Read-only SSH inventory | Разрешить только уже рассмотренный metadata collector: `botadmin@api.mayaos.ru` через существующий `mocine3388@prime.beget.com`, `python3 - --collect`, reviewed bytes на stdin, ≤10 минут, $0; без secret contents, setup, service/permission changes или paid calls. Exact argv, pin и [automatic-review rejection](MAYA-REAL-MODEL-PREREQUISITES-20261007.md#concrete-read-only-inventory-collector--not-executed-on-target) остаются прежними. | **REJECTED / PENDING exact permission**; процесс не создан, SSH/collector не выполнялись, retry/workaround не разрешён. |
+| Карточка однодневного графика в текущем closed profile | **Разрешить только для графика одного мастера за один день исправление обычным сообщением в чате вместо обязательного отдельного редактора; после правки заново показать текущие/новые интервалы и потребовать новое подтверждение?** Рекомендуется этот узкий вариант. Он относится только к `schedule_rule` / существующему A15; остальные SETTINGS_DRAFT и HANDOFF остаются закрыты. [Точная нормативная поправка и неизменные fences](MAYA-DEVELOPMENT-PROFILE-CHOICE-20261006.md#minimal-owner-choice). | **PROPOSED — NOT APPROVED**; до ответа текущая карточка недоступна в closed profile. |
+
+Последний вопрос меняет ровно продуктовую обязанность non-chat fallback из
+SETTINGS.4. Это не повторное разрешение на управление графиком и не новое
+разрешение AE/роли. [Нативный source checkpoint](MAYA-NATIVE-SCHEDULE-SOURCE-CHECKPOINT-20261008.md)
+доказывает backend/full-scope synthetic путь, но не closed-profile доступность.
+Если исключение не одобрено, этот профиль сохраняет текущий отказ. Реальный
+HANDOFF-редактор потребует отдельной конкретной receiver/profile квалификации;
+его нельзя включить переименованием в NAVIGATE или REFINE.
+
+Ни один ответ не подразумевает принятие остальных трёх вопросов. Этот документ
+не меняет normative/generated contract, runtime, физическую схему, retention,
+права, credential access или release trust. **NOT_ISSUED.**
+
+## Исторический readiness pass — 2026-10-05
+
+Ниже сохранён прежний документ и его тогдашние статусы; они не заменяют текущие
+checkpoint и четыре точных вопроса выше.
+
 Дата: 2026-10-05. Проверенный код: `c9e1013ca27dcd372ebcd5b306cdb4f46ce4f274`, ветка `codex/maya-b35-completion-20261005`. Это короткий readiness pass по существующим контрактам, **не новый аудит, не разрешение на release и не заявление о завершении MAYA**. Реализация в этом проходе не менялась. Evidence выполненной работы — в [completion map](MAYA-FINAL-COMPLETION-MAP.md).
 
 ## Решения владельца
