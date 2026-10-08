@@ -234,9 +234,13 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
           index === 6 ? 'только на одну услугу' : 'Во сколько вам удобно?',
         );
       } else {
-        expect(body.resolution?.receipt.envelope.kind).toBe(
-          'TIME_SLOT_SELECTOR',
-        );
+        // On failure expose only the synthetic turn number/fixed reply, not
+        // opaque tokens, raw envelopes or private principal identifiers.
+        expect({
+          turn: index,
+          reply: body.reply,
+          kind: body.resolution?.receipt.envelope.kind,
+        }).toMatchObject({ turn: index, kind: 'TIME_SLOT_SELECTOR' });
         envelope = body.resolution?.receipt.envelope;
       }
     }

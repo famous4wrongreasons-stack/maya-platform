@@ -347,9 +347,15 @@ describe('native explicit branch binding across HTTP/application/PG restart', ()
       checkpoints.push(
         'A17 activation and native branch availability at branch timezone',
       );
-      expect((await slots(token, randomUUID(), foreignBranch.id)).status).toBe(
-        404,
-      );
+      // The current native source witness rejects an unbound/foreign branch before
+      // the later availability owner. A17 foreign binding above still returns 404.
+      const readsBeforeForeign = providerReads.length;
+      const foreignSlots = await slots(token, randomUUID(), foreignBranch.id);
+      expect(foreignSlots.status).toBe(503);
+      expect(foreignSlots.body).toMatchObject({
+        error: { code: 'booking_branch_source_unavailable' },
+      });
+      expect(providerReads).toHaveLength(readsBeforeForeign);
       // Synthetic pre-existing SUCCEEDED create is a fixture, not a provider booking.
       const execution = await kernel().createExecutionForControlledFixture({
         contract: ACTION_EXECUTION_REQUEST_CONTRACT,

@@ -1422,11 +1422,31 @@ export class AiCoreService {
               'employee' in task.entities
                 ? task.entities.employee
                 : proposedArguments.staff_id;
+            // A current name mention must become a tenant catalog preference before
+            // returning the service question; request-local aliases cannot be persisted.
+            // Read it before the emitting services READ, whose source pin then also
+            // refuses a changed binding before a new selector can be minted.
+            const pendingStaffSource =
+              servicesPreference === undefined &&
+              employeePreference !== undefined
+                ? await readCatalog('catalog.staff.read')
+                : null;
             const serviceSource = await readCatalog(
               'catalog.services.read',
               servicesPreference === undefined,
             );
-            if (servicesPreference === undefined)
+            if (servicesPreference === undefined) {
+              if (pendingStaffSource) {
+                const pendingStaff = bindBookingCatalog({
+                  staffSource: pendingStaffSource,
+                  serviceSource,
+                  employee: employeePreference,
+                  services: [],
+                  nameReferences: sanitized.nameReferences,
+                });
+                if (pendingStaff.staff)
+                  task.entities.employee = pendingStaff.staff.name;
+              }
               return this.complete(
                 user,
                 dto,
@@ -1448,6 +1468,7 @@ export class AiCoreService {
                 },
                 toolResults,
               );
+            }
             const services = bindBookingServices(
               serviceSource,
               servicesPreference,

@@ -341,7 +341,7 @@ describe('L20 registered-READ synthetic MOCK lost-response → canonical UNKNOWN
     expect(presented?.terminal_lines).toEqual([
       {
         outcome: 'SUBMITTED',
-        text: 'Запрос принят. Подтверждение ожидается.',
+        text: 'Результат пока не подтверждён. Не отправляйте повторно.',
         action_receipt_ref: null,
       },
     ]);

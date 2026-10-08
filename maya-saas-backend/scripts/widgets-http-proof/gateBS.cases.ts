@@ -124,11 +124,18 @@ export async function personalSource(
       assert.equal(object(result.owner_decision).state, 'SUCCEEDED');
     else if (field === 'staff_ref') {
       assert.equal(result.next_envelope, null);
-      assert.deepEqual(result.owner_decision, {
-        kind: 'booking_selection_pending',
-        next: 'date',
-        reply: 'На какую дату проверить время у выбранного мастера?',
-      });
+      const pendingDecision = object(result.owner_decision);
+      // Native fetch JSON may cross the Jest VM realm. Keep the exact closed
+      // shape/value check without requiring equal realm-specific prototypes.
+      assert.equal(Reflect.ownKeys(pendingDecision).length, 3);
+      for (const key of ['kind', 'next', 'reply'])
+        assert(Object.prototype.hasOwnProperty.call(pendingDecision, key));
+      assert.equal(pendingDecision.kind, 'booking_selection_pending');
+      assert.equal(pendingDecision.next, 'date');
+      assert.equal(
+        pendingDecision.reply,
+        'На какую дату проверить время у выбранного мастера?',
+      );
       const pending = await ctx.fixtures.bookingProofState(tenant);
       assert.equal(pending.appointments.length, 0);
       assert.equal(pending.executions.length, 0);

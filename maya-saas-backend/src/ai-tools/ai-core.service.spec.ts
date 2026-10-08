@@ -173,6 +173,160 @@ describe('AiCoreService', () => {
       return { ...mocks, timeline, turn, availabilityArgs };
     }
 
+    it.each([false, true])(
+      'retains only unambiguous current staff before the service question (ambiguous=%s)',
+      async (ambiguous) => {
+        const f = bookingFixture();
+        const sourceRevision = 'a'.repeat(64);
+        f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
+          sourceRevision,
+        });
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
+        if (ambiguous) {
+          const delegated = f.runtime.execute.getMockImplementation();
+          if (!delegated) throw new Error('fixture runtime missing');
+          f.runtime.execute.mockImplementation(
+            (...args: Parameters<AiToolRuntimeService['execute']>) =>
+              args[1] === 'catalog.staff.read'
+                ? Promise.resolve({
+                    status: 'completed',
+                    result: {
+                      staff: [
+                        { id: 'staff-a', name: 'Антон' },
+                        { id: 'staff-b', name: 'Антон' },
+                      ],
+                    },
+                  })
+                : delegated(...args),
+          );
+        }
+        f.model.decide.mockImplementationOnce((input) => {
+          const mention = JSON.stringify(input.messages).match(
+            /\[name removed\]@[a-f0-9]{32}_\d+/,
+          )?.[0];
+          if (!mention)
+            throw new Error('Expected current request-local name alias');
+          return Promise.resolve(
+            decision({
+              reply: '',
+              toolCall: null,
+              semanticPlan: new ConversationIntelligenceService().validatePlan(
+                {
+                  tasks: [
+                    {
+                      intent: 'booking.find_availability',
+                      entities: {
+                        employee: mention,
+                        branch: 'Центральный',
+                      },
+                      confidence: 1,
+                    },
+                  ],
+                  parent_request: 'Выбрать услугу',
+                },
+                UserRole.CLIENT,
+                names,
+                input.conversationPlan,
+              ),
+            }),
+          );
+        });
+        const first = await f.service.chat(client, {
+          ...dto,
+          conversationId: 'booking-conversation',
+          requestId: 'booking-staff-only',
+          messages: [{ role: 'user', content: 'Хочу у Антона' }],
+        });
+        expect(first.action).toBeNull();
+        expect(first.reply).toBe('Выберите услугу для записи.');
+        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+          'catalog.staff.read',
+          'catalog.services.read',
+        ]);
+        expect(f.runtime.execute.mock.calls[0][0].tenantId).toBe(
+          client.tenantId,
+        );
+        expect(f.runtime.execute.mock.calls[0][3]).toMatchObject({
+          suppressWidgetTrigger: true,
+          bookingSelector: { scope: { branchId: 'branch-a', sourceRevision } },
+        });
+        const saved = f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0]
+          .semanticContext as {
+          plan: { tasks: { entities: Record<string, unknown> }[] };
+        };
+        expect(saved.plan.tasks[0].entities.employee).toBe(
+          ambiguous ? undefined : 'Антон',
+        );
+        expect(saved.plan.tasks[0].entities.services).toBeUndefined();
+        f.runtime.execute.mockClear();
+        await f.turn({ services: ['Стрижка'], date_or_period: '2026-10-11' });
+        expect(f.availabilityArgs()).toEqual(
+          ambiguous
+            ? []
+            : [
+                {
+                  date: '2026-10-11',
+                  branch_id: 'branch-a',
+                  staff_id: 'staff-a',
+                  service_ids: ['service-a'],
+                },
+              ],
+        );
+        expect(
+          f.runtime.execute.mock.calls.every(
+            (call) => !call[1].startsWith('appointments.'),
+          ),
+        ).toBe(true);
+        expect(f.model.decide).toHaveBeenCalledTimes(2);
+        if (!ambiguous) {
+          const modelPlan =
+            f.model.decide.mock.calls.at(-1)?.[0].conversationPlan;
+          expect(JSON.stringify(modelPlan)).not.toContain('Антон');
+          expect(JSON.stringify(modelPlan)).toMatch(
+            /\[name removed\]@[a-f0-9]{32}_\d+/,
+          );
+        }
+      },
+    );
+
+    it('refuses drift after the staff-only preference read before emitting a service selector', async () => {
+      const f = bookingFixture();
+      const sourceRevision = 'a'.repeat(64);
+      f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
+        sourceRevision,
+      });
+      f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
+      const delegated = f.runtime.execute.getMockImplementation();
+      if (!delegated) throw new Error('fixture runtime missing');
+      const dispatched: string[] = [];
+      f.runtime.execute.mockImplementation(
+        async (...args: Parameters<AiToolRuntimeService['execute']>) => {
+          await args[3]?.bookingSelector?.revalidate();
+          dispatched.push(args[1]);
+          const result = await delegated(...args);
+          if (args[1] === 'catalog.staff.read')
+            f.crm.readBranchAvailabilityRevision.mockResolvedValue(
+              'b'.repeat(64),
+            );
+          return result;
+        },
+      );
+      const response = await f.turn({
+        employee: 'Антон',
+        branch: 'Центральный',
+      });
+      expect(dispatched).toEqual(['catalog.staff.read']);
+      expect(f.availabilityArgs()).toEqual([]);
+      expect(response.reply).toContain('Данные филиала изменились');
+      expect(response.action).toBeNull();
+    });
+
     it('continues ordinary service → staff → explicit day with bounded fresh reads and retained source preferences', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-10-07T10:00:00Z'));
       try {
