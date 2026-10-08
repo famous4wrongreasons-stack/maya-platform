@@ -1,0 +1,25 @@
+{
+  "contract": "maya.client-value-http-verification/1",
+  "sourceHead": "f4104e837dbb158e7c860e91589befacc0273612",
+  "runtimeHead": "7c25fc8f6287fe6ebc2a6a564d9acaffd6e6a641",
+  "status": "qualified-local-pass",
+  "certificate": "NOT_ISSUED",
+  "prepareAndResumeJestPassed": true,
+  "currentReactCheckpoints": 7,
+  "actualPostgresAndBackendProcessRestart": true,
+  "realModelAcceptance": false,
+  "liveProviderAcceptance": false,
+  "allAttemptGroupsClosed": true,
+  "failedAttempts": {
+    "attempt1": "Financial role case omitted required reporting period; 400 before role guard. Four React checkpoints passed.",
+    "attempt2": "Second synthetic internal appointment overlapped first; canonical DB constraint refused. Prepare and actual PG restart passed.",
+    "attempt3": "Replay helper added audience absent from React original; intent no longer matched. Resume UI restoration and acceptance reached; exact replay assertion failed."
+  },
+  "remaining": [
+    "Natural published-source expiry over HTTP; immutable canonical temporal constraints prohibit shortcut date rewrites.",
+    "HELD-work HTTP and late within-transaction source/authority drift remain separately unit-qualified.",
+    "Real model and YCLIENTS provider qualification; no external call authorized.",
+    "MAYA/C10 aggregate completion and separate pending autonomy/schema decisions."
+  ],
+  "privacy": "Synthetic fixtures only. Private restart receipt, credentials, database files and Chrome profiles excluded."
+}

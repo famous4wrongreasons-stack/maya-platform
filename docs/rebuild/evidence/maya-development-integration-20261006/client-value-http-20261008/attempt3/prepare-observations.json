@@ -1,0 +1,115 @@
+{
+  "contract": "maya.client-value-http-proof/1",
+  "stage": "prepare",
+  "status": "passed",
+  "sourceHead": "7dac9a52efb260495efc50a121efd2c65bd1dc9a",
+  "sourceDigest": "cfbde3012a57f4d73d21f652a51f9f59673f7008215017df1fadb82d6b369f10",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "realModelCalls": 0,
+  "providerTransport": "FINITE_SYNTHETIC_NATIVE_YCLIENTS_GET",
+  "realProviderCalls": 0,
+  "integrationSetup": "SYNTHETIC_ACTIVE_BINDING_NOT_A17_ACCEPTANCE",
+  "businessEffectAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "proofGaps": [
+    {
+      "case": "expired-source-http",
+      "executed": false,
+      "reason": "Existing published source expiry cannot be rewritten without bypassing canonical DB invariants.",
+      "c7": "prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql:76 C7_measurement_retention_ck; :202 C7 snapshot immutable; :263 C7_measurement_publication_guard_trg",
+      "c8": "prisma/migrations/20260913093000_chapter8_valuation_foundation/migration.sql:142 C8_result_time_ck; :299-300 C8 immutable result/history; :497 C8_result_write_trg",
+      "qualification": "No expiry/admission/period/hash rewrite, trigger disabling, clock mock or substituted reader. Existing unit checks remain separate."
+    },
+    {
+      "case": "held-work-http",
+      "executed": false,
+      "reason": "No C9/work-store fault injection in this proof."
+    }
+  ],
+  "canonicalPolicySetup": {
+    "revision": 1,
+    "hash": "08a9e3ea6f9c84b29719dc06d6ee3d1e3fac370470bcd9b23bb8be74863bffe7",
+    "executionHash": "068879a1a31b96f8386a9441adeab8314351eb05eff8631d8f0a35132a00c437"
+  },
+  "initial": {
+    "reply": "Объединила опубликованный финансовый отчёт и доступные оценки давности визитов. У этих источников разные периоды наблюдения.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 15:16:57,655 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nПроверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 08.10.2026, 15:16:57,881 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.\n\nСохранённое предложение относится только к проверке оценок давности. Финансовый отчёт не устанавливает ценность этих гостей, причину изменения выручки или вероятность возврата. Отдельный следующий шаг — по новому запросу проверить актуальность оценок; аудитория и рассылка не создавались.",
+    "runHash": "e7da128454c82b7f9b3472c9943d10db59d4ccdd3574036e62ec17b931e61d34",
+    "revisionHash": "6ceae5c22e4a308f3c3bc8e4aef650de82f3df20bc4785b55dd76f257ed78b7a",
+    "graphHash": "71e76c98fb024877fcf27eebe651a75cd8a3a38b7fe9d4e93d9e8b7764b33f54",
+    "analysis": {
+      "contract": "maya.c9-bi-report-response/1",
+      "mode": "as_reported",
+      "outcome": "PARTIAL",
+      "agentId": "BUSINESS_INTELLIGENCE",
+      "findingsCount": 1,
+      "evidenceCount": 1,
+      "noSideEffects": true,
+      "executionAuthority": false
+    },
+    "recommendation": {
+      "contract": "maya.c9-lifecycle-response/1",
+      "outcome": "PARTIAL",
+      "agentId": "CLIENT_LIFECYCLE",
+      "findingsCount": 1,
+      "evidenceCount": 1,
+      "noSideEffects": true,
+      "executionAuthority": false,
+      "canContact": false
+    }
+  },
+  "scoped": {
+    "reply": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?",
+    "runStarted": false
+  },
+  "corrected": {
+    "reply": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?",
+    "runStarted": false
+  },
+  "checkpoints": [
+    "initial",
+    "scoped",
+    "corrected",
+    "reload-restored"
+  ],
+  "boundaries": {
+    "missingFinancialSource": true,
+    "remainingLifecycleAvailable": true,
+    "unconfiguredLifecycle": true,
+    "foreignRunStatus": 400,
+    "foreignRunCode": "c9_run_authority",
+    "clientRoleStatuses": [
+      403,
+      403
+    ],
+    "unexpectedSourceReads": 0,
+    "separateCanonicalPolicySetup": {
+      "revision": 1,
+      "hash": "08a9e3ea6f9c84b29719dc06d6ee3d1e3fac370470bcd9b23bb8be74863bffe7",
+      "executionHash": "7a621437d863696c6f6437526586afdaa76a1e6fd9438dcc25c591fe03f0a81e"
+    }
+  },
+  "restartReceiptPrivate": true,
+  "runtimeBusinessWrites": 0,
+  "outboundNotifications": 0,
+  "modelSelections": 5,
+  "syntheticProviderReads": [
+    {
+      "tenantHash": "680ef0c45b04585f2c96bebeb9b409d151b03b9218c0b264c4dd41067371e859",
+      "route": "transactions/424242"
+    },
+    {
+      "tenantHash": "680ef0c45b04585f2c96bebeb9b409d151b03b9218c0b264c4dd41067371e859",
+      "route": "company/424242/staff"
+    },
+    {
+      "tenantHash": "680ef0c45b04585f2c96bebeb9b409d151b03b9218c0b264c4dd41067371e859",
+      "route": "records/424242"
+    },
+    {
+      "tenantHash": "680ef0c45b04585f2c96bebeb9b409d151b03b9218c0b264c4dd41067371e859",
+      "route": "company/424242/salary/calculation/staff/71"
+    }
+  ],
+  "syntheticTransportCalls": 4,
+  "forbiddenEdges": []
+}

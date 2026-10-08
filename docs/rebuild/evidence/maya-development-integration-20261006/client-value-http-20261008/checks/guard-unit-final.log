@@ -1,0 +1,14 @@
+✔ admits only exact loopback static/history reads; queries and external origins fail (2.777208ms)
+✔ auth requires the assigned email and closed fields without tenant/role injection (0.18375ms)
+✔ admits finite explicit prompts and inert retained assistant text only (0.548583ms)
+✔ allows bounded passive history resolution but no receipt, intent or observation authority (0.207458ms)
+✔ public request evidence drops credentials, email, OTP, body and arbitrary URL segments (0.299167ms)
+✔ request interception continues actual allowed HTTP and blocks effects without any response fulfillment (0.193458ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32.727792

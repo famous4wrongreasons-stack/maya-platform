@@ -1,0 +1,38 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_5212bbc66af0 on 127.0.0.1:50533 (local)
+FAIL test/widgets-live/client-value-restart.probe-spec.ts
+  client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart]
+    ✕ preserves separate source evidence and clarification across actual process/PG restart (168 ms)
+
+  ● client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart] › preserves separate source evidence and clarification across actual process/PG restart
+
+    DriverAdapterError: conflicting key value violates exclusion constraint "Appointment_internal_no_overlap"
+
+      575 |       end = new Date(start.getTime() + 3600000);
+      576 |     // Explicit synthetic reconciled/local historical fact, not a booking action.
+    > 577 |     const appointment = await db.prisma.appointment.create({
+          |                         ^
+      578 |       data: {
+      579 |         tenantId: s.tenant.id,
+      580 |         mayaClientId: client.id,
+
+      at PrismaPgAdapter.onError (../node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PrismaPgAdapter.performIO (../node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PrismaPgAdapter.queryRaw (../node_modules/@prisma/adapter-pg/dist/index.js:604:30)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:26)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:213:41)
+      at e.interpretNode (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.run (../node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at publishLifecycle (widgets-live/client-value-restart.probe-spec.ts:577:25)
+      at Object.<anonymous> (widgets-live/client-value-restart.probe-spec.ts:1164:30)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        0.92 s, estimated 79 s
+Ran all test suites within paths "test/widgets-live/client-value-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-value-http-20261008/attempt2/resume-jest.json

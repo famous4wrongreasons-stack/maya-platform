@@ -1,0 +1,29 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_1c6a08c8414f on 127.0.0.1:50086 (local)
+FAIL test/widgets-live/client-value-restart.probe-spec.ts (82.611 s)
+  client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart]
+    ✕ preserves separate source evidence and clarification across actual process/PG restart (78283 ms)
+
+  ● client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart] › preserves separate source evidence and clarification across actual process/PG restart
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      857 |         randomUUID(),
+      858 |       );
+    > 859 |       expect(denied.status).toBe(403);
+          |                             ^
+      860 |     }
+      861 |     expect(providerReads).toHaveLength(readCount);
+      862 |     expect(model.mock.calls).toHaveLength(modelCount);
+
+      at boundaries (widgets-live/client-value-restart.probe-spec.ts:859:29)
+      at Object.<anonymous> (widgets-live/client-value-restart.probe-spec.ts:1120:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        82.631 s
+Ran all test suites within paths "test/widgets-live/client-value-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-value-http-20261008/attempt1/prepare-jest.json

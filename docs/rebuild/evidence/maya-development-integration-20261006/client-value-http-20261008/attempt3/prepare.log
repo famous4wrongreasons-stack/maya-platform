@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_d53aa83e1297 on 127.0.0.1:50939 (local)
+PASS test/widgets-live/client-value-restart.probe-spec.ts (78.918 s)
+  client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart]
+    ✓ preserves separate source evidence and clarification across actual process/PG restart (78125 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        78.936 s
+Ran all test suites within paths "test/widgets-live/client-value-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-value-http-20261008/attempt3/prepare-jest.json

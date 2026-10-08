@@ -1,0 +1,56 @@
+{
+  "contract": "maya.client-value-http-proof/1",
+  "stage": "resume",
+  "status": "incomplete",
+  "sourceHead": "9a919b625ec760da4169d470acd7491c8cc633eb",
+  "sourceDigest": "01a634408919e76a006b9674bb9308fe46390695e5250a5efc943c596c67ae8c",
+  "modelSelection": "SCRIPTED_SYNTHETIC",
+  "realModelCalls": 0,
+  "providerTransport": "FINITE_SYNTHETIC_NATIVE_YCLIENTS_GET",
+  "realProviderCalls": 0,
+  "integrationSetup": "SYNTHETIC_ACTIVE_BINDING_NOT_A17_ACCEPTANCE",
+  "businessEffectAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "proofGaps": [
+    {
+      "case": "expired-source-http",
+      "executed": false,
+      "reason": "Existing published source expiry cannot be rewritten without bypassing canonical DB invariants.",
+      "c7": "prisma/migrations/20260908153000_chapter7_measurement_foundation/migration.sql:76 C7_measurement_retention_ck; :202 C7 snapshot immutable; :263 C7_measurement_publication_guard_trg",
+      "c8": "prisma/migrations/20260913093000_chapter8_valuation_foundation/migration.sql:142 C8_result_time_ck; :299-300 C8 immutable result/history; :497 C8_result_write_trg",
+      "qualification": "No expiry/admission/period/hash rewrite, trigger disabling, clock mock or substituted reader. Existing unit checks remain separate."
+    },
+    {
+      "case": "held-work-http",
+      "executed": false,
+      "reason": "No C9/work-store fault injection in this proof."
+    }
+  ],
+  "actualProcessAndPostgresRestart": true,
+  "newerC7Publication": {
+    "originalSourceHash": "f12ed3518a6a5bb4854cb1c4cbe5b4c33ac85de447f1414ab7e7437516673fda",
+    "newSourceHash": "4ff9ea66b9982723df3759b9c9315774d1549621e5a5696c519d3c8f58b5e4e5",
+    "distinctRevision": true
+  },
+  "modelSelections": 0,
+  "syntheticProviderReads": [
+    {
+      "tenantHash": "753c4820b3076e115828500adf258ee963d81cb155b9f0739be618bbfd83a0e3",
+      "route": "transactions/424242"
+    },
+    {
+      "tenantHash": "753c4820b3076e115828500adf258ee963d81cb155b9f0739be618bbfd83a0e3",
+      "route": "company/424242/staff"
+    },
+    {
+      "tenantHash": "753c4820b3076e115828500adf258ee963d81cb155b9f0739be618bbfd83a0e3",
+      "route": "records/424242"
+    },
+    {
+      "tenantHash": "753c4820b3076e115828500adf258ee963d81cb155b9f0739be618bbfd83a0e3",
+      "route": "company/424242/salary/calculation/staff/71"
+    }
+  ],
+  "syntheticTransportCalls": 4,
+  "forbiddenEdges": []
+}

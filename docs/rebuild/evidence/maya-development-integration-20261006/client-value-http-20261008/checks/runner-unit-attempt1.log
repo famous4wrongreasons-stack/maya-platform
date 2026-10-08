@@ -1,0 +1,10 @@
+✔ finite current React proof uses a new process on both sides of a real PG restart (0.767542ms)
+✔ existing isolation boundaries reject shared ports, unrelated databases and shell-sensitive private paths (2.227916ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39.936209

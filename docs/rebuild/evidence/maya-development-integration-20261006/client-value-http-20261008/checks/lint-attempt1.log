@@ -1,0 +1,38 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/client-value-restart.probe-spec.ts
+   150:32  error  'transport' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+   200:47  error  Async arrow function has no 'await' expression                                                                    @typescript-eslint/require-await
+   377:17  error  This assertion is unnecessary since it does not change the type of the expression                                 @typescript-eslint/no-unnecessary-type-assertion
+   479:17  error  Replace `⏎··········.get(Package5Wave1ExecutableService)⏎··········` with `.get(Package5Wave1ExecutableService)`  prettier/prettier
+   482:1   error  Delete `··`                                                                                                       prettier/prettier
+   483:1   error  Delete `··`                                                                                                       prettier/prettier
+   484:1   error  Delete `··`                                                                                                       prettier/prettier
+   485:15  error  Delete `··`                                                                                                       prettier/prettier
+   486:15  error  Delete `··`                                                                                                       prettier/prettier
+   487:1   error  Delete `··`                                                                                                       prettier/prettier
+   488:1   error  Replace `················` with `··············`                                                                  prettier/prettier
+   489:15  error  Delete `··`                                                                                                       prettier/prettier
+   490:15  error  Delete `··`                                                                                                       prettier/prettier
+   491:1   error  Delete `··`                                                                                                       prettier/prettier
+   492:17  error  Delete `··`                                                                                                       prettier/prettier
+   493:1   error  Delete `··`                                                                                                       prettier/prettier
+   494:17  error  Delete `··`                                                                                                       prettier/prettier
+   495:1   error  Replace `··················` with `················`                                                              prettier/prettier
+   496:15  error  Delete `··`                                                                                                       prettier/prettier
+   497:1   error  Delete `··`                                                                                                       prettier/prettier
+   498:1   error  Delete `··`                                                                                                       prettier/prettier
+   546:17  error  Replace `⏎··········.get(MeasurementReportReader)⏎··········` with `.get(MeasurementReportReader)`                prettier/prettier
+   549:1   error  Delete `··`                                                                                                       prettier/prettier
+   550:1   error  Delete `··`                                                                                                       prettier/prettier
+   551:11  error  Delete `··`                                                                                                       prettier/prettier
+   552:1   error  Replace `··············` with `············`                                                                      prettier/prettier
+   553:1   error  Delete `··`                                                                                                       prettier/prettier
+   554:11  error  Delete `··`                                                                                                       prettier/prettier
+   555:1   error  Delete `··`                                                                                                       prettier/prettier
+   556:1   error  Delete `··`                                                                                                       prettier/prettier
+  1122:21  error  This assertion is unnecessary since it does not change the type of the expression                                 @typescript-eslint/no-unnecessary-type-assertion
+  1128:39  error  This assertion is unnecessary since it does not change the type of the expression                                 @typescript-eslint/no-unnecessary-type-assertion
+
+✖ 32 problems (32 errors, 0 warnings)
+  30 errors and 0 warnings potentially fixable with the `--fix` option.
+

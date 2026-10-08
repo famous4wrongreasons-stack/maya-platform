@@ -1,0 +1,12 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START react-web-build
+PASS react-web-build
+START prepare
+{"status":"failed","clusterStopped":true,"output":"/tmp/maya-client-value-http-20261008/attempt1"}

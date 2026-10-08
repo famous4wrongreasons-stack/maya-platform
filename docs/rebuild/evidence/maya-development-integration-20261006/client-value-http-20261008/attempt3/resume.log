@@ -1,0 +1,30 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_d53aa83e1297 on 127.0.0.1:50939 (local)
+FAIL test/widgets-live/client-value-restart.probe-spec.ts (46.416 s)
+  client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart]
+    ✕ preserves separate source evidence and clarification across actual process/PG restart (45653 ms)
+
+  ● client value [actual HTTP, current React, C7/C8 owners, process and PostgreSQL restart] › preserves separate source evidence and clarification across actual process/PG restart
+
+    expect(received).toMatchObject(expected)
+
+    Matcher error: received value must be a non-null object
+
+    Received has value: undefined
+
+      751 |     replayed = false,
+      752 |   ) {
+    > 753 |     expect(body.coordination).toMatchObject({
+          |                               ^
+      754 |       scope: 'explicit_business_lifecycle',
+      755 |       domains: ['BUSINESS_INTELLIGENCE', 'CLIENT_LIFECYCLE'],
+      756 |       revision: 1,
+
+      at assertReply (widgets-live/client-value-restart.probe-spec.ts:753:31)
+      at widgets-live/client-value-restart.probe-spec.ts:1035:15
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        46.433 s, estimated 79 s
+Ran all test suites within paths "test/widgets-live/client-value-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-value-http-20261008/attempt3/resume-jest.json

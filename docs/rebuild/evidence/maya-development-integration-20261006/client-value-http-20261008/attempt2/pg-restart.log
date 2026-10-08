@@ -1,0 +1,18 @@
+waiting for server to shut down.... done
+server stopped
+waiting for server to start....2026-10-08 15:15:40.913 UTC [95692] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-08 15:15:40.913 UTC [95692] LOG:  listening on IPv4 address "127.0.0.1", port 50533
+2026-10-08 15:15:40.915 UTC [95695] LOG:  database system was shut down at 2026-10-08 15:15:40 UTC
+2026-10-08 15:15:40.917 UTC [95692] LOG:  database system is ready to accept connections
+ done
+server started
+2026-10-08 15:15:42.131 UTC [95742] ERROR:  conflicting key value violates exclusion constraint "Appointment_internal_no_overlap"
+2026-10-08 15:15:42.131 UTC [95742] DETAIL:  Key ("tenantId", "staffExternalId", tsrange("blockedStartAt", "blockedEndAt", '[)'::text))=(cmuzog6tb00005sc9o8wp9z3f, synthetic, ["2026-08-29 15:15:42.129","2026-08-29 16:15:42.129")) conflicts with existing key ("tenantId", "staffExternalId", tsrange("blockedStartAt", "blockedEndAt", '[)'::text))=(cmuzog6tb00005sc9o8wp9z3f, synthetic, ["2026-08-29 15:14:22.665","2026-08-29 16:14:22.665")).
+2026-10-08 15:15:42.131 UTC [95742] STATEMENT:  INSERT INTO "public"."Appointment" ("id","tenantId","mayaClientId","source","staffExternalId","serviceIds","startAt","endAt","blockedStartAt","blockedEndAt","status","attendance","totalPriceKopecks","currency","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING "public"."Appointment"."id", "public"."Appointment"."tenantId", "public"."Appointment"."clientId", "public"."Appointment"."mayaClientId", "public"."Appointment"."clientVisitMood", "public"."Appointment"."branchId", "public"."Appointment"."crmExternalId", "public"."Appointment"."crmProvider", "public"."Appointment"."source", "public"."Appointment"."staffExternalId", "public"."Appointment"."serviceIds", "public"."Appointment"."startAt", "public"."Appointment"."endAt", "public"."Appointment"."blockedStartAt", "public"."Appointment"."blockedEndAt", "public"."Appointment"."status", "public"."Appointment"."attendance", "public"."Appointment"."notes", "public"."Appointment"."totalPriceKopecks", "public"."Appointment"."currency", "public"."Appointment"."providerPayload", "public"."Appointment"."createdAt", "public"."Appointment"."updatedAt", "public"."Appointment"."staffId"
+2026-10-08 15:15:42.307 UTC [95692] LOG:  received fast shutdown request
+2026-10-08 15:15:42.307 UTC [95692] LOG:  aborting any active transactions
+2026-10-08 15:15:42.308 UTC [95692] LOG:  background worker "logical replication launcher" (PID 95698) exited with exit code 1
+2026-10-08 15:15:42.308 UTC [95693] LOG:  shutting down
+2026-10-08 15:15:42.308 UTC [95693] LOG:  checkpoint starting: shutdown immediate
+2026-10-08 15:15:42.310 UTC [95693] LOG:  checkpoint complete: wrote 34 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=32, longest=0.001 s, average=0.001 s; distance=36 kB, estimate=36 kB; lsn=0/227F100, redo lsn=0/227F100
+2026-10-08 15:15:42.311 UTC [95692] LOG:  database system is shut down
