@@ -1,0 +1,146 @@
+{
+  "contract": "maya.goods-search-http-react-proof/1",
+  "status": "passed",
+  "providerTransport": "FINITE_IN_PROCESS_SYNTHETIC_FETCH",
+  "adapter": "ACTUAL_CRM_FACTORY_AND_NATIVE_YCLIENTS",
+  "setup": "SYNTHETIC_ACTIVE_INTEGRATION_ROWS",
+  "sourceDrift": "SYNTHETIC_SETTINGS_UPDATE_DURING_REAL_NATIVE_READ",
+  "a17Acceptance": false,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "scriptedModel": true,
+  "restartClaim": false,
+  "businessEffectsScope": "REQUESTS_EXCLUDE_EXPLICIT_TEST_INTEGRATION_SEED_AND_SOURCE_DRIFT",
+  "clientRoleDenied": {
+    "status": 403,
+    "code": "ai_tool_forbidden",
+    "sourceGets": 0
+  },
+  "foreignTenantRead": {
+    "exactOwnCompanyRoute": true,
+    "ownCompanyGets": 0,
+    "foreignCompanyGets": 1,
+    "nativeAdapterSyntheticTransport": true
+  },
+  "sourceChangedDuringRead": {
+    "status": 409,
+    "reason": "goods_source_changed",
+    "nativeGets": 1,
+    "candidatesReturned": false,
+    "syntheticSettingsEdit": true
+  },
+  "businessSnapshotSha256": "dc409ac706491b47fdbc948f980c92a84dc04e533ab0eeb917d527c468e7ce09",
+  "mixed": {
+    "modelCalls": 1,
+    "exactC9SearchReadReceipts": 1,
+    "settledReceipts": 1,
+    "heldUnknownReceipts": 0,
+    "nativeSearchGets": 1,
+    "autoDetailGets": 0,
+    "providerWrites": 0,
+    "businessSnapshotUnchanged": true
+  },
+  "categories": {
+    "modelCalls": 2,
+    "exactC9SearchReadReceipts": 2,
+    "settledReceipts": 2,
+    "heldUnknownReceipts": 0,
+    "nativeSearchGets": 2,
+    "autoDetailGets": 0,
+    "providerWrites": 0,
+    "businessSnapshotUnchanged": true
+  },
+  "empty": {
+    "modelCalls": 3,
+    "exactC9SearchReadReceipts": 3,
+    "settledReceipts": 3,
+    "heldUnknownReceipts": 0,
+    "nativeSearchGets": 3,
+    "autoDetailGets": 0,
+    "providerWrites": 0,
+    "businessSnapshotUnchanged": true
+  },
+  "unavailable": {
+    "modelCalls": 4,
+    "exactC9SearchReadReceipts": 4,
+    "settledReceipts": 3,
+    "heldUnknownReceipts": 1,
+    "nativeSearchGets": 4,
+    "autoDetailGets": 0,
+    "providerWrites": 0,
+    "businessSnapshotUnchanged": true
+  },
+  "reload": {
+    "modelCalls": 4,
+    "exactC9SearchReadReceipts": 4,
+    "settledReceipts": 3,
+    "heldUnknownReceipts": 1,
+    "nativeSearchGets": 4,
+    "autoDetailGets": 0,
+    "providerWrites": 0,
+    "businessSnapshotUnchanged": true
+  },
+  "revoked": {
+    "modelCalls": 4,
+    "exactC9SearchReadReceipts": 4,
+    "settledReceipts": 3,
+    "heldUnknownReceipts": 1,
+    "nativeSearchGets": 4,
+    "autoDetailGets": 0,
+    "providerWrites": 0,
+    "businessSnapshotUnchanged": true,
+    "status": 401
+  },
+  "businessEffects": 0,
+  "nativeDetailGets": 0,
+  "nativeMutationRequests": 0,
+  "outboundNotifications": 0,
+  "realProviderCalls": 0,
+  "modelCalls": 4,
+  "realModelCalls": 0,
+  "nativeFactoryCalls": 4,
+  "nativeSyntheticGetCount": 6,
+  "nativeGetLedger": [
+    {
+      "company": "426102",
+      "query": "шампунь",
+      "phase": "foreign"
+    },
+    {
+      "company": "426101",
+      "query": "проверка смены",
+      "phase": "source-change"
+    },
+    {
+      "company": "426101",
+      "query": "шампунь",
+      "phase": "browser"
+    },
+    {
+      "company": "426101",
+      "query": "уход",
+      "phase": "browser"
+    },
+    {
+      "company": "426101",
+      "query": "несуществующий",
+      "phase": "browser"
+    },
+    {
+      "company": "426101",
+      "query": "синтетический сбой",
+      "phase": "browser"
+    }
+  ],
+  "checkpoints": [
+    "mixed",
+    "categories",
+    "empty",
+    "unavailable",
+    "reload",
+    "revoked"
+  ],
+  "unexpected": [],
+  "actionExecutions": 0,
+  "approvalRequests": 0
+}

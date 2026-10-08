@@ -1,13 +1,13 @@
 # Что ещё не реализовано в согласованной MAYA — 2026-10-08
 
-Сверка кода на `6996a22c` с [YCLIENTS-first scope](../product/README.md), [картой завершения](MAYA-FINAL-COMPLETION-MAP.md) и [картой доменов](MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md). Ниже отсутствующие функции отделены от частично связанных путей и проверки уже существующего кода. Историческая пометка в карте не отменяет более новый checkpoint. Это не release certification.
+Сверка кода на `245d3888` с [YCLIENTS-first scope](../product/README.md), [картой завершения](MAYA-FINAL-COMPLETION-MAP.md) и [картой доменов](MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md). Ниже отсутствующие функции отделены от частично связанных путей и проверки уже существующего кода. Историческая пометка в карте не отменяет более новый checkpoint. Это не release certification.
 
 ## Отсутствующие функции
 
 | Функция | Конкретный остаток и источник |
 | --- | --- |
 | Реальное распознавание фото накладной | Production `GoodsPhotoParser.parse` возвращает `goods_photo_parser_not_configured`. Upload validation, временное preview и review есть. [Код](../../maya-saas-backend/src/ai-tools/goods-photo.service.ts). |
-| Создание и изменение товаров в YCLIENTS | Есть чтение товаров и приход существующего товара; каталожных create/update портов нет. [CRMAdapter](../../maya-saas-backend/src/crm/crm-adapter.interface.ts), [goods checkpoint](MAYA-YCLIENTS-GOODS-VERTICAL-CHECKPOINT-20261007.md). |
+| Создание и изменение товаров в YCLIENTS | Есть ограниченный поиск товаров по запросу, чтение точного товара и приход существующего товара; каталожных create/update портов нет. [CRMAdapter](../../maya-saas-backend/src/crm/crm-adapter.interface.ts), [goods checkpoint](MAYA-YCLIENTS-GOODS-VERTICAL-CHECKPOINT-20261007.md). |
 | Создание/редактирование услуг, связей услуга–мастер и карточек сотрудников в YCLIENTS | A28 реализует INTERNAL. Отдельные native операции цены/графика не дают полного управления внешним каталогом. [Контракт](../../maya-saas-backend/src/action-engine/package5-wave4-executable.contract.ts), [source guard](../../maya-saas-backend/src/package5-wave4/package5-wave4.service.ts). |
 | Несколько компаний YCLIENTS и управление их привязками | Текущая реализация хранит одну точную tenant-owned пару company/branch. Найден конкретный блокер: sync второй company может отозвать staff access первой; identities не company-qualified. Подготовлен [единственный schema delta](MAYA-YCLIENTS-MULTI-COMPANY-SCHEMA-DELTA-20261008.md), сохраняющий один A17 credential owner/global disconnect. Миграция и multi-company routing/UI не выполнены. |
 | Первая Client-привязка без прежнего verified channel | Перенос существующего доверия и successor relink есть. Initial-only bootstrap отсутствует; нужен выбор доверенного initial proof. [Точный остаток](MAYA-FIRST-CLIENT-LINK-REMAINDER-20261007.md). |
@@ -23,6 +23,8 @@
 - Loyalty, сертификаты, абонементы, расходы, staff tasks/dossier/team имеют владельцев и отдельные READ/effects. Остались конкретные operation→source→role→confirmation связки; объявлять целые домены отсутствующими нельзя. Конкретный дефект `tasks.list` теперь закрыт [A23 READ checkpoint](MAYA-OWN-TASKS-CHECKPOINT-20261008.md): текущие статусы читаются из OperationalWorkItem, история отдельно, 331 unit tests и 7 HTTP/current React checkpoints PASS. Это не полная приёмка task create/complete или всех соседних доменов.
 
 - Клиентское досье: [ambiguity/privacy checkpoint](MAYA-CLIENT-DOSSIER-CHECKPOINT-20261008.md), runtime `6996a22c`, закрывает first-match disclosure до чтения истории/лояльности, private query masking и model-invented selection. **433 tests / 5 suites, actual HTTP/PG/current React: 6 checkpoints PASS**, Client 403, foreign-tenant routing, exact useful reply после reload. Synthetic domain-port/scripted model. Отдельно остаются native YCLIENTS search error→empty-array и подпись limited-history spend fallback; универсальное распознавание ПД и весь dossier domain не приняты.
+
+- Поиск товаров: [checkpoint](MAYA-YCLIENTS-GOODS-SEARCH-CHECKPOINT-20261008.md), runtime `245d3888`, добавляет bounded name/article/barcode READ, максимум 20 товаров/категорий через C9/native adapter. 663 tests/13 suites и actual HTTP/PG/current React: 6 checkpoints PASS. Synthetic provider/scripted model; не создание каталога, не полный список, не multi-company/A17/live acceptance.
 
 ## Не считать отсутствующими функциями
 

@@ -1,0 +1,66 @@
+FAIL src/ai-tools/ai-tool-runtime.service.spec.ts
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=false)
+
+    expect(received).resolves.toMatchObject()
+
+    Received promise rejected instead of resolved
+    Rejected to value: [NotFoundException: AI tool not found.]
+
+      41 |       const dto={surface:'web' as const,arguments:{query:'шампунь'},idempotencyKey:IDEMPOTENCY_KEY};
+      42 |       const run=(cachedReplay=false)=>h.tenantContext.runAsSystemTenant('tenant-a',()=>cachedReplay?h.runtime.replayCompletedRead(actor,'inventory.goods.search',dto,'search-execution',{suppressWidgetTrigger:true}):h.runtime.execute(actor,'inventory.goods.search',dto,{suppressWidgetTrigger:true}));
+    > 43 |       await expect(run()).resolves.toMatchObject({status:'completed'});
+         |             ^
+      44 |       h.executionFindUnique.mockImplementation(()=>{revision='rotated';return Promise.resolve(saved);});
+      45 |       await expect(run(replay)).rejects.toThrow('goods_source_changed');
+      46 |       expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-tool-runtime.service.spec.ts:43:13
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=true)
+
+    expect(received).resolves.toMatchObject()
+
+    Received promise rejected instead of resolved
+    Rejected to value: [NotFoundException: AI tool not found.]
+
+      41 |       const dto={surface:'web' as const,arguments:{query:'шампунь'},idempotencyKey:IDEMPOTENCY_KEY};
+      42 |       const run=(cachedReplay=false)=>h.tenantContext.runAsSystemTenant('tenant-a',()=>cachedReplay?h.runtime.replayCompletedRead(actor,'inventory.goods.search',dto,'search-execution',{suppressWidgetTrigger:true}):h.runtime.execute(actor,'inventory.goods.search',dto,{suppressWidgetTrigger:true}));
+    > 43 |       await expect(run()).resolves.toMatchObject({status:'completed'});
+         |             ^
+      44 |       h.executionFindUnique.mockImplementation(()=>{revision='rotated';return Promise.resolve(saved);});
+      45 |       await expect(run(replay)).rejects.toThrow('goods_source_changed');
+      46 |       expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-tool-runtime.service.spec.ts:43:13
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds candidates when access is revoked during async presentation
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "goods_current_unscoped_owner_required"
+    Received message:   "AI tool not found."
+
+          566 |           : { reason: this.assertSafeReason(args.reason) };
+          567 |       default:
+        > 568 |         throw new NotFoundException({
+              |               ^
+          569 |           message: 'AI tool not found.',
+          570 |           error: { code: 'ai_tool_not_found' },
+          571 |         });
+
+      at AiToolRegistryService.validateArguments (ai-tools/ai-tool-registry.service.ts:568:15)
+      at AiToolRuntimeService.execute (ai-tools/ai-tool-runtime.service.ts:170:37)
+      at ai-tools/ai-tool-runtime.service.spec.ts:54:79
+      at TenantContextService.runAsSystemTenant (tenancy/tenant-context.service.ts:46:25)
+      at Object.<anonymous> (ai-tools/ai-tool-runtime.service.spec.ts:54:36)
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (ai-tools/ai-tool-runtime.service.spec.ts:54:239)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 55 skipped, 58 total
+Snapshots:   0 total
+Time:        0.465 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-runtime.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-search-20261008/cached-revocation-red.json

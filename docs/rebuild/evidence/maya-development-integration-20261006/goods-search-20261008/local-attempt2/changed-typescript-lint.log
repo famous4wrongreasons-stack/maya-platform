@@ -1,0 +1,20 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core.service.spec.ts
+  3356:33  error  Replace `⏎············.fn()⏎············` with `.fn()`  prettier/prettier
+  3359:1   error  Delete `··`                                             prettier/prettier
+  3360:13  error  Delete `··`                                             prettier/prettier
+  3361:1   error  Delete `··`                                             prettier/prettier
+  3362:40  error  Replace `⏎············.fn()⏎············` with `.fn()`  prettier/prettier
+  3365:1   error  Delete `··`                                             prettier/prettier
+  3366:13  error  Delete `··`                                             prettier/prettier
+  3367:1   error  Delete `··`                                             prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/crm/adapters/yclients-goods-search.spec.ts
+  214:7  error  Async method 'json' has no 'await' expression  @typescript-eslint/require-await
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/crm/goods-search-actor.spec.ts
+  142:77  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+✖ 10 problems (10 errors, 0 warnings)
+  8 errors and 0 warnings potentially fixable with the `--fix` option.
+

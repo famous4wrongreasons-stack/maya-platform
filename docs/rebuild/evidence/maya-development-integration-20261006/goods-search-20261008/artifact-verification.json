@@ -1,0 +1,304 @@
+{
+  "contract": "maya.goods-search-independent-artifact-verification/1",
+  "status": "QUALIFIED_PASS",
+  "reviewer": "checkpoint_review",
+  "reviewedAtUtc": "2026-10-08T10:29:47.795200+00:00",
+  "candidateCommit": "245d3888f69b036fd28f4a31b6e87becf12bd264",
+  "mode": "READ_HASH_ONLY_NO_GATES_SERVICES_NETWORK",
+  "blockers": [],
+  "sourceVerification": {
+    "browserFiles": 1857,
+    "browserGitBlobMatches": 1857,
+    "browserWorkingTreeMatches": 1857,
+    "browserMapDigestRecomputed": "a1d4c62d76d757949e6f291876eabf230e018a4b0f2a2e0f24dd549453dbb3c0",
+    "localFiles": 29,
+    "localGitBlobMatches": 29,
+    "localWorkingTreeMatches": 29,
+    "localPathSetEqualsCommitDelta": true,
+    "localExecutedHead": "ef02f37ab7c47b9b10632b1dd86c0e08eb05e218",
+    "dirtyExecutedBytesMatchCandidate": true,
+    "postCommitLocalRerunClaim": false,
+    "browserStartEndCommitMatch": true,
+    "sourceUnchanged": true,
+    "harnessUnchanged": true
+  },
+  "harnessVerification": {
+    "matched": true,
+    "localLauncher": "local-gates-v3.mjs",
+    "browserLauncher": "native-proof.mjs",
+    "fence": "loopback-only.cjs",
+    "supervisor": "owned-stage.mjs",
+    "canonicalRunCommand": {
+      "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+      "sha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+      "alsoBoundByBrowserMap": true
+    }
+  },
+  "local": {
+    "passedTests": 663,
+    "passedSuites": 13,
+    "failedTests": 0,
+    "pendingTests": 0,
+    "browserGuardPassed": 5,
+    "typesLintPassed": true,
+    "contractPassed": 31,
+    "contractPending": 4,
+    "k3Passed": 10
+  },
+  "browser": {
+    "passedTests": 1,
+    "passedSuites": 1,
+    "checkpoints": [
+      "mixed",
+      "categories",
+      "empty",
+      "unavailable",
+      "reload",
+      "revoked"
+    ],
+    "pngsPresentAndHeadersValid": 6,
+    "exactMixedReplyInReloadDom": true,
+    "unavailableGrounding": "blocked",
+    "unavailableCoordination": "INCOMPLETE",
+    "settledReceipts": 3,
+    "heldUnknownReceipts": 1,
+    "reloadRevocationAdditionalReads": 0,
+    "reloadRevocationAdditionalModelCalls": 0,
+    "clientRoleDenied": {
+      "status": 403,
+      "code": "ai_tool_forbidden",
+      "sourceGets": 0
+    },
+    "foreignTenantRead": {
+      "exactOwnCompanyRoute": true,
+      "ownCompanyGets": 0,
+      "foreignCompanyGets": 1,
+      "nativeAdapterSyntheticTransport": true
+    },
+    "sourceChangedDuringRead": {
+      "status": 409,
+      "reason": "goods_source_changed",
+      "nativeGets": 1,
+      "candidatesReturned": false,
+      "syntheticSettingsEdit": true
+    },
+    "revokedStatus": 401,
+    "nativeSyntheticGets": 6,
+    "syntheticGetPhases": {
+      "browser": 4,
+      "foreign": 1,
+      "source-change": 1
+    },
+    "scriptedModelCalls": 4,
+    "realModelCalls": 0,
+    "realProviderCalls": 0,
+    "detailGets": 0,
+    "providerWrites": 0,
+    "outboundNotifications": 0,
+    "businessEffects": 0,
+    "actionExecutions": 0,
+    "approvalRequests": 0,
+    "unexpected": [],
+    "browserGuardBlocked": [],
+    "browserGuardErrors": []
+  },
+  "cleanup": {
+    "localGroupsClosedAbsentExit0": 8,
+    "browserGroupsClosedAbsentExit0": 4,
+    "clusterStoppedInManifestAndLog": true,
+    "postmasterPidAbsent": true,
+    "clusterDirectoryRetained": true,
+    "basis": "Recorded supervisor states, stop log and read-only pid-file metadata; no new live process/service probe"
+  },
+  "registryDelta": {
+    "addedToolAndC9": "inventory.goods.search",
+    "newAeKeys": [],
+    "newPolicyKeys": [],
+    "current": {
+      "AE": 228,
+      "POLICY": 223,
+      "TOOL": 52,
+      "C9": 61
+    },
+    "historical": {
+      "AE": 226,
+      "POLICY": 221,
+      "TOOL": 48,
+      "C9": 57
+    },
+    "historicalHashesPreserved": true,
+    "releaseProfileRegenerated": false
+  },
+  "redV3": {
+    "failedSelectedTests": 3,
+    "pendingUnselectedTests": 55,
+    "negativeControlOnly": true,
+    "restoredRuntimeMatchesCandidate": true,
+    "qualification": "Temporary omission of final search revalidators only; restored in finally",
+    "testedRuntimeSha256": "17f64f013dd92903fd4bd5892d33104539e0f7d74b5e309cd205dbf22101449d",
+    "restoredRuntimeSha256": "5bcae88731df41976fe85569b9dcb0bbcb03f94319dd81aae1b9c3d32796ee1f"
+  },
+  "finalRawArtifactCount": 30,
+  "finalRawArtifacts": {
+    "local-attempt6/backend-types.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "local-attempt6/browser-guard.log": {
+      "bytes": 590,
+      "sha256": "c2aff20260bbffe9bdf781137b1cf4d322a274d436b374ca63063a994d69b7fd"
+    },
+    "local-attempt6/changed-typescript-lint.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "local-attempt6/contract-check.log": {
+      "bytes": 6636,
+      "sha256": "7d7000a4c84f207560cf2aceae77a681e86c954861490a3b9efd0730785fd4f7"
+    },
+    "local-attempt6/contract-types.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "local-attempt6/k3.log": {
+      "bytes": 7873,
+      "sha256": "ac417a602e6a928bfc26d6082fe1bd715f735be5a31d917a44d5895f8ba216f1"
+    },
+    "local-attempt6/report.json": {
+      "bytes": 14756,
+      "sha256": "ca5253bb9af4c94f7e8f50c6f16c1027b2fd5760ef4c7635f4eb158c1bcc5fbc"
+    },
+    "local-attempt6/targeted-unit.json": {
+      "bytes": 327794,
+      "sha256": "45488de6f1459c097375320e1ff924cae27294cbf5ce79dd65e495aa4c409509"
+    },
+    "local-attempt6/targeted-unit.log": {
+      "bytes": 1507,
+      "sha256": "9725c1db16283cfbd0eb40e0afa9310a1486eada1b355590c28ab5f2c1269e23"
+    },
+    "local-attempt6/widgets-live-types.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "browser-attempt1/browser-jest.json": {
+      "bytes": 1410,
+      "sha256": "7b99aa35ce0e53717d28697ad4d5ba2e5364b698af4f3b20f6e6be2df4b63ead"
+    },
+    "browser-attempt1/browser.log": {
+      "bytes": 1326,
+      "sha256": "71e32804549653692fbb4e2db8f193c28c30e33b9e0a778f79759d2d2bdd70e4"
+    },
+    "browser-attempt1/createdb.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "browser-attempt1/goods-search-observations.json": {
+      "bytes": 3683,
+      "sha256": "fb08f7e841b5d0f83697c867324f4d716518eb24e48cf5dbeeb83bd0729f9791"
+    },
+    "browser-attempt1/initdb.log": {
+      "bytes": 946,
+      "sha256": "72ac0a4aa3c1e177b3dd9e69db265637c8809ce2978bd8949b27ab7925547dea"
+    },
+    "browser-attempt1/manifest.json": {
+      "bytes": 2389,
+      "sha256": "89c45fa11ef3a21f8a1c385b5029bf99f15c82de20a78aebd3e6ec4a6684d30e"
+    },
+    "browser-attempt1/migrations.log": {
+      "bytes": 14720,
+      "sha256": "69c1b863cc362d7a57040bdd6996770243fcc6b56fdcf1507f1b3ad2205be383"
+    },
+    "browser-attempt1/output/playwright/browser.json": {
+      "bytes": 20435,
+      "sha256": "c9107722fa255e40f74a17bf24b636569478aa753f420fabc02ec80d0408cd7e"
+    },
+    "browser-attempt1/output/playwright/categories.png": {
+      "bytes": 97634,
+      "sha256": "1ad35461749d3f1a22a1497a959bad64121a236fc803369236e420e42be3ae17"
+    },
+    "browser-attempt1/output/playwright/empty.png": {
+      "bytes": 107267,
+      "sha256": "e7a12f4e5f3fb08e9cd9c7dcbe9909a519eab5ddfd6952a490def91b10c647a4"
+    },
+    "browser-attempt1/output/playwright/mixed.png": {
+      "bytes": 62343,
+      "sha256": "826e487d7280d2691c76957af60d889fbc8f965a3d2f1e4015c931eb498017b4"
+    },
+    "browser-attempt1/output/playwright/reload.png": {
+      "bytes": 110713,
+      "sha256": "f6cec8ce000cc1a17d7ba8da7e2326ae65609e5840e2ca487545e5d3d0ac2693"
+    },
+    "browser-attempt1/output/playwright/revoked.png": {
+      "bytes": 27025,
+      "sha256": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab"
+    },
+    "browser-attempt1/output/playwright/unavailable.png": {
+      "bytes": 110914,
+      "sha256": "c7c58756c77135a11d2c0fdbd3e899f9f2ed016ea48bfc584bc45a61ff8d4f98"
+    },
+    "browser-attempt1/pg-start.log": {
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    "browser-attempt1/pg-stop.log": {
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    "browser-attempt1/postgres.log": {
+      "bytes": 1246,
+      "sha256": "b4bdbb0aed88b79f9ece0297c5059c16d1483bfecb8f1c84ce3e63fbdd7ab1a3"
+    },
+    "browser-attempt1/react-web-build.log": {
+      "bytes": 185,
+      "sha256": "274071bfc1e01e6b95ce8b1427d9df4fe370c99cfa4f8c6f30e3be09c1e923ad"
+    },
+    "browser-attempt1/shell-runtime-build.log": {
+      "bytes": 1010,
+      "sha256": "52a6ada5897e1a6e1545a5848a408dd52dc1e51df369f83d9e9db70fc71393f8"
+    },
+    "browser-attempt1/source-hashes.json": {
+      "bytes": 227144,
+      "sha256": "ccf93a79d42d196cef61529b3134e0873b32f71992be2981ce7deaa9ae780c00"
+    }
+  },
+  "supportingArtifacts": {
+    "cached-revocation-red-v3.json": {
+      "bytes": 39229,
+      "sha256": "f8feeb26f404a425892b30b47c8c92e17c716f8ac0d2d875f0a800e33739f737"
+    },
+    "cached-revocation-red-v3.log": {
+      "bytes": 3178,
+      "sha256": "3226faa1811a8c52ed5343e4be03cfd9f13a060972f31c17e254b0805f01569c"
+    },
+    "cached-revocation-red-v3-source.json": {
+      "bytes": 286,
+      "sha256": "01c17da8509eb9594a8ba8146404982b6641fbe10cf049adf4b2a86acff60457"
+    },
+    "local-gates-v3.mjs": {
+      "bytes": 7196,
+      "sha256": "3431ce1e22be25d1282bacdb82663e68b4ff7bc162c679fbff3cddf9a37d1efd"
+    },
+    "native-proof.mjs": {
+      "bytes": 10155,
+      "sha256": "9cdd9efe9cac4c3e499d54db51feb6f462855c4e1af0dfb25675cea593e00237"
+    },
+    "owned-stage.mjs": {
+      "bytes": 4513,
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    "loopback-only.cjs": {
+      "bytes": 606,
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    }
+  },
+  "limitations": [
+    "Finite local HTTP/PG/current React; in-process synthetic native YCLIENTS fetch and scripted model only.",
+    "Browser searches names only; barcode/article binding and cached/replay/presentation revocation races are unit-only evidence.",
+    "RED v3 is guard-omission fault injection, not a historical pre-fix run; v1/v2 are intermediate, not independent race proof.",
+    "Zero request business effects excludes explicit synthetic integration seeding and settings-drift writes.",
+    "No A17, live-provider, real-model, restart, full-catalogue, migration, background authority, production/site or C10 completion acceptance.",
+    "Saved official template uses term/count while parameter metadata names search_term/max_count; live wire compatibility unverified.",
+    "Exact reload DOM retained; parent reports partial paint in reload PNG, so no visual/design acceptance.",
+    "Copied final console label Synthetic client dossier in executed native-proof.mjs is nonblocking; goods-search contracts/arguments/environment/reports identify the actual fixture."
+  ]
+}

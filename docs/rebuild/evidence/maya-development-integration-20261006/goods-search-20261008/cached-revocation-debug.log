@@ -1,0 +1,61 @@
+FAIL src/ai-tools/ai-tool-runtime.service.spec.ts
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=false)
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": "search-execution", "replayed": true, "result": {"rows": [{"id": "123", "kind": "item", "title": "PRIVATE_SAVED_CANDIDATE"}]}, "status": "completed", "tool_name": "inventory.goods.search"}
+
+      79 |           return Promise.resolve(saved);
+      80 |         });
+    > 81 |         await expect(run(replay)).rejects.toThrow('goods_source_changed');
+         |               ^
+      82 |         expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      83 |       },
+      84 |     );
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-tool-runtime.service.spec.ts:81:15
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=true)
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": "search-execution", "replayed": true, "result": {"rows": [{"id": "123", "kind": "item", "title": "PRIVATE_SAVED_CANDIDATE"}]}, "status": "completed", "tool_name": "inventory.goods.search"}
+
+      79 |           return Promise.resolve(saved);
+      80 |         });
+    > 81 |         await expect(run(replay)).rejects.toThrow('goods_source_changed');
+         |               ^
+      82 |         expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      83 |       },
+      84 |     );
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-tool-runtime.service.spec.ts:81:15
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds candidates when access is revoked during async presentation
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": undefined, "replayed": false, "result": {"rows": [{"id": "123", "kind": "item", "title": "PRIVATE_CANDIDATE"}]}, "status": "completed", "tool_name": "inventory.goods.search"}
+
+      102 |         rows: [{ kind: 'item', id: '123', title: 'PRIVATE_CANDIDATE' }],
+      103 |       });
+    > 104 |       await expect(
+          |             ^
+      105 |         h.tenantContext.runAsSystemTenant('tenant-a', () =>
+      106 |           h.runtime.execute(
+      107 |             { ...customer, role: UserRole.TENANT_OWNER },
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.<anonymous> (ai-tools/ai-tool-runtime.service.spec.ts:104:13)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 55 skipped, 58 total
+Snapshots:   0 total
+Time:        1.964 s
+Ran all test suites within paths "src/ai-tools/ai-tool-runtime.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-search-20261008/cached-revocation-debug.json

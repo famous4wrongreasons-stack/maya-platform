@@ -1,0 +1,84 @@
+PASS src/crm/adapters/yclients-goods-search.spec.ts
+PASS src/crm/goods-search-actor.spec.ts
+PASS src/crm/yclients-goods-search.spec.ts
+FAIL src/ai-tools/goods-search-presentation.spec.ts
+  ● goods search source reply and finite READ admission › does not turn empty or category-only search into goods absence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "verified"
+    Received: "blocked"
+
+      41 |     (rows) => {
+      42 |       const answer = goodsSearchReply({ ...result(), rows });
+    > 43 |       expect(answer.status).toBe('verified');
+         |                             ^
+      44 |       expect(answer.reply).toContain('не подтверждает его отсутствие');
+      45 |       expect(answer.reply).not.toContain('Товар №');
+      46 |     },
+
+      at ai-tools/goods-search-presentation.spec.ts:43:29
+
+  ● goods search source reply and finite READ admission › does not turn empty or category-only search into goods absence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "verified"
+    Received: "blocked"
+
+      41 |     (rows) => {
+      42 |       const answer = goodsSearchReply({ ...result(), rows });
+    > 43 |       expect(answer.status).toBe('verified');
+         |                             ^
+      44 |       expect(answer.reply).toContain('не подтверждает его отсутствие');
+      45 |       expect(answer.reply).not.toContain('Товар №');
+      46 |     },
+
+      at ai-tools/goods-search-presentation.spec.ts:43:29
+
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › goods search [scripted model only] › terminates after one C9 read with a server-composed answer and no item selection (stale=false)
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      3395 |         expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      3396 |         expect(mocks.runtime.execute.mock.calls[0][1]).toBe(tool);
+    > 3397 |         expect(conversationRead).toHaveBeenCalledTimes(1);
+           |                                  ^
+      3398 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      3399 |         expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+      3400 |           'SOURCE_TITLE_SENTINEL',
+
+      at ai-tools/ai-core.service.spec.ts:3397:34
+
+  ● AiCoreService › goods search [scripted model only] › terminates after one C9 read with a server-composed answer and no item selection (stale=true)
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      3395 |         expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      3396 |         expect(mocks.runtime.execute.mock.calls[0][1]).toBe(tool);
+    > 3397 |         expect(conversationRead).toHaveBeenCalledTimes(1);
+           |                                  ^
+      3398 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      3399 |         expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+      3400 |           'SOURCE_TITLE_SENTINEL',
+
+      at ai-tools/ai-core.service.spec.ts:3397:34
+
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/routing-regression.acceptance.spec.ts
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/ai-tools/ai-tool-policy.service.spec.ts
+
+Test Suites: 2 failed, 7 passed, 9 total
+Tests:       4 failed, 531 passed, 535 total
+Snapshots:   0 total
+Time:        2.101 s
+Ran all test suites within paths "src/crm/yclients-goods-search.spec.ts", "src/crm/adapters/yclients-goods-search.spec.ts", "src/crm/goods-search-actor.spec.ts", "src/ai-tools/goods-search-presentation.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/ai-tool-policy.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-search-20261008/local-attempt1/targeted-unit.json

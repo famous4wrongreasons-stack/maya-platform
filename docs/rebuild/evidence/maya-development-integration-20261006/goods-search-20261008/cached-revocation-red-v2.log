@@ -1,0 +1,61 @@
+FAIL src/ai-tools/ai-tool-runtime.service.spec.ts
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=false)
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": "search-execution", "replayed": true, "result": {"rows": [{"id": "123", "kind": "item", "title": "PRIVATE_SAVED_CANDIDATE"}]}, "status": "completed", "tool_name": "inventory.goods.search"}
+
+      43 |       await expect(run()).resolves.toMatchObject({status:'completed'});
+      44 |       h.executionFindUnique.mockImplementation(()=>{revision='rotated';return Promise.resolve(saved);});
+    > 45 |       await expect(run(replay)).rejects.toThrow('goods_source_changed');
+         |             ^
+      46 |       expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      47 |     });
+      48 |     it('withholds candidates when access is revoked during async presentation',async()=>{
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-tool-runtime.service.spec.ts:45:13
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=true)
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": "search-execution", "replayed": true, "result": {"rows": [{"id": "123", "kind": "item", "title": "PRIVATE_SAVED_CANDIDATE"}]}, "status": "completed", "tool_name": "inventory.goods.search"}
+
+      43 |       await expect(run()).resolves.toMatchObject({status:'completed'});
+      44 |       h.executionFindUnique.mockImplementation(()=>{revision='rotated';return Promise.resolve(saved);});
+    > 45 |       await expect(run(replay)).rejects.toThrow('goods_source_changed');
+         |             ^
+      46 |       expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      47 |     });
+      48 |     it('withholds candidates when access is revoked during async presentation',async()=>{
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-tool-runtime.service.spec.ts:45:13
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds candidates when access is revoked during async presentation
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": undefined, "replayed": false, "result": {"rows": [{"id": "123", "kind": "item", "title": "PRIVATE_CANDIDATE"}]}, "status": "completed", "tool_name": "inventory.goods.search"}
+
+      52 |       jest.spyOn(h.handler,'normalizeArguments').mockImplementation((_name,_actor,args)=>revoked?Promise.reject(new ForbiddenException('goods_current_unscoped_owner_required')):Promise.resolve({...args,source_revision:'initial'}));
+      53 |       h.handlerExecute.mockResolvedValue({rows:[{kind:'item',id:'123',title:'PRIVATE_CANDIDATE'}]});
+    > 54 |       await expect(h.tenantContext.runAsSystemTenant('tenant-a',()=>h.runtime.execute({...customer,role:UserRole.TENANT_OWNER},'inventory.goods.search',{surface:'web',arguments:{query:'шампунь'},idempotencyKey:IDEMPOTENCY_KEY}))).rejects.toThrow('goods_current_unscoped_owner_required');
+         |             ^
+      55 |       expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      56 |     });
+      57 |   });
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.<anonymous> (ai-tools/ai-tool-runtime.service.spec.ts:54:13)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 55 skipped, 58 total
+Snapshots:   0 total
+Time:        0.449 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-runtime.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-search-20261008/cached-revocation-red-v2.json

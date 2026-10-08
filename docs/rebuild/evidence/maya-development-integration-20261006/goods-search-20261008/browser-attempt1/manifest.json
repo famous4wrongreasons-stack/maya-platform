@@ -1,0 +1,87 @@
+{
+  "contract": "maya.goods-search-owned-cluster/1",
+  "mode": "current-react-http-postgres-scripted-model",
+  "candidateCommit": "245d3888f69b036fd28f4a31b6e87becf12bd264",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "9cdd9efe9cac4c3e499d54db51feb6f462855c4e1af0dfb25675cea593e00237",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceSha256": "a1d4c62d76d757949e6f291876eabf230e018a4b0f2a2e0f24dd549453dbb3c0",
+  "database": "maya_widget_gate_proof_c9occ_14ea08457814",
+  "port": 54419,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-goods-search-0dFjJG/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "shell-runtime-build",
+    "react-web-build",
+    "browser"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "FINITE_LOCAL_HTTP_REACT_SCRIPTED_SELECTION_ONLY",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 32029,
+      "pgid": 32029,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "shell-runtime-build": {
+      "detached": true,
+      "pid": 32044,
+      "pgid": 32044,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 32087,
+      "pgid": 32087,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "browser": {
+      "detached": true,
+      "pid": 32139,
+      "pgid": 32139,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "commitAtEnd": "245d3888f69b036fd28f4a31b6e87becf12bd264",
+  "sourceUnchanged": true,
+  "harnessUnchanged": true,
+  "clusterStopped": true
+}

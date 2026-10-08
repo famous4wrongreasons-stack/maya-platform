@@ -1,0 +1,217 @@
+{
+  "contract": "maya.goods-search-local-gates/1",
+  "source": "ef02f37ab7c47b9b10632b1dd86c0e08eb05e218",
+  "tree": "9e14fe81744f81be81b8593caa053a39cd66f2df",
+  "base": "ef02f37ab7c47b9b10632b1dd86c0e08eb05e218",
+  "started": "2026-10-08T10:13:17.101Z",
+  "status": "FAIL",
+  "commands": [
+    {
+      "name": "browser-guard",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--test",
+        "../maya-carrier-react/test/goods-search-browser-guard.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/crm/yclients-goods-search.spec.ts",
+        "src/crm/adapters/yclients-goods-search.spec.ts",
+        "src/crm/goods-search-actor.spec.ts",
+        "src/ai-tools/goods-search-presentation.spec.ts",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/routing-regression.acceptance.spec.ts",
+        "src/ai-tools/ai-tool-registry.service.spec.ts",
+        "src/ai-tools/ai-tool-policy.service.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-goods-search-20261008/local-attempt3/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-typescript-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.ts",
+        "src/ai-tools/ai-tool-registry.service.ts",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/ai-tools/ai-tool-runtime.service.ts",
+        "src/ai-tools/ai-tool.catalog.ts",
+        "src/conversation-intelligence/conversation-taxonomy.ts",
+        "src/crm/adapters/yclients-crm.adapter.ts",
+        "src/crm/crm-adapter.interface.ts",
+        "src/crm/crm.service.ts",
+        "src/orchestration/c9.registry.ts",
+        "src/ai-tools/goods-search-chat-selection.ts",
+        "src/ai-tools/goods-search-presentation.spec.ts",
+        "src/ai-tools/goods-search-presentation.ts",
+        "src/crm/adapters/yclients-goods-search.spec.ts",
+        "src/crm/goods-search-actor.spec.ts",
+        "src/crm/yclients-goods-search.spec.ts",
+        "src/crm/yclients-goods-search.ts",
+        "test/widgets-live/goods-search.probe-spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "browser-guard",
+      "elapsedMs": 56
+    }
+  ],
+  "failures": [
+    {
+      "error": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n"
+    }
+  ],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "888165c22f03ac3d0756d38f3dbe8d5aa06cd8123be770d67726cc934d16b58c",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "ff6966d8b9a52668b99d40c4e479034f76a3497cfd257817254a8336f0057d3d",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": "8cb2c89c9f2f9964ffb412de9239c762841a3e82a07f3cafee11befe08c908a2",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "0f5299daa60baccfec3cf5ae2fe1a709be7c83760abd260237d17c83606ba408",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "b29941125cc10065faccafb6b572b5693ce1c1bb084ad794340f63d6fb722acb",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "3cb4437141c448fff45f1edaa76292aeeb0ba5c72f12aa074ef08213ecb1b748",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "5bcae88731df41976fe85569b9dcb0bbcb03f94319dd81aae1b9c3d32796ee1f",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "2998611d16c350e9909f4a36c42f60f194817f69121b4f66511a2e38a1ca62b5",
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts": "c6fe9100210766c4fc39799e12caf6538dc4593af7d91a18154cfbb715f2d013",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "0aa937f22e74085c51011c190ab069f9e5abe5cd7be983138aff8bd5ce9ac189",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "42d963032de948baa913c232c2f6cc56b316406ceb99ebbdc15190e0992cb34d",
+    "maya-saas-backend/src/crm/crm.service.ts": "1a1c1e4de9ec35f292f8db9d11852dab417febff86f8f629776ff37a3b824173",
+    "maya-saas-backend/src/orchestration/c9.registry.ts": "ffde3c29941570f20d9f05d2fd0ef7a1d683c31824fcad7743a18ef19fcfde5e",
+    "maya-saas-backend/src/ai-tools/goods-search-chat-selection.ts": "be6fc6aead738ab1eaf778b21e8379ff376d1f59e496a2eab1534d61a9927177",
+    "maya-saas-backend/src/ai-tools/goods-search-presentation.spec.ts": "2dde88d64a71217b3524259097ffd242e3202507e96512e0d0ea7d3b3128b4ba",
+    "maya-saas-backend/src/ai-tools/goods-search-presentation.ts": "a7043ccba8c262f68903bbe10e335572169bc9b89f96c3bbcca289ddce7c0e45",
+    "maya-saas-backend/src/crm/adapters/yclients-goods-search.spec.ts": "2954428a5ddfa2c636719872bb04a9ce0af9df07529435729223a7c6baa328b8",
+    "maya-saas-backend/src/crm/goods-search-actor.spec.ts": "c31ae3da02be6af08887fc1a5b172f91c2025e6178a0fc8b676431d962f6b62e",
+    "maya-saas-backend/src/crm/yclients-goods-search.spec.ts": "f01de9c18f044e2a2169f1cd1cc16874a5198f62fc11877195cf15c0450c917a",
+    "maya-saas-backend/src/crm/yclients-goods-search.ts": "148fe65066ead5e9245d1db23cc18a7c883b6522e8db5479c7bca6ff1f4bf12a",
+    "maya-saas-backend/test/widgets-live/goods-search.probe-spec.ts": "746b7735067a3482c74c39e52012fb38de2793623761b52dfe364da4b993bf5f",
+    "maya-carrier-react/test/goods-search-browser-guard.mjs": "7129de859ce8073b1c35bffbd4e892631c7d8c50be236fa73d8e2d88a845acb6",
+    "maya-carrier-react/test/goods-search-browser-guard.test.mjs": "8d38a9afeae0906c091f3b44323a788b5cd9c81632c67368279ad0754d469e5f",
+    "maya-carrier-react/test/goods-search-browser-probe.mjs": "1adad3f7200292da3f41274f4e587982eee26e2bc14c8362a5ac971c7de2fe32"
+  },
+  "launcherSha256": "00c1414c3c0a5fe91c642e4a15c409d5417915c46fe5a0ea8d0138dc4410a04e",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "browser-guard": {
+      "detached": true,
+      "pid": 28251,
+      "pgid": 28251,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "targeted-unit": {
+      "detached": true,
+      "pid": 28254,
+      "pgid": 28254,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "ef02f37ab7c47b9b10632b1dd86c0e08eb05e218",
+  "treeAtEnd": "9e14fe81744f81be81b8593caa053a39cd66f2df",
+  "dirtyAtEnd": "M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool.catalog.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts\n M maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts\n M maya-saas-backend/src/crm/crm-adapter.interface.ts\n M maya-saas-backend/src/crm/crm.service.ts\n M maya-saas-backend/src/orchestration/c9.registry.ts\n?? maya-carrier-react/test/goods-search-browser-guard.mjs\n?? maya-carrier-react/test/goods-search-browser-guard.test.mjs\n?? maya-carrier-react/test/goods-search-browser-probe.mjs\n?? maya-saas-backend/src/ai-tools/goods-search-chat-selection.ts\n?? maya-saas-backend/src/ai-tools/goods-search-presentation.spec.ts\n?? maya-saas-backend/src/ai-tools/goods-search-presentation.ts\n?? maya-saas-backend/src/crm/adapters/yclients-goods-search.spec.ts\n?? maya-saas-backend/src/crm/goods-search-actor.spec.ts\n?? maya-saas-backend/src/crm/yclients-goods-search.spec.ts\n?? maya-saas-backend/src/crm/yclients-goods-search.ts\n?? maya-saas-backend/test/widgets-live/goods-search.probe-spec.ts",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "00c1414c3c0a5fe91c642e4a15c409d5417915c46fe5a0ea8d0138dc4410a04e",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T10:13:19.013Z"
+}

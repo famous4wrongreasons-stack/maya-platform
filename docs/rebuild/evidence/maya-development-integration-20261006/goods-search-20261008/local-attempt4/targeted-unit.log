@@ -1,0 +1,61 @@
+FAIL src/ai-tools/ai-tool-runtime.service.spec.ts
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=false)
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "goods_source_changed"
+    Received message:   "AI tool execution cannot be completed."
+
+          2796 |
+          2797 |   private executionConflict(code: string): never {
+        > 2798 |     throw new ConflictException({
+               |           ^
+          2799 |       message: 'AI tool execution cannot be completed.',
+          2800 |       error: { code },
+          2801 |     });
+
+      at AiToolRuntimeService.executionConflict (ai-tools/ai-tool-runtime.service.ts:2798:11)
+      at AiToolRuntimeService.revalidateGoodsSearch (ai-tools/ai-tool-runtime.service.ts:465:12)
+      at AiToolRuntimeService.execute (ai-tools/ai-tool-runtime.service.ts:327:5)
+      at ai-tools/ai-tool-runtime.service.spec.ts:83:9
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at ai-tools/ai-tool-runtime.service.spec.ts:83:43
+
+  ● AiToolRuntimeService › goods search cached authority after awaited work › withholds cached candidates when the source revision changes during lookup (replay=true)
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "goods_source_changed"
+    Received message:   "AI tool execution cannot be completed."
+
+          2796 |
+          2797 |   private executionConflict(code: string): never {
+        > 2798 |     throw new ConflictException({
+               |           ^
+          2799 |       message: 'AI tool execution cannot be completed.',
+          2800 |       error: { code },
+          2801 |     });
+
+      at AiToolRuntimeService.executionConflict (ai-tools/ai-tool-runtime.service.ts:2798:11)
+      at AiToolRuntimeService.revalidateGoodsSearch (ai-tools/ai-tool-runtime.service.ts:465:12)
+      at AiToolRuntimeService.replayCompletedRead (ai-tools/ai-tool-runtime.service.ts:430:5)
+      at ai-tools/ai-tool-runtime.service.spec.ts:83:9
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at ai-tools/ai-tool-runtime.service.spec.ts:83:43
+
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/routing-regression.acceptance.spec.ts
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/crm/adapters/yclients-goods-search.spec.ts
+PASS src/ai-tools/ai-tool-policy.service.spec.ts
+PASS src/crm/goods-search-actor.spec.ts
+PASS src/crm/yclients-goods-search.spec.ts
+PASS src/ai-tools/goods-search-presentation.spec.ts
+
+Test Suites: 1 failed, 9 passed, 10 total
+Tests:       2 failed, 601 passed, 603 total
+Snapshots:   0 total
+Time:        1.54 s
+Ran all test suites within paths "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/crm/yclients-goods-search.spec.ts", "src/crm/adapters/yclients-goods-search.spec.ts", "src/crm/goods-search-actor.spec.ts", "src/ai-tools/goods-search-presentation.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/ai-tool-policy.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-search-20261008/local-attempt4/targeted-unit.json
