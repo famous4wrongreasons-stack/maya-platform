@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -35,20 +36,28 @@ export class GoodsPhotoService {
     private readonly policy: AiToolPolicyService,
     private readonly registry: AiToolRegistryService,
   ) {}
+  /** Metadata/authority witness only; parser and UI never own a provider adapter. */
+  async sourceIdentity(
+    user: AuthenticatedUser,
+    toolName: string,
+    expected?: string,
+  ): Promise<string> {
+    if (!user.tenantId) throw new BadRequestException('goods_tenant_required');
+    await this.policy.assertCanExecute(
+      this.policy.buildPrincipal(user.tenantId, user.userId, user.role, 'web'),
+      this.registry.get(toolName),
+    );
+    const revision = await this.crm.goodsReadIdentity(
+      user.tenantId,
+      user.userId,
+    );
+    if (expected !== undefined && revision !== expected)
+      throw new ConflictException('goods_source_changed');
+    return revision;
+  }
   async preview(user: AuthenticatedUser, file: GoodsPhotoFile | undefined) {
     try {
-      if (!user.tenantId)
-        throw new BadRequestException('goods_tenant_required');
-      await this.policy.assertCanExecute(
-        this.policy.buildPrincipal(
-          user.tenantId,
-          user.userId,
-          user.role,
-          'web',
-        ),
-        this.registry.get('inventory.goods.read'),
-      );
-      await this.crm.assertGoodsActor(user.tenantId, user.userId);
+      const source = await this.sourceIdentity(user, 'inventory.goods.read');
       if (
         !file ||
         !Buffer.isBuffer(file.buffer) ||
@@ -104,9 +113,10 @@ export class GoodsPhotoService {
           review_required: true,
         };
       });
-      await this.crm.assertGoodsActor(user.tenantId, user.userId);
+      await this.sourceIdentity(user, 'inventory.goods.read', source);
       return {
         contract: 'maya.goods-photo.preview/1',
+        source_revision: source,
         photo_sha256,
         lines,
         recognition_acceptance: 'NOT_ACCEPTED',
@@ -117,7 +127,7 @@ export class GoodsPhotoService {
           'Предварительные поля. Проверьте совпадение товара, единицы, количество и смысл цены. Неоднозначности нужно исправить до подтверждения прихода.',
       };
     } finally {
-      file?.buffer?.fill(0);
+      if (Buffer.isBuffer(file?.buffer)) file.buffer.fill(0);
     }
   }
 }

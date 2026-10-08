@@ -114,8 +114,11 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
     modelSelection: 'SCRIPTED_SYNTHETIC',
     parser: 'SYNTHETIC_NOT_OCR_ACCEPTANCE',
     provider: 'SYNTHETIC_ADAPTER',
+    reviewLane:
+      'HISTORICAL_RAW_RUNTIME_REGRESSION_NOT_PHOTO_CARRIER_ACCEPTANCE',
     certificate: 'NOT_ISSUED',
   };
+  const fixtureActors = new Map<string, { tenantId: string; userId: string }>();
   beforeAll(async () => {
     db = await bootFixtureContext();
     http = await bootHttp();
@@ -292,10 +295,12 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
         settingsJson: { companyId: company, currency: 'RUB' },
       },
     });
+    const token = await http.login(tenant.slug, user.email, user.password);
+    fixtureActors.set(token, { tenantId: tenant.id, userId: user.id });
     return {
       tenant,
       user,
-      token: await http.login(tenant.slug, user.email, user.password),
+      token,
       company,
     };
   }
@@ -304,8 +309,33 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
       .post(route)
       .set('Authorization', `Bearer ${token}`)
       .send(body as object);
-  const review = (token: string, p: Record<string, unknown>) =>
-    post(token, '/api/ai/goods/receipt-review', p);
+  // Historical canonical approval/runtime regression. The current photo ingress
+  // returns only a certified widget resolution; this fixture deliberately tests
+  // the existing tool HTTP owner and does not claim photo-carrier acceptance.
+  const review = (token: string, p: Record<string, unknown>) => {
+    const actor = fixtureActors.get(token);
+    if (!actor) throw new Error('Explicit synthetic fixture actor required');
+    const hash = createHash('sha256')
+      .update(
+        JSON.stringify({
+          actor,
+          photo: p.photo_sha256,
+          line: p.source_line,
+          version: p.review_version,
+        }),
+      )
+      .digest('hex');
+    const idempotencyKey = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+    return post(
+      token,
+      '/api/ai/tools/inventory.goods.receipt.prepare/execute',
+      {
+        surface: 'web',
+        arguments: p,
+        idempotencyKey,
+      },
+    );
+  };
   const approve = (token: string, a: Approval, hash = a.payload_hash) =>
     post(token, `/api/ai/approvals/${a.id}/approve`, { payloadHash: hash });
   const reject = (token: string, a: Approval) =>
@@ -556,6 +586,10 @@ describe('Goods vertical and restart [synthetic parser/model/provider]', () => {
         other.email,
         other.password,
       );
+    fixtureActors.set(otherToken, {
+      tenantId: owner.tenant.id,
+      userId: other.id,
+    });
     check(await approve(otherToken, a2), 403, 'other actor');
     const concurrent = await Promise.all([
       approve(owner.token, a2),

@@ -241,7 +241,7 @@ const INVALID_RESOLUTION = Symbol('invalid_chat_widget_resolution');
  * retain those duties. It only proves enough of the certified envelope root to make ingestion total,
  * then keeps the exact server object so the shell cannot manufacture or repair authority bytes.
  */
-const projectChatResolution = (
+export const projectChatResolution = (
   value: unknown,
 ): ChatWidgetResolution | null | typeof INVALID_RESOLUTION => {
   if (value === undefined || value === null) return null;

@@ -17,6 +17,7 @@
     "src/net/booking-reasons.ts",
     "src/net/client.ts",
     "src/net/endpoint.ts",
+    "src/net/goods-photo.ts",
     "src/net/personal.ts",
     "src/net/project.ts",
     "src/net/session.ts",
@@ -30,6 +31,7 @@
     "src/shell/conversation.ts",
     "src/shell/deeplink.ts",
     "src/shell/dom-port.ts",
+    "src/shell/goods-photo.ts",
     "src/shell/intents.ts",
     "src/shell/personal-booking.ts",
     "src/shell/ports.ts",
@@ -66,11 +68,15 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "f48823e0c80211e8c27741746766c338e580faf4c64f22df3d0c01749de17ed9"
+        "sha256": "da050b75c9bfb513f2cf9a8dc41df894ca97e88181cb923e660d09380cc26409"
       },
       {
         "path": "src/net/endpoint.ts",
         "sha256": "fa3b17f2bf7e63e073a97a0130766f6735437719004094d0bbc051416a86da7c"
+      },
+      {
+        "path": "src/net/goods-photo.ts",
+        "sha256": "bda7cd1cfcb27edeedcb377afb04b4a7c70620a53921e9a4d7c04c0b7fab0e71"
       },
       {
         "path": "src/net/personal.ts",
@@ -78,7 +84,7 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "c102e2341a007212a7f13fa6305768d0bee0fbb578685701abe1128a2960f7c7"
+        "sha256": "6a45c65cb1ba8719910c633ee8e36bc83f5a66071cb9c86b73c64bb7a4496df0"
       },
       {
         "path": "src/net/session.ts",
@@ -86,7 +92,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "7584bb641d7fe90d14f5b78283909467fe6085cec29bb1dfa9d03074c4357397"
+        "sha256": "7e058edbecd361046c2cde9182cd6646685554b4fdaddbe46e3efc16f2bc0f49"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -114,11 +120,15 @@
       },
       {
         "path": "src/shell/conversation.ts",
-        "sha256": "f9e97d426b66106686ffa2097a7f2d3066901fe6bd6289d968ad53f5d26f5352"
+        "sha256": "807965f63143f0fb1a336f258fc42871d39069bf16c0f5ef146c02938a782b66"
       },
       {
         "path": "src/shell/deeplink.ts",
         "sha256": "7240916a6fc93bb0a2813826d48539743e791a2662b20e62650ac8e6030fddd4"
+      },
+      {
+        "path": "src/shell/goods-photo.ts",
+        "sha256": "d2d33047c51629a3428b3555a66948f5366e0d30cd3a5fa93094657e5817e717"
       },
       {
         "path": "src/shell/intents.ts",
@@ -138,7 +148,7 @@
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "60c45f75032f7b4b1d8a7107128f462a836c7f4af47a9e2e15a9fb9b03863e2f"
+        "sha256": "c29af1e42ecb3c392e8345a59dff8b6e8500f9d3b90e6ae90adf3ed547b02224"
       },
       {
         "path": "src/shell/view.ts",
@@ -150,8 +160,8 @@
       }
     ]
   },
-  "bytes": 540674,
-  "digest": "fcdd99b76e5819ad160182cfdae1765b61032faf79001151882e2edf507517c9",
+  "bytes": 577402,
+  "digest": "5bddba17828b6e9e15e2a2f5cd106b01b17230c1b4eec96d2700d30e157ed5d3",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -159,8 +169,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "2fbbe39b555b20218d23624489fffc34491387a08c157b01902b6e4e16056ccb",
-    "modulePath": "m/2fbbe39b555b2021/",
+    "digest": "7f87eb81ce04ed90115786e23164fa079f820e33fe6cb289545ed583941a667e",
+    "modulePath": "m/7f87eb81ce04ed90/",
     "files": [
       {
         "path": "entry/main.js",
@@ -219,13 +229,18 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "efbe1896db1b08450bd13c34b913d87f9ae0a7c85aa85cbbb2193b0bfab33f61",
-        "bytes": 28053
+        "sha256": "47504142659ac93f15055b76fbf9f54ebddaee2bd5ca808e94ec0309f8603f43",
+        "bytes": 32180
       },
       {
         "path": "src/net/endpoint.js",
         "sha256": "5d822288a47d4ef73f570283f16042d002ef954973be25c2b9585b79f41bbbde",
         "bytes": 32
+      },
+      {
+        "path": "src/net/goods-photo.js",
+        "sha256": "b740a795e2ce6d3dff90bc9abba749e79e550e9b871707bffe88b8befadf2d1c",
+        "bytes": 9843
       },
       {
         "path": "src/net/personal.js",
@@ -234,8 +249,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "11f833e988ce5bface867af019449fe1ef75d668552293c4780a37abac4899f5",
-        "bytes": 17742
+        "sha256": "eb9ac1c86b2e24403474115c327ea22b74bb79cac000493663bcb7ca881a2435",
+        "bytes": 17749
       },
       {
         "path": "src/net/session.js",
@@ -279,8 +294,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "6cf08f0bfcf600ee9fc4aa340a2727821863158f5103cc983a9e297780b15bb7",
-        "bytes": 17005
+        "sha256": "348bb7ff793dcde8dee44367bdc3b2965ffefbb9ea123c52807b52b59fc04bb4",
+        "bytes": 20746
       },
       {
         "path": "src/shell/deeplink.js",
@@ -291,6 +306,11 @@
         "path": "src/shell/dom-port.js",
         "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "bytes": 11
+      },
+      {
+        "path": "src/shell/goods-photo.js",
+        "sha256": "09d9e39e47f0961c3823fcd7160f4b4fa1a88de5a198a1d29f4e31149300d0aa",
+        "bytes": 10296
       },
       {
         "path": "src/shell/intents.js",
@@ -314,8 +334,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "f7ed02804f8e75493a7f49f6b2340e60d2b237ead7f24c1628ebc16aa438a521",
-        "bytes": 9549
+        "sha256": "c65566d72b7352970858f75b1c41bb29b17e50648477e9f438fe0c23faf73f9c",
+        "bytes": 9806
       },
       {
         "path": "src/shell/view.js",
@@ -343,7 +363,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "8fb0b3f7444e2ae32245761868c8c2a21b8dcc502b7384bf58c940f920f43dc0",
+      "sha256": "a017f8eb4a07f6e461c136a35a4c751d42f80475463b09c4b629c1f59614c6da",
       "bytes": 1344
     },
     "assets": [

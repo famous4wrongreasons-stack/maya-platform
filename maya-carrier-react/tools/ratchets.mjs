@@ -13,6 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 
 export class CarrierRefused extends Error {
   constructor(refusals) {
@@ -205,8 +206,9 @@ export const CLOSED_TAGS = new Set([
  * refused: `type="image"` is a request sink and is not in the set, and `formAction` navigates and
  * is already a REQUEST_SINK.
  *
- * REPLACEMENT RATCHET: `input` is admitted ONLY with a literal `type` from that same three-member
- * set, written at the call site. A computed type (`type={kind}`) is refused, because a type that
+ * REPLACEMENT RATCHET: ordinary `input` is admitted only with a literal `type` from that same
+ * three-member set. GoodsPhotoPicker alone adds one file input, restricted to three image MIME
+ * types, no directory/multiple/spread attributes. A computed type (`type={kind}`) is refused, because a type that
  * arrives through an identifier cannot be read here — the same reasoning as `inline-style-shape`.
  * `createElement('input', …)` is refused outright: its attributes are an object this scanner cannot
  * vet, and the carrier writes JSX.
@@ -215,25 +217,40 @@ export const CLOSED_TAGS = new Set([
  * literal types admit. See `input-type` in the self-test.
  */
 const INPUT_TYPES = new Set(['text', 'email', 'password']);
+// A finite upload capability, not a new request sink or general input-type grant.
+// Multipart transport stays in the headless client's single exchange function.
+export const GOODS_PHOTO_PICKER = 'src/chat/GoodsPhotoPicker.tsx';
 
 /** Attributes that make a browser issue a request or navigate. */
 const REQUEST_SINKS = ['src', 'srcSet', 'href', 'action', 'formAction', 'poster', 'ping', 'data', 'background'];
 
-/** The source of one JSX opening tag, brace-aware, so `onChange={(e) => …}` does not end it early. */
-const openingTag = (code, at) => {
-  let depth = 0;
-  for (let i = at; i < code.length; i += 1) {
-    const ch = code[i];
-    if (ch === '{') depth += 1;
-    else if (ch === '}') depth -= 1;
-    else if (ch === '>' && depth <= 0) return code.slice(at, i + 1);
-  }
-  return code.slice(at);
+/** Only actual top-level JSX attributes count. Strings in handlers grant no capability. */
+const inputAttributes = (text) => {
+  const source = ts.createSourceFile('carrier.tsx', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const inputs = new Map();
+  const visit = node => {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && node.tagName.getText(source) === 'input') {
+      const attributes = new Map();
+      let unsafe = false;
+      for (const attribute of node.attributes.properties) {
+        if (!ts.isJsxAttribute(attribute)) { unsafe = true; continue; }
+        const name = attribute.name.getText(source);
+        if (attributes.has(name)) unsafe = true;
+        attributes.set(name, attribute.initializer && ts.isStringLiteral(attribute.initializer) ? attribute.initializer.text : null);
+      }
+      inputs.set(node.getStart(source), { attributes, unsafe });
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return inputs;
 };
 
 export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
   const out = [];
+  let photoPickers = 0;
   const code = codeOnly(text);
+  const inputs = inputAttributes(text);
   // Both spellings. The owner's canonical source is pre-compiled React.createElement, and a
   // component that used it instead of JSX would otherwise walk straight through the closed set.
   const tagSites = [
@@ -244,14 +261,18 @@ export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
     const tag = m[1];
     if (tag === 'input') {
       const viaCreateElement = !m[0].startsWith('<');
-      // Read from the RAW text: `code` has had its string bodies blanked, so the literal type would
-      // be a run of spaces. codeOnly is length-preserving, so the index still lines up.
-      const literal = viaCreateElement ? null : openingTag(text, m.index).match(/\stype\s*=\s*['"]([a-z]+)['"]/);
-      if (literal === null || !INPUT_TYPES.has(literal[1]))
+      const parsed = viaCreateElement ? undefined : inputs.get(m.index);
+      const literal = parsed?.attributes.get('type');
+      const photoPicker = rel === GOODS_PHOTO_PICKER && literal === 'file' && !parsed?.unsafe
+        && parsed.attributes.get('accept') === 'image/png,image/jpeg,image/webp'
+        && !['multiple', 'directory', 'webkitdirectory'].some(name => parsed.attributes.has(name));
+      if (photoPicker && ++photoPickers > 1)
+        out.push(refusal('input-type', rel, lineAt(text, m.index), 'input', 'Only one goods photo picker is admitted.'));
+      if (!parsed || parsed.unsafe || (!INPUT_TYPES.has(literal) && !photoPicker))
         out.push(refusal('input-type', rel, lineAt(text, m.index), 'input',
           viaCreateElement
             ? 'createElement(\'input\', …) is refused: its attributes are an object this scanner cannot vet.'
-            : 'an <input> is admitted only with a literal type of text, email or password — the same three the shell\u2019s createInput door allows.'));
+            : 'An input needs a literal text/email/password type; only the dedicated goods photo picker may admit one bounded image file.'));
       continue;
     }
     if (!CLOSED_TAGS.has(tag))

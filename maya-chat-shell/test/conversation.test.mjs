@@ -257,14 +257,15 @@ test('submitUserTurn is the sole path: only it (and retry of its own turn) calls
   assert.deepEqual(callers, [path.join('src', 'shell', 'conversation.ts')]);
   assert.equal((read('src/shell/conversation.ts').match(/\.chat\s*\(/g) ?? []).length, 1, 'one call site');
 
-  // Surface: the port adds nothing that sends.
+  // Surface: the finite attachment seam never calls Transport.chat or creates a local user turn.
   const s = setup();
-  assert.deepEqual(Object.keys(s.conversation).sort(), ['dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view']);
+  assert.deepEqual(Object.keys(s.conversation).sort(), ['dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'runGoodsPhotoOperation', 'submitUserTurn', 'subscribe', 'timeline', 'view']);
   assert.deepEqual(Object.keys(s.conversation.timeline).sort(), ['appendNotice', 'appendServerLine', 'appendWidget', 'hasItem', 'onDropped', 'replaceWidget']);
   s.conversation.timeline.appendNotice('deeplink_refused');
   s.conversation.timeline.appendServerLine('server-authored receipt');
   s.conversation.timeline.appendWidget({ kind: 'widget', id: 'w1', result: {}, display: 'live', pending: null, sentence: null });
   s.conversation.retry('nope');
+  await s.conversation.runGoodsPhotoOperation('preview', async () => ({ ok: false, failure: { reason: 'unavailable' } }), new AbortController().signal);
   assert.equal(s.calls.length, 0, 'writing the timeline or retrying nothing sends nothing');
 
   const r = s.conversation.submitUserTurn('Когда ближайшее окно?', TYPED);

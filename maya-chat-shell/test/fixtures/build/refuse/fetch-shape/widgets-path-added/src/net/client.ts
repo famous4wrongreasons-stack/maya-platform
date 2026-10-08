@@ -22,6 +22,10 @@ const PATHS = {
   personal4: '/personal-client/appointments/results',
   personal5: '/personal-client/appointments',
   personalBranches: '/branches',
+  goodsPhotoPreview: '/ai/goods/photo-preview',
+  goodsPhotoSearch: '/ai/goods/search',
+  goodsPhotoItem: '/ai/goods/item-read',
+  goodsPhotoReview: '/ai/goods/receipt-review',
 
   widgetAdmin: '/widgets/admin',
 } as const;

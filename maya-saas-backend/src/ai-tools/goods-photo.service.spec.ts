@@ -28,7 +28,7 @@ function setup() {
       ],
     }),
   };
-  const crm = { assertGoodsActor: jest.fn().mockResolvedValue(undefined) };
+  const crm = { goodsReadIdentity: jest.fn().mockResolvedValue('source-v1') };
   const policy = {
     buildPrincipal: jest.fn().mockReturnValue({}),
     assertCanExecute: jest.fn().mockResolvedValue(undefined),
@@ -70,7 +70,8 @@ describe('ephemeral photo preview, synthetic parser only', () => {
     });
     expect(JSON.stringify(preview)).not.toMatch(/PRIVATE|raw_ocr|supplier/);
     expect(buffer.every((v) => v === 0)).toBe(true);
-    expect(h.crm.assertGoodsActor).toHaveBeenCalledTimes(2);
+    expect(h.crm.goodsReadIdentity).toHaveBeenCalledTimes(2);
+    expect(h.policy.assertCanExecute).toHaveBeenCalledTimes(2);
   });
   it('has no default OCR/network path', () =>
     expect(() => new GoodsPhotoParser().parse(image())).toThrow(
@@ -79,7 +80,7 @@ describe('ephemeral photo preview, synthetic parser only', () => {
   it('denies before parser and clears memory when actor is refused', async () => {
     const h = setup(),
       buffer = image();
-    h.crm.assertGoodsActor.mockRejectedValue(new Error('denied'));
+    h.crm.goodsReadIdentity.mockRejectedValue(new Error('denied'));
     await expect(
       h.service.preview(user, {
         buffer,
@@ -90,6 +91,32 @@ describe('ephemeral photo preview, synthetic parser only', () => {
     expect(h.parser.parse).not.toHaveBeenCalled();
     expect(buffer.every((v) => v === 0)).toBe(true);
   });
+  it.each(['source', 'actor', 'feature'])(
+    'withholds provisional fields and wipes memory if %s changes during parsing',
+    async (change) => {
+      const h = setup(),
+        buffer = image();
+      h.parser.parse.mockImplementation(() => {
+        if (change === 'source')
+          h.crm.goodsReadIdentity.mockResolvedValue('source-v2');
+        if (change === 'actor')
+          h.crm.goodsReadIdentity.mockRejectedValue(new Error('revoked'));
+        if (change === 'feature')
+          h.policy.assertCanExecute.mockRejectedValue(new Error('revoked'));
+        return Promise.resolve({ lines: [{ name: 'PRIVATE_PROVISIONAL' }] });
+      });
+      await expect(
+        h.service.preview(user, {
+          buffer,
+          mimetype: 'image/png',
+          size: buffer.length,
+        }),
+      ).rejects.toThrow(
+        change === 'source' ? 'goods_source_changed' : 'revoked',
+      );
+      expect(buffer.every((v) => v === 0)).toBe(true);
+    },
+  );
   it('rejects wrong magic, oversized images and unbounded parser output without persistence', async () => {
     const h = setup();
     for (const buffer of [Buffer.alloc(20), Buffer.alloc(2 * 1024 * 1024 + 1)])

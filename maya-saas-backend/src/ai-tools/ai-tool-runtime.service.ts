@@ -152,6 +152,8 @@ export class AiToolRuntimeService {
     dto: ExecuteAiToolDto,
     internal: {
       readonly suppressWidgetTrigger?: boolean;
+      /** The explicit goods review ingress may prepare/read, never resume an approved effect. */
+      readonly goodsReviewOnly?: true;
       /** Transient metadata witness for the existing typed booking successor. */
       readonly onAvailabilityScope?: (check: () => Promise<void>) => void;
       readonly bookingSelector?: Parameters<
@@ -167,6 +169,8 @@ export class AiToolRuntimeService {
   ) {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
+    if (internal.goodsReviewOnly && toolName !== GOODS_RECEIPT_TOOL)
+      this.approvalConflict('goods_review_context_invalid');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
     const personal = await this.bindPersonalReadScope(
@@ -215,6 +219,7 @@ export class AiToolRuntimeService {
           savedArgs,
           this.inputHash(toolName, savedArgs, principal),
           dto.idempotencyKey,
+          internal.goodsReviewOnly === true,
         );
         return this.attachGoodsReceiptApprovalWidget(
           user,
@@ -293,6 +298,7 @@ export class AiToolRuntimeService {
         args,
         inputHash,
         idempotencyKey,
+        internal.goodsReviewOnly === true,
       );
       return definition.name === GOODS_RECEIPT_TOOL
         ? this.attachGoodsReceiptApprovalWidget(
@@ -1594,6 +1600,7 @@ export class AiToolRuntimeService {
   private async projectGoodsApproval(
     approval: ApprovalRecord,
     replayed: boolean,
+    reviewOnly = false,
   ) {
     // Source/authority reads and admission waits may outlive a user decision.
     // Project the persisted state after those waits, never the earlier snapshot.
@@ -1612,8 +1619,10 @@ export class AiToolRuntimeService {
     if (
       current.status === APPROVAL_STATUS.APPROVED ||
       current.status === APPROVAL_STATUS.EXECUTING
-    )
+    ) {
+      if (reviewOnly) return { status: 'held', replayed: true };
       return this.executeApproved(current);
+    }
     if (current.status !== APPROVAL_STATUS.PENDING)
       this.approvalConflict('goods_proposal_no_longer_pending');
     return {
@@ -1629,6 +1638,7 @@ export class AiToolRuntimeService {
     args: ValidatedAiToolArguments,
     inputHash: string,
     idempotencyKey: string,
+    goodsReviewOnly = false,
   ) {
     const existing = await this.prisma.aiApprovalRequest.findUnique({
       where: {
@@ -1641,7 +1651,7 @@ export class AiToolRuntimeService {
     if (existing) {
       this.assertSameApproval(existing, definition, principal, inputHash);
       if (definition.name === GOODS_RECEIPT_TOOL)
-        return this.projectGoodsApproval(existing, true);
+        return this.projectGoodsApproval(existing, true, goodsReviewOnly);
       if (
         definition.name === SERVICE_PRICE_TOOL &&
         (existing.status === APPROVAL_STATUS.REJECTED ||
@@ -1738,7 +1748,7 @@ export class AiToolRuntimeService {
     });
 
     if (definition.name === GOODS_RECEIPT_TOOL)
-      return this.projectGoodsApproval(approval, false);
+      return this.projectGoodsApproval(approval, false, goodsReviewOnly);
 
     return {
       status: 'approval_required',

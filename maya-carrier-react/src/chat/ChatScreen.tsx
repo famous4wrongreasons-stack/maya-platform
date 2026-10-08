@@ -19,7 +19,7 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation, privacy, session, voice, widgets } from '../runtime/compose.ts';
+import { conversation, goodsPhoto, privacy, session, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
 import { FullscreenDetail } from '../widgets/FullscreenDetail.tsx';
@@ -42,6 +42,7 @@ import { MayaMark, MayaMarkAnimated, MayaVolumeMark } from '../identity/MayaMark
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
 import { ReplyText } from '../reply-link.tsx';
 import { PrivacyPanel } from './PrivacyPanel.tsx';
+import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -368,6 +369,7 @@ export function ChatScreen({
   }, []);
   const now = useCountdownClock(view);
   const privacyView = usePortView(privacy);
+  const goodsPhotoView = usePortView(goodsPhoto);
   const shellView = usePortView(widgets);
   const privacyOpen = shellView.primary === 'shell.privacy';
   const voiceView = usePortView(voice);
@@ -638,6 +640,7 @@ export function ChatScreen({
               {view.items.map((item) => (
                 <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
               ))}
+              <GoodsPhotoPanel view={goodsPhotoView} port={goodsPhoto} disabled={!view.composer.enabled || view.inFlight} t={t} />
             </>
           )}
         </div>

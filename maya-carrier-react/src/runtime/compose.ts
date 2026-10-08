@@ -192,6 +192,7 @@ cancelPrivacyVoice = () => voiceMachine.cancel();
 
 export const session = net.session;
 export const conversation = runtime.conversation;
+export const goodsPhoto = runtime.goodsPhoto;
 export const privacy = runtime.privacy;
 export const widgets = runtime.widgetPort;
 export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });

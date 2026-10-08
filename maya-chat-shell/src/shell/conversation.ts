@@ -20,7 +20,7 @@
 // Memory only (A6). A signed-in → signed-out transition empties the timeline and aborts the turn in
 // flight, so no history crosses to another session or tenant (D7 B).
 
-import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, ConversationHistoryProjection, Outcome, WidgetResolveProjection } from '../net/types.ts';
+import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, ConversationHistoryProjection, GoodsPhotoFailure, GoodsPhotoResponse, Outcome, WidgetResolveProjection } from '../net/types.ts';
 import type {
   Cancel,
   ComposerState,
@@ -87,6 +87,8 @@ export interface ConversationDeps {
 
 export interface Conversation extends ConversationPort {
   readonly timeline: TimelineWriter;
+  /** Finite attachment operation: server-certified turns use the same timeline/widget owners. */
+  runGoodsPhotoOperation(kind: GoodsPhotoResponse['kind'], work: (conversationId: string | undefined, signal: AbortSignal) => Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
   /** Internal runtime seam. Neither conversation identity nor generation is UI authority. */
   erasureTarget(): ConversationErasureTarget | null;
   freezeForErasure(target: ConversationErasureTarget): boolean;
@@ -231,6 +233,8 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   let generation = 0;
   let inflight: { readonly itemId: string; readonly abort: AbortHandle; readonly generation: number } | null = null;
   let restoring: AbortHandle | null = null;
+  let photoFlight: AbortHandle | null = null;
+  const photoTurns = new Set<string>();
   let historyUnavailable = false;
   let erasurePending = false;
   let blocked: 'subscription_required' | 'tenant_required' | null = null;
@@ -240,6 +244,14 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const nextId = (prefix: string): string => {
     serial += 1;
     return `${prefix}${serial}`;
+  };
+  const rememberPhotoTurn = (turnId: string): void => {
+    photoTurns.add(turnId);
+    // Memory follows the same finite horizon as the visible conversation.
+    if (photoTurns.size > DISPLAY_CAP) {
+      const oldest = photoTurns.values().next().value;
+      if (oldest !== undefined) photoTurns.delete(oldest);
+    }
   };
 
   const composer = (): ComposerState => {
@@ -252,7 +264,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const snapshot = (): ConversationView => {
     const views = items.map(itemView);
     if (dropped > 0) views.unshift({ kind: 'notice', id: DISPLAY_CAPPED_ID, notice: 'display_capped' });
-    return { items: views, inFlight: inflight !== null || restoring !== null, composer: composer(), dropped };
+    return { items: views, inFlight: inflight !== null || restoring !== null || photoFlight !== null, composer: composer(), dropped };
   };
 
   const publish = (ids: readonly string[], reason: DropReason): void => {
@@ -370,7 +382,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
 
   const submitUserTurn = (text: string, origin: TurnOrigin): SubmitResult => {
     if (!composer().enabled) return { accepted: false, refusal: 'composer_disabled' };
-    if (inflight !== null || restoring !== null) return { accepted: false, refusal: 'in_flight' };
+    if (inflight !== null || restoring !== null || photoFlight !== null) return { accepted: false, refusal: 'in_flight' };
     if (historyUnavailable) {
       restore();
       return { accepted: false, refusal: 'in_flight' };
@@ -399,7 +411,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const retry = (itemId: string): void => {
     const item = items.find((x): x is UserItem => x.kind === 'user' && x.id === itemId);
     if (item === undefined || item.state !== 'failed' || item.retry.retry !== 'same_request') return;
-    if (inflight !== null || restoring !== null || !composer().enabled || latestUserTurn() !== item) return;
+    if (inflight !== null || restoring !== null || photoFlight !== null || !composer().enabled || latestUserTurn() !== item) return;
     const notBefore = item.retry.notBefore;
     if (notBefore !== null && deps.scheduler.now() < notBefore) return;
     send(item);
@@ -410,8 +422,11 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     generation += 1;
     const abort = inflight?.abort;
     const restoreAbort = restoring;
+    const photoAbort = photoFlight;
     inflight = null;
     restoring = null;
+    photoFlight = null;
+    photoTurns.clear();
     historyUnavailable = false;
     const ids = items.map((item) => item.id);
     items.length = 0;
@@ -419,6 +434,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     blocked = null;
     abort?.abort();
     restoreAbort?.abort();
+    photoAbort?.abort();
     publish(ids, 'cleared');
   };
 
@@ -459,6 +475,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
           // No old request ID, retry, widget or approval is restored. An unfinished
           // turn remains display-only and never becomes context for a new request.
           append({ kind: 'user', id: nextId('u'), text: turn.text, modality: 'typed', requestId: '', state: 'sent', failure: null, retry: NO_RETRY, historyEligible: turn.completed });
+          if (turn.completed && typeof turn.id === 'string') rememberPhotoTurn(turn.id);
         }
       }
       // One shared warning preserves uncertainty without repeating it after
@@ -545,6 +562,44 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     submitUserTurn,
     retry,
     timeline,
+    async runGoodsPhotoOperation(kind, work, signal) {
+      if (!signedIn) return { ok: false, failure: { reason: 'signed_out' } };
+      if (signal.aborted || !composer().enabled || inflight || restoring || photoFlight || historyUnavailable) return { ok: false, failure: { reason: 'unavailable' } };
+      const abort = deps.newAbort(), startGeneration = generation, target = conversationId;
+      const onAbort = (): void => abort.abort();
+      signal.addEventListener('abort', onAbort, { once: true });
+      photoFlight = abort;
+      emit();
+      try {
+        if (abort.signal.aborted || signal.aborted || generation !== startGeneration || photoFlight !== abort || !signedIn) return { ok: false, failure: { reason: 'unavailable' } };
+        const outcome = await work(target, abort.signal);
+        if (abort.signal.aborted || signal.aborted || generation !== startGeneration || photoFlight !== abort || !signedIn) return { ok: false, failure: { reason: 'unavailable' } };
+        if (!outcome.ok) return outcome;
+        const value = outcome.value;
+        if (value.kind !== kind) return { ok: false, failure: { reason: kind === 'review' ? 'unknown' : 'unavailable' } };
+        if (value.kind === 'preview') return outcome;
+        const turn = value.turn;
+        if (turn.conversationId !== turn.userTurn.conversationId || (target !== undefined && target !== turn.conversationId)) return { ok: false, failure: { reason: kind === 'review' ? 'unknown' : 'unavailable' } };
+        conversationId = turn.conversationId;
+        if (!photoTurns.has(turn.userTurn.turnId)) {
+          rememberPhotoTurn(turn.userTurn.turnId);
+          // These exact strings and identity were persisted by the server. No attachment bytes,
+          // locally drafted proposal, runtime result or synthetic completion enters chat history.
+          append({ kind: 'user', id: nextId('u'), text: turn.userText, modality: 'typed', requestId: '', userTurn: turn.userTurn, conversationId, state: 'sent', failure: null, retry: NO_RETRY });
+          append({ kind: 'assistant', id: nextId('a'), text: turn.reply });
+          if (value.kind === 'review') {
+            const presentation = value.resolution === null ? undefined : deps.ingestResolution?.(value.resolution);
+            if (value.status === 'approval_required' && presentation !== 'approval_presented') append({ kind: 'notice', id: nextId('n'), notice: 'approval_not_here' });
+          }
+        }
+        return outcome;
+      } catch {
+        return { ok: false, failure: { reason: kind === 'review' ? 'unknown' : 'unavailable' } };
+      } finally {
+        signal.removeEventListener('abort', onAbort);
+        if (photoFlight === abort) { photoFlight = null; emit(); }
+      }
+    },
     erasureTarget: () => signedIn && !erasurePending && conversationId !== undefined
       ? { conversationId, generation } : null,
     freezeForErasure(target) {

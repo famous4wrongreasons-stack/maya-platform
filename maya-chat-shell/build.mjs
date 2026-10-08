@@ -148,7 +148,7 @@ const GLOBAL_ALLOW = {
   renderer: [],
   integrity: [],
   contract: [],
-  net: ['fetch', 'AbortController', 'AbortSignal', 'Headers', 'setTimeout', 'clearTimeout'],
+  net: ['fetch', 'AbortController', 'AbortSignal', 'Headers', 'Blob', 'FormData', 'setTimeout', 'clearTimeout'],
   voice: ['navigator', 'MediaRecorder', 'AudioContext', 'OfflineAudioContext', 'Blob', 'setTimeout', 'clearTimeout'],
   shell: ['crypto', 'setTimeout', 'clearTimeout'],
   dom: [],
@@ -236,6 +236,10 @@ export const P1_PATHS = [
   '/personal-client/appointments/preview',
   '/personal-client/appointments/results',
   '/personal-client/appointments',
+  '/ai/goods/photo-preview',
+  '/ai/goods/search',
+  '/ai/goods/item-read',
+  '/ai/goods/receipt-review',
 
 ];
 export const TARGETS = {

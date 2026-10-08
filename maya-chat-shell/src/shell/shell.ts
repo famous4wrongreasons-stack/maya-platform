@@ -13,11 +13,12 @@
 // never changes, so there is no address for a detail.
 
 import type { InteractiveRefKey, WidgetEnvelope } from '../contract.ts';
-import type { ChatWidgetResolution } from '../net/types.ts';
+import type { ChatWidgetResolution, GoodsPhotoTransport } from '../net/types.ts';
 import type { RenderResult } from '../renderer/nodes.ts';
 import { BASE_ROUTES } from '../routes/registry.ts';
 import { createConversation, type AbortHandle, type Conversation } from './conversation.ts';
 import { createPrivacy, type Privacy } from './privacy.ts';
+import { createGoodsPhoto, type GoodsPhotoPort } from './goods-photo.ts';
 import { landDeepLink, type DeepLinkLanding } from './deeplink.ts';
 import { createRenderObserver, createUnavailableSubmission, createWidgets, type Widgets } from './intents.ts';
 import type {
@@ -270,7 +271,7 @@ export const createShell = (deps: ShellDeps): ShellController => {
 // ── composition, for entry/ ────────────────────────────────────────────────────────────────────
 
 export interface ShellRuntimeDeps {
-  readonly transport: Pick<Transport, 'chat' | 'conversation' | 'eraseConversation' | 'resolveWidgets'>;
+  readonly transport: Pick<Transport, 'chat' | 'conversation' | 'eraseConversation' | 'resolveWidgets'> & Partial<GoodsPhotoTransport>;
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly render: RenderFn;
   readonly environment: Pick<EnvironmentProbe, 'a11y' | 'onA11yChange' | 'fragment'>;
@@ -288,6 +289,7 @@ export interface ShellRuntimeDeps {
 export interface ShellRuntime {
   readonly conversation: Conversation;
   readonly privacy: Privacy;
+  readonly goodsPhoto: GoodsPhotoPort;
   readonly widgets: Widgets;
   readonly shell: ShellController;
   /** The DOM's view of routes, widgets and the detail chrome. */
@@ -355,9 +357,11 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     refreshBookingReceipt: (itemId) => void widgets.refreshBookingReceipt(itemId),
     closeDetail: shell.closeDetail,
   };
+  const goodsPhoto = createGoodsPhoto({ transport: deps.transport, session: deps.session, privacy, conversation, newAbort: deps.newAbort, newId });
   return {
     conversation,
     privacy,
+    goodsPhoto,
     widgets,
     shell,
     widgetPort,
@@ -367,6 +371,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
         notice: (kind) => void conversation.timeline.appendNotice(kind),
       }),
     dispose() {
+      goodsPhoto.dispose();
       privacy.dispose();
       ingestAuthorizedEnvelope = null;
       restoreBookingOutcomes = null;

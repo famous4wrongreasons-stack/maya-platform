@@ -391,3 +391,48 @@ export interface PersonalTransport {
   personalResults(signal: AbortSignal): Promise<Outcome<PersonalResults, PersonalFailure>>;
   personalCreate(selection: PersonalSelection, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>>;
 }
+
+// Explicit goods-photo workflow. Decimal source facts remain exact text.
+export type GoodsPhotoFile = Blob;
+export type GoodsPhotoFailureReason = 'invalid_photo' | 'recognition_unavailable' | 'invalid_request' | 'forbidden' | 'signed_out' | 'source_unavailable' | 'conflict' | 'unavailable' | 'unknown';
+export interface GoodsPhotoFailure { readonly reason: GoodsPhotoFailureReason }
+export interface GoodsPhotoLine {
+  readonly sourceLine: number; readonly name: string | null; readonly quantity: string | null;
+  readonly unitLabel: string | null; readonly unitPrice: string | null; readonly lineTotal: string | null;
+  readonly priceKind: 'purchase_unit' | 'sale_unit' | 'line_total' | null;
+  readonly parserConfidence: number | null;
+}
+export interface GoodsSearchMatch { readonly kind: 'item' | 'category'; readonly id: string; readonly title: string }
+export interface GoodsPhotoItem {
+  readonly id: string; readonly name: string; readonly article: string | null; readonly barcode: string | null;
+  readonly asOf: string; readonly currency: string | null; readonly itemKind: 'physical' | 'loyalty' | 'unknown';
+  readonly salePrice: string | null; readonly costPrice: string | null; readonly unitCostPrice: string | null;
+  readonly saleUnitId: string | null; readonly saleUnitLabel: string | null;
+  readonly writeOffUnitId: string | null; readonly writeOffUnitLabel: string | null; readonly unitRatio: string | null;
+  readonly stock: { readonly status: 'observed' | 'unavailable'; readonly rows: readonly { readonly storeId: string; readonly quantity: string }[]; readonly unitBasis: 'not_provided'; readonly exhaustive: false };
+}
+export interface GoodsPhotoReviewFields {
+  readonly storeId: string; readonly quantity: string; readonly unitId: string; readonly unitCost: string;
+  readonly currency: string; readonly receivedAt: string; readonly priceKind: '' | 'receipt_purchase_unit';
+}
+export interface GoodsPhotoProposal {
+  readonly goods_id: string; readonly store_id: string; readonly quantity: string; readonly unit_id: string;
+  readonly unit_cost: string; readonly currency: string; readonly price_kind: 'receipt_purchase_unit'; readonly received_at: string;
+  readonly photo_sha256: string; readonly source_line: number; readonly review_version: number;
+}
+export interface GoodsPhotoTurn {
+  readonly conversationId: string; readonly userTurn: { readonly turnId: string; readonly conversationId: string };
+  readonly userText: string; readonly reply: string;
+}
+export type GoodsPhotoResponse =
+  | { readonly kind: 'preview'; readonly sourceRevision: string; readonly photoSha256: string; readonly lines: readonly GoodsPhotoLine[] }
+  | { readonly kind: 'search'; readonly sourceRevision: string; readonly turn: GoodsPhotoTurn; readonly query: string; readonly matches: readonly GoodsSearchMatch[]; readonly mayHaveMore: boolean }
+  | { readonly kind: 'item'; readonly sourceRevision: string; readonly turn: GoodsPhotoTurn; readonly item: GoodsPhotoItem }
+  | { readonly kind: 'review'; readonly turn: GoodsPhotoTurn; readonly status: 'approval_required' | 'completed' | 'held'; readonly resolution: ChatWidgetResolution | null };
+export interface GoodsPhotoRequestContext { readonly requestId: string; readonly conversationId?: string; readonly source_revision: string }
+export interface GoodsPhotoTransport {
+  goodsPhotoPreview(photo: GoodsPhotoFile, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
+  goodsPhotoSearch(request: GoodsPhotoRequestContext & { readonly query: string }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
+  goodsPhotoItem(request: GoodsPhotoRequestContext & { readonly goods_id: string }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
+  goodsPhotoReview(request: GoodsPhotoRequestContext & { readonly proposal: GoodsPhotoProposal }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
+}

@@ -12,6 +12,8 @@
 
 import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
 import type { PersonalSelection, PersonalFailure } from './types.ts';
+import { goodsPhotoQuery, projectGoodsPhotoContext, projectGoodsPhotoPreview, projectGoodsPhotoSearch, projectGoodsPhotoItem, projectGoodsPhotoProposal, projectGoodsPhotoReview } from './goods-photo.ts';
+import type { GoodsPhotoFile, GoodsPhotoFailure, GoodsPhotoProposal, GoodsPhotoRequestContext, GoodsPhotoResponse } from './types.ts';
 import { API_BASE } from './endpoint.ts';
 import {
   errorCode,
@@ -85,6 +87,10 @@ const PATHS = {
   personalPreview: '/personal-client/appointments/preview',
   personalResults: '/personal-client/appointments/results',
   personalCreate: '/personal-client/appointments',
+  goodsPhotoPreview: '/ai/goods/photo-preview',
+  goodsPhotoSearch: '/ai/goods/search',
+  goodsPhotoItem: '/ai/goods/item-read',
+  goodsPhotoReview: '/ai/goods/receipt-review',
 } as const;
 
 type Endpoint = keyof typeof PATHS;
@@ -97,6 +103,10 @@ export const TRANSCRIBE_TIMEOUT_MS = 30_000;
 export const DEFAULT_RETRY_AFTER_SEC = 60;
 
 type RequestBody =
+  | FormData
+  | (GoodsPhotoRequestContext & { readonly query: string })
+  | (GoodsPhotoRequestContext & { readonly goods_id: string })
+  | (GoodsPhotoRequestContext & { readonly proposal: GoodsPhotoProposal })
   | PersonalSelection
   | EmailStartRequest
   | EmailVerifyRequest
@@ -169,13 +179,14 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
   const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
   const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
-  const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...(reading ? {} : { 'Content-Type': 'application/json' }) };
+  const multipart = endpoint === 'goodsPhotoPreview' && body instanceof FormData;
+  const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...(reading || multipart ? {} : { 'Content-Type': 'application/json' }) };
   const path = endpoint === 'historyErasure' ? `${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure` : PATHS[endpoint];
   try {
     const response = await fetch(API_BASE + path + (slots !== null ? slots.branchId === undefined ? `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}` : `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}&branchId=${encodeURIComponent(slots.branchId)}` : search === null ? '' : `?q=${encodeURIComponent(search)}`), {
       method: reading ? 'GET' : 'POST',
       headers,
-      body: reading ? null : JSON.stringify(body),
+      body: reading ? null : multipart ? body as FormData : JSON.stringify(body),
       signal: controller.signal,
       credentials: 'omit',
       cache: 'no-store',
@@ -485,7 +496,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = ''): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = ''): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -583,6 +594,34 @@ const personalOutcome = <T>(ex: AuthorizedExchange, project: (raw: unknown) => T
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */
 export function createTransport(auth: Authorizer, timeouts: Timeouts = { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS }) {
   return {
+    async goodsPhotoPreview(photo: GoodsPhotoFile, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>> {
+      if (!(photo instanceof Blob) || photo.size < 12 || photo.size > 2 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(photo.type)) return fail({ reason: 'invalid_photo' });
+      const body = new FormData();
+      body.append('photo', photo, photo.type === 'image/png' ? 'invoice.png' : photo.type === 'image/jpeg' ? 'invoice.jpg' : 'invoice.webp');
+      const ex = await authorizedExchange(auth, 'goodsPhotoPreview', body, signal, timeouts.requestMs);
+      return goodsPhotoOutcome(ex, projectGoodsPhotoPreview, 'preview');
+    },
+    async goodsPhotoSearch(request: GoodsPhotoRequestContext & { readonly query: string }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>> {
+      const context = projectGoodsPhotoContext(request), query = goodsPhotoQuery(request.query);
+      if (!context || query === null) return fail({ reason: 'invalid_request' });
+      const body = { ...context, query };
+      const ex = await authorizedExchange(auth, 'goodsPhotoSearch', body, signal, timeouts.requestMs);
+      return goodsPhotoOutcome(ex, raw => projectGoodsPhotoSearch(raw, body), 'read');
+    },
+    async goodsPhotoItem(request: GoodsPhotoRequestContext & { readonly goods_id: string }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>> {
+      const context = projectGoodsPhotoContext(request);
+      if (!context || typeof request.goods_id !== 'string' || !/^[1-9]\d{0,14}$/.test(request.goods_id)) return fail({ reason: 'invalid_request' });
+      const body = { ...context, goods_id: request.goods_id };
+      const ex = await authorizedExchange(auth, 'goodsPhotoItem', body, signal, timeouts.requestMs);
+      return goodsPhotoOutcome(ex, raw => projectGoodsPhotoItem(raw, body), 'read');
+    },
+    async goodsPhotoReview(request: GoodsPhotoRequestContext & { readonly proposal: GoodsPhotoProposal }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>> {
+      const context = projectGoodsPhotoContext(request), proposal = projectGoodsPhotoProposal(request.proposal);
+      if (!context || !proposal) return fail({ reason: 'invalid_request' });
+      const body = { ...context, proposal };
+      const ex = await authorizedExchange(auth, 'goodsPhotoReview', body, signal, timeouts.requestMs);
+      return goodsPhotoOutcome(ex, raw => projectGoodsPhotoReview(raw, body), 'review');
+    },
     async personalBranches(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalBranches', {}, signal, timeouts.requestMs), projectPersonalBranches); },
     async personalServices(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalServices', {}, signal, timeouts.requestMs), projectPersonalChoices); },
     async personalStaff(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalStaff', {}, signal, timeouts.requestMs), projectPersonalChoices); },
@@ -689,6 +728,26 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
     },
   };
 }
+
+const goodsPhotoOutcome = (ex: AuthorizedExchange, project: (body: unknown) => GoodsPhotoResponse | null, mode: 'preview' | 'read' | 'review'): Outcome<GoodsPhotoResponse, GoodsPhotoFailure> => {
+  if (ex.kind === 'signed_out') return fail({ reason: 'signed_out' });
+  // A failed authorization refresh never dispatched the owner action.
+  if (ex.kind === 'unavailable') return fail({ reason: 'unavailable' });
+  if (ex.kind !== 'response') return fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' });
+  if (isSuccess(ex.status)) {
+    const value = project(ex.body);
+    return value === null ? fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' }) : { ok: true, value };
+  }
+  if (ex.status === 400 || ex.status === 413) return fail({ reason: mode === 'preview' ? 'invalid_photo' : 'invalid_request' });
+  if (ex.status === 403) return fail({ reason: 'forbidden' });
+  if (ex.status === 409) return fail({ reason: 'conflict' });
+  if (ex.status === 404) return fail({ reason: 'unavailable' });
+  if (ex.status === 503 && mode !== 'review') {
+    const descriptor = ex.body && typeof ex.body === 'object' ? Object.getOwnPropertyDescriptor(ex.body, 'message') : undefined;
+    return fail({ reason: mode === 'preview' && descriptor && 'value' in descriptor && descriptor.value === 'goods_photo_parser_not_configured' ? 'recognition_unavailable' : 'source_unavailable' });
+  }
+  return fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' });
+};
 
 const widgetOutcome = <T>(ex: AuthorizedExchange, project: (body: unknown) => T | null): Outcome<T, WidgetFailure> => {
   if (ex.kind === 'signed_out') return fail({ reason: 'signed_out', signedOut: ex.reason });

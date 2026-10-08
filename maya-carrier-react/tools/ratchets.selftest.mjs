@@ -147,6 +147,34 @@ export function selfTest() {
     if (!R.checkCss('x.css', good).length) { admitted++; console.log(`  PASS  admit  no-external-resource       ${good.slice(0, 40)}`); }
     else { failed++; console.log(`  FAIL  admit  no-external-resource       wrongly refused: ${good}`); }
   }
+  // Only this one literal, bounded file picker is an upload capability.
+  {
+    const picker = '<input type="file" accept="image/png,image/jpeg,image/webp" onChange={select} />';
+    const cases = [
+      [R.GOODS_PHOTO_PICKER, picker, false],
+      ['src/chat/ChatScreen.tsx', picker, true],
+      [R.GOODS_PHOTO_PICKER, '<input type="file" accept="*/*" />', true],
+      [R.GOODS_PHOTO_PICKER, picker.replace('onChange', 'multiple onChange'), true],
+      [R.GOODS_PHOTO_PICKER, picker.replace('onChange', 'webkitdirectory onChange'), true],
+      [R.GOODS_PHOTO_PICKER, picker.replace('onChange', '{...props} onChange'), true],
+      [R.GOODS_PHOTO_PICKER, picker.replace('type="file"', 'type={kind}'), true],
+      [R.GOODS_PHOTO_PICKER, '<input type="image" />', true],
+      [R.GOODS_PHOTO_PICKER, picker + picker, true],
+      [R.GOODS_PHOTO_PICKER, `<input type="file" accept={mime} onChange={() => { const note = ' accept="image/png,image/jpeg,image/webp" '; }} />`, true],
+      [R.GOODS_PHOTO_PICKER, `<input type={kind} accept="image/png,image/jpeg,image/webp" onChange={() => { const note = ' type="file" '; }} />`, true],
+      [R.GOODS_PHOTO_PICKER, '<input type="file" type="image" accept="image/png,image/jpeg,image/webp" />', true],
+    ];
+    for (const [file, source, mustRefuse] of cases) {
+      const hit = R.scanJsx(file, source).some(r => r.rule === 'input-type');
+      if (hit === mustRefuse) {
+        if (mustRefuse) refused++; else admitted++;
+        console.log(`  PASS  ${mustRefuse ? 'refuse' : 'admit '} goods-photo-picker          ${source.slice(0, 44)}`);
+      } else {
+        failed++;
+        console.log(`  FAIL  goods-photo-picker ${file}: ${source}`);
+      }
+    }
+  }
   // the inline-SVG shape must be ADMITTED — it is bytes in the file, not a fetch
   if (!R.checkCss('x.css', INLINE_SVG_CSS).length) { admitted++; console.log('  PASS  admit  no-external-resource       inline data:image/svg+xml'); }
   else { failed++; console.log('  FAIL  admit  no-external-resource       inline SVG wrongly refused'); }
