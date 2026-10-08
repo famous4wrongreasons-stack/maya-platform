@@ -28,12 +28,13 @@ const reasons = [
 
 describe('F36b/P10 — owner decision 2026-10-05; no expanded authority or public outcome', () => {
   it('admits only the existing C9 row and preserves every previous registry object', () => {
-    // Pricing and the finite goods rows were admitted later. Retain the
+    // Later development rows are compared separately, without widget admission. Retain the
     // historical F36b hashes over the exact pre-pricing/pre-goods registry.
     const laterKeys = [
       SERVICE_PRICE_TOOL,
       'inventory.goods.read',
       'inventory.goods.search',
+      'catalog.service.rename.preview',
       'inventory.goods.receipt.prepare',
     ];
     expect(

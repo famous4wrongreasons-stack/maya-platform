@@ -133,6 +133,74 @@ describe('AiCoreModelService', () => {
     }
   });
 
+  describe('service rename preview semantic admission [synthetic parsing, no model call]', () => {
+    const name = 'catalog.service.rename.preview';
+    const call = {
+      name,
+      arguments_json: JSON.stringify({
+        service_id: '123',
+        new_title: 'Новое название',
+      }),
+    };
+    const plan = () =>
+      semanticPlan('services.rename_preview', {
+        service: 'Стрижка',
+        new_title: 'Новое название',
+      });
+    const ownerInput = (role: UserRole) => ({
+      ...input,
+      principalRole: role,
+      tools: [{ ...input.tools[0], name }],
+      requiredToolNames: [name],
+    });
+    it.each([UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER])(
+      'admits only a finite owner READ through the real planner response validator: %s',
+      (role) => {
+        const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+        const result = service['validatePlanningResponse'](
+          JSON.stringify(toolPlan(call, plan())),
+          ownerInput(role),
+        );
+        expect(result.toolCall).toEqual({
+          name,
+          arguments: { service_id: '123', new_title: 'Новое название' },
+        });
+        expect(result.semanticPlan?.tasks[0]).toMatchObject({
+          intent: 'services.rename_preview',
+          action: 'read',
+          permission: { status: 'allowed' },
+          tool: { alternatives: [name] },
+        });
+      },
+    );
+    it.each([UserRole.CLIENT, UserRole.ADMINISTRATOR, UserRole.TENANT_ADMIN])(
+      'does not let a model grant rename management to %s',
+      (role) => {
+        const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+        expect(() =>
+          service['validatePlanningResponse'](
+            JSON.stringify(toolPlan(call, plan())),
+            ownerInput(role),
+          ),
+        ).toThrow();
+      },
+    );
+    it('refuses a rename tool under an unrelated service-price READ intent', () => {
+      const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+      expect(() =>
+        service['validatePlanningResponse'](
+          JSON.stringify(
+            toolPlan(
+              call,
+              semanticPlan('services.price', { service: 'Стрижка' }),
+            ),
+          ),
+          ownerInput(UserRole.TENANT_OWNER),
+        ),
+      ).toThrow();
+    });
+  });
+
   it('uses a strict tool-only DeepSeek planner without exposing the key', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(
       deepSeekResponse(

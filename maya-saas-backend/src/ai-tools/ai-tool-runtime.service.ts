@@ -154,6 +154,8 @@ export class AiToolRuntimeService {
       readonly suppressWidgetTrigger?: boolean;
       /** The explicit goods review ingress may prepare/read, never resume an approved effect. */
       readonly goodsReviewOnly?: true;
+      /** One server-owned source for the explicit catalog → rename preview READ pair. */
+      readonly serviceRenameSourceRevision?: string;
       /** Transient metadata witness for the existing typed booking successor. */
       readonly onAvailabilityScope?: (check: () => Promise<void>) => void;
       readonly bookingSelector?: Parameters<
@@ -169,10 +171,20 @@ export class AiToolRuntimeService {
   ) {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
+    const serviceRenameSourceRevision = this.serviceRenameSourceContext(
+      definition,
+      internal.serviceRenameSourceRevision,
+    );
     if (internal.goodsReviewOnly && toolName !== GOODS_RECEIPT_TOOL)
       this.approvalConflict('goods_review_context_invalid');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      null,
+      serviceRenameSourceRevision,
+    );
     const personal = await this.bindPersonalReadScope(
       user,
       principal,
@@ -288,6 +300,7 @@ export class AiToolRuntimeService {
       args,
       principal,
       internal.bookingSelector,
+      serviceRenameSourceRevision,
     );
 
     if (definition.approvalPolicy !== 'none') {
@@ -316,6 +329,12 @@ export class AiToolRuntimeService {
     }
 
     await internal.bookingSelector?.revalidate();
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      args,
+      serviceRenameSourceRevision,
+    );
     const completed = await this.executeNow({
       principal,
       definition,
@@ -326,12 +345,23 @@ export class AiToolRuntimeService {
           ? this.requireIdempotencyKey(dto.idempotencyKey)
           : (dto.idempotencyKey ?? randomUUID()),
       approval: null,
+      serviceRenameSourceRevision,
     });
     await personal?.revalidate();
     await revalidateAvailability?.();
     await internal.bookingSelector?.revalidate();
-    await this.revalidateGoodsSearch(principal, definition, args);
-    if (internal.suppressWidgetTrigger === true) return completed;
+    await this.revalidateOwnerSourceRead(principal, definition, args);
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      args,
+      serviceRenameSourceRevision,
+    );
+    if (
+      internal.suppressWidgetTrigger === true ||
+      serviceRenameSourceRevision !== undefined
+    )
+      return completed;
     const output = await this.attachReadWidget(
       user,
       definition,
@@ -347,7 +377,7 @@ export class AiToolRuntimeService {
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
-    await this.revalidateGoodsSearch(principal, definition, args);
+    await this.revalidateOwnerSourceRead(principal, definition, args);
     return output;
   }
 
@@ -361,10 +391,20 @@ export class AiToolRuntimeService {
   ): Promise<unknown> {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
+    const serviceRenameSourceRevision = this.serviceRenameSourceContext(
+      definition,
+      internal.serviceRenameSourceRevision,
+    );
     if (definition.riskTier !== 'read' || definition.approvalPolicy !== 'none')
       this.executionConflict('ai_tool_read_replay_only');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      null,
+      serviceRenameSourceRevision,
+    );
     const personal = await this.bindPersonalReadScope(
       user,
       principal,
@@ -381,11 +421,18 @@ export class AiToolRuntimeService {
       args,
     );
     await internal.bookingSelector?.revalidate();
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      args,
+      serviceRenameSourceRevision,
+    );
     const inputHash = this.inputHash(
       toolName,
       args,
       principal,
       internal.bookingSelector,
+      serviceRenameSourceRevision,
     );
     const execution = await this.prisma.aiToolExecution.findUnique({
       where: {
@@ -395,6 +442,12 @@ export class AiToolRuntimeService {
         },
       },
     });
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      args,
+      serviceRenameSourceRevision,
+    );
     if (!execution) this.executionConflict('ai_tool_read_replay_unavailable');
     this.assertSameExecution(execution, { principal, definition, inputHash });
     const snapshot =
@@ -433,8 +486,18 @@ export class AiToolRuntimeService {
     await personal?.revalidate();
     await revalidateAvailability?.();
     await internal.bookingSelector?.revalidate();
-    await this.revalidateGoodsSearch(principal, definition, args);
-    if (internal.suppressWidgetTrigger === true) return completed;
+    await this.revalidateOwnerSourceRead(principal, definition, args);
+    await this.revalidateServiceRenameSource(
+      principal,
+      definition,
+      args,
+      serviceRenameSourceRevision,
+    );
+    if (
+      internal.suppressWidgetTrigger === true ||
+      serviceRenameSourceRevision !== undefined
+    )
+      return completed;
     const output = await this.attachReadWidget(
       user,
       definition,
@@ -450,25 +513,67 @@ export class AiToolRuntimeService {
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
-    await this.revalidateGoodsSearch(principal, definition, args);
+    await this.revalidateOwnerSourceRead(principal, definition, args);
     return output;
   }
 
-  /** Cached READs skip the source handler. Recheck the current goods owner and
-   * source after awaited persistence/presentation without issuing another GET. */
-  private async revalidateGoodsSearch(
+  private serviceRenameSourceContext(
+    definition: AiToolDefinition,
+    revision: unknown,
+  ): string | undefined {
+    if (revision === undefined) return undefined;
+    if (
+      typeof revision !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(revision) ||
+      !['catalog.services.read', 'catalog.service.rename.preview'].includes(
+        definition.name,
+      ) ||
+      definition.riskTier !== 'read'
+    )
+      this.executionConflict('service_rename_source_context_invalid');
+    return revision;
+  }
+
+  private async revalidateServiceRenameSource(
+    principal: AiToolPrincipal,
+    definition: AiToolDefinition,
+    args: ValidatedAiToolArguments | null,
+    expected: string | undefined,
+  ): Promise<void> {
+    if (expected === undefined) return;
+    if (
+      definition.name === 'catalog.service.rename.preview' &&
+      args !== null &&
+      args.source_revision !== expected
+    )
+      this.executionConflict('service_rename_source_changed');
+    if ((await this.handler.serviceRenameReadIdentity(principal)) !== expected)
+      this.executionConflict('service_rename_source_changed');
+  }
+
+  /** These two owner READs bind their cache to a current source witness. Recheck
+   * authority after awaited persistence/presentation without another provider GET. */
+  private async revalidateOwnerSourceRead(
     principal: AiToolPrincipal,
     definition: AiToolDefinition,
     args: ValidatedAiToolArguments,
   ): Promise<void> {
-    if (definition.name !== 'inventory.goods.search') return;
+    if (
+      definition.name !== 'inventory.goods.search' &&
+      definition.name !== 'catalog.service.rename.preview'
+    )
+      return;
     const current = await this.handler.normalizeArguments(
       definition.name,
       principal,
       args,
     );
     if (current.source_revision !== args.source_revision)
-      this.executionConflict('goods_source_changed');
+      this.executionConflict(
+        definition.name === 'catalog.service.rename.preview'
+          ? 'service_rename_source_changed'
+          : 'goods_source_changed',
+      );
   }
 
   private async attachReadWidget(
@@ -487,6 +592,8 @@ export class AiToolRuntimeService {
     >[0]['bookingSelector'],
   ): Promise<unknown> {
     if (
+      // Read-only rename previews have no registered widget/approval lane.
+      definition.name === 'catalog.service.rename.preview' ||
       definition.riskTier !== 'read' ||
       typeof completed !== 'object' ||
       completed === null ||
@@ -1823,9 +1930,16 @@ export class AiToolRuntimeService {
     idempotencyKey: string;
     approval: ApprovalRecord | null;
     admissionGuard?: (transaction: Prisma.TransactionClient) => Promise<void>;
+    serviceRenameSourceRevision?: string;
   }) {
     if (params.definition.riskTier !== 'read')
       return this.executeCanonicalTool(params);
+    await this.revalidateServiceRenameSource(
+      params.principal,
+      params.definition,
+      params.args,
+      params.serviceRenameSourceRevision,
+    );
     const existing = await this.prisma.aiToolExecution.findUnique({
       where: {
         tenantId_idempotencyKey: {
@@ -1834,6 +1948,12 @@ export class AiToolRuntimeService {
         },
       },
     });
+    await this.revalidateServiceRenameSource(
+      params.principal,
+      params.definition,
+      params.args,
+      params.serviceRenameSourceRevision,
+    );
     if (existing) {
       this.assertSameExecution(existing, params);
       if (
@@ -1919,6 +2039,12 @@ export class AiToolRuntimeService {
     });
 
     try {
+      await this.revalidateServiceRenameSource(
+        params.principal,
+        params.definition,
+        params.args,
+        params.serviceRenameSourceRevision,
+      );
       const result = await this.withTimeout(
         this.handler.execute(
           params.definition.name,
@@ -1927,6 +2053,12 @@ export class AiToolRuntimeService {
           params.idempotencyKey,
         ),
         params.definition.timeoutMs,
+      );
+      await this.revalidateServiceRenameSource(
+        params.principal,
+        params.definition,
+        params.args,
+        params.serviceRenameSourceRevision,
       );
       const encryptedResult = this.encryption.encrypt(JSON.stringify(result));
       const completedAt = new Date();
@@ -2406,6 +2538,7 @@ export class AiToolRuntimeService {
     bookingSelector?: NonNullable<
       Parameters<AiToolRuntimeService['execute']>[3]
     >['bookingSelector'],
+    serviceRenameSourceRevision?: string,
   ): string {
     const canonical = this.canonicalJson({
       actor_user_id: principal.userId,
@@ -2416,25 +2549,32 @@ export class AiToolRuntimeService {
         ? {
             read_authority: {
               contract: 'maya.read-authority/1',
+              ...(serviceRenameSourceRevision === undefined
+                ? {}
+                : {
+                    service_rename_source_revision: serviceRenameSourceRevision,
+                  }),
               ...(toolName === 'catalog.services.read'
                 ? { source_projection: SERVICE_CATALOG_READ_CONTRACT }
-                : toolName === 'inventory.goods.search'
-                  ? { source_projection: 'maya.goods-search.read/1' }
-                  : toolName === 'inventory.goods.read'
-                    ? { source_projection: 'maya.goods-item.read/2' }
-                    : toolName === 'catalog.staff.read'
-                      ? // READ cache identity only; rejects legacy name-derived facts.
-                        {
-                          source_projection:
-                            'maya.public-catalog-source-facts/1',
-                        }
-                      : toolName === 'booking.availability.read' ||
-                          toolName === 'booking.group-availability.read'
-                        ? {
+                : toolName === 'catalog.service.rename.preview'
+                  ? { source_projection: 'maya.service-rename.preview/1' }
+                  : toolName === 'inventory.goods.search'
+                    ? { source_projection: 'maya.goods-search.read/1' }
+                    : toolName === 'inventory.goods.read'
+                      ? { source_projection: 'maya.goods-item.read/2' }
+                      : toolName === 'catalog.staff.read'
+                        ? // READ cache identity only; rejects legacy name-derived facts.
+                          {
                             source_projection:
-                              'maya.availability-source-scope/2',
+                              'maya.public-catalog-source-facts/1',
                           }
-                        : {}),
+                        : toolName === 'booking.availability.read' ||
+                            toolName === 'booking.group-availability.read'
+                          ? {
+                              source_projection:
+                                'maya.availability-source-scope/2',
+                            }
+                          : {}),
               ...(bookingSelector &&
               ['catalog.services.read', 'catalog.staff.read'].includes(toolName)
                 ? {

@@ -13,6 +13,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
+import { PROFILE_REGISTRY } from '../../entitlements/widget-release-profile.registry';
+import { allowedKinds } from '../../widget-contract/owner-classes';
+import { projectorRowForCompletedRead } from '../projection/projector.registry';
+import { WIDGET_CAPABILITY_POLICY } from './capability-policy';
+import { aeForPropose } from './propose-pairing';
 import {
   SERVICE_PRICE_CAPABILITY,
   SERVICE_PRICE_TOOL,
@@ -57,16 +62,24 @@ const isGoodsSearchRef = (ref: CapabilityRefLike): boolean =>
   (ref.space === 'C9' || ref.space === 'TOOL') &&
   ref.key === 'inventory.goods.search';
 
+const isServiceRenamePreviewRef = (ref: CapabilityRefLike): boolean =>
+  (ref.space === 'C9' || ref.space === 'TOOL') &&
+  ref.key === 'catalog.service.rename.preview';
+
 const historicalRefs = (): readonly CapabilityRefLike[] =>
   allRefs().filter(
-    (ref) => !isPricingRef(ref) && !isGoodsRef(ref) && !isGoodsSearchRef(ref),
+    (ref) =>
+      !isPricingRef(ref) &&
+      !isGoodsRef(ref) &&
+      !isGoodsSearchRef(ref) &&
+      !isServiceRenamePreviewRef(ref),
   );
 
 describe('K4 — the four key spaces, bound to the live registries', () => {
   it('preserves every historical census and adds exactly the three space-qualified pricing refs', () => {
     const c = census();
-    expect(c.C9).toBe(61);
-    expect(c.TOOL).toBe(52);
+    expect(c.C9).toBe(62);
+    expect(c.TOOL).toBe(53);
     expect(c.AE).toBe(228);
     for (const [space, count] of [
       ['C9', 57],
@@ -92,8 +105,40 @@ describe('K4 — the four key spaces, bound to the live registries', () => {
       'C9:inventory.goods.search',
       'TOOL:inventory.goods.search',
     ]);
+    expect(
+      allRefs().filter(isServiceRenamePreviewRef).map(capKey).sort(),
+    ).toEqual([
+      'C9:catalog.service.rename.preview',
+      'TOOL:catalog.service.rename.preview',
+    ]);
     expect(c.CONTROL).toBe(CONTROL_KEYS.size);
     expect(c.registryHash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('derives the rename READ floor without admitting it into widget profile, pairing or COMMIT', () => {
+    const key = 'catalog.service.rename.preview';
+    expect(
+      C9_CAPABILITIES.find((row) => row.capabilityKey === key),
+    ).toMatchObject({
+      mode: 'READ',
+      domains: ['ADMIN'],
+      ownerKey: `existing.ai-tool:${key}`,
+    });
+    // F28 totality derives a floor/consent row for every registered C9 key.
+    // This is not a positive widget-template or effect admission.
+    expect(WIDGET_CAPABILITY_POLICY[`C9:${key}`]).toEqual({
+      min_verification: 'SESSION_VERIFIED',
+      consent_class: 'none',
+      dispatch_is_synchronous: true,
+    });
+    expect(PROFILE_REGISTRY.successorCapabilities).not.toContain(key);
+    expect(allowedKinds({ space: 'C9', key }).size).toBe(0);
+    expect(projectorRowForCompletedRead(`C9:${key}`)).toBeNull();
+    expect(aeForPropose(key)).toBeNull();
+    expect(subjectFloorFor({ space: 'C9', key })).toBe('CHANNEL_IDENTITY');
+    expect(
+      Object.prototype.hasOwnProperty.call(AE_WIDGET_COMMIT_ALLOWLIST, key),
+    ).toBe(false);
   });
 
   it('F24 holds: TOOL names are all C9 keys by spelling, and AE shares none with C9', () => {
@@ -129,7 +174,7 @@ describe('K4 — verificationFloor is TOTAL over all four spaces', () => {
   it('returns a floor on the ladder for every key in every space, with no default branch', () => {
     const refs = allRefs();
     expect(historicalRefs()).toHaveLength(57 + 48 + 226 + CONTROL_KEYS.size);
-    expect(refs).toHaveLength(61 + 52 + 228 + CONTROL_KEYS.size);
+    expect(refs).toHaveLength(62 + 53 + 228 + CONTROL_KEYS.size);
     const offLadder: string[] = [];
     for (const ref of refs) {
       const floor = subjectFloorFor(ref);
@@ -234,6 +279,7 @@ describe('K4 — historical floor repairs, the bounded V1.4 admission, and the u
       (c) =>
         c.capabilityKey !== SERVICE_PRICE_TOOL &&
         c.capabilityKey !== 'inventory.goods.search' &&
+        c.capabilityKey !== 'catalog.service.rename.preview' &&
         !['inventory.goods.read', 'inventory.goods.receipt.prepare'].includes(
           c.capabilityKey,
         ),
@@ -243,7 +289,7 @@ describe('K4 — historical floor repairs, the bounded V1.4 admission, and the u
       return a;
     }, {});
     expect(counts.LOCAL + counts.SOURCE_READ + counts.SOURCE_HANDOFF).toBe(57);
-    expect(C9_CAPABILITIES).toHaveLength(61);
+    expect(C9_CAPABILITIES).toHaveLength(62);
     expect(
       C9_CAPABILITIES.filter((c) => c.capabilityKey === SERVICE_PRICE_TOOL),
     ).toEqual([

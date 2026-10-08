@@ -444,6 +444,29 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'catalog.service.rename.preview',
+    description:
+      'Read a preview of renaming one exact existing YCLIENTS service for the current owner and configured company. Requires an explicit service ID and requested new title. Returns observed old/new title and preserved-field evidence only. It does not rename the service, prepare an approval, change the booking title or send a provider write. The approval lane is not registered.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['service_id', 'new_title'],
+      properties: {
+        service_id: { type: 'string', pattern: '^[1-9][0-9]{0,14}$' },
+        new_title: { type: 'string', minLength: 1, maxLength: 240 },
+      },
+    },
+    allowedRoles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['crm.integration'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 8000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'inventory.goods.receipt.prepare',
     description:
       'Prepare one owner-reviewed physical goods stock receipt from one photo line. Requires explicit exact goods/store/unit, fractional quantity, purchase price PER chosen unit, currency and receipt timestamp. Never infer sale price or absolute balance. Creates pending approval only; unresolved extraction must be corrected first. No current carrier money COMMIT is registered for this tool.',

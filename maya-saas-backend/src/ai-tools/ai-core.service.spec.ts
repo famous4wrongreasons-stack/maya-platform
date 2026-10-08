@@ -3330,6 +3330,181 @@ describe('AiCoreService', () => {
     },
   );
 
+  describe('service rename preview [scripted model only; no approval lane]', () => {
+    const tool = 'catalog.service.rename.preview';
+    const catalog = {
+      contract: 'maya.service-catalog.read/1',
+      source: 'external_crm',
+      services: [
+        { id: '123', name: 'Стрижка' },
+        { id: '124', name: 'Борода' },
+      ],
+    };
+    const preview = {
+      contract: 'maya.service-rename.preview/1',
+      source: 'external_crm',
+      scope: 'single_existing_service_title',
+      as_of: '2026-10-08T12:00:00Z',
+      company_id: '7',
+      service_id: '123',
+      old_title: 'Стрижка',
+      new_title: 'Новое название',
+      booking_title: 'Онлайн SOURCE_BOOKING_LABEL',
+      source_revision: 'a'.repeat(64),
+      current_revision: 'b'.repeat(64),
+      preserved_fields_hash: 'c'.repeat(64),
+      blocked_reason: 'approval_lane_not_registered',
+      preview_only: true,
+      noSideEffects: true,
+    };
+    function fixture(stale = false) {
+      const mocks = createService(['catalog.services.read', tool]);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: 'MODEL_CHANGED_SERVICE',
+          toolCall: {
+            name: tool,
+            arguments: {
+              service_id: '124',
+              new_title: 'MODEL_GUESS',
+              source_revision: 'foreign',
+            },
+          },
+        }),
+      );
+      mocks.runtime.execute.mockImplementation((_actor, name) =>
+        Promise.resolve({
+          status: 'completed',
+          execution_id: name + '-read',
+          stale: name === tool && stale,
+          result: name === 'catalog.services.read' ? catalog : preview,
+        }),
+      );
+      return mocks;
+    }
+    it.each([false, true])(
+      'binds literal user request, passes through one C9 owner and terminates without a second model reply (stale=%s)',
+      async (stale) => {
+        const mocks = fixture(stale);
+        const timeline = {
+          routeTypedUtterance: jest.fn().mockResolvedValue(null),
+          persistTypedTurn: jest.fn().mockResolvedValue({
+            turnId: 'rename-turn',
+            conversationId: 'rename-conversation',
+          }),
+          readConversationContext: jest.fn().mockResolvedValue({
+            version: 'maya.chat-context-window/1',
+            contexts: [],
+          }),
+          readBookingSelection: jest.fn().mockResolvedValue(null),
+          persistAssistantReply: jest.fn().mockResolvedValue(undefined),
+        };
+        Object.defineProperty(mocks.service, 'moduleRef', {
+          value: { get: () => timeline },
+        });
+        const conversationRead = jest.fn(
+          (...args: Parameters<C9Orchestrator['conversationRead']>) =>
+            args[4](),
+        );
+        Object.defineProperty(mocks.service, 'orchestrator', {
+          value: {
+            conversationDigest: () => 'a'.repeat(64),
+            conversationRead,
+            finishConversationReads: jest.fn().mockResolvedValue(null),
+          },
+        });
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [
+            {
+              role: 'user',
+              content: 'Переименуй услугу «Стрижка» в «Новое название»',
+            },
+          ],
+        });
+        const call = mocks.runtime.execute.mock.calls.find(
+          (row) => row[1] === tool,
+        );
+        expect(call?.[2].arguments).toEqual({
+          service_id: '123',
+          new_title: 'Новое название',
+        });
+        expect(call?.[3]).toMatchObject({ suppressWidgetTrigger: true });
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(2);
+        expect(conversationRead.mock.calls.map((row) => row[1])).toEqual([
+          'catalog.services.read',
+          tool,
+        ]);
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+          'SOURCE_BOOKING_LABEL',
+        );
+        expect(answer.action).toBeNull();
+        expect(answer.reply).not.toContain('MODEL_CHANGED_SERVICE');
+        if (stale) expect(answer.reply).not.toContain('SOURCE_BOOKING_LABEL');
+        else {
+          expect(answer.reply).toContain('SOURCE_BOOKING_LABEL');
+          expect(answer.reply).toContain('ещё не подключены');
+        }
+        expect(timeline.persistAssistantReply).toHaveBeenCalled();
+      },
+    );
+    it.each([
+      'да, подтверждаю',
+      'Не переименуй услугу «Стрижка» в «Новое»',
+      'Переименуй услугу «Массаж» в «Новое»',
+    ])('refuses inferred or absent selections: %s', async (content) => {
+      const mocks = fixture();
+      const answer = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content }],
+      });
+      expect(
+        mocks.runtime.execute.mock.calls.some((row) => row[1] === tool),
+      ).toBe(false);
+      expect(answer.action).toBeNull();
+      expect(answer.reply).not.toContain('SOURCE_BOOKING_LABEL');
+    });
+    it('refuses same service ID after company rotation between catalog and preview', async () => {
+      const mocks = fixture();
+      mocks.crm.serviceRenameReadIdentity
+        .mockResolvedValueOnce('a'.repeat(64))
+        .mockResolvedValueOnce('b'.repeat(64));
+      const answer = await mocks.service.chat(user, {
+        ...dto,
+        messages: [
+          {
+            role: 'user',
+            content: 'Переименуй услугу «Стрижка» в «Новое название»',
+          },
+        ],
+      });
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute.mock.calls[0][1]).toBe(
+        'catalog.services.read',
+      );
+      expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+        serviceRenameSourceRevision: 'a'.repeat(64),
+      });
+      expect(answer.reply).toContain('не подтверждён');
+      expect(answer.action).toBeNull();
+    });
+
+    it('does not expose the management preview to the client audience', async () => {
+      const mocks = createService([tool]);
+      mocks.model.decide.mockResolvedValue(
+        decision({ reply: 'Уточните услугу.', toolCall: null }),
+      );
+      await mocks.service.chat(user, {
+        ...dto,
+        audience: 'client',
+        messages: [{ role: 'user', content: 'Привет' }],
+      });
+      expect(mocks.model.decide.mock.calls[0]?.[0].tools).toEqual([]);
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    });
+  });
+
   describe('goods search [scripted model only]', () => {
     const tool = 'inventory.goods.search';
     it.each([
@@ -7364,6 +7539,7 @@ describe('AiCoreService', () => {
       .fn()
       .mockResolvedValue({ defaultTimezone: businessTimezone });
     const crm = {
+      serviceRenameReadIdentity: jest.fn().mockResolvedValue('a'.repeat(64)),
       resolveConfiguredBookingBranch: jest.fn().mockResolvedValue(null),
       readBranchAvailabilityRevision: jest.fn().mockResolvedValue(null),
       resolveBookingBranchPreference: jest

@@ -7,6 +7,7 @@ import type { GoodsSearchRead } from './yclients-goods-search';
 import type { ServiceCatalogRead } from './service-catalog-read';
 import { CrmProvider } from '../common/domain.enums';
 import type { ServicePriceSnapshot } from './yclients-service-price.contract';
+import type { ServiceRenameSnapshot } from './yclients-service-rename.contract';
 import type {
   FetchCompleteness,
   FetchTruncationReason,
@@ -535,6 +536,11 @@ export interface CRMAdapter {
     serviceId: string,
     deadlineAt?: number,
   ): Promise<ServicePriceSnapshot>;
+  /** Uncached exact title-preview source. No writer, price-edit grant or approval. */
+  readServiceRenameSnapshot?(
+    serviceId: string,
+    deadlineAt?: number,
+  ): Promise<ServiceRenameSnapshot>;
   /** Called only by the registered CRM service price Action Engine owner. */
   updateServiceFixedPrice?(params: {
     serviceId: string;

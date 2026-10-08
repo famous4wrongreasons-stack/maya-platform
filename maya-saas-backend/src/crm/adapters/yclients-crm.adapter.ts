@@ -44,6 +44,13 @@ import {
   type ServicePriceSnapshot,
 } from '../yclients-service-price.contract';
 import {
+  serviceRenameId,
+  serviceRenamePermissions,
+  serviceRenameSnapshot,
+  serviceRenameUnavailable,
+  type ServiceRenameSnapshot,
+} from '../yclients-service-rename.contract';
+import {
   BadRequestException,
   ConflictException,
   InternalServerErrorException,
@@ -737,6 +744,53 @@ export class YclientsCRMAdapter implements CRMAdapter {
       catalog_exhaustive: false,
       services,
     };
+  }
+
+  /** Title-only preview source; three bounded GETs, no mutation or pricing authority. */
+  async readServiceRenameSnapshot(
+    serviceId: string,
+    deadlineAt = Date.now() + 20_000,
+  ): Promise<ServiceRenameSnapshot> {
+    const id = serviceRenameId(serviceId);
+    try {
+      const companyId = goodsId(this.settings.companyId);
+      const read = async (path: string) => {
+        const timeoutMs = deadlineAt - Date.now();
+        if (timeoutMs <= 0)
+          serviceRenameUnavailable('service_rename_deadline_elapsed');
+        const response = await this.request<unknown>(path, {
+          method: 'GET',
+          timeoutMs,
+          preserveGoodsNumbers: true,
+        });
+        if (response.success !== true)
+          serviceRenameUnavailable('service_rename_unverified_source');
+        return response.data;
+      };
+      const permissionsPath = `user/permissions/${companyId}`;
+      const beforePermission = serviceRenamePermissions(
+        await read(permissionsPath),
+      );
+      const data = await read(`company/${companyId}/services/${id}`);
+      const rows = Array.isArray(data) ? data : [data];
+      if (rows.length !== 1)
+        serviceRenameUnavailable('service_rename_ambiguous_source');
+      const snapshot = serviceRenameSnapshot(
+        rows[0],
+        companyId,
+        id,
+        this.settings.currency ?? '',
+      );
+      const afterPermission = serviceRenamePermissions(
+        await read(permissionsPath),
+      );
+      if (afterPermission !== beforePermission)
+        serviceRenameUnavailable('service_rename_provider_permission_changed');
+      return snapshot;
+    } catch (error) {
+      if (error instanceof ServiceUnavailableException) throw error;
+      serviceRenameUnavailable('service_rename_source_unavailable', error);
+    }
   }
 
   /** Uncached management read. Provider permissions are a separate authoritative read. */

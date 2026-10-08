@@ -1,3 +1,8 @@
+import {
+  bindServiceRenameChat,
+  serviceRenameClarification,
+  serviceRenameReply,
+} from './service-rename-chat';
 import { goodsSearchReply } from './goods-search-presentation';
 import { explicitGoodsSearchCode } from './goods-search-chat-selection';
 import { goodsReadReply } from './goods-presentation';
@@ -452,6 +457,7 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'clients.dormant.list': 'client_retention',
   'clients.dossier.read': 'client_dossier',
   'catalog.services.read': 'service_catalog',
+  'catalog.service.rename.preview': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
   'company.business-hours.read': 'company_profile',
   'support.integration-status.read': 'integration_status',
@@ -2081,6 +2087,86 @@ export class AiCoreService {
             );
           hardenedArguments = { ...hardenedArguments, date };
         }
+        let serviceRenameSourceRevision: string | undefined;
+        if (decision.toolCall.name === 'catalog.service.rename.preview') {
+          if (!this.crm) this.modelFailure('service_rename_source_unavailable');
+          serviceRenameSourceRevision =
+            await this.crm.serviceRenameReadIdentity(tenantId, user.userId);
+          const catalog = allowedNames.has('catalog.services.read')
+            ? this.record(
+                await this.executeChatTool(
+                  dto,
+                  toolUser,
+                  'catalog.services.read',
+                  {
+                    surface: dto.surface,
+                    arguments: {},
+                    idempotencyKey: this.toolIdempotencyKey(
+                      tenantId,
+                      user.userId,
+                      dto.requestId,
+                      step,
+                      'catalog.services.read',
+                    ),
+                  },
+                  { suppressWidgetTrigger: true, serviceRenameSourceRevision },
+                ),
+              )
+            : null;
+          if (catalog)
+            toolsUsed.push({
+              name: 'catalog.services.read',
+              status:
+                typeof catalog.status === 'string' ? catalog.status : 'unknown',
+              execution_id:
+                typeof catalog.execution_id === 'string'
+                  ? catalog.execution_id
+                  : null,
+            });
+          if (
+            (await this.crm.serviceRenameReadIdentity(
+              tenantId,
+              user.userId,
+            )) !== serviceRenameSourceRevision
+          )
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: serviceRenameClarification('source_unavailable'),
+                source: 'safe_fallback',
+                action: null,
+              },
+              toolResults,
+            );
+          const bound = bindServiceRenameChat(
+            this.latestUserText(dto.messages),
+            catalog?.status === 'completed' && catalog.stale !== true
+              ? catalog.result
+              : null,
+          );
+          if (bound.kind === 'clarify')
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: serviceRenameClarification(bound.reason),
+                source: 'safe_fallback',
+                action: null,
+              },
+              toolResults,
+            );
+          // Neither the model's target nor its proposed text survive this binding.
+          hardenedArguments = bound.arguments;
+        }
         if (decision.toolCall.name === 'catalog.service.price.update') {
           // A proposed price/service from the model is never business intent.
           // Bind the exact owner utterance to a current catalog before preparing
@@ -2158,6 +2244,8 @@ export class AiCoreService {
         // Public consultation consumes the existing semantic intent, not a
         // phrase fastpath. Catalog reads supporting booking/compound plans keep
         // their existing continuation; this presentation grants no authority.
+        const serviceRenamePreview =
+          decision.toolCall.name === 'catalog.service.rename.preview';
         const goodsRead = [
           'inventory.goods.read',
           'inventory.goods.search',
@@ -2191,8 +2279,11 @@ export class AiCoreService {
               {
                 widgetTrigger: 'T-2a',
                 // Consultation is a READ answer, not a booking selector.
-                ...(publicConsultation || goodsRead
+                ...(publicConsultation || goodsRead || serviceRenamePreview
                   ? { suppressWidgetTrigger: true }
+                  : {}),
+                ...(serviceRenameSourceRevision
+                  ? { serviceRenameSourceRevision }
                   : {}),
                 requestId: dto.requestId,
                 userTurn: this.persistedUserTurns.get(dto),
@@ -2326,56 +2417,59 @@ export class AiCoreService {
           (decision.toolCall.name === 'booking.availability.read' &&
             isExactBookingTime(hardenedArguments.time)) ||
           goodsRead ||
+          serviceRenamePreview ||
           publicConsultation
         ) {
-          const sourceReply = goodsRead
-            ? decision.toolCall.name === 'inventory.goods.search'
-              ? goodsSearchReply(execution.result, execution.stale === true)
-              : goodsReadReply(execution.result, execution.stale === true)
-            : publicConsultation
-              ? publicConsultationReply(
-                  execution.result,
-                  activeSemanticPlan!.tasks[0].intent ===
-                    'employees.list_public'
-                    ? 'staff'
-                    : 'salon',
-                  execution.stale === true,
-                )
-              : personalPreparation
-                ? this.personalCatalogPreparationReply(execution)
-                : decision.toolCall.name === 'staff.schedule.own.read'
-                  ? this.deterministicOwnStaffScheduleReply(
-                      execution.result,
-                      hardenedArguments.date,
-                      execution.stale === true,
-                    )
-                  : decision.toolCall.name === 'company.business-hours.read'
-                    ? this.deterministicCompanyProfileReply(
+          const sourceReply = serviceRenamePreview
+            ? serviceRenameReply(execution.result, execution.stale === true)
+            : goodsRead
+              ? decision.toolCall.name === 'inventory.goods.search'
+                ? goodsSearchReply(execution.result, execution.stale === true)
+                : goodsReadReply(execution.result, execution.stale === true)
+              : publicConsultation
+                ? publicConsultationReply(
+                    execution.result,
+                    activeSemanticPlan!.tasks[0].intent ===
+                      'employees.list_public'
+                      ? 'staff'
+                      : 'salon',
+                    execution.stale === true,
+                  )
+                : personalPreparation
+                  ? this.personalCatalogPreparationReply(execution)
+                  : decision.toolCall.name === 'staff.schedule.own.read'
+                    ? this.deterministicOwnStaffScheduleReply(
                         execution.result,
+                        hardenedArguments.date,
                         execution.stale === true,
                       )
-                    : decision.toolCall.name === 'appointments.own.list'
-                      ? this.deterministicOwnAppointmentsReply(
+                    : decision.toolCall.name === 'company.business-hours.read'
+                      ? this.deterministicCompanyProfileReply(
                           execution.result,
                           execution.stale === true,
                         )
-                      : decision.toolCall.name ===
-                          'support.integration-status.read'
-                        ? integrationStatusReply(
+                      : decision.toolCall.name === 'appointments.own.list'
+                        ? this.deterministicOwnAppointmentsReply(
                             execution.result,
                             execution.stale === true,
                           )
-                        : decision.toolCall.name === 'tasks.list'
-                          ? ownTasksReply(
+                        : decision.toolCall.name ===
+                            'support.integration-status.read'
+                          ? integrationStatusReply(
                               execution.result,
                               execution.stale === true,
                             )
-                          : decision.toolCall.name === 'clients.dossier.read'
-                            ? this.deterministicClientDossierReply(
+                          : decision.toolCall.name === 'tasks.list'
+                            ? ownTasksReply(
                                 execution.result,
                                 execution.stale === true,
                               )
-                            : null;
+                            : decision.toolCall.name === 'clients.dossier.read'
+                              ? this.deterministicClientDossierReply(
+                                  execution.result,
+                                  execution.stale === true,
+                                )
+                              : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(
@@ -6934,6 +7028,7 @@ export class AiCoreService {
       toolName.startsWith('analytics.') ||
       toolName.startsWith('expenses.') ||
       toolName === 'catalog.service.price.update' ||
+      toolName === 'catalog.service.rename.preview' ||
       toolName === 'customers.count' ||
       toolName === 'clients.retention.scan' ||
       toolName === 'clients.dossier.read' ||

@@ -765,7 +765,7 @@ try {
     { cwd: BE, encoding: 'utf8' },
   ).trim();
   const expected = {
-    current: { AE: 228, POLICY: 223, TOOL: 52, C9: 61 },
+    current: { AE: 228, POLICY: 223, TOOL: 53, C9: 62 },
     historical: { AE: 226, POLICY: 221, TOOL: 48, C9: 57 },
     pricing: {
       AE: ['crm.service.fixed-price.update.v1'],
@@ -780,16 +780,17 @@ try {
       C9: ['inventory.goods.receipt.prepare', 'inventory.goods.read'],
     },
     search: { AE: [], POLICY: [], TOOL: ['inventory.goods.search'], C9: ['inventory.goods.search'] },
+    renamePreview: { AE: [], POLICY: [], TOOL: ['catalog.service.rename.preview'], C9: ['catalog.service.rename.preview'] },
   };
   chk(
-    'the four registry censuses preserve the historical baseline and exact approved deltas',
+    'the four registry censuses preserve the historical baseline and exact approved and development READ deltas',
     got === JSON.stringify(expected),
     got,
     'EXECUTED',
   );
 } catch (e) {
   chk(
-    'the four registry censuses preserve the historical baseline and exact approved deltas',
+    'the four registry censuses preserve the historical baseline and exact approved and development READ deltas',
     false,
     String(e.message).slice(0, 120),
     'EXECUTED',

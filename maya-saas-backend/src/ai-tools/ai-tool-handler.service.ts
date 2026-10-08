@@ -286,6 +286,14 @@ export class AiToolHandlerService {
         return this.readNoShowRiskClients(principal, args);
       case 'catalog.services.read':
         return this.readServices(principal.tenantId);
+      case 'catalog.service.rename.preview':
+        return this.crmService.previewServiceRenameForActor(
+          principal.tenantId,
+          principal.userId,
+          String(args.service_id),
+          String(args.new_title),
+          String(args.source_revision),
+        );
       case 'booking.availability.read':
         return this.readAvailability(principal.tenantId, args);
       case 'booking.group-availability.read':
@@ -2312,6 +2320,14 @@ export class AiToolHandlerService {
     };
   }
 
+  /** Internal witness for the explicit catalog → rename preview read pair. */
+  serviceRenameReadIdentity(principal: AiToolPrincipal): Promise<string> {
+    return this.crmService.serviceRenameReadIdentity(
+      principal.tenantId,
+      principal.userId,
+    );
+  }
+
   /**
    * Доводка аргументов ДО подписи и показа карточки.
    *
@@ -2334,6 +2350,13 @@ export class AiToolHandlerService {
         principal.userId,
         args,
       );
+    if (toolName === 'catalog.service.rename.preview') {
+      return {
+        service_id: args.service_id,
+        new_title: args.new_title,
+        source_revision: await this.serviceRenameReadIdentity(principal),
+      };
+    }
     if (toolName === 'inventory.goods.search') {
       return {
         query: goodsSearchQuery(args.query),

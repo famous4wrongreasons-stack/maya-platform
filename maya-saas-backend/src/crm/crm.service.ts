@@ -42,6 +42,15 @@ import {
   ServicePricePreDispatchError,
   type ServicePriceSnapshot,
 } from './yclients-service-price.contract';
+import {
+  serviceRenameId,
+  serviceRenameTitle,
+  serviceRenameRevision,
+  serviceRenameSourceChanged,
+  serviceRenameUnavailable,
+  serviceRenamePreview,
+  type ServiceRenamePreview,
+} from './yclients-service-rename.contract';
 import { clientPrincipalEvidence } from '../action-engine/client-action-principal.contract';
 
 import {
@@ -1304,6 +1313,151 @@ export class CrmService {
       await this.readServiceCatalog(tenantId),
       serviceIds,
     );
+  }
+
+  /** Metadata-only current title-preview scope. No provider write port is required. */
+  private async serviceRenameSourceContext(tenantId: string, userId: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    if (this.tenantContext.get()?.userId !== userId)
+      throw new ForbiddenException('service_rename_principal_mismatch');
+    const membership = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { userId, tenantId } },
+      include: { user: true },
+    });
+    if (
+      !membership ||
+      membership.status !== 'active' ||
+      membership.user.status !== 'active' ||
+      membership.branchId ||
+      ![UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        membership.role as UserRole,
+      )
+    )
+      throw new ForbiddenException(
+        'service_rename_current_unscoped_owner_required',
+      );
+    if (!this.goodsEntitlements)
+      throw new ForbiddenException('service_rename_features_unavailable');
+    for (const feature of ['ai.owner', 'crm.integration'] as const)
+      await this.goodsEntitlements.assertFeature(tenantId, feature);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { id: true, status: true, calendarSource: true },
+    });
+    if (!tenant || tenant.status !== 'active')
+      throw new ForbiddenException('service_rename_active_tenant_required');
+    if ((tenant.calendarSource as CalendarSource) !== CalendarSource.EXTERNAL)
+      serviceRenameUnavailable('service_rename_external_source_required');
+    const integration = await this.getStoredIntegration(tenantId);
+    if (
+      (integration.provider as CrmProvider) !== CrmProvider.YCLIENTS ||
+      integration.status !== 'active'
+    )
+      serviceRenameUnavailable('service_rename_yclients_integration_required');
+    const settings = integration.settingsJson as Record<string, unknown>;
+    let companyId: string;
+    let binding: ReturnType<typeof normalizeCrmBranchBinding>;
+    try {
+      companyId = goodsId(settings?.companyId);
+      binding = normalizeCrmBranchBinding(settings?.branchBinding, companyId);
+    } catch (error) {
+      serviceRenameUnavailable(
+        'service_rename_branch_source_unavailable',
+        error,
+      );
+    }
+    const branch = binding
+      ? await this.prisma.branch.findFirst({
+          where: { id: binding.branchId, tenantId },
+          select: { id: true, timezone: true },
+        })
+      : null;
+    if (binding && !branch)
+      serviceRenameUnavailable('service_rename_branch_source_unavailable');
+    const revision = servicePriceHash({
+      contract: 'maya.service-rename-source/1',
+      tenantId,
+      userId,
+      membership: {
+        id: membership.id,
+        role: membership.role,
+        branchId: membership.branchId,
+      },
+      integration: {
+        id: integration.id,
+        provider: integration.provider,
+        status: integration.status,
+        settings: integration.settingsJson,
+        baseUrl: integration.baseUrl,
+        credential: this.encryptionService.opaqueReference(
+          'service-rename-integration',
+          integration.encryptedApiToken,
+        ),
+      },
+      branch,
+    });
+    // Metadata reads above can await a cache/source owner. Revalidate the
+    // actual current principal at the end, not only the authentication claim.
+    const currentMembership = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { userId, tenantId } },
+      include: { user: true },
+    });
+    if (
+      !currentMembership ||
+      currentMembership.status !== 'active' ||
+      currentMembership.user.status !== 'active' ||
+      currentMembership.branchId ||
+      currentMembership.id !== membership.id ||
+      currentMembership.role !== membership.role ||
+      ![UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+        currentMembership.role as UserRole,
+      )
+    )
+      throw new ForbiddenException(
+        'service_rename_current_unscoped_owner_required',
+      );
+    return { revision, companyId };
+  }
+
+  private async serviceRenameContext(tenantId: string, userId: string) {
+    const before = await this.serviceRenameSourceContext(tenantId, userId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (!adapter.readServiceRenameSnapshot)
+      serviceRenameUnavailable('service_rename_provider_not_implemented');
+    const after = await this.serviceRenameSourceContext(tenantId, userId);
+    if (before.revision !== after.revision) serviceRenameSourceChanged();
+    return { adapter, ...after };
+  }
+
+  async serviceRenameReadIdentity(
+    tenantId: string,
+    userId: string,
+  ): Promise<string> {
+    return (await this.serviceRenameContext(tenantId, userId)).revision;
+  }
+
+  async previewServiceRenameForActor(
+    tenantId: string,
+    userId: string,
+    serviceId: string,
+    newTitle: string,
+    expectedRevision: string,
+  ): Promise<ServiceRenamePreview> {
+    const id = serviceRenameId(serviceId),
+      title = serviceRenameTitle(newTitle),
+      expected = serviceRenameRevision(expectedRevision);
+    const before = await this.serviceRenameContext(tenantId, userId);
+    if (before.revision !== expected) serviceRenameSourceChanged();
+    const snapshot = await before.adapter.readServiceRenameSnapshot!(id);
+    const after = await this.serviceRenameContext(tenantId, userId);
+    if (
+      after.revision !== before.revision ||
+      snapshot.companyId !== before.companyId ||
+      snapshot.serviceId !== id ||
+      snapshot.contract !== 'maya.yclients-service-rename.snapshot/1'
+    )
+      serviceRenameSourceChanged();
+    return serviceRenamePreview(snapshot, title, before.revision);
   }
 
   /** The existing CRM owner binds the company's service to current tenant authority. */

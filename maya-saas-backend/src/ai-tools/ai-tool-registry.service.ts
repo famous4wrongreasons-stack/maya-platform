@@ -4,6 +4,7 @@ import {
   GOODS_RECEIPT_TOOL,
 } from '../crm/goods-receipt.contract';
 import { goodsId } from '../crm/yclients-goods-read';
+import { serviceRenameTitle } from '../crm/yclients-service-rename.contract';
 import {
   BadRequestException,
   Injectable,
@@ -329,6 +330,12 @@ export class AiToolRegistryService {
       }
       case GOODS_RECEIPT_TOOL:
         return preparedGoods(args);
+      case 'catalog.service.rename.preview':
+        this.assertAllowedKeys(args, ['service_id', 'new_title']);
+        return {
+          service_id: this.assertYclientsId(args.service_id, 'service_id'),
+          new_title: serviceRenameTitle(args.new_title),
+        };
       case 'inventory.goods.search':
         this.assertAllowedKeys(args, ['query']);
         return { query: goodsSearchQuery(args.query) };

@@ -625,6 +625,23 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       synonyms: ['услуги', 'прайс', 'что можно сделать'],
       examples: ['Какие есть услуги?'],
     }),
+    intent(
+      'services.rename_preview',
+      'services',
+      'Preview one YCLIENTS service title. No approval or mutation.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+        permission: 'catalog.service.rename.preview',
+        tools: ['catalog.service.rename.preview'],
+        requiredSlots: ['service', 'new_title'],
+        synonyms: ['переименовать услугу', 'название услуги'],
+        examples: ['Переименуй услугу «Стрижка» в «Мужская стрижка»'],
+        responseRule:
+          'Return the source-qualified old/new internal title preview only. The server binds the current literal user request and service identity. Preserve online-booking title, disclose unqualified printed-name behavior, and never claim approval or application.',
+      },
+    ),
     intent('services.price', 'services', 'Read service price.', {
       action: 'read',
       dataClass: 'C',

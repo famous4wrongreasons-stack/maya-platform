@@ -6,7 +6,7 @@ const {SERVICE_PRICE_CAPABILITY,SERVICE_PRICE_TOOL}=require('../../src/crm/yclie
 const {GOODS_RECEIPT_CAPABILITY,GOODS_RECEIPT_TOOL}=require('../../src/crm/goods-receipt.contract');
 
 // Preserve the pre-pricing census (226/221/48/57). Only the exact approved
-// pricing delta, goods receipt delta and exact read-only goods-search delta are subtracted;
+// pricing/goods deltas and exact development READ search/rename deltas are subtracted;
 // expose every admitted identity separately so an unknown/renamed/duplicate
 // entry cannot be hidden by increasing the current cardinality pin.
 const keys={
@@ -28,12 +28,14 @@ const goodsKeys={
   C9:[GOODS_RECEIPT_TOOL,'inventory.goods.read'],
 };
 const searchKeys={AE:[],POLICY:[],TOOL:['inventory.goods.search'],C9:['inventory.goods.search']};
+const renamePreviewKeys={AE:[],POLICY:[],TOOL:['catalog.service.rename.preview'],C9:['catalog.service.rename.preview']};
 const census = {
   current:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.length])),
-  historical:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key!==pricingKey[space]&&!goodsKeys[space].includes(key)&&!searchKeys[space].includes(key)).length])),
+  historical:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key!==pricingKey[space]&&!goodsKeys[space].includes(key)&&!searchKeys[space].includes(key)&&!renamePreviewKeys[space].includes(key)).length])),
   pricing:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key===pricingKey[space])])),
   goods:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>goodsKeys[space].includes(key))])),
   search:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>searchKeys[space].includes(key))])),
+  renamePreview:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>renamePreviewKeys[space].includes(key))])),
 };
 
 // Additional output mode for the existing contract generator. Never activates a
