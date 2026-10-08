@@ -2,7 +2,7 @@
 
 Development continuation of [goods search](MAYA-YCLIENTS-GOODS-SEARCH-CHECKPOINT-20261008.md) and the already approved F32b/F74b GR-PC1 receipt lane. This slice wires an ephemeral photo and one reviewed line to the existing canonical chat approval. It does not grant real OCR, provider receipt admission, background initiation or a new financial subtype.
 
-**Actual upload today:** with an authorized current source and an otherwise valid image, the default parser returns HTTP 503 `goods_photo_parser_not_configured`. The current React user sees «Распознавание фото пока не подключено. Строки не извлечены». No lines, matching or receipt proposal follow. In the successful proof, a Jest DI spy replaces `GoodsPhotoParser.parse` and returns the fixture's literal `RAW_LINES` array after checking synthetic image bytes; it does not decode or recognize the image. Thus the completed local result is the downstream review/approval plumbing with synthetic extraction, not a working OCR feature for an arbitrary invoice.
+**Historical runtime at `38295909` (superseded for the opt-in local Mac profile by the [actual OCR continuation](MAYA-GOODS-PHOTO-ACTUAL-OCR-CHECKPOINT-20261008.md)):** with an authorized current source and an otherwise valid image, the default parser returns HTTP 503 `goods_photo_parser_not_configured`. The current React user sees «Распознавание фото пока не подключено. Строки не извлечены». No lines, matching or receipt proposal follow. In the successful proof, a Jest DI spy replaces `GoodsPhotoParser.parse` and returns the fixture's literal `RAW_LINES` array after checking synthetic image bytes; it does not decode or recognize the image. Thus the completed local result is the downstream review/approval plumbing with synthetic extraction, not a working OCR feature for an arbitrary invoice.
 
 ## Useful path
 
@@ -24,7 +24,7 @@ Review creates a real persisted authenticated chat turn describing preparation. 
 
 ## Remaining exact gates
 
-`GoodsPhotoParser` has no configured OCR transport and returns `goods_photo_parser_not_configured`. Any successful extraction in local proof is an explicitly injected synthetic parser, not OCR or real-model acceptance. A real gate still requires an approved image/OCR transport and document-data handling contract, decoder/resource bounds and error behavior, then authorized representative-document acceptance. The existing text AiCore transport is not repurposed for invoice images. No real document or paid/external call is authorized by this checkpoint.
+At this historical checkpoint, `GoodsPhotoParser` had no configured OCR transport and returned `goods_photo_parser_not_configured`. Any successful extraction in local proof is an explicitly injected synthetic parser, not OCR or real-model acceptance. The subsequent [actual local OCR checkpoint](MAYA-GOODS-PHOTO-ACTUAL-OCR-CHECKPOINT-20261008.md) implements and tests a bounded local Mac processing edge on synthetic images. Linux deployment, general invoice quality and authorized representative-document acceptance remain separate work. The existing text AiCore transport is not repurposed for invoice images. No real document or paid/external call is authorized by this checkpoint.
 
 Real YCLIENTS receipt admission remains separately blocked by the documented uncertainty in `storages_ids` / `storages_transactions_types` permission qualification. The UI does not relax that gate. No SKU creation, supplier accounting, full warehouse system, batch receipt, sale-price update or inferred stock unit is included.
 

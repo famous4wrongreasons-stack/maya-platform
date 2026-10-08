@@ -1,0 +1,7 @@
+src/ai-tools/goods-photo-ocr-rows.ts(87,33): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'object'.
+src/ai-tools/goods-photo-ocr-rows.ts(97,16): error TS18048: 'descriptor' is possibly 'undefined'.
+src/ai-tools/goods-photo-ocr-rows.ts(110,3): error TS2322: Type 'unknown' is not assignable to type 'number'.
+src/ai-tools/goods-photo-ocr-rows.ts(121,21): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'object'.
+src/ai-tools/goods-photo-ocr-rows.ts(125,23): error TS18046: 'length' is of type 'unknown'.
+src/ai-tools/goods-photo-ocr-rows.ts(128,17): error TS18048: 'descriptor' is possibly 'undefined'.
+src/ai-tools/goods-photo-ocr-rows.ts(158,13): error TS18046: 'row.text' is of type 'unknown'.

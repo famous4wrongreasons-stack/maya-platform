@@ -1,0 +1,131 @@
+{
+  "contract": "maya.actual-ocr-http-preview-proof/1",
+  "status": "passed",
+  "parser": "ACTUAL_CONFIGURED_GOODS_PHOTO_PARSER_NO_SPY",
+  "images": "SYNTHETIC_PIXELS",
+  "integration": "SYNTHETIC_ACTIVE_METADATA_NOT_A17_ACCEPTANCE",
+  "nativeProofSha256": "ffd40e32e3bf806f66102302325dc9f3ed17b27cdad3c33b99a13c415b3cdadc",
+  "currentReactAcceptance": true,
+  "realDocumentAcceptance": false,
+  "deploymentAcceptance": false,
+  "restartClaim": false,
+  "opened": {
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "uploaded": {
+    "body": {
+      "contract": "maya.goods-photo.preview/1",
+      "source_revision": "b24de0d3843e7d12c3625d0a1256151ceb84eb408987c84e30a4cc3d5ba052fa",
+      "photo_sha256": "c1a15056196967887b421e612893b3669af21f8b7a9c3594af1fa0790a3f43e9",
+      "lines": [
+        {
+          "source_line": 1,
+          "name": "Шампунь Кедр",
+          "quantity": "2",
+          "unit_label": "шт",
+          "unit_price": "350.00",
+          "line_total": "700.00",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        },
+        {
+          "source_line": 2,
+          "name": "Крем для рук",
+          "quantity": "1",
+          "unit_label": "шТ",
+          "unit_price": "125.50",
+          "line_total": "125.50",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        }
+      ],
+      "recognition_acceptance": "NOT_ACCEPTED",
+      "review_required": true,
+      "original_stored": false,
+      "persistent_draft": false,
+      "notice": "Предварительные поля. Проверьте совпадение товара, единицы, количество и смысл цены. Неоднозначности нужно исправить до подтверждения прихода."
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "changed": {
+    "body": {
+      "contract": "maya.goods-photo.preview/1",
+      "source_revision": "b24de0d3843e7d12c3625d0a1256151ceb84eb408987c84e30a4cc3d5ba052fa",
+      "photo_sha256": "2a3c946532c15d0764794cd531423692d0586beee54f85d4ca622ab1fd2d7ce1",
+      "lines": [
+        {
+          "source_line": 1,
+          "name": "Шампунь Лес",
+          "quantity": "3",
+          "unit_label": "шт",
+          "unit_price": "350.00",
+          "line_total": "1050.00",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        },
+        {
+          "source_line": 2,
+          "name": "Крем для рук",
+          "quantity": "1",
+          "unit_label": "шТ",
+          "unit_price": "125.50",
+          "line_total": "125.50",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        }
+      ],
+      "recognition_acceptance": "NOT_ACCEPTED",
+      "review_required": true,
+      "original_stored": false,
+      "persistent_draft": false,
+      "notice": "Предварительные поля. Проверьте совпадение товара, единицы, количество и смысл цены. Неоднозначности нужно исправить до подтверждения прихода."
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "blank": {
+    "body": {
+      "message": "goods_photo_ocr_table_unsupported",
+      "error": "Bad Request",
+      "statusCode": 400
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "malformed": {
+    "body": {
+      "message": "goods_photo_image_invalid",
+      "error": "Bad Request",
+      "statusCode": 400
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "revoked": {
+    "body": {
+      "message": "Active tenant membership is required",
+      "error": "Unauthorized",
+      "statusCode": 401
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "checkpoints": [
+    "opened",
+    "uploaded",
+    "changed",
+    "blank",
+    "malformed",
+    "revoked"
+  ],
+  "forbidden": [],
+  "blockedProviderOrExternalFetchAttempts": 0,
+  "blockedModelAttempts": 0,
+  "qualification": "LOCAL_SYNTHETIC_IMAGES_ONLY_NO_GENERAL_INVOICE_ACCEPTANCE"
+}

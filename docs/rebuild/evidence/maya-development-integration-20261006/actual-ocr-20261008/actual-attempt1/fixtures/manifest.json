@@ -1,0 +1,38 @@
+{
+  "contract": "maya.synthetic-ocr-images/1",
+  "generator": "INSTALLED_SHARP_SVG_TEXT",
+  "fixtures": {
+    "russian": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/russian.png",
+      "sha256": "c1a15056196967887b421e612893b3669af21f8b7a9c3594af1fa0790a3f43e9",
+      "bytes": 29762,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "changed": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/changed.png",
+      "sha256": "2a3c946532c15d0764794cd531423692d0586beee54f85d4ca622ab1fd2d7ce1",
+      "bytes": 30184,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "english": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/english.png",
+      "sha256": "e85fd523b6c3d4e8f127268871c9580057618f823afbd30319d9c18363ca08ad",
+      "bytes": 33735,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "blank": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/blank.png",
+      "sha256": "c4a49268203cf4633934210dffa4e024aa8f5f788cb99f112869ab9a12966aa1",
+      "bytes": 3405,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    }
+  }
+}

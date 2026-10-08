@@ -1,0 +1,21 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "frozen_at": "2026-10-08T13:00:52.326229+00:00",
+  "files": {
+    "README.md": "9fc9f960259b09287dc904685a6ab1905f586d26d8062b1e68855d8bc2b51591",
+    "actual-ocr-browser-guard.mjs": "cb725c10b17c864539f9600903b00b0c81472d10cfc0a2dc1bba89c75396da83",
+    "actual-ocr-browser-guard.test.mjs": "8d6297ea99d5750746304574d718526f88a469fa3db819fcd59e632c01393a55",
+    "actual-ocr-browser.mjs": "259c6cbdd8886db1943cb10c363fadcc3029ca166b7caac9a18c2289e3ae3691",
+    "actual-ocr.probe-spec.ts": "cf670148c00efc1eb14d11e826de6dc216093ba9bdd1034688a2ca0f5a535cdf",
+    "fixed-input-hashes.json": "d235b67b99fc45a3c3d1623fe7f03622ad39bccc22d2ea5515e7908899ec894c",
+    "jest-proof.json": "c7bc89792813a57f85925b26cffea41f0c145ba78ec12e2f80678147667584ef",
+    "loopback-only.cjs": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+    "native-proof.mjs": "b18cec4890f9a8836ff5cdbfe2277a7366993cd7cc1393f0fa52f8d7b9c63ed6",
+    "owned-stage.mjs": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+    "tsconfig.proof.json": "869fd2208965768765abcabe0b49284dbd1b8e088685350ec3a4cc4182b0a7a0"
+  },
+  "verification": "Read-only source audit and harness authoring only; no syntax/type/test/build/PG/browser invocation",
+  "prerequisite": "Passed actual-attempt3 native synthetic image proof with unchanged binary/source/fixtures",
+  "scope": "One fresh owned PG, real HTTP/current React upload-only; no business mutation path",
+  "refreeze_reason": "Probe outputRaw is asserted then assigned to an explicit string const for nested callbacks; no non-null assertion."
+}

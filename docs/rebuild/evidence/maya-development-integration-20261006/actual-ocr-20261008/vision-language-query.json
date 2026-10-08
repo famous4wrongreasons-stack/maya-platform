@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/swift",
+    "-module-cache-path",
+    "/tmp/maya-actual-ocr-20261008/swift-module-cache",
+    "/tmp/maya-actual-ocr-20261008/vision-language-inventory.swift"
+  ],
+  "timeoutSeconds": 45,
+  "elapsedSeconds": 3.064,
+  "exitCode": 0,
+  "stdout": "{\n  \"imageInputs\" : 0,\n  \"levels\" : [\n    {\n      \"languages\" : [\n        \"en-US\",\n        \"fr-FR\",\n        \"it-IT\",\n        \"de-DE\",\n        \"es-ES\",\n        \"pt-BR\",\n        \"zh-Hans\",\n        \"zh-Hant\",\n        \"yue-Hans\",\n        \"yue-Hant\",\n        \"ko-KR\",\n        \"ja-JP\",\n        \"ru-RU\",\n        \"uk-UA\",\n        \"th-TH\",\n        \"vi-VT\",\n        \"ar-SA\",\n        \"ars-SA\",\n        \"tr-TR\",\n        \"id-ID\",\n        \"cs-CZ\",\n        \"da-DK\",\n        \"nl-NL\",\n        \"no-NO\",\n        \"nn-NO\",\n        \"nb-NO\",\n        \"ms-MY\",\n        \"pl-PL\",\n        \"ro-RO\",\n        \"sv-SE\"\n      ],\n      \"level\" : \"accurate\",\n      \"requestRevision\" : 3\n    },\n    {\n      \"languages\" : [\n        \"en-US\",\n        \"fr-FR\",\n        \"it-IT\",\n        \"de-DE\",\n        \"es-ES\",\n        \"pt-BR\"\n      ],\n      \"level\" : \"fast\",\n      \"requestRevision\" : 3\n    }\n  ],\n  \"operation\" : \"supportedRecognitionLanguages_only\",\n  \"recognitionRequestsPerformed\" : 0,\n  \"supportedRevisions\" : [\n    1,\n    2,\n    3\n  ]\n}\n",
+  "stderr": ""
+}

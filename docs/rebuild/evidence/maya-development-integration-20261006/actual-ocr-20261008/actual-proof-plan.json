@@ -1,0 +1,53 @@
+{
+  "status": "PREPARED_NOT_EXECUTED_BY_AGENT",
+  "contract": "maya.actual-ocr-proof-plan/1",
+  "command": "node --max-old-space-size=512 /tmp/maya-actual-ocr-20261008/actual-parser-proof.mjs --run --output=/tmp/maya-actual-ocr-20261008/actual-attempt1",
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+  "parentSyntaxChecks": [
+    "node --check /tmp/maya-actual-ocr-20261008/actual-parser-proof.mjs",
+    "node --check /tmp/maya-actual-ocr-20261008/synthetic-images.mjs"
+  ],
+  "nativeBuildCommand": "node scripts/build-goods-photo-ocr.mjs",
+  "actualNativeCallsExpected": 4,
+  "sequence": [
+    "Generate four actual PNG fixtures from finite SVG/blank sharp sources",
+    "Start first production parse on Russian table; immediately second call with changed table must throw goods_photo_ocr_busy synchronously; await first real result",
+    "Parse changed Russian pixels; words hash and structured rows must change",
+    "Parse English table; exact rows",
+    "Parse blank image through native engine; empty words and table unsupported",
+    "Malformed bytes must refuse before worker"
+  ],
+  "observer": "Original child_process.spawn called with unchanged args/options and returned original ChildProcess; bounded actual stdout/PID counters only, no synthetic worker or row injection",
+  "effects": {
+    "network": 0,
+    "PG": 0,
+    "HTTP": 0,
+    "browser": 0,
+    "realDocuments": 0,
+    "model": 0,
+    "provider": 0
+  },
+  "expectedRowsSource": "Assertions from finite generator text only, never inputs to production parser/worker",
+  "memory": {
+    "nodeHeapMb": 512,
+    "nativeWorkerConcurrency": 1,
+    "workerWallTimeoutMs": 15000,
+    "nativeOutputCapBytes": 262144,
+    "nativeInputCapBytes": 16777216,
+    "parentInputCapBytes": 2097152,
+    "pixels": 12000000
+  },
+  "qualification": [
+    "Actual production parser plus native OCR on synthetic image pixels only after root runs",
+    "No real document/general invoice accuracy or deployment claim",
+    "Synthetic PNG/SVG evidence intentionally retained; runtime parser uses stdin/stdout without original image files",
+    "Raw words retained only for these synthetic fixture images",
+    "No actual OCR or image generator invocation by this agent"
+  ],
+  "files": {
+    "/tmp/maya-actual-ocr-20261008/actual-parser-proof.mjs": "5bbcd2a1db731d1dc6ab379faf7ee17e90ab492af9d858dc16a2ce46cfc720dd",
+    "/tmp/maya-actual-ocr-20261008/synthetic-images.mjs": "713e546de93964165413b7297a2c6c415ec6784544083c2067ae6c5a83a13b7e",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-vision.swift": "342062af23e3d8288a02e599806472ff1c81c2b1b8742943ff85e75b46cc6281",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/build-goods-photo-ocr.mjs": "39e20e6de5d9ab8623598d98eb175d2734ddd603468097f86dc30421f5a470eb"
+  }
+}

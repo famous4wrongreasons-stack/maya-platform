@@ -1,0 +1,30 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test",
+  "testEnvironment": "node",
+  "testRegex": "actual-ocr\\.probe-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": [
+      "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/ts-jest",
+      {
+        "tsconfig": "/tmp/maya-actual-ocr-20261008/http-carrier-harness/tsconfig.proof.json"
+      }
+    ]
+  },
+  "globalSetup": "<rootDir>/widgets-live/support/global-setup.ts",
+  "setupFiles": [
+    "<rootDir>/widgets-live/support/setup-environment.ts"
+  ],
+  "testTimeout": 240000,
+  "roots": [
+    "/tmp/maya-actual-ocr-20261008/http-carrier-harness"
+  ],
+  "moduleDirectories": [
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules",
+    "node_modules"
+  ]
+}

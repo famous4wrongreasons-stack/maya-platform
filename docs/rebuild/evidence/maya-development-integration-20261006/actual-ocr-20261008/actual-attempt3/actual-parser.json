@@ -1,0 +1,674 @@
+{
+  "contract": "maya.actual-local-goods-photo-ocr-proof/1",
+  "status": "passed",
+  "qualification": "ACTUAL_PRODUCTION_PARSER_AND_APPLE_VISION_ON_SYNTHETIC_IMAGE_PIXELS",
+  "processObserver": "CALL_THROUGH_REAL_SPAWN_ARGUMENTS_AND_RESULTS_UNCHANGED",
+  "scriptedOcr": false,
+  "stubbedOcr": false,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "httpAcceptance": false,
+  "currentReactAcceptance": false,
+  "realDocumentAcceptance": false,
+  "deploymentAcceptance": false,
+  "binarySha256": "a5b6069f56ca6433a6fb8c0dc778a57da7e1b8d40c274a146ed44530d434217b",
+  "cases": {
+    "busy": {
+      "synchronousRefusal": "goods_photo_ocr_busy",
+      "extraWorkers": 0
+    },
+    "russianUnitCaseVariations": [
+      {
+        "row": 2,
+        "rendered": "шт",
+        "recognizedLiteral": "шТ"
+      }
+    ],
+    "russian": {
+      "recognizedRows": [
+        {
+          "name": "Шампунь Кедр",
+          "quantity": "2",
+          "unit_label": "шт",
+          "unit_price": "350.00",
+          "line_total": "700.00",
+          "price_kind": null,
+          "confidence": null
+        },
+        {
+          "name": "Крем для рук",
+          "quantity": "1",
+          "unit_label": "шТ",
+          "unit_price": "125.50",
+          "line_total": "125.50",
+          "price_kind": null,
+          "confidence": null
+        }
+      ],
+      "workerPid": 19013,
+      "wordsSha256": "6a4b2dc346d6d8b3b309818b6c8d292374f2f1031dbff72121a62cba1bdb9af0",
+      "recognizedWordCount": 18
+    },
+    "changedUnitCaseVariations": [
+      {
+        "row": 2,
+        "rendered": "шт",
+        "recognizedLiteral": "шТ"
+      }
+    ],
+    "changed": {
+      "recognizedRows": [
+        {
+          "name": "Шампунь Лес",
+          "quantity": "3",
+          "unit_label": "шт",
+          "unit_price": "350.00",
+          "line_total": "1050.00",
+          "price_kind": null,
+          "confidence": null
+        },
+        {
+          "name": "Крем для рук",
+          "quantity": "1",
+          "unit_label": "шТ",
+          "unit_price": "125.50",
+          "line_total": "125.50",
+          "price_kind": null,
+          "confidence": null
+        }
+      ],
+      "workerPid": 19015,
+      "wordsSha256": "49e9afa633219b1063c63269a43cac283ffbe42b6ce99e63d7a05b5e989115e5",
+      "recognizedWordCount": 18
+    },
+    "englishUnitCaseVariations": [],
+    "english": {
+      "recognizedRows": [
+        {
+          "name": "Cedar Shampoo",
+          "quantity": "2",
+          "unit_label": "pcs",
+          "unit_price": "350.00",
+          "line_total": "700.00",
+          "price_kind": null,
+          "confidence": null
+        },
+        {
+          "name": "Hand Cream",
+          "quantity": "1",
+          "unit_label": "pcs",
+          "unit_price": "125.50",
+          "line_total": "125.50",
+          "price_kind": null,
+          "confidence": null
+        }
+      ],
+      "workerPid": 19017,
+      "wordsSha256": "5175c4df6f20d018ba45d32e04f4f07f5ad36ba615d74366af7e93c52e6e1cfa",
+      "recognizedWordCount": 17
+    },
+    "blank": {
+      "actualNativeWorker": true,
+      "error": "goods_photo_ocr_table_unsupported",
+      "words": 0
+    },
+    "malformed": {
+      "error": "goods_photo_image_invalid",
+      "nativeWorkers": 0
+    }
+  },
+  "workers": [
+    {
+      "case": "russian",
+      "pid": 19013,
+      "stdoutBytes": 2737,
+      "stderrBytes": 0,
+      "exited": true,
+      "exitCode": 0,
+      "signal": null,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "6a4b2dc346d6d8b3b309818b6c8d292374f2f1031dbff72121a62cba1bdb9af0",
+      "words": {
+        "contract": "maya.local-vision.words/1",
+        "image_height": 440,
+        "image_width": 1800,
+        "languages": [
+          "ru-RU",
+          "en-US"
+        ],
+        "revision": 3,
+        "words": [
+          {
+            "confidence": 0.5,
+            "height": 0.08994001908735794,
+            "left": 0.03144914312379934,
+            "text": "Товар",
+            "top": 0.1551534689942139,
+            "width": 0.06813474443223741
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.1196272243152966,
+            "left": 0.031769510602303166,
+            "text": "Шампунь",
+            "top": 0.4412627754523657,
+            "width": 0.10250412835015192
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.1166627190329812,
+            "left": 0.1372426653043919,
+            "text": "Кедр",
+            "top": 0.4480268847289418,
+            "width": 0.05627852121988933
+          },
+          {
+            "confidence": 1,
+            "height": 0.10252337889237839,
+            "left": 0.033357989289397004,
+            "text": "Крем",
+            "top": 0.7422849100156593,
+            "width": 0.05514575958251953
+          },
+          {
+            "confidence": 1,
+            "height": 0.10103633187033911,
+            "left": 0.0914142469015381,
+            "text": "для",
+            "top": 0.7436937520375029,
+            "width": 0.04292202843560114
+          },
+          {
+            "confidence": 1,
+            "height": 0.10219481208107695,
+            "left": 0.13724504749019625,
+            "text": "рук",
+            "top": 0.744805991686115,
+            "width": 0.04160626305474174
+          },
+          {
+            "confidence": 1,
+            "height": 0.10119047164917006,
+            "left": 0.4040697677528537,
+            "text": "Кол-во",
+            "top": 0.14880952535738778,
+            "width": 0.07558139377170137
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.08928571301020416,
+            "left": 0.40406976750415285,
+            "text": "2",
+            "top": 0.4464285714285714,
+            "width": 0.017441860215946847
+          },
+          {
+            "confidence": 1,
+            "height": 0.08333333124999998,
+            "left": 0.4055232558866279,
+            "text": "1",
+            "top": 0.7440476190476191,
+            "width": 0.013081395021802389
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.10714285590431916,
+            "left": 0.533430232653785,
+            "text": "Ед",
+            "top": 0.15476190627403086,
+            "width": 0.03197674433390296
+          },
+          {
+            "confidence": 0.30000001192092896,
+            "height": 0.07738095196810635,
+            "left": 0.5334302323388624,
+            "text": "шт",
+            "top": 0.45833333298703527,
+            "width": 0.03197674433390296
+          },
+          {
+            "confidence": 0.30000001192092896,
+            "height": 0.08928571180863809,
+            "left": 0.5319767441701727,
+            "text": "шТ",
+            "top": 0.7559523829349667,
+            "width": 0.03343023300170889
+          },
+          {
+            "confidence": 1,
+            "height": 0.13559321490201082,
+            "left": 0.6416666658854167,
+            "text": "Цена",
+            "top": 0.13559322136255392,
+            "width": 0.0708333333333333
+          },
+          {
+            "confidence": 1,
+            "height": 0.13559321490201082,
+            "left": 0.6416666658333333,
+            "text": "350.00",
+            "top": 0.4237288172947572,
+            "width": 0.08333333333333337
+          },
+          {
+            "confidence": 1,
+            "height": 0.15254237435080786,
+            "left": 0.6416666655729166,
+            "text": "125.50",
+            "top": 0.7118644071042571,
+            "width": 0.08750000000000002
+          },
+          {
+            "confidence": 1,
+            "height": 0.09924482865767048,
+            "left": 0.8108953121813364,
+            "text": "Сумма",
+            "top": 0.15275853821705365,
+            "width": 0.07443030463324662
+          },
+          {
+            "confidence": 1,
+            "height": 0.11904761574485079,
+            "left": 0.8095930242104947,
+            "text": "700.00",
+            "top": 0.44047619297791474,
+            "width": 0.07558139377170148
+          },
+          {
+            "confidence": 1,
+            "height": 0.11689761768687845,
+            "left": 0.8094218525246888,
+            "text": "125.50",
+            "top": 0.7361940489982672,
+            "width": 0.07447024875217012
+          }
+        ]
+      }
+    },
+    {
+      "case": "changed",
+      "pid": 19015,
+      "stdoutBytes": 2744,
+      "stderrBytes": 0,
+      "exited": true,
+      "exitCode": 0,
+      "signal": null,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "49e9afa633219b1063c63269a43cac283ffbe42b6ce99e63d7a05b5e989115e5",
+      "words": {
+        "contract": "maya.local-vision.words/1",
+        "image_height": 440,
+        "image_width": 1800,
+        "languages": [
+          "ru-RU",
+          "en-US"
+        ],
+        "revision": 3,
+        "words": [
+          {
+            "confidence": 0.5,
+            "height": 0.09381125190041284,
+            "left": 0.031563234470923664,
+            "text": "Товар",
+            "top": 0.15234519487144815,
+            "width": 0.06786290486653646
+          },
+          {
+            "confidence": 1,
+            "height": 0.10227272727272729,
+            "left": 0.033430233839562395,
+            "text": "Шампунь",
+            "top": 0.44545454545454544,
+            "width": 0.09990309821234808
+          },
+          {
+            "confidence": 1,
+            "height": 0.10227272727272729,
+            "left": 0.13645833286578918,
+            "text": "Лес",
+            "top": 0.44545454545454544,
+            "width": 0.045227711995442704
+          },
+          {
+            "confidence": 1,
+            "height": 0.10250040401111948,
+            "left": 0.033359210608931565,
+            "text": "Крем",
+            "top": 0.7423153271543546,
+            "width": 0.055143267313639326
+          },
+          {
+            "confidence": 1,
+            "height": 0.10101847215132287,
+            "left": 0.09141548092625372,
+            "text": "для",
+            "top": 0.7436998440083583,
+            "width": 0.042919548882378464
+          },
+          {
+            "confidence": 1,
+            "height": 0.10217750722711738,
+            "left": 0.13724633918597362,
+            "text": "рук",
+            "top": 0.7447928809549947,
+            "width": 0.041603749593098954
+          },
+          {
+            "confidence": 1,
+            "height": 0.10119047164917006,
+            "left": 0.4040697677528537,
+            "text": "Кол-во",
+            "top": 0.14880952535738778,
+            "width": 0.07558139377170137
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.09523809365079361,
+            "left": 0.4040697676598837,
+            "text": "3",
+            "top": 0.446428573015873,
+            "width": 0.017441860174418622
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.08928571205357161,
+            "left": 0.4055232558866279,
+            "text": "1",
+            "top": 0.7440476190476191,
+            "width": 0.013081395021802389
+          },
+          {
+            "confidence": 0.5,
+            "height": 0.10714285590431916,
+            "left": 0.533430232653785,
+            "text": "Ед",
+            "top": 0.15476190627403086,
+            "width": 0.03197674433390296
+          },
+          {
+            "confidence": 0.30000001192092896,
+            "height": 0.07738095196810635,
+            "left": 0.5334302323388624,
+            "text": "шт",
+            "top": 0.45833333298703527,
+            "width": 0.03197674433390296
+          },
+          {
+            "confidence": 0.30000001192092896,
+            "height": 0.08928571180863809,
+            "left": 0.5319767441701727,
+            "text": "шТ",
+            "top": 0.7559523829349667,
+            "width": 0.03343023300170889
+          },
+          {
+            "confidence": 1,
+            "height": 0.13559321490201082,
+            "left": 0.6416666658854167,
+            "text": "Цена",
+            "top": 0.13559322136255392,
+            "width": 0.0708333333333333
+          },
+          {
+            "confidence": 1,
+            "height": 0.13559321490201082,
+            "left": 0.6416666658333333,
+            "text": "350.00",
+            "top": 0.4237288172947572,
+            "width": 0.08333333333333337
+          },
+          {
+            "confidence": 1,
+            "height": 0.15254237435080786,
+            "left": 0.6416666655729166,
+            "text": "125.50",
+            "top": 0.7118644071042571,
+            "width": 0.08750000000000002
+          },
+          {
+            "confidence": 1,
+            "height": 0.09924482865767048,
+            "left": 0.8108953121813364,
+            "text": "Сумма",
+            "top": 0.15275853821705365,
+            "width": 0.07443030463324662
+          },
+          {
+            "confidence": 1,
+            "height": 0.12038310657848017,
+            "left": 0.8095396066350483,
+            "text": "1050.00",
+            "top": 0.43980844769861793,
+            "width": 0.0887696244981554
+          },
+          {
+            "confidence": 1,
+            "height": 0.11470995816317464,
+            "left": 0.8095197164625243,
+            "text": "125.50",
+            "top": 0.7372878787647377,
+            "width": 0.07427452087402342
+          }
+        ]
+      }
+    },
+    {
+      "case": "english",
+      "pid": 19017,
+      "stdoutBytes": 2502,
+      "stderrBytes": 0,
+      "exited": true,
+      "exitCode": 0,
+      "signal": null,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "5175c4df6f20d018ba45d32e04f4f07f5ad36ba615d74366af7e93c52e6e1cfa",
+      "words": {
+        "contract": "maya.local-vision.words/1",
+        "image_height": 440,
+        "image_width": 1800,
+        "languages": [
+          "ru-RU",
+          "en-US"
+        ],
+        "revision": 3,
+        "words": [
+          {
+            "confidence": 1,
+            "height": 0.09769743139093567,
+            "left": 0.03337140332641809,
+            "text": "Description",
+            "top": 0.1535322368633899,
+            "width": 0.11785021464029949
+          },
+          {
+            "confidence": 1,
+            "height": 0.10227272727272729,
+            "left": 0.033430231720286134,
+            "text": "Cedar",
+            "top": 0.44545454545454544,
+            "width": 0.0655281024509006
+          },
+          {
+            "confidence": 1,
+            "height": 0.10227272727272729,
+            "left": 0.10208333457252501,
+            "text": "Shampoo",
+            "top": 0.44545454545454544,
+            "width": 0.10285852220323351
+          },
+          {
+            "confidence": 1,
+            "height": 0.09090909090909094,
+            "left": 0.03343023424653912,
+            "text": "Hand",
+            "top": 0.7431818181818182,
+            "width": 0.05823643154568143
+          },
+          {
+            "confidence": 1,
+            "height": 0.09090909090909094,
+            "left": 0.09444444558420266,
+            "text": "Cream",
+            "top": 0.7431818181818182,
+            "width": 0.07270671420627171
+          },
+          {
+            "confidence": 1,
+            "height": 0.11904761574485079,
+            "left": 0.40406976737893274,
+            "text": "Qty",
+            "top": 0.1428571438471513,
+            "width": 0.04069767422146264
+          },
+          {
+            "confidence": 1,
+            "height": 0.0892857127976191,
+            "left": 0.4040697675145349,
+            "text": "2",
+            "top": 0.4464285714285714,
+            "width": 0.017441860174418622
+          },
+          {
+            "confidence": 1,
+            "height": 0.07738095109126997,
+            "left": 0.4055232558381783,
+            "text": "1",
+            "top": 0.75,
+            "width": 0.01162790678294573
+          },
+          {
+            "confidence": 1,
+            "height": 0.0952380960637873,
+            "left": 0.5319767433055946,
+            "text": "Unit",
+            "top": 0.14880952369429679,
+            "width": 0.046511628892686674
+          },
+          {
+            "confidence": 1,
+            "height": 0.0952380960637873,
+            "left": 0.5319767443759493,
+            "text": "pcs",
+            "top": 0.4583333334495878,
+            "width": 0.03924418555365683
+          },
+          {
+            "confidence": 1,
+            "height": 0.10119047164916994,
+            "left": 0.5319767443805636,
+            "text": "pcs",
+            "top": 0.750000001547864,
+            "width": 0.03924418555365661
+          },
+          {
+            "confidence": 1,
+            "height": 0.11864406412298034,
+            "left": 0.6416666672222222,
+            "text": "Price",
+            "top": 0.1355932214695833,
+            "width": 0.06666666666666665
+          },
+          {
+            "confidence": 1,
+            "height": 0.13559321490201082,
+            "left": 0.6416666658333333,
+            "text": "350.00",
+            "top": 0.4237288172947572,
+            "width": 0.08333333333333337
+          },
+          {
+            "confidence": 1,
+            "height": 0.15254237435080786,
+            "left": 0.6416666667916666,
+            "text": "125.50",
+            "top": 0.7118644045195114,
+            "width": 0.08750000000000002
+          },
+          {
+            "confidence": 1,
+            "height": 0.0892857118086382,
+            "left": 0.8110465131787363,
+            "text": "Amount",
+            "top": 0.14880952430401428,
+            "width": 0.08284883287217881
+          },
+          {
+            "confidence": 1,
+            "height": 0.12566701715642747,
+            "left": 0.8092882892431273,
+            "text": "700.00",
+            "top": 0.43716649225732174,
+            "width": 0.07619086371527783
+          },
+          {
+            "confidence": 1,
+            "height": 0.1138066118413752,
+            "left": 0.8095606184938041,
+            "text": "125.50",
+            "top": 0.7377395519275302,
+            "width": 0.07419271681043837
+          }
+        ]
+      }
+    },
+    {
+      "case": "blank",
+      "pid": 19019,
+      "stdoutBytes": 133,
+      "stderrBytes": 0,
+      "exited": true,
+      "exitCode": 0,
+      "signal": null,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "030a54be666817b328fd56df40ac982253dc55a2fb1b6a26000ac0d2988e61af",
+      "words": {
+        "contract": "maya.local-vision.words/1",
+        "image_height": 440,
+        "image_width": 1800,
+        "languages": [
+          "ru-RU",
+          "en-US"
+        ],
+        "revision": 3,
+        "words": []
+      }
+    }
+  ],
+  "unexpectedNetworkCalls": 0,
+  "fixtures": {
+    "russian": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/russian.png",
+      "sha256": "c1a15056196967887b421e612893b3669af21f8b7a9c3594af1fa0790a3f43e9",
+      "bytes": 29762,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "changed": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/changed.png",
+      "sha256": "2a3c946532c15d0764794cd531423692d0586beee54f85d4ca622ab1fd2d7ce1",
+      "bytes": 30184,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "english": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/english.png",
+      "sha256": "e85fd523b6c3d4e8f127268871c9580057618f823afbd30319d9c18363ca08ad",
+      "bytes": 33735,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "blank": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/blank.png",
+      "sha256": "c4a49268203cf4633934210dffa4e024aa8f5f788cb99f112869ab9a12966aa1",
+      "bytes": 3405,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    }
+  },
+  "dynamicPixelsChangeWordsAndRows": true,
+  "sourceUnchanged": true
+}

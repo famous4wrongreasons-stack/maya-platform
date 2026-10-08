@@ -1,0 +1,14 @@
+PASS src/config/runtime-config.spec.ts
+PASS src/ai-tools/goods-photo-ocr-rows.spec.ts
+PASS src/ai-tools/goods-photo-parser.service.spec.ts
+PASS src/ai-tools/goods-photo.controller.spec.ts
+PASS src/ai-tools/goods-photo-runtime.spec.ts
+PASS src/ai-tools/goods-photo.service.spec.ts
+PASS src/ai-tools/goods-photo.contract.spec.ts
+
+Test Suites: 7 passed, 7 total
+Tests:       129 passed, 129 total
+Snapshots:   0 total
+Time:        1.035 s
+Ran all test suites within paths "src/ai-tools/goods-photo.controller.spec.ts", "src/ai-tools/goods-photo.contract.spec.ts", "src/ai-tools/goods-photo.service.spec.ts", "src/ai-tools/goods-photo-runtime.spec.ts", "src/ai-tools/goods-photo-parser.service.spec.ts", "src/ai-tools/goods-photo-ocr-rows.spec.ts", "src/config/runtime-config.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-actual-ocr-20261008/local-attempt1/targeted-unit.json

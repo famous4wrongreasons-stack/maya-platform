@@ -1,0 +1,149 @@
+{
+  "actual-attempt1": {
+    "status": "failed",
+    "sourceEntries": 11,
+    "sourceMismatches": [],
+    "fixtures": [
+      {
+        "case": "russian",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "changed",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "english",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "blank",
+        "hashMatches": true,
+        "sizeMatches": true
+      }
+    ],
+    "workers": [
+      {
+        "case": "russian",
+        "pid": 14293,
+        "absentNow": true,
+        "exitCode": 2,
+        "wordCount": 0
+      }
+    ],
+    "artifacts": {
+      "actual-parser.json": "269a51d0f230ad18725f2d6b204fbfae8e2bb73fc749cfeddbf9764c4426c347",
+      "source-hashes.json": "89c9e55077f232d8e1cc0addafb156d0b8b2bb79fb9759828fd7da81c43e8c84",
+      "fixtures/manifest.json": "c7e2ac54587defe8af913bb9c2ad28fe99269e8684b39fccd4436d58c37c0847"
+    },
+    "failure": "goods_photo_ocr_unavailable"
+  },
+  "actual-attempt2": {
+    "status": "failed",
+    "sourceEntries": 11,
+    "sourceMismatches": [],
+    "fixtures": [
+      {
+        "case": "russian",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "changed",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "english",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "blank",
+        "hashMatches": true,
+        "sizeMatches": true
+      }
+    ],
+    "workers": [
+      {
+        "case": "russian",
+        "pid": 18428,
+        "absentNow": true,
+        "exitCode": 0,
+        "wordCount": 18
+      }
+    ],
+    "artifacts": {
+      "actual-parser.json": "877eecbeaab17322424aa2b2501198920e73188e92cf58c852ae7fcb0f51a2a3",
+      "source-hashes.json": "89c9e55077f232d8e1cc0addafb156d0b8b2bb79fb9759828fd7da81c43e8c84",
+      "fixtures/manifest.json": "a1ee8167123bcc43d0a5d54ba7774bed537e7f50582f2c50570fbc0153cd31bc"
+    },
+    "failure": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    lines: [\n      {\n        confidence: null,\n        line_total: '700.00',\n...\n        quantity: '1',\n+       unit_label: 'шТ',\n-       unit_label: 'шт',\n        unit_price: '125.50'\n      }\n    ]\n  }\n"
+  },
+  "actual-attempt3": {
+    "status": "passed",
+    "sourceEntries": 11,
+    "sourceMismatches": [],
+    "fixtures": [
+      {
+        "case": "russian",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "changed",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "english",
+        "hashMatches": true,
+        "sizeMatches": true
+      },
+      {
+        "case": "blank",
+        "hashMatches": true,
+        "sizeMatches": true
+      }
+    ],
+    "workers": [
+      {
+        "case": "russian",
+        "pid": 19013,
+        "absentNow": true,
+        "exitCode": 0,
+        "wordCount": 18
+      },
+      {
+        "case": "changed",
+        "pid": 19015,
+        "absentNow": true,
+        "exitCode": 0,
+        "wordCount": 18
+      },
+      {
+        "case": "english",
+        "pid": 19017,
+        "absentNow": true,
+        "exitCode": 0,
+        "wordCount": 17
+      },
+      {
+        "case": "blank",
+        "pid": 19019,
+        "absentNow": true,
+        "exitCode": 0,
+        "wordCount": 0
+      }
+    ],
+    "artifacts": {
+      "actual-parser.json": "ffd40e32e3bf806f66102302325dc9f3ed17b27cdad3c33b99a13c415b3cdadc",
+      "source-hashes.json": "f756b027d5834968ff227101a6969f9a4b41788def5cf39fcc9b9fad75fc9e28",
+      "fixtures/manifest.json": "adab4df24e8e1e7292a415822f5f29a7e81d02f74b20118b711b2f77e0e7a753"
+    },
+    "failure": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "frozen_at": "2026-10-08T12:44:32.731668+00:00",
+  "scope": "Finite current-carrier OCR preview errors only",
+  "verification": "Scoped range formatting; no tests, gates, services or browser run by this agent",
+  "tests_added": {
+    "shell": "3 tests: exact status/message matrix (18 cases), non-preview preservation (14 combinations), own-data-property refusal",
+    "react": "2 tests: busy/failed text with inert render; unsupported five-header scope"
+  },
+  "files": {
+    "maya-chat-shell/src/net/types.ts": "a28fc5315a5f8493640b193000cfe03d2afe5bb52b7c18993ddf78645e4c3e45",
+    "maya-chat-shell/src/net/client.ts": "6260f9d15f2ae7f5b81ca526ee4240349f9f6e0c8954c9374223469cee6e128b",
+    "maya-chat-shell/test/goods-photo-net.test.mjs": "575f013a9d8b46bbec553f96b08e2b646625f194566342170b36bbb25c68da0a",
+    "maya-carrier-react/src/chat/GoodsPhotoPanel.tsx": "890f53b2e75088f426e2cfa78cf6c9a3e38de12bb834351acca66ad835c615fb",
+    "maya-carrier-react/test/goods-photo.test.mjs": "e06643af13be6df9f8ef7687e13d3aeaf74aba3230bf20b442bd87c3ae54e456"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "syntheticDiagnosticOnly": true,
+  "sourceSha256": "7e6367ff658f781ab356a0f8a64e8e1a61d27e0edf7146d26e615093f5bbfd5b",
+  "status": "FAIL",
+  "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- null\n"
+}

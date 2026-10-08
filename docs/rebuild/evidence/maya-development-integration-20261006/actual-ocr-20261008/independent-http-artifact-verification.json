@@ -1,0 +1,102 @@
+{
+  "candidateCommit": "b56ea887fcda770fb988db0e69904b7e95029242",
+  "totalSourceEntries": 2001,
+  "currentMismatches": [],
+  "gitBlobMatches": 1976,
+  "gitMismatches": [],
+  "generatedNonGitPaths": [
+    "maya-carrier-react/dist/web/icons/maya-192.png",
+    "maya-carrier-react/dist/web/icons/maya-512-maskable.png",
+    "maya-carrier-react/dist/web/icons/maya-512.png",
+    "maya-carrier-react/dist/web/icons/maya-apple-180.png",
+    "maya-carrier-react/dist/web/index.html",
+    "maya-carrier-react/dist/web/m/CCNOW2BC/main.js",
+    "maya-carrier-react/dist/web/manifest.webmanifest",
+    "maya-carrier-react/dist/web/styles.css",
+    "maya-saas-backend/dist/ocr/goods-photo-vision"
+  ],
+  "externalEntries": 16,
+  "capturedHarnessMatches": {
+    "loopback-only.cjs": true,
+    "owned-stage.mjs": true,
+    "native-proof.mjs": true,
+    "jest-proof.json": true,
+    "actual-ocr-browser-guard.test.mjs": true,
+    "README.md": true,
+    "tsconfig.proof.json": true,
+    "actual-ocr-browser.mjs": true,
+    "actual-ocr.probe-spec.ts": true,
+    "actual-ocr-browser-guard.mjs": true,
+    "fixed-input-hashes.json": true
+  },
+  "fixedNativeInputsCount": 8,
+  "fixedNativeInputMismatches": [],
+  "manifestSourceDigestMatches": true,
+  "ownedGroupsAbsentNow": {
+    "migrations": true,
+    "actual-ocr-browser": true
+  },
+  "postmasterPidAbsentNow": true,
+  "localStageBinding": {
+    "5": {
+      "status": "FAIL",
+      "failures": [
+        {
+          "error": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n"
+        }
+      ],
+      "sourceCount": 16,
+      "gitMismatches": [
+        "maya-chat-shell/dist/manifest.json",
+        "maya-saas-backend/src/ai-tools/goods-photo-parser.service.spec.ts"
+      ],
+      "notInCommit": [],
+      "changedVsPrior": []
+    },
+    "6": {
+      "status": "FAIL",
+      "failures": [
+        {
+          "error": "canonical_owned_stage_exit_2_null\n\n2 !== 0\n"
+        }
+      ],
+      "sourceCount": 16,
+      "gitMismatches": [
+        "maya-chat-shell/dist/manifest.json"
+      ],
+      "notInCommit": [],
+      "changedVsPrior": [
+        "maya-saas-backend/src/ai-tools/goods-photo-parser.service.spec.ts"
+      ]
+    },
+    "7": {
+      "status": "PASS",
+      "failures": [],
+      "sourceCount": 16,
+      "gitMismatches": [
+        "maya-chat-shell/dist/manifest.json"
+      ],
+      "notInCommit": [],
+      "changedVsPrior": []
+    }
+  },
+  "artifactSha256": {
+    "manifest.json": "3d00558beb1866ee29ef5dab890d1cbca3c6287449da3b7fb08a3e6710324632",
+    "source-hashes.json": "ce2ea3b6f86f01a9aa73217d6172aebab5615240880a8f1af34aec4c3d68c559",
+    "actual-ocr-http.json": "071e81186096da943eb0619d065c9c6c10f51d5be7901d5b1ef4efa5414573de",
+    "browser-jest.json": "d08d9fee1108541cc5d27f116c584edb164b9a11e8615718b5f9ccbced14557d",
+    "output/playwright/browser.json": "9601caa52eb38b70acfc325233b678e245f6307a9bc51c45808013a75780380c"
+  },
+  "executionContextSha256": "af751e27e3735aaf61d0d982e283712a10e80da0d8ecb73c645834eaeb080282",
+  "launcherBindings": {
+    "launcherSha256": true,
+    "ownedSupervisorSha256": true,
+    "fenceSha256": true
+  },
+  "separatelyPackagedShellManifest": {
+    "path": "maya-chat-shell/dist/manifest.json",
+    "sha256": "24b3793fddb0310ea29b2bf91872d3e518a4cbca5c499dd2109ba3b2b9df87ee",
+    "gitCandidateMatch": false,
+    "parentPlan": "Preserve exact generated metadata in separate evidence/docs checkpoint commit; no changed build bytes or rerun claimed."
+  }
+}

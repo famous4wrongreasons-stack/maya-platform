@@ -1,0 +1,13 @@
+{
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-vision.swift": "342062af23e3d8288a02e599806472ff1c81c2b1b8742943ff85e75b46cc6281",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/build-goods-photo-ocr.mjs": "39e20e6de5d9ab8623598d98eb175d2734ddd603468097f86dc30421f5a470eb",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts": "3d2ae04abb77b4600d673b378f1320856f01c7d75492da1c3bcdcdd82285e733",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts": "7570adbcb5bc66940d9134228e55ad63cc45c9c2a85daa9eca4b2fa2921c8f42",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo.service.ts": "b92edbcb6506e72267eb19aad049ebe42a6ca868ac8649a7c3d5892636cbe68c",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json": "cb55b8a9ea127e20d8ecb630485f14851263ebba06282fdf4bbd0cd978e596ae",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package-lock.json": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/tsconfig.json": "e842d82e49eb9d08d26f9afd42f47cf56f916d6348ccfec37c11ce4c6642cb1e",
+  "/tmp/maya-actual-ocr-20261008/actual-parser-proof.mjs": "5bbcd2a1db731d1dc6ab379faf7ee17e90ab492af9d858dc16a2ce46cfc720dd",
+  "/tmp/maya-actual-ocr-20261008/synthetic-images.mjs": "713e546de93964165413b7297a2c6c415ec6784544083c2067ae6c5a83a13b7e",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/dist/ocr/goods-photo-vision": "a5b6069f56ca6433a6fb8c0dc778a57da7e1b8d40c274a146ed44530d434217b"
+}

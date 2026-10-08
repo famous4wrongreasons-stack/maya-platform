@@ -1,0 +1,11 @@
+✔ admits only the finite upload and existing auth/history reads (0.467125ms)
+✔ rejects business transitions and expanded resolve scope (0.123416ms)
+✔ rejects foreign origins, emails, query strings and unbounded upload metadata (0.097125ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 29.539166

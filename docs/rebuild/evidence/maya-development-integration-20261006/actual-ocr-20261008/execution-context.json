@@ -1,0 +1,48 @@
+{
+  "contract": "maya.local-ocr-execution-context/1",
+  "recordedBy": "root from actual exec tool outcomes",
+  "runtimeCodeModifiedForContext": false,
+  "attempts": [
+    {
+      "output": "actual-attempt1",
+      "sandbox_permissions": "use_default",
+      "outcome": "native exit2, no words"
+    },
+    {
+      "output": "diagnostic-default-attempt1.json",
+      "sandbox_permissions": "use_default",
+      "outcome": "Foundation._GenericObjCError code0 during perform"
+    },
+    {
+      "output": "diagnostic-cpu-attempt1.json",
+      "sandbox_permissions": "use_default",
+      "outcome": "supported CPU selected; same GenericObjCError during perform"
+    },
+    {
+      "output": "actual-attempt2",
+      "sandbox_permissions": "require_escalated",
+      "toolAllowedExecution": true,
+      "outcome": "real RU words and rows; strict unit-label case assertion failed"
+    },
+    {
+      "output": "actual-attempt3",
+      "sandbox_permissions": "require_escalated",
+      "toolAllowedExecution": true,
+      "outcome": "PASS; real RU/changed RU/EN/blank workers, busy+malformed no extra workers",
+      "execSessionId": 69919,
+      "execExitCode": 0
+    },
+    {
+      "output": "http-browser-attempt1",
+      "sandbox_permissions": "require_escalated",
+      "toolAllowedExecution": true,
+      "outcome": "PASS; six current React/HTTP checkpoints, real local OCR; own PG stopped and groups absent",
+      "execSessionId": 21636,
+      "execExitCode": 0,
+      "candidateCommit": "b56ea887fcda770fb988db0e69904b7e95029242"
+    }
+  ],
+  "successfulCommand": "node --max-old-space-size=512 /tmp/maya-actual-ocr-20261008/actual-parser-proof.mjs --run --output=/tmp/maya-actual-ocr-20261008/actual-attempt3",
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+  "qualification": "System-context local macOS execution was allowed by the tool approval mechanism. Underlying framework error alone does not identify a specific denied OS entitlement. No OS-wide network measurement; Node hooks only. No runtime CPU fallback or sandbox workaround added."
+}

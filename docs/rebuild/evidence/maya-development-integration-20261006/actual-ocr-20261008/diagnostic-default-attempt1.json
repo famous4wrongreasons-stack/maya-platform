@@ -1,0 +1,13 @@
+{
+  "syntheticOnly": true,
+  "mode": "default",
+  "originalSha256": "c1a15056196967887b421e612893b3669af21f8b7a9c3594af1fa0790a3f43e9",
+  "normalizedSha256": "07f7771f188844605925c775f0c984522603cd3af7d749efbfa8f6e5976b37e5",
+  "binarySha256": "060240d45097e24194dcc35f42b604c40ca2731713a765966cacdf9e73c00592",
+  "pid": 18096,
+  "closed": true,
+  "stdout": "",
+  "stderr": "{\"contract\":\"maya.synthetic-vision-diagnostic\\/1\",\"details\":{\"bytes\":29953,\"cpuRequested\":false,\"sha256\":\"07f7771f188844605925c775f0c984522603cd3af7d749efbfa8f6e5976b37e5\"},\"event\":\"synthetic_input\"}\n{\"contract\":\"maya.synthetic-vision-diagnostic\\/1\",\"details\":{\"code\":0,\"description\":\"The operation couldn’t be completed. (Foundation._GenericObjCError error 0.)\",\"domain\":\"Foundation._GenericObjCError\"},\"event\":\"perform_error\"}\ngoods_photo_ocr_recognition_failed\n",
+  "exitCode": 2,
+  "signal": null
+}

@@ -1,0 +1,294 @@
+{
+  "contract": "maya.actual-ocr-browser-preview/1",
+  "status": "passed",
+  "syntheticImages": true,
+  "scriptedOcr": false,
+  "parserStubbed": false,
+  "realDocumentAcceptance": false,
+  "deploymentAcceptance": false,
+  "snapshots": {
+    "opened": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nНапишите MAYA, что нужно сделать, — ответ появится здесь.\nТовар по фото накладной\n\nВыберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.\n\nФото накладной или заказ-наряда\nОдин файл PNG, JPEG или WebP, до 2 МиБ. Фото не сохраняется.\n\nЗакрыть и очистить поля фото\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Приватность и данные"
+        },
+        {
+          "tag": "INPUT",
+          "name": "Фото накладной или заказ-нарядаОдин файл PNG, JPEG или WebP, до 2 МиБ. Фото не сохраняется."
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть и очистить поля фото"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "uploaded": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nНапишите MAYA, что нужно сделать, — ответ появится здесь.\nТовар по фото накладной\n\nВыберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.\n\nПредварительные строки\n\nКаждую строку нужно сверить с документом. Смысл цены может быть не определён.\n\nШампунь Кедр · количество: 2 · единица: шт\n\nПоле цены: 350.00. Смысл: не определён. Отдельное поле суммы строки: 700.00.\n\nВыбрать строку 1\nКрем для рук · количество: 1 · единица: шТ\n\nПоле цены: 125.50. Смысл: не определён. Отдельное поле суммы строки: 125.50.\n\nВыбрать строку 2\nЗакрыть и очистить поля фото\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Приватность и данные"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Выбрать строку 1"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Выбрать строку 2"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть и очистить поля фото"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "changed": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nНапишите MAYA, что нужно сделать, — ответ появится здесь.\nТовар по фото накладной\n\nВыберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.\n\nПредварительные строки\n\nКаждую строку нужно сверить с документом. Смысл цены может быть не определён.\n\nШампунь Лес · количество: 3 · единица: шт\n\nПоле цены: 350.00. Смысл: не определён. Отдельное поле суммы строки: 1050.00.\n\nВыбрать строку 1\nКрем для рук · количество: 1 · единица: шТ\n\nПоле цены: 125.50. Смысл: не определён. Отдельное поле суммы строки: 125.50.\n\nВыбрать строку 2\nЗакрыть и очистить поля фото\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Приватность и данные"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Выбрать строку 1"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Выбрать строку 2"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть и очистить поля фото"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "blank": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nНапишите MAYA, что нужно сделать, — ответ появится здесь.\nТовар по фото накладной\n\nВыберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.\n\nФото накладной или заказ-наряда\nОдин файл PNG, JPEG или WebP, до 2 МиБ. Фото не сохраняется.\n\nПоддерживается только простая таблица с пятью заголовками: «Наименование», «Количество», «Ед.», «Цена», «Сумма». Строки не извлечены.\n\nЗакрыть и очистить поля фото\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Приватность и данные"
+        },
+        {
+          "tag": "INPUT",
+          "name": "Фото накладной или заказ-нарядаОдин файл PNG, JPEG или WebP, до 2 МиБ. Фото не сохраняется."
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть и очистить поля фото"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "malformed": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nНапишите MAYA, что нужно сделать, — ответ появится здесь.\nТовар по фото накладной\n\nВыберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.\n\nФото накладной или заказ-наряда\nОдин файл PNG, JPEG или WebP, до 2 МиБ. Фото не сохраняется.\n\nНужен один файл PNG, JPEG или WebP до 2 МиБ.\n\nЗакрыть и очистить поля фото\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Приватность и данные"
+        },
+        {
+          "tag": "INPUT",
+          "name": "Фото накладной или заказ-нарядаОдин файл PNG, JPEG или WebP, до 2 МиБ. Фото не сохраняется."
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Закрыть и очистить поля фото"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    },
+    "revoked": {
+      "text": "MAYA\nВход в MAYA\n\nНайдите свой салон и продолжите через Telegram.\n\nНазвание салона\nНайти салон\nВойти по email\n\nСессия завершена — войдите снова.",
+      "controls": [
+        {
+          "tag": "TEXTAREA",
+          "name": "Название салона"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Найти салон"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Войти по email"
+        }
+      ]
+    }
+  },
+  "observations": {
+    "explicitUploads": 5,
+    "noAutomaticMatching": true,
+    "noReceiptPreparation": true,
+    "noApprovalOrAE": true,
+    "preRequestRevocation": true,
+    "inFlightRevocationClaim": false,
+    "nativeImages": [
+      "russian",
+      "changed",
+      "blank"
+    ]
+  },
+  "carrierOrigin": "http://127.0.0.1:52913",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/CCNOW2BC/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/goods/photo-preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/goods/photo-preview",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/goods/photo-preview",
+      "status": 400,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/goods/photo-preview",
+      "status": 400,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/goods/photo-preview",
+      "status": 401,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "status": 401,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

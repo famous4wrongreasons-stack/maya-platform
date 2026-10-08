@@ -1,0 +1,74 @@
+{
+  "contract": "maya.actual-ocr-owned-cluster/1",
+  "mode": "actual-current-react-http-postgres-local-native-ocr-preview",
+  "candidateCommit": "b56ea887fcda770fb988db0e69904b7e95029242",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "b18cec4890f9a8836ff5cdbfe2277a7366993cd7cc1393f0fa52f8d7b9c63ed6",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceSha256": "2c3d9814c173a2df185c14e015b126a5cba32138ccef5ad8fe0b46d8495b1a38",
+  "database": "maya_widget_gate_proof_c9occ_4b8ae3dabadb",
+  "port": 52901,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-actual-ocr-4CNHYS/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "actual-ocr-browser"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "ACTUAL_LOCAL_OCR_SYNTHETIC_PIXELS_ONLY_NO_REAL_DOCUMENT_OR_DEPLOYMENT_ACCEPTANCE",
+  "scratchHarnessGitBinding": false,
+  "businessActionsAdmitted": false,
+  "fixedNativeInputs": {
+    "/tmp/maya-actual-ocr-20261008/actual-attempt3/actual-parser.json": "ffd40e32e3bf806f66102302325dc9f3ed17b27cdad3c33b99a13c415b3cdadc",
+    "/tmp/maya-actual-ocr-20261008/actual-attempt3/source-hashes.json": "f756b027d5834968ff227101a6969f9a4b41788def5cf39fcc9b9fad75fc9e28",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/dist/ocr/goods-photo-vision": "a5b6069f56ca6433a6fb8c0dc778a57da7e1b8d40c274a146ed44530d434217b",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-vision.swift": "342062af23e3d8288a02e599806472ff1c81c2b1b8742943ff85e75b46cc6281",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/build-goods-photo-ocr.mjs": "39e20e6de5d9ab8623598d98eb175d2734ddd603468097f86dc30421f5a470eb",
+    "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/russian.png": "c1a15056196967887b421e612893b3669af21f8b7a9c3594af1fa0790a3f43e9",
+    "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/changed.png": "2a3c946532c15d0764794cd531423692d0586beee54f85d4ca622ab1fd2d7ce1",
+    "/tmp/maya-actual-ocr-20261008/actual-attempt3/fixtures/blank.png": "c4a49268203cf4633934210dffa4e024aa8f5f788cb99f112869ab9a12966aa1"
+  },
+  "currentReactAcceptance": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 24241,
+      "pgid": 24241,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "actual-ocr-browser": {
+      "detached": true,
+      "pid": 24253,
+      "pgid": 24253,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "commitAtEnd": "b56ea887fcda770fb988db0e69904b7e95029242",
+  "sourceUnchanged": true,
+  "harnessUnchanged": true,
+  "clusterStopped": true
+}

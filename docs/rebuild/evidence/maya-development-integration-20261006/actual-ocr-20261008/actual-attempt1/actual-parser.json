@@ -1,0 +1,72 @@
+{
+  "contract": "maya.actual-local-goods-photo-ocr-proof/1",
+  "status": "failed",
+  "qualification": "ACTUAL_PRODUCTION_PARSER_AND_APPLE_VISION_ON_SYNTHETIC_IMAGE_PIXELS",
+  "processObserver": "CALL_THROUGH_REAL_SPAWN_ARGUMENTS_AND_RESULTS_UNCHANGED",
+  "scriptedOcr": false,
+  "stubbedOcr": false,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "httpAcceptance": false,
+  "currentReactAcceptance": false,
+  "realDocumentAcceptance": false,
+  "deploymentAcceptance": false,
+  "binarySha256": "a5b6069f56ca6433a6fb8c0dc778a57da7e1b8d40c274a146ed44530d434217b",
+  "cases": {
+    "busy": {
+      "synchronousRefusal": "goods_photo_ocr_busy",
+      "extraWorkers": 0
+    }
+  },
+  "workers": [
+    {
+      "case": "russian",
+      "pid": 14293,
+      "stdoutBytes": 0,
+      "stderrBytes": 35,
+      "exited": true,
+      "exitCode": 2,
+      "signal": null,
+      "stderrSha256": "1b2f7c96cd93bf29bf8086451bc7d69044bc8de1316c46c46f15e40fb0910f7c",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "unexpectedNetworkCalls": 0,
+  "fixtures": {
+    "russian": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/russian.png",
+      "sha256": "c1a15056196967887b421e612893b3669af21f8b7a9c3594af1fa0790a3f43e9",
+      "bytes": 29762,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "changed": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/changed.png",
+      "sha256": "2a3c946532c15d0764794cd531423692d0586beee54f85d4ca622ab1fd2d7ce1",
+      "bytes": 30184,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "english": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/english.png",
+      "sha256": "e85fd523b6c3d4e8f127268871c9580057618f823afbd30319d9c18363ca08ad",
+      "bytes": 33735,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    },
+    "blank": {
+      "path": "/tmp/maya-actual-ocr-20261008/actual-attempt1/fixtures/blank.png",
+      "sha256": "c4a49268203cf4633934210dffa4e024aa8f5f788cb99f112869ab9a12966aa1",
+      "bytes": 3405,
+      "width": 1800,
+      "height": 440,
+      "synthetic": true
+    }
+  },
+  "failureCase": "russian",
+  "failure": "goods_photo_ocr_unavailable",
+  "failureStack": "ServiceUnavailableException: goods_photo_ocr_unavailable\n    at unavailable (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts:21:10)\n    at ChildProcess.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts:78:18)\n    at Object.onceWrapper (node:events:631:26)\n    at ChildProcess.emit (node:events:521:24)\n    at ChildProcess.emit (node:domain:489:12)\n    at maybeClose (node:internal/child_process:1124:16)\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:306:5)"
+}

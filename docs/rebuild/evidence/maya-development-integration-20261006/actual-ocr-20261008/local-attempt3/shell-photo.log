@@ -1,0 +1,16 @@
+✔ finite projections preserve exact decimals and strip source authority; malformed and drift refuse (1.571625ms)
+✔ certified approval with assistant correlation passes; wrong kind/capability and contradictory status refuse (0.769792ms)
+✔ multipart uses one fixed photo name, no manual boundary or original filename; default parser unavailable is explicit (9.19ms)
+✔ JSON DTOs stay closed, preserve current conversation and witness, and invalid input makes no request (0.86725ms)
+✔ review loss or malformed success stays unknown with no resend; 401 refresh is bounded (0.4315ms)
+✔ preview recognizes only exact OCR message and HTTP status pairs, with one request and no retry (1.547292ms)
+✔ OCR error names do not reclassify source reads or uncertain proposal preparation (1.225666ms)
+✔ preview error classification does not invoke message accessors or inherit a message (0.113209ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 75.821125

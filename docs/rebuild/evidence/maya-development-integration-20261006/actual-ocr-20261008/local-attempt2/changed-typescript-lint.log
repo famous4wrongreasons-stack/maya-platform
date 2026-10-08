@@ -1,0 +1,6 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.spec.ts
+  366:5  error  Using the `delete` operator with an array expression is unsafe  @typescript-eslint/no-array-delete
+
+✖ 1 problem (1 error, 0 warnings)
+

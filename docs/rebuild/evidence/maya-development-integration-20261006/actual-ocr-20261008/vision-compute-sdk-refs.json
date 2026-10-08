@@ -1,0 +1,37 @@
+{
+  "contract": "maya.vision-compute-sdk-refs/1",
+  "status": "READ_ONLY_NO_RUNTIME_CHANGE",
+  "refs": [
+    {
+      "path": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Vision.framework/Headers/VNRequest.h",
+      "sha256": "bce33196f5f3ccec1d486f03d8ab18ab014defb3cbe2c079720940e611bdf19e",
+      "lines": [
+        63,
+        146
+      ]
+    },
+    {
+      "path": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Vision.framework/Modules/Vision.swiftmodule/arm64e-apple-macos.swiftinterface",
+      "sha256": "a62d599306b059ae3e64e2eb382c80f6d76ea5fa7993a34505d4461658ce4892",
+      "lines": [
+        1107,
+        1114
+      ]
+    },
+    {
+      "path": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreML.framework/Modules/CoreML.swiftmodule/arm64e-apple-macos.swiftinterface",
+      "sha256": "340290b9b32d576ad56070fe5ad447c8c1dea5361b646461ee0e98a8bccca282",
+      "lines": [
+        740,
+        753
+      ]
+    }
+  ],
+  "actualFailure": {
+    "stderrPlainCode": "goods_photo_ocr_recognition_failed",
+    "stderrSha256": "1b2f7c96cd93bf29bf8086451bc7d69044bc8de1316c46c46f15e40fb0910f7c",
+    "stage": "perform catch or generic catch; underlying NSError needed",
+    "acceptedImages": 0
+  },
+  "recommendedDecision": "Inspect unchanged-default synthetic diagnostic NSError before selecting a fix. A CPU stage assignment is a diagnostic option, not a confirmed repair."
+}

@@ -1,0 +1,224 @@
+{
+  "contract": "maya.local-ocr-inventory/1",
+  "recordedAtUtc": "2026-10-08T12:25:16.124408+00:00",
+  "scope": "READ_ONLY_INSTALLED_TOOL_AND_LANGUAGE_METADATA",
+  "platform": {
+    "os": "macOS",
+    "version": "26.5.2",
+    "build": "25F84",
+    "target": "arm64-apple-macosx26.0"
+  },
+  "tesseract": {
+    "path": "/opt/homebrew/bin/tesseract",
+    "realpath": "/opt/homebrew/Cellar/tesseract/5.5.3/bin/tesseract",
+    "version": "5.5.3",
+    "leptonicaVersion": "1.87.0",
+    "availableLanguages": [
+      "eng",
+      "osd",
+      "snum"
+    ],
+    "russianInstalled": false,
+    "languageModels": [
+      {
+        "name": "eng.traineddata",
+        "path": "/opt/homebrew/share/tessdata/eng.traineddata",
+        "realpath": "/opt/homebrew/Cellar/tesseract/5.5.3/share/tessdata/eng.traineddata",
+        "bytes": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "osd.traineddata",
+        "path": "/opt/homebrew/share/tessdata/osd.traineddata",
+        "realpath": "/opt/homebrew/Cellar/tesseract/5.5.3/share/tessdata/osd.traineddata",
+        "bytes": 10562727,
+        "sha256": "9cf5d576fcc47564f11265841e5ca839001e7e6f38ff7f7aacf46d15a96b00ff"
+      },
+      {
+        "name": "snum.traineddata",
+        "path": "/opt/homebrew/share/tessdata/snum.traineddata",
+        "realpath": "/opt/homebrew/Cellar/tesseract/5.5.3/share/tessdata/snum.traineddata",
+        "bytes": 8467391,
+        "sha256": "36f772980ff17c66a767f584a0d80bf2302a1afa585c01a226c1863afcea1392"
+      }
+    ]
+  },
+  "swift": {
+    "path": "/usr/bin/swift",
+    "version": "6.3.3",
+    "driverVersion": "1.148.6",
+    "developerDirectory": "/Applications/Xcode.app/Contents/Developer",
+    "sdk": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+  },
+  "vision": {
+    "imageInputs": 0,
+    "levels": [
+      {
+        "languages": [
+          "en-US",
+          "fr-FR",
+          "it-IT",
+          "de-DE",
+          "es-ES",
+          "pt-BR",
+          "zh-Hans",
+          "zh-Hant",
+          "yue-Hans",
+          "yue-Hant",
+          "ko-KR",
+          "ja-JP",
+          "ru-RU",
+          "uk-UA",
+          "th-TH",
+          "vi-VT",
+          "ar-SA",
+          "ars-SA",
+          "tr-TR",
+          "id-ID",
+          "cs-CZ",
+          "da-DK",
+          "nl-NL",
+          "no-NO",
+          "nn-NO",
+          "nb-NO",
+          "ms-MY",
+          "pl-PL",
+          "ro-RO",
+          "sv-SE"
+        ],
+        "level": "accurate",
+        "requestRevision": 3
+      },
+      {
+        "languages": [
+          "en-US",
+          "fr-FR",
+          "it-IT",
+          "de-DE",
+          "es-ES",
+          "pt-BR"
+        ],
+        "level": "fast",
+        "requestRevision": 3
+      }
+    ],
+    "operation": "supportedRecognitionLanguages_only",
+    "recognitionRequestsPerformed": 0,
+    "supportedRevisions": [
+      1,
+      2,
+      3
+    ]
+  },
+  "python": {
+    "defaultExecutable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "defaultVersion": "3.14.6",
+    "systemVersion": "3.9.6",
+    "scope": "Default Python distributions only; no private env or venv scan",
+    "relevantInstalledDefaultDistributions": [],
+    "checkedDistributions": [
+      "pytesseract",
+      "tesserocr",
+      "easyocr",
+      "paddleocr",
+      "paddlepaddle",
+      "paddlepaddle-gpu",
+      "ocrmypdf",
+      "opencv-python",
+      "opencv-python-headless",
+      "pillow",
+      "torch",
+      "torchvision",
+      "transformers",
+      "rapidocr-onnxruntime",
+      "rapidocr",
+      "onnxruntime",
+      "pyobjc-core",
+      "pyobjc-framework-Vision",
+      "pyobjc-framework-Cocoa",
+      "numpy"
+    ]
+  },
+  "node": {
+    "path": "/usr/local/bin/node",
+    "version": "24.15.0",
+    "backendInstalled": {
+      "sharp": "0.35.4",
+      "pngjs": "5.0.0"
+    },
+    "backendNotInstalled": [
+      "tesseract.js",
+      "tesseract.js-core",
+      "node-tesseract-ocr",
+      "onnxruntime-node",
+      "@huggingface/transformers",
+      "canvas",
+      "jimp",
+      "jpeg-js"
+    ]
+  },
+  "other": {
+    "pdftotext": {
+      "path": "/opt/homebrew/bin/pdftotext",
+      "version": "26.04.0",
+      "limitation": "Text-layer extraction, not an image OCR engine"
+    },
+    "sips": "/usr/bin/sips",
+    "notOnPath": [
+      "ocrmypdf",
+      "magick"
+    ]
+  },
+  "selectedLocalOption": {
+    "engine": "Apple Vision VNRecognizeTextRequest",
+    "recognitionLevel": "accurate",
+    "revision": 3,
+    "recognitionLanguages": [
+      "ru-RU",
+      "en-US"
+    ],
+    "languageMetadataVerified": true,
+    "realImageRecognitionVerified": false,
+    "platformLimitation": "Mac-only proof; current node:24-alpine Dockerfile has no OCR engine"
+  },
+  "execution": {
+    "installs": 0,
+    "externalApiCalls": 0,
+    "modelCalls": 0,
+    "imageInputs": 0,
+    "recognitionRequestsPerformed": 0,
+    "testsOrGatesRun": 0,
+    "postgresOrBackendServicesStarted": 0,
+    "repositoryEdits": 0,
+    "visionMetadataQueryElapsedSeconds": 3.064,
+    "visionMetadataQueryTimeoutSeconds": 45
+  },
+  "proposedLimitsNotImplemented": {
+    "compressedInputBytes": 2097152,
+    "decodedPixels": 8000000,
+    "maxDimension": 4096,
+    "nativeOcrConcurrency": 1,
+    "childWallTimeoutMs": 15000,
+    "termination": "SIGTERM then owned-child SIGKILL after 500ms",
+    "stdoutMaxBytes": 131072,
+    "stderrMaxBytes": 4096,
+    "maxObservations": 200,
+    "observationTextChars": 240,
+    "structuredRows": 20,
+    "io": "Fixed executable; shell:false; image bytes on stdin, bounded JSON on stdout, no URL/path inputs or image tempfiles"
+  },
+  "evidence": [
+    {
+      "path": "/tmp/maya-actual-ocr-20261008/vision-languages.json",
+      "sha256": "f7d2d6c383764f905fa9aab5aae5e2241db32bf4673b96f8bb5a0d4403a935aa"
+    },
+    {
+      "path": "/tmp/maya-actual-ocr-20261008/vision-language-query.json",
+      "sha256": "64bcc5488de3ee5913516d66283fdfe336528ba4a9c7781936d6fee3ecf79f67"
+    },
+    {
+      "path": "/tmp/maya-actual-ocr-20261008/vision-language-inventory.swift",
+      "sha256": "610817f1c313196f9460fb2c601574433d687dd3df9658dc218d7a2943438401"
+    }
+  ]
+}
