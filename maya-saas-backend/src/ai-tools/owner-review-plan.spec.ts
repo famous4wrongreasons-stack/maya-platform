@@ -8,6 +8,10 @@ import {
   OWNER_REVIEW_QUESTION,
   ownerReviewPlanState,
   withOwnerReviewClarification,
+  isSingleLifecycleTaskSet,
+  singleLifecyclePlanState,
+  SINGLE_LIFECYCLE_CLARIFICATION,
+  ownerReviewClarification,
 } from './owner-review-plan';
 
 describe('finite owner review plan boundary', () => {
@@ -144,5 +148,103 @@ describe('finite owner review plan boundary', () => {
     expect(
       isOwnerReviewClarification(CLIENT_VALUE_CLARIFICATION, lifecycle),
     ).toBe(false);
+  });
+
+  const single = () =>
+    ci.validatePlan(
+      {
+        tasks: [
+          {
+            intent: 'clients.dormant_list',
+            entities: {},
+            confidence: 0.99,
+          },
+        ],
+      },
+      UserRole.TENANT_OWNER,
+      ['clients.dormant.list'],
+    )!;
+  it('keeps a single Lifecycle request separate from compound review and current authority', () => {
+    const value = single();
+    expect(isSingleLifecycleTaskSet(value)).toBe(true);
+    expect(isOwnerReviewTaskSet(value)).toBe(false);
+    expect(
+      ownerReviewPlanState(value, 'web', UserRole.TENANT_OWNER),
+    ).toBeNull();
+    for (const role of [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER])
+      expect(singleLifecyclePlanState(value, 'web', role)).toBe('ready');
+    for (const role of [
+      UserRole.CLIENT,
+      UserRole.STAFF,
+      UserRole.ADMINISTRATOR,
+      undefined,
+    ])
+      expect(singleLifecyclePlanState(value, 'web', role)).toBeNull();
+    expect(
+      singleLifecyclePlanState(value, 'native', UserRole.TENANT_OWNER),
+    ).toBeNull();
+    expect(
+      singleLifecyclePlanState(null, 'web', UserRole.TENANT_OWNER),
+    ).toBeNull();
+    value.tasks[0].permission.status = 'denied';
+    expect(
+      singleLifecyclePlanState(value, 'web', UserRole.TENANT_OWNER),
+    ).toBeNull();
+    value.tasks[0].permission.status = 'allowed';
+    value.tasks[0].tool.status = 'not_available';
+    expect(
+      singleLifecyclePlanState(value, 'web', UserRole.TENANT_OWNER),
+    ).toBeNull();
+    expect(
+      isSingleLifecycleTaskSet({
+        ...value,
+        tasks: [...value.tasks, ...value.tasks],
+      }),
+    ).toBe(false);
+    expect(isSingleLifecycleTaskSet(plan())).toBe(false);
+  });
+  it('retains single-scope preferences without exchanging single and compound markers', () => {
+    const value = single();
+    value.tasks[0].entities.unknown_constraint = 'preserve this';
+    expect(singleLifecyclePlanState(value, 'web', UserRole.TENANT_OWNER)).toBe(
+      'clarify',
+    );
+    const clarified = withOwnerReviewClarification(value);
+    expect(clarified.tasks[0].entities).toEqual(value.tasks[0].entities);
+    expect(clarified.tasks[0].clarification_question).toBe(
+      SINGLE_LIFECYCLE_CLARIFICATION.question,
+    );
+    expect(SINGLE_LIFECYCLE_CLARIFICATION.question.length).toBeLessThanOrEqual(
+      300,
+    );
+    expect(ownerReviewClarification(value)).toBe(
+      SINGLE_LIFECYCLE_CLARIFICATION,
+    );
+    expect(
+      isOwnerReviewClarification(SINGLE_LIFECYCLE_CLARIFICATION, value),
+    ).toBe(true);
+    for (const wrong of [
+      CLIENT_VALUE_CLARIFICATION,
+      OWNER_REVIEW_CLARIFICATION,
+      { ...SINGLE_LIFECYCLE_CLARIFICATION, scope: 'all_clients' },
+      { ...SINGLE_LIFECYCLE_CLARIFICATION, question: 'contact guests' },
+    ])
+      expect(isOwnerReviewClarification(wrong, value)).toBe(false);
+    expect(
+      isOwnerReviewClarification(SINGLE_LIFECYCLE_CLARIFICATION, plan()),
+    ).toBe(false);
+    expect(isOwnerReviewClarification(SINGLE_LIFECYCLE_CLARIFICATION)).toBe(
+      false,
+    );
+    const unresolved = single();
+    unresolved.context.unresolved_references = ['that branch'];
+    expect(
+      singleLifecyclePlanState(unresolved, 'web', UserRole.TENANT_OWNER),
+    ).toBe('clarify');
+    const question = single();
+    question.tasks[0].requires_clarification = true;
+    expect(
+      singleLifecyclePlanState(question, 'web', UserRole.TENANT_OWNER),
+    ).toBe('clarify');
   });
 });

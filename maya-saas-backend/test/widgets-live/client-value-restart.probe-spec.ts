@@ -41,6 +41,7 @@ const database = assertProofDatabase();
 if (!/^maya_widget_gate_proof_c9occ_[a-z0-9_]+$/.test(database.database))
   throw new Error('Client value requires a fresh owned c9occ proof database');
 const prompts = {
+  single: 'Проверь, кого пора вернуть',
   overview:
     'Объясни последний опубликованный финансовый отчёт и проверь оценки давности визитов гостей',
   scoped:
@@ -334,11 +335,15 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
               language: 'ru',
               dialogue_act: 'request',
               tasks: [
-                {
-                  id: 'summary',
-                  intent: 'analytics.business_summary',
-                  entities_json: JSON.stringify(entities),
-                },
+                ...(prompt === prompts.single
+                  ? []
+                  : [
+                      {
+                        id: 'summary',
+                        intent: 'analytics.business_summary',
+                        entities_json: JSON.stringify(entities),
+                      },
+                    ]),
                 {
                   id: 'return',
                   intent: 'clients.dormant_list',
@@ -669,6 +674,7 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
     runId: string,
     c7Id: string | null,
     c8Ids: string[],
+    single = false,
   ) {
     const root = await db.prisma.c9Run.findUniqueOrThrow({
       where: { id: runId },
@@ -700,18 +706,19 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
       orderBy: { domain: 'asc' },
     });
     expect(receipts.map((r) => [r.domain, r.state])).toEqual([
-      ['BUSINESS_INTELLIGENCE', 'SETTLED'],
+      ...(single ? [] : [['BUSINESS_INTELLIGENCE', 'SETTLED']]),
       ['CLIENT_LIFECYCLE', 'SETTLED'],
     ]);
-    expect(receipts[0].resultJson).toMatchObject({
-      contract: 'maya.c9-bi-report-receipt/1',
-      sourceCount: c7Id ? 1 : 0,
-    });
-    expect(receipts[1].resultJson).toMatchObject({
+    if (!single)
+      expect(receipts[0].resultJson).toMatchObject({
+        contract: 'maya.c9-bi-report-receipt/1',
+        sourceCount: c7Id ? 1 : 0,
+      });
+    expect(receipts.at(-1)!.resultJson).toMatchObject({
       contract: 'maya.c9-lifecycle-receipt/1',
       revisionId: revisions[0].id,
     });
-    const biRefs = receipts[0].inputEvidenceRefsJson as Array<{
+    const biRefs = (single ? [] : receipts[0].inputEvidenceRefsJson) as Array<{
       sourceType: string;
       id: string;
       identityHash: string;
@@ -887,12 +894,19 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
   async function browser() {
     const sequence =
       stage === 'prepare'
-        ? ['initial', 'scoped', 'corrected', 'reload-restored']
+        ? [
+            'initial',
+            'single-lifecycle',
+            'scoped',
+            'corrected',
+            'reload-restored',
+          ]
         : ['restart-restored', 'accepted', 'unavailable'];
     const checkpoints: string[] = [];
     const browserOutput = path.join(output!, stage + '-browser');
     mkdirSync(browserOutput);
-    let expectedRuns = stage === 'prepare' ? 0 : 1;
+    let expectedRuns = stage === 'prepare' ? 0 : 2;
+    let expectedReceipts = stage === 'prepare' ? 0 : 3;
     let expectedModel = model.mock.calls.length;
     const currentC7 = saved.source.c7Id;
     let mark = http.recorder.mark(),
@@ -967,6 +981,7 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
                 name === 'unavailable' ? 'UNAVAILABLE' : 'PARTIAL',
               );
               expectedRuns++;
+              expectedReceipts += 2;
               expectedModel++;
               const expectedC8 = name === 'unavailable' ? [] : currentC8Ids;
               const graphHash = await graph(
@@ -994,6 +1009,52 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
                 analysis: body.analysis,
                 recommendation: body.recommendation,
               };
+            } else if (name === 'single-lifecycle') {
+              const body = message.response!;
+              expect(body.coordination).toMatchObject({
+                scope: 'explicit_lifecycle',
+                revision: 1,
+                current: true,
+                replayed: false,
+              });
+              expect(body.coordination!.run_id).not.toBe(
+                saved.first.coordination!.run_id,
+              );
+              expect(body.user_turn.conversationId).toBe(saved.conversationId);
+              expect(body.analysis).toBeUndefined();
+              expect(body.recommendation).toMatchObject({
+                contract: 'maya.c9-lifecycle-response/1',
+                outcome: 'PARTIAL',
+                agentId: 'CLIENT_LIFECYCLE',
+                findingsCount: 1,
+                evidenceCount: 1,
+                noSideEffects: true,
+                executionAuthority: false,
+                canContact: false,
+              });
+              expect(body.reply).toContain('Предложение сохранено, версия 1.');
+              expect(body.reply).not.toContain('финансовый');
+              for (const id of privateClientIds)
+                expect(JSON.stringify(body)).not.toContain(id);
+              const graphHash = await graph(
+                saved.salon,
+                body.coordination!.run_id,
+                null,
+                currentC8Ids,
+                true,
+              );
+              expectedRuns++;
+              expectedReceipts++;
+              expectedModel++;
+              observations.singleLifecycle = {
+                reply: body.reply,
+                graphHash,
+                runHash: hash(body.coordination!.run_id),
+                revisionHash: hash(body.coordination!.revision_id),
+                recommendation: body.recommendation,
+                workReceipts: 1,
+                financialWork: 0,
+              };
             } else if (name === 'scoped' || name === 'corrected') {
               const body = message.response!;
               expectedModel++;
@@ -1019,7 +1080,7 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
               await db.prisma.c9WorkReceipt.count({
                 where: { tenantId: saved.salon.tenant.id },
               }),
-            ).toBe(expectedRuns * 2);
+            ).toBe(expectedReceipts);
             assertNoBusinessWrites(mark);
             expect(await businessState(saved.salon.tenant.id)).toBe(baseline);
             expect(providerReads).toHaveLength(providerBefore);
@@ -1055,7 +1116,7 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
                 await db.prisma.c9WorkReceipt.count({
                   where: { tenantId: saved.salon.tenant.id },
                 }),
-              ).toBe(expectedRuns * 2);
+              ).toBe(expectedReceipts);
               observations.exactCurrentReplayAfterNewerSources = {
                 sameRun: true,
                 sameRevision: true,

@@ -13,6 +13,7 @@ import { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
 import { UserRole } from '../common/domain.enums';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { SINGLE_LIFECYCLE_CLARIFICATION } from './owner-review-plan';
 
 const user: AuthenticatedUser = {
   userId: 'owner',
@@ -98,6 +99,26 @@ function fixture(entities: Record<string, string> = {}) {
       .mockResolvedValue(undefined),
   };
   const orchestration = {
+    checkClientReturn: jest.fn().mockResolvedValue({
+      reply:
+        'SYNTHETIC: до трёх оценок давности по правилу бизнеса; без прогноза возврата и контактов.',
+      coordination: {
+        run_id: 'lifecycle-run',
+        scope: 'explicit_lifecycle',
+        state: 'PROPOSED',
+        revision: 1,
+        revision_id: 'lifecycle-revision',
+        current: true,
+        replayed: false,
+      },
+      recommendation: {
+        contract: 'maya.c9-lifecycle-response/1',
+        outcome: 'PARTIAL',
+        canContact: false,
+        noSideEffects: true,
+        executionAuthority: false,
+      },
+    }),
     reviewBusinessAndClientReturn: jest.fn().mockResolvedValue({
       reply:
         'SYNTHETIC: опубликованный отчёт и до трёх оценок давности; без контактов.',
@@ -257,6 +278,354 @@ function clientValueDecision(entities: Record<string, string> = {}) {
   return decision;
 }
 
+function singleLifecycleDecision(entities: Record<string, string> = {}) {
+  const decision = compoundDecision();
+  decision.semanticPlan = new ConversationIntelligenceService().validatePlan(
+    {
+      parent_request: 'Посмотри, кто давно не записывался',
+      tasks: [
+        {
+          id: 'return',
+          intent: 'clients.dormant_list',
+          entities,
+          confidence: 0.99,
+        },
+      ],
+    },
+    user.role,
+    ['clients.dormant.list'],
+  );
+  return decision;
+}
+
+describe('single Lifecycle semantic ingress (scripted selection, not source or model acceptance)', () => {
+  it('routes one validated Lifecycle paraphrase to one C9 without BI or generic tool dispatch', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(singleLifecycleDecision());
+    const out = await f.service.chat(
+      user,
+      dto('Посмотри, кто давно не записывался'),
+    );
+    expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+    expect(f.orchestration.checkClientReturn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        turn: { turnId: 'turn', conversationId: 'conversation' },
+      }),
+    );
+    expect(
+      f.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+    expect(f.orchestration.checkCancellationWindows).not.toHaveBeenCalled();
+    expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+    expect(out).toMatchObject({
+      action: null,
+      coordination: { run_id: 'lifecycle-run', revision: 1 },
+      recommendation: {
+        canContact: false,
+        noSideEffects: true,
+        executionAuthority: false,
+      },
+    });
+    expect(out).not.toHaveProperty('analysis');
+  });
+  it.each<Record<string, string>>([
+    { period: '2026-10-01' },
+    { branch: 'PRIVATE_BRANCH' },
+    { date_or_period: 'tomorrow' },
+    { days_since_last_visit: '45' },
+    { employee: 'PRIVATE_STAFF' },
+    { custom_constraint: 'all_clients' },
+  ])(
+    'saves a bounded question without dropping unsupported scope: %j',
+    async (entities) => {
+      const f = fixture();
+      f.model.decide.mockResolvedValue(singleLifecycleDecision(entities));
+      const out = await f.service.chat(
+        user,
+        dto('Проверь давность визитов с дополнительными условиями'),
+      );
+      expect(out.reply).toBe(SINGLE_LIFECYCLE_CLARIFICATION.question);
+      expect(out).not.toHaveProperty('coordination');
+      expect(out).not.toHaveProperty('analysis');
+      expect(out).not.toHaveProperty('recommendation');
+      expect(f.orchestration.checkClientReturn).not.toHaveBeenCalled();
+      expect(
+        f.orchestration.reviewBusinessAndClientReturn,
+      ).not.toHaveBeenCalled();
+      expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+      expect(f.model.decide).toHaveBeenCalledTimes(1);
+      expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+      expect(f.timeline.persistAssistantReply.mock.calls[0][0]).toMatchObject({
+        semanticContext: {
+          ownerReviewClarification: SINGLE_LIFECYCLE_CLARIFICATION,
+          plan: { tasks: [{ intent: 'clients.dormant_list', entities }] },
+        },
+      });
+    },
+  );
+  it('restores the single-scope marker, retains a correction, and only then accepts an explicit bounded request', async () => {
+    const first = fixture();
+    first.model.decide.mockResolvedValue(
+      singleLifecycleDecision({
+        period: '2026-10-01',
+        branch: 'PRIVATE_BRANCH_NORTH',
+      }),
+    );
+    await first.service.chat(
+      user,
+      dto('Проверь давность визитов за указанный день в филиале'),
+    );
+    const saved =
+      first.timeline.persistAssistantReply.mock.calls[0][0].semanticContext;
+    expect(saved).toHaveProperty(
+      'ownerReviewClarification',
+      SINGLE_LIFECYCLE_CLARIFICATION,
+    );
+
+    // Reconstructed service and retained encrypted-context projection are unit seams,
+    // not a claim of an HTTP, PostgreSQL or model restart acceptance.
+    const corrected = fixture();
+    corrected.timeline.readConversationContext.mockResolvedValue(saved);
+    corrected.model.decide.mockResolvedValue(
+      singleLifecycleDecision({
+        period: '2026-10-02',
+        branch: 'PRIVATE_BRANCH_SOUTH',
+      }),
+    );
+    const question = await corrected.service.chat(user, {
+      ...dto('Нет, за следующий день в другом филиале'),
+      conversationId: 'conversation',
+    });
+    expect(question.reply).toBe(SINGLE_LIFECYCLE_CLARIFICATION.question);
+    expect(corrected.model.decide.mock.calls).toHaveProperty(
+      '0.0.conversationPlan.tasks',
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'return',
+          intent: 'clients.dormant_list',
+          entities: {
+            period: '2026-10-01',
+            branch: expect.stringMatching(/^\[reference removed\]@/) as unknown,
+          },
+          requires_clarification: true,
+          clarification_question: SINGLE_LIFECYCLE_CLARIFICATION.question,
+        }),
+      ]),
+    );
+    expect(JSON.stringify(corrected.model.decide.mock.calls)).not.toContain(
+      'PRIVATE_BRANCH_NORTH',
+    );
+    expect(corrected.orchestration.checkClientReturn).not.toHaveBeenCalled();
+    expect(corrected.runtime.execute).not.toHaveBeenCalled();
+    const replacement =
+      corrected.timeline.persistAssistantReply.mock.calls[0][0].semanticContext;
+    expect(replacement).toHaveProperty(
+      'ownerReviewClarification',
+      SINGLE_LIFECYCLE_CLARIFICATION,
+    );
+    expect(replacement).toHaveProperty('plan.tasks.0.entities', {
+      period: '2026-10-02',
+      branch: 'PRIVATE_BRANCH_SOUTH',
+    });
+
+    const accepted = fixture();
+    accepted.timeline.readConversationContext.mockResolvedValue(replacement);
+    accepted.model.decide.mockResolvedValue(singleLifecycleDecision());
+    const out = await accepted.service.chat(user, {
+      ...dto('Да, выполни ограниченную проверку без дополнительных условий'),
+      conversationId: 'conversation',
+      messages: [
+        { role: 'assistant', content: 'PRIVATE_STALE_CLIENT_FACT' },
+        {
+          role: 'user',
+          content:
+            'Да, выполни ограниченную проверку без дополнительных условий',
+        },
+      ],
+    });
+    expect(accepted.model.decide.mock.calls).toHaveProperty(
+      '0.0.conversationPlan.tasks',
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'return',
+          intent: 'clients.dormant_list',
+          entities: {
+            period: '2026-10-02',
+            branch: expect.stringMatching(/^\[reference removed\]@/) as unknown,
+          },
+          requires_clarification: true,
+          clarification_question: SINGLE_LIFECYCLE_CLARIFICATION.question,
+        }),
+      ]),
+    );
+    for (const privateText of [
+      'PRIVATE_BRANCH_NORTH',
+      'PRIVATE_BRANCH_SOUTH',
+      'PRIVATE_STALE_CLIENT_FACT',
+    ])
+      expect(JSON.stringify(accepted.model.decide.mock.calls)).not.toContain(
+        privateText,
+      );
+    expect(accepted.model.decide).toHaveBeenCalledTimes(1);
+    expect(accepted.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+    expect(
+      accepted.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    expect(accepted.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(accepted.runtime.execute).not.toHaveBeenCalled();
+    expect(out.coordination).toMatchObject({ run_id: 'lifecycle-run' });
+    expect(accepted.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+    expect(
+      accepted.timeline.persistAssistantReply.mock.calls[0][0].semanticContext,
+    ).not.toHaveProperty('ownerReviewClarification');
+  });
+  it('does not turn a mixed Lifecycle and window task set into a single unscoped read', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue({
+      ...singleLifecycleDecision(),
+      semanticPlan: new ConversationIntelligenceService().validatePlan(
+        {
+          tasks: [
+            {
+              id: 'return',
+              intent: 'clients.dormant_list',
+              entities: {},
+              confidence: 0.99,
+            },
+            {
+              id: 'windows',
+              intent: 'schedule.review_cancellation_windows',
+              entities: {},
+              confidence: 0.99,
+            },
+          ],
+        },
+        user.role,
+        ['clients.dormant.list', 'booking.availability.read'],
+      ),
+      toolCall: { name: 'clients.dormant.list', arguments: {} },
+    });
+    const out = await f.service.chat(
+      user,
+      dto('Проверь давность визитов и окна после отмен'),
+    );
+    expect(f.orchestration.checkClientReturn).not.toHaveBeenCalled();
+    expect(f.orchestration.checkCancellationWindows).not.toHaveBeenCalled();
+    expect(
+      f.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(out).not.toHaveProperty('recommendation');
+  });
+  it('refuses a late Lifecycle purpose switch after an ordinary settled read', async () => {
+    const f = fixture();
+    f.model.decide
+      .mockResolvedValueOnce({
+        ...singleLifecycleDecision(),
+        semanticPlan: null,
+        toolCall: {
+          name: 'analytics.business.query',
+          arguments: { period: 'today', query: 'summary' },
+        },
+      })
+      .mockResolvedValue(singleLifecycleDecision());
+    f.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'ordinary-read',
+      result: { date: '2035-05-10', staff: [] },
+    });
+    const out = await f.service.chat(user, dto('Посмотри дела в салоне'));
+    expect(f.orchestration.conversationRead).toHaveBeenCalledTimes(1);
+    expect(f.runtime.execute).toHaveBeenCalledTimes(1);
+    expect(f.model.decide).toHaveBeenCalledTimes(2);
+    expect(f.orchestration.checkClientReturn).not.toHaveBeenCalled();
+    expect(
+      f.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    expect(out).not.toHaveProperty('recommendation');
+  });
+  it.each([{ audience: 'client' as const }, { audience: 'staff' as const }])(
+    'does not grant the owner projection to another audience: %j',
+    async (scope) => {
+      const f = fixture();
+      // Other roles retain their existing guarded source paths. This unit checks
+      // only that absent planning cannot mint the new owner projection or marker.
+      f.model.decide.mockResolvedValue(null);
+      const out = await f.service.chat(user, {
+        ...dto('Посмотри, кто давно не записывался'),
+        ...scope,
+      });
+      expect(f.orchestration.checkClientReturn).not.toHaveBeenCalled();
+      expect(
+        f.orchestration.reviewBusinessAndClientReturn,
+      ).not.toHaveBeenCalled();
+      expect(out).not.toHaveProperty('recommendation');
+      expect(
+        JSON.stringify(f.timeline.persistAssistantReply.mock.calls),
+      ).not.toContain(SINGLE_LIFECYCLE_CLARIFICATION.scope);
+    },
+  );
+  it('requires the persisted user turn before admitting semantic Lifecycle work', async () => {
+    const f = fixture();
+    f.timeline.persistTypedTurn.mockResolvedValue(null);
+    f.model.decide.mockResolvedValue(singleLifecycleDecision());
+    await expect(
+      f.service.chat(user, dto('Посмотри, кто давно не записывался')),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'conversation_history_unavailable' } },
+    });
+    expect(f.orchestration.checkClientReturn).not.toHaveBeenCalled();
+    expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.timeline.persistAssistantReply).not.toHaveBeenCalled();
+  });
+  it('withholds findings when the canonical Lifecycle owner reports held work', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(singleLifecycleDecision());
+    f.orchestration.checkClientReturn.mockRejectedValue(
+      new Error('c9_read_work_in_progress_or_unknown'),
+    );
+    await expect(
+      f.service.chat(user, dto('Посмотри, кто давно не записывался')),
+    ).rejects.toThrow('c9_read_work_in_progress_or_unknown');
+    expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+    expect(
+      f.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.timeline.persistAssistantReply).not.toHaveBeenCalled();
+  });
+  it('propagates a revoked source-owner refusal without substituting a generic read or saved facts', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(singleLifecycleDecision());
+    f.orchestration.checkClientReturn.mockRejectedValue(
+      new Error('c9_current_principal_required'),
+    );
+    await expect(
+      f.service.chat(user, dto('Посмотри, кто давно не записывался')),
+    ).rejects.toThrow('c9_current_principal_required');
+    expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+    expect(
+      f.orchestration.reviewBusinessAndClientReturn,
+    ).not.toHaveBeenCalled();
+    expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(f.timeline.persistAssistantReply).not.toHaveBeenCalled();
+  });
+});
+
 describe('explicit BI + Lifecycle in current chat (scripted planning only)', () => {
   it('delegates one complete response to C9 without generic source dispatch or another model stage', async () => {
     const f = fixture();
@@ -341,6 +710,8 @@ describe('explicit BI + Lifecycle in current chat (scripted planning only)', () 
     f.model.decide.mockResolvedValue(clientValueDecision());
     f.orchestration.reviewBusinessAndClientReturn.mockImplementation(
       (...args: unknown[]) => {
+        if (typeof args[0] !== 'object' || args[0] === null)
+          throw new Error('Synthetic C9 turn must be an object');
         Object.assign(args[0], {
           runId: 'client-value-run',
           failed: true,
@@ -460,7 +831,7 @@ describe('finite owner review compound ingress (synthetic, not real model accept
       expect.objectContaining({ reply: result.reply }),
     );
   });
-  it.each([
+  it.each<Record<string, string>>([
     { branch: 'branch-A' },
     { date_or_period: 'tomorrow' },
     { employee: 'staff-A' },

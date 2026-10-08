@@ -100,7 +100,7 @@ async function login(page, email) {
 function assertReadOnly(body) {
   assert.equal(body.action, null);
   assert.equal(body.resolution, undefined, 'This response has no widget/action authority');
-  assert.deepEqual(body.tools_used, [], 'Compound domains remain inside the single C9 path');
+  assert.deepEqual(body.tools_used, [], 'Domain reads remain inside the single C9 path');
   assert.ok(uuid(body.request_id));
   assert.ok(uuid(body.user_turn?.turnId) && uuid(body.user_turn?.conversationId));
   assert.ok(typeof body.reply === 'string' && body.reply.length > 0 && body.reply.length <= 12_000);
@@ -156,6 +156,40 @@ function assertCompound(body, lifecycleOutcome) {
     assert.ok(body.reply.includes('Отсутствие оценки не означает, что гости активны или спят.'));
     assert.doesNotMatch(body.reply, /Оценка [123]:/);
   }
+}
+function assertSingleLifecycle(body) {
+  assertReadOnly(body);
+  assert.equal(body.analysis, undefined, 'Standalone Lifecycle does not add a financial analysis');
+  const coordination = body.coordination;
+  assert.ok(uuid(coordination?.run_id) && uuid(coordination?.revision_id));
+  assert.equal(coordination.scope, 'explicit_lifecycle');
+  assert.equal(coordination.domains, undefined);
+  assert.equal(coordination.state, 'PROPOSED');
+  assert.equal(coordination.revision, 1);
+  assert.equal(coordination.current, true, 'Fresh available standalone findings are current');
+  assert.equal(coordination.replayed, false);
+  const lifecycle = body.recommendation;
+  assert.equal(lifecycle.contract, 'maya.c9-lifecycle-response/1');
+  assert.equal(lifecycle.agent.agent_id, 'CLIENT_LIFECYCLE');
+  assert.equal(lifecycle.outcome, 'PARTIAL');
+  assert.equal(lifecycle.agent.completeness.totalCount, null);
+  assert.equal(lifecycle.noSideEffects, true);
+  assert.equal(lifecycle.executionAuthority, false);
+  assert.equal(lifecycle.canContact, false);
+  assert.equal(lifecycle.reasoning, 'deterministic');
+  assert.ok(uuid(lifecycle.evidence.workReceiptId));
+  assert.ok(Array.isArray(lifecycle.agent.findings) && lifecycle.agent.findings.length >= 1 && lifecycle.agent.findings.length <= 3);
+  assert.equal(lifecycle.evidence.sourceHandles.length, lifecycle.agent.findings.length);
+  for (const fact of lifecycle.agent.findings) {
+    assert.ok(typeof fact.statement === 'string' && fact.statement.length > 0);
+    assert.ok(body.reply.includes(fact.statement), 'Every standalone source fact appears in the coherent reply');
+  }
+  assert.ok(body.reply.startsWith('Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.'));
+  assert.ok(body.reply.includes('По оценке на'));
+  assert.ok(body.reply.includes('Проверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.'));
+  assert.ok(body.reply.includes('Давность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.'));
+  assert.ok(body.reply.includes('Предложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.'));
+  assert.doesNotMatch(body.reply, /c8\.dormancy\/|вероятность возврата\s*[:—-]?\s*\d|выручка[^.\n]*(?:из-за|благодаря)/iu);
 }
 function assertClarification(body) {
   assertReadOnly(body);
@@ -334,6 +368,15 @@ async function main() {
       assertCompound(first, 'PARTIAL');
       report.observations.initial = publicResponse(first);
       await capture('initial'); await checkpoint('initial', { response: responseProjection(first), notBefore });
+      activeStep = 'single-lifecycle';
+      const single = await submit(page, PROMPTS.single);
+      assertSingleLifecycle(single);
+      assert.equal(single.user_turn.conversationId, first.user_turn.conversationId);
+      assert.notEqual(single.coordination.run_id, first.coordination.run_id, 'The explicit standalone request owns a separate C9 run');
+      assert.notEqual(single.coordination.revision_id, first.coordination.revision_id);
+      assert.notEqual(single.recommendation.evidence.workReceiptId, first.recommendation.evidence.workReceiptId);
+      report.observations['single-lifecycle'] = publicResponse(single);
+      await capture('single-lifecycle'); await checkpoint('single-lifecycle', { response: responseProjection(single), notBefore });
       for (const key of ['scoped', 'corrected']) {
         activeStep = key;
         const body = await submit(page, PROMPTS[key]);
@@ -348,7 +391,7 @@ async function main() {
       await page.reload(); notBefore = await login(page, input.email);
       await restored(first.reply, calls);
       await capture('reload-restored'); await checkpoint('reload-restored', { notBefore });
-      assert.equal(page.apiRequests('/ai/chat').length, 3);
+      assert.equal(page.apiRequests('/ai/chat').length, 4);
     } else {
       activeStep = 'restart-restored';
       await restored(input.initialReply ?? input.firstReply, 0);

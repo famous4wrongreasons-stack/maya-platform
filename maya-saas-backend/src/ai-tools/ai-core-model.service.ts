@@ -3,6 +3,7 @@ import {
   ownerReviewPlanState,
   ownerReviewClarification,
   ownerReviewKind,
+  singleLifecyclePlanState,
 } from './owner-review-plan';
 import {
   plannerWireContext,
@@ -756,6 +757,24 @@ export class AiCoreModelService {
           usage,
         };
       }
+      const singleLifecycle = singleLifecyclePlanState(
+        plan.semanticPlan,
+        input.surface,
+        input.principalRole,
+      );
+      if (singleLifecycle !== null) {
+        return {
+          reply:
+            singleLifecycle === 'clarify'
+              ? ownerReviewClarification(plan.semanticPlan).question
+              : 'Проверяю доступные опубликованные оценки давности визитов.',
+          toolCall: null,
+          semanticPlan: plan.semanticPlan,
+          provider,
+          model: plan.model,
+          usage,
+        };
+      }
       const clarification = this.semanticClarification(plan.semanticPlan);
       if (clarification) {
         return {
@@ -1048,6 +1067,7 @@ export class AiCoreModelService {
       'arguments_json must be a string containing one valid JSON object.',
       'A non-null tool_call must belong to ready_tools of an allowed task that has no unresolved required slot.',
       'EXAMPLE JSON OUTPUT WITHOUT A TOOL: {"semantic_plan":{"parent_request":"Привет","language":"ru","dialogue_act":"greeting","tasks":[{"id":"task_1","intent":"small_talk.greeting","entities_json":"{}","depends_on":[],"confidence":0.99,"requires_clarification":false,"clarification_question":null}],"context":{"carried_slots":[],"replaced_slots":[],"unresolved_references":[]}},"tool_call":null}',
+      'For an authenticated web owner, a single clients.dormant_list task is delegated to existing C9 with tool_call=null. Its only scope is up to three published C8 visit-recency evaluations under business rules, not a customer list or a campaign. Preserve every requested period, branch, threshold and other constraint in semantic entities. The server offers a bounded alternative when scope differs; retain its saved clarification and original slots until explicit acceptance or correction. Never add an unrequested financial task or infer customer value, return probability or contact permission.',
       'A web owner compound analytics.business_summary + clients.dormant_list (optional analytics.recommendations) is also delegated to existing C9 with tool_call=null. Its only scope is the last published tenant-wide financial snapshot plus up to three existing C8 dormancy evaluations, not a customer list or campaign. Preserve every requested period, branch, threshold and other constraint; the server asks about this bounded alternative. Retain the saved clarification and original slots until explicit acceptance or correction. Never substitute clients.retention.scan or claim customer value, return probability, causal revenue effect or contact permission from these evaluations.',
     ]
       .filter(Boolean)
@@ -1235,6 +1255,11 @@ export class AiCoreModelService {
           )) &&
         !this.semanticPlanMayFinishWithoutTool(semanticPlan) &&
         ownerReviewPlanState(
+          semanticPlan,
+          input.surface,
+          input.principalRole,
+        ) === null &&
+        singleLifecyclePlanState(
           semanticPlan,
           input.surface,
           input.principalRole,

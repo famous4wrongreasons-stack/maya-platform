@@ -10,9 +10,11 @@ import { ownTasksReply } from './own-tasks-presentation';
 import {
   isOwnerReviewClarification,
   isOwnerReviewTaskSet,
+  isSingleLifecycleTaskSet,
   ownerReviewClarification,
   ownerReviewKind,
   ownerReviewPlanState,
+  singleLifecyclePlanState,
   withOwnerReviewClarification,
 } from './owner-review-plan';
 import { publicConsultationReply } from './public-consultation-presentation';
@@ -848,6 +850,7 @@ export class AiCoreService {
     let groundingRetries = 0;
     let numberRetries = 0;
     let corrections: string[] = [];
+    let lifecycleDelegated = false;
 
     try {
       // Короткое «нет» после вопроса MAYA про дополнительные расходы — это не
@@ -1173,6 +1176,81 @@ export class AiCoreService {
             {
               reply:
                 'Этот совместный обзор сейчас недоступен в данном контексте. Для отдельной проверки нужен новый запрос владельца в бизнес-чате.',
+              source: 'safe_fallback',
+              action: null,
+            },
+          );
+        }
+        // The single Lifecycle request uses the same C9 owner as its explicit
+        // command. A semantic preference never supplies source or action authority.
+        if (
+          activeSemanticPlan?.tasks.some(
+            (task) => task.intent === 'clients.dormant_list',
+          ) &&
+          !clientAudience &&
+          dto.surface === 'web' &&
+          [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+            toolUser.role,
+          )
+        ) {
+          const state = singleLifecyclePlanState(
+            activeSemanticPlan,
+            dto.surface,
+            toolUser.role,
+          );
+          if (
+            state !== null &&
+            step === 0 &&
+            toolsUsed.length === 0 &&
+            !this.readTurns.get(dto)?.runId
+          ) {
+            if (state === 'clarify') {
+              decision.semanticPlan =
+                withOwnerReviewClarification(activeSemanticPlan);
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply: ownerReviewClarification(activeSemanticPlan).question,
+                  source: 'safe_fallback',
+                  action: null,
+                  ownerReviewClarification: true,
+                },
+              );
+            }
+            lifecycleDelegated = true;
+            const turn = this.readTurns.get(dto);
+            if (!turn) this.modelFailure('conversation_history_unavailable');
+            const lifecycle = await this.orchestrator.checkClientReturn(turn);
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: lifecycle.reply,
+                source: 'safe_fallback',
+                action: null,
+                lifecycle,
+              },
+            );
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply:
+                'Такая проверка сейчас недоступна в этом контексте. Для отдельной проверки до трёх опубликованных оценок давности нужен новый запрос владельца в бизнес-чате.',
               source: 'safe_fallback',
               action: null,
             },
@@ -2531,6 +2609,9 @@ export class AiCoreService {
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
+      // Match the explicit Lifecycle command: source-owner/turn refusals must
+      // not become a fabricated CRM connectivity explanation or generic retry.
+      if (lifecycleDelegated) throw error;
       if (this.readTurns.get(dto)?.failed) {
         const partial = this.deterministicGroundedReply(
           toolResults,
@@ -3115,7 +3196,8 @@ export class AiCoreService {
           : {
               version: 'maya.chat-semantic-context/1',
               ...(response.ownerReviewClarification &&
-              isOwnerReviewTaskSet(lastPlan)
+              (isOwnerReviewTaskSet(lastPlan) ||
+                isSingleLifecycleTaskSet(lastPlan))
                 ? {
                     ownerReviewClarification:
                       ownerReviewClarification(lastPlan),
@@ -3358,7 +3440,7 @@ export class AiCoreService {
       this.requireTenant(user),
     );
     const ownerReviewClarification =
-      isOwnerReviewTaskSet(plan) &&
+      (isOwnerReviewTaskSet(plan) || isSingleLifecycleTaskSet(plan)) &&
       isOwnerReviewClarification(saved.ownerReviewClarification, plan);
     const retainedSource = this.record(saved.bookingSource);
     if (

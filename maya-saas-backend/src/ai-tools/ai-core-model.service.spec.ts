@@ -172,6 +172,216 @@ describe('AiCoreModelService', () => {
     }
   });
 
+  describe('single Lifecycle delegation [scripted transport, real planner parser]', () => {
+    const clarification =
+      'Могу проверить до трёх опубликованных оценок давности визитов по правилам бизнеса. Это не список клиентов; отдельно запрошенные период, филиал и порог такая проверка не учитывает. Выполнить эту ограниченную проверку без дополнительных условий?';
+    const request = 'Проверь оценки давности визитов гостей';
+    const lifecycleInput = (
+      role: UserRole = UserRole.TENANT_OWNER,
+    ): AiCoreModelInput => ({
+      ...input,
+      principalRole: role,
+      messages: [{ role: 'user', content: request }],
+      tools: [{ ...input.tools[0], name: 'clients.dormant.list' }],
+      requiredToolNames: ['clients.dormant.list'],
+    });
+    const lifecyclePlan = (
+      entities: Record<string, unknown> = {},
+      overrides: Record<string, unknown> = {},
+    ) => ({
+      ...semanticPlan('clients.dormant_list', entities, overrides),
+      parent_request: request,
+    });
+
+    it.each([UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER])(
+      'returns delegated null tool after exactly one scripted planner response for web owner %s',
+      async (role) => {
+        const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(
+          deepSeekResponse(JSON.stringify(toolPlan(null, lifecyclePlan())), {
+            prompt_tokens: 17,
+            completion_tokens: 9,
+            total_tokens: 26,
+          }),
+        );
+        const service = createService({
+          AI_CORE_PROVIDER: 'deepseek',
+          DEEPSEEK_API_KEY: 'synthetic-only-key',
+          DEEPSEEK_BASE_URL: 'https://deepseek.example.test',
+        });
+
+        const result = await service.decide(lifecycleInput(role));
+
+        expect(result?.toolCall).toBeNull();
+        expect(result?.semanticPlan?.tasks).toHaveLength(1);
+        expect(result?.semanticPlan?.tasks[0]).toMatchObject({
+          intent: 'clients.dormant_list',
+          action: 'read',
+          entities: {},
+          permission: { status: 'allowed' },
+          tool: { status: 'ready', alternatives: ['clients.dormant.list'] },
+        });
+        expect(result?.reply).toMatch(/Проверяю.*оценки давности/u);
+        expect(result?.reply).not.toMatch(/финансов|выручк|отмен/u);
+        expect(result?.usage).toEqual({
+          inputTokens: 17,
+          outputTokens: 9,
+          totalTokens: 26,
+        });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        const payload = requestPayload(fetchMock, 0) as {
+          messages: Array<{ role: string; content: string }>;
+        };
+        const plannerInput = payload.messages.find(
+          (message) => message.role === 'user',
+        );
+        expect(plannerInput).toBeDefined();
+        expect(JSON.parse(plannerInput!.content)).toMatchObject({
+          phase: 'tool_planning',
+          principal_role: role,
+          required_tools: ['clients.dormant.list'],
+        });
+      },
+    );
+
+    it.each<[Record<string, unknown>, string]>([
+      [
+        { period: '2026-10-01' },
+        'Проверь оценки давности визитов за 2026-10-01',
+      ],
+      [
+        { branch: 'synthetic-branch' },
+        'Проверь оценки давности визитов по филиалу synthetic-branch',
+      ],
+      [
+        { threshold_days: 60 },
+        'Проверь оценки давности визитов с порогом 60 дней',
+      ],
+      [
+        {
+          period: '2026-10-02',
+          branch: 'synthetic-corrected-branch',
+          threshold_days: 45,
+        },
+        'Проверь оценки давности визитов за 2026-10-02 по филиалу synthetic-corrected-branch с порогом 45 дней',
+      ],
+    ])(
+      'preserves explicit scope %j and asks the single bounded question without a natural responder',
+      async (entities, prompt) => {
+        const plan = lifecyclePlan(entities);
+        plan.parent_request = prompt;
+        const unchanged = JSON.stringify(plan);
+        const fetchMock = jest
+          .spyOn(global, 'fetch')
+          .mockResolvedValue(
+            deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+          );
+        const service = createService({
+          AI_CORE_PROVIDER: 'deepseek',
+          DEEPSEEK_API_KEY: 'synthetic-only-key',
+        });
+
+        const result = await service.decide({
+          ...lifecycleInput(),
+          messages: [{ role: 'user', content: prompt }],
+        });
+
+        expect(result?.toolCall).toBeNull();
+        expect(result?.semanticPlan?.tasks).toHaveLength(1);
+        expect(result?.semanticPlan?.tasks[0].entities).toEqual(entities);
+        expect(result?.reply).toBe(clarification);
+        expect(result?.reply.match(/\?/g)).toHaveLength(1);
+        expect(JSON.stringify(plan)).toBe(unchanged);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it('uses the server bounded clarification instead of an arbitrary model-proposed action question', async () => {
+      const plan = lifecyclePlan(
+        { branch: 'synthetic-branch', threshold_days: 90 },
+        {
+          requires_clarification: true,
+          clarification_question: 'Отправить скидку выбранным клиентам?',
+        },
+      );
+      const prompt =
+        'Проверь оценки давности визитов по филиалу synthetic-branch с порогом 90 дней';
+      plan.parent_request = prompt;
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(
+          deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+        );
+      const service = createService({
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'synthetic-only-key',
+      });
+
+      const result = await service.decide({
+        ...lifecycleInput(),
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      expect(result?.toolCall).toBeNull();
+      expect(result?.semanticPlan?.tasks[0].entities).toEqual({
+        branch: 'synthetic-branch',
+        threshold_days: 90,
+      });
+      expect(result?.reply).toBe(clarification);
+      expect(result?.reply).not.toContain('скидку');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      UserRole.TENANT_ADMIN,
+      UserRole.ADMINISTRATOR,
+      UserRole.BRANCH_MANAGER,
+    ])(
+      'keeps the required-tool null guard for non-owner business role %s',
+      (role) => {
+        const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+        expect(() =>
+          service['validatePlanningResponse'](
+            JSON.stringify(toolPlan(null, lifecyclePlan())),
+            lifecycleInput(role),
+          ),
+        ).toThrow('ai_core_required_tool_missing');
+      },
+    );
+
+    it('does not extend single Lifecycle delegation to native or unqualified additional task sets', () => {
+      const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+      expect(() =>
+        service['validatePlanningResponse'](
+          JSON.stringify(toolPlan(null, lifecyclePlan())),
+          { ...lifecycleInput(), surface: 'native' },
+        ),
+      ).toThrow('ai_core_required_tool_missing');
+      for (const intents of [
+        ['clients.dormant_list', 'clients.dormant_list'],
+        [
+          'clients.dormant_list',
+          'analytics.business_summary',
+          'analytics.anomaly_detection',
+        ],
+      ]) {
+        const plan = lifecyclePlan();
+        plan.tasks = intents.map((intent, index) => ({
+          ...semanticPlan(intent, {}).tasks[0],
+          id: `task_${index + 1}`,
+        }));
+        expect(() =>
+          service['validatePlanningResponse'](
+            JSON.stringify(toolPlan(null, plan)),
+            {
+              ...lifecycleInput(),
+              tools: [...lifecycleInput().tools, ...input.tools],
+            },
+          ),
+        ).toThrow('ai_core_required_tool_missing');
+      }
+    });
+  });
+
   describe('service rename preview semantic admission [synthetic parsing, no model call]', () => {
     const name = 'catalog.service.rename.preview';
     const call = {

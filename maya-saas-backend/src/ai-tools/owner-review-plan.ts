@@ -23,6 +23,41 @@ export const CLIENT_VALUE_CLARIFICATION = {
     'Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?',
 } as const;
 
+export const SINGLE_LIFECYCLE_CLARIFICATION = {
+  contract: 'maya.owner-review-clarification/1',
+  scope: 'up_to_three_published_c8_dormancy_evaluations',
+  question:
+    'Могу проверить до трёх опубликованных оценок давности визитов по правилам бизнеса. Это не список клиентов; отдельно запрошенные период, филиал и порог такая проверка не учитывает. Выполнить эту ограниченную проверку без дополнительных условий?',
+} as const;
+
+/** A single existing Lifecycle capability, never an implicit finance request. */
+export function isSingleLifecycleTaskSet(
+  plan: ConversationSemanticPlan | null | undefined,
+): boolean {
+  return plan?.tasks.length === 1 && plan.tasks[0].intent === LIFECYCLE;
+}
+
+export function singleLifecyclePlanState(
+  plan: ConversationSemanticPlan | null | undefined,
+  surface: string,
+  role: UserRole | undefined,
+): 'ready' | 'clarify' | null {
+  if (
+    !plan ||
+    !isSingleLifecycleTaskSet(plan) ||
+    surface !== 'web' ||
+    (role !== UserRole.TENANT_OWNER && role !== UserRole.BUSINESS_OWNER) ||
+    plan.tasks[0].permission.status !== 'allowed' ||
+    plan.tasks[0].tool.status !== 'ready'
+  )
+    return null;
+  return plan.tasks[0].requires_clarification ||
+    Object.keys(plan.tasks[0].entities).length > 0 ||
+    plan.context.unresolved_references.length > 0
+    ? 'clarify'
+    : 'ready';
+}
+
 export function ownerReviewKind(
   plan: ConversationSemanticPlan | null | undefined,
 ): 'occupancy' | 'lifecycle' | null {
@@ -47,6 +82,7 @@ export function ownerReviewKind(
 }
 
 export function ownerReviewClarification(plan: ConversationSemanticPlan) {
+  if (isSingleLifecycleTaskSet(plan)) return SINGLE_LIFECYCLE_CLARIFICATION;
   return ownerReviewKind(plan) === 'lifecycle'
     ? CLIENT_VALUE_CLARIFICATION
     : OWNER_REVIEW_CLARIFICATION;
@@ -88,7 +124,8 @@ export function isOwnerReviewClarification(
   plan?: ConversationSemanticPlan,
 ): boolean {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-  if (plan && !isOwnerReviewTaskSet(plan)) return false;
+  if (plan && !isOwnerReviewTaskSet(plan) && !isSingleLifecycleTaskSet(plan))
+    return false;
   const expected = plan
     ? ownerReviewClarification(plan)
     : OWNER_REVIEW_CLARIFICATION;

@@ -26,11 +26,13 @@ test('auth requires the assigned email and closed fields without tenant/role inj
 });
 
 test('admits finite explicit prompts and inert retained assistant text only', () => {
+  assert.equal(PROMPTS.single, 'Проверь, кого пора вернуть');
   for (const prompt of Object.values(PROMPTS)) assert.equal(admitted(request('/api/ai/chat', chat(prompt)), origin, scope), true);
   const history = [...chat().messages, { role: 'assistant', content: 'Synthetic retained bounded review clarification.' }, ...chat(PROMPTS.accept).messages];
   assert.equal(admitted(request('/api/ai/chat', { ...chat(), conversationId: id, messages: history }), origin, scope), true);
   for (const body of [
     chat('Отправь рассылку клиентам'),
+    chat('Проверь, кого пора вернуть и отправь им сообщения'),
     { ...chat(), tenantId: id }, { ...chat(), audience: 'business' },
     { ...chat(), toolCall: { name: 'clients.dormant.list' } },
     { ...chat(), conversationId: 'raw-foreign-reference' },
