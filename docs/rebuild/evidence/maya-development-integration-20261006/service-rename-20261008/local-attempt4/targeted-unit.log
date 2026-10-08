@@ -1,0 +1,42 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/ai-tools/ai-tool-service-rename.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/crm/service-rename-actor.spec.ts
+PASS src/orchestration/c9.conversation-reads.spec.ts
+PASS src/widgets/authority/totality.spec.ts
+PASS src/ai-tools/ai-core-model.service.spec.ts
+PASS src/crm/adapters/yclients-service-rename.spec.ts
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 93315  - [39m10/08/2026, 12:04:36 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m
+PASS src/crm/yclients-service-rename.contract.spec.ts
+PASS src/crm/adapters/yclients-service-price.spec.ts
+PASS src/widgets/authority/business-rules-admission.spec.ts
+PASS src/ai-tools/service-rename-chat.spec.ts
+
+Test Suites: 13 passed, 13 total
+Tests:       598 passed, 598 total
+Snapshots:   0 total
+Time:        1.841 s, estimated 2 s
+Ran all test suites within paths "src/crm/yclients-service-rename.contract.spec.ts", "src/crm/adapters/yclients-service-rename.spec.ts", "src/crm/service-rename-actor.spec.ts", "src/ai-tools/ai-tool-service-rename.spec.ts", "src/ai-tools/service-rename-chat.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/crm/adapters/yclients-service-price.spec.ts", "src/widgets/authority/totality.spec.ts", "src/widgets/authority/business-rules-admission.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-service-edit-20261008/local-attempt4/targeted-unit.json

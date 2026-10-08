@@ -1,0 +1,124 @@
+PASS src/ai-tools/ai-core-model.service.spec.ts
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 90894  - [39m10/08/2026, 12:00:33 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m
+FAIL src/conversation-intelligence/conversation-intelligence.service.spec.ts
+  ● ConversationIntelligenceService › keeps the runtime planner contract compact while retaining every intent
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [{"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Find suitable booking slots.", "domain": "booking", "intent": "booking.find_availability", "language_hints": ["окно", "свободное время", "слот", "Есть окно вечером?", "К Артёму завтра после шести"], "optional_slots": ["employee", "services", "branch", "time_of_day"], "readiness": "ready", "readiness_note": null, "ready_tools": ["booking.availability.read"], "required_slots": ["date_or_period"], "slot_aliases": {"date_or_period": ["date", "period"], "services": ["service"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "List the actor own appointments.", "domain": "booking", "intent": "booking.list_own", "language_hints": ["мои записи", "мои визиты", "когда я записан", "Покажи мои записи", "Когда я записан в следующий раз?"], "optional_slots": ["period", "status"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", "domain": "booking", "intent": "booking.prepare_personal", "language_hints": ["хочу записаться", "записаться для себя", "открыть личную запись", "Хочу записаться", "Открой форму личной записи"], "optional_slots": ["services", "employee", "branch", "date_or_period", "time_of_day"], "readiness": "ready", "readiness_note": null, "ready_tools": ["catalog.services.read"], "required_slots": [], "slot_aliases": {"date_or_period": ["date", "period"], "services": ["service"]}}, {"action": "execute", "allowed_for_role": false, "data_class": "E", "description": "Create an appointment for the actor.", "domain": "booking", "intent": "booking.create_own", "language_hints": ["запиши", "поставь меня", "забронируй", "Запиши меня завтра", "Давай к Саше на 19:00"], "optional_slots": ["employee", "branch"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["services", "date", "time"], "slot_aliases": {"date": ["date_or_period"], "services": ["service"]}}, {"action": "execute", "allowed_for_role": false, "data_class": "E", "description": "Reschedule the actor appointment.", "domain": "booking", "intent": "booking.reschedule_own", "language_hints": ["перенеси", "передвинь запись", "другое время", "Перенеси меня на пятницу", "Нет, лучше завтра"], "optional_slots": ["new_employee"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["appointment", "new_date", "new_time"], "slot_aliases": {}}, {"action": "execute", "allowed_for_role": false, "data_class": "E", "description": "Cancel the actor appointment.", "domain": "booking", "intent": "booking.cancel_own", "language_hints": ["отмени запись", "не смогу прийти", "сними бронь", "Отмени мою запись на завтра"], "optional_slots": [], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["appointment"], "slot_aliases": {}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Tell who performs an appointment.", "domain": "booking", "intent": "booking.get_employee", "language_hints": ["к кому я записан", "кто меня стрижёт", "Кто меня сегодня стрижёт?"], "optional_slots": ["appointment", "date"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {"date": ["date_or_period"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Repeat the last usual service bundle.", "domain": "booking", "intent": "booking.repeat_last", "language_hints": ["мне как обычно", "как в прошлый раз", "повтори прошлую запись", "Мне как всегда, только в пятницу"], "optional_slots": ["date", "time"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {"date": ["date_or_period"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Find slots for multiple people.", "domain": "booking", "intent": "booking.group_or_simultaneous", "language_hints": ["нас двое", "одновременно", "рядом по времени", "Можно записать нас двоих одновременно?"], "optional_slots": ["simultaneous", "branch"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": ["party_size", "services", "date_or_period"], "slot_aliases": {"date_or_period": ["date", "period"], "services": ["service"]}}, {"action": "read", "allowed_for_role": true, "data_class": "C", "description": "Read the employee own work schedule.", "domain": "schedule", "intent": "schedule.get_own", "language_hints": ["мой график", "когда я работаю", "моя смена", "Я завтра работаю?"], "optional_slots": ["period"], "readiness": "ready", "readiness_note": null, "ready_tools": [], "required_slots": [], "slot_aliases": {}}, …]
+
+      81 |     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
+      82 |     // 85 existing intents + A22 + Occupancy + personal catalog + goods item.
+    > 83 |     expect(contract.intents).toHaveLength(89);
+         |                              ^
+      84 |     expect(
+      85 |       contract.intents.find(
+      86 |         (item) => item.intent === 'schedule.review_cancellation_windows',
+
+      at Object.<anonymous> (conversation-intelligence/conversation-intelligence.service.spec.ts:83:30)
+
+PASS src/ai-tools/ai-tool-service-rename.spec.ts
+PASS src/crm/service-rename-actor.spec.ts
+PASS src/orchestration/c9.conversation-reads.spec.ts
+PASS src/crm/adapters/yclients-service-rename.spec.ts
+PASS src/crm/adapters/yclients-service-price.spec.ts
+PASS src/crm/yclients-service-rename.contract.spec.ts
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › service rename preview [scripted model only; no approval lane] › does not expose the management preview to the client audience
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 11
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "approval_policy": "none",
+    +     "description": "Tool catalog.service.rename.preview",
+    +     "input_schema": Object {
+    +       "type": "object",
+    +     },
+    +     "name": "catalog.service.rename.preview",
+    +     "risk_tier": "read",
+    +   },
+    + ]
+
+      3501 |         messages: [{ role: 'user', content: 'Привет' }],
+      3502 |       });
+    > 3503 |       expect(mocks.model.decide.mock.calls[0]?.[0].tools).toEqual([]);
+           |                                                           ^
+      3504 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3505 |     });
+      3506 |   });
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:3503:59)
+
+PASS src/ai-tools/service-rename-chat.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+FAIL src/widgets/authority/totality.spec.ts
+  ● K4 — the four key spaces, bound to the live registries › does not admit the rename development READ into widget policy, profile, pairing or COMMIT
+
+    expect(received).toBeUndefined()
+
+    Received: {"consent_class": "none", "dispatch_is_synchronous": true, "min_verification": "SESSION_VERIFIED"}
+
+      123 |       ownerKey: `existing.ai-tool:${key}`,
+      124 |     });
+    > 125 |     expect(WIDGET_CAPABILITY_POLICY[`C9:${key}`]).toBeUndefined();
+          |                                                   ^
+      126 |     expect(PROFILE_REGISTRY.successorCapabilities).not.toContain(key);
+      127 |     expect(aeForPropose(key)).toBeNull();
+      128 |     expect(subjectFloorFor({ space: 'C9', key })).toBe('STEP_UP_VERIFIED');
+
+      at Object.<anonymous> (widgets/authority/totality.spec.ts:125:51)
+
+  ● K4 — historical floor repairs, the bounded V1.4 admission, and the unique LOCAL row › the resource classes partition the registry
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 61
+    Received length: 62
+    Received array:  [{"approvalAdapter": "NONE", "capabilityKey": "catalog.services.read", "contractVersion": 1, "domains": ["OCCUPANCY", "ADMIN"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["booking"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "catalog.services.read:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "catalog.services.read:output/1", "ownerKey": "existing.ai-tool:catalog.services.read", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 8000, "toolOrInterface": "catalog.services.read"}, {"approvalAdapter": "exact_source_confirmation", "capabilityKey": "catalog.service.price.update", "contractVersion": 1, "domains": ["ADMIN"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["crm.integration"], "idempotencyAdapter": "existing_source_receipt", "inputContract": "catalog.service.price.update:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "PROPOSE_ONLY", "outputContract": "catalog.service.price.update:output/1", "ownerKey": "existing.ai-tool:catalog.service.price.update", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_HANDOFF", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 15000, "toolOrInterface": "catalog.service.price.update"}, {"approvalAdapter": "NONE", "capabilityKey": "booking.availability.read", "contractVersion": 1, "domains": ["OCCUPANCY"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["booking"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "booking.availability.read:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "booking.availability.read:output/1", "ownerKey": "existing.ai-tool:booking.availability.read", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 8000, "toolOrInterface": "booking.availability.read"}, {"approvalAdapter": "NONE", "capabilityKey": "booking.group-availability.read", "contractVersion": 1, "domains": ["OCCUPANCY"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["booking"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "booking.group-availability.read:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "booking.group-availability.read:output/1", "ownerKey": "existing.ai-tool:booking.group-availability.read", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 12000, "toolOrInterface": "booking.group-availability.read"}, {"approvalAdapter": "NONE", "capabilityKey": "appointments.own.list", "contractVersion": 1, "domains": ["ADMIN"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["booking.customer_app"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "appointments.own.list:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "appointments.own.list:output/1", "ownerKey": "existing.ai-tool:appointments.own.list", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 8000, "toolOrInterface": "appointments.own.list"}, {"approvalAdapter": "NONE", "capabilityKey": "loyalty.own.read", "contractVersion": 1, "domains": ["CLIENT_LIFECYCLE"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["loyalty"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "loyalty.own.read:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "loyalty.own.read:output/1", "ownerKey": "existing.ai-tool:loyalty.own.read", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 8000, "toolOrInterface": "loyalty.own.read"}, {"approvalAdapter": "NONE", "capabilityKey": "analytics.employee.query", "contractVersion": 1, "domains": ["BUSINESS_INTELLIGENCE"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["analytics.employee"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "analytics.employee.query:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "analytics.employee.query:output/1", "ownerKey": "existing.ai-tool:analytics.employee.query", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 70000, "toolOrInterface": "analytics.employee.query"}, {"approvalAdapter": "NONE", "capabilityKey": "analytics.business.query", "contractVersion": 1, "domains": ["BUSINESS_INTELLIGENCE"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["analytics.business"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "analytics.business.query:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "analytics.business.query:output/1", "ownerKey": "existing.ai-tool:analytics.business.query", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 70000, "toolOrInterface": "analytics.business.query"}, {"approvalAdapter": "NONE", "capabilityKey": "analytics.business.profit", "contractVersion": 1, "domains": ["BUSINESS_INTELLIGENCE"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["analytics.business"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "analytics.business.profit:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "analytics.business.profit:output/1", "ownerKey": "existing.ai-tool:analytics.business.profit", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 70000, "toolOrInterface": "analytics.business.profit"}, {"approvalAdapter": "NONE", "capabilityKey": "analytics.revenue.forecast", "contractVersion": 1, "domains": ["BUSINESS_INTELLIGENCE"], "evidencePolicy": "qualified_current_reference", "featureRefs": ["analytics.business"], "idempotencyAdapter": "c9_work_receipt", "inputContract": "analytics.revenue.forecast:input/1", "maxInputBytes": 16384, "maxOutputBytes": 32768, "mode": "READ", "outputContract": "analytics.revenue.forecast:output/1", "ownerKey": "existing.ai-tool:analytics.revenue.forecast", "principalKinds": ["USER"], "providerAvailabilityResolver": "current_source_readiness", "resourceClass": "SOURCE_READ", "scopeResolver": "current_source_scope", "sourcePolicyResolver": "current_source_policy", "taskBundleRef": "c9.skills/1", "timeoutMs": 70000, "toolOrInterface": "analytics.revenue.forecast"}, …]
+
+      280 |     }, {});
+      281 |     expect(counts.LOCAL + counts.SOURCE_READ + counts.SOURCE_HANDOFF).toBe(57);
+    > 282 |     expect(C9_CAPABILITIES).toHaveLength(61);
+          |                             ^
+      283 |     expect(
+      284 |       C9_CAPABILITIES.filter((c) => c.capabilityKey === SERVICE_PRICE_TOOL),
+      285 |     ).toEqual([
+
+      at Object.<anonymous> (widgets/authority/totality.spec.ts:282:29)
+
+PASS src/widgets/authority/business-rules-admission.spec.ts
+
+Test Suites: 3 failed, 10 passed, 13 total
+Tests:       4 failed, 594 passed, 598 total
+Snapshots:   0 total
+Time:        2.347 s
+Ran all test suites within paths "src/crm/yclients-service-rename.contract.spec.ts", "src/crm/adapters/yclients-service-rename.spec.ts", "src/crm/service-rename-actor.spec.ts", "src/ai-tools/ai-tool-service-rename.spec.ts", "src/ai-tools/service-rename-chat.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/crm/adapters/yclients-service-price.spec.ts", "src/widgets/authority/totality.spec.ts", "src/widgets/authority/business-rules-admission.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-service-edit-20261008/local-attempt1/targeted-unit.json
