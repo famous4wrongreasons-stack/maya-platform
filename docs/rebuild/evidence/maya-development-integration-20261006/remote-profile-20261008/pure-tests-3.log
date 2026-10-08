@@ -1,0 +1,27 @@
+✔ shared nonsecret control files get exact read mode even under restrictive caller umask (14.568833ms)
+✔ ExecCondition refuses a closed, expired, wrong-phase or wrong-plan launch even after cleanup (0.552375ms)
+✔ illustrative values render, but can never be applied as observations (1.714917ms)
+✔ host headroom, group exclusivity, authority and path injection fail before rendering (3.618792ms)
+✔ launches carry executable phase fences, original resource caps and no shell (0.423958ms)
+✔ absolute timer tracks permit end, not a renewed ten minute grant (0.928125ms)
+✔ cleanup continues other own groups after one refusal and does not stop foreign units (0.583334ms)
+✔ cleanup requires actual empty cgroups, even after successful systemctl stop (0.373291ms)
+✔ pinned files reject changed bytes, symlinks, world-writable and noncanonical JSON (1.979459ms)
+✔ dry renderer writes new files only; mixed phase flags cannot imply a paid call (18.94575ms)
+✔ every transient role has bounded stop and resource policy with no capabilities or restart (1.145542ms)
+✔ prepare and runner isolate networking, credential access and writable evidence (0.115333ms)
+✔ runner-check preserves original credential visibility for metadata-only access denial proof (0.093791ms)
+✔ broker admits only exact IPv4 hosts and its three writable locations (0.0725ms)
+✔ broker-check sees the credential path but has no IP family or upstream network (0.078667ms)
+✔ unsafe path interpolation cannot introduce properties, mounts, specifiers or commands (1.703709ms)
+✔ unknown fields, duplicate principals and invalid numeric resource declarations refuse (0.323541ms)
+✔ network declarations cannot widen an exact IPv4 host into DNS, CIDR, IPv6 or injected properties (0.443583ms)
+✔ generation is deterministic and leaves its declaration unchanged (0.667209ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 112.022583

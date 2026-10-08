@@ -1,0 +1,42 @@
+✔ omitted heap flags preserve the existing process-memory defaults (0.514333ms)
+✔ both inclusive bounds produce only the exact bounded Node option (0.115708ms)
+✔ each flag is independently optional and does not mutate its declaration (0.057792ms)
+✔ heap values outside either bound refuse rather than clamp or inherit (0.163708ms)
+✔ nondecimal and option-injection inputs cannot become NODE_OPTIONS (0.4465ms)
+✔ resource helper cannot accept model-budget or authority overrides (0.070709ms)
+✔ illustrative values render, but can never be applied as observations (2.092041ms)
+✔ host headroom, group exclusivity, authority and path injection fail before rendering (3.357083ms)
+✔ launches carry executable phase fences, original resource caps and no shell (0.391333ms)
+✔ absolute timer tracks permit end, not a renewed ten minute grant (0.881125ms)
+✔ cleanup continues other own groups after one refusal and does not stop foreign units (0.569084ms)
+✔ cleanup requires actual empty cgroups, even after successful systemctl stop (0.443ms)
+✔ pinned files reject changed bytes, symlinks, world-writable and noncanonical JSON (3.029667ms)
+✔ dry renderer writes new files only; mixed phase flags cannot imply a paid call (3.032042ms)
+✔ canonical pinned plan is rebuilt exactly, never trusting supplied derived fields (3.108333ms)
+✔ illustrative plans, oversized files, duplicate keys and noncanonical bytes refuse (0.816458ms)
+✔ closed CLI requires canonical absolute paths and permits bounded hold for exactly the three check roles (0.693125ms)
+✔ private namespace summary admits loopback including unreachable IPv6 loopback entries (0.509417ms)
+✔ external interfaces or IPv4/IPv6 routes refuse private roles but remain counts for network-check (1.082709ms)
+✔ route truncation, malformed fields and excessive input fail closed instead of empty routes (0.168583ms)
+✔ sysfs flags parse exactly with at most 32 validated interface names and no address reads (0.13825ms)
+✔ access failures distinguish denial from missing path, I/O failure and unexpected success (0.251ms)
+✔ broker credential metadata must describe the existing regular owner-bound nonwritable file (0.094875ms)
+✔ actual principal, groups, Linux and net namespace identity must match the selected role (1.006209ms)
+✔ network-check verifies exact generated hosts bytes with every pinned address and no additions (0.229375ms)
+✔ every transient role has bounded stop and resource policy with no capabilities or restart (1.128959ms)
+✔ prepare and runner isolate networking, credential access and writable evidence (0.114208ms)
+✔ runner-check preserves original credential visibility for metadata-only access denial proof (0.091208ms)
+✔ broker admits only exact IPv4 hosts and its three writable locations (0.07625ms)
+✔ broker-check sees the credential path but has no IP family or upstream network (0.075875ms)
+✔ unsafe path interpolation cannot introduce properties, mounts, specifiers or commands (1.614209ms)
+✔ unknown fields, duplicate principals and invalid numeric resource declarations refuse (0.328875ms)
+✔ network declarations cannot widen an exact IPv4 host into DNS, CIDR, IPv6 or injected properties (0.259583ms)
+✔ generation is deterministic and leaves its declaration unchanged (0.357375ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 147.1405
