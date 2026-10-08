@@ -1,0 +1,9 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/replay.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/replay.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/replay.test.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/conversation-qualification/replay.test.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+✖ 2 problems (2 errors, 0 warnings)
+

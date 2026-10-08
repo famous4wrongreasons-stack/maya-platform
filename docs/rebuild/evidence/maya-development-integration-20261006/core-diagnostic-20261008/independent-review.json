@@ -1,0 +1,26 @@
+{
+  "reviewer": "independent_review agent",
+  "status": "qualified-code-pass",
+  "blockingFindings": [],
+  "scope": [
+    "strict required/stable conversation correlation",
+    "actual response history and stop on unknown",
+    "3500 model reply bound; deterministic C9 might be longer and then fails closed",
+    "derived-development batch no gold, proposed only limits, no inherited paid authority"
+  ],
+  "codeCandidate": "4b86ba27ef01001838d09c371e5018f77b892ce0",
+  "servicesOrTestsRunByReviewer": false,
+  "artifactReview": {
+    "status": "qualified-pass",
+    "candidateManifestSha256": "f78d5d0f4a1fcb08521df4f985e131fd384830c96ab856b1cf913eb89b7bd391",
+    "sourceHashesAndGitBlobsVerified": 2404,
+    "rawCopiesVerified": 17,
+    "mismatches": 0,
+    "testsConfirmed": 26,
+    "eslintFailurePreserved": true,
+    "metadataStatus": "INCOMPLETE",
+    "actualDialoguesExecuted": 0,
+    "freshProcessInspectionByReviewer": false,
+    "fourGroupsReportedClosedAndAbsent": true
+  }
+}

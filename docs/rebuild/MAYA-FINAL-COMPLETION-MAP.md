@@ -1239,18 +1239,19 @@ older entries above retain their original, narrower evidence qualifications.
   restart, exact settled replay and late canonical policy drift. Prior current
   React and booking proofs remain separately qualified. Provider facts/planning
   are synthetic; component expiry is not natural elapsed HTTP or worker-crash recovery.
-- **Missing implementation/preparation:** one strict current-candidate conversational
-  adapter/frozen diagnostic with retained actual replies and required conversation
-  correlation; the current keyless broker has no live upstream/credential admission,
+- **Missing implementation:** [the 3-dialogue / 5-turn diagnostic and strict replay](MAYA-CORE-CONVERSATION-PREFLIGHT-20261008.md)
+  are now prepared on candidate `4b86ba27` (2,404 bound app/backend files; 26 local
+  mechanical checks). The five-turn HTTP fixture adapter is still pending;
+  the current keyless broker has no live upstream/credential admission,
   and its offline budget does not implement the proposed smaller diagnostic cap.
-  A actually crashed DISPATCHED worker and naturally elapsed expiry remain unqualified,
+  An actually crashed DISPATCHED worker and naturally elapsed expiry remain unqualified,
   without extending this completed bounded checkpoint into another audit.
 - **External qualification:** real-model natural Russian, typos, follow-ups, entity
   replacement, topic switching, compound/general chat, roles and UNKNOWN behavior;
   real YCLIENTS and deployment are separate. A small authored diagnostic cannot
   establish 99% quality, a holdout score or overall MAYA/C10 acceptance.
-- **Decision and nearest deliverable:** freeze one core conversational candidate and
-  a small diagnostic first. Resolve exact isolated runner/profile and credential
+- **Decision and nearest deliverable:** attach the frozen diagnostic to current HTTP
+  fixtures and implement its restrictive broker/budget profile. Resolve exact isolated runner/profile and credential
   reference/owner/authorized reader metadata, then a fresh bounded model permit;
   the old permit is closed. No new SSH, secret read or paid call is authorized here.
   Warehouse/OCR/Linux portability, design, multi-company schema and background

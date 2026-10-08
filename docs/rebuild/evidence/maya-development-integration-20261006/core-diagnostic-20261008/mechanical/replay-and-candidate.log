@@ -1,0 +1,34 @@
+✔ offline binding is mandatory, no default/live transport or old ledger resume (22.977209ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (60.481708ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (40.45125ms)
+✔ short writes are completed before dispatch and zero progress fails closed (59.62775ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (53.841334ms)
+✔ early wakeup cannot dispatch before the minimum interval (40.708125ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (956.767792ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (1166.578959ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (26.559583ms)
+✔ 24 dialog and 64 turn caps apply independently (516.209459ms)
+✔ wall time and clock reversal cannot reopen budget (54.922167ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (59.816458ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (34.04725ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (41.9375ms)
+✔ oversized output is unresolved, with full reservation kept (43.713333ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (7.290875ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (2.230666ms)
+✔ existing replay rejects tampered manifest before opening a dialog (4.193958ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (3261.508417ms)
+✔ freezes reproducible balanced dev selection, identifies correlated families, and keeps test holdout untouched (19.286208ms)
+✔ replays only real assistant responses with canonical body, no labels or gold responses (3.389084ms)
+✔ unknown result stops without retry, closes fixture and does not serialize exception secrets (3.430917ms)
+✔ tampered manifest refuses before opening fixture (2.910459ms)
+✔ missing or changed conversation correlation stops before any follow-up or retry (18.846834ms)
+✔ retains the current 3500-character reply in actual history and refuses an oversized response (5.536834ms)
+✔ client-first slice covers only booking groups and keeps independent families visible (2.774ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6488.687042

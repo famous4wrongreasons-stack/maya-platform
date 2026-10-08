@@ -1,0 +1,112 @@
+{
+  "contract": "maya.core-conversation-followup-roadmap/1",
+  "status": "PROPOSED_NOT_FROZEN_NOT_EXECUTABLE",
+  "paidAuthorized": false,
+  "inheritsFirstBatchAuthority": false,
+  "qualification": "Follow-up coverage only. No independent families, passes, new capabilities or language acceptance claimed.",
+  "coverage": [
+    {
+      "area": "natural_RU_typos",
+      "sources": [
+        "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl"
+      ],
+      "selection": "dev style=typo only; keep exact source row IDs and SHA; separate spelling robustness from genuinely ambiguous period/daypart",
+      "checks": [
+        "no fabricated entity resolution",
+        "appropriate clarification without losing accepted context"
+      ]
+    },
+    {
+      "area": "entity_replacement",
+      "sources": [
+        "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+        "maya-saas-backend/datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json"
+      ],
+      "sourceCases": [
+        "current-booking-correction",
+        "name-role-correction",
+        "multi-service-boundary"
+      ],
+      "checks": [
+        "current explicit service/staff/date/time replaces only stated fields",
+        "self-name and negated mention do not select staff",
+        "no fabricated multi-service support"
+      ]
+    },
+    {
+      "area": "topic_switch_and_return",
+      "sources": [
+        "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl"
+      ],
+      "sourceCases": [
+        "mt-topic_switch_and_return-0"
+      ],
+      "checks": [
+        "new purpose does not inherit old execution authority",
+        "returning to topic uses current source and explicit scope",
+        "known unsupported branch/period yields honest clarification"
+      ]
+    },
+    {
+      "area": "general_chat",
+      "sources": [
+        "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+        "maya-saas-backend/test/widgets-diagnostics/support/development-integration-fixture.ts"
+      ],
+      "selection": "dev small_talk only plus exact existing general prompt; freeze role and follow-up separately",
+      "checks": [
+        "coherent ordinary response",
+        "no invented source claim",
+        "no needless mutation or business data access"
+      ]
+    },
+    {
+      "area": "create",
+      "sources": [
+        "maya-saas-backend/datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json",
+        "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts"
+      ],
+      "sourceCases": [
+        "confirmation-original"
+      ],
+      "checks": [
+        "separate free-text intention from explicit carrier COMMIT",
+        "canonical preview/source/actor correlation",
+        "actual receipt required for success"
+      ],
+      "boundary": "Initial diagnostic ends at read/preview; later synthetic carrier execution needs separately frozen action scope."
+    },
+    {
+      "area": "move_cancel_stop",
+      "sources": [
+        "maya-saas-backend/datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json",
+        "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts"
+      ],
+      "sourceCases": [
+        "stop-original"
+      ],
+      "checks": [
+        "existing owned appointment and current verified principal",
+        "exact move/cancel target and explicit confirmation",
+        "stop never mutates or revives pending action"
+      ],
+      "boundary": "No existing source label is treated as proof of a completed move/cancel; later fixture must provide actual owned appointment and exact receipt."
+    },
+    {
+      "area": "UNKNOWN_and_restart",
+      "sources": [
+        "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts",
+        "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+        "maya-saas-backend/scripts/conversation-qualification/replay.test.mjs"
+      ],
+      "checks": [
+        "lost response stops without repeated mutation/model dispatch",
+        "reload reads actual persisted history and same principal",
+        "revocation and foreign scope refuse",
+        "restart preserves reservations and immutable receipts without paid-permit reuse"
+      ],
+      "boundary": "Separate synthetic persistence/transport proof first. No real UNKNOWN dispatch or paid restart is authorized."
+    }
+  ],
+  "holdoutPolicy": "Do not tune against adversarial.jsonl or contrastive.jsonl test split; known train/dev-derived cases are never renamed independent holdout."
+}

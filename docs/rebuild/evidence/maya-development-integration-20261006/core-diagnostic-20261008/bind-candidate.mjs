@@ -1,0 +1,22 @@
+// One-shot, read-only source freeze. No transport, secret loader or paid mode.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const repo='/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration';
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const git=(args)=>execFileSync('git',args,{cwd:repo,encoding:'utf8'});
+const candidate=git(['rev-parse','HEAD']).trim();
+const scopes=['maya-saas-backend/src','maya-saas-backend/prisma','maya-saas-backend/scripts/conversation-qualification','maya-saas-backend/datasets/conversation-intelligence','maya-saas-backend/test/widgets-live','maya-saas-backend/test/jest-current-candidate-http.json','maya-saas-backend/test/jest-widgets-live.json','maya-saas-backend/test/tsconfig.widgets-live.json','maya-saas-backend/package.json','maya-saas-backend/package-lock.json','maya-saas-backend/prisma.config.ts','maya-saas-backend/tsconfig.json','maya-saas-backend/tsconfig.build.json','maya-carrier-react','maya-chat-shell'];
+assert.equal(git(['status','--porcelain','--untracked-files=normal','--',...scopes]),'','Freeze only committed app/backend bytes');
+const files=git(['ls-files','-z','--',...scopes]).split('\0').filter(Boolean).sort();
+const sourceHashes=Object.fromEntries(files.map(f=>[f,sha(fs.readFileSync(path.join(repo,f)))]));
+const batchPath='maya-saas-backend/datasets/conversation-intelligence/core-diagnostic-20261008.json';
+const batch=JSON.parse(fs.readFileSync(path.join(repo,batchPath),'utf8'));
+assert.equal(batch.paidAuthorized,false);assert.equal(batch.limitsExecutable,false);
+const manifest={version:1,purpose:'pilot_calibration_not_qualification',status:'FROZEN_CORE_DIAGNOSTIC_NOT_EXECUTED',split:'dev',candidateCommit:candidate,sourceHashes,batchSha256:sourceHashes[batchPath],dialogs:3,userTurns:5,independentFamilies:0,roles:['client','owner','admin'],paidAuthorized:false,actualModelCalls:0,actualProviderCalls:0,appBackendCandidateBound:true,httpFixturesQualifiedForThisBatch:false,liveTransportImplemented:false,limitsExecutable:false,proposedLimits:batch.proposedLimits,cases:batch.cases,qualification:'Known derived development inputs only. Correlation and replay mechanics tested separately. No conversational/model/provider acceptance.'};
+manifest.manifestSha256=sha(JSON.stringify(manifest));
+const output='/tmp/maya-core-conversation-20261008/candidate-manifest.json';
+fs.writeFileSync(output,JSON.stringify(manifest,null,2)+'\n',{flag:'wx',mode:0o600});
+console.log(JSON.stringify({candidate,sourceFiles:files.length,manifestSha256:manifest.manifestSha256,batchSha256:manifest.batchSha256,paidAuthorized:false}));

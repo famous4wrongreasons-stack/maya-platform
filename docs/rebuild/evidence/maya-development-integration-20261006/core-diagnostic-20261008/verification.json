@@ -1,0 +1,32 @@
+{
+  "contract": "maya.core-diagnostic-preparation/1",
+  "status": "PREPARED_NOT_EXECUTED",
+  "candidateCommit": "4b86ba27ef01001838d09c371e5018f77b892ce0",
+  "candidateManifestSha256": "f78d5d0f4a1fcb08521df4f985e131fd384830c96ab856b1cf913eb89b7bd391",
+  "sourceFiles": 2404,
+  "dialogs": 3,
+  "userTurns": 5,
+  "mechanicalTests": 26,
+  "formatAndParse": true,
+  "eslint": "NOT_QUALIFIED: repo TypeScript project service excludes these existing .mjs files; exact failed invocation retained, no config suppression",
+  "provenanceVerified": true,
+  "actualAssistantHistoryMechanicsChecked": true,
+  "modelRepliesEvaluated": 0,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "credentialsRead": false,
+  "resourcesCreatedByMetadataPreflight": false,
+  "paidAuthorized": false,
+  "ownedGroupsAbsent": 4,
+  "currentLocalNode": "24.15.0",
+  "currentLocalPostgres": "16.14",
+  "metadataPreflightStatus": "INCOMPLETE",
+  "limitations": [
+    "Candidate binds app/backend source, not new build/browser/runtime acceptance.",
+    "Five-user-turn fixture/live adapter has not been executed or qualified.",
+    "Metadata preflight uses existing 24-case manifest and unknown example profile; this is not admission for the five-turn batch.",
+    "Proposed USD2/12attempt/10minute ceiling is not executable in current offline-only USD12/96attempt gate.",
+    "Live broker/target/credential reference and fresh owner authorization still missing.",
+    "No model quality or 99% conclusion; known derived development cases only."
+  ]
+}

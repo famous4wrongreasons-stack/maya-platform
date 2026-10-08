@@ -1,0 +1,32 @@
+{
+  "contract": "maya.core-conversation-mechanical/1",
+  "status": "passed",
+  "sourceHashes": {
+    "scripts/conversation-qualification/replay.mjs": "2743112c4ab780cb4ce85f6a51813c7364b4c10c7badcdc71e54c2dbf92c551b",
+    "scripts/conversation-qualification/replay.test.mjs": "c01931d7959e926ffd4f5522af98682d542762fab3b61f235b0173e527f301d5",
+    "datasets/conversation-intelligence/core-diagnostic-20261008.json": "b793c5489dcd8838e4edc6bca6c00c53530b57892c29520876845608786e2dc6"
+  },
+  "provenanceAndFiveTurnsVerified": true,
+  "modelCalls": 0,
+  "providerCalls": 0,
+  "paidAuthorized": false,
+  "qualification": "LOCAL_TEST_ADAPTER_RESPONSES_ONLY_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE",
+  "completed": [
+    "format-and-parse"
+  ],
+  "groups": {
+    "format-and-parse": {
+      "detached": true,
+      "pid": 38838,
+      "pgid": 38838,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceUnchanged": true
+}
