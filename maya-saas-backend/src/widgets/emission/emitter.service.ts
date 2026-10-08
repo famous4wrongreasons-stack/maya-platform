@@ -1189,17 +1189,16 @@ export class WidgetEmitterService {
         request.tenantId,
         request.conversationId,
       );
-      const turn = await tx.widgetTimelineTurn.findFirst({
-        where: {
+      const turn = await TimelineStore.readLiveTurnIdentity(
+        tx,
+        {
           tenantId: request.tenantId,
           id: request.turnId,
           conversationId: request.conversationId,
           principalProofHash: principal.proofHash,
-          erasedAt: null,
-          retentionUntil: { gt: now },
         },
-        select: { id: true },
-      });
+        now,
+      );
       if (turn === null)
         throw new IntentTemplateRefusal('emission_turn_unavailable');
       if (approvalParentWidgetId !== null) {

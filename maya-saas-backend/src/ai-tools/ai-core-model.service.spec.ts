@@ -237,7 +237,7 @@ describe('AiCoreModelService', () => {
     };
     expect(modelInput.phase).toBe('tool_planning');
     expect(modelInput.required_tools).toEqual(['analytics.business.query']);
-    expect(modelInput.response_contract).toBeUndefined();
+    expect(modelInput.response_contract).not.toHaveProperty('reply');
     expect(
       (request?.[1]?.headers as Record<string, string>).Authorization,
     ).toBe('Bearer server-only-deepseek-key');

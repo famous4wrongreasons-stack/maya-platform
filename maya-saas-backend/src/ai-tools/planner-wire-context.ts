@@ -4,6 +4,10 @@ import type {
 } from '../conversation-intelligence/conversation-intelligence.types';
 import type { AiCoreToolDescriptor } from './ai-core.types';
 
+// Request-local indexes for these four repeated labels only. The actual values
+// remain in the same message; no intent, permission or readiness row is removed.
+const LABEL_COLUMNS = ['domain', 'action', 'data_class', 'readiness'] as const;
+
 /** Request-local wire representation only. No filtering, routing or authority. */
 export function plannerWireContext(
   tools: AiCoreToolDescriptor[],
@@ -25,6 +29,12 @@ export function plannerWireContext(
   const columns = Object.keys(contract.intents[0] ?? {}) as Array<
     keyof ConversationPlannerIntent
   >;
+  const dictionaries = Object.fromEntries(
+    LABEL_COLUMNS.map((key) => [
+      key,
+      [...new Set(contract.intents.map((intent) => intent[key]))],
+    ]),
+  ) as Record<(typeof LABEL_COLUMNS)[number], string[]>;
   const rows = contract.intents.map((intent) => {
     // Fail loudly on a heterogeneous future contract rather than drop a field.
     if (
@@ -32,7 +42,13 @@ export function plannerWireContext(
       columns.some((key) => !Object.prototype.hasOwnProperty.call(intent, key))
     )
       throw new Error('planner_intent_shape_mismatch');
-    return columns.map((key) => intent[key]);
+    return columns.map((key) =>
+      Object.prototype.hasOwnProperty.call(dictionaries, key)
+        ? dictionaries[key as keyof typeof dictionaries].indexOf(
+            intent[key] as string,
+          )
+        : intent[key],
+    );
   });
   const toolColumns = Object.keys(available[0] ?? {});
   const homogeneous = available.every(
@@ -52,9 +68,12 @@ export function plannerWireContext(
         }
       : available,
     tool_input_schemas: schemas,
-    conversation_contract: { ...contract, intents: { columns, rows } },
+    conversation_contract: {
+      ...contract,
+      intents: { columns, rows, dictionaries },
+    },
   };
 }
 
 export const PLANNER_WIRE_INSTRUCTIONS =
-  'WIRE REPRESENTATION: available_tools and conversation_contract.intents use {columns,rows}: each row contains field values in column order. Read rows as complete objects, including denied and planned intents. available_tools may also contain ordinary descriptor objects. input_schema_ref indexes the complete schema in tool_input_schemas (zero-based). All descriptions, readiness, permissions, slots and policies remain authoritative.';
+  'WIRE REPRESENTATION: available_tools and conversation_contract.intents use {columns,rows}: each row contains field values in column order. For intent columns named in dictionaries, expand each zero-based cell index using that column dictionary. Read rows as complete objects, including denied and planned intents. available_tools may also contain ordinary descriptor objects. input_schema_ref indexes the complete schema in tool_input_schemas (zero-based). All descriptions, readiness, permissions, slots and policies remain authoritative.';

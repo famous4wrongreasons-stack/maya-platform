@@ -8,13 +8,11 @@ import {
 } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
-import { stableActionJson } from '../../action-engine/action-engine.identity';
 import { PrismaService } from '../../prisma/prisma.service';
 import { meets } from '../authority/ladder';
 import type { PrincipalResolver, RequestTx } from '../authority/principal-view';
 import { PRINCIPAL_RESOLVER } from '../di-tokens';
 import { TimelineStore } from '../stores/timeline.store';
-import { sha256Hex } from '../token.util';
 import { WidgetConversationErasureJob } from './erasure.job';
 import { historyErasureInput } from './history-erasure.dto';
 
@@ -57,9 +55,12 @@ export class HistoryErasureOwner {
     if (!actor.tenantId || !actor.userId || !actor.sessionId)
       throw new ForbiddenException('history_erasure_principal_unavailable');
     const tenantId = actor.tenantId;
-    const requestDigest = sha256Hex(
-      stableActionJson([REQUEST_NAMESPACE, tenantId, actor.userId, requestId]),
-    );
+    const requestDigest = TimelineStore.historyErasureIdentityDigest([
+      REQUEST_NAMESPACE,
+      tenantId,
+      actor.userId,
+      requestId,
+    ]);
     const requestPrefix = `${REQUEST_NAMESPACE}:${requestDigest}:`;
     const complete = (erasedAt: Date): HistoryErasureCompletion => {
       if (!(erasedAt instanceof Date) || !Number.isFinite(erasedAt.getTime()))
@@ -87,15 +88,13 @@ export class HistoryErasureOwner {
         if (principal.proofHash !== initial.proofHash)
           throw new ForbiddenException('history_erasure_principal_unavailable');
         const now = await TimelineStore.readDatabaseClock(tx);
-        const scopeDigest = sha256Hex(
-          stableActionJson([
-            `${REQUEST_NAMESPACE}/scope`,
-            tenantId,
-            actor.userId,
-            principal.proofHash,
-            conversationId,
-          ]),
-        );
+        const scopeDigest = TimelineStore.historyErasureIdentityDigest([
+          `${REQUEST_NAMESPACE}/scope`,
+          tenantId,
+          actor.userId,
+          principal.proofHash,
+          conversationId,
+        ]);
         const erasureRequestRef = `${requestPrefix}${scopeDigest}`;
 
         // A successful job creates MANY rows for one ref. Bound DISTINCT refs,

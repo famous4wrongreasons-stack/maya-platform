@@ -75,6 +75,11 @@ export class TimelineStore {
     private readonly encryption?: ChatReplyCipher,
   ) {}
 
+  /** Keyless privacy request identity; preserves the existing ordered JSON-string-array bytes. */
+  static historyErasureIdentityDigest(parts: readonly string[]): string {
+    return sha256Hex(stableActionJson(parts));
+  }
+
   /** Retention/admission use the transaction's PostgreSQL clock, never the app clock. */
   static async readDatabaseClock(
     tx: Pick<RequestTx, '$queryRaw'>,
@@ -754,6 +759,27 @@ export class TimelineStore {
   ): Promise<{ id: string } | null> {
     return tx.widgetTimelineTurn.findFirst({
       where: scoped(input.tenantId, {
+        conversationId: input.conversationId,
+        principalProofHash: input.principalProofHash,
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      }),
+      select: { id: true },
+    });
+  }
+
+  /** Minter liveness fence on the caller transaction; no role inference or transcript projection. */
+  static readLiveTurnIdentity(
+    tx: Pick<TimelineClient, 'widgetTimelineTurn'>,
+    input: Pick<
+      TimelineTurnInput,
+      'tenantId' | 'conversationId' | 'principalProofHash'
+    > & { id: string },
+    now: Date,
+  ): Promise<{ id: string } | null> {
+    return tx.widgetTimelineTurn.findFirst({
+      where: scoped(input.tenantId, {
+        id: input.id,
         conversationId: input.conversationId,
         principalProofHash: input.principalProofHash,
         erasedAt: null,

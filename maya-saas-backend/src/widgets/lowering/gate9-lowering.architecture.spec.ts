@@ -375,6 +375,7 @@ const STORE_METHOD_ALLOWLIST = new Set([
   'readUserTurn',
   'assertConversation',
   'readLiveConversationAnchor', // privacy metadata only; never transcript content
+  'readLiveTurnIdentity', // exact minter parent identity; never transcript content
   'assertNotErased', // private late-writer fence inside the single turn owner
   'ensureAssistantExecutionTurn',
   'appendTurn',
@@ -647,7 +648,11 @@ describe('T-ARCH-STORE-METHODS — no second method reaches the turn table (9.11
 
   it('T-ARCH-STORE-ERASURE privacy reaches only a live identity projection and the existing RT6 job', () => {
     const source = parseSrc('widgets/stores/timeline.store.ts');
-    for (const name of ['readLiveConversationAnchor', 'assertNotErased']) {
+    for (const name of [
+      'readLiveConversationAnchor',
+      'readLiveTurnIdentity',
+      'assertNotErased',
+    ]) {
       const method = declarationOf(source, name);
       expect(method).not.toBeNull();
       const text = method!.getText(source);
@@ -661,6 +666,11 @@ describe('T-ARCH-STORE-METHODS — no second method reaches the turn table (9.11
       expect(text).not.toMatch(
         /\btextContent\b|\bspokenTranscript\b|\bsemanticContext\b/,
       );
+      if (name === 'readLiveTurnIdentity') {
+        expect(text).toContain('id: input.id');
+        expect(text).toContain('erasedAt: null');
+        expect(text).toContain('retentionUntil: { gt: now }');
+      }
     }
     const owner = parseSrc('widgets/consent/history-erasure.owner.ts');
     expect(
@@ -673,6 +683,11 @@ describe('T-ARCH-STORE-METHODS — no second method reaches the turn table (9.11
     expect(callsOf(owner, 'readLiveConversationAnchor')).toBe(1);
     expect(callsOf(owner, 'hasUnlinkedDraftContent')).toBe(1);
     expect(callsOf(owner, 'lockRequest')).toBe(1);
+    const emitter = parseSrc('widgets/emission/emitter.service.ts');
+    expect(callsOf(emitter, 'readLiveTurnIdentity')).toBe(1);
+    expect(
+      prismaOps(emitter).filter((op) => op.startsWith('widgetTimelineTurn.')),
+    ).toEqual([]);
   });
 
   it('T-ARCH-STORE-BOOKING preference recovery reads only identity and retained closed choices, never text or authority', () => {

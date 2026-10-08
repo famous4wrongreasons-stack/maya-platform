@@ -1,4 +1,4 @@
-import type { GoodsReceiptApprovalSnapshot } from '../../ai-tools/ai-approval-widget-trigger.port';
+import type { GoodsReceiptApprovalOwnerPort } from './goods-receipt-approval.port';
 
 /** Exact immutable receipt facts only. No provider read, model text, photo or person data. */
 export const GOODS_RECEIPT_UNCONFIRMED =
@@ -9,7 +9,7 @@ const headlines = {
   UNKNOWN: GOODS_RECEIPT_UNCONFIRMED,
 } as const;
 export function goodsReceiptTerminalText(
-  facts: GoodsReceiptApprovalSnapshot['facts'],
+  facts: Awaited<ReturnType<GoodsReceiptApprovalOwnerPort['read']>>['facts'],
   state: keyof typeof headlines,
 ): string {
   const required = [

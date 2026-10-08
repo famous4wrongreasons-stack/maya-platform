@@ -1,5 +1,6 @@
 import type { RequestTx } from '../authority/principal-view';
 import { TimelineStore, timelineLockKey } from './timeline.store';
+import { sha256Hex } from '../token.util';
 
 const INPUT = Object.freeze({
   tenantId: 'tenant-a',
@@ -279,5 +280,45 @@ describe('TimelineStore privacy anchor projection', () => {
       ),
     ).rejects.toThrow('conversation_scope_conflict');
     expect(findFirst).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([{ id: 'exact-turn' }, null])(
+    'minter reads only its exact live turn identity and preserves absence: %j',
+    async (result) => {
+      const findFirst = jest.fn().mockResolvedValue(result);
+      const tx = { widgetTimelineTurn: { findFirst } } as unknown as RequestTx;
+      expect(
+        await TimelineStore.readLiveTurnIdentity(
+          tx,
+          { ...scope, id: 'exact-turn' },
+          NOW,
+        ),
+      ).toEqual(result);
+      expect(findFirst).toHaveBeenCalledTimes(1);
+      expect(findFirst).toHaveBeenCalledWith({
+        where: {
+          ...scope,
+          id: 'exact-turn',
+          erasedAt: null,
+          retentionUntil: { gt: NOW },
+        },
+        select: { id: true },
+      });
+    },
+  );
+
+  it('privacy identity digest retains original ordered JSON bytes including escapes and Unicode', () => {
+    const parts = [
+      'maya.privacy.history-erasure/1',
+      'tenant:"\\\n',
+      'Пользователь 👩🏽‍💻',
+      '00000000-0000-4000-8000-000000000001',
+    ];
+    expect(TimelineStore.historyErasureIdentityDigest(parts)).toBe(
+      sha256Hex(JSON.stringify(parts)),
+    );
+    expect(
+      TimelineStore.historyErasureIdentityDigest([...parts].reverse()),
+    ).not.toBe(TimelineStore.historyErasureIdentityDigest(parts));
   });
 });

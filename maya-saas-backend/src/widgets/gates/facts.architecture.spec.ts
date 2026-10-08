@@ -185,65 +185,122 @@ const withoutGoodsSnapshotFacts = (unit: SourceUnit): string => {
   const spans: { start: number; end: number }[] = [];
   const text = (node: ts.Node | undefined): string =>
     node?.getText(sf).replace(/\s+/g, '') ?? '';
-  const functionOf = (
+  // Bind this source only. No dependency/lib loading, type-check run or file I/O.
+  // Symbols distinguish an original snapshot captured by a closure from an arrow
+  // parameter, block local, catch binding or other declaration shadowing its name.
+  const program = ts.createProgram(
+    [unit.file],
+    { noLib: true, noResolve: true },
+    {
+      getSourceFile: (file) => (file === unit.file ? sf : undefined),
+      getDefaultLibFileName: () => '',
+      writeFile: () => undefined,
+      getCurrentDirectory: () => '',
+      getDirectories: () => [],
+      fileExists: (file) => file === unit.file,
+      readFile: (file) => (file === unit.file ? unit.source : undefined),
+      getCanonicalFileName: (file) => file,
+      useCaseSensitiveFileNames: () => true,
+      getNewLine: () => '\n',
+    },
+  );
+  const checker = program.getTypeChecker();
+  const boundTo = (
     node: ts.Node,
-  ): ts.FunctionDeclaration | ts.MethodDeclaration | null => {
-    for (let p = node.parent; p; p = p.parent)
-      if (ts.isFunctionDeclaration(p) || ts.isMethodDeclaration(p)) return p;
-    return null;
-  };
+    declaration: ts.Declaration | undefined,
+  ): boolean =>
+    declaration !== undefined &&
+    ts.isIdentifier(node) &&
+    checker.getSymbolAtLocation(node)?.declarations?.includes(declaration) ===
+      true;
+  const functionNamed = (name: string) =>
+    sf.statements.find(
+      (st): st is ts.FunctionDeclaration =>
+        ts.isFunctionDeclaration(st) && text(st.name) === name,
+    );
+  const parameter = (
+    owner: ts.FunctionDeclaration | ts.MethodDeclaration | undefined,
+    name: string,
+    type: string,
+  ) =>
+    owner?.parameters.find(
+      (p) => text(p.name) === name && text(p.type) === type,
+    );
+  const local = (
+    owner: ts.FunctionDeclaration | ts.MethodDeclaration | undefined,
+    name: string,
+    type: string,
+  ) =>
+    owner?.body?.statements
+      .flatMap((st) =>
+        ts.isVariableStatement(st) ? [...st.declarationList.declarations] : [],
+      )
+      .find((d) => text(d.name) === name && text(d.type) === type);
+  const presenter =
+    unit.file === files[0]
+      ? functionNamed('goodsReceiptApprovalMintRequest')
+      : undefined;
+  const snapshot =
+    text(presenter?.type) === 'MintRequest'
+      ? parameter(presenter, 'snapshot', 'GoodsReceiptApprovalSnapshot')
+      : undefined;
+  const fact = snapshot ? local(presenter, 'fact', 'FactUsed') : undefined;
+  const terminal =
+    unit.file === files[1]
+      ? functionNamed('goodsReceiptTerminalText')
+      : undefined;
+  const terminalFacts = parameter(
+    terminal,
+    'facts',
+    "Awaited<ReturnType<GoodsReceiptApprovalOwnerPort['read']>>['facts']",
+  );
+  const adapter =
+    unit.file === files[2]
+      ? sf.statements.find(
+          (st): st is ts.ClassDeclaration =>
+            ts.isClassDeclaration(st) &&
+            text(st.name) === 'GoodsReceiptApprovalAdapter',
+        )
+      : undefined;
+  const method = (name: string) =>
+    adapter?.members.find(
+      (member): member is ts.MethodDeclaration =>
+        ts.isMethodDeclaration(member) && text(member.name) === name,
+    );
+  const ownerSnapshotType =
+    "Awaited<ReturnType<GoodsReceiptApprovalAdapter['read']>>";
+  const terminalSource = parameter(
+    method('recordTerminal'),
+    'source',
+    ownerSnapshotType,
+  );
+  const decisionSource = local(
+    method('decide'),
+    'source',
+    `${ownerSnapshotType}|undefined`,
+  );
   const visit = (node: ts.Node): void => {
-    const owner = functionOf(node);
-    const name = text(owner?.name);
-    const parameter = (name: string, type: string): boolean =>
-      owner?.parameters.some(
-        (p) => text(p.name) === name && text(p.type) === type,
-      ) ?? false;
-    const snapshotPresenter =
-      unit.file === files[0] &&
-      name === 'goodsReceiptApprovalMintRequest' &&
-      text(owner?.type) === 'MintRequest' &&
-      parameter('snapshot', 'GoodsReceiptApprovalSnapshot');
-    const terminalPresenter =
-      unit.file === files[1] &&
-      name === 'goodsReceiptTerminalText' &&
-      parameter('facts', "GoodsReceiptApprovalSnapshot['facts']");
-    const ownerSnapshotType =
-      "Awaited<ReturnType<GoodsReceiptApprovalAdapter['read']>>";
-    const adapterSnapshot =
-      unit.file === files[2] &&
-      owner !== null &&
-      ((name === 'recordTerminal' && parameter('source', ownerSnapshotType)) ||
-        (name === 'decide' &&
-          owner.body?.statements.some(
-            (st) =>
-              ts.isVariableStatement(st) &&
-              st.declarationList.declarations.some(
-                (d) =>
-                  text(d.name) === 'source' &&
-                  text(d.type) === `${ownerSnapshotType}|undefined`,
-              ),
-          )));
     const copiedSnapshot =
       ts.isPropertyAccessExpression(node) &&
-      ((snapshotPresenter && text(node) === 'snapshot.facts') ||
-        (adapterSnapshot && text(node) === 'source.facts'));
-    const terminalSnapshot =
-      terminalPresenter &&
-      ts.isIdentifier(node) &&
-      node.text === 'facts' &&
-      !ts.isParameter(node.parent) &&
-      !(
-        ts.isPropertyAccessExpression(node.parent) && node.parent.name === node
+      node.name.text === 'facts' &&
+      [snapshot, terminalSource, decisionSource].some((declaration) =>
+        boundTo(node.expression, declaration),
       );
+    const terminalSnapshot =
+      boundTo(node, terminalFacts) && node !== terminalFacts?.name;
     const composerEvidence =
-      snapshotPresenter &&
+      fact !== undefined &&
       ts.isPropertyAssignment(node) &&
       text(node.name) === 'facts' &&
-      text(node.initializer) === '[fact]' &&
+      ts.isArrayLiteralExpression(node.initializer) &&
+      node.initializer.elements.length === 1 &&
+      boundTo(node.initializer.elements[0], fact) &&
       ts.isObjectLiteralExpression(node.parent) &&
       ts.isPropertyAssignment(node.parent.parent) &&
-      text(node.parent.parent.name) === 'composerInput';
+      text(node.parent.parent.name) === 'composerInput' &&
+      ts.isObjectLiteralExpression(node.parent.parent.parent) &&
+      ts.isReturnStatement(node.parent.parent.parent.parent) &&
+      node.parent.parent.parent.parent.parent === presenter?.body;
     if (copiedSnapshot || terminalSnapshot || composerEvidence) {
       spans.push({ start: node.getStart(sf), end: node.end });
       return;
@@ -420,11 +477,62 @@ describe('T-ARCH-FACTS — who may produce and who may read each fact', () => {
         slot: null,
         file,
         source: source.replace(
-          "GoodsReceiptApprovalSnapshot['facts']",
+          "Awaited<ReturnType<GoodsReceiptApprovalOwnerPort['read']>>['facts']",
           'AdmissionFacts',
         ),
       }).length,
     ).toBeGreaterThan(0);
+  });
+
+  it('goods source exemptions follow lexical bindings through captures, never shadowed parameters or locals', () => {
+    const cases = [
+      {
+        file: 'inventory/goods-receipt-terminal.presenter.ts',
+        anchor: '  const required = [',
+        capture:
+          'const capture = () => facts.goods_id; function nested() { return facts.goods_id; }',
+        shadows: [
+          'const nested = (facts: AdmissionFacts) => facts.loweredTurn;',
+          '{ const facts = {} as AdmissionFacts; const turn = facts.loweredTurn; }',
+          'function nested(facts: AdmissionFacts) { return facts.loweredTurn; }',
+          'try {} catch (facts) { const turn = facts.loweredTurn; }',
+        ],
+      },
+      {
+        file: 'inventory/goods-receipt-approval.presenter.ts',
+        anchor: '  const fact: FactUsed = {',
+        capture: 'const capture = () => snapshot.facts.goods_name;',
+        shadows: [
+          'const nested = (snapshot: { facts: AdmissionFacts }) => snapshot.facts.loweredTurn;',
+          '{ const snapshot = {} as { facts: AdmissionFacts }; const turn = snapshot.facts.loweredTurn; }',
+        ],
+      },
+      {
+        file: 'owner-ports/goods-receipt-approval.adapter.ts',
+        anchor: '    const r = input.routing.record;',
+        capture: 'const capture = () => source.facts.goods_id;',
+        shadows: [
+          'const nested = (source: { facts: AdmissionFacts }) => source.facts.loweredTurn;',
+          '{ const source = {} as { facts: AdmissionFacts }; const turn = source.facts.loweredTurn; }',
+        ],
+      },
+    ];
+    for (const { file, anchor, capture, shadows } of cases) {
+      const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+      expect(source).toContain(anchor);
+      const withSnippet = (snippet: string) => ({
+        slot: null,
+        file,
+        source: source.replace(anchor, `${snippet}\n${anchor}`),
+      });
+      expect(factViolations(withSnippet(capture))).toEqual([]);
+      for (const shadow of shadows)
+        expect(factViolations(withSnippet(shadow))).toEqual(
+          expect.arrayContaining([
+            expect.stringContaining('no slot reads loweredTurn'),
+          ]),
+        );
+    }
   });
 
   it('the goods approval edge reads the Class A turn only as the derived slot 13 helper', () => {

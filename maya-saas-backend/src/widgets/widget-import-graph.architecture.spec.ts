@@ -1147,8 +1147,21 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         'stores/timeline.store.ts:$queryRaw',
         'consent/erasure.job.ts:$transaction',
         'consent/erasure.job.ts:$executeRaw',
+        'consent/erasure.job.ts:$queryRaw',
       ]),
     );
+    // Raw SQL belongs to the existing timeline/RT6 owners. The privacy owner
+    // only reads its immutable request tombstones; its advisory write lock and
+    // orphan-provenance query are delegated to the RT6 job.
+    expect(
+      [...seen].filter((x) => /:\$(?:execute|query)Raw/.test(x)).sort(),
+    ).toEqual([
+      'consent/erasure.job.ts:$executeRaw',
+      'consent/erasure.job.ts:$queryRaw',
+      'consent/history-erasure.owner.ts:$queryRaw',
+      'stores/timeline.store.ts:$executeRaw',
+      'stores/timeline.store.ts:$queryRaw',
+    ]);
     expect(
       [...seen].every(
         (x) =>
@@ -1156,7 +1169,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
           x === 'stores/timeline.store.ts:$executeRaw' ||
           x === 'stores/timeline.store.ts:$queryRaw' ||
           x === 'consent/erasure.job.ts:$executeRaw' ||
-          x === 'consent/history-erasure.owner.ts:$executeRaw' ||
+          x === 'consent/erasure.job.ts:$queryRaw' ||
           x === 'consent/history-erasure.owner.ts:$queryRaw',
       ),
     ).toBe(true);

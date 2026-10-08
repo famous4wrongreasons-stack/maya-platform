@@ -106,12 +106,27 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
       expect({
         ...rest,
         intents: intents.rows.map((row) =>
-          Object.fromEntries(intents.columns.map((key, i) => [key, row[i]])),
+          Object.fromEntries(
+            intents.columns.map((key, i) => [
+              key,
+              Object.prototype.hasOwnProperty.call(intents.dictionaries, key)
+                ? intents.dictionaries[
+                    key as keyof typeof intents.dictionaries
+                  ][row[i] as number]
+                : row[i],
+            ]),
+          ),
         ),
       }).toEqual(contract);
       expect(intents.columns).toHaveLength(13);
       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
       expect(intents.rows).toHaveLength(89);
+      expect(Object.keys(intents.dictionaries)).toEqual([
+        'domain',
+        'action',
+        'data_class',
+        'readiness',
+      ]);
       expect(contract.intents.some((x) => !x.allowed_for_role)).toBe(true);
       expect(contract.intents.some((x) => x.readiness === 'partial')).toBe(
         true,
@@ -270,7 +285,6 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
           expect(system).toContain(
             'arguments_json must be a string containing one valid JSON object.',
           );
-          expect(data).not.toHaveProperty('response_contract');
           if (role !== UserRole.CLIENT)
             for (const rule of [
               'C7 ФИНАНСОВЫЕ РЕЗУЛЬТАТЫ:',
