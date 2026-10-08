@@ -1,0 +1,108 @@
+{
+  "contract": "maya.service-rename-browser/1",
+  "status": "failed",
+  "syntheticNativeProviderTransport": true,
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "snapshots": {
+    "failure": {
+      "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nПереименуй услугу «Стрижка» в «Новое название»\nСервер MAYA не ответил. Текст остался в поле ввода — отправьте его ещё раз, это будет новый запрос.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "name": "Приватность и данные"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Товар по фото накладной"
+        },
+        {
+          "tag": "TEXTAREA",
+          "name": "Сообщение для MAYA"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Сказать голосом"
+        },
+        {
+          "tag": "BUTTON",
+          "name": "Отправить"
+        }
+      ]
+    }
+  },
+  "observations": {},
+  "carrierOrigin": "http://127.0.0.1:63390",
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "failure": "Timed out: combined real chat response",
+  "failureStack": "Error: Timed out: combined real chat response\n    at until (file:///private/tmp/maya-service-edit-20261008/service-rename-browser-probe.mjs:27:9)\n    at async answer (file:///private/tmp/maya-service-edit-20261008/service-rename-browser-probe.mjs:114:19)\n    at async main (file:///private/tmp/maya-service-edit-20261008/service-rename-browser-probe.mjs:319:20)",
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/m/FOEC2GMM/main.js",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%2523n)'%2F%3E%3C%2Fsvg%3E",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/start",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/email/verify",
+      "status": 201,
+      "failed": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/widgets/resolve",
+      "status": 200,
+      "failed": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "status": 500,
+      "failed": null
+    }
+  ],
+  "guards": [
+    {
+      "blocked": [],
+      "errors": []
+    }
+  ]
+}

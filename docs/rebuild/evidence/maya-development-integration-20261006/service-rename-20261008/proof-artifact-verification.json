@@ -1,0 +1,69 @@
+{
+  "browser-attempt1": {
+    "manifestStatus": "failed",
+    "candidateCommitMatches": true,
+    "totalSources": 1980,
+    "repoSources": 1970,
+    "scratchSources": 10,
+    "currentMismatches": [
+      "/tmp/maya-service-edit-20261008/proof-plan.json",
+      "/tmp/maya-service-edit-20261008/service-rename.probe-spec.ts"
+    ],
+    "gitMismatches": [],
+    "capturedScratchMismatches": [],
+    "sourceDigestMatches": true,
+    "launcherBindings": {
+      "launcherSha256": true,
+      "fenceSha256": true,
+      "ownedSupervisorSha256": true
+    },
+    "ownedGroupsAbsentNow": {
+      "migrations": true,
+      "shell-runtime-build": true,
+      "react-web-build": true,
+      "rename-browser": true
+    },
+    "postmasterPidAbsentNow": true,
+    "artifactSha256": {
+      "manifest.json": "e6c43fa6c553c9953ae77139942b9fbe5c2a283b71b0b826800d99c11061023e",
+      "source-hashes.json": "1ad279c49ddb46f9b576801399d2d1f60c01cbfa4f6816e83ff50f97c58c4e68",
+      "service-rename-observations.json": "240b4b9094c1fce1b0929034c06740d146692982cc08dfc4f760caf835f947c1",
+      "browser-jest.json": "2f8407a07dc020e41c22c467218c25b99bba0200dcb6ca9f047fecd452e1043f",
+      "output/playwright/browser.json": "f69ac4f0096fb38675ed2af595a3bfc8ad8cc06de1f81099054f2fe924737890"
+    }
+  },
+  "browser-attempt2": {
+    "manifestStatus": "passed",
+    "candidateCommitMatches": true,
+    "totalSources": 1980,
+    "repoSources": 1970,
+    "scratchSources": 10,
+    "currentMismatches": [],
+    "gitMismatches": [],
+    "capturedScratchMismatches": [],
+    "sourceDigestMatches": true,
+    "launcherBindings": {
+      "launcherSha256": true,
+      "fenceSha256": true,
+      "ownedSupervisorSha256": true
+    },
+    "ownedGroupsAbsentNow": {
+      "migrations": true,
+      "shell-runtime-build": true,
+      "react-web-build": true,
+      "rename-browser": true
+    },
+    "postmasterPidAbsentNow": true,
+    "artifactSha256": {
+      "manifest.json": "19a6f9b15091a99c7a74862dc46145c1e4d2da944670521c98659008db14b7d3",
+      "source-hashes.json": "43d71a3c8389a0baaa15db31426f39536f0232bbd567b5ec045f188965ec8666",
+      "service-rename-observations.json": "533ae7f50499682185989a64b9250b201882cd37abdc679e4cf4a21189f8e700",
+      "browser-jest.json": "270d7b44b1337206f152b65303ac9d0be09b89865f22a362ec6ca672e55e3b4e",
+      "output/playwright/browser.json": "e179fc524ce3404c755a0493e1b64cf37099bb8d7a04b12de414deb964a444ce"
+    }
+  },
+  "localCommitBinding": {
+    "files": 24,
+    "mismatches": []
+  }
+}

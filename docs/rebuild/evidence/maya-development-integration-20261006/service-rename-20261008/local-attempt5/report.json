@@ -1,0 +1,167 @@
+{
+  "contract": "maya.service-rename-local-gates/1",
+  "source": "d90243a6cb655a82de1ceb347f25cddfd04de074",
+  "tree": "289f37083c6f829e7291ba4e94a2977ae6449e8d",
+  "base": "d90243a6cb655a82de1ceb347f25cddfd04de074",
+  "started": "2026-10-08T12:05:44.970Z",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "rename-probe-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "/tmp/maya-service-edit-20261008/tsconfig.proof.json",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "rename-browser-guard",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--test",
+        "/tmp/maya-service-edit-20261008/service-rename-browser-guard.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "contract-check",
+      "elapsedMs": 667
+    },
+    {
+      "name": "k3",
+      "elapsedMs": 2530
+    },
+    {
+      "name": "rename-probe-types",
+      "elapsedMs": 5751
+    },
+    {
+      "name": "rename-browser-guard",
+      "elapsedMs": 55
+    }
+  ],
+  "failures": [],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/scripts/widget-contract-check.mjs": "b77f42f090ff26933bd7f70b327e7a9c2ae93d0e4de9f0f272958f5b64157d4d",
+    "maya-saas-backend/scripts/widget-contract/registry-probe.js": "ecce5e04c331fa6601bce9fdfe351366abfab311bdf24c4b8f7208539ae390c4",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "992a1af567389d4bf2535c159103a9758081035a3bcdc45cc8f74df92532a38f",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "468e1c26e8a81f966addca2a2c10ec5ed7130bcf814565ba8f2a74f7c9e15658",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "1d997bb12ce662ebb93e6389c270a2f2fded77f9c8f6c083c37a693dbd3f1a24",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "7b932a4701d6c8308f3bf7d82558b369132633bef5d5563c6ae03bb5cc8271f9",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "3760a9fbd17f99f0e83c6051c2a2f68570f626528438463034effda39836da4b",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "68eb7a6cca8c5cca0215ec48fc55000a9243ff83f35c95c3c89e233e08ec6ab6",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "5c985d6089a090a66295ba34e365abb60c8d9dcdaac5324db6105ee245aad5de",
+    "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts": "2c9b9ac14291d8b53bcc49a5db6014da2757426b75a766df52acb2dca829fafd",
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts": "70e8a8bbd8398cbd4e4093da0b8afd5c8c68816dd7644eb0fc5affac3fb3c124",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "1f3a8c51ac916dd44ea5b49a6098b00f3132b041e568f59ec6fa5c800177d836",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "ce3771c5458c85e09e3b550fa784c30e48acd9dcd0fb300fa0d2d2abfc4828e9",
+    "maya-saas-backend/src/crm/crm.service.ts": "e325586509753ebb1ec303f8c118eea7c3959e100233aaf89b28a2950f8f5ec0",
+    "maya-saas-backend/src/orchestration/c9.registry.ts": "14132b5af591d183facbce9ca6ae5c58623100aadd06f56e777321da778408fd",
+    "maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts": "e9810871f62d0cb07c4e4e5f7dc4738550d91a0f4b81cbef3e3f150ce9c6449e",
+    "maya-saas-backend/src/widgets/authority/totality.spec.ts": "46c4383abc8e6bb66ccc18583cb06869e8123c878845b8daad7a6322897581cf",
+    "maya-saas-backend/src/ai-tools/ai-tool-service-rename.spec.ts": "c9a04527b276cd751331ab2258e14489ea3410d9d905adfef1e806f9064012ed",
+    "maya-saas-backend/src/ai-tools/service-rename-chat.spec.ts": "34abd9e78530664b6ab458c0aba36243e8430fac9f092d7138807dccd5516214",
+    "maya-saas-backend/src/ai-tools/service-rename-chat.ts": "8508846cf507684226ded862e5f65cf268f22832ac7eeb4e8c97de33b6bdf150",
+    "maya-saas-backend/src/crm/adapters/yclients-service-rename.spec.ts": "6e11fc3f97616e7c8e94bf03aa7ee26cb3065e6b804668de60c5f47ac26cf165",
+    "maya-saas-backend/src/crm/service-rename-actor.spec.ts": "4c1c96df144808a5e16a1801142e84118182950ef982651777e6a1ca203ec466",
+    "maya-saas-backend/src/crm/yclients-service-rename.contract.spec.ts": "54097e2b0efd1ea2f912642912f210269eec62a92276d41e6ac0e81e8cc28668",
+    "maya-saas-backend/src/crm/yclients-service-rename.contract.ts": "76b0fb1d299bda1391751e6011e2cd7ca20d9332f0cbbd753df7719857e8f56e"
+  },
+  "launcherSha256": "5f1206a6594adc5446f88d618d9e8fd176d8e2801d2717990399d207c5e7e97e",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "contract-check": {
+      "detached": true,
+      "pid": 93968,
+      "pgid": 93968,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "k3": {
+      "detached": true,
+      "pid": 93981,
+      "pgid": 93981,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "rename-probe-types": {
+      "detached": true,
+      "pid": 94027,
+      "pgid": 94027,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "rename-browser-guard": {
+      "detached": true,
+      "pid": 94083,
+      "pgid": 94083,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "d90243a6cb655a82de1ceb347f25cddfd04de074",
+  "treeAtEnd": "289f37083c6f829e7291ba4e94a2977ae6449e8d",
+  "dirtyAtEnd": "M docs/rebuild/MAYA-GOODS-PHOTO-REVIEW-CHECKPOINT-20261008.md\n M maya-saas-backend/scripts/widget-contract-check.mjs\n M maya-saas-backend/scripts/widget-contract/registry-probe.js\n M maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool.catalog.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts\n M maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts\n M maya-saas-backend/src/crm/crm-adapter.interface.ts\n M maya-saas-backend/src/crm/crm.service.ts\n M maya-saas-backend/src/orchestration/c9.registry.ts\n M maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts\n M maya-saas-backend/src/widgets/authority/totality.spec.ts\n?? docs/rebuild/MAYA-YCLIENTS-SERVICE-RENAME-ADMISSION-20261008.md\n?? maya-saas-backend/src/ai-tools/ai-tool-service-rename.spec.ts\n?? maya-saas-backend/src/ai-tools/service-rename-chat.spec.ts\n?? maya-saas-backend/src/ai-tools/service-rename-chat.ts\n?? maya-saas-backend/src/crm/adapters/yclients-service-rename.spec.ts\n?? maya-saas-backend/src/crm/service-rename-actor.spec.ts\n?? maya-saas-backend/src/crm/yclients-service-rename.contract.spec.ts\n?? maya-saas-backend/src/crm/yclients-service-rename.contract.ts",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "5f1206a6594adc5446f88d618d9e8fd176d8e2801d2717990399d207c5e7e97e",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T12:05:54.032Z"
+}

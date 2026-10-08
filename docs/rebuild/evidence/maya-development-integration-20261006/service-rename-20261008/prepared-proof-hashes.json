@@ -1,0 +1,16 @@
+{
+  "status": "PREPARED_REVISION_3_NOT_EXECUTED",
+  "retainedFailedAttempt": "browser-attempt1",
+  "files": {
+    "native-proof.mjs": "6ae77b93caa9a2014e286137e6446775fc303fbdf8ad5fc1fd68409000a04d48",
+    "owned-stage.mjs": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+    "loopback-only.cjs": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+    "service-rename.probe-spec.ts": "7ecda8633deec9235501e5a321553ecd191a5bd90bbe2fdd71bfd0bb433043f8",
+    "service-rename-browser-probe.mjs": "1c723ecc015aaf0ab7f538c5a1e115ce58d1b5312cfbfe36038ce4d22ca1df20",
+    "service-rename-browser-guard.mjs": "0c022f27deb252267318e2fb1c2c98490a509939ce3d97432c9f24022483d878",
+    "service-rename-browser-guard.test.mjs": "10c4f4df0ad6865ca7327b2c8ebc67290b848464bba3c02239315b2bf33f75b4",
+    "jest-proof.json": "cbf9541f36bf872099a34857de4a2d49919ed6458e19941f2031eb92d11428f4",
+    "tsconfig.proof.json": "31ef53d8505f42bb8d7c9640c03a7b160f0c41dd3100e13824d2bfe5b5c9a831",
+    "proof-plan.json": "0398810efd2994e89afb421abe47f389e44367a1cc72483a4596a185ac7516ee"
+  }
+}

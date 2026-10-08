@@ -1,0 +1,146 @@
+{
+  "contract": "maya.service-rename.validation-union/1",
+  "runtimeCommit": "995a87e3b1e5102605385dc5c0afdca062cae6d0",
+  "qualification": "Distinct executed stages; failed attempt statuses preserved. No claim of full passing rerun.",
+  "stages": {
+    "targeted-unit": {
+      "attempt": "local-attempt4",
+      "name": "targeted-unit",
+      "elapsedMs": 1973
+    },
+    "backend-types": {
+      "attempt": "local-attempt4",
+      "name": "backend-types",
+      "elapsedMs": 5886
+    },
+    "widgets-live-types": {
+      "attempt": "local-attempt4",
+      "name": "widgets-live-types",
+      "elapsedMs": 6774
+    },
+    "changed-typescript-lint": {
+      "attempt": "local-attempt4",
+      "name": "changed-typescript-lint",
+      "elapsedMs": 5896
+    },
+    "contract-check": {
+      "attempt": "local-attempt5",
+      "name": "contract-check",
+      "elapsedMs": 667
+    },
+    "k3": {
+      "attempt": "local-attempt5",
+      "name": "k3",
+      "elapsedMs": 2530
+    },
+    "rename-probe-types": {
+      "attempt": "local-attempt6",
+      "name": "rename-probe-types",
+      "elapsedMs": 5667
+    },
+    "rename-browser-guard": {
+      "attempt": "local-attempt6",
+      "name": "rename-browser-guard",
+      "elapsedMs": 56
+    }
+  },
+  "attemptStatuses": {
+    "local-attempt1": {
+      "status": "FAIL",
+      "completed": [],
+      "sourceUnchanged": true,
+      "harnessUnchanged": true,
+      "allOwnedGroupsClosedAbsent": true
+    },
+    "local-attempt2": {
+      "status": "FAIL",
+      "completed": [],
+      "sourceUnchanged": true,
+      "harnessUnchanged": true,
+      "allOwnedGroupsClosedAbsent": true
+    },
+    "local-attempt3": {
+      "status": "FAIL",
+      "completed": [
+        "targeted-unit",
+        "backend-types",
+        "widgets-live-types"
+      ],
+      "sourceUnchanged": true,
+      "harnessUnchanged": true,
+      "allOwnedGroupsClosedAbsent": true
+    },
+    "local-attempt4": {
+      "status": "FAIL",
+      "completed": [
+        "targeted-unit",
+        "backend-types",
+        "widgets-live-types",
+        "changed-typescript-lint"
+      ],
+      "sourceUnchanged": true,
+      "harnessUnchanged": true,
+      "allOwnedGroupsClosedAbsent": true
+    },
+    "local-attempt5": {
+      "status": "PASS",
+      "completed": [
+        "contract-check",
+        "k3",
+        "rename-probe-types",
+        "rename-browser-guard"
+      ],
+      "sourceUnchanged": true,
+      "harnessUnchanged": true,
+      "allOwnedGroupsClosedAbsent": true
+    },
+    "local-attempt6": {
+      "status": "PASS",
+      "completed": [
+        "rename-probe-types",
+        "rename-browser-guard"
+      ],
+      "sourceUnchanged": true,
+      "harnessUnchanged": true,
+      "allOwnedGroupsClosedAbsent": true
+    }
+  },
+  "runtimeHashes": {
+    "maya-saas-backend/scripts/widget-contract-check.mjs": "b77f42f090ff26933bd7f70b327e7a9c2ae93d0e4de9f0f272958f5b64157d4d",
+    "maya-saas-backend/scripts/widget-contract/registry-probe.js": "ecce5e04c331fa6601bce9fdfe351366abfab311bdf24c4b8f7208539ae390c4",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "992a1af567389d4bf2535c159103a9758081035a3bcdc45cc8f74df92532a38f",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "468e1c26e8a81f966addca2a2c10ec5ed7130bcf814565ba8f2a74f7c9e15658",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "1d997bb12ce662ebb93e6389c270a2f2fded77f9c8f6c083c37a693dbd3f1a24",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "7b932a4701d6c8308f3bf7d82558b369132633bef5d5563c6ae03bb5cc8271f9",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "3760a9fbd17f99f0e83c6051c2a2f68570f626528438463034effda39836da4b",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "68eb7a6cca8c5cca0215ec48fc55000a9243ff83f35c95c3c89e233e08ec6ab6",
+    "maya-saas-backend/src/ai-tools/ai-tool-service-rename.spec.ts": "c9a04527b276cd751331ab2258e14489ea3410d9d905adfef1e806f9064012ed",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "5c985d6089a090a66295ba34e365abb60c8d9dcdaac5324db6105ee245aad5de",
+    "maya-saas-backend/src/ai-tools/service-rename-chat.spec.ts": "34abd9e78530664b6ab458c0aba36243e8430fac9f092d7138807dccd5516214",
+    "maya-saas-backend/src/ai-tools/service-rename-chat.ts": "8508846cf507684226ded862e5f65cf268f22832ac7eeb4e8c97de33b6bdf150",
+    "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts": "2c9b9ac14291d8b53bcc49a5db6014da2757426b75a766df52acb2dca829fafd",
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts": "70e8a8bbd8398cbd4e4093da0b8afd5c8c68816dd7644eb0fc5affac3fb3c124",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "1f3a8c51ac916dd44ea5b49a6098b00f3132b041e568f59ec6fa5c800177d836",
+    "maya-saas-backend/src/crm/adapters/yclients-service-rename.spec.ts": "6e11fc3f97616e7c8e94bf03aa7ee26cb3065e6b804668de60c5f47ac26cf165",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "ce3771c5458c85e09e3b550fa784c30e48acd9dcd0fb300fa0d2d2abfc4828e9",
+    "maya-saas-backend/src/crm/crm.service.ts": "e325586509753ebb1ec303f8c118eea7c3959e100233aaf89b28a2950f8f5ec0",
+    "maya-saas-backend/src/crm/service-rename-actor.spec.ts": "4c1c96df144808a5e16a1801142e84118182950ef982651777e6a1ca203ec466",
+    "maya-saas-backend/src/crm/yclients-service-rename.contract.spec.ts": "54097e2b0efd1ea2f912642912f210269eec62a92276d41e6ac0e81e8cc28668",
+    "maya-saas-backend/src/crm/yclients-service-rename.contract.ts": "76b0fb1d299bda1391751e6011e2cd7ca20d9332f0cbbd753df7719857e8f56e",
+    "maya-saas-backend/src/orchestration/c9.registry.ts": "14132b5af591d183facbce9ca6ae5c58623100aadd06f56e777321da778408fd",
+    "maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts": "e9810871f62d0cb07c4e4e5f7dc4738550d91a0f4b81cbef3e3f150ce9c6449e",
+    "maya-saas-backend/src/widgets/authority/totality.spec.ts": "46c4383abc8e6bb66ccc18583cb06869e8123c878845b8daad7a6322897581cf"
+  },
+  "unit": {
+    "numPassedTests": 598,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numPassedTestSuites": 13,
+    "numFailedTestSuites": 0
+  },
+  "sourceQualification": {
+    "attempt4RuntimeHashesMatchCommittedSource": true,
+    "attempt5All24HashesMatchCommittedSource": true
+  },
+  "scratchTypeQualification": "Attempt6 checked corrected booking grant and route-specific redirect fixture before browser attempt2; scratch hashes are separately captured by browser launcher."
+}

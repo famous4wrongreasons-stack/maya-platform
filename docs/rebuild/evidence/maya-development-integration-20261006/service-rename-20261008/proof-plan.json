@@ -1,0 +1,113 @@
+{
+  "contract": "maya.service-rename-proof-plan/1",
+  "status": "PREPARED_REVISION_3_NOT_EXECUTED",
+  "scope": "READ_ONLY_EXISTING_SERVICE_TITLE_PREVIEW",
+  "scratchOnly": true,
+  "candidateCommit": "Parent supplies reviewed committed candidate at launch; current runtime is in progress",
+  "command": "node /tmp/maya-service-edit-20261008/native-proof.mjs --run --browser --expected-commit=<reviewed 40hex> --output=/tmp/maya-service-edit-20261008/browser-attempt2",
+  "rootOnlyChecks": [
+    "node --max-old-space-size=3072 node_modules/typescript/bin/tsc --project /tmp/maya-service-edit-20261008/tsconfig.proof.json --noEmit --incremental false",
+    "node --check /tmp/maya-service-edit-20261008/native-proof.mjs",
+    "node --check /tmp/maya-service-edit-20261008/service-rename-browser-probe.mjs",
+    "node --check /tmp/maya-service-edit-20261008/service-rename-browser-guard.mjs",
+    "node --test /tmp/maya-service-edit-20261008/service-rename-browser-guard.test.mjs"
+  ],
+  "resources": {
+    "freshOwnedPostgresClusters": 1,
+    "jestWorkers": 1,
+    "nodeHeapMb": 3072,
+    "chromeJsHeapMb": 256,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "backendBrowserStageTimeoutMs": 360000,
+    "browserChildTimeoutMs": 300000,
+    "debugLoginCooldownSeconds": 60
+  },
+  "checkpoints": [
+    "success",
+    "ambiguous",
+    "forbidden",
+    "drift",
+    "reload",
+    "revoked"
+  ],
+  "httpNegatives": {
+    "clientRole": "403 ai_tool_forbidden before handler/source",
+    "foreignTenant": "separate owner exact company route; 3 native GET; no C9 or model"
+  },
+  "expected": {
+    "modelSelections": 4,
+    "catalogC9Reads": 4,
+    "previewC9Reads": 3,
+    "totalC9Receipts": 7,
+    "settledC9Receipts": 5,
+    "heldC9Receipts": 2,
+    "nativeGetsBrowser": 12,
+    "nativeGetsForeign": 3,
+    "totalNativeGets": 15,
+    "providerWrites": 0,
+    "actionExecutions": 0,
+    "approvalRequests": 0,
+    "widgetIntents": 0,
+    "outboundNotifications": 0,
+    "modelAndSourceReloadRepeats": 0
+  },
+  "qualification": [
+    "Actual HTTP/auth/PG/C9/current built React/native CRM factory and adapter only after parent executes",
+    "Active integration rows are explicit synthetic setup, not A17 connection acceptance",
+    "Model tool selection scripted, deliberately wrong ID/title overridden by actual server binding; no real model acceptance",
+    "Native transport finite synthetic responses only; not live YCLIENTS or permission acceptance",
+    "Source drift and membership revocation are explicit fixture DB edits outside request effect scope",
+    "No process/PG restart claim; actual browser reload/relogin only",
+    "No write payload, approval lane or service mutation acceptance",
+    "Price-edit permission false, title-specific permission true",
+    "Source snapshot conservatively qualified; observed print_title never copied into writable payload or disclosed"
+  ],
+  "outputs": [
+    "manifest.json",
+    "source-hashes.json",
+    "harness/",
+    "browser-jest.json",
+    "service-rename-observations.json",
+    "output/playwright/browser.json",
+    "output/playwright/{success,ambiguous,forbidden,drift,reload,revoked}.png"
+  ],
+  "privacy": "No tokens, OTP, auth headers, private restart receipts or provider credentials in safe reports; synthetic public labels only; raw local process logs are not an archive artifact",
+  "limitations": [
+    "PRINT_TITLE effective-label preservation not documented; reply explicitly qualifies it",
+    "Changing a service is not authorized or implemented in this proof",
+    "No stale cached-result fabrication: source drift and native403 are actual negative paths"
+  ],
+  "fixturePrerequisites": {
+    "catalog.services.read": [
+      "booking"
+    ],
+    "catalog.service.rename.preview": [
+      "ai.owner",
+      "crm.integration"
+    ],
+    "qualification": "Existing entitlements granted through fixture helpers before request baseline; no runtime guard bypass."
+  },
+  "retainedFailedAttempts": [
+    {
+      "path": "browser-attempt1",
+      "cause": "Synthetic fixture omitted booking entitlement required by catalog.services.read; model tools assertion rejected before browser source reads.",
+      "runtimeDefectClaim": false,
+      "replacementAttempt": "browser-attempt2"
+    }
+  ],
+  "nativeFetchContract": {
+    "catalog": "GET /book_services/{company}; no query/body; redirect undefined as existing request(path)",
+    "management": "GET /user/permissions/{company}, /company/{company}/services/{service}; no query/body; redirect error from preserveGoodsNumbers",
+    "network": "Finite intercepted responses only; no followed redirects or actual provider requests."
+  },
+  "readOnlyAssumptionReview": [
+    "Native permissions/detail/permissions sequence and unsupported/403->503 conversion re-read in current adapter",
+    "Mid-service source settings drift is checked by current CRM owner after all three management GETs ->409; no public preview",
+    "Catalog C9 domain OCCUPANCY; preview ADMIN; catch holds failed reads without resend",
+    "Ambiguous bind completes after catalog only with not_required grounding; useful preview verified; exceptions blocked",
+    "Existing synthetic raw service fixture satisfies required fields and conservative servicePriceSnapshot qualification",
+    "Attempt1 already confirmed Client403 before source and foreign owner exact 3GET/no effects; no new acceptance claim"
+  ]
+}

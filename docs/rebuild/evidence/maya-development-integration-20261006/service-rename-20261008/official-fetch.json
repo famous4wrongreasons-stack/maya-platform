@@ -1,0 +1,6 @@
+{
+  "url": "https://developers.yclients.com/ru/",
+  "kind": "PUBLIC_DOCUMENTATION_ONLY_NO_BUSINESS_ENDPOINT",
+  "status": "failed",
+  "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+}

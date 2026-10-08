@@ -1,0 +1,699 @@
+{
+  "contract": "maya.service-edit.official-api-findings/1",
+  "status": "READ_ONLY_RESEARCH_COMPLETE_NOT_PROVIDER_ACCEPTANCE",
+  "repoHead": "d90243a6cb655a82de1ceb347f25cddfd04de074",
+  "researchedAt": "2026-10-08T11:44:51.236808+00:00",
+  "source": {
+    "officialUrl": "https://developers.yclients.com/ru/",
+    "livePublicFetch": {
+      "url": "https://developers.yclients.com/ru/",
+      "finalUrl": "https://developers.yclients.com/ru/",
+      "status": 200,
+      "bytes": 10060503,
+      "sha256": "ed57f3e1908597d58e880184d7cea555534d6243837d5648069b114f4326bd36",
+      "fetchedAt": "2026-10-08T11:39:49.692531+00:00",
+      "kind": "PUBLIC_DOCUMENTATION_ONLY_NO_BUSINESS_ENDPOINT"
+    },
+    "freshExtractedPath": "/tmp/maya-service-edit-20261008/official-current-openapi.json",
+    "freshExtractedSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+    "previousCapturedPath": "/tmp/maya-yclients-official-openapi-20261007.json",
+    "previousCapturedSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+    "freshSemanticEqualsPrevious": true,
+    "inventoryPath": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/docs/rebuild/evidence/maya-development-integration-20261006/yclients-api-inventory/operations.json",
+    "inventorySha256": "25c55a77443aa96778ff338ba3436c302fdce4fce4cf13277dea21fc88eba153",
+    "archivePath": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/docs/rebuild/evidence/maya-development-integration-20261006/yclients-api-inventory/archive.json",
+    "operationCount": 304,
+    "urlPathCount": 248
+  },
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/api/v1/company/{company_id}/services/{service_id}",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/company/{company_id}/services/{service_id}",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/%D0%9F%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C%20%D1%81%D0%BF%D0%B8%D1%81%D0%BE%D0%BA%20%D1%83%D1%81%D0%BB%D1%83%D0%B3%20%2F%20%D0%BA%D0%BE%D0%BD%D0%BA%D1%80%D0%B5%D1%82%D0%BD%D1%83%D1%8E%20%D1%83%D1%81%D0%BB%D1%83%D0%B3%D1%83",
+      "pointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1{service_id}/get",
+      "operationSha256CanonicalJson": "f39044775b2e774d534667fb15e25b0e36433405433650e0ff69c53240bc5e3e",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": null,
+      "requestBodyRequired": false,
+      "requiredFields": [],
+      "optionalFields": [],
+      "documentedResponses": [
+        "200",
+        "403",
+        "404"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/company/{company_id}/services/{service_id}",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/company/{company_id}/services/{service_id}",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/%D0%98%D0%B7%D0%BC%D0%B5%D0%BD%D0%B8%D1%82%D1%8C%20%D1%83%D1%81%D0%BB%D1%83%D0%B3%D1%83",
+      "pointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1{service_id}/patch",
+      "operationSha256CanonicalJson": "f5a7003610095c7dfcec19cba3c284a54f91044702395470e11435d945d99e94",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": "#/components/schemas/services_change_companyid_request_data_types",
+      "requestBodyRequired": true,
+      "requiredFields": [
+        "title",
+        "category_id",
+        "price_min",
+        "price_max",
+        "duration",
+        "booking_title",
+        "is_multi",
+        "tax_variant",
+        "vat_id",
+        "is_need_limit_date",
+        "seance_search_start",
+        "seance_search_finish",
+        "step",
+        "seance_search_step"
+      ],
+      "optionalFields": [
+        "technical_break_duration",
+        "discount",
+        "comment",
+        "date_from",
+        "date_to",
+        "dates",
+        "weight",
+        "service_type",
+        "api_service_id",
+        "online_invoicing_status",
+        "price_prepaid_percent",
+        "price_prepaid_amount",
+        "abonement_restriction_value",
+        "is_abonement_autopayment_enabled",
+        "autopayment_before_visit_time",
+        "staff"
+      ],
+      "documentedResponses": [
+        "200"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/services/{company_id}/{service_id}",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/services/{company_id}/{service_id}",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/%D0%A3%D1%81%D1%82%D0%B0%D1%80%D0%B5%D0%B2%D1%88%D0%B5%D0%B5.%20%D0%98%D0%B7%D0%BC%D0%B5%D0%BD%D0%B8%D1%82%D1%8C%20%D1%83%D1%81%D0%BB%D1%83%D0%B3%D1%83",
+      "pointer": "#/paths/~1api~1v1~1services~1{company_id}~1{service_id}/put",
+      "operationSha256CanonicalJson": "80af808dd2a5dd4bafb1619b5ef876cba026649ed41d11da8fd546e5a8815045",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": true,
+      "requestSchemaRef": "#/components/schemas/deprecated_services_companyid_request_data_types",
+      "requestBodyRequired": true,
+      "requiredFields": [],
+      "optionalFields": [
+        "title",
+        "category_id",
+        "price_min",
+        "price_max",
+        "duration",
+        "discount",
+        "comment",
+        "weight",
+        "service_type",
+        "api_service_id",
+        "staff"
+      ],
+      "documentedResponses": [
+        "201"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/services/links",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/company/{company_id}/services/links",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/%D0%98%D0%B7%D0%BC%D0%B5%D0%BD%D0%B8%D1%82%D1%8C%20%D0%B4%D0%BB%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D1%81%D1%82%D1%8C%20%D0%BE%D0%BA%D0%B0%D0%B7%D0%B0%D0%BD%D0%B8%D1%8F%20%D1%83%D1%81%D0%BB%D1%83%D0%B3%D0%B8%20%D1%81%D0%BE%D1%82%D1%80%D1%83%D0%B4%D0%BD%D0%B8%D0%BA%D0%B0%D0%BC%D0%B8%2C%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5%20%D0%BA%D0%B0%D1%80%D1%82%D1%8B%2C%20%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F%20%D0%BD%D0%B0%20%D0%B4%D1%80%D1%83%D0%B3%D0%B8%D1%85%20%D1%8F%D0%B7%D1%8B%D0%BA%D0%B0%D1%85",
+      "pointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1links/post",
+      "operationSha256CanonicalJson": "fcae55e7a419d220d032db9ecc84aded80f6e15dffef7c1390ecb960ee6d849e",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": "#/components/schemas/services_companyid_links_request_data_types",
+      "requestBodyRequired": true,
+      "requiredFields": [
+        "service_id",
+        "master_settings",
+        "resource_ids",
+        "translations"
+      ],
+      "optionalFields": [],
+      "documentedResponses": [],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/company/{company_id}/services/{service_id}/staff",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/api.location.services.staff.create",
+      "pointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1{service_id}~1staff/post",
+      "operationSha256CanonicalJson": "85c5b43f7cd2950d12f0f7119839aec4b7e1900de5a250fdc96c3d2bf3a54ea9",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": null,
+      "requestBodyRequired": false,
+      "requiredFields": [
+        "master_id",
+        "seance_length",
+        "technological_card_id"
+      ],
+      "optionalFields": [],
+      "documentedResponses": [
+        "201",
+        "401",
+        "403",
+        "404",
+        "422"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/api.location.services.staff.update",
+      "pointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1{service_id}~1staff~1{master_id}/put",
+      "operationSha256CanonicalJson": "67b9afaf01567ef83688f412fbf10aa1152e65dbd70e42312a8d1cd228795708",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": null,
+      "requestBodyRequired": false,
+      "requiredFields": [
+        "seance_length",
+        "technological_card_id"
+      ],
+      "optionalFields": [],
+      "documentedResponses": [
+        "200",
+        "401",
+        "403",
+        "404",
+        "422"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Uslugi/operation/api.location.services.staff.delete",
+      "pointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1{service_id}~1staff~1{master_id}/delete",
+      "operationSha256CanonicalJson": "5625610bef87fae3411062b7bb6fe8ee5f9d10528384b690f00813bdcdf68290",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": null,
+      "requestBodyRequired": false,
+      "requiredFields": [],
+      "optionalFields": [],
+      "documentedResponses": [
+        "204",
+        "401",
+        "403",
+        "404"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/user/permissions/{company_id}",
+      "apiUrlTemplate": "https://api.yclients.ru/api/v1/user/permissions/{company_id}",
+      "officialDocUrl": "https://developers.yclients.com/ru/#tag/Polzovatel/operation/%D0%9F%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C%20%D1%81%D0%BF%D0%B8%D1%81%D0%BE%D0%BA%20%D0%BF%D1%80%D0%B0%D0%B2",
+      "pointer": "#/paths/~1api~1v1~1user~1permissions~1{company_id}/get",
+      "operationSha256CanonicalJson": "71f4225cf3cda0c81f0969be9d7f1e8c0b1bee69807b029575ec483b826b3820",
+      "unchangedSinceCapturedInventory": true,
+      "deprecated": false,
+      "requestSchemaRef": null,
+      "requestBodyRequired": false,
+      "requiredFields": [],
+      "optionalFields": [],
+      "documentedResponses": [
+        "200"
+      ],
+      "conditionalWriteHeaderDocumented": false
+    }
+  ],
+  "currentUpdateFields": [
+    {
+      "field": "title",
+      "required": true,
+      "type": "string",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/title"
+    },
+    {
+      "field": "booking_title",
+      "required": true,
+      "type": "string",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/booking_title"
+    },
+    {
+      "field": "category_id",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/category_id"
+    },
+    {
+      "field": "price_min",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/price_min"
+    },
+    {
+      "field": "price_max",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/price_max"
+    },
+    {
+      "field": "duration",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/duration"
+    },
+    {
+      "field": "technical_break_duration",
+      "required": false,
+      "type": "number",
+      "nullable": true,
+      "minimum": 0,
+      "maximum": 3600,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/technical_break_duration"
+    },
+    {
+      "field": "discount",
+      "required": false,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/discount"
+    },
+    {
+      "field": "comment",
+      "required": false,
+      "type": "string",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/comment"
+    },
+    {
+      "field": "is_multi",
+      "required": true,
+      "type": "boolean",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/is_multi"
+    },
+    {
+      "field": "tax_variant",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/tax_variant"
+    },
+    {
+      "field": "vat_id",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/vat_id"
+    },
+    {
+      "field": "is_need_limit_date",
+      "required": true,
+      "type": "boolean",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/is_need_limit_date"
+    },
+    {
+      "field": "date_from",
+      "required": false,
+      "type": "string",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/date_from"
+    },
+    {
+      "field": "date_to",
+      "required": false,
+      "type": "string",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/date_to"
+    },
+    {
+      "field": "dates",
+      "required": false,
+      "type": "array of strings",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/dates"
+    },
+    {
+      "field": "seance_search_start",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/seance_search_start"
+    },
+    {
+      "field": "seance_search_finish",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/seance_search_finish"
+    },
+    {
+      "field": "step",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/step"
+    },
+    {
+      "field": "seance_search_step",
+      "required": true,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/seance_search_step"
+    },
+    {
+      "field": "weight",
+      "required": false,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/weight"
+    },
+    {
+      "field": "service_type",
+      "required": false,
+      "type": "number",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/service_type"
+    },
+    {
+      "field": "api_service_id",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/api_service_id"
+    },
+    {
+      "field": "online_invoicing_status",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/online_invoicing_status"
+    },
+    {
+      "field": "price_prepaid_percent",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/price_prepaid_percent"
+    },
+    {
+      "field": "price_prepaid_amount",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/price_prepaid_amount"
+    },
+    {
+      "field": "abonement_restriction_value",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/abonement_restriction_value"
+    },
+    {
+      "field": "is_abonement_autopayment_enabled",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/is_abonement_autopayment_enabled"
+    },
+    {
+      "field": "autopayment_before_visit_time",
+      "required": false,
+      "type": "integer",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/autopayment_before_visit_time"
+    },
+    {
+      "field": "staff",
+      "required": false,
+      "type": "array",
+      "nullable": false,
+      "minimum": null,
+      "maximum": null,
+      "maxLength": null,
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/staff"
+    }
+  ],
+  "servicePermissions": [
+    {
+      "field": "settings_services_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_access"
+    },
+    {
+      "field": "settings_services_create_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_create_access"
+    },
+    {
+      "field": "services_edit",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/services_edit"
+    },
+    {
+      "field": "settings_services_edit_title_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_title_access"
+    },
+    {
+      "field": "settings_services_relation_category_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_relation_category_access"
+    },
+    {
+      "field": "settings_services_edit_price_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_price_access"
+    },
+    {
+      "field": "settings_services_edit_image_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_image_access"
+    },
+    {
+      "field": "settings_services_edit_online_seance_date_time_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_online_seance_date_time_access"
+    },
+    {
+      "field": "settings_services_edit_online_pay_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_online_pay_access"
+    },
+    {
+      "field": "settings_services_edit_services_related_resource_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_services_related_resource_access"
+    },
+    {
+      "field": "edit_master_service_and_duration",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/edit_master_service_and_duration"
+    },
+    {
+      "field": "services_delete",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/services_delete"
+    }
+  ],
+  "getSchemaRequiredWriteFieldsMissing": [
+    "booking_title",
+    "duration",
+    "is_multi",
+    "is_need_limit_date",
+    "seance_search_finish",
+    "seance_search_start",
+    "seance_search_step",
+    "step",
+    "tax_variant",
+    "vat_id"
+  ],
+  "documentedOmissionEffects": [
+    {
+      "field": "technical_break_duration",
+      "effect": "Omission sets default null, inheriting branch technical-break setting. Non-null supported values 0..3600 in steps of300.",
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/technical_break_duration"
+    },
+    {
+      "field": "dates",
+      "effect": "Omission makes every date in the supplied interval available.",
+      "pointer": "#/components/schemas/services_change_companyid_request_data_types/properties/dates"
+    }
+  ],
+  "officialSupportRefs": [
+    {
+      "url": "https://support.yclients.ru/200",
+      "supports": [
+        "separate primary/online names",
+        "empty online or print name inherits primary name",
+        "service description UI limit450",
+        "base duration and staff configuration scopes"
+      ],
+      "retrievedVia": "web search/open on 2026-10-08"
+    },
+    {
+      "url": "https://support.yclients.ru/5-8-241",
+      "supports": [
+        "staff-specific duration and price",
+        "separate assignment/removal scope"
+      ],
+      "retrievedVia": "web search/open on 2026-10-08"
+    },
+    {
+      "url": "https://support.yclients.ru/429",
+      "supports": [
+        "chain-only description/price management"
+      ],
+      "retrievedVia": "web search on 2026-10-08"
+    }
+  ],
+  "proposal": {
+    "operation": "RENAME_PRIMARY_TITLE_ONLY",
+    "transport": "CURRENT_DOCUMENTED_PATCH_WITH_COMPLETE_SOURCE_BODY",
+    "safeNow": "READ_ONLY_RENAME_PREVIEW_WITH_SYNTHETIC_READ_VALIDATION",
+    "writeContractSatisfiedByDocsAlone": false,
+    "permissionCandidates": [
+      "settings.settings_services_access",
+      "settings.services_edit",
+      "settings.settings_services_edit_title_access"
+    ],
+    "pricePermissionRequiredForRenameDocumented": false,
+    "officialTitleMaxLength": null,
+    "suggestedLocalTitleMaxLength": 240,
+    "preserveBookingTitle": true,
+    "staffAssignmentOrDurationChange": false,
+    "nativeApiBusinessCalls": 0,
+    "modelCalls": 0,
+    "outboundNotifications": 0,
+    "testsOrServicesStarted": false,
+    "nativeWriteDisposition": "BLOCKED_EXACT_PRINT_TITLE_PRESERVATION_CONTRACT"
+  },
+  "limits": [
+    "No title-only sparse PATCH semantics documented",
+    "No conditional write/CAS/ETag or idempotency header documented for service PATCH",
+    "Published GET schema is not sufficient to construct all required PATCH values",
+    "Response-only fields and richer staff-link settings cannot be blindly echoed or discarded",
+    "Exact provider permission combination needed for an unchanged full-body PATCH remains untested",
+    "Real provider acceptance and atomic preservation are not claimed",
+    "Service print_title writable or omission-preservation contract absent; other-domain goods properties are not authority"
+  ],
+  "printTitle": {
+    "inServiceGetSchema": false,
+    "inServicePatchRequestSchema": false,
+    "inServicePatchResponseSchema": false,
+    "inServicePatchResponseExample": true,
+    "responseExamplePointer": "#/paths/~1api~1v1~1company~1{company_id}~1services~1{service_id}/patch/responses/200/content/application~1json/example/data/print_title",
+    "omissionPreservesDocumented": false,
+    "writableSchemasFoundInOtherDomain": [
+      "goods_company_request_data_type",
+      "goods_company_request_with_rules_data_type"
+    ],
+    "safeDecision": "PREVIEW_ONLY_NO_WRITE_PRESERVATION_CLAIM"
+  }
+}

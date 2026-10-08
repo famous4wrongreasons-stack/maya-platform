@@ -1,0 +1,2070 @@
+{
+  "contract": "maya.service-edit.official-api-projection/1",
+  "sourceSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+  "paths": {
+    "/api/v1/company/{company_id}/services/{service_id}": {
+      "get": {
+        "tags": [
+          "Услуги"
+        ],
+        "summary": "Получить список услуг / конкретную услугу",
+        "description": "+ Параметр\r\n    + company_id (required, number, `1`) - ID компании\r\n    + service_id (optional, number, `1`) - ID услуги",
+        "operationId": "Получить список услуг / конкретную услугу",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "description": "ID услуги, если нужно работать с конкретной услугой.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "staff_id",
+            "in": "query",
+            "description": "ID сотрудника, если нужно отфильтровать по сотруднику",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "description": "ID категории, если нужно отфильтровать по категории",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/vnd.yclients.v2+json"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/company_companyid_services_serviceid_response200_data_types"
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "79067",
+                      "title": "Бритье головы",
+                      "category_id": "4",
+                      "price_min": "1000.00",
+                      "price_max": "1000.00",
+                      "discount": "0",
+                      "comment": "",
+                      "weight": "2",
+                      "active": "1",
+                      "api_id": "",
+                      "staff": []
+                    },
+                    {
+                      "id": "83169",
+                      "title": "Мужская стрижка",
+                      "category_id": "83167",
+                      "price_min": "1300.00",
+                      "price_max": "1300.00",
+                      "discount": "0",
+                      "comment": "",
+                      "weight": "6",
+                      "active": "1",
+                      "api_id": "00000000042",
+                      "staff": [
+                        {
+                          "id": "5905",
+                          "seance_length": "2700"
+                        },
+                        {
+                          "id": "5907",
+                          "seance_length": "3600"
+                        },
+                        {
+                          "id": "8973",
+                          "seance_length": "3600"
+                        },
+                        {
+                          "id": "13616",
+                          "seance_length": "3600"
+                        },
+                        {
+                          "id": "16681",
+                          "seance_length": "3600"
+                        },
+                        {
+                          "id": "17969",
+                          "seance_length": "3600"
+                        },
+                        {
+                          "id": "34006",
+                          "seance_length": "3600"
+                        }
+                      ],
+                      "image_group": {
+                        "id": 72234,
+                        "entity": "settings_service",
+                        "entity_id": 389927,
+                        "images": {
+                          "basic": {
+                            "id": "186791",
+                            "path": "https://yclients.ru/path/to/image/tagret-image.jpeg",
+                            "width": "372",
+                            "height": "280",
+                            "type": "jpeg",
+                            "image_group_id": 72234,
+                            "version": "basic"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "meta": {
+                    "total_count": 2
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/company_companyid_service_categories_response403_data_types"
+                },
+                "example": {
+                  "success": false,
+                  "meta": {
+                    "message": "Необходимо продлить лицензию в филиале с id: {company_id}"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/company_companyid_service_categories_response404_data_types"
+                },
+                "example": {
+                  "success": false,
+                  "meta": {
+                    "message": "Сообщения о возможных ошибках",
+                    "errors": [
+                      {
+                        "message": "Не указан филиал."
+                      },
+                      {
+                        "message": "Филиал не найден."
+                      },
+                      {
+                        "message": "Услуга не указана."
+                      },
+                      {
+                        "message": "Услуга не найдена."
+                      },
+                      {
+                        "message": "Сотрудник не найден."
+                      },
+                      {
+                        "message": "Категория не найдена."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Услуги"
+        ],
+        "summary": "Изменить услугу",
+        "description": "Метод, позволяющий изменить услугу",
+        "operationId": "Изменить услугу",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "description": "ID услуги",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/vnd.yclients.v2+json"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/services_change_companyid_request_data_types"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/services_change_companyid_response_data_types"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "booking_title": "Мужская стрижка",
+                    "tax_variant": 0,
+                    "vat_id": 2,
+                    "print_title": "Мужская стрижка",
+                    "service_type": 1,
+                    "api_service_id": 1234,
+                    "repeat_visit_days_step": "null",
+                    "seance_search_start": 1800,
+                    "seance_search_finish": 84600,
+                    "seance_search_step": 900,
+                    "step": 300,
+                    "is_need_limit_date": "true",
+                    "date_from": "2022-09-19",
+                    "date_to": "2022-09-30",
+                    "schedule_template_type": 2,
+                    "online_invoicing_status": 0,
+                    "is_abonement_autopayment_enabled": 0,
+                    "autopayment_before_visit_time": 0,
+                    "abonement_restriction_value": 0,
+                    "is_chain": "false",
+                    "is_price_managed_only_in_chain": "false",
+                    "is_comment_managed_only_in_chain": "false",
+                    "price_prepaid_amount": 0,
+                    "price_prepaid_percent": 100,
+                    "id": 10832934,
+                    "salon_service_id": 12192004,
+                    "title": "Мужская стрижка",
+                    "category_id": 10832928,
+                    "price_min": 250,
+                    "price_max": 1200,
+                    "discount": 0,
+                    "comment": "",
+                    "weight": 0,
+                    "active": 1,
+                    "api_id": "1234",
+                    "prepaid": "forbidden",
+                    "is_multi": "false",
+                    "capacity": 0,
+                    "image_group": [],
+                    "staff": [
+                      {
+                        "id": 5905,
+                        "seance_length": 2700,
+                        "technological_card_id": 0
+                      },
+                      {
+                        "id": 5907,
+                        "seance_length": 3600,
+                        "technological_card_id": 0
+                      }
+                    ],
+                    "dates": [
+                      "2022-09-19",
+                      "2022-09-20",
+                      "2022-09-21",
+                      "2022-09-22",
+                      "2022-09-23",
+                      "2022-09-24",
+                      "2022-09-25",
+                      "2022-09-26",
+                      "2022-09-27",
+                      "2022-09-28",
+                      "2022-09-29",
+                      "2022-09-30"
+                    ],
+                    "duration": 3600,
+                    "resources": [],
+                    "is_online": true
+                  },
+                  "meta": []
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
+    "/api/v1/services/{company_id}/{service_id}": {
+      "put": {
+        "tags": [
+          "Услуги"
+        ],
+        "deprecated": true,
+        "summary": "Устаревшее. Изменить услугу",
+        "description": "Устаревшее. Метод, позволяющий изменить услугу",
+        "operationId": "Устаревшее. Изменить услугу",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "description": "ID услуги",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/vnd.yclients.v2+json"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/deprecated_services_companyid_request_data_types"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/deprecated_services_companyid_response_data_types"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 83169,
+                    "title": "Мужская стрижка",
+                    "category_id": 83167,
+                    "price_min": 1300,
+                    "price_max": 1300,
+                    "duration": 3600,
+                    "discount": 0,
+                    "comment": "",
+                    "weight": 6,
+                    "active": 1,
+                    "api_id": "00000000042",
+                    "staff": [
+                      {
+                        "id": 5905,
+                        "seance_length": 2700
+                      },
+                      {
+                        "id": 5907,
+                        "seance_length": 3600
+                      },
+                      {
+                        "id": 8973,
+                        "seance_length": 3600
+                      },
+                      {
+                        "id": 13616,
+                        "seance_length": 3600
+                      },
+                      {
+                        "id": 16681,
+                        "seance_length": 3600
+                      },
+                      {
+                        "id": 1796,
+                        "seance_length": 3600
+                      },
+                      {
+                        "id": 34006,
+                        "seance_length": 3600
+                      }
+                    ]
+                  },
+                  "meta": []
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
+    "/api/v1/company/{company_id}/services/links": {
+      "post": {
+        "tags": [
+          "Услуги"
+        ],
+        "summary": "Изменить длительность оказания услуги сотрудниками, технические карты, названия на других языках",
+        "description": "Метод, позволяющий изменить длительность оказания услуги сотрудниками, технические карты, названия на других языках",
+        "operationId": "Изменить длительность оказания услуги сотрудниками, технические карты, названия на других языках",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/vnd.yclients.v2+json"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/services_companyid_links_request_data_types"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/company/{company_id}/services/{service_id}/staff": {
+      "post": {
+        "tags": [
+          "Услуги"
+        ],
+        "summary": "Привязка сотрудника, оказывающего услугу",
+        "description": "Создает привязку сотрудника к услуге с указанием длительности и технологической карты.\n",
+        "operationId": "api.location.services.staff.create",
+        "security": [
+          {
+            "BearerPartnerUser": [
+              "Bearer {PartnerToken}, User {UserToken}"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept_header"
+          },
+          {
+            "$ref": "#/components/parameters/content_type_header"
+          },
+          {
+            "$ref": "#/components/parameters/company_id"
+          },
+          {
+            "$ref": "#/components/parameters/service_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "master_id",
+                  "seance_length",
+                  "technological_card_id"
+                ],
+                "type": "object",
+                "properties": {
+                  "master_id": {
+                    "type": "number",
+                    "description": "Идентификатор сотрудника, оказывающего услугу.",
+                    "example": 123
+                  },
+                  "seance_length": {
+                    "type": "number",
+                    "description": "Длительность оказания услуги указанным сотрудником в секундах,  \nминимально 300 секунд (5 минут), максимально 86100 секунд (23 часа 55 минут).\n",
+                    "example": 3600
+                  },
+                  "technological_card_id": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "Идентификатор технологической карты, используемой при оказании услуги указанным сотрудником.",
+                    "example": 123
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "$ref": "#/components/schemas/response_success_true_object"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/master_service_link"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/response_meta_empty_object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_unauthorized_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_forbidden_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_not_found_response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/422_unprocessable_entity_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/{company_id}/services/{service_id}/staff/{master_id}": {
+      "put": {
+        "tags": [
+          "Услуги"
+        ],
+        "summary": "Изменение настроек оказания услуги сотрудником",
+        "description": "Обновляет данные привязки сотрудника к услуге с указанием длительности и технологической карты.\n",
+        "operationId": "api.location.services.staff.update",
+        "security": [
+          {
+            "BearerPartnerUser": [
+              "Bearer {PartnerToken}, User {UserToken}"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept_header"
+          },
+          {
+            "$ref": "#/components/parameters/content_type_header"
+          },
+          {
+            "$ref": "#/components/parameters/company_id"
+          },
+          {
+            "$ref": "#/components/parameters/service_id"
+          },
+          {
+            "$ref": "#/components/parameters/master_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "seance_length",
+                  "technological_card_id"
+                ],
+                "type": "object",
+                "properties": {
+                  "seance_length": {
+                    "type": "number",
+                    "description": "Длительность оказания услуги указанным сотрудником в секундах,  \nминимально 300 секунд (5 минут), максимально 86100 секунд (23 часа 55 минут).\n",
+                    "example": 3600
+                  },
+                  "technological_card_id": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "Идентификатор технологической карты, используемой при оказании услуги указанным сотрудником.",
+                    "example": 123
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "$ref": "#/components/schemas/response_success_true_object"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/master_service_link"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/response_meta_empty_object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_unauthorized_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_forbidden_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_not_found_response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/422_unprocessable_entity_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Услуги"
+        ],
+        "summary": "Отвязка сотрудника, оказывающего услугу",
+        "description": "Удаляет привязку сотрудника к услуге.\n",
+        "operationId": "api.location.services.staff.delete",
+        "security": [
+          {
+            "BearerPartnerUser": [
+              "Bearer {PartnerToken}, User {UserToken}"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept_header"
+          },
+          {
+            "$ref": "#/components/parameters/content_type_header"
+          },
+          {
+            "$ref": "#/components/parameters/company_id"
+          },
+          {
+            "$ref": "#/components/parameters/service_id"
+          },
+          {
+            "$ref": "#/components/parameters/master_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "$ref": "#/components/schemas/response_success_true_object"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/response_data_null_object"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/response_meta_empty_object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_unauthorized_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_forbidden_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_not_found_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/permissions/{company_id}": {
+      "get": {
+        "tags": [
+          "Пользователь"
+        ],
+        "summary": "Получить список прав",
+        "description": "+ Параметр\r\n    + company_id (required, number, `1`) - ID компании",
+        "operationId": "Получить список прав",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "description": "ID компании",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "e.g. application/vnd.yclients.v2+json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "application/vnd.yclients.v2+json"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "application/json",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer partner_token, User user_token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user_permissions_response_data_types"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "timetable": {
+                      "timetable_access": true,
+                      "master_id": 1000238,
+                      "position_id": 0,
+                      "last_days_count": 1000,
+                      "schedule_edit_access": true,
+                      "timetable_phones_access": true,
+                      "timetable_transferring_record_access": true,
+                      "timetable_statistics_access": true
+                    },
+                    "record_form": {
+                      "record_form_access": true,
+                      "record_form_client_access": true,
+                      "records_autocomplete_access": true,
+                      "create_records_access": true,
+                      "edit_records_access": true,
+                      "edit_records_attendance_access": true,
+                      "records_services_cost_access": true,
+                      "records_services_discount_access": true,
+                      "record_edit_full_paid_access": true,
+                      "delete_records_access": true,
+                      "delete_customer_came_records_access": true,
+                      "delete_paid_records_access": true,
+                      "records_goods_access": true,
+                      "records_goods_create_transaction_access": true,
+                      "records_goods_create_last_days_count": -1,
+                      "records_goods_edit_transaction_access": true,
+                      "records_goods_edit_last_days_count": -1,
+                      "records_goods_cost_access": true,
+                      "records_goods_discount_access": true,
+                      "records_finances_access": true,
+                      "records_finances_last_days_count": -1,
+                      "records_finances_pay_from_deposits_access": true,
+                      "records_group_id_access": true,
+                      "records_group_id": 134178
+                    },
+                    "finances": {
+                      "finances_access": true,
+                      "finances_accounts_ids": [],
+                      "finances_transactions_access": true,
+                      "finances_last_days_count": -1,
+                      "finances_create_transactions_access": true,
+                      "finances_create_last_days_count": -1,
+                      "finances_edit_transactions_access": true,
+                      "finances_edit_last_days_count": -1,
+                      "finances_delete_transactions_access": true,
+                      "finances_transactions_excel_access": true,
+                      "finances_expenses_ids": [],
+                      "finances_accounts_access": true,
+                      "finances_accounts_banalce_access": true,
+                      "finances_suppliers_read_access": true,
+                      "finances_suppliers_create_access": true,
+                      "finances_suppliers_update_access": true,
+                      "finances_suppliers_delete_access": true,
+                      "finances_suppliers_excel_access": true,
+                      "finances_expenses_read_access": true,
+                      "expenses_read_access": true,
+                      "finances_expenses_create_access": true,
+                      "expenses_create_access": true,
+                      "finances_expenses_update_access": true,
+                      "expenses_update_access": true,
+                      "finances_expenses_delete_access": true,
+                      "expenses_delete_access": true,
+                      "finances_kkm_transactions_access": true,
+                      "kkm_transactions_accounts_access": true,
+                      "finances_kkm_settings_read_access": true,
+                      "kkm_settings_reed_access": true,
+                      "finances_kkm_settings_update_access": true,
+                      "kkm_settings_update_access": true,
+                      "finances_settings_invoicing_read_access": true,
+                      "settings_invoicing_read_access": true,
+                      "finances_settings_invoicing_update_access": true,
+                      "settings_invoicing_update_access": true,
+                      "finances_options_read_access": true,
+                      "options_read_access": true,
+                      "finances_options_update_access": true,
+                      "options_update_access": true,
+                      "finances_salary_schemes_access": true,
+                      "finances_salary_calc_access": true,
+                      "finances_salary_not_limitation_today_access": true,
+                      "finances_payroll_calculation_create_access": true,
+                      "finances_payroll_calculation_create_not_limitation_today_access": true,
+                      "finances_salary_access_master_checkbox": true,
+                      "finances_salary_access_master_id": 1000237,
+                      "get_salary_access_master_id": 1000237,
+                      "finances_salary_master_not_limitation_today_access": true,
+                      "finances_payroll_calculation_create_by_master_access": true,
+                      "calculation_create_by_master_not_limitation_today_access": true,
+                      "finances_period_report_access": true,
+                      "finances_period_report_excel_access": true,
+                      "finances_year_report_access": true,
+                      "finances_year_report_excel_access": true,
+                      "finances_print_check_access": true,
+                      "finances_z_report_access": true,
+                      "finances_z_report_no_limit_today_access": true,
+                      "finances_z_report_excel_access": true
+                    },
+                    "clients": {
+                      "clients_access": true,
+                      "client_phones_access": true,
+                      "clients_phones_email_access": true,
+                      "clients_card_phone_access": true,
+                      "clients_delete_access": true,
+                      "clients_excel_access": true,
+                      "excel_access": true,
+                      "client_comments_list_access": true,
+                      "client_comments_add_access": true,
+                      "client_comments_own_edit_access": true,
+                      "client_comments_other_edit_access": true,
+                      "client_files_list_access": true,
+                      "client_files_upload_access": true,
+                      "client_files_delete_access": true,
+                      "clients_visit_master_id": 0,
+                      "get_visit_master_id": 0
+                    },
+                    "dashboard": {
+                      "dashboard_access": true,
+                      "dash_access": true,
+                      "dash_phones_access": true,
+                      "dash_records_access": true,
+                      "dash_records_last_days_count": -1,
+                      "dash_records_excel_access": true,
+                      "dash_records_phones_access": true,
+                      "dash_message_access": true,
+                      "dash_message_excel_access": true,
+                      "dash_message_phones_access": true,
+                      "dash_reviews_access": true,
+                      "dash_reviews_delete_access": true,
+                      "dashboard_calls_access": true,
+                      "dashboard_calls_excel_access": true,
+                      "dashboard_calls_phones_access": true
+                    },
+                    "notification": {
+                      "notification": true,
+                      "web_push": true,
+                      "web_phone_push": true,
+                      "notification_sms_ending_license": true,
+                      "notification_sms_low_balance": true,
+                      "notification_email_ending_license": true
+                    },
+                    "loyalty": {
+                      "loyalty_access": true,
+                      "has_loyalty_access": true,
+                      "loyalty_cards_manual_transactions_access": true,
+                      "has_loyalty_cards_manual_transactions_access": true,
+                      "loyalty_certificate_and_abonement_manual_transactions_access": true
+                    },
+                    "storages": {
+                      "storages_access": true,
+                      "storages_ids": [],
+                      "storages_transactions_access": true,
+                      "storages_last_days_count": -1,
+                      "storages_move_goods_access": true,
+                      "storages_create_transactions_access": true,
+                      "storages_create_last_days_count": -1,
+                      "storages_create_transactions_buy_access": true,
+                      "storages_create_transactions_sale_access": true,
+                      "storages_edit_transactions_access": true,
+                      "storages_edit_last_days_count": -1,
+                      "storages_edit_transactions_buy_access": true,
+                      "storages_edit_transactions_sale_access": true,
+                      "storages_delete_transactions_access": true,
+                      "storages_transactions_excel_access": true,
+                      "storages_transactions_types": [],
+                      "storages_inventory_access": true,
+                      "storages_inventory_create_edit_access": true,
+                      "storages_inventory_delete_access": true,
+                      "storages_inventory_excel_access": true,
+                      "storages_remnants_report_access": true,
+                      "storages_remnants_report_excel_access": true,
+                      "storages_sales_report_access": true,
+                      "storages_sales_report_excel_access": true,
+                      "storages_consumable_report_access": true,
+                      "storages_consumable_report_excel_access": true,
+                      "storages_write_off_report_access": true,
+                      "storages_write_off_report_excel_access": true,
+                      "storages_turnover_report_access": true,
+                      "storages_turnover_report_excel_access": true,
+                      "storages_goods_crud_access": true,
+                      "storages_goods_create_access": true,
+                      "storages_goods_update_access": true,
+                      "storages_goods_title_edit_access": true,
+                      "storages_goods_category_edit_access": true,
+                      "storages_goods_selling_price_edit_access": true,
+                      "storages_goods_cost_price_edit_access": true,
+                      "storages_goods_units_edit_access": true,
+                      "storages_goods_critical_balance_edit_access": true,
+                      "storages_goods_masses_edit_access": true,
+                      "storages_goods_comment_edit_access": true,
+                      "storages_goods_archive_access": true,
+                      "storages_goods_delete_access": true
+                    },
+                    "settings": {
+                      "settings_access": true,
+                      "settings_basis_access": true,
+                      "settings_information_access": true,
+                      "users_access": true,
+                      "delete_users_access": true,
+                      "create_users_access": true,
+                      "edit_users_access": true,
+                      "limited_users_access": false,
+                      "settings_services_access": true,
+                      "settings_services_create_access": true,
+                      "services_edit": true,
+                      "settings_services_edit_title_access": true,
+                      "settings_services_relation_category_access": true,
+                      "settings_services_edit_price_access": true,
+                      "settings_services_edit_image_access": true,
+                      "settings_services_edit_online_seance_date_time_access": true,
+                      "settings_services_edit_online_pay_access": true,
+                      "settings_services_edit_services_related_resource_access": true,
+                      "settings_positions_read": true,
+                      "settings_positions_create": true,
+                      "settings_positions_delete": true,
+                      "edit_master_service_and_duration": true,
+                      "tech_card_edit": true,
+                      "services_delete": true,
+                      "settings_master_access": true,
+                      "master_create": true,
+                      "master_edit": true,
+                      "master_delete": true,
+                      "settings_master_dismiss_access": true,
+                      "schedule_edit": true,
+                      "settings_notifications_access": true,
+                      "settings_email_notifications_access": true,
+                      "settings_template_notifications_access": true,
+                      "webhook_read_access": true
+                    },
+                    "other": {
+                      "stat_access": true,
+                      "billing_access": true,
+                      "send_sms": true,
+                      "auth_enable_check_ip": false,
+                      "auth_list_allowed_ip": []
+                    }
+                  },
+                  "meta": []
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": [],
+            "user": []
+          }
+        ]
+      }
+    }
+  },
+  "schemas": {
+    "services_change_companyid_request_data_types": {
+      "title": "Root Type for services_change_companyid_request_data_types",
+      "required": [
+        "title",
+        "category_id",
+        "price_min",
+        "price_max",
+        "duration",
+        "booking_title",
+        "is_multi",
+        "tax_variant",
+        "vat_id",
+        "is_need_limit_date",
+        "seance_search_start",
+        "seance_search_finish",
+        "step",
+        "seance_search_step"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Название услуги"
+        },
+        "booking_title": {
+          "type": "string",
+          "description": "Название услуги для онлайн-записи"
+        },
+        "category_id": {
+          "type": "number",
+          "description": "ID категории услуг"
+        },
+        "price_min": {
+          "type": "number",
+          "description": "Минимальная стоимость услуги",
+          "format": "float"
+        },
+        "price_max": {
+          "type": "number",
+          "description": "Максимальная стоимость услуги",
+          "format": "float"
+        },
+        "duration": {
+          "type": "number",
+          "description": "Длительность услуги, по умолчанию равна 3600 секундам"
+        },
+        "technical_break_duration": {
+          "type": "number",
+          "nullable": true,
+          "minimum": 0,
+          "maximum": 3600,
+          "description": "Длительность технического перерыва\n- Если не передан. Значение по умолчанию null \n- Значение null, соответствует общей настройке филиала, и задается в разделе *Настройки → Журнал записи → Технические перерывы*\n- Параметр принимает только значения, кратные 300 (5-минутные интервалы)\n- Максимальное допустимое значение 3600 (1 час)\n"
+        },
+        "discount": {
+          "type": "number",
+          "description": "Скидка при оказании услуги",
+          "format": "float"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий к услуге"
+        },
+        "is_multi": {
+          "type": "boolean",
+          "description": "false - индивидуальная услуга, true - групповая услуга"
+        },
+        "tax_variant": {
+          "type": "number",
+          "description": "ID системы налогообложения"
+        },
+        "vat_id": {
+          "type": "number",
+          "description": "ID НДС"
+        },
+        "is_need_limit_date": {
+          "type": "boolean",
+          "description": "Ограничение по датам для онлайн-записи"
+        },
+        "date_from": {
+          "type": "string",
+          "description": "Дата с которой услуга будет доступна в формате yyyy-mm-dd"
+        },
+        "date_to": {
+          "type": "string",
+          "description": "Дата до которой услуга будет доступна в формате yyyy-mm-dd"
+        },
+        "dates": {
+          "type": "array of strings",
+          "description": "Список дат в которые будет доступна онлайн запись (если массив не передан, все даты за указанный период будут доступны)"
+        },
+        "seance_search_start": {
+          "type": "number",
+          "description": "Начало периода в какое время доступна запись, указывается в секундах"
+        },
+        "seance_search_finish": {
+          "type": "number",
+          "description": "Конец периода в какое время доступна запись, указывается в секундах"
+        },
+        "step": {
+          "type": "number",
+          "description": "Шаг вывода сеансов, указывается в секундах"
+        },
+        "seance_search_step": {
+          "type": "number",
+          "description": "Шаг поиска сеансов, указывается в секундах"
+        },
+        "weight": {
+          "type": "number",
+          "description": "Вес услуги (используется для сортировки услуг при отображении)"
+        },
+        "service_type": {
+          "type": "number",
+          "description": "Доступна ли для онлайн записи услуга. 1 - доступна, 0 не доступна."
+        },
+        "api_service_id": {
+          "type": "integer",
+          "description": "Внешний идентификатор услуги"
+        },
+        "online_invoicing_status": {
+          "type": "integer",
+          "description": "Онлайн-предоплата включена (0-выключена, 2-включена)"
+        },
+        "price_prepaid_percent": {
+          "type": "integer",
+          "description": "Размер предоплаты в процентах (от минимальной стоимости услуги)"
+        },
+        "price_prepaid_amount": {
+          "type": "integer",
+          "description": "Сумма предоплаты"
+        },
+        "abonement_restriction_value": {
+          "type": "integer",
+          "description": "Запрет записи без абонемента (Только если online_invoicing_status=0)"
+        },
+        "is_abonement_autopayment_enabled": {
+          "type": "integer",
+          "description": "Автосписание с абонемента"
+        },
+        "autopayment_before_visit_time": {
+          "type": "integer",
+          "description": "За какое время до визита производится автосписание"
+        },
+        "staff": {
+          "type": "array",
+          "description": "Сотрудники, оказываюшие услугу и длительность оказания услуги каждым из них",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Идентификатор сотрудника"
+              },
+              "seance_length": {
+                "type": "number",
+                "description": "Длительность оказания услуги (кратно 15 минутам)"
+              }
+            }
+          }
+        }
+      },
+      "description": "Создать услугу",
+      "example": {
+        "title": "Мужская стрижка",
+        "booking_title": "Мужская стрижка",
+        "category_id": 83167,
+        "price_min": 1300,
+        "price_max": 1300,
+        "duration": 3600,
+        "discount": 0,
+        "tax_variant": 1,
+        "vat_id": 3,
+        "is_multi": false,
+        "is_need_limit_date": true,
+        "api_service_id": 1234,
+        "date_from": "2022-09-19",
+        "date_to": "2022-09-30",
+        "seance_search_start": 36000,
+        "seance_search_finish": 84600,
+        "step": 300,
+        "seance_search_step": 900,
+        "comment": "",
+        "weight": 6,
+        "service_type": 1,
+        "staff": [
+          {
+            "id": 5905,
+            "seance_length": 2700
+          },
+          {
+            "id": 5907,
+            "seance_length": 3600
+          },
+          {
+            "id": 8973,
+            "seance_length": 3600
+          },
+          {
+            "id": 13616,
+            "seance_length": 3600
+          },
+          {
+            "id": 16681,
+            "seance_length": 3600
+          },
+          {
+            "id": 1796,
+            "seance_length": 3600
+          },
+          {
+            "id": 34006,
+            "seance_length": 3600
+          }
+        ]
+      }
+    },
+    "deprecated_services_companyid_request_data_types": {
+      "title": "Root Type for deprecated_services_companyid_request_data_types",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Название услуги"
+        },
+        "category_id": {
+          "type": "number",
+          "description": "ID категории услуг"
+        },
+        "price_min": {
+          "type": "number",
+          "description": "Минимальная стоимость услуги",
+          "format": "float"
+        },
+        "price_max": {
+          "type": "number",
+          "description": "Максимальная стоимость услуги",
+          "format": "float"
+        },
+        "duration": {
+          "type": "number",
+          "description": "Длительность услуги, по умолчанию равна 3600 секундам"
+        },
+        "discount": {
+          "type": "number",
+          "description": "Скидка при оказании услуги",
+          "format": "float"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий к услуге"
+        },
+        "weight": {
+          "type": "number",
+          "description": "Вес услуги (используется для сортировки услуг при отображении)"
+        },
+        "service_type": {
+          "type": "number",
+          "description": "Доступна ли для онлайн записи услуга. 1 - доступна, 0 не доступна."
+        },
+        "api_service_id": {
+          "type": "string",
+          "description": "Внешний идентификатор услуги"
+        },
+        "staff": {
+          "type": "array",
+          "description": "Сотрудники, оказываюшие услугу и длительность оказания услуги каждым из них",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Идентификатор сотрудника"
+              },
+              "seance_length": {
+                "type": "number",
+                "description": "Длительность оказания услуги (кратно 15 минутам)"
+              }
+            }
+          }
+        }
+      },
+      "description": "Изменить услугу",
+      "example": {
+        "title": "Мужская стрижка",
+        "category_id": 83167,
+        "price_min": 1300,
+        "price_max": 1300,
+        "duration": 3600,
+        "discount": 0,
+        "comment": "",
+        "weight": 6,
+        "active": 1,
+        "api_id": "00000000042",
+        "staff": [
+          {
+            "id": 5905,
+            "seance_length": 2700
+          },
+          {
+            "id": 5907,
+            "seance_length": 3600
+          },
+          {
+            "id": 8973,
+            "seance_length": 3600
+          },
+          {
+            "id": 13616,
+            "seance_length": 3600
+          },
+          {
+            "id": 16681,
+            "seance_length": 3600
+          },
+          {
+            "id": 1796,
+            "seance_length": 3600
+          },
+          {
+            "id": 34006,
+            "seance_length": 3600
+          }
+        ]
+      }
+    },
+    "company_companyid_services_serviceid_response200_data_types": {
+      "title": "Root Type for company_companyid_services_serviceid_response200_data_types",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Статус успешности выполнения (true)"
+        },
+        "data": {
+          "type": "array",
+          "description": "Массив объектов с данными",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Идентификатор услуги"
+              },
+              "salon_service_id": {
+                "type": "number",
+                "description": "Идентификатор услуги для компании в сети"
+              },
+              "title": {
+                "type": "string",
+                "description": "Название услуги"
+              },
+              "category_id": {
+                "type": "number",
+                "description": "Идентификатор категории, в которой состоит услуги"
+              },
+              "price_min": {
+                "type": "number",
+                "description": "Минимальная цена на услугу",
+                "format": "float"
+              },
+              "price_max": {
+                "type": "number",
+                "description": "Максимальная цена на услугу",
+                "format": "float"
+              },
+              "discount": {
+                "type": "string",
+                "description": "Скидка",
+                "format": "float"
+              },
+              "comment": {
+                "type": "string",
+                "description": "Комментарий к услуге"
+              },
+              "weight": {
+                "type": "number",
+                "description": "Вес услуги (используется для сортировки категорий при отображении)"
+              },
+              "active": {
+                "type": "number",
+                "description": "1 - доступна для онлайн записи, 0 - не доступна"
+              },
+              "api_id": {
+                "type": "string",
+                "description": "Внешний идентификатор услуги"
+              },
+              "staff": {
+                "type": "array",
+                "description": "Список сотрудников, оказывающих услугу и длительность сеанса",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "total_count": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "description": "Метаданные (содержит количество найденных услуг)"
+        }
+      },
+      "description": "Получить список услуг / конкретную услугу",
+      "example": {
+        "success": true,
+        "data": [
+          {
+            "id": "79067",
+            "salon_service_id": "322888",
+            "title": "Бритье головы",
+            "category_id": "4",
+            "price_min": "1000.00",
+            "price_max": "1000.00",
+            "discount": "0",
+            "comment": "",
+            "weight": "2",
+            "active": "1",
+            "api_id": "",
+            "staff": []
+          },
+          {
+            "id": "83169",
+            "salon_service_id": "433222",
+            "title": "Мужская стрижка",
+            "category_id": "83167",
+            "price_min": "1300.00",
+            "price_max": "1300.00",
+            "discount": "0",
+            "comment": "",
+            "weight": "6",
+            "active": "1",
+            "api_id": "00000000042",
+            "staff": [
+              {
+                "id": "5905",
+                "seance_length": "2700"
+              },
+              {
+                "id": "5907",
+                "seance_length": "3600"
+              },
+              {
+                "id": "8973",
+                "seance_length": "3600"
+              },
+              {
+                "id": "13616",
+                "seance_length": "3600"
+              },
+              {
+                "id": "16681",
+                "seance_length": "3600"
+              },
+              {
+                "id": "17969",
+                "seance_length": "3600"
+              },
+              {
+                "id": "34006",
+                "seance_length": "3600"
+              }
+            ],
+            "image_group": {
+              "id": 72234,
+              "entity": "settings_service",
+              "entity_id": 389927,
+              "images": {
+                "basic": {
+                  "id": "186791",
+                  "path": "https://yclients.ru/path/to/image/tagret-image.jpeg",
+                  "width": "372",
+                  "height": "280",
+                  "type": "jpeg",
+                  "image_group_id": 72234,
+                  "version": "basic"
+                }
+              }
+            }
+          }
+        ],
+        "meta": {
+          "total_count": 2
+        }
+      }
+    },
+    "services_change_companyid_response_data_types": {
+      "title": "Root Type for services_change_companyid_response_data_types",
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Статус успешности выполнения (true)"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Название услуги"
+            },
+            "booking_title": {
+              "type": "string",
+              "description": "Название услуги для онлайн-записи"
+            },
+            "category_id": {
+              "type": "number",
+              "description": "ID категории услуг"
+            },
+            "price_min": {
+              "type": "number",
+              "description": "Минимальная стоимость услуги",
+              "format": "float"
+            },
+            "price_max": {
+              "type": "number",
+              "description": "Максимальная стоимость услуги",
+              "format": "float"
+            },
+            "duration": {
+              "type": "number",
+              "description": "Длительность услуги, по умолчанию равна 3600 секундам"
+            },
+            "discount": {
+              "type": "number",
+              "description": "Скидка при оказании услуги",
+              "format": "float"
+            },
+            "comment": {
+              "type": "string",
+              "description": "Комментарий к услуге"
+            },
+            "is_multi": {
+              "type": "boolean",
+              "description": "false - индивидуальная услуга, true - групповая услуга"
+            },
+            "tax_variant": {
+              "type": "number",
+              "description": "ID системы налогообложения"
+            },
+            "vat_id": {
+              "type": "number",
+              "description": "ID НДС"
+            },
+            "is_need_limit_date": {
+              "type": "boolean",
+              "description": "Ограничение по датам для онлайн-записи"
+            },
+            "seance_search_start": {
+              "type": "number",
+              "description": "Начало периода в какое время доступна запись, указывается в секундах"
+            },
+            "seance_search_finish": {
+              "type": "number",
+              "description": "Конец периода в какое время доступна запись, указывается в секундах"
+            },
+            "step": {
+              "type": "number",
+              "description": "Шаг вывода сеансов, указывается в секундах"
+            },
+            "seance_search_step": {
+              "type": "number",
+              "description": "Шаг поиска сеансов, указывается в секундах"
+            },
+            "weight": {
+              "type": "number",
+              "description": "Вес услуги (используется для сортировки услуг при отображении)"
+            },
+            "technical_break_duration": {
+              "type": "number",
+              "description": "Длительность технического перерыва\n"
+            },
+            "active": {
+              "type": "number",
+              "description": "Доступна ли для онлайн записи услуга. 1 - доступна, 0 не доступна."
+            },
+            "api_id": {
+              "type": "string",
+              "description": "Внешний идентификатор услуги"
+            },
+            "staff": {
+              "type": "array",
+              "description": "Сотрудники, оказываюшие услугу и длительность оказания услуги каждым из них",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "description": "Идентификатор сотрудника"
+                  },
+                  "seance_length": {
+                    "type": "number",
+                    "description": "Длительность оказания услуги (кратно 15 минутам)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "array",
+          "description": "Метаданные (пустой массив)",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Изменить услугу",
+      "example": {
+        "title": "Мужская стрижка",
+        "booking_title": "Мужская стрижка",
+        "category_id": 83167,
+        "price_min": 1300,
+        "price_max": 1300,
+        "duration": 3600,
+        "discount": 0,
+        "tax_variant": 1,
+        "vat_id": 3,
+        "is_multi": false,
+        "is_need_limit_date": true,
+        "date_from": "2022-09-19",
+        "date_to": "2022-09-30",
+        "seance_search_start": 36000,
+        "seance_search_finish": 84600,
+        "step": 300,
+        "seance_search_step": 900,
+        "comment": "",
+        "weight": 6,
+        "active": 1,
+        "api_id": "00000000042",
+        "staff": [
+          {
+            "id": 5905,
+            "seance_length": 2700
+          },
+          {
+            "id": 5907,
+            "seance_length": 3600
+          },
+          {
+            "id": 8973,
+            "seance_length": 3600
+          },
+          {
+            "id": 13616,
+            "seance_length": 3600
+          },
+          {
+            "id": 16681,
+            "seance_length": 3600
+          },
+          {
+            "id": 1796,
+            "seance_length": 3600
+          },
+          {
+            "id": 34006,
+            "seance_length": 3600
+          }
+        ],
+        "meta": []
+      }
+    },
+    "services_companyid_links_request_data_types": {
+      "title": "Root Type for services_companyid_links_request_data_types",
+      "required": [
+        "service_id",
+        "master_settings",
+        "resource_ids",
+        "translations"
+      ],
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "number",
+          "description": "ID услуги"
+        },
+        "master_settings": {
+          "type": "array",
+          "description": "Список сотрудников, оказывающих услугу c длительностью сеанса и технологическими картами",
+          "items": {
+            "type": "object",
+            "properties": {
+              "master_id": {
+                "type": "number",
+                "description": "ID сотрудника оказывающего услугу"
+              },
+              "technological_card_id": {
+                "type": "number",
+                "description": "ID технологической карты по которой сотрудник оказывает услугу"
+              },
+              "hours": {
+                "type": "number",
+                "description": "Количество часов необходимых для оказания услуги"
+              },
+              "minutes": {
+                "type": "number",
+                "description": "Количество минут необходимых для оказания услуги"
+              },
+              "price": {
+                "type": "object",
+                "description": "Цена услуги для данного мастера, если она отличается от цены услуги по умолчанию (для этого указать NULL)",
+                "properties": {
+                  "min": {
+                    "type": "float",
+                    "description": "Цена услуги \"от\""
+                  },
+                  "max": {
+                    "type": "float",
+                    "description": "Цена услуги \"до\""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "resource_ids": {
+          "type": "array",
+          "description": "Список ресурсов необходимых для оказания услуги",
+          "items": {
+            "type": "number",
+            "description": "ID ресурсов"
+          }
+        },
+        "translations": {
+          "type": "array",
+          "description": "Список переводов для каждого языка",
+          "items": {
+            "type": "object",
+            "properties": {
+              "language_id": {
+                "type": "number",
+                "description": "ID языка для перевода"
+              },
+              "translation": {
+                "type": "string",
+                "description": "Текст который будет выведен в названии при выбранном языке"
+              }
+            }
+          }
+        }
+      },
+      "description": "Изменить длительность оказания услуги сотрудниками, технические карты, названия на других языках",
+      "example": {
+        "service_id": 10832939,
+        "master_settings": [
+          {
+            "master_id": 2033728,
+            "technological_card_id": 291341,
+            "hours": 0,
+            "minutes": 45,
+            "price": {
+              "min": 999.99,
+              "max": null
+            }
+          },
+          {
+            "master_id": 1987799,
+            "technological_card_id": 291341,
+            "hours": 1,
+            "minutes": 15,
+            "price": null
+          }
+        ],
+        "resource_ids": [
+          62173
+        ],
+        "translations": [
+          {
+            "language_id": 1,
+            "translation": ""
+          },
+          {
+            "language_id": 2,
+            "translation": "Massage"
+          }
+        ]
+      }
+    }
+  },
+  "servicePermissionFields": [
+    {
+      "field": "settings_services_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_access"
+    },
+    {
+      "field": "settings_services_create_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_create_access"
+    },
+    {
+      "field": "services_edit",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/services_edit"
+    },
+    {
+      "field": "settings_services_edit_title_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_title_access"
+    },
+    {
+      "field": "settings_services_relation_category_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_relation_category_access"
+    },
+    {
+      "field": "settings_services_edit_price_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_price_access"
+    },
+    {
+      "field": "settings_services_edit_image_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_image_access"
+    },
+    {
+      "field": "settings_services_edit_online_seance_date_time_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_online_seance_date_time_access"
+    },
+    {
+      "field": "settings_services_edit_online_pay_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_online_pay_access"
+    },
+    {
+      "field": "settings_services_edit_services_related_resource_access",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/settings_services_edit_services_related_resource_access"
+    },
+    {
+      "field": "edit_master_service_and_duration",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/edit_master_service_and_duration"
+    },
+    {
+      "field": "services_delete",
+      "type": "boolean",
+      "pointer": "#/components/schemas/user_permissions_response_data_types/properties/data/properties/settings/properties/services_delete"
+    }
+  ]
+}

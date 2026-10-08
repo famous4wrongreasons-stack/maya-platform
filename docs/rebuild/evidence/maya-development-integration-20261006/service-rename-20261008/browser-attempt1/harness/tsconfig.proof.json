@@ -1,0 +1,26 @@
+{
+  "extends": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/tsconfig.widgets-live.json",
+  "compilerOptions": {
+    "baseUrl": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+    "paths": {
+      "@nestjs/config": [
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/@nestjs/config"
+      ],
+      "supertest": [
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/@types/supertest"
+      ],
+      "@nestjs/common": [
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/@nestjs/common"
+      ]
+    },
+    "typeRoots": [
+      "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/@types"
+    ],
+    "noEmit": true,
+    "incremental": false
+  },
+  "include": [
+    "/tmp/maya-service-edit-20261008/service-rename.probe-spec.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/**/*.d.ts"
+  ]
+}

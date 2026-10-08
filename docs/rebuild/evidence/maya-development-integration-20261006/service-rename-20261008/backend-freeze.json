@@ -1,0 +1,23 @@
+{
+  "frozen_at": "2026-10-08T11:57:52.043764+00:00",
+  "verification": "Scoped Prettier only. Tests/types/lint not run by delegated agent; root owns serial gate.",
+  "test_suites": [
+    "src/crm/yclients-service-rename.contract.spec.ts",
+    "src/crm/adapters/yclients-service-rename.spec.ts",
+    "src/crm/service-rename-actor.spec.ts"
+  ],
+  "files": {
+    "src/crm/yclients-service-rename.contract.ts": "76b0fb1d299bda1391751e6011e2cd7ca20d9332f0cbbd753df7719857e8f56e",
+    "src/crm/yclients-service-rename.contract.spec.ts": "54097e2b0efd1ea2f912642912f210269eec62a92276d41e6ac0e81e8cc28668",
+    "src/crm/adapters/yclients-service-rename.spec.ts": "6e11fc3f97616e7c8e94bf03aa7ee26cb3065e6b804668de60c5f47ac26cf165",
+    "src/crm/service-rename-actor.spec.ts": "4c1c96df144808a5e16a1801142e84118182950ef982651777e6a1ca203ec466",
+    "src/crm/crm-adapter.interface.ts": "ce3771c5458c85e09e3b550fa784c30e48acd9dcd0fb300fa0d2d2abfc4828e9",
+    "src/crm/adapters/yclients-crm.adapter.ts": "1f3a8c51ac916dd44ea5b49a6098b00f3132b041e568f59ec6fa5c800177d836",
+    "src/crm/crm.service.ts": "cc2cad907f2688d7089c4a24bb8eecec59374489e625288d761d2219b084b989"
+  },
+  "limitations": [
+    "Synthetic fixtures only; no live provider/model calls",
+    "READ preview only; no PATCH/AE/widget/approval authority",
+    "Future write and effective print_title preservation unqualified"
+  ]
+}

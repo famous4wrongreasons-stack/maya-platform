@@ -2,6 +2,8 @@
 
 Development continuation of [goods search](MAYA-YCLIENTS-GOODS-SEARCH-CHECKPOINT-20261008.md) and the already approved F32b/F74b GR-PC1 receipt lane. This slice wires an ephemeral photo and one reviewed line to the existing canonical chat approval. It does not grant real OCR, provider receipt admission, background initiation or a new financial subtype.
 
+**Actual upload today:** with an authorized current source and an otherwise valid image, the default parser returns HTTP 503 `goods_photo_parser_not_configured`. The current React user sees «Распознавание фото пока не подключено. Строки не извлечены». No lines, matching or receipt proposal follow. In the successful proof, a Jest DI spy replaces `GoodsPhotoParser.parse` and returns the fixture's literal `RAW_LINES` array after checking synthetic image bytes; it does not decode or recognize the image. Thus the completed local result is the downstream review/approval plumbing with synthetic extraction, not a working OCR feature for an arbitrary invoice.
+
 ## Useful path
 
 The current React chat opens an explicit image picker. One PNG/JPEG/WebP, at most 2 MiB, goes through the headless client's sole authenticated multipart exchange. The original filename is replaced by a fixed transport filename; no image URL, media widget, TeamAttachment, document store or browser storage is introduced. The backend clears its input Buffer in `finally`. Signature and size checks are bounded input checks, not full image-decoder qualification.

@@ -1,0 +1,56 @@
+{
+  "contract": "maya.service-rename-http-react-proof/1",
+  "status": "failed",
+  "providerTransport": "FINITE_IN_PROCESS_SYNTHETIC_FETCH",
+  "adapter": "ACTUAL_CRM_FACTORY_AND_NATIVE_YCLIENTS",
+  "setup": "SYNTHETIC_ACTIVE_INTEGRATION_ROWS_NOT_A17",
+  "a17Acceptance": false,
+  "sourceDrift": "SYNTHETIC_SETTINGS_UPDATE_DURING_REAL_NATIVE_SERVICE_READ",
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "restartClaim": false,
+  "mutationLaneAcceptance": false,
+  "businessEffectsScope": "REQUESTS_EXCLUDE_EXPLICIT_TEST_SEED_SOURCE_DRIFT_AND_MEMBERSHIP_REVOCATION",
+  "clientRoleDenied": {
+    "status": 403,
+    "code": "ai_tool_forbidden",
+    "sourceGets": 0
+  },
+  "foreignTenantRead": {
+    "status": 201,
+    "exactOwnCompanyRoute": true,
+    "ownCompanyGets": 0,
+    "foreignCompanyGets": 3,
+    "sourceFixtureSynthetic": true
+  },
+  "modelCalls": 1,
+  "realModelCalls": 0,
+  "nativeFactoryCalls": 1,
+  "nativeSyntheticGetCount": 3,
+  "nativeGetLedger": [
+    {
+      "company": "426202",
+      "path": "/api/v1/user/permissions/426202",
+      "phase": "foreign",
+      "key": null
+    },
+    {
+      "company": "426202",
+      "path": "/api/v1/company/426202/services/201",
+      "phase": "foreign",
+      "key": null
+    },
+    {
+      "company": "426202",
+      "path": "/api/v1/user/permissions/426202",
+      "phase": "foreign",
+      "key": null
+    }
+  ],
+  "checkpoints": [],
+  "unexpected": [],
+  "actionExecutions": 0,
+  "approvalRequests": 0,
+  "widgetIntents": 0
+}

@@ -1,0 +1,89 @@
+{
+  "contract": "maya.service-rename-owned-cluster/1",
+  "mode": "actual-current-react-http-postgres-native-service-read-only-preview",
+  "candidateCommit": "995a87e3b1e5102605385dc5c0afdca062cae6d0",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "6ae77b93caa9a2014e286137e6446775fc303fbdf8ad5fc1fd68409000a04d48",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceSha256": "12e1f34e942a85095b6ae649e4451ce0ee5c94593e3005b2be43969b6fac60f4",
+  "database": "maya_widget_gate_proof_c9occ_6c9c526b4772",
+  "port": 63785,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-service-rename-CtvtBr/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "shell-runtime-build",
+    "react-web-build",
+    "rename-browser"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "CURRENT_REACT_WITH_NATIVE_ADAPTER_SYNTHETIC_GET_AND_SCRIPTED_MODEL_NOT_PROVIDER_ACCEPTANCE",
+  "scratchHarnessGitBinding": false,
+  "currentReactAcceptance": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 97241,
+      "pgid": 97241,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "shell-runtime-build": {
+      "detached": true,
+      "pid": 97251,
+      "pgid": 97251,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 97299,
+      "pgid": 97299,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "rename-browser": {
+      "detached": true,
+      "pid": 97344,
+      "pgid": 97344,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "commitAtEnd": "995a87e3b1e5102605385dc5c0afdca062cae6d0",
+  "sourceUnchanged": true,
+  "harnessUnchanged": true,
+  "clusterStopped": true
+}
