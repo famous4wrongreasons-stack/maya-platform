@@ -1,0 +1,13 @@
+PASS src/orchestration/c9.business-lifecycle.spec.ts
+PASS src/orchestration/c9.business-occupancy.spec.ts
+PASS src/orchestration/c9.lifecycle.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+PASS src/orchestration/c9.context-and-bi.spec.ts
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       105 passed, 105 total
+Snapshots:   0 total
+Time:        0.934 s, estimated 1 s
+Ran all test suites within paths "src/orchestration/c9.business-lifecycle.spec.ts", "src/orchestration/c9.business-occupancy.spec.ts", "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.context-and-bi.spec.ts", "src/orchestration/c9.occupancy.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-failure-20261008/green1/targeted-jest.json

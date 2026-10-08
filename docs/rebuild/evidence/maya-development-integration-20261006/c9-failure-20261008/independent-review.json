@@ -1,0 +1,26 @@
+{
+  "reviewer": "independent checkpoint_review agent",
+  "scope": "read-only code, raw evidence, Git/source and cleanup verification",
+  "status": "qualified-pass",
+  "sourceHead": "5d37ad01e9de9220a5440af2a3f687f8f63968e0",
+  "sourceBindingsVerified": 1815,
+  "localBindingsVerified": 11,
+  "rawArtifactCopiesVerified": 74,
+  "rawArtifactBytes": 1266940,
+  "rawCopyMismatches": 0,
+  "ownedGroupsAbsent": 33,
+  "ownedClustersStopped": 2,
+  "tests": 199,
+  "suites": 9,
+  "actualHttpTests": 4,
+  "blockingFindings": [],
+  "qualifications": [
+    "Persisted HELD_UNKNOWN replay, not crashed DISPATCHED recovery.",
+    "Expiry component clocks, not naturally elapsed HTTP.",
+    "No current React rerun or live model/provider/overall C10 acceptance."
+  ],
+  "earlierReviewFindingsResolved": [
+    "Bind prisma.config.ts and tsconfig inputs in HTTP driver.",
+    "Require withholding old C8 prose as well as structured findings."
+  ]
+}

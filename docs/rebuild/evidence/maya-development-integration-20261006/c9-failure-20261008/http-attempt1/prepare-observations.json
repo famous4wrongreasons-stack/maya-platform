@@ -1,0 +1,70 @@
+{
+  "contract": "maya.c9-lifecycle-failure-http-proof/1",
+  "stage": "prepare",
+  "status": "passed",
+  "sourceHead": "d42dacea6f2c70ef326c69c42ac056435832238f",
+  "sourceDigest": "f1b83d0947f3eba77d3d8ba98aafefa1397eeab2376bc8d68a7304f2c14b8fc5",
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "modelSelection": "SCRIPTED_SYNTHETIC_COMPOUND_ONLY",
+  "sourceBoundary": "CALL_THROUGH_ACTUAL_C8_READ_THEN_SYNTHETIC_DELIVERY_PAUSE_OR_LOSS",
+  "qualifications": [
+    "Internal historical appointment facts and active CRM binding are synthetic setup, not booking/A17 acceptance.",
+    "HELD_UNKNOWN crosses actual restart; no crashed DISPATCHED worker or natural lease-expiry recovery is claimed.",
+    "Lifecycle HELD replay refuses; only a new explicit request admits new discovery. No completed source receipt is guessed.",
+    "Policy changes use the canonical owner in a separately labelled fixture scope. No temporal/constraint/clock edits.",
+    "C7 publication uses the native YCLIENTS adapter with finite synthetic GET transport; no external network."
+  ],
+  "cases": {
+    "concurrent": {
+      "duplicate": {
+        "status": 400,
+        "code": "c9_read_work_in_progress_or_unknown",
+        "reply": null,
+        "current": null,
+        "outcome": null,
+        "findingsCount": 0,
+        "financialFindingsCount": 0
+      },
+      "stateDuringPause": "DISPATCHED",
+      "leaseGeneration": 1,
+      "genuineSourceReads": 1,
+      "completed": {
+        "status": 201,
+        "code": null,
+        "reply": "Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 08.10.2026, 16:07:31,730 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "current": true,
+        "outcome": "PARTIAL",
+        "findingsCount": 1,
+        "financialFindingsCount": 0
+      },
+      "exactlyOneWork": true,
+      "exactlyOneRevision": true,
+      "businessHashUnchanged": true
+    },
+    "held": {
+      "originalStatus": 500,
+      "duplicate": {
+        "status": 400,
+        "code": "c9_read_work_in_progress_or_unknown",
+        "reply": null,
+        "current": null,
+        "outcome": null,
+        "findingsCount": 0,
+        "financialFindingsCount": 0
+      },
+      "state": "HELD_UNKNOWN",
+      "leaseGeneration": 1,
+      "genuineSourceReads": 1,
+      "sourceRedispatch": 0,
+      "revisions": 0,
+      "businessHashUnchanged": true
+    }
+  },
+  "modelSelections": 0,
+  "actualC8ListReads": 2,
+  "actualC8SnapshotReads": 9,
+  "syntheticNativeProviderReads": [],
+  "transportCalls": 0,
+  "forbiddenEdges": []
+}

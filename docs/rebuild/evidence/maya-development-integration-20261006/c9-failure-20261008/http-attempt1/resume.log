@@ -1,0 +1,30 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_5f07f7adcffc on 127.0.0.1:57143 (local)
+FAIL test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts
+  C9 lifecycle failure [actual HTTP, canonical work, process and PostgreSQL restart]
+    ✓ A/B restart: settled exact replay is historical; held exact replay refuses; new explicit request may read (559 ms)
+    ✕ C standalone: late policy change cannot expose a previously current C8 finding (519 ms)
+    ✓ D compound: late policy change cannot expose a previously current C8 finding (709 ms)
+
+  ● C9 lifecycle failure [actual HTTP, canonical work, process and PostgreSQL restart] › C standalone: late policy change cannot expose a previously current C8 finding
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "PARTIAL"
+    Received array: ["STALE", "UNAVAILABLE"]
+
+      1101 |           expect(result!.status).toBe(201);
+      1102 |           if (result!.body.recommendation) {
+    > 1103 |             expect(['STALE', 'UNAVAILABLE']).toContain(
+           |                                              ^
+      1104 |               result!.body.recommendation.outcome,
+      1105 |             );
+      1106 |             expect(result!.body.recommendation.agent.findings).toEqual([]);
+
+      at Object.<anonymous> (widgets-live/c9-lifecycle-failure-restart.probe-spec.ts:1103:46)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Snapshots:   0 total
+Time:        2.629 s, estimated 6 s
+Ran all test suites within paths "test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-failure-20261008/http-attempt1/resume-jest.json

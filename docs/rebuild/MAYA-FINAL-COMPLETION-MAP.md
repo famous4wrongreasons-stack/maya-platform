@@ -1223,3 +1223,35 @@ Scripted model selection and synthetic native provider inputs; no real model/pro
 [Qualified checkpoint](MAYA-SINGLE-LIFECYCLE-SEMANTIC-CHECKPOINT-20261008.md), code/proof `6d92799f2b4ca1f185c7d1685c6a19e8cc8eae79`: ordinary owner paraphrase now delegates to existing C9 Lifecycle, one C8 receipt and saved proposal, without unrequested BI or contact/mutation authority. Distinct bounded clarification persists requested scope; current owner/tenant/source checks remain in C9; semantic refusals retain their true error instead of CRM-connectivity fallback.
 
 190 tests/nine suites, production+focused types, scoped lint and six browser guards PASS. Actual single initial HTTP/current React step plus seven compound checkpoints PASS; compound actual PG/process restart and immutable HISTORICAL/STALE replay remain green. Zero request business writes/outbound, all owned resources cleaned, 2,217 source hashes match Git. Single-specific scoped continuation/restart/replay is unit-only here; natural HTTP expiry/HELD/late drift and real model/provider remain unqualified. No schema/background authority/website/production change; overall MAYA/C10 NOT_ISSUED.
+
+### CORE status after bounded C9 failure checkpoint — 2026-10-08
+
+This is the current implemented-versus-missing list for the owner's core priority;
+older entries above retain their original, narrower evidence qualifications.
+
+- **Implemented:** explicit owner READs use the existing C9/agents/strategy, durable
+  work and source-capped versions. [The late-source fix](MAYA-C9-FAILURE-CHECKPOINT-20261008.md)
+  adds the existing compound final check to standalone Lifecycle. Permitted booking
+  create/move/cancel and receipt/restart paths remain in their canonical owners;
+  no background initiation follows from these explicit requests.
+- **Current synthetic evidence:** 199 targeted tests and four actual HTTP/PG cases
+  now cover concurrent work, persisted HELD_UNKNOWN refusal across process/PG
+  restart, exact settled replay and late canonical policy drift. Prior current
+  React and booking proofs remain separately qualified. Provider facts/planning
+  are synthetic; component expiry is not natural elapsed HTTP or worker-crash recovery.
+- **Missing implementation/preparation:** one strict current-candidate conversational
+  adapter/frozen diagnostic with retained actual replies and required conversation
+  correlation; the current keyless broker has no live upstream/credential admission,
+  and its offline budget does not implement the proposed smaller diagnostic cap.
+  A actually crashed DISPATCHED worker and naturally elapsed expiry remain unqualified,
+  without extending this completed bounded checkpoint into another audit.
+- **External qualification:** real-model natural Russian, typos, follow-ups, entity
+  replacement, topic switching, compound/general chat, roles and UNKNOWN behavior;
+  real YCLIENTS and deployment are separate. A small authored diagnostic cannot
+  establish 99% quality, a holdout score or overall MAYA/C10 acceptance.
+- **Decision and nearest deliverable:** freeze one core conversational candidate and
+  a small diagnostic first. Resolve exact isolated runner/profile and credential
+  reference/owner/authorized reader metadata, then a fresh bounded model permit;
+  the old permit is closed. No new SSH, secret read or paid call is authorized here.
+  Warehouse/OCR/Linux portability, design, multi-company schema and background
+  autonomy remain outside this stage. Working website untouched. `NOT_ISSUED`.

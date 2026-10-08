@@ -1,0 +1,40 @@
+PASS src/orchestration/c9.business-lifecycle.spec.ts
+  explicit C9 business + Client Lifecycle (synthetic durable ports)
+    ✓ admits one client_value run, shares two reads and exposes both domains only after saved work (6 ms)
+    ✓ retains financial evidence only in its read receipt and source-caps the single C8-only proposal (2 ms)
+    ✓ never serializes private Client identity or raw financial facts into work results or response (1 ms)
+    ✓ refuses insufficient shared budget before selecting either source: {"domainsMax":1} (12 ms)
+    ✓ refuses insufficient shared budget before selecting either source: {"toolCallsMax":1} (1 ms)
+    ✓ requires current bi permission before either domain reads (1 ms)
+    ✓ requires current lifecycle permission before either domain reads
+    ✓ keeps empty configured=true sources unknown, never zero finance or an active client base (1 ms)
+    ✓ keeps empty configured=false sources unknown, never zero finance or an active client base (1 ms)
+    ✓ replays exact saved refs and version after recreation without fresh source discovery or work dispatch (2 ms)
+    ✓ rechecks current bi authority on saved replay before returning old facts (1 ms)
+    ✓ rechecks current lifecycle authority on saved replay before returning old facts (1 ms)
+    ✓ withholds stale C8 findings after preparation without rewriting the saved version (2 ms)
+    ✓ refuses a late C8 currentness change even when publication metadata and built findings still look valid (1 ms)
+    ✓ reauthorizes bi after both facts were built and refuses late revocation (1 ms)
+    ✓ reauthorizes lifecycle after both facts were built and refuses late revocation (1 ms)
+    ✓ refuses coherent exposure when financialRef expires after both facts were built (1 ms)
+    ✓ refuses coherent exposure when clientRef expires after both facts were built (1 ms)
+    ✓ isolates rootValidUntil at expiry offset -1 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates rootValidUntil at expiry offset 0 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates financialValidUntil at expiry offset -1 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates financialValidUntil at expiry offset 0 ms after awaited qualification (component clock only) (2 ms)
+    ✓ isolates financialRetentionUntil at expiry offset -1 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates financialRetentionUntil at expiry offset 0 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates clientValidUntil at expiry offset -1 ms after awaited qualification (component clock only) (3 ms)
+    ✓ isolates clientValidUntil at expiry offset 0 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates clientRetentionUntil at expiry offset -1 ms after awaited qualification (component clock only) (1 ms)
+    ✓ isolates clientRetentionUntil at expiry offset 0 ms after awaited qualification (component clock only) (2 ms)
+    ✓ does not redispatch held Lifecycle work after BI settled
+    ✓ does not replace an erased exact lifecycle revision with a newer revision on replay (1 ms)
+    ✓ shares saved work leases across concurrent copies with one Lifecycle discovery and proposal (1 ms)
+    ✓ traverses actual AiCore chat and real C9 into one persisted compound reply with scripted planning only (14 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       32 passed, 32 total
+Snapshots:   0 total
+Time:        0.59 s, estimated 1 s
+Ran all test suites within paths "src/orchestration/c9.business-lifecycle.spec.ts".

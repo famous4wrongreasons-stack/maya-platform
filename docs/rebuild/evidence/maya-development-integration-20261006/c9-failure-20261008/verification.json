@@ -1,0 +1,46 @@
+{
+  "contract": "maya.c9-failure-verification/1",
+  "status": "qualified-local-pass",
+  "certificate": "NOT_ISSUED",
+  "sourceHead": "5d37ad01e9de9220a5440af2a3f687f8f63968e0",
+  "sourceCount": 1815,
+  "unitTests": 199,
+  "unitSuites": 9,
+  "productionTypes": true,
+  "focusedProofAndSpecTypes": true,
+  "scopedLint": true,
+  "httpTests": 4,
+  "actualNodeAndPostgresRestart": true,
+  "ownedGroupsAbsent": 33,
+  "ownClustersStopped": 2,
+  "lateStandaloneRed": {
+    "status": 201,
+    "outcome": "PARTIAL",
+    "current": true,
+    "findings": 1
+  },
+  "lateStandaloneGreen": {
+    "status": 400,
+    "code": "c9_source_changed",
+    "findings": 0
+  },
+  "compoundLateSource": "UNCONFIRMED, no findings/prose",
+  "heldReplay": "400 c9_read_work_in_progress_or_unknown, exact receipt preserved, no rediscovery",
+  "noRequestBusinessWrites": true,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "qualification": [
+    "Fault injection delays or loses delivery after a genuine canonical C8 read. Source values, owners and constraints are not replaced.",
+    "HELD_UNKNOWN replay across actual restart is proved; no crashed DISPATCHED worker / natural lease expiry recovery.",
+    "Ten isolated expiry boundary cases are component-clock tests, not DB-admissible deadline shapes or natural elapsed HTTP.",
+    "Current React was not rerun in this HTTP-only failure slice; previous checkpoint remains separately qualified.",
+    "No schema, retention or background authority change, no live provider/model/production/working-website change."
+  ],
+  "failedAttempts": {
+    "green1": "Prettier errors in authored fixture/expiry spec; targeted105+productiontypes passed.",
+    "green2": "13 fixture lint findings; targeted105+productiontypes passed.",
+    "http-attempt1": "One exact standalone late-source failure; other three cases passed. Genuine policy revision1→2 after read returned causes stale current finding.",
+    "red": "Directory name inherited from runner; this phase is a successful 32-test expiry component baseline, not a failing RED."
+  },
+  "artifactPolicy": "Private receipt, DB files and ambient secrets excluded; all source inputs and failed finite attempts retained."
+}

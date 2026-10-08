@@ -1,0 +1,19 @@
+{
+  "extends": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "types": [
+      "node",
+      "jest"
+    ],
+    "typeRoots": [
+      "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/@types"
+    ]
+  },
+  "include": [
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.business-lifecycle.spec.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts"
+  ]
+}

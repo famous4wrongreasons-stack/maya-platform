@@ -1,0 +1,125 @@
+{
+  "contract": "maya.c9-failure-local-checks/1",
+  "qualification": "Synthetic tests only; no real model/provider or process/PG/browser restart acceptance",
+  "base": "573a840b58e8e342b0a1caae6ef8d84c928d2abc",
+  "status": "failed",
+  "commands": [
+    {
+      "name": "targeted",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/orchestration/c9.business-lifecycle.spec.ts",
+        "src/orchestration/c9.business-occupancy.spec.ts",
+        "src/orchestration/c9.lifecycle.spec.ts",
+        "src/orchestration/c9.lifecycle-source.spec.ts",
+        "src/orchestration/c9.context-and-bi.spec.ts",
+        "src/orchestration/c9.occupancy.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-c9-failure-20261008/green2/targeted-jest.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    },
+    {
+      "name": "types",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    },
+    {
+      "name": "lint",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/owner-review-plan.ts",
+        "src/ai-tools/owner-review-plan.spec.ts",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-core.occupancy.spec.ts",
+        "src/ai-tools/ai-core-model.service.ts",
+        "src/ai-tools/ai-core-model.service.spec.ts",
+        "src/orchestration/c9.orchestrator.ts",
+        "src/orchestration/c9.store.ts",
+        "src/orchestration/c9.lifecycle-source.ts",
+        "src/orchestration/c9.lifecycle-source.spec.ts",
+        "src/orchestration/c9.business-lifecycle.spec.ts",
+        "test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    },
+    {
+      "name": "proof-types",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "/tmp/maya-c9-failure-20261008/tsconfig.proof.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    }
+  ],
+  "completed": [
+    "targeted",
+    "types"
+  ],
+  "sourceHashes": {
+    "maya-saas-backend/src/orchestration/c9.business-lifecycle.spec.ts": "899f5de9351e8f889fe0367a1b23d1e86921b8423a78f05705e557920c98d4b5",
+    "maya-saas-backend/src/orchestration/c9.business-occupancy.spec.ts": "2f9cdeba75e18ec9f4dfd4597e9712724b3f8329e4da374541b7fff903a0e760",
+    "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts": "b37d7b077958ed23a37efceb628ef252eb4fa98485c913e7ac7aee66f7588e2b",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts": "a0e5b4ad9ca77d850fdb620fe56289b3f5e491afd25874584bbe57dcf84f62e0",
+    "maya-saas-backend/src/orchestration/c9.context-and-bi.spec.ts": "7362fbf40bd18e55bd85191b662e2effe2b7a73c210b16b04c605a8e0318c0a1",
+    "maya-saas-backend/src/orchestration/c9.occupancy.spec.ts": "87cce836d8a2cf5169d07fbe95a2c7a04315efa71612339e18581e2e4ee664ea"
+  },
+  "groups": {
+    "targeted": {
+      "detached": true,
+      "pid": 28963,
+      "pgid": 28963,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "types": {
+      "detached": true,
+      "pid": 29025,
+      "pgid": 29025,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "lint": {
+      "detached": true,
+      "pid": 29076,
+      "pgid": 29076,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "failure": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n",
+  "sourceUnchanged": true
+}

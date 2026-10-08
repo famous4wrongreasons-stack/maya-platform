@@ -1,0 +1,13 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_bed76c61963e on 127.0.0.1:57804 (local)
+PASS test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts
+  C9 lifecycle failure [actual HTTP, canonical work, process and PostgreSQL restart]
+    ✓ A/B restart: settled exact replay is historical; held exact replay refuses; new explicit request may read (633 ms)
+    ✓ C standalone: late policy change cannot expose a previously current C8 finding (689 ms)
+    ✓ D compound: late policy change cannot expose a previously current C8 finding (737 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        2.916 s, estimated 3 s
+Ran all test suites within paths "test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-c9-failure-20261008/http-attempt2/resume-jest.json

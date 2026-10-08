@@ -1,0 +1,19 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/c9-lifecycle-failure-restart.probe-spec.ts
+  202:15  error  This assertion is unnecessary since it does not change the type of the expression                   @typescript-eslint/no-unnecessary-type-assertion
+  415:39  error  This assertion is unnecessary since it does not change the type of the expression                   @typescript-eslint/no-unnecessary-type-assertion
+  437:17  error  This assertion is unnecessary since it does not change the type of the expression                   @typescript-eslint/no-unnecessary-type-assertion
+  683:17  error  Replace `⏎··········.get(MeasurementReportReader)⏎··········` with `.get(MeasurementReportReader)`  prettier/prettier
+  686:1   error  Delete `··`                                                                                         prettier/prettier
+  687:1   error  Delete `··`                                                                                         prettier/prettier
+  688:11  error  Delete `··`                                                                                         prettier/prettier
+  689:1   error  Replace `··············` with `············`                                                        prettier/prettier
+  690:1   error  Delete `··`                                                                                         prettier/prettier
+  691:11  error  Delete `··`                                                                                         prettier/prettier
+  692:1   error  Delete `··`                                                                                         prettier/prettier
+  693:1   error  Delete `··`                                                                                         prettier/prettier
+  912:21  error  This assertion is unnecessary since it does not change the type of the expression                   @typescript-eslint/no-unnecessary-type-assertion
+
+✖ 13 problems (13 errors, 0 warnings)
+  13 errors and 0 warnings potentially fixable with the `--fix` option.
+

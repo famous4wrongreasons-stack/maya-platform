@@ -1,0 +1,145 @@
+{
+  "contract": "maya.c9-lifecycle-failure-http-proof/1",
+  "stage": "resume",
+  "status": "incomplete",
+  "sourceHead": "d42dacea6f2c70ef326c69c42ac056435832238f",
+  "sourceDigest": "f1b83d0947f3eba77d3d8ba98aafefa1397eeab2376bc8d68a7304f2c14b8fc5",
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "modelSelection": "SCRIPTED_SYNTHETIC_COMPOUND_ONLY",
+  "sourceBoundary": "CALL_THROUGH_ACTUAL_C8_READ_THEN_SYNTHETIC_DELIVERY_PAUSE_OR_LOSS",
+  "qualifications": [
+    "Internal historical appointment facts and active CRM binding are synthetic setup, not booking/A17 acceptance.",
+    "HELD_UNKNOWN crosses actual restart; no crashed DISPATCHED worker or natural lease-expiry recovery is claimed.",
+    "Lifecycle HELD replay refuses; only a new explicit request admits new discovery. No completed source receipt is guessed.",
+    "Policy changes use the canonical owner in a separately labelled fixture scope. No temporal/constraint/clock edits.",
+    "C7 publication uses the native YCLIENTS adapter with finite synthetic GET transport; no external network."
+  ],
+  "cases": {
+    "restart": {
+      "nodePidChanged": true,
+      "postgresPostmasterChanged": true,
+      "exactSourceBinding": true
+    },
+    "settledRestart": {
+      "response": {
+        "status": 201,
+        "code": null,
+        "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nОценка 1: По оценке на 08.10.2026, 16:07:31,730 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "current": false,
+        "outcome": "HISTORICAL",
+        "findingsCount": 1,
+        "financialFindingsCount": 0
+      },
+      "exactReceiptUnchanged": true,
+      "savedEvidenceUnchanged": true,
+      "discoveryCalls": 0
+    },
+    "heldRestart": {
+      "response": {
+        "status": 400,
+        "code": "c9_read_work_in_progress_or_unknown",
+        "reply": null,
+        "current": null,
+        "outcome": null,
+        "findingsCount": 0,
+        "financialFindingsCount": 0
+      },
+      "exactReceiptUnchanged": true,
+      "savedEvidenceUnchanged": true,
+      "discoveryCalls": 0
+    },
+    "freshRequest": {
+      "response": {
+        "status": 201,
+        "code": null,
+        "reply": "Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 08.10.2026, 16:07:32,271 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "current": true,
+        "outcome": "PARTIAL",
+        "findingsCount": 1,
+        "financialFindingsCount": 0
+      },
+      "distinctExplicitRequest": true,
+      "heldReceiptUnchanged": true,
+      "genuineSourceReads": 1
+    },
+    "standaloneLateSource": {
+      "delayedReadWasCurrentAndAvailable": true,
+      "postSettlementSnapshotOrdinal": 2,
+      "actualSnapshotHash": "b418e514bc83966c2a0e6fa62bf188aa31c7c78e8ebf31f55d427b5316ce283a",
+      "sourcePolicyBefore": {
+        "revision": 1,
+        "contentHash": "08a9e3ea6f9c84b29719dc06d6ee3d1e3fac370470bcd9b23bb8be74863bffe7",
+        "executionHash": "37ae3bb1452780389f24a5aff0ab7c14f69cc7f36e8085847100e62da99ad10c"
+      },
+      "sourcePolicyAfter": {
+        "revision": 2,
+        "contentHash": "5c569e1d02339cde5101e057d2a7f488215a1d4d8586f51991eed2f843665437",
+        "executionHash": "71fa9c17fec2a1d1dffa95f58d5dab883f3cb14bb974bef15d8107f5b8b7793d"
+      },
+      "labelledFixtureWrites": 12,
+      "actualC7Publication": false,
+      "immutableSourceHash": "124820ae874b484338462e8faa651ad7490c2815058940e3d805ffd3c33bb5d3",
+      "response": {
+        "status": 201,
+        "code": null,
+        "reply": "Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nОценка 1: По оценке на 08.10.2026, 16:07:34,660 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "current": true,
+        "outcome": "PARTIAL",
+        "findingsCount": 1,
+        "financialFindingsCount": 0
+      },
+      "actualValueDeliveredUnchanged": true
+    },
+    "compoundLateSource": {
+      "delayedReadWasCurrentAndAvailable": true,
+      "postSettlementSnapshotOrdinal": 2,
+      "actualSnapshotHash": "c2493cb9c7618852ab5a728f26d0943d3e08e7012b417726648b5a9d986a1f2b",
+      "sourcePolicyBefore": {
+        "revision": 1,
+        "contentHash": "08a9e3ea6f9c84b29719dc06d6ee3d1e3fac370470bcd9b23bb8be74863bffe7",
+        "executionHash": "d1a00af92aba21c5c5fdfb0019dca35a66b1f923d6702b2d59b744c4d08837a6"
+      },
+      "sourcePolicyAfter": {
+        "revision": 2,
+        "contentHash": "5c569e1d02339cde5101e057d2a7f488215a1d4d8586f51991eed2f843665437",
+        "executionHash": "939c644b5bc5e02aadeaee1b614b0aa49e7fd55987c7df5d898b4be560c743a8"
+      },
+      "labelledFixtureWrites": 12,
+      "actualC7Publication": true,
+      "immutableSourceHash": "d7d311fb16cebe0579b0b304e86382bae9c420bda6df064b1c6c148cc54258a1",
+      "response": {
+        "status": 201,
+        "code": null,
+        "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+        "current": null,
+        "outcome": null,
+        "findingsCount": 0,
+        "financialFindingsCount": 0
+      },
+      "actualValueDeliveredUnchanged": true,
+      "savedReceiptAndRevisionUnchanged": true,
+      "freshExplicitResponse": {
+        "status": 201,
+        "code": null,
+        "reply": "Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.\n\nПодтверждённые оценки сейчас недоступны. Отсутствие оценки не означает, что гости активны или спят.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "current": false,
+        "outcome": "UNAVAILABLE",
+        "findingsCount": 0,
+        "financialFindingsCount": 0
+      },
+      "noRuntimeBusinessWrites": true
+    }
+  },
+  "modelSelections": 1,
+  "actualC8ListReads": 4,
+  "actualC8SnapshotReads": 31,
+  "syntheticNativeProviderReads": [
+    "transactions/424242",
+    "company/424242/staff",
+    "records/424242",
+    "company/424242/salary/calculation/staff/71"
+  ],
+  "transportCalls": 4,
+  "forbiddenEdges": []
+}
