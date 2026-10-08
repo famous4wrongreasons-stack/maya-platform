@@ -1,0 +1,8 @@
+{
+  "codeCommit": "6c989c87a7737b30eb178590e48bb82c33f0e5cf",
+  "parent": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+  "executedWorkingPatchSha256": "f5cce6a37819ae2a8fe66501ad3e073e56a4eeb90e79b1e331bc25686d6252fe",
+  "commitPatchMatchesExecuted": true,
+  "allSixExecutedFilesMatchCommit": true,
+  "qualification": "Green ran on accepted parent plus the four-file working patch; this later code commit contains exactly the executed patch and file bytes. Tests were not rerun or represented as having run on a clean HEAD."
+}

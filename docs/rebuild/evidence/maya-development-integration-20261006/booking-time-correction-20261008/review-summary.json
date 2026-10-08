@@ -1,0 +1,18 @@
+{
+  "recordKind": "Root-authored faithful summary of read-only independent review; not human approval, transcript or certification",
+  "reviewer": "/root/checkpoint_review",
+  "status": "NO_NEW_CODE_OR_AUTHORITY_BLOCKERS",
+  "codeCommit": "6c989c87a7737b30eb178590e48bb82c33f0e5cf",
+  "findings": [
+    "Current clock alias is normalized before prior context carry in three existing personal-booking intents.",
+    "Fresh 15:00 supersedes old14:30; current conflicts reject; daypart asks for clarification while retaining corrected service/day.",
+    "Permission, confirmation, tenant/branch checks and AE remain unchanged; no new mutations.",
+    "Red reproduces wrong14:30 READ; green241tests/3suites plus types/lint/K3 pass; source and patch hashes checked; owned groups closed and absent.",
+    "FK plain recommendation is a pending product choice; identify Tenant as salon account rather than branch."
+  ],
+  "limits": [
+    "Scripted semantic selection, mocked timeline/catalog/runtime; real AiCore and semantic validator.",
+    "No new HTTP/PG/browser/model/provider/restart acceptance.",
+    "Reviewer made no edits and ran no tests/services."
+  ]
+}

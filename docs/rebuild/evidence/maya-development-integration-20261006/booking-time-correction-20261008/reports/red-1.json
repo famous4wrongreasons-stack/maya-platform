@@ -1,0 +1,101 @@
+{
+  "contract": "maya.time-correction-local-proof/1",
+  "mode": "red",
+  "started": "2026-10-08T05:01:53.307Z",
+  "source": {
+    "head": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+    "tree": "07ee65a7ffaf2bba95397b3400b675d4d1257fba",
+    "dirty": "M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+    "patchSha256": "b394045acd243cb45c557380400f7212d0d38ac042f39fbf45d56fcf05f57814",
+    "fileHashes": {
+      "src/ai-tools/ai-core.service.ts": "190657eab074dcc6fb49a40c11d8151cb4c5475d8ab22cbd4ebe4aa341cc7e69",
+      "src/ai-tools/ai-core.service.spec.ts": "6c8f7011368dd419b5e04bedfa5edd4c0316fcbfc082f50843dec5724a030386",
+      "src/conversation-intelligence/conversation-intelligence.service.ts": "63320bafaea5648623d1bf731f60178604d048bfa5da68294a80e245fe9688d1",
+      "src/conversation-intelligence/conversation-intelligence.service.spec.ts": "390c67f7be5fc6688a863d13c0fe5dc1d37b07b0e650634a40fa31823913e005",
+      "src/conversation-intelligence/semantic-slot-normalization.ts": "5ecfb991c63f7de588c09d55a567acbd7d4ce9070d309e8c834e8436df875463",
+      "src/conversation-intelligence/semantic-slot-normalization.spec.ts": "1024a8090ebcc438b6e7dace4c2e37aabde2e659a5804f01cba2264778e94cf9"
+    }
+  },
+  "harness": [
+    {
+      "path": "/private/tmp/maya-time-correction-validation-20261008/run.mjs",
+      "sha256": "fa5ff04eaa1f3bd703935a06a0abcfb6c8a9dcc864af529d61910a341b90db1c"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/owned-stage.mjs",
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/loopback-only.cjs",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    }
+  ],
+  "commands": [
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "--testNamePattern=replaces an earlier exact clock with the current time_of_day correction",
+        "--json",
+        "--outputFile=/tmp/maya-time-correction-validation-20261008/red-1/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [],
+  "status": "FAIL",
+  "qualification": "Scripted semantic selection; mocked timeline/catalog/runtime; real AiCore and semantic validator. No model/provider/browser/HTTP/PG/restart acceptance.",
+  "groups": {
+    "targeted-unit": {
+      "detached": true,
+      "pid": 7662,
+      "pgid": 7662,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "failure": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n",
+  "sourceAtEnd": {
+    "head": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+    "tree": "07ee65a7ffaf2bba95397b3400b675d4d1257fba",
+    "dirty": "M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+    "patchSha256": "b394045acd243cb45c557380400f7212d0d38ac042f39fbf45d56fcf05f57814",
+    "fileHashes": {
+      "src/ai-tools/ai-core.service.ts": "190657eab074dcc6fb49a40c11d8151cb4c5475d8ab22cbd4ebe4aa341cc7e69",
+      "src/ai-tools/ai-core.service.spec.ts": "6c8f7011368dd419b5e04bedfa5edd4c0316fcbfc082f50843dec5724a030386",
+      "src/conversation-intelligence/conversation-intelligence.service.ts": "63320bafaea5648623d1bf731f60178604d048bfa5da68294a80e245fe9688d1",
+      "src/conversation-intelligence/conversation-intelligence.service.spec.ts": "390c67f7be5fc6688a863d13c0fe5dc1d37b07b0e650634a40fa31823913e005",
+      "src/conversation-intelligence/semantic-slot-normalization.ts": "5ecfb991c63f7de588c09d55a567acbd7d4ce9070d309e8c834e8436df875463",
+      "src/conversation-intelligence/semantic-slot-normalization.spec.ts": "1024a8090ebcc438b6e7dace4c2e37aabde2e659a5804f01cba2264778e94cf9"
+    }
+  },
+  "harnessAtEnd": [
+    {
+      "path": "/private/tmp/maya-time-correction-validation-20261008/run.mjs",
+      "sha256": "fa5ff04eaa1f3bd703935a06a0abcfb6c8a9dcc864af529d61910a341b90db1c"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/owned-stage.mjs",
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/loopback-only.cjs",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    }
+  ],
+  "sourceStable": true,
+  "harnessStable": true,
+  "cancelled": null,
+  "finished": "2026-10-08T05:01:54.422Z"
+}

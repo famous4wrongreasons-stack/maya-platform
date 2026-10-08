@@ -1,0 +1,178 @@
+{
+  "contract": "maya.time-correction-local-proof/1",
+  "mode": "green",
+  "started": "2026-10-08T05:04:24.524Z",
+  "source": {
+    "head": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+    "tree": "07ee65a7ffaf2bba95397b3400b675d4d1257fba",
+    "dirty": "M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts",
+    "patchSha256": "f5cce6a37819ae2a8fe66501ad3e073e56a4eeb90e79b1e331bc25686d6252fe",
+    "fileHashes": {
+      "src/ai-tools/ai-core.service.ts": "f1095dc7ab19198c4ddf9bb71fe8b82637c65c065221a26bcf064f2f9c0e9a3c",
+      "src/ai-tools/ai-core.service.spec.ts": "d59a991391876839a355af594b2ebf75ff67cd5de05b200632d1faa58aea622c",
+      "src/conversation-intelligence/conversation-intelligence.service.ts": "b4e75c4cc2921242fd3e2cb5b81e87734393c91d3469509a6dfa950c05ab6c5c",
+      "src/conversation-intelligence/conversation-intelligence.service.spec.ts": "049e860a5a62db35f437980b4ed70bd020df444168ece0ed2acb9166a070a4c4",
+      "src/conversation-intelligence/semantic-slot-normalization.ts": "5ecfb991c63f7de588c09d55a567acbd7d4ce9070d309e8c834e8436df875463",
+      "src/conversation-intelligence/semantic-slot-normalization.spec.ts": "1024a8090ebcc438b6e7dace4c2e37aabde2e659a5804f01cba2264778e94cf9"
+    }
+  },
+  "harness": [
+    {
+      "path": "/private/tmp/maya-time-correction-validation-20261008/run.mjs",
+      "sha256": "fa5ff04eaa1f3bd703935a06a0abcfb6c8a9dcc864af529d61910a341b90db1c"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/owned-stage.mjs",
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/loopback-only.cjs",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    }
+  ],
+  "commands": [
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/conversation-intelligence/conversation-intelligence.service.spec.ts",
+        "src/conversation-intelligence/semantic-slot-normalization.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-time-correction-validation-20261008/green-1/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/conversation-intelligence/conversation-intelligence.service.ts",
+        "src/conversation-intelligence/conversation-intelligence.service.spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    "targeted-unit",
+    "backend-types",
+    "changed-lint",
+    "k3"
+  ],
+  "status": "PASS",
+  "qualification": "Scripted semantic selection; mocked timeline/catalog/runtime; real AiCore and semantic validator. No model/provider/browser/HTTP/PG/restart acceptance.",
+  "groups": {
+    "targeted-unit": {
+      "detached": true,
+      "pid": 8987,
+      "pgid": 8987,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "backend-types": {
+      "detached": true,
+      "pid": 9041,
+      "pgid": 9041,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "changed-lint": {
+      "detached": true,
+      "pid": 9082,
+      "pgid": 9082,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "k3": {
+      "detached": true,
+      "pid": 9116,
+      "pgid": 9116,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": {
+    "head": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+    "tree": "07ee65a7ffaf2bba95397b3400b675d4d1257fba",
+    "dirty": "M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts\n M maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts",
+    "patchSha256": "f5cce6a37819ae2a8fe66501ad3e073e56a4eeb90e79b1e331bc25686d6252fe",
+    "fileHashes": {
+      "src/ai-tools/ai-core.service.ts": "f1095dc7ab19198c4ddf9bb71fe8b82637c65c065221a26bcf064f2f9c0e9a3c",
+      "src/ai-tools/ai-core.service.spec.ts": "d59a991391876839a355af594b2ebf75ff67cd5de05b200632d1faa58aea622c",
+      "src/conversation-intelligence/conversation-intelligence.service.ts": "b4e75c4cc2921242fd3e2cb5b81e87734393c91d3469509a6dfa950c05ab6c5c",
+      "src/conversation-intelligence/conversation-intelligence.service.spec.ts": "049e860a5a62db35f437980b4ed70bd020df444168ece0ed2acb9166a070a4c4",
+      "src/conversation-intelligence/semantic-slot-normalization.ts": "5ecfb991c63f7de588c09d55a567acbd7d4ce9070d309e8c834e8436df875463",
+      "src/conversation-intelligence/semantic-slot-normalization.spec.ts": "1024a8090ebcc438b6e7dace4c2e37aabde2e659a5804f01cba2264778e94cf9"
+    }
+  },
+  "harnessAtEnd": [
+    {
+      "path": "/private/tmp/maya-time-correction-validation-20261008/run.mjs",
+      "sha256": "fa5ff04eaa1f3bd703935a06a0abcfb6c8a9dcc864af529d61910a341b90db1c"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/owned-stage.mjs",
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    {
+      "path": "/tmp/maya-exact-time-validation-20261008/loopback-only.cjs",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    }
+  ],
+  "sourceStable": true,
+  "harnessStable": true,
+  "cancelled": null,
+  "finished": "2026-10-08T05:04:37.819Z"
+}

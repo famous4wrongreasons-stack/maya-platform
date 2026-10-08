@@ -1,0 +1,118 @@
+{
+  "contract": "maya.booking-time-correction-checkpoint/1",
+  "codeCommit": "6c989c87a7737b30eb178590e48bb82c33f0e5cf",
+  "acceptedParent": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+  "status": "QUALIFIED_LOCAL_MECHANICS_PASS",
+  "testCount": 241,
+  "suiteCount": 3,
+  "addedRegressionCases": 7,
+  "redFailureRetained": true,
+  "sourceBinding": {
+    "codeCommit": "6c989c87a7737b30eb178590e48bb82c33f0e5cf",
+    "parent": "9c1c598bb3524a0a47dc73fdf05a6053af10123f",
+    "executedWorkingPatchSha256": "f5cce6a37819ae2a8fe66501ad3e073e56a4eeb90e79b1e331bc25686d6252fe",
+    "commitPatchMatchesExecuted": true,
+    "allSixExecutedFilesMatchCommit": true,
+    "qualification": "Green ran on accepted parent plus the four-file working patch; this later code commit contains exactly the executed patch and file bytes. Tests were not rerun or represented as having run on a clean HEAD."
+  },
+  "files": [
+    {
+      "path": "build-public.py",
+      "bytes": 6777,
+      "sha256": "0e0252996ee1c4dda3593811bd094f1b2f418aa9ef88c86bc880cf1eb3e5cd38"
+    },
+    {
+      "path": "commit-binding.json",
+      "bytes": 526,
+      "sha256": "16eef1ae01cc30302a5278f8f86529d64dcf550856761e3f9506706dbd34ce3b"
+    },
+    {
+      "path": "jest/green-1.json",
+      "bytes": 31899,
+      "sha256": "ed6d9872e9d7dac1a0f245de2e9aea483e13f1744fbce09f98516af1bcdffdcb"
+    },
+    {
+      "path": "jest/red-1.json",
+      "bytes": 27958,
+      "sha256": "6876c99233df43db071a6271937268b15f587bf3384dafa19e7aa08319231e79"
+    },
+    {
+      "path": "raw-inputs.json",
+      "bytes": 2564,
+      "sha256": "4f3268d04d1c6e01616c9ef3bebe0c256585f3de266b321269af9f537a5bf704"
+    },
+    {
+      "path": "red-test.patch",
+      "bytes": 1626,
+      "sha256": "97883f58e2cb0723061efbda6728e2efac6347cea37e3873c480f7c6ee715528"
+    },
+    {
+      "path": "reports/green-1.json",
+      "bytes": 7295,
+      "sha256": "5ccc91471a1125c8883a46d4d3f8166b4086837b987293c82cca73034ba9ba17"
+    },
+    {
+      "path": "reports/red-1.json",
+      "bytes": 4753,
+      "sha256": "ed64c7abec4a8b6c51362e91c87e792c386d66eec073a632e806b0c1fb66ad95"
+    },
+    {
+      "path": "review-summary.json",
+      "bytes": 1158,
+      "sha256": "475f4faa461d735f75b0c33178865e6cb69214fad91f624437e6e625e16e57c3"
+    },
+    {
+      "path": "run.mjs",
+      "bytes": 5142,
+      "sha256": "fa5ff04eaa1f3bd703935a06a0abcfb6c8a9dcc864af529d61910a341b90db1c"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/rebuild/MAYA-BOOKING-CORRECTION-CHECKPOINT-20261008.md",
+      "bytes": 4828,
+      "sha256": "1fe82c7e96e074a36b109df1ca8aecffbbaef9177b2fc4d3b92f094c3986a79c"
+    },
+    {
+      "path": "docs/rebuild/MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md",
+      "bytes": 12038,
+      "sha256": "ea2bffa6cb7bceabdaf30c8e043da459cd346bba4bc5e745a69adef5c3de5822"
+    },
+    {
+      "path": "docs/rebuild/MAYA-REMAINING-READINESS-DECISIONS.md",
+      "bytes": 20940,
+      "sha256": "42a33d1865c87952e80b73b35e672897b6c6c56096b182f1fc7327d3a96fa46c"
+    },
+    {
+      "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+      "bytes": 160907,
+      "sha256": "2e71e4ee92f1031306f74859497c42d96e9285a94417ff73fd3a6bb23de90f54"
+    },
+    {
+      "path": "docs/rebuild/MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md",
+      "bytes": 23496,
+      "sha256": "f9747bb8cfa9ed0694d02ad38e9fdeb0dfa64b86b929e287740f83d079b1721c"
+    }
+  ],
+  "linkedExecutedDependencies": [
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/exact-time-booking-20261008/gates/launchers/owned-stage.mjs",
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+      "qualification": "Already committed byte-exact executed dependency; absolute scratch import paths in launcher are historical provenance, not a portable command."
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/exact-time-booking-20261008/gates/launchers/loopback-only.cjs",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+      "qualification": "Already committed byte-exact executed dependency; absolute scratch import paths in launcher are historical provenance, not a portable command."
+    }
+  ],
+  "documentBinding": "Document hashes bind this documentation commit, not later map revisions. Prior exact-time/unified manifests retain their historical documentation bindings.",
+  "selfExcluded": "manifest.json",
+  "limits": [
+    "No new HTTP/PG/browser/restart/model/provider acceptance.",
+    "Scripted turns do not establish natural-language quality or a success percentage.",
+    "Prior three PublicBooking FK differences remain unresolved; no DB/DDL execution in this follow-up.",
+    "FK recommendation, schedule card, initial Client trust and C10 remain separate pending choices.",
+    "No production/site/SSH/paid/push/merge action."
+  ]
+}

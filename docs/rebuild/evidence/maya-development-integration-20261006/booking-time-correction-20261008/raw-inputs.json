@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/red-1/report.json",
+      "bytes": 4753,
+      "sha256": "ed64c7abec4a8b6c51362e91c87e792c386d66eec073a632e806b0c1fb66ad95"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/red-1/targeted-unit.json",
+      "bytes": 97175,
+      "sha256": "99e2b8f7497e674b611bf80dec3961fd65f1c3fbe472d3a0f21731a1be7a2421"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/red-1/targeted-unit.log",
+      "bytes": 21440,
+      "sha256": "2b556bbc47fbe565c6f22e4bc718b62333c613471aa6ea4703b243747ec87e0d"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/green-1/report.json",
+      "bytes": 7295,
+      "sha256": "5ccc91471a1125c8883a46d4d3f8166b4086837b987293c82cca73034ba9ba17"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/green-1/targeted-unit.json",
+      "bytes": 111543,
+      "sha256": "fe2d557af828c3852c520097bd7239565aa5203ba1bb49859742999b1cd68bbf"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/green-1/targeted-unit.log",
+      "bytes": 637,
+      "sha256": "512fb60c4d0d038310d9102c14f129f6af508c018cec17743bf655436b0d64e4"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/green-1/backend-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/green-1/changed-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/green-1/k3.log",
+      "bytes": 7873,
+      "sha256": "ac417a602e6a928bfc26d6082fe1bd715f735be5a31d917a44d5895f8ba216f1"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/red-test.patch",
+      "bytes": 1626,
+      "sha256": "97883f58e2cb0723061efbda6728e2efac6347cea37e3873c480f7c6ee715528"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/commit-binding.json",
+      "bytes": 526,
+      "sha256": "16eef1ae01cc30302a5278f8f86529d64dcf550856761e3f9506706dbd34ce3b"
+    },
+    {
+      "path": "/tmp/maya-time-correction-validation-20261008/run.mjs",
+      "bytes": 5142,
+      "sha256": "fa5ff04eaa1f3bd703935a06a0abcfb6c8a9dcc864af529d61910a341b90db1c"
+    }
+  ],
+  "qualification": "Hashes identify private scratch reports/logs; raw Jest and log payloads are not copied into this public package."
+}
