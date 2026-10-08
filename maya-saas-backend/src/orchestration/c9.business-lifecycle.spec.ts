@@ -25,6 +25,13 @@ import type { C9WorkDraft, C9WorkLease } from './c9.work';
 
 const LIFECYCLE_CALL = 'explicit-client-return';
 const NOW = '2035-05-10T08:30:00.000Z';
+type FixtureDeadlines = {
+  rootValidUntil: string;
+  financialValidUntil: string;
+  financialRetentionUntil: string;
+  clientValidUntil: string;
+  clientRetentionUntil: string;
+};
 
 /** Durable JSON columns round-trip into this Jest realm's plain objects. */
 function jsonClone<T>(value: T): T {
@@ -34,7 +41,7 @@ function jsonClone<T>(value: T): T {
 /** Synthetic durable ports only. Orchestration, both domain agents, strategy and
  * proposal validators are real. This is not HTTP, database, model or C8/C7 owner
  * acceptance; the maps model saved receipts/revisions across service instances. */
-function fixture() {
+function fixture(deadlines: Partial<FixtureDeadlines> = {}) {
   const turn: C9ConversationReads = {
     turn: { turnId: 'turn', conversationId: 'conversation' },
     intentHash: 'a'.repeat(64),
@@ -45,7 +52,9 @@ function fixture() {
     authorityHash: 'b'.repeat(64),
     budgetManifestHash: 'c'.repeat(64),
     budgetManifestJson: c9DefaultBudget(),
-    validUntil: new Date('2035-05-11T00:00:00.000Z'),
+    validUntil: new Date(
+      deadlines.rootValidUntil ?? '2035-05-11T00:00:00.000Z',
+    ),
   };
   const financialRef = {
     sourceType: 'MeasurementRevision',
@@ -57,8 +66,9 @@ function fixture() {
     identityHash: 'd'.repeat(64),
     inputHash: 'e'.repeat(64),
     observedAt: '2035-05-10T08:00:00.000Z',
-    validUntil: '2035-05-10T08:40:00.000Z',
-    retentionUntil: '2035-05-10T08:40:00.000Z',
+    validUntil: deadlines.financialValidUntil ?? '2035-05-10T08:40:00.000Z',
+    retentionUntil:
+      deadlines.financialRetentionUntil ?? '2035-05-10T08:40:00.000Z',
     status: 'VERIFIED',
     completeness: 'PARTIAL',
     unavailableReason: null,
@@ -71,8 +81,9 @@ function fixture() {
     subjectRef: 'private-client-not-for-output',
     identityHash: 'f'.repeat(64),
     inputHash: '1'.repeat(64),
-    validUntil: '2035-05-10T09:00:00.000Z',
-    retentionUntil: '2035-05-10T08:50:00.000Z',
+    validUntil: deadlines.clientValidUntil ?? '2035-05-10T09:00:00.000Z',
+    retentionUntil:
+      deadlines.clientRetentionUntil ?? '2035-05-10T08:50:00.000Z',
   };
   const selection: LifecycleSelection = {
     contract: 'maya.c9-lifecycle-selection/1',
@@ -641,27 +652,80 @@ describe('explicit C9 business + Client Lifecycle (synthetic durable ports)', ()
     },
   );
 
-  it.each(['root', 'financialRef', 'clientRef'] as const)(
-    'checks %s expiry synchronously after the final awaited current-source check',
-    async (field) => {
-      const f = fixture();
+  it.each(
+    (
+      [
+        'rootValidUntil',
+        'financialValidUntil',
+        'financialRetentionUntil',
+        'clientValidUntil',
+        'clientRetentionUntil',
+      ] as const
+    ).flatMap((field) => [-1, 0].map((offsetMs) => ({ field, offsetMs }))),
+  )(
+    'isolates $field at expiry offset $offsetMs ms after awaited qualification (component clock only)',
+    async ({ field, offsetMs }) => {
+      const expiresAt = Date.parse('2035-05-10T08:40:00.000Z');
+      const later = '2035-05-11T00:00:00.000Z';
+      const deadlines: FixtureDeadlines = {
+        rootValidUntil: later,
+        financialValidUntil: later,
+        financialRetentionUntil: later,
+        clientValidUntil: later,
+        clientRetentionUntil: later,
+      };
+      deadlines[field] = new Date(expiresAt).toISOString();
+      // Isolate each component guard. These synthetic ports do not qualify a
+      // database-admissible C7/C8 deadline shape or naturally elapsed HTTP time.
+      const f = fixture(deadlines);
+      const original = jsonClone({
+        rootValidUntil: f.root.validUntil.toISOString(),
+        financialRef: f.financialRef,
+        clientRef: f.clientRef,
+      });
+      const readAt = expiresAt + offsetMs;
       const clock = jest.spyOn(Date, 'now').mockReturnValue(Date.parse(NOW));
-      const expiresAt =
-        field === 'root'
-          ? f.root.validUntil.getTime()
-          : Date.parse(f[field].retentionUntil);
-      f.lifecycle.assertCurrent.mockImplementationOnce(() => {
-        clock.mockReturnValue(expiresAt);
-        return Promise.resolve();
+      const current = f.lifecycle.assertCurrent.getMockImplementation()!;
+      f.lifecycle.assertCurrent.mockImplementationOnce(async (...args) => {
+        await current(...args);
+        clock.mockReturnValue(readAt);
       });
       try {
-        await expect(
-          f.create().reviewBusinessAndClientReturn(f.turn),
-        ).rejects.toThrow('c9_source_expired');
+        expect(
+          Object.entries(deadlines)
+            .filter(([, value]) => Date.parse(value) <= readAt)
+            .map(([key]) => key),
+        ).toEqual(offsetMs < 0 ? [] : [field]);
+        if (offsetMs < 0) {
+          const response = await f
+            .create()
+            .reviewBusinessAndClientReturn(f.turn);
+          expect(response.coordination).toMatchObject({
+            run_id: 'run',
+            revision_id: 'revision',
+            scope: 'explicit_business_lifecycle',
+            current: false,
+          });
+          expect(f.turn.failed).toBeUndefined();
+        } else {
+          await expect(
+            f.create().reviewBusinessAndClientReturn(f.turn),
+          ).rejects.toThrow('c9_source_expired');
+          expect(f.turn).toMatchObject({ runId: 'run', failed: true });
+        }
         expect(f.work.settle).toHaveBeenCalledTimes(2);
         expect(f.store.revision).toHaveBeenCalledTimes(1);
         expect(f.lifecycle.assertCurrent).toHaveBeenCalledTimes(1);
-        expect(f.turn).toMatchObject({ runId: 'run', failed: true });
+        expect(f.store.validateRefs).toHaveBeenCalledTimes(1);
+        expect(f.events.at(-2)).toBe(
+          'validate:financial-source,lifecycle-source',
+        );
+        expect(f.events.at(-1)).toBe('current:lifecycle-source');
+        expect({
+          rootValidUntil: f.root.validUntil.toISOString(),
+          financialRef: f.financialRef,
+          clientRef: f.clientRef,
+        }).toEqual(original);
       } finally {
         clock.mockRestore();
       }
