@@ -1,0 +1,70 @@
+{
+  "qualification": "REVIEW_ONLY_NOT_AUTHORITY",
+  "beforeStage": "Supply reviewed metadata, full offline root-owned checkout with ready Linux dependencies and nonsecret rendered plan at placedPlan. No delivery or installation is performed by this tool.",
+  "placedPlan": "/srv/maya-core-inputs/00000000-0000-4000-8000-000000000001/plan.json",
+  "stage": {
+    "command": "/opt/node-v24/bin/node",
+    "args": [
+      "--max-old-space-size=128",
+      "/srv/maya-core-candidates/5b04b0c88a9f33589e9cde3d20936a9b7754c376/maya-saas-backend/scripts/conversation-qualification/core-remote-bootstrap.mjs",
+      "--stage",
+      "--plan",
+      "/srv/maya-core-inputs/00000000-0000-4000-8000-000000000001/plan.json",
+      "--sha256",
+      "ae43f3397b2893979e66edafd5c01e9efc8cbf9768db926fff2ac8fee35b1b0f",
+      "--setup-approval-ref",
+      "[REQUIRED_SETUP_APPROVAL_REF]"
+    ]
+  },
+  "start": {
+    "command": "/opt/node-v24/bin/node",
+    "args": [
+      "--max-old-space-size=128",
+      "/srv/maya-core-candidates/5b04b0c88a9f33589e9cde3d20936a9b7754c376/maya-saas-backend/scripts/conversation-qualification/core-remote-bootstrap.mjs",
+      "--start",
+      "--plan",
+      "/srv/maya-core-diagnostic-00000000-0000-4000-8000-000000000001/plan.json",
+      "--sha256",
+      "ae43f3397b2893979e66edafd5c01e9efc8cbf9768db926fff2ac8fee35b1b0f",
+      "--setup-receipt-sha256",
+      "[REQUIRED_REVIEWED_SETUP_RECEIPT_SHA256]",
+      "--isolation-review-ref",
+      "[REQUIRED_EFFECTIVE_ISOLATION_REVIEW]",
+      "--permit-sha256",
+      "[REQUIRED_FRESH_PERMIT_SHA256]",
+      "--owner-approval-ref",
+      "[REQUIRED_PAID_APPROVAL_REF]"
+    ]
+  },
+  "cleanup": {
+    "setup": {
+      "command": "/opt/node-v24/bin/node",
+      "args": [
+        "--max-old-space-size=128",
+        "/srv/maya-core-candidates/5b04b0c88a9f33589e9cde3d20936a9b7754c376/maya-saas-backend/scripts/conversation-qualification/core-remote-bootstrap.mjs",
+        "--cleanup",
+        "--scope",
+        "setup",
+        "--plan",
+        "/srv/maya-core-diagnostic-00000000-0000-4000-8000-000000000001/plan.json",
+        "--sha256",
+        "ae43f3397b2893979e66edafd5c01e9efc8cbf9768db926fff2ac8fee35b1b0f"
+      ]
+    },
+    "run": {
+      "command": "/opt/node-v24/bin/node",
+      "args": [
+        "--max-old-space-size=128",
+        "/srv/maya-core-candidates/5b04b0c88a9f33589e9cde3d20936a9b7754c376/maya-saas-backend/scripts/conversation-qualification/core-remote-bootstrap.mjs",
+        "--cleanup",
+        "--scope",
+        "run",
+        "--plan",
+        "/srv/maya-core-diagnostic-00000000-0000-4000-8000-000000000001/plan.json",
+        "--sha256",
+        "ae43f3397b2893979e66edafd5c01e9efc8cbf9768db926fff2ac8fee35b1b0f"
+      ]
+    }
+  },
+  "noTransferNoSetupNoPaidExecution": true
+}

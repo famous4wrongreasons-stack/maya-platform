@@ -1,0 +1,35 @@
+{
+  "contract": "maya.local-execution-resumed/1",
+  "observedAt": "2026-10-08T18:38:38.542202+00:00",
+  "head": "5b04b0c88a9f33589e9cde3d20936a9b7754c376",
+  "ownProcessGroups": [
+    {
+      "name": "pure-tests-1",
+      "pgid": 93873,
+      "currentlyAbsent": true
+    },
+    {
+      "name": "pure-tests-2",
+      "pgid": 94917,
+      "currentlyAbsent": true
+    },
+    {
+      "name": "pure-tests-3",
+      "pgid": 96450,
+      "currentlyAbsent": true
+    },
+    {
+      "name": "runner-syntax",
+      "pgid": 96454,
+      "currentlyAbsent": true
+    },
+    {
+      "name": "pure-tests-4-final-binding",
+      "pgid": 98244,
+      "currentlyAbsent": true
+    }
+  ],
+  "remoteConnectionsSinceResumption": 0,
+  "oldRenderExcluded": true,
+  "initialRenderAttempt": "refused noncanonical /tmp config parent on macOS; same file canonical /private/tmp path used successfully; no code/policy relaxation"
+}

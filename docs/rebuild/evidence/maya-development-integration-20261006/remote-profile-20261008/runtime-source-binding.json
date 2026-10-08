@@ -1,0 +1,75 @@
+{
+  "candidateCommit": "5b04b0c88a9f33589e9cde3d20936a9b7754c376",
+  "files": {
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-resources.mjs": {
+      "bytes": 1220,
+      "sha256": "a28a37c06a45d5b2dde12de425164a2c7cf27eff79aa238d2c58be5b67fe73ca",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-resources.test.mjs": {
+      "bytes": 2933,
+      "sha256": "9336ee0f65b04cefe329e61cf4397ca7cbf2745619d235b05dbf0c71512237e9",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-conversation-runner.mjs": {
+      "bytes": 13308,
+      "sha256": "f4fd645e84926f2e43891d2e533b8dfd80866d709517e3ff7f3f124b2f58051c",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-bootstrap.mjs": {
+      "bytes": 29753,
+      "sha256": "226f8421f6958878943ed85d6447f9ac28844f01e1c88d58a51e48a8ad699660",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-bootstrap.test.mjs": {
+      "bytes": 9564,
+      "sha256": "502316a4e03fd9935ee26b3577718b7f5c42ef036ca7cdc91c89907ed5b3fa96",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-effective.mjs": {
+      "bytes": 18954,
+      "sha256": "351cadeae45c5790b9f28603cc5ab3e3371b651483ffd29df8e7c4eae1ca661b",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-effective.test.mjs": {
+      "bytes": 24785,
+      "sha256": "a1b1702af14484f704863f18fca88ccede145a839312448c49035d26c8256563",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-example.json": {
+      "bytes": 1239,
+      "sha256": "ac47597f82112f2fede4ee4e8382056af89fc31d7aad5dcdb597b67387598400",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-observe.mjs": {
+      "bytes": 14194,
+      "sha256": "6c403dcec5fbbdf6a5ef4dd7157b3448ba1bacdc6d7334555098549eb4967e55",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-observe.test.mjs": {
+      "bytes": 11278,
+      "sha256": "579de5230fa517e61ecdafc0eedb89b7cef5561df4c14e467cb569ecc90bda07",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-phase.mjs": {
+      "bytes": 1843,
+      "sha256": "8de12f50b0407a0527c297ea2be2faa8cbb47549e83907544a5e63b8474f0cba",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-plan.mjs": {
+      "bytes": 11704,
+      "sha256": "6a2e3c501653ac1271936e86575afa508fbecff78c795d6c08d685f456c4f685",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-systemd.mjs": {
+      "bytes": 5621,
+      "sha256": "e06fbaf619735199dfb4134c9abec0c65d144293cf0e3ee362fba149f4ae388d",
+      "matchesCommittedBlob": true
+    },
+    "maya-saas-backend/scripts/conversation-qualification/core-remote-systemd.test.mjs": {
+      "bytes": 9697,
+      "sha256": "f32afecebf6721ef6283bfd725a720dd95c198875a2f6eb60b649b51e60f25c6",
+      "matchesCommittedBlob": true
+    }
+  }
+}

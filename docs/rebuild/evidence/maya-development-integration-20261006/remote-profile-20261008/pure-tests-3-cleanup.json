@@ -1,0 +1,28 @@
+{
+  "groups": {
+    "pure-tests-3": {
+      "detached": true,
+      "pid": 96450,
+      "pgid": 96450,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "runner-syntax": {
+      "detached": true,
+      "pid": 96454,
+      "pgid": 96454,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "contract": "maya.local-ssh-config-reference/2",
+  "source": "~/.ssh/config",
+  "sourceSha256": "ee9153b83e83eadeae467f18974d8b96d248902ea451221652b349068db86263",
+  "bytes": 113,
+  "networkCalls": 0,
+  "keyFilesOpened": 0,
+  "includeFilesOpened": 0,
+  "sshGNotRun": true,
+  "relevantBlocks": [
+    {
+      "selector": [
+        "GLOBAL"
+      ],
+      "settings": []
+    }
+  ],
+  "otherBlocksOmitted": 1,
+  "noObservedSuccessfulConnectionInThisInspection": true
+}

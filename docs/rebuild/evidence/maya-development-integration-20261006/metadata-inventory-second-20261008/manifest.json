@@ -1,0 +1,41 @@
+{
+  "contract": "maya.authorized-metadata-inventory-attempt/1",
+  "observedAt": "2026-10-08T17:50:09.132045+00:00",
+  "outcome": "SSH_TRANSPORT_FAILED_NO_INVENTORY",
+  "automaticReview": "PROCESS_CREATION_ALLOWED",
+  "authorization": {
+    "questionMessage": "Sentinel_09214945044c81918e918aeea10cddcc",
+    "questionTime": "2026-10-08 17:26 UTC",
+    "answerMessage": "Sentinel_9cfc9637d8b88191b20ca3751caa60b4",
+    "answerTime": "2026-10-08 17:45 UTC",
+    "answer": "разрешаю",
+    "scope": "one metadata-only SSH probe, no setup or paid run"
+  },
+  "attemptsUnderThisAuthorization": 1,
+  "exitCode": 255,
+  "seconds": 8.021,
+  "route": "existing Beget ProxyCommand",
+  "phase": "SSH_BANNER_EXCHANGE_TIMEOUT",
+  "collectorSha256": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+  "collectorOutputObserved": false,
+  "remoteCollectorExecution": "NOT_OBSERVED",
+  "inventoryEstablished": false,
+  "stdoutBytes": 0,
+  "remoteWrites": false,
+  "paidCalls": 0,
+  "additionalConnections": 0,
+  "files": {
+    "transport-receipt.json": {
+      "bytes": 790,
+      "sha256": "3d8de4636580c93253c33646af699134381affc8d6ede08e84f7335bda2c21df"
+    },
+    "stdout.json": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ssh-stderr.txt": {
+      "bytes": 129,
+      "sha256": "dbcdbf46c97a84461faae0b51b15a0d34ad35cb467896faa28856e75b9f93056"
+    }
+  }
+}

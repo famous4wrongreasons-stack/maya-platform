@@ -1,0 +1,76 @@
+{
+  "contract": "maya.connection-diagnostic-proposal/1",
+  "executionPerformed": false,
+  "freshAuthorizationRequired": true,
+  "priorAuthorizationsExhausted": true,
+  "purpose": "Distinguish proxy authentication, stdio forwarding, target SSH banner/authentication, then collect the already-reviewed metadata only if the same connection succeeds. No blind retry of the collector without transport phase evidence.",
+  "knownFailure": "SSH banner exchange timeout on the outer target connection using Beget ProxyCommand; exact root cause is not established.",
+  "causeNotEstablished": [
+    "proxy TCP forwarding failure or delay",
+    "route/firewall behavior between Beget and target",
+    "target sshd availability or throttling",
+    "transient local transport condition"
+  ],
+  "command": "ssh",
+  "args": [
+    "-vv",
+    "-i",
+    "/Users/stanislavmosin/.ssh/yandex_bot",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "UpdateHostKeys=no",
+    "-o",
+    "ConnectTimeout=8",
+    "-o",
+    "ConnectionAttempts=1",
+    "-o",
+    "ProxyCommand=ssh -vv -i /Users/stanislavmosin/.ssh/beget_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ConnectTimeout=8 -o ConnectionAttempts=1 -W %h:%p mocine3388@prime.beget.com",
+    "botadmin@api.mayaos.ru",
+    "python3 - --collect"
+  ],
+  "stdinFile": "maya-saas-backend/scripts/conversation-qualification/diagnostic-readonly-inventory.py",
+  "stdinSha256": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+  "sameExistingRouteAndIdentities": true,
+  "soleFlagAddition": "-vv for both existing SSH clients",
+  "bounds": {
+    "networkAttempts": 1,
+    "connectionAttemptsPerHop": 1,
+    "connectTimeoutPerHopSeconds": 8,
+    "outerDeadlineSeconds": 580,
+    "ownGroupTermThenKillSeconds": 6,
+    "stderrCapBytes": 65536,
+    "stdoutCapBytes": 1048576,
+    "usd": 0
+  },
+  "evidenceRules": {
+    "rawDebugPersisted": false,
+    "onlyFinitePhaseMarkersPersisted": [
+      "proxyAuthenticated",
+      "forwardChannelConfirmed",
+      "targetBannerReceived",
+      "targetAuthenticated",
+      "collectorOutputObserved",
+      "timeout",
+      "hostKeyRefused",
+      "authenticationRefused",
+      "forwardingRefused"
+    ],
+    "collectorStdout": "existing structured metadata allowlist only",
+    "secretFilesOpenedByCollector": 0,
+    "hostKeyCheckingWeakened": false,
+    "knownHostsWrites": false
+  },
+  "excluded": [
+    "remote writes/setup/sudo/services",
+    "key/env/config/log/client DB contents",
+    "key copy/new credentials",
+    "direct route switch",
+    "provider/model calls",
+    "additional retry"
+  ],
+  "alternativeConfirmedSameTargetRoute": null,
+  "alternativeFinding": "No current supported alternative same-target connection established by inspected local config or successful route receipt. Historical 111.88.148.206 in AGENTS is a different target, not a proven fallback for api.mayaos.ru / 89.169.160.55."
+}

@@ -1,9 +1,11 @@
 # Переход к реальной модели: конкретный пакет на 2026-10-08
 
-**Код broker реализован, серверный запуск ещё не подготовлен.** Metadata lookup
-не означает, что сразу после него можно делать платные вызовы. Код проверен dry
+**Код broker и локальный bootstrap реализованы; серверный запуск не выполнен.**
+Актуальный [profile checkpoint](MAYA-REMOTE-PROFILE-CHECKPOINT-20261008.md)
+содержит точные setup/start/cleanup команды, лимиты и оставшиеся prerequisites.
+Metadata lookup не означает, что сразу после него можно делать платные вызовы. Код проверен dry
 на `746e0ae4e1efda0abf7918cbb63a5fe4d46861b9`; сохранённый checkpoint —
-`e9a6d803b7af14da5110938f8db7ef4a8face53e`. В этой подготовке внешних соединений,
+`e9a6d803b7af14da5110938f8db7ef4a8face53e`. В той подготовке внешних соединений,
 чтения ключей, платных вызовов и дополнительных HTTP/PG-тестов не было.
 
 ## Что предлагается запустить
@@ -25,7 +27,14 @@
 
 ## SSH и минимальные недостающие сведения
 
-Последняя разрешённая попытка 08.10 в 08:24 UTC **шла через Beget ProxyCommand**:
+Последняя разрешённая попытка **08.10 в 17:50:09 UTC выполнена** после ответа
+владельца «разрешаю» в 17:45 UTC. **Exit 255, 8.021 секунды, SSH banner exchange
+timeout, stdout 0 байт**. Metadata не получены, выполнение collector на target
+не наблюдалось. Дополнительных подключений после этой попытки не было.
+[Новый receipt](evidence/maya-development-integration-20261006/metadata-inventory-second-20261008/manifest.json).
+Это metadata-only разрешение не включает setup или paid run.
+
+Эта попытка и предыдущая в 08:24 UTC **шли через Beget ProxyCommand**:
 `botadmin@api.mayaos.ru` с identity-reference `~/.ssh/yandex_bot`, промежуточный
 `mocine3388@prime.beget.com` с `~/.ssh/beget_deploy`. Она закончилась SSH banner
 timeout за 8.02 секунды, stdout 0; remote collection не наблюдалась.
@@ -58,7 +67,11 @@ timeout за 8.02 секунды, stdout 0; remote collection не наблюд�
 не позволяют получить нужные metadata, результат — конкретный missing field;
 оператор может предоставить его без значения ключа. Не расширять поиск по диску.
 Полный старый collector читает больше (три units/три principals/до 16 paths) и не
-должен выдаваться за этот более узкий lookup. Новый lookup сейчас не выполнялся.
+должен выдаваться за этот более узкий lookup. Обе выполненные SSH-попытки передавали
+старый collector; более узкий lookup не исполнялся. После возвращения Wi-Fi
+подтверждено только локальное выполнение. Следующий конкретный диагностический
+шаг подготовлен в [profile checkpoint](MAYA-REMOTE-PROFILE-CHECKPOINT-20261008.md),
+но новая SSH-попытка не выполнена и не разрешена автоматически.
 
 ## Что ещё потребует отдельного remote setup
 
@@ -71,8 +84,11 @@ systemd units с конечным сроком. Это **remote writes/process/s
 
 Runner/backend должны иметь только свою PG и Unix broker, без произвольного
 внешнего egress; broker — доступ только к DeepSeek HTTPS и своему evidence.
-Точный способ OS-изоляции зависит от существующего профиля; готовых новых
-systemd units/remote bootstrap в этом commit нет. Проверить текущий ресурсный
+Локальный [bootstrap/systemd profile](MAYA-REMOTE-PROFILE-CHECKPOINT-20261008.md)
+теперь реализован, но Linux/systemd enforcement ещё не проверен и ничего не
+развёрнуто. Broker kernel policy ограничивает адреса; порт 443/TLS hostname
+ограничены существующим кодом, отдельный OS port restriction не заявляется.
+Проверить текущий ресурсный
 запас; не обещать, что Mac/Jest-профиль поместится на историческом 2 GiB сервере.
 При несовместимости нужен конкретный облегчённый runtime/setup, не повышение
 лимитов и не запуск на production на удачу.

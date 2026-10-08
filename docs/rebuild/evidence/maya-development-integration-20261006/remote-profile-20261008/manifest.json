@@ -1,0 +1,96 @@
+{
+  "contract": "maya.remote-profile-checkpoint/1",
+  "runtimeCommit": "5b04b0c88a9f33589e9cde3d20936a9b7754c376",
+  "qualification": "LOCAL_RENDER_AND_SYNTHETIC_TESTS_NOT_LINUX_OR_MODEL_ACCEPTANCE",
+  "finalPlanSha256": "ae43f3397b2893979e66edafd5c01e9efc8cbf9768db926fff2ac8fee35b1b0f",
+  "finalPlanExecutable": false,
+  "distinctPassingTests": 80,
+  "sourceFilesBound": 14,
+  "ownProcessGroupsAbsent": 5,
+  "newRemoteConnectionsAfterWifi": 0,
+  "setupPerformed": false,
+  "paidCalls": 0,
+  "oldScratchRenderExcluded": true,
+  "files": {
+    "connection-diagnostic-proposal.json": {
+      "bytes": 2964,
+      "sha256": "caa2ffc96eb109ca9fe3ce71b8463b49f135e52447f54cd3c596030ce8ab269b"
+    },
+    "final-input.json": {
+      "bytes": 1239,
+      "sha256": "088d7bc7ec90b7a305ba795ece9ce8e0e776b9990b94aa630dd05f9d077d6a8f"
+    },
+    "final-render-result.json": {
+      "bytes": 183,
+      "sha256": "e4c2570cad4830f62dd3ab7a155ca3618bf3ac26f616b5b04b363a300311be74"
+    },
+    "independent-review.md": {
+      "bytes": 1975,
+      "sha256": "c883d756232491ebf739cf5b446b8fc0267040fe5702367fe2754ac51413a357"
+    },
+    "local-ssh-reference-final.json": {
+      "bytes": 469,
+      "sha256": "6f73671b033a16f3740475cecbae147832c672c22f0da9e131a10bea2878c5a2"
+    },
+    "pure-tests-1-cleanup.json": {
+      "bytes": 277,
+      "sha256": "78e1d9c2159cc73cbc0e24d132e5cb6a1c99cb610caf63fb6b5cd98d684ff8bc"
+    },
+    "pure-tests-1.log": {
+      "bytes": 3438,
+      "sha256": "6759bbf4db0527fe78172a569f222767a100e233b8c2c046fea1b67f63cf1c91"
+    },
+    "pure-tests-2-cleanup.json": {
+      "bytes": 277,
+      "sha256": "58415f624943beb11fced0fb0a8869fc7b8c3ff8f86b7489be819a0bf36300b5"
+    },
+    "pure-tests-2.log": {
+      "bytes": 3751,
+      "sha256": "1f5788b519544c0ff58a99fd0c769e0df144db7d39866f9a7b1285b251d1102b"
+    },
+    "pure-tests-3-cleanup.json": {
+      "bytes": 534,
+      "sha256": "04da6390867469489e51fcdfbc2ac117abae974a71058d9aadc44df076b3be90"
+    },
+    "pure-tests-3.log": {
+      "bytes": 1979,
+      "sha256": "9dfb8796977037f57d1af37f0b523a1ebcb6c02e109273aeb48374ca42ba8310"
+    },
+    "pure-tests-4-cleanup.json": {
+      "bytes": 291,
+      "sha256": "0c87ea12541f24f9b8f84a01dac4c50f2b6534967e05bf0d3ae8db205ff158fa"
+    },
+    "pure-tests-4-final-binding.log": {
+      "bytes": 4174,
+      "sha256": "4d136676dd06bdadde7b50ad376ffc85e0116bbbbf0529a10fef884f97b0e277"
+    },
+    "rendered/commands.json": {
+      "bytes": 2784,
+      "sha256": "93a1991efe9ddd10cb081199989b0fd07a8ffa28c660aa77794bb0d9b13979cd"
+    },
+    "rendered/plan.json": {
+      "bytes": 3604,
+      "sha256": "ae43f3397b2893979e66edafd5c01e9efc8cbf9768db926fff2ac8fee35b1b0f"
+    },
+    "rendered/preview.json": {
+      "bytes": 12457,
+      "sha256": "8b1093907a7e488289661536dc7e38101b8339a4b9358c4f96d2e9a4e3bd7d12"
+    },
+    "resumption.json": {
+      "bytes": 902,
+      "sha256": "42b1c6c75e37bb97fb5edece89021d375bc3b6056babbd9872491c771b6cff0f"
+    },
+    "runner-syntax.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "runtime-source-binding.json": {
+      "bytes": 3404,
+      "sha256": "baf4b08d8849253cb1dd62ee3134219c21ec44a4005b0fe5d506574b8b0918b4"
+    },
+    "test-index.json": {
+      "bytes": 6071,
+      "sha256": "aa36975c607d6f03b70c5e631e86dfca53488bc9354f0bd0cf2229e5143090d2"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-10-08T17:50:09.132045+00:00",
+  "status": "completed",
+  "exitCode": 255,
+  "seconds": 8.021,
+  "collectorSha256": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+  "target": "botadmin@api.mayaos.ru",
+  "route": "existing Beget ProxyCommand",
+  "remoteCommand": "python3 - --collect",
+  "stdoutBytes": 0,
+  "stderrBytes": 129,
+  "evidenceDirectory": "/tmp/maya-diagnostic-inventory-second-20261008",
+  "authorization": {
+    "questionMessage": "Sentinel_09214945044c81918e918aeea10cddcc",
+    "questionTime": "2026-10-08 17:26 UTC",
+    "answerMessage": "Sentinel_9cfc9637d8b88191b20ca3751caa60b4",
+    "answerTime": "2026-10-08 17:45 UTC",
+    "answer": "разрешаю",
+    "scope": "one metadata-only SSH probe, no setup or paid run"
+  }
+}

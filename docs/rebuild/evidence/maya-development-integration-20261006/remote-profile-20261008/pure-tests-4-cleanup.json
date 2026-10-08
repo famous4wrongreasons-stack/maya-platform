@@ -1,0 +1,16 @@
+{
+  "groups": {
+    "pure-tests-4-final-binding": {
+      "detached": true,
+      "pid": 98244,
+      "pgid": 98244,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  }
+}

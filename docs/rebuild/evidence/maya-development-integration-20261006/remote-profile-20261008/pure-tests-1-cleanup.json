@@ -1,0 +1,16 @@
+{
+  "groups": {
+    "pure-tests-1": {
+      "detached": true,
+      "pid": 93873,
+      "pgid": 93873,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  }
+}
