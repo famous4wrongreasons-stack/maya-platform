@@ -1,0 +1,61 @@
+{
+  "contract": "maya.owned-stage-cleanup-probe/1",
+  "qualification": "Harmless synthetic Node child/grandchild only; no database or product acceptance",
+  "status": "PASS",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "cases": [
+    {
+      "scenario": "normal-parent-exit",
+      "result": "PASS",
+      "observedError": null
+    },
+    {
+      "scenario": "timeout",
+      "result": "PASS",
+      "observedError": "owned_stage_timeout"
+    },
+    {
+      "scenario": "cancel-during-cleanup",
+      "result": "PASS",
+      "observedError": "SIGTERM"
+    }
+  ],
+  "groups": {
+    "normal-parent-exit": {
+      "detached": true,
+      "pid": 87477,
+      "pgid": 87477,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": true,
+      "killSent": true
+    },
+    "timeout": {
+      "detached": true,
+      "pid": 87508,
+      "pgid": 87508,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "error": null,
+      "termSent": true,
+      "killSent": false
+    },
+    "cancel-during-cleanup": {
+      "detached": true,
+      "pid": 87511,
+      "pgid": 87511,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": true,
+      "killSent": true
+    }
+  }
+}

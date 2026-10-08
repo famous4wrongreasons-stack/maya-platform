@@ -1,0 +1,3 @@
+PublicBookingAttempt|PublicBookingAttempt_quoteId_sessionId_tenantId_fkey|a|a|f|f|t|FOREIGN KEY ("quoteId", "sessionId", "tenantId") REFERENCES "PublicBookingQuote"(id, "sessionId", "tenantId")
+PublicBookingQuote|PublicBookingQuote_sessionId_tenantId_fkey|a|a|f|f|t|FOREIGN KEY ("sessionId", "tenantId") REFERENCES "PublicBookingSession"(id, "tenantId")
+PublicBookingSession|PublicBookingSession_tenantId_fkey|a|a|f|f|t|FOREIGN KEY ("tenantId") REFERENCES "Tenant"(id)

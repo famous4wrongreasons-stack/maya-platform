@@ -1,0 +1,127 @@
+{
+  "contract": "maya.exact-time-input-digests/1",
+  "inputs": [
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-attempt1/report.json",
+      "sha256": "1f53b6c201fafdaa3e80c75b8cc9ff37e9ecac6b7d7847dc8df599f700cd7e0a",
+      "bytes": 7284,
+      "mode": "byte-exact reviewed metadata",
+      "output": "reports/local-attempt1.json"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-attempt1/targeted-unit.json",
+      "sha256": "e1b372e3135b73f2f8b87d7be45b52d04d8cb853d0753f91c168efc3ef74b491",
+      "bytes": 223393,
+      "mode": "digest only"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-attempt2/report.json",
+      "sha256": "c672d9b9e025cd4a34d3f963f22ad0a157bb32e0f0908c56ae57b727194acb8e",
+      "bytes": 8281,
+      "mode": "byte-exact reviewed metadata",
+      "output": "reports/local-attempt2.json"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-attempt2/targeted-unit.json",
+      "sha256": "07fc7d4d7e13890d2d86980179b83bb336504bbf1839b164e85b9502d8268c8b",
+      "bytes": 221404,
+      "mode": "digest only"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-attempt3/report.json",
+      "sha256": "4bcd22faa5c00db07005295146caa9872f2fedb46208dafd277fd3cf4d937358",
+      "bytes": 9236,
+      "mode": "byte-exact reviewed metadata",
+      "output": "reports/local-attempt3.json"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-attempt3/targeted-unit.json",
+      "sha256": "1116967c7538259bff8b0e5f38c3f992dcb223eb14442297de2eb3468c4445c3",
+      "bytes": 221406,
+      "mode": "digest only"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/http-attempt1/pg-report.json",
+      "sha256": "fa8b5991b57ed36cdb88b9ac795666cca2f80b7d76442544aec19f1c59d840c0",
+      "bytes": 10530,
+      "mode": "byte-exact reviewed metadata",
+      "output": "reports/http-attempt1.json"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/http-attempt1/booking-and-capture-target.json",
+      "sha256": "106ad503e821d02f9c88c9db41b992810eed8ca2baaefc419542cf657d7dcc7e",
+      "bytes": 8887,
+      "mode": "digest only"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/http-attempt1/schema-guest_constraints.log",
+      "sha256": "5029b302763f827f16b88741db3a7460a3331648b40d85508dcba5e98aaaf089",
+      "bytes": 469,
+      "mode": "byte-exact reviewed public schema metadata",
+      "output": "schema/schema-guest_constraints.log"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/http-attempt1/schema-guest_migrations.log",
+      "sha256": "b65d9346ad669d82d94cfe73da7241d5589a9d47c6c58f7baba306b5eac36426",
+      "bytes": 442,
+      "mode": "byte-exact reviewed public schema metadata",
+      "output": "schema/schema-guest_migrations.log"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/http-attempt1/maya_widget_gate_proof_exact_time-diff.log",
+      "sha256": "fe8599bb04f9e4ef3919b17b166e716f37c3b25ff8b8079fd1c0c57fd5fb9a03",
+      "bytes": 525,
+      "mode": "byte-exact reviewed public schema metadata",
+      "output": "schema/maya_widget_gate_proof_exact_time-diff.log"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/local-gates.mjs",
+      "sha256": "1e2dc99a9b5befff8c376eaf011559863a05feb45dfde210bf28bdc88ad16972",
+      "bytes": 6475,
+      "mode": "byte-exact reviewed historical launcher; absolute paths are provenance, not portable commands",
+      "output": "launchers/local-gates.mjs"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/http-gates.mjs",
+      "sha256": "e92a6edd30a57e3fe015fab49edb111e011a2927908a56dfb12af41854bb3b0f",
+      "bytes": 8591,
+      "mode": "byte-exact reviewed historical launcher; absolute paths are provenance, not portable commands",
+      "output": "launchers/http-gates.mjs"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/owned-stage.mjs",
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+      "bytes": 4513,
+      "mode": "byte-exact reviewed historical launcher; absolute paths are provenance, not portable commands",
+      "output": "launchers/owned-stage.mjs"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/loopback-only.cjs",
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+      "bytes": 606,
+      "mode": "byte-exact reviewed historical launcher; absolute paths are provenance, not portable commands",
+      "output": "launchers/loopback-only.cjs"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/supervisor-probe.mjs",
+      "sha256": "25ae254f9d866040a696849553987c03ff8c031f5db63dcc2d374a689dbd0e37",
+      "bytes": 2635,
+      "mode": "byte-exact reviewed historical launcher; absolute paths are provenance, not portable commands",
+      "output": "launchers/supervisor-probe.mjs"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/supervisor-probe/report.json",
+      "sha256": "da85a14d27bc0ec1b7694f0e75d12e934d7e3782809faa500cda5dcdbfcd6fe3",
+      "bytes": 1411,
+      "mode": "byte-exact harmless child/grandchild probe metadata",
+      "output": "reports/supervisor-probe.json"
+    },
+    {
+      "source": "/tmp/maya-exact-time-validation-20261008/build-public-evidence.py",
+      "sha256": "009a4063810dfe80a282f2c6935a4d9a659685b938fbf97f52bfe0f6707903c6",
+      "bytes": 7838,
+      "mode": "byte-exact evidence builder",
+      "output": "build-public-evidence.py"
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "contract": "maya.exact-time-local-gates/1",
+  "source": "b768c9aac8f0e070bcf54614222146c9777ee12c",
+  "tree": "3895d46d290cbd2a4eb0006b43dde3cfaaf61beb",
+  "base": "e5113addc422de7f5ced655ab438d0415b4c2681",
+  "started": "2026-10-08T04:28:28.742Z",
+  "status": "FAIL",
+  "commands": [
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-core-model.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-registry.service.spec.ts",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/appointments/client-appointment-create.service.spec.ts",
+        "src/widgets/owner-ports/booking-selector.adapter.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-exact-time-validation-20261008/local-attempt2/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-typescript-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.ts",
+        "src/ai-tools/ai-tool-registry.service.spec.ts",
+        "src/ai-tools/ai-tool-registry.service.ts",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/ai-tools/ai-tool-runtime.service.ts",
+        "src/ai-tools/ai-tool.catalog.ts",
+        "src/appointments/client-appointment-create.service.spec.ts",
+        "src/appointments/client-appointment-create.service.ts",
+        "test/widgets-live/chat-catalog-booking.live-spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "targeted-unit",
+      "elapsedMs": 1613
+    },
+    {
+      "name": "backend-types",
+      "elapsedMs": 5765
+    },
+    {
+      "name": "widgets-live-types",
+      "elapsedMs": 6588
+    }
+  ],
+  "failures": [
+    {
+      "error": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n"
+    }
+  ],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "f4b240acb08b54d56ea3d583d9891583efeb57f810573650c0f9bce33696e04e",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "36909ec8c91240ad64b95c84832f1cf06ed75284adb8c0896dd0562c9c406340",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": "f314ae0090014d2708b36f50f2d465b1fc1aa5c163df6c6fa4af79b8cecb8bf3",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "0171f465126688d393b1e48b9b6ace533add2f773ed04d2e2ab9805bcec887b5",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts": "1581a80ff5fbbc0e37a220895fc595778f3823e4afb54d0cbfb025b50774e433",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "500dcb69a24c515bb4d673c3da6e4f38972c27f8a2e183615692c6ed4640f394",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "451f9a2d886d843797da3d4b0a164bfa65abb7da40873bec729108e1f3f92386",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "171d1cd7f13d0ff130f2063a3cc34a80f4617943a124d9d4448403bc8601a6e9",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "ae9fb985a431ad1be050c16edaef739ee100718cd646ab959c2ab7a3956c4f44",
+    "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts": "1f0815a2b8fa48c20387e96a9936fc80c6c3bbb060a66e458a759407d64b80f3",
+    "maya-saas-backend/src/appointments/client-appointment-create.service.ts": "e760a9ebbd95e7953fb18dea5775b2abe2e004421901d0f496b4dfd4e6a01c1c",
+    "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts": "35a45711b2a50df2c59469cd83a651e7094fc22a0eb2fbf38f228f64d43604b6"
+  },
+  "launcherSha256": "1e2dc99a9b5befff8c376eaf011559863a05feb45dfde210bf28bdc88ad16972",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "targeted-unit": {
+      "detached": true,
+      "pid": 90275,
+      "pgid": 90275,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "backend-types": {
+      "detached": true,
+      "pid": 90313,
+      "pgid": 90313,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "widgets-live-types": {
+      "detached": true,
+      "pid": 90356,
+      "pgid": 90356,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "changed-typescript-lint": {
+      "detached": true,
+      "pid": 90409,
+      "pgid": 90409,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "b768c9aac8f0e070bcf54614222146c9777ee12c",
+  "treeAtEnd": "3895d46d290cbd2a4eb0006b43dde3cfaaf61beb",
+  "dirtyAtEnd": "",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "1e2dc99a9b5befff8c376eaf011559863a05feb45dfde210bf28bdc88ad16972",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T04:28:48.168Z"
+}

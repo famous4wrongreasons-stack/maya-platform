@@ -1,0 +1,164 @@
+{
+  "contract": "maya.exact-time-checkpoint-package/1",
+  "codeCandidate": "b60dd55ffacba86fd2f81476e6708de439886770",
+  "codeTree": "3c9d41057cb0cfde6490f9e3b46cfb7358e651f9",
+  "previousAcceptedCheckpoint": "e5113addc422de7f5ced655ab438d0415b4c2681",
+  "branch": "codex/maya-development-integration-20261006",
+  "status": "QUALIFIED_LOCAL_FUNCTIONAL_PASS_WITH_UNRESOLVED_SCHEMA_DIFF",
+  "files": [
+    {
+      "path": "final-review.json",
+      "bytes": 2071,
+      "sha256": "b5e08848c0cc32505ea4ab3eebdaa4022cb49fbaf02b44485678abe16c516bb3"
+    },
+    {
+      "path": "gates/build-public-evidence.py",
+      "bytes": 7838,
+      "sha256": "009a4063810dfe80a282f2c6935a4d9a659685b938fbf97f52bfe0f6707903c6"
+    },
+    {
+      "path": "gates/bundle-files.json",
+      "bytes": 3499,
+      "sha256": "160f272515982ecd8102f8a58c559df07f5729752d7438c8dc6a13e21cb46325"
+    },
+    {
+      "path": "gates/input-artifacts.json",
+      "bytes": 5637,
+      "sha256": "474dcc3f4fd4c1260be97d51725de152ebf93faf41aa0a3c38e0bcd58158852d"
+    },
+    {
+      "path": "gates/jest/http-attempt1.json",
+      "bytes": 3012,
+      "sha256": "5eecf02d07d8eb480a630fb494d3fe4cc7286c2e429a50e4b04b6109fee3c512"
+    },
+    {
+      "path": "gates/jest/local-attempt1.json",
+      "bytes": 70040,
+      "sha256": "e7358eec73a0a657341e5dafc7b1ef5749ea7b0f71946bd964f263e8b0ec52e2"
+    },
+    {
+      "path": "gates/jest/local-attempt2.json",
+      "bytes": 70186,
+      "sha256": "1491832d40a5aaf82a5e291df0c27c928077a6c1679a8fb03031e913bac404fe"
+    },
+    {
+      "path": "gates/jest/local-attempt3.json",
+      "bytes": 70186,
+      "sha256": "538beea17866a7fe4e1646682f5c129862b8cdb5015e6d757139c482c4a6df9f"
+    },
+    {
+      "path": "gates/launchers/http-gates.mjs",
+      "bytes": 8591,
+      "sha256": "e92a6edd30a57e3fe015fab49edb111e011a2927908a56dfb12af41854bb3b0f"
+    },
+    {
+      "path": "gates/launchers/local-gates.mjs",
+      "bytes": 6475,
+      "sha256": "1e2dc99a9b5befff8c376eaf011559863a05feb45dfde210bf28bdc88ad16972"
+    },
+    {
+      "path": "gates/launchers/loopback-only.cjs",
+      "bytes": 606,
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    },
+    {
+      "path": "gates/launchers/owned-stage.mjs",
+      "bytes": 4513,
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    {
+      "path": "gates/launchers/supervisor-probe.mjs",
+      "bytes": 2635,
+      "sha256": "25ae254f9d866040a696849553987c03ff8c031f5db63dcc2d374a689dbd0e37"
+    },
+    {
+      "path": "gates/reports/http-attempt1.json",
+      "bytes": 10530,
+      "sha256": "fa8b5991b57ed36cdb88b9ac795666cca2f80b7d76442544aec19f1c59d840c0"
+    },
+    {
+      "path": "gates/reports/local-attempt1.json",
+      "bytes": 7284,
+      "sha256": "1f53b6c201fafdaa3e80c75b8cc9ff37e9ecac6b7d7847dc8df599f700cd7e0a"
+    },
+    {
+      "path": "gates/reports/local-attempt2.json",
+      "bytes": 8281,
+      "sha256": "c672d9b9e025cd4a34d3f963f22ad0a157bb32e0f0908c56ae57b727194acb8e"
+    },
+    {
+      "path": "gates/reports/local-attempt3.json",
+      "bytes": 9236,
+      "sha256": "4bcd22faa5c00db07005295146caa9872f2fedb46208dafd277fd3cf4d937358"
+    },
+    {
+      "path": "gates/reports/supervisor-probe.json",
+      "bytes": 1411,
+      "sha256": "da85a14d27bc0ec1b7694f0e75d12e934d7e3782809faa500cda5dcdbfcd6fe3"
+    },
+    {
+      "path": "gates/schema/maya_widget_gate_proof_exact_time-diff.log",
+      "bytes": 525,
+      "sha256": "fe8599bb04f9e4ef3919b17b166e716f37c3b25ff8b8079fd1c0c57fd5fb9a03"
+    },
+    {
+      "path": "gates/schema/schema-guest_constraints.log",
+      "bytes": 469,
+      "sha256": "5029b302763f827f16b88741db3a7460a3331648b40d85508dcba5e98aaaf089"
+    },
+    {
+      "path": "gates/schema/schema-guest_migrations.log",
+      "bytes": 442,
+      "sha256": "b65d9346ad669d82d94cfe73da7241d5589a9d47c6c58f7baba306b5eac36426"
+    },
+    {
+      "path": "gates/source-binding.json",
+      "bytes": 4203,
+      "sha256": "86d7f319637a27ef3348d9518a3eca05a3a3103a6bcc802c399f06165281b8c7"
+    },
+    {
+      "path": "gates/summary.json",
+      "bytes": 4710,
+      "sha256": "e0fe203897f5f0b761869f681c0cebc5d04c5e4bb673f2ffe2a1877509280e0e"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/rebuild/MAYA-EXACT-TIME-BOOKING-CHECKPOINT-20261008.md",
+      "bytes": 10030,
+      "sha256": "d6f0d4954acbd0c972fbc7407a3d03c51d1d60120837b61293a69ea86c5bdd86"
+    },
+    {
+      "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+      "bytes": 160122,
+      "sha256": "a82509525cc313fdde427a28ab24ed5bf672c49c722763b4c4c5334773715912"
+    },
+    {
+      "path": "docs/rebuild/MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md",
+      "bytes": 22844,
+      "sha256": "2397383e40add015bbabdfc3bdf2dc9966184b29a77188f5c98d8682a5f3115f"
+    },
+    {
+      "path": "docs/rebuild/MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md",
+      "bytes": 9079,
+      "sha256": "1469182220b654ee037e93986295e8317f78a259eb0b9e9a471c95b6d7a96938"
+    },
+    {
+      "path": "docs/rebuild/MAYA-REMAINING-READINESS-DECISIONS.md",
+      "bytes": 20434,
+      "sha256": "1fc85cd6c79b232e68d184fbb59c4d39311ca334e80a2f00387eab61a85a57ac"
+    }
+  ],
+  "documentBinding": "These document hashes bind the Git documentation commit containing this manifest, immediately following the code candidate. They are not expected to match later map revisions.",
+  "selfExcluded": "manifest.json",
+  "review": "final-review.json",
+  "noAggregateTestTotal": true,
+  "correctionMigration": "NOT_WRITTEN_PENDING_EXACT_OWNER_SEMANTICS",
+  "upgradeQualification": "NOT_RUN",
+  "qualifications": [
+    "Existing unchanged migrations were applied only to a fresh owned local PG for finite booking tests; schema diff stays FAIL.",
+    "21 gate artifact files plus their inventory remain byte-exact to independently reviewed public bundle.",
+    "No real provider/model/browser/restart/C10/release claim. Exact-time supports bounded ambiguity refusal.",
+    "No website source, published migration, schema, provider serialization, paid, SSH, production, push or merge change."
+  ]
+}

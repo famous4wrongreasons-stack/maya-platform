@@ -1,0 +1,95 @@
+{
+  "contract": "maya.exact-time-source-binding/1",
+  "base": "e5113addc422de7f5ced655ab438d0415b4c2681",
+  "candidate": "b60dd55ffacba86fd2f81476e6708de439886770",
+  "tree": "3c9d41057cb0cfde6490f9e3b46cfb7358e651f9",
+  "cleanAtCollection": true,
+  "protectedUnchangedPaths": [
+    "maya-saas-backend/prisma",
+    "maya-saas-backend/src/appointments/public-booking.repository.ts",
+    "maya-saas-backend/src/appointments/public-booking.service.ts",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+    "сайт и приложение",
+    "maya-os-site",
+    "maya-ios-carrier",
+    "maya-chat-shell",
+    "maya-carrier-react"
+  ],
+  "changedPaths": [
+    {
+      "path": "docs/rebuild/MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md",
+      "blob": "e23459c719b5ac496e1a7607c6676afb29624b4d",
+      "sha256": "9fcb49af9e4a547d980c04887093677cc15945daf5df558e0c3bfa1bac39979a"
+    },
+    {
+      "path": "docs/rebuild/MAYA-REMAINING-READINESS-DECISIONS.md",
+      "blob": "94455a908d3c40c4952987a21cdb32039e628399",
+      "sha256": "274013806862b9948bc067c180a236b2db617eb8c59e91029baa5a964c985aad"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-development-integration-20261006/public-booking-fk-recheck-20261008/source-recheck.json",
+      "blob": "cf1e3da9d83e125f8d2309f22327c8a0c51d0d7a",
+      "sha256": "4b0e82ddd64f9952d976bbf5df19748b0840957fdbfc97dfb9c733a2d1c67783"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "blob": "9155b60a9bedef33312567c1d9c6d655cdefb78b",
+      "sha256": "f4b240acb08b54d56ea3d583d9891583efeb57f810573650c0f9bce33696e04e"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "blob": "ffc6fb164b4532f262638d5b31684c1382306e95",
+      "sha256": "190657eab074dcc6fb49a40c11d8151cb4c5475d8ab22cbd4ebe4aa341cc7e69"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+      "blob": "ffbe8a99474f28484d2feece62941d6bd2e123d4",
+      "sha256": "f314ae0090014d2708b36f50f2d465b1fc1aa5c163df6c6fa4af79b8cecb8bf3"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "blob": "59035aede41d395ebb0dd1e0e9ac239152f06e68",
+      "sha256": "0171f465126688d393b1e48b9b6ace533add2f773ed04d2e2ab9805bcec887b5"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts",
+      "blob": "f29bf55d28c13476be8d39f19fcfad8d1652572e",
+      "sha256": "1581a80ff5fbbc0e37a220895fc595778f3823e4afb54d0cbfb025b50774e433"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+      "blob": "5aa7441519b381c814bc75883327ac1f3c194ddc",
+      "sha256": "500dcb69a24c515bb4d673c3da6e4f38972c27f8a2e183615692c6ed4640f394"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "blob": "4d5a241fd1f4803b95e558a8668c97db5048fce3",
+      "sha256": "451f9a2d886d843797da3d4b0a164bfa65abb7da40873bec729108e1f3f92386"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "blob": "fdc19fb7fd657e379416f19226fe8a394baa30b4",
+      "sha256": "171d1cd7f13d0ff130f2063a3cc34a80f4617943a124d9d4448403bc8601a6e9"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "blob": "3eff4578656c27310d6ad1b158d79f5c727251f3",
+      "sha256": "ae9fb985a431ad1be050c16edaef739ee100718cd646ab959c2ab7a3956c4f44"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts",
+      "blob": "fe03ed88f6d15d68195ad7d8132ec8c00ef91cbe",
+      "sha256": "1df811ab9a7a7a13db637fcc6ea15dbc147b6112e72a6dacae991fb2b66a58bc"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.ts",
+      "blob": "37bafe6b511369a99beb09a3cf3e9bef3b3a3881",
+      "sha256": "e760a9ebbd95e7953fb18dea5775b2abe2e004421901d0f496b4dfd4e6a01c1c"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "blob": "d21f668b83e270db29a6e31d144a3bbe9f2a43ec",
+      "sha256": "35a45711b2a50df2c59469cd83a651e7094fc22a0eb2fbf38f228f64d43604b6"
+    }
+  ]
+}

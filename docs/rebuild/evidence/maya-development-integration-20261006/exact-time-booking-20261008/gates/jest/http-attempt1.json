@@ -1,0 +1,90 @@
+{
+  "contract": "maya.qualified-jest-status-projection/1",
+  "source": "b60dd55ffacba86fd2f81476e6708de439886770",
+  "rawSha256": "106ad503e821d02f9c88c9db41b992810eed8ca2baaefc419542cf657d7dcc7e",
+  "qualification": "Counts and hashed test identities only; failure/console/auth payloads omitted. Repeated cohorts overlap; not additive.",
+  "counts": {
+    "numFailedTestSuites": 0,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 3,
+    "numPassedTests": 13,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTodoTests": 0,
+    "numTotalTestSuites": 3,
+    "numTotalTests": 13
+  },
+  "suites": [
+    {
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "status": "passed",
+      "assertions": [
+        {
+          "identitySha256": "4b72db8a0bffb6819cc50fac1d72babc1bd31422c1df2e25c35e3d22decb6899",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "72b6fdcf9342e5852100ca8cbba014fbc7be5ffb5c79a132ac113c285ebb8a80",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "41dd2f91c301afc32a3a990d77cbe5069fdbcebbc4bb9fc3065cf8d5c14fe662",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "31828e17ecdaee01a50483a877766d38a83df4e49c6ce90efcc006c50d5c5467",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9705e9e842e4f2e0ecea80db130d888adf50e7d36b784cb53f14e05ffec68e85",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "8262976296e01f403e0a6c7820a12d64ce7d7fb7d84b715ddf92b391fe8c1110",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "002f83941665423f6a0370d3fcaa28594e8c108755d824fa069893ecd59302ca",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "9b6ae2afa7e64c8cbf56993b905d901562f5bffcd7848387e8edec1873039bb9",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/semantic-slot-captures.live-spec.ts",
+      "status": "passed",
+      "assertions": [
+        {
+          "identitySha256": "487444608c3e8e02f8c1629dc6dba4adfa2952f02912de441cb010fa84b39f24",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "2a3edaa543ae029fe030fb8ad11f7dededb6fb296e00d6dcf37508037a845f44",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "3771948da35da783c8269c220d2d6fbb9673f4cc33c2f0bbebafe0ff94bc38ae",
+          "status": "passed"
+        },
+        {
+          "identitySha256": "a5e75a1edde897aa9fc74d23cd6372489baa133f92efdd1cc3955be314007c58",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+      "status": "passed",
+      "assertions": [
+        {
+          "identitySha256": "abdbe3ec9252ac7e4b650c8923481edcd6c8744bd8fc3379b1797dad49f4804a",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

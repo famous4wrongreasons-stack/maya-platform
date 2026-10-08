@@ -1,0 +1,42 @@
+{
+  "contract": "maya.exact-time-independent-review/1",
+  "candidate": "b60dd55ffacba86fd2f81476e6708de439886770",
+  "reviewer": "/root/independent_review",
+  "recordKind": "Root-authored faithful summary of read-only independent reviewer messages; not a transcript, human approval or certificate",
+  "status": "QUALIFIED_LOCAL_CHECKPOINT_NO_NEW_BLOCKERS",
+  "reviewedCode": [
+    "4bac6a30 exact-time READ/calendar/cache/quote guards: all12files matched original frozen draft manifest",
+    "4bac6a30→b60dd55f: canonical time_of_day preference before early clarification and three formatting-only comma removals",
+    "PublicBooking FK source/provenance and substantive NO ACTION/RESTRICT replacement distinction; pending choice confirmed",
+    "Owned process-group supervisor: cancellation after cleanup and closed+groupAbsent checks corrected before execution"
+  ],
+  "evidence": {
+    "unitTests": 469,
+    "unitSuites": 7,
+    "httpTests": 13,
+    "httpSuites": 3,
+    "unitAndStaticStatus": "PASS",
+    "httpFunctionalStatus": "PASS",
+    "overallHttpRunner": "FAIL_ONLY_THREE_PUBLIC_BOOKING_FKS",
+    "boundFiles": 21,
+    "inventorySelfExcluded": true,
+    "rawHashesVerified": 18,
+    "exactCopiesVerified": 14,
+    "jestProjections": 4,
+    "gitBindings": 15,
+    "reportSourceBindings": 36,
+    "supervisorCasesPassed": 3,
+    "ownedGroupsClosedAndAbsent": true,
+    "pgStoppedAndPidfileAbsent": true,
+    "inventorySha256": "160f272515982ecd8102f8a58c559df07f5729752d7438c8dc6a13e21cb46325"
+  },
+  "limits": [
+    "Failed attempt1 lost-time and attempt2 formatting reports remain failed.",
+    "DST is bounded refusal, not full overlap support.",
+    "UNKNOWN regression proves exact-alias routing, not persistence/provider acceptance.",
+    "HTTP uses synthetic/internal effects and scripted model; headless carrier is not a browser.",
+    "No new browser/restart/live-provider/model/C10/release acceptance.",
+    "Previous aggregate counts remain bound to their prior candidate.",
+    "Reviewer performed read-only review; no tests/services/edits."
+  ]
+}

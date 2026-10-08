@@ -10,11 +10,14 @@
 байты. Три relation declaration также не менялись с исходного commit.
 [Точные hashes, provenance и ссылки на выполненные проверки](evidence/maya-development-integration-20261006/public-booking-fk-recheck-20261008/source-recheck.json).
 
-Последний fresh local PG run на runtime `4023c4d5` снова дал ровно эти три
-расхождения; следующий `e5113add` меняет только документацию/evidence.
+Предшествующий fresh local PG run на runtime `4023c4d5` дал ровно эти три
+расхождения; следующий `e5113add` менял только документацию/evidence. Затем
+[ограниченный booking run на `b60dd55f`](MAYA-EXACT-TIME-BOOKING-CHECKPOINT-20261008.md)
+применил ту же исходную цепочку только к новой disposable PG и снова подтвердил
+три NO ACTION FK, validated/nondeferrable, и исходные четыре checksums.
 Исторический SQL-контрпример ниже остаётся квалифицированным к своему запуску,
-а не объявляется новым тестом. Новый fresh/upgrade migration run **не выполнялся**,
-поскольку вариант миграции ещё не выбран.
+а не объявляется новым тестом. Проверка **исправляющей** миграции на fresh/upgrade
+fixture не выполнялась: вариант не выбран и нового corrective DDL нет.
 
 Независимый review подтвердил: guest rollback contract сохраняет историю и
 ограничения, но не выбирает семантику замены родителя. Действующего product API

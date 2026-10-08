@@ -1,0 +1,120 @@
+{
+  "contract": "maya.exact-time-qualified-checkpoint/1",
+  "candidate": "b60dd55ffacba86fd2f81476e6708de439886770",
+  "status": "QUALIFIED_LOCAL_FUNCTIONAL_PASS_WITH_UNRESOLVED_SCHEMA_DIFF",
+  "aggregateTests": null,
+  "stages": [
+    {
+      "id": "local-attempt1",
+      "source": "4bac6a307a4e0b39d1e51ee4117fd3c8704c20c9",
+      "status": "FAIL",
+      "functionalStatus": null,
+      "schemaDiffStatus": null,
+      "sourceAndHarnessStable": true,
+      "ownedGroupsClosedAndAbsent": true,
+      "report": "reports/local-attempt1.json",
+      "jest": "jest/local-attempt1.json",
+      "counts": {
+        "numFailedTestSuites": 1,
+        "numFailedTests": 1,
+        "numPassedTestSuites": 6,
+        "numPassedTests": 467,
+        "numPendingTestSuites": 0,
+        "numPendingTests": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTodoTests": 0,
+        "numTotalTestSuites": 7,
+        "numTotalTests": 468
+      }
+    },
+    {
+      "id": "local-attempt2",
+      "source": "b768c9aac8f0e070bcf54614222146c9777ee12c",
+      "status": "FAIL",
+      "functionalStatus": null,
+      "schemaDiffStatus": null,
+      "sourceAndHarnessStable": true,
+      "ownedGroupsClosedAndAbsent": true,
+      "report": "reports/local-attempt2.json",
+      "jest": "jest/local-attempt2.json",
+      "counts": {
+        "numFailedTestSuites": 0,
+        "numFailedTests": 0,
+        "numPassedTestSuites": 7,
+        "numPassedTests": 469,
+        "numPendingTestSuites": 0,
+        "numPendingTests": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTodoTests": 0,
+        "numTotalTestSuites": 7,
+        "numTotalTests": 469
+      }
+    },
+    {
+      "id": "local-attempt3",
+      "source": "b60dd55ffacba86fd2f81476e6708de439886770",
+      "status": "PASS",
+      "functionalStatus": null,
+      "schemaDiffStatus": null,
+      "sourceAndHarnessStable": true,
+      "ownedGroupsClosedAndAbsent": true,
+      "report": "reports/local-attempt3.json",
+      "jest": "jest/local-attempt3.json",
+      "counts": {
+        "numFailedTestSuites": 0,
+        "numFailedTests": 0,
+        "numPassedTestSuites": 7,
+        "numPassedTests": 469,
+        "numPendingTestSuites": 0,
+        "numPendingTests": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTodoTests": 0,
+        "numTotalTestSuites": 7,
+        "numTotalTests": 469
+      }
+    },
+    {
+      "id": "http-attempt1",
+      "source": "b60dd55ffacba86fd2f81476e6708de439886770",
+      "status": "FAIL",
+      "functionalStatus": "PASS",
+      "schemaDiffStatus": "FAIL",
+      "sourceAndHarnessStable": true,
+      "ownedGroupsClosedAndAbsent": true,
+      "report": "reports/http-attempt1.json",
+      "jest": "jest/http-attempt1.json",
+      "counts": {
+        "numFailedTestSuites": 0,
+        "numFailedTests": 0,
+        "numPassedTestSuites": 3,
+        "numPassedTests": 13,
+        "numPendingTestSuites": 0,
+        "numPendingTests": 0,
+        "numRuntimeErrorTestSuites": 0,
+        "numTodoTests": 0,
+        "numTotalTestSuites": 3,
+        "numTotalTests": 13
+      }
+    }
+  ],
+  "schemaDiff": "FAIL",
+  "httpOwnedPgStopped": true,
+  "failureQualifications": [
+    "local-attempt1 at4bac6a30:467pass/1fail of468; observed loss of exact time after service correction.",
+    "local-attempt2 atb768c9aa:469unitpass and backend/widgets types pass; three TypeScript generic-comma lint errors stopped later static stages.",
+    "local-attempt3 atb60dd55f:469/7unit, types/lint/contract/K3 pass.",
+    "http-attempt1 atb60dd55f:13/3HTTP pass; migration validate/deploy/status pass; overall runner FAIL solely for three unchanged PublicBookingFK differences."
+  ],
+  "limits": [
+    "Finite exact-time selected-staff slice only. Ambiguous DST instants are refused, not fully supported.",
+    "A durable exact alias UNKNOWN test proves routing only; no new persistence/provider UNKNOWN acceptance.",
+    "HTTP uses actual local Nest/PostgreSQL and a separate Node headless carrier; no new actual browser/PG restart proof.",
+    "Intentional synthetic/internal DB and AE fixture effects occur; no global zero-effects claim.",
+    "Scripted model selections and synthetic sources are not real language/model/provider acceptance.",
+    "No correction migration or upgrade fixture: parent replacement semantics remain an exact owner decision.",
+    "Earlier7237/645backend and562/57HTTP aggregate results belong to4023c4d5; they were not rerun or relabeled.",
+    "Historical unified package document hashes bind e5113add docs, not later map revisions.",
+    "No website source, published migration, provider adapter, production, SSH, paid call, push or merge changes.",
+    "No C10 autonomy or release/certificate acceptance."
+  ]
+}
