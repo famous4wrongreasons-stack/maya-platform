@@ -1,0 +1,154 @@
+{
+  "contract": "maya.client-value-evidence-manifest/1",
+  "codeCommit": "7c25fc8f6287fe6ebc2a6a564d9acaffd6e6a641",
+  "artifacts": [
+    {
+      "path": "green1/local-gates.mjs",
+      "bytes": 3548,
+      "sha256": "49c32a537012b70ff2fa4021d1c3a7f8bdd8d53f44434b6032ca45360f67df40"
+    },
+    {
+      "path": "green1/report.json",
+      "bytes": 4606,
+      "sha256": "124be1464466ccb2dc719b4a004ea5089739b2fa17947734010962b05419d8a5"
+    },
+    {
+      "path": "green1/targeted.log",
+      "bytes": 32559,
+      "sha256": "7dda8d66897b2af9c6ac2cdc8458901d88724f26ec3a595c15972520b7cf4061"
+    },
+    {
+      "path": "green2/lint.log",
+      "bytes": 1895,
+      "sha256": "6e797c9e73b703f1a828cf6ffc09bff54466ecbced431d3090c58065191a9f96"
+    },
+    {
+      "path": "green2/local-gates.mjs",
+      "bytes": 3639,
+      "sha256": "5855cd173dc903520f0f1cdcc215bab3653e3997b50d7c344063ff648557ecca"
+    },
+    {
+      "path": "green2/report.json",
+      "bytes": 5243,
+      "sha256": "c396eae9e66265cbb29ae8aabd84ac5658c0d023c3c55be57e8803b74d7fb625"
+    },
+    {
+      "path": "green2/targeted.log",
+      "bytes": 5203,
+      "sha256": "acef973f63cb1b7cc79a39efa79f2a366e026f59d9d501baa3d4cd50d4900f8a"
+    },
+    {
+      "path": "green2/types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "green3/lint.log",
+      "bytes": 411,
+      "sha256": "c60cda21f98e8e95998aaaad671ad3de6924cc77f14c004059cba0dab0b5f474"
+    },
+    {
+      "path": "green3/local-gates.mjs",
+      "bytes": 3639,
+      "sha256": "5855cd173dc903520f0f1cdcc215bab3653e3997b50d7c344063ff648557ecca"
+    },
+    {
+      "path": "green3/report.json",
+      "bytes": 5243,
+      "sha256": "24fca1853a56a0c2b3fe4290faf21167cdc6d34ab6fb3c986faa3a2f962e235a"
+    },
+    {
+      "path": "green3/targeted.log",
+      "bytes": 5204,
+      "sha256": "b33cf8df5cc8599cedb093f7b0202a3e083e55ee722717a926e9cea0ce6d48d5"
+    },
+    {
+      "path": "green3/types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "green4/lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "green4/local-gates.mjs",
+      "bytes": 3829,
+      "sha256": "a1203e7004e8c6a873637ac106955b14bcfe4f981e424420c487092aa5a39840"
+    },
+    {
+      "path": "green4/report.json",
+      "bytes": 4094,
+      "sha256": "9c0d63f22381c9a1750e6fcd0d70c3e8719e0adc4802745ebb5961848df4fee6"
+    },
+    {
+      "path": "green4/targeted.log",
+      "bytes": 2641,
+      "sha256": "7e4dedaf51c44e95fb2bc800a7752396497eb0b160c3405a447263ab4f4fdeca"
+    },
+    {
+      "path": "independent-review-original-snapshot.md",
+      "bytes": 5509,
+      "sha256": "3d6098c7dd539faecf897559b4a0627e7ea724f630eb67275f1f62c7a73e550e"
+    },
+    {
+      "path": "independent-review.md",
+      "bytes": 7150,
+      "sha256": "62724e136785dd8259c72bf0334aac7102bab0898a041da665f3dd115cc5a8f9"
+    },
+    {
+      "path": "red/local-gates.mjs",
+      "bytes": 3548,
+      "sha256": "49c32a537012b70ff2fa4021d1c3a7f8bdd8d53f44434b6032ca45360f67df40"
+    },
+    {
+      "path": "red/regression.log",
+      "bytes": 1369,
+      "sha256": "a112f8d547d2198edbfcdf3532b58d09e6a41306fb4811da154498306b3a14ad"
+    },
+    {
+      "path": "red/report.json",
+      "bytes": 2135,
+      "sha256": "0457e9323d49a60d5e1eb1ea1e76b2d49284ce9b999de106d25716e1a747304a"
+    },
+    {
+      "path": "runner-dependencies/loopback-only.cjs",
+      "bytes": 606,
+      "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+    },
+    {
+      "path": "runner-dependencies/owned-stage.mjs",
+      "bytes": 4513,
+      "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 3356,
+      "sha256": "7c32d69c03327949f27b524dc56811d92fd74484c015fd613bf087a47554025b"
+    }
+  ],
+  "sourceBindings": {
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "f422354d51d3879a8d54bf0317896ba57df53c641da5404ce529dde7c5899fa3",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.ts": "837b5f346a72703fe348db57d01c9901318ce370bd8b1d0d097d36b4390b1f12",
+    "maya-saas-backend/src/ai-tools/ai-core.occupancy.spec.ts": "db75c66b4e99ec0265426f8eb1a510a51a30bd6ce3629d60d96f6cf6f931672b",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "9d1a62ef5a241670f781dce9f165b8789a5e8d591bc9b26bc280b0216dce8512",
+    "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts": "9df45839593d464e7dae09e4841add195969d5bcaabfd48ddfb509d48600f68e",
+    "maya-saas-backend/src/ai-tools/owner-review-plan.ts": "3d726be1b4565328cedf45ec6b140c3ff4258c8d65e2c6af90a548237387804c",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts": "a0e5b4ad9ca77d850fdb620fe56289b3f5e491afd25874584bbe57dcf84f62e0",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts": "22ec1a3034dc0615df2c0c7136ef6be302ce7ae6634d10e26b642d72556fe74b",
+    "maya-saas-backend/src/orchestration/c9.orchestrator.ts": "03078383856a6c4254df1f059561cdb8fe8e327f28cd7f0ef2b8ebdaf0f53d2d",
+    "maya-saas-backend/src/orchestration/c9.store.ts": "2b22a7ce2dae9d9d045ba3bb14514ff88ff0f402381649ca7482b0b679225674",
+    "maya-saas-backend/src/orchestration/c9.business-lifecycle.spec.ts": "e702fde9aa111dd8a5ed6dec68179c24eede109ad77047dde57f1b6fbf128e84",
+    "maya-saas-backend/src/orchestration/c9.business-occupancy.spec.ts": "2f9cdeba75e18ec9f4dfd4597e9712724b3f8329e4da374541b7fff903a0e760",
+    "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts": "b37d7b077958ed23a37efceb628ef252eb4fa98485c913e7ac7aee66f7588e2b",
+    "maya-saas-backend/src/orchestration/c9.context-and-bi.spec.ts": "7362fbf40bd18e55bd85191b662e2effe2b7a73c210b16b04c605a8e0318c0a1",
+    "maya-saas-backend/src/orchestration/c9.occupancy.spec.ts": "87cce836d8a2cf5169d07fbe95a2c7a04315efa71612339e18581e2e4ee664ea"
+  },
+  "limits": [
+    "Synthetic/scripted local tests",
+    "No new HTTP/PostgreSQL or browser proof",
+    "Recreated service objects are not process restart",
+    "No real-model/provider or full MAYA/C10 acceptance"
+  ]
+}

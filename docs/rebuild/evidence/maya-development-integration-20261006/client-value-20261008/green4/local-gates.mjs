@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+import { runOwnedStage } from '/tmp/maya-linux-ocr-20261008/owned-stage.mjs';
+const root='/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration';
+const phase=process.argv[2]; assert.match(phase,/^(red|green[1-9])$/);
+const output=path.join('/tmp/maya-client-value-20261008',phase);fs.mkdirSync(output,{mode:0o700});
+const backend=path.join(root,'maya-saas-backend');
+const env={PATH:process.env.PATH,HOME:process.env.HOME,TMPDIR:process.env.TMPDIR,NODE_OPTIONS:'--max-old-space-size=3072 --require=/tmp/maya-linux-ocr-20261008/loopback-only.cjs',TZ:'UTC',LANG:'C',LC_ALL:'C'};
+const spec=(name,args)=>({name,args,cwd:backend,command:process.execPath,timeoutMs:240000});
+const suites=['src/ai-tools/owner-review-plan.spec.ts','src/ai-tools/ai-core.occupancy.spec.ts','src/ai-tools/ai-core-model.service.spec.ts','src/orchestration/c9.business-lifecycle.spec.ts','src/orchestration/c9.business-occupancy.spec.ts','src/orchestration/c9.lifecycle.spec.ts','src/orchestration/c9.lifecycle-source.spec.ts','src/orchestration/c9.context-and-bi.spec.ts','src/orchestration/c9.occupancy.spec.ts'];
+const commands=phase==='red' ? [spec('regression',['node_modules/jest/bin/jest.js','--runInBand','--runTestsByPath',suites[0]])] : [spec('targeted',['node_modules/jest/bin/jest.js','--runInBand','--runTestsByPath',...suites]),spec('types',['node_modules/typescript/bin/tsc','--noEmit','--project','tsconfig.build.json','--incremental','false']),spec('lint',['node_modules/eslint/bin/eslint.js','src/ai-tools/owner-review-plan.ts','src/ai-tools/owner-review-plan.spec.ts','src/ai-tools/ai-core.service.ts','src/ai-tools/ai-core.occupancy.spec.ts','src/ai-tools/ai-core-model.service.ts','src/ai-tools/ai-core-model.service.spec.ts','src/orchestration/c9.orchestrator.ts','src/orchestration/c9.store.ts','src/orchestration/c9.lifecycle-source.ts','src/orchestration/c9.lifecycle-source.spec.ts','src/orchestration/c9.business-lifecycle.spec.ts'])];
+if (phase === 'green4') { commands.splice(1,1); commands[0] = spec('targeted',['node_modules/jest/bin/jest.js','--runInBand','--runTestsByPath','src/ai-tools/ai-core.occupancy.spec.ts']); }
+const changed=execFileSync('git',['diff','--name-only'],{cwd:root,encoding:'utf8'}).trim().split('\n').filter(Boolean);
+const files=[...new Set([...changed,...suites.map(f=>'maya-saas-backend/'+f)])].filter(f=>fs.existsSync(path.join(root,f)));
+const hash=f=>createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex');
+const report={contract:'maya.client-value-local-checks/1',qualification:'Synthetic tests only; no real model/provider or process/PG/browser restart acceptance',base:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),status:'running',commands,completed:[],sourceHashes:Object.fromEntries(files.map(f=>[f,hash(f)]))};
+const control={cancelled:null,terminateActive:null};for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>{control.cancelled??=signal;control.terminateActive?.();});
+try {for(const command of commands){console.log('START '+command.name);await runOwnedStage(command,env,output,control,report);report.completed.push(command.name);console.log('PASS '+command.name);}report.status='passed';}catch(e){report.status='failed';report.failure=e.message;process.exitCode=1;}finally{report.sourceUnchanged=Object.entries(report.sourceHashes).every(([f,h])=>hash(f)===h);if(!report.sourceUnchanged){report.status='failed';process.exitCode=1;}fs.copyFileSync(new URL(import.meta.url),path.join(output,'local-gates.mjs'));fs.writeFileSync(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');}

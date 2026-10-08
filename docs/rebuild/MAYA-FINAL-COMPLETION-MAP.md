@@ -1202,3 +1202,12 @@ The [portable OCR checkpoint](MAYA-GOODS-PHOTO-PORTABLE-OCR-CHECKPOINT-20261008.
 ### 2026-10-08 — Linux execution target absent; manual unit review fixed
 
 [Read-only Linux follow-up](MAYA-LINUX-OCR-EXECUTION-PREFLIGHT-20261008.md) found no installed/reachable local container/VM runtime; no runtime was installed and Linux execution remains unqualified. Independent code `da3f65dd2512101100457ac08b9bd2815e12412b` keeps a labeled catalog write-off unit visible when its same-ID sale-unit label is absent; explicit selection remains required. Twelve presentation and twenty-one headless tests, types/build and independent review pass. Goods F32b/F74b authority is traced to the recorded finite purchase-cost decision, with original transcript retrieval explicitly unverified; service rename keeps its separate origin and full PATCH/print-title semantics gates. `NOT_ISSUED`.
+
+
+### Explicit financial report + Lifecycle review through existing C9 — 2026-10-08
+
+[Qualified checkpoint](MAYA-CLIENT-VALUE-EXPLICIT-REQUEST-CHECKPOINT-20261008.md), code/tests `7c25fc8f`: one explicit owner web request now combines the last published tenant-wide C7 financial snapshot with up to three C8 evaluations through the existing `c9.client_value` route. One run, two bounded read receipts, one independent source-capped Lifecycle proposal and one coherent reply. Separate retained clarification scope preserves requested periods/branches; current source checks reject late C8 invalidity even when metadata remains PUBLISHED. No audience/contact permission, fabricated probability/value or business effect.
+
+**162 targeted tests / nine suites and production types PASS; final affected ingress 23 tests plus scoped lint PASS.** Actual AiCore → C9/agents/strategy is exercised in process with scripted planning and synthetic timeline/source/storage ports. Replay, held work, source/authority drift, post-await expiry, concurrency and privacy are covered locally. Independent static review PASS; all ten owned process groups closed. Failed attempts, final Git source bindings and raw logs remain in the [archive](evidence/maya-development-integration-20261006/client-value-20261008/manifest.json).
+
+No new HTTP/current React/PostgreSQL/process restart or real-model/provider proof is claimed for this pair. Multiple-company schema, Linux VM permission, service-rename mutation and background C10 remain separate boundaries. Working website, schema, production, push/merge/deploy untouched. Overall MAYA/C10 remain incomplete; `NOT_ISSUED`.

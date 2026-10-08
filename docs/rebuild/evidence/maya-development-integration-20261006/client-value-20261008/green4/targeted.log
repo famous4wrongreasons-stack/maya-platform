@@ -1,0 +1,33 @@
+PASS src/ai-tools/ai-core.occupancy.spec.ts
+  explicit BI + Lifecycle in current chat (scripted planning only)
+    ✓ delegates one complete response to C9 without generic source dispatch or another model stage (15 ms)
+    ✓ restores the distinct question and original period into a new service before a fresh explicit continuation (9 ms)
+    ✓ withholds both parts when C9 holds the combined request (1 ms)
+  finite owner review compound ingress (synthetic, not real model acceptance)
+    ✓ delegates the finite plan once to the existing C9 owner and preserves one coherent completion (1 ms)
+    ✓ asks and persists the exact bounded alternative instead of silently replacing the requested period
+    ✓ returns one explicit incomplete completion when compound work is held after admission (1 ms)
+    ✓ clarifies unsupported entities before any read: {"branch":"branch-A"} (1 ms)
+    ✓ clarifies unsupported entities before any read: {"date_or_period":"tomorrow"}
+    ✓ clarifies unsupported entities before any read: {"employee":"staff-A"} (1 ms)
+    ✓ clarifies unsupported entities before any read: {"goal":"fill_every_window"}
+    ✓ clarifies unsupported entities before any read: {"custom_constraint":"discount"} (1 ms)
+    ✓ restores the server question and original requested scope after restart before accepting a newly planned bounded review (1 ms)
+    ✓ ignores a generic tool proposal inside the finite plan and never dispatches it (1 ms)
+    ✓ refuses a late compound purpose switch after an ordinary settled read
+    ✓ cannot delegate a foreign surface or audience: {"surface":"native"}
+    ✓ cannot delegate a foreign surface or audience: {"audience":"client"}
+    ✓ cannot delegate a foreign surface or audience: {"audience":"staff"} (1 ms)
+  explicit owner chat Occupancy ingress (scripted semantic routing, not real model acceptance)
+    ✓ handles the canonical explicit command without model or generic tool calls and saves the reply
+    ✓ routes a paraphrase from the validated semantic task on the existing first planning pass
+    ✓ does not silently drop a requested branch/date scope (1 ms)
+    ✓ refuses a late purpose switch after a settled ordinary read instead of creating a second run (1 ms)
+    ✓ requires a persisted canonical user turn and cannot synthesize authority (25 ms)
+    ✓ does not route a customer-audience owner into the occupancy business projection (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       23 passed, 23 total
+Snapshots:   0 total
+Time:        0.527 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.occupancy.spec.ts".

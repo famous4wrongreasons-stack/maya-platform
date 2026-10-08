@@ -1,0 +1,47 @@
+{
+  "contract": "maya.client-value-local-checks/1",
+  "qualification": "Synthetic tests only; no real model/provider or process/PG/browser restart acceptance",
+  "base": "a34f37cde27bf1af78a91ef434bd32e7d5884e20",
+  "status": "failed",
+  "commands": [
+    {
+      "name": "regression",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/ai-tools/owner-review-plan.spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    }
+  ],
+  "completed": [],
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts": "0e9046367f6c09048a657ecdd6e42df19806d0bc35755f8d628d85f3e1789d82",
+    "maya-saas-backend/src/ai-tools/ai-core.occupancy.spec.ts": "5b64449074d1959ca944595f6784ae06a62f6cf51848555276b9d141762aff31",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "992a1af567389d4bf2535c159103a9758081035a3bcdc45cc8f74df92532a38f",
+    "maya-saas-backend/src/orchestration/c9.business-occupancy.spec.ts": "2f9cdeba75e18ec9f4dfd4597e9712724b3f8329e4da374541b7fff903a0e760",
+    "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts": "b37d7b077958ed23a37efceb628ef252eb4fa98485c913e7ac7aee66f7588e2b",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts": "15017578eb043d05a59463a7b5d6541e14812a1ca4a1dc35498a2025526f29de",
+    "maya-saas-backend/src/orchestration/c9.context-and-bi.spec.ts": "7362fbf40bd18e55bd85191b662e2effe2b7a73c210b16b04c605a8e0318c0a1",
+    "maya-saas-backend/src/orchestration/c9.occupancy.spec.ts": "87cce836d8a2cf5169d07fbe95a2c7a04315efa71612339e18581e2e4ee664ea"
+  },
+  "groups": {
+    "regression": {
+      "detached": true,
+      "pid": 67082,
+      "pgid": 67082,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "failure": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n",
+  "sourceUnchanged": true
+}

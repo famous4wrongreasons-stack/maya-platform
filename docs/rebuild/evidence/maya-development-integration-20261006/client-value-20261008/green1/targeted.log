@@ -1,0 +1,562 @@
+PASS src/ai-tools/owner-review-plan.spec.ts
+FAIL src/orchestration/c9.business-lifecycle.spec.ts
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › admits one client_value run, shares two reads and exposes both domains only after saved work
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:337:22)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › retains financial evidence only in its read receipt and source-caps the single C8-only proposal
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:393:5)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › never serializes private Client identity or raw financial facts into work results or response
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:418:22)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › replays exact saved refs and version after recreation without fresh source discovery or work dispatch
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:497:19)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › rechecks current bi authority on saved replay before returning old facts
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:541:7
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › rechecks current lifecycle authority on saved replay before returning old facts
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:541:7
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › withholds stale C8 findings after preparation without rewriting the saved version
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:563:22)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › refuses a late C8 currentness change even when publication metadata and built findings still look valid
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "c9_source_changed"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:586:5)
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:588:15)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › reauthorizes bi after both facts were built and refuses late revocation
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "late membership revocation"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:612:7
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:614:17
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › reauthorizes lifecycle after both facts were built and refuses late revocation
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "late membership revocation"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:612:7
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:614:17
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › refuses coherent exposure when financialRef expires after both facts were built
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "c9_source_expired"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:631:7
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:633:17
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › refuses coherent exposure when clientRef expires after both facts were built
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "c9_source_expired"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:631:7
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:633:17
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › checks root expiry synchronously after the final awaited current-source check
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "c9_source_expired"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:657:9
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:659:19
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › checks financialRef expiry synchronously after the final awaited current-source check
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "c9_source_expired"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:657:9
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:659:19
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › checks clientRef expiry synchronously after the final awaited current-source check
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "c9_source_expired"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at orchestration/c9.business-lifecycle.spec.ts:657:9
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at orchestration/c9.business-lifecycle.spec.ts:659:19
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › does not redispatch held Lifecycle work after BI settled
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "source_transport_lost"
+    Received message:   "c9_object_required"
+
+          39 | export type C9Check = (value: unknown) => unknown;
+          40 | export function c9Deny(code: string): never {
+        > 41 |   throw new BadRequestException(`c9_${code}`);
+             |         ^
+          42 | }
+          43 | export function c9Object(v: unknown): C9Object {
+          44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+                at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:675:5)
+      at Object.toThrow (../node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:677:15)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › does not replace an erased exact lifecycle revision with a newer revision on replay
+
+    BadRequestException: c9_object_required
+
+      39 | export type C9Check = (value: unknown) => unknown;
+      40 | export function c9Deny(code: string): never {
+    > 41 |   throw new BadRequestException(`c9_${code}`);
+         |         ^
+      42 | }
+      43 | export function c9Object(v: unknown): C9Object {
+      44 |   if (
+
+      at c9Deny (orchestration/c9.contract.ts:41:9)
+      at c9Object (orchestration/c9.contract.ts:50:5)
+      at orchestration/c9.contract.ts:109:17
+      at C9Handles.add (orchestration/c9.context.ts:23:27)
+      at orchestration/c9.business-lifecycle.spec.ts:242:42
+          at Array.map (<anonymous>)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:241:28)
+      at C9Orchestrator.prepareFinancialReport (orchestration/c9.orchestrator.ts:720:28)
+      at C9Orchestrator.reviewBusinessAndClientReturn (orchestration/c9.orchestrator.ts:907:25)
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:692:5)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › shares saved work leases across concurrent copies with one Lifecycle discovery and proposal
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      712 |     expect(
+      713 |       results.filter((result) => result.status === 'fulfilled'),
+    > 714 |     ).toHaveLength(1);
+          |       ^
+      715 |     expect(
+      716 |       results.filter((result) => result.status === 'rejected'),
+      717 |     ).toHaveLength(1);
+
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:714:7)
+
+  ● explicit C9 business + Client Lifecycle (synthetic durable ports) › traverses actual AiCore chat and real C9 into one persisted compound reply with scripted planning only
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 27
+    + Received  +  1
+
+      Object {
+        "action": null,
+    -   "analysis": Object {
+    -     "agent": Object {
+    -       "agent_id": "BUSINESS_INTELLIGENCE",
+    -       "findings": ArrayContaining [
+    -         ObjectContaining {
+    -           "statement": Any<String>,
+    -         },
+    -       ],
+    -     },
+    -   },
+        "coordination": Object {
+    -     "current": false,
+    -     "revision": 1,
+    -     "revision_id": "revision",
+          "run_id": "run",
+    -     "scope": "explicit_business_lifecycle",
+    -   },
+    -   "recommendation": Object {
+    -     "agent": Object {
+    -       "agent_id": "CLIENT_LIFECYCLE",
+    -       "findings": ArrayContaining [
+    -         ObjectContaining {
+    -           "statement": Any<String>,
+    -         },
+    -       ],
+    -     },
+    -     "canContact": false,
+    -     "executionAuthority": false,
+    -     "noSideEffects": true,
+    +     "scope": "deterministic_reads",
+        },
+      }
+
+      824 |       messages: [{ role: 'user', content: text }],
+      825 |     });
+    > 826 |     expect(response).toMatchObject({
+          |                      ^
+      827 |       action: null,
+      828 |       coordination: {
+      829 |         run_id: 'run',
+
+      at Object.<anonymous> (orchestration/c9.business-lifecycle.spec.ts:826:22)
+
+FAIL src/ai-tools/ai-core.occupancy.spec.ts
+  ● explicit BI + Lifecycle in current chat (scripted planning only) › restores the distinct question and original period into a new service before a fresh explicit continuation
+
+    expect(received).toHaveProperty(path, value)
+
+    Expected path: "0.0.conversationPlan.tasks"
+
+    Expected value: ArrayContaining [ObjectContaining {"clarification_question": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?", "entities": {"branch": "named", "period": "today"}, "id": "summary", "requires_clarification": true}]
+    Received value: [{"action": "analyze", "capability": {"note": null, "readiness": "ready"}, "clarification_question": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и до трёх оценок давности визитов по правилам бизнеса. Это не список клиентов и не обзор за отдельный период или филиал. Подойдёт такой ограниченный обзор без дополнительных условий?", "confidence": 0.99, "data_class": "D", "depends_on": [], "domain": "analytics", "entities": {"branch": "[reference removed]@cc82de734b234364a9a00e81d1707608_1", "period": "today"}, "id": "summary", "intent": "analytics.business_summary", "permission": {"required": "analytics.business.read", "status": "allowed"}, "requires_clarification": true, "requires_confirmation": false, "response_rule": "Answer the requested intent directly, then offer at most one useful next step.", "risk": "low", "sub_intent": "analytics.business_summary", "tool": {"alternatives": ["analytics.business.query"], "name": "analytics.business.query", "status": "ready"}}, {"action": "read", "capability": {"note": null, "readiness": "ready"}, "clarification_question": null, "confidence": 0.99, "data_class": "C", "depends_on": [], "domain": "clients", "entities": {}, "id": "return", "intent": "clients.dormant_list", "permission": {"required": "clients.registry.read", "status": "allowed"}, "requires_clarification": false, "requires_confirmation": false, "response_rule": "Use privacy-safe C8 presentation labels and confirmed rules only. No names, phones, contact export, invented inactivity threshold or return probability. Unknown history is not dormancy; unavailable stays unavailable.", "risk": "low", "sub_intent": "clients.dormant_list", "tool": {"alternatives": [], "name": null, "status": "not_available"}}]
+
+      305 |       conversationId: 'conversation',
+      306 |     });
+    > 307 |     expect(restarted.model.decide.mock.calls).toHaveProperty(
+          |                                               ^
+      308 |       '0.0.conversationPlan.tasks',
+      309 |       expect.arrayContaining([
+      310 |         expect.objectContaining({
+
+      at Object.<anonymous> (ai-tools/ai-core.occupancy.spec.ts:307:47)
+
+PASS src/orchestration/c9.business-occupancy.spec.ts
+PASS src/orchestration/c9.lifecycle.spec.ts
+PASS src/orchestration/c9.occupancy.spec.ts
+PASS src/orchestration/c9.context-and-bi.spec.ts
+PASS src/orchestration/c9.lifecycle-source.spec.ts
+PASS src/ai-tools/ai-core-model.service.spec.ts
+
+Test Suites: 2 failed, 7 passed, 9 total
+Tests:       20 failed, 142 passed, 162 total
+Snapshots:   0 total
+Time:        1.523 s
+Ran all test suites within paths "src/ai-tools/owner-review-plan.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts", "src/orchestration/c9.business-lifecycle.spec.ts", "src/orchestration/c9.business-occupancy.spec.ts", "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.context-and-bi.spec.ts", "src/orchestration/c9.occupancy.spec.ts".
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 72758  - [39m10/08/2026, 2:34:11 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m

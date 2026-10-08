@@ -1,0 +1,28 @@
+FAIL src/ai-tools/owner-review-plan.spec.ts
+  finite owner review plan boundary
+    ✓ admits only an exact task set with current ready owner capabilities (1 ms)
+    ✓ never drops even unknown constraints and distinguishes a saved question from authority (1 ms)
+    ✕ admits the existing BI + Lifecycle pair and preserves its own bounded question (1 ms)
+
+  ● finite owner review plan boundary › admits the existing BI + Lifecycle pair and preserves its own bounded question
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ready"
+    Received: null
+
+      104 |       ['analytics.business.query', 'clients.dormant.list'],
+      105 |     )!;
+    > 106 |     expect(ownerReviewPlanState(lifecycle, 'web', UserRole.TENANT_OWNER)).toBe('ready');
+          |                                                                           ^
+      107 |     lifecycle.tasks[1].entities.period = 'today';
+      108 |     expect(ownerReviewPlanState(lifecycle, 'web', UserRole.TENANT_OWNER)).toBe('clarify');
+      109 |     const clarified = withOwnerReviewClarification(lifecycle);
+
+      at Object.<anonymous> (ai-tools/owner-review-plan.spec.ts:106:75)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Snapshots:   0 total
+Time:        0.303 s
+Ran all test suites within paths "src/ai-tools/owner-review-plan.spec.ts".

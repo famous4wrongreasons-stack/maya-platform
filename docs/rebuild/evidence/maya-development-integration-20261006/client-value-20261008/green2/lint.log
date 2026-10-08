@@ -1,0 +1,22 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts
+  96:27  error  'fetchMock.mock.calls[0][1]?.body' may use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core-model.service.ts
+  748:42  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-core.occupancy.spec.ts
+  324:13  error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+  351:63  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/orchestration/c9.business-lifecycle.spec.ts
+  132:61  error  '_now' is defined but never used       @typescript-eslint/no-unused-vars
+  240:57  error  '_question' is defined but never used  @typescript-eslint/no-unused-vars
+  841:11  error  Unsafe assignment of an `any` value    @typescript-eslint/no-unsafe-assignment
+  842:39  error  Unsafe assignment of an `any` value    @typescript-eslint/no-unsafe-assignment
+  849:11  error  Unsafe assignment of an `any` value    @typescript-eslint/no-unsafe-assignment
+  850:39  error  Unsafe assignment of an `any` value    @typescript-eslint/no-unsafe-assignment
+
+✖ 10 problems (10 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+

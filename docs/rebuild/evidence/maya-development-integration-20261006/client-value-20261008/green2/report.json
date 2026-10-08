@@ -1,0 +1,123 @@
+{
+  "contract": "maya.client-value-local-checks/1",
+  "qualification": "Synthetic tests only; no real model/provider or process/PG/browser restart acceptance",
+  "base": "a34f37cde27bf1af78a91ef434bd32e7d5884e20",
+  "status": "failed",
+  "commands": [
+    {
+      "name": "targeted",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/ai-tools/owner-review-plan.spec.ts",
+        "src/ai-tools/ai-core.occupancy.spec.ts",
+        "src/ai-tools/ai-core-model.service.spec.ts",
+        "src/orchestration/c9.business-lifecycle.spec.ts",
+        "src/orchestration/c9.business-occupancy.spec.ts",
+        "src/orchestration/c9.lifecycle.spec.ts",
+        "src/orchestration/c9.lifecycle-source.spec.ts",
+        "src/orchestration/c9.context-and-bi.spec.ts",
+        "src/orchestration/c9.occupancy.spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    },
+    {
+      "name": "types",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    },
+    {
+      "name": "lint",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/owner-review-plan.ts",
+        "src/ai-tools/owner-review-plan.spec.ts",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-core.occupancy.spec.ts",
+        "src/ai-tools/ai-core-model.service.ts",
+        "src/ai-tools/ai-core-model.service.spec.ts",
+        "src/orchestration/c9.orchestrator.ts",
+        "src/orchestration/c9.store.ts",
+        "src/orchestration/c9.lifecycle-source.ts",
+        "src/orchestration/c9.lifecycle-source.spec.ts",
+        "src/orchestration/c9.business-lifecycle.spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 240000
+    }
+  ],
+  "completed": [
+    "targeted",
+    "types"
+  ],
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "9f5dc74cc1e55c3aa51d6a5ab3e6d8c1abfd0599d69c35eb3769e8854371cbbb",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.ts": "b8b49109d45df5732206a9aec1ff938bef9cb685bdb72eb930ab006d4260cb55",
+    "maya-saas-backend/src/ai-tools/ai-core.occupancy.spec.ts": "e88ca90aa00b67ce10c97452de66a18741abb5fb4861287157d03cbed2890c87",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "9d1a62ef5a241670f781dce9f165b8789a5e8d591bc9b26bc280b0216dce8512",
+    "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts": "9df45839593d464e7dae09e4841add195969d5bcaabfd48ddfb509d48600f68e",
+    "maya-saas-backend/src/ai-tools/owner-review-plan.ts": "3d726be1b4565328cedf45ec6b140c3ff4258c8d65e2c6af90a548237387804c",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts": "a0e5b4ad9ca77d850fdb620fe56289b3f5e491afd25874584bbe57dcf84f62e0",
+    "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts": "22ec1a3034dc0615df2c0c7136ef6be302ce7ae6634d10e26b642d72556fe74b",
+    "maya-saas-backend/src/orchestration/c9.orchestrator.ts": "03078383856a6c4254df1f059561cdb8fe8e327f28cd7f0ef2b8ebdaf0f53d2d",
+    "maya-saas-backend/src/orchestration/c9.store.ts": "2b22a7ce2dae9d9d045ba3bb14514ff88ff0f402381649ca7482b0b679225674",
+    "maya-saas-backend/src/orchestration/c9.business-lifecycle.spec.ts": "9f56f11cce79c4844b9a413fda7b4c9e0846f83b57a1440bc8f6a455e6e175e0",
+    "maya-saas-backend/src/orchestration/c9.business-occupancy.spec.ts": "2f9cdeba75e18ec9f4dfd4597e9712724b3f8329e4da374541b7fff903a0e760",
+    "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts": "b37d7b077958ed23a37efceb628ef252eb4fa98485c913e7ac7aee66f7588e2b",
+    "maya-saas-backend/src/orchestration/c9.context-and-bi.spec.ts": "7362fbf40bd18e55bd85191b662e2effe2b7a73c210b16b04c605a8e0318c0a1",
+    "maya-saas-backend/src/orchestration/c9.occupancy.spec.ts": "87cce836d8a2cf5169d07fbe95a2c7a04315efa71612339e18581e2e4ee664ea"
+  },
+  "groups": {
+    "targeted": {
+      "detached": true,
+      "pid": 73650,
+      "pgid": 73650,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "types": {
+      "detached": true,
+      "pid": 73679,
+      "pgid": 73679,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "lint": {
+      "detached": true,
+      "pid": 73726,
+      "pgid": 73726,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "failure": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n",
+  "sourceUnchanged": true
+}
