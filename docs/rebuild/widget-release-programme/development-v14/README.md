@@ -95,3 +95,33 @@ Fresh HTTP/BIN receipts, the full mutation qualification and a conformance audit
 remain outstanding. Certificate stays `NOT_ISSUED`; production and C10 autonomy
 are not authorized. Schema and migration files are unchanged pending the
 separate [three-relation FK choice](../../MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md).
+
+
+## Goods source-pin reconciliation — 2026-10-08
+
+The preceding preparation record and command results are historical. The exact
+pre-goods V1.4 bytes, including this README, generator, tests, four candidate JSON
+artifacts and their own contract, are preserved in
+[history/pre-goods-20261007/manifest.json](history/pre-goods-20261007/manifest.json).
+Their pin remains `V14_HASH`; `loadV14Preparation()` verifies both compressed and
+original hashes and validates the historical triple with its own contract.
+The V1.3 archive, prior preparation evidence and approved-release records are
+unchanged.
+
+The current generator separately requires `V14_GOODS_HASH`:
+`0843f3cfc8c651423a8d3a355092aa27742163bcf5fc5ba99f8328a4f033398c`.
+This is the already-approved F32b/F74b delta from `880c45db`, separate from F32a.
+Exactly nine summaries are reconciled: `G7-5`, `G7-FR6d`, `G11-I4`, `G11-I5`,
+`G11-I6`, `G13-I1`, `G13-I2`, `G13-I3`, `G13-I9`. All other MONEY and
+PAYMENT_HANDOFF admission remains closed; presentation conveys no authority.
+No normative contract, checker, HAR-5 test or mutation declaration changes.
+
+The current four generated JSON artifacts use the goods pin. Their qualification
+remains 165 ordered clause IDs, 163 `false`, `G6-6` and `G13-R8` at `STOPPED:D-H`,
+empty evidence and mutants, no U state, the same seven withdrawn U grounds,
+16/11 candidate maps, `NOT_ISSUED` and 0/15 gates. No historical or synthetic
+receipt is promoted. `--check`, `--write` and the test entry point above remain
+the finite preparation interface. This source reconciliation is not release,
+provider, model or full-mutation qualification. The saved pre-reconciliation
+HAR-5 failure and its candidate binding remain evidence of that actual run;
+post-change commands need separately recorded results.

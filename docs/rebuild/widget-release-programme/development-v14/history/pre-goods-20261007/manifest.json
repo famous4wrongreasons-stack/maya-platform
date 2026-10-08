@@ -1,0 +1,82 @@
+{
+  "contract": "maya.v14-pre-goods-history/1",
+  "historicalOnly": true,
+  "contractSha256": "9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769",
+  "approvedGoodsCommit": "880c45dbf2d16774fe10d0dc0923bc7cd0786c44",
+  "capturedFromCandidate": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+  "qualification": "Historical bytes only; no current evidence, mutation result, U promotion or release authority",
+  "files": [
+    {
+      "path": "v14-contract.md.gz",
+      "originalPath": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+      "sourceCommit": "ba5a9dde0af12b2486a073af7b1fc683cba1e2ad",
+      "sourceBlob": "74a15396bb6fa508d0023c61a3dfee892417035b",
+      "uncompressedBytes": 742305,
+      "uncompressedSha256": "9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769",
+      "archiveSha256": "2a6bd7f05267be8bfa6512cd30f049ca0f5133a9ecf3aace6a44d78c5220f12d"
+    },
+    {
+      "path": "v14-inventory.json.gz",
+      "originalPath": "docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "e440987a9b61b56ca20b97bbae8f03f402a71e10",
+      "uncompressedBytes": 22928,
+      "uncompressedSha256": "740aa1d20836b62761ceee3e42ae7d6aae78fd9a89cfc1e68b878c72bde76537",
+      "archiveSha256": "ef3bada4617ac1f8338225ab7f485025f21584e86d280709a2a6af05d27ced33"
+    },
+    {
+      "path": "v14-audit.json.gz",
+      "originalPath": "docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "d18506840a8fcd40a98d8d2a9f42c123fd92d751",
+      "uncompressedBytes": 60550,
+      "uncompressedSha256": "83f444770d63b1a67f9db9c49f13c180a9915fb9e8587aee82016f6bad800bf0",
+      "archiveSha256": "fa9681f93db2f4fac51c3271ae03f426d61490db8e138c69998d0e76f8d50f50"
+    },
+    {
+      "path": "v14-u-proofs.json.gz",
+      "originalPath": "docs/rebuild/widget-release-programme/development-v14/u-proofs.json",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "639fa8af0fe0b6a5b88c5ee586d2ee9e638a6610",
+      "uncompressedBytes": 12169,
+      "uncompressedSha256": "e4e50b37341596a20b54a427a9a37d6e0eb8d2871590f08c1ccd42e47e4a0990",
+      "archiveSha256": "659b1a7426f6dcd5db70b96154b0b696c68409b57216df6f9f00c7f436489790"
+    },
+    {
+      "path": "v14-e1-u-proofs.json.gz",
+      "originalPath": "docs/rebuild/widget-release-programme/development-v14/e1-u-proofs.json",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "b8e8d88061425f1f1a34bae33cd4981da7f8b3c7",
+      "uncompressedBytes": 8122,
+      "uncompressedSha256": "229b8a27fe617b44d6e77573f4ae8fe737c02f19eba23b16afef062efe373ea2",
+      "archiveSha256": "ad6d94579dd268adbc3abbcc99975a5a0af1828db0a1b982a23f4dfb3658b494"
+    },
+    {
+      "path": "prepare-audit.mjs.gz",
+      "originalPath": "docs/rebuild/widget-release-programme/development-v14/prepare-audit.mjs",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "1a0cd82bcf1f9c24a4047dd548359f85f10206c3",
+      "uncompressedBytes": 9620,
+      "uncompressedSha256": "4e1d435f80a69a89dfb57098f826a38e2870d6fb7a31f3ae3bd009ed92e76972",
+      "archiveSha256": "b7dd8195b6655ae457fdce6c5f151fee48aa15836b6682554e7f54a0fdc237ce"
+    },
+    {
+      "path": "prepare-audit.test.mjs.gz",
+      "originalPath": "docs/rebuild/widget-release-programme/development-v14/prepare-audit.test.mjs",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "4d9b2459e0a1d2b9a44a88e3aca5f8142b6ebc1f",
+      "uncompressedBytes": 2764,
+      "uncompressedSha256": "21d3533857103491a982a56742ca9dada3a681590b688ca0ebdc04b8d1de8b01",
+      "archiveSha256": "c103de644d7ab9f2a9d033be7905bda64cc1a52d2fc4332fc59d981a667fbcb3"
+    },
+    {
+      "path": "README.md.gz",
+      "originalPath": "docs/rebuild/widget-release-programme/development-v14/README.md",
+      "sourceCommit": "1bb1b2ab95f8546d937601cc7422a606bef41ce0",
+      "sourceBlob": "0836dafd797da98977b584692a26ced566a7d0e3",
+      "uncompressedBytes": 5489,
+      "uncompressedSha256": "38dfe3752e4d80d17ef68efa5a2addff1f9450dc38e99aca91d24976968166a0",
+      "archiveSha256": "f9a095c44767ccdd39fea99971de636da6aa9c9102e368ca4413a046e2ebd3ab"
+    }
+  ]
+}

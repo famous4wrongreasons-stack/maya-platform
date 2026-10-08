@@ -4,10 +4,10 @@
   "against": {
     "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
     "version": "1.4",
-    "sha256": "9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769",
-    "lines": 7606
+    "sha256": "0843f3cfc8c651423a8d3a355092aa27742163bcf5fc5ba99f8328a4f033398c",
+    "lines": 7624
   },
-  "note": "Fresh V1.4 clause inventory. Exactly 165 historical clause IDs remain. Nine clause summaries reflect the approved F74a/F32a rules; no new exclusion or authority. C11 locators remain historical, not current line numbers. Original inventory/audit/contract bytes are archived under widget-release-programme/development-v14/history.",
+  "note": "Unqualified V1.4 baseline reconciled to the separately approved F32b/F74b goods delta. Exactly 165 historical clause IDs remain. Only nine summaries change; F32a remains separate and all other MONEY admission remains closed. C11 locators remain historical. Prior V1.4 inventory/audit/contract/generator/candidate-map bytes are preserved under widget-release-programme/development-v14/history/pre-goods-20261007; V1.3 history is unchanged.",
   "gates": [
     {
       "n": "1",
@@ -265,7 +265,7 @@
         },
         {
           "key": "G7-5",
-          "text": "kind ≠ draft → consumed producing record satisfying §3.10.2, except the exact F32a canonical-chat approval provenance of F74a; no caller-supplied origin or bare approval ID"
+          "text": "kind ≠ draft → consumed producing record satisfying §3.10.2, except the separately named exact F32a/F74a price and F32b/F74b goods canonical-chat approval provenance; no caller-supplied origin or bare approval ID"
         },
         {
           "key": "G7-6",
@@ -289,7 +289,7 @@
         },
         {
           "key": "G7-FR6d",
-          "text": "MONEY actuation refused except the exact OWNER-bound F32a single-service fixed-RUB APPROVAL; all other MONEY and PAYMENT_HANDOFF remain gap-blocked; F80"
+          "text": "MONEY actuation refused except the separate exact OWNER-bound F32a single-service fixed-RUB APPROVAL and F32b one-line inventory purchase-cost APPROVAL; all other MONEY and PAYMENT_HANDOFF remain gap-blocked; F80"
         }
       ]
     },
@@ -573,15 +573,15 @@
         },
         {
           "key": "G11-I4",
-          "text": "Gate 11 resolves nouns from the retained decision record and original lineage: the existing consumed-record path or the exact F74a canonical-chat approval source; the noun is not exposed to the client"
+          "text": "Gate 11 resolves nouns from the retained decision record and original lineage: the existing consumed-record path or the separately named exact F74a price and F74b goods canonical-chat approval sources; the noun is not exposed to the client"
         },
         {
           "key": "G11-I5",
-          "text": "changed approval noun rejects and re-mints on the existing consumed-record path; F74a refuses without dispatch and requires a new canonical proposal"
+          "text": "changed approval noun rejects and re-mints on the existing consumed-record path; exact F74a and F74b owners refuse without dispatch and require a new canonical proposal"
         },
         {
           "key": "G11-I6",
-          "text": "existing AE branch: policy binding and fresh noun read; exact F74a branch: approval ID, payloadHash and authenticated user-turn binding, with a source re-read before decision and dispatch"
+          "text": "existing AE branch: policy binding and fresh noun read; separately named exact F74a and F74b branches: approval ID, payloadHash and authenticated user-turn binding, with current source and permission checks before decision and dispatch"
         },
         {
           "key": "G11-I7",
@@ -733,15 +733,15 @@
         },
         {
           "key": "G13-I1",
-          "text": "approval_decision routes to the existing AE owner or the exact F32a typed AiApprovalRequest owner, never from WidgetIntent.role"
+          "text": "approval_decision routes to the existing AE owner or the respective exact F32a price or F32b goods typed AiApprovalRequest owner, never from WidgetIntent.role"
         },
         {
           "key": "G13-I2",
-          "text": "R3.11.3 requirements hold on both the existing AE approval path and the exact F32a/F74a path"
+          "text": "R3.11.3 requirements hold on the existing AE approval path and the separately named exact F32a/F74a and F32b/F74b paths"
         },
         {
           "key": "G13-I3",
-          "text": "F74 or exact F74a provenance and F75 paired consumption apply; neither client-supplied origin nor a bare approval ID confers authority"
+          "text": "F74 or the separately named exact F74a and F74b provenance and F75 paired consumption apply; neither client-supplied origin nor a bare approval ID confers authority"
         },
         {
           "key": "G13-I4",
@@ -765,7 +765,7 @@
         },
         {
           "key": "G13-I9",
-          "text": "existing AE approver policy and P27 remain; F32a requires a live local OWNER, original requester, tenant, approval ID/payloadHash and active integration binding"
+          "text": "existing AE approver policy and P27 remain; the separate F32a and F32b owners require a current active local OWNER, original requester, same tenant, approval ID/payloadHash and current integration binding; F32b additionally requires tenant-wide membership and fresh source/permission qualification"
         }
       ]
     },

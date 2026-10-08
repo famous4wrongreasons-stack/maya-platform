@@ -12,7 +12,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../../../..');
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const document = 'docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md';
+// Historical pre-goods pin is immutable; its exact preparation bytes remain archived.
 export const V14_HASH = '9bd33e79959c87d9e8f28ffbccc622ca9180aa7f179533499305ac892cc1d769';
+export const V14_GOODS_HASH = '0843f3cfc8c651423a8d3a355092aa27742163bcf5fc5ba99f8328a4f033398c';
+const V14_HISTORY_MANIFEST_SHA256 = '3d6d5183a097509ca790d1dbaa6ae9834548e3c0de3f9eea5309dd3b430360bb';
 export const HANDOFF_STOP = ['G6-6', 'G13-R8'];
 // F74a makes a narrow approval path reachable. An old whole-clause absence proof
 // cannot certify that path, even when its old source markers still exist.
@@ -20,15 +23,15 @@ export const WITHDRAWN_APPROVAL_U = Object.freeze([
   'G11-I4', 'G11-I5', 'G11-I6', 'G11-I10', 'G13-I1', 'G13-I2', 'G13-I9',
 ]);
 export const CHANGED_CLAUSES = Object.freeze({
-  'G7-5': 'kind ≠ draft → consumed producing record satisfying §3.10.2, except the exact F32a canonical-chat approval provenance of F74a; no caller-supplied origin or bare approval ID',
-  'G7-FR6d': 'MONEY actuation refused except the exact OWNER-bound F32a single-service fixed-RUB APPROVAL; all other MONEY and PAYMENT_HANDOFF remain gap-blocked; F80',
-  'G11-I4': 'Gate 11 resolves nouns from the retained decision record and original lineage: the existing consumed-record path or the exact F74a canonical-chat approval source; the noun is not exposed to the client',
-  'G11-I5': 'changed approval noun rejects and re-mints on the existing consumed-record path; F74a refuses without dispatch and requires a new canonical proposal',
-  'G11-I6': 'existing AE branch: policy binding and fresh noun read; exact F74a branch: approval ID, payloadHash and authenticated user-turn binding, with a source re-read before decision and dispatch',
-  'G13-I1': 'approval_decision routes to the existing AE owner or the exact F32a typed AiApprovalRequest owner, never from WidgetIntent.role',
-  'G13-I2': 'R3.11.3 requirements hold on both the existing AE approval path and the exact F32a/F74a path',
-  'G13-I3': 'F74 or exact F74a provenance and F75 paired consumption apply; neither client-supplied origin nor a bare approval ID confers authority',
-  'G13-I9': 'existing AE approver policy and P27 remain; F32a requires a live local OWNER, original requester, tenant, approval ID/payloadHash and active integration binding',
+  "G7-5": "kind ≠ draft → consumed producing record satisfying §3.10.2, except the separately named exact F32a/F74a price and F32b/F74b goods canonical-chat approval provenance; no caller-supplied origin or bare approval ID",
+  "G7-FR6d": "MONEY actuation refused except the separate exact OWNER-bound F32a single-service fixed-RUB APPROVAL and F32b one-line inventory purchase-cost APPROVAL; all other MONEY and PAYMENT_HANDOFF remain gap-blocked; F80",
+  "G11-I4": "Gate 11 resolves nouns from the retained decision record and original lineage: the existing consumed-record path or the separately named exact F74a price and F74b goods canonical-chat approval sources; the noun is not exposed to the client",
+  "G11-I5": "changed approval noun rejects and re-mints on the existing consumed-record path; exact F74a and F74b owners refuse without dispatch and require a new canonical proposal",
+  "G11-I6": "existing AE branch: policy binding and fresh noun read; separately named exact F74a and F74b branches: approval ID, payloadHash and authenticated user-turn binding, with current source and permission checks before decision and dispatch",
+  "G13-I1": "approval_decision routes to the existing AE owner or the respective exact F32a price or F32b goods typed AiApprovalRequest owner, never from WidgetIntent.role",
+  "G13-I2": "R3.11.3 requirements hold on the existing AE approval path and the separately named exact F32a/F74a and F32b/F74b paths",
+  "G13-I3": "F74 or the separately named exact F74a and F74b provenance and F75 paired consumption apply; neither client-supplied origin nor a bare approval ID confers authority",
+  "G13-I9": "existing AE approver policy and P27 remain; the separate F32a and F32b owners require a current active local OWNER, original requester, same tenant, approval ID/payloadHash and current integration binding; F32b additionally requires tenant-wide membership and fresh source/permission qualification",
 });
 
 /** Historical validators use the historical contract bytes, never the new contract under old pins. */
@@ -51,19 +54,52 @@ export function loadV13Audit() {
   };
 }
 
+/** Exact pre-goods V1.4 preparation; receipts remain bound to its own contract. */
+export function loadV14Preparation() {
+  const directory = path.join(here, 'history/pre-goods-20261007');
+  const manifestBytes = fs.readFileSync(path.join(directory, 'manifest.json'));
+  assert.equal(sha(manifestBytes), V14_HISTORY_MANIFEST_SHA256);
+  const manifest = JSON.parse(manifestBytes);
+  assert.equal(manifest.historicalOnly, true);
+  assert.equal(manifest.contractSha256, V14_HASH);
+  const names = ['v14-contract.md', 'v14-inventory.json', 'v14-audit.json',
+    'v14-u-proofs.json', 'v14-e1-u-proofs.json', 'prepare-audit.mjs',
+    'prepare-audit.test.mjs', 'README.md'];
+  assert.deepEqual(manifest.files.map(file => file.path), names.map(name => name + '.gz'));
+  const raw = new Map(names.map(name => {
+    const entry = manifest.files.find(file => file.path === name + '.gz');
+    const bytes = fs.readFileSync(path.join(directory, entry.path));
+    assert.equal(sha(bytes), entry.archiveSha256);
+    const unpacked = gunzipSync(bytes);
+    assert.equal(unpacked.length, entry.uncompressedBytes);
+    assert.equal(sha(unpacked), entry.uncompressedSha256);
+    return [name, unpacked];
+  }));
+  assert.equal(sha(raw.get('v14-contract.md')), V14_HASH);
+  return {
+    audit: JSON.parse(raw.get('v14-audit.json')),
+    inventory: JSON.parse(raw.get('v14-inventory.json')),
+    contractBytes: raw.get('v14-contract.md'),
+    map: JSON.parse(raw.get('v14-u-proofs.json')),
+    e1: JSON.parse(raw.get('v14-e1-u-proofs.json')),
+  };
+}
+
 export function prepareAudit() {
   const prior = loadV13Audit();
   assert.deepEqual(check(prior), [], 'Historical evidence must remain verifiable against its own contract');
+  const previousV14 = loadV14Preparation();
+  assert.deepEqual(check(previousV14), [], 'Pre-goods preparation must validate against its own contract');
   const contractBytes = fs.readFileSync(path.join(root, document));
-  assert.equal(sha(contractBytes), V14_HASH, 'Only the reviewed V1.4 contract may use this preparation');
+  assert.equal(sha(contractBytes), V14_GOODS_HASH, 'Only the exact approved goods contract may use this preparation');
   const approved = JSON.parse(fs.readFileSync(path.join(here, '../approved-release/current-audit.json')));
   const approvedClauses = new Map(approved.gates.flatMap(gate => Object.entries(gate.clauses)));
   const inventory = structuredClone(prior.inventory);
   inventory.against = {
-    document, version: '1.4', sha256: V14_HASH,
+    document, version: '1.4', sha256: V14_GOODS_HASH,
     lines: contractBytes.toString().trimEnd().split('\n').length,
   };
-  inventory.note = 'Fresh V1.4 clause inventory. Exactly 165 historical clause IDs remain. Nine clause summaries reflect the approved F74a/F32a rules; no new exclusion or authority. C11 locators remain historical, not current line numbers. Original inventory/audit/contract bytes are archived under widget-release-programme/development-v14/history.';
+  inventory.note = 'Unqualified V1.4 baseline reconciled to the separately approved F32b/F74b goods delta. Exactly 165 historical clause IDs remain. Only nine summaries change; F32a remains separate and all other MONEY admission remains closed. C11 locators remain historical. Prior V1.4 inventory/audit/contract/generator/candidate-map bytes are preserved under widget-release-programme/development-v14/history/pre-goods-20261007; V1.3 history is unchanged.';
   for (const gate of inventory.gates) for (const clause of gate.clauses)
     if (Object.hasOwn(CHANGED_CLAUSES, clause.key)) clause.text = CHANGED_CLAUSES[clause.key];
   const ids = inventory.gates.flatMap(gate => gate.clauses.map(clause => clause.key));
@@ -98,7 +134,7 @@ export function prepareAudit() {
         return [clause.key, {
           text: clause.text, state: stopped ? 'STOPPED:D-H' : 'false', conforms: false,
           reason: stopped ? 'Existing D-H STOP; excluded only by the fixed no-HANDOFF profile' : WITHDRAWN_APPROVAL_U.includes(clause.key)
-            ? 'F74a makes the scoped approval path reachable; historical whole-clause U ground withdrawn; fresh V1.4 evidence and full mutation qualification pending'
+            ? 'F74a and separately F74b make scoped approval paths reachable; historical whole-clause U ground withdrawn; fresh V1.4 evidence and full mutation qualification pending'
             : 'Fresh V1.4 evidence and full mutation qualification pending',
           evidence: [], mutants: [],
           ...(old.u_candidate === true && !WITHDRAWN_APPROVAL_U.includes(clause.key) ? {
@@ -122,7 +158,7 @@ export function prepareUProofs() {
   const map = {
     ...prior,
     qualification: 'V1.4 candidates only; all four duties and mutation admission require fresh evidence',
-    against: V14_HASH,
+    against: V14_GOODS_HASH,
     withdrawn_approval_u: WITHDRAWN_APPROVAL_U,
     proofs,
   };
@@ -144,6 +180,6 @@ function main() {
     if (process.argv.includes('--write')) fs.writeFileSync(file, text);
     else assert.equal(fs.readFileSync(file, 'utf8'), text, `${path.basename(file)} differs from fresh V1.4 baseline`);
   }
-  console.log('V1.4 AUDIT BASELINE: PASS — 163 unqualified duties, 2 HANDOFF STOP; NOT_ISSUED');
+  console.log('V1.4 GOODS AUDIT BASELINE: PASS — 163 unqualified duties, 2 HANDOFF STOP; NOT_ISSUED');
 }
 if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) main();
