@@ -63,6 +63,8 @@ export type C9Answer = {
 };
 
 /** Invocation-local state; it carries no source data or authority. */
+type ConversationRoot = Awaited<ReturnType<C9Store['conversationReadRun']>>;
+
 export type C9ConversationReads = {
   turn: { turnId: string; conversationId: string };
   intentHash: string;
@@ -239,14 +241,29 @@ export class C9Orchestrator {
       turn.intentHash,
       'occupancy',
     );
-    await this.occupancy.authorize(root.id);
+    return (
+      await this.prepareCancellationWindows(root, turn.intentHash)
+    ).expose();
+  }
+
+  /** Preparation persists only the existing source receipt and Occupancy proposal.
+   * Exposure stays deferred so compound work cannot finalize a reply too early.
+   */
+  private async prepareCancellationWindows(
+    root: ConversationRoot,
+    intentHash: string,
+    reportRefs?: readonly C9Object[],
+  ) {
+    const occupancy = this.occupancy;
+    if (!occupancy || !this.strategy) c9Deny('context_fact_source_unavailable');
+    await occupancy.authorize(root.id);
     const cap = c9Capability('booking.availability.read', 'OCCUPANCY');
     const receipt = await this.work.reserve(root.id, {
       callKey: 'explicit-cancellation-window',
       domain: 'OCCUPANCY',
       kind: 'TOOL_READ',
       taskKey: cap.capabilityKey,
-      inputHash: c9Hash('occupancy-request/1', [turn.intentHash]),
+      inputHash: c9Hash('occupancy-request/1', [intentHash]),
       evidenceRefs: [],
       reservation: {
         contract: 'maya.c9-reservation/1',
@@ -280,13 +297,17 @@ export class C9Orchestrator {
       const lease = await this.work.claim(root.id, receipt.id);
       if (!lease) c9Deny('read_work_in_progress_or_unknown');
       try {
-        const current = await this.occupancy.readForExposure(root.id);
+        const current = await occupancy.readForExposure(root.id);
         projection = current.projection;
         revalidate = current.revalidate;
         // Save the exact proposal before settlement. SETTLED therefore always
         // has one immutable version; a concurrent replay cannot win a different
         // no-action proposal. Interrupted DISPATCHED work stays held, never retried.
-        const saved = await this.saveOccupancyProposal(root, projection);
+        const saved = await this.saveOccupancyProposal(
+          root,
+          projection,
+          reportRefs,
+        );
         savedRevisionId = saved.id;
         await this.work.settle(
           lease,
@@ -312,93 +333,100 @@ export class C9Orchestrator {
         throw error;
       }
     }
-    // Restart never redispatches a settled read or turns its historical evidence
-    // into current availability. A new user turn is required for another check.
-    const snapshot = await this.store.snapshot(root.id);
-    const revision = snapshot.revisions.find((r) => r.id === savedRevisionId);
-    if (!revision) c9Deny('source_read_receipt');
-    if (revalidate && !(await revalidate()))
-      projection = {
-        ...projection,
-        outcome: 'STALE',
-        reason: 'source_changed_before_exposure',
-        window: null,
-      };
-    await this.occupancy.authorize(root.id);
-    const handle =
-      'h_' + c9Hash('occupancy-evidence/1', [root.id, receipt.id, projection]);
-    const answer = this.agents.answer(
-      'OCCUPANCY',
-      'c9.cancellation_windows',
-      {
-        trusted: { domain: 'OCCUPANCY', scopeHash: root.authorityHash },
-        facts: [
-          {
-            kind: 'cancellation_window',
-            capability: cap.capabilityKey,
-            evidenceHandle: handle,
-            asOf: projection.asOf,
-            completeness:
-              replayed ||
-              projection.hasMore ||
-              !['AVAILABLE', 'OCCUPIED', 'EXPIRED', 'CLOSED'].includes(
-                projection.outcome,
-              )
-                ? 'PARTIAL'
-                : 'COMPLETE',
-            qualification: 'VERIFIED',
-            available: projection.outcome !== 'UNAVAILABLE',
-            reasons: [
-              projection.reason,
-              ...(projection.hasMore ? ['candidate_scan_bounded'] : []),
-              ...(replayed ? ['historical_read_not_revalidated'] : []),
-            ],
-            occupancy: projection,
-            historical: replayed,
-          },
-        ],
-      },
-      new Set([cap.capabilityKey]),
-      new Set([handle]),
-    );
-    const alternatives = revision.alternativesJson as unknown as C9Object[];
     return {
-      reply: [
-        occupancyStatement(projection, replayed),
-        projection.hasMore
-          ? 'Это ограниченная проверка одного окна; другие сохранённые возможности не проверены.'
-          : '',
-        'Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались.',
-        'Варианты: ' +
-          alternatives.map((a) => String(a.title)).join('; ') +
-          '.',
-        `Предложение сохранено, версия ${revision.revision}. Записи и цены не менялись, сообщения клиентам не отправлялись.`,
-      ]
-        .filter(Boolean)
-        .join(' '),
-      coordination: {
-        run_id: root.id,
-        scope: 'explicit_occupancy' as const,
-        state: 'PROPOSED',
-        revision_id: revision.id,
-        revision: revision.revision,
-        replayed,
-        current: !replayed && projection.outcome === 'AVAILABLE',
-      },
-      recommendation: {
-        contract: 'maya.c9-occupancy-response/1',
-        outcome: projection.outcome,
-        agent: answer.result,
-        evidence: {
-          workReceiptId: receipt.id,
-          asOf: projection.asOf,
-          opportunityRefs: projection.evidenceRefs,
-          scheduleRef: projection.scheduleRef,
-        },
-        options: alternatives.map((a) => ({ key: a.key, title: a.title })),
-        noSideEffects: true,
-        executionAuthority: false,
-        reasoning: 'deterministic',
+      expose: async () => {
+        // Restart never redispatches a settled read or turns its historical evidence
+        // into current availability. A new user turn is required for another check.
+        const snapshot = await this.store.snapshot(root.id);
+        const revision = snapshot.revisions.find(
+          (r) => r.id === savedRevisionId,
+        );
+        if (!revision) c9Deny('source_read_receipt');
+        if (revalidate && !(await revalidate()))
+          projection = {
+            ...projection,
+            outcome: 'STALE',
+            reason: 'source_changed_before_exposure',
+            window: null,
+          };
+        await occupancy.authorize(root.id);
+        const handle =
+          'h_' +
+          c9Hash('occupancy-evidence/1', [root.id, receipt.id, projection]);
+        const answer = this.agents.answer(
+          'OCCUPANCY',
+          'c9.cancellation_windows',
+          {
+            trusted: { domain: 'OCCUPANCY', scopeHash: root.authorityHash },
+            facts: [
+              {
+                kind: 'cancellation_window',
+                capability: cap.capabilityKey,
+                evidenceHandle: handle,
+                asOf: projection.asOf,
+                completeness:
+                  replayed ||
+                  projection.hasMore ||
+                  !['AVAILABLE', 'OCCUPIED', 'EXPIRED', 'CLOSED'].includes(
+                    projection.outcome,
+                  )
+                    ? 'PARTIAL'
+                    : 'COMPLETE',
+                qualification: 'VERIFIED',
+                available: projection.outcome !== 'UNAVAILABLE',
+                reasons: [
+                  projection.reason,
+                  ...(projection.hasMore ? ['candidate_scan_bounded'] : []),
+                  ...(replayed ? ['historical_read_not_revalidated'] : []),
+                ],
+                occupancy: projection,
+                historical: replayed,
+              },
+            ],
+          },
+          new Set([cap.capabilityKey]),
+          new Set([handle]),
+        );
+        const alternatives = revision.alternativesJson as unknown as C9Object[];
+        return {
+          reply: [
+            occupancyStatement(projection, replayed),
+            projection.hasMore
+              ? 'Это ограниченная проверка одного окна; другие сохранённые возможности не проверены.'
+              : '',
+            'Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались.',
+            'Варианты: ' +
+              alternatives.map((a) => String(a.title)).join('; ') +
+              '.',
+            `Предложение сохранено, версия ${revision.revision}. Записи и цены не менялись, сообщения клиентам не отправлялись.`,
+          ]
+            .filter(Boolean)
+            .join(' '),
+          coordination: {
+            run_id: root.id,
+            scope: 'explicit_occupancy' as const,
+            state: 'PROPOSED',
+            revision_id: revision.id,
+            revision: revision.revision,
+            replayed,
+            current: !replayed && projection.outcome === 'AVAILABLE',
+          },
+          recommendation: {
+            contract: 'maya.c9-occupancy-response/1',
+            outcome: projection.outcome,
+            agent: answer.result,
+            evidence: {
+              workReceiptId: receipt.id,
+              asOf: projection.asOf,
+              opportunityRefs: projection.evidenceRefs,
+              scheduleRef: projection.scheduleRef,
+            },
+            options: alternatives.map((a) => ({ key: a.key, title: a.title })),
+            noSideEffects: true,
+            executionAuthority: false,
+            reasoning: 'deterministic',
+          },
+        };
       },
     };
   }
@@ -625,14 +653,23 @@ export class C9Orchestrator {
       turn.intentHash,
       'bi',
     );
-    const refs = await this.bi.select(root.id);
+    return (await this.prepareFinancialReport(root, turn.intentHash)).expose();
+  }
+
+  private async prepareFinancialReport(
+    root: ConversationRoot,
+    intentHash: string,
+  ) {
+    const bi = this.bi;
+    if (!bi) c9Deny('context_fact_source_unavailable');
+    const refs = await bi.select(root.id);
     const cap = c9Capability('c7.measurement.read', 'BUSINESS_INTELLIGENCE');
     const receipt = await this.work.reserve(root.id, {
       callKey: BI_REPORT_CALL,
       domain: 'BUSINESS_INTELLIGENCE',
       kind: 'TOOL_READ',
       taskKey: cap.capabilityKey,
-      inputHash: c9Hash('bi-report-request/1', [turn.intentHash]),
+      inputHash: c9Hash('bi-report-request/1', [intentHash]),
       evidenceRefs: refs,
       reservation: {
         contract: 'maya.c9-reservation/1',
@@ -692,65 +729,145 @@ export class C9Orchestrator {
         throw error;
       }
     }
-    // Permissions, source expiry and scope are checked again before every exposure.
-    // Nothing asynchronous follows the final authorized source read.
-    await this.bi.authorize(root.id);
-    const { context, handles } = await this.context.build(
-      root.id,
-      'BUSINESS_INTELLIGENCE',
-      refs,
-      'Объясни опубликованный финансовый снимок',
-    );
-    const answer = this.agents.answer(
-      'BUSINESS_INTELLIGENCE',
-      'c9.business_overview',
-      context,
-      new Set([cap.capabilityKey]),
-      handles.keys(),
-    );
-    const findings = (answer.result.findings as C9Object[]).map((f) =>
-      String(f.statement),
-    );
     return {
-      reply: [
-        refs.length
-          ? replayed
-            ? 'Повторно открыт тот же опубликованный снимок; новая версия не выбиралась.'
-            : 'Найден последний доступный опубликованный финансовый отчёт на начало запроса.'
-          : replayed
-            ? 'Открыт сохранённый результат проверки наличия отчёта; новый поиск не выполнялся.'
-            : 'Проверено наличие опубликованного финансового снимка на начало запроса.',
-        ...findings,
-        !findings.length
-          ? 'Доступного опубликованного финансового снимка для объяснения нет. Это не означает нулевую выручку или прибыль.'
-          : '',
-        refs.length
-          ? 'Факт чтения и ссылка на источник сохранены.'
-          : 'Сохранён факт проверки без найденного снимка.',
-      ]
-        .filter(Boolean)
-        .join('\n\n'),
-      coordination: {
-        run_id: root.id,
-        scope: 'explicit_bi_report' as const,
-        state: root.state,
-        replayed,
-        current: false,
-      },
-      analysis: {
-        contract: 'maya.c9-bi-report-response/1',
-        mode: 'as_reported',
-        outcome: c9Object(answer.result.completeness).status,
-        agent: answer.result,
-        evidence: {
-          workReceiptId: receipt.id,
-          sourceHandles: [...handles.keys()],
-        },
-        noSideEffects: true,
-        executionAuthority: false,
-        reasoning: 'deterministic',
+      refs,
+      expose: async () => {
+        // Permissions, source expiry and scope are checked again before every exposure.
+        // Nothing asynchronous follows the final authorized source read.
+        await bi.authorize(root.id);
+        const { context, handles } = await this.context.build(
+          root.id,
+          'BUSINESS_INTELLIGENCE',
+          refs,
+          'Объясни опубликованный финансовый снимок',
+        );
+        const answer = this.agents.answer(
+          'BUSINESS_INTELLIGENCE',
+          'c9.business_overview',
+          context,
+          new Set([cap.capabilityKey]),
+          handles.keys(),
+        );
+        const findings = (answer.result.findings as C9Object[]).map((f) =>
+          String(f.statement),
+        );
+        return {
+          reply: [
+            refs.length
+              ? replayed
+                ? 'Повторно открыт тот же опубликованный снимок; новая версия не выбиралась.'
+                : 'Найден последний доступный опубликованный финансовый отчёт на начало запроса.'
+              : replayed
+                ? 'Открыт сохранённый результат проверки наличия отчёта; новый поиск не выполнялся.'
+                : 'Проверено наличие опубликованного финансового снимка на начало запроса.',
+            ...findings,
+            !findings.length
+              ? 'Доступного опубликованного финансового снимка для объяснения нет. Это не означает нулевую выручку или прибыль.'
+              : '',
+            refs.length
+              ? 'Факт чтения и ссылка на источник сохранены.'
+              : 'Сохранён факт проверки без найденного снимка.',
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
+          coordination: {
+            run_id: root.id,
+            scope: 'explicit_bi_report' as const,
+            state: root.state,
+            replayed,
+            current: false,
+          },
+          analysis: {
+            contract: 'maya.c9-bi-report-response/1',
+            mode: 'as_reported',
+            outcome: c9Object(answer.result.completeness).status,
+            agent: answer.result,
+            evidence: {
+              workReceiptId: receipt.id,
+              sourceHandles: [...handles.keys()],
+            },
+            noSideEffects: true,
+            executionAuthority: false,
+            reasoning: 'deterministic',
+          },
+        };
       },
     };
+  }
+
+  /** One explicit turn, one existing C9 run, two registered domains, one reply.
+   * Financial facts remain C7 snapshots; live CRM is never fabricated as C7 evidence.
+   */
+  async reviewBusinessAndCancellationWindows(turn: C9ConversationReads) {
+    try {
+      if (!this.bi || !this.occupancy || !this.strategy)
+        c9Deny('context_fact_source_unavailable');
+      const root = await this.store.conversationReadRun(
+        turn.turn,
+        turn.intentHash,
+        'occupancy_review',
+      );
+      turn.runId = root.id;
+      const manifest = c9Object(root.budgetManifestJson);
+      const domains = this.route('c9.occupancy_review', manifest);
+      // Each of the two domains requires one read within the shared route budget.
+      if ((manifest.toolCallsMax as number) < 2) c9Deny('route_domain_budget');
+      // Admission/bounds are common; neither domain is allowed to start work for
+      // a request that cannot admit its complete finite scope.
+      await this.bi.authorize(root.id);
+      await this.occupancy.authorize(root.id);
+      const financial = await this.prepareFinancialReport(
+        root,
+        turn.intentHash,
+      );
+      const windows = await this.prepareCancellationWindows(
+        root,
+        turn.intentHash,
+        financial.refs,
+      );
+      // Re-read the same published source and verify the transient CRM witness
+      // after both work receipts exist. Do not compose earlier finalized replies.
+      const bi = await financial.expose();
+      const occupancy = await windows.expose();
+      await this.bi.authorize(root.id);
+      await this.occupancy.authorize(root.id);
+      // C7 payloads are immutable, but their exact revision can expire or be
+      // withdrawn while the window witness is checked. Validate those same refs
+      // last; no selection, rebinding or asynchronous work follows exposure.
+      await this.store.transaction(undefined, async (tx, principal, now) => {
+        await this.store.lock(tx, principal, root.id, true, now);
+        await this.store.validateRefs(tx, principal, financial.refs, now);
+      });
+      const findings = (bi.analysis.agent.findings as C9Object[]).map((f) =>
+        String(f.statement),
+      );
+      const available = occupancy.coordination.current;
+      return {
+        reply: [
+          'Объединила опубликованный финансовый отчёт и проверку одной сохранённой возможности после отмены. У этих источников разные периоды наблюдения.',
+          findings.length
+            ? findings.join('\n')
+            : 'Опубликованный финансовый снимок недоступен. Это не означает нулевую выручку или прибыль; финансовая часть обзора неполна.',
+          occupancy.reply,
+          available
+            ? 'Практический следующий шаг — отдельно проверить доступное время на дату найденного окна. Финансовый снимок не доказывает спрос на это время и не объясняет причину отмены.'
+            : 'Сейчас актуальное свободное окно не подтверждено. Не стоит строить план заполнения на этом результате; для текущей доступности нужен новый явный запрос.',
+        ].join('\n\n'),
+        coordination: {
+          ...occupancy.coordination,
+          scope: 'explicit_business_occupancy' as const,
+          domains,
+          // BI is historical even when the cancellation window is current.
+          current: false,
+          replayed: bi.coordination.replayed && occupancy.coordination.replayed,
+        },
+        analysis: bi.analysis,
+        recommendation: occupancy.recommendation,
+      };
+    } catch (error) {
+      turn.failed = true;
+      throw error;
+    }
   }
 
   private async lifecycleContext(runId: string, selection: LifecycleSelection) {
@@ -810,22 +927,41 @@ export class C9Orchestrator {
   private saveOccupancyProposal(
     root: { id: string; budgetManifestHash: string; validUntil: Date },
     projection: OccupancyProjection,
+    reportRefs?: readonly C9Object[],
   ) {
     const available = projection.outcome === 'AVAILABLE';
     const proposal = this.strategy!.propose({
-      objectiveKey: 'c9.cancellation_windows',
-      safeDescription: 'Проверка окна после отмены по явному запросу владельца',
+      objectiveKey: reportRefs
+        ? 'c9.occupancy_review'
+        : 'c9.cancellation_windows',
+      safeDescription: reportRefs
+        ? 'Опубликованный финансовый обзор и проверка окна после отмены по явному запросу владельца'
+        : 'Проверка окна после отмены по явному запросу владельца',
+      ...(reportRefs
+        ? { scopeRefs: [...reportRefs, ...projection.evidenceRefs] }
+        : {}),
       budgetManifestHash: root.budgetManifestHash,
       validUntil: new Date(
         Math.min(
           root.validUntil.getTime(),
           projection.window ? Date.parse(projection.window.start) : Infinity,
+          ...(reportRefs ?? []).flatMap((ref) => [
+            ref.validUntil ? Date.parse(ref.validUntil as string) : Infinity,
+            ref.retentionUntil
+              ? Date.parse(ref.retentionUntil as string)
+              : Infinity,
+          ]),
         ),
       ).toISOString(),
       unknowns: [
         'Причина и автор отмены не установлены.',
         'Спрос, вероятность заполнения и доход не оценивались.',
         'Перед любым действием требуется новая проверка доступности.',
+        ...(reportRefs
+          ? [
+              'Финансовый отчёт является опубликованным снимком. Связь финансовых показателей с отменой не установлена.',
+            ]
+          : []),
       ],
       options:
         available && projection.window

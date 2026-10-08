@@ -29,6 +29,110 @@ describe('AiCoreModelService', () => {
     jest.restoreAllMocks();
   });
 
+  it('finite owner review parser accepts a delegated null tool call without weakening generic ready tasks', () => {
+    const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+    const plan = semanticPlan('analytics.business_summary', {});
+    plan.tasks.push({
+      ...semanticPlan('schedule.review_cancellation_windows', {}).tasks[0],
+      id: 'windows',
+    });
+    const ownerInput = {
+      ...input,
+      principalRole: UserRole.TENANT_OWNER,
+      tools: [
+        ...input.tools,
+        { ...input.tools[0], name: 'booking.availability.read' },
+      ],
+    };
+    expect(
+      service['validatePlanningResponse'](
+        JSON.stringify(toolPlan(null, plan)),
+        ownerInput,
+      ).toolCall,
+    ).toBeNull();
+    expect(() =>
+      service['validatePlanningResponse'](
+        JSON.stringify(
+          toolPlan(null, semanticPlan('analytics.business_summary', {})),
+        ),
+        ownerInput,
+      ),
+    ).toThrow('ai_core_required_tool_missing');
+  });
+  it.each([{}, { period: 'today' }])(
+    'finite owner review uses one mocked planner call and no final model stage: %j',
+    async (entities) => {
+      const plan = semanticPlan('analytics.business_summary', entities);
+      plan.tasks.push({
+        ...semanticPlan('schedule.review_cancellation_windows', {}).tasks[0],
+        id: 'windows',
+      });
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(
+          deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+        );
+      const service = createService({
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'synthetic-only-key',
+      });
+      const result = await service.decide({
+        ...input,
+        principalRole: UserRole.TENANT_OWNER,
+        tools: [
+          ...input.tools,
+          { ...input.tools[0], name: 'booking.availability.read' },
+        ],
+      });
+      expect(result?.toolCall).toBeNull();
+      expect(result?.semanticPlan?.tasks).toHaveLength(2);
+      expect(result?.reply).toContain('последний опубликованный');
+      if ('period' in entities)
+        expect(result?.reply).toContain('Подойдёт такой ограниченный обзор');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    },
+  );
+  it('finite owner review null exception cannot admit native, duplicate or additional ready task plans', () => {
+    const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
+    const plan = semanticPlan('analytics.business_summary', {});
+    plan.tasks.push({
+      ...semanticPlan('schedule.review_cancellation_windows', {}).tasks[0],
+      id: 'windows',
+    });
+    const ownerInput = {
+      ...input,
+      principalRole: UserRole.TENANT_OWNER,
+      tools: [
+        ...input.tools,
+        { ...input.tools[0], name: 'booking.availability.read' },
+      ],
+    };
+    expect(() =>
+      service['validatePlanningResponse'](
+        JSON.stringify(toolPlan(null, plan)),
+        { ...ownerInput, surface: 'native' },
+      ),
+    ).toThrow('ai_core_required_tool_missing');
+    for (const intent of [
+      'analytics.business_summary',
+      'analytics.anomaly_detection',
+    ]) {
+      const extra = {
+        ...plan,
+        tasks: [
+          ...plan.tasks,
+          { ...semanticPlan(intent, {}).tasks[0], id: 'extra' },
+        ],
+      };
+      expect(() =>
+        service['validatePlanningResponse'](
+          JSON.stringify(toolPlan(null, extra)),
+          ownerInput,
+        ),
+      ).toThrow('ai_core_required_tool_missing');
+    }
+  });
+
   it('uses a strict tool-only DeepSeek planner without exposing the key', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(
       deepSeekResponse(

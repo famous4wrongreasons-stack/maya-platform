@@ -269,7 +269,8 @@ export class C9Store {
   conversationReadRun(
     turn: { turnId: string; conversationId: string },
     intentHash: string,
-    purpose: 'reads' | 'occupancy' | 'lifecycle' | 'bi' = 'reads',
+    purpose:
+      'reads' | 'occupancy' | 'lifecycle' | 'bi' | 'occupancy_review' = 'reads',
   ) {
     return this.transaction(undefined, async (tx, p, now) => {
       if (!/^[a-f0-9]{64}$/.test(intentHash))
@@ -306,13 +307,15 @@ export class C9Store {
         eventExpiresAt: event.envelope.expiresAt,
         objectiveKey: `c9.conversation_${purpose}:${intentHash}`,
         safeQuestion:
-          purpose === 'occupancy'
-            ? 'Проверь окна после отмен'
-            : purpose === 'lifecycle'
-              ? 'Кого пора вернуть?'
-              : purpose === 'bi'
-                ? 'Объясни последний опубликованный финансовый отчёт'
-                : 'Read capabilities selected by the conversation runtime.',
+          purpose === 'occupancy_review'
+            ? 'Объясни последний опубликованный финансовый отчёт и проверь одну сохранённую возможность после отмены'
+            : purpose === 'occupancy'
+              ? 'Проверь окна после отмен'
+              : purpose === 'lifecycle'
+                ? 'Кого пора вернуть?'
+                : purpose === 'bi'
+                  ? 'Объясни последний опубликованный финансовый отчёт'
+                  : 'Read capabilities selected by the conversation runtime.',
         period: null,
         subjectRefs: [],
         oneOffConstraints: {

@@ -1,5 +1,9 @@
 import { mutationClarification } from './mutation-response';
 import {
+  ownerReviewPlanState,
+  OWNER_REVIEW_QUESTION,
+} from './owner-review-plan';
+import {
   plannerWireContext,
   PLANNER_WIRE_INSTRUCTIONS,
 } from './planner-wire-context';
@@ -730,6 +734,25 @@ export class AiCoreModelService {
           usage,
         };
       }
+      const ownerReview = ownerReviewPlanState(
+        plan.semanticPlan,
+        input.surface,
+        input.principalRole,
+      );
+      if (ownerReview !== null) {
+        // C9 owns both source reads and the composed result. No final-model call before delegation.
+        return {
+          reply:
+            ownerReview === 'clarify'
+              ? OWNER_REVIEW_QUESTION
+              : 'Проверяю последний опубликованный общий отчёт и сохранённую возможность после отмены.',
+          toolCall: null,
+          semanticPlan: plan.semanticPlan,
+          provider,
+          model: plan.model,
+          usage,
+        };
+      }
       const clarification = this.semanticClarification(plan.semanticPlan);
       if (clarification) {
         return {
@@ -1012,6 +1035,7 @@ export class AiCoreModelService {
       PLANNER_WIRE_INSTRUCTIONS,
       'Use tool_call=null only when no tool is needed or the supplied tool_results are sufficient.',
       'When required_tools contains a tool without a matching result, select one suitable required tool.',
+      'Exception for an authenticated owner on web: the exact task set analytics.business_summary + schedule.review_cancellation_windows (+ optional analytics.recommendations) is delegated to existing C9; use tool_call=null. Its only executable scope is the last published tenant-wide financial snapshot plus one saved cancellation opportunity, with no entities or custom constraints. Preserve every requested date, period, branch, employee or goal in semantic entities; never silently replace a requested current period with that historical snapshot. The server asks about the bounded alternative when scope differs. A saved semantic clarification_question names that pending alternative; retain requested slots until the user explicitly accepts or corrects it.',
       'JSON OUTPUT CONTRACT:',
       'Return exactly one JSON object. Do not use Markdown or add text outside JSON.',
       'The only top-level keys are semantic_plan and tool_call.',
@@ -1205,7 +1229,12 @@ export class AiCoreModelService {
             semanticPlan,
             input.toolResults.map((result) => result.name),
           )) &&
-        !this.semanticPlanMayFinishWithoutTool(semanticPlan)
+        !this.semanticPlanMayFinishWithoutTool(semanticPlan) &&
+        ownerReviewPlanState(
+          semanticPlan,
+          input.surface,
+          input.principalRole,
+        ) === null
       ) {
         throw new Error('ai_core_required_tool_missing');
       }

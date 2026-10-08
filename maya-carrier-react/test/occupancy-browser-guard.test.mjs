@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { admitted, installGuard, localOrigin, OWNER_REQUEST } from './occupancy-browser-guard.mjs';
+import { admitted, installGuard, localOrigin, OWNER_REQUEST, COMPOUND_PROMPTS } from './occupancy-browser-guard.mjs';
 
 const origin = 'http://127.0.0.1:45678';
 const chat = { url: origin + '/api/ai/chat', method: 'POST', postData: JSON.stringify({ surface: 'web', messages: [{ role: 'user', content: OWNER_REQUEST }] }) };
@@ -39,4 +39,19 @@ test('guard admits only bounded read-only widget history, never render observati
   assert.equal(resolve({ thread_page: { limit: 30, tenantId: 'foreign' } }), false);
   assert.equal(resolve({ thread_page: { limit: 30 }, rendered: {} }), false);
   assert.equal(resolve({ thread_page: { limit: 30, before: 'bad' } }), false);
+});
+
+
+test('compound browser admits only its three exact owner prompts, isolated from the occupancy mode', () => {
+  for (const content of Object.values(COMPOUND_PROMPTS)) {
+    const req = { ...chat, postData: JSON.stringify({ surface: 'web', messages: [{ role: 'user', content }] }) };
+    assert.equal(admitted(req, origin, 'compound'), true);
+    assert.equal(admitted(req, origin), false);
+    for (const invalid of [content + ' и запиши клиента', [content], { text: content }]) {
+      assert.equal(admitted({ ...chat, postData: JSON.stringify({ surface: 'web', messages: [{ role: 'user', content: invalid }] }) }, origin, 'compound'), false);
+    }
+    for (const url of ['https://foreign.invalid/api/ai/chat', origin + '/api/widgets/intent', origin + '/api/ai/tools/booking.create/execute']) assert.equal(admitted({ ...req, url }, origin, 'compound'), false);
+  }
+  assert.equal(admitted(chat, origin, 'compound'), false);
+  assert.equal(admitted(chat, origin, 'unknown'), false);
 });

@@ -31,7 +31,7 @@ describe('conversation capability contract', () => {
       {
         intent: 'schedule.review_cancellation_windows',
         readiness: 'partial',
-        note: 'Explicit owner web request only: one saved Opportunity, current CRM schedule and availability, C9 recommendation. No background checks, bookings, discounts, customer lists or messaging. Named dates/branches/employees and compound tasks require clarification in this slice.',
+        note: 'Explicit owner web request only: one saved Opportunity, current CRM schedule and availability, C9 recommendation. The exact business_summary + cancellation_windows (+ optional recommendations) task set can include the last published tenant-wide financial snapshot in one C9 review. No background checks, bookings, discounts, customer lists or messaging. Any requested period/date/branch/employee/goal or other compound tasks require clarification; never substitute historical finance for a requested current period.',
       },
     ]);
   });

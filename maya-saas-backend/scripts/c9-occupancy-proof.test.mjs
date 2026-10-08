@@ -90,3 +90,19 @@ test('branch binding uses the same owned serial restart driver without a carrier
 test('command deadline override rejects unbounded or malformed values before spawn/files', async()=>{
  for (const timeoutMs of [0,-1,720001,Infinity,1.5,'720000']) await assert.rejects(runCommand({name:'browser',timeoutMs}, {}, '/not-created', {}), /bounded/);
 });
+
+
+test('compound mode reuses the finite restart probe and preserves explicit browser mode', () => {
+  const args = { pgBin: '/owned/bin', cluster: '/tmp/owned/pg', log: '/tmp/evidence/pg.log', port: 45678, database: 'maya_widget_gate_proof_c9occ_abcdef', receipt: '/tmp/private/receipt.json', output: '/tmp/evidence', compound: true };
+  const plan = proofCommands(args);
+  assert.deepEqual(plan.map(s => s.name), ['initdb', 'pg-start', 'createdb', 'migrations', 'carrier-bundle', 'prepare', 'pg-restart', 'resume']);
+  for (const stage of [plan[5], plan[7]]) {
+    assert.equal(stage.env.JEST_C9_OCCUPANCY_COMPOUND, 'true');
+    assert.ok(stage.args.includes('test/widgets-live/c9-occupancy-restart.probe-spec.ts'));
+  }
+  const browser = proofCommands({ ...args, browser: true });
+  assert.deepEqual(browser.map(s => s.name), ['initdb', 'pg-start', 'createdb', 'migrations', 'react-web-build', 'browser']);
+  assert.equal(browser[5].env.JEST_C9_OCCUPANCY_COMPOUND, 'true');
+  assert.equal(browser[5].env.JEST_C9_OCCUPANCY_STAGE, 'browser');
+  assert.throws(() => proofCommands({ ...args, branchBinding: true }), /exclusive/);
+});

@@ -82,13 +82,32 @@ function fixture(entities: Record<string, string> = {}) {
     execute: jest.fn(),
   };
   const timeline = {
+    readConversationContext: jest.fn().mockResolvedValue(null),
     routeTypedUtterance: jest.fn().mockResolvedValue(null),
     persistTypedTurn: jest
       .fn()
       .mockResolvedValue({ turnId: 'turn', conversationId: 'conversation' }),
-    persistAssistantReply: jest.fn().mockResolvedValue(undefined),
+    persistAssistantReply: jest
+      .fn<Promise<void>, [{ semanticContext: unknown; reply: string }]>()
+      .mockResolvedValue(undefined),
   };
   const orchestration = {
+    reviewBusinessAndCancellationWindows: jest.fn().mockResolvedValue({
+      reply:
+        'SYNTHETIC: последний опубликованный общий отчёт и одно окно; ограниченная рекомендация.',
+      coordination: {
+        run_id: 'compound-run',
+        scope: 'explicit_owner_review',
+        state: 'PROPOSED',
+        revision: 1,
+      },
+      analysis: { contract: 'maya.c9-bi-response/1', synthetic: true },
+      recommendation: {
+        contract: 'maya.c9-occupancy-response/1',
+        noSideEffects: true,
+        executionAuthority: false,
+      },
+    }),
     conversationDigest: jest.fn().mockReturnValue('a'.repeat(64)),
     conversationRead: jest.fn(
       (...args: Parameters<C9Orchestrator['conversationRead']>) => {
@@ -150,6 +169,249 @@ const dto = (content: string) => ({
   surface: 'web' as const,
   requestId: 'request_occupancy',
   messages: [{ role: 'user' as const, content }],
+});
+const compoundPlan = (entities: Record<string, string> = {}) =>
+  new ConversationIntelligenceService().validatePlan(
+    {
+      parent_request: 'Обзор бизнеса, окна после отмен и рекомендация',
+      tasks: [
+        {
+          id: 'summary',
+          intent: 'analytics.business_summary',
+          entities,
+          confidence: 0.99,
+        },
+        {
+          id: 'windows',
+          intent: 'schedule.review_cancellation_windows',
+          entities: {},
+          confidence: 0.99,
+        },
+        {
+          id: 'recommendation',
+          intent: 'analytics.recommendations',
+          entities: {},
+          depends_on: ['summary', 'windows'],
+          confidence: 0.99,
+        },
+      ],
+    },
+    user.role,
+    ['analytics.business.query', 'booking.availability.read'],
+  );
+const compoundDecision = (entities: Record<string, string> = {}) => ({
+  provider: 'safe',
+  model: 'SCRIPTED_SYNTHETIC',
+  reply: '',
+  toolCall: null,
+  semanticPlan: compoundPlan(entities),
+  usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+});
+describe('finite owner review compound ingress (synthetic, not real model acceptance)', () => {
+  it('delegates the finite plan once to the existing C9 owner and preserves one coherent completion', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(compoundDecision());
+    const result = await f.service.chat(
+      user,
+      dto(
+        'Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг',
+      ),
+    );
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).toHaveBeenCalledTimes(1);
+    expect(f.orchestration.checkCancellationWindows).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      action: null,
+      coordination: { run_id: 'compound-run', revision: 1 },
+      analysis: { synthetic: true },
+      recommendation: { noSideEffects: true },
+    });
+    expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+  });
+  it('asks and persists the exact bounded alternative instead of silently replacing the requested period', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(compoundDecision({ period: 'today' }));
+    const result = await f.service.chat(
+      user,
+      dto(
+        'Дай обзор за сегодня, проверь окна после отмен и посоветуй следующий шаг',
+      ),
+    );
+    expect(result.reply).toContain('последний опубликованный финансовый отчёт');
+    expect(result.reply).toContain('по всему бизнесу');
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+    expect(f.timeline.persistAssistantReply.mock.calls[0][0]).toMatchObject({
+      semanticContext: {
+        ownerReviewClarification: { question: result.reply },
+      },
+    });
+  });
+  it('returns one explicit incomplete completion when compound work is held after admission', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(compoundDecision());
+    f.orchestration.reviewBusinessAndCancellationWindows.mockImplementation(
+      (
+        turn: Parameters<
+          C9Orchestrator['reviewBusinessAndCancellationWindows']
+        >[0],
+      ) => {
+        turn.runId = 'compound-run';
+        turn.failed = true;
+        return Promise.reject(new Error('synthetic compound settlement loss'));
+      },
+    );
+    // A proposed compound run must never be terminalized as an ordinary read run.
+    f.orchestration.finishConversationReads.mockRejectedValue(
+      new Error('conversation_read_run_required'),
+    );
+
+    const result = await f.service.chat(
+      user,
+      dto(
+        'Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг',
+      ),
+    );
+
+    expect(result.reply).toBe(
+      'Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.',
+    );
+    expect(result).toMatchObject({
+      action: null,
+      source: 'safe_fallback',
+      coordination: { run_id: 'compound-run', state: 'UNCONFIRMED' },
+    });
+    expect(result).not.toHaveProperty('analysis');
+    expect(result).not.toHaveProperty('recommendation');
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).toHaveBeenCalledTimes(1);
+    expect(f.orchestration.finishConversationReads).toHaveBeenCalledWith(
+      expect.objectContaining({ runId: 'compound-run', failed: true }),
+    );
+    expect(f.orchestration.checkCancellationWindows).not.toHaveBeenCalled();
+    expect(f.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+    expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+    expect(f.timeline.persistAssistantReply).toHaveBeenCalledWith(
+      expect.objectContaining({ reply: result.reply }),
+    );
+  });
+  it.each([
+    { branch: 'branch-A' },
+    { date_or_period: 'tomorrow' },
+    { employee: 'staff-A' },
+    { goal: 'fill_every_window' },
+    { custom_constraint: 'discount' },
+  ])('clarifies unsupported entities before any read: %j', async (entities) => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(compoundDecision(entities));
+    const out = await f.service.chat(
+      user,
+      dto(
+        'Обзор бизнеса, окна после отмен и рекомендация с дополнительными условиями',
+      ),
+    );
+    expect(out.reply).toContain('Подойдёт такой ограниченный обзор');
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+  });
+  it('restores the server question and original requested scope after restart before accepting a newly planned bounded review', async () => {
+    const before = fixture();
+    before.model.decide.mockResolvedValue(
+      compoundDecision({ period: 'today' }),
+    );
+    const asked = await before.service.chat(
+      user,
+      dto('Дай обзор за сегодня, окна после отмен и совет'),
+    );
+    const saved =
+      before.timeline.persistAssistantReply.mock.calls[0][0].semanticContext;
+    const restarted = fixture();
+    restarted.timeline.readConversationContext.mockResolvedValue(saved);
+    restarted.model.decide.mockResolvedValue(compoundDecision());
+    const result = await restarted.service.chat(user, {
+      ...dto('Да, такой ограниченный обзор'),
+      conversationId: 'conversation',
+    });
+    expect(restarted.model.decide).toHaveBeenCalledTimes(1);
+    expect(restarted.model.decide.mock.calls).toHaveProperty(
+      '0.0.conversationPlan.tasks',
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'summary',
+          entities: { period: 'today' },
+          requires_clarification: true,
+          clarification_question: asked.reply,
+        }),
+      ]),
+    );
+    expect(
+      restarted.orchestration.reviewBusinessAndCancellationWindows,
+    ).toHaveBeenCalledTimes(1);
+    expect(result.coordination).toMatchObject({ run_id: 'compound-run' });
+    expect(restarted.runtime.execute).not.toHaveBeenCalled();
+  });
+  it('ignores a generic tool proposal inside the finite plan and never dispatches it', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue({
+      ...compoundDecision(),
+      toolCall: { name: 'analytics.business.query', arguments: {} },
+    });
+    await f.service.chat(user, dto('Обзор бизнеса и окна после отмен'));
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).toHaveBeenCalledTimes(1);
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+  });
+  it('refuses a late compound purpose switch after an ordinary settled read', async () => {
+    const f = fixture();
+    f.model.decide
+      .mockResolvedValueOnce({
+        ...compoundDecision(),
+        semanticPlan: null,
+        toolCall: {
+          name: 'analytics.business.query',
+          arguments: { period: 'today', query: 'summary' },
+        },
+      })
+      .mockResolvedValue(compoundDecision());
+    f.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'ordinary-read',
+      result: { date: '2035-05-10', staff: [] },
+    });
+    await f.service.chat(user, dto('Посмотри дела в салоне'));
+    expect(f.orchestration.conversationRead).toHaveBeenCalledTimes(1);
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+  });
+  it.each([
+    { surface: 'native' as const },
+    { audience: 'client' as const },
+    { audience: 'staff' as const },
+  ])('cannot delegate a foreign surface or audience: %j', async (scope) => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue(compoundDecision());
+    await f.service.chat(user, {
+      ...dto('Обзор бизнеса и окна после отмен'),
+      ...scope,
+    });
+    expect(
+      f.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+  });
 });
 describe('explicit owner chat Occupancy ingress (scripted semantic routing, not real model acceptance)', () => {
   it('handles the canonical explicit command without model or generic tool calls and saves the reply', async () => {

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Browser } from '../../maya-chat-shell/test/cdp-verify.mjs';
 import { createDevServer } from '../../maya-chat-shell/dev/serve.mjs';
-import { installGuard, localOrigin, OWNER_REQUEST } from './occupancy-browser-guard.mjs';
+import { installGuard, localOrigin, OWNER_REQUEST, COMPOUND_PROMPTS } from './occupancy-browser-guard.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -76,11 +76,11 @@ async function login(page, email) {
   await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
   return Date.now() + (response.retry_after_seconds + 1) * 1000;
 }
-async function sendOwnerRequest(page) {
+async function sendOwnerRequest(page, prompt = OWNER_REQUEST) {
   const view = await snapshot(page);
   assert.ok(view.controls.some((control) => control.name === 'Сообщение для MAYA'));
-  assert.equal(await page.fill('Q.composer()', OWNER_REQUEST), true);
-  assert.ok(await page.waitFor('!!Q.byName("button", /^Отправить$/) && !Q.byName("button", /^Отправить$/).disabled'));
+  assert.equal(await page.fill('Q.composer()', prompt), true);
+  assert.ok(await page.waitFor('!!Q.byName("button", /^Отправить$/) && Q.byName("button", /^Отправить$/).getAttribute("aria-disabled") === "false"'));
   await clickNamed(page, 'Отправить');
 }
 async function answer(page, before, outcome, replyCount = 1) {
@@ -112,11 +112,13 @@ async function main() {
   const pendingInput = receive('start');
   process.send({ type: 'ready' });
   const input = await pendingInput;
+  assert.ok(input.compound === undefined || input.compound === true, 'finite browser mode');
+  const compound = input.compound === true;
   const backendOrigin = localOrigin(input.backendOrigin);
   assert.ok(path.isAbsolute(input.output));
   const output = path.join(input.output, 'output', 'playwright');
   fs.mkdirSync(output, { recursive: true, mode: 0o700 });
-  const report = { contract: 'maya.explicit-occupancy-browser/1', status: 'running', syntheticCrmAdapter: false, nativeYclientsAdapter: true, syntheticProviderTransport: true, realModelAcceptance: false, externalProviderAcceptance: false, snapshots: {}, observations: {} };
+  const report = { contract: compound ? 'maya.explicit-business-occupancy-browser/1' : 'maya.explicit-occupancy-browser/1', status: 'running', syntheticCrmAdapter: false, nativeYclientsAdapter: true, syntheticProviderTransport: true, realModelAcceptance: false, externalProviderAcceptance: false, snapshots: {}, observations: {} };
   let browser, dev, chromeChild, chromeProfile;
   const pages = [], guards = [];
   let closing;
@@ -138,6 +140,7 @@ async function main() {
   process.once('disconnect', terminate);
   async function capture(page, name) {
     // DOM completion precedes compositor paint; preserve real pixels after two frames.
+    assert.ok(await page.waitFor('!document.querySelector(".maya-typewriter-caret")'));
     await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
     report.snapshots[name] = await snapshot(page);
     const { data } = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
@@ -145,7 +148,7 @@ async function main() {
   }
   async function newPage(origin) {
     const page = await browser.newPage(); pages.push(page);
-    guards.push(await installGuard(page, origin));
+    guards.push(await installGuard(page, origin, compound ? 'compound' : 'occupancy'));
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
     await page.goto(origin + '/');
     return page;
@@ -187,9 +190,68 @@ async function main() {
         connectTimer = setTimeout(() => reject(new Error('Owned CDP connect timed out')), 10_000);
       })]);
     } finally { clearTimeout(connectTimer); }
+    assert.equal(closing, undefined, 'Acceptance cancelled during CDP connection');
     report.chrome = await browser.version();
     const page = await newPage(origin);
     const nextLoginAt = await login(page, input.ownerEmail);
+    if (compound) {
+      const readAnswer = async (before, count) => {
+        const request = await until(() => page.apiRequests('/ai/chat').slice(before).find((r) => r.finishedAt && r.status === 201), 'compound actual chat');
+        const body = JSON.parse(await page.responseBody(request.requestId));
+        const expected = body.reply.replace(/\s+/g, ' ').trim();
+        assert.ok(await page.waitFor(`Q.all('[data-chat-message="maya"]').length === ${count} && Q.all('[data-chat-message="maya"]').at(-1).textContent.replace(/^MAYA: /, '').replace(/\\s+/g, ' ').trim() === ${JSON.stringify(expected)}`));
+        assert.equal(await page.eval('Q.all("article.widget button").length'), 0, 'Read-only response provides no action controls');
+        return body;
+      };
+      const assertCombined = (body) => {
+        assert.equal(body.coordination.scope, 'explicit_business_occupancy');
+        assert.deepEqual(body.coordination.domains, ['OCCUPANCY', 'BUSINESS_INTELLIGENCE']);
+        assert.equal(body.coordination.current, false);
+        assert.equal(body.coordination.revision, 1);
+        assert.equal(body.analysis.mode, 'as_reported');
+        assert.equal(body.analysis.executionAuthority, false);
+        assert.equal(body.recommendation.outcome, 'AVAILABLE');
+        assert.equal(body.recommendation.executionAuthority, false);
+        assert.ok(body.reply.includes('123,45') && body.reply.includes('12:00') && body.reply.includes('Europe/Moscow'));
+      };
+      await sendOwnerRequest(page, COMPOUND_PROMPTS.compound);
+      const first = await readAnswer(0, 1);
+      assertCombined(first);
+      report.observations.available = first;
+      await capture(page, 'compound-available');
+      await checkpoint('compound_available', { body: first });
+      const beforeQuestion = page.apiRequests('/ai/chat').length;
+      await sendOwnerRequest(page, COMPOUND_PROMPTS.compound_scoped);
+      const question = await readAnswer(beforeQuestion, 2);
+      assert.equal(question.reply, input.question);
+      assert.equal(question.coordination, undefined);
+      assert.equal(question.analysis, undefined);
+      assert.equal(question.recommendation, undefined);
+      await capture(page, 'compound-clarification');
+      await checkpoint('compound_clarification', { body: question });
+      await page.reload();
+      assert.ok(await page.waitFor('!!Q.byName("button", /^Войти по email$/)'));
+      assert.equal(await page.eval('!!Q.composer()'), false);
+      while (Date.now() < nextLoginAt) await pause(Math.min(1000, nextLoginAt - Date.now()));
+      await login(page, input.ownerEmail);
+      assert.ok(await page.waitFor(`Q.log()?.innerText.includes(${JSON.stringify(question.reply)})`));
+      assert.equal(page.apiRequests('/ai/chat').length, 2, 'Restoring a question cannot authorize another C9 run');
+      await capture(page, 'compound-question-after-relogin');
+      await checkpoint('compound_history');
+      const beforeContinue = page.apiRequests('/ai/chat').length;
+      await sendOwnerRequest(page, COMPOUND_PROMPTS.compound_continue);
+      const continued = await readAnswer(beforeContinue, 3);
+      assertCombined(continued);
+      assert.notEqual(continued.coordination.run_id, first.coordination.run_id);
+      assert.equal(continued.user_turn.conversationId, question.user_turn.conversationId);
+      report.observations.continued = continued;
+      await capture(page, 'compound-continued');
+      await checkpoint('compound_continued', { body: continued });
+      for (const guard of guards) { assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []); }
+      assert.deepEqual(page.exceptions, []);
+      report.status = 'passed';
+      return;
+    }
     await sendOwnerRequest(page);
     const fresh = await answer(page, 0, 'AVAILABLE');
     assert.equal((await page.eval('Q.log().innerText')).split('Предложение сохранено, версия 1').length - 1, 1);

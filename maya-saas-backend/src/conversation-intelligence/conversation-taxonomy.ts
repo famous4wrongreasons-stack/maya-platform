@@ -316,7 +316,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         tools: ['booking.availability.read'],
         readiness: 'partial',
         readinessNote:
-          'Explicit owner web request only: one saved Opportunity, current CRM schedule and availability, C9 recommendation. No background checks, bookings, discounts, customer lists or messaging. Named dates/branches/employees and compound tasks require clarification in this slice.',
+          'Explicit owner web request only: one saved Opportunity, current CRM schedule and availability, C9 recommendation. The exact business_summary + cancellation_windows (+ optional recommendations) task set can include the last published tenant-wide financial snapshot in one C9 review. No background checks, bookings, discounts, customer lists or messaging. Any requested period/date/branch/employee/goal or other compound tasks require clarification; never substitute historical finance for a requested current period.',
         optionalSlots: ['date_or_period', 'employee', 'branch'],
         responseRule:
           'Delegate this explicit request through C9 cancellation-window review. Do not call generic availability with an invented date. Current CRM and Opportunity owners supply scope; no absence or probability may be inferred.',

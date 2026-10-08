@@ -1,4 +1,12 @@
 import { goodsReadReply } from './goods-presentation';
+import {
+  isOwnerReviewClarification,
+  isOwnerReviewTaskSet,
+  OWNER_REVIEW_CLARIFICATION,
+  OWNER_REVIEW_QUESTION,
+  ownerReviewPlanState,
+  withOwnerReviewClarification,
+} from './owner-review-plan';
 import { publicConsultationReply } from './public-consultation-presentation';
 import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
 import { integrationStatusReply } from './integration-status-presentation';
@@ -217,6 +225,10 @@ type GroundingReport = {
 };
 
 type AiCoreCompletion = {
+  ownerReview?: Awaited<
+    ReturnType<C9Orchestrator['reviewBusinessAndCancellationWindows']>
+  >;
+  ownerReviewClarification?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
@@ -1081,6 +1093,73 @@ export class AiCoreService {
             requiredToolNames = [];
             requirementSatisfied = true;
           }
+        }
+        if (activeSemanticPlan && isOwnerReviewTaskSet(activeSemanticPlan)) {
+          const state = ownerReviewPlanState(
+            activeSemanticPlan,
+            dto.surface,
+            toolUser.role,
+          );
+          if (
+            !clientAudience &&
+            state !== null &&
+            step === 0 &&
+            toolsUsed.length === 0 &&
+            !this.readTurns.get(dto)?.runId
+          ) {
+            if (state === 'clarify') {
+              decision.semanticPlan =
+                withOwnerReviewClarification(activeSemanticPlan);
+              return this.complete(
+                user,
+                dto,
+                brain,
+                sanitized.redacted,
+                toolsUsed,
+                decisions,
+                {
+                  reply: OWNER_REVIEW_QUESTION,
+                  source: 'safe_fallback',
+                  action: null,
+                  ownerReviewClarification: true,
+                },
+              );
+            }
+            const turn = this.readTurns.get(dto);
+            if (!turn) this.modelFailure('conversation_history_unavailable');
+            const ownerReview =
+              await this.orchestrator.reviewBusinessAndCancellationWindows(
+                turn,
+              );
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: ownerReview.reply,
+                source: 'safe_fallback',
+                action: null,
+                ownerReview,
+              },
+            );
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply:
+                'Этот совместный обзор сейчас недоступен в данном контексте. Для отдельной проверки нужен новый запрос владельца в бизнес-чате.',
+              source: 'safe_fallback',
+              action: null,
+            },
+          );
         }
         // Consume the existing validated semantic task contract; paraphrases need
         // no second planner/model call and never become generic unscoped reads.
@@ -2678,6 +2757,7 @@ export class AiCoreService {
   ) {
     const readTurn = this.readTurns.get(dto);
     const coordination =
+      response.ownerReview?.coordination ??
       response.biReport?.coordination ??
       response.lifecycle?.coordination ??
       response.occupancy?.coordination ??
@@ -2740,6 +2820,12 @@ export class AiCoreService {
       .find((tool) => tool.resolution !== undefined)?.resolution;
     const completion = {
       request_id: dto.requestId,
+      ...(response.ownerReview
+        ? {
+            analysis: response.ownerReview.analysis,
+            recommendation: response.ownerReview.recommendation,
+          }
+        : {}),
       ...(response.biReport ? { analysis: response.biReport.analysis } : {}),
       ...(response.lifecycle
         ? { recommendation: response.lifecycle.recommendation }
@@ -2792,6 +2878,10 @@ export class AiCoreService {
           ? null
           : {
               version: 'maya.chat-semantic-context/1',
+              ...(response.ownerReviewClarification &&
+              isOwnerReviewTaskSet(lastPlan)
+                ? { ownerReviewClarification: OWNER_REVIEW_CLARIFICATION }
+                : {}),
               ...(lastPlan.tasks.length === 1 &&
               [
                 'booking.prepare_personal',
@@ -2981,6 +3071,9 @@ export class AiCoreService {
       tools.map((t) => t.name),
     );
     if (!plan) return null;
+    const ownerReviewClarification =
+      isOwnerReviewTaskSet(plan) &&
+      isOwnerReviewClarification(saved.ownerReviewClarification);
     const retainedSource = this.record(saved.bookingSource);
     if (
       plan.tasks.length === 1 &&
@@ -3077,20 +3170,22 @@ export class AiCoreService {
     }
     // Revalidate current permissions and available capabilities. History carries
     // semantic preferences only; no confirmation, execution or authority survives.
-    return bookingSelectionMerged
-      ? this.conversationLayer().validatePlan(
-          {
-            ...plan,
-            tasks: plan.tasks.map((task) => ({
-              ...task,
-              requires_clarification: false,
-              clarification_question: null,
-            })),
-          },
-          effectiveRole,
-          tools.map((tool) => tool.name),
-        )
-      : plan;
+    return ownerReviewClarification
+      ? withOwnerReviewClarification(plan)
+      : bookingSelectionMerged
+        ? this.conversationLayer().validatePlan(
+            {
+              ...plan,
+              tasks: plan.tasks.map((task) => ({
+                ...task,
+                requires_clarification: false,
+                clarification_question: null,
+              })),
+            },
+            effectiveRole,
+            tools.map((tool) => tool.name),
+          )
+        : plan;
   }
 
   private conversationLayer(): ConversationIntelligenceService {

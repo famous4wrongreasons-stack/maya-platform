@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 
 export const OWNER_REQUEST = 'Проверь окна после отмен';
+export const COMPOUND_PROMPTS = Object.freeze({
+  compound: 'Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг',
+  compound_scoped: 'Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг',
+  compound_continue: 'Да, такой ограниченный обзор',
+});
 
 export function localOrigin(raw) {
   const url = new URL(raw);
@@ -14,7 +19,8 @@ export function localOrigin(raw) {
 
 // Request-stage admission, never response fulfillment. There is no UI/API fixture.
 // The exact owner utterance is the only business request this acceptance may send.
-export function admitted(request, origin) {
+export function admitted(request, origin, mode = 'occupancy') {
+  if (!['occupancy', 'compound'].includes(mode)) return false;
   try {
     const url = new URL(request.url);
     if (url.origin !== localOrigin(origin) || url.username || url.password || url.hash) return false;
@@ -34,17 +40,19 @@ export function admitted(request, origin) {
     if (url.pathname !== '/api/ai/chat') return false;
     const body = JSON.parse(request.postData);
     return body.surface === 'web' && Array.isArray(body.messages) &&
-      body.messages.at(-1)?.role === 'user' && body.messages.at(-1)?.content === OWNER_REQUEST;
+      body.messages.at(-1)?.role === 'user' && typeof body.messages.at(-1)?.content === 'string' &&
+      (mode === 'compound' ? Object.values(COMPOUND_PROMPTS).includes(body.messages.at(-1).content) : body.messages.at(-1).content === OWNER_REQUEST);
   } catch { return false; }
 }
 
-export async function installGuard(page, origin) {
+export async function installGuard(page, origin, mode = 'occupancy') {
+  assert.ok(['occupancy', 'compound'].includes(mode), 'finite guard mode required');
   localOrigin(origin);
   const blocked = [], errors = [];
   const listener = (event) => {
     if (event.sessionId !== page.sessionId || event.method !== 'Fetch.requestPaused') return;
     const { requestId, request } = event.params;
-    const allow = admitted(request, origin);
+    const allow = admitted(request, origin, mode);
     // Never retain query, body, tokens, email or OTP in evidence.
     if (!allow) blocked.push({ method: request.method, path: new URL(request.url).pathname });
     void page.send(allow ? 'Fetch.continueRequest' : 'Fetch.failRequest', {

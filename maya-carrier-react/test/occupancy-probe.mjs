@@ -7,7 +7,15 @@ import { pathToFileURL } from 'node:url';
 import { createConversation, projectChat, projectConversationHistory, replyMarkup } from './.bundle.mjs';
 import { findAll, parse, textOf } from './html.mjs';
 
+export const COMPOUND_PROMPTS = Object.freeze({
+  compound: 'Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг',
+  compound_scoped: 'Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг',
+  compound_continue: 'Да, такой ограниченный обзор',
+});
+
 export async function observeOccupancy({ requestId, exchange, mode = 'chat' }) {
+  assert.ok(['chat', 'history', ...Object.keys(COMPOUND_PROMPTS)].includes(mode), 'finite carrier mode required');
+  const restore = mode === 'history' || mode === 'compound_continue';
   const exchanges = [];
   let transportError = null;
   const diagnose = async (work) => {
@@ -30,7 +38,7 @@ export async function observeOccupancy({ requestId, exchange, mode = 'chat' }) {
         assert.equal(value.action_status, null, 'no action authority');
         return { ok: true, value };
       }),
-      ...(mode === 'history' ? {
+      ...(restore ? {
         conversation: () => diagnose(async () => {
           const raw = await perform('GET', '/api/ai/conversation');
           const value = projectConversationHistory(raw);
@@ -45,8 +53,7 @@ export async function observeOccupancy({ requestId, exchange, mode = 'chat' }) {
     newRequestId: () => requestId,
   });
   try {
-    if (mode === 'chat') assert.equal(conversation.submitUserTurn('Проверь окна после отмен', 'typed').accepted, true);
-    await new Promise((resolve, reject) => {
+    const settled = () => new Promise((resolve, reject) => {
       const timeout = setTimeout(() => { off(); reject(new Error('carrier did not settle')); }, 15_000);
       const settled = () => {
         if (conversation.view().inFlight) return;
@@ -57,16 +64,21 @@ export async function observeOccupancy({ requestId, exchange, mode = 'chat' }) {
       const off = conversation.subscribe(settled);
       settled();
     });
+    if (restore) await settled();
+    if (transportError) throw transportError;
+    if (mode !== 'history') {
+      assert.equal(conversation.submitUserTurn(mode === 'chat' ? 'Проверь окна после отмен' : COMPOUND_PROMPTS[mode], 'typed').accepted, true);
+      await settled();
+    }
     if (transportError) throw transportError;
     const items = conversation.view().items;
     assert.equal(items.some((item) => item.kind === 'widget'), false);
     const replies = items.filter((item) => item.kind === 'assistant').map((item) => item.text);
-    const expected = mode === 'chat'
-      ? [exchanges[0].body.reply]
-      : exchanges[0].body.turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text);
+    const historical = restore ? exchanges[0].body.turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text) : [];
+    const expected = mode === 'history' ? historical : [...historical, exchanges.at(-1).body.reply];
     assert.ok(replies.length > 0, 'assistant response is visible');
     assert.deepEqual(replies, expected, 'runtime preserves exact server text');
-    if (mode === 'chat') assert.equal(replies.length, 1, 'one coherent response');
+    if (mode !== 'history') assert.equal(replies.length - historical.length, 1, 'one coherent new response');
     for (const reply of replies) {
       const root = parse(replyMarkup(reply));
       assert.equal(textOf(root), reply, 'current React ReplyText preserves visible text');

@@ -6,6 +6,11 @@ import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import request from 'supertest';
+import type {
+  AiCoreModelDecision,
+  AiCoreModelInput,
+} from '../../src/ai-tools/ai-core.types';
+import { OWNER_REVIEW_QUESTION } from '../../src/ai-tools/owner-review-plan';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
   CalendarSource,
@@ -40,6 +45,14 @@ import {
 
 // Mandatory two-process proof, never an in-memory "restart" fallback. The driver
 // creates its own cluster/database, runs prepare, restarts PG, then runs resume.
+const compound = process.env.JEST_C9_OCCUPANCY_COMPOUND === 'true';
+const compoundPrompts = {
+  compound:
+    'Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг',
+  compound_scoped:
+    'Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг',
+  compound_continue: 'Да, такой ограниченный обзор',
+} as const;
 const stage = process.env.JEST_C9_OCCUPANCY_STAGE;
 const receiptPath = process.env.JEST_C9_OCCUPANCY_RECEIPT;
 const reportPath = process.env.JEST_C9_OCCUPANCY_REPORT;
@@ -82,6 +95,27 @@ type ChatBody = {
     };
   };
 };
+type CompoundBody = ChatBody & {
+  analysis: {
+    mode: string;
+    noSideEffects: boolean;
+    executionAuthority: boolean;
+    evidence: { workReceiptId: string; sourceHandles: string[] };
+  };
+};
+type FinancialSource = {
+  revisionId: string;
+  snapshotHash: string;
+  period: { from: string; to: string };
+};
+type CompoundSaved = Omit<Saved, 'contract' | 'first'> & {
+  contract: 'maya.c9-business-occupancy-private-restart/1';
+  first: CompoundBody;
+  source: FinancialSource;
+  businessHash: string;
+  held: { requestId: string; runId: string; graph: string };
+  clarification: { requestId: string; conversationId: string };
+};
 type CarrierObservation = {
   replies: string[];
   exchanges: Array<{ status: number; body: ChatBody }>;
@@ -110,7 +144,11 @@ type Saved = {
   graph: string;
 };
 
-describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]', () => {
+const suiteName = compound
+  ? 'compound owner review [HTTP] [PostgreSQL] [native CRM, synthetic transport and planner]'
+  : 'explicit cancellation window [HTTP] [PostgreSQL] [two processes] [native CRM, synthetic transport, zero model]';
+
+describe(suiteName, () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures, saved: Saved;
   const providerReads: string[] = [];
   const reads: string[] = [],
@@ -118,6 +156,7 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
   const observations: Record<string, unknown> = {};
   const touchedTenants: string[] = [];
   const unavailableTenants = new Set<string>();
+  const financeDays = new Map<string, string>();
   let model: jest.SpyInstance;
   beforeAll(async () => {
     db = await bootFixtureContext();
@@ -212,6 +251,52 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         };
       } else if (route === `company/${company}/staff`) {
         data = [{ id: 71, name: 'Synthetic master', bookable: true }];
+      } else if (
+        compound &&
+        financeDays.has(tenantId) &&
+        [
+          `transactions/${company}`,
+          `records/${company}`,
+          `company/${company}/salary/calculation/staff/71`,
+        ].includes(route)
+      ) {
+        const financeDay = financeDays.get(tenantId)!;
+        const actualQuery = Object.fromEntries(url.searchParams);
+        if (route.endsWith('/staff/71')) {
+          expect(actualQuery).toEqual({
+            date_from: financeDay,
+            date_to: financeDay,
+          });
+          data = {
+            total_sum: { income: '500', expense: '300', balance: '200' },
+          };
+        } else {
+          expect(actualQuery).toEqual({
+            start_date: financeDay,
+            end_date: financeDay,
+            count: '200',
+            page: '1',
+            ...(route.startsWith('records/') ? { with_deleted: '1' } : {}),
+          });
+          data = route.startsWith('transactions/')
+            ? [
+                {
+                  id: 901,
+                  amount: '2000',
+                  sold_item_type: 'service',
+                  record_id: 801,
+                  staff_id: 71,
+                  account: { title: 'Synthetic account', is_cash: true },
+                },
+              ]
+            : [
+                {
+                  id: 801,
+                  staff_id: 71,
+                  services: [{ id: 81, title: 'Synthetic service' }],
+                },
+              ];
+        }
       } else if (route === `service_categories/${company}`) {
         data = [];
       } else {
@@ -222,12 +307,90 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         status: 200,
       });
     });
-    model = jest
-      .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation(() => {
+    const modelOwner = http.app.get(AiCoreModelService);
+    model = jest.spyOn(modelOwner, 'decide').mockImplementation((input) => {
+      if (!compound) {
         unexpectedEdges.push('model');
         throw new Error('Exact explicit request must not call a model');
+      }
+      expect(model.mock.calls.length).toBeLessThanOrEqual(12);
+      expect(input.toolResults).toEqual([]);
+      const prompt = input.messages
+        .filter((m) => m.role === 'user')
+        .at(-1)?.content;
+      expect(Object.values(compoundPrompts)).toContain(prompt);
+      if (prompt === compoundPrompts.compound_continue) {
+        expect(input.conversationPlan?.tasks[0]).toMatchObject({
+          intent: 'analytics.business_summary',
+          entities: { period: 'today' },
+          requires_clarification: true,
+          clarification_question: OWNER_REVIEW_QUESTION,
+        });
+        observations.restoredClarificationReachedPlanner = true;
+      }
+      // Only the provider's JSON output is synthetic. The actual planning parser,
+      // CI validator and previous server context decide whether null tool is legal.
+      const parser = modelOwner as unknown as {
+        validatePlanningResponse(
+          output: string,
+          input: AiCoreModelInput,
+        ): Pick<AiCoreModelDecision, 'toolCall' | 'semanticPlan'>;
+      };
+      const parsed = parser.validatePlanningResponse(
+        JSON.stringify({
+          semantic_plan: {
+            contract: 'maya-ci/1',
+            parent_request: prompt,
+            language: 'ru',
+            dialogue_act: 'request',
+            tasks: [
+              {
+                id: 'summary',
+                intent: 'analytics.business_summary',
+                entities_json: JSON.stringify(
+                  prompt === compoundPrompts.compound_scoped
+                    ? { period: 'today' }
+                    : {},
+                ),
+                depends_on: [],
+              },
+              {
+                id: 'windows',
+                intent: 'schedule.review_cancellation_windows',
+                entities_json: '{}',
+                depends_on: [],
+              },
+              {
+                id: 'recommendation',
+                intent: 'analytics.recommendations',
+                entities_json: '{}',
+                depends_on: ['summary', 'windows'],
+              },
+            ].map((task) => ({
+              ...task,
+              confidence: 0.99,
+              requires_clarification: false,
+              clarification_question: null,
+            })),
+            context: {
+              carried_slots: [],
+              replaced_slots: [],
+              unresolved_references: [],
+            },
+          },
+          tool_call: null,
+        }),
+        input,
+      );
+      expect(parsed.toolCall).toBeNull();
+      return Promise.resolve({
+        ...parsed,
+        reply: '',
+        provider: 'openai',
+        model: 'synthetic-compound-planner-no-paid-call',
+        usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
       });
+    });
   });
   afterAll(async () => {
     jest.restoreAllMocks();
@@ -586,9 +749,11 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
       const result = await http.app
         .get(TenantContextService)
         .runAsSystemTenant(tenant.id, () =>
-          http.app
-            .get(OpportunityLifecycleRunner)
-            .run({ tenantId: tenant.id, asOf, sourceCompleteness: 'complete' }),
+          http.app.get(OpportunityLifecycleRunner).run({
+            tenantId: tenant.id,
+            asOf,
+            sourceCompleteness: 'complete',
+          }),
         );
       expect(result).toMatchObject({
         status: 'ran',
@@ -779,8 +944,14 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
         orderBy: { id: 'asc' },
       }),
       db.prisma.teamMessage.findMany({ where, orderBy: { id: 'asc' } }),
-      db.prisma.operationalAlertRun.findMany({ where, orderBy: { id: 'asc' } }),
-      db.prisma.expenseReminderRun.findMany({ where, orderBy: { id: 'asc' } }),
+      db.prisma.operationalAlertRun.findMany({
+        where,
+        orderBy: { id: 'asc' },
+      }),
+      db.prisma.expenseReminderRun.findMany({
+        where,
+        orderBy: { id: 'asc' },
+      }),
     ]);
     for (const effects of state.slice(4)) expect(effects).toHaveLength(0);
     return digest(state);
@@ -883,26 +1054,565 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
     observations[`${requestId}:${Object.keys(observations).length}`] = observed;
     return body;
   }
+  async function publishCompoundSource(salon: Salon): Promise<FinancialSource> {
+    const day = new Date();
+    day.setUTCHours(0, 0, 0, 0);
+    day.setUTCDate(day.getUTCDate() - 1);
+    financeDays.set(salon.tenant.id, day.toISOString().slice(0, 10));
+    const start = new Date(day.getTime() + 12 * 3600000);
+    const end = new Date(start.getTime() + 3600000);
+    // Synthetic reconciled appointment, not a MAYA booking or an AE acceptance.
+    await db.prisma.appointment.create({
+      data: {
+        tenantId: salon.tenant.id,
+        branchId: salon.branchId,
+        source: 'external',
+        crmProvider: CrmProvider.YCLIENTS,
+        crmExternalId: '801',
+        staffExternalId: '71',
+        serviceIds: ['81'],
+        startAt: start,
+        endAt: end,
+        blockedStartAt: start,
+        blockedEndAt: end,
+        attendance: 'arrived',
+        totalPriceKopecks: 12345,
+        currency: 'RUB',
+      },
+    });
+    const period = {
+      from: day.toISOString(),
+      to: new Date(day.getTime() + 86400000 - 1).toISOString(),
+    };
+    const { MeasurementReportReader } = createRequire(__filename)(
+      '../../src/measurement/measurement.report',
+    ) as typeof import('../../src/measurement/measurement.report');
+    const report = await http.app
+      .get(TenantContextService)
+      .runAsSystemTenant(salon.tenant.id, () =>
+        http.app
+          .get(MeasurementReportReader)
+          .snapshot(
+            salon.tenant.id,
+            'synthetic-compound-' + randomUUID(),
+            period,
+            new Date(),
+          ),
+      );
+    expect(report.mode).toBe('as_reported');
+    expect(typeof report.revisionId).toBe('string');
+    expect(typeof report.snapshotHash).toBe('string');
+    expect(unexpectedEdges).toEqual([]);
+    expect(providerReads).toEqual(
+      expect.arrayContaining([
+        'transactions/424242',
+        'records/424242',
+        'company/424242/salary/calculation/staff/71',
+      ]),
+    );
+    return {
+      period,
+      revisionId: report.revisionId!,
+      snapshotHash: report.snapshotHash!,
+    };
+  }
+  async function compoundGraph(
+    salon: Salon,
+    source: FinancialSource,
+    runId: string,
+    held = false,
+  ) {
+    const root = await db.prisma.c9Run.findUniqueOrThrow({
+      where: { id: runId },
+    });
+    expect(root).toMatchObject({
+      tenantId: salon.tenant.id,
+      principalJson: { userId: salon.owner.id },
+      currentRevision: 1,
+    });
+    const revisions = await db.prisma.c9StrategyRevision.findMany({
+      where: { tenantId: salon.tenant.id, runId },
+      orderBy: { revision: 'asc' },
+      include: { c9PlanSteps: { orderBy: { id: 'asc' } } },
+    });
+    const receipts = await db.prisma.c9WorkReceipt.findMany({
+      where: { tenantId: salon.tenant.id, runId },
+      orderBy: { domain: 'asc' },
+    });
+    expect(revisions).toHaveLength(1);
+    expect(revisions[0].objectiveJson).toMatchObject({
+      key: 'c9.occupancy_review',
+    });
+    const refs = object(revisions[0].constraintsJson).scopeRefs as Array<{
+      sourceType: string;
+      id: string;
+    }>;
+    expect(refs.map((r) => [r.sourceType, r.id]).sort()).toEqual(
+      [
+        ['MeasurementRevision', source.revisionId],
+        ['Opportunity', salon.opportunityId],
+        ['AgentTask', salon.taskId],
+      ].sort(),
+    );
+    expect(receipts.map((r) => [r.domain, r.state])).toEqual([
+      ['BUSINESS_INTELLIGENCE', 'SETTLED'],
+      ['OCCUPANCY', held ? 'HELD_UNKNOWN' : 'SETTLED'],
+    ]);
+    const bi = receipts[0];
+    const sourceRefs = bi.inputEvidenceRefsJson as unknown as Array<{
+      sourceType: string;
+      id: string;
+      hash: string;
+    }>;
+    expect(sourceRefs).toHaveLength(1);
+    expect(sourceRefs[0]).toMatchObject({
+      sourceType: 'MeasurementRevision',
+      id: source.revisionId,
+    });
+    expect(bi.resultJson).toMatchObject({
+      contract: 'maya.c9-bi-report-receipt/1',
+      sourceCount: 1,
+    });
+    const sourceRow = await db.prisma.measurementRevision.findUniqueOrThrow({
+      where: { id: source.revisionId },
+    });
+    expect(sourceRow.snapshotHash).toBe(source.snapshotHash);
+    expect(sourceRefs[0]).toMatchObject({
+      identityHash: sourceRow.identityHash,
+      inputHash: sourceRow.intentHash,
+    });
+    expect(bi.retentionUntil.getTime()).toBeLessThanOrEqual(
+      sourceRow.expiresAt.getTime(),
+    );
+    // Full owner rows (including durable budget) remain stable across retries/restart.
+    return digest({ root, revisions, receipts, sourceRow });
+  }
+  async function compoundChat(
+    salon: Salon,
+    token: string,
+    requestId: string,
+    mode: keyof typeof compoundPrompts = 'compound',
+  ) {
+    const before = await businessState(salon.tenant.id);
+    const mark = http.recorder.mark();
+    const modelBefore = model.mock.calls.length;
+    const observed = await carrier(token, requestId, mode);
+    const body = observed.exchanges.at(-1)!.body as CompoundBody;
+    expect(model.mock.calls.length - modelBefore).toBe(1);
+    expect(await businessState(salon.tenant.id)).toBe(before);
+    const writes = http.recorder
+      .since(mark)
+      .filter(
+        (op) =>
+          op.write &&
+          (op.model
+            ? /^(Appointment|Opportunity|AgentTask|DomainEvent|Action|Inbox|Notification|Delivery|Outbox|Marketing|Team|OperationalAlert|ExpenseReminder)/.test(
+                op.model,
+              )
+            : /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+"?(?:Appointment|Opportunity|AgentTask|DomainEvent|Action|Inbox|Notification|Delivery|Outbox|Marketing|Team|OperationalAlert|ExpenseReminder)/i.test(
+                op.sql ?? '',
+              )),
+      );
+    expect(writes).toEqual([]);
+    expect(unexpectedEdges).toEqual([]);
+    expect(observed.replies.at(-1)).toBe(body.reply);
+    expect(body.request_id).toBe(requestId);
+    observations[requestId + ':' + Object.keys(observations).length] = observed;
+    return body;
+  }
+  function assertCompoundReply(
+    body: CompoundBody,
+    salon: Salon,
+    replayed: boolean,
+  ) {
+    expect(body.coordination).toMatchObject({
+      scope: 'explicit_business_occupancy',
+      domains: ['OCCUPANCY', 'BUSINESS_INTELLIGENCE'],
+      state: 'PROPOSED',
+      revision: 1,
+      current: false,
+      replayed,
+    });
+    expect(body.analysis).toMatchObject({
+      mode: 'as_reported',
+      noSideEffects: true,
+      executionAuthority: false,
+    });
+    expect(body.analysis.evidence.sourceHandles).toHaveLength(1);
+    expect(body.recommendation).toMatchObject({
+      outcome: 'AVAILABLE',
+      reasoning: 'deterministic',
+      noSideEffects: true,
+      executionAuthority: false,
+    });
+    expect(
+      body.recommendation.evidence.opportunityRefs.map((r) => r.id),
+    ).toEqual([salon.opportunityId, salon.taskId]);
+    expect(body.analysis.evidence.workReceiptId).not.toBe(
+      body.recommendation.evidence.workReceiptId,
+    );
+    expect(body.reply).toContain('123,45');
+    expect(body.reply).toContain('разные периоды наблюдения');
+    expect(body.reply).toContain('Предложение сохранено, версия 1');
+    if (replayed)
+      expect(body.reply).toContain('сохранённый результат предыдущей проверки');
+    else
+      for (const fact of [
+        '12:00',
+        '13:00',
+        'Europe/Moscow',
+        'не доказывает спрос',
+      ])
+        expect(body.reply).toContain(fact);
+  }
+  async function heldCompoundRequest(
+    salon: Salon,
+    token: string,
+    requestId: string,
+    runId?: string,
+  ) {
+    const beforeReads = providerReads.length;
+    const reply = await compoundChat(salon, token, requestId);
+    // A held domain never exposes a successful combined recommendation.
+    expect(reply.recommendation).toBeUndefined();
+    expect(reply.analysis).toBeUndefined();
+    expect(reply.reply).not.toContain('Предложение сохранено');
+    const receipts = await db.prisma.c9WorkReceipt.findMany({
+      where: {
+        tenantId: salon.tenant.id,
+        domain: 'OCCUPANCY',
+        state: 'HELD_UNKNOWN',
+      },
+    });
+    expect(receipts).toHaveLength(1);
+    if (runId) {
+      expect(receipts[0].runId).toBe(runId);
+      expect(providerReads).toHaveLength(beforeReads);
+    }
+    return receipts[0].runId;
+  }
+  async function compoundAcceptance() {
+    let checkpoint: CompoundSaved;
+    if (stage === 'prepare') {
+      const salon = await makeSalon();
+      const source = await publishCompoundSource(salon);
+      const token = await login(salon);
+      const before = await businessState(salon.tenant.id);
+      const requestId = randomUUID();
+      reads.length = 0;
+      const first = await compoundChat(salon, token, requestId);
+      assertCompoundReply(first, salon, false);
+      expect(reads.sort()).toEqual([
+        'availability:' + salon.tenant.id,
+        'schedule:' + salon.tenant.id,
+      ]);
+      expect(
+        await db.prisma.c9Run.count({ where: { tenantId: salon.tenant.id } }),
+      ).toBe(1);
+      const graph = await compoundGraph(
+        salon,
+        source,
+        first.coordination.run_id,
+      );
+      const mark = providerReads.length;
+      const repeated = await compoundChat(salon, token, requestId);
+      assertCompoundReply(repeated, salon, true);
+      expect(repeated.analysis.evidence).toEqual(first.analysis.evidence);
+      expect(repeated.recommendation.evidence).toEqual(
+        first.recommendation.evidence,
+      );
+      expect(
+        await compoundGraph(salon, source, first.coordination.run_id),
+      ).toBe(graph);
+      expect(providerReads).toHaveLength(mark);
+      const { C9WorkService } = createRequire(__filename)(
+        '../../src/orchestration/c9.work',
+      ) as typeof import('../../src/orchestration/c9.work');
+      const work = http.app.get(C9WorkService);
+      const settle = work.settle.bind(work);
+      let injected = 0;
+      const interrupted = jest
+        .spyOn(work, 'settle')
+        .mockImplementation((lease, result, usage) => {
+          if (object(result).contract === 'maya.c9-occupancy-read/1') {
+            injected += 1;
+            return Promise.reject(
+              new Error('synthetic_compound_settlement_interrupted'),
+            );
+          }
+          return settle(lease, result, usage);
+        });
+      const heldRequestId = randomUUID();
+      let heldRun: string;
+      try {
+        heldRun = await heldCompoundRequest(salon, token, heldRequestId);
+      } finally {
+        interrupted.mockRestore();
+      }
+      expect(injected).toBe(1);
+      const heldGraph = await compoundGraph(salon, source, heldRun, true);
+      await heldCompoundRequest(salon, token, heldRequestId, heldRun);
+      expect(await compoundGraph(salon, source, heldRun, true)).toBe(heldGraph);
+      expect(
+        await db.prisma.c9Run.count({ where: { tenantId: salon.tenant.id } }),
+      ).toBe(2);
+      const clarificationId = randomUUID();
+      const beforeQuestionReads = providerReads.length;
+      const question = await compoundChat(
+        salon,
+        token,
+        clarificationId,
+        'compound_scoped',
+      );
+      expect(question.reply).toBe(OWNER_REVIEW_QUESTION);
+      expect(question.coordination).toBeUndefined();
+      expect(question.analysis).toBeUndefined();
+      expect(question.recommendation).toBeUndefined();
+      expect(
+        await db.prisma.c9Run.count({ where: { tenantId: salon.tenant.id } }),
+      ).toBe(2);
+      expect(providerReads).toHaveLength(beforeQuestionReads);
+      expect(await businessState(salon.tenant.id)).toBe(before);
+      checkpoint = {
+        contract: 'maya.c9-business-occupancy-private-restart/1',
+        database: database.database,
+        port: database.port,
+        pid: process.pid,
+        postgresStarted: await postgresStarted(),
+        salon,
+        source,
+        requestId,
+        first,
+        graph,
+        businessHash: before,
+        held: { requestId: heldRequestId, runId: heldRun, graph: heldGraph },
+        clarification: {
+          requestId: clarificationId,
+          conversationId: question.user_turn.conversationId,
+        },
+      };
+      writeFileSync(receiptPath!, JSON.stringify(checkpoint), {
+        mode: 0o600,
+        flag: 'wx',
+      });
+    } else {
+      checkpoint = JSON.parse(
+        readFileSync(receiptPath!, 'utf8'),
+      ) as CompoundSaved;
+      expect(checkpoint.contract).toBe(
+        'maya.c9-business-occupancy-private-restart/1',
+      );
+      expect([checkpoint.database, checkpoint.port]).toEqual([
+        database.database,
+        database.port,
+      ]);
+      expect(process.pid).not.toBe(checkpoint.pid);
+      expect(await postgresStarted()).not.toBe(checkpoint.postgresStarted);
+      const { salon, source } = checkpoint;
+      touchedTenants.push(salon.tenant.id);
+      // No finance GET routes are enabled after restart: C7 must be read as published.
+      const token = await login(salon);
+      expect(await businessState(salon.tenant.id)).toBe(
+        checkpoint.businessHash,
+      );
+      expect(
+        await compoundGraph(
+          salon,
+          source,
+          checkpoint.first.coordination.run_id,
+        ),
+      ).toBe(checkpoint.graph);
+      expect(
+        await compoundGraph(salon, source, checkpoint.held.runId, true),
+      ).toBe(checkpoint.held.graph);
+      const history = await carrier(token, randomUUID(), 'history');
+      expect(history.replies.at(-1)).toBe(OWNER_REVIEW_QUESTION);
+      const continued = await compoundChat(
+        salon,
+        token,
+        randomUUID(),
+        'compound_continue',
+      );
+      assertCompoundReply(continued, salon, false);
+      expect(continued.user_turn.conversationId).toBe(
+        checkpoint.clarification.conversationId,
+      );
+      expect(continued.coordination.run_id).not.toBe(
+        checkpoint.first.coordination.run_id,
+      );
+      expect(observations.restoredClarificationReachedPlanner).toBe(true);
+      await compoundGraph(salon, source, continued.coordination.run_id);
+      expect(
+        await db.prisma.c9Run.count({ where: { tenantId: salon.tenant.id } }),
+      ).toBe(3);
+      const readsBefore = providerReads.length;
+      const replay = await compoundChat(salon, token, checkpoint.requestId);
+      assertCompoundReply(replay, salon, true);
+      expect(replay.analysis.evidence).toEqual(
+        checkpoint.first.analysis.evidence,
+      );
+      expect(replay.recommendation.evidence).toEqual(
+        checkpoint.first.recommendation.evidence,
+      );
+      await heldCompoundRequest(
+        salon,
+        token,
+        checkpoint.held.requestId,
+        checkpoint.held.runId,
+      );
+      expect(providerReads).toHaveLength(readsBefore);
+      expect(
+        await compoundGraph(
+          salon,
+          source,
+          checkpoint.first.coordination.run_id,
+        ),
+      ).toBe(checkpoint.graph);
+      expect(
+        await compoundGraph(salon, source, checkpoint.held.runId, true),
+      ).toBe(checkpoint.held.graph);
+      expect(await businessState(salon.tenant.id)).toBe(
+        checkpoint.businessHash,
+      );
+      expect(
+        await db.prisma.c9Run.count({ where: { tenantId: salon.tenant.id } }),
+      ).toBe(3);
+      // Source setup belongs only to this synthetic second tenant. Marks follow
+      // setup/login so denied requests cannot hide a fresh provider/model read.
+      const foreignSalon = await makeSalon();
+      const foreignToken = await login(foreignSalon);
+      const foreignBefore = await businessState(foreignSalon.tenant.id);
+      const deniedProviderMark = providerReads.length;
+      const deniedReadMark = reads.length;
+      const deniedModelMark = model.mock.calls.length;
+      const runPath = `/api/orchestration/runs/${checkpoint.first.coordination.run_id}`;
+      const foreign = await request(http.app.getHttpServer())
+        .get(runPath)
+        .set('authorization', `Bearer ${foreignToken}`);
+      expect(foreign.status).toBe(400);
+      expect(foreign.body).toMatchObject({ message: 'c9_run_authority' });
+      for (const sourceId of [
+        salon.appointmentId,
+        salon.opportunityId,
+        source.revisionId,
+      ])
+        expect(JSON.stringify(foreign.body)).not.toContain(sourceId);
+      await db.prisma.membership.updateMany({
+        where: { tenantId: salon.tenant.id, userId: salon.owner.id },
+        data: { status: 'suspended' },
+      });
+      const revoked = await request(http.app.getHttpServer())
+        .post('/api/ai/chat')
+        .set('authorization', `Bearer ${token}`)
+        .send({
+          surface: 'web',
+          requestId: checkpoint.requestId,
+          messages: [{ role: 'user', content: compoundPrompts.compound }],
+        });
+      expect([401, 403]).toContain(revoked.status);
+      const revokedRun = await request(http.app.getHttpServer())
+        .get(runPath)
+        .set('authorization', `Bearer ${token}`);
+      expect([401, 403]).toContain(revokedRun.status);
+      expect(providerReads).toHaveLength(deniedProviderMark);
+      expect(reads).toHaveLength(deniedReadMark);
+      expect(model.mock.calls).toHaveLength(deniedModelMark);
+      expect(
+        await db.prisma.c9Run.count({ where: { tenantId: salon.tenant.id } }),
+      ).toBe(3);
+      expect(
+        await db.prisma.c9Run.count({
+          where: { tenantId: foreignSalon.tenant.id },
+        }),
+      ).toBe(0);
+      expect(
+        await compoundGraph(
+          salon,
+          source,
+          checkpoint.first.coordination.run_id,
+        ),
+      ).toBe(checkpoint.graph);
+      expect(
+        await compoundGraph(salon, source, checkpoint.held.runId, true),
+      ).toBe(checkpoint.held.graph);
+      expect(await businessState(salon.tenant.id)).toBe(
+        checkpoint.businessHash,
+      );
+      expect(await businessState(foreignSalon.tenant.id)).toBe(foreignBefore);
+      expect(unexpectedEdges).toEqual([]);
+      observations.refusals = {
+        foreignTenant: foreign.status,
+        revokedChat: revoked.status,
+        revokedRun: revokedRun.status,
+        deniedProviderReads: 0,
+        deniedModelCalls: 0,
+      };
+      observations.processRestart = true;
+      observations.postgresRestart = true;
+      observations.heldNoRedispatch = true;
+    }
+    writeFileSync(
+      reportPath!,
+      JSON.stringify(
+        {
+          contract: 'maya.explicit-business-occupancy-http-pg-proof/1',
+          stage,
+          pid: process.pid,
+          postgresStarted: await postgresStarted(),
+          database: database.database,
+          nativeYclientsAdapter: true,
+          syntheticProviderTransport: true,
+          scriptedSemanticPlanner: true,
+          realModelAcceptance: false,
+          externalProviderAcceptance: false,
+          browserAcceptance: false,
+          c10AutonomousAdmission: false,
+          c7Measurement: 'owner-published business_period MeasurementRevision',
+          providerReadCalls: providerReads.length,
+          providerWriteCalls: 0,
+          modelCalls: model.mock.calls.length,
+          businessWrites: 0,
+          actionExecutions: 0,
+          source: checkpoint.source,
+          confirmedRunId: checkpoint.first.coordination.run_id,
+          heldRunId: checkpoint.held.runId,
+          observations,
+        },
+        null,
+        2,
+      ) + '\n',
+      { mode: 0o600, flag: 'wx' },
+    );
+  }
+
   async function browserAcceptance() {
     const config = http.app.get(ConfigService);
     config.set('EMAIL_LOGIN_ENABLED', 'true');
     config.set('EMAIL_AUTH_PROVIDER', 'debug');
     const salon = await makeSalon(),
-      expired = await makeSalon(true);
+      expired = compound ? salon : await makeSalon(true);
+    const compoundSource = compound ? await publishCompoundSource(salon) : null;
     const before = await businessState(salon.tenant.id);
     const expiredBefore = await businessState(expired.tenant.id);
     const mark = http.recorder.mark();
     reads.length = 0;
     let first: ChatBody | undefined, firstGraph: string | undefined;
-    const expected = [
-      'available',
-      'history',
-      'offline',
-      'reconnected',
-      'unbound',
-      'revoked',
-      'expired',
-    ];
+    const expected = compound
+      ? [
+          'compound_available',
+          'compound_clarification',
+          'compound_history',
+          'compound_continued',
+        ]
+      : [
+          'available',
+          'history',
+          'offline',
+          'reconnected',
+          'unbound',
+          'revoked',
+          'expired',
+        ];
     const completed: string[] = [];
     const backendOrigin = await http.listenLoopback();
     await new Promise<void>((resolve, reject) => {
@@ -945,6 +1655,9 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
                 backendOrigin,
                 ownerEmail: salon.owner.email,
                 expiredEmail: expired.owner.email,
+                ...(compound
+                  ? { compound: true, question: OWNER_REVIEW_QUESTION }
+                  : {}),
                 output: path.dirname(reportPath!),
               });
               return;
@@ -954,6 +1667,53 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
             expect(await businessState(salon.tenant.id)).toBe(before);
             expect(await businessState(expired.tenant.id)).toBe(expiredBefore);
             expect(unexpectedEdges).toEqual([]);
+            if (compound) {
+              const body = message.body as CompoundBody | undefined;
+              const continued = message.name === 'compound_continued';
+              expect(model.mock.calls.length).toBe(
+                continued ? 3 : message.name === 'compound_available' ? 1 : 2,
+              );
+              if (message.name === 'compound_clarification') {
+                expect(body?.reply).toBe(OWNER_REVIEW_QUESTION);
+                expect(body?.coordination).toBeUndefined();
+              } else if (body) {
+                assertCompoundReply(body, salon, false);
+                const persisted = await compoundGraph(
+                  salon,
+                  compoundSource!,
+                  body.coordination.run_id,
+                );
+                if (!continued) {
+                  first = body;
+                  firstGraph = persisted;
+                } else {
+                  expect(body.coordination.run_id).not.toBe(
+                    first!.coordination.run_id,
+                  );
+                  expect(observations.restoredClarificationReachedPlanner).toBe(
+                    true,
+                  );
+                }
+              }
+              expect(first).toBeDefined();
+              expect(
+                await compoundGraph(
+                  salon,
+                  compoundSource!,
+                  first!.coordination.run_id,
+                ),
+              ).toBe(firstGraph);
+              expect(
+                await db.prisma.c9Run.count({
+                  where: { tenantId: salon.tenant.id },
+                }),
+              ).toBe(continued ? 2 : 1);
+              expect(reads).toHaveLength(continued ? 4 : 2);
+              if (body) observations[message.name] = body;
+              completed.push(message.name);
+              child.send({ type: 'continue:' + message.name });
+              return;
+            }
             expect(model).not.toHaveBeenCalled();
             const body = message.body;
             if (body) {
@@ -1062,7 +1822,9 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
       reportPath!,
       JSON.stringify(
         {
-          contract: 'maya.explicit-occupancy-browser-http-pg-proof/1',
+          contract: compound
+            ? 'maya.explicit-business-occupancy-browser-http-pg-proof/1'
+            : 'maya.explicit-occupancy-browser-http-pg-proof/1',
           stage,
           pid: process.pid,
           postgresStarted: await postgresStarted(),
@@ -1089,6 +1851,11 @@ describe('explicit cancellation window [HTTP] [PostgreSQL] [two processes] [nati
     );
   }
   it('persists one request/proposal/evidence graph, resumes without reread, isolates and refuses revoked authority', async () => {
+    if (compound) {
+      if (stage === 'browser') await browserAcceptance();
+      else await compoundAcceptance();
+      return;
+    }
     if (stage === 'browser') {
       await browserAcceptance();
       return;
