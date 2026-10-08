@@ -335,6 +335,35 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       ),
     ).toBe(true);
     expect(availabilityCalls.at(-1)?.[2].date).toContain(tomorrow);
+    expect(availabilityCalls.at(-1)?.[2].time).toBe('18:30');
+    // Actual registered handler result, not scripted model output. The previous
+    // dated READ contains several daily slots; the final exact READ contains only 18:30.
+    const availabilityResults = await Promise.all(
+      reads.mock.calls.flatMap((call, i) =>
+        call[0] === 'booking.availability.read'
+          ? [reads.mock.results[i].value as Promise<unknown>]
+          : [],
+      ),
+    );
+    const prior = availabilityResults.at(-2) as { slots: { start: string }[] };
+    const exact = availabilityResults.at(-1) as {
+      timezone: string;
+      requested_date: string;
+      requested_time: string;
+      slots: { start: string; staff_id: string; branch_id: string }[];
+    };
+    expect(prior.slots.length).toBeGreaterThan(1);
+    expect(exact.timezone).toBe('Europe/Moscow');
+    expect(exact.requested_date).toBe(tomorrow);
+    expect(exact.requested_time).toBe('18:30');
+    expect(exact.slots).toEqual([
+      {
+        start: new Date(`${tomorrow}T18:30:00+03:00`).toISOString(),
+        end: new Date(`${tomorrow}T19:00:00+03:00`).toISOString(),
+        staff_id: other.id,
+        branch_id: branch.id,
+      },
+    ]);
     expect(
       await db.prisma.actionExecution.count({
         where: { tenantId: tenant.id, actionClass: 'create_appointment' },

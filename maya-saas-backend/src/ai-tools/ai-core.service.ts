@@ -1655,6 +1655,9 @@ export class AiCoreService {
                     surface: dto.surface,
                     arguments: {
                       date,
+                      ...(isExactBookingTime(timePreference)
+                        ? { time: timePreference }
+                        : {}),
                       staff_id: bound.staff.id,
                       service_ids: bound.services.map((s) => s.id),
                       ...(branch ? { branch_id: branch.id } : {}),
@@ -1706,7 +1709,25 @@ export class AiCoreService {
                 {
                   reply: this.widgetResolution(execution).resolution
                     ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
-                    : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
+                    : execution.status === 'completed' &&
+                        isExactBookingTime(timePreference) &&
+                        this.record(execution.result).exact_time_unavailable ===
+                          'ambiguous_local_time'
+                      ? `На ${date.slice(0, 10)} в ${timePreference} источник возвращает неоднозначное локальное время. Точный вариант подтвердить не могу. Укажите другое время или дату. Запись не создана.`
+                      : execution.status === 'completed' &&
+                          isExactBookingTime(timePreference) &&
+                          this.record(execution.result)
+                            .exact_time_unavailable === 'incomplete_source'
+                        ? `На ${date.slice(0, 10)} в ${timePreference} данных источника недостаточно для проверки точного времени. Запись не создана.`
+                        : execution.status === 'completed' &&
+                            isExactBookingTime(timePreference) &&
+                            Array.isArray(
+                              this.record(execution.result).slots,
+                            ) &&
+                            (this.record(execution.result).slots as unknown[])
+                              .length === 0
+                          ? `На ${date.slice(0, 10)} в ${timePreference} не нашла подтверждённых свободных окон. Выберите другое время или дату. Запись не создана.`
+                          : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
                   source: 'safe_fallback',
                   action: null,
                   grounding: this.groundingReport(
@@ -2236,6 +2257,8 @@ export class AiCoreService {
             this.contextualUserText(sanitized.messages),
           ) ||
           personalPreparation ||
+          (decision.toolCall.name === 'booking.availability.read' &&
+            isExactBookingTime(hardenedArguments.time)) ||
           goodsRead ||
           publicConsultation
         ) {
@@ -3950,9 +3973,23 @@ export class AiCoreService {
       case 'operations.journal.read':
         return this.deterministicOperationsJournalReply(evidence.result);
       case 'booking.availability.read': {
-        const slots = this.record(evidence.result).slots;
+        const availability = this.record(evidence.result);
+        const slots = availability.slots;
         if (!Array.isArray(slots)) {
           return null;
+        }
+        if (
+          isExactBookingTime(availability.requested_time) &&
+          typeof availability.requested_date === 'string'
+        ) {
+          const when = `${availability.requested_date} в ${availability.requested_time}`;
+          if (availability.exact_time_unavailable === 'ambiguous_local_time')
+            return `На ${when} источник возвращает неоднозначное локальное время. Точный вариант подтвердить не могу. Укажите другое время или дату. Запись не создана.`;
+          if (availability.exact_time_unavailable === 'incomplete_source')
+            return `На ${when} данных источника недостаточно для проверки точного времени. Запись не создана.`;
+          return slots.length === 0
+            ? `На ${when} не нашла подтверждённых свободных окон. Проверить другое время или дату?`
+            : `На ${when} найдено ${slots.length} ${this.pluralize(slots.length, 'окно', 'окна', 'окон')}. Выберите конкретный вариант, затем проверьте детали и подтвердите запись.`;
         }
         const dateMatch = userText.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
         const dateLabel = dateMatch
@@ -6439,7 +6476,7 @@ export class AiCoreService {
             acceptedBookingServices.add(id);
         }
       },
-      project: <T>(value: T, catalog = false): T => {
+      project: <T,>(value: T, catalog = false): T => {
         if (catalog && Array.isArray(value)) {
           for (const entry of value as AiCoreToolResult[]) {
             if (entry.name !== 'catalog.services.read') continue;
@@ -6459,7 +6496,7 @@ export class AiCoreService {
         }
         return walk(value, catalog) as T;
       },
-      resolveReferences: <T>(value: T, semantic = false): T =>
+      resolveReferences: <T,>(value: T, semantic = false): T =>
         restore(value, semantic) as T,
       present: (value: string) =>
         value.replace(

@@ -323,6 +323,43 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it('accepts only exact HH:mm with a selected staff and no caller timezone authority', () => {
+    const args = { date: '2026-11-01', staff_id: '71', time: '01:30' };
+    expect(
+      service.validateArguments('booking.availability.read', args),
+    ).toEqual({
+      ...args,
+      date: '2026-11-01T00:00:00.000Z',
+    });
+    for (const time of [
+      '1:30',
+      '24:00',
+      '01:60',
+      '01:30:00',
+      ' 01:30 ',
+      null,
+      ['01:30'],
+    ])
+      expect(() =>
+        service.validateArguments('booking.availability.read', {
+          ...args,
+          time,
+        }),
+      ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('booking.availability.read', {
+        date: args.date,
+        time: args.time,
+      }),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      service.validateArguments('booking.availability.read', {
+        ...args,
+        timezone: 'UTC',
+      }),
+    ).toThrow(BadRequestException);
+  });
+
   it('keeps a booking availability day stable across timezone offsets', () => {
     expect(
       service.validateArguments('booking.availability.read', {

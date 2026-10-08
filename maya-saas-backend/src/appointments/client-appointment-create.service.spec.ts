@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import type { BoundClientBookingSnapshot } from '../action-engine/client-booking-intent.contract';
 import {
   BadRequestException,
   ForbiddenException,
@@ -641,6 +642,26 @@ describe('B31 verified Client create initiator and canonical executor', () => {
 /** U-OWN·V11: the read-only half of the create owner. `forAccount` runs the same
  * extraction and then executes, so a quote can never drift from the create. */
 describe('U-OWN read-only create quote', () => {
+  const retainedOverlap = (startAt: string): BoundClientBookingSnapshot => ({
+    executionId: 'synthetic-retained-execution',
+    descriptor: {
+      tenantId: 'tenant-1',
+      mayaClientId: 'client-1',
+      calendarTarget: { source: 'internal', provider: null, companyId: null },
+      branchId: null,
+      staffRef: 'staff-1',
+      serviceIds: ['svc-1'],
+      startAt,
+      durationMinutes: null,
+      clientName: 'Guest',
+      clientPhone: '+79990001122',
+      notes: null,
+      creationMode: 'client',
+      allowBusy: false,
+      notifyBySmsHours: 0,
+    },
+    resolutionContext: { timezone: 'America/New_York' },
+  });
   const quote = (
     h: ReturnType<typeof setup>,
     input?: Record<string, unknown>,
@@ -654,6 +675,188 @@ describe('U-OWN read-only create quote', () => {
           (input ?? h.dto) as never,
         ),
     );
+
+  it.each(['2026-11-01T06:30:00.000Z', '2026-11-01T01:30:00-05:00'])(
+    'refuses the other overlap instant %s before generating an alias or returning the first instant booking',
+    async (start) => {
+      const h = setup();
+      h.prisma.tenant.findUnique.mockResolvedValue({
+        defaultTimezone: 'America/New_York',
+      });
+      // If the former local-time lookup were reached, it would collide with this
+      // different synthetic execution at 05:30Z. No authoritative fixture is minted.
+      h.prisma.actionExecution.findUnique.mockResolvedValue({
+        id: 'first-instant-execution',
+      });
+      const input = { ...h.dto, start };
+      await expect(quote(h, input)).rejects.toMatchObject({
+        response: { error: { code: 'booking_preview_stale' } },
+      });
+      await expect(h.run(input)).rejects.toMatchObject({
+        response: { error: { code: 'booking_preview_stale' } },
+      });
+      expect(h.runtime.resolveClientBookingRetry).not.toHaveBeenCalled();
+      expect(h.runtime.preview).not.toHaveBeenCalled();
+      expect(h.prisma.actionExecution.findUnique).not.toHaveBeenCalled();
+      expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+      expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      expect(h.provider.createAppointment).not.toHaveBeenCalled();
+      expect(h.rows).toHaveLength(0);
+    },
+  );
+
+  it('refuses ambiguous fresh source rows even when the requested first instant round-trips', async () => {
+    const h = setup();
+    h.prisma.tenant.findUnique.mockResolvedValue({
+      defaultTimezone: 'America/New_York',
+    });
+    const starts = ['2026-11-01T05:30:00.000Z', '2026-11-01T06:30:00.000Z'];
+    (h.crm.getAvailableSlots as jest.Mock).mockResolvedValue(
+      starts.map((start) => ({
+        start,
+        end: new Date(Date.parse(start) + 3_600_000).toISOString(),
+        staff_id: 'staff-1',
+        branch_id: null,
+      })),
+    );
+    await expect(
+      quote(h, { ...h.dto, start: starts[0] }),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'booking_preview_stale' } },
+    });
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+
+  it.each(['not-a-date', '2026-11-01T01:30:00'])(
+    'refuses malformed or offset-less fresh source start %s as unavailable before matching',
+    async (start) => {
+      const h = setup();
+      (h.crm.getAvailableSlots as jest.Mock).mockResolvedValue([
+        { start: START, end: END, staff_id: 'staff-1', branch_id: null },
+        { start, end: END, staff_id: 'staff-1', branch_id: null },
+      ]);
+      await expect(quote(h)).rejects.toMatchObject({
+        response: { error: { code: 'booking_service_facts_unavailable' } },
+      });
+      expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+      expect(h.provider.createAppointment).not.toHaveBeenCalled();
+      expect(h.rows).toHaveLength(0);
+    },
+  );
+
+  it('preserves an ordinary offset instant through quote and the existing internal executor', async () => {
+    const h = setup();
+    h.prisma.tenant.findUnique.mockResolvedValue({
+      defaultTimezone: 'America/New_York',
+    });
+    const start = '2026-11-01T07:30:00.000Z';
+    const slots = [
+      {
+        start,
+        end: '2026-11-01T08:30:00.000Z',
+        staff_id: 'staff-1',
+        branch_id: null,
+      },
+    ];
+    (h.crm.getAvailableSlots as jest.Mock).mockResolvedValue(slots);
+    h.calendar.getAvailableSlots.mockResolvedValue(slots);
+    const input = { ...h.dto, start: '2026-11-01T02:30:00-05:00' };
+    expect((await quote(h, input)).start).toBe(start);
+    expect((await h.run(input)).appointment.startAt.toISOString()).toBe(start);
+    expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+    expect(h.rows).toHaveLength(1);
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('does not turn a second overlap instant into replay of a first-instant alias', async () => {
+    const h = setup();
+    h.prisma.tenant.findUnique.mockResolvedValue({
+      defaultTimezone: 'America/New_York',
+    });
+    h.runtime.resolveClientBookingRetry.mockResolvedValue(
+      retainedOverlap('2026-11-01T05:30:00.000Z'),
+    );
+    await expect(
+      h.context.runAsAuthPrincipal(
+        { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+        () =>
+          h.service.forAccount(
+            'tenant-1',
+            'user-1',
+            { ...h.dto, start: '2026-11-01T01:30:00-05:00' },
+            {
+              callerIdempotency: {
+                scope: 'synthetic-existing-alias',
+                key: 'first-instant-alias',
+              },
+            },
+          ),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'IDEMPOTENCY_CONFLICT' } },
+    });
+    expect(h.runtime.resolveClientBookingRetry).toHaveBeenCalledTimes(1);
+    expect(h.runtime.preview).not.toHaveBeenCalled();
+    expect(h.prisma.actionExecution.findUnique).not.toHaveBeenCalled();
+    expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+
+  it('retains the explicit original scoped durable alias path for UNKNOWN without fresh slot lookup or dispatch', async () => {
+    const h = setup();
+    h.prisma.tenant.findUnique.mockResolvedValue({
+      defaultTimezone: 'America/New_York',
+    });
+    // Synthetic retained lookup result. It proves routing to an already bound
+    // second instant UNKNOWN, not acceptance of a new overlap booking.
+    const bound = retainedOverlap('2026-11-01T06:30:00.000Z');
+    h.runtime.resolveClientBookingRetry.mockResolvedValue(bound);
+    h.runtime.executeWithReceipt.mockRejectedValue(
+      Object.assign(new Error('synthetic unknown'), {
+        actionExecutionResult: {
+          state: 'UNKNOWN',
+          executionId: bound.executionId,
+        },
+      }),
+    );
+    await expect(
+      h.context.runAsAuthPrincipal(
+        { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+        () =>
+          h.service.forAccount(
+            'tenant-1',
+            'user-1',
+            { ...h.dto, start: '2026-11-01T06:30:00.000Z' },
+            {
+              callerIdempotency: {
+                scope: 'synthetic-existing-alias',
+                key: 'synthetic-original-request',
+              },
+            },
+          ),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'crm_outcome_unknown' } },
+    });
+    expect(h.runtime.resolveClientBookingRetry).toHaveBeenCalledTimes(1);
+    expect(h.runtime.resolveClientBookingRetry).toHaveBeenCalledWith(
+      'tenant-1',
+      'client-1',
+      'synthetic-original-request',
+    );
+    expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+    expect(h.runtime.executeWithReceipt.mock.calls[0][0].input).toMatchObject({
+      start: '2026-11-01T06:30:00.000Z',
+    });
+    expect(h.runtime.preview).not.toHaveBeenCalled();
+    expect(h.crm.getAvailableSlots).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
 
   it('quotes the owned create without an execution or a row', async () => {
     const h = setup();
@@ -991,7 +1194,7 @@ describe('SB-1 canonical create with personal context', () => {
     ],
     revalidate: jest.fn().mockResolvedValue(undefined),
   });
-  const ownerRun = <T>(h: ReturnType<typeof setup>, fn: () => T) =>
+  const ownerRun = <T,>(h: ReturnType<typeof setup>, fn: () => T) =>
     h.context.runAsAuthPrincipal(
       { tenantId: 'tenant-1', userId: 'user-1', role: 'tenant_owner' },
       fn,

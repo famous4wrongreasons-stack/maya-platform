@@ -20,6 +20,8 @@ import { TenantsService } from '../tenants/tenants.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
+import { ConflictException, ForbiddenException } from '@nestjs/common';
+
 describe('AiToolHandlerService output minimization', () => {
   const principal = {
     tenantId: 'tenant-a',
@@ -30,6 +32,206 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  describe('exact source-local availability preference — synthetic source facts', () => {
+    const scope = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+    const slot = (start: string) => ({
+      start,
+      end: new Date(Date.parse(start) + 30 * 60_000).toISOString(),
+      staff_id: '71',
+      branch_id: scope.branchId,
+    });
+    function fixture(timezone: string, starts: string[]) {
+      const getAvailableSlots = jest.fn().mockResolvedValue(starts.map(slot));
+      const availabilityContext = jest
+        .fn()
+        .mockResolvedValue({ branchId: null, timezone: 'UTC' });
+      const branchTimezone = jest.fn().mockResolvedValue({ timezone });
+      const readBranchAvailabilityRevision = jest
+        .fn()
+        .mockResolvedValue(scope.sourceRevision);
+      const handler = createService({
+        crmService: {
+          availabilityContext,
+          readBranchAvailabilityRevision,
+          getServices: jest
+            .fn()
+            .mockResolvedValue([{ id: '81', name: 'Synthetic service' }]),
+        } as unknown as CrmService,
+        appointmentsService: {
+          getAvailableSlots,
+        } as unknown as AppointmentsService,
+        staffService: {
+          listStaff: jest
+            .fn()
+            .mockResolvedValue([{ id: '71', name: 'Synthetic staff' }]),
+        } as unknown as StaffService,
+        prisma: {
+          branch: { findFirst: branchTimezone },
+        } as unknown as PrismaService,
+      });
+      const run = (date: string, time: string, branch = true) =>
+        handler.execute(
+          'booking.availability.read',
+          principal,
+          {
+            date,
+            time,
+            staff_id: '71',
+            service_ids: ['81'],
+            ...(branch ? { branch_id: scope.branchId } : {}),
+          },
+          'synthetic-exact-read',
+        );
+      return {
+        run,
+        getAvailableSlots,
+        availabilityContext,
+        branchTimezone,
+        readBranchAvailabilityRevision,
+      };
+    }
+    it.each([
+      {
+        timezone: 'Asia/Kathmandu',
+        date: '2026-10-11',
+        time: '00:15',
+        starts: [
+          '2026-10-10T18:30:00Z',
+          '2026-10-10T18:45:00Z',
+          '2026-10-11T18:30:00Z',
+        ],
+        expected: ['2026-10-10T18:30:00Z'],
+      },
+      {
+        timezone: 'Europe/Moscow',
+        date: '2026-10-11',
+        time: '14:30',
+        starts: [
+          '2026-10-11T11:00:00Z',
+          '2026-10-11T11:30:30Z',
+          '2026-10-11T12:00:00Z',
+        ],
+        expected: [],
+      },
+      {
+        timezone: 'America/New_York',
+        date: '2026-03-08',
+        time: '02:30',
+        starts: ['2026-03-08T06:30:00Z', '2026-03-08T07:30:00Z'],
+        expected: [],
+      },
+    ])(
+      'filters $date $time in $timezone without nearest/day/DST normalization',
+      async ({ timezone, date, time, starts, expected }) => {
+        const f = fixture(timezone, starts);
+        await expect(f.run(date, time)).resolves.toEqual({
+          timezone,
+          requested_date: date,
+          requested_time: time,
+          booking_selection: {
+            tenantId: 'tenant-a',
+            serviceId: '81',
+            staffId: '71',
+            branchId: scope.branchId,
+            branchSourceRevision: scope.sourceRevision,
+          },
+          slots: expected.map(slot),
+        });
+        expect(f.getAvailableSlots).toHaveBeenCalledTimes(1);
+        expect(f.getAvailableSlots).toHaveBeenCalledWith('tenant-a', {
+          date,
+          staffId: '71',
+          serviceIds: ['81'],
+          branchId: scope.branchId,
+        });
+      },
+    );
+    it.each([
+      { starts: ['2026-11-01T05:30:00Z', '2026-11-01T06:30:00Z'] },
+      { starts: ['2026-11-01T06:30:00Z'] },
+      { starts: ['2026-11-01T01:30:00-05:00'] },
+    ])(
+      'refuses overlap or non-round-trippable exact source instants $starts without proposing a substitute',
+      async ({ starts }) => {
+        const f = fixture('America/New_York', starts);
+        await expect(f.run('2026-11-01', '01:30')).resolves.toEqual({
+          timezone: 'America/New_York',
+          requested_date: '2026-11-01',
+          requested_time: '01:30',
+          exact_time_unavailable: 'ambiguous_local_time',
+          booking_selection: null,
+          slots: [],
+        });
+        expect(f.getAvailableSlots).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('continues an ordinary exact source instant without changing its branch witness', async () => {
+      const f = fixture('America/New_York', [
+        '2026-11-01T07:30:00Z',
+        '2026-11-01T08:00:00Z',
+      ]);
+      await expect(f.run('2026-11-01', '02:30')).resolves.toMatchObject({
+        slots: [slot('2026-11-01T07:30:00Z')],
+        booking_selection: {
+          branchId: scope.branchId,
+          branchSourceRevision: scope.sourceRevision,
+        },
+      });
+    });
+    it('reports incomplete source timestamps separately from an empty exact match', async () => {
+      const f = fixture('Europe/Moscow', ['2026-10-11T11:30:00Z']);
+      f.getAvailableSlots.mockResolvedValueOnce([
+        { ...slot('2026-10-11T11:30:00Z'), start: '2026-10-11T14:30:00' },
+      ]);
+      await expect(f.run('2026-10-11', '14:30')).resolves.toMatchObject({
+        exact_time_unavailable: 'incomplete_source',
+        booking_selection: null,
+        slots: [],
+      });
+    });
+    it('uses the selected internal staff calendar instead of the tenant clock', async () => {
+      const f = fixture('UTC', ['2026-10-10T18:30:00Z']);
+      f.availabilityContext.mockResolvedValue({
+        branchId: scope.branchId,
+        timezone: 'Asia/Kathmandu',
+      });
+      await expect(f.run('2026-10-11', '00:15', false)).resolves.toMatchObject({
+        timezone: 'Asia/Kathmandu',
+        slots: [slot('2026-10-10T18:30:00Z')],
+      });
+      expect(f.branchTimezone).not.toHaveBeenCalled();
+    });
+    it('does not hide a foreign branch at a nonmatching time, or return facts after timezone/source drift', async () => {
+      const f = fixture('Europe/Moscow', ['2026-10-11T11:30:00Z']);
+      f.getAvailableSlots.mockResolvedValueOnce([
+        slot('2026-10-11T11:30:00Z'),
+        { ...slot('2026-10-11T12:00:00Z'), branch_id: 'foreign-branch' },
+      ]);
+      await expect(f.run('2026-10-11', '14:30')).rejects.toThrow(
+        ConflictException,
+      );
+      f.branchTimezone
+        .mockResolvedValueOnce({ timezone: 'Europe/Moscow' })
+        .mockResolvedValue({ timezone: 'UTC' });
+      await expect(f.run('2026-10-11', '14:30')).rejects.toThrow(
+        ConflictException,
+      );
+      f.readBranchAvailabilityRevision
+        .mockResolvedValueOnce(scope.sourceRevision)
+        .mockResolvedValue('b'.repeat(64));
+      await expect(f.run('2026-10-11', '14:30')).rejects.toThrow(
+        ConflictException,
+      );
+    });
+    it('propagates a revoked current calendar before reading source slots', async () => {
+      const f = fixture('Europe/Moscow', []);
+      const denial = new ForbiddenException('synthetic current source denied');
+      f.availabilityContext.mockRejectedValue(denial);
+      await expect(f.run('2026-10-11', '14:30')).rejects.toBe(denial);
+      expect(f.getAvailableSlots).not.toHaveBeenCalled();
+    });
   });
 
   it('catalog READ uses the CRM qualified projection and never the defaulted public DTO', async () => {

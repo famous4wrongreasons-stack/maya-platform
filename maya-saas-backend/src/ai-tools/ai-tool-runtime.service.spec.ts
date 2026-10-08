@@ -355,6 +355,80 @@ describe('AiToolRuntimeService', () => {
     },
   );
 
+  describe('exact-time READ cache identity', () => {
+    function fixture() {
+      const h = createHarness();
+      let row: Record<string, unknown> | null = null;
+      h.executionFindUnique.mockImplementation(() => Promise.resolve(row));
+      h.executionCreate.mockImplementation((value: unknown) => {
+        row = { ...record(record(value).data), id: 'exact-time-read' };
+        return Promise.resolve(row);
+      });
+      h.executionUpdate.mockImplementation((value: unknown) => {
+        row = { ...row, ...record(record(value).data) };
+        return Promise.resolve(row);
+      });
+      h.handlerExecute.mockResolvedValue({ slots: [] });
+      const run = (time = '14:30', replay = false, actor = customer) =>
+        h.tenantContext.runAsSystemTenant('tenant-a', () => {
+          const input = {
+            surface: 'web' as const,
+            idempotencyKey: IDEMPOTENCY_KEY,
+            arguments: {
+              date: '2026-10-11',
+              time,
+              staff_id: '71',
+              service_ids: ['81'],
+              branch_id: 'maya-branch',
+            },
+          };
+          return replay
+            ? h.runtime.replayCompletedRead(
+                actor,
+                'booking.availability.read',
+                input,
+                'exact-time-read',
+                { suppressWidgetTrigger: true },
+              )
+            : h.runtime.execute(actor, 'booking.availability.read', input, {
+                suppressWidgetTrigger: true,
+              });
+        });
+      return { ...h, run };
+    }
+    it.each([false, true])(
+      'refuses the previous time under the same read key, replay=%s',
+      async (replay) => {
+        const h = fixture();
+        await h.run();
+        await expect(h.run('15:00', replay)).rejects.toThrow(ConflictException);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        expect(h.executionCreate).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('binds internal selected-staff calendar changes before replay and preserves policy/tenant denials', async () => {
+      const h = fixture();
+      h.availabilityTenant.mockResolvedValue({
+        calendarSource: 'internal',
+        defaultTimezone: 'UTC',
+      });
+      await h.run();
+      h.availabilityPreferenceCalendar.mockResolvedValue({
+        branchId: 'other-current-branch',
+        timezone: 'Asia/Kathmandu',
+      });
+      await expect(h.run('14:30', true)).rejects.toThrow(ConflictException);
+      h.policyAssertCanExecute.mockRejectedValue(
+        new ForbiddenException('revoked'),
+      );
+      await expect(h.run()).rejects.toThrow(ForbiddenException);
+      await expect(
+        h.run('14:30', false, { ...customer, tenantId: 'foreign-tenant' }),
+      ).rejects.toThrow(ForbiddenException);
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe.each([
     'booking.availability.read',
     'booking.group-availability.read',
@@ -996,7 +1070,11 @@ function createHarness(
     listAllowed: jest.fn().mockResolvedValue([]),
   } as unknown as AiToolPolicyService;
   const handlerExecute = jest.fn();
+  const availabilityPreferenceCalendar = jest
+    .fn()
+    .mockResolvedValue({ branchId: 'maya-branch', timezone: 'Europe/Moscow' });
   const handler = {
+    availabilityPreferenceCalendar,
     execute: handlerExecute,
     // Доводка аргументов и обогащение карточки — тождественные для всего,
     // кроме записи расхода; настоящее поведение проверяется в её собственных
@@ -1070,6 +1148,7 @@ function createHarness(
     personalRevalidate,
     personal,
     handlerExecute,
+    availabilityPreferenceCalendar,
     policyAssertCanExecute,
     policyAssertCanDecide,
     getLastAuditLogInput: () => lastAuditLogInput,

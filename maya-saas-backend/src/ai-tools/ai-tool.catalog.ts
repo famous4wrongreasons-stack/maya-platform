@@ -215,13 +215,19 @@ export const MAYA_AI_TOOL_CATALOG = [
   },
   {
     name: 'booking.availability.read',
-    description: 'Read available appointment slots without customer PII.',
+    description:
+      'Read available appointment slots without customer PII. Optional time is an exact HH:mm preference in the selected source calendar; requires staff_id and never selects a nearby time.',
     inputSchema: {
       type: 'object',
       additionalProperties: false,
       required: ['date'],
       properties: {
         date: { type: 'string', format: 'date-time' },
+        time: {
+          type: 'string',
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$',
+          description: 'Exact source-local HH:mm; requires staff_id.',
+        },
         staff_id: { type: 'string', minLength: 1, maxLength: 128 },
         service_ids: {
           type: 'array',

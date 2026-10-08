@@ -577,6 +577,46 @@ describe('AiCoreService', () => {
       }
     });
 
+    it('carries exact time corrections into fresh READs without losing branch/staff/date and gives an honest empty result', async () => {
+      const f = bookingFixture();
+      await f.turn({ ...initial, date_or_period: '2026-10-11', time: '14:30' });
+      const empty = await f.turn({ time: '15:00' });
+      await f.turn({ services: ['Борода'] });
+      expect(f.availabilityArgs()).toEqual([
+        {
+          date: '2026-10-11',
+          time: '14:30',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+        },
+        {
+          date: '2026-10-11',
+          time: '15:00',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+        },
+        {
+          date: '2026-10-11',
+          time: '15:00',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-b'],
+        },
+      ]);
+      expect(empty.reply).toContain('2026-10-11 в 15:00');
+      expect(empty.reply).toContain('не нашла подтверждённых свободных окон');
+      expect(empty.reply).not.toContain('Выберите подходящее время');
+      expect(empty.action).toBeNull();
+      expect(
+        f.runtime.execute.mock.calls.some(
+          (call) =>
+            typeof call[1] === 'string' && call[1].startsWith('appointments.'),
+        ),
+      ).toBe(false);
+    });
+
     it('retains every other choice across date, service, staff and branch corrections and intent transition', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
       try {
@@ -631,6 +671,7 @@ describe('AiCoreService', () => {
             staff_id: 'staff-b',
             service_ids: ['service-b'],
             date: '2026-10-11',
+            time: '14:30',
           },
         ]);
         expect(f.crm.resolveBookingBranchPreference.mock.calls).toEqual([
@@ -1651,6 +1692,87 @@ describe('AiCoreService', () => {
     const firstInput = mocks.model.decide.mock.calls[0]?.[0];
     expect(JSON.stringify(firstInput)).toContain('2026-07-31');
     expect(JSON.stringify(firstInput)).not.toContain('918 000');
+  });
+
+  it.each([
+    {
+      reason: 'ambiguous_local_time',
+      expected: 'неоднозначное локальное время',
+    },
+    { reason: 'incomplete_source', expected: 'данных источника недостаточно' },
+  ])(
+    'does not call unavailable exact source $reason an empty or occupied calendar',
+    async ({ reason, expected }) => {
+      const mocks = createService(['booking.availability.read']);
+      mocks.model.decide.mockResolvedValueOnce(
+        decision({
+          reply: 'Проверяю.',
+          toolCall: {
+            name: 'booking.availability.read',
+            arguments: { date: '2026-11-01', time: '01:30', staff_id: '71' },
+          },
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'exact-source-refusal',
+        result: {
+          timezone: 'America/New_York',
+          requested_date: '2026-11-01',
+          requested_time: '01:30',
+          exact_time_unavailable: reason,
+          booking_selection: null,
+          slots: [],
+        },
+      });
+      const answer = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Проверь выбранное точное время' }],
+      });
+      expect(answer.reply).toContain(expected);
+      expect(answer.reply).not.toMatch(
+        /занят|ближайш|не нашла подтверждённых свободных окон/,
+      );
+      expect(answer.action).toBeNull();
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('composes the exact filtered READ result without a second model answer suggesting another time', async () => {
+    const mocks = createService(['booking.availability.read']);
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: 'Проверяю.',
+        toolCall: {
+          name: 'booking.availability.read',
+          arguments: { date: '2026-10-11', time: '14:30', staff_id: '71' },
+        },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'exact-time-read',
+      result: {
+        timezone: 'Europe/Moscow',
+        requested_date: '2026-10-11',
+        requested_time: '14:30',
+        slots: [],
+      },
+    });
+    const answer = await mocks.service.chat(user, {
+      ...dto,
+      messages: [
+        {
+          role: 'user',
+          content: 'Проверь 11 октября в 14:30 у выбранного мастера',
+        },
+      ],
+    });
+    expect(answer.reply).toContain('2026-10-11 в 14:30');
+    expect(answer.reply).toContain('не нашла подтверждённых свободных окон');
+    expect(answer.reply).not.toMatch(/ближайш|зарезервиров|создана запись/i);
+    expect(answer.action).toBeNull();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('lets the model describe only the slots the availability tool returned', async () => {

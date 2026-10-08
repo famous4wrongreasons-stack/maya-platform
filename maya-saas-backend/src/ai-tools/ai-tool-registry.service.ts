@@ -251,6 +251,7 @@ export class AiToolRegistryService {
         return { query: this.assertClientSearchQuery(args.query) };
       case 'booking.availability.read':
         this.assertAllowedKeys(args, [
+          'time',
           'date',
           'staff_id',
           'service_ids',
@@ -258,6 +259,9 @@ export class AiToolRegistryService {
         ]);
         return {
           date: this.parseBookingDay(args.date, 'date'),
+          ...(args.time === undefined
+            ? {}
+            : { time: this.exactAvailabilityTime(args.time, args.staff_id) }),
           ...(args.staff_id === undefined
             ? {}
             : {
@@ -1352,6 +1356,16 @@ export class AiToolRegistryService {
       this.invalidArguments(`${field} must be an ISO date-time`);
     }
     return date;
+  }
+
+  private exactAvailabilityTime(value: unknown, staffId: unknown): string {
+    if (
+      typeof value !== 'string' ||
+      !/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value)
+    )
+      this.invalidArguments('time must be an exact HH:mm');
+    this.assertExternalId(staffId, 'staff_id');
+    return value;
   }
 
   private parseBookingDay(value: unknown, field: string): string {

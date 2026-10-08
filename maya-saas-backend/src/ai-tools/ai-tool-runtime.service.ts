@@ -2468,6 +2468,16 @@ export class AiToolRuntimeService {
         .update(
           this.canonicalJson({
             tenant,
+            ...(definition.name === 'booking.availability.read' &&
+            args.time !== undefined
+              ? {
+                  preferenceCalendar:
+                    await this.handler.availabilityPreferenceCalendar(
+                      principal.tenantId,
+                      args,
+                    ),
+                }
+              : {}),
             integration: integration
               ? {
                   ...integration,

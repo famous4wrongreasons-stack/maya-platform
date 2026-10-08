@@ -36,6 +36,7 @@ import { BusinessContentService } from '../business-content/business-content.ser
 import { UserRole } from '../common/domain.enums';
 import { CustomersService } from '../customers/customers.service';
 import { CrmService } from '../crm/crm.service';
+import { canonicalAppointmentInstant } from '../crm/appointment-time.utils';
 import type {
   CrmClientSearchResult,
   CrmJournalAppointment,
@@ -1509,10 +1510,32 @@ export class AiToolHandlerService {
       .slice(0, 8);
   }
 
+  /** Server-only calendar facts for exact preference reads, also bound into the existing READ hash. */
+  async availabilityPreferenceCalendar(
+    tenantId: string,
+    args: ValidatedAiToolArguments,
+  ) {
+    const selected = await this.crmService.availabilityContext(
+      tenantId,
+      this.requiredString(args.staff_id),
+    );
+    if (typeof args.branch_id !== 'string') return selected;
+    if (selected.branchId && selected.branchId !== args.branch_id)
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+    return {
+      branchId: args.branch_id,
+      timezone: await this.reportingTimezone(tenantId, args.branch_id),
+    };
+  }
+
   private async readAvailability(
     tenantId: string,
     args: ValidatedAiToolArguments,
   ) {
+    const exactTime = typeof args.time === 'string' ? args.time : null;
+    const preferenceCalendar = exactTime
+      ? await this.availabilityPreferenceCalendar(tenantId, args)
+      : null;
     const branchId = typeof args.branch_id === 'string' ? args.branch_id : null;
     const branchSourceRevision = branchId
       ? await this.crmService.readBranchAvailabilityRevision(tenantId, branchId)
@@ -1532,10 +1555,11 @@ export class AiToolHandlerService {
     const [services, staff, timezone] = await Promise.all([
       this.crmService.getServices(tenantId),
       this.staffService.listStaff(tenantId),
-      this.reportingTimezone(
-        tenantId,
-        typeof args.branch_id === 'string' ? args.branch_id : undefined,
-      ),
+      preferenceCalendar?.timezone ??
+        this.reportingTimezone(
+          tenantId,
+          typeof args.branch_id === 'string' ? args.branch_id : undefined,
+        ),
     ]);
     const serviceIds = this.stringArray(args.service_ids);
     const selection =
@@ -1561,10 +1585,79 @@ export class AiToolHandlerService {
       )) !== branchSourceRevision
     )
       throw new ConflictException({ error: { code: 'booking_preview_stale' } });
+    if (preferenceCalendar) {
+      const current = await this.availabilityPreferenceCalendar(tenantId, args);
+      // Validate every original source row before filtering; a foreign row cannot be hidden
+      // just because its local time does not match the requested preference.
+      if (
+        current.timezone !== preferenceCalendar.timezone ||
+        current.branchId !== preferenceCalendar.branchId ||
+        slots.some(
+          (slot) =>
+            slot.staff_id !== args.staff_id ||
+            (preferenceCalendar.branchId !== null &&
+              slot.branch_id !== preferenceCalendar.branchId),
+        )
+      )
+        throw new ConflictException({
+          error: { code: 'booking_preview_stale' },
+        });
+    }
+    const requestedDate = this.requiredString(args.date).slice(0, 10);
+    const selectedSlots = exactTime
+      ? slots.filter((slot) => {
+          // Only actual instants from the source qualify; never construct a local instant,
+          // round seconds, or normalize an absent DST hour to the next available time.
+          if (!/(?:Z|[+-]\d{2}:\d{2})$/.test(slot.start)) return false;
+          const instant = new Date(slot.start);
+          return (
+            Number.isFinite(instant.getTime()) &&
+            instant.getUTCSeconds() === 0 &&
+            instant.getUTCMilliseconds() === 0 &&
+            this.localDate(instant, timezone) === requestedDate &&
+            this.localTime(slot.start, timezone) === exactTime
+          );
+        })
+      : slots;
+    // The current create owner/provider path round-trips through local wall time.
+    // Do not expose two overlap instants, or an instant that that path would replace.
+    // Source incompleteness is distinct from a complete source with no exact match.
+    const incompleteSource =
+      exactTime &&
+      slots.some(
+        (slot) =>
+          !/(?:Z|[+-]\d{2}:\d{2})$/.test(slot.start) ||
+          !/(?:Z|[+-]\d{2}:\d{2})$/.test(slot.end) ||
+          !Number.isFinite(Date.parse(slot.start)) ||
+          !Number.isFinite(Date.parse(slot.end)) ||
+          Date.parse(slot.end) <= Date.parse(slot.start),
+      );
+    const ambiguousTime =
+      exactTime &&
+      selectedSlots.length > 0 &&
+      (new Set(selectedSlots.map((slot) => Date.parse(slot.start))).size > 1 ||
+        selectedSlots.some(
+          (slot) =>
+            canonicalAppointmentInstant(
+              `${requestedDate}T${exactTime}:00`,
+              timezone,
+            ) !== new Date(slot.start).toISOString(),
+        ));
+    const exactTimeUnavailable = incompleteSource
+      ? 'incomplete_source'
+      : ambiguousTime
+        ? 'ambiguous_local_time'
+        : null;
     return {
       timezone,
-      booking_selection: selection,
-      slots: slots.map((slot) => ({
+      ...(exactTime
+        ? { requested_time: exactTime, requested_date: requestedDate }
+        : {}),
+      ...(exactTimeUnavailable
+        ? { exact_time_unavailable: exactTimeUnavailable }
+        : {}),
+      booking_selection: exactTimeUnavailable ? null : selection,
+      slots: (exactTimeUnavailable ? [] : selectedSlots).map((slot) => ({
         start: slot.start,
         end: slot.end,
         staff_id: slot.staff_id,

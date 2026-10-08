@@ -304,7 +304,17 @@ export class ClientAppointmentCreateService {
               tenantTimezone: tenant?.defaultTimezone,
             });
     const localStart = normalizeRequestedStart(dto.start, timezone);
-    const start = canonicalAppointmentInstant(localStart, timezone);
+    const requestedInstant = canonicalAppointmentInstant(dto.start, timezone);
+    if (bound && requestedInstant !== bound.descriptor.startAt)
+      throw new ConflictException({ error: { code: 'IDEMPOTENCY_CONFLICT' } });
+    const start = bound
+      ? requestedInstant
+      : canonicalAppointmentInstant(localStart, timezone);
+    // A new exact instant must survive the existing wall-time quote/provider path.
+    // Refuse before deriving an alias or looking up a different existing appointment.
+    // An exact matching durable alias retains its original instant and replay path.
+    if (!bound && requestedInstant !== start)
+      throw new ConflictException({ error: { code: 'booking_preview_stale' } });
 
     // This is the existing server-derived caller alias, not the intent hash.
     // The kernel fingerprints only the versioned normalized business descriptor.
@@ -435,9 +445,37 @@ export class ClientAppointmentCreateService {
         serviceIds: dto.serviceIds,
         branchId: dto.branchId,
       });
+      if (
+        slots.some(
+          (candidate) =>
+            !candidate ||
+            typeof candidate.start !== 'string' ||
+            typeof candidate.end !== 'string' ||
+            !/(?:Z|[+-]\d{2}:\d{2})$/.test(candidate.start) ||
+            !/(?:Z|[+-]\d{2}:\d{2})$/.test(candidate.end) ||
+            !Number.isFinite(Date.parse(candidate.start)) ||
+            !Number.isFinite(Date.parse(candidate.end)) ||
+            Date.parse(candidate.end) <= Date.parse(candidate.start),
+        )
+      )
+        throw new ServiceUnavailableException({
+          error: { code: 'booking_service_facts_unavailable' },
+        });
       const slot = findMatchingSlotByLocalStart(slots, localStart, timezone);
       if (!slot)
         throw new BadRequestException({ error: { code: 'slot_taken' } });
+      // Fresh source data cannot substitute the other overlap instant, even if
+      // a stale selector/request reached this owner without the new READ filter.
+      if (
+        slots.some(
+          (candidate) =>
+            normalizeRequestedStart(candidate.start, timezone) === localStart &&
+            new Date(candidate.start).toISOString() !== start,
+        )
+      )
+        throw new ConflictException({
+          error: { code: 'booking_preview_stale' },
+        });
       if (
         new Date(slot.end).getTime() - new Date(slot.start).getTime() !==
         services.reduce((sum, service) => sum + service.duration_minutes, 0) *
