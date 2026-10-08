@@ -771,7 +771,7 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
         assert.equal(offOutcome.status, 'settled');
         assert.equal(offOutcome.lines[0]?.outcome, 'CONFIRMED');
         assert.equal(offOutcome.lines[0]?.text, 'График обновлён.');
-        assert.deepEqual(provider[dayoff.tenant.id].slots, []);
+        expect(provider[dayoff.tenant.id].slots).toEqual([]);
         assert.equal(provider[dayoff.tenant.id].puts, 1);
         const offSnapshot = await actionSnapshot(dayoff);
         assert.equal(offSnapshot.state, 'SUCCEEDED');
@@ -795,7 +795,7 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
           pause.chat,
         );
         assert.equal(breakOutcome.lines[0]?.outcome, 'CONFIRMED');
-        assert.deepEqual(provider[breakSalon.tenant.id].slots, BREAK);
+        expect(provider[breakSalon.tenant.id].slots).toEqual(BREAK);
         assert.equal(provider[breakSalon.tenant.id].puts, 1);
         const breakSnapshot = await actionSnapshot(breakSalon);
         assert.equal(breakSnapshot.state, 'SUCCEEDED');
@@ -828,7 +828,7 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
         );
         assert.equal(driftOutcome.lines[0]?.outcome, 'NOT_CONFIRMED');
         assert.equal(provider[drift.tenant.id].puts, 0);
-        assert.deepEqual(provider[drift.tenant.id].slots, INITIAL);
+        expect(provider[drift.tenant.id].slots).toEqual(INITIAL);
         assert.equal(
           transport.length,
           driftReadStart,
@@ -848,7 +848,7 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
         );
         assert.equal(unknownOutcome.lines[0]?.outcome, 'SUBMITTED');
         assert.equal(provider[unknownSalon.tenant.id].puts, 1);
-        assert.deepEqual(provider[unknownSalon.tenant.id].slots, DIVERGENT);
+        expect(provider[unknownSalon.tenant.id].slots).toEqual(DIVERGENT);
         const snapshot = await actionSnapshot(unknownSalon);
         assert.equal(snapshot.state, 'UNKNOWN');
         assert.equal(snapshot.sourceIdentityHash, unknown.args.source_hash);
