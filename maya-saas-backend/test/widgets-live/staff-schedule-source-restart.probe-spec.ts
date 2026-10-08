@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import request from 'supertest';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
@@ -560,7 +561,15 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
     return new Promise((resolve, reject) => {
       const child = spawn(
         process.execPath,
-        [path.resolve('test/widgets-live/support/schedule-carrier-proof.mjs')],
+        [
+          '--input-type=module',
+          '--eval',
+          // This deadline lives in the child, so killing Jest cannot orphan it.
+          `const owner = process.ppid;
+           setTimeout(() => process.exit(124), 55000).unref();
+           setInterval(() => { if (process.ppid !== owner) process.exit(125); }, 500).unref();
+           await import(${JSON.stringify(pathToFileURL(path.resolve('test/widgets-live/support/schedule-carrier-proof.mjs')).href)});`,
+        ],
         { stdio: ['pipe', 'pipe', 'pipe'], env: process.env },
       );
       let stdout = '',
