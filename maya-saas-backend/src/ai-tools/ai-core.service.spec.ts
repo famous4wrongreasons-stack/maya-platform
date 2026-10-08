@@ -1,66 +1,66 @@
-import type { C9Orchestrator } from "../orchestration/c9.orchestrator";
+import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import {
   ForbiddenException,
   ServiceUnavailableException,
-} from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import { AuditLogService } from "../audit-log/audit-log.service";
-import { AuthRateLimitService } from "../auth/auth-rate-limit.service";
-import type { AuthenticatedUser } from "../common/authenticated-user.interface";
-import { UserRole } from "../common/domain.enums";
-import { MayaBrainRouterService } from "../ai-brain/maya-brain-router.service";
-import { ConversationIntelligenceService } from "../conversation-intelligence/conversation-intelligence.service";
-import { DashboardPreferencesService } from "../dashboard-preferences/dashboard-preferences.service";
-import { TenantContextService } from "../tenancy/tenant-context.service";
-import { AiCoreModelService } from "./ai-core-model.service";
-import { AiCoreService } from "./ai-core.service";
-import { AiCoreController } from "./ai-core.controller";
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import { UserRole } from '../common/domain.enums';
+import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
+import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
+import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
+import { TenantContextService } from '../tenancy/tenant-context.service';
+import { AiCoreModelService } from './ai-core-model.service';
+import { AiCoreService } from './ai-core.service';
+import { AiCoreController } from './ai-core.controller';
 import {
   staffScheduleRevision,
   staffScheduleSourceRevision,
-} from "../crm/staff-schedule.utils";
-import { AiMemoryService } from "./ai-memory.service";
-import type { AiCoreModelDecision, AiCoreModelInput } from "./ai-core.types";
-import { AiToolRuntimeService } from "./ai-tool-runtime.service";
-import { StaffScheduleCommandService } from "./staff-schedule-command.service";
+} from '../crm/staff-schedule.utils';
+import { AiMemoryService } from './ai-memory.service';
+import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
+import { AiToolRuntimeService } from './ai-tool-runtime.service';
+import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
-describe("AiCoreService", () => {
+describe('AiCoreService', () => {
   const user: AuthenticatedUser = {
-    userId: "owner-user",
-    sessionId: "session-a",
-    tenantId: "tenant-a",
+    userId: 'owner-user',
+    sessionId: 'session-a',
+    tenantId: 'tenant-a',
     role: UserRole.TENANT_OWNER,
-    email: "owner@example.test",
+    email: 'owner@example.test',
     branchId: null,
-    membershipId: "membership-a",
-    membershipStatus: "active",
+    membershipId: 'membership-a',
+    membershipStatus: 'active',
   };
   const dto = {
-    surface: "web" as const,
-    requestId: "request_12345678",
-    messages: [{ role: "user" as const, content: "Покажи показатели" }],
+    surface: 'web' as const,
+    requestId: 'request_12345678',
+    messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
 
-  describe("current tenant-owned branch preferences in Client booking", () => {
+  describe('current tenant-owned branch preferences in Client booking', () => {
     const client = { ...user, role: UserRole.CLIENT };
     const names = [
-      "catalog.staff.read",
-      "catalog.services.read",
-      "booking.availability.read",
-      "appointments.own.create",
+      'catalog.staff.read',
+      'catalog.services.read',
+      'booking.availability.read',
+      'appointments.own.create',
     ];
     const initial = {
-      branch: "Центральный",
-      employee: "Антон",
-      services: ["Стрижка"],
-      date_or_period: "tomorrow",
+      branch: 'Центральный',
+      employee: 'Антон',
+      services: ['Стрижка'],
+      date_or_period: 'tomorrow',
     };
     function bookingFixture(numericIds = false) {
-      const mocks = createService(names, {}, "UTC");
+      const mocks = createService(names, {}, 'UTC');
       const branches = [
-        { id: "branch-a", name: "Центральный", timezone: "Europe/Moscow" },
-        { id: "branch-b", name: "Северный", timezone: "Asia/Novosibirsk" },
+        { id: 'branch-a', name: 'Центральный', timezone: 'Europe/Moscow' },
+        { id: 'branch-b', name: 'Северный', timezone: 'Asia/Novosibirsk' },
       ];
       mocks.crm.resolveBookingBranchPreference.mockImplementation(
         (_tenant: string, preference: string | null, proposed?: string) => {
@@ -83,7 +83,7 @@ describe("AiCoreService", () => {
         persistTypedTurn: jest.fn().mockImplementation(() =>
           Promise.resolve({
             turnId: `booking-turn-${++serial}`,
-            conversationId: "booking-conversation",
+            conversationId: 'booking-conversation',
           }),
         ),
         readConversationContext: jest
@@ -96,34 +96,34 @@ describe("AiCoreService", () => {
             return Promise.resolve();
           }),
       };
-      Object.defineProperty(mocks.service, "moduleRef", {
+      Object.defineProperty(mocks.service, 'moduleRef', {
         value: { get: () => timeline },
       });
-      Object.defineProperty(mocks.service, "orchestrator", {
+      Object.defineProperty(mocks.service, 'orchestrator', {
         value: {
-          conversationDigest: () => "a".repeat(64),
+          conversationDigest: () => 'a'.repeat(64),
           conversationRead: (
-            ...args: Parameters<C9Orchestrator["conversationRead"]>
+            ...args: Parameters<C9Orchestrator['conversationRead']>
           ) => args[4](),
           finishConversationReads: jest.fn().mockResolvedValue(null),
         },
       });
       mocks.runtime.execute.mockImplementation((_actor, name) =>
         Promise.resolve({
-          status: "completed",
+          status: 'completed',
           result:
-            name === "catalog.staff.read"
+            name === 'catalog.staff.read'
               ? {
                   staff: [
-                    { id: numericIds ? "71" : "staff-a", name: "Антон" },
-                    { id: numericIds ? "72" : "staff-b", name: "Борис" },
+                    { id: numericIds ? '71' : 'staff-a', name: 'Антон' },
+                    { id: numericIds ? '72' : 'staff-b', name: 'Борис' },
                   ],
                 }
-              : name === "catalog.services.read"
+              : name === 'catalog.services.read'
                 ? {
                     services: [
-                      { id: numericIds ? "81" : "service-a", name: "Стрижка" },
-                      { id: numericIds ? "82" : "service-b", name: "Борода" },
+                      { id: numericIds ? '81' : 'service-a', name: 'Стрижка' },
+                      { id: numericIds ? '82' : 'service-b', name: 'Борода' },
                     ],
                   }
                 : { slots: [] },
@@ -132,16 +132,16 @@ describe("AiCoreService", () => {
       async function turn(
         entities: Record<string, string | string[]>,
         args: Record<string, unknown> = {},
-        intent = "booking.find_availability",
+        intent = 'booking.find_availability',
       ) {
         mocks.model.decide.mockImplementationOnce((input) =>
           Promise.resolve(
             decision({
-              reply: "",
+              reply: '',
               semanticPlan: new ConversationIntelligenceService().validatePlan(
                 {
                   tasks: [{ intent, entities, confidence: 1 }],
-                  parent_request: "Проверить выбранное время",
+                  parent_request: 'Проверить выбранное время',
                 },
                 UserRole.CLIENT,
                 names,
@@ -149,11 +149,11 @@ describe("AiCoreService", () => {
               ),
               toolCall: {
                 name:
-                  intent === "booking.prepare_personal"
-                    ? "catalog.services.read"
-                    : intent === "booking.create_own"
-                      ? "appointments.own.create"
-                      : "booking.availability.read",
+                  intent === 'booking.prepare_personal'
+                    ? 'catalog.services.read'
+                    : intent === 'booking.create_own'
+                      ? 'appointments.own.create'
+                      : 'booking.availability.read',
                 arguments: args,
               },
             }),
@@ -161,42 +161,42 @@ describe("AiCoreService", () => {
         );
         return mocks.service.chat(client, {
           ...dto,
-          conversationId: "booking-conversation",
+          conversationId: 'booking-conversation',
           requestId: `booking-request-${serial + 1}`,
-          messages: [{ role: "user", content: "Проверить выбранное время" }],
+          messages: [{ role: 'user', content: 'Проверить выбранное время' }],
         });
       }
       const availabilityArgs = () =>
         mocks.runtime.execute.mock.calls
-          .filter((call) => call[1] === "booking.availability.read")
+          .filter((call) => call[1] === 'booking.availability.read')
           .map((call) => call[2].arguments);
       return { ...mocks, timeline, turn, availabilityArgs };
     }
 
     it.each([false, true])(
-      "retains only unambiguous current staff before the service question (ambiguous=%s)",
+      'retains only unambiguous current staff before the service question (ambiguous=%s)',
       async (ambiguous) => {
         const f = bookingFixture();
-        const sourceRevision = "a".repeat(64);
+        const sourceRevision = 'a'.repeat(64);
         f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
-          id: "branch-a",
-          name: "Центральный",
-          timezone: "Europe/Moscow",
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
           sourceRevision,
         });
         f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
         if (ambiguous) {
           const delegated = f.runtime.execute.getMockImplementation();
-          if (!delegated) throw new Error("fixture runtime missing");
+          if (!delegated) throw new Error('fixture runtime missing');
           f.runtime.execute.mockImplementation(
-            (...args: Parameters<AiToolRuntimeService["execute"]>) =>
-              args[1] === "catalog.staff.read"
+            (...args: Parameters<AiToolRuntimeService['execute']>) =>
+              args[1] === 'catalog.staff.read'
                 ? Promise.resolve({
-                    status: "completed",
+                    status: 'completed',
                     result: {
                       staff: [
-                        { id: "staff-a", name: "Антон" },
-                        { id: "staff-b", name: "Антон" },
+                        { id: 'staff-a', name: 'Антон' },
+                        { id: 'staff-b', name: 'Антон' },
                       ],
                     },
                   })
@@ -208,24 +208,24 @@ describe("AiCoreService", () => {
             /\[name removed\]@[a-f0-9]{32}_\d+/,
           )?.[0];
           if (!mention)
-            throw new Error("Expected current request-local name alias");
+            throw new Error('Expected current request-local name alias');
           return Promise.resolve(
             decision({
-              reply: "",
+              reply: '',
               toolCall: null,
               semanticPlan: new ConversationIntelligenceService().validatePlan(
                 {
                   tasks: [
                     {
-                      intent: "booking.find_availability",
+                      intent: 'booking.find_availability',
                       entities: {
                         employee: mention,
-                        branch: "Центральный",
+                        branch: 'Центральный',
                       },
                       confidence: 1,
                     },
                   ],
-                  parent_request: "Выбрать услугу",
+                  parent_request: 'Выбрать услугу',
                 },
                 UserRole.CLIENT,
                 names,
@@ -236,55 +236,55 @@ describe("AiCoreService", () => {
         });
         const first = await f.service.chat(client, {
           ...dto,
-          conversationId: "booking-conversation",
-          requestId: "booking-staff-only",
-          messages: [{ role: "user", content: "Хочу у Антона" }],
+          conversationId: 'booking-conversation',
+          requestId: 'booking-staff-only',
+          messages: [{ role: 'user', content: 'Хочу у Антона' }],
         });
         expect(first.action).toBeNull();
-        expect(first.reply).toBe("Выберите услугу для записи.");
+        expect(first.reply).toBe('Выберите услугу для записи.');
         expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-          "catalog.staff.read",
-          "catalog.services.read",
+          'catalog.staff.read',
+          'catalog.services.read',
         ]);
         expect(f.runtime.execute.mock.calls[0][0].tenantId).toBe(
           client.tenantId,
         );
         expect(f.runtime.execute.mock.calls[0][3]).toMatchObject({
           suppressWidgetTrigger: true,
-          bookingSelector: { scope: { branchId: "branch-a", sourceRevision } },
+          bookingSelector: { scope: { branchId: 'branch-a', sourceRevision } },
         });
         const saved = f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0]
           .semanticContext as {
           plan: { tasks: { entities: Record<string, unknown> }[] };
         };
         expect(saved.plan.tasks[0].entities.employee).toBe(
-          ambiguous ? undefined : "Антон",
+          ambiguous ? undefined : 'Антон',
         );
         expect(saved.plan.tasks[0].entities.services).toBeUndefined();
         f.runtime.execute.mockClear();
-        await f.turn({ services: ["Стрижка"], date_or_period: "2026-10-11" });
+        await f.turn({ services: ['Стрижка'], date_or_period: '2026-10-11' });
         expect(f.availabilityArgs()).toEqual(
           ambiguous
             ? []
             : [
                 {
-                  date: "2026-10-11",
-                  branch_id: "branch-a",
-                  staff_id: "staff-a",
-                  service_ids: ["service-a"],
+                  date: '2026-10-11',
+                  branch_id: 'branch-a',
+                  staff_id: 'staff-a',
+                  service_ids: ['service-a'],
                 },
               ],
         );
         expect(
           f.runtime.execute.mock.calls.every(
-            (call) => !call[1].startsWith("appointments."),
+            (call) => !call[1].startsWith('appointments.'),
           ),
         ).toBe(true);
         expect(f.model.decide).toHaveBeenCalledTimes(2);
         if (!ambiguous) {
           const modelPlan =
             f.model.decide.mock.calls.at(-1)?.[0].conversationPlan;
-          expect(JSON.stringify(modelPlan)).not.toContain("Антон");
+          expect(JSON.stringify(modelPlan)).not.toContain('Антон');
           expect(JSON.stringify(modelPlan)).toMatch(
             /\[name removed\]@[a-f0-9]{32}_\d+/,
           );
@@ -292,60 +292,60 @@ describe("AiCoreService", () => {
       },
     );
 
-    it("refuses drift after the staff-only preference read before emitting a service selector", async () => {
+    it('refuses drift after the staff-only preference read before emitting a service selector', async () => {
       const f = bookingFixture();
-      const sourceRevision = "a".repeat(64);
+      const sourceRevision = 'a'.repeat(64);
       f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
-        id: "branch-a",
-        name: "Центральный",
-        timezone: "Europe/Moscow",
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
         sourceRevision,
       });
       f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
       const delegated = f.runtime.execute.getMockImplementation();
-      if (!delegated) throw new Error("fixture runtime missing");
+      if (!delegated) throw new Error('fixture runtime missing');
       const dispatched: string[] = [];
       f.runtime.execute.mockImplementation(
-        async (...args: Parameters<AiToolRuntimeService["execute"]>) => {
+        async (...args: Parameters<AiToolRuntimeService['execute']>) => {
           await args[3]?.bookingSelector?.revalidate();
           dispatched.push(args[1]);
           const result = await delegated(...args);
-          if (args[1] === "catalog.staff.read")
+          if (args[1] === 'catalog.staff.read')
             f.crm.readBranchAvailabilityRevision.mockResolvedValue(
-              "b".repeat(64),
+              'b'.repeat(64),
             );
           return result;
         },
       );
       const response = await f.turn({
-        employee: "Антон",
-        branch: "Центральный",
+        employee: 'Антон',
+        branch: 'Центральный',
       });
-      expect(dispatched).toEqual(["catalog.staff.read"]);
+      expect(dispatched).toEqual(['catalog.staff.read']);
       expect(f.availabilityArgs()).toEqual([]);
-      expect(response.reply).toContain("Данные филиала изменились");
+      expect(response.reply).toContain('Данные филиала изменились');
       expect(response.action).toBeNull();
     });
 
     it.each([
-      { services: ["Стрижка", "Борода"] },
-      { services: ["Неизвестная услуга"] },
+      { services: ['Стрижка', 'Борода'] },
+      { services: ['Неизвестная услуга'] },
     ])(
-      "retains staff while clarifying rejected services: $services",
+      'retains staff while clarifying rejected services: $services',
       async ({ services }) => {
         const f = bookingFixture();
         await f.turn({
-          employee: "Антон",
-          services: ["Стрижка"],
-          date: "2026-10-11",
+          employee: 'Антон',
+          services: ['Стрижка'],
+          date: '2026-10-11',
         });
         f.runtime.execute.mockClear();
         const clarification = await f.turn({ services });
         expect(clarification.action).toBeNull();
         expect(f.availabilityArgs()).toEqual([]);
         expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-          "catalog.services.read",
-          "catalog.staff.read",
+          'catalog.services.read',
+          'catalog.staff.read',
         ]);
         expect(
           f.runtime.execute.mock.calls.every(
@@ -356,97 +356,97 @@ describe("AiCoreService", () => {
           .semanticContext as {
           plan: { tasks: { entities: Record<string, unknown> }[] };
         };
-        expect(saved.plan.tasks[0].entities.employee).toBe("Антон");
+        expect(saved.plan.tasks[0].entities.employee).toBe('Антон');
         expect(saved.plan.tasks[0].entities.services).toEqual(services);
         f.runtime.execute.mockClear();
-        await f.turn({ services: ["Борода"] });
+        await f.turn({ services: ['Борода'] });
         expect(f.availabilityArgs()).toEqual([
           {
-            date: "2026-10-11",
-            staff_id: "staff-a",
-            service_ids: ["service-b"],
+            date: '2026-10-11',
+            staff_id: 'staff-a',
+            service_ids: ['service-b'],
           },
         ]);
         expect(
           f.runtime.execute.mock.calls.every(
-            (call) => !call[1].startsWith("appointments."),
+            (call) => !call[1].startsWith('appointments.'),
           ),
         ).toBe(true);
         expect(f.model.decide).toHaveBeenCalledTimes(3);
       },
     );
 
-    it("continues ordinary service → staff → explicit day with bounded fresh reads and retained source preferences", async () => {
-      jest.useFakeTimers().setSystemTime(new Date("2026-10-07T10:00:00Z"));
+    it('continues ordinary service → staff → explicit day with bounded fresh reads and retained source preferences', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T10:00:00Z'));
       try {
         const f = bookingFixture();
-        const sourceRevision = "a".repeat(64);
+        const sourceRevision = 'a'.repeat(64);
         f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
-          id: "branch-a",
-          name: "Центральный",
-          timezone: "Europe/Moscow",
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
           sourceRevision,
         });
         f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
-        await f.turn({}, {}, "booking.prepare_personal");
+        await f.turn({}, {}, 'booking.prepare_personal');
         expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
-          "catalog.services.read",
+          'catalog.services.read',
         ]);
         f.timeline.readBookingSelection.mockResolvedValue({
-          selectedAt: "2026-10-07T10:00:01Z",
-          services: ["service-a"],
-          branch: "branch-a",
+          selectedAt: '2026-10-07T10:00:01Z',
+          services: ['service-a'],
+          branch: 'branch-a',
           sourceRevision,
         });
-        jest.setSystemTime(new Date("2026-10-07T10:00:02Z"));
+        jest.setSystemTime(new Date('2026-10-07T10:00:02Z'));
         f.runtime.execute.mockClear();
         await f.turn({});
         expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
-          "catalog.services.read",
-          "catalog.staff.read",
+          'catalog.services.read',
+          'catalog.staff.read',
         ]);
         expect(f.runtime.execute.mock.calls[1][3]).toMatchObject({
           suppressWidgetTrigger: false,
           bookingSelector: {
-            serviceId: "service-a",
-            scope: { branchId: "branch-a", sourceRevision },
+            serviceId: 'service-a',
+            scope: { branchId: 'branch-a', sourceRevision },
           },
         });
         f.timeline.readBookingSelection.mockResolvedValue({
-          selectedAt: "2026-10-07T10:00:03Z",
-          services: ["service-a"],
-          employee: "staff-a",
-          branch: "branch-a",
+          selectedAt: '2026-10-07T10:00:03Z',
+          services: ['service-a'],
+          employee: 'staff-a',
+          branch: 'branch-a',
           sourceRevision,
         });
-        jest.setSystemTime(new Date("2026-10-07T10:00:04Z"));
+        jest.setSystemTime(new Date('2026-10-07T10:00:04Z'));
         f.runtime.execute.mockClear();
-        await f.turn({ date_or_period: "2026-10-09" });
+        await f.turn({ date_or_period: '2026-10-09' });
         expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
-          "catalog.services.read",
-          "catalog.staff.read",
-          "booking.availability.read",
+          'catalog.services.read',
+          'catalog.staff.read',
+          'booking.availability.read',
         ]);
         expect(f.availabilityArgs()).toEqual([
           {
-            branch_id: "branch-a",
-            service_ids: ["service-a"],
-            staff_id: "staff-a",
-            date: "2026-10-09",
+            branch_id: 'branch-a',
+            service_ids: ['service-a'],
+            staff_id: 'staff-a',
+            date: '2026-10-09',
           },
         ]);
         f.timeline.readBookingSelection.mockResolvedValue(null);
         f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
-          id: "branch-a",
-          name: "Центральный",
-          timezone: "Europe/Moscow",
-          sourceRevision: "b".repeat(64),
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
+          sourceRevision: 'b'.repeat(64),
         });
-        f.crm.readBranchAvailabilityRevision.mockResolvedValue("b".repeat(64));
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue('b'.repeat(64));
         f.runtime.execute.mockClear();
-        await f.turn({ date_or_period: "2026-10-10" });
+        await f.turn({ date_or_period: '2026-10-10' });
         expect(f.runtime.execute.mock.calls.map((c) => c[1])).toEqual([
-          "catalog.services.read",
+          'catalog.services.read',
         ]);
         expect(f.availabilityArgs()).toEqual([]);
       } finally {
@@ -454,93 +454,93 @@ describe("AiCoreService", () => {
       }
     });
 
-    it("refuses a source change between retained preferences and the next model decision", async () => {
+    it('refuses a source change between retained preferences and the next model decision', async () => {
       const f = bookingFixture();
       const sourceA = {
-        id: "branch-a",
-        name: "Центральный",
-        timezone: "Europe/Moscow",
-        sourceRevision: "a".repeat(64),
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
+        sourceRevision: 'a'.repeat(64),
       };
       f.crm.resolveConfiguredBookingBranch.mockResolvedValue(sourceA);
       f.crm.readBranchAvailabilityRevision.mockResolvedValue(
         sourceA.sourceRevision,
       );
-      await f.turn({ ...initial, date_or_period: "2026-10-09" });
+      await f.turn({ ...initial, date_or_period: '2026-10-09' });
       f.runtime.execute.mockClear();
       f.crm.resolveConfiguredBookingBranch
         .mockResolvedValueOnce(sourceA)
-        .mockResolvedValue({ ...sourceA, sourceRevision: "b".repeat(64) });
-      const response = await f.turn({ date_or_period: "2026-10-10" });
-      expect(response.reply).toContain("Данные филиала изменились");
+        .mockResolvedValue({ ...sourceA, sourceRevision: 'b'.repeat(64) });
+      const response = await f.turn({ date_or_period: '2026-10-10' });
+      expect(response.reply).toContain('Данные филиала изменились');
       expect(f.runtime.execute).not.toHaveBeenCalled();
       expect(response.action).toBeNull();
     });
 
-    it("pins the selected catalog source through availability admission and refuses a last-moment binding change", async () => {
+    it('pins the selected catalog source through availability admission and refuses a last-moment binding change', async () => {
       const f = bookingFixture();
       const source = {
-        id: "branch-a",
-        name: "Центральный",
-        timezone: "Europe/Moscow",
-        sourceRevision: "a".repeat(64),
+        id: 'branch-a',
+        name: 'Центральный',
+        timezone: 'Europe/Moscow',
+        sourceRevision: 'a'.repeat(64),
       };
       f.crm.resolveConfiguredBookingBranch.mockResolvedValue(source);
       f.crm.readBranchAvailabilityRevision.mockResolvedValue(
         source.sourceRevision,
       );
       const delegated = f.runtime.execute.getMockImplementation();
-      if (!delegated) throw new Error("fixture runtime missing");
+      if (!delegated) throw new Error('fixture runtime missing');
       const dispatched: string[] = [];
       f.runtime.execute.mockImplementation(
-        async (...args: Parameters<AiToolRuntimeService["execute"]>) => {
+        async (...args: Parameters<AiToolRuntimeService['execute']>) => {
           // Exercise the runtime's existing private pre-read witness boundary with the
           // real AiCore internal options, while provider facts remain synthetic.
           await args[3]?.bookingSelector?.revalidate();
           dispatched.push(args[1]);
           const result = await delegated(...args);
-          if (args[1] === "catalog.staff.read")
+          if (args[1] === 'catalog.staff.read')
             f.crm.readBranchAvailabilityRevision.mockResolvedValue(
-              "b".repeat(64),
+              'b'.repeat(64),
             );
           return result;
         },
       );
       const response = await f.turn({
         ...initial,
-        date_or_period: "2026-10-09",
+        date_or_period: '2026-10-09',
       });
       expect(dispatched).toEqual([
-        "catalog.services.read",
-        "catalog.staff.read",
+        'catalog.services.read',
+        'catalog.staff.read',
       ]);
-      expect(response.reply).toContain("Данные филиала изменились");
+      expect(response.reply).toContain('Данные филиала изменились');
       expect(response.action).toBeNull();
     });
 
-    it("restores accepted numeric service 81 through the private model placeholder before fresh catalog binding", async () => {
-      jest.useFakeTimers().setSystemTime(new Date("2026-10-07T10:00:00Z"));
+    it('restores accepted numeric service 81 through the private model placeholder before fresh catalog binding', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T10:00:00Z'));
       try {
         const f = bookingFixture(true);
-        const sourceRevision = "a".repeat(64);
+        const sourceRevision = 'a'.repeat(64);
         f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
-          id: "branch-a",
-          name: "Центральный",
-          timezone: "Europe/Moscow",
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
           sourceRevision,
         });
         f.crm.readBranchAvailabilityRevision.mockResolvedValue(sourceRevision);
-        await f.turn({}, {}, "booking.prepare_personal");
+        await f.turn({}, {}, 'booking.prepare_personal');
         f.timeline.readBookingSelection.mockResolvedValue({
-          selectedAt: "2026-10-07T10:00:01Z",
-          services: ["81"],
-          employee: "71",
-          branch: "branch-a",
+          selectedAt: '2026-10-07T10:00:01Z',
+          services: ['81'],
+          employee: '71',
+          branch: 'branch-a',
           sourceRevision,
         });
-        jest.setSystemTime(new Date("2026-10-07T10:00:02Z"));
+        jest.setSystemTime(new Date('2026-10-07T10:00:02Z'));
         f.runtime.execute.mockClear();
-        await f.turn({ date_or_period: "2026-10-09" });
+        await f.turn({ date_or_period: '2026-10-09' });
         const modelContext = f.model.decide.mock.calls.at(-1)?.[0]
           .conversationPlan as {
           tasks: { entities: { services: string[] } }[];
@@ -549,16 +549,16 @@ describe("AiCoreService", () => {
           /^\[reference removed\]@[a-f0-9]{32}_\d+$/,
         );
         expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-          "catalog.services.read",
-          "catalog.staff.read",
-          "booking.availability.read",
+          'catalog.services.read',
+          'catalog.staff.read',
+          'booking.availability.read',
         ]);
         expect(f.availabilityArgs()).toEqual([
           {
-            branch_id: "branch-a",
-            service_ids: ["81"],
-            staff_id: "71",
-            date: "2026-10-09",
+            branch_id: 'branch-a',
+            service_ids: ['81'],
+            staff_id: '71',
+            date: '2026-10-09',
           },
         ]);
         expect(
@@ -567,7 +567,7 @@ describe("AiCoreService", () => {
           semanticContext: {
             plan: {
               tasks: [
-                { entities: { services: ["Стрижка"], employee: "Антон" } },
+                { entities: { services: ['Стрижка'], employee: 'Антон' } },
               ],
             },
           },
@@ -577,69 +577,69 @@ describe("AiCoreService", () => {
       }
     });
 
-    it("retains every other choice across date, service, staff and branch corrections and intent transition", async () => {
-      jest.useFakeTimers().setSystemTime(new Date("2026-10-07T22:30:00Z"));
+    it('retains every other choice across date, service, staff and branch corrections and intent transition', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
       try {
         const f = bookingFixture();
         await f.turn(initial);
         // The selected Moscow day is already 8 October; tomorrow is the 9th.
         expect(f.availabilityArgs().at(-1)).toEqual({
-          branch_id: "branch-a",
-          staff_id: "staff-a",
-          service_ids: ["service-a"],
-          date: "2026-10-09",
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+          date: '2026-10-09',
         });
-        jest.setSystemTime(new Date("2026-10-08T22:30:00Z"));
-        await f.turn({ services: ["Борода"] });
-        await f.turn({ employee: "Борис" });
-        await f.turn({ branch: "Северный" });
-        await f.turn({ date_or_period: "2026-10-11" });
-        await f.turn({ time: "14:30" }, {}, "booking.create_own");
+        jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
+        await f.turn({ services: ['Борода'] });
+        await f.turn({ employee: 'Борис' });
+        await f.turn({ branch: 'Северный' });
+        await f.turn({ date_or_period: '2026-10-11' });
+        await f.turn({ time: '14:30' }, {}, 'booking.create_own');
         expect(f.availabilityArgs()).toEqual([
           {
-            branch_id: "branch-a",
-            staff_id: "staff-a",
-            service_ids: ["service-a"],
-            date: "2026-10-09",
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-a'],
+            date: '2026-10-09',
           },
           {
-            branch_id: "branch-a",
-            staff_id: "staff-a",
-            service_ids: ["service-b"],
-            date: "2026-10-09",
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
           },
           {
-            branch_id: "branch-a",
-            staff_id: "staff-b",
-            service_ids: ["service-b"],
-            date: "2026-10-09",
+            branch_id: 'branch-a',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
           },
           {
-            branch_id: "branch-b",
-            staff_id: "staff-b",
-            service_ids: ["service-b"],
-            date: "2026-10-09",
+            branch_id: 'branch-b',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
           },
           {
-            branch_id: "branch-b",
-            staff_id: "staff-b",
-            service_ids: ["service-b"],
-            date: "2026-10-11",
+            branch_id: 'branch-b',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-11',
           },
           {
-            branch_id: "branch-b",
-            staff_id: "staff-b",
-            service_ids: ["service-b"],
-            date: "2026-10-11",
+            branch_id: 'branch-b',
+            staff_id: 'staff-b',
+            service_ids: ['service-b'],
+            date: '2026-10-11',
           },
         ]);
         expect(f.crm.resolveBookingBranchPreference.mock.calls).toEqual([
-          ["tenant-a", "Центральный", undefined],
-          ["tenant-a", "Центральный", undefined],
-          ["tenant-a", "Центральный", undefined],
-          ["tenant-a", "Северный", undefined],
-          ["tenant-a", "Северный", undefined],
-          ["tenant-a", "Северный", undefined],
+          ['tenant-a', 'Центральный', undefined],
+          ['tenant-a', 'Центральный', undefined],
+          ['tenant-a', 'Центральный', undefined],
+          ['tenant-a', 'Северный', undefined],
+          ['tenant-a', 'Северный', undefined],
+          ['tenant-a', 'Северный', undefined],
         ]);
         const stored = f.timeline.persistAssistantReply.mock.calls.at(-1)?.[0];
         expect(stored).toMatchObject({
@@ -648,11 +648,11 @@ describe("AiCoreService", () => {
               tasks: [
                 {
                   entities: {
-                    branch: "Северный",
-                    employee: "Борис",
-                    services: ["Борода"],
-                    date: "2026-10-11",
-                    time: "14:30",
+                    branch: 'Северный',
+                    employee: 'Борис',
+                    services: ['Борода'],
+                    date: '2026-10-11',
+                    time: '14:30',
                   },
                 },
               ],
@@ -664,7 +664,7 @@ describe("AiCoreService", () => {
         );
         expect(
           f.runtime.execute.mock.calls.every(
-            (call) => !call[1].startsWith("appointments."),
+            (call) => !call[1].startsWith('appointments.'),
           ),
         ).toBe(true);
       } finally {
@@ -673,45 +673,45 @@ describe("AiCoreService", () => {
     });
 
     it.each([
-      ["foreign branch", "foreign-branch", undefined],
-      ["ambiguous branch", "Неоднозначный", undefined],
-      ["conflicting fresh ID", "Центральный", "branch-b"],
+      ['foreign branch', 'foreign-branch', undefined],
+      ['ambiguous branch', 'Неоднозначный', undefined],
+      ['conflicting fresh ID', 'Центральный', 'branch-b'],
     ])(
-      "refuses %s before actionable availability",
+      'refuses %s before actionable availability',
       async (_label, branch, branchId) => {
         const f = bookingFixture();
         const result = await f.turn(
           { ...initial, branch },
           branchId ? { branch_id: branchId } : {},
         );
-        expect(result.reply).toContain("Уточните филиал");
+        expect(result.reply).toContain('Уточните филиал');
         expect(result.action).toBeNull();
         expect(f.runtime.execute).not.toHaveBeenCalled();
       },
     );
 
-    it("revalidates a branch supplied only as a fresh ID and stores its public preference for the next correction", async () => {
+    it('revalidates a branch supplied only as a fresh ID and stores its public preference for the next correction', async () => {
       const f = bookingFixture();
       const entities = {
         employee: initial.employee,
         services: initial.services,
         date_or_period: initial.date_or_period,
       };
-      await f.turn(entities, { branch_id: "branch-a" });
-      await f.turn({ employee: "Борис" });
+      await f.turn(entities, { branch_id: 'branch-a' });
+      await f.turn({ employee: 'Борис' });
       expect(f.crm.resolveBookingBranchPreference.mock.calls).toEqual([
-        ["tenant-a", null, "branch-a"],
-        ["tenant-a", "Центральный", undefined],
+        ['tenant-a', null, 'branch-a'],
+        ['tenant-a', 'Центральный', undefined],
       ]);
       expect(f.availabilityArgs().at(-1)).toMatchObject({
-        branch_id: "branch-a",
-        staff_id: "staff-b",
-        service_ids: ["service-a"],
+        branch_id: 'branch-a',
+        staff_id: 'staff-b',
+        service_ids: ['service-a'],
       });
     });
 
-    it("retains the branch-local day while clarifying a missing service", async () => {
-      jest.useFakeTimers().setSystemTime(new Date("2026-10-07T22:30:00Z"));
+    it('retains the branch-local day while clarifying a missing service', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
       try {
         const f = bookingFixture();
         const entities = {
@@ -720,16 +720,16 @@ describe("AiCoreService", () => {
           date_or_period: initial.date_or_period,
         };
         const clarification = await f.turn(entities);
-        expect(clarification.reply).toContain("Выберите услугу");
+        expect(clarification.reply).toContain('Выберите услугу');
         expect(f.availabilityArgs()).toEqual([]);
-        jest.setSystemTime(new Date("2026-10-08T22:30:00Z"));
-        await f.turn({ services: ["Борода"] });
+        jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
+        await f.turn({ services: ['Борода'] });
         expect(f.availabilityArgs()).toEqual([
           {
-            branch_id: "branch-a",
-            staff_id: "staff-a",
-            service_ids: ["service-b"],
-            date: "2026-10-09",
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-b'],
+            date: '2026-10-09',
           },
         ]);
       } finally {
@@ -737,29 +737,29 @@ describe("AiCoreService", () => {
       }
     });
 
-    it.each(["semantic branch", "proposed branch ID"])(
-      "offers a current staff selector and retains %s, service and local day",
+    it.each(['semantic branch', 'proposed branch ID'])(
+      'offers a current staff selector and retains %s, service and local day',
       async (source) => {
-        jest.useFakeTimers().setSystemTime(new Date("2026-10-07T22:30:00Z"));
+        jest.useFakeTimers().setSystemTime(new Date('2026-10-07T22:30:00Z'));
         try {
           const f = bookingFixture();
           const clarification = await f.turn(
             {
-              ...(source === "semantic branch"
+              ...(source === 'semantic branch'
                 ? { branch: initial.branch }
                 : {}),
               services: initial.services,
               date_or_period: initial.date_or_period,
             },
-            source === "proposed branch ID" ? { branch_id: "branch-a" } : {},
+            source === 'proposed branch ID' ? { branch_id: 'branch-a' } : {},
           );
-          expect(clarification.reply).toContain("Выберите мастера");
+          expect(clarification.reply).toContain('Выберите мастера');
           expect(clarification.action).toBeNull();
-          expect(clarification).not.toHaveProperty("resolution");
+          expect(clarification).not.toHaveProperty('resolution');
           expect(f.availabilityArgs()).toEqual([]);
           expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-            "catalog.services.read",
-            "catalog.staff.read",
+            'catalog.services.read',
+            'catalog.staff.read',
           ]);
           expect(
             f.runtime.execute.mock.calls.map(
@@ -774,23 +774,23 @@ describe("AiCoreService", () => {
                 tasks: [
                   {
                     entities: {
-                      branch: "Центральный",
-                      services: ["Стрижка"],
-                      date_or_period: "2026-10-09",
+                      branch: 'Центральный',
+                      services: ['Стрижка'],
+                      date_or_period: '2026-10-09',
                     },
                   },
                 ],
               },
             },
           });
-          jest.setSystemTime(new Date("2026-10-08T22:30:00Z"));
-          await f.turn({ employee: "Борис" });
+          jest.setSystemTime(new Date('2026-10-08T22:30:00Z'));
+          await f.turn({ employee: 'Борис' });
           expect(f.availabilityArgs()).toEqual([
             {
-              branch_id: "branch-a",
-              staff_id: "staff-b",
-              service_ids: ["service-a"],
-              date: "2026-10-09",
+              branch_id: 'branch-a',
+              staff_id: 'staff-b',
+              service_ids: ['service-a'],
+              date: '2026-10-09',
             },
           ]);
         } finally {
@@ -799,37 +799,37 @@ describe("AiCoreService", () => {
       },
     );
 
-    it("refuses a foreign branch on a partial request before catalog reads or staff selection", async () => {
+    it('refuses a foreign branch on a partial request before catalog reads or staff selection', async () => {
       const f = bookingFixture();
       const result = await f.turn({
-        branch: "branch-foreign",
-        services: ["Стрижка"],
-        date_or_period: "2026-10-09",
+        branch: 'branch-foreign',
+        services: ['Стрижка'],
+        date_or_period: '2026-10-09',
       });
-      expect(result.reply).toContain("Уточните филиал");
+      expect(result.reply).toContain('Уточните филиал');
       expect(result.action).toBeNull();
-      expect(result).not.toHaveProperty("resolution");
+      expect(result).not.toHaveProperty('resolution');
       expect(f.runtime.execute).not.toHaveBeenCalled();
     });
 
-    it("does not reuse a retained branch when its current source binding is unavailable", async () => {
+    it('does not reuse a retained branch when its current source binding is unavailable', async () => {
       const f = bookingFixture();
       await f.turn(initial);
       f.runtime.execute.mockClear();
       f.crm.resolveBookingBranchPreference.mockRejectedValueOnce(
         new ServiceUnavailableException({
-          error: { code: "booking_branch_source_unavailable" },
+          error: { code: 'booking_branch_source_unavailable' },
         }),
       );
-      await expect(f.turn({ services: ["Борода"] })).resolves.toMatchObject({
+      await expect(f.turn({ services: ['Борода'] })).resolves.toMatchObject({
         action: null,
-        reply: expect.stringContaining("Данные филиала изменились") as unknown,
+        reply: expect.stringContaining('Данные филиала изменились') as unknown,
       });
       expect(f.runtime.execute).not.toHaveBeenCalled();
     });
   });
 
-  it("a stale history replay cannot append UNKNOWN after the original request saved SUCCEEDED", async () => {
+  it('a stale history replay cannot append UNKNOWN after the original request saved SUCCEEDED', async () => {
     const mocks = createService();
     let release!: () => void;
     let observed!: () => void;
@@ -839,7 +839,7 @@ describe("AiCoreService", () => {
     const wait = new Promise<void>((resolve) => {
       release = resolve;
     });
-    let latest = "pre-UNKNOWN";
+    let latest = 'pre-UNKNOWN';
     const timeline = {
       routeTypedUtterance: jest.fn().mockImplementation(async () => {
         const reply = latest;
@@ -848,8 +848,8 @@ describe("AiCoreService", () => {
         return {
           reply,
           historyReplay: true,
-          userTurn: { turnId: "turn", conversationId: "conversation" },
-          action: { status: "terminate", code: null, stopped_at_gate: "13" },
+          userTurn: { turnId: 'turn', conversationId: 'conversation' },
+          action: { status: 'terminate', code: null, stopped_at_gate: '13' },
         };
       }),
       persistAssistantReply: jest
@@ -858,53 +858,53 @@ describe("AiCoreService", () => {
           latest = reply;
         }),
     };
-    Object.defineProperty(mocks.service, "moduleRef", {
+    Object.defineProperty(mocks.service, 'moduleRef', {
       value: { get: () => timeline },
     });
     const pending = mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Подтвердить приход" }],
+      messages: [{ role: 'user', content: 'Подтвердить приход' }],
     });
     await read;
-    latest = "SUCCEEDED exact immutable facts";
+    latest = 'SUCCEEDED exact immutable facts';
     release();
     const response = await pending;
     expect(response).toMatchObject({
-      reply: "pre-UNKNOWN",
-      user_turn: { turnId: "turn", conversationId: "conversation" },
+      reply: 'pre-UNKNOWN',
+      user_turn: { turnId: 'turn', conversationId: 'conversation' },
     });
     expect(timeline.persistAssistantReply).not.toHaveBeenCalled();
-    expect(latest).toBe("SUCCEEDED exact immutable facts");
+    expect(latest).toBe('SUCCEEDED exact immutable facts');
     expect(mocks.model.decide).not.toHaveBeenCalled();
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it.each(["native", "web"] as const)(
-    "routes a %s conversation through the real schedule preview owner",
+  it.each(['native', 'web'] as const)(
+    'routes a %s conversation through the real schedule preview owner',
     async (surface) => {
-      const mocks = createService(["staff.schedule.update"]);
+      const mocks = createService(['staff.schedule.update']);
       const current = {
-        staff_id: "synthetic-staff",
-        date: "2026-10-06",
+        staff_id: 'synthetic-staff',
+        date: '2026-10-06',
         is_working: true,
-        slots: [{ from: "10:00", to: "20:00" }],
-        revision: staffScheduleRevision("synthetic-staff", "2026-10-06", [
-          { from: "10:00", to: "20:00" },
+        slots: [{ from: '10:00', to: '20:00' }],
+        revision: staffScheduleRevision('synthetic-staff', '2026-10-06', [
+          { from: '10:00', to: '20:00' },
         ]),
       };
       const crm = {
         getStaff: jest
           .fn()
           .mockResolvedValue([
-            { id: "synthetic-staff", name: "Антон Тестовый" },
+            { id: 'synthetic-staff', name: 'Антон Тестовый' },
           ]),
         resolveStaffScheduleSource: jest.fn().mockResolvedValue({
-          provider: "yclients",
-          staffId: "local-staff-a",
-          branchId: "branch-a",
-          externalStaffId: "synthetic-staff",
-          timezone: "UTC",
-          sourceHash: "a".repeat(64),
+          provider: 'yclients',
+          staffId: 'local-staff-a',
+          branchId: 'branch-a',
+          externalStaffId: 'synthetic-staff',
+          timezone: 'UTC',
+          sourceHash: 'a'.repeat(64),
         }),
         getStaffScheduleDay: jest.fn().mockResolvedValue(current),
         previewStaffScheduleDayChange: jest.fn().mockResolvedValue({
@@ -918,44 +918,44 @@ describe("AiCoreService", () => {
         crm as never,
         {
           tenant: {
-            findUnique: jest.fn().mockResolvedValue({ defaultTimezone: "UTC" }),
+            findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
           },
         } as never,
         mocks.runtime as never,
       );
       mocks.staffScheduleCommand.tryHandle.mockImplementation(
-        (...args: Parameters<StaffScheduleCommandService["tryHandle"]>) =>
+        (...args: Parameters<StaffScheduleCommandService['tryHandle']>) =>
           command.tryHandle(...args),
       );
       mocks.runtime.execute.mockResolvedValue({
-        status: "approval_required",
-        approval: { id: "approval-synthetic", payload_hash: "f".repeat(64) },
+        status: 'approval_required',
+        approval: { id: 'approval-synthetic', payload_hash: 'f'.repeat(64) },
       });
       const controller = new AiCoreController(mocks.service, {} as never);
       const result = await controller.chat(user, {
         surface,
-        requestId: "schedule-route-1234",
+        requestId: 'schedule-route-1234',
         messages: [
-          { role: "user", content: "Сделай Антону 2026-10-06 выходной" },
+          { role: 'user', content: 'Сделай Антону 2026-10-06 выходной' },
         ],
       });
       expect(result).toMatchObject({
         action: {
-          status: "approval_required",
-          approval: { id: "approval-synthetic" },
+          status: 'approval_required',
+          approval: { id: 'approval-synthetic' },
         },
       });
       expect(crm.getStaff).toHaveBeenCalledWith(user.tenantId);
       expect(mocks.runtime.execute).toHaveBeenCalledWith(
         user,
-        "staff.schedule.update",
+        'staff.schedule.update',
         expect.objectContaining({
           surface,
           arguments: expect.objectContaining({
-            staff_id: "synthetic-staff",
+            staff_id: 'synthetic-staff',
             current_revision: staffScheduleSourceRevision(
               current.revision,
-              "a".repeat(64),
+              'a'.repeat(64),
             ),
             slots: [],
           }) as unknown,
@@ -965,17 +965,17 @@ describe("AiCoreService", () => {
     },
   );
 
-  it("uses client authority for schedule commands in a client audience even for the owner", async () => {
+  it('uses client authority for schedule commands in a client audience even for the owner', async () => {
     const mocks = createService();
     mocks.staffScheduleCommand.tryHandle.mockResolvedValue({
-      reply: "denied",
+      reply: 'denied',
       action: null,
       toolUsage: null,
     });
     await mocks.service.chat(user, {
       ...dto,
-      audience: "client",
-      messages: [{ role: "user", content: "Закрой Антону завтра" }],
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Закрой Антону завтра' }],
     });
     expect(mocks.staffScheduleCommand.tryHandle).toHaveBeenCalledWith(
       expect.objectContaining({ role: UserRole.CLIENT }),
@@ -984,46 +984,46 @@ describe("AiCoreService", () => {
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it("renders canonical dormancy signals without legacy contacts or inferred activity", () => {
+  it('renders canonical dormancy signals without legacy contacts or inferred activity', () => {
     const { service } = createService();
     const render = (value: unknown) =>
-      service["deterministicDormantClientsReply"](value);
+      service['deterministicDormantClientsReply'](value);
     const item = {
-      handle: "result_1",
-      kind: "POLICY_SIGNAL",
+      handle: 'result_1',
+      kind: 'POLICY_SIGNAL',
       current: true,
       available: true,
-      rule: { key: "c8.dormancy/cadence", version: 2 },
-      values: [{ key: "cadence", value: true }],
-      asOf: "2026-10-05T10:00:00.000Z",
-      completeness: "PARTIAL",
-      qualification: "VERIFIED",
+      rule: { key: 'c8.dormancy/cadence', version: 2 },
+      values: [{ key: 'cadence', value: true }],
+      asOf: '2026-10-05T10:00:00.000Z',
+      completeness: 'PARTIAL',
+      qualification: 'VERIFIED',
     };
     const payload = {
-      contract: "c8.valuation.ai/1",
+      contract: 'c8.valuation.ai/1',
       configured: true,
       items: [item],
       moreAvailable: true,
     };
     const reply = render(payload);
-    expect(reply).toContain("Оценка 1:");
-    expect(reply).toContain("05.10.2026, 10:00 (UTC)");
-    expect(reply).toContain("Исходные данные неполные");
-    expect(reply).toContain("не список уникальных клиентов");
+    expect(reply).toContain('Оценка 1:');
+    expect(reply).toContain('05.10.2026, 10:00 (UTC)');
+    expect(reply).toContain('Исходные данные неполные');
+    expect(reply).toContain('не список уникальных клиентов');
     expect(reply).not.toMatch(/c8.dormancy|result_1|PARTIAL/);
-    expect(reply).toContain("не разрешение на контакт");
-    expect(reply).toContain("не весь список");
+    expect(reply).toContain('не разрешение на контакт');
+    expect(reply).toContain('не весь список');
     for (const unavailable of [
       { ...payload, configured: false, items: [] },
       { ...payload, items: [] },
       { ...payload, items: [{ ...item, available: false }] },
       { ...payload, items: [{ ...item, current: false }] },
-      { ...payload, items: [{ ...item, qualification: "UNVERIFIED" }] },
+      { ...payload, items: [{ ...item, qualification: 'UNVERIFIED' }] },
       { ...payload, items: [{ ...item, qualification: undefined }] },
-      { ...payload, items: [{ ...item, completeness: "UNKNOWN" }] },
-      { ...payload, items: [{ ...item, asOf: "unknown" }] },
+      { ...payload, items: [{ ...item, completeness: 'UNKNOWN' }] },
+      { ...payload, items: [{ ...item, asOf: 'unknown' }] },
       { ...payload, items: [{ ...item, rule: null }] },
-      { ...payload, items: [{ ...item, rule: "unknown" }] },
+      { ...payload, items: [{ ...item, rule: 'unknown' }] },
       { ...payload, items: [{ ...item, rule: [] }] },
       { ...payload, items: [{ ...item, rule: { ...item.rule, version: 0 } }] },
       {
@@ -1035,73 +1035,73 @@ describe("AiCoreService", () => {
         items: [
           {
             ...item,
-            values: [...item.values, { key: "cadence", value: false }],
+            values: [...item.values, { key: 'cadence', value: false }],
           },
         ],
       },
     ]) {
-      expect(render(unavailable)).toContain("недоступ");
-      expect(render(unavailable)).not.toContain("база активна");
+      expect(render(unavailable)).toContain('недоступ');
+      expect(render(unavailable)).not.toContain('база активна');
     }
     expect(
       render({
         ...payload,
-        items: [{ ...item, values: [{ key: "cadence", value: false }] }],
+        items: [{ ...item, values: [{ key: 'cadence', value: false }] }],
       }),
-    ).toContain("не выполнено");
+    ).toContain('не выполнено');
     expect(
       render({
         inactive_days: 30,
-        clients: [{ name: "PRIVATE_NAME", phone: "PRIVATE_PHONE" }],
+        clients: [{ name: 'PRIVATE_NAME', phone: 'PRIVATE_PHONE' }],
       }),
     ).toBeNull();
   });
 
-  it("returns C8 unavailability through chat after the selected dormancy read when model continuation fails", async () => {
-    const mocks = createService(["clients.dormant.list"]);
+  it('returns C8 unavailability through chat after the selected dormancy read when model continuation fails', async () => {
+    const mocks = createService(['clients.dormant.list']);
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "dormancy-read",
-      result: { contract: "c8.valuation.ai/1", configured: false, items: [] },
+      status: 'completed',
+      execution_id: 'dormancy-read',
+      result: { contract: 'c8.valuation.ai/1', configured: false, items: [] },
     });
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
           reply: null,
-          toolCall: { name: "clients.dormant.list", arguments: {} },
+          toolCall: { name: 'clients.dormant.list', arguments: {} },
         }),
       )
       .mockResolvedValue(null);
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
-      messages: [{ role: "user", content: "Кто давно не приходил?" }],
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Кто давно не приходил?' }],
     });
     expect(mocks.runtime.execute).toHaveBeenCalled();
     expect(result.reply).toContain(
-      "Подтверждённые результаты давности сейчас недоступны",
+      'Подтверждённые результаты давности сейчас недоступны',
     );
-    expect(result.reply).not.toContain("30 дней");
+    expect(result.reply).not.toContain('30 дней');
   });
 
   it.each([
-    "На сегодня на 16:30 к Стасу",
-    "Нет, лучше завтра к другому мастеру",
-    "Хочу на стрижку в пятницу вечером",
-    "Давай вместо завтра послезавтра",
+    'На сегодня на 16:30 к Стасу',
+    'Нет, лучше завтра к другому мастеру',
+    'Хочу на стрижку в пятницу вечером',
+    'Давай вместо завтра послезавтра',
   ])(
-    "plans user booking turns before heuristic data preloads without exporting assistant history: %s",
+    'plans user booking turns before heuristic data preloads without exporting assistant history: %s',
     async (text) => {
-      const toolNames = ["analytics.business.query", "catalog.services.read"];
+      const toolNames = ['analytics.business.query', 'catalog.services.read'];
       const mocks = createService(toolNames);
       const semanticPlan = new ConversationIntelligenceService().validatePlan(
         {
-          parent_request: "Я хочу записаться как клиент",
+          parent_request: 'Я хочу записаться как клиент',
           tasks: [
             {
-              intent: "booking.create_own",
+              intent: 'booking.create_own',
               confidence: 0.98,
-              entities: { service: "стрижка", date: "tomorrow", time: "16:30" },
+              entities: { service: 'стрижка', date: 'tomorrow', time: '16:30' },
             },
           ],
         },
@@ -1110,19 +1110,19 @@ describe("AiCoreService", () => {
       );
       mocks.model.decide.mockResolvedValue(
         decision({
-          reply: "Для личной записи нужен подтверждённый клиентский доступ.",
+          reply: 'Для личной записи нужен подтверждённый клиентский доступ.',
           toolCall: null,
           semanticPlan,
         }),
       );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
+        status: 'completed',
         result: { appointments_count: 13 },
       });
       const messages = [
-        { role: "user" as const, content: "Я хочу записаться как клиент" },
-        { role: "assistant" as const, content: "На какой день и время?" },
-        { role: "user" as const, content: text },
+        { role: 'user' as const, content: 'Я хочу записаться как клиент' },
+        { role: 'assistant' as const, content: 'На какой день и время?' },
+        { role: 'user' as const, content: text },
       ];
       const result = await mocks.service.chat(user, { ...dto, messages });
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
@@ -1132,76 +1132,76 @@ describe("AiCoreService", () => {
           ...message,
           content: message.content.replace(
             /\[name removed\]@[a-f0-9]{32}_\d+/g,
-            "Стасу",
+            'Стасу',
           ),
         })),
-      ).toEqual(messages.filter((message) => message.role === "user"));
+      ).toEqual(messages.filter((message) => message.role === 'user'));
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
-      expect(result.reply).toContain("подтверждённый клиентский доступ");
+      expect(result.reply).toContain('подтверждённый клиентский доступ');
     },
   );
 
   it.each([
-    "ready",
-    "empty",
-    "malformed",
-    "stale",
-    "no-resolution",
-    "refused-resolution",
-    "wrong-source",
-    "no-navigation",
+    'ready',
+    'empty',
+    'malformed',
+    'stale',
+    'no-resolution',
+    'refused-resolution',
+    'wrong-source',
+    'no-navigation',
   ])(
-    "personal preparation announces a form only for a fresh actually minted catalog entry: %s",
+    'personal preparation announces a form only for a fresh actually minted catalog entry: %s',
     async (caseName) => {
-      const mocks = createService(["catalog.services.read"]);
+      const mocks = createService(['catalog.services.read']);
       const semanticPlan = new ConversationIntelligenceService().validatePlan(
         {
-          parent_request: "Хочу записаться",
+          parent_request: 'Хочу записаться',
           tasks: [
-            { intent: "booking.prepare_personal", entities: {}, confidence: 1 },
+            { intent: 'booking.prepare_personal', entities: {}, confidence: 1 },
           ],
         },
         user.role,
-        ["catalog.services.read"],
+        ['catalog.services.read'],
       );
       mocks.model.decide.mockResolvedValue(
         decision({
-          reply: "",
-          toolCall: { name: "catalog.services.read", arguments: {} },
+          reply: '',
+          toolCall: { name: 'catalog.services.read', arguments: {} },
           semanticPlan,
         }),
       );
       const result =
-        caseName === "empty"
+        caseName === 'empty'
           ? { services: [] }
-          : caseName === "malformed"
+          : caseName === 'malformed'
             ? {}
-            : { services: [{ id: "service", name: "Service" }] };
+            : { services: [{ id: 'service', name: 'Service' }] };
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
-        stale: caseName === "stale",
+        status: 'completed',
+        stale: caseName === 'stale',
         result,
-        ...(caseName === "no-resolution"
+        ...(caseName === 'no-resolution'
           ? {}
           : {
               resolution: {
-                matched: caseName !== "refused-resolution",
+                matched: caseName !== 'refused-resolution',
                 receipt: {
                   envelope: {
-                    kind: "SERVICE_SELECTOR",
+                    kind: 'SERVICE_SELECTOR',
                     provenance: {
                       source_capability:
-                        caseName === "wrong-source"
-                          ? "foreign.read"
-                          : "catalog.services.read",
+                        caseName === 'wrong-source'
+                          ? 'foreign.read'
+                          : 'catalog.services.read',
                     },
                     intents:
-                      caseName === "no-navigation"
+                      caseName === 'no-navigation'
                         ? []
                         : [
                             {
-                              effect: "NAVIGATE",
-                              target: { class: "detail", ref: "fs.booking" },
+                              effect: 'NAVIGATE',
+                              target: { class: 'detail', ref: 'fs.booking' },
                             },
                           ],
                   },
@@ -1211,166 +1211,166 @@ describe("AiCoreService", () => {
       });
       const answer = await mocks.service.chat(user, {
         ...dto,
-        messages: [{ role: "user", content: "Хочу записаться" }],
+        messages: [{ role: 'user', content: 'Хочу записаться' }],
       });
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
       expect(answer.grounding?.status).toBe(
-        caseName === "ready" ? "verified" : "blocked",
+        caseName === 'ready' ? 'verified' : 'blocked',
       );
-      if (caseName === "ready")
-        expect(answer.reply).toContain("Записаться для себя");
+      if (caseName === 'ready')
+        expect(answer.reply).toContain('Записаться для себя');
       else {
-        expect(answer.reply).toContain("не удалось открыть");
-        expect(answer.reply).not.toContain("Показываю");
+        expect(answer.reply).toContain('не удалось открыть');
+        expect(answer.reply).not.toContain('Показываю');
       }
     },
   );
 
-  it("does not substitute a heuristic analytics read when semantic planning is unavailable", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('does not substitute a heuristic analytics read when semantic planning is unavailable', async () => {
+    const mocks = createService(['analytics.business.query']);
     mocks.model.decide.mockRejectedValue(
       new ServiceUnavailableException({
-        error: { code: "ai_model_unavailable" },
+        error: { code: 'ai_model_unavailable' },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
+      status: 'completed',
       result: { appointments_count: 13 },
     });
     await expect(
       mocks.service.chat(user, {
         ...dto,
         messages: [
-          { role: "user", content: "Я хочу записаться как клиент" },
-          { role: "assistant", content: "На какой день и время?" },
-          { role: "user", content: "На сегодня на 16:30 к Стасу" },
+          { role: 'user', content: 'Я хочу записаться как клиент' },
+          { role: 'assistant', content: 'На какой день и время?' },
+          { role: 'user', content: 'На сегодня на 16:30 к Стасу' },
         ],
       }),
     ).rejects.toBeInstanceOf(ServiceUnavailableException);
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it("persists an explicit REMEMBER command without invoking the model", async () => {
+  it('persists an explicit REMEMBER command without invoking the model', async () => {
     const mocks = createService();
     mocks.memory.handleExplicitCommand.mockResolvedValue({
-      kind: "remembered",
-      reply: "Запомнила: отвечать кратко.",
+      kind: 'remembered',
+      reply: 'Запомнила: отвечать кратко.',
     });
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "ЗАПОМНИ отвечать кратко" }],
+      messages: [{ role: 'user', content: 'ЗАПОМНИ отвечать кратко' }],
     });
 
-    expect(result.reply).toBe("Запомнила: отвечать кратко.");
+    expect(result.reply).toBe('Запомнила: отвечать кратко.');
     expect(mocks.memory.handleExplicitCommand).toHaveBeenCalledWith(
-      "tenant-a",
-      "owner-user",
-      "ЗАПОМНИ отвечать кратко",
+      'tenant-a',
+      'owner-user',
+      'ЗАПОМНИ отвечать кратко',
     );
     expect(mocks.model.decide).not.toHaveBeenCalled();
     expect(mocks.runtime.listTools).not.toHaveBeenCalled();
   });
 
-  it("passes tenant-scoped remembered notes to the model", async () => {
+  it('passes tenant-scoped remembered notes to the model', async () => {
     const mocks = createService([]);
     mocks.memory.listForModel.mockResolvedValue([
-      "предпочитает короткие ответы",
+      'предпочитает короткие ответы',
     ]);
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Поняла, отвечу коротко.", toolCall: null }),
+      decision({ reply: 'Поняла, отвечу коротко.', toolCall: null }),
     );
 
     await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Привет" }],
+      messages: [{ role: 'user', content: 'Привет' }],
     });
 
     expect(mocks.model.decide.mock.calls[0]?.[0].memoryFacts).toEqual([
-      "предпочитает короткие ответы",
+      'предпочитает короткие ответы',
     ]);
   });
 
-  it("introduces MAYA and lists personal analytics settings without calling a model", async () => {
+  it('introduces MAYA and lists personal analytics settings without calling a model', async () => {
     const mocks = createService();
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Что ты умеешь?" }],
+      messages: [{ role: 'user', content: 'Что ты умеешь?' }],
     });
 
-    expect(result.reply).toContain("Я MAYA, ваша операционная помощница");
-    expect(result.reply).toContain("Аналитика бизнеса");
+    expect(result.reply).toContain('Я MAYA, ваша операционная помощница');
+    expect(result.reply).toContain('Аналитика бизнеса');
     expect(mocks.model.decide).not.toHaveBeenCalled();
     expect(mocks.runtime.listTools).not.toHaveBeenCalled();
   });
 
-  it("enables a named analytics capability directly from chat", async () => {
+  it('enables a named analytics capability directly from chat', async () => {
     const mocks = createService();
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Включи анализ сотрудников" }],
+      messages: [{ role: 'user', content: 'Включи анализ сотрудников' }],
     });
 
-    expect(result.reply).toContain("Включила: Эффективность команды");
+    expect(result.reply).toContain('Включила: Эффективность команды');
     const updateCall = mocks.dashboardPreferences.updateAssistant.mock.calls[0];
-    expect(updateCall?.[0]).toBe("tenant-a");
-    expect(updateCall?.[1]).toBe("owner-user");
+    expect(updateCall?.[0]).toBe('tenant-a');
+    expect(updateCall?.[1]).toBe('owner-user');
     const enabledCapabilities = (
       updateCall?.[2] as { enabledCapabilities?: string[] } | undefined
     )?.enabledCapabilities;
     expect(enabledCapabilities).toEqual([
-      "business_analytics",
-      "staff_performance",
+      'business_analytics',
+      'staff_performance',
     ]);
     expect(mocks.model.decide).not.toHaveBeenCalled();
   });
 
-  it("returns a safe fallback without calling tools when no model is configured", async () => {
+  it('returns a safe fallback without calling tools when no model is configured', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(null);
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Привет" }],
+      messages: [{ role: 'user', content: 'Привет' }],
     });
 
-    expect(result.source).toBe("safe_fallback");
+    expect(result.source).toBe('safe_fallback');
     expect(result.action).toBeNull();
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
-    expect(mocks.rateLimit.assertTenant).toHaveBeenCalledWith("ai_chat", {
-      tenantId: "tenant-a",
-      identity: "owner-user",
+    expect(mocks.rateLimit.assertTenant).toHaveBeenCalledWith('ai_chat', {
+      tenantId: 'tenant-a',
+      identity: 'owner-user',
     });
     // Персона считается роутером на месте, без флагов и без записи в базу.
-    expect(result.brain).toEqual({ persona: "director", intent: "general" });
+    expect(result.brain).toEqual({ persona: 'director', intent: 'general' });
   });
 
-  it("redacts PII, executes an allowed read tool and lets the model answer from its result", async () => {
+  it('redacts PII, executes an allowed read tool and lets the model answer from its result', async () => {
     const mocks = createService();
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "<b>Выручка по бизнесу за период выросла, считаю по данным CRM.</b>",
+          '<b>Выручка по бизнесу за период выросла, считаю по данным CRM.</b>',
         toolCall: null,
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-a",
-      tool_name: "analytics.business.query",
+      status: 'completed',
+      execution_id: 'execution-a',
+      tool_name: 'analytics.business.query',
       result: {
-        revenue: [{ currency: "RUB", amount_kopecks: 100_000 }],
-        client_phone: "+79180000000",
+        revenue: [{ currency: 'RUB', amount_kopecks: 100_000 }],
+        client_phone: '+79180000000',
       },
       replayed: false,
     });
@@ -1379,9 +1379,9 @@ describe("AiCoreService", () => {
       ...dto,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "Клиент Иван, +7 918 000-00-00, ivan@example.com: покажи выручку",
+            'Клиент Иван, +7 918 000-00-00, ivan@example.com: покажи выручку',
         },
       ],
     });
@@ -1389,60 +1389,60 @@ describe("AiCoreService", () => {
     const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     // 152-ФЗ: имя, телефон и почта клиента не пересекают внешнюю границу
     // модели. Это единственный контур, который вообще нельзя обсуждать.
-    expect(JSON.stringify(modelInput)).not.toContain("Иван");
-    expect(JSON.stringify(modelInput)).not.toContain("918 000");
-    expect(JSON.stringify(modelInput)).not.toContain("ivan@example.com");
-    expect(modelInput?.persona).toBe("director");
+    expect(JSON.stringify(modelInput)).not.toContain('Иван');
+    expect(JSON.stringify(modelInput)).not.toContain('918 000');
+    expect(JSON.stringify(modelInput)).not.toContain('ivan@example.com');
+    expect(modelInput?.persona).toBe('director');
     // ПД могут прийти и «с другой стороны» — из результата инструмента.
     // Телефон обязан быть вырезан и там.
-    expect(JSON.stringify(modelInput)).not.toContain("+79180000000");
+    expect(JSON.stringify(modelInput)).not.toContain('+79180000000');
     // Суть схемы: модель пишет ответ, ГЛЯДЯ на цифры инструмента, а не по
     // памяти. Данные поступают после явного выбора инструмента планировщиком.
-    expect(modelInput?.toolResults?.[0]?.name).toBe("analytics.business.query");
+    expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
-      reply: "Выручка по бизнесу за период выросла, считаю по данным CRM.",
-      source: "deepseek",
+      reply: 'Выручка по бизнесу за период выросла, считаю по данным CRM.',
+      source: 'deepseek',
       redacted_input: true,
       grounding: {
-        status: "verified",
-        domain: "business_query",
-        evidence_tools: ["analytics.business.query"],
+        status: 'verified',
+        domain: 'business_query',
+        evidence_tools: ['analytics.business.query'],
       },
       tools_used: [
         {
-          name: "analytics.business.query",
-          status: "completed",
-          execution_id: "execution-a",
+          name: 'analytics.business.query',
+          status: 'completed',
+          execution_id: 'execution-a',
         },
       ],
     });
     // Сначала выбор инструмента, затем ответ на основе его результата.
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
-    expect(result.reply).not.toContain("+79180000000");
+    expect(result.reply).not.toContain('+79180000000');
     // Разметку из ответа модели по-прежнему вычищаем перед выдачей наружу.
-    expect(result.reply).not.toContain("<b>");
+    expect(result.reply).not.toContain('<b>');
   });
 
-  it("stops at the immutable approval instead of letting the model write", async () => {
+  it('stops at the immutable approval instead of letting the model write', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "Подготовлю изменение.",
+        reply: 'Подготовлю изменение.',
         toolCall: {
-          name: "loyalty.internal.adjust",
+          name: 'loyalty.internal.adjust',
           arguments: {
-            target_user_id: "customer_123",
+            target_user_id: 'customer_123',
             delta: 100,
-            reason: "Компенсация",
+            reason: 'Компенсация',
           },
         },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "approval_required",
+      status: 'approval_required',
       approval: {
-        id: "approval-a",
-        payload_hash: "a".repeat(64),
+        id: 'approval-a',
+        payload_hash: 'a'.repeat(64),
         payload_preview: { delta: 100 },
       },
       replayed: false,
@@ -1451,88 +1451,88 @@ describe("AiCoreService", () => {
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Начисли клиенту 100 баллов компенсации." },
+        { role: 'user', content: 'Начисли клиенту 100 баллов компенсации.' },
       ],
     });
 
     expect(result).toMatchObject({
       action: {
-        status: "approval_required",
-        approval: { id: "approval-a" },
+        status: 'approval_required',
+        approval: { id: 'approval-a' },
       },
     });
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     const executeCall = mocks.runtime.execute.mock.calls[0];
     expect(executeCall?.[0]).toBe(user);
-    expect(executeCall?.[1]).toBe("loyalty.internal.adjust");
-    expect(executeCall?.[2].surface).toBe("web");
+    expect(executeCall?.[1]).toBe('loyalty.internal.adjust');
+    expect(executeCall?.[2].surface).toBe('web');
     expect(executeCall?.[2].idempotencyKey).toMatch(/^ai-chat-[a-f0-9]{64}$/);
   });
 
   it.each([
     [
       {
-        role: "user" as const,
-        content: "Установи цену услуги Стрижка 1900 рублей",
+        role: 'user' as const,
+        content: 'Установи цену услуги Стрижка 1900 рублей',
       },
     ],
     [
       {
-        role: "user" as const,
-        content: "Установи цену услуги Стрижка 1800 рублей",
+        role: 'user' as const,
+        content: 'Установи цену услуги Стрижка 1800 рублей',
       },
       {
-        role: "assistant" as const,
-        content: "Модель предлагает Борода 9999 рублей",
+        role: 'assistant' as const,
+        content: 'Модель предлагает Борода 9999 рублей',
       },
-      { role: "user" as const, content: "Нет, 1900 рублей" },
+      { role: 'user' as const, content: 'Нет, 1900 рублей' },
     ],
   ])(
-    "binds a pricing proposal to user text and catalog instead of model numbers",
+    'binds a pricing proposal to user text and catalog instead of model numbers',
     async (...messages) => {
       const mocks = createService([
-        "catalog.services.read",
-        "catalog.service.price.update",
+        'catalog.services.read',
+        'catalog.service.price.update',
       ]);
       mocks.model.decide.mockResolvedValue(
         decision({
-          reply: "",
+          reply: '',
           toolCall: {
-            name: "catalog.service.price.update",
+            name: 'catalog.service.price.update',
             arguments: {
-              service_id: "43",
+              service_id: '43',
               price_rubles: 9999,
-              company_id: "foreign",
+              company_id: 'foreign',
             },
           },
         }),
       );
       const previewSummary =
-        "Изменить цену услуги «Стрижка» в YCLIENTS: 1 700 ₽ → 1 900 ₽ (RUB). Требуется ваше подтверждение.";
+        'Изменить цену услуги «Стрижка» в YCLIENTS: 1 700 ₽ → 1 900 ₽ (RUB). Требуется ваше подтверждение.';
       const resolution = {
         matched: true,
         receipt: {
-          widget_id: "source-fixture-approval",
-          envelope_seal: "source-fixture-seal",
-          envelope: { kind: "APPROVAL" },
+          widget_id: 'source-fixture-approval',
+          envelope_seal: 'source-fixture-seal',
+          envelope: { kind: 'APPROVAL' },
         },
         dismiss_widget_id: null,
       };
       mocks.runtime.execute.mockImplementation((_actor, name) =>
         Promise.resolve(
-          name === "catalog.services.read"
+          name === 'catalog.services.read'
             ? {
-                status: "completed",
+                status: 'completed',
                 result: {
                   services: [
-                    { id: "42", name: "Стрижка" },
-                    { id: "43", name: "Борода" },
+                    { id: '42', name: 'Стрижка' },
+                    { id: '43', name: 'Борода' },
                   ],
                 },
               }
             : {
-                status: "approval_required",
-                approval: { id: "price-approval", summary: previewSummary },
+                status: 'approval_required',
+                approval: { id: 'price-approval', summary: previewSummary },
                 resolution,
               },
         ),
@@ -1542,148 +1542,148 @@ describe("AiCoreService", () => {
       expect(result.resolution).toBe(resolution);
       expect(
         mocks.runtime.execute.mock.calls.find(
-          (call) => call[1] === "catalog.service.price.update",
+          (call) => call[1] === 'catalog.service.price.update',
         )?.[2].arguments,
-      ).toEqual({ service_id: "42", price_rubles: 1900 });
+      ).toEqual({ service_id: '42', price_rubles: 1900 });
       expect(result).toMatchObject({
         action: {
-          status: "approval_required",
-          approval: { id: "price-approval" },
+          status: 'approval_required',
+          approval: { id: 'price-approval' },
         },
       });
     },
   );
 
   it.each([
-    ["Установи цену Стрижка на 10%", false],
-    ["Установи цену Массаж 1900", false],
-    ["Установи цену Стрижка 1900", true],
+    ['Установи цену Стрижка на 10%', false],
+    ['Установи цену Массаж 1900', false],
+    ['Установи цену Стрижка 1900', true],
   ] as const)(
-    "does not prepare pricing from ambiguous intent or stale catalog: %s",
+    'does not prepare pricing from ambiguous intent or stale catalog: %s',
     async (content, stale) => {
       const mocks = createService([
-        "catalog.services.read",
-        "catalog.service.price.update",
+        'catalog.services.read',
+        'catalog.service.price.update',
       ]);
       mocks.model.decide.mockResolvedValue(
         decision({
-          reply: "",
+          reply: '',
           toolCall: {
-            name: "catalog.service.price.update",
-            arguments: { service_id: "42", price_rubles: 1900 },
+            name: 'catalog.service.price.update',
+            arguments: { service_id: '42', price_rubles: 1900 },
           },
         }),
       );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
+        status: 'completed',
         stale,
-        result: { services: [{ id: "42", name: "Стрижка" }] },
+        result: { services: [{ id: '42', name: 'Стрижка' }] },
       });
       const result = await mocks.service.chat(user, {
         ...dto,
-        messages: [{ role: "user", content }],
+        messages: [{ role: 'user', content }],
       });
       expect(
         mocks.runtime.execute.mock.calls.some(
-          (call) => call[1] === "catalog.service.price.update",
+          (call) => call[1] === 'catalog.service.price.update',
         ),
       ).toBe(false);
       expect(result.action).toBeNull();
     },
   );
 
-  it("withholds owner pricing from the client audience even if the owner is signed in", async () => {
-    const mocks = createService(["catalog.service.price.update"]);
+  it('withholds owner pricing from the client audience even if the owner is signed in', async () => {
+    const mocks = createService(['catalog.service.price.update']);
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Уточните услугу.", toolCall: null }),
+      decision({ reply: 'Уточните услугу.', toolCall: null }),
     );
     await mocks.service.chat(user, {
       ...dto,
-      audience: "client",
-      messages: [{ role: "user", content: "Привет" }],
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Привет' }],
     });
     expect(mocks.model.decide.mock.calls[0]?.[0].tools).toEqual([]);
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it("redacts standalone likely names before the external model boundary", async () => {
+  it('redacts standalone likely names before the external model boundary', async () => {
     const mocks = createService();
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-redaction",
+      status: 'completed',
+      execution_id: 'execution-redaction',
       result: { verified: true, metrics: {}, changes: {}, current: {} },
     });
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Уточните период.", toolCall: null }),
+      decision({ reply: 'Уточните период.', toolCall: null }),
     );
 
     await mocks.service.chat(user, {
       ...dto,
       messages: [
         {
-          role: "user",
-          content: "Иван записан сегодня. Покажи Ивана в отчёте.",
+          role: 'user',
+          content: 'Иван записан сегодня. Покажи Ивана в отчёте.',
         },
       ],
     });
 
     const modelInput = JSON.stringify(mocks.model.decide.mock.calls[0]?.[0]);
-    expect(modelInput).not.toContain("Иван");
-    expect(modelInput).not.toContain("Ивана");
-    expect(modelInput).toContain("[name removed]");
+    expect(modelInput).not.toContain('Иван');
+    expect(modelInput).not.toContain('Ивана');
+    expect(modelInput).toContain('[name removed]');
   });
 
-  it("preserves an ISO booking date while redacting a phone number", async () => {
-    const mocks = createService(["booking.availability.read"]);
+  it('preserves an ISO booking date while redacting a phone number', async () => {
+    const mocks = createService(['booking.availability.read']);
     mocks.model.decide.mockResolvedValue(null);
 
     await mocks.service.chat(user, {
       ...dto,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "Покажи свободные окна на 2026-07-31. Телефон +7 918 000-00-00.",
+            'Покажи свободные окна на 2026-07-31. Телефон +7 918 000-00-00.',
         },
       ],
     });
 
     const firstInput = mocks.model.decide.mock.calls[0]?.[0];
-    expect(JSON.stringify(firstInput)).toContain("2026-07-31");
-    expect(JSON.stringify(firstInput)).not.toContain("918 000");
+    expect(JSON.stringify(firstInput)).toContain('2026-07-31');
+    expect(JSON.stringify(firstInput)).not.toContain('918 000');
   });
 
-  it("lets the model describe only the slots the availability tool returned", async () => {
-    const mocks = createService(["booking.availability.read"]);
+  it('lets the model describe only the slots the availability tool returned', async () => {
+    const mocks = createService(['booking.availability.read']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю окна.",
+          reply: 'Проверяю окна.',
           toolCall: {
-            name: "booking.availability.read",
-            arguments: { date: "2026-07-31T00:00:00.000Z" },
+            name: 'booking.availability.read',
+            arguments: { date: '2026-07-31T00:00:00.000Z' },
           },
         }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "На эту дату есть два свободных окна подряд, оба утром. Подсказать ближайшее?",
+            'На эту дату есть два свободных окна подряд, оба утром. Подсказать ближайшее?',
           toolCall: null,
         }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-availability",
+      status: 'completed',
+      execution_id: 'execution-availability',
       result: {
         slots: [
           {
-            start: "2026-07-31T07:00:00.000Z",
-            end: "2026-07-31T08:00:00.000Z",
+            start: '2026-07-31T07:00:00.000Z',
+            end: '2026-07-31T08:00:00.000Z',
           },
           {
-            start: "2026-07-31T08:00:00.000Z",
-            end: "2026-07-31T09:00:00.000Z",
+            start: '2026-07-31T08:00:00.000Z',
+            end: '2026-07-31T09:00:00.000Z',
           },
         ],
       },
@@ -1693,8 +1693,8 @@ describe("AiCoreService", () => {
       ...dto,
       messages: [
         {
-          role: "user",
-          content: "Покажи свободные окна на 2026-07-31.",
+          role: 'user',
+          content: 'Покажи свободные окна на 2026-07-31.',
         },
       ],
     });
@@ -1702,97 +1702,97 @@ describe("AiCoreService", () => {
     // Свободное время нельзя выдумать: слоты приходят только из инструмента,
     // и проверяем мы именно то, что они дошли до модели перед ответом.
     const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.toolResults?.[0]?.name).toBe("booking.availability.read");
+    expect(second?.toolResults?.[0]?.name).toBe('booking.availability.read');
     expect(result).toMatchObject({
       reply:
-        "На эту дату есть два свободных окна подряд, оба утром. Подсказать ближайшее?",
-      source: "deepseek",
+        'На эту дату есть два свободных окна подряд, оба утром. Подсказать ближайшее?',
+      source: 'deepseek',
       grounding: {
-        status: "verified",
-        domain: "booking_availability",
+        status: 'verified',
+        domain: 'booking_availability',
       },
     });
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps ordinary capitalized words so the model can understand the request", async () => {
+  it('keeps ordinary capitalized words so the model can understand the request', async () => {
     const mocks = createService();
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-capitalized",
+      status: 'completed',
+      execution_id: 'execution-capitalized',
       result: { verified: true, metrics: {}, changes: {}, current: {} },
     });
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Показываю.", toolCall: null }),
+      decision({ reply: 'Показываю.', toolCall: null }),
     );
 
     await mocks.service.chat(user, {
       ...dto,
       messages: [
         {
-          role: "user",
-          content: "Обсудим разделы Записи и Выручка.",
+          role: 'user',
+          content: 'Обсудим разделы Записи и Выручка.',
         },
       ],
     });
 
     const modelInput = JSON.stringify(mocks.model.decide.mock.calls[0]?.[0]);
-    expect(modelInput).toContain("Обсудим разделы Записи и Выручка.");
+    expect(modelInput).toContain('Обсудим разделы Записи и Выручка.');
   });
 
-  it("retries once and blocks a factual reply when the model skips its tool", async () => {
+  it('retries once and blocks a factual reply when the model skips its tool', async () => {
     // Справочник услуг сервер заранее не грузит: цену модель обязана взять
     // сама, вызовом инструмента. Здесь она этого не делает и называет число.
-    const mocks = createService(["catalog.services.read"]);
+    const mocks = createService(['catalog.services.read']);
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Стрижка стоит 999 999 ₽.", toolCall: null }),
+      decision({ reply: 'Стрижка стоит 999 999 ₽.', toolCall: null }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Сколько стоит стрижка?" }],
+      messages: [{ role: 'user', content: 'Сколько стоит стрижка?' }],
     });
 
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     expect(result).toMatchObject({
-      source: "safe_fallback",
+      source: 'safe_fallback',
       grounding: {
-        status: "blocked",
-        domain: "service_catalog",
-        required_tools: ["catalog.services.read"],
+        status: 'blocked',
+        domain: 'service_catalog',
+        required_tools: ['catalog.services.read'],
         evidence_tools: [],
       },
     });
-    expect(result.reply).not.toContain("999");
+    expect(result.reply).not.toContain('999');
   });
 
-  it("accepts financial figures only when the server tool returned them", async () => {
+  it('accepts financial figures only when the server tool returned them', async () => {
     const mocks = createService();
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю.",
+          reply: 'Проверяю.',
           toolCall: {
-            name: "analytics.business.query",
+            name: 'analytics.business.query',
             arguments: {
-              period: "custom",
-              from: "2026-07-01T00:00:00.000Z",
-              to: "2026-07-31T23:59:59.999Z",
+              period: 'custom',
+              from: '2026-07-01T00:00:00.000Z',
+              to: '2026-07-31T23:59:59.999Z',
             },
           },
         }),
       )
       .mockResolvedValueOnce(
-        decision({ reply: "Выручка: 1 000 ₽.", toolCall: null }),
+        decision({ reply: 'Выручка: 1 000 ₽.', toolCall: null }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-grounded",
+      status: 'completed',
+      execution_id: 'execution-grounded',
       result: {
         revenue: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 100_000,
             amount_major_units: 1_000,
           },
@@ -1802,47 +1802,47 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Покажи выручку за июль." }],
+      messages: [{ role: 'user', content: 'Покажи выручку за июль.' }],
     });
 
     // Сумма в ответе — ровно та, что вернул инструмент (100 000 копеек),
     // поэтому сторож чисел пропускает текст модели без правок.
     const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.toolResults?.[0]?.name).toBe("analytics.business.query");
+    expect(second?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
-      reply: "Выручка: 1 000 ₽.",
-      source: "deepseek",
-      grounding: { status: "verified" },
+      reply: 'Выручка: 1 000 ₽.',
+      source: 'deepseek',
+      grounding: { status: 'verified' },
     });
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
-  it("blocks a figure that differs from the completed tool result", async () => {
+  it('blocks a figure that differs from the completed tool result', async () => {
     const mocks = createService();
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю.",
+          reply: 'Проверяю.',
           toolCall: {
-            name: "analytics.business.query",
+            name: 'analytics.business.query',
             arguments: {
-              period: "custom",
-              from: "2026-07-01T00:00:00.000Z",
-              to: "2026-07-31T23:59:59.999Z",
+              period: 'custom',
+              from: '2026-07-01T00:00:00.000Z',
+              to: '2026-07-31T23:59:59.999Z',
             },
           },
         }),
       )
       .mockResolvedValueOnce(
-        decision({ reply: "Выручка: 9 999 ₽.", toolCall: null }),
+        decision({ reply: 'Выручка: 9 999 ₽.', toolCall: null }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-mismatch",
+      status: 'completed',
+      execution_id: 'execution-mismatch',
       result: {
         revenue: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 100_000,
             amount_major_units: 1_000,
           },
@@ -1852,35 +1852,35 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Покажи аналитику за июль." }],
+      messages: [{ role: 'user', content: 'Покажи аналитику за июль.' }],
     });
 
-    expect(result.source).toBe("safe_fallback");
-    expect(result.grounding.status).toBe("blocked");
-    expect(result.reply).not.toContain("9 999");
+    expect(result.source).toBe('safe_fallback');
+    expect(result.grounding.status).toBe('blocked');
+    expect(result.reply).not.toContain('9 999');
   });
 
-  it("never substitutes business analytics for an unavailable staff schedule", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('never substitutes business analytics for an unavailable staff schedule', async () => {
+    const mocks = createService(['analytics.business.query']);
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
-      messages: [{ role: "user", content: "Кто работает сегодня?" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'Кто работает сегодня?' }],
     });
 
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     expect(mocks.model.decide).not.toHaveBeenCalled();
     expect(result).toMatchObject({
-      source: "safe_fallback",
+      source: 'safe_fallback',
       grounding: {
-        status: "blocked",
-        domain: "staff_schedule",
+        status: 'blocked',
+        domain: 'staff_schedule',
         required_tools: [],
         evidence_tools: [],
       },
     });
-    expect(result.reply).not.toContain("аналитик");
+    expect(result.reply).not.toContain('аналитик');
   });
 
   // 🔴 Живой случай из прода: «Че ты как?» с телефона. Планировщик верно
@@ -1888,14 +1888,14 @@ describe("AiCoreService", () => {
   // источника — поставленный РАНЬШЕ, по регулярке, где есть «че как», но нет
   // «че ТЫ как» — забраковал ответ и подменил заготовкой. Вердикт умного слоя
   // должен быть старше совпадения с шаблоном.
-  it("не требует источник, когда смысловой план назвал ход болтовнёй", async () => {
-    const toolNames = ["analytics.business.query"];
+  it('не требует источник, когда смысловой план назвал ход болтовнёй', async () => {
+    const toolNames = ['analytics.business.query'];
     const semanticPlan = new ConversationIntelligenceService().validatePlan(
       {
-        parent_request: "Че ты как?",
+        parent_request: 'Че ты как?',
         tasks: [
           {
-            intent: "small_talk.free_form",
+            intent: 'small_talk.free_form',
             entities: {},
             confidence: 0.94,
           },
@@ -1905,12 +1905,12 @@ describe("AiCoreService", () => {
       toolNames,
     );
     if (!semanticPlan) {
-      throw new Error("Expected a validated semantic plan");
+      throw new Error('Expected a validated semantic plan');
     }
     const mocks = createService(toolNames);
     mocks.model.decide.mockResolvedValueOnce(
       decision({
-        reply: "Всё бодро. Салон под присмотром — спрашивайте, что нужно.",
+        reply: 'Всё бодро. Салон под присмотром — спрашивайте, что нужно.',
         toolCall: null,
         semanticPlan,
       }),
@@ -1918,25 +1918,25 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Че ты как?" }],
+      messages: [{ role: 'user', content: 'Че ты как?' }],
     });
 
     expect(result.reply).toBe(
-      "Всё бодро. Салон под присмотром — спрашивайте, что нужно.",
+      'Всё бодро. Салон под присмотром — спрашивайте, что нужно.',
     );
-    expect(result.source).not.toBe("safe_fallback");
+    expect(result.source).not.toBe('safe_fallback');
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it("routes an unseen owner paraphrase through semantic planning instead of a monthly-summary default", async () => {
-    const toolNames = ["analytics.business.query", "staff.schedule.read"];
+  it('routes an unseen owner paraphrase through semantic planning instead of a monthly-summary default', async () => {
+    const toolNames = ['analytics.business.query', 'staff.schedule.read'];
     const semanticPlan = new ConversationIntelligenceService().validatePlan(
       {
-        parent_request: "Кто из ребят завтра в строю?",
+        parent_request: 'Кто из ребят завтра в строю?',
         tasks: [
           {
-            intent: "schedule.get_team",
-            entities: { date_or_period: "tomorrow" },
+            intent: 'schedule.get_team',
+            entities: { date_or_period: 'tomorrow' },
             confidence: 0.96,
           },
         ],
@@ -1945,33 +1945,33 @@ describe("AiCoreService", () => {
       toolNames,
     );
     if (!semanticPlan) {
-      throw new Error("Expected a validated semantic plan");
+      throw new Error('Expected a validated semantic plan');
     }
     const mocks = createService(toolNames);
     mocks.model.decide.mockResolvedValueOnce(
       decision({
-        reply: "Проверяю данные.",
+        reply: 'Проверяю данные.',
         toolCall: {
-          name: "staff.schedule.read",
-          arguments: { date: "2026-08-15" },
+          name: 'staff.schedule.read',
+          arguments: { date: '2026-08-15' },
         },
         semanticPlan,
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-semantic-schedule",
+      status: 'completed',
+      execution_id: 'execution-semantic-schedule',
       result: {
         verified: true,
-        source: "crm",
-        date: "2026-08-15",
+        source: 'crm',
+        date: '2026-08-15',
         staff: [
           {
-            id: "staff-1",
-            name: "Илья",
-            title: "Барбер",
+            id: 'staff-1',
+            name: 'Илья',
+            title: 'Барбер',
             is_working: true,
-            slots: [{ from: "10:00", to: "20:00" }],
+            slots: [{ from: '10:00', to: '20:00' }],
           },
         ],
       },
@@ -1979,8 +1979,8 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
-      messages: [{ role: "user", content: "Кто из ребят завтра в строю?" }],
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Кто из ребят завтра в строю?' }],
     });
 
     expect(mocks.model.decide.mock.calls[0]?.[0]).toMatchObject({
@@ -1989,38 +1989,38 @@ describe("AiCoreService", () => {
     });
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       user,
-      "staff.schedule.read",
-      expect.objectContaining({ arguments: { date: "2026-08-15" } }),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      'staff.schedule.read',
+      expect.objectContaining({ arguments: { date: '2026-08-15' } }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(mocks.runtime.execute).not.toHaveBeenCalledWith(
       user,
-      "analytics.business.query",
+      'analytics.business.query',
       expect.anything(),
       expect.anything(),
     );
     expect(result).toMatchObject({
-      source: "safe_fallback",
+      source: 'safe_fallback',
       grounding: {
-        status: "verified",
-        evidence_tools: ["staff.schedule.read"],
+        status: 'verified',
+        evidence_tools: ['staff.schedule.read'],
       },
     });
-    expect(result.reply).toContain("Илья — 10:00–20:00");
+    expect(result.reply).toContain('Илья — 10:00–20:00');
   });
 
-  it("asks one semantic clarification and executes no tool when meaning is uncertain", async () => {
-    const toolNames = ["analytics.business.query", "staff.schedule.read"];
+  it('asks one semantic clarification and executes no tool when meaning is uncertain', async () => {
+    const toolNames = ['analytics.business.query', 'staff.schedule.read'];
     const semanticPlan = new ConversationIntelligenceService().validatePlan(
       {
-        parent_request: "Кто там завтра на точке?",
+        parent_request: 'Кто там завтра на точке?',
         tasks: [
           {
-            intent: "schedule.get_team",
-            entities: { date_or_period: "tomorrow" },
+            intent: 'schedule.get_team',
+            entities: { date_or_period: 'tomorrow' },
             confidence: 0.51,
             clarification_question:
-              "Вы хотите узнать, кто из команды работает завтра?",
+              'Вы хотите узнать, кто из команды работает завтра?',
           },
         ],
       },
@@ -2028,12 +2028,12 @@ describe("AiCoreService", () => {
       toolNames,
     );
     if (!semanticPlan) {
-      throw new Error("Expected a validated semantic plan");
+      throw new Error('Expected a validated semantic plan');
     }
     const mocks = createService(toolNames);
     mocks.model.decide.mockResolvedValueOnce(
       decision({
-        reply: semanticPlan.tasks[0]?.clarification_question ?? "",
+        reply: semanticPlan.tasks[0]?.clarification_question ?? '',
         toolCall: null,
         semanticPlan,
       }),
@@ -2041,69 +2041,69 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
-      messages: [{ role: "user", content: "Кто там завтра на точке?" }],
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Кто там завтра на точке?' }],
     });
 
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     expect(result).toMatchObject({
-      reply: "Вы хотите узнать, кто из команды работает завтра?",
-      source: "safe_fallback",
-      grounding: { status: "not_required" },
+      reply: 'Вы хотите узнать, кто из команды работает завтра?',
+      source: 'safe_fallback',
+      grounding: { status: 'not_required' },
     });
   });
 
   it.each([
     [
-      "Какие у вас мастера?",
+      'Какие у вас мастера?',
       false,
-      { staff: [{ name: "Тестовый мастер", title: "Барбер" }] },
-      "verified",
+      { staff: [{ name: 'Тестовый мастер', title: 'Барбер' }] },
+      'verified',
     ],
     [
-      "Какие у вас мастера?",
+      'Какие у вас мастера?',
       true,
-      { staff: [{ name: "Тестовый мастер" }] },
-      "blocked",
+      { staff: [{ name: 'Тестовый мастер' }] },
+      'blocked',
     ],
-    ["Какие у вас мастера?", false, { staff: null }, "blocked"],
+    ['Какие у вас мастера?', false, { staff: null }, 'blocked'],
   ] as const)(
-    "composes semantic public staff consultation: %s",
+    'composes semantic public staff consultation: %s',
     async (message, stale, result, status) => {
       const mocks = createService([
-        "catalog.staff.read",
-        "analytics.business.query",
+        'catalog.staff.read',
+        'analytics.business.query',
       ]);
       mocks.model.decide.mockResolvedValueOnce(
         decision({
           reply: null,
-          toolCall: { name: "catalog.staff.read", arguments: {} },
+          toolCall: { name: 'catalog.staff.read', arguments: {} },
           semanticPlan: new ConversationIntelligenceService().validatePlan(
             {
-              dialogue_act: "request",
+              dialogue_act: 'request',
               tasks: [
                 {
-                  intent: "employees.list_public",
+                  intent: 'employees.list_public',
                   entities: {},
                   confidence: 0.99,
                 },
               ],
             },
             user.role,
-            ["catalog.staff.read"],
+            ['catalog.staff.read'],
           ),
         }),
       );
       mocks.runtime.execute.mockResolvedValueOnce({
-        status: "completed",
-        execution_id: "public-source-read",
+        status: 'completed',
+        execution_id: 'public-source-read',
         stale,
         result,
       });
       const out = await mocks.service.chat(user, {
         ...dto,
-        messages: [{ role: "user", content: message }],
+        messages: [{ role: 'user', content: message }],
       });
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
@@ -2112,233 +2112,233 @@ describe("AiCoreService", () => {
       });
       expect(out).toMatchObject({
         action: null,
-        source: "safe_fallback",
+        source: 'safe_fallback',
         grounding: {
           status,
-          domain: "staff_catalog",
-          evidence_tools: ["catalog.staff.read"],
+          domain: 'staff_catalog',
+          evidence_tools: ['catalog.staff.read'],
         },
       });
-      if (status === "verified")
-        expect(out.reply).toContain("Тестовый мастер — Барбер");
-      else expect(out.reply).not.toContain("Тестовый мастер");
+      if (status === 'verified')
+        expect(out.reply).toContain('Тестовый мастер — Барбер');
+      else expect(out.reply).not.toContain('Тестовый мастер');
     },
   );
 
   it.each([UserRole.ADMINISTRATOR, UserRole.TENANT_OWNER])(
-    "lets %s ask a public staff question without analytics entitlement",
+    'lets %s ask a public staff question without analytics entitlement',
     async (role) => {
-      const mocks = createService(["catalog.staff.read"]);
+      const mocks = createService(['catalog.staff.read']);
       mocks.model.decide.mockResolvedValueOnce(
         decision({
           reply: null,
-          toolCall: { name: "catalog.staff.read", arguments: {} },
+          toolCall: { name: 'catalog.staff.read', arguments: {} },
           semanticPlan: new ConversationIntelligenceService().validatePlan(
             {
-              dialogue_act: "request",
+              dialogue_act: 'request',
               tasks: [
                 {
-                  intent: "employees.list_public",
+                  intent: 'employees.list_public',
                   entities: {},
                   confidence: 0.99,
                 },
               ],
             },
             role,
-            ["catalog.staff.read"],
+            ['catalog.staff.read'],
           ),
         }),
       );
       mocks.runtime.execute.mockResolvedValueOnce({
-        status: "completed",
-        execution_id: "public-source",
-        result: { staff: [{ name: "Тестовый мастер", title: "Барбер" }] },
+        status: 'completed',
+        execution_id: 'public-source',
+        result: { staff: [{ name: 'Тестовый мастер', title: 'Барбер' }] },
       });
       const out = await mocks.service.chat(
         { ...user, role },
         {
           ...dto,
-          messages: [{ role: "user", content: "Какие мастера работают?" }],
+          messages: [{ role: 'user', content: 'Какие мастера работают?' }],
         },
       );
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
       expect(out.grounding).toMatchObject({
-        status: "verified",
-        domain: "staff_catalog",
+        status: 'verified',
+        domain: 'staff_catalog',
       });
-      expect(out.reply).toContain("Тестовый мастер");
+      expect(out.reply).toContain('Тестовый мастер');
     },
   );
 
   it.each([
-    "Какая выручка бизнеса за месяц?",
-    "Какой график у мастера завтра?",
+    'Какая выручка бизнеса за месяц?',
+    'Какой график у мастера завтра?',
   ])(
-    "does not let a public staff tool substitute protected evidence: %s",
+    'does not let a public staff tool substitute protected evidence: %s',
     async (content) => {
-      const mocks = createService(["catalog.staff.read"]);
+      const mocks = createService(['catalog.staff.read']);
       const out = await mocks.service.chat(
         { ...user, role: UserRole.ADMINISTRATOR },
         {
           ...dto,
-          messages: [{ role: "user", content }],
+          messages: [{ role: 'user', content }],
         },
       );
-      expect(out.grounding).toMatchObject({ status: "blocked" });
+      expect(out.grounding).toMatchObject({ status: 'blocked' });
       expect(mocks.model.decide).not.toHaveBeenCalled();
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
     },
   );
 
-  it("keeps a compound public catalog plan in its existing continuation", async () => {
+  it('keeps a compound public catalog plan in its existing continuation', async () => {
     const mocks = createService([
-      "catalog.staff.read",
-      "analytics.business.query",
+      'catalog.staff.read',
+      'analytics.business.query',
     ]);
     const semanticPlan = new ConversationIntelligenceService().validatePlan(
       {
-        dialogue_act: "request",
+        dialogue_act: 'request',
         tasks: [
-          { intent: "employees.list_public", entities: {}, confidence: 0.99 },
-          { intent: "company.public_info", entities: {}, confidence: 0.99 },
+          { intent: 'employees.list_public', entities: {}, confidence: 0.99 },
+          { intent: 'company.public_info', entities: {}, confidence: 0.99 },
         ],
       },
       user.role,
-      ["catalog.staff.read"],
+      ['catalog.staff.read'],
     );
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
         semanticPlan,
-        toolCall: { name: "catalog.staff.read", arguments: {} },
+        toolCall: { name: 'catalog.staff.read', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValueOnce(
       decision({
-        reply: "Сведения о салоне и команде получены.",
+        reply: 'Сведения о салоне и команде получены.',
         semanticPlan,
         toolCall: null,
       }),
     );
     mocks.runtime.execute.mockResolvedValueOnce({
-      status: "completed",
-      execution_id: "compound-public-read",
+      status: 'completed',
+      execution_id: 'compound-public-read',
       result: { salon: {}, staff: [] },
     });
     await mocks.service.chat(user, {
       ...dto,
-      audience: "client",
-      messages: [{ role: "user", content: "Расскажи о барбершопе" }],
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Расскажи о барбершопе' }],
     });
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(mocks.runtime.execute.mock.calls[0]?.[3]).not.toHaveProperty(
-      "suppressWidgetTrigger",
+      'suppressWidgetTrigger',
     );
   });
 
-  it("keeps owner in client audience on salon story without business analytics", async () => {
+  it('keeps owner in client audience on salon story without business analytics', async () => {
     const mocks = createService([
-      "analytics.business.query",
-      "catalog.staff.read",
-      "catalog.services.read",
+      'analytics.business.query',
+      'catalog.staff.read',
+      'catalog.services.read',
     ]);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "catalog.staff.read", arguments: {} },
+        toolCall: { name: 'catalog.staff.read', arguments: {} },
         semanticPlan: new ConversationIntelligenceService().validatePlan(
           {
-            dialogue_act: "request",
+            dialogue_act: 'request',
             tasks: [
-              { intent: "company.public_info", entities: {}, confidence: 0.99 },
+              { intent: 'company.public_info', entities: {}, confidence: 0.99 },
             ],
           },
           UserRole.CUSTOMER,
-          ["catalog.staff.read"],
+          ['catalog.staff.read'],
         ),
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-staff-catalog",
+      status: 'completed',
+      execution_id: 'execution-staff-catalog',
       result: {
         salon: {
-          name: "Мужская Эстетика",
-          about: ["Премиальный барбершоп в Ставрополе."],
-          founded_hint: "около 2020 (более 6 лет)",
+          name: 'Мужская Эстетика',
+          about: ['Премиальный барбершоп в Ставрополе.'],
+          founded_hint: 'около 2020 (более 6 лет)',
         },
         staff: [
-          { id: "1", name: "Илья", title: "Барбер", specialization: null },
+          { id: '1', name: 'Илья', title: 'Барбер', specialization: null },
         ],
       },
     });
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      audience: "client",
-      messages: [{ role: "user", content: "Расскажи о барбершопе" }],
+      audience: 'client',
+      messages: [{ role: 'user', content: 'Расскажи о барбершопе' }],
     });
 
     expect(mocks.runtime.listTools).toHaveBeenCalled();
     const firstModelInput = mocks.model.decide.mock.calls[0]?.[0];
-    expect(firstModelInput?.persona).toBe("admin");
+    expect(firstModelInput?.persona).toBe('admin');
     expect(
       firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
-    ).toEqual(expect.not.arrayContaining(["analytics.business.query"]));
+    ).toEqual(expect.not.arrayContaining(['analytics.business.query']));
     expect(
       firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
-    ).toEqual(expect.arrayContaining(["catalog.staff.read"]));
+    ).toEqual(expect.arrayContaining(['catalog.staff.read']));
     expect(
       firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
-    ).not.toContain("booking.upsell.suggest");
+    ).not.toContain('booking.upsell.suggest');
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       user,
-      "catalog.staff.read",
+      'catalog.staff.read',
       expect.objectContaining({
         arguments: {},
       }),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(mocks.runtime.execute).not.toHaveBeenCalledWith(
       user,
-      "analytics.business.query",
+      'analytics.business.query',
       expect.anything(),
       expect.anything(),
     );
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    expect(result.reply).toContain("Из сохранённого описания салона");
-    expect(result.reply).not.toContain("более 6 лет");
-    expect(result.brain).toMatchObject({ persona: "admin" });
+    expect(result.reply).toContain('Из сохранённого описания салона');
+    expect(result.reply).not.toContain('более 6 лет');
+    expect(result.brain).toMatchObject({ persona: 'admin' });
     expect(result.widget).toBeUndefined();
     expect(result.reply).not.toMatch(/выручк|прибыл|загрузк|аналитик/i);
   });
 
-  it("🔴 баланс чужого журнала произносится с оговоркой, а не как факт Maya", async () => {
+  it('🔴 баланс чужого журнала произносится с оговоркой, а не как факт Maya', async () => {
     // P7.1. Поверхность чата — та же поверхность лояльности. Раньше здесь
     // звучало голое число даже тогда, когда оно отдано из кэша, потому что
     // владелец не ответил. Maya не ведёт этот реестр и обещать за него не может.
     const customer: AuthenticatedUser = {
       ...user,
-      userId: "customer-user",
+      userId: 'customer-user',
       role: UserRole.CUSTOMER,
     };
-    const mocks = createService(["loyalty.own.read"]);
+    const mocks = createService(['loyalty.own.read']);
     mocks.model.decide.mockResolvedValueOnce(
       decision({
-        reply: "Проверяю баланс.",
-        toolCall: { name: "loyalty.own.read", arguments: {} },
+        reply: 'Проверяю баланс.',
+        toolCall: { name: 'loyalty.own.read', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-loyalty-stale",
+      status: 'completed',
+      execution_id: 'execution-loyalty-stale',
       result: {
         balance: 385,
-        currency: "RUB",
-        authority: "legacy_bot",
-        authority_scope: "resolved",
+        currency: 'RUB',
+        authority: 'legacy_bot',
+        authority_scope: 'resolved',
         stale: true,
         verification_required: true,
       },
@@ -2346,38 +2346,38 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(customer, {
       ...dto,
-      messages: [{ role: "user", content: "Сколько у меня баллов?" }],
+      messages: [{ role: 'user', content: 'Сколько у меня баллов?' }],
     });
 
-    expect(result.reply).toContain("385");
-    expect(result.reply).toContain("последнее известное значение");
+    expect(result.reply).toContain('385');
+    expect(result.reply).toContain('последнее известное значение');
   });
 
-  it("grounds a customer loyalty balance in the authenticated customer tool", async () => {
+  it('grounds a customer loyalty balance in the authenticated customer tool', async () => {
     const customer: AuthenticatedUser = {
       ...user,
-      userId: "customer-user",
+      userId: 'customer-user',
       role: UserRole.CUSTOMER,
     };
-    const mocks = createService(["loyalty.own.read"]);
+    const mocks = createService(['loyalty.own.read']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю баланс.",
-          toolCall: { name: "loyalty.own.read", arguments: {} },
+          reply: 'Проверяю баланс.',
+          toolCall: { name: 'loyalty.own.read', arguments: {} },
         }),
       )
       .mockResolvedValueOnce(
-        decision({ reply: "Ваш баланс: 2 133 балла.", toolCall: null }),
+        decision({ reply: 'Ваш баланс: 2 133 балла.', toolCall: null }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-loyalty",
+      status: 'completed',
+      execution_id: 'execution-loyalty',
       // Свой свежий реестр — единственный случай, когда оговорка не нужна.
       result: {
         balance: 2_133,
-        currency: "RUB",
-        authority: "maya",
+        currency: 'RUB',
+        authority: 'maya',
         authoritative: true,
         stale: false,
         verification_required: false,
@@ -2386,146 +2386,146 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(customer, {
       ...dto,
-      messages: [{ role: "user", content: "Сколько у меня баллов?" }],
+      messages: [{ role: 'user', content: 'Сколько у меня баллов?' }],
     });
 
     // Клиент ходит только в own-scope инструмент и общается с персоной admin —
     // это защита от чужих балансов, и её смена контракта не касается.
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
-      "loyalty.own.read",
+      'loyalty.own.read',
     ]);
-    expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe("admin");
+    expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe('admin');
     // 🔴 Баланс — личные данные спрашивающего, поэтому ответ собирает сервер, а
     // результат инструмента во внешнюю модель не уходит вовсе: второго вызова
     // нет. Ради гладкой формулировки контур 152-ФЗ не размениваем.
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
-      reply: "Ваш баланс: 2 133 балла.",
-      source: "safe_fallback",
+      reply: 'Ваш баланс: 2 133 балла.',
+      source: 'safe_fallback',
       grounding: {
-        status: "verified",
-        domain: "client_loyalty",
-        evidence_tools: ["loyalty.own.read"],
+        status: 'verified',
+        domain: 'client_loyalty',
+        evidence_tools: ['loyalty.own.read'],
       },
     });
   });
 
-  it("grounds a request to spend bonuses before suggesting a service", async () => {
+  it('grounds a request to spend bonuses before suggesting a service', async () => {
     const customer: AuthenticatedUser = {
       ...user,
-      userId: "customer-user",
+      userId: 'customer-user',
       role: UserRole.CUSTOMER,
     };
-    const mocks = createService(["loyalty.own.read"]);
+    const mocks = createService(['loyalty.own.read']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю варианты.",
-          toolCall: { name: "loyalty.own.read", arguments: {} },
+          reply: 'Проверяю варианты.',
+          toolCall: { name: 'loyalty.own.read', arguments: {} },
         }),
       )
       .mockResolvedValueOnce(
         decision({
-          reply: "У вас 2 133 балла. По сумме хватает на SPA за 1 200.",
+          reply: 'У вас 2 133 балла. По сумме хватает на SPA за 1 200.',
           toolCall: null,
         }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-loyalty-spend",
+      status: 'completed',
+      execution_id: 'execution-loyalty-spend',
       result: {
         balance: 2_133,
         spend_options: {
           verification_required: true,
-          items: [{ name: "SPA", points_required: 1_200 }],
+          items: [{ name: 'SPA', points_required: 1_200 }],
         },
       },
     });
 
     const result = await mocks.service.chat(customer, {
-      surface: "web",
-      messages: [{ role: "user", content: "На что я могу потратить бонусы?" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'На что я могу потратить бонусы?' }],
     });
 
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
-      "loyalty.own.read",
+      'loyalty.own.read',
     ]);
     // Ни баланс, ни доступные к списанию услуги во внешнюю модель не уезжают.
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(
       JSON.stringify(mocks.model.decide.mock.calls[0]?.[0].toolResults),
-    ).not.toContain("SPA");
+    ).not.toContain('SPA');
     expect(result).toMatchObject({
-      source: "safe_fallback",
-      grounding: { status: "verified", domain: "client_loyalty" },
+      source: 'safe_fallback',
+      grounding: { status: 'verified', domain: 'client_loyalty' },
     });
     // 🔴 Обещание переподтверждения обязано звучать всегда: без него клиент
     // решит, что баллы уже списаны. Это гарантия сервера, а не добрая воля
     // модели — поэтому проверяем дословно.
     expect(result.reply).toContain(
-      "Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.",
+      'Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.',
     );
-    expect(result.reply).toContain("2 133");
-    expect(result.reply).toContain("1 200");
+    expect(result.reply).toContain('2 133');
+    expect(result.reply).toContain('1 200');
   });
 
-  it("grounds the authenticated customer appointment history", async () => {
+  it('grounds the authenticated customer appointment history', async () => {
     const customer: AuthenticatedUser = {
       ...user,
-      userId: "customer-user",
+      userId: 'customer-user',
       role: UserRole.CUSTOMER,
     };
-    const mocks = createService(["appointments.own.list"]);
+    const mocks = createService(['appointments.own.list']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю записи.",
-          toolCall: { name: "appointments.own.list", arguments: {} },
+          reply: 'Проверяю записи.',
+          toolCall: { name: 'appointments.own.list', arguments: {} },
         }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "Одна запись впереди, ещё одна была отменена. Подробности — в разделе «Записи».",
+            'Одна запись впереди, ещё одна была отменена. Подробности — в разделе «Записи».',
           toolCall: null,
         }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-appointments",
+      status: 'completed',
+      execution_id: 'execution-appointments',
       result: {
         appointments: [
           {
-            status: "confirmed",
+            status: 'confirmed',
             is_upcoming: true,
-            start_at: "2099-07-20T10:00:00.000Z",
-            branch: { timezone: "Europe/Moscow" },
+            start_at: '2099-07-20T10:00:00.000Z',
+            branch: { timezone: 'Europe/Moscow' },
           },
-          { status: "canceled", is_upcoming: false },
+          { status: 'canceled', is_upcoming: false },
         ],
       },
     });
 
     const result = await mocks.service.chat(customer, {
       ...dto,
-      messages: [{ role: "user", content: "Какие у меня записи?" }],
+      messages: [{ role: 'user', content: 'Какие у меня записи?' }],
     });
 
     expect(result).toMatchObject({
-      source: "safe_fallback",
+      source: 'safe_fallback',
       grounding: {
-        status: "verified",
-        domain: "client_appointments",
-        evidence_tools: ["appointments.own.list"],
+        status: 'verified',
+        domain: 'client_appointments',
+        evidence_tools: ['appointments.own.list'],
       },
     });
-    expect(result.reply).toContain("Предстоящих: 1, отменённых: 1.");
+    expect(result.reply).toContain('Предстоящих: 1, отменённых: 1.');
     // История записей читается только own-scope инструментом и только персоной
     // admin: клиент не должен получить доступ к чужим визитам ни на одном ходу.
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
-      "appointments.own.list",
+      'appointments.own.list',
     ]);
-    expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe("admin");
+    expect(mocks.model.decide.mock.calls[0]?.[0].persona).toBe('admin');
     // 🔴 Главное в этом тесте. Набор визитов идентифицирует человека сам по
     // себе — по датам, услугам и суммам, даже без имени и телефона. Поэтому
     // ответ собирает сервер, а во внешнюю модель история НЕ уходит: второго
@@ -2533,24 +2533,24 @@ describe("AiCoreService", () => {
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(
       JSON.stringify(mocks.model.decide.mock.calls[0]?.[0].toolResults),
-    ).toBe("[]");
+    ).toBe('[]');
   });
 
-  describe("personal appointment details in the canonical chat", () => {
-    const tool = "appointments.own.list";
+  describe('personal appointment details in the canonical chat', () => {
+    const tool = 'appointments.own.list';
     const client = { ...user, role: UserRole.CLIENT };
     beforeEach(() =>
-      jest.useFakeTimers().setSystemTime(new Date("2026-10-06T12:00:00Z")),
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-06T12:00:00Z')),
     );
     afterEach(() => jest.useRealTimers());
     const appointment = (changes: Record<string, unknown> = {}) => ({
-      id: "private-appointment",
-      status: "confirmed",
+      id: 'private-appointment',
+      status: 'confirmed',
       is_upcoming: true,
-      start_at: "2026-10-07T09:00:00.000Z",
-      end_at: "2026-10-07T10:00:00.000Z",
-      branch: { name: "Тестовый филиал", timezone: "Asia/Novosibirsk" },
-      services: [{ name: "Стрижка" }],
+      start_at: '2026-10-07T09:00:00.000Z',
+      end_at: '2026-10-07T10:00:00.000Z',
+      branch: { name: 'Тестовый филиал', timezone: 'Asia/Novosibirsk' },
+      services: [{ name: 'Стрижка' }],
       ...changes,
     });
     function fixture(result: unknown, stale = false) {
@@ -2559,8 +2559,8 @@ describe("AiCoreService", () => {
         decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
       );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
-        execution_id: "personal-read",
+        status: 'completed',
+        execution_id: 'personal-read',
         result,
         stale,
       });
@@ -2569,55 +2569,55 @@ describe("AiCoreService", () => {
     const ask = (mocks: ReturnType<typeof fixture>) =>
       mocks.service.chat(client, {
         ...dto,
-        messages: [{ role: "user", content: "Когда я записан?" }],
+        messages: [{ role: 'user', content: 'Когда я записан?' }],
       });
-    it("describes an empty available list without denying history hidden by the source setting", async () => {
+    it('describes an empty available list without denying history hidden by the source setting', async () => {
       const reply = await ask(fixture({ appointments: [] }));
-      expect(reply.grounding.status).toBe("verified");
+      expect(reply.grounding.status).toBe('verified');
       expect(reply.reply).toBe(
-        "В доступном списке нет записей. Источник: ваши записи в MAYA.",
+        'В доступном списке нет записей. Источник: ваши записи в MAYA.',
       );
     });
-    it("answers the next appointment at its branch time without exposing history to another model call", async () => {
+    it('answers the next appointment at its branch time without exposing history to another model call', async () => {
       const mocks = fixture({ appointments: [appointment()] });
       const reply = await ask(mocks);
-      expect(reply.reply).toContain("07.10.2026");
-      expect(reply.reply).toContain("16:00");
-      expect(reply.reply).toContain("Asia/Novosibirsk");
-      expect(reply.reply).toContain("Стрижка");
+      expect(reply.reply).toContain('07.10.2026');
+      expect(reply.reply).toContain('16:00');
+      expect(reply.reply).toContain('Asia/Novosibirsk');
+      expect(reply.reply).toContain('Стрижка');
       expect(reply.reply).not.toMatch(/private-appointment|раздел «Записи»/);
-      expect(reply.grounding.status).toBe("verified");
+      expect(reply.grounding.status).toBe('verified');
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.model.decide.mock.calls[0][0].toolResults).toEqual([]);
     });
-    it.each(["same conversation", "restored conversation"])(
-      "does not export a prior personal reply through %s model input",
+    it.each(['same conversation', 'restored conversation'])(
+      'does not export a prior personal reply through %s model input',
       async (mode) => {
         const mocks = fixture({
           appointments: [
             appointment({
               branch: {
-                name: "PRIVATE_BRANCH_MARKER",
-                timezone: "Asia/Novosibirsk",
+                name: 'PRIVATE_BRANCH_MARKER',
+                timezone: 'Asia/Novosibirsk',
               },
-              services: [{ name: "PRIVATE_VISIT_SERVICE_MARKER" }],
+              services: [{ name: 'PRIVATE_VISIT_SERVICE_MARKER' }],
             }),
           ],
         });
         const first = await ask(mocks);
-        expect(first.reply).toContain("PRIVATE_VISIT_SERVICE_MARKER");
+        expect(first.reply).toContain('PRIVATE_VISIT_SERVICE_MARKER');
         const followUp = {
           ...dto,
-          requestId: "personal-followup-1234",
+          requestId: 'personal-followup-1234',
           messages: [
-            { role: "user" as const, content: "Когда я записан?" },
-            { role: "assistant" as const, content: first.reply },
-            { role: "user" as const, content: "А теперь?" },
+            { role: 'user' as const, content: 'Когда я записан?' },
+            { role: 'assistant' as const, content: first.reply },
+            { role: 'user' as const, content: 'А теперь?' },
           ],
         };
         // A new server instance has no in-memory knowledge of the prior reply.
         const receiver =
-          mode === "restored conversation"
+          mode === 'restored conversation'
             ? fixture({ appointments: [] })
             : mocks;
         await receiver.service.chat(client, followUp);
@@ -2627,13 +2627,13 @@ describe("AiCoreService", () => {
         expect(input).not.toMatch(
           /PRIVATE_VISIT_SERVICE_MARKER|PRIVATE_BRANCH_MARKER|Asia\/Novosibirsk|16:00|Предстоящих: 1/,
         );
-        expect(input).toContain("А теперь?");
+        expect(input).toContain('А теперь?');
         await receiver.service.chat(client, {
           ...followUp,
-          requestId: "personal-followup-5678",
+          requestId: 'personal-followup-5678',
           messages: [
-            { role: "assistant", content: first.reply.slice(25, 170) },
-            { role: "user", content: "Проверь ещё раз" },
+            { role: 'assistant', content: first.reply.slice(25, 170) },
+            { role: 'user', content: 'Проверь ещё раз' },
           ],
         });
         expect(
@@ -2643,7 +2643,7 @@ describe("AiCoreService", () => {
         );
       },
     );
-    it("counts the complete raw list and displays only three earliest upcoming appointments", async () => {
+    it('counts the complete raw list and displays only three earliest upcoming appointments', async () => {
       const rows = Array.from({ length: 45 }, (_, i) =>
         appointment({
           id: `private-${i}`,
@@ -2652,32 +2652,32 @@ describe("AiCoreService", () => {
         }),
       ).reverse();
       const reply = await ask(fixture({ appointments: rows }));
-      expect(reply.reply).toContain("45");
-      expect(reply.reply).toContain("07.10.2026");
-      expect(reply.reply).toContain("09.10.2026");
-      expect(reply.reply).not.toContain("10.10.2026");
-      expect(reply.reply).not.toContain("В вашей истории 40");
+      expect(reply.reply).toContain('45');
+      expect(reply.reply).toContain('07.10.2026');
+      expect(reply.reply).toContain('09.10.2026');
+      expect(reply.reply).not.toContain('10.10.2026');
+      expect(reply.reply).not.toContain('В вашей истории 40');
     });
-    it("withholds private history in the actual serialized next model request, including a refused personal reread", async () => {
+    it('withholds private history in the actual serialized next model request, including a refused personal reread', async () => {
       const mocks = fixture({
         appointments: [
-          appointment({ services: [{ name: "PRIVATE_SERIALIZED_VISIT" }] }),
+          appointment({ services: [{ name: 'PRIVATE_SERIALIZED_VISIT' }] }),
         ],
       });
       const wire: string[] = [];
       const realModel = new AiCoreModelService(
         new ConfigService({
-          AI_CORE_PROVIDER: "openai",
-          OPENAI_API_KEY: "synthetic-transport-no-credential",
+          AI_CORE_PROVIDER: 'openai',
+          OPENAI_API_KEY: 'synthetic-transport-no-credential',
         }),
       );
       const transport = jest
-        .spyOn(globalThis, "fetch")
+        .spyOn(globalThis, 'fetch')
         .mockImplementation((url, init) => {
-          expect(url).toBe("https://api.openai.com/v1/responses");
-          expect(init?.method).toBe("POST");
-          if (typeof init?.body !== "string")
-            throw new Error("Expected serialized provider request body");
+          expect(url).toBe('https://api.openai.com/v1/responses');
+          expect(init?.method).toBe('POST');
+          if (typeof init?.body !== 'string')
+            throw new Error('Expected serialized provider request body');
           const serialized = init.body;
           wire.push(serialized);
           // The real provider serializer runs; no socket/provider is used.
@@ -2688,17 +2688,17 @@ describe("AiCoreService", () => {
                   {
                     content: [
                       {
-                        type: "output_text",
+                        type: 'output_text',
                         text: JSON.stringify({
                           semantic_plan: {
-                            parent_request: "Покажи мои записи",
-                            language: "ru",
-                            dialogue_act: "question",
+                            parent_request: 'Покажи мои записи',
+                            language: 'ru',
+                            dialogue_act: 'question',
                             tasks: [
                               {
-                                id: "own",
-                                intent: "booking.list_own",
-                                entities_json: "{}",
+                                id: 'own',
+                                intent: 'booking.list_own',
+                                entities_json: '{}',
                                 depends_on: [],
                                 confidence: 1,
                                 requires_clarification: false,
@@ -2712,8 +2712,8 @@ describe("AiCoreService", () => {
                             },
                           },
                           tool_call: {
-                            name: "appointments.own.list",
-                            arguments_json: "{}",
+                            name: 'appointments.own.list',
+                            arguments_json: '{}',
                           },
                         }),
                       },
@@ -2729,19 +2729,19 @@ describe("AiCoreService", () => {
       mocks.model.decide.mockImplementation((input) => realModel.decide(input));
       try {
         const first = await ask(mocks);
-        expect(first.reply).toContain("PRIVATE_SERIALIZED_VISIT");
+        expect(first.reply).toContain('PRIVATE_SERIALIZED_VISIT');
         for (const denied of [false, true]) {
           if (denied)
             mocks.runtime.execute.mockRejectedValueOnce(
-              new ForbiddenException("synthetic revoked personal link"),
+              new ForbiddenException('synthetic revoked personal link'),
             );
           const next = mocks.service.chat(client, {
             ...dto,
-            requestId: denied ? "wire-revoked-1234" : "wire-followup-1234",
+            requestId: denied ? 'wire-revoked-1234' : 'wire-followup-1234',
             messages: [
-              { role: "user", content: "Когда я записан?" },
-              { role: "assistant", content: first.reply },
-              { role: "user", content: "Покажи мои записи" },
+              { role: 'user', content: 'Когда я записан?' },
+              { role: 'assistant', content: first.reply },
+              { role: 'user', content: 'Покажи мои записи' },
             ],
           });
           if (denied)
@@ -2751,110 +2751,110 @@ describe("AiCoreService", () => {
             /PRIVATE_SERIALIZED_VISIT|Asia\/Novosibirsk|16:00|Предстоящих: 1/,
           );
           const body = JSON.parse(wire.at(-1)!) as { input: string };
-          expect(body.input).toContain("Покажи мои записи");
+          expect(body.input).toContain('Покажи мои записи');
         }
         expect(wire).toHaveLength(3);
       } finally {
         transport.mockRestore();
       }
     });
-    it("does not offer a canceled future appointment as the next visit", async () => {
+    it('does not offer a canceled future appointment as the next visit', async () => {
       const reply = await ask(
-        fixture({ appointments: [appointment({ status: "canceled" })] }),
+        fixture({ appointments: [appointment({ status: 'canceled' })] }),
       );
-      expect(reply.reply).toContain("Предстоящих: 0");
+      expect(reply.reply).toContain('Предстоящих: 0');
       expect(reply.reply).not.toMatch(/16:00|Стрижка/);
     });
-    it("does not offer a cached upcoming flag after its actual instant has passed", async () => {
+    it('does not offer a cached upcoming flag after its actual instant has passed', async () => {
       const reply = await ask(
         fixture({
-          appointments: [appointment({ start_at: "2026-10-06T09:00:00Z" })],
+          appointments: [appointment({ start_at: '2026-10-06T09:00:00Z' })],
         }),
       );
-      expect(reply.grounding.status).toBe("verified");
-      expect(reply.reply).toContain("Предстоящих: 0");
-      expect(reply.reply).not.toContain("Стрижка");
+      expect(reply.grounding.status).toBe('verified');
+      expect(reply.reply).toContain('Предстоящих: 0');
+      expect(reply.reply).not.toContain('Стрижка');
     });
     it.each([
-      new Date("2026-10-07T09:00:00Z"),
-      "2026-10-07T09:00:00Z",
-      "2026-10-07T09:00:00.1Z",
-    ])("accepts canonical reader/persisted instant %s", async (start) => {
+      new Date('2026-10-07T09:00:00Z'),
+      '2026-10-07T09:00:00Z',
+      '2026-10-07T09:00:00.1Z',
+    ])('accepts canonical reader/persisted instant %s', async (start) => {
       const reply = await ask(
         fixture({ appointments: [appointment({ start_at: start })] }),
       );
-      expect(reply.grounding.status).toBe("verified");
-      expect(reply.reply).toContain("07.10.2026, 16:00");
+      expect(reply.grounding.status).toBe('verified');
+      expect(reply.reply).toContain('07.10.2026, 16:00');
     });
     it.each([
-      ["missing list", {}],
-      ["null list", { appointments: null }],
-      ["malformed entry", { appointments: [null] }],
+      ['missing list', {}],
+      ['null list', { appointments: null }],
+      ['malformed entry', { appointments: [null] }],
       [
-        "missing upcoming time",
+        'missing upcoming time',
         { appointments: [appointment({ start_at: null })] },
       ],
       [
-        "normalized invalid calendar date",
-        { appointments: [appointment({ start_at: "2027-02-30T09:00:00Z" })] },
+        'normalized invalid calendar date',
+        { appointments: [appointment({ start_at: '2027-02-30T09:00:00Z' })] },
       ],
       [
-        "timezone-free datetime",
-        { appointments: [appointment({ start_at: "2026-10-07T09:00:00" })] },
+        'timezone-free datetime',
+        { appointments: [appointment({ start_at: '2026-10-07T09:00:00' })] },
       ],
       [
-        "missing branch timezone",
-        { appointments: [appointment({ branch: { name: "Филиал" } })] },
+        'missing branch timezone',
+        { appointments: [appointment({ branch: { name: 'Филиал' } })] },
       ],
       [
-        "unknown status",
-        { appointments: [appointment({ status: "unknown" })] },
+        'unknown status',
+        { appointments: [appointment({ status: 'unknown' })] },
       ],
       [
-        "invalid timezone",
+        'invalid timezone',
         {
-          appointments: [appointment({ branch: { timezone: "Mars/Olympus" } })],
+          appointments: [appointment({ branch: { timezone: 'Mars/Olympus' } })],
         },
       ],
     ])(
-      "does not turn %s into a verified empty history or invented date",
+      'does not turn %s into a verified empty history or invented date',
       async (_label, data) => {
         const reply = await ask(fixture(data));
-        expect(reply.grounding.status).toBe("blocked");
+        expect(reply.grounding.status).toBe('blocked');
         expect(reply.reply).not.toMatch(
           /У вас пока нет записей|В доступном списке нет записей|16:00|07.10.2026/,
         );
       },
     );
-    it("refuses stale appointment times instead of claiming the snapshot is current", async () => {
+    it('refuses stale appointment times instead of claiming the snapshot is current', async () => {
       const reply = await ask(fixture({ appointments: [appointment()] }, true));
-      expect(reply.grounding.status).toBe("blocked");
-      expect(reply.reply).not.toContain("16:00");
+      expect(reply.grounding.status).toBe('blocked');
+      expect(reply.reply).not.toContain('16:00');
     });
   });
 
-  it("explains access denial without pretending the protected source is offline", async () => {
+  it('explains access denial without pretending the protected source is offline', async () => {
     const customer: AuthenticatedUser = {
       ...user,
-      userId: "customer-user",
+      userId: 'customer-user',
       role: UserRole.CUSTOMER,
     };
-    const mocks = createService(["appointments.own.list"]);
+    const mocks = createService(['appointments.own.list']);
 
     const result = await mocks.service.chat(customer, {
       ...dto,
       messages: [
-        { role: "user", content: "Какая выручка бизнеса за этот месяц?" },
+        { role: 'user', content: 'Какая выручка бизнеса за этот месяц?' },
       ],
     });
 
     expect(result).toMatchObject({
       reply:
-        "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
-      source: "safe_fallback",
+        'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.',
+      source: 'safe_fallback',
       grounding: {
-        status: "blocked",
-        domain: "business_query",
+        status: 'blocked',
+        domain: 'business_query',
       },
     });
     expect(mocks.model.decide).not.toHaveBeenCalled();
@@ -2865,21 +2865,21 @@ describe("AiCoreService", () => {
   // профильную возможность, то есть ассистента нет в тарифе. Раньше это звучало
   // так же, как «не ваша роль», и владелец читал тарифное ограничение как
   // поломку. Тариф надо назвать вслух.
-  it("names the plan when the assistant is not part of it at all", async () => {
+  it('names the plan when the assistant is not part of it at all', async () => {
     const mocks = createService([]);
 
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Какая выручка бизнеса за этот месяц?" },
+        { role: 'user', content: 'Какая выручка бизнеса за этот месяц?' },
       ],
     });
 
     expect(result).toMatchObject({
       reply:
-        "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно.",
-      source: "safe_fallback",
-      grounding: { status: "blocked" },
+        'MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно.',
+      source: 'safe_fallback',
+      grounding: { status: 'blocked' },
     });
     expect(mocks.model.decide).not.toHaveBeenCalled();
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
@@ -2891,48 +2891,48 @@ describe("AiCoreService", () => {
   // которая ему выдана. Подсказка называла только журнал команды, мастеру не
   // положенный, поэтому вся семья считалась закрытой. Отказ в СВОИХ данных —
   // всегда дефект, а не защита.
-  it.each(["Сколько у меня ещё записей сегодня", "Какой у меня график завтра"])(
-    "не отказывает мастеру в его собственных данных: %s",
+  it.each(['Сколько у меня ещё записей сегодня', 'Какой у меня график завтра'])(
+    'не отказывает мастеру в его собственных данных: %s',
     async (question) => {
       const master: AuthenticatedUser = {
         ...user,
-        userId: "master-user",
+        userId: 'master-user',
         role: UserRole.EMPLOYEE,
       };
       const mocks = createService([
-        "analytics.employee.query",
-        "staff.schedule.own.read",
-        "appointments.own.list",
+        'analytics.employee.query',
+        'staff.schedule.own.read',
+        'appointments.own.list',
       ]);
       mocks.model.decide.mockResolvedValue(
-        decision({ reply: "Смотрю твой день.", toolCall: null }),
+        decision({ reply: 'Смотрю твой день.', toolCall: null }),
       );
 
       const result = await mocks.service.chat(master, {
         ...dto,
-        messages: [{ role: "user", content: question }],
+        messages: [{ role: 'user', content: question }],
       });
 
       // Единственное, что тут важно и не хрупко: человеку не говорят, что его
       // собственные данные ему не положены. Каким путём MAYA доберётся до ответа
       // — моделью или серверным разбором своих записей, — дело десятое.
-      expect(result.reply).not.toContain("недоступен для вашей текущей роли");
-      expect(result.reply).not.toContain("чужие или закрытые данные");
+      expect(result.reply).not.toContain('недоступен для вашей текущей роли');
+      expect(result.reply).not.toContain('чужие или закрытые данные');
     },
   );
 
-  describe("stored Admin integration status [scripted selection only]", () => {
-    const tool = "support.integration-status.read";
+  describe('stored Admin integration status [scripted selection only]', () => {
+    const tool = 'support.integration-status.read';
     const payload = {
       configured: true,
-      calendar_source: "external",
-      next_action: "reconnect",
+      calendar_source: 'external',
+      next_action: 'reconnect',
       connection: {
-        provider: "yclients",
-        status: "error",
+        provider: 'yclients',
+        status: 'error',
         verified: true,
-        verified_at: "2026-10-05T08:00:00.000Z",
-        last_checked_at: "2026-10-06T09:00:00.000Z",
+        verified_at: '2026-10-05T08:00:00.000Z',
+        last_checked_at: '2026-10-06T09:00:00.000Z',
         last_sync_at: null,
       },
     };
@@ -2946,39 +2946,39 @@ describe("AiCoreService", () => {
           }),
         )
         .mockResolvedValue(
-          decision({ reply: "MODEL: CRM работает сейчас.", toolCall: null }),
+          decision({ reply: 'MODEL: CRM работает сейчас.', toolCall: null }),
         );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
-        execution_id: "stored-admin-status",
+        status: 'completed',
+        execution_id: 'stored-admin-status',
         stale,
         result,
       });
       return mocks;
     }
-    it.each(["native", "web"] as const)(
-      "answers the selected READ on %s with one model selection and unchanged actor",
+    it.each(['native', 'web'] as const)(
+      'answers the selected READ on %s with one model selection and unchanged actor',
       async (surface) => {
         const mocks = fixture();
         const output = await mocks.service.chat(user, {
           ...dto,
           surface,
-          messages: [{ role: "user", content: "Как состояние подключения?" }],
+          messages: [{ role: 'user', content: 'Как состояние подключения?' }],
         });
         expect(output.reply).toContain(
-          "Сохранённый статус интеграции YCLIENTS: ошибка подключения",
+          'Сохранённый статус интеграции YCLIENTS: ошибка подключения',
         );
-        expect(output.reply).toContain("06.10.2026, 09:00 (UTC)");
+        expect(output.reply).toContain('06.10.2026, 09:00 (UTC)');
         expect(output.reply).toContain(
-          "Текущая доступность CRM не подтверждена",
+          'Текущая доступность CRM не подтверждена',
         );
-        expect(output.reply).toContain("переподключить CRM");
-        expect(output.reply).not.toContain("MODEL");
+        expect(output.reply).toContain('переподключить CRM');
+        expect(output.reply).not.toContain('MODEL');
         expect(output).toMatchObject({
           action: null,
           grounding: {
-            status: "verified",
-            domain: "integration_status",
+            status: 'verified',
+            domain: 'integration_status',
             evidence_tools: [tool],
           },
         });
@@ -2989,40 +2989,40 @@ describe("AiCoreService", () => {
       },
     );
     it.each([
-      ["stale", true, payload],
-      ["incomplete", false, {}],
+      ['stale', true, payload],
+      ['incomplete', false, {}],
     ] as const)(
-      "keeps %s source blocked without a recovery recommendation",
+      'keeps %s source blocked without a recovery recommendation',
       async (_label, stale, result) => {
         const mocks = fixture(stale, result);
         const output = await mocks.service.chat(user, {
           ...dto,
-          messages: [{ role: "user", content: "Как состояние подключения?" }],
+          messages: [{ role: 'user', content: 'Как состояние подключения?' }],
         });
-        expect(output.grounding.status).toBe("blocked");
+        expect(output.grounding.status).toBe('blocked');
         expect(output.reply).not.toMatch(/переподключить CRM|MODEL/);
         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       },
     );
-    it("does not reuse a successful status after source access is revoked", async () => {
+    it('does not reuse a successful status after source access is revoked', async () => {
       const mocks = fixture();
       const first = await mocks.service.chat(user, {
         ...dto,
-        messages: [{ role: "user", content: "Как состояние подключения?" }],
+        messages: [{ role: 'user', content: 'Как состояние подключения?' }],
       });
       mocks.model.decide.mockResolvedValue(
         decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
       );
       mocks.runtime.execute.mockRejectedValue(
-        new ForbiddenException("feature revoked"),
+        new ForbiddenException('feature revoked'),
       );
       await expect(
         mocks.service.chat(user, {
           ...dto,
-          requestId: "admin-revoked-next",
+          requestId: 'admin-revoked-next',
           messages: [
-            { role: "assistant", content: first.reply },
-            { role: "user", content: "А теперь?" },
+            { role: 'assistant', content: first.reply },
+            { role: 'user', content: 'А теперь?' },
           ],
         }),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -3030,15 +3030,15 @@ describe("AiCoreService", () => {
   });
 
   // Scripted tool selection and source fixtures: no model/provider acceptance.
-  describe("public company profile consultation", () => {
-    const tool = "company.business-hours.read";
+  describe('public company profile consultation', () => {
+    const tool = 'company.business-hours.read';
     const profile = {
       verified: true,
-      source: "external_crm",
-      title: "Synthetic salon",
-      address: "Тестовая улица, 7",
-      timezone: "Europe/Moscow",
-      schedule: "Пн–Пт 10:00–20:00; Сб–Вс 11:00–18:00",
+      source: 'external_crm',
+      title: 'Synthetic salon',
+      address: 'Тестовая улица, 7',
+      timezone: 'Europe/Moscow',
+      schedule: 'Пн–Пт 10:00–20:00; Сб–Вс 11:00–18:00',
       schedule_available: true,
     };
     const client = { ...user, role: UserRole.CLIENT };
@@ -3047,7 +3047,7 @@ describe("AiCoreService", () => {
       mocks.model.decide
         .mockResolvedValue(
           decision({
-            reply: "MODEL: Мы открыты сейчас и есть свободное место.",
+            reply: 'MODEL: Мы открыты сейчас и есть свободное место.',
             toolCall: null,
           }),
         )
@@ -3055,34 +3055,34 @@ describe("AiCoreService", () => {
           decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
         );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
-        execution_id: "profile-read",
+        status: 'completed',
+        execution_id: 'profile-read',
         result,
       });
       return mocks;
     }
-    it("answers the client address and hours from the public CRM profile without another model call", async () => {
+    it('answers the client address and hours from the public CRM profile without another model call', async () => {
       const mocks = fixture(profile);
       const result = await mocks.service.chat(client, {
         ...dto,
         messages: [
           {
-            role: "user",
-            content: "Где вы находитесь и во сколько открываетесь?",
+            role: 'user',
+            content: 'Где вы находитесь и во сколько открываетесь?',
           },
         ],
       });
       expect(result.reply).toContain(profile.address);
       expect(result.reply).toContain(profile.schedule);
-      expect(result.reply).toContain("Europe/Moscow");
-      expect(result.reply).toContain("Источник: CRM салона");
+      expect(result.reply).toContain('Europe/Moscow');
+      expect(result.reply).toContain('Источник: CRM салона');
       expect(result.reply).not.toMatch(/MODEL|открыты сейчас|свободное место/);
       expect(result).toMatchObject({
-        source: "safe_fallback",
+        source: 'safe_fallback',
         action: null,
         grounding: {
-          status: "verified",
-          domain: "company_profile",
+          status: 'verified',
+          domain: 'company_profile',
           evidence_tools: [tool],
         },
       });
@@ -3091,10 +3091,10 @@ describe("AiCoreService", () => {
       // exposed its raw JSON fallback beside the complete server answer.
       expect(mocks.runtime.execute.mock.calls[0]?.[3]).toMatchObject({
         suppressWidgetTrigger: true,
-        widgetTrigger: "T-2a",
+        widgetTrigger: 'T-2a',
       });
     });
-    it("preserves an address when discovery has no hours instead of inventing them", async () => {
+    it('preserves an address when discovery has no hours instead of inventing them', async () => {
       const mocks = fixture({
         ...profile,
         schedule: null,
@@ -3104,166 +3104,166 @@ describe("AiCoreService", () => {
       const result = await mocks.service.chat(client, {
         ...dto,
         messages: [
-          { role: "user", content: "Какой у вас график работы и адрес?" },
+          { role: 'user', content: 'Какой у вас график работы и адрес?' },
         ],
       });
       expect(result.reply).toContain(profile.address);
-      expect(result.reply).toContain("График работы не указан");
+      expect(result.reply).toContain('График работы не указан');
       expect(result.reply).not.toMatch(/10:00|20:00|MODEL|открыты сейчас/);
-      expect(result.grounding.status).toBe("blocked");
+      expect(result.grounding.status).toBe('blocked');
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     });
     it.each([
-      ["unverified", { verified: false }],
-      ["wrong source", { source: "model" }],
-      ["stale", { stale: true }],
-      ["contradictory availability", { schedule_available: false }],
-      ["missing hours", { schedule: undefined }],
-      ["unbounded hours", { schedule: "x".repeat(1500) }],
+      ['unverified', { verified: false }],
+      ['wrong source', { source: 'model' }],
+      ['stale', { stale: true }],
+      ['contradictory availability', { schedule_available: false }],
+      ['missing hours', { schedule: undefined }],
+      ['unbounded hours', { schedule: 'x'.repeat(1500) }],
     ])(
-      "does not claim company profile facts from %s",
+      'does not claim company profile facts from %s',
       async (_label, changes) => {
         const mocks = fixture({ ...profile, ...changes });
         const result = await mocks.service.chat(client, {
           ...dto,
-          messages: [{ role: "user", content: "Во сколько вы открываетесь?" }],
+          messages: [{ role: 'user', content: 'Во сколько вы открываетесь?' }],
         });
-        expect(result.grounding.status).toBe("blocked");
-        expect(result.reply).toContain("Не удалось подтвердить");
+        expect(result.grounding.status).toBe('blocked');
+        expect(result.reply).toContain('Не удалось подтвердить');
         expect(result.reply).not.toMatch(/10:00|20:00|MODEL/);
         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       },
     );
-    it("keeps known hours but marks a missing address instead of substituting the salon name", async () => {
+    it('keeps known hours but marks a missing address instead of substituting the salon name', async () => {
       const mocks = fixture({ ...profile, address: null });
       const result = await mocks.service.chat(client, {
         ...dto,
-        messages: [{ role: "user", content: "Как к вам добраться?" }],
+        messages: [{ role: 'user', content: 'Как к вам добраться?' }],
       });
-      expect(result.reply).toContain("Адрес не указан в CRM");
+      expect(result.reply).toContain('Адрес не указан в CRM');
       expect(result.reply).toContain(profile.schedule);
-      expect(result.reply).not.toContain("Synthetic salon");
-      expect(result.grounding.status).toBe("blocked");
+      expect(result.reply).not.toContain('Synthetic salon');
+      expect(result.grounding.status).toBe('blocked');
     });
-    it("rereads current public facts for a short address follow-up without carrying old hours", async () => {
+    it('rereads current public facts for a short address follow-up without carrying old hours', async () => {
       const mocks = fixture(profile);
       const first = await mocks.service.chat(client, {
         ...dto,
-        messages: [{ role: "user", content: "Во сколько вы открываетесь?" }],
+        messages: [{ role: 'user', content: 'Во сколько вы открываетесь?' }],
       });
       mocks.model.decide.mockResolvedValueOnce(
         decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
       );
       mocks.runtime.execute.mockResolvedValueOnce({
-        status: "completed",
-        execution_id: "profile-read-2",
+        status: 'completed',
+        execution_id: 'profile-read-2',
         result: {
           ...profile,
-          address: "Новая улица, 8",
+          address: 'Новая улица, 8',
           schedule: null,
           schedule_available: false,
         },
       });
       const second = await mocks.service.chat(client, {
         ...dto,
-        requestId: "profile_followup_123",
+        requestId: 'profile_followup_123',
         messages: [
-          { role: "user", content: "Во сколько вы открываетесь?" },
-          { role: "assistant", content: first.reply },
-          { role: "user", content: "А адрес?" },
+          { role: 'user', content: 'Во сколько вы открываетесь?' },
+          { role: 'assistant', content: first.reply },
+          { role: 'user', content: 'А адрес?' },
         ],
       });
-      expect(second.reply).toContain("Новая улица, 8");
-      expect(second.reply).toContain("График работы не указан");
+      expect(second.reply).toContain('Новая улица, 8');
+      expect(second.reply).toContain('График работы не указан');
       expect(second.reply).not.toContain(profile.schedule);
       expect(second.reply).not.toContain(profile.address);
       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
       expect(mocks.runtime.execute).toHaveBeenCalledTimes(2);
     });
-    it("refuses a model-only public address answer before a current source read", async () => {
+    it('refuses a model-only public address answer before a current source read', async () => {
       const mocks = createService([tool]);
       mocks.model.decide.mockResolvedValue(
         decision({
-          reply: "Мы на Выдуманной улице, 99, работаем круглосуточно.",
+          reply: 'Мы на Выдуманной улице, 99, работаем круглосуточно.',
           toolCall: null,
         }),
       );
       const result = await mocks.service.chat(client, {
         ...dto,
-        messages: [{ role: "user", content: "Где вы находитесь?" }],
+        messages: [{ role: 'user', content: 'Где вы находитесь?' }],
       });
-      expect(result.grounding.status).toBe("blocked");
-      expect(result.reply).not.toContain("Выдуманной");
+      expect(result.grounding.status).toBe('blocked');
+      expect(result.reply).not.toContain('Выдуманной');
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
     });
     it.each([
-      "Как изменить email-адрес?",
-      "Что такое IP-адрес?",
-      "Какой у вас адрес электронной почты?",
-      "Какой ваш адрес сайта?",
-      "Где находится настройка уведомлений?",
-      "Когда открывается запись на ноябрь?",
+      'Как изменить email-адрес?',
+      'Что такое IP-адрес?',
+      'Какой у вас адрес электронной почты?',
+      'Какой ваш адрес сайта?',
+      'Где находится настройка уведомлений?',
+      'Когда открывается запись на ноябрь?',
     ])(
-      "does not require the salon profile for another domain: %s",
+      'does not require the salon profile for another domain: %s',
       async (content) => {
-        const mocks = createService([tool, "catalog.services.read"]);
+        const mocks = createService([tool, 'catalog.services.read']);
         mocks.model.decide.mockResolvedValue(
-          decision({ reply: "Уточните вопрос.", toolCall: null }),
+          decision({ reply: 'Уточните вопрос.', toolCall: null }),
         );
         const result = await mocks.service.chat(client, {
           ...dto,
-          messages: [{ role: "user", content }],
+          messages: [{ role: 'user', content }],
         });
         expect(result.grounding.required_tools).not.toEqual([tool]);
-        expect(result.grounding.domain).not.toBe("company_profile");
+        expect(result.grounding.domain).not.toBe('company_profile');
         expect(mocks.runtime.execute).not.toHaveBeenCalled();
       },
     );
-    it("keeps a client dossier address question in the existing dossier domain", async () => {
-      const mocks = createService([tool, "clients.dossier.read"]);
+    it('keeps a client dossier address question in the existing dossier domain', async () => {
+      const mocks = createService([tool, 'clients.dossier.read']);
       mocks.model.decide.mockResolvedValue(
-        decision({ reply: "Уточните гостя.", toolCall: null }),
+        decision({ reply: 'Уточните гостя.', toolCall: null }),
       );
       const result = await mocks.service.chat(user, {
         ...dto,
         messages: [
-          { role: "user", content: "Покажи досье клиента и его адрес" },
+          { role: 'user', content: 'Покажи досье клиента и его адрес' },
         ],
       });
-      expect(result.grounding.required_tools).toEqual(["clients.dossier.read"]);
+      expect(result.grounding.required_tools).toEqual(['clients.dossier.read']);
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
     });
   });
 
-  describe("own schedule", () => {
+  describe('own schedule', () => {
     beforeEach(() =>
-      jest.useFakeTimers().setSystemTime(new Date("2026-10-06T12:00:00Z")),
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-06T12:00:00Z')),
     );
     afterEach(() => jest.useRealTimers());
     it.each([
       {
         is_working: true,
         slots: [
-          { from: "09:00", to: "12:00" },
-          { from: "13:00", to: "18:00" },
+          { from: '09:00', to: '12:00' },
+          { from: '13:00', to: '18:00' },
         ],
         reply:
-          "Ваш график на 07.10.2026: 09:00–12:00, 13:00–18:00. Источник: YClients.",
+          'Ваш график на 07.10.2026: 09:00–12:00, 13:00–18:00. Источник: YClients.',
       },
       {
         is_working: false,
         slots: [],
-        reply: "По графику на 07.10.2026 у вас выходной. Источник: YClients.",
+        reply: 'По графику на 07.10.2026 у вас выходной. Источник: YClients.',
       },
     ])(
-      "composes own schedule from the current source: $is_working",
+      'composes own schedule from the current source: $is_working',
       async (day) => {
-        const mocks = createService(["staff.schedule.own.read"]);
+        const mocks = createService(['staff.schedule.own.read']);
         const employee = { ...user, role: UserRole.EMPLOYEE };
         mocks.model.decide
           .mockResolvedValue(
             decision({
-              reply: "MODEL MUST NOT COMPOSE THE SHIFT",
+              reply: 'MODEL MUST NOT COMPOSE THE SHIFT',
               toolCall: null,
             }),
           )
@@ -3271,42 +3271,42 @@ describe("AiCoreService", () => {
             decision({
               reply: null,
               toolCall: {
-                name: "staff.schedule.own.read",
-                arguments: { date: "2026-10-07" },
+                name: 'staff.schedule.own.read',
+                arguments: { date: '2026-10-07' },
               },
             }),
           );
         mocks.runtime.execute.mockResolvedValue({
-          status: "completed",
-          execution_id: "own-schedule-read",
+          status: 'completed',
+          execution_id: 'own-schedule-read',
           result: {
             available: true,
             verified: true,
-            source: "external_crm",
-            date: "2026-10-07",
+            source: 'external_crm',
+            date: '2026-10-07',
             is_working: day.is_working,
             slots: day.slots,
           },
         });
         const result = await mocks.service.chat(employee, {
           ...dto,
-          messages: [{ role: "user", content: "Какой у меня график завтра?" }],
+          messages: [{ role: 'user', content: 'Какой у меня график завтра?' }],
         });
         expect(result).toMatchObject({
           reply: day.reply,
-          source: "safe_fallback",
+          source: 'safe_fallback',
           action: null,
           grounding: {
-            status: "verified",
-            domain: "staff_schedule",
-            evidence_tools: ["staff.schedule.own.read"],
+            status: 'verified',
+            domain: 'staff_schedule',
+            evidence_tools: ['staff.schedule.own.read'],
           },
         });
         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
         expect(mocks.runtime.execute).toHaveBeenCalledWith(
           employee,
-          "staff.schedule.own.read",
-          expect.objectContaining({ arguments: { date: "2026-10-07" } }),
+          'staff.schedule.own.read',
+          expect.objectContaining({ arguments: { date: '2026-10-07' } }),
           expect.anything(),
         );
       },
@@ -3314,46 +3314,46 @@ describe("AiCoreService", () => {
 
     it.each([
       [
-        "unlinked",
+        'unlinked',
         {
           available: false,
-          reason: "employee_is_not_linked_to_active_crm_staff",
-          date: "2026-10-07",
+          reason: 'employee_is_not_linked_to_active_crm_staff',
+          date: '2026-10-07',
         },
       ],
-      ["working without intervals", { is_working: true, slots: [] }],
-      ["missing work status", { is_working: undefined }],
-      ["unverified", { verified: false }],
-      ["stale", { stale: true }],
-      ["wrong source", { source: "model" }],
-      ["wrong date", { date: "2026-10-08" }],
-      ["broken interval", { slots: [{ from: "18:00", to: "09:00" }] }],
-      ["contradictory day off", { is_working: false }],
-    ])("refuses to invent an own schedule when %s", async (label, changes) => {
-      const mocks = createService(["staff.schedule.own.read"]);
+      ['working without intervals', { is_working: true, slots: [] }],
+      ['missing work status', { is_working: undefined }],
+      ['unverified', { verified: false }],
+      ['stale', { stale: true }],
+      ['wrong source', { source: 'model' }],
+      ['wrong date', { date: '2026-10-08' }],
+      ['broken interval', { slots: [{ from: '18:00', to: '09:00' }] }],
+      ['contradictory day off', { is_working: false }],
+    ])('refuses to invent an own schedule when %s', async (label, changes) => {
+      const mocks = createService(['staff.schedule.own.read']);
       mocks.model.decide
         .mockResolvedValue(
-          decision({ reply: "MODEL INVENTED A DAY OFF", toolCall: null }),
+          decision({ reply: 'MODEL INVENTED A DAY OFF', toolCall: null }),
         )
         .mockResolvedValueOnce(
           decision({
             reply: null,
             toolCall: {
-              name: "staff.schedule.own.read",
-              arguments: { date: "2026-10-07" },
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2026-10-07' },
             },
           }),
         );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
-        execution_id: "own-schedule-read",
+        status: 'completed',
+        execution_id: 'own-schedule-read',
         result: {
           available: true,
           verified: true,
-          source: "external_crm",
-          date: "2026-10-07",
+          source: 'external_crm',
+          date: '2026-10-07',
           is_working: true,
-          slots: [{ from: "09:00", to: "18:00" }],
+          slots: [{ from: '09:00', to: '18:00' }],
           ...changes,
         },
       });
@@ -3361,48 +3361,48 @@ describe("AiCoreService", () => {
         { ...user, role: UserRole.EMPLOYEE },
         {
           ...dto,
-          messages: [{ role: "user", content: "Какой у меня график завтра?" }],
+          messages: [{ role: 'user', content: 'Какой у меня график завтра?' }],
         },
       );
       expect(result).toMatchObject({
-        source: "safe_fallback",
+        source: 'safe_fallback',
         action: null,
-        grounding: { status: "blocked" },
+        grounding: { status: 'blocked' },
       });
       expect(result.reply).not.toMatch(/выходной|09:00|18:00|MODEL/);
       expect(result.reply).toContain(
-        label === "unlinked" ? "привязк" : "подтвердить",
+        label === 'unlinked' ? 'привязк' : 'подтвердить',
       );
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
     });
 
     it.each([
-      ["Завтра я работаю?", "2026-10-07"],
-      ["А послезавтра?", "2026-10-08"],
-      ["Сегодня я работаю?", "2026-10-06"],
-      ["Мой график 2026-10-02", "2026-10-02"],
-      ["Мой график 02.10.2026", "2026-10-02"],
-      ["Мой график 02.10.26.", "2026-10-02"],
+      ['Завтра я работаю?', '2026-10-07'],
+      ['А послезавтра?', '2026-10-08'],
+      ['Сегодня я работаю?', '2026-10-06'],
+      ['Мой график 2026-10-02', '2026-10-02'],
+      ['Мой график 02.10.2026', '2026-10-02'],
+      ['Мой график 02.10.26.', '2026-10-02'],
     ])(
-      "binds own schedule date to the current request: %s",
+      'binds own schedule date to the current request: %s',
       async (text, date) => {
-        const mocks = createService(["staff.schedule.own.read"]);
+        const mocks = createService(['staff.schedule.own.read']);
         mocks.model.decide.mockResolvedValueOnce(
           decision({
             reply: null,
             toolCall: {
-              name: "staff.schedule.own.read",
-              arguments: { date: "2099-01-01" },
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2099-01-01' },
             },
           }),
         );
         mocks.runtime.execute.mockResolvedValue({
-          status: "completed",
+          status: 'completed',
           result: {
             available: true,
             verified: true,
-            source: "external_crm",
+            source: 'external_crm',
             date,
             is_working: false,
             slots: [],
@@ -3412,44 +3412,44 @@ describe("AiCoreService", () => {
           { ...user, role: UserRole.EMPLOYEE },
           {
             ...dto,
-            messages: [{ role: "user", content: text }],
+            messages: [{ role: 'user', content: text }],
           },
         );
         expect(mocks.runtime.execute).toHaveBeenCalledWith(
           expect.anything(),
-          "staff.schedule.own.read",
+          'staff.schedule.own.read',
           expect.objectContaining({ arguments: { date } }),
           expect.anything(),
         );
-        expect(result.grounding.status).toBe("verified");
-        expect(result.reply).not.toContain("2099");
+        expect(result.grounding.status).toBe('verified');
+        expect(result.reply).not.toContain('2099');
       },
     );
 
     it.each([
-      ["Europe/Moscow", "2026-10-08"],
-      ["America/Los_Angeles", "2026-10-07"],
+      ['Europe/Moscow', '2026-10-08'],
+      ['America/Los_Angeles', '2026-10-07'],
     ])(
-      "binds own schedule tomorrow across local midnight in %s",
+      'binds own schedule tomorrow across local midnight in %s',
       async (timezone, expectedDate) => {
         // Moscow has already entered October 7; UTC is still October 6.
-        jest.setSystemTime(new Date("2026-10-06T21:30:00Z"));
-        const mocks = createService(["staff.schedule.own.read"], {}, timezone);
+        jest.setSystemTime(new Date('2026-10-06T21:30:00Z'));
+        const mocks = createService(['staff.schedule.own.read'], {}, timezone);
         mocks.model.decide.mockResolvedValueOnce(
           decision({
             reply: null,
             toolCall: {
-              name: "staff.schedule.own.read",
-              arguments: { date: "2026-10-07" },
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2026-10-07' },
             },
           }),
         );
         mocks.runtime.execute.mockResolvedValue({
-          status: "completed",
+          status: 'completed',
           result: {
             available: true,
             verified: true,
-            source: "external_crm",
+            source: 'external_crm',
             date: expectedDate,
             is_working: false,
             slots: [],
@@ -3459,16 +3459,16 @@ describe("AiCoreService", () => {
           { ...user, role: UserRole.EMPLOYEE },
           {
             ...dto,
-            messages: [{ role: "user", content: "Я завтра работаю?" }],
+            messages: [{ role: 'user', content: 'Я завтра работаю?' }],
           },
         );
         expect(mocks.runtime.execute).toHaveBeenCalledWith(
           expect.anything(),
-          "staff.schedule.own.read",
+          'staff.schedule.own.read',
           expect.objectContaining({ arguments: { date: expectedDate } }),
           expect.anything(),
         );
-        expect(result.grounding.status).toBe("verified");
+        expect(result.grounding.status).toBe('verified');
         expect(mocks.tenantRead).toHaveBeenCalledWith({
           where: { id: user.tenantId },
           select: { defaultTimezone: true },
@@ -3477,25 +3477,25 @@ describe("AiCoreService", () => {
     );
 
     it.each([
-      "Мой график",
-      "Сегодня или завтра?",
-      "На 31.02.2026",
-      "Мой график 07.10.026",
-      "Мой график 07.10.326",
-      "Мой график не завтра, а в пятницу",
-      "С 07.10 до пятницы",
-      "Не на завтра, а на следующий день",
-      "Завтра и в пятницу",
+      'Мой график',
+      'Сегодня или завтра?',
+      'На 31.02.2026',
+      'Мой график 07.10.026',
+      'Мой график 07.10.326',
+      'Мой график не завтра, а в пятницу',
+      'С 07.10 до пятницы',
+      'Не на завтра, а на следующий день',
+      'Завтра и в пятницу',
     ])(
-      "clarifies an own schedule date without trusting model args: %s",
+      'clarifies an own schedule date without trusting model args: %s',
       async (text) => {
-        const mocks = createService(["staff.schedule.own.read"]);
+        const mocks = createService(['staff.schedule.own.read']);
         mocks.model.decide.mockResolvedValueOnce(
           decision({
             reply: null,
             toolCall: {
-              name: "staff.schedule.own.read",
-              arguments: { date: "2026-10-07" },
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2026-10-07' },
             },
           }),
         );
@@ -3503,36 +3503,36 @@ describe("AiCoreService", () => {
           { ...user, role: UserRole.EMPLOYEE },
           {
             ...dto,
-            messages: [{ role: "user", content: text }],
+            messages: [{ role: 'user', content: text }],
           },
         );
-        expect(result.reply).toContain("На какую дату");
-        expect(result.grounding.status).toBe("blocked");
+        expect(result.reply).toContain('На какую дату');
+        expect(result.grounding.status).toBe('blocked');
         expect(mocks.runtime.execute).not.toHaveBeenCalled();
         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       },
     );
 
-    it("refuses an own schedule that would be truncated by result sanitization", async () => {
-      const mocks = createService(["staff.schedule.own.read"]);
+    it('refuses an own schedule that would be truncated by result sanitization', async () => {
+      const mocks = createService(['staff.schedule.own.read']);
       mocks.model.decide.mockResolvedValueOnce(
         decision({
           reply: null,
           toolCall: {
-            name: "staff.schedule.own.read",
-            arguments: { date: "2026-10-07" },
+            name: 'staff.schedule.own.read',
+            arguments: { date: '2026-10-07' },
           },
         }),
       );
       const minute = (n: number) =>
-        `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
+        `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
+        status: 'completed',
         result: {
           available: true,
           verified: true,
-          source: "external_crm",
-          date: "2026-10-07",
+          source: 'external_crm',
+          date: '2026-10-07',
           is_working: true,
           slots: Array.from({ length: 201 }, (_, i) => ({
             from: minute(i * 2),
@@ -3544,94 +3544,94 @@ describe("AiCoreService", () => {
         { ...user, role: UserRole.EMPLOYEE },
         {
           ...dto,
-          messages: [{ role: "user", content: "Я завтра работаю?" }],
+          messages: [{ role: 'user', content: 'Я завтра работаю?' }],
         },
       );
-      expect(result.grounding.status).toBe("blocked");
-      expect(result.reply).toContain("Не удалось подтвердить");
-      expect(result.reply).not.toContain("00:00");
+      expect(result.grounding.status).toBe('blocked');
+      expect(result.reply).toContain('Не удалось подтвердить');
+      expect(result.reply).not.toContain('00:00');
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     });
 
-    it("does not expose the staff own schedule in an owner client audience", async () => {
+    it('does not expose the staff own schedule in an owner client audience', async () => {
       const mocks = createService([
-        "staff.schedule.own.read",
-        "catalog.services.read",
+        'staff.schedule.own.read',
+        'catalog.services.read',
       ]);
       const result = await mocks.service.chat(user, {
         ...dto,
-        audience: "client",
-        messages: [{ role: "user", content: "Мой рабочий график на завтра" }],
+        audience: 'client',
+        messages: [{ role: 'user', content: 'Мой рабочий график на завтра' }],
       });
-      expect(result.grounding.status).toBe("blocked");
+      expect(result.grounding.status).toBe('blocked');
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
       for (const [input] of mocks.model.decide.mock.calls)
         expect(input.tools.map((tool) => tool.name)).not.toContain(
-          "staff.schedule.own.read",
+          'staff.schedule.own.read',
         );
     });
 
-    it("rereads the own schedule for a short next-day follow-up instead of reusing the prior shift", async () => {
-      const mocks = createService(["staff.schedule.own.read"]);
+    it('rereads the own schedule for a short next-day follow-up instead of reusing the prior shift', async () => {
+      const mocks = createService(['staff.schedule.own.read']);
       const employee = { ...user, role: UserRole.EMPLOYEE };
       const ci = new ConversationIntelligenceService();
       const messages = [
-        { role: "user" as const, content: "Я завтра работаю?" },
+        { role: 'user' as const, content: 'Я завтра работаю?' },
       ];
       for (const [date, isWorking] of [
-        ["2026-10-07", true],
-        ["2026-10-08", false],
+        ['2026-10-07', true],
+        ['2026-10-08', false],
       ] as const) {
         mocks.model.decide.mockResolvedValueOnce(
           decision({
             reply: null,
             semanticPlan: ci.validatePlan(
               {
-                dialogue_act: isWorking ? "request" : "follow_up",
+                dialogue_act: isWorking ? 'request' : 'follow_up',
                 tasks: [
                   {
-                    intent: "schedule.get_own",
+                    intent: 'schedule.get_own',
                     entities: { period: date },
                     confidence: 0.99,
                   },
                 ],
               },
               employee.role,
-              ["staff.schedule.own.read"],
+              ['staff.schedule.own.read'],
             ),
-            toolCall: { name: "staff.schedule.own.read", arguments: { date } },
+            toolCall: { name: 'staff.schedule.own.read', arguments: { date } },
           }),
         );
         mocks.runtime.execute.mockResolvedValueOnce({
-          status: "completed",
+          status: 'completed',
           execution_id: `own-read-${date}`,
           result: {
             available: true,
             verified: true,
-            source: "external_crm",
+            source: 'external_crm',
             date,
             is_working: isWorking,
-            slots: isWorking ? [{ from: "09:00", to: "18:00" }] : [],
+            slots: isWorking ? [{ from: '09:00', to: '18:00' }] : [],
           },
         });
       }
       const first = await mocks.service.chat(employee, { ...dto, messages });
       const next = await mocks.service.chat(employee, {
         ...dto,
-        requestId: "followup_12345678",
+        requestId: 'followup_12345678',
         messages: [
           ...messages,
-          { role: "assistant", content: first.reply },
-          { role: "user", content: "А послезавтра?" },
+          { role: 'assistant', content: first.reply },
+          { role: 'user', content: 'А послезавтра?' },
         ],
       });
-      expect(first.reply).toContain("07.10.2026: 09:00–18:00");
-      expect(next.reply).toContain("08.10.2026 у вас выходной");
-      expect(next.reply).not.toContain("09:00");
+      expect(first.reply).toContain('07.10.2026: 09:00–18:00');
+      expect(next.reply).toContain('08.10.2026 у вас выходной');
+      expect(next.reply).not.toContain('09:00');
       expect(next.grounding).toMatchObject({
-        status: "verified",
-        domain: "staff_schedule",
-        evidence_tools: ["staff.schedule.own.read"],
+        status: 'verified',
+        domain: 'staff_schedule',
+        evidence_tools: ['staff.schedule.own.read'],
       });
       expect(
         mocks.runtime.execute.mock.calls.map(([, name, input]) => [
@@ -3639,38 +3639,38 @@ describe("AiCoreService", () => {
           input.arguments,
         ]),
       ).toEqual([
-        ["staff.schedule.own.read", { date: "2026-10-07" }],
-        ["staff.schedule.own.read", { date: "2026-10-08" }],
+        ['staff.schedule.own.read', { date: '2026-10-07' }],
+        ['staff.schedule.own.read', { date: '2026-10-08' }],
       ]);
       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
       expect(next.action).toBeNull();
     });
   });
 
-  it("uses employee analytics rather than business totals for staff", async () => {
+  it('uses employee analytics rather than business totals for staff', async () => {
     const employee: AuthenticatedUser = {
       ...user,
-      userId: "employee-user",
+      userId: 'employee-user',
       role: UserRole.EMPLOYEE,
     };
-    const mocks = createService(["analytics.employee.query"]);
+    const mocks = createService(['analytics.employee.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.employee.query", arguments: {} },
+        toolCall: { name: 'analytics.employee.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Ваша выручка: 99 400 ₽.", toolCall: null }),
+      decision({ reply: 'Ваша выручка: 99 400 ₽.', toolCall: null }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-employee",
+      status: 'completed',
+      execution_id: 'execution-employee',
       result: {
         revenue: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 9_940_000,
             amount_major_units: 99_400,
           },
@@ -3680,43 +3680,43 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(employee, {
       ...dto,
-      messages: [{ role: "user", content: "Покажи мою выручку за месяц." }],
+      messages: [{ role: 'user', content: 'Покажи мою выручку за месяц.' }],
     });
 
     // Сотруднику разрешён только его личный срез. Бизнес-итоги не должны
     // появиться среди фактически вызванных инструментов.
     const modelInput = mocks.model.decide.mock.calls[1]?.[0];
-    expect(modelInput?.toolResults?.[0]?.name).toBe("analytics.employee.query");
+    expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.employee.query');
     expect(result).toMatchObject({
-      reply: "Ваша выручка: 99 400 ₽.",
-      source: "deepseek",
+      reply: 'Ваша выручка: 99 400 ₽.',
+      source: 'deepseek',
       grounding: {
-        status: "verified",
-        domain: "employee_query",
+        status: 'verified',
+        domain: 'employee_query',
       },
     });
     expect(mocks.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-      "analytics.employee.query",
+      'analytics.employee.query',
     ]);
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
-  it("loads verified CRM context for an open-ended owner business question", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('loads verified CRM context for an open-ended owner business question', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-open-owner-query",
+      status: 'completed',
+      execution_id: 'execution-open-owner-query',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "none" },
+        source: 'crm',
+        comparison: { mode: 'none' },
         metrics: {
           revenue_amount_kopecks: 15_000_000,
           appointments_total: 120,
@@ -3729,124 +3729,124 @@ describe("AiCoreService", () => {
     });
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "Сейчас в первую очередь стоит разобрать поток клиентов.",
+        reply: 'Сейчас в первую очередь стоит разобрать поток клиентов.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
-        { role: "user", content: "Что сейчас требует моего внимания?" },
+        { role: 'user', content: 'Что сейчас требует моего внимания?' },
       ],
     });
 
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       user,
-      "analytics.business.query",
+      'analytics.business.query',
       expect.objectContaining({
-        arguments: { period: "month_to_date", comparison: "none" },
+        arguments: { period: 'month_to_date', comparison: 'none' },
       }),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(result).toMatchObject({
       grounding: {
-        status: "verified",
-        domain: "business_query",
+        status: 'verified',
+        domain: 'business_query',
       },
     });
   });
 
-  it("does not load a CRM report for a simple owner greeting", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('does not load a CRM report for a simple owner greeting', async () => {
+    const mocks = createService(['analytics.business.query']);
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Здравствуйте! Чем помочь?", toolCall: null }),
+      decision({ reply: 'Здравствуйте! Чем помочь?', toolCall: null }),
     );
 
     await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
-      messages: [{ role: "user", content: "Привет!" }],
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Привет!' }],
     });
 
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([]);
   });
 
-  it("blocks a repeated client upsell after the client asks for only a haircut", async () => {
+  it('blocks a repeated client upsell after the client asks for only a haircut', async () => {
     const client: AuthenticatedUser = {
       ...user,
-      userId: "client-user",
+      userId: 'client-user',
       role: UserRole.CLIENT,
     };
     const mocks = createService([]);
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "Можем добавить моделирование бороды. Добавляем или только стрижка?",
+          'Можем добавить моделирование бороды. Добавляем или только стрижка?',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(client, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "assistant",
-          content: "К стрижке можно добавить уход за бородой.",
+          role: 'assistant',
+          content: 'К стрижке можно добавить уход за бородой.',
         },
-        { role: "user", content: "Только стрижка." },
+        { role: 'user', content: 'Только стрижка.' },
       ],
     });
 
-    expect(result.reply).toContain("без дополнительных услуг");
-    expect(result.reply).toContain("Продолжаем запись");
-    expect(result.reply).not.toContain("моделирование бороды");
+    expect(result.reply).toContain('без дополнительных услуг');
+    expect(result.reply).toContain('Продолжаем запись');
+    expect(result.reply).not.toContain('моделирование бороды');
   });
 
-  it("does not let a client upsell bypass the verified service catalog", async () => {
+  it('does not let a client upsell bypass the verified service catalog', async () => {
     const client: AuthenticatedUser = {
       ...user,
-      userId: "client-user",
+      userId: 'client-user',
       role: UserRole.CLIENT,
     };
     const mocks = createService([]);
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "Можем добавить моделирование бороды. Добавляем?",
+        reply: 'Можем добавить моделирование бороды. Добавляем?',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(client, {
       ...dto,
-      surface: "native",
-      messages: [{ role: "user", content: "Хочу мужскую стрижку." }],
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Хочу мужскую стрижку.' }],
     });
 
-    expect(result.reply).toContain("после проверки каталога");
-    expect(result.reply).not.toContain("моделирование бороды");
+    expect(result.reply).toContain('после проверки каталога');
+    expect(result.reply).not.toContain('моделирование бороды');
   });
 
-  it("allows one client upsell after the service catalog is verified", async () => {
+  it('allows one client upsell after the service catalog is verified', async () => {
     const client: AuthenticatedUser = {
       ...user,
-      userId: "client-user",
+      userId: 'client-user',
       role: UserRole.CLIENT,
     };
-    const mocks = createService(["catalog.services.read"]);
+    const mocks = createService(['catalog.services.read']);
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-service-catalog",
+      status: 'completed',
+      execution_id: 'execution-service-catalog',
       result: {
         services: [
           {
-            id: "service-beard",
-            name: "Моделирование бороды",
+            id: 'service-beard',
+            name: 'Моделирование бороды',
             price: 1_000,
-            currency: "RUB",
+            currency: 'RUB',
           },
         ],
       },
@@ -3854,51 +3854,51 @@ describe("AiCoreService", () => {
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверю каталог.",
-          toolCall: { name: "catalog.services.read", arguments: {} },
+          reply: 'Проверю каталог.',
+          toolCall: { name: 'catalog.services.read', arguments: {} },
         }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "К стрижке можно один раз добавить моделирование бороды. Хотите добавить?",
+            'К стрижке можно один раз добавить моделирование бороды. Хотите добавить?',
           toolCall: null,
         }),
       );
 
     const result = await mocks.service.chat(client, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
-        { role: "user", content: "Что можно добавить к мужской стрижке?" },
+        { role: 'user', content: 'Что можно добавить к мужской стрижке?' },
       ],
     });
 
-    expect(result.reply).toContain("моделирование бороды");
+    expect(result.reply).toContain('моделирование бороды');
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       client,
-      "catalog.services.read",
+      'catalog.services.read',
       expect.any(Object),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
   });
 
-  it("lets the native model explain a weakest-service query from verified data", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('lets the native model explain a weakest-service query from verified data', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-business-query",
+      status: 'completed',
+      execution_id: 'execution-business-query',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: { appointments_total: 120, unique_clients: 80 },
         changes: {
           unique_clients: {
@@ -3909,11 +3909,11 @@ describe("AiCoreService", () => {
           },
         },
         current: {
-          service_summary: [{ name: "Мужская стрижка", appointments: 60 }],
+          service_summary: [{ name: 'Мужская стрижка', appointments: 60 }],
         },
         service_changes: [
           {
-            name: "Мужская стрижка",
+            name: 'Мужская стрижка',
             current_appointments: 60,
             previous_appointments: 75,
             delta: -15,
@@ -3925,78 +3925,78 @@ describe("AiCoreService", () => {
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "Сильнее всего просела мужская стрижка. Проверьте окна и возврат клиентов.",
+          'Сильнее всего просела мужская стрижка. Проверьте окна и возврат клиентов.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
-          content: "Какая услуга просела по сравнению с предыдущим месяцем?",
+          role: 'user',
+          content: 'Какая услуга просела по сравнению с предыдущим месяцем?',
         },
       ],
     });
 
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       user,
-      "analytics.business.query",
+      'analytics.business.query',
       expect.objectContaining({
-        surface: "native",
+        surface: 'native',
         arguments: {
-          period: "month_to_date",
-          comparison: "previous_period",
+          period: 'month_to_date',
+          comparison: 'previous_period',
         },
       }),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(mocks.model.decide).toHaveBeenCalledWith(
       expect.objectContaining({
-        surface: "native",
+        surface: 'native',
         toolResults: [
-          expect.objectContaining({ name: "analytics.business.query" }),
+          expect.objectContaining({ name: 'analytics.business.query' }),
         ],
       }),
     );
     expect(result).toMatchObject({
-      source: "deepseek",
+      source: 'deepseek',
       grounding: {
-        status: "verified",
-        domain: "business_query",
-        evidence_tools: ["analytics.business.query"],
+        status: 'verified',
+        domain: 'business_query',
+        evidence_tools: ['analytics.business.query'],
       },
     });
-    expect(result.reply.toLocaleLowerCase("ru-RU")).toContain(
-      "мужская стрижка",
+    expect(result.reply.toLocaleLowerCase('ru-RU')).toContain(
+      'мужская стрижка',
     );
-    expect(result.reply).toContain("возврат клиентов");
+    expect(result.reply).toContain('возврат клиентов');
   });
 
-  it("answers from verified business data when the model is temporarily unavailable", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('answers from verified business data when the model is temporarily unavailable', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-business-fallback",
+      status: 'completed',
+      execution_id: 'execution-business-fallback',
       result: {
         verified: true,
-        source: "crm",
-        period: { timezone: "Europe/Moscow" },
+        source: 'crm',
+        period: { timezone: 'Europe/Moscow' },
         freshness: {
-          status: "stale",
-          snapshot_at: "2026-08-06T12:00:00.000Z",
-          reason: "ai_tool_timeout_unknown",
+          status: 'stale',
+          snapshot_at: '2026-08-06T12:00:00.000Z',
+          reason: 'ai_tool_timeout_unknown',
         },
-        comparison: { mode: "previous_year_same_period" },
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { unique_clients: 80 },
         changes: {
           unique_clients: {
@@ -4014,48 +4014,48 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "На сколько мы просели по количеству клиентов по сравнению с прошлым годом?",
+            'На сколько мы просели по количеству клиентов по сравнению с прошлым годом?',
         },
       ],
     });
 
     expect(result).toMatchObject({
-      source: "safe_fallback",
+      source: 'safe_fallback',
       grounding: {
-        status: "verified",
-        domain: "business_query",
+        status: 'verified',
+        domain: 'business_query',
       },
     });
-    expect(result.reply).toContain("80");
-    expect(result.reply).toContain("100");
-    expect(result.reply).toContain("−20");
-    expect(result.reply).toContain("последний подтверждённый снимок");
-    expect(result.reply).toContain("данные не обнулены");
-    expect(result.reply).not.toContain("Не смогла подтвердить");
+    expect(result.reply).toContain('80');
+    expect(result.reply).toContain('100');
+    expect(result.reply).toContain('−20');
+    expect(result.reply).toContain('последний подтверждённый снимок');
+    expect(result.reply).toContain('данные не обнулены');
+    expect(result.reply).not.toContain('Не смогла подтвердить');
   });
 
-  it("keeps a weak-spots follow-up comprehensive when the model is unavailable", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('keeps a weak-spots follow-up comprehensive when the model is unavailable', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-business-full-review",
+      status: 'completed',
+      execution_id: 'execution-business-full-review',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
-        resolved_period: { label_ru: "этот месяц по сегодня" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
+        resolved_period: { label_ru: 'этот месяц по сегодня' },
         metrics: {
           revenue_amount_kopecks: 38_375_000,
           appointments_total: 202,
@@ -4075,11 +4075,11 @@ describe("AiCoreService", () => {
           booked_minutes: { percent_change: -8 },
         },
         current: {
-          revenue: [{ currency: "RUB", amount_kopecks: 38_375_000 }],
+          revenue: [{ currency: 'RUB', amount_kopecks: 38_375_000 }],
         },
         service_changes: [
           {
-            name: "Моделирование бороды",
+            name: 'Моделирование бороды',
             current_appointments: 12,
             previous_appointments: 16,
             delta: -4,
@@ -4092,47 +4092,47 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
-          content: "На что стоит обратить внимание? Где у нас слабые места",
+          role: 'user',
+          content: 'На что стоит обратить внимание? Где у нас слабые места',
         },
-        { role: "assistant", content: "Дала короткую сводку." },
-        { role: "user", content: "Ты по максимуму должна срез дать" },
+        { role: 'assistant', content: 'Дала короткую сводку.' },
+        { role: 'user', content: 'Ты по максимуму должна срез дать' },
       ],
     });
 
     expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toMatchObject({
-      period: "month_to_date",
-      comparison: "previous_period",
+      period: 'month_to_date',
+      comparison: 'previous_period',
     });
-    expect(result.source).toBe("safe_fallback");
-    expect(result.reply).toContain("Полный срез");
-    expect(result.reply).toContain("Слабые места");
-    expect(result.reply).toContain("−10%");
-    expect(result.reply).toContain("Моделирование бороды");
-    expect(result.reply).not.toContain("Первое действие");
-    expect(result.reply).not.toContain("аренд");
+    expect(result.source).toBe('safe_fallback');
+    expect(result.reply).toContain('Полный срез');
+    expect(result.reply).toContain('Слабые места');
+    expect(result.reply).toContain('−10%');
+    expect(result.reply).toContain('Моделирование бороды');
+    expect(result.reply).not.toContain('Первое действие');
+    expect(result.reply).not.toContain('аренд');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 
-  it("answers a compound year comparison without bypassing canonical opportunities", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('answers a compound year comparison without bypassing canonical opportunities', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-business-action-plan",
+      status: 'completed',
+      execution_id: 'execution-business-action-plan',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_year_same_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_year_same_period' },
         metrics: {
           unique_clients: 80,
           cancellation_rate_percent: 5,
@@ -4153,54 +4153,54 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "Сравни количество клиентов с прошлым годом с начала года и объясни, что делать.",
+            'Сравни количество клиентов с прошлым годом с начала года и объясни, что делать.',
         },
       ],
     });
 
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       user,
-      "analytics.business.query",
+      'analytics.business.query',
       expect.objectContaining({
         arguments: {
-          period: "year_to_date",
-          comparison: "previous_year_same_period",
+          period: 'year_to_date',
+          comparison: 'previous_year_same_period',
         },
       }),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(result).toMatchObject({
-      source: "safe_fallback",
-      grounding: { status: "verified", domain: "business_query" },
+      source: 'safe_fallback',
+      grounding: { status: 'verified', domain: 'business_query' },
     });
-    expect(result.reply).toContain("80");
-    expect(result.reply).toContain("100");
-    expect(result.reply).not.toContain("Первое действие");
-    expect(result.reply).not.toContain("уснувших клиентов");
+    expect(result.reply).toContain('80');
+    expect(result.reply).toContain('100');
+    expect(result.reply).not.toContain('Первое действие');
+    expect(result.reply).not.toContain('уснувших клиентов');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 
-  it("does not invent an action when an owner asks what to do about a revenue decline", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('does not invent an action when an owner asks what to do about a revenue decline', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-revenue-action-plan",
+      status: 'completed',
+      execution_id: 'execution-revenue-action-plan',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_year_same_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_year_same_period' },
         metrics: {
           revenue_amount_kopecks: 786_526_000,
           unique_clients: 936,
@@ -4228,41 +4228,41 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "Сравни выручку этого года с прошлым за тот же период и скажи, что делать.",
+            'Сравни выручку этого года с прошлым за тот же период и скажи, что делать.',
         },
       ],
     });
 
     // Копейки CRM обязаны превратиться в рубли ровно один раз: 786 526 000
     // копеек — это 7 865 260 ₽, а не 786 526 000 ₽ и не 78 652 600 ₽.
-    expect(result.reply).toContain("7 865 260 ₽");
-    expect(result.reply).toContain("−822 790 ₽");
-    expect(result.reply).not.toContain("Первое действие");
-    expect(result.reply).not.toContain("уснувших клиентов");
+    expect(result.reply).toContain('7 865 260 ₽');
+    expect(result.reply).toContain('−822 790 ₽');
+    expect(result.reply).not.toContain('Первое действие');
+    expect(result.reply).not.toContain('уснувших клиентов');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 
-  it("explains the strongest verified factor when an owner asks why business declined", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('explains the strongest verified factor when an owner asks why business declined', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-business-diagnosis",
+      status: 'completed',
+      execution_id: 'execution-business-diagnosis',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: {
           revenue_amount_kopecks: 7_000_000,
           appointments_total: 70,
@@ -4303,73 +4303,73 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
-          content: "Почему бизнес просел по сравнению с прошлым месяцем?",
+          role: 'user',
+          content: 'Почему бизнес просел по сравнению с прошлым месяцем?',
         },
       ],
     });
 
-    expect(result.reply).toContain("Самое сильное подтверждённое ухудшение");
-    expect(result.reply).toContain("число уникальных клиентов: −37,5%");
-    expect(result.reply).toContain("средний чек вырос на 25%");
+    expect(result.reply).toContain('Самое сильное подтверждённое ухудшение');
+    expect(result.reply).toContain('число уникальных клиентов: −37,5%');
+    expect(result.reply).toContain('средний чек вырос на 25%');
     expect(mocks.model.decide).toHaveBeenCalled();
   });
 
-  it("distinguishes a CRM outage from a Maya reasoning failure", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('distinguishes a CRM outage from a Maya reasoning failure', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
-    mocks.runtime.execute.mockRejectedValue(new Error("crm_timeout"));
+    mocks.runtime.execute.mockRejectedValue(new Error('crm_timeout'));
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
         {
-          role: "user",
-          content: "Где сейчас у бизнеса слабое место?",
+          role: 'user',
+          content: 'Где сейчас у бизнеса слабое место?',
         },
       ],
     });
 
     expect(result).toMatchObject({
-      source: "safe_fallback",
-      grounding: { status: "blocked", domain: "business_query" },
+      source: 'safe_fallback',
+      grounding: { status: 'blocked', domain: 'business_query' },
     });
-    expect(result.reply).toContain("не отвечает источник бизнес-данных CRM");
-    expect(result.reply).not.toContain("не получилось связаться с MAYA");
+    expect(result.reply).toContain('не отвечает источник бизнес-данных CRM');
+    expect(result.reply).not.toContain('не получилось связаться с MAYA');
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
-  it("uses only the current employee query to give a master performance advice", async () => {
+  it('uses only the current employee query to give a master performance advice', async () => {
     const employee: AuthenticatedUser = {
       ...user,
-      userId: "employee-user",
+      userId: 'employee-user',
       role: UserRole.EMPLOYEE,
     };
-    const mocks = createService(["analytics.employee.query"]);
+    const mocks = createService(['analytics.employee.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.employee.query", arguments: {} },
+        toolCall: { name: 'analytics.employee.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-employee-query",
+      status: 'completed',
+      execution_id: 'execution-employee-query',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "none" },
+        source: 'crm',
+        comparison: { mode: 'none' },
         metrics: {
           booked_value_amount_kopecks: 3_000_000,
           average_booked_value_amount_kopecks: 150_000,
@@ -4378,8 +4378,8 @@ describe("AiCoreService", () => {
         },
         changes: {},
         current: {
-          revenue: [{ currency: "RUB", amount_kopecks: 3_000_000 }],
-          average_ticket: [{ currency: "RUB", amount_kopecks: 150_000 }],
+          revenue: [{ currency: 'RUB', amount_kopecks: 3_000_000 }],
+          average_ticket: [{ currency: 'RUB', amount_kopecks: 150_000 }],
         },
         service_changes: [],
       },
@@ -4387,16 +4387,16 @@ describe("AiCoreService", () => {
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "Среднюю стоимость записи лучше поднимать через подходящие уходы, а не давление на клиента.",
+          'Среднюю стоимость записи лучше поднимать через подходящие уходы, а не давление на клиента.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(employee, {
       ...dto,
-      surface: "native",
+      surface: 'native',
       messages: [
-        { role: "user", content: "Как мне поднять средний чек за месяц?" },
+        { role: 'user', content: 'Как мне поднять средний чек за месяц?' },
       ],
     });
 
@@ -4405,16 +4405,16 @@ describe("AiCoreService", () => {
     // бы не из чего — ответ выродился бы в перечень текущих счётчиков.
     expect(mocks.runtime.execute).toHaveBeenCalledWith(
       employee,
-      "analytics.employee.query",
+      'analytics.employee.query',
       expect.objectContaining({
-        arguments: { period: "month_to_date", comparison: "previous_period" },
+        arguments: { period: 'month_to_date', comparison: 'previous_period' },
       }),
-      expect.objectContaining({ widgetTrigger: "T-2a" }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "employee_query",
-      evidence_tools: ["analytics.employee.query"],
+      status: 'verified',
+      domain: 'employee_query',
+      evidence_tools: ['analytics.employee.query'],
     });
     // Модель получает только личный срез сотрудника и не может запросить
     // командную финансовую аналитику вне серверных прав.
@@ -4422,50 +4422,50 @@ describe("AiCoreService", () => {
       expect.objectContaining({
         principalRole: UserRole.EMPLOYEE,
         toolResults: [
-          expect.objectContaining({ name: "analytics.employee.query" }),
+          expect.objectContaining({ name: 'analytics.employee.query' }),
         ],
       }),
     );
     expect(mocks.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-      "analytics.employee.query",
+      'analytics.employee.query',
     ]);
-    expect(result.source).toBe("deepseek");
-    expect(result.reply).toContain("поднимать через подходящие уходы");
+    expect(result.source).toBe('deepseek');
+    expect(result.reply).toContain('поднимать через подходящие уходы');
   });
 
-  it("refuses to label operating data as gross profit", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('refuses to label operating data as gross profit', async () => {
+    const mocks = createService(['analytics.business.query']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю.",
+          reply: 'Проверяю.',
           toolCall: {
-            name: "analytics.business.query",
-            arguments: { period: "month_to_date" },
+            name: 'analytics.business.query',
+            arguments: { period: 'month_to_date' },
           },
         }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "Валовую прибыль по этим данным посчитать нельзя: в CRM нет прямых затрат на услуги. Могу показать поступления и операционный результат.",
+            'Валовую прибыль по этим данным посчитать нельзя: в CRM нет прямых затрат на услуги. Могу показать поступления и операционный результат.',
           toolCall: null,
         }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-profit",
+      status: 'completed',
+      execution_id: 'execution-profit',
       result: {
         revenue: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 10_000_000,
             amount_major_units: 100_000,
           },
         ],
         net: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 6_000_000,
             amount_major_units: 60_000,
           },
@@ -4476,66 +4476,66 @@ describe("AiCoreService", () => {
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Какая валовая прибыль бизнеса за месяц?" },
+        { role: 'user', content: 'Какая валовая прибыль бизнеса за месяц?' },
       ],
     });
 
     // Операционный результат — не валовая прибыль. Модель видела обе суммы,
     // но назвать их так не имеет права: без прямых затрат показатель ложный.
-    expect(result.reply).toContain("Валовую прибыль");
-    expect(result.reply).toContain("нет прямых затрат");
-    expect(result.reply).not.toContain("100 000");
-    expect(result.reply).not.toContain("60 000");
+    expect(result.reply).toContain('Валовую прибыль');
+    expect(result.reply).toContain('нет прямых затрат');
+    expect(result.reply).not.toContain('100 000');
+    expect(result.reply).not.toContain('60 000');
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
     const second = mocks.model.decide.mock.calls[1]?.[0];
-    expect(second?.toolResults?.[0]?.name).toBe("analytics.business.query");
+    expect(second?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
-  it("returns only the verified CRM payroll aggregate for salary questions", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('returns only the verified CRM payroll aggregate for salary questions', async () => {
+    const mocks = createService(['analytics.business.query']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю.",
+          reply: 'Проверяю.',
           toolCall: {
-            name: "analytics.business.query",
-            arguments: { period: "month_to_date" },
+            name: 'analytics.business.query',
+            arguments: { period: 'month_to_date' },
           },
         }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "Начислено сотрудникам за период 563 880,01 ₽, выплачено 0 ₽, остаток к выплате 563 880,01 ₽.",
+            'Начислено сотрудникам за период 563 880,01 ₽, выплачено 0 ₽, остаток к выплате 563 880,01 ₽.',
           toolCall: null,
         }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-payroll",
+      status: 'completed',
+      execution_id: 'execution-payroll',
       result: {
-        data_source: "crm",
+        data_source: 'crm',
         finance: {
-          source: "external_crm",
+          source: 'external_crm',
           payroll: {
-            status: "available",
+            status: 'available',
             verified: true,
             accrued_total: {
-              currency: "RUB",
+              currency: 'RUB',
               amount_kopecks: 56_388_001,
               amount_major_units: 563_880.01,
             },
             paid_total: {
-              currency: "RUB",
+              currency: 'RUB',
               amount_kopecks: 0,
               amount_major_units: 0,
             },
             balance_total: {
-              currency: "RUB",
+              currency: 'RUB',
               amount_kopecks: 56_388_001,
               amount_major_units: 563_880.01,
             },
@@ -4547,16 +4547,16 @@ describe("AiCoreService", () => {
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Какая зарплата сотрудников за месяц?" },
+        { role: 'user', content: 'Какая зарплата сотрудников за месяц?' },
       ],
     });
 
     expect(result.reply).toBe(
-      "Начислено сотрудникам за период 563 880,01 ₽, выплачено 0 ₽, остаток к выплате 563 880,01 ₽.",
+      'Начислено сотрудникам за период 563 880,01 ₽, выплачено 0 ₽, остаток к выплате 563 880,01 ₽.',
     );
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
     // По зарплате наружу уходит только агрегат по ФОТ. Разбивки по людям нет
     // и в том, что видит модель, — сумму конкретного мастера ей взять неоткуда,
@@ -4567,55 +4567,55 @@ describe("AiCoreService", () => {
         { finance?: { payroll?: Record<string, unknown> } } | undefined
     )?.finance?.payroll;
     expect(Object.keys(payroll ?? {}).sort()).toEqual([
-      "accrued_total",
-      "balance_total",
-      "paid_total",
-      "status",
-      "verified",
+      'accrued_total',
+      'balance_total',
+      'paid_total',
+      'status',
+      'verified',
     ]);
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
-  it("returns verified payroll by master when the model is unavailable", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('returns verified payroll by master when the model is unavailable', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(null);
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-payroll-by-master",
+      status: 'completed',
+      execution_id: 'execution-payroll-by-master',
       result: {
         verified: true,
-        source: "crm",
-        resolved_period: { label_ru: "сегодня, 10 августа" },
+        source: 'crm',
+        resolved_period: { label_ru: 'сегодня, 10 августа' },
         metrics: { revenue_amount_kopecks: 5_580_000 },
         changes: {},
         current: {
           staff_summary: [
             {
-              name: "Илья",
+              name: 'Илья',
               appointments: 9,
               salary: {
-                status: "available",
+                status: 'available',
                 accrued: {
-                  currency: "RUB",
+                  currency: 'RUB',
                   amount_kopecks: 905_000,
                   amount_major_units: 9_050,
                 },
               },
             },
             {
-              name: "Стас",
+              name: 'Стас',
               appointments: 7,
               salary: {
-                status: "available",
+                status: 'available',
                 accrued: {
-                  currency: "RUB",
+                  currency: 'RUB',
                   amount_kopecks: 725_000,
                   amount_major_units: 7_250,
                 },
@@ -4631,65 +4631,65 @@ describe("AiCoreService", () => {
       ...dto,
       messages: [
         {
-          role: "user",
-          content: "Скажи сколько каждый из мастеров заработал",
+          role: 'user',
+          content: 'Скажи сколько каждый из мастеров заработал',
         },
       ],
     });
 
-    expect(result.source).toBe("safe_fallback");
-    expect(result.reply).toContain("Илья — 9 050 ₽");
-    expect(result.reply).toContain("Стас — 7 250 ₽");
-    expect(result.reply).toContain("начисленная зарплата");
-    expect(result.reply).not.toContain("55 800");
+    expect(result.source).toBe('safe_fallback');
+    expect(result.reply).toContain('Илья — 9 050 ₽');
+    expect(result.reply).toContain('Стас — 7 250 ₽');
+    expect(result.reply).toContain('начисленная зарплата');
+    expect(result.reply).not.toContain('55 800');
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
   });
 
-  it("never substitutes payroll for money brought in by each master", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('never substitutes payroll for money brought in by each master', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(null);
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-staff-contribution",
+      status: 'completed',
+      execution_id: 'execution-staff-contribution',
       result: {
         verified: true,
-        source: "crm",
-        resolved_period: { label_ru: "сегодня, 10 августа" },
+        source: 'crm',
+        resolved_period: { label_ru: 'сегодня, 10 августа' },
         metrics: { revenue_amount_kopecks: 5_580_000 },
         changes: {},
         current: {
           staff_summary: [
             {
-              name: "Илья",
+              name: 'Илья',
               appointments: 9,
-              confirmed_revenue: { status: "unavailable", amount: null },
+              confirmed_revenue: { status: 'unavailable', amount: null },
               salary: {
-                status: "available",
+                status: 'available',
                 accrued: {
-                  currency: "RUB",
+                  currency: 'RUB',
                   amount_kopecks: 905_000,
                   amount_major_units: 9_050,
                 },
               },
             },
             {
-              name: "Стас",
+              name: 'Стас',
               appointments: 7,
-              confirmed_revenue: { status: "unavailable", amount: null },
+              confirmed_revenue: { status: 'unavailable', amount: null },
               salary: {
-                status: "available",
+                status: 'available',
                 accrued: {
-                  currency: "RUB",
+                  currency: 'RUB',
                   amount_kopecks: 725_000,
                   amount_major_units: 7_250,
                 },
@@ -4703,32 +4703,32 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Давай скажи кто сколько принес" }],
+      messages: [{ role: 'user', content: 'Давай скажи кто сколько принес' }],
     });
 
-    expect(result.source).toBe("safe_fallback");
+    expect(result.source).toBe('safe_fallback');
     expect(result.reply).toContain(
-      "Подтверждённую кассовую выручку по каждому мастеру",
+      'Подтверждённую кассовую выручку по каждому мастеру',
     );
-    expect(result.reply).toContain("Илья — 9 записей");
-    expect(result.reply).toContain("Стас — 7 записей");
-    expect(result.reply).not.toContain("9 050");
-    expect(result.reply).not.toContain("7 250");
+    expect(result.reply).toContain('Илья — 9 записей');
+    expect(result.reply).toContain('Стас — 7 записей');
+    expect(result.reply).not.toContain('9 050');
+    expect(result.reply).not.toContain('7 250');
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
   });
 
-  it("does not turn unavailable CRM revenue into zero", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('does not turn unavailable CRM revenue into zero', async () => {
+    const mocks = createService(['analytics.business.query']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю.",
+          reply: 'Проверяю.',
           toolCall: {
-            name: "analytics.business.query",
-            arguments: { period: "month_to_date" },
+            name: 'analytics.business.query',
+            arguments: { period: 'month_to_date' },
           },
         }),
       )
@@ -4736,61 +4736,61 @@ describe("AiCoreService", () => {
       // отсутствующих данных. Нуля нет в результате инструмента, поэтому
       // сторож чисел обязан развернуть её на переписывание.
       .mockResolvedValueOnce(
-        decision({ reply: "Выручка за месяц: 0 ₽.", toolCall: null }),
+        decision({ reply: 'Выручка за месяц: 0 ₽.', toolCall: null }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "Подтверждённых поступлений за месяц CRM не вернула — это не ноль, а отсутствие данных. Повторите чуть позже.",
+            'Подтверждённых поступлений за месяц CRM не вернула — это не ноль, а отсутствие данных. Повторите чуть позже.',
           toolCall: null,
         }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-revenue-unavailable",
+      status: 'completed',
+      execution_id: 'execution-revenue-unavailable',
       result: {
-        data_source: "crm",
+        data_source: 'crm',
         revenue: [],
         finance: {
-          source: "external_crm",
-          revenue: { status: "unavailable", verified: false, total: null },
+          source: 'external_crm',
+          revenue: { status: 'unavailable', verified: false, total: null },
         },
       },
     });
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Какая выручка за месяц?" }],
+      messages: [{ role: 'user', content: 'Какая выручка за месяц?' }],
     });
 
     // Главная граница: «данных нет» никогда не должно звучать как «ноль».
-    expect(result.reply).toContain("это не ноль, а отсутствие данных");
-    expect(result.reply).not.toContain("0 ₽");
-    expect(result.source).toBe("deepseek");
+    expect(result.reply).toContain('это не ноль, а отсутствие данных');
+    expect(result.reply).not.toContain('0 ₽');
+    expect(result.source).toBe('deepseek');
     // Ретрай выдан по конкретной претензии: ноль не подтверждён инструментом.
     expect(mocks.model.decide).toHaveBeenCalledTimes(3);
     expect(mocks.model.decide.mock.calls[2]?.[0].corrections?.[0]).toContain(
-      "tool_results: 0",
+      'tool_results: 0',
     );
   });
 
-  it("answers exact appointment statuses without asking the model to recalculate", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('answers exact appointment statuses without asking the model to recalculate', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-appointment-count",
+      status: 'completed',
+      execution_id: 'execution-appointment-count',
       result: {
         verified: true,
-        source: "crm",
-        resolved_period: { label_ru: "сегодня" },
-        comparison: { mode: "none" },
+        source: 'crm',
+        resolved_period: { label_ru: 'сегодня' },
+        comparison: { mode: 'none' },
         changes: {},
         metrics: {
           appointments_total: 21,
@@ -4808,44 +4808,44 @@ describe("AiCoreService", () => {
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Сколько всего записей у бизнеса сегодня?" },
+        { role: 'user', content: 'Сколько всего записей у бизнеса сегодня?' },
       ],
     });
 
-    expect(result.reply).toContain("Всего записей: 21");
-    expect(result.reply).toContain("завершённых 9");
-    expect(result.reply).toContain("ожидают визита 7");
-    expect(result.reply).toContain("отменённых 3");
+    expect(result.reply).toContain('Всего записей: 21');
+    expect(result.reply).toContain('завершённых 9');
+    expect(result.reply).toContain('ожидают визита 7');
+    expect(result.reply).toContain('отменённых 3');
     // 🔴 Cycle 04 P5. Статусная корзина провайдера называется своим именем:
     // «не пришёл» — это состояние ЗАПИСИ, а неявка как наблюдение приходит из
     // канонического присутствия и отвечает на другой вопрос.
-    expect(result.reply).toContain("со статусом «не пришёл» 2");
+    expect(result.reply).toContain('со статусом «не пришёл» 2');
     expect(result.reply).not.toMatch(/неявок 2/);
-    expect(result.source).toBe("safe_fallback");
+    expect(result.source).toBe('safe_fallback');
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
-  it("answers a daily breakdown from exact CRM status buckets", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('answers a daily breakdown from exact CRM status buckets', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-daily-breakdown",
+      status: 'completed',
+      execution_id: 'execution-daily-breakdown',
       result: {
         verified: true,
-        source: "crm",
-        resolved_period: { label_ru: "этот месяц" },
-        comparison: { mode: "none" },
+        source: 'crm',
+        resolved_period: { label_ru: 'этот месяц' },
+        comparison: { mode: 'none' },
         changes: {},
         metrics: {
           appointments_total: 18,
@@ -4858,7 +4858,7 @@ describe("AiCoreService", () => {
         current: {
           daily: [
             {
-              date: "2026-08-11",
+              date: '2026-08-11',
               appointments: 8,
               total: 10,
               active: 8,
@@ -4869,7 +4869,7 @@ describe("AiCoreService", () => {
               revenue: [],
             },
             {
-              date: "2026-08-12",
+              date: '2026-08-12',
               appointments: 7,
               total: 8,
               active: 7,
@@ -4888,15 +4888,15 @@ describe("AiCoreService", () => {
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Покажи сводку по дням за этот месяц" },
+        { role: 'user', content: 'Покажи сводку по дням за этот месяц' },
       ],
     });
 
-    expect(result.reply).toContain("11.08: всего 10");
-    expect(result.reply).toContain("завершено 5");
-    expect(result.reply).toContain("12.08: всего 8");
-    expect(result.reply).toContain("ожидают 4");
-    expect(result.source).toBe("safe_fallback");
+    expect(result.reply).toContain('11.08: всего 10');
+    expect(result.reply).toContain('завершено 5');
+    expect(result.reply).toContain('12.08: всего 8');
+    expect(result.reply).toContain('ожидают 4');
+    expect(result.source).toBe('safe_fallback');
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
@@ -4908,33 +4908,33 @@ describe("AiCoreService", () => {
    * объяснить причину, ни назвать мастера. Сервер сам ставит окно
    * `year_to_date` и режим сравнения `previous_year_same_period`.
    */
-  it("answers a year-over-year question from the universal business query", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('answers a year-over-year question from the universal business query', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "Поступления за 2026 год — 150 000 ₽ против 100 000 ₽ годом ранее, рост 50%. Показываю последний подтверждённый снимок от 06.08.2026: CRM сейчас не ответила, данные не обнулены.",
+          'Поступления за 2026 год — 150 000 ₽ против 100 000 ₽ годом ранее, рост 50%. Показываю последний подтверждённый снимок от 06.08.2026: CRM сейчас не ответила, данные не обнулены.',
         toolCall: null,
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-year-comparison",
+      status: 'completed',
+      execution_id: 'execution-year-comparison',
       result: {
         verified: true,
         freshness: {
-          status: "stale",
-          snapshot_at: "2026-08-06T12:00:00.000Z",
-          reason: "ai_tool_timeout_unknown",
+          status: 'stale',
+          snapshot_at: '2026-08-06T12:00:00.000Z',
+          reason: 'ai_tool_timeout_unknown',
         },
-        comparison: { mode: "previous_year_same_period" },
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { revenue_amount_kopecks: 15_000_000 },
         changes: {
           revenue_amount_kopecks: {
@@ -4951,35 +4951,35 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Сравни этот год с предыдущим" }],
+      messages: [{ role: 'user', content: 'Сравни этот год с предыдущим' }],
     });
 
     // Оба параметра окна ставит сервер, а не модель.
     expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toMatchObject({
-      period: "year_to_date",
-      comparison: "previous_year_same_period",
+      period: 'year_to_date',
+      comparison: 'previous_year_same_period',
     });
     expect(result).toMatchObject({
-      source: "deepseek",
+      source: 'deepseek',
       grounding: {
-        status: "verified",
-        domain: "business_query",
-        evidence_tools: ["analytics.business.query"],
+        status: 'verified',
+        domain: 'business_query',
+        evidence_tools: ['analytics.business.query'],
       },
     });
     // Устаревший снимок нельзя выдавать за свежие данные. Признак протухания
     // доезжает до модели вместе с цифрами, и она обязана назвать его вслух.
     const modelInput = mocks.model.decide.mock.calls[1]?.[0];
-    expect(modelInput?.toolResults?.[0]?.name).toBe("analytics.business.query");
+    expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(
       (
         modelInput?.toolResults?.[0]?.result as
           { freshness?: { status?: string } } | undefined
       )?.freshness?.status,
-    ).toBe("stale");
-    expect(result.reply).toContain("последний подтверждённый снимок");
-    expect(result.reply).toContain("06.08.2026");
-    expect(result.reply).toContain("данные не обнулены");
+    ).toBe('stale');
+    expect(result.reply).toContain('последний подтверждённый снимок');
+    expect(result.reply).toContain('06.08.2026');
+    expect(result.reply).toContain('данные не обнулены');
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
@@ -4990,23 +4990,23 @@ describe("AiCoreService", () => {
    * прошлого года сам. Инструмент убран — и без этой строки ответ на «сравни
    * этот год с прошлым» терял ровно то число, ради которого вопрос задавали.
    */
-  it("names last year revenue in the deterministic year-over-year summary", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('names last year revenue in the deterministic year-over-year summary', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     // Провайдер молчит: текст собирает сервер, и проверяется именно он.
     mocks.model.decide.mockResolvedValue(null);
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-year-money",
+      status: 'completed',
+      execution_id: 'execution-year-money',
       result: {
         verified: true,
-        comparison: { mode: "previous_year_same_period" },
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { revenue_amount_kopecks: 120_000_000 },
         changes: {
           revenue_amount_kopecks: {
@@ -5017,7 +5017,7 @@ describe("AiCoreService", () => {
           },
         },
         current: {
-          revenue: [{ currency: "RUB", amount_kopecks: 120_000_000 }],
+          revenue: [{ currency: 'RUB', amount_kopecks: 120_000_000 }],
         },
         service_changes: [],
       },
@@ -5025,40 +5025,40 @@ describe("AiCoreService", () => {
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "native",
-      messages: [{ role: "user", content: "Сравни этот год с прошлым" }],
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Сравни этот год с прошлым' }],
     });
 
-    expect(result.source).toBe("safe_fallback");
-    expect(result.reply).toContain("1 200 000 ₽ против 1 000 000 ₽");
-    expect(result.reply).toContain("аналогичным периодом прошлого года");
+    expect(result.source).toBe('safe_fallback');
+    expect(result.reply).toContain('1 200 000 ₽ против 1 000 000 ₽');
+    expect(result.reply).toContain('аналогичным периодом прошлого года');
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
   });
 
-  it("keeps a customer-count follow-up inside the same year-over-year window", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('keeps a customer-count follow-up inside the same year-over-year window', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "Уникальных клиентов 80 против 100 годом ранее: −20 (−20%).",
+        reply: 'Уникальных клиентов 80 против 100 годом ранее: −20 (−20%).',
         toolCall: null,
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-customer-year-comparison",
+      status: 'completed',
+      execution_id: 'execution-customer-year-comparison',
       result: {
         verified: true,
-        comparison: { mode: "previous_year_same_period" },
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { unique_clients: 80 },
         changes: {
           unique_clients: {
@@ -5077,51 +5077,51 @@ describe("AiCoreService", () => {
       ...dto,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "Скажи, на сколько бизнес просел в этом году по сравнению с прошлым",
+            'Скажи, на сколько бизнес просел в этом году по сравнению с прошлым',
         },
         {
-          role: "assistant",
-          content: "По выручке есть снижение.",
+          role: 'assistant',
+          content: 'По выручке есть снижение.',
         },
-        { role: "user", content: "А по количеству клиентов?" },
+        { role: 'user', content: 'А по количеству клиентов?' },
       ],
     });
 
     // 🔴 Короткое «а по клиентам?» обязано остаться в ТОМ ЖЕ окне: сменить
     // период молча — значит сравнить несравнимое.
     expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toMatchObject({
-      period: "year_to_date",
-      comparison: "previous_year_same_period",
+      period: 'year_to_date',
+      comparison: 'previous_year_same_period',
     });
     expect(result).toMatchObject({
       grounding: {
-        status: "verified",
-        domain: "business_query",
-        evidence_tools: ["analytics.business.query"],
+        status: 'verified',
+        domain: 'business_query',
+        evidence_tools: ['analytics.business.query'],
       },
     });
   });
 
-  it("recognizes a direct customer decline comparison with the previous year", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('recognizes a direct customer decline comparison with the previous year', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Клиентов 80 против 100.", toolCall: null }),
+      decision({ reply: 'Клиентов 80 против 100.', toolCall: null }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-direct-customer-year-comparison",
+      status: 'completed',
+      execution_id: 'execution-direct-customer-year-comparison',
       result: {
         verified: true,
-        comparison: { mode: "previous_year_same_period" },
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { unique_clients: 80 },
         changes: {
           unique_clients: {
@@ -5140,25 +5140,25 @@ describe("AiCoreService", () => {
       ...dto,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "Скажи, на сколько мы просели по количеству клиентов по сравнению с прошлым годом",
+            'Скажи, на сколько мы просели по количеству клиентов по сравнению с прошлым годом',
         },
       ],
     });
 
     expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toMatchObject({
-      period: "year_to_date",
-      comparison: "previous_year_same_period",
+      period: 'year_to_date',
+      comparison: 'previous_year_same_period',
     });
   });
 
-  it("fails closed when the model requests a tool unavailable to the role", async () => {
+  it('fails closed when the model requests a tool unavailable to the role', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "Запускаю.",
-        toolCall: { name: "system.shell.execute", arguments: {} },
+        reply: 'Запускаю.',
+        toolCall: { name: 'system.shell.execute', arguments: {} },
       }),
     );
 
@@ -5167,33 +5167,33 @@ describe("AiCoreService", () => {
         ...dto,
         // Приветствие нарочно: на нём сервер ничего не предзагружает, и
         // единственным обращением к инструменту остаётся выдумка модели.
-        messages: [{ role: "user", content: "Привет" }],
+        messages: [{ role: 'user', content: 'Привет' }],
       }),
     ).rejects.toMatchObject<ServiceUnavailableException>({ status: 503 });
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     // Мягкая запись: мы внутри catch, и падение аудита подменило бы исходное
     // исключение. Сам факт записи по-прежнему обязателен.
     expect(mocks.auditLog.tryLog).toHaveBeenCalledWith(
-      expect.objectContaining({ action: "ai.core_turn_failed" }),
+      expect.objectContaining({ action: 'ai.core_turn_failed' }),
     );
   });
 
-  it("asks the model to rewrite an unsourced number and ships the corrected answer", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('asks the model to rewrite an unsourced number and ships the corrected answer', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-number-retry",
+      status: 'completed',
+      execution_id: 'execution-number-retry',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "none" },
+        source: 'crm',
+        comparison: { mode: 'none' },
         metrics: {
           revenue_amount_kopecks: 7_000_000,
           unique_clients: 80,
@@ -5202,7 +5202,7 @@ describe("AiCoreService", () => {
         current: {
           revenue: [
             {
-              currency: "RUB",
+              currency: 'RUB',
               amount_kopecks: 7_000_000,
               amount_major_units: 70_000,
             },
@@ -5214,21 +5214,21 @@ describe("AiCoreService", () => {
     mocks.model.decide
       // Модель называет сумму, которой нет ни в одном результате инструмента.
       .mockResolvedValueOnce(
-        decision({ reply: "Выручка выросла до 999 999 ₽.", toolCall: null }),
+        decision({ reply: 'Выручка выросла до 999 999 ₽.', toolCall: null }),
       )
       .mockResolvedValueOnce(
         decision({
           reply:
-            "Поступления за период — 70 000 ₽ при 80 уникальных клиентах. Это подтверждённые данные CRM.",
+            'Поступления за период — 70 000 ₽ при 80 уникальных клиентах. Это подтверждённые данные CRM.',
           toolCall: null,
         }),
       );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
+      surface: 'web',
       messages: [
-        { role: "user", content: "Что сейчас требует моего внимания?" },
+        { role: 'user', content: 'Что сейчас требует моего внимания?' },
       ],
     });
 
@@ -5237,41 +5237,41 @@ describe("AiCoreService", () => {
     // сохраняется, а выдуманная сумма всё равно не доходит до владельца.
     expect(mocks.model.decide).toHaveBeenCalledTimes(3);
     const second = mocks.model.decide.mock.calls[2]?.[0];
-    expect(second?.corrections?.[0]).toContain("999999");
-    expect(second?.toolResults?.[0]?.name).toBe("analytics.business.query");
+    expect(second?.corrections?.[0]).toContain('999999');
+    expect(second?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
       reply:
-        "Поступления за период — 70 000 ₽ при 80 уникальных клиентах. Это подтверждённые данные CRM.",
-      source: "deepseek",
-      grounding: { status: "verified", domain: "business_query" },
+        'Поступления за период — 70 000 ₽ при 80 уникальных клиентах. Это подтверждённые данные CRM.',
+      source: 'deepseek',
+      grounding: { status: 'verified', domain: 'business_query' },
     });
-    expect(result.reply).not.toContain("999 999");
+    expect(result.reply).not.toContain('999 999');
   });
 
   it.each([false, true])(
-    "treats conversation as context, with explicit user scenario=%s, not assistant numeric evidence",
+    'treats conversation as context, with explicit user scenario=%s, not assistant numeric evidence',
     async (explicitUserScenario) => {
-      const mocks = createService(["analytics.business.query"]);
+      const mocks = createService(['analytics.business.query']);
       // Explicit planner choice: no data source may run before this decision.
       mocks.model.decide.mockResolvedValueOnce(
         decision({
           reply: null,
-          toolCall: { name: "analytics.business.query", arguments: {} },
+          toolCall: { name: 'analytics.business.query', arguments: {} },
         }),
       );
       mocks.runtime.execute.mockResolvedValue({
-        status: "completed",
-        execution_id: "execution-history-grounding",
+        status: 'completed',
+        execution_id: 'execution-history-grounding',
         result: {
           verified: true,
-          source: "crm",
-          comparison: { mode: "none" },
+          source: 'crm',
+          comparison: { mode: 'none' },
           metrics: { revenue_amount_kopecks: 7_000_000 },
           changes: {},
           current: {
             revenue: [
               {
-                currency: "RUB",
+                currency: 'RUB',
                 amount_kopecks: 7_000_000,
                 amount_major_units: 70_000,
               },
@@ -5280,19 +5280,19 @@ describe("AiCoreService", () => {
           service_changes: [],
         },
       });
-      const earlierAssistant = "Ранее выручка составила 999999 ₽.";
+      const earlierAssistant = 'Ранее выручка составила 999999 ₽.';
       mocks.model.decide
         .mockResolvedValueOnce(
           decision({
             reply: explicitUserScenario
-              ? "Ваш план — 999999 ₽. Поступления по CRM — 70 000 ₽."
-              : "Выручка — 999999 ₽.",
+              ? 'Ваш план — 999999 ₽. Поступления по CRM — 70 000 ₽.'
+              : 'Выручка — 999999 ₽.',
             toolCall: null,
           }),
         )
         .mockResolvedValueOnce(
           decision({
-            reply: "Поступления по CRM — 70 000 ₽.",
+            reply: 'Поступления по CRM — 70 000 ₽.',
             toolCall: null,
           }),
         );
@@ -5300,20 +5300,20 @@ describe("AiCoreService", () => {
         ...dto,
         messages: [
           {
-            role: "user",
+            role: 'user',
             content: explicitUserScenario
-              ? "Если мой план 999999 ₽, что проверить?"
-              : "Покажи выручку.",
+              ? 'Если мой план 999999 ₽, что проверить?'
+              : 'Покажи выручку.',
           },
-          { role: "assistant", content: earlierAssistant },
-          { role: "user", content: "Что сейчас требует моего внимания?" },
+          { role: 'assistant', content: earlierAssistant },
+          { role: 'user', content: 'Что сейчас требует моего внимания?' },
         ],
       });
       // User preferences remain context; unclassified assistant prose cannot
       // become external model context or a substitute for current source facts.
       expect(mocks.model.decide.mock.calls[1]?.[0].messages).not.toContainEqual(
         {
-          role: "assistant",
+          role: 'assistant',
           content: earlierAssistant,
         },
       );
@@ -5321,47 +5321,47 @@ describe("AiCoreService", () => {
         explicitUserScenario ? 2 : 3,
       );
       if (explicitUserScenario) {
-        expect(result.reply).toContain("Ваш план — 999999 ₽");
+        expect(result.reply).toContain('Ваш план — 999999 ₽');
       } else {
         expect(
           mocks.model.decide.mock.calls[2]?.[0].corrections?.[0],
-        ).toContain("999999");
-        expect(result.reply).not.toContain("999999");
+        ).toContain('999999');
+        expect(result.reply).not.toContain('999999');
       }
-      expect(result.reply).toContain("70 000 ₽");
+      expect(result.reply).toContain('70 000 ₽');
     },
   );
 
-  it("falls back to the deterministic text when the model repeats an unsourced number", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('falls back to the deterministic text when the model repeats an unsourced number', async () => {
+    const mocks = createService(['analytics.business.query']);
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Проверяю.",
+          reply: 'Проверяю.',
           toolCall: {
-            name: "analytics.business.query",
-            arguments: { period: "month_to_date" },
+            name: 'analytics.business.query',
+            arguments: { period: 'month_to_date' },
           },
         }),
       )
       // Модель настаивает на своей цифре и во второй раз — дальше уступок нет.
       .mockResolvedValue(
-        decision({ reply: "Валовая прибыль: 40 000 ₽.", toolCall: null }),
+        decision({ reply: 'Валовая прибыль: 40 000 ₽.', toolCall: null }),
       );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-profit-retry",
+      status: 'completed',
+      execution_id: 'execution-profit-retry',
       result: {
         revenue: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 10_000_000,
             amount_major_units: 100_000,
           },
         ],
         net: [
           {
-            currency: "RUB",
+            currency: 'RUB',
             amount_kopecks: 6_000_000,
             amount_major_units: 60_000,
           },
@@ -5372,7 +5372,7 @@ describe("AiCoreService", () => {
     const result = await mocks.service.chat(user, {
       ...dto,
       messages: [
-        { role: "user", content: "Какая валовая прибыль бизнеса за месяц?" },
+        { role: 'user', content: 'Какая валовая прибыль бизнеса за месяц?' },
       ],
     });
 
@@ -5381,35 +5381,35 @@ describe("AiCoreService", () => {
     // суммы за валовую прибыль.
     expect(mocks.model.decide).toHaveBeenCalledTimes(3);
     expect(mocks.model.decide.mock.calls[2]?.[0].corrections?.[0]).toContain(
-      "40000",
+      '40000',
     );
-    expect(result.source).toBe("safe_fallback");
-    expect(result.reply).toContain("Валовая прибыль сейчас не рассчитывается");
-    expect(result.reply).not.toContain("40 000");
-    expect(result.reply).not.toContain("100 000");
-    expect(result.reply).not.toContain("60 000");
+    expect(result.source).toBe('safe_fallback');
+    expect(result.reply).toContain('Валовая прибыль сейчас не рассчитывается');
+    expect(result.reply).not.toContain('40 000');
+    expect(result.reply).not.toContain('100 000');
+    expect(result.reply).not.toContain('60 000');
     expect(result.grounding).toMatchObject({
-      status: "verified",
-      domain: "business_query",
+      status: 'verified',
+      domain: 'business_query',
     });
   });
 
-  it("lets the model say a decline in words while the server keeps the minus sign", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('lets the model say a decline in words while the server keeps the minus sign', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-negative-percent",
+      status: 'completed',
+      execution_id: 'execution-negative-percent',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_year_same_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { revenue_amount_kopecks: 7_000_000 },
         changes: {
           revenue_amount_kopecks: {
@@ -5426,18 +5426,18 @@ describe("AiCoreService", () => {
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.",
+          'Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
+      surface: 'web',
       messages: [
         {
-          role: "user",
-          content: "Насколько просела выручка по сравнению с прошлым годом?",
+          role: 'user',
+          content: 'Насколько просела выручка по сравнению с прошлым годом?',
         },
       ],
     });
@@ -5448,28 +5448,28 @@ describe("AiCoreService", () => {
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result).toMatchObject({
       reply:
-        "Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.",
-      source: "deepseek",
-      grounding: { status: "verified", domain: "business_query" },
+        'Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.',
+      source: 'deepseek',
+      grounding: { status: 'verified', domain: 'business_query' },
     });
   });
 
-  it("does not mistake decline wording next to an absolute figure for an error", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('does not mistake decline wording next to an absolute figure for an error', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-absolute-decline",
+      status: 'completed',
+      execution_id: 'execution-absolute-decline',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: {
           average_ticket_amount_kopecks: 143_617,
           appointments_total: 141,
@@ -5495,15 +5495,15 @@ describe("AiCoreService", () => {
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
-          "Средний чек просел до 1 436,17 ₽ с 1 503,74 ₽, это −4,5%. Записей стало меньше: 141 против 171.",
+          'Средний чек просел до 1 436,17 ₽ с 1 503,74 ₽, это −4,5%. Записей стало меньше: 141 против 171.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
-      messages: [{ role: "user", content: "Че у нас за просадки" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'Че у нас за просадки' }],
     });
 
     // 🔴 Из-за этого «что у нас за просадки» и отвечалось шаблоном: сторож
@@ -5511,27 +5511,27 @@ describe("AiCoreService", () => {
     // направления. Но абсолютная величина направления не несёт — падает не
     // число, а показатель. Проверка направления имеет смысл только для дельт.
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
-    expect(result.source).toBe("deepseek");
-    expect(result.reply).toContain("1 436,17 ₽");
-    expect(result.reply).toContain("141 против 171");
+    expect(result.source).toBe('deepseek');
+    expect(result.reply).toContain('1 436,17 ₽');
+    expect(result.reply).toContain('141 против 171');
   });
 
-  it("catches a decline described as growth even though the figure itself is real", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('catches a decline described as growth even though the figure itself is real', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-direction",
+      status: 'completed',
+      execution_id: 'execution-direction',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_year_same_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_year_same_period' },
         metrics: { revenue_amount_kopecks: 7_000_000 },
         changes: {
           revenue_amount_kopecks: {
@@ -5548,24 +5548,24 @@ describe("AiCoreService", () => {
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Поступления выросли на 9,2% к прошлому году. Отличный темп.",
+          reply: 'Поступления выросли на 9,2% к прошлому году. Отличный темп.',
           toolCall: null,
         }),
       )
       .mockResolvedValueOnce(
         decision({
-          reply: "Поступления снизились на 9,2% к прошлому году.",
+          reply: 'Поступления снизились на 9,2% к прошлому году.',
           toolCall: null,
         }),
       );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
+      surface: 'web',
       messages: [
         {
-          role: "user",
-          content: "Насколько просела выручка по сравнению с прошлым годом?",
+          role: 'user',
+          content: 'Насколько просела выручка по сравнению с прошлым годом?',
         },
       ],
     });
@@ -5575,28 +5575,28 @@ describe("AiCoreService", () => {
     // владелец принял бы решение по несуществующему росту. Ловим по словам
     // рядом с числом и требуем переписать.
     const correction = mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0];
-    expect(correction).toContain("снижение, а не рост");
-    expect(result.reply).toContain("снизились на 9,2%");
-    expect(result.reply).not.toContain("выросли");
-    expect(result.source).toBe("deepseek");
+    expect(correction).toContain('снижение, а не рост');
+    expect(result.reply).toContain('снизились на 9,2%');
+    expect(result.reply).not.toContain('выросли');
+    expect(result.source).toBe('deepseek');
   });
 
-  it("lets the model name a money change in roubles when the server counted it in kopecks", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('lets the model name a money change in roubles when the server counted it in kopecks', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-kopecks-delta",
+      status: 'completed',
+      execution_id: 'execution-kopecks-delta',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: { revenue_amount_kopecks: 20_250_000 },
         changes: {
           // Рублёвого двойника у дельты в changes нет — только копейки.
@@ -5613,15 +5613,15 @@ describe("AiCoreService", () => {
     });
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "Поступления упали на 10 000 ₽ — это −4,7% к прошлому периоду.",
+        reply: 'Поступления упали на 10 000 ₽ — это −4,7% к прошлому периоду.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
-      messages: [{ role: "user", content: "Почему просела выручка?" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'Почему просела выручка?' }],
     });
 
     // 🔴 Из-за этого разбор просадки и сваливался в шаблон: сервер держит
@@ -5629,26 +5629,26 @@ describe("AiCoreService", () => {
     // считал верную сумму выдумкой. Та же величина в правильной единице —
     // не выдумка; переписывать ответ незачем.
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
-    expect(result.reply).toContain("10 000 ₽");
-    expect(result.source).toBe("deepseek");
+    expect(result.reply).toContain('10 000 ₽');
+    expect(result.source).toBe('deepseek');
   });
 
-  it("still rejects a money figure that is not in the data at any scale", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('still rejects a money figure that is not in the data at any scale', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-invented-money",
+      status: 'completed',
+      execution_id: 'execution-invented-money',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: { revenue_amount_kopecks: 20_250_000 },
         changes: {
           revenue_amount_kopecks: {
@@ -5665,49 +5665,49 @@ describe("AiCoreService", () => {
     mocks.model.decide
       .mockResolvedValueOnce(
         decision({
-          reply: "Поступления упали примерно на 12 345 ₽.",
+          reply: 'Поступления упали примерно на 12 345 ₽.',
           toolCall: null,
         }),
       )
       .mockResolvedValueOnce(
-        decision({ reply: "Поступления упали на 10 000 ₽.", toolCall: null }),
+        decision({ reply: 'Поступления упали на 10 000 ₽.', toolCall: null }),
       );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
-      messages: [{ role: "user", content: "Почему просела выручка?" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'Почему просела выручка?' }],
     });
 
     // Послабление касается только единиц измерения. Округление «примерно»
     // остаётся выдумкой и по-прежнему отправляется на переписывание.
     expect(mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0]).toContain(
-      "12345",
+      '12345',
     );
-    expect(result.reply).toContain("10 000 ₽");
+    expect(result.reply).toContain('10 000 ₽');
   });
 
-  it("does not treat an hour inside a timestamp as a confirmed metric", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('does not treat an hour inside a timestamp as a confirmed metric', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-timestamp",
+      status: 'completed',
+      execution_id: 'execution-timestamp',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         // 21 здесь встречается только как час в смещении Europe/Moscow.
         period: {
-          from: "2026-08-01T21:00:00.000Z",
-          to: "2026-08-07T20:59:59.999Z",
-          timezone: "Europe/Moscow",
+          from: '2026-08-01T21:00:00.000Z',
+          to: '2026-08-07T20:59:59.999Z',
+          timezone: 'Europe/Moscow',
         },
         metrics: { appointments_total: 40 },
         changes: {},
@@ -5717,67 +5717,67 @@ describe("AiCoreService", () => {
     });
     mocks.model.decide
       .mockResolvedValueOnce(
-        decision({ reply: "Доля отмен — 21%.", toolCall: null }),
+        decision({ reply: 'Доля отмен — 21%.', toolCall: null }),
       )
       .mockResolvedValueOnce(
-        decision({ reply: "Записей за период: 40.", toolCall: null }),
+        decision({ reply: 'Записей за период: 40.', toolCall: null }),
       );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
-      messages: [{ role: "user", content: "Что с записями за неделю?" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'Что с записями за неделю?' }],
     });
 
     // 🔴 Разбирая строки дат на числа, сторож считал бы подтверждёнными часы,
     // минуты и дни месяца — и пропустил бы любой процент от 0 до 59. Из таких
     // строк берём только год.
     expect(mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0]).toContain(
-      "21",
+      '21',
     );
-    expect(result.reply).toBe("Записей за период: 40.");
+    expect(result.reply).toBe('Записей за период: 40.');
   });
 
-  it("lets a per-master service drop through the number guard by name", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('lets a per-master service drop through the number guard by name', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "execution-staff-names",
+      status: 'completed',
+      execution_id: 'execution-staff-names',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: { appointments_total: 40 },
         changes: {},
         current: {
           staff_summary: [
             {
-              name: "Анна",
+              name: 'Анна',
               appointments: 32,
               revenue: [],
               booked_minutes: 960,
-              services: [{ name: "Мужская стрижка", appointments: 32 }],
+              services: [{ name: 'Мужская стрижка', appointments: 32 }],
             },
             {
-              name: "Илья",
+              name: 'Илья',
               appointments: 19,
               revenue: [],
               booked_minutes: 570,
-              services: [{ name: "Борода", appointments: 19 }],
+              services: [{ name: 'Борода', appointments: 19 }],
             },
           ],
         },
         service_changes: [],
         staff_changes: [
           {
-            name: "Илья",
+            name: 'Илья',
             current_appointments: 19,
             previous_appointments: 31,
             delta: -12,
@@ -5788,7 +5788,7 @@ describe("AiCoreService", () => {
             // шаблон вместо разбора.
             services: [
               {
-                name: "Борода",
+                name: 'Борода',
                 current_appointments: 19,
                 previous_appointments: 31,
                 delta: -12,
@@ -5801,62 +5801,62 @@ describe("AiCoreService", () => {
     });
     mocks.model.decide.mockResolvedValue(
       decision({
-        reply: "У Ильи просела «Борода»: 19 записей против 31, это −12.",
+        reply: 'У Ильи просела «Борода»: 19 записей против 31, это −12.',
         toolCall: null,
       }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
+      surface: 'web',
       messages: [
         {
-          role: "user",
-          content: "Кто из мастеров просел по сравнению с прошлым месяцем?",
+          role: 'user',
+          content: 'Кто из мастеров просел по сравнению с прошлым месяцем?',
         },
       ],
     });
 
     // Model sees request-local mentions; presentation resolves labels on the server.
     const modelInput = JSON.stringify(mocks.model.decide.mock.calls[1]?.[0]);
-    expect(modelInput).not.toContain("Илья");
-    expect(modelInput).toContain("[name removed]@");
-    expect(modelInput).toContain("Борода");
+    expect(modelInput).not.toContain('Илья');
+    expect(modelInput).toContain('[name removed]@');
+    expect(modelInput).toContain('Борода');
     // Разбор доходит до пользователя дословно: ни сторож чисел, ни подстановка
     // имён его больше не трогают.
     expect(result.reply).toBe(
-      "У Ильи просела «Борода»: 19 записей против 31, это −12.",
+      'У Ильи просела «Борода»: 19 записей против 31, это −12.',
     );
-    expect(result.source).not.toBe("safe_fallback");
-    expect(result.grounding).toMatchObject({ status: "verified" });
+    expect(result.source).not.toBe('safe_fallback');
+    expect(result.grounding).toMatchObject({ status: 'verified' });
   });
 
-  it("projects actual serialized model requests through read, correction and server label presentation", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('projects actual serialized model requests through read, correction and server label presentation', async () => {
+    const mocks = createService(['analytics.business.query']);
     const provider = new AiCoreModelService(
       new ConfigService({
-        AI_CORE_PROVIDER: "deepseek",
-        DEEPSEEK_API_KEY: "offline-placeholder",
-        DEEPSEEK_BASE_URL: "https://model.example.invalid",
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'offline-placeholder',
+        DEEPSEEK_BASE_URL: 'https://model.example.invalid',
       }),
     );
     mocks.model.decide.mockImplementation((input) => provider.decide(input));
     mocks.memory.listForModel.mockResolvedValue([
-      "Мастер Илья предпочитает утро",
+      'Мастер Илья предпочитает утро',
     ]);
     mocks.runtime.execute.mockResolvedValue({
-      status: "completed",
-      execution_id: "private-execution-id",
+      status: 'completed',
+      execution_id: 'private-execution-id',
       result: {
         verified: true,
         metrics: { appointments_total: 40 },
         changes: {},
-        staff_scope: { name: "Рустам Ахметов", title: "Мастер" },
+        staff_scope: { name: 'Рустам Ахметов', title: 'Мастер' },
         current: {
           staff_summary: [
             {
-              id: "private-staff-id",
-              name: "Рустам Ахметов",
+              id: 'private-staff-id',
+              name: 'Рустам Ахметов',
               appointments: 40,
             },
           ],
@@ -5865,10 +5865,10 @@ describe("AiCoreService", () => {
     });
     const bodies: string[] = [];
     const transport = jest
-      .spyOn(global, "fetch")
+      .spyOn(global, 'fetch')
       .mockImplementation((_url, init) => {
-        if (typeof init?.body !== "string")
-          throw new Error("Expected serialized body");
+        if (typeof init?.body !== 'string')
+          throw new Error('Expected serialized body');
         const body = init.body;
         bodies.push(body);
         const envelope = JSON.parse(body) as {
@@ -5883,21 +5883,21 @@ describe("AiCoreService", () => {
         if (bodies.length === 1) {
           content = JSON.stringify({
             semantic_plan: {
-              parent_request: "Анализ записей",
-              language: "ru",
-              dialogue_act: "request",
+              parent_request: 'Анализ записей',
+              language: 'ru',
+              dialogue_act: 'request',
               tasks: [
                 {
-                  id: "t1",
-                  intent: "analytics.business_summary",
+                  id: 't1',
+                  intent: 'analytics.business_summary',
                   entities: {},
                   confidence: 0.99,
                 },
               ],
             },
             tool_call: {
-              name: "analytics.business.query",
-              arguments_json: "{}",
+              name: 'analytics.business.query',
+              arguments_json: '{}',
             },
           });
         } else {
@@ -5911,7 +5911,7 @@ describe("AiCoreService", () => {
         return Promise.resolve(
           new Response(
             JSON.stringify({
-              choices: [{ finish_reason: "stop", message: { content } }],
+              choices: [{ finish_reason: 'stop', message: { content } }],
               usage: {
                 prompt_tokens: 1,
                 completion_tokens: 1,
@@ -5927,18 +5927,18 @@ describe("AiCoreService", () => {
         ...dto,
         messages: [
           {
-            role: "user",
-            content: "Кто из мастеров просел по сравнению с прошлым месяцем?",
+            role: 'user',
+            content: 'Кто из мастеров просел по сравнению с прошлым месяцем?',
           },
         ],
       });
       expect(bodies.length).toBe(3);
-      expect(bodies[2]).toContain("grounding_corrections");
+      expect(bodies[2]).toContain('grounding_corrections');
       for (const body of bodies) {
         const data = JSON.stringify(
           (
             JSON.parse(body) as { messages: { role: string }[] }
-          ).messages.filter((m) => m.role !== "system"),
+          ).messages.filter((m) => m.role !== 'system'),
         );
         expect(
           /Илья|Ильи|Рустам|Ахметов|private-staff-id|private-execution-id/.test(
@@ -5946,74 +5946,74 @@ describe("AiCoreService", () => {
           ),
         ).toBe(false);
       }
-      expect(bodies[1]).toContain("[name removed]@");
-      expect(bodies[1]).toContain("[reference removed]@");
-      expect(result.reply).toBe("Рустам Ахметов: 40 записей.");
-      expect(result.grounding.status).toBe("verified");
+      expect(bodies[1]).toContain('[name removed]@');
+      expect(bodies[1]).toContain('[reference removed]@');
+      expect(result.reply).toBe('Рустам Ахметов: 40 записей.');
+      expect(result.grounding.status).toBe('verified');
     } finally {
       transport.mockRestore();
     }
   });
 
-  it("restores only registered accepted service preferences and rejects foreign or forged private references", () => {
+  it('restores only registered accepted service preferences and rejects foreign or forged private references', () => {
     const { service } = createService();
-    const privacy = service["sanitizeMessages"]([
-      { role: "user", content: "Продолжим запись" },
+    const privacy = service['sanitizeMessages']([
+      { role: 'user', content: 'Продолжим запись' },
     ]);
-    privacy.retainAcceptedBookingServices(["81"]);
+    privacy.retainAcceptedBookingServices(['81']);
     const projected = privacy.project({
-      services: ["81"],
-      branch: "81",
-      appointment_id: "91",
-      goods_id: "92",
+      services: ['81'],
+      branch: '81',
+      appointment_id: '91',
+      goods_id: '92',
     });
     expect(projected.services[0]).toMatch(/^\[reference removed\]@/);
     expect(
       privacy.resolveReferences({ services: projected.services }, true),
-    ).toEqual({ services: ["81"] });
+    ).toEqual({ services: ['81'] });
     expect(
       privacy.resolveReferences({ services: [projected.branch] }, true),
-    ).toEqual({ services: ["[reference unavailable]"] });
+    ).toEqual({ services: ['[reference unavailable]'] });
     expect(projected.services[0]).not.toBe(projected.branch);
     for (const unrelated of [projected.appointment_id, projected.goods_id]) {
       expect(
         privacy.resolveReferences({ services: [unrelated] }, true),
-      ).toEqual({ services: ["[reference unavailable]"] });
+      ).toEqual({ services: ['[reference unavailable]'] });
     }
-    const forged = projected.services[0] + "_forged";
+    const forged = projected.services[0] + '_forged';
     expect(privacy.resolveReferences({ services: [forged] }, true)).not.toEqual(
-      { services: ["81"] },
+      { services: ['81'] },
     );
-    const otherRequest = service["sanitizeMessages"]([
-      { role: "user", content: "Продолжим запись" },
+    const otherRequest = service['sanitizeMessages']([
+      { role: 'user', content: 'Продолжим запись' },
     ]);
     expect(
       otherRequest.resolveReferences({ services: projected.services }, true),
-    ).not.toEqual({ services: ["81"] });
-    const unregistered = otherRequest.project({ services: ["81"] });
+    ).not.toEqual({ services: ['81'] });
+    const unregistered = otherRequest.project({ services: ['81'] });
     expect(otherRequest.resolveReferences(unregistered, true)).toEqual({
-      services: ["[reference unavailable]"],
+      services: ['[reference unavailable]'],
     });
   });
 
-  it("keeps nonnumeric catalog service IDs out of serialized resumed semantic context", async () => {
+  it('keeps nonnumeric catalog service IDs out of serialized resumed semantic context', async () => {
     const { service } = createService();
     const provider = new AiCoreModelService(
       new ConfigService({
-        AI_CORE_PROVIDER: "deepseek",
-        DEEPSEEK_API_KEY: "offline-placeholder",
-        DEEPSEEK_BASE_URL: "https://model.example.invalid",
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'offline-placeholder',
+        DEEPSEEK_BASE_URL: 'https://model.example.invalid',
       }),
     );
-    const first = service["sanitizeMessages"]([
-      { role: "user", content: "Хочу эту услугу" },
+    const first = service['sanitizeMessages']([
+      { role: 'user', content: 'Хочу эту услугу' },
     ]);
     const catalog = first.project(
       [
         {
-          name: "catalog.services.read",
+          name: 'catalog.services.read',
           result: {
-            services: [{ id: "svc-standard-private", name: "Борода" }],
+            services: [{ id: 'svc-standard-private', name: 'Борода' }],
           },
         },
       ],
@@ -6022,31 +6022,31 @@ describe("AiCoreService", () => {
     const alias = catalog[0].result.services[0].id;
     const bodies: string[] = [];
     const transport = jest
-      .spyOn(global, "fetch")
+      .spyOn(global, 'fetch')
       .mockImplementation((_url, init) => {
-        if (typeof init?.body !== "string")
-          throw new Error("Expected serialized body");
+        if (typeof init?.body !== 'string')
+          throw new Error('Expected serialized body');
         bodies.push(init.body);
         return Promise.resolve(
           new Response(
             JSON.stringify({
               choices: [
                 {
-                  finish_reason: "stop",
+                  finish_reason: 'stop',
                   message: {
                     content: JSON.stringify({
                       semantic_plan: {
-                        parent_request: "Выбрать время",
-                        language: "ru",
-                        dialogue_act: "request",
+                        parent_request: 'Выбрать время',
+                        language: 'ru',
+                        dialogue_act: 'request',
                         tasks: [
                           {
-                            id: "t1",
-                            intent: "booking.find_availability",
+                            id: 't1',
+                            intent: 'booking.find_availability',
                             confidence: 0.99,
                             entities: {
                               services: [
-                                bodies.length === 1 ? alias : "Борода",
+                                bodies.length === 1 ? alias : 'Борода',
                               ],
                             },
                           },
@@ -6063,17 +6063,17 @@ describe("AiCoreService", () => {
         );
       });
     const input: AiCoreModelInput = {
-      surface: "web",
-      persona: "admin",
+      surface: 'web',
+      persona: 'admin',
       principalRole: UserRole.CLIENT,
       messages: first.messages,
       tools: [
         {
-          name: "booking.availability.read",
-          description: "Read availability",
-          input_schema: { type: "object" },
-          risk_tier: "read",
-          approval_policy: "none",
+          name: 'booking.availability.read',
+          description: 'Read availability',
+          input_schema: { type: 'object' },
+          risk_tier: 'read',
+          approval_policy: 'none',
         },
       ],
       toolResults: catalog,
@@ -6083,12 +6083,12 @@ describe("AiCoreService", () => {
     try {
       const selected = await provider.decide(input);
       const retained = first.resolveReferences(selected!.semanticPlan!, true);
-      expect(retained.tasks[0].entities.services).toEqual(["Борода"]);
+      expect(retained.tasks[0].entities.services).toEqual(['Борода']);
       expect(first.resolveReferences({ service_ids: [alias] })).toEqual({
-        service_ids: ["svc-standard-private"],
+        service_ids: ['svc-standard-private'],
       });
-      const resumed = service["sanitizeMessages"]([
-        { role: "user", content: "А завтра?" },
+      const resumed = service['sanitizeMessages']([
+        { role: 'user', content: 'А завтра?' },
       ]);
       await provider.decide({
         ...input,
@@ -6098,21 +6098,21 @@ describe("AiCoreService", () => {
       });
       expect(bodies.length).toBe(2);
       for (const body of bodies)
-        expect(body.includes("svc-standard-private")).toBe(false);
-      expect(bodies[1]).toContain("Борода");
+        expect(body.includes('svc-standard-private')).toBe(false);
+      expect(bodies[1]).toContain('Борода');
       expect(bodies[1]).not.toContain(alias);
     } finally {
       transport.mockRestore();
     }
   });
 
-  it("lets a salon-wide sentence without any master name through untouched", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('lets a salon-wide sentence without any master name through untouched', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue(perMasterExecution());
@@ -6120,28 +6120,28 @@ describe("AiCoreService", () => {
     // Ложные тревоги тут дороже пропусков: прошлая проверка направления
     // браковала верные ответы пачками.
     const reply =
-      "За период 40 записей и 104 500 ₽ выручки, 33 уникальных клиента. Записи просели на 12 (−23,1%).";
+      'За период 40 записей и 104 500 ₽ выручки, 33 уникальных клиента. Записи просели на 12 (−23,1%).';
     mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
-      messages: [{ role: "user", content: "Что у нас по записям за месяц?" }],
+      surface: 'web',
+      messages: [{ role: 'user', content: 'Что у нас по записям за месяц?' }],
     });
 
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toBe(reply);
-    expect(result.source).not.toBe("safe_fallback");
-    expect(result.grounding).toMatchObject({ status: "verified" });
+    expect(result.source).not.toBe('safe_fallback');
+    expect(result.grounding).toMatchObject({ status: 'verified' });
   });
 
-  it("keeps a full three-part answer with per-master detail intact", async () => {
-    const mocks = createService(["analytics.business.query"]);
+  it('keeps a full three-part answer with per-master detail intact', async () => {
+    const mocks = createService(['analytics.business.query']);
     // Explicit planner choice: no data source may run before this decision.
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply: null,
-        toolCall: { name: "analytics.business.query", arguments: {} },
+        toolCall: { name: 'analytics.business.query', arguments: {} },
       }),
     );
     mocks.runtime.execute.mockResolvedValue(perMasterExecution());
@@ -6149,83 +6149,83 @@ describe("AiCoreService", () => {
     // рекомендация. Каждое число стоит у своего владельца — придираться не к
     // чему, и ни одной пометки быть не должно.
     const reply =
-      "У Ильи «Борода» просела: 19 записей против 31, это −12 (−38,7%). У Стаса ровно — 21 запись, как и было. По салону 40 записей и 104 500 ₽, 33 уникальных клиента. Первым делом верните бородачей: обзвон тех, кто был в прошлом месяце.";
+      'У Ильи «Борода» просела: 19 записей против 31, это −12 (−38,7%). У Стаса ровно — 21 запись, как и было. По салону 40 записей и 104 500 ₽, 33 уникальных клиента. Первым делом верните бородачей: обзвон тех, кто был в прошлом месяце.';
     mocks.model.decide.mockResolvedValue(decision({ reply, toolCall: null }));
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      surface: "web",
+      surface: 'web',
       messages: [
-        { role: "user", content: "Почему просели записи в этом месяце?" },
+        { role: 'user', content: 'Почему просели записи в этом месяце?' },
       ],
     });
 
     expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toBe(reply);
-    expect(result.source).not.toBe("safe_fallback");
+    expect(result.source).not.toBe('safe_fallback');
   });
 
-  it("leaves the model answer byte-for-byte alone instead of rewriting master labels", async () => {
+  it('leaves the model answer byte-for-byte alone instead of rewriting master labels', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Сегодня в смене master_2.", toolCall: null }),
+      decision({ reply: 'Сегодня в смене master_2.', toolCall: null }),
     );
 
     const result = await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Привет" }],
+      messages: [{ role: 'user', content: 'Привет' }],
     });
 
     // Прежняя схема переписывала этот текст в «Мастер 2». Подстановки больше
     // нет: сервер в готовый ответ не лезет.
-    expect(result.reply).toBe("Сегодня в смене master_2.");
+    expect(result.reply).toBe('Сегодня в смене master_2.');
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 
-  it("trims a long conversation instead of refusing to answer it", async () => {
+  it('trims a long conversation instead of refusing to answer it', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Отвечаю по последнему вопросу.", toolCall: null }),
+      decision({ reply: 'Отвечаю по последнему вопросу.', toolCall: null }),
     );
     // 🔴 Ровно тот разговор, который положил чат в проде: 12 реплик по 2000
     // знаков кириллицей — это ~48 КБ при пороге 16. Раньше сюда прилетал отказ
     // 400 ДО обработчика: владелец видел молчание, в логах пусто, в аудите ни
     // строки. Содержательный разговор — не ошибка ввода.
-    const long = "а".repeat(2_000);
+    const long = 'а'.repeat(2_000);
     const messages = [
       ...Array.from({ length: 11 }, (_, index) => ({
-        role: index % 2 === 0 ? "user" : "assistant",
+        role: index % 2 === 0 ? 'user' : 'assistant',
         content: long,
       })),
       // Последняя реплика — пользовательская и намеренно не про данные:
       // проверяем обрезку разговора, а не работу аналитики.
-      { role: "user" as const, content: "Привет!" },
+      { role: 'user' as const, content: 'Привет!' },
     ];
 
     const result = await mocks.service.chat(user, { ...dto, messages });
 
-    expect(result.reply).toBe("Отвечаю по последнему вопросу.");
+    expect(result.reply).toBe('Отвечаю по последнему вопросу.');
     const sent = mocks.model.decide.mock.calls[0]?.[0]?.messages ?? [];
     // Старое отрезано, последний вопрос на месте — отвечаем именно на него.
     expect(sent.length).toBeLessThan(12);
-    expect(sent.at(-1)?.content).toBe("Привет!");
+    expect(sent.at(-1)?.content).toBe('Привет!');
   });
 
-  it("gives the model the server time instead of letting it guess the calendar", async () => {
+  it('gives the model the server time instead of letting it guess the calendar', async () => {
     const mocks = createService();
     mocks.model.decide.mockResolvedValue(
-      decision({ reply: "Здравствуйте! Чем помочь?", toolCall: null }),
+      decision({ reply: 'Здравствуйте! Чем помочь?', toolCall: null }),
     );
 
     await mocks.service.chat(user, {
       ...dto,
-      messages: [{ role: "user", content: "Привет!" }],
+      messages: [{ role: 'user', content: 'Привет!' }],
     });
 
     // Без серверного «сейчас» модель не знает сегодняшнюю дату, а выдумывать
     // календарь ей запрещено — любой вопрос про динамику стал бы безответным.
     const nowUtc = mocks.model.decide.mock.calls[0]?.[0].nowUtc;
-    expect(typeof nowUtc).toBe("string");
+    expect(typeof nowUtc).toBe('string');
     expect(new Date(String(nowUtc)).toISOString()).toBe(nowUtc);
   });
 
@@ -6237,12 +6237,12 @@ describe("AiCoreService", () => {
    */
   function perMasterExecution() {
     return {
-      status: "completed",
-      execution_id: "execution-per-master",
+      status: 'completed',
+      execution_id: 'execution-per-master',
       result: {
         verified: true,
-        source: "crm",
-        comparison: { mode: "previous_period" },
+        source: 'crm',
+        comparison: { mode: 'previous_period' },
         metrics: { appointments_total: 40, unique_clients: 33 },
         changes: {
           appointments_total: {
@@ -6255,35 +6255,35 @@ describe("AiCoreService", () => {
         current: {
           revenue: [
             {
-              currency: "RUB",
+              currency: 'RUB',
               amount_kopecks: 10_450_000,
               amount_major_units: 104_500,
             },
           ],
           staff_summary: [
             {
-              name: "Стас",
+              name: 'Стас',
               appointments: 21,
               revenue: [],
               booked_minutes: 630,
-              services: [{ name: "Мужская стрижка", appointments: 21 }],
+              services: [{ name: 'Мужская стрижка', appointments: 21 }],
             },
             {
-              name: "Илья",
+              name: 'Илья',
               appointments: 19,
               revenue: [],
               booked_minutes: 570,
-              services: [{ name: "Борода", appointments: 19 }],
+              services: [{ name: 'Борода', appointments: 19 }],
             },
           ],
           service_summary: [
-            { name: "Мужская стрижка", appointments: 21, booked_value: [] },
-            { name: "Борода", appointments: 19, booked_value: [] },
+            { name: 'Мужская стрижка', appointments: 21, booked_value: [] },
+            { name: 'Борода', appointments: 19, booked_value: [] },
           ],
         },
         service_changes: [
           {
-            name: "Борода",
+            name: 'Борода',
             current_appointments: 19,
             previous_appointments: 31,
             delta: -12,
@@ -6292,14 +6292,14 @@ describe("AiCoreService", () => {
         ],
         staff_changes: [
           {
-            name: "Илья",
+            name: 'Илья',
             current_appointments: 19,
             previous_appointments: 31,
             delta: -12,
             percent_change: -38.7,
             services: [
               {
-                name: "Борода",
+                name: 'Борода',
                 current_appointments: 19,
                 previous_appointments: 31,
                 delta: -12,
@@ -6308,14 +6308,14 @@ describe("AiCoreService", () => {
             ],
           },
           {
-            name: "Стас",
+            name: 'Стас',
             current_appointments: 21,
             previous_appointments: 21,
             delta: 0,
             percent_change: 0,
             services: [
               {
-                name: "Мужская стрижка",
+                name: 'Мужская стрижка',
                 current_appointments: 21,
                 previous_appointments: 21,
                 delta: 0,
@@ -6329,19 +6329,19 @@ describe("AiCoreService", () => {
   }
 
   function decision(
-    value: Pick<AiCoreModelDecision, "reply" | "toolCall"> &
-      Partial<Pick<AiCoreModelDecision, "semanticPlan">>,
+    value: Pick<AiCoreModelDecision, 'reply' | 'toolCall'> &
+      Partial<Pick<AiCoreModelDecision, 'semanticPlan'>>,
   ): AiCoreModelDecision {
     return {
       ...value,
-      provider: "deepseek",
-      model: "test-model",
+      provider: 'deepseek',
+      model: 'test-model',
       usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 },
     };
   }
 
   function createService(
-    toolNames = ["analytics.business.query", "loyalty.internal.adjust"],
+    toolNames = ['analytics.business.query', 'loyalty.internal.adjust'],
     env: Record<string, string> = {},
     businessTimezone?: string,
   ) {
@@ -6349,8 +6349,8 @@ describe("AiCoreService", () => {
       get: jest.fn((name: string) =>
         name in env
           ? env[name]
-          : name === "AI_CORE_MAX_TOOL_STEPS"
-            ? "2"
+          : name === 'AI_CORE_MAX_TOOL_STEPS'
+            ? '2'
             : undefined,
       ),
     };
@@ -6358,29 +6358,29 @@ describe("AiCoreService", () => {
       assertTenantId: jest.fn((tenantId: string) => tenantId),
     };
     const assertTenant: jest.MockedFunction<
-      AuthRateLimitService["assertTenant"]
+      AuthRateLimitService['assertTenant']
     > = jest.fn().mockResolvedValue(undefined);
     const rateLimit = { assertTenant };
-    const listTools: jest.MockedFunction<AiToolRuntimeService["listTools"]> =
+    const listTools: jest.MockedFunction<AiToolRuntimeService['listTools']> =
       jest.fn();
     listTools.mockResolvedValue({
       tools: toolNames.map((name) => ({
         name,
         description: `Tool ${name}`,
-        input_schema: { type: "object" },
-        risk_tier: name === "loyalty.internal.adjust" ? "high_write" : "read",
-        approval_policy: name === "loyalty.internal.adjust" ? "owner" : "none",
-        idempotency: name === "loyalty.internal.adjust" ? "required" : "none",
+        input_schema: { type: 'object' },
+        risk_tier: name === 'loyalty.internal.adjust' ? 'high_write' : 'read',
+        approval_policy: name === 'loyalty.internal.adjust' ? 'owner' : 'none',
+        idempotency: name === 'loyalty.internal.adjust' ? 'required' : 'none',
         timeout_ms: 8_000,
       })),
     });
-    const execute: jest.MockedFunction<AiToolRuntimeService["execute"]> =
+    const execute: jest.MockedFunction<AiToolRuntimeService['execute']> =
       jest.fn();
     const runtime = {
       listTools,
       execute,
     };
-    const decide: jest.MockedFunction<AiCoreModelService["decide"]> = jest.fn();
+    const decide: jest.MockedFunction<AiCoreModelService['decide']> = jest.fn();
     const model = { decide };
     const auditLog = {
       log: jest.fn().mockResolvedValue(undefined),
@@ -6388,15 +6388,15 @@ describe("AiCoreService", () => {
     };
     const dashboardPreferences = {
       getAssistant: jest.fn().mockResolvedValue({
-        config: { enabled_capabilities: ["business_analytics"] },
+        config: { enabled_capabilities: ['business_analytics'] },
       }),
       updateAssistant: jest.fn((_: string, __: string, value: object) =>
         Promise.resolve({
           config: {
             enabled_capabilities:
-              "enabledCapabilities" in value
+              'enabledCapabilities' in value
                 ? (value.enabledCapabilities as string[])
-                : ["business_analytics"],
+                : ['business_analytics'],
           },
         }),
       ),
@@ -6411,7 +6411,7 @@ describe("AiCoreService", () => {
       resolveReadDate:
         scheduleDateOwner.resolveReadDate.bind(scheduleDateOwner),
       tryHandle: jest
-        .fn<StaffScheduleCommandService["tryHandle"]>()
+        .fn<StaffScheduleCommandService['tryHandle']>()
         .mockResolvedValue(null),
     };
     const memory = {
