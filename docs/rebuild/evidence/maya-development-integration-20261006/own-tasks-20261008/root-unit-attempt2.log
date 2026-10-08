@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       236 passed, 236 total
+Snapshots:   0 total
+Time:        0.893 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/own-tasks-presentation.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-task-list-20261008/root-unit-attempt2.json

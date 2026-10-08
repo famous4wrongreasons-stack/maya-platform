@@ -1,0 +1,23 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts
+  52:29  error  Replace `⏎··············.fn()⏎··············` with `.fn()`  prettier/prettier
+  55:15  error  Delete `··`                                                 prettier/prettier
+  56:15  error  Delete `··`                                                 prettier/prettier
+  57:1   error  Replace `················` with `··············`            prettier/prettier
+  58:1   error  Delete `··`                                                 prettier/prettier
+  59:1   error  Delete `··`                                                 prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/own-tasks-presentation.ts
+  121:141  error  'task.due_date' will use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+  137:92   error  'task.due_date' will use Object's default stringification format ('[object Object]') when stringified  @typescript-eslint/no-base-to-string
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/package5-wave1/operational-tasks.read.spec.ts
+  110:71  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+  177:9   error  Unsafe assignment of an `any` value         @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/test/widgets-live/own-tasks.probe-spec.ts
+  134:17  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+✖ 11 problems (11 errors, 0 warnings)
+  7 errors and 0 warnings potentially fixable with the `--fix` option.
+

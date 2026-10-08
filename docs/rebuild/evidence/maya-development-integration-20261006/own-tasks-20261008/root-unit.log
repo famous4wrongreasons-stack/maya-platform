@@ -1,0 +1,71 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › canonical own tasks [scripted selection only] › composes the source reply on web without another model turn or a write
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+    @@ -9,9 +9,13 @@
+          "tenantId": "tenant-a",
+          "userId": "owner-user",
+        },
+        "tasks.list",
+        Object {
+    +     "arguments": Object {
+            "period": "all",
+            "status": "all",
+    +     },
+    +     "idempotencyKey": "ai-chat-2b49d06092db049871799e749b8cc7f0d6d2ac13d73efaa0df4f91ba2f96d42f",
+    +     "surface": "web",
+        },
+      ]
+
+      3402 |         );
+      3403 |         expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+    > 3404 |         expect(mocks.runtime.execute.mock.calls[0]?.slice(0, 3)).toEqual([
+           |                                                                  ^
+      3405 |           user,
+      3406 |           'tasks.list',
+      3407 |           { status: 'all', period: 'all' },
+
+      at ai-tools/ai-core.service.spec.ts:3404:66
+
+  ● AiCoreService › canonical own tasks [scripted selection only] › composes the source reply on native without another model turn or a write
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+    @@ -9,9 +9,13 @@
+          "tenantId": "tenant-a",
+          "userId": "owner-user",
+        },
+        "tasks.list",
+        Object {
+    +     "arguments": Object {
+            "period": "all",
+            "status": "all",
+    +     },
+    +     "idempotencyKey": "ai-chat-2b49d06092db049871799e749b8cc7f0d6d2ac13d73efaa0df4f91ba2f96d42f",
+    +     "surface": "native",
+        },
+      ]
+
+      3402 |         );
+      3403 |         expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+    > 3404 |         expect(mocks.runtime.execute.mock.calls[0]?.slice(0, 3)).toEqual([
+           |                                                                  ^
+      3405 |           user,
+      3406 |           'tasks.list',
+      3407 |           { status: 'all', period: 'all' },
+
+      at ai-tools/ai-core.service.spec.ts:3404:66
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       2 failed, 234 passed, 236 total
+Snapshots:   0 total
+Time:        1.102 s
+Ran all test suites within paths "src/ai-tools/own-tasks-presentation.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-task-list-20261008/root-unit.json

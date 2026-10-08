@@ -1,0 +1,7 @@
+{
+  "completed_at_utc": "2026-10-08T08:41:27.377388+00:00",
+  "scope": "single synthetic targeted suite; no provider, network or database",
+  "command": "node --max-old-space-size=2048 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/ai-tool-extended-capabilities.spec.ts --json --outputFile=/tmp/maya-task-list-20261008/extended-unit.json",
+  "path": "src/ai-tools/ai-tool-extended-capabilities.spec.ts",
+  "sha256": "14e54b295d810a93a0c0f9664f53644cda68b027780f10f13d11c333b66716e7"
+}

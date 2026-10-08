@@ -1,0 +1,66 @@
+FAIL src/ai-tools/ai-tool-handler.service.spec.ts
+  ● AiToolHandlerService output minimization › canonical task list source › reads completed A23 state despite stale or archived Inbox (archived=false)
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+        "scope": "authenticated_user",
+        "tasks": Array [
+          Object {
+            "id": "task-inbox",
+    -       "status": "completed",
+    -       "task": "Проверить отмены",
+    +       "status": "active",
+    +       "task": "Stale projection text",
+          },
+        ],
+      }
+
+      72 |           ...principal, userId: 'staff-a', role: UserRole.STAFF,
+      73 |         }, { status: 'all', period: 'all' }, 'read-tasks');
+    > 74 |         expect(result).toMatchObject({
+         |                        ^
+      75 |           scope: 'authenticated_user',
+      76 |           tasks: [{ id: 'task-inbox', task: 'Проверить отмены', status: 'completed' }],
+      77 |         });
+
+      at ai-tools/ai-tool-handler.service.spec.ts:74:24
+
+  ● AiToolHandlerService output minimization › canonical task list source › reads completed A23 state despite stale or archived Inbox (archived=true)
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 7
+    + Received  + 1
+
+      Object {
+        "scope": "authenticated_user",
+    -   "tasks": Array [
+    -     Object {
+    -       "id": "task-inbox",
+    -       "status": "completed",
+    -       "task": "Проверить отмены",
+    -     },
+    -   ],
+    +   "tasks": Array [],
+      }
+
+      72 |           ...principal, userId: 'staff-a', role: UserRole.STAFF,
+      73 |         }, { status: 'all', period: 'all' }, 'read-tasks');
+    > 74 |         expect(result).toMatchObject({
+         |                        ^
+      75 |           scope: 'authenticated_user',
+      76 |           tasks: [{ id: 'task-inbox', task: 'Проверить отмены', status: 'completed' }],
+      77 |         });
+
+      at ai-tools/ai-tool-handler.service.spec.ts:74:24
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 50 skipped, 52 total
+Snapshots:   0 total
+Time:        0.596 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-handler.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-task-list-20261008/baseline-unit.json

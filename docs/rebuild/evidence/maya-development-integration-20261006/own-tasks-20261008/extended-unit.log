@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        0.506 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-extended-capabilities.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-task-list-20261008/extended-unit.json

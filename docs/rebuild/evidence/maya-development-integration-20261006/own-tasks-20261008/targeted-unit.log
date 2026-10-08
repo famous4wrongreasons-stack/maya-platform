@@ -1,0 +1,7 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       76 passed, 76 total
+Snapshots:   0 total
+Time:        0.843 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-handler.service.spec.ts", "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts", "src/package5-wave1/operational-tasks.read.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-task-list-20261008/targeted-unit.json

@@ -1,0 +1,32 @@
+{
+  "candidate": "1483b3342dfaea557b5999fb44f44e4b85edded5",
+  "browser": {
+    "count": 1850,
+    "mismatches": []
+  },
+  "local": {
+    "count": 11,
+    "mismatches": []
+  },
+  "review": {
+    "count": 14,
+    "mismatches": []
+  },
+  "browserSourceAggregateMatch": true,
+  "dependencies": {
+    "browserLauncher": true,
+    "browserSupervisor": true,
+    "browserFence": true,
+    "localLauncher": true,
+    "localSupervisor": true,
+    "localFence": true,
+    "localRunCommand": true,
+    "failedLauncher": true
+  },
+  "missingGitBlobs": [],
+  "allLocalAndBrowserGroupsClosedAbsent": true,
+  "clusterStopped": true,
+  "browserSourceAndHarnessUnchanged": true,
+  "localSourceAndHarnessUnchanged": true,
+  "pngCount": 7
+}

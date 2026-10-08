@@ -1,0 +1,260 @@
+{
+  "contract": "maya.own-tasks-local-gates/1",
+  "source": "0bf1488ff25c24f7c6386d2ecdcce73e85705b7a",
+  "tree": "e2126201f471164b302c16c0f0d3c27261aa9fa5",
+  "base": "0bf1488ff25c24f7c6386d2ecdcce73e85705b7a",
+  "started": "2026-10-08T08:53:49.993Z",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/own-tasks-presentation.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-extended-capabilities.spec.ts",
+        "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts",
+        "src/package5-wave1/operational-tasks.read.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-task-list-20261008/local-attempt3/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-typescript-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-tool-extended-capabilities.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.ts",
+        "src/package5-wave1/package5-wave1-canonical-cutover.service.ts",
+        "src/ai-tools/own-tasks-presentation.spec.ts",
+        "src/ai-tools/own-tasks-presentation.ts",
+        "src/package5-wave1/operational-tasks.read.spec.ts",
+        "src/package5-wave1/operational-tasks.read.ts",
+        "test/widgets-live/own-tasks.probe-spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "targeted-unit",
+      "elapsedMs": 1597
+    },
+    {
+      "name": "backend-types",
+      "elapsedMs": 6654
+    },
+    {
+      "name": "widgets-live-types",
+      "elapsedMs": 7801
+    },
+    {
+      "name": "changed-typescript-lint",
+      "elapsedMs": 5462
+    },
+    {
+      "name": "contract-types",
+      "elapsedMs": 3121
+    },
+    {
+      "name": "contract-check",
+      "elapsedMs": 772
+    },
+    {
+      "name": "k3",
+      "elapsedMs": 2820
+    }
+  ],
+  "failures": [],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "f60211501d35b8d9b47bcbdc6c3daebe084ee85fe1e3b04a1328bbf37cd32e1f",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "a3cf2b0f237f04b97ae47c5819b6a1bfcefae667370c186cc334d595f28038df",
+    "maya-saas-backend/src/ai-tools/ai-tool-extended-capabilities.spec.ts": "14e54b295d810a93a0c0f9664f53644cda68b027780f10f13d11c333b66716e7",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": "48e03a37d4ce6653fa6abe509c63b5e0403647b7d56ff8a01b36bea4732644c8",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "209fdd59c70b03fdb9dca5b3cf36cda3ba5c7bc0c1766073688c9b30a9fdcd8c",
+    "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts": "9b9dda93923067621b921cdc232b02fa5084f8d19b017b0b1f80f25d760e5799",
+    "maya-saas-backend/src/ai-tools/own-tasks-presentation.spec.ts": "fae3cdd01c099b4495c026bb63743c883ca139c16f3060ae48c4ecdc9080b080",
+    "maya-saas-backend/src/ai-tools/own-tasks-presentation.ts": "ba8082213bf2030aee9da1790ca4bac98960be0b95f837ba31f0f16654a24bfc",
+    "maya-saas-backend/src/package5-wave1/operational-tasks.read.spec.ts": "e0d6103fd79cfbdc01d7b6d9842ceeb809a46762c1b51dd55327fe9a6efe94a4",
+    "maya-saas-backend/src/package5-wave1/operational-tasks.read.ts": "93ebdf198a81a418d25eb31300081931f775aae41f8acc2bae7e7d763adb3cc1",
+    "maya-saas-backend/test/widgets-live/own-tasks.probe-spec.ts": "abab7bd2ac59dd7c0873a51ea482ffb11cffe33ebb43bd06c5515c97bc8be241"
+  },
+  "launcherSha256": "2bff70b239fcd5ea64746b19e3613e11f1029d7cdb2d4641554934de98a5eda9",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "targeted-unit": {
+      "detached": true,
+      "pid": 84585,
+      "pgid": 84585,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "backend-types": {
+      "detached": true,
+      "pid": 84618,
+      "pgid": 84618,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "widgets-live-types": {
+      "detached": true,
+      "pid": 84672,
+      "pgid": 84672,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "changed-typescript-lint": {
+      "detached": true,
+      "pid": 84747,
+      "pgid": 84747,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "contract-types": {
+      "detached": true,
+      "pid": 84789,
+      "pgid": 84789,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "contract-check": {
+      "detached": true,
+      "pid": 84817,
+      "pgid": 84817,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "k3": {
+      "detached": true,
+      "pid": 84835,
+      "pgid": 84835,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "0bf1488ff25c24f7c6386d2ecdcce73e85705b7a",
+  "treeAtEnd": "e2126201f471164b302c16c0f0d3c27261aa9fa5",
+  "dirtyAtEnd": "M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool-extended-capabilities.spec.ts\n M maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts\n M maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts\n?? maya-carrier-react/test/own-tasks-browser-guard.mjs\n?? maya-carrier-react/test/own-tasks-browser-guard.test.mjs\n?? maya-carrier-react/test/own-tasks-browser-probe.mjs\n?? maya-saas-backend/src/ai-tools/own-tasks-presentation.spec.ts\n?? maya-saas-backend/src/ai-tools/own-tasks-presentation.ts\n?? maya-saas-backend/src/package5-wave1/operational-tasks.read.spec.ts\n?? maya-saas-backend/src/package5-wave1/operational-tasks.read.ts\n?? maya-saas-backend/test/widgets-live/own-tasks.probe-spec.ts",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "2bff70b239fcd5ea64746b19e3613e11f1029d7cdb2d4641554934de98a5eda9",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T08:54:18.286Z"
+}

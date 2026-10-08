@@ -1,6 +1,6 @@
 # Что ещё не реализовано в согласованной MAYA — 2026-10-08
 
-Сверка кода на `fb65749b` с [YCLIENTS-first scope](../product/README.md), [картой завершения](MAYA-FINAL-COMPLETION-MAP.md) и [картой доменов](MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md). Ниже отсутствующие функции отделены от частично связанных путей и проверки уже существующего кода. Историческая пометка в карте не отменяет более новый checkpoint. Это не release certification.
+Сверка кода на `1483b334` с [YCLIENTS-first scope](../product/README.md), [картой завершения](MAYA-FINAL-COMPLETION-MAP.md) и [картой доменов](MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md). Ниже отсутствующие функции отделены от частично связанных путей и проверки уже существующего кода. Историческая пометка в карте не отменяет более новый checkpoint. Это не release certification.
 
 ## Отсутствующие функции
 
@@ -20,7 +20,7 @@
 - Приход существующего товара: adapter/AE/review есть, но selected-store/type permissions не допускаются до квалификации точного source contract. Это не отсутствие adapter. [Receipt checkpoint](MAYA-YCLIENTS-RECEIPT-ADAPTER-CHECKPOINT-20261007.md).
 - Выходной/перерыв/график: native backend есть; текущий закрытый профиль не допускает обязательный SETTINGS_DRAFT editor. [Открытое product choice](MAYA-DEVELOPMENT-PROFILE-CHOICE-20261006.md).
 - C9: Occupancy, Lifecycle, BI и ограниченный compound вызываются; произвольные многодоменные процессы не замкнуты. Зарегистрированный `C9ModelGateway.reason` без рабочего caller не означает отсутствие уже действующих agents/strategy.
-- Loyalty, сертификаты, абонементы, расходы, staff tasks/dossier/team имеют владельцев и отдельные READ/effects. Остались конкретные operation→source→role→confirmation связки; объявлять целые домены отсутствующими нельзя. Подтверждённый следующий дефект: `tasks.list` читает устаревшую inbox-проекцию вместо A23 состояния; отдельное исправление начато после topic-return checkpoint.
+- Loyalty, сертификаты, абонементы, расходы, staff tasks/dossier/team имеют владельцев и отдельные READ/effects. Остались конкретные operation→source→role→confirmation связки; объявлять целые домены отсутствующими нельзя. Конкретный дефект `tasks.list` теперь закрыт [A23 READ checkpoint](MAYA-OWN-TASKS-CHECKPOINT-20261008.md): текущие статусы читаются из OperationalWorkItem, история отдельно, 331 unit tests и 7 HTTP/current React checkpoints PASS. Это не полная приёмка task create/complete или всех соседних доменов.
 
 ## Не считать отсутствующими функциями
 
@@ -29,3 +29,7 @@ UNKNOWN → CONFIRMED, native reschedule UNKNOWN после app/PG restart и 14
 Real provider/model/voice/device acceptance, calibration, attribution, scale/SLO, RT8/package/ledger и production qualification — самостоятельные проверки и ограничения, не новые отсутствующие модули. Три PublicBooking FK требуют [решения о семантике замены parent](MAYA-PUBLIC-BOOKING-FK-CHOICE-20261006.md), а не нового booking owner.
 
 Metadata SSH уже получил разрешение на одну точную попытку; она завершилась transport timeout без inventory. Новое выполнение не предпринимается. Initial Client trust, scoped C10, schedule editor exception и PublicBooking FK остаются отдельными решениями. Goods F32b/F74b ранее одобрены. Новые внешние messaging ingress, другие CRM, телефония, самостоятельный content module и полная бухгалтерия отложены или исключены текущим scope. 300 unmapped API operations не означают 300 отсутствующих функций.
+
+## Следующий отсутствующий функциональный срез
+
+Для запроса владельца о привязке филиалов следующий отсутствующий срез — несколько одновременных компаний/филиалов YCLIENTS с явным выбором текущего источника. Нынешний `maya.crm-branch-binding/1` хранит одну точную пару `companyId + branchId`; не следует выдавать его локальную проверку за multi-company routing. Следующий bounded preflight должен определить хранение нескольких точных связей, выбор разрешённого источника и сохранение существующей одиночной связи. Новая схема/retention не одобрены исходной задачей: если они понадобятся, нужен конкретный вариант для решения владельца. Это не блокирует чтение исходников и подготовку локального среза без production вызовов и не требует повторного разрешения на уже работающую одиночную привязку.

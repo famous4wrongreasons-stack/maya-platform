@@ -1,0 +1,28 @@
+{
+  "scope": "synthetic unit tests only; no HTTP, PostgreSQL, provider, model or browser run by this agent",
+  "baseline_runtime_head": "fb65749bbfb12582e8043ea4864a6d91bdf8c2b5",
+  "baseline_command": "node --max-old-space-size=2048 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/ai-tool-handler.service.spec.ts --testNamePattern='canonical task list source' --json --outputFile=/tmp/maya-task-list-20261008/baseline-unit.json",
+  "targeted_command": "node --max-old-space-size=2048 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/ai-tool-handler.service.spec.ts src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts src/package5-wave1/operational-tasks.read.spec.ts --json --outputFile=/tmp/maya-task-list-20261008/targeted-unit.json",
+  "candidate_sources": [
+    {
+      "path": "src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "209fdd59c70b03fdb9dca5b3cf36cda3ba5c7bc0c1766073688c9b30a9fdcd8c"
+    },
+    {
+      "path": "src/ai-tools/ai-tool-handler.service.spec.ts",
+      "sha256": "c7b9f91887c6138b2f091f2df27f2c8c1ca416811bbccad91ebccc4c2d52c4e9"
+    },
+    {
+      "path": "src/package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sha256": "9b9dda93923067621b921cdc232b02fa5084f8d19b017b0b1f80f25d760e5799"
+    },
+    {
+      "path": "src/package5-wave1/operational-tasks.read.ts",
+      "sha256": "93ebdf198a81a418d25eb31300081931f775aae41f8acc2bae7e7d763adb3cc1"
+    },
+    {
+      "path": "src/package5-wave1/operational-tasks.read.spec.ts",
+      "sha256": "6fd82375842da57bb37cb3bd710503ec20054017f55ff594b005f78a5e34a612"
+    }
+  ]
+}

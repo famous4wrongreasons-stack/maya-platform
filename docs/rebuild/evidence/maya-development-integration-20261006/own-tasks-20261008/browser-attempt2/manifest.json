@@ -1,0 +1,87 @@
+{
+  "contract": "maya.own-tasks-owned-cluster/1",
+  "mode": "current-react-http-postgres-scripted-model",
+  "candidateCommit": "1483b3342dfaea557b5999fb44f44e4b85edded5",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "5733d32c51aa24abc88da7a02f8d9ec6796a5dcabfb3b1f71cefc9a0aa0ff65e",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceSha256": "c6713baa68d10f1de690c5a1314f1704c540fd5259a1a241254b6b707bc49ed6",
+  "database": "maya_widget_gate_proof_c9occ_be524ae885ec",
+  "port": 60771,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-own-tasks-J9Vwdx/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "shell-runtime-build",
+    "react-web-build",
+    "browser"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "FINITE_LOCAL_HTTP_REACT_SCRIPTED_SELECTION_ONLY",
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 85867,
+      "pgid": 85867,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "shell-runtime-build": {
+      "detached": true,
+      "pid": 85880,
+      "pgid": 85880,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 85933,
+      "pgid": 85933,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "browser": {
+      "detached": true,
+      "pid": 85974,
+      "pgid": 85974,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "commitAtEnd": "1483b3342dfaea557b5999fb44f44e4b85edded5",
+  "sourceUnchanged": true,
+  "harnessUnchanged": true,
+  "clusterStopped": true
+}

@@ -1,0 +1,104 @@
+{
+  "contract": "maya.own-tasks-http-react-proof/1",
+  "status": "passed",
+  "scriptedModel": true,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "setup": "ACTUAL_A23_HTTP_CREATE_COMPLETE_PLUS_EXPLICIT_SYNTHETIC_INBOX_DIVERGENCE",
+  "missingInboxSeam": "SYNTHETIC_PROJECTION_FAILURE_AFTER_REAL_CANONICAL_CREATE",
+  "businessEffectsScope": "READ_PHASE_AFTER_SETUP_BASELINE",
+  "restartClaim": false,
+  "businessSnapshotSha256": "e6611e4fc95b198268d56f6cfad51faed8b8ddb729da1929e9314ebf7c218e79",
+  "http-all": {
+    "count": 5,
+    "historicalCount": 2,
+    "canonicalStatuses": [
+      "active",
+      "active",
+      "active",
+      "completed",
+      "completed"
+    ],
+    "noForeignAssigneeOrTenant": true
+  },
+  "http-active": {
+    "count": 3,
+    "historicalCount": 2,
+    "canonicalStatuses": [
+      "active",
+      "active",
+      "active"
+    ],
+    "noForeignAssigneeOrTenant": true
+  },
+  "http-today": {
+    "count": 2,
+    "historicalCount": 2,
+    "canonicalStatuses": [
+      "active",
+      "completed"
+    ],
+    "noForeignAssigneeOrTenant": true
+  },
+  "http-overdue": {
+    "count": 2,
+    "historicalCount": 2,
+    "canonicalStatuses": [
+      "active",
+      "completed"
+    ],
+    "noForeignAssigneeOrTenant": true
+  },
+  "history": {
+    "modelCalls": 1,
+    "exactC9TaskReadReceipts": 1,
+    "businessSnapshotUnchanged": true
+  },
+  "active": {
+    "modelCalls": 2,
+    "exactC9TaskReadReceipts": 2,
+    "businessSnapshotUnchanged": true
+  },
+  "all": {
+    "modelCalls": 3,
+    "exactC9TaskReadReceipts": 3,
+    "businessSnapshotUnchanged": true
+  },
+  "today": {
+    "modelCalls": 4,
+    "exactC9TaskReadReceipts": 4,
+    "businessSnapshotUnchanged": true
+  },
+  "overdue": {
+    "modelCalls": 5,
+    "exactC9TaskReadReceipts": 5,
+    "businessSnapshotUnchanged": true
+  },
+  "reload": {
+    "modelCalls": 5,
+    "exactC9TaskReadReceipts": 5,
+    "businessSnapshotUnchanged": true
+  },
+  "revoked": {
+    "modelCalls": 5,
+    "exactC9TaskReadReceipts": 5,
+    "businessSnapshotUnchanged": true,
+    "status": 401
+  },
+  "businessEffectsAfterSetup": 0,
+  "providerFetches": 0,
+  "modelCalls": 5,
+  "realModelCalls": 0,
+  "unexpected": [],
+  "checkpoints": [
+    "history",
+    "active",
+    "all",
+    "today",
+    "overdue",
+    "reload",
+    "revoked"
+  ],
+  "setupActionExecutions": 15,
+  "devicePushTokens": 0
+}
