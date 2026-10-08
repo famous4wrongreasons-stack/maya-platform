@@ -1,0 +1,112 @@
+{
+  "contract": "maya.goods-unit-label-regression/1",
+  "status": "passed",
+  "base": "a80018042f1774a2923ef63d2fded2015765d860",
+  "sourceHashes": {
+    "maya-carrier-react/src/chat/GoodsPhotoPanel.tsx": "63c16e72d8de992824b9b675bb2f7442f453f8b0317eb14decbaeb66259fbf2f",
+    "maya-carrier-react/test/goods-photo.test.mjs": "3a4699ad9de9bf843e7496cbff799bc92a663c7fc3a1549fa64860c6121f191b",
+    "maya-chat-shell/src/shell/goods-photo.ts": "d2d33047c51629a3428b3555a66948f5366e0d30cd3a5fa93094657e5817e717",
+    "maya-chat-shell/src/net/goods-photo.ts": "bda7cd1cfcb27edeedcb377afb04b4a7c70620a53921e9a4d7c04c0b7fab0e71"
+  },
+  "completed": [
+    "carrier-photo",
+    "shell-photo",
+    "carrier-types",
+    "carrier-build"
+  ],
+  "commands": [
+    {
+      "name": "carrier-photo",
+      "args": [
+        "--test",
+        "test/goods-photo.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 120000
+    },
+    {
+      "name": "shell-photo",
+      "args": [
+        "--test",
+        "test/goods-photo.test.mjs",
+        "test/goods-photo-net.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 120000
+    },
+    {
+      "name": "carrier-types",
+      "args": [
+        "build.mjs",
+        "--typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 120000
+    },
+    {
+      "name": "carrier-build",
+      "args": [
+        "build.mjs",
+        "--target=web"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react",
+      "command": "/usr/local/bin/node",
+      "timeoutMs": 120000
+    }
+  ],
+  "qualification": "Synthetic presentation/headless tests only; no OCR/native/provider/backend/PG/HTTP acceptance",
+  "groups": {
+    "carrier-photo": {
+      "detached": true,
+      "pid": 59082,
+      "pgid": 59082,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "shell-photo": {
+      "detached": true,
+      "pid": 59087,
+      "pgid": 59087,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "carrier-types": {
+      "detached": true,
+      "pid": 59090,
+      "pgid": 59090,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "carrier-build": {
+      "detached": true,
+      "pid": 59117,
+      "pgid": 59117,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceUnchanged": true
+}

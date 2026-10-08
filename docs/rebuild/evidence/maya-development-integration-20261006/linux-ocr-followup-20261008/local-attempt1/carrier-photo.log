@@ -1,0 +1,20 @@
+✔ unconfigured recognition is explicit and rendering dispatches nothing (3.57075ms)
+✔ high confidence or sale price cannot fill reviewed receipt values (0.936708ms)
+✔ category cannot be selected as an existing item; selected item requires an explicit gesture (0.419583ms)
+✔ a labeled write-off unit stays selectable when the same sale unit has no label (0.849959ms)
+✔ a unit with no catalog label is not inferred from OCR text or another identifier (0.531167ms)
+✔ uncertain preparation blocks repeat dispatch but permits clearing ephemeral fields (0.595167ms)
+✔ failed source is never shown as an empty successful search (0.245167ms)
+✔ known completed or held review has no preparation or correction controls (1.409792ms)
+✔ ambiguous total keeps both extracted fields separate without deriving a unit cost (0.278875ms)
+✔ picker clears DOM filename and FileList reference before passing a single file (0.1855ms)
+✔ OCR busy and failed states describe extraction rather than YCLIENTS and never dispatch on render (0.356833ms)
+✔ unsupported table explains the exact five-header scope without inventing extraction or a retry (0.202666ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.434416

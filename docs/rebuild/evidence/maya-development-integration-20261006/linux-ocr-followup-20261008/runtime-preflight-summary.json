@@ -1,0 +1,82 @@
+{
+  "contract": "maya.linux-runtime-read-only-summary/1",
+  "observedAt": "2026-10-08T14:03:20.879276+00:00",
+  "runtimeExecutables": {
+    "docker": null,
+    "podman": null,
+    "colima": null,
+    "lima": null,
+    "limactl": null,
+    "nerdctl": null,
+    "container": null,
+    "qemu-system-aarch64": null,
+    "multipass": null,
+    "tart": null,
+    "orb": null,
+    "orbctl": null,
+    "prlctl": null,
+    "vmrun": null
+  },
+  "standardPaths": {
+    "/Applications/Docker.app": false,
+    "/Applications/Podman Desktop.app": false,
+    "/Applications/OrbStack.app": false,
+    "/Applications/Rancher Desktop.app": false,
+    "/Applications/UTM.app": false,
+    "/Applications/VMware Fusion.app": false,
+    "/Applications/Parallels Desktop.app": false,
+    "/opt/homebrew/bin/docker": false,
+    "/opt/homebrew/bin/podman": false,
+    "/usr/local/bin/docker": false,
+    "/usr/local/bin/podman": false,
+    "/var/run/docker.sock": false,
+    "/Users/stanislavmosin/.docker/run/docker.sock": false,
+    "/Users/stanislavmosin/.colima/default/docker.sock": false,
+    "/Users/stanislavmosin/.lima": false
+  },
+  "additionalLocations": {
+    "/Users/stanislavmosin/Applications/Docker.app": false,
+    "/Users/stanislavmosin/Applications/OrbStack.app": false,
+    "/Users/stanislavmosin/Applications/UTM.app": false,
+    "/Users/stanislavmosin/Applications/docker": false,
+    "/Users/stanislavmosin/Applications/podman-desktop": false,
+    "/Users/stanislavmosin/Applications/orbstack": false,
+    "/Users/stanislavmosin/Applications/utm": false,
+    "/Users/stanislavmosin/Applications/colima": false,
+    "/opt/homebrew/Caskroom/Docker.app": false,
+    "/opt/homebrew/Caskroom/OrbStack.app": false,
+    "/opt/homebrew/Caskroom/UTM.app": false,
+    "/opt/homebrew/Caskroom/docker": false,
+    "/opt/homebrew/Caskroom/podman-desktop": false,
+    "/opt/homebrew/Caskroom/orbstack": false,
+    "/opt/homebrew/Caskroom/utm": false,
+    "/opt/homebrew/Caskroom/colima": false
+  },
+  "runtimeProcesses": [],
+  "hardware": {
+    "exitCode": 0,
+    "stdout": "hw.memsize: 137438953472\nhw.logicalcpu: 16\nhw.physicalcpu: 16\n",
+    "stderr": ""
+  },
+  "load": {
+    "exitCode": 0,
+    "stdout": "17:01  1 user, load averages: 2.85 4.02 3.16\n",
+    "stderr": ""
+  },
+  "memory": {
+    "exitCode": 0,
+    "stdout": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                  3169450.\nPages active:                                1444920.\nPages inactive:                              2560329.\nPages speculative:                             49943.\nPages throttled:                                   0.\nPages wired down:                             487915.\nPages purgeable:                               88986.\n\"Translation faults\":                    23529818918.\nPages copy-on-write:                      1241251400.\nPages zero filled:                       28975418670.\nPages reactivated:                          26801227.\nPages purged:                               29404307.\nFile-backed pages:                           1657710.\nAnonymous pages:                             2397482.\nPages stored in compressor:                  1553340.\nPages occupied by compressor:                 551835.\nDecompressions:                             57702548.\nCompressions:                               52723534.\nPageins:                                    66402167.\nPageouts:                                      67323.\nSwapins:                                     2270355.\nSwapouts:                                    3163715.\n",
+    "stderr": ""
+  },
+  "disk": {
+    "exitCode": 0,
+    "stdout": "Filesystem   1024-blocks       Used  Available Capacity  iused       ifree %iused  Mounted on\n/dev/disk3s5  7811085600 3724609708 4056090920    48% 11140795 40560909200    0%   /System/Volumes/Data\n",
+    "stderr": ""
+  },
+  "otherPostgresProcessCount": 24,
+  "changesToForeignProcesses": 0,
+  "processReadQualification": "ps name-only wide read, no argv; initial narrow output was truncated and superseded. Irrelevant application names not retained.",
+  "permissionQualification": "Initial sandbox ps/sysctl refused; tool allowed read-only diagnostic escalation. No host configuration/permission/network changes.",
+  "linuxRuntimeInstalled": false,
+  "linuxExecuted": false
+}
