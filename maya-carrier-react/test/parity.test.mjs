@@ -27,7 +27,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(HERE, '..', '..', 'maya-chat-shell', 'dev', 'fixtures', 'envelopes');
 const INDEX = JSON.parse(fs.readFileSync(path.join(FIXTURES, 'index.json'), 'utf8'));
 
-const { resultOf, markupOf } = await import(pathToFileURL(path.join(HERE, '.bundle.mjs')).href);
+const { resultOf, markupOf, receiptRefreshMarkup, project, render } = await import(pathToFileURL(path.join(HERE, '.bundle.mjs')).href);
 
 const envelopeOf = (f) => JSON.parse(fs.readFileSync(path.join(FIXTURES, f.file), 'utf8'));
 
@@ -225,6 +225,67 @@ test('M7 — a terminal card is drawn whole, marked terminal, and carries no con
   // Whole, not collapsed: the heading AND the server's prose are still there.
   assert.ok(textOf(facts.article).includes(result.textEquivalent.headline));
   assert.ok(textOf(facts.article).length > result.textEquivalent.headline.length, 'more than the headline');
+});
+
+// A synthetic consumed renderer view checks presentation only. The runtime's
+// receipt qualification and exact READ correlation have their own shell tests.
+const spentBooking = () => {
+  const fixture = INDEX.fixtures.find(row => row.id === 'kind-booking-confirmation');
+  assert.ok(fixture);
+  const view = project(envelopeOf(fixture));
+  const result = render({
+    view: { ...view, lifecycle: { ...view.lifecycle, state: 'CONSUMED' } },
+    verdict: 'valid', density: view.presentation.density,
+    env: { reduced_motion: false, forced_colors: false, text_scale: 1, pointer: 'fine', keyboard_only_hint: false, caption_preference: false },
+  });
+  assert.equal(result.readingOrder.length, 0);
+  return { id: 'local-spent-booking-item', result, display: 'terminal', pending: null, sentence: 'booking_unconfirmed' };
+};
+const refreshButton = markup => findAll(parse(markup), el => el.tag === 'button')[0] ?? null;
+
+test('L27 React receipt control requires both runtime projection and callback', () => {
+  const item = spentBooking();
+  for (const receiptRefresh of [undefined, null]) {
+    assert.equal(refreshButton(receiptRefreshMarkup({ ...item, receiptRefresh })), null);
+  }
+  assert.equal(refreshButton(receiptRefreshMarkup({ ...item, receiptRefresh: 'available' }, false)), null);
+  assert.equal(refreshButton(receiptRefreshMarkup({ ...item, receiptRefresh: 'unavailable' }, false)), null);
+});
+
+test('L27 React receipt READ is separate chrome; spent article and result text remain unchanged', () => {
+  const item = spentBooking();
+  const before = markupOf(item);
+  for (const receiptRefresh of ['available', 'pending', 'unavailable']) {
+    const markup = receiptRefreshMarkup({ ...item, receiptRefresh });
+    const root = parse(markup), facts = factsOf(markup);
+    assert.deepEqual(facts.article, factsOf(before).article, 'No widget content or sealed controls rewritten');
+    assert.deepEqual(facts.drawnRefs, [], 'Receipt READ has no widget intent ref');
+    assert.deepEqual(facts.sinks, []);
+    const originalSentence = findAll(parse(before), el => el.attrs.class === 'widget-sentence')[0];
+    assert.deepEqual(findAll(root, el => el.attrs.class === 'widget-sentence')[0], originalSentence);
+    const button = refreshButton(markup); assert.ok(button);
+    assert.equal(button.attrs.type, 'button');
+    for (const key of ['data-ref', 'data-widget-id', 'data-token', 'formaction']) assert.equal(key in button.attrs, false);
+    assert.equal(findAll(facts.article, el => el.tag === 'button').length, 0, 'Spent card stays static');
+    assert.equal(textOf(root).includes('Запись подтверждена.'), false, 'The READ button invents no result');
+  }
+});
+
+test('L27 React pending disables only the receipt READ; unavailable offers a neutral manual retry', () => {
+  const item = spentBooking();
+  const available = refreshButton(receiptRefreshMarkup({ ...item, receiptRefresh: 'available' }));
+  assert.equal(textOf(available), 'Проверить результат');
+  assert.equal('disabled' in available.attrs, false);
+  const pendingMarkup = receiptRefreshMarkup({ ...item, receiptRefresh: 'pending' });
+  const pending = refreshButton(pendingMarkup);
+  assert.equal(textOf(pending), 'Проверяем результат…');
+  assert.equal('disabled' in pending.attrs, true);
+  assert.equal(pending.attrs['aria-busy'], 'true');
+  const unavailableMarkup = receiptRefreshMarkup({ ...item, receiptRefresh: 'unavailable' });
+  const unavailable = refreshButton(unavailableMarkup);
+  assert.equal(textOf(unavailable), 'Проверить результат');
+  assert.equal('disabled' in unavailable.attrs, false);
+  assert.equal(textOf(findAll(parse(unavailableMarkup), el => el.attrs.role === 'status')[0]), 'Не удалось проверить результат. Попробуйте ещё раз.');
 });
 
 // ── 3. the checker, proved in the other direction ──────────────────────────────────────────────

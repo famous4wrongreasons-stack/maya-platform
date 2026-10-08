@@ -292,6 +292,30 @@ async function main() {
       }
       if (scenario.key !== 'success') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
       assert.ok(await page.waitFor(`!Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`));
+      // Explicit shell receipt READ after the action is spent. No old control,
+      // token, capability or retry can be restored by this affordance.
+      const intentCount = requests(page, '/widgets/intent').length;
+      const chatCount = requests(page, '/ai/chat').length;
+      const receiptButton = `Q.all('button').find(el => Q.visible(el) && el.textContent.trim() === 'Проверить результат')`;
+      assert.ok(await page.waitFor(`!!(${receiptButton})`));
+      await page.send('Network.emulateNetworkConditions', { offline:true, latency:0, downloadThroughput:-1, uploadThroughput:-1 });
+      assert.equal(await page.click(receiptButton), true);
+      assert.ok(await page.waitFor('document.body.innerText.includes("Не удалось проверить результат. Попробуйте ещё раз.")'));
+      await page.send('Network.emulateNetworkConditions', { offline:false, latency:0, downloadThroughput:-1, uploadThroughput:-1 });
+      const beforeRead = requests(page, '/widgets/resolve').length;
+      assert.equal(await page.click(receiptButton), true);
+      await until(() => requests(page, '/widgets/resolve').slice(beforeRead).some(row => row.finishedAt && row.status === 200), 'manual current receipt READ');
+      assert.ok(await page.waitFor(`!!(${receiptButton}) && !(${receiptButton}).disabled`));
+      const repeated = requests(page, '/widgets/resolve').length;
+      assert.equal(await page.click(receiptButton), true);
+      await until(() => requests(page, '/widgets/resolve').slice(repeated).some(row => row.finishedAt && row.status === 200), 'repeat receipt READ');
+      assert.ok(await page.waitFor(`!!(${receiptButton}) && !(${receiptButton}).disabled`));
+      assert.equal(requests(page, '/widgets/intent').length, intentCount);
+      assert.equal(requests(page, '/ai/chat').length, chatCount);
+      assert.equal(await page.eval(`Q.all('button[data-ref]').filter(el => Q.visible(el) && !el.disabled).some(el => el.dataset.ref === ${JSON.stringify('intent:' + commit.intent_ref)})`), false);
+      if (scenario.key === 'success') assert.equal(await page.eval('document.body.innerText.split("Запись подтверждена.").length - 1'), 1);
+      if (scenario.key === 'unknown') assert.equal(await page.eval('document.body.innerText.includes("Запись подтверждена.")'), false);
+      report.observations[scenario.key + 'ReceiptRefresh'] = {offlineRefusal:true, currentReceiptReads:2, automaticRequests:0, newCommit:0, newChat:0, oldControlRestored:false};
       report.observations[scenario.key + 'Result'] = publicResult(result);
       await capture(page, scenario.key + '-result'); await checkpoint(scenario.key + '-result', { result: publicResult(result) });
       reloads.push({ page, scenario, nextLoginAt, commitRef: 'intent:' + commit.intent_ref });

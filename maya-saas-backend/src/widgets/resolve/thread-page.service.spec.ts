@@ -189,7 +189,6 @@ describe('P-RESOLVE principal thread page', () => {
       { outcome: 'CONFIRMED', text: 'x', action_receipt_ref: '  ' },
       { outcome: 'SUBMITTED', text: 'x', action_receipt_ref: 'ae-receipt' },
       { outcome: 'SUBMITTED', text: 'x' },
-      { outcome: 'CONFIRMED', text: 12, action_receipt_ref: 'ae-receipt' },
     ];
     findMany.mockResolvedValue([
       {
@@ -198,8 +197,84 @@ describe('P-RESOLVE principal thread page', () => {
         renderReceipts: [{ emittedEnvelopeJson: envelope }],
       },
     ] as never);
-    await expect(service.read({ limit: 20 })).resolves.toEqual([
-      { envelope, terminal_lines: valid, reread_intent: null },
+    const page = await service.read({ limit: 20 });
+    expect(page).toHaveLength(1);
+    expect(
+      page[0].terminal_lines.map(({ outcome, action_receipt_ref }) => ({
+        outcome,
+        action_receipt_ref,
+      })),
+    ).toEqual(
+      valid.map(({ outcome, action_receipt_ref }) => ({
+        outcome,
+        action_receipt_ref,
+      })),
+    );
+    expect(JSON.stringify(page)).not.toContain('Server line');
+    expect(page[0].terminal_lines.map((line) => line.text)).toEqual([
+      'Результат пока не подтверждён. Не отправляйте повторно.',
+      'Запись не подтверждена.',
+      'Срок действия предложения истёк.',
+      'Предложение заменено новой версией.',
+      'Предложение закрыто.',
+      'Предложение доставлено без возможности действия.',
+      'Запись подтверждена.',
     ]);
+  });
+  it('projects the immutable AE COMMIT refusal, never legacy prose or a CONTROL adjudication', async () => {
+    const { service, findMany } = make();
+    findMany.mockResolvedValue([
+      {
+        terminalLinesJson: [
+          {
+            outcome: 'NOT_CONFIRMED',
+            action_receipt_ref: null,
+            text: 'PRIVATE LEGACY NARRATIVE',
+            extra: 'PRIVATE EXTRA',
+          },
+        ],
+        intentRecords: [
+          {
+            intentTokenHash: 'a'.repeat(64),
+            effect: 'CONTROL',
+            capabilitySpace: 'CONTROL',
+            receipts: [
+              {
+                outcome: 'REFUSED',
+                refusalCode: 'NOT_COLLECTED',
+                actionReceiptRef: null,
+              },
+            ],
+          },
+          {
+            intentTokenHash: 'b'.repeat(64),
+            effect: 'COMMIT',
+            capabilitySpace: 'AE',
+            receipts: [
+              {
+                outcome: 'REFUSED',
+                refusalCode: 'handle_stale',
+                actionReceiptRef: null,
+              },
+            ],
+          },
+        ],
+        renderReceipts: [{ emittedEnvelopeJson: envelope }],
+      },
+    ] as never);
+    const page = await service.read({ limit: 20 });
+    expect(page[0].terminal_lines).toEqual([
+      {
+        outcome: 'NOT_CONFIRMED',
+        action_receipt_ref: null,
+        text: 'Данные изменились с момента показа. Откройте актуальную версию.',
+      },
+    ]);
+    expect(JSON.stringify(page)).not.toContain('PRIVATE');
+    const [query] = findMany.mock.calls[0] as [{ where: unknown }];
+    expect(query.where).toMatchObject({
+      erasedAt: null,
+      turn: { erasedAt: null, principalProofHash: principal.proofHash },
+    });
   });
 });

@@ -239,7 +239,7 @@ test('the runtime: one widget port for the DOM, a real detail at SHEET density, 
     newAbort: () => new AbortController(),
     submission: { submit: () => ((submits += 1), Promise.resolve({ status: 'unavailable' })) },
   });
-  assert.deepEqual(Object.keys(runtime.widgetPort).sort(), ['activate', 'closeDetail', 'navigate', 'rendered', 'subscribe', 'view']);
+  assert.deepEqual(Object.keys(runtime.widgetPort).sort(), ['activate', 'closeDetail', 'navigate', 'refreshBookingReceipt', 'rendered', 'subscribe', 'view']);
   assert.deepEqual(runtime.landFragment(), { landed: 'route', route: 'shell.privacy' });
   assert.equal(runtime.widgetPort.view().primary, 'shell.privacy');
 

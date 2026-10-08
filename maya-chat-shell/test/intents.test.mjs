@@ -63,7 +63,7 @@ const setup = (options = {}) => {
   };
   const runtime = createShellRuntime({
     transport: {
-      resolveWidgets: request => options.observe ? options.observe(request) : Promise.resolve({ ok: false, failure: { reason: 'forbidden' } }),
+      resolveWidgets: (request, signal) => options.receiptRead ? options.receiptRead(request, signal) : options.observe ? options.observe(request) : Promise.resolve({ ok: false, failure: { reason: 'forbidden' } }),
       chat: (body, signal) => ((counts.chat += 1), (options.chat ?? (() => new Promise(() => undefined)))(body, signal)),
       transcribe: () => ((counts.transcribe += 1), new Promise(() => undefined)),
     },
@@ -1133,10 +1133,8 @@ test('NS-1: ordinary ACCEPTED responses are unchanged — the reread still settl
 
 // ── L27: one canonical terminal outcome, at most one visible terminal outcome ──────────────────
 //
-// `createLiveSubmission` re-reads the thread page on every settled submission, and that page carries
-// the widget's CURRENT terminal-line SET, not a delta. So every later settled submission on the same
-// widget hands the runtime lines the conversation is already showing: press Confirm, then Dismiss,
-// and the confirmation is written twice.
+// COMMIT burns every control even if its result is lost. A later explicit bounded READ carries the
+// current terminal set; it must publish each canonical outcome once without resubmitting anything.
 //
 // The rule these proofs pin is about canonical identity, never display text. A terminal line's
 // `action_receipt_ref` is present iff its outcome is CONFIRMED (widget-contract §4.2) and it is the
@@ -1151,20 +1149,10 @@ const SUBMITTED_TEXT = 'Запрос принят. Подтверждение о
 const confirmed = (ref = CONFIRMED_REF, text = CONFIRMED_TEXT) => ({ outcome: 'CONFIRMED', text, action_receipt_ref: ref });
 const submitted = (text = SUBMITTED_TEXT) => ({ outcome: 'SUBMITTED', text, action_receipt_ref: null });
 
-/**
- * The certified booking confirmation, whose escape is the canonical CONTROL dismiss.
- *
- * The fixture's own `i9` is the NONE escape, which sends nothing. The card the owner presses carries
- * the submitting escape: effect CONTROL, the closed capability `CONTROL:control.widget.dismiss`, its
- * own minted token. That is the control whose reply re-reads the thread page.
- */
+/** Certified PWA confirmation; its NONE escape is never rewritten into tokened CONTROL. */
 const terminalCard = (widgetId) => {
   const card = envelope('kind-booking-confirmation');
   if (widgetId !== undefined) card.widget_id = widgetId;
-  const escape = card.intents.find((i) => i.intent_ref === 'i9');
-  escape.effect = 'CONTROL';
-  escape.intent_token = 'q4Lm2Xv8-TbN7eR1_wY6pK0sHgZcD3fA';
-  escape.capability = { space: 'CONTROL', key: 'control.widget.dismiss' };
   return reseal(card);
 };
 
@@ -1173,8 +1161,17 @@ const terminalStore = () => {
   const lines = new Map();
   const envelopes = new Map();
   let rereads = 0;
+  const read = async (request) => {
+    assert.deepEqual(request, { thread_page: { limit: 20 } });
+    rereads += 1;
+    return { ok: true, value: {
+      tenant_bound: true,
+      widgets: [...envelopes.entries()].map(([id, env]) => ({ envelope: env, terminal_lines: (lines.get(id) ?? []).map((l) => ({ ...l })), reread_intent: null })),
+    } };
+  };
   return {
     lines,
+    read,
     rereads: () => rereads,
     put(env, next) {
       envelopes.set(env.widget_id, env);
@@ -1183,13 +1180,7 @@ const terminalStore = () => {
     port(over = {}) {
       return createLiveSubmission({
         widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED', ...over } }),
-        resolveWidgets: async () => (rereads += 1, {
-          ok: true,
-          value: {
-            tenant_bound: true,
-            widgets: [...envelopes.entries()].map(([id, env]) => ({ envelope: env, terminal_lines: (lines.get(id) ?? []).map((l) => ({ ...l })), reread_intent: null })),
-          },
-        }),
+        resolveWidgets: read,
       });
     },
   };
@@ -1200,7 +1191,7 @@ const serverLines = (s) => s.items().filter((i) => i.kind === 'assistant').map((
 test('historical booking outcomes share live receipt dedupe without holding controls or tokens', async () => {
   const card = terminalCard(), store = terminalStore();
   store.put(card, [confirmed()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const pending = { outcome: 'SUBMITTED', text: 'Запрос принят. Подтверждение ожидается.', action_receipt_ref: null };
   const history = [
     { widgetId: card.widget_id, lines: [confirmed(), confirmed()] },
@@ -1222,12 +1213,12 @@ test('historical booking outcomes share live receipt dedupe without holding cont
   s.runtime.dispose();
 });
 
-test('L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one receipt and ONE visible terminal outcome', async () => {
+test('L27: COMMIT → CONFIRMED → explicit READ leaves one submission, one receipt and one visible outcome', async () => {
   const card = terminalCard();
   const store = terminalStore();
-  // The COMMIT is what writes the booking and the receipt; the escape only adjudicates itself.
+  // Counting double only: exactly one COMMIT reaches it, no Dismiss/resend after the receipt.
   const business = { bookings: 0, receipts: [] };
-  const s = setup({ submission: createLiveSubmission({
+  const s = setup({ receiptRead: store.read, submission: createLiveSubmission({
     widgetIntent: async (submission) => {
       if (submission.intent_token === card.intents[0].intent_token) {
         business.bookings += 1;
@@ -1244,43 +1235,37 @@ test('L27: COMMIT → CONFIRMED → Dismiss leaves one business effect, one rece
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'the confirmation is written once');
   const afterCommit = s.runtime.widgets.counters();
 
-  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i9'), { outcome: 'dismissed' }, 'Dismiss');
-  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'and is NOT written again by the dismiss');
-
-  // Dismiss still does everything it did: it is submitted, it is accepted, it moves the widget's
-  // lifecycle, and it leaves no silent outcome. Only the re-append is gone.
-  const afterDismiss = s.runtime.widgets.counters();
-  assert.equal(afterDismiss.submissions - afterCommit.submissions, 1, 'the dismiss still reaches the server');
-  assert.equal(afterDismiss.stateChanges - afterCommit.stateChanges, 1, 'the dismiss still moves lifecycle state');
-  assert.equal(afterDismiss.sentences, 0, 'and leaves no silent outcome');
-  assert.equal(afterDismiss.activations - (afterDismiss.stateChanges + afterDismiss.sentences), 0, 'D9 still balances');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'the READ does not write the outcome again');
+  assert.deepEqual(s.runtime.widgets.counters(), afterCommit, 'READ is not activation or submission');
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i9'), { outcome: 'ignored', reason: 'not_drawn' });
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'ignored', reason: 'not_drawn' });
   assert.equal(s.item(itemId).display, 'terminal');
+  assert.equal(s.item(itemId).receiptRefresh, 'available');
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
 
   // These count what the shell SENT, which is all a shell-side proof can honestly establish: the
-  // booking and the receipt rows are the double's own. That one COMMIT reaches the Action Engine and
-  // that the escape's receipt adjudicates only itself is the backend's own executed evidence
-  // (WIDGET-GATE-FBE2E-CLOSURE.md §7.3 clauses 2 and 3), and nothing here changes either.
+  // booking and receipt rows are the double's own; actual effects require backend evidence.
   assert.equal(business.bookings, 1, 'exactly one COMMIT submission reached the server');
-  assert.deepEqual(business.receipts, [CONFIRMED_REF, null], 'the escape submitted its own intent, adjudicating only itself');
+  assert.deepEqual(business.receipts, [CONFIRMED_REF], 'no escape or duplicate COMMIT was submitted');
   assert.deepEqual(store.lines.get(card.widget_id), [confirmed()], 'and the durable record still holds one line');
   s.runtime.dispose();
 });
 
-test('L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed', async () => {
+test('L27: repeated explicit READ keeps the visible terminal outcome at one', async () => {
   const card = terminalCard();
   const store = terminalStore();
   store.put(card, [confirmed()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const { itemId } = s.runtime.widgets.ingest(card);
   assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
-  // Five presses is a proof about the runtime, not a production sequence: `control.dismiss@1` is
-  // single-use server-side, so in production the second press is refused before it is adjudicated.
-  // The point is that the count holds through the shell's own record, whatever the server allows.
+  const submissions = s.runtime.widgets.counters().submissions;
   for (let press = 0; press < 5; press += 1) {
-    assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i9'), { outcome: 'dismissed' }, `press ${press}`);
+    await s.runtime.widgets.refreshBookingReceipt(itemId);
     assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], `press ${press}`);
   }
   assert.equal(store.rereads(), 6, 'every press still re-read the thread page; only the append was suppressed');
+  assert.equal(s.runtime.widgets.counters().submissions, submissions);
   s.runtime.dispose();
 });
 
@@ -1289,12 +1274,12 @@ test('L27: two genuinely different terminal outcomes both remain representable',
   const card = terminalCard();
   const store = terminalStore();
   store.put(card, [submitted()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const { itemId } = s.runtime.widgets.ingest(card);
   await s.runtime.widgets.activate(itemId, 'intent:i1');
   assert.deepEqual(serverLines(s), [SUBMITTED_TEXT]);
   store.put(card, [submitted(), confirmed()]);
-  await s.runtime.widgets.activate(itemId, 'intent:i9');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
   assert.deepEqual(serverLines(s), [SUBMITTED_TEXT, CONFIRMED_TEXT], 'the new outcome class is written; the old one is not rewritten');
   s.runtime.dispose();
 
@@ -1304,7 +1289,7 @@ test('L27: two genuinely different terminal outcomes both remain representable',
   const two = terminalStore();
   two.put(first, [confirmed(CONFIRMED_REF)]);
   two.put(second, [confirmed('9c11baa0-2f74-4d6e-8a15-3ee6b0f7c2d1')]);
-  const t = setup({ submission: two.port() });
+  const t = setup({ submission: two.port(), receiptRead: two.read });
   const a = t.runtime.widgets.ingest(first);
   const b = t.runtime.widgets.ingest(second);
   await t.runtime.widgets.activate(a.itemId, 'intent:i1');
@@ -1312,17 +1297,18 @@ test('L27: two genuinely different terminal outcomes both remain representable',
   assert.equal(serverLines(t).length, 2, 'two business facts, two lines');
   t.runtime.dispose();
 
-  // (c) L14: a CONFIRMED line replaced by another CONFIRMED line with a DIFFERENT reference is a
-  //     different business fact, and must still be written.
+  // (c) A different receipt on the SAME immutable emission is inconsistent. Two distinct
+  // canonical references remain representable through two widgets, proven above.
   const third = terminalCard();
   const again = terminalStore();
   again.put(third, [confirmed(CONFIRMED_REF)]);
-  const u = setup({ submission: again.port() });
+  const u = setup({ submission: again.port(), receiptRead: again.read });
   const c = u.runtime.widgets.ingest(third);
   await u.runtime.widgets.activate(c.itemId, 'intent:i1');
   again.put(third, [confirmed('0f5d3c92-8b47-4e10-9a6f-c1d8e2b34507')]);
-  await u.runtime.widgets.activate(c.itemId, 'intent:i9');
-  assert.equal(serverLines(u).length, 2, 'a second receipt is a second outcome, even with identical text');
+  await u.runtime.widgets.refreshBookingReceipt(c.itemId);
+  assert.deepEqual(serverLines(u), [CONFIRMED_TEXT], 'the observed receipt is never replaced');
+  assert.equal(u.item(c.itemId).receiptRefresh, 'unavailable');
   u.runtime.dispose();
 });
 
@@ -1334,7 +1320,7 @@ test('L27: identity is the canonical reference, never the sentence — in BOTH d
   const store = terminalStore();
   store.put(first, [{ outcome: 'CANCELLED', text: 'Запись отменена.', action_receipt_ref: null }]);
   store.put(second, [{ outcome: 'CANCELLED', text: 'Запись отменена.', action_receipt_ref: null }]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const a = s.runtime.widgets.ingest(first);
   const b = s.runtime.widgets.ingest(second);
   await s.runtime.widgets.activate(a.itemId, 'intent:i1');
@@ -1347,11 +1333,11 @@ test('L27: identity is the canonical reference, never the sentence — in BOTH d
   const card = terminalCard();
   const reminted = terminalStore();
   reminted.put(card, [confirmed(CONFIRMED_REF, CONFIRMED_TEXT)]);
-  const t = setup({ submission: reminted.port() });
+  const t = setup({ submission: reminted.port(), receiptRead: reminted.read });
   const { itemId } = t.runtime.widgets.ingest(card);
   await t.runtime.widgets.activate(itemId, 'intent:i1');
   reminted.put(card, [confirmed(CONFIRMED_REF, 'Запись подтверждена. Ждём вас.')]);
-  await t.runtime.widgets.activate(itemId, 'intent:i9');
+  await t.runtime.widgets.refreshBookingReceipt(itemId);
   assert.deepEqual(serverLines(t), [CONFIRMED_TEXT], 'one receipt, one line');
   t.runtime.dispose();
 });
@@ -1361,7 +1347,7 @@ test('L27: an ordinary assistant message and a terminal outcome never deduplicat
   const store = terminalStore();
   store.put(card, [confirmed()]);
   const s = setup({
-    submission: store.port(),
+    submission: store.port(), receiptRead: store.read,
     chat: async () => ({ ok: true, value: { request_id: 'req-1', reply: CONFIRMED_TEXT, action_status: null, resolution: null } }),
   });
   const { itemId } = s.runtime.widgets.ingest(card);
@@ -1375,8 +1361,8 @@ test('L27: an ordinary assistant message and a terminal outcome never deduplicat
   await flush();
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT, CONFIRMED_TEXT], 'the reply is not suppressed by the receipt already on screen');
 
-  // And the terminal line still is: the dismiss adds nothing.
-  await s.runtime.widgets.activate(itemId, 'intent:i9');
+  // And the terminal line still is: the READ adds nothing.
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT, CONFIRMED_TEXT], 'still exactly the receipt and the reply');
   s.runtime.dispose();
 
@@ -1384,7 +1370,7 @@ test('L27: an ordinary assistant message and a terminal outcome never deduplicat
   // says the sentence FIRST, in an ordinary turn, and the server-authored receipt must still be
   // written when it arrives. A rule that compared sentences would swallow the receipt here.
   const t = setup({
-    submission: store.port(),
+    submission: store.port(), receiptRead: store.read,
     chat: async () => ({ ok: true, value: { request_id: 'req-2', reply: CONFIRMED_TEXT, action_status: null, resolution: null } }),
   });
   t.runtime.conversation.submitUserTurn('Записал?', 'typed');
@@ -1402,52 +1388,61 @@ test('L27: UNKNOWN → reconciliation → CONFIRMED keeps the later canonical tr
   const store = terminalStore();
   // The COMMIT is accepted but the canonical outcome is not yet known: the widget is SUBMITTED.
   store.put(card, [submitted()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const { itemId } = s.runtime.widgets.ingest(card);
   await s.runtime.widgets.activate(itemId, 'intent:i1');
   assert.deepEqual(serverLines(s), [SUBMITTED_TEXT], 'the unresolved outcome is shown');
 
   // Reconciliation resolves it. The thread page now carries the CONFIRMED line, with its reference.
   store.put(card, [confirmed()]);
-  await s.runtime.widgets.activate(itemId, 'intent:i9');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
   assert.deepEqual(serverLines(s), [SUBMITTED_TEXT, CONFIRMED_TEXT], 'the transition is visible, in order');
 
   // A further press adds nothing: the reconciled outcome is already represented.
-  await s.runtime.widgets.activate(itemId, 'intent:i9');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
   assert.deepEqual(serverLines(s), [SUBMITTED_TEXT, CONFIRMED_TEXT]);
   s.runtime.dispose();
 });
 
-test('L27: retry and refusal paths are unchanged', async () => {
-  // A transient failure writes no line and leaves a sentence; the retry that settles writes it once.
+test('L27: lost COMMIT response and refusal remain spent; only explicit READ can recover a receipt', async () => {
+  // A transient failure never permits mutation retry; a bounded READ recovers the stored outcome.
   const card = terminalCard();
   const store = terminalStore();
   store.put(card, [confirmed()]);
   let attempts = 0;
-  const s = setup({ submission: createLiveSubmission({
+  const s = setup({ receiptRead: store.read, submission: createLiveSubmission({
     widgetIntent: async () => (attempts += 1) === 1
       ? { ok: false, failure: { reason: 'no_connection' } }
       : { ok: true, value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED' } },
     resolveWidgets: async () => ({ ok: true, value: { tenant_bound: true, widgets: [{ envelope: card, terminal_lines: [confirmed()], reread_intent: null }] } }),
   }) });
   const { itemId } = s.runtime.widgets.ingest(card);
-  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'no_connection', submitted: true });
-  assert.deepEqual(serverLines(s), [], 'a failed submission writes nothing');
   assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
-  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'the retry writes it once');
+  assert.equal(s.item(itemId).sentence, 'booking_unconfirmed');
+  assert.deepEqual(serverLines(s), [], 'a failed submission writes nothing');
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'ignored', reason: 'not_drawn' });
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'READ writes it once');
+  assert.equal(attempts, 1, 'the lost response never retries COMMIT');
   s.runtime.dispose();
 
-  // Every non-settled outcome still answers exactly as it did, and none of them writes a line.
+  // Every non-settled mutation is spent and writes no fabricated receipt.
   for (const [status, expected] of [
-    ['unavailable', 'activation_unavailable'],
+    ['unavailable', 'booking_unconfirmed'],
     ['forbidden', 'activation_forbidden'],
-    ['no_connection', 'no_connection'],
-    ['server_error', 'activation_unavailable'],
-    ['unexpected_response', 'activation_unavailable'],
+    ['no_connection', 'booking_unconfirmed'],
+    ['server_error', 'booking_unconfirmed'],
+    ['unexpected_response', 'booking_unconfirmed'],
   ]) {
     const t = setup({ submission: { submit: async () => ({ status }) } });
     const item = t.runtime.widgets.ingest(terminalCard());
-    assert.deepEqual(await t.runtime.widgets.activate(item.itemId, 'intent:i1'), { outcome: 'sentence', sentence: expected, submitted: true }, status);
+    assert.deepEqual(await t.runtime.widgets.activate(item.itemId, 'intent:i1'), { outcome: 'dismissed' }, status);
+    assert.equal(t.item(item.itemId).sentence, expected, status);
+    await t.runtime.widgets.refreshBookingReceipt(item.itemId);
+    assert.equal(t.item(item.itemId).receiptRefresh, 'unavailable', status);
+    assert.equal(t.item(item.itemId).sentence, expected, 'failed READ preserves known sentence');
+    assert.equal(t.runtime.widgets.heldTokens(), 0);
+    assert.equal(t.runtime.widgets.counters().submissions, 1);
     assert.deepEqual(serverLines(t), [], status);
     t.runtime.dispose();
   }
@@ -1464,7 +1459,7 @@ test('L27: a successor emission carrying its predecessor\'s confirmation states 
   const store = terminalStore();
   store.put(first, [confirmed()]);
   store.put(second, [confirmed()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
 
   const { itemId } = s.runtime.widgets.ingest(first);
   await s.runtime.widgets.activate(itemId, 'intent:i1');
@@ -1472,7 +1467,8 @@ test('L27: a successor emission carrying its predecessor\'s confirmation states 
 
   const replaced = s.runtime.widgets.ingest(second);
   assert.equal(replaced.ingested, 'replaced', 'the successor takes the predecessor\'s place');
-  await s.runtime.widgets.activate(replaced.itemId, 'intent:i9');
+  await s.runtime.widgets.activate(replaced.itemId, 'intent:i1');
+  await s.runtime.widgets.refreshBookingReceipt(replaced.itemId);
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'one receipt, one statement, across the emission boundary');
   s.runtime.dispose();
 });
@@ -1481,11 +1477,11 @@ test('L27: the record survives the display cap, on the path where that is reacha
   // A timeline card is appended BEFORE its own line, and the cap evicts from the front, so a card
   // whose line has been evicted has itself been released — it cannot submit again, and this branch
   // would be unreachable. A DETAIL entry has no timeline item, so the cap never releases it: it can
-  // still submit after its own line is gone. That is the case the ledger's lifetime is about.
+  // still READ after its own line is gone. That is the case the ledger's lifetime is about.
   const card = terminalCard();
   const store = terminalStore();
   store.put(card, [confirmed()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const opener = s.runtime.widgets.ingest(terminalCard('01M2Q9G7M0OPENEROPENEROPEN'));
   const detail = s.runtime.shell.presentDetail(card, { itemId: opener.itemId, ref: 'intent:i1' });
   assert.equal(detail.presented, true);
@@ -1498,9 +1494,12 @@ test('L27: the record survives the display cap, on the path where that is reacha
   assert.ok(s.runtime.shell.view().fullscreen !== null, 'the detail is still on screen');
 
   const before = s.runtime.widgets.counters().submissions;
-  assert.deepEqual(await s.runtime.widgets.activate(detail.itemId, 'intent:i1'), { outcome: 'dismissed' }, 'and can still submit');
-  assert.equal(s.runtime.widgets.counters().submissions - before, 1, 'the settled branch really ran');
+  await s.runtime.widgets.refreshBookingReceipt(detail.itemId);
+  assert.equal(s.runtime.widgets.counters().submissions, before, 'detail refresh is a READ');
+  assert.equal(store.rereads(), 2, 'the explicit READ really ran');
   assert.equal(serverLines(s).filter((t) => t === CONFIRMED_TEXT).length, 0, 'an evicted outcome is not re-asserted at the bottom');
+  s.runtime.widgetPort.closeDetail();
+  assert.equal(s.runtime.shell.view().fullscreen, null);
   s.runtime.dispose();
 });
 
@@ -1511,7 +1510,7 @@ test('L27: one canonical receipt is stated once ACROSS widgets, even after the f
   const store = terminalStore();
   store.put(first, [confirmed()]);
   store.put(second, [confirmed()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const a = s.runtime.widgets.ingest(first);
   await s.runtime.widgets.activate(a.itemId, 'intent:i1');
   assert.equal(serverLines(s).filter((t) => t === CONFIRMED_TEXT).length, 1);
@@ -1531,7 +1530,7 @@ test('L27: a cleared conversation starts again', async () => {
   const card = terminalCard();
   const store = terminalStore();
   store.put(card, [confirmed()]);
-  const t = setup({ submission: store.port() });
+  const t = setup({ submission: store.port(), receiptRead: store.read });
   const again = t.runtime.widgets.ingest(card);
   await t.runtime.widgets.activate(again.itemId, 'intent:i1');
   assert.deepEqual(serverLines(t), [CONFIRMED_TEXT]);
@@ -1543,25 +1542,33 @@ test('L27: a cleared conversation starts again', async () => {
   t.runtime.dispose();
 });
 
-test('L27: a settled submission whose thread page failed loses nothing — the next one writes the outcome', async () => {
+test('L27: ACCEPTED plus failed first page recovers through explicit READ without a second intent', async () => {
   // The intent succeeded and the server wrote the line, but the bounded re-read failed, so the port
   // answers `accepted` and no line is written. Nothing may be recorded as shown that was not shown:
-  // the next settled submission must still write it, exactly once.
+  // the explicit READ must still write it, exactly once.
   const card = terminalCard();
   let pages = 0;
-  const s = setup({ submission: createLiveSubmission({
-    widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED' } }),
-    resolveWidgets: async () => (pages += 1) === 1
+  let intents = 0;
+  const read = async (request) => {
+    assert.deepEqual(request, { thread_page: { limit: 20 } });
+    return (pages += 1) === 1
       ? { ok: false, failure: { reason: 'server_error' } }
-      : { ok: true, value: { tenant_bound: true, widgets: [{ envelope: card, terminal_lines: [confirmed()], reread_intent: null }] } },
+      : { ok: true, value: { tenant_bound: true, widgets: [{ envelope: card, terminal_lines: [confirmed()], reread_intent: null }] } };
+  };
+  const s = setup({ receiptRead: read, submission: createLiveSubmission({
+    widgetIntent: async () => { intents++; return { ok: true, value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED' } }; },
+    resolveWidgets: read,
   }) });
   const { itemId } = s.runtime.widgets.ingest(card);
   assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' }, 'an accepted intent is not a failure');
   assert.deepEqual(serverLines(s), [], 'and it carried no line to write');
-  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i9'), { outcome: 'dismissed' });
-  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'the next settled submission writes it');
-  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i9'), { outcome: 'dismissed' });
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'the explicit READ writes it');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'and only then stops');
+  assert.equal(intents, 1);
+  assert.equal(pages, 3);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
   s.runtime.dispose();
 });
 
@@ -1571,7 +1578,7 @@ test('L27: two identical lines inside ONE response are one outcome, and two diff
   const card = terminalCard();
   const store = terminalStore();
   store.put(card, [confirmed(), confirmed(), submitted(), submitted()]);
-  const s = setup({ submission: store.port() });
+  const s = setup({ submission: store.port(), receiptRead: store.read });
   const { itemId } = s.runtime.widgets.ingest(card);
   await s.runtime.widgets.activate(itemId, 'intent:i1');
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT, SUBMITTED_TEXT], 'one line per canonical outcome, in the page\'s order');
@@ -1594,6 +1601,181 @@ test('L27: a reference identifies an outcome only on the line class the contract
   s.runtime.dispose();
 });
 
+
+const receiptPage = (card, lines = [confirmed()]) => ({ ok: true, value: { tenant_bound: true, widgets: [{ envelope: card, terminal_lines: lines, reread_intent: null }] } });
+
+test('L27: only a spent booking admits refresh, and concurrent clicks perform one bounded READ', async () => {
+  const card = terminalCard();
+  let reads = 0, complete;
+  const s = setup({ submission: { submit: async () => ({ status: 'accepted' }) }, receiptRead: (request) => {
+    assert.deepEqual(request, { thread_page: { limit: 20 } });
+    reads++; return new Promise(resolve => { complete = resolve; });
+  } });
+  const { itemId } = s.runtime.widgets.ingest(card);
+  await s.runtime.widgets.refreshBookingReceipt('unknown');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
+  assert.equal(reads, 0, 'live controls cannot use receipt refresh');
+  await s.runtime.widgets.activate(itemId, 'intent:i1');
+  const before = s.item(itemId).result;
+  const first = s.runtime.widgets.refreshBookingReceipt(itemId);
+  assert.equal(s.item(itemId).receiptRefresh, 'pending');
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
+  s.runtime.widgetPort.refreshBookingReceipt(itemId);
+  assert.equal(reads, 1);
+  const returned = structuredClone(card);
+  returned.intents[0].intent_token = 'must-never-be-ingested';
+  complete(receiptPage(returned));
+  await first;
+  assert.equal(s.item(itemId).receiptRefresh, 'available');
+  assert.deepEqual(s.item(itemId).result, before, 'returned envelope never replaces the stored presentation');
+  s.setA11y({ ...A11Y, text_scale: 1.5 });
+  assert.equal(s.item(itemId).display, 'terminal');
+  assert.equal(s.item(itemId).result.readingOrder.length, 0);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  assert.equal(s.runtime.widgets.counters().submissions, 1);
+  s.advance(24 * 60 * 60 * 1000);
+  assert.equal(reads, 1, 'there is no polling or timer retry');
+  s.runtime.dispose();
+});
+
+test('L27: missing, duplicate, foreign or uncorrelated receipt rows are unavailable without losing known receipt', async () => {
+  const card = terminalCard();
+  const changed = (edit) => { const copy = structuredClone(card); edit(copy); return receiptPage(copy); };
+  const rows = [
+    ['missing bounded row', { ok: true, value: { tenant_bound: true, widgets: Array.from({ length: 20 }, (_, i) => ({ envelope: { ...card, widget_id: `other-${i}` }, terminal_lines: [confirmed()], reread_intent: null })) } }],
+    ['unbound tenant', { ...receiptPage(card), value: { ...receiptPage(card).value, tenant_bound: false } }],
+    ['duplicate row', { ...receiptPage(card), value: { tenant_bound: true, widgets: [...receiptPage(card).value.widgets, ...receiptPage(card).value.widgets] } }],
+    ['foreign widget', changed(c => { c.widget_id = 'another-widget'; })],
+    ['foreign kind', changed(c => { c.kind = 'APPROVAL'; })],
+    ['foreign tenant', changed(c => { c.tenant_id = 'foreign'; })],
+    ['foreign principal', changed(c => { c.integrity.principal_proof_hash = 'foreign'; })],
+    ['foreign turn', changed(c => { c.correlation.turn_id = 'foreign'; })],
+    ['foreign parent', changed(c => { c.correlation.parent_widget_id = 'foreign'; })],
+    ['empty terminal set', receiptPage(card, [])],
+    ['transport denied', { ok: false, failure: { reason: 'forbidden' } }],
+  ];
+  for (const [label, reply] of rows) {
+    const s = setup({ submission: { submit: async () => ({ status: 'settled', lines: [confirmed()] }) }, receiptRead: async () => reply });
+    const { itemId } = s.runtime.widgets.ingest(card);
+    await s.runtime.widgets.activate(itemId, 'intent:i1');
+    await s.runtime.widgets.refreshBookingReceipt(itemId);
+    assert.equal(s.item(itemId).receiptRefresh, 'unavailable', label);
+    assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], label);
+    assert.equal(s.item(itemId).sentence, null, label);
+    assert.equal(s.item(itemId).result.readingOrder.length, 0, label);
+    assert.equal(s.runtime.widgets.heldTokens(), 0, label);
+    assert.equal(s.runtime.widgets.counters().submissions, 1, label);
+    s.runtime.dispose();
+  }
+});
+
+test('L27: failed or throwing READ remains manually retryable while confirmed facts never regress', async () => {
+  const card = terminalCard();
+  let read = () => { throw new Error('synthetic synchronous reader failure'); };
+  const s = setup({ submission: { submit: async () => ({ status: 'settled', lines: [confirmed()] }) }, receiptRead: (...args) => read(...args) });
+  const { itemId } = s.runtime.widgets.ingest(card);
+  await s.runtime.widgets.activate(itemId, 'intent:i1');
+  for (const next of [
+    read,
+    async () => { throw new Error('synthetic rejected read'); },
+    async () => receiptPage(card, [submitted(), { outcome: 'NOT_CONFIRMED', text: 'Не подтверждено.', action_receipt_ref: null }]),
+    async () => receiptPage(card, [confirmed('9c11baa0-2f74-4d6e-8a15-3ee6b0f7c2d1')]),
+    async () => receiptPage(card, [confirmed(), confirmed('9c11baa0-2f74-4d6e-8a15-3ee6b0f7c2d1')]),
+  ]) {
+    read = next;
+    await s.runtime.widgets.refreshBookingReceipt(itemId);
+    assert.equal(s.item(itemId).receiptRefresh, 'unavailable');
+    assert.deepEqual(serverLines(s), [CONFIRMED_TEXT]);
+  }
+  read = async () => receiptPage(card, [submitted(), confirmed(CONFIRMED_REF, 'Новая формулировка того же результата.')]);
+  await s.runtime.widgets.refreshBookingReceipt(itemId);
+  assert.equal(s.item(itemId).receiptRefresh, 'available');
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT], 'known confirmation suppresses older states and reminted text');
+  assert.equal(s.runtime.widgets.counters().submissions, 1);
+  s.runtime.dispose();
+});
+
+test('L27: cross-widget dedupe still records each emission confirmation for later stale READ rejection', async () => {
+  const a = terminalCard(), b = terminalCard('01M2Q9G7M0ZZZZZZZZZZZZZZZZ');
+  const s = setup({ submission: { submit: async () => ({ status: 'settled', lines: [confirmed()] }) }, receiptRead: async () => receiptPage(b, [submitted()]) });
+  const first = s.runtime.widgets.ingest(a), second = s.runtime.widgets.ingest(b);
+  await s.runtime.widgets.activate(first.itemId, 'intent:i1');
+  await s.runtime.widgets.activate(second.itemId, 'intent:i1');
+  await s.runtime.widgets.refreshBookingReceipt(second.itemId);
+  assert.deepEqual(serverLines(s), [CONFIRMED_TEXT]);
+  assert.equal(s.item(second.itemId).receiptRefresh, 'unavailable');
+  s.runtime.dispose();
+});
+
+test('L27: sign-out, disposal or replacement aborts the READ and ignores a transport that resolves late', async () => {
+  for (const change of ['signout', 'dispose', 'replace']) {
+    const card = terminalCard();
+    let complete, signal;
+    const s = setup({ submission: { submit: async () => ({ status: 'accepted' }) }, receiptRead: (_request, suppliedSignal) => {
+      signal = suppliedSignal; return new Promise(resolve => { complete = resolve; });
+    } });
+    const { itemId } = s.runtime.widgets.ingest(card);
+    await s.runtime.widgets.activate(itemId, 'intent:i1');
+    const pending = s.runtime.widgets.refreshBookingReceipt(itemId);
+    if (change === 'signout') s.signOut();
+    else if (change === 'dispose') s.runtime.dispose();
+    else {
+      const successor = terminalCard('01M2Q9G7M0WWWWWWWWWWWWWWWW');
+      successor.lifecycle.supersedes_widget_id = card.widget_id; reseal(successor);
+      assert.equal(s.runtime.widgets.ingest(successor).ingested, 'replaced');
+    }
+    assert.equal(signal.aborted, true, change);
+    complete(receiptPage(card));
+    await pending;
+    assert.deepEqual(serverLines(s), [], change);
+    if (change === 'replace') assert.equal(s.item(itemId).receiptRefresh, undefined, 'new live entry does not inherit receipt state');
+    s.runtime.dispose();
+  }
+});
+
+test('L27: privacy freeze aborts receipt READ and prevents erased content returning after completion', async () => {
+  const card = terminalCard();
+  let complete, readSignal;
+  const s = setup({
+    chat: async () => ({ ok: true, value: { request_id: 'synthetic-turn', reply: '', action_status: null, resolution: null, userTurn: { conversationId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee', turnId: '12345678-abcd-4def-8abc-123456789abc' } } }),
+    submission: { submit: async () => ({ status: 'accepted' }) },
+    receiptRead: (_request, signal) => { readSignal = signal; return new Promise(resolve => { complete = resolve; }); },
+  });
+  s.runtime.conversation.submitUserTurn('Сохранённая беседа', 'typed'); await flush();
+  const { itemId } = s.runtime.widgets.ingest(card);
+  await s.runtime.widgets.activate(itemId, 'intent:i1');
+  const pending = s.runtime.widgets.refreshBookingReceipt(itemId);
+  const target = s.runtime.conversation.erasureTarget();
+  assert.ok(target);
+  assert.equal(s.runtime.conversation.freezeForErasure(target), true);
+  assert.equal(readSignal.aborted, true);
+  complete(receiptPage(card)); await pending;
+  assert.deepEqual(s.items(), []);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  s.runtime.conversation.finishErasure();
+  assert.deepEqual(s.items(), []);
+  s.runtime.dispose();
+});
+
+test('L27: reentrant clear during pending publication prevents dispatch, and during receipt publication stops remaining lines', async () => {
+  for (const when of ['pending', 'first-line']) {
+    const card = terminalCard(); let reads = 0, cleared = false;
+    const s = setup({ submission: { submit: async () => ({ status: 'accepted' }) }, receiptRead: async () => { reads++; return receiptPage(card, [submitted(), confirmed()]); } });
+    const { itemId } = s.runtime.widgets.ingest(card);
+    await s.runtime.widgets.activate(itemId, 'intent:i1');
+    const off = s.runtime.conversation.subscribe(view => {
+      if (cleared) return;
+      const shouldClear = when === 'pending' ? view.items.some(i => i.kind === 'widget' && i.receiptRefresh === 'pending') : view.items.some(i => i.kind === 'assistant');
+      if (shouldClear) { cleared = true; s.signOut(); }
+    });
+    await s.runtime.widgets.refreshBookingReceipt(itemId);
+    assert.equal(cleared, true, when);
+    assert.equal(reads, when === 'pending' ? 0 : 1, when);
+    assert.deepEqual(s.items(), [], when);
+    assert.equal(s.runtime.widgets.heldTokens(), 0, when);
+    off(); s.runtime.dispose();
+  }
+});
 
 test('L25: tap alone never observes rendering; explicit mounted callback is bounded, idempotent and gates selector REFINE', async () => {
   const calls = [];

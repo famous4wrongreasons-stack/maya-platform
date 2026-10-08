@@ -102,7 +102,9 @@ export class HistoryErasureOwner {
         const prior = await tx.$queryRaw<
           { erasureRequestRef: string; erasedAt: Date }[]
         >`
-          SELECT "erasureRequestRef", MIN("erasedAt") AS "erasedAt"
+          SELECT "erasureRequestRef", MIN("erasedAt") FILTER (
+            WHERE "store" = 'timeline' AND "rowKey" LIKE 'WidgetTimelineTurn/%'
+          ) AS "erasedAt"
           FROM "WidgetErasureTombstone"
           WHERE "tenantId" = ${tenantId}
             AND "erasureRequestRef" LIKE ${`${requestPrefix}%`}
@@ -115,9 +117,23 @@ export class HistoryErasureOwner {
             prior[0].erasureRequestRef !== erasureRequestRef
           )
             throw new ConflictException('history_erasure_request_conflict');
-          // Authority was resolved again above. Completed requests do not rerun
-          // the job, inspect newly written content or claim another deletion.
-          return complete(prior[0].erasedAt);
+          // Bind completion ONLY to original turn tombstones. A repair timestamp
+          // cannot change it, even if the database clock moved backwards.
+          const completion = complete(prior[0].erasedAt);
+          // Authority was resolved again above. Repair only legacy narrative on
+          // this request's already-tombstoned emissions; never rerun full erasure
+          // or select newly written rows. Clean retries write nothing.
+          await this.erasure.repairRetainedTerminalContent(
+            tx,
+            {
+              tenantId,
+              conversationId,
+              subjectPrincipalProofHash: principal.proofHash,
+              erasureRequestRef,
+            },
+            now,
+          );
+          return completion;
         }
 
         const liveTurn = await tx.widgetTimelineTurn.findFirst({

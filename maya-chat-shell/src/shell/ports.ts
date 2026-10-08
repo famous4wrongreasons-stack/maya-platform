@@ -263,6 +263,8 @@ export type TimelineItemView =
       readonly display: 'live' | 'pending' | 'collapsed' | 'stale' | 'terminal';
       readonly pending: InteractiveRefKey | null;
       readonly sentence: WidgetSentence | null;
+      /** Explicit receipt READ only; never an intent or permission to repeat COMMIT. */
+      readonly receiptRefresh?: 'available' | 'pending' | 'unavailable' | null;
     }
   | { readonly kind: 'notice'; readonly id: string; readonly notice: NoticeKind };
 
@@ -333,6 +335,8 @@ export interface WidgetPort {
   navigate(route: PrimaryRoute): void;
   /** Activation by ref only; the shell resolves the intent and never exposes its token. */
   activate(itemId: string, ref: InteractiveRefKey): void;
+  /** Reread only the stored booking receipt, without exposing targets or tokens. */
+  refreshBookingReceipt(itemId: string): void;
   closeDetail(): void;
 }
 

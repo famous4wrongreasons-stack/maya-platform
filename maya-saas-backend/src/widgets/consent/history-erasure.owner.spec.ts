@@ -186,6 +186,11 @@ const fixture = () => {
                   !row.erasureRequestRef.startsWith(prefix)
                 )
                   continue;
+                if (
+                  row.store !== 'timeline' ||
+                  !row.rowKey.startsWith('WidgetTimelineTurn/')
+                )
+                  continue;
                 const original = grouped.get(row.erasureRequestRef);
                 if (!original || original > row.erasedAt)
                   grouped.set(row.erasureRequestRef, row.erasedAt);
@@ -218,8 +223,10 @@ const fixture = () => {
   );
   const prisma = { $transaction: transaction } as unknown as PrismaService;
   const principalResolver: PrincipalResolver = { resolve };
+  const repair = jest.fn().mockResolvedValue(0);
   const erasure = {
     runInTransaction: job,
+    repairRetainedTerminalContent: repair,
   } as unknown as WidgetConversationErasureJob;
   const makeOwner = () =>
     new HistoryErasureOwner(prisma, principalResolver, erasure);
@@ -232,6 +239,7 @@ const fixture = () => {
     trace,
     statements,
     job,
+    repair,
     resolve,
     transaction,
     findLive,
@@ -240,6 +248,43 @@ const fixture = () => {
 };
 
 describe('K12 authenticated history erasure owner — synthetic mechanics', () => {
+  it('repairs only the completed exact request and keeps the original turn completion despite clock rollback', async () => {
+    const f = fixture();
+    const first = await f.owner.erase(ACTOR, CONVERSATION, {
+      requestId: REQUEST,
+    });
+    const ref = f.tombstones[0].erasureRequestRef;
+    f.tombstones.push({
+      tenantId: ACTOR.tenantId!,
+      erasureRequestRef: ref,
+      erasedAt: new Date(NOW.getTime() - 1000),
+      store: 'timeline',
+      rowKey: 'WidgetEmission/legacy',
+    });
+    f.state.now = new Date(NOW.getTime() - 2000);
+    expect(
+      await f.makeOwner().erase(ACTOR, CONVERSATION, { requestId: REQUEST }),
+    ).toEqual(first);
+    expect(f.job).toHaveBeenCalledTimes(1);
+    expect(f.repair).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        tenantId: ACTOR.tenantId,
+        conversationId: CONVERSATION,
+        subjectPrincipalProofHash: PRINCIPAL.proofHash,
+        erasureRequestRef: ref,
+      },
+      f.state.now,
+    );
+    expect(
+      f.statements.some(
+        ({ sql }) =>
+          sql.includes('MIN("erasedAt") FILTER') &&
+          sql.includes("'WidgetTimelineTurn/%'"),
+      ),
+    ).toBe(true);
+  });
+
   it('first confirmation uses one ReadCommitted transaction, ordered locks, DB clock and an actual turn tombstone', async () => {
     const f = fixture();
     const result = await f.owner.erase(ACTOR, CONVERSATION, {

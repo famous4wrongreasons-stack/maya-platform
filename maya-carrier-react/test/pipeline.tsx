@@ -40,6 +40,19 @@ export function markupOf(item: unknown, dark = true): string {
   );
 }
 
+/** SSR must never activate an intent or initiate even a receipt READ. */
+export function receiptRefreshMarkup(item: unknown, withCallback = true): string {
+  const unexpected = () => { throw new Error('Rendering called a runtime operation'); };
+  return renderToStaticMarkup(
+    <WidgetCard
+      item={item as never}
+      t={tokens(true)}
+      activate={unexpected}
+      {...(withCallback ? { refreshBookingReceipt: unexpected } : {})}
+    />,
+  );
+}
+
 export { project, verify, render };
 
 // Explicit occupancy proof: the current conversation owner and wire projectors,

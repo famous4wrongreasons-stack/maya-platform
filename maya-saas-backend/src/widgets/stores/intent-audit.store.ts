@@ -7,7 +7,6 @@
 
 import { isPostgresSerializationConflict } from '../../common/postgres-transaction-conflict';
 import { PrismaService } from '../../prisma/prisma.service';
-import { reasonTextOrNull } from '../rendering/reason-text';
 import { scoped } from './tenant-scope';
 import { TimelineStore } from './timeline.store';
 
@@ -374,6 +373,8 @@ const ownedBy = (
   }),
 });
 
+// Only retained audit facts belong here. The READ projects closed wording from
+// these facts and the exact immutable adjudication; narrative is never persisted.
 const terminalLine = (receipt: {
   outcome: string;
   refusalCode?: string | null;
@@ -382,20 +383,15 @@ const terminalLine = (receipt: {
   if (receipt.outcome === 'ACCEPTED' && receipt.actionReceiptRef !== null)
     return Object.freeze({
       outcome: 'CONFIRMED',
-      text: 'Запись подтверждена.',
       action_receipt_ref: receipt.actionReceiptRef,
     });
   if (receipt.outcome === 'ACCEPTED')
     return Object.freeze({
       outcome: 'SUBMITTED',
-      text: 'Результат пока не подтверждён. Не отправляйте повторно.',
       action_receipt_ref: null,
     });
   return Object.freeze({
     outcome: 'NOT_CONFIRMED',
-    text:
-      reasonTextOrNull(receipt.refusalCode ?? null)?.rendered ??
-      'Запись не подтверждена.',
     action_receipt_ref: null,
   });
 };

@@ -320,6 +320,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   const shell = createShell({ history: deps.history, session: deps.session });
   const observations = createRenderObserver(deps.transport, deps.newAbort);
   const widgets = createWidgets({
+    transport: deps.transport,
     recordRender: observations.record,
     timeline: conversation.timeline,
     render: deps.render,
@@ -351,6 +352,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     subscribe: shell.subscribe,
     navigate: shell.navigate,
     activate: (itemId, ref) => void widgets.activate(itemId, ref),
+    refreshBookingReceipt: (itemId) => void widgets.refreshBookingReceipt(itemId),
     closeDetail: shell.closeDetail,
   };
   return {

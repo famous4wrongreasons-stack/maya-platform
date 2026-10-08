@@ -1,3 +1,4 @@
+import { reasonTextOrNull } from '../rendering/reason-text';
 import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
 import type { ScheduleApprovalAdapter } from '../owner-ports/schedule-approval.adapter';
 import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
@@ -69,6 +70,8 @@ export class WidgetThreadPageService {
       const rows = await tx.widgetEmission.findMany({
         where: {
           tenantId,
+          erasedAt: null,
+          turn: { erasedAt: null, principalProofHash: principal.proofHash },
           ...(cursor === null ? {} : { issuedAt: { lt: cursor.issuedAt } }),
           intentRecords: {
             some: { principalProofHash: principal.proofHash },
@@ -81,7 +84,17 @@ export class WidgetThreadPageService {
           intentRecords: {
             where: { principalProofHash: principal.proofHash },
             orderBy: { issuedAt: 'asc' },
-            select: RELEASE_RECORD_SELECT,
+            select: {
+              ...RELEASE_RECORD_SELECT,
+              receipts: {
+                where: { tenantId },
+                select: {
+                  outcome: true,
+                  refusalCode: true,
+                  actionReceiptRef: true,
+                },
+              },
+            },
           },
           renderReceipts: {
             where: { erasedAt: null },
@@ -124,7 +137,16 @@ export class WidgetThreadPageService {
                   } as AuthenticatedUser,
                   row.intentRecords[0].widgetId,
                 )
-              : terminalLines(row.terminalLinesJson),
+              : terminalLines(
+                  row.terminalLinesJson,
+                  row.intentRecords
+                    .filter(
+                      (record) =>
+                        record.effect === 'COMMIT' &&
+                        record.capabilitySpace === 'AE',
+                    )
+                    .flatMap((record) => record.receipts),
+                ),
           // Fresh reread tokens are owned by the later projector edge.
           reread_intent: null,
         });
@@ -205,29 +227,62 @@ export class WidgetThreadPageService {
   }
 }
 
-const terminalLines = (value: unknown): TerminalLine[] => {
-  if (!Array.isArray(value)) return [];
-  return value.filter(isTerminalLine);
+// This is a current projection of retained audit facts, not a replay of original
+// narrative. Legacy text/extra keys are never read or returned. Frozen envelope
+// bodies and template versions are unchanged; no capability is re-executed.
+const TERMINAL_TEXT: Readonly<Record<TerminalLine['outcome'], string>> = {
+  CONFIRMED: 'Запись подтверждена.',
+  SUBMITTED: 'Результат пока не подтверждён. Не отправляйте повторно.',
+  NOT_CONFIRMED: 'Запись не подтверждена.',
+  EXPIRED_UNUSED: 'Срок действия предложения истёк.',
+  SUPERSEDED: 'Предложение заменено новой версией.',
+  CANCELLED: 'Предложение закрыто.',
+  DELIVERED_ONLY: 'Предложение доставлено без возможности действия.',
 };
-
-const isTerminalLine = (value: unknown): value is TerminalLine => {
-  if (!isRecord(value) || typeof value.text !== 'string') return false;
-  const outcomes: readonly TerminalLine['outcome'][] = [
-    'SUBMITTED',
-    'CONFIRMED',
-    'NOT_CONFIRMED',
-    'EXPIRED_UNUSED',
-    'SUPERSEDED',
-    'CANCELLED',
-    'DELIVERED_ONLY',
-  ];
-  if (!outcomes.includes(value.outcome as TerminalLine['outcome']))
-    return false;
-  // Contract §4.2: a canonical action reference is present iff CONFIRMED.
-  return value.outcome === 'CONFIRMED'
-    ? typeof value.action_receipt_ref === 'string' &&
-        value.action_receipt_ref.trim().length > 0
-    : value.action_receipt_ref === null;
+const terminalLines = (
+  value: unknown,
+  receipts: readonly {
+    outcome: string;
+    refusalCode: string | null;
+    actionReceiptRef: string | null;
+  }[],
+): TerminalLine[] => {
+  if (!Array.isArray(value)) return [];
+  const refused = receipts.filter(
+    (receipt) =>
+      receipt.outcome !== 'ACCEPTED' && receipt.actionReceiptRef === null,
+  );
+  // Ambiguous or missing canonical adjudication cannot supply a specific reason.
+  const refusal =
+    refused.length === 1
+      ? reasonTextOrNull(refused[0].refusalCode)?.rendered
+      : undefined;
+  return value.flatMap((line: unknown): TerminalLine[] => {
+    if (
+      !isRecord(line) ||
+      typeof line.outcome !== 'string' ||
+      !Object.prototype.hasOwnProperty.call(TERMINAL_TEXT, line.outcome)
+    )
+      return [];
+    const outcome = line.outcome as TerminalLine['outcome'];
+    if (
+      outcome === 'CONFIRMED'
+        ? typeof line.action_receipt_ref !== 'string' ||
+          line.action_receipt_ref.trim().length === 0
+        : line.action_receipt_ref !== null
+    )
+      return [];
+    return [
+      {
+        outcome,
+        text:
+          outcome === 'NOT_CONFIRMED'
+            ? (refusal ?? TERMINAL_TEXT[outcome])
+            : TERMINAL_TEXT[outcome],
+        action_receipt_ref: line.action_receipt_ref as string | null,
+      },
+    ];
+  });
 };
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>

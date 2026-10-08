@@ -74,7 +74,7 @@ export interface ConversationErasureResult {
 }
 
 /**
- * P-RT6's dark provider. K12 will schedule it; this unit only establishes the atomic mechanism.
+ * P-RT6's existing job, called by the explicitly authenticated privacy owner.
  *
  * Acquire Gate 9's lock in a separate statement BEFORE taking the target snapshot. A lock inside
  * the erasure CTE would retain a pre-wait READ COMMITTED snapshot and miss a concurrent writer.
@@ -96,7 +96,7 @@ export class WidgetConversationErasureJob {
     );
   }
 
-  /** The future privacy owner must resolve authority in this SAME ReadCommitted transaction. */
+  /** The privacy owner resolves authority in this SAME ReadCommitted transaction. */
   async runInTransaction(
     tx: RequestTx,
     request: ConversationErasureRequest,
@@ -273,7 +273,77 @@ export class WidgetConversationErasureJob {
         FROM changed
       `;
 
-    return Object.freeze({ tombstonesWritten });
+    const repaired = await this.repairRetainedTerminalContent(tx, request, now);
+    return Object.freeze({ tombstonesWritten: tombstonesWritten + repaired });
+  }
+
+  /** Remove legacy narrative accidentally retained in the audit-only terminal JSON.
+   * Only emissions already tombstoned by THIS request are eligible. A completion
+   * replay may repair those bytes, never erase a new row or change its completion.
+   * Tombstones name the exact removed JSON pointers; outcome/ref audit survives.
+   */
+  async repairRetainedTerminalContent(
+    tx: RequestTx,
+    request: ConversationErasureRequest,
+    now: Date,
+  ): Promise<number> {
+    this.assertRequest(request);
+    return tx.$executeRaw`
+      WITH candidates AS MATERIALIZED (
+        SELECT e."id", e."terminalLinesJson" AS data
+        FROM "WidgetEmission" e
+        JOIN "WidgetTimelineTurn" t ON t."id" = e."turnId" AND t."tenantId" = e."tenantId"
+        WHERE e."tenantId" = ${request.tenantId}
+          AND t."conversationId" = ${request.conversationId}::uuid
+          AND t."principalProofHash" = ${request.subjectPrincipalProofHash}
+          AND t."erasedAt" IS NOT NULL AND e."erasedAt" IS NOT NULL
+          AND e."terminalLinesJson" IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM "WidgetErasureTombstone" prior
+            WHERE prior."tenantId" = e."tenantId"
+              AND prior."erasureRequestRef" = ${request.erasureRequestRef}
+              AND prior."store" = 'timeline'
+              AND prior."rowKey" = 'WidgetEmission/' || e."id"::text
+              AND prior."fieldsErased" @> ARRAY['/bodyJson']::text[]
+          )
+      ), projections AS MATERIALIZED (
+        SELECT c."id",
+          CASE WHEN jsonb_typeof(c.data) = 'array' THEN (
+            SELECT COALESCE(jsonb_agg(
+              CASE WHEN jsonb_typeof(item.value) = 'object' THEN (
+                SELECT COALESCE(jsonb_object_agg(kv.key, kv.value), '{}'::jsonb)
+                FROM jsonb_each(item.value) kv
+                WHERE kv.key IN ('outcome', 'action_receipt_ref')
+              ) ELSE 'null'::jsonb END ORDER BY item.ordinality
+            ), '[]'::jsonb)
+            FROM jsonb_array_elements(c.data) WITH ORDINALITY item
+          ) ELSE NULL END AS retained,
+          CASE WHEN jsonb_typeof(c.data) = 'array' THEN ARRAY(
+            SELECT '/terminalLinesJson/' || (item.ordinality - 1)::text ||
+              CASE WHEN jsonb_typeof(item.value) = 'object'
+                THEN '/' || replace(replace(k.key, '~', '~0'), '/', '~1') ELSE '' END
+            FROM jsonb_array_elements(c.data) WITH ORDINALITY item
+            CROSS JOIN LATERAL (
+              SELECT key FROM jsonb_object_keys(
+                CASE WHEN jsonb_typeof(item.value) = 'object' THEN item.value ELSE '{}'::jsonb END
+              ) key WHERE key NOT IN ('outcome', 'action_receipt_ref')
+              UNION ALL SELECT '' WHERE jsonb_typeof(item.value) NOT IN ('object', 'null')
+            ) k
+            ORDER BY item.ordinality, k.key
+          ) ELSE ARRAY['/terminalLinesJson']::text[] END AS paths
+        FROM candidates c
+      ), repaired AS (
+        UPDATE "WidgetEmission" e SET "terminalLinesJson" = p.retained
+        FROM projections p WHERE e."id" = p."id" AND e."tenantId" = ${request.tenantId}
+          AND e."terminalLinesJson" IS DISTINCT FROM p.retained
+          AND cardinality(p.paths) > 0
+        RETURNING e."id", p.paths
+      )
+      INSERT INTO "WidgetErasureTombstone"
+        ("id", "tenantId", "erasedAt", "erasureRequestRef", "store", "rowKey", "fieldsErased")
+      SELECT gen_random_uuid(), ${request.tenantId}, ${now}, ${request.erasureRequestRef},
+        'timeline', 'WidgetEmission/' || "id"::text, paths FROM repaired
+    `;
   }
 
   private assertRequest(request: ConversationErasureRequest): void {

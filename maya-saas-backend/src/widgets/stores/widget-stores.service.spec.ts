@@ -457,7 +457,6 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           terminalLinesJson: [
             {
               outcome: 'NOT_CONFIRMED',
-              text: 'Запись не подтверждена.',
               action_receipt_ref: null,
             },
           ],
@@ -465,7 +464,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
       });
     });
 
-    it('keeps the original refusal reason when a contradictory retry writes its terminal line', async () => {
+    it('keeps the original refusal audit without persisting prose on a contradictory retry', async () => {
       const { stores, calls } = storesOver({
         id: 'receipt-stale',
         widgetId: 'w-1',
@@ -488,7 +487,6 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           terminalLinesJson: [
             {
               outcome: 'NOT_CONFIRMED',
-              text: 'Данные изменились с момента показа. Откройте актуальную версию.',
               action_receipt_ref: null,
             },
           ],
@@ -679,7 +677,6 @@ describe('WidgetStoresService — every existing method sends what it sent befor
               terminalLinesJson: [
                 {
                   outcome: 'CONFIRMED',
-                  text: 'Запись подтверждена.',
                   action_receipt_ref: 'ae-1',
                 },
               ],

@@ -40,7 +40,9 @@ const schemaErasableFields = (): Readonly<
 };
 
 const mockPrisma = (changed = 7) => {
-  const execute = jest.fn().mockResolvedValue(changed);
+  const execute = jest.fn((strings: TemplateStringsArray) =>
+    Promise.resolve(strings.join('').includes('WITH candidates') ? 0 : changed),
+  );
   const transaction = jest.fn(
     async (work: (tx: unknown) => Promise<unknown>, options?: unknown) => {
       void options;
@@ -55,10 +57,9 @@ const mockPrisma = (changed = 7) => {
 };
 
 const statementOf = (execute: jest.Mock): string => {
-  const [strings] = execute.mock.calls.at(-1) as [
-    TemplateStringsArray,
-    ...unknown[],
-  ];
+  const [strings] = execute.mock.calls.find(([parts]: [TemplateStringsArray]) =>
+    parts.join('').includes('WITH turn_scope'),
+  ) as [TemplateStringsArray, ...unknown[]];
   return strings.join('?');
 };
 
@@ -90,7 +91,7 @@ describe('P-RT6 — conversation erasure job', () => {
     expect(transaction.mock.calls[0][1]).toEqual({
       isolationLevel: 'ReadCommitted',
     });
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(3);
     const sql = statementOf(execute);
     const [lockStrings] = execute.mock.calls[0] as [
       TemplateStringsArray,
@@ -135,7 +136,7 @@ describe('P-RT6 — conversation erasure job', () => {
     const { prisma, execute } = mockPrisma();
     await new WidgetConversationErasureJob(prisma).run(REQUEST);
     const parameters = (
-      execute.mock.calls.at(-1) as unknown as readonly unknown[]
+      execute.mock.calls[1] as unknown as readonly unknown[]
     ).slice(1);
 
     expect(parameters).toContain(REQUEST.tenantId);
@@ -166,7 +167,8 @@ describe('P-RT6 — conversation erasure job', () => {
     const execute = jest
       .fn()
       .mockImplementationOnce(() => lock)
-      .mockResolvedValue(3);
+      .mockResolvedValueOnce(3)
+      .mockResolvedValue(0);
     const tx = { $executeRaw: execute } as unknown as RequestTx;
     const { prisma, transaction } = mockPrisma();
     const pending = new WidgetConversationErasureJob(prisma).runInTransaction(
@@ -179,7 +181,7 @@ describe('P-RT6 — conversation erasure job', () => {
     expect(transaction).not.toHaveBeenCalled();
     unlock();
     await expect(pending).resolves.toEqual({ tombstonesWritten: 3 });
-    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(3);
   });
 
   it('never enters the target statement after a lock failure', async () => {

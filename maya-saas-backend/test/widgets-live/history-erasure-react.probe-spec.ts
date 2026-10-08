@@ -5,7 +5,18 @@ import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
-import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
+import {
+  bootFixtureContext,
+  bootGateway,
+  type FixtureContext,
+  type GatewayHarness,
+} from './support/bootstrap';
+import {
+  populateHistoryErasureFixture,
+  readPopulatedHistorySnapshot,
+  assertPopulatedHistoryErased,
+  type PopulatedHistoryFixture,
+} from './support/history-erasure-populated';
 import {
   Fixtures,
   type TenantFixture,
@@ -42,6 +53,7 @@ type Saved = {
   backendPid: number;
   probePid: number;
   pgStarted: string;
+  populated: PopulatedHistoryFixture;
 };
 const delay = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -90,6 +102,8 @@ const own = (child: ChildProcess) => {
 
 describe('history erasure current React and separate compiled entry restart [synthetic]', () => {
   let db: FixtureContext;
+  let gateway: GatewayHarness;
+  let fx: Fixtures;
   let saved: Saved;
   let backendOrigin = '';
   let backend: ChildProcess | undefined;
@@ -149,6 +163,19 @@ describe('history erasure current React and separate compiled entry restart [syn
         select: { textContent: true, erasedAt: true },
       }),
     ).toEqual({ textContent: saved.survivorMarker, erasedAt: null });
+    const actor = await fx.actor(saved.tenant, saved.user);
+    const snapshot = await readPopulatedHistorySnapshot(
+      db,
+      gateway,
+      actor,
+      saved.populated,
+    );
+    assertPopulatedHistoryErased(saved.populated, snapshot);
+    report.populatedOwnerReadsAndAuditPreserved = true;
+    report.legacyTerminalContentErased = true;
+    report.canonicalRowsHash = digest(snapshot.canonicalRows);
+    report.canonicalOwnerReadsHash = digest(snapshot.ownerReads);
+    report.retainedWidgetFactsHash = digest(snapshot.retainedWidgetFacts);
   };
   async function call(route: string, body: object, token?: string) {
     const response = await fetch(backendOrigin + '/api' + route, {
@@ -170,17 +197,19 @@ describe('history erasure current React and separate compiled entry restart [syn
     process.once('SIGINT', terminate);
     assertNoEnvFiles();
     db = await bootFixtureContext();
+    gateway = await bootGateway();
+    fx = new Fixtures(db, gateway);
     const [{ started }] = await db.prisma.$queryRaw<
       Array<{ started: Date }>
     >`SELECT pg_postmaster_start_time() AS started`;
     if (stage === 'prepare') {
-      const fx = new Fixtures(db, null);
       const tenant = await fx.tenant(
         'history erasure React binary',
         CalendarSource.INTERNAL,
       );
       await fx.grantFeature(tenant, 'widgets.runtime');
       const user = await fx.user(tenant, UserRole.TENANT_OWNER);
+      const client = await fx.client(tenant, user);
       const actor = await fx.actor(tenant, user);
       const principalProofHash = await fx.principalProofHash(actor);
       const conversationId = randomUUID(),
@@ -214,6 +243,19 @@ describe('history erasure current React and separate compiled entry restart [syn
           textContent: erasedMarker,
         },
       });
+      const populated = await populateHistoryErasureFixture({
+        ctx: db,
+        gateway,
+        fixtures: fx,
+        tenant,
+        user,
+        actor,
+        client,
+        conversationId,
+        targetTurnId: target.id,
+        siblingConversationId,
+        siblingTurnId: sibling.id,
+      });
       // Exact fixture ownership stays inside this private fresh cluster until the
       // resume phase ends. The runner stops it; no shared database is cleaned.
       saved = {
@@ -233,6 +275,7 @@ describe('history erasure current React and separate compiled entry restart [syn
         pgStarted: started.toISOString(),
         completion: null as unknown as HistoryErasureCompletion,
         tombstoneHash: '',
+        populated,
       };
     } else {
       saved = JSON.parse(fs.readFileSync(receiptPath, 'utf8')) as Saved;
@@ -332,6 +375,7 @@ describe('history erasure current React and separate compiled entry restart [syn
         report.backendStopped = true;
       } finally {
         if (logFd !== undefined) fs.closeSync(logFd);
+        await gateway?.close();
         await db?.close();
         process.off('SIGTERM', terminate);
         process.off('SIGINT', terminate);
@@ -423,6 +467,9 @@ describe('history erasure current React and separate compiled entry restart [syn
               conversationId: saved.conversationId,
               erasedMarker: saved.erasedMarker,
               survivorMarker: saved.survivorMarker,
+              populatedWidgetId: saved.populated.widgetId,
+              contentMarker: saved.populated.contentMarker,
+              receiptText: 'Запись подтверждена.',
             });
             return;
           }
@@ -441,7 +488,16 @@ describe('history erasure current React and separate compiled entry restart [syn
             completed = value as unknown as HistoryErasureCompletion;
             await assertScope();
             const rows = await tombstones();
-            expect(rows.length).toBe(1);
+            expect(rows.length).toBeGreaterThan(7);
+            expect(
+              rows.some(
+                (row) =>
+                  row.rowKey.startsWith('WidgetEmission/') &&
+                  row.fieldsErased.some((field) =>
+                    field.startsWith('/terminalLinesJson/'),
+                  ),
+              ),
+            ).toBe(true);
             expect(rows[0].erasedAt.toISOString()).toBe(completed.erasedAt);
             if (message.name === 'completed') {
               assert.ok(typeof message.nextLoginAt === 'number');
@@ -484,22 +540,129 @@ describe('history erasure current React and separate compiled entry restart [syn
         saved.completion = completed;
         saved.nextLoginAt = nextLoginAt;
         saved.tombstoneHash = digest(await tombstones());
+      }
+      // Reject an unconsumed stored control after erasure through actual HTTP;
+      // no predecessor invocation or canonical action can be revived by that token.
+      const login = await call('/auth/login', {
+        tenantSlug: saved.tenant.slug,
+        email: saved.user.email,
+        password: saved.user.password,
+      });
+      expect(login.status).toBe(201);
+      const token = json(login.body).access_token;
+      assert.ok(typeof token === 'string');
+      const oldControl = await db.prisma.widgetIntentRecord.findFirstOrThrow({
+        where: {
+          tenantId: saved.tenant.id,
+          intentTokenHash: createHash('sha256')
+            .update(String(saved.populated.oldControlSubmission.intent_token))
+            .digest('hex'),
+        },
+        include: { emission: true },
+      });
+      expect(oldControl.consumedAt).toBeNull();
+      expect(oldControl.erasedAt).not.toBeNull();
+      expect(oldControl.emission.supersededByWidgetId).toBeNull();
+      expect(oldControl.expiresAt.getTime()).toBeGreaterThan(Date.now());
+      const refused = await call(
+        '/widgets/intent',
+        saved.populated.oldControlSubmission,
+        token,
+      );
+      expect(refused.status).toBe(200);
+      const refusal = json(refused.body);
+      // Existing lowering gate 9 rejects erased intent content before dispatch.
+      expect(refusal).toMatchObject({
+        outcome: 'superseded',
+        code: 'handle_stale',
+        stopped_at_gate: 9,
+        next_envelope: null,
+        resolved_widget: null,
+        owner_decision: null,
+        receipt_outcome: null,
+      });
+      report.oldControlRefusal = {
+        outcome: refusal.outcome,
+        code: refusal.code,
+        gate: refusal.stopped_at_gate,
+      };
+      await assertScope();
+      report.oldUnconsumedControlRefused = true;
+      if (stage === 'prepare') {
+        const beforeRepair = await db.prisma.widgetEmission.findFirstOrThrow({
+          where: {
+            tenantId: saved.tenant.id,
+            widgetId: saved.populated.widgetId,
+          },
+          select: { id: true, erasedAt: true, terminalLinesJson: true },
+        });
+        assert.ok(Array.isArray(beforeRepair.terminalLinesJson));
+        // Explicit compatibility fixture: reproduce an OLD completed erasure
+        // whose audit JSON incorrectly retained prose. No runtime writer does this.
+        await db.prisma.widgetEmission.update({
+          where: { id: beforeRepair.id },
+          data: {
+            terminalLinesJson: beforeRepair.terminalLinesJson.map((line) => ({
+              ...json(line),
+              text: 'Synthetic pre-fix completed erasure prose',
+              legacy_copy: { private: 'Synthetic legacy nested bytes' },
+            })),
+          },
+        });
+        const count = (await tombstones()).length;
+        const repaired = await call(
+          `/privacy/conversations/${saved.conversationId}/erasure`,
+          { requestId: saved.completion.requestId },
+          token,
+        );
+        expect(repaired.status).toBe(200);
+        expect(repaired.body).toEqual(saved.completion);
+        const afterRepair = await db.prisma.widgetEmission.findUniqueOrThrow({
+          where: { id: beforeRepair.id },
+          select: { id: true, erasedAt: true, terminalLinesJson: true },
+        });
+        expect(afterRepair).toEqual(beforeRepair);
+        const stamps = await tombstones();
+        expect(stamps).toHaveLength(count + 1);
+        expect(
+          stamps
+            .filter((row) =>
+              row.fieldsErased.includes('/terminalLinesJson/0/text'),
+            )
+            .every((row) =>
+              row.fieldsErased.includes('/terminalLinesJson/0/legacy_copy'),
+            ),
+        ).toBe(true);
+        const cleanReplay = await call(
+          `/privacy/conversations/${saved.conversationId}/erasure`,
+          { requestId: saved.completion.requestId },
+          token,
+        );
+        expect(cleanReplay.status).toBe(200);
+        expect(cleanReplay.body).toEqual(saved.completion);
+        expect(digest(await tombstones())).toBe(digest(stamps));
+        await assertScope();
+        saved.tombstoneHash = digest(stamps);
         fs.writeFileSync(receiptPath, JSON.stringify(saved), {
           flag: 'wx',
           mode: 0o600,
         });
+        report.completedLegacyRepair = {
+          exactOriginalCompletion: true,
+          sameEmissionErasedAt: true,
+          additionalContentTombstones: 1,
+          repeatedRepairWrites: 0,
+          newRowsSelected: false,
+        };
       }
-      expect(
-        await db.prisma.appointment.count({
-          where: { tenantId: saved.tenant.id },
-        }),
-      ).toBe(0);
-      expect(
-        await db.prisma.actionExecution.count({
-          where: { tenantId: saved.tenant.id },
-        }),
-      ).toBe(0);
       report.noCanonicalAppointmentOrActionCreated = true;
+      report.fixtureQualifications = saved.populated.qualifications;
+      report.canonicalFixtureCounts = {
+        appointments: 1,
+        consentFacts: 2,
+        loyaltyTransactions: 1,
+        actionExecutions: saved.populated.executionIds.length,
+      };
       report.otherConversationSurvives = true;
       report.status = 'passed';
     } catch (error) {

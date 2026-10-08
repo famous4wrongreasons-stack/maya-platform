@@ -22,6 +22,7 @@ export interface WidgetItemView {
   readonly display: 'live' | 'pending' | 'collapsed' | 'stale' | 'terminal';
   readonly pending: InteractiveRefKey | null;
   readonly sentence: WidgetSentence | null;
+  readonly receiptRefresh?: 'available' | 'pending' | 'unavailable' | null;
 }
 
 type ResultOrNone = RenderResult | null;
@@ -33,12 +34,15 @@ export function WidgetCard({
   t,
   activate,
   rendered,
+  refreshBookingReceipt,
   variant = 'lane',
 }: {
   readonly item: WidgetItemView;
   readonly t: Tokens;
   readonly rendered?: ((itemId: string) => void) | undefined;
   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
+  /** Separate receipt READ, using only the local item identity. Never an intent activation. */
+  readonly refreshBookingReceipt?: (itemId: string) => void;
   /** In the lane a card is one turn's width; in the fullscreen sheet it is the whole sheet. */
   readonly variant?: 'lane' | 'sheet';
 }) {
@@ -183,6 +187,25 @@ export function WidgetCard({
         >
           {widgetSentence(item.sentence)}
         </p>
+      )}
+
+      {item.receiptRefresh == null || refreshBookingReceipt === undefined ? null : (
+        <div className="widget-receipt-refresh" style={{ marginTop: 8 }}>
+          <button
+            type="button"
+            disabled={item.receiptRefresh === 'pending'}
+            aria-busy={item.receiptRefresh === 'pending' ? 'true' : undefined}
+            onClick={() => {
+              if (item.receiptRefresh !== 'pending') refreshBookingReceipt(item.id);
+            }}
+            style={{ padding: '10px 12px', border: '1px solid ' + c.line, borderRadius: 12, background: 'transparent', color: c.ink, font: 'inherit', fontSize: 13, cursor: item.receiptRefresh === 'pending' ? 'default' : 'pointer' }}
+          >
+            {item.receiptRefresh === 'pending' ? 'Проверяем результат…' : 'Проверить результат'}
+          </button>
+          <p role="status" style={{ margin: '6px 0 0', fontSize: 12.5, lineHeight: 1.45, color: c.muted }}>
+            {item.receiptRefresh === 'unavailable' ? 'Не удалось проверить результат. Попробуйте ещё раз.' : ''}
+          </p>
+        </div>
       )}
     </div>
   );

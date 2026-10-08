@@ -87,7 +87,7 @@ async function main() {
   const terminate = () => { void cleanup().finally(() => process.exit(2)); };
   process.once('disconnect', terminate); process.once('SIGTERM', terminate); process.once('SIGINT', terminate);
   const observed = [];
-  const report = { contract: 'maya.history-erasure-react-browser/1', stage: input.stage, status: 'running', actualReact: true, actualHttp: true, authentication: 'existing synthetic debug email', backend: 'compiled production entry, NODE_ENV=test', fixtureCoverage: 'synthetic text conversations and local unsent draft; no populated historical widget or receipt fixture', realModelAcceptance: false, productionConfiguration: false, screenshots: [], checks: {} };
+  const report = { contract: 'maya.history-erasure-react-browser/1', stage: input.stage, status: 'running', actualReact: true, actualHttp: true, authentication: 'existing synthetic debug email', backend: 'compiled production entry, NODE_ENV=test', fixtureCoverage: 'synthetic populated historical booking/metric envelopes, render and adjudication receipts, C/X fields, local draft and canonical owners; consent register owner unavailable', realModelAcceptance: false, productionConfiguration: false, screenshots: [], checks: {} };
   async function capture(name) {
     await page.send('Page.bringToFront');
     await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
@@ -101,7 +101,14 @@ async function main() {
     assert.equal(await page.eval(`Q.all('button[data-ref],button[data-personal-control]').filter(Q.visible).length`), 0);
     report.checks.erasedMarkerAbsent = true;
     report.checks.siblingConversationSurvives = true;
-    report.checks.textOnlyFixtureHasNoActionControls = true;
+    assert.equal(await page.eval(`document.body.innerText.includes(${JSON.stringify(input.receiptText)})`), false);
+    assert.equal(await page.eval(`document.body.innerText.includes(${JSON.stringify(input.contentMarker)})`), false);
+    const latest = page.apiRequests('/widgets/resolve').filter(r => r.finishedAt && r.status === 200).at(-1);
+    const wire = JSON.parse(await page.responseBody(latest.requestId));
+    assert.equal(JSON.stringify(wire).includes(input.populatedWidgetId), false);
+    assert.equal(JSON.stringify(wire).includes(input.contentMarker), false);
+    report.checks.populatedHistoricalReceiptRemoved = true;
+    report.checks.historicalActionsNotRestored = true;
   }
   try {
     relay = createPersonalProofServer({ root: path.join(root, 'dist/web'), backendOrigin: localOrigin(input.backendOrigin), historyErasureFault: {
@@ -140,6 +147,17 @@ async function main() {
     const nextLoginAt = await login(page, input.email);
     if (input.stage === 'prepare') {
       assert.ok(await hasText(page, input.erasedMarker));
+      assert.ok(await hasText(page, input.receiptText), 'Populated canonical receipt is visible before erasure');
+      const initialRead = page.apiRequests('/widgets/resolve').filter(r => r.finishedAt && r.status === 200).at(-1);
+      const historical = JSON.parse(await page.responseBody(initialRead.requestId));
+      const target = historical.widgets.find(row => row.envelope.widget_id === input.populatedWidgetId);
+      assert.ok(target, 'Actual historical card must be returned before erasure');
+      assert.ok(JSON.stringify(target.envelope.body).includes(input.contentMarker));
+      assert.equal(JSON.stringify(target.terminal_lines).includes(input.contentMarker), false, 'Legacy prose never leaves audit projection');
+      assert.equal(target.reread_intent, null);
+      assert.equal(await page.eval(`Q.all('button[data-ref],button[data-personal-control]').filter(Q.visible).length`), 0);
+      report.checks.populatedReceiptVisibleBeforeErasure = true;
+      report.checks.frozenHistoricalBodyReadWithoutLiveControls = true;
       assert.ok(await page.waitFor('Q.composer() && !Q.composer().readOnly'));
       assert.equal(await page.fill('Q.composer()', 'Synthetic private draft must be cleared'), true);
       assert.equal(await page.eval('Q.composer().value.length > 0'), true);

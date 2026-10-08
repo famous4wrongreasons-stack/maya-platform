@@ -177,6 +177,7 @@ export interface ActivationCounters {
 }
 
 export interface WidgetsDeps {
+  readonly transport: Pick<Transport, 'resolveWidgets'>;
   readonly recordRender?: (envelope: WidgetEnvelope) => Promise<boolean>;
   readonly timeline: TimelineWriter;
   readonly render: RenderFn;
@@ -197,6 +198,8 @@ export interface Widgets extends DetailSource {
   hasPresentedApproval(envelope: WidgetEnvelope): boolean;
   /** Assignable to `WidgetPort.activate`; the outcome is for tests and the dev fixture host. */
   activate(itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome>;
+  /** One explicit bounded READ; a spent booking never regains controls. */
+  refreshBookingReceipt(itemId: string): Promise<void>;
   /** V6: the live envelopes, vault side (never the view). */
   lockSources(): readonly WidgetEnvelope[];
   counters(): ActivationCounters;
@@ -218,6 +221,8 @@ interface Entry {
   /** Presentation receipt only; never rewrites the sealed envelope or its lifecycle. */
   priceReceipt: WidgetSentence | null;
   bookingReceipt: boolean;
+  receiptRefresh: 'available' | 'pending' | 'unavailable' | null;
+  confirmedReceiptRef: string | null;
   /** Spent selector presentation only; never used in a request or booking decision. */
   pendingStaffOption: string | null;
   inflight: AbortHandle | null;
@@ -585,6 +590,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     display: entry.pending !== null && entry.display === 'live' ? 'pending' : entry.display,
     pending: entry.pending,
     sentence: entry.sentence,
+    ...(entry.bookingReceipt ? { receiptRefresh: entry.receiptRefresh } : {}),
   });
 
   const publish = (entry: Entry): void => {
@@ -665,8 +671,10 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
         display: next.display,
         sentence: next.sentence,
         priceReceipt: null,
-      bookingReceipt: false,
-      pendingStaffOption: null,
+        bookingReceipt: false,
+        receiptRefresh: null,
+        confirmedReceiptRef: null,
+        pendingStaffOption: null,
         emission: predecessor.emission + 1,
       });
       if (predecessor.display === 'collapsed') vault.drop(predecessor.itemId);
@@ -689,6 +697,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       sentence: next.sentence,
       priceReceipt: null,
       bookingReceipt: false,
+      receiptRefresh: null,
+      confirmedReceiptRef: null,
       pendingStaffOption: null,
       inflight: null,
       expiry: null,
@@ -745,6 +755,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       sentence: next.sentence,
       priceReceipt: null,
       bookingReceipt: false,
+      receiptRefresh: null,
+      confirmedReceiptRef: null,
       pendingStaffOption: null,
       inflight: null,
       expiry: null,
@@ -857,6 +869,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       sentence: next.sentence,
       priceReceipt: null,
       bookingReceipt: false,
+      receiptRefresh: null,
+      confirmedReceiptRef: null,
       pendingStaffOption: null,
       emission: opener.emission + 1,
     });
@@ -994,9 +1008,11 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       cancelWork(entry);
       vault.drop(entry.itemId);
       entry.bookingReceipt = true;
+      entry.receiptRefresh = 'available';
       entry.display = 'terminal';
       entry.result = bookingReceiptResult(entry.result, entry.view);
       if (outcome.status === 'settled') {
+        entry.confirmedReceiptRef = outcome.lines.find(line => line.outcome === 'CONFIRMED')?.action_receipt_ref ?? null;
         for (const line of outcome.lines) if (line.text.trim().length > 0) publishOutcome(submission.widget_id, line);
         entry.sentence = null;
       } else entry.sentence = outcome.status === 'refused' ? outcome.sentence
@@ -1074,6 +1090,56 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     return endInSentence(entry, sentenceFor(outcome), true);
   };
 
+  const refreshBookingReceipt = async (itemId: string): Promise<void> => {
+    const entry = entries.get(itemId);
+    if (entry === undefined || !entry.bookingReceipt || entry.envelope.kind !== 'BOOKING_CONFIRMATION' || entry.inflight !== null) return;
+    const source = entry.envelope;
+    const widgetId = source.widget_id;
+    const tenant = source.tenant_id;
+    const principal = source.integrity.principal_proof_hash;
+    const turn = source.correlation.turn_id;
+    const parent = source.correlation.parent_widget_id;
+    const emission = entry.emission;
+    const abort = deps.newAbort();
+    entry.inflight = abort;
+    const active = (): boolean => entries.get(itemId) === entry && entry.emission === emission && entry.envelope === source && entry.inflight === abort && !abort.signal.aborted;
+    entry.receiptRefresh = 'pending';
+    publish(entry);
+    if (!active()) return;
+    let lines: readonly TerminalLine[] | null = null;
+    try {
+      const page = await deps.transport.resolveWidgets({ thread_page: { limit: 20 } }, abort.signal);
+      if (page.ok && page.value.tenant_bound && typeof tenant === 'string' && tenant.length > 0 && typeof principal === 'string' && principal.length > 0) {
+        const candidates = page.value.widgets.filter(widget => widget.envelope.widget_id === widgetId);
+        const current = candidates.length === 1 ? candidates[0] : undefined;
+        if (current !== undefined && current.envelope.kind === 'BOOKING_CONFIRMATION'
+          && current.envelope.tenant_id === tenant && current.envelope.integrity.principal_proof_hash === principal
+          && current.envelope.correlation.turn_id === turn && current.envelope.correlation.parent_widget_id === parent
+          && current.terminal_lines.some(line => line.text.trim().length > 0)) lines = current.terminal_lines;
+      }
+    } catch {
+      // A missing or lost READ cannot erase a known receipt or grant mutation retry.
+    }
+    if (!active()) return;
+    if (lines !== null) {
+      const confirmed = new Set(lines.filter(line => line.outcome === 'CONFIRMED').map(line => line.action_receipt_ref));
+      if (confirmed.size > 1 || (entry.confirmedReceiptRef !== null && !confirmed.has(entry.confirmedReceiptRef))) lines = null;
+      else if (entry.confirmedReceiptRef !== null) lines = lines.filter(line => line.outcome === 'CONFIRMED');
+    }
+    if (lines !== null) {
+      for (const line of lines) {
+        if (!active()) return;
+        publishOutcome(widgetId, line);
+      }
+      if (!active()) return;
+      entry.confirmedReceiptRef ??= lines.find(line => line.outcome === 'CONFIRMED')?.action_receipt_ref ?? null;
+      entry.sentence = null;
+    }
+    entry.inflight = null;
+    entry.receiptRefresh = lines === null ? 'unavailable' : 'available';
+    publish(entry);
+  };
+
   const offEnvironment = deps.environment.onA11yChange(() => {
     for (const entry of entries.values()) {
       const result = renderEntry(entry.view, entry.verdict, entry.place);
@@ -1114,6 +1180,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     hasPresentedApproval,
     rendered,
     activate,
+    refreshBookingReceipt,
     openDetail,
     releaseDetail(itemId) {
       if (entries.get(itemId)?.place !== 'detail') return;
