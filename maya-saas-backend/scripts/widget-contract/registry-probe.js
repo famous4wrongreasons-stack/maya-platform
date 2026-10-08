@@ -3,9 +3,12 @@ const {canonicalProductionPolicyDefinitions}=require('../../src/action-engine/ac
 const {MAYA_AI_TOOL_CATALOG}=require('../../src/ai-tools/ai-tool.catalog');
 const {C9_CAPABILITIES}=require('../../src/orchestration/c9.registry');
 const {SERVICE_PRICE_CAPABILITY,SERVICE_PRICE_TOOL}=require('../../src/crm/yclients-service-price.contract');
+const {GOODS_RECEIPT_CAPABILITY,GOODS_RECEIPT_TOOL}=require('../../src/crm/goods-receipt.contract');
 
-// The former census remains an independent baseline. Exclude only the one exact
-// approved pricing entry in each registry, then expose its identity separately.
+// Preserve the pre-pricing census (226/221/48/57). Only the exact approved
+// pricing delta (aba6bfe7) and goods delta (38cb213a, F32b/F74b) are subtracted;
+// expose every admitted identity separately so an unknown/renamed/duplicate
+// entry cannot be hidden by increasing the current cardinality pin.
 const keys={
   AE:new ActionCapabilityRegistry().list().map(row=>row.capability),
   POLICY:canonicalProductionPolicyDefinitions().map(row=>row.capability),
@@ -18,14 +21,21 @@ const pricingKey={
   TOOL:SERVICE_PRICE_TOOL,
   C9:SERVICE_PRICE_TOOL,
 };
+const goodsKeys={
+  AE:[GOODS_RECEIPT_CAPABILITY],
+  POLICY:[GOODS_RECEIPT_CAPABILITY],
+  TOOL:[GOODS_RECEIPT_TOOL,'inventory.goods.read'],
+  C9:[GOODS_RECEIPT_TOOL,'inventory.goods.read'],
+};
 const census = {
   current:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.length])),
-  historical:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key!==pricingKey[space]).length])),
+  historical:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key!==pricingKey[space]&&!goodsKeys[space].includes(key)).length])),
   pricing:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key===pricingKey[space])])),
+  goods:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>goodsKeys[space].includes(key))])),
 };
 
 // Additional output mode for the existing contract generator. Never activates a
-// grant/certificate. The normal census output is byte-compatible.
+// grant/certificate. Census reconciliation does not alter this release snapshot.
 if (process.argv[2] === '--release-snapshot') {
   const { INTENT_TEMPLATE_INVENTORY } = require('../../src/widgets/emission/intent-template.inventory');
   const { bookingTemplateAsIntentRow } = require('../../src/widgets/booking/booking-intent-template.registry');

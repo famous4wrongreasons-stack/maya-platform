@@ -5,6 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import vm from 'node:vm';
 import ts from 'typescript';
 import {
   assemble,
@@ -21,6 +22,60 @@ import {
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const declared = registry(path.join(backend, 'test/widgets-live/mutations'));
 const head = 'a'.repeat(40);
+
+test('contract registry census preserves historical pins and admits only exact approved goods/pricing additions', () => {
+  const checkerFile = path.join(backend, 'scripts/widget-contract-check.mjs');
+  const checker = ts.createSourceFile(checkerFile, fs.readFileSync(checkerFile, 'utf8'), ts.ScriptTarget.ES2022, true);
+  const expectedNodes = [];
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(checker) === 'expected' &&
+        node.initializer && ts.isObjectLiteralExpression(node.initializer) &&
+        node.initializer.properties.some(property => property.name?.getText(checker) === 'historical'))
+      expectedNodes.push(node.initializer);
+    ts.forEachChild(node, visit);
+  };
+  visit(checker);
+  assert.equal(expectedNodes.length, 1, 'Use the actual checker expectation, not a second permissive oracle');
+  const expected = JSON.parse(JSON.stringify(vm.runInNewContext('(' + expectedNodes[0].getText(checker) + ')')));
+  const baseline = { AE: 226, POLICY: 221, TOOL: 48, C9: 57 };
+  assert.deepEqual(expected.historical, baseline, 'Historical pins must not advance with new registrations');
+  const pricing = { AE: 'crm.service.fixed-price.update.v1', POLICY: 'crm.service.fixed-price.update.v1', TOOL: 'catalog.service.price.update', C9: 'catalog.service.price.update' };
+  const goods = { AE: ['crm.goods.receipt.create.v1'], POLICY: ['crm.goods.receipt.create.v1'], TOOL: ['inventory.goods.receipt.prepare', 'inventory.goods.read'], C9: ['inventory.goods.receipt.prepare', 'inventory.goods.read'] };
+  const keys = Object.fromEntries(Object.entries(baseline).map(([space, count]) => [space, [...Array.from({ length: count }, (_, index) => `historical:${space}:${index}`), pricing[space], ...goods[space]]]));
+  const source = fs.readFileSync(path.join(backend, 'scripts/widget-contract/registry-probe.js'), 'utf8');
+  const census = rows => {
+    let output = '';
+    const modules = {
+      '../../src/action-engine/action-engine.registry': { ActionCapabilityRegistry: class { list() { return rows.AE.map(capability => ({ capability })); } } },
+      '../../src/action-engine/action-engine.policy-registry': { canonicalProductionPolicyDefinitions: () => rows.POLICY.map(capability => ({ capability })) },
+      '../../src/ai-tools/ai-tool.catalog': { MAYA_AI_TOOL_CATALOG: rows.TOOL.map(name => ({ name })) },
+      '../../src/orchestration/c9.registry': { C9_CAPABILITIES: rows.C9.map(capabilityKey => ({ capabilityKey })) },
+      '../../src/crm/yclients-service-price.contract': { SERVICE_PRICE_CAPABILITY: pricing.AE, SERVICE_PRICE_TOOL: pricing.TOOL },
+      '../../src/crm/goods-receipt.contract': { GOODS_RECEIPT_CAPABILITY: goods.AE[0], GOODS_RECEIPT_TOOL: goods.TOOL[0] },
+    };
+    vm.runInNewContext(source, {
+      require: name => { assert.ok(Object.hasOwn(modules, name), 'Census must not load release/mutation machinery'); return modules[name]; },
+      process: { argv: ['node', 'registry-probe.js'] },
+      console: { log: value => { output += value; } },
+    });
+    return JSON.parse(output);
+  };
+  assert.deepEqual(census(keys), expected);
+  for (const space of Object.keys(baseline)) {
+    const renamed = structuredClone(keys);
+    renamed[space][renamed[space].indexOf(goods[space][0])] += '.unapproved';
+    const result = census(renamed);
+    assert.deepEqual(result.current, expected.current, 'The adversary preserves total cardinality');
+    assert.notDeepEqual(result, expected, 'A same-count renamed goods registration must fail');
+  }
+  const duplicated = structuredClone(keys);
+  duplicated.TOOL[0] = goods.TOOL[0];
+  assert.deepEqual(census(duplicated).current, expected.current);
+  assert.notDeepEqual(census(duplicated), expected, 'A duplicate approved key cannot replace historical membership');
+  const unapproved = structuredClone(keys);
+  unapproved.C9.push('inventory.goods.unapproved');
+  assert.notDeepEqual(census(unapproved), expected, 'No broad goods prefix exemption');
+});
 
 test('R01 integration artifact is built before unfiltered backend and mutation controls', () => {
   const command = '        run: node ../maya-chat-shell/build.mjs';

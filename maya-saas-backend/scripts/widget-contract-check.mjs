@@ -765,7 +765,7 @@ try {
     { cwd: BE, encoding: 'utf8' },
   ).trim();
   const expected = {
-    current: { AE: 227, POLICY: 222, TOOL: 49, C9: 58 },
+    current: { AE: 228, POLICY: 223, TOOL: 51, C9: 60 },
     historical: { AE: 226, POLICY: 221, TOOL: 48, C9: 57 },
     pricing: {
       AE: ['crm.service.fixed-price.update.v1'],
@@ -773,16 +773,22 @@ try {
       TOOL: ['catalog.service.price.update'],
       C9: ['catalog.service.price.update'],
     },
+    goods: {
+      AE: ['crm.goods.receipt.create.v1'],
+      POLICY: ['crm.goods.receipt.create.v1'],
+      TOOL: ['inventory.goods.receipt.prepare', 'inventory.goods.read'],
+      C9: ['inventory.goods.receipt.prepare', 'inventory.goods.read'],
+    },
   };
   chk(
-    'the three registries load at their declared cardinalities',
+    'the four registry censuses preserve the historical baseline and exact approved deltas',
     got === JSON.stringify(expected),
     got,
     'EXECUTED',
   );
 } catch (e) {
   chk(
-    'the three registries load at their declared cardinalities',
+    'the four registry censuses preserve the historical baseline and exact approved deltas',
     false,
     String(e.message).slice(0, 120),
     'EXECUTED',
