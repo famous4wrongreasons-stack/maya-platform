@@ -566,12 +566,12 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
     );
     return { c7Id: report.revisionId!, c7Hash: report.snapshotHash!, day };
   }
-  async function publishLifecycle(s: Salon) {
+  async function publishLifecycle(s: Salon, elapsedDays: 40 | 41 = 40) {
     const client = await db.prisma.client.create({
       data: { tenantId: s.tenant.id },
     });
     privateClientIds.add(client.id);
-    const start = new Date(Date.now() - 40 * 86400000),
+    const start = new Date(Date.now() - elapsedDays * 86400000),
       end = new Date(start.getTime() + 3600000);
     // Explicit synthetic reconciled/local historical fact, not a booking action.
     const appointment = await db.prisma.appointment.create({
@@ -1161,7 +1161,7 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
         newSourceHash: newer.c7Hash,
         distinctRevision: true,
       };
-      const newerLifecycle = await publishLifecycle(saved.salon);
+      const newerLifecycle = await publishLifecycle(saved.salon, 41);
       expect(newerLifecycle.c8Id).not.toBe(originalSource.c8Id);
       currentC8Ids = [originalSource.c8Id, newerLifecycle.c8Id];
       observations.newerC8Publication = {
