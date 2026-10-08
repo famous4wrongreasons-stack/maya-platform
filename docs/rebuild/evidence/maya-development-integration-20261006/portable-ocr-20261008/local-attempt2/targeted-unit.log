@@ -1,0 +1,16 @@
+PASS src/ai-tools/goods-photo-tesseract-runtime.spec.ts
+PASS src/ai-tools/goods-photo.controller.spec.ts
+PASS src/ai-tools/goods-photo-parser.service.spec.ts
+PASS src/ai-tools/goods-photo-tesseract.spec.ts
+PASS src/ai-tools/goods-photo-runtime.spec.ts
+PASS src/ai-tools/goods-photo.service.spec.ts
+PASS src/config/runtime-config.spec.ts
+PASS src/ai-tools/goods-photo.contract.spec.ts
+PASS src/ai-tools/goods-photo-ocr-rows.spec.ts
+
+Test Suites: 9 passed, 9 total
+Tests:       233 passed, 233 total
+Snapshots:   0 total
+Time:        1.05 s
+Ran all test suites within paths "src/ai-tools/goods-photo.controller.spec.ts", "src/ai-tools/goods-photo.contract.spec.ts", "src/ai-tools/goods-photo.service.spec.ts", "src/ai-tools/goods-photo-runtime.spec.ts", "src/ai-tools/goods-photo-parser.service.spec.ts", "src/ai-tools/goods-photo-ocr-rows.spec.ts", "src/config/runtime-config.spec.ts", "src/ai-tools/goods-photo-tesseract.spec.ts", "src/ai-tools/goods-photo-tesseract-runtime.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-linux-ocr-20261008/local-attempt2/targeted-unit.json

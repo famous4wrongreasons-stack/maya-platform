@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_d1c2307a0705 on 127.0.0.1:58550 (local)
+PASS ../../../../../../../../tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr.probe-spec.ts (23.536 s)
+  actual local OCR upload-only HTTP/current React proof [SYNTHETIC IMAGES]
+    ✓ exposes actual provisional image rows and bounded errors, without starting a business workflow (19598 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        23.553 s
+Ran all test suites within paths "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-linux-ocr-20261008/http-browser-attempt2/browser-jest.json
