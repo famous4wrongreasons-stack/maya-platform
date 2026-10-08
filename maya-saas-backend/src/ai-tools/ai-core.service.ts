@@ -3107,29 +3107,76 @@ export class AiCoreService {
     );
     const currentTurn = this.persistedUserTurns.get(dto);
     if (!currentTurn) return null;
-    const context = await timeline.readConversationContext?.(
+    const projection = await timeline.readConversationContext?.(
       user,
       dto.conversationId,
       currentTurn.turnId,
+      { precedingCompletions: true },
     );
-    if (!context) return null;
-    const saved = this.record(context);
-    if (
-      saved.version !== 'maya.chat-semantic-context/1' ||
-      typeof saved.savedAt !== 'string'
-    )
-      return null;
+    const window = this.record(projection);
+    const contexts =
+      window.version === 'maya.chat-context-window/1'
+        ? Array.isArray(window.contexts) && window.contexts.length <= 8
+          ? window.contexts
+          : []
+        : [projection];
+    const decode = (value: unknown) => {
+      const saved = this.record(value);
+      if (
+        saved.version !== 'maya.chat-semantic-context/1' ||
+        typeof saved.savedAt !== 'string'
+      )
+        return null;
+      const savedDate = new Date(saved.savedAt);
+      if (!Number.isFinite(savedDate.getTime())) return null;
+      try {
+        const plan = this.conversationLayer().validatePlan(
+          saved.plan,
+          effectiveRole,
+          tools.map((t) => t.name),
+        );
+        return plan ? { saved, savedDate, plan } : null;
+      } catch {
+        // Invalid retained context is a boundary, never a reason to search past it.
+        return null;
+      }
+    };
+    let selected = decode(contexts[0]);
+    if (!selected) return null;
+    const latest = selected;
+    const nonDataInterlude = (plan: ConversationSemanticPlan) =>
+      plan.tasks.every(
+        (task) =>
+          task.data_class === 'A' &&
+          task.action === 'answer' &&
+          ['general_business_questions', 'small_talk'].includes(task.domain),
+      );
+    if (nonDataInterlude(selected.plan)) {
+      // Preserve one interrupted booking only across non-data conversation.
+      // A different task, action, absent/erased completion or the finite window
+      // ends the search. No old receipt, token or mutation is recovered.
+      for (const value of contexts.slice(1)) {
+        const candidate = decode(value);
+        if (!candidate) break;
+        if (
+          candidate.plan.tasks.length === 1 &&
+          [
+            'booking.prepare_personal',
+            'booking.find_availability',
+            'booking.create_own',
+          ].includes(candidate.plan.tasks[0].intent)
+        ) {
+          selected = candidate;
+          break;
+        }
+        if (!nonDataInterlude(candidate.plan)) break;
+      }
+    }
+    const { saved, savedDate, plan } = selected;
+    const fallback = selected !== latest ? latest.plan : null;
     const timezone = await this.resolveBusinessTimezone(
       this.requireTenant(user),
     );
-    const savedDate = new Date(saved.savedAt);
-    if (!Number.isFinite(savedDate.getTime())) return null;
-    const plan = this.conversationLayer().validatePlan(
-      saved.plan,
-      effectiveRole,
-      tools.map((t) => t.name),
-    );
-    if (!plan) return null;
     const ownerReviewClarification =
       isOwnerReviewTaskSet(plan) &&
       isOwnerReviewClarification(saved.ownerReviewClarification);
@@ -3153,13 +3200,13 @@ export class AiCoreService {
           configured.id !== retainedSource.branchId ||
           configured.sourceRevision !== retainedSource.sourceRevision
         )
-          return null;
+          return fallback;
         this.bookingPreferenceSources.set(dto, {
           branchId: configured.id,
           sourceRevision: configured.sourceRevision,
         });
       } catch (error) {
-        if (isBookingSourceUnavailable(error)) return null;
+        if (isBookingSourceUnavailable(error)) return fallback;
         throw error;
       }
     }
@@ -3204,14 +3251,14 @@ export class AiCoreService {
             this.requireTenant(user),
           );
         } catch (error) {
-          if (isBookingSourceUnavailable(error)) return null;
+          if (isBookingSourceUnavailable(error)) return fallback;
           throw error;
         }
         const sameSource = selected.sourceRevision
           ? configured?.id === selected.branch &&
             configured?.sourceRevision === selected.sourceRevision
           : configured === null;
-        if (!sameSource) return null;
+        if (!sameSource) return fallback;
         if (sameSource) {
           bookingSelectionMerged = true;
           retainAcceptedBookingServices?.(selected.services);

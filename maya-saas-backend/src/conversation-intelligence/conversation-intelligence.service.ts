@@ -100,6 +100,7 @@ export class ConversationIntelligenceService {
       'When the intent has no ready_tools, keep that intent and return no tool call. This means understood but unavailable, not misunderstood.',
       'Choose at most one next tool call. On the next planning pass, inspect tool_results and continue the first unsatisfied task.',
       'General questions, writing help and small talk need no tool and remain free-form LLM conversation.',
+      'semantic_plan may preserve the last booking across intervening general questions. It is only preference context: use it only when the current request returns to or changes that booking. Do not treat it as the current request, availability, a confirmation or mutation authority; a new booking starts afresh.',
       'Name mentions may be opaque request-local tokens such as [name removed]@nonce_1. Select the exact token for the employee only when the user means that specialist; self-identification and excluded/negated people are not employee selections. Never invent tokens or reuse tokens from earlier requests. A correction replaces the employee token; history is preference only.',
       'Do not put personal data into semantic entities; input is already redacted and tenant runtime owns identity resolution.',
     ].join('\n');

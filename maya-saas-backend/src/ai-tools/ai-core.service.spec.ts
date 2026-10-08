@@ -75,7 +75,7 @@ describe('AiCoreService', () => {
           );
         },
       );
-      let saved: unknown = null;
+      const saved: unknown[] = [];
       let serial = 0;
       const timeline = {
         readBookingSelection: jest.fn().mockResolvedValue(null),
@@ -86,13 +86,16 @@ describe('AiCoreService', () => {
             conversationId: 'booking-conversation',
           }),
         ),
-        readConversationContext: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(saved)),
+        readConversationContext: jest.fn().mockImplementation(() =>
+          Promise.resolve({
+            version: 'maya.chat-context-window/1',
+            contexts: saved.slice(-8).reverse(),
+          }),
+        ),
         persistAssistantReply: jest
           .fn<Promise<void>, [{ semanticContext: unknown }]>()
           .mockImplementation((input) => {
-            saved = input.semanticContext;
+            saved.push(input.semanticContext);
             return Promise.resolve();
           }),
       };
@@ -170,8 +173,200 @@ describe('AiCoreService', () => {
         mocks.runtime.execute.mock.calls
           .filter((call) => call[1] === 'booking.availability.read')
           .map((call) => call[2].arguments);
-      return { ...mocks, timeline, turn, availabilityArgs };
+      async function general(prompt = 'Что такое тайм-менеджмент?') {
+        mocks.model.decide.mockImplementationOnce((input) =>
+          Promise.resolve(
+            decision({
+              reply: 'Тайм-менеджмент — это планирование своего времени.',
+              toolCall: null,
+              semanticPlan: new ConversationIntelligenceService().validatePlan(
+                {
+                  tasks: [
+                    {
+                      intent: 'general.explain_term',
+                      entities: { topic: 'тайм-менеджмент' },
+                      confidence: 1,
+                    },
+                  ],
+                },
+                UserRole.CLIENT,
+                names,
+                input.conversationPlan,
+              ),
+            }),
+          ),
+        );
+        return mocks.service.chat(client, {
+          ...dto,
+          conversationId: 'booking-conversation',
+          requestId: `booking-general-${serial + 1}`,
+          messages: [{ role: 'user', content: prompt }],
+        });
+      }
+      return { ...mocks, timeline, turn, general, availabilityArgs };
     }
+
+    it('returns to the same booking after a non-data question and changes only the date', async () => {
+      const f = bookingFixture();
+      await f.turn({ ...initial, date_or_period: '2026-10-11' });
+      f.runtime.execute.mockClear();
+      const general = await f.general();
+      expect(general.reply).toContain('планирование своего времени');
+      expect(general.action).toBeNull();
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+      const followUp = await f.general('Объясни проще');
+      expect(followUp.reply).toContain('планирование своего времени');
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+      await f.turn({ date_or_period: '2026-10-12' });
+      expect(f.availabilityArgs()).toEqual([
+        {
+          date: '2026-10-12',
+          branch_id: 'branch-a',
+          staff_id: 'staff-a',
+          service_ids: ['service-a'],
+        },
+      ]);
+      expect(
+        f.runtime.execute.mock.calls.every(
+          (call) => !call[1].startsWith('appointments.'),
+        ),
+      ).toBe(true);
+    });
+
+    it.each(['barrier', 'business-task', 'window-limit', 'invalid-plan'])(
+      'does not recover older booking across %s',
+      async (boundary) => {
+        const f = bookingFixture();
+        await f.turn({ ...initial, date_or_period: '2026-10-11' });
+        const booking =
+          f.timeline.persistAssistantReply.mock.calls.at(-1)![0]
+            .semanticContext;
+        await f.general();
+        const general =
+          f.timeline.persistAssistantReply.mock.calls.at(-1)![0]
+            .semanticContext;
+        const interrupted =
+          boundary === 'barrier'
+            ? null
+            : {
+                ...(general as Record<string, unknown>),
+                plan: {
+                  tasks: [
+                    {
+                      intent:
+                        boundary === 'business-task'
+                          ? 'support.integration_status'
+                          : 'unknown.intent',
+                      entities: {},
+                      confidence: 1,
+                    },
+                  ],
+                },
+              };
+        f.timeline.readConversationContext.mockResolvedValue({
+          version: 'maya.chat-context-window/1',
+          contexts:
+            boundary === 'window-limit'
+              ? Array.from({ length: 8 }, () => general)
+              : [general, interrupted, booking],
+        });
+        f.runtime.execute.mockClear();
+        await f.turn({ date_or_period: '2026-10-12' });
+        expect(f.availabilityArgs()).toEqual([]);
+        expect(
+          f.runtime.execute.mock.calls.every(
+            (call) => !call[1].startsWith('appointments.'),
+          ),
+        ).toBe(true);
+      },
+    );
+
+    it('starts a new booking without carrying old preferences after a non-data question', async () => {
+      const f = bookingFixture();
+      await f.turn({ ...initial, date_or_period: '2026-10-11' });
+      await f.general();
+      f.runtime.execute.mockClear();
+      const response = await f.turn({}, {}, 'booking.prepare_personal');
+      expect(response.action).toBeNull();
+      expect(f.availabilityArgs()).toEqual([]);
+      expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+        'catalog.services.read',
+      ]);
+    });
+
+    it.each(['changed', 'unavailable'])(
+      'keeps the latest general context when interrupted booking source is %s',
+      async (state) => {
+        const f = bookingFixture();
+        const source = {
+          id: 'branch-a',
+          name: 'Центральный',
+          timezone: 'Europe/Moscow',
+          sourceRevision: 'a'.repeat(64),
+        };
+        f.crm.resolveConfiguredBookingBranch.mockResolvedValue(source);
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue(
+          source.sourceRevision,
+        );
+        await f.turn({ ...initial, date_or_period: '2026-10-11' });
+        await f.general();
+        if (state === 'changed')
+          f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+            ...source,
+            sourceRevision: 'b'.repeat(64),
+          });
+        else
+          f.crm.resolveConfiguredBookingBranch.mockRejectedValue(
+            new ServiceUnavailableException({
+              error: { code: 'booking_branch_source_unavailable' },
+            }),
+          );
+        f.runtime.execute.mockClear();
+        const response = await f.general('Объясни проще');
+        const plan = f.model.decide.mock.calls.at(-1)![0].conversationPlan;
+        expect(plan?.tasks.map((task) => task.intent)).toEqual([
+          'general.explain_term',
+        ]);
+        expect(plan?.tasks[0].entities).not.toHaveProperty('services');
+        expect(response.action).toBeNull();
+        expect(f.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['tomorrow', '2026-10-11'])(
+      'preserves original context age across general questions for date %s',
+      async (date) => {
+        const f = bookingFixture();
+        await f.turn({ ...initial, date_or_period: '2026-10-11' });
+        const booking = f.timeline.persistAssistantReply.mock.calls.at(-1)![0]
+          .semanticContext as {
+          savedAt: string;
+          plan: { tasks: { entities: Record<string, unknown> }[] };
+        };
+        booking.savedAt = '2020-01-01T12:00:00Z';
+        booking.plan.tasks[0].entities.date_or_period = date;
+        await f.general();
+        f.runtime.execute.mockClear();
+        await f.turn({ time_of_day: '15:00' });
+        const plan = f.model.decide.mock.calls.at(-1)![0].conversationPlan;
+        expect(plan?.tasks[0].entities.date_or_period).toBe(
+          date === 'tomorrow' ? undefined : date,
+        );
+        expect(f.availabilityArgs()).toEqual(
+          date === 'tomorrow'
+            ? []
+            : [
+                {
+                  date,
+                  time: '15:00',
+                  branch_id: 'branch-a',
+                  staff_id: 'staff-a',
+                  service_ids: ['service-a'],
+                },
+              ],
+        );
+      },
+    );
 
     it.each([false, true])(
       'retains only unambiguous current staff before the service question (ambiguous=%s)',

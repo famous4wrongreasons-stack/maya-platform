@@ -85,6 +85,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     actor: Parameters<AiTypedWidgetTriggerPort['readCurrentConversation']>[0],
     conversationId: string,
     beforeTurnId: string,
+    options?: { readonly precedingCompletions: true },
   ): Promise<unknown> {
     const tenantId = actor.tenantId;
     if (tenantId === null)
@@ -106,6 +107,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         now,
         this.encryption,
         beforeTurnId,
+        options,
       );
     });
   }

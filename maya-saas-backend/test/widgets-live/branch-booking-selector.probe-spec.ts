@@ -149,6 +149,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
     setupActionsExcludedFromBookingEffectCounts: true,
   };
   const scenarios: Scenario[] = [];
+  const generalReadStarts = new Map<string, number>();
   const principals = new Map<string, PrincipalView>();
   beforeAll(async () => {
     db = await bootFixtureContext();
@@ -215,7 +216,34 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
             'Хочу записаться',
             'Запишите меня, пожалуйста',
           ].includes(prompt ?? '');
-          const resume = prompt === 'Продолжим запись';
+          const resume =
+            prompt === 'Продолжим запись' || prompt === 'Вернёмся к записи';
+          if (
+            prompt === 'Что такое тайм-менеджмент?' ||
+            prompt === 'Объясни проще'
+          ) {
+            return Promise.resolve({
+              reply: 'Тайм-менеджмент — это планирование своего времени.',
+              semanticPlan: new ConversationIntelligenceService().validatePlan(
+                {
+                  tasks: [
+                    {
+                      intent: 'general.explain_term',
+                      entities: { topic: 'тайм-менеджмент' },
+                      confidence: 0.99,
+                    },
+                  ],
+                },
+                input.principalRole ?? UserRole.CLIENT,
+                input.tools.map((tool) => tool.name),
+                input.conversationPlan,
+              ),
+              toolCall: null,
+              provider: 'openai',
+              model: 'SCRIPTED_SYNTHETIC_GENERAL_QUESTION',
+              usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+            });
+          }
           const staffCorrection =
             /^Лучше к (\[name removed\]@[a-f0-9]{32}_\d+)$/.exec(prompt ?? '');
           const entities: Record<string, unknown> = {};
@@ -1229,6 +1257,15 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         bookingActionExecutions: 0,
         syntheticBookingPosts: 0,
       };
+    } else if (['general', 'general-follow-up'].includes(name)) {
+      await assertNoEffect(s);
+      expect(generalReadStarts.has(s.key)).toBe(true);
+      expect(reads.length).toBe(generalReadStarts.get(s.key));
+      observations[String(message.name)] = {
+        providerReads: 0,
+        bookingActionExecutions: 0,
+        syntheticBookingPosts: 0,
+      };
     } else if (
       [
         'date',
@@ -1236,6 +1273,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         'staff-edit',
         'day-edit',
         'time-exact',
+        'topic-return',
         'time-correction',
       ].includes(name)
     ) {
@@ -1246,13 +1284,18 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         kind: 'TIME_SLOT_SELECTOR',
         service,
         staff,
-        day: ['day-edit', 'time-exact', 'time-correction'].includes(name)
+        day: [
+          'day-edit',
+          'time-exact',
+          'topic-return',
+          'time-correction',
+        ].includes(name)
           ? day
           : s.day,
         selectedStart: message.selectedStart,
       });
-      if (name === 'time-exact' || name === 'time-correction') {
-        const wanted = name === 'time-exact' ? '14:30' : '15:00';
+      if (['time-exact', 'topic-return', 'time-correction'].includes(name)) {
+        const wanted = name === 'time-correction' ? '15:00' : '14:30';
         expect(message.requestedTime).toBe(wanted);
         expect(
           new Intl.DateTimeFormat('en-GB', {
@@ -1265,13 +1308,19 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       observations[String(message.name)] = {
         serviceId: service,
         staffId: staff,
-        day: ['day-edit', 'time-exact', 'time-correction'].includes(name)
+        day: [
+          'day-edit',
+          'time-exact',
+          'topic-return',
+          'time-correction',
+        ].includes(name)
           ? day
           : s.day,
         exactBoundBranchPreserved: true,
         bookingActionExecutions: 0,
         syntheticBookingPosts: 0,
       };
+      if (name === 'time-exact') generalReadStarts.set(s.key, reads.length);
     } else if (name === 'readback-ready') {
       expect(s.key).toBe('unknown');
       expect(await ledgerCount(s)).toBe(1);
@@ -1978,6 +2027,9 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
                       'staff-edit',
                       'day-edit',
                       'time-exact',
+                      'general',
+                      'general-follow-up',
+                      'topic-return',
                       'time-correction',
                       'preview',
                       ...(s.key === 'unknown' ? ['readback-ready'] : []),
@@ -2097,7 +2149,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         );
       });
     });
-    expect(checkpoints).toHaveLength(ordinary ? 34 : 15);
+    expect(checkpoints).toHaveLength(ordinary ? 43 : 15);
     if (ordinary) expect(observations.staffCorrectionPrivateAliases).toBe(3);
   }
   it(

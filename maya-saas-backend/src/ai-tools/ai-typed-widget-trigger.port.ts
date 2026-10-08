@@ -35,6 +35,8 @@ export interface AiTypedWidgetTriggerPort {
     actor: Readonly<AuthenticatedUser>,
     conversationId: string,
     beforeTurnId: string,
+    /** Server-only bounded projection; no text, cursor or caller-selected limit. */
+    options?: { readonly precedingCompletions: true },
   ): Promise<unknown>;
   /** Accepted closed choices as preferences for a NEW explicit turn, never intent authority. */
   readBookingSelection?(

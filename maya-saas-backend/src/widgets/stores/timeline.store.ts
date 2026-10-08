@@ -216,6 +216,7 @@ export class TimelineStore {
     now: Date,
     encryption: ChatReplyCipher,
     beforeTurnId: string,
+    options?: { readonly precedingCompletions: true },
   ): Promise<unknown> {
     await TimelineStore.lockConversation(tx, tenantId, conversationId);
     const current = await TimelineStore.readUserTurn(
@@ -233,6 +234,52 @@ export class TimelineStore {
       current.retentionUntil <= now
     )
       return null;
+    if (options?.precedingCompletions) {
+      // A bounded projection of existing completions, not another memory store.
+      // Do not filter out erased, expired, empty or foreign-principal rows: each
+      // is a barrier and must prevent recovery from older context beyond it.
+      const rows = await tx.widgetTimelineTurn.findMany({
+        where: scoped(tenantId, {
+          conversationId,
+          turnIndex: { lt: current.turnIndex },
+          role: 'assistant',
+        }),
+        orderBy: { turnIndex: 'desc' },
+        take: 8,
+        select: {
+          textContent: true,
+          channel: true,
+          principalProofHash: true,
+          erasedAt: true,
+          retentionUntil: true,
+        },
+      });
+      const contexts: unknown[] = [];
+      for (const row of rows) {
+        if (
+          row.channel !== 'pwa' ||
+          row.principalProofHash !== principalProofHash ||
+          row.erasedAt !== null ||
+          row.retentionUntil <= now ||
+          !row.textContent ||
+          !isChatReply(row.textContent)
+        ) {
+          contexts.push(null);
+          break;
+        }
+        let context: unknown = null;
+        try {
+          context =
+            decodeChatCompletion(encryption, row.textContent).semanticContext ??
+            null;
+        } catch {
+          // A malformed completion is a boundary, not recoverable preferences.
+        }
+        contexts.push(context);
+        if (context === null) break;
+      }
+      return { version: 'maya.chat-context-window/1', contexts };
+    }
     const row = await tx.widgetTimelineTurn.findFirst({
       where: scoped(tenantId, {
         conversationId,

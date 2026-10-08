@@ -293,6 +293,19 @@ async function main() {
       await times(page, scenario, prompts.staffCorrection, scenario.day, 'staff-edit');
       await times(page, scenario, prompts.dayCorrection, scenario.alternateDay, 'day-edit');
       await times(page, scenario, prompts.exactTime, scenario.alternateDay, 'time-exact', '14:30');
+      for (const [step, prompt] of [['general', prompts.general], ['general-follow-up', prompts.generalFollowUp]]) {
+        const beforeIntents = requests(page, '/widgets/intent').length;
+        const response = await ask(page, prompt);
+        assert.equal(response.reply, 'Тайм-менеджмент — это планирование своего времени.');
+        assert.equal(response.action, null);
+        assert.equal(response.resolution, undefined);
+        assert.deepEqual(response.tools_used, []);
+        assert.equal(requests(page, '/widgets/intent').length, beforeIntents);
+        await capture(page, scenario.key + '-' + step);
+        report.observations[scenario.key + '-' + step] = { scriptedGeneralAnswer: true, toolCalls: 0, newWidgetIntents: 0 };
+        await checkpoint(scenario.key + '-' + step, {});
+      }
+      await times(page, scenario, prompts.topicReturn, scenario.alternateDay, 'topic-return', '14:30');
       const time = await times(page, scenario, prompts.timeCorrection, scenario.alternateDay, 'time-correction', '15:00');
       const slot = time.body.groups.flatMap(group => group.slots)[0];
       const draft = await clickRef(page, 'slot:' + slot.slot_ref), confirmation = draft.next_envelope;

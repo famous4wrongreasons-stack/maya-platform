@@ -9,6 +9,9 @@ export const ordinaryPrompts = scenario => ({
   staffCorrection: `Лучше к ${scenario.otherStaffName}`,
   dayCorrection: `Лучше на ${scenario.alternateDay}`,
   exactTime: 'В 14:30',
+  general: 'Что такое тайм-менеджмент?',
+  generalFollowUp: 'Объясни проще',
+  topicReturn: 'Вернёмся к записи',
   timeCorrection: 'Нет, в 15:00',
 });
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
