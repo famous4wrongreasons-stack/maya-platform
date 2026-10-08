@@ -1,0 +1,107 @@
+  PASS  refuse no-storage                   const t = localStorage.getItem('x');
+  PASS  admit  no-storage                   const t = view.token;
+  PASS  refuse no-storage                   document.cookie = 'a=b';
+  PASS  admit  no-storage                   const c = props.cookieless;
+  PASS  refuse no-eval                      const f = new Function('return 1');
+  PASS  admit  no-eval                      const f = () => 1;
+  PASS  refuse no-eval                      globalThis.x = 1;
+  PASS  admit  no-eval                      const x = 1;
+  PASS  refuse no-html-sink                 el.innerHTML = reply;
+  PASS  admit  no-html-sink                 el.textContent = reply;
+  PASS  refuse no-html-sink                 <div dangerouslySetInnerHTML={{__html: s}} /
+  PASS  admit  no-html-sink                 <div>{s}</div>
+  PASS  refuse no-service-worker            navigator.serviceWorker.register('/sw.js');
+  PASS  admit  no-service-worker            const n = 1;
+  PASS  refuse no-capability-decision       if (isOwner(user)) show();
+  PASS  admit  no-capability-decision       if (view.canClear) show();
+  PASS  refuse no-capability-decision       const r = useRole();
+  PASS  admit  no-capability-decision       const r = props.display;
+  PASS  refuse no-legacy-transport          const P = 'https://malesthetic.pro/app/api-p
+  PASS  admit  no-legacy-transport          const P = '/api';
+  PASS  refuse no-outcome-invention         if (line.outcome === 'CONFIRMED') tick();
+  PASS  admit  no-outcome-invention         if (item.display === 'terminal') quiet();
+  PASS  refuse no-outcome-invention         show(receipt.action_receipt_ref);
+  PASS  admit  no-outcome-invention         show(item.sentence);
+  PASS  refuse no-outcome-invention         const lines: TerminalLine[] = [];
+  PASS  admit  no-outcome-invention         const lines: string[] = [];
+  PASS  refuse no-outcome-invention         const o = 'EXPIRED_UNUSED';
+  PASS  admit  no-outcome-invention         if (result.lifecycle.state === 'SUPERSEDED')
+  PASS  refuse no-network-in-presentation   await fetch('/api/ai/chat');
+  PASS  admit  no-network-in-presentation   await port.submitUserTurn(text);
+  PASS  refuse no-network-in-presentation   new WebSocket('wss://x');
+  PASS  admit  no-network-in-presentation   const w = null;
+  PASS  refuse closed-tag-set               <img src="a.png" />
+  PASS  admit  closed-tag-set               <div className="a" />
+  PASS  refuse closed-tag-set               <svg><path /></svg>
+  PASS  admit  closed-tag-set               <span />
+  PASS  refuse closed-tag-set               <form onSubmit={f} />
+  PASS  admit  closed-tag-set               <button type="button" />
+  PASS  refuse request-sink                 <a href={url}>x</a>
+  PASS  admit  request-sink                 <a>x</a>
+  PASS  refuse inline-style-shape           <div style={theme.box} />
+  PASS  admit  inline-style-shape           <div style={{ color: 'red' }} />
+  PASS  refuse style-url                    <div style={{ backgroundImage: 'url(https://
+  PASS  admit  style-url                    <div style={{ backgroundImage: 'url("data:im
+  PASS  refuse closed-tag-set               React.createElement('img', { src: 'x' })
+  PASS  admit  closed-tag-set               React.createElement('div', null)
+  PASS  refuse input-type                   <input />
+  PASS  admit  input-type                   <input type="text" />
+  PASS  refuse input-type                   <input type="image" />
+  PASS  admit  input-type                   <input type="email" />
+  PASS  refuse input-type                   <input type={kind} onChange={(e) => set(e)} 
+  PASS  admit  input-type                   <input type="password" onChange={(e) => set(
+  PASS  refuse input-type                   React.createElement('input', { type: 'text' 
+  PASS  admit  input-type                   <input type="text" value={v} />
+  PASS  refuse style-url                    <div style={{ background: "url('//evil/x')" 
+  PASS  admit  style-url                    <div style={{ filter: "url(%23n)" }} />
+  PASS  refuse no-external-resource       .a { background-image: url("https://x/y.
+  PASS  admit  no-external-resource       .a { background: var(--bg); }
+  PASS  refuse no-external-resource       @import "other.css";
+  PASS  admit  no-external-resource       .a { color: var(--text); }
+  PASS  refuse no-external-resource       @font-face { src: url("f.woff2"); }
+  PASS  admit  no-external-resource       .a { font-family: var(--font); }
+  PASS  admit  goods-photo-picker          <input type="file" accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="file" accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="file" accept="*/*" />
+  PASS  refuse goods-photo-picker          <input type="file" accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="file" accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="file" accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type={kind} accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="image" />
+  PASS  refuse goods-photo-picker          <input type="file" accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="file" accept={mime} onChange={(
+  PASS  refuse goods-photo-picker          <input type={kind} accept="image/png,image/j
+  PASS  refuse goods-photo-picker          <input type="file" type="image" accept="imag
+  PASS  admit  no-external-resource       inline data:image/svg+xml
+  PASS  refuse runtime-allowlist           the DOM boundary
+  PASS  refuse runtime-allowlist           a non-member (dom/)
+  PASS  refuse runtime-allowlist           a non-member, double-quoted
+  PASS  refuse runtime-allowlist           a non-member, dynamic import
+  PASS  refuse runtime-allowlist           a non-member, side-effect import
+  PASS  refuse runtime-allowlist           the voice layer (outside the package)
+  PASS  admit  runtime-allowlist           a published member
+  PASS  admit  runtime-allowlist           a published member, type-only
+  PASS  admit  runtime-allowlist           a path merely mentioned in a string
+  PASS  admit  runtime-allowlist           a path merely mentioned in a comment
+  PASS  admit  runtime-allowlist           an ordinary relative import
+  PASS  refuse runtime-allowlist           a member whose bytes drifted from the published hash
+  PASS  refuse voice-boundary              a capture API in an ordinary component
+  PASS  refuse voice-boundary              MediaRecorder outside the capture file
+  PASS  refuse voice-boundary              AudioContext outside the capture file
+  PASS  refuse voice-boundary              the microphone at top level
+  PASS  refuse voice-boundary              the microphone behind no gesture
+  PASS  refuse voice-boundary              two microphone sites
+  PASS  refuse voice-boundary              logging in the capture layer
+  PASS  refuse voice-boundary              a network call in the capture layer
+  PASS  refuse voice-boundary              an object URL in the capture layer
+  PASS  refuse voice-boundary              postMessage in the capture layer
+  PASS  admit  voice-boundary              the microphone inside a GestureProof-taking function
+  PASS  admit  voice-boundary              an ordinary component
+  PASS  admit  voice-boundary              the capture API named only in a comment
+  PASS  admit  voice-boundary              the real src/voice/capture.ts
+  PASS  refuse csp                        incomplete CSP + inline script
+  PASS  refuse csp                        no CSP at all
+  PASS  admit  csp                        the carrier’s own policy
+
+self-test: refuse 61, admit 43, failures 0
+self-test: PASS

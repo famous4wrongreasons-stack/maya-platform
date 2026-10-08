@@ -1,0 +1,261 @@
+✔ receipt restoration uses one bounded read and discards a late old-session result (2.512541ms)
+✔ receipt forbidden does not create authority or block restored text chat (0.471041ms)
+✔ receipt no_connection does not create authority or block restored text chat (0.25175ms)
+✔ receipt server_error does not create authority or block restored text chat (0.245333ms)
+✔ receipt tenant_unbound cannot publish unbound text or strand the composer (0.268833ms)
+✔ receipt reader_rejects cannot publish unbound text or strand the composer (0.177375ms)
+✔ receipt reader_throws cannot publish unbound text or strand the composer (0.170917ms)
+✔ receipt sink_throws cannot publish unbound text or strand the composer (0.161375ms)
+✔ an older server missing the additive history route remains usable with a visible limitation (0.190917ms)
+✔ server continuation waits before send, restores text only, excludes unfinished work from context (0.458375ms)
+✔ logout aborts restoration; an old session result never enters the next conversation (0.444083ms)
+✔ history failure is visible; next send retries only the read and keeps the draft until context is restored (0.339375ms)
+✖ submitUserTurn is the sole path: only it (and retry of its own turn) calls Transport.chat (3.287917ms)
+✔ typed and spoken turns are byte-identical on the wire; the modality stays on the item (0.103167ms)
+✔ the user text: NFC and trimmed, 1..2000 units, refused visibly and never truncated; one turn in flight (0.66625ms)
+✔ D6: after the 3 500-unit reply fixture every history item is ≤ 2000, the pair is not split, and the next turns are accepted (0.675834ms)
+✔ history: only sent user turns and real replies, the last 11 plus the new message (DTO 1..12) (0.6665ms)
+✔ same-requestId retry only after 429 / 502 / network / abort / 503 — never after 409 or an unknown outcome (0.907875ms)
+✔ 409 is terminal for its id; an older failed turn loses its same-id retry once the conversation moves on (0.27425ms)
+✔ approval_required: the reply, then the approval_not_here notice; the next turn carries the reply and never the notice (0.494625ms)
+✔ 402 / 403 / tenant_required / 400: a conversation notice, the composer state, and none of it in history (0.3565ms)
+✔ sign-out empties the timeline and aborts the turn in flight; nothing crosses into the next session (0.21075ms)
+✔ display cap: 200 items on screen, older ones dropped and disclosed, never silently (4.159459ms)
+✔ subscribers see every state change, in order, and can unsubscribe (0.178667ms)
+✔ over the real net client: the long reply and the approval shape end in DTO-valid next turns (fetch replaced) (18.080834ms)
+✔ TURN-ID carries only the server conversation reference, preserves retry identity, and clears it on logout (0.63375ms)
+✔ finite projections preserve exact decimals and strip source authority; malformed and drift refuse (1.5685ms)
+✔ certified approval with assistant correlation passes; wrong kind/capability and contradictory status refuse (0.779958ms)
+✔ multipart uses one fixed photo name, no manual boundary or original filename; default parser unavailable is explicit (9.403167ms)
+✔ JSON DTOs stay closed, preserve current conversation and witness, and invalid input makes no request (0.89925ms)
+✔ review loss or malformed success stays unknown with no resend; 401 refresh is bounded (0.477083ms)
+✔ preview adds no chat and performs no lookup; explicit item selection keeps all review fields blank (3.922333ms)
+✔ exact correction prepares one version, sends canonical owner resolution, and only explicit changed draft advances (1.206375ms)
+✔ response loss blocks every repeat/edit path; held and completed are terminal (0.899125ms)
+✔ single photo flight locks chat; close aborts request and suppresses late result (0.3345ms)
+✔ privacy epoch and signout erase fields, abort detail and never resurrect a late canonical turn (1.020458ms)
+✔ source refusal preserves original witness and does not perform automatic lookup/review (0.308542ms)
+✔ absent transport is honestly unavailable without fabricated transcript (0.209708ms)
+✔ canonical operation refuses foreign conversation and duplicate canonical turns do not reanimate widgets (0.338458ms)
+✔ restored completed canonical review remains display-only on explicit stable replay (0.349541ms)
+✔ successful busy-to-idle publication cannot resurrect fields after a synchronous subscriber reset (0.828292ms)
+✔ reset queued between operation settlement and caller continuation cannot reapply the response (0.369667ms)
+✔ reset during initial search/detail publication prevents dispatch from the closed form (0.245958ms)
+✔ conversation subscriber erasure/signout before attachment dispatch makes no transport call (0.232708ms)
+✔ exact fractional receipt renders current React wording, freezes controls, and never rewrites sealed facts (12.161959ms)
+✔ mismatched company_id never confirms an accepted receipt (1.127ms)
+✔ mismatched goods_id never confirms an accepted receipt (1.184166ms)
+✔ mismatched store_id never confirms an accepted receipt (0.884083ms)
+✔ mismatched quantity never confirms an accepted receipt (0.931625ms)
+✔ mismatched unit_id never confirms an accepted receipt (0.981459ms)
+✔ mismatched unit_cost never confirms an accepted receipt (0.676833ms)
+✔ mismatched currency never confirms an accepted receipt (0.717833ms)
+✔ mismatched line_total never confirms an accepted receipt (1.003875ms)
+✔ mismatched received_at never confirms an accepted receipt (0.801125ms)
+✔ unknown stays unconfirmed without another submission (0.643875ms)
+✔ accepted only stays unconfirmed without another submission (0.574875ms)
+✔ no AE stays unconfirmed without another submission (0.710791ms)
+✔ no receipt stays unconfirmed without another submission (0.588917ms)
+✔ wrong provider stays unconfirmed without another submission (0.608083ms)
+✔ not verified stays unconfirmed without another submission (0.608959ms)
+✔ sale price requested stays unconfirmed without another submission (0.853166ms)
+✔ absolute stock requested stays unconfirmed without another submission (0.634667ms)
+✔ wrong operation stays unconfirmed without another submission (0.598708ms)
+✔ no_connection cannot offer retry (0.897375ms)
+✔ server_error cannot offer retry (0.548708ms)
+✔ unexpected_response cannot offer retry (0.374916ms)
+✔ only rejection control can claim a rejected receipt (0.768375ms)
+✔ duplicate or missing preview field cannot borrow readback (1.064ms)
+✔ projection ignores getters and undeclared provider data (0.052042ms)
+✖ PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line (1.440083ms)
+✖ typed methods only: the two widget methods are explicit; no generic request or token accessor (68.802708ms)
+✔ widget transport sends only typed bodies and retains only authorized response members (8.386667ms)
+✔ explicit booking receipt transport projects only the widget locator; passive reads never inherit it (0.631792ms)
+✔ NS-1: `resolved_widget` survives projection in its envelope shape only; every other shape is null, never a rejection (4.005792ms)
+✔ email start keeps {next_step} only — debug_code never survives (0.3235ms)
+✔ email verify (one business): tokens + TOP-LEVEL tenant.name + user.name; every other key dropped (0.413667ms)
+✔ email verify (select_business): businesses[].role dropped, slug echoed verbatim at re-verify (0.16975ms)
+✔ password login: body keys exactly {tenantSlug, email, password}; tenant NESTED at user.tenant; null name → "" (0.382416ms)
+✔ signInPassword refuses an empty business address before any request (V2-6) (0.1115ms)
+✔ refresh: tokens + session only → grant; display stays what sign-in set (0.437833ms)
+✔ malformed success bodies are unexpected_response, never a partial sign-in (0.252834ms)
+✔ the password path never tells an existing account from a wrong password: /auth/login 401, 403 (either body) and 404 are one state (0.082208ms)
+✔ §1.4 sign-in failure table: every row maps to its named state; silent login outcomes = 0 (1.144791ms)
+✔ row 9 client-side: the same field state before sending, 0 requests (IsEmail shape, 4..8 digits, MinLength 8) (0.059166ms)
+✔ row 10: a sign-in request that times out is no_connection (26.945458ms)
+✔ row 11: /ai/chat → 403 tenant_required is its own named failure (0.430834ms)
+✔ /ai/chat request: exactly {surface, requestId, messages}, surface "web", Bearer, omit, no-store; no audience or tenant on the wire (0.257125ms)
+✔ approval_required: action_status copies action.status only — never action.approval (V2-5) (0.219084ms)
+✔ B4: /ai/chat retains one exact SH-19 authorized envelope and rejects an incomplete substitute (0.679042ms)
+✔ /ai/chat taxonomy: 402, 403×3, 429, 400, 503 modelFailure, 409, 502/network, 5xx, unexpected — one named failure each (1.100667ms)
+✔ /ai/chat timeout (80 s in production) is no_connection; a caller abort is aborted (33.128917ms)
+✔ 401 → one refresh → one retry with the new bearer (0.424458ms)
+✔ two or more parallel 401s produce exactly one /auth/refresh (single flight); every call retried with the new bearer (20.992667ms)
+✔ a 401 that arrives after another call already refreshed reuses the new grant (no second refresh) (6.792834ms)
+✔ proactive refresh within 30 s of expiry: parallel calls share one refresh (12.565833ms)
+✔ terminal refresh codes end the session with that reason, notify once, and send no retry (0.912167ms)
+✔ refresh that cannot complete now keeps the session: 429 → rate_limited, network → no_connection (0.486417ms)
+✔ refresh 400 validation, 401 without a code and a malformed 2xx each end the session (no silent loop) (0.631041ms)
+✔ a 401 on the retry after a successful refresh ends the session (session_revoked); never a loop (0.242375ms)
+✔ a lapsed refresh token ends the session as session_expired with 0 requests (0.107458ms)
+✔ aborting a turn while it waits on a shared refresh returns aborted at once; the refresh still lands (12.189542ms)
+✔ /ai/transcribe: body exactly {audioBase64}; {transcript} kept; failures mapped (§1.9) (28.455417ms)
+✔ never signed in: view reason null; chat and transcribe answer signed_out with 0 requests (0.195ms)
+✔ signOut: signed out locally at once, then /auth/logout with the bearer; later calls send nothing (0.458666ms)
+✔ signOut never throws when logout fails, and a failing subscriber does not stop the others (11.224083ms)
+✔ signOut with an expired access token refreshes once to revoke; the refreshed grant is never installed (0.530167ms)
+✔ signOut after the refresh token lapsed sends nothing: there is no server session left to revoke (0.165583ms)
+✔ signOut during an in-flight refresh: logout uses the refreshed bearer; the waiting turn ends signed_out (7.221958ms)
+✔ a grant from a later sign-in is never handed to a call made under the earlier one (5.966417ms)
+✔ the purity gates admit src/net/** as written (fetch shape, PATHS, surface, audience, globals, imports, collisions) (3293.342542ms)
+✔ the gates are not vacuous over these files: a tenth path, a second fetch, a storage read and surface "voice" are refused (224.3715ms)
+✔ createNet() is structurally SessionPort + Transport (shell/ports.ts, frozen in S0) with no adapter (182.045416ms)
+✔ no storage, no document, no cookie: never touched at runtime, never named in src/net (0.561875ms)
+✔ the finder: one GET to the allowlisted path, the term percent-encoded, no body and no content type (0.332375ms)
+✔ the finder refuses a one-character term before any request, and names the server's own minimum (0.038041ms)
+✔ Telegram start: the web body names this page's callback, the native body names none, and only Telegram's own URL is followed (0.447167ms)
+✔ the landing signs in: body exactly {state, code}, the login projection reused verbatim, is_new_user carried (0.257583ms)
+✔ a callback nobody here asked for is refused before any request — the whole defence against a delivered pair (0.096292ms)
+✔ one login, one landing: the second delivery of the same callback is refused without spending a request (0.154125ms)
+✔ the two carriers land the same callback: an object from the native shim, this page’s fragment on the web (0.346209ms)
+✔ a fragment that is not exactly a callback is not one: no mark, a repeated key, a bad escape, a route (0.382125ms)
+✔ the provider said no: error=access_denied is its own state and sends nothing (0.069291ms)
+✔ every completion failure the server can answer is a named state, and each one restarts the login (0.867375ms)
+✔ a 2xx that is not a login does not sign anyone in (0.247709ms)
+✔ conversation history is authenticated GET with no selector/body, refreshes once, and strips action authority (0.453875ms)
+✔ every request of this suite went to an approved URL, and all approved URLs were exercised (0.044833ms)
+✔ a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names (13.801875ms)
+✔ only explicit confirmation for a server-owned current conversation sends erasure (3.713125ms)
+✔ lost response freezes actions; manual retry preserves the same tuple and fresh turn has no deleted history (0.601125ms)
+✔ inflight chat, retained receipt read and stale timeline callbacks cannot resurrect content (2.280333ms)
+✔ all widget capabilities including detail-only entries are released, and late submission is ignored (10.420333ms)
+✔ pending render observation cannot start after erasure cleared its entry (1.130625ms)
+✔ privacy closes the real personal receiver, drops selections and ignores a late personal read (2.8255ms)
+✔ privacy explicitly cancels committed voice transcription; delayed transcript never submits a new turn (0.600542ms)
+✔ logout/new login invalidates erasure continuation; late completion cannot clear the next session (0.365084ms)
+✔ replacement session during synchronous voice cancellation cannot dispatch the old target (0.316167ms)
+✔ replacement session during synchronous conversation freeze cannot dispatch the old target (0.201042ms)
+✔ replacement session during synchronous retry publication cannot dispatch the old target (0.203333ms)
+✔ definite forbidden never claims completion or revives old controls (0.161292ms)
+✔ definite unavailable never claims completion or revives old controls (0.159584ms)
+✔ definite conflict never claims completion or revives old controls (0.131708ms)
+✔ definite invalid_request never claims completion or revives old controls (0.135ms)
+✔ mismatched completion remains uncertain and cannot unlock the conversation (0.12275ms)
+ℹ tests 143
+ℹ suites 0
+ℹ pass 140
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4533.008542
+
+✖ failing tests:
+
+test at test/conversation.test.mjs:252:1
+✖ submitUserTurn is the sole path: only it (and retry of its own turn) calls Transport.chat (3.287917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'dispose',
+      'erasureTarget',
+      'finishErasure',
+      'freezeForErasure',
+      'retry',
+  +   'runGoodsPhotoOperation',
+      'submitUserTurn',
+      'subscribe',
+      'timeline',
+      'view'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/conversation.test.mjs:262:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'runGoodsPhotoOperation', 'submitUserTurn', 'subscribe', 'timeline', 'view' ],
+    expected: [ 'dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/net.test.mjs:317:1
+✖ PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line (1.440083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      '/ai/chat',
+      '/ai/conversation',
+  +   '/ai/goods/item-read',
+  +   '/ai/goods/photo-preview',
+  +   '/ai/goods/receipt-review',
+  +   '/ai/goods/search',
+      '/ai/transcribe',
+      '/auth/email/start',
+      '/auth/email/verify',
+      '/auth/login',
+      '/auth/logout',
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/net.test.mjs:322:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '/ai/chat', '/ai/conversation', '/ai/goods/item-read', '/ai/goods/photo-preview', '/ai/goods/receipt-review', '/ai/goods/search', '/ai/transcribe', '/auth/email/start', '/auth/email/verify', '/auth/login', '/auth/logout', '/auth/oauth/telegram/complete', '/auth/oauth/telegram/start', '/auth/refresh', '/available-slots', '/branches', '/mobile/pwa/search', '/personal-client/appointments', '/personal-client/appointments/preview', '/personal-client/appointments/results', '/privacy/conversations', '/services', '/staff', '/widgets/intent', '/widgets/resolve' ],
+    expected: [ '/ai/chat', '/ai/conversation', '/ai/transcribe', '/auth/email/start', '/auth/email/verify', '/auth/login', '/auth/logout', '/auth/oauth/telegram/complete', '/auth/oauth/telegram/start', '/auth/refresh', '/available-slots', '/branches', '/mobile/pwa/search', '/personal-client/appointments', '/personal-client/appointments/preview', '/personal-client/appointments/results', '/privacy/conversations', '/services', '/staff', '/widgets/intent', '/widgets/resolve' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/net.test.mjs:351:1
+✖ typed methods only: the two widget methods are explicit; no generic request or token accessor (68.802708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'chat',
+      'conversation',
+      'eraseConversation',
+  +   'goodsPhotoItem',
+  +   'goodsPhotoPreview',
+  +   'goodsPhotoReview',
+  +   'goodsPhotoSearch',
+      'personalBranches',
+      'personalCreate',
+      'personalPreview',
+      'personalResults',
+      'personalServices',
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/net.test.mjs:363:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [
+      'chat',              'conversation',
+      'eraseConversation', 'goodsPhotoItem',
+      'goodsPhotoPreview', 'goodsPhotoReview',
+      'goodsPhotoSearch',  'personalBranches',
+      'personalCreate',    'personalPreview',
+      'personalResults',   'personalServices',
+      'personalSlots',     'personalStaff',
+      'resolveWidgets',    'transcribe',
+      'widgetIntent'
+    ],
+    expected: [ 'chat', 'conversation', 'eraseConversation', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,54 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_cadb78ab4062 on 127.0.0.1:59811 (local)
+[31m[Nest] 66125  - [39m10/08/2026, 11:21:34 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 66125  - [39m10/08/2026, 11:21:34 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 66125  - [39m10/08/2026, 11:21:36 AM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mJestAssertionError: expect(received).toContain(expected) // indexOf
+
+Expected value: "reject"
+Received array: ["review", "correction", "approve"]
+    at YclientsCRMAdapter.<anonymous> (/tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts:73:65)
+    at [90m/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4mjest-mock[24m/build/index.js:305:39
+    at YclientsCRMAdapter.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4mjest-mock[24m/build/index.js:312:13[90m)[39m
+    at YclientsCRMAdapter.mockConstructor [as readGoodsReceiptContext] [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mnode_modules/[4mjest-mock[24m/build/index.js:102:19[90m)[39m
+    at CrmService.prepareGoodsReceipt [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/crm/crm.service.ts:667:46[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+    at AiToolRuntimeService.readGoodsReceiptWidgetApproval [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/ai-tools/ai-tool-runtime.service.ts:571:27[90m)[39m
+    at GoodsReceiptApprovalAdapter.read [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/owner-ports/goods-receipt-approval.adapter.ts:91:24[90m)[39m
+    at GoodsReceiptApprovalAdapter.readNoun [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/owner-ports/goods-receipt-approval.adapter.ts:128:13[90m)[39m
+    at resolve [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/gates/gate11.ts:87:20[90m)[39m
+    at IntentGatewayService.runSlots [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/intent-gateway.service.ts:496:29[90m)[39m
+    at IntentGatewayService.submit [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/intent-gateway.service.ts:432:29[90m)[39m
+    at [90m/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39mtest/widgets-live/support/no-write-recorder.ts:144:51
+    at WidgetsController.intent [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/[39msrc/widgets/widgets.controller.ts:77:24[90m)[39m {
+  matcherResult: {
+    message: [32m'expect(received).toContain(expected) // indexOf\n\nExpected value: "reject"\nReceived array: ["review", "correction", "approve"]'[39m,
+    pass: [33mfalse[39m
+  }
+}
+FAIL ../../../../../../../../tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts (16.347 s)
+  Photo HTTP preparation [SYNTHETIC PARSER AND RECEIPT PORT]
+    ✕ makes only explicit reads; reviews, rejects and corrects immutable owner proposals (15587 ms)
+
+  ● Photo HTTP preparation [SYNTHETIC PARSER AND RECEIPT PORT] › makes only explicit reads; reviews, rejects and corrects immutable owner proposals
+
+    Photo browser 1: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+    500 !== 200
+
+      140 |   assert.ok(button,'Canonical decision control is visible'); await clickNamed(page,button.name);
+      141 |   const call=await until(()=>page.apiRequests('/widgets/intent').slice(before).find(r=>r.finishedAt),'canonical decision');
+    > 142 |   assert.equal(call.status,200); const body=JSON.parse(await page.responseBody(call.requestId));
+          |          ^
+      143 |   assert.equal(body.owner_decision?.state,state); assert.equal(typeof body.owner_decision.receipt_text,'string');
+      144 |   assert.equal(page.apiRequests('/widgets/intent').length,before+1);
+      145 |   assert.ok(await page.waitFor('document.body.innerText.includes('+JSON.stringify(state==='SUCCEEDED'?'Приход товара подтверждён в YCLIENTS.':'Приход отклонён. Изменений в складе нет.')+')'));
+
+      at decide (../file:/private/tmp/maya-goods-photo-20261008/goods-photo-browser-probe.mjs:142:10)
+      at async main (../file:/private/tmp/maya-goods-photo-20261008/goods-photo-browser-probe.mjs:358:5)
+      at ../../../../../../../../../tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts:298:173
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        16.363 s, estimated 21 s
+Ran all test suites within paths "/tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-photo-20261008/browser-attempt3/browser-jest.json

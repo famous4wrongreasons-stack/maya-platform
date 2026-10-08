@@ -1,0 +1,43 @@
+✔ finite projections preserve exact decimals and strip source authority; malformed and drift refuse (1.693459ms)
+✖ certified approval with assistant correlation passes; wrong kind/capability and contradictory status refuse (0.862125ms)
+✔ multipart uses one fixed photo name, no manual boundary or original filename; default parser unavailable is explicit (10.077291ms)
+✖ JSON DTOs stay closed, preserve current conversation and witness, and invalid input makes no request (0.698667ms)
+✔ review loss or malformed success stays unknown with no resend; 401 refresh is bounded (0.609916ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 3
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.277459
+
+✖ failing tests:
+
+test at test/goods-photo-net.test.mjs:30:1
+✖ certified approval with assistant correlation passes; wrong kind/capability and contradictory status refuse (0.862125ms)
+  TypeError: Cannot read properties of null (reading 'status')
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/goods-photo-net.test.mjs:38:99)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at test/goods-photo-net.test.mjs:52:1
+✖ JSON DTOs stay closed, preserve current conversation and witness, and invalid input makes no request (0.698667ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell/test/goods-photo-net.test.mjs:54:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,15 @@
+PASS src/widgets/owner-ports/goods-receipt-history.spec.ts
+PASS src/ai-tools/goods-photo.controller.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/goods-photo-runtime.spec.ts
+PASS src/ai-tools/goods-photo.service.spec.ts
+PASS src/crm/goods-receipt.contract.spec.ts
+PASS src/ai-tools/goods-photo.contract.spec.ts
+PASS src/widgets/inventory/goods-receipt-widget.contract.spec.ts
+
+Test Suites: 8 passed, 8 total
+Tests:       171 passed, 171 total
+Snapshots:   0 total
+Time:        1.172 s
+Ran all test suites within paths "src/ai-tools/goods-photo.controller.spec.ts", "src/ai-tools/goods-photo.contract.spec.ts", "src/ai-tools/goods-photo.service.spec.ts", "src/ai-tools/goods-photo-runtime.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/crm/goods-receipt.contract.spec.ts", "src/widgets/inventory/goods-receipt-widget.contract.spec.ts", "src/widgets/owner-ports/goods-receipt-history.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-goods-photo-20261008/local-attempt2/targeted-unit.json

@@ -1,0 +1,64 @@
+{
+  "contract": "maya.goods-photo-owned-cluster/1",
+  "mode": "actual-http-postgres-native-search-item-synthetic-extraction-receipt-port",
+  "candidateCommit": "3829590932f7efb456438a0d94446f9e6eb6fca1",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "b4646d5ede778e63a095f500564a1b6b3a6daae4892c1b9ec6087973faf6e09d",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceSha256": "3062ea811866d852920df4a128bbf420ea7574102c36f31e56c5b4ecf2940f2b",
+  "database": "maya_widget_gate_proof_c9occ_41cb6ca83a54",
+  "port": 60507,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-goods-photo-73FeKg/pg",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "photo-http"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "FINITE_HTTP_ONLY_NOT_OCR_OR_CURRENT_REACT_ACCEPTANCE",
+  "scratchHarnessGitBinding": false,
+  "syntheticApproveEnabled": true,
+  "currentReactAcceptance": false,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 69922,
+      "pgid": 69922,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "photo-http": {
+      "detached": true,
+      "pid": 69976,
+      "pgid": 69976,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "commitAtEnd": "3829590932f7efb456438a0d94446f9e6eb6fca1",
+  "sourceUnchanged": true,
+  "harnessUnchanged": true,
+  "clusterStopped": true
+}

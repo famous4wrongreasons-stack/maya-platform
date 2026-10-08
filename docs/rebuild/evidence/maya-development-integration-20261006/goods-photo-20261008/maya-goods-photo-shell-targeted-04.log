@@ -1,0 +1,26 @@
+✔ finite projections preserve exact decimals and strip source authority; malformed and drift refuse (1.751166ms)
+✔ certified approval with assistant correlation passes; wrong kind/capability and contradictory status refuse (0.853459ms)
+✔ multipart uses one fixed photo name, no manual boundary or original filename; default parser unavailable is explicit (10.430209ms)
+✔ JSON DTOs stay closed, preserve current conversation and witness, and invalid input makes no request (1.1295ms)
+✔ review loss or malformed success stays unknown with no resend; 401 refresh is bounded (0.507916ms)
+✔ preview adds no chat and performs no lookup; explicit item selection keeps all review fields blank (3.752708ms)
+✔ exact correction prepares one version, sends canonical owner resolution, and only explicit changed draft advances (1.161625ms)
+✔ response loss blocks every repeat/edit path; held and completed are terminal (0.897084ms)
+✔ single photo flight locks chat; close aborts request and suppresses late result (0.326375ms)
+✔ privacy epoch and signout erase fields, abort detail and never resurrect a late canonical turn (0.953834ms)
+✔ source refusal preserves original witness and does not perform automatic lookup/review (0.304625ms)
+✔ absent transport is honestly unavailable without fabricated transcript (0.191792ms)
+✔ canonical operation refuses foreign conversation and duplicate canonical turns do not reanimate widgets (0.390125ms)
+✔ restored completed canonical review remains display-only on explicit stable replay (0.296625ms)
+✔ successful busy-to-idle publication cannot resurrect fields after a synchronous subscriber reset (0.611292ms)
+✔ reset queued between operation settlement and caller continuation cannot reapply the response (0.307916ms)
+✔ reset during initial search/detail publication prevents dispatch from the closed form (0.230291ms)
+✔ conversation subscriber erasure/signout before attachment dispatch makes no transport call (0.227709ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80.412291

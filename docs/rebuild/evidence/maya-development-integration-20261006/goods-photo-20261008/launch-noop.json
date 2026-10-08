@@ -1,0 +1,7 @@
+{
+  "qualification": "NOT_EXECUTED_NOT_A_PASS",
+  "exitCode": 0,
+  "reason": "macOS /tmp symlink made main-entry URL equality false; no output directory or services started",
+  "oldLauncherSha256": "96036d53be8b37d95c9df570af2ea31ea24e36d45b8bd093f7ff44e19ec1b013",
+  "correctedLauncherSha256": "56b31ed2e9a0ceeeaf12d6aa99767ae0134bd4960055983f95c3e3029ca43fc5"
+}

@@ -1,0 +1,13 @@
+✔ only exact owned loopback and finite fixture login (2.7215ms)
+✔ preview permits bounded multipart transport only (0.132292ms)
+✔ native read requests require preserved-shaped witness and exact finite values (0.176417ms)
+✔ review is closed manual purchase fields only (0.162709ms)
+✔ only sealed null-input approval intents, never direct approval or chat shortcut (0.144167ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35.109958

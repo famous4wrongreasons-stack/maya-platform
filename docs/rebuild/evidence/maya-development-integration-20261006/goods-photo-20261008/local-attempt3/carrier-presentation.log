@@ -1,0 +1,21 @@
+✔ unconfigured recognition is explicit and rendering dispatches nothing (3.767542ms)
+✔ high confidence or sale price cannot fill reviewed receipt values (1.35575ms)
+✔ category cannot be selected as an existing item; selected item requires an explicit gesture (0.539708ms)
+✔ uncertain preparation blocks repeat dispatch but permits clearing ephemeral fields (0.9855ms)
+✔ failed source is never shown as an empty successful search (0.303167ms)
+✔ known completed or held review has no preparation or correction controls (1.209416ms)
+✔ ambiguous total keeps both extracted fields separate without deriving a unit cost (0.266042ms)
+✔ picker clears DOM filename and FileList reference before passing a single file (0.168708ms)
+✔ privacy limits deletion to the current conversation and retains audit/business records (3.603708ms)
+✔ privacy requires a distinct explicit confirmation, carrying no target or event arguments (0.832084ms)
+✔ uncertain permits only manual same-request retry even when no new target is available (0.3015ms)
+✔ refusal never offers a new deletion or retry, and gives a sign-out exit (0.959709ms)
+✔ only canonical completed declares deletion; every phase has an accessible status and no sinks (0.949667ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 64.034125

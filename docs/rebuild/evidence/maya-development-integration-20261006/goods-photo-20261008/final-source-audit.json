@@ -1,0 +1,14 @@
+{
+  "contract": "maya.goods-photo-final-source-audit/1",
+  "runtimeCommit": "3829590932f7efb456438a0d94446f9e6eb6fca1",
+  "checks": {
+    "browserAttempt4SourceEqualsCommittedAndWorktree": true,
+    "httpAttempt1SourceEqualsCommittedAndWorktree": true,
+    "archivedAllFailedAttemptsWithoutRelabeling": true,
+    "allFiveProofClustersStopped": true,
+    "all18ProofProcessGroupsAbsent": true,
+    "noPostmasterPidForFiveOwnedClusters": true,
+    "credentialPatternScan": "no JWT, private key or serialized auth-value matches in attempted reports/harnesses"
+  },
+  "qualification": "Source matches explicitly verified with SHA-256 and git show before this archive. No real OCR/model/provider acceptance."
+}

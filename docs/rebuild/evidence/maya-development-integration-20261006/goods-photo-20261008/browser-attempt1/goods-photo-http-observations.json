@@ -1,0 +1,20 @@
+{
+  "contract": "maya.goods-photo-http-proof/1",
+  "status": "failed",
+  "parser": "DI_SYNTHETIC_NOT_OCR_ACCEPTANCE",
+  "provider": "ACTUAL_FACTORY_NATIVE_SEARCH_ITEM_WITH_FINITE_SYNTHETIC_FETCH",
+  "receiptContextAndDispatch": "EXPLICIT_SYNTHETIC_QUALIFIED_PORT",
+  "syntheticApproveEnabled": true,
+  "setup": "SYNTHETIC_ACTIVE_INTEGRATION_ROW",
+  "a17Acceptance": false,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "currentReactAcceptance": false,
+  "restartClaim": false,
+  "parserCalls": 0,
+  "qualifiedContextReads": 0,
+  "nativeGets": [],
+  "syntheticEffectCount": 0,
+  "forbidden": [],
+  "checkpoints": []
+}

@@ -1,0 +1,90 @@
+{
+  "contract": "maya.goods-photo-http-proof/1",
+  "status": "failed",
+  "parser": "DI_SYNTHETIC_NOT_OCR_ACCEPTANCE",
+  "provider": "ACTUAL_FACTORY_NATIVE_SEARCH_ITEM_WITH_FINITE_SYNTHETIC_FETCH",
+  "receiptContextAndDispatch": "EXPLICIT_SYNTHETIC_QUALIFIED_PORT",
+  "syntheticApproveEnabled": true,
+  "setup": "SYNTHETIC_ACTIVE_INTEGRATION_ROW",
+  "a17Acceptance": false,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "currentReactAcceptance": false,
+  "restartClaim": false,
+  "opened": {
+    "parserCalls": 0,
+    "nativeGets": 0,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "uploaded": {
+    "parserCalls": 1,
+    "nativeGets": 0,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "selected": {
+    "parserCalls": 1,
+    "nativeGets": 0,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "searched": {
+    "parserCalls": 1,
+    "nativeGets": 1,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "detail": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "reviewed": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 2,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "parserCalls": 1,
+  "qualifiedContextReads": 2,
+  "nativeGets": [
+    "search",
+    "detail"
+  ],
+  "syntheticEffectCount": 0,
+  "forbidden": [],
+  "checkpoints": [
+    "opened",
+    "uploaded",
+    "selected",
+    "searched",
+    "detail",
+    "reviewed"
+  ]
+}

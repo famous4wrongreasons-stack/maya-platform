@@ -1,0 +1,9 @@
+{
+  "recorded_at": "2026-10-08T11:06:20.743991+00:00",
+  "changes": "Remove four unnecessary assertions; type two Jest mock signatures from canonical method parameter types. No lint suppression or runtime behavior change.",
+  "validation": "Scoped Prettier exit0 only; parent owns lint/test rerun.",
+  "files": {
+    "src/ai-tools/goods-photo.contract.ts": "eb61b7d1d00f1d73cbaf75a1aa74fe1c14cbd4f30b7eb294d36b72286676e9e2",
+    "src/ai-tools/goods-photo.controller.spec.ts": "d4dc9367df3c7f44cf5170740a03cf23c51bc5c60b51943f071c6a13f262fd12"
+  }
+}

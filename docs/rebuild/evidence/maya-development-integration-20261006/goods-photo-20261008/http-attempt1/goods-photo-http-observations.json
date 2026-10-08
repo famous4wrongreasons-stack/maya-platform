@@ -1,0 +1,138 @@
+{
+  "contract": "maya.goods-photo-http-proof/1",
+  "status": "passed",
+  "parser": "DI_SYNTHETIC_NOT_OCR_ACCEPTANCE",
+  "provider": "ACTUAL_FACTORY_NATIVE_SEARCH_ITEM_WITH_FINITE_SYNTHETIC_FETCH",
+  "receiptContextAndDispatch": "EXPLICIT_SYNTHETIC_QUALIFIED_PORT",
+  "syntheticApproveEnabled": true,
+  "setup": "SYNTHETIC_ACTIVE_INTEGRATION_ROW",
+  "a17Acceptance": false,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "currentReactAcceptance": false,
+  "restartClaim": false,
+  "default-unconfigured-parser": {
+    "parserCalls": 0,
+    "nativeGets": 0,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "provisional-two-lines-no-matching": {
+    "parserCalls": 1,
+    "nativeGets": 0,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "explicit-native-search": {
+    "parserCalls": 1,
+    "nativeGets": 1,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "explicit-native-item": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 0,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "manual-fields-canonical-approval-only": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 2,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "canonical-rejection-no-dispatch": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 2,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "corrected-version-new-approval": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 4,
+    "syntheticEffects": 0,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "explicit-canonical-approve-synthetic-effect-once": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 6,
+    "syntheticEffects": 1,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "old-source-witness-refused-before-read-or-approval": {
+    "parserCalls": 1,
+    "nativeGets": 2,
+    "qualifiedContextReads": 6,
+    "syntheticEffects": 1,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "revoked-before-preview-return": {
+    "parserCalls": 2,
+    "nativeGets": 2,
+    "qualifiedContextReads": 6,
+    "syntheticEffects": 1,
+    "outboundWrites": 0,
+    "unrelatedBusinessWrites": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0
+  },
+  "provisionalRecognitionAcceptance": false,
+  "actualApprovalRecords": 2,
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "parserCalls": 2,
+  "qualifiedContextReads": 6,
+  "nativeGets": [
+    "search",
+    "detail"
+  ],
+  "syntheticEffectCount": 1,
+  "forbidden": [],
+  "checkpoints": [
+    "default-unconfigured-parser",
+    "provisional-two-lines-no-matching",
+    "explicit-native-search",
+    "explicit-native-item",
+    "manual-fields-canonical-approval-only",
+    "canonical-rejection-no-dispatch",
+    "corrected-version-new-approval",
+    "explicit-canonical-approve-synthetic-effect-once",
+    "old-source-witness-refused-before-read-or-approval",
+    "revoked-before-preview-return"
+  ]
+}

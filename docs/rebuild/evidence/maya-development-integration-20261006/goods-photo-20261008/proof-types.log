@@ -1,0 +1,65 @@
+../../../../../../../../tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts(96,126): error TS2339: Property 'set' does not exist on type 'Test'.
+../../../../../../../../tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts(97,107): error TS2339: Property 'set' does not exist on type 'Test'.
+../../../../../../../../tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts(163,114): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+../../../../../../../../tmp/maya-goods-photo-20261008/goods-photo.probe-spec.ts(192,28): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+src/admin/admin.service.ts(2,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+src/appointments/public-booking.controller.ts(12,40): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/appointments/public-booking.service.ts(11,40): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/appointments/public-booking.service.ts(121,13): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/appointments/public-booking.service.ts(122,16): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/auth/auth-client-metadata.ts(1,30): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/auth/auth-rate-limit.filter.ts(2,31): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/auth/auth-session.service.ts(358,47): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(payload: string, options?: Omit<JwtSignOptions, string | number | symbol> | undefined): Promise<string>', gave the following error.
+    Argument of type '{ user_id: string; tenant_id: string | null; role: string; session_id: string; }' is not assignable to parameter of type 'string'.
+  Overload 2 of 3, '(payload: Buffer<ArrayBufferLike>, options?: JwtSignOptions | undefined): Promise<string>', gave the following error.
+    Object literal may only specify known properties, and 'user_id' does not exist in type 'Buffer<ArrayBufferLike>'.
+  Overload 3 of 3, '(payload: { user_id: string; tenant_id: string | null; role: string; session_id: string; }, options?: JwtSignOptions | undefined): Promise<string>', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'JwtSignOptions'.
+src/auth/auth.controller.ts(14,40): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/auth/auth.service.ts(11,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+src/auth/jwt.strategy.ts(8,38): error TS7016: Could not find a declaration file for module 'passport-jwt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/passport-jwt/lib/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/passport-jwt` if it exists or add a new declaration (.d.ts) file containing `declare module 'passport-jwt';`
+src/auth/social-auth.service.ts(10,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+src/bootstrap/configure-http-app.ts(4,34): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/branding/branding.controller.ts(10,31): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/communication-delivery/communication-web-push.transport.ts(3,26): error TS7016: Could not find a declaration file for module 'web-push'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/web-push/src/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/web-push` if it exists or add a new declaration (.d.ts) file containing `declare module 'web-push';`
+src/crm/client-channel-authenticator.service.ts(71,11): error TS2353: Object literal may only specify known properties, and 'algorithms' does not exist in type 'JwtVerifyOptions'.
+src/onboarding/ai-confirmation-coordinator.service.ts(10,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+src/onboarding/canonical-trial-onboarding.service.ts(9,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+src/onboarding/onboarding.controller.ts(15,30): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/request-metrics.interceptor.ts(8,40): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/team-communications/team-communications.controller.ts(13,31): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/tenancy/tenant-resolution.middleware.ts(2,54): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/tenancy/tenant-resolver.service.ts(8,30): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/tenants/tenant-pwa.controller.ts(10,31): error TS7016: Could not find a declaration file for module 'express'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/express/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/express` if it exists or add a new declaration (.d.ts) file containing `declare module 'express';`
+src/tenants/tenant-pwa.service.ts(7,20): error TS7016: Could not find a declaration file for module 'qrcode'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/qrcode/lib/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/qrcode` if it exists or add a new declaration (.d.ts) file containing `declare module 'qrcode';`
+src/users/users.service.ts(9,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+test/widgets-live/support/fixtures.ts(39,25): error TS7016: Could not find a declaration file for module 'bcrypt'. '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/bcrypt/bcrypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if it exists or add a new declaration (.d.ts) file containing `declare module 'bcrypt';`
+test/widgets-live/support/http-bootstrap.ts(172,10): error TS2551: Property 'send' does not exist on type 'Test'. Did you mean 'end'?
+test/widgets-live/support/http-bootstrap.ts(183,10): error TS2339: Property 'set' does not exist on type 'Test'.
+test/widgets-live/support/http-bootstrap.ts(192,10): error TS2551: Property 'send' does not exist on type 'Test'. Did you mean 'end'?
+test/widgets-live/support/http-bootstrap.ts(198,10): error TS2339: Property 'set' does not exist on type 'Test'.
+test/widgets-live/support/http-bootstrap.ts(205,10): error TS2339: Property 'set' does not exist on type 'Test'.

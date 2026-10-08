@@ -1,0 +1,86 @@
+{
+  "contract": "maya.goods-photo-owned-cluster/1",
+  "mode": "actual-current-react-http-postgres-native-search-item-synthetic-extraction-receipt-port",
+  "candidateCommit": "3829590932f7efb456438a0d94446f9e6eb6fca1",
+  "sourceBinding": "LAUNCH_TIME_WORKTREE_BYTES",
+  "ownedSupervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "launcherSha256": "56b31ed2e9a0ceeeaf12d6aa99767ae0134bd4960055983f95c3e3029ca43fc5",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "sourceSha256": "1c7370b7c1b42f9bd0b16067228fe5ee3055f94ab4d652b1ea00bf5c218b9035",
+  "database": "maya_widget_gate_proof_c9occ_cabd6a6ae729",
+  "port": 59490,
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-goods-photo-s5TtBS/pg",
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "shell-runtime-build",
+    "react-web-build"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "qualification": "CURRENT_REACT_WITH_SYNTHETIC_EXTRACTION_AND_RECEIPT_PORT_NOT_OCR_PROVIDER_ACCEPTANCE",
+  "scratchHarnessGitBinding": false,
+  "syntheticApproveEnabled": true,
+  "currentReactAcceptance": false,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "groups": {
+    "migrations": {
+      "detached": true,
+      "pid": 63934,
+      "pgid": 63934,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "shell-runtime-build": {
+      "detached": true,
+      "pid": 63947,
+      "pgid": 63947,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 63984,
+      "pgid": 63984,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "photo-browser": {
+      "detached": true,
+      "pid": 64025,
+      "pgid": 64025,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "clusterStopped": true
+}

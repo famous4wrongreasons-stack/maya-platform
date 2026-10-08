@@ -1,0 +1,311 @@
+{
+  "contract": "maya.goods-photo.independent-code-review/1",
+  "reviewedAt": "2026-10-08T11:14:38.532637+00:00",
+  "baseCommit": "071a825a4c1ed8ef615ed3024ba09b6e9a78be7b",
+  "qualification": "QUALIFIED_PASS_CODE_REVIEW_AND_LOCAL_GATE_UNION; all 39 reviewed source hashes match local-attempt3; 37 shared hashes also match local-attempt2; current HTTP/React proof pending",
+  "fileCount": 39,
+  "files": {
+    "maya-carrier-react/package.json": {
+      "sha256": "9eb6e65f15f30a613566a3fa8fb8f80e5bf90379695c1181f9faa8cbddb1ad45",
+      "bytes": 1002
+    },
+    "maya-carrier-react/src/chat/ChatScreen.tsx": {
+      "sha256": "51a613767e314d0bb7f6881236a0c2eb5f5bf912b490338a7631ce80d1e0ba19",
+      "bytes": 39874
+    },
+    "maya-carrier-react/src/chat/GoodsPhotoPanel.tsx": {
+      "sha256": "187d2f4cbdd86c89cf6773d539ed1465c724cbecfaa8eab199001c6427e1d3bd",
+      "bytes": 12868
+    },
+    "maya-carrier-react/src/chat/GoodsPhotoPicker.tsx": {
+      "sha256": "33322c06e14ca574d42135b0a5eff3294f2fe1efa5da7807ea1c903739a37f56",
+      "bytes": 1131
+    },
+    "maya-carrier-react/src/runtime/compose.ts": {
+      "sha256": "d49f2f9c7bac7327e0cacadb4b5396ed0eaee358793f6ed018d43368cd1acf18",
+      "bytes": 9765
+    },
+    "maya-carrier-react/test/goods-photo.test.mjs": {
+      "sha256": "4335a2b9cc76efb41c5abda3ad82db3da34c3ef3791246d0b609f3ea618b7bd1",
+      "bytes": 7408
+    },
+    "maya-carrier-react/tools/ratchets.mjs": {
+      "sha256": "8434030bbaf8a7a38f3b73d130ed10905a82a748ea1bd8567a4638b126317614",
+      "bytes": 26686
+    },
+    "maya-carrier-react/tools/ratchets.selftest.mjs": {
+      "sha256": "c65e9ba2d7216e36c0dfa195a9f3d29d42f8fdc521e657baf42bf882a3f64339",
+      "bytes": 15123
+    },
+    "maya-chat-shell/build.mjs": {
+      "sha256": "f7e23d125d9f6ce0877e873cfb97a2e8b3564f55ff278364b3881f95238ece5e",
+      "bytes": 147363
+    },
+    "maya-chat-shell/src/net/client.ts": {
+      "sha256": "da050b75c9bfb513f2cf9a8dc41df894ca97e88181cb923e660d09380cc26409",
+      "bytes": 43645
+    },
+    "maya-chat-shell/src/net/goods-photo.ts": {
+      "sha256": "bda7cd1cfcb27edeedcb377afb04b4a7c70620a53921e9a4d7c04c0b7fab0e71",
+      "bytes": 10963
+    },
+    "maya-chat-shell/src/net/project.ts": {
+      "sha256": "6a45c65cb1ba8719910c633ee8e36bc83f5a66071cb9c86b73c64bb7a4496df0",
+      "bytes": 23852
+    },
+    "maya-chat-shell/src/net/types.ts": {
+      "sha256": "7e058edbecd361046c2cde9182cd6646685554b4fdaddbe46e3efc16f2bc0f49",
+      "bytes": 22376
+    },
+    "maya-chat-shell/src/shell/conversation.ts": {
+      "sha256": "807965f63143f0fb1a336f258fc42871d39069bf16c0f5ef146c02938a782b66",
+      "bytes": 28174
+    },
+    "maya-chat-shell/src/shell/goods-photo.ts": {
+      "sha256": "d2d33047c51629a3428b3555a66948f5366e0d30cd3a5fa93094657e5817e717",
+      "bytes": 12317
+    },
+    "maya-chat-shell/src/shell/shell.ts": {
+      "sha256": "c29af1e42ecb3c392e8345a59dff8b6e8500f9d3b90e6ae90adf3ed547b02224",
+      "bytes": 16491
+    },
+    "maya-chat-shell/test/conversation.test.mjs": {
+      "sha256": "3fdc9cf4ea0aef173589d01e6bb6669789b24bde3415672ec654fe5ca8a293a1",
+      "bytes": 36152
+    },
+    "maya-chat-shell/test/fixtures/build/admit/fetch-shape/declared-query/src/net/client.ts": {
+      "sha256": "7d3f5f2b91e025d9c7380c81dafa7531d8d0f884919eaef991b6d08e2869ad66",
+      "bytes": 1580
+    },
+    "maya-chat-shell/test/fixtures/build/admit/fetch-shape/keyed-single-site/src/net/client.ts": {
+      "sha256": "86e9d8ba9b110b0b4c6ce0c19444c37fde0c5108b18649a4e78445e3836c55f6",
+      "bytes": 1543
+    },
+    "maya-chat-shell/test/fixtures/build/admit/retired-paths/api-base-plus-paths/src/net/client.ts": {
+      "sha256": "e6e558cebb8a6a35412ab348e05e8443438221f1909a0d9e3b94fb5eb990c127",
+      "bytes": 1201
+    },
+    "maya-chat-shell/test/fixtures/build/refuse/audience/client-body/src/net/client.ts": {
+      "sha256": "a008cf17d8d3e1579dfba0dbe183ecf5b4c3290ae675d42cdd0c61a6ef791f8c",
+      "bytes": 1256
+    },
+    "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/query-concatenated/src/net/client.ts": {
+      "sha256": "10f3a829f3f4bb88f355d5a3fdabb071114a9e7cac319b47ab235f723b383566",
+      "bytes": 1232
+    },
+    "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/query-raw-interpolation/src/net/client.ts": {
+      "sha256": "b2ddbe780a603843764a8b528623dde1cbc3523327f693b0918116c30734e567",
+      "bytes": 1212
+    },
+    "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/second-call-site/src/net/client.ts": {
+      "sha256": "11e9ec6281080802961539188267b8013728bab1cc75550e475b844633559650",
+      "bytes": 1259
+    },
+    "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/string-path/src/net/client.ts": {
+      "sha256": "f32a101aa1d7cd77f6ba6f8c2a661ecb3011c71ebc812c55ebf522100bb16378",
+      "bytes": 1179
+    },
+    "maya-chat-shell/test/fixtures/build/refuse/fetch-shape/widgets-path-added/src/net/client.ts": {
+      "sha256": "1d3441f4bb3415fbd97151ddc693c36fec8edcec094d9524a87e0531d32bb1d3",
+      "bytes": 1195
+    },
+    "maya-chat-shell/test/goods-photo-fixtures.mjs": {
+      "sha256": "ad400c1d167124aa328ee6f9cb1676f182ef6b8344831dbfc225a0fbf8509990",
+      "bytes": 3467
+    },
+    "maya-chat-shell/test/goods-photo-net.test.mjs": {
+      "sha256": "1cbc087a769a0c96a0b0ea950f6429e9bd304bc994f5806f30937281bada1563",
+      "bytes": 6654
+    },
+    "maya-chat-shell/test/goods-photo.test.mjs": {
+      "sha256": "3063ace523d14f5451997071ef36ad0fbfcd607c7645f820513dfb30f012db75",
+      "bytes": 15596
+    },
+    "maya-chat-shell/test/net.test.mjs": {
+      "sha256": "7e237ee16cf4c02ce5b1c7f421c5ed131d3f021a1b27b6eff578c34e61433fd3",
+      "bytes": 88795
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": {
+      "sha256": "ac65822ee2b51754389fa9d74e3c552200ef7833537a675e953d3ab6b006a190",
+      "bytes": 92752
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo-runtime.spec.ts": {
+      "sha256": "47e1c5e4758310bdff486e1cf7efb5ec9a6ea06117417d98b9025b2cf3ee4e75",
+      "bytes": 5674
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo.contract.spec.ts": {
+      "sha256": "72bc097a0496e2299e2cc7718746321917b078cbaca7c22a1f1511ab61689028",
+      "bytes": 4102
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo.contract.ts": {
+      "sha256": "eb61b7d1d00f1d73cbaf75a1aa74fe1c14cbd4f30b7eb294d36b72286676e9e2",
+      "bytes": 7929
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo.controller.spec.ts": {
+      "sha256": "d4dc9367df3c7f44cf5170740a03cf23c51bc5c60b51943f071c6a13f262fd12",
+      "bytes": 14159
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo.controller.ts": {
+      "sha256": "ddae56224df21c6a3ea5d33860eab061fd5634581edda7df5150c8d414af16ca",
+      "bytes": 10704
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo.service.spec.ts": {
+      "sha256": "c956f040f6d4ed962849936f66521f05ae446b548f31fda85aee543a695014eb",
+      "bytes": 4731
+    },
+    "maya-saas-backend/src/ai-tools/goods-photo.service.ts": {
+      "sha256": "c23143dd266139be7342f80c696ccea87fb2cc8c85a8bec3e4c3f249a754d1ae",
+      "bytes": 5001
+    },
+    "maya-saas-backend/test/widgets-live/goods-vertical.probe-spec.ts": {
+      "sha256": "8c0f9a4b57378ebd38308b8b805e1e770f19ac4cfb828f439ecf6e30a2d5c92b",
+      "bytes": 32741
+    }
+  },
+  "freezeHashesMatched": true,
+  "changesSinceFailedLocalAttempt1": [
+    "maya-chat-shell/src/shell/conversation.ts",
+    "maya-chat-shell/src/shell/goods-photo.ts",
+    "maya-chat-shell/test/goods-photo.test.mjs",
+    "maya-saas-backend/src/ai-tools/goods-photo.contract.ts",
+    "maya-saas-backend/src/ai-tools/goods-photo.controller.spec.ts"
+  ],
+  "excludedGeneratedBuildArtifact": "maya-chat-shell/dist/manifest.json; generated runtime allowlist publication, parent will commit; source review intentionally excludes it",
+  "evidenceFiles": {
+    "/tmp/maya-goods-photo-20261008/backend-targeted.json": {
+      "sha256": "df80746e239c6cfd23c52936c226833082f3cab163a6f1a3596dca2dfe825b69",
+      "bytes": 23272
+    },
+    "/tmp/maya-goods-photo-20261008/backend-targeted.log": {
+      "sha256": "939d44bd4fd6ae0267f3ed321f797d668c0f4860b19469dde4ef77148226d411",
+      "bytes": 421
+    },
+    "/tmp/maya-goods-photo-20261008/backend-lint-fix.json": {
+      "sha256": "0d855d3d2f1cb4f40207f5debb2415dd72f28f5f5a02fac1df57be26273f5151",
+      "bytes": 549
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt1/report.json": {
+      "sha256": "9e6066e3408a31a3a8fad38fb9ff7f3d4da7c1c8771916145d442d807cdd190e",
+      "bytes": 14935
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt1/targeted-unit.json": {
+      "sha256": "2967dc40c59466f1f15d5a211041268208b4b30674667cb13c7b6b28add6beec",
+      "bytes": 86807
+    },
+    "/tmp/maya-goods-photo-shell-targeted-04.log": {
+      "sha256": "cfb3256b1cf7c05ac0a7e6eb5a4cf18530faba2805159fd7071d75f8e2f513a8",
+      "bytes": 2109
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt2/report.json": {
+      "sha256": "c18deadb7b51fd2d8a1e156db9f9705f9c8140d98837b0656b6874180b12afc9",
+      "bytes": 15695
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt2/targeted-unit.json": {
+      "sha256": "0e5aca93b1ea486b4a306027db35f76b6195cc3786bb54d6ecb9d89ebb596866",
+      "bytes": 86807
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt2/shell-targeted.log": {
+      "sha256": "c02a1d4db30f23f5d9b77ce71e7b61f0e4cb75a0db2e5bd5276e77a33b78ba2c",
+      "bytes": 20390
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/report.json": {
+      "sha256": "697df2519b7a5ba23198e54874b1c122c94ef69994006ccb249429df481ac1ac",
+      "bytes": 13246
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/shell-targeted.log": {
+      "sha256": "42389b7ad6b82c4e20557ca627a1e5dc2622e2c968ec45ddbed744b442bbf093",
+      "bytes": 14887
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/carrier-ratchets.log": {
+      "sha256": "b4c3c371b8c04c77ccd475e6afee5b4c9bada45e2149816a40166705f9a43769",
+      "bytes": 7818
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/carrier-types.log": {
+      "sha256": "9d44d5fd811f20f05789973c0092acdefd8d27a1f5a25c6f6e71b2c3a3f6f966",
+      "bytes": 126
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/carrier-presentation.log": {
+      "sha256": "e0bf78d8f5921169ed1b9fe34139f25fbbad23461249c062b3849e151469d00b",
+      "bytes": 1364
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/contract-check.log": {
+      "sha256": "7d7000a4c84f207560cf2aceae77a681e86c954861490a3b9efd0730785fd4f7",
+      "bytes": 6636
+    },
+    "/tmp/maya-goods-photo-20261008/local-attempt3/k3.log": {
+      "sha256": "ac417a602e6a928bfc26d6082fe1bd715f735be5a31d917a44d5895f8ba216f1",
+      "bytes": 7873
+    }
+  },
+  "historicalEvidence": {
+    "backendTargeted": {
+      "tests": 44,
+      "suites": 4,
+      "passed": true,
+      "qualification": "Before two lint-only changes; not a final full-gate result"
+    },
+    "shellTargeted04": {
+      "tests": 18,
+      "passed": true,
+      "qualification": "Synthetic headless/net tests; log inspected, not rerun"
+    },
+    "localAttempt1": {
+      "status": "FAIL",
+      "completed": [
+        "targeted-unit",
+        "backend-types",
+        "widgets-live-types"
+      ],
+      "allOwnedGroupsClosedAbsent": true,
+      "qualification": "171 backend tests/8 suites and two type gates passed; whole attempt FAIL at lint; five subsequently reviewed file deltas"
+    }
+  },
+  "additionalReviewedTests": {
+    "files": [
+      "maya-chat-shell/test/conversation.test.mjs",
+      "maya-chat-shell/test/net.test.mjs"
+    ],
+    "meaning": "Exact four endpoint literals and four transport methods; finite runGoodsPhotoOperation internal seam; one chat callsite and zero chat calls negative retained; new projection file included in no-extra-fetch scan."
+  },
+  "localGateUnion": {
+    "status": "PASS",
+    "qualification": "Union of successful unchanged-runtime gates across attempts, not a relabeling of either failed attempt. Two closed-list tests are the only source delta between attempt2 and attempt3. Generated dist manifest is excluded from 39-file source review.",
+    "attempt2": {
+      "overall": "FAIL",
+      "successfulGates": [
+        "targeted-unit",
+        "backend-types",
+        "widgets-live-types",
+        "changed-typescript-lint",
+        "shell-build"
+      ],
+      "backendTests": 171,
+      "backendSuites": 8,
+      "failedGate": "shell-targeted (closed-list assertions subsequently updated)",
+      "reviewedSourceHashMatches": 37
+    },
+    "attempt3": {
+      "overall": "PASS",
+      "successfulGates": [
+        "shell-targeted",
+        "carrier-ratchets",
+        "carrier-types",
+        "carrier-presentation",
+        "contract-check",
+        "k3"
+      ],
+      "shellTests": 143,
+      "carrierPresentationTests": 13,
+      "goodsPhotoCarrierTestsWithinPresentation": 8,
+      "ratchetRefuse": 61,
+      "ratchetAdmit": 43,
+      "contractChecksPassed": 31,
+      "contractChecksPending": 4,
+      "k3ChecksPassed": 10,
+      "reviewedSourceHashMatches": 39
+    },
+    "sourceAndHarnessUnchangedBoth": true,
+    "ownedGroupsClosedAbsent": 12,
+    "httpReactProof": "PENDING"
+  }
+}

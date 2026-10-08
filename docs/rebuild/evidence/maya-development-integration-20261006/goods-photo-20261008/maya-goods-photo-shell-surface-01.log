@@ -1,0 +1,11 @@
+✔ submitUserTurn is the sole path: only it (and retry of its own turn) calls Transport.chat (4.401084ms)
+✔ PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line (68.12325ms)
+✔ typed methods only: the two widget methods are explicit; no generic request or token accessor (0.357209ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.65425

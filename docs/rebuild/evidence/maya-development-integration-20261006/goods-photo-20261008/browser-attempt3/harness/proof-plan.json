@@ -1,0 +1,74 @@
+{
+  "contract": "maya.goods-photo-proof-plan/1",
+  "status": "PREPARATION_ONLY_NOT_EXECUTED",
+  "sourceHeadAtPreparation": "071a825a4c1ed8ef615ed3024ba09b6e9a78be7b",
+  "runtimeSourceMayStillChange": false,
+  "rootControlsHeavySlot": true,
+  "resources": {
+    "nodeHeapMb": 3072,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "parallelStages": 1,
+    "httpTimeoutMs": 180000,
+    "browserTimeoutMs": 600000
+  },
+  "qualification": {
+    "model": "FORBIDDEN",
+    "parser": "DI_SYNTHETIC_EXTRACTION_ONLY",
+    "native": "ACTUAL_FACTORY_SEARCH_AND_ITEM_WITH_FINITE_SYNTHETIC_FETCH",
+    "receiptContext": "SYNTHETIC_QUALIFIED_CONTEXT_PORT",
+    "receiptDispatch": "OPTIONAL_ROOT_AUTHORIZED_SYNTHETIC_AE_ON_EXPLICIT_APPROVE_ONLY",
+    "a17": "SYNTHETIC_ACTIVE_INTEGRATION_SEED_NOT_ACCEPTANCE",
+    "realOCR": false,
+    "realProvider": false,
+    "restartClaim": false
+  },
+  "httpScenarios": [
+    "default parser returns503 without source read",
+    "explicit PNG upload yields two provisional rows with unresolved price semantics, no reads/approval",
+    "explicit search produces bounded source candidates through C9",
+    "explicit item selection reads exactly one native item card",
+    "owner corrected quantity/unit cost creates only canonical approval",
+    "reject canonical approval without AE/provider write",
+    "new corrected version creates distinct immutable canonical approval",
+    "revocation during parser refuses preview and wipes buffer",
+    "original source_revision after synthetic source settings change: exact409 before C9, provider or approval"
+  ],
+  "browserScenarios": [
+    "explicit file gesture only; two provisional rows; blank corrected fields",
+    "select one line: no source call",
+    "search button: one native search; categories unselectable",
+    "select exact item: one detail read; receipt fields still blank",
+    "manual corrected receipt fields: canonical approval through certified resolution",
+    "canonical reject then correction: no automatic resend/approval",
+    "explicit canonical approve corrected version 2: one qualified synthetic AE success, zero native provider mutation",
+    "cancel while upload awaits: late result suppressed and fields cleared",
+    "review response loss: uncertain and no retry or automatic matching",
+    "revocation: request refused; no authority restoration on reopen/reload"
+  ],
+  "browserProtocolStatus": "WRITTEN_20_CHECKPOINTS_NOT_TYPECHECKED_NOT_EXECUTED",
+  "api": {
+    "preview": "POST /api/ai/goods/photo-preview multipart photo",
+    "search": "POST /api/ai/goods/search {requestId,source_revision,conversationId?,query}",
+    "detail": "POST /api/ai/goods/item-read {requestId,source_revision,conversationId?,goods_id}",
+    "review": "POST /api/ai/goods/receipt-review {requestId,source_revision,conversationId?,proposal}",
+    "reject": "existing canonical approval reject owner route; browser uses certified APPROVAL"
+  },
+  "evidenceRules": [
+    "safe reports and source hashes only",
+    "no raw OCR/document/auth/approval token output",
+    "all fixtures synthetic",
+    "preserve every failed attempt",
+    "no browser/native/provider acceptance until actual run and full cleanup"
+  ],
+  "remainingChecks": [
+    "Root serial syntax/guard/type checks for scratch files",
+    "Reviewed committed runtime candidate",
+    "Root serial actual HTTP/PG/browser execution"
+  ],
+  "httpFixtureStatus": "WRITTEN_NOT_TYPECHECKED_NOT_EXECUTED",
+  "launcherCommand": "node /tmp/maya-goods-photo-20261008/native-proof.mjs --run --expected-commit=<reviewed 40-hex HEAD> --output=/tmp/maya-goods-photo-20261008/http-attempt1 --synthetic-approve",
+  "browserLauncherCommand": "node /tmp/maya-goods-photo-20261008/native-proof.mjs --run --browser --synthetic-approve --expected-commit=<reviewed 40-hex HEAD> --output=/tmp/maya-goods-photo-20261008/browser-attempt1"
+}

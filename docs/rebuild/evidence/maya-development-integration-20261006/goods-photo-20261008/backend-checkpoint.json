@@ -1,0 +1,28 @@
+{
+  "source_head": "071a825a4c1ed8ef615ed3024ba09b6e9a78be7b",
+  "qualification": "SYNTHETIC_ONLY_NOT_OCR_PROVIDER_OR_CARRIER_ACCEPTANCE",
+  "command": "node --max-old-space-size=2048 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/goods-photo.controller.spec.ts src/ai-tools/goods-photo.contract.spec.ts src/ai-tools/goods-photo.service.spec.ts src/ai-tools/goods-photo-runtime.spec.ts --json --outputFile=/tmp/maya-goods-photo-20261008/backend-targeted.json",
+  "tests_passed": 44,
+  "suites_passed": 4,
+  "success": true,
+  "started_at": "2026-10-08T10:58:45.932000+00:00",
+  "finished_at": "2026-10-08T10:58:46.982000+00:00",
+  "files": {
+    "src/ai-tools/goods-photo.controller.ts": "ddae56224df21c6a3ea5d33860eab061fd5634581edda7df5150c8d414af16ca",
+    "src/ai-tools/goods-photo.controller.spec.ts": "25c95c46deac8d5cd1e91bd973977e370b06ff04f66f5d32853dce6c2cd1d48c",
+    "src/ai-tools/goods-photo.contract.ts": "c490fd6d6d4c4593fcf627164146b21b39771986a23286b55941e8d505666343",
+    "src/ai-tools/goods-photo.contract.spec.ts": "72bc097a0496e2299e2cc7718746321917b078cbaca7c22a1f1511ab61689028",
+    "src/ai-tools/goods-photo.service.ts": "c23143dd266139be7342f80c696ccea87fb2cc8c85a8bec3e4c3f249a754d1ae",
+    "src/ai-tools/goods-photo.service.spec.ts": "c956f040f6d4ed962849936f66521f05ae446b548f31fda85aee543a695014eb",
+    "src/ai-tools/goods-photo-runtime.spec.ts": "47e1c5e4758310bdff486e1cf7efb5ec9a6ea06117417d98b9025b2cf3ee4e75",
+    "src/ai-tools/ai-tool-runtime.service.ts": "ac65822ee2b51754389fa9d74e3c552200ef7833537a675e953d3ab6b006a190",
+    "test/widgets-live/goods-vertical.probe-spec.ts": "8c0f9a4b57378ebd38308b8b805e1e770f19ac4cfb828f439ecf6e30a2d5c92b"
+  },
+  "remaining": [
+    "Root production/types/scoped lint and actual HTTP/current React proof are separate",
+    "Default GoodsPhotoParser remains unavailable",
+    "Unbound approval after crash refuses reparent/recovery",
+    "Historical goods-vertical HTTP fixture modified but not run",
+    "No provider writes, model/OCR/network, new schema or store, commit or deploy"
+  ]
+}
