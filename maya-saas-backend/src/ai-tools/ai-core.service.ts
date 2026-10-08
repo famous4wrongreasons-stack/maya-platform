@@ -1,4 +1,4 @@
-import { goodsReadReply } from './goods-presentation';
+import { goodsReadReply } from "./goods-presentation";
 import {
   isOwnerReviewClarification,
   isOwnerReviewTaskSet,
@@ -6,21 +6,21 @@ import {
   OWNER_REVIEW_QUESTION,
   ownerReviewPlanState,
   withOwnerReviewClarification,
-} from './owner-review-plan';
-import { publicConsultationReply } from './public-consultation-presentation';
-import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
-import { integrationStatusReply } from './integration-status-presentation';
+} from "./owner-review-plan";
+import { publicConsultationReply } from "./public-consultation-presentation";
+import { isExplicitFinancialReportRequest } from "../orchestration/c9.bi-presentation";
+import { integrationStatusReply } from "./integration-status-presentation";
 import {
   isExplicitClientReturnRequest,
   lifecycleSignal,
   lifecycleStatement,
-} from '../orchestration/c9.lifecycle-presentation';
-import { isExplicitCancellationWindowRequest } from '../orchestration/c9.occupancy-presentation';
-import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
+} from "../orchestration/c9.lifecycle-presentation";
+import { isExplicitCancellationWindowRequest } from "../orchestration/c9.occupancy-presentation";
+import { isExactBookingTime } from "../conversation-intelligence/semantic-slot-normalization";
 import {
   buildCommonPersonNameForms,
   GIVEN_NAME_ALIASES,
-} from '../common/person-name-forms';
+} from "../common/person-name-forms";
 import {
   bindBookingCatalog,
   bindBookingServices,
@@ -28,27 +28,27 @@ import {
   isBookingSourceUnavailable,
   bookingPreferenceDate,
   MULTI_SERVICE_LIMITATION,
-} from './booking-catalog-binding';
+} from "./booking-catalog-binding";
 import {
   bindServicePriceChat,
   servicePriceClarification,
-} from './service-price-chat-binding';
-import { localCalendarDate } from '../owner-reports/owner-reports.time';
-import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
-import { CrmService } from '../crm/crm.service';
+} from "./service-price-chat-binding";
+import { localCalendarDate } from "../owner-reports/owner-reports.time";
+import { normalizeScheduleSlots } from "../crm/staff-schedule.utils";
+import { CrmService } from "../crm/crm.service";
 import {
   mutationClarification,
   mutationReceiptReply,
   mutationReceiptStatus,
-} from './mutation-response';
+} from "./mutation-response";
 import {
   AI_SCHEDULE_WIDGET,
   type AiScheduleWidgetPort,
-} from './ai-schedule-widget.port';
+} from "./ai-schedule-widget.port";
 import {
   measurementText,
   type MeasurementPresentation,
-} from '../measurement/measurement.presentation';
+} from "../measurement/measurement.presentation";
 import {
   BadRequestException,
   ConflictException,
@@ -57,115 +57,115 @@ import {
   Injectable,
   Optional,
   ServiceUnavailableException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createHash, randomUUID } from 'crypto';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { createHash, randomUUID } from "crypto";
 
-import { AuditLogService } from '../audit-log/audit-log.service';
-import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
-import type { AuthenticatedUser } from '../common/authenticated-user.interface';
-import { AppointmentStatus, UserRole } from '../common/domain.enums';
+import { AuditLogService } from "../audit-log/audit-log.service";
+import { AuthRateLimitService } from "../auth/auth-rate-limit.service";
+import type { AuthenticatedUser } from "../common/authenticated-user.interface";
+import { AppointmentStatus, UserRole } from "../common/domain.enums";
 import {
   ASSISTANT_CAPABILITY_CATALOG,
   type AssistantCapability,
-} from '../dashboard-preferences/assistant-capabilities.constants';
-import { DashboardPreferencesService } from '../dashboard-preferences/dashboard-preferences.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { TenantContextService } from '../tenancy/tenant-context.service';
-import { MayaBrainRouterService } from '../ai-brain/maya-brain-router.service';
+} from "../dashboard-preferences/assistant-capabilities.constants";
+import { DashboardPreferencesService } from "../dashboard-preferences/dashboard-preferences.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { TenantContextService } from "../tenancy/tenant-context.service";
+import { MayaBrainRouterService } from "../ai-brain/maya-brain-router.service";
 import {
   isBusinessReviewFollowUp,
   isComprehensiveBusinessReview,
-} from '../ai-brain/business-review-intent';
-import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
-import type { ConversationSemanticPlan } from '../conversation-intelligence/conversation-intelligence.types';
+} from "../ai-brain/business-review-intent";
+import { ConversationIntelligenceService } from "../conversation-intelligence/conversation-intelligence.service";
+import type { ConversationSemanticPlan } from "../conversation-intelligence/conversation-intelligence.types";
 import type {
   MayaBrainIntent,
   MayaBrainRoute,
-} from '../ai-brain/maya-brain.types';
-import { AiCoreModelService } from './ai-core-model.service';
-import { AiMemoryService } from './ai-memory.service';
+} from "../ai-brain/maya-brain.types";
+import { AiCoreModelService } from "./ai-core-model.service";
+import { AiMemoryService } from "./ai-memory.service";
 import type {
   AiCoreMessage,
   AiCoreModelDecision,
   AiCoreToolDescriptor,
   AiCoreToolResult,
-} from './ai-core.types';
-import { AiToolRuntimeService } from './ai-tool-runtime.service';
-import { buildChatReportCard } from './chat-report-card';
-import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
-import { ReportingPeriodResolver } from './reporting-period.resolver';
-import { StaffScheduleCommandService } from './staff-schedule-command.service';
-import { ModuleRef } from '@nestjs/core';
+} from "./ai-core.types";
+import { AiToolRuntimeService } from "./ai-tool-runtime.service";
+import { buildChatReportCard } from "./chat-report-card";
+import type { AiCoreChatDto } from "./dto/ai-core-chat.dto";
+import { ReportingPeriodResolver } from "./reporting-period.resolver";
+import { StaffScheduleCommandService } from "./staff-schedule-command.service";
+import { ModuleRef } from "@nestjs/core";
 import {
   C9Orchestrator,
   type C9ConversationReads,
-} from '../orchestration/c9.orchestrator';
-import { C9_CAPABILITIES } from '../orchestration/c9.registry';
+} from "../orchestration/c9.orchestrator";
+import { C9_CAPABILITIES } from "../orchestration/c9.registry";
 import {
   AI_TYPED_WIDGET_TRIGGER,
   type AiTypedWidgetTriggerPort,
-} from './ai-typed-widget-trigger.port';
+} from "./ai-typed-widget-trigger.port";
 
 const MAX_CHAT_INPUT_BYTES = 16 * 1_024;
 const COMMON_PERSON_NAME_FORMS = buildCommonPersonNameForms([
   ...GIVEN_NAME_ALIASES.keys(),
-  'александр',
-  'алексей',
-  'алёна',
-  'анастасия',
-  'андрей',
-  'анна',
-  'антон',
-  'артём',
-  'борис',
-  'вадим',
-  'валерий',
-  'валерия',
-  'василий',
-  'виктор',
-  'виктория',
-  'владимир',
-  'дарья',
-  'диана',
-  'дмитрий',
-  'евгений',
-  'евгения',
-  'егор',
-  'екатерина',
-  'елена',
-  'иван',
-  'илья',
-  'ирина',
-  'кирилл',
-  'константин',
-  'ксения',
-  'максим',
-  'маргарита',
-  'марина',
-  'мария',
-  'михаил',
-  'надежда',
-  'наталья',
-  'никита',
-  'николай',
-  'олег',
-  'ольга',
-  'павел',
-  'пётр',
-  'полина',
-  'роман',
-  'руслан',
-  'светлана',
-  'сергей',
-  'софия',
-  'станислав',
-  'татьяна',
-  'тимур',
-  'фёдор',
-  'юлия',
-  'юрий',
-  'ярослав',
+  "александр",
+  "алексей",
+  "алёна",
+  "анастасия",
+  "андрей",
+  "анна",
+  "антон",
+  "артём",
+  "борис",
+  "вадим",
+  "валерий",
+  "валерия",
+  "василий",
+  "виктор",
+  "виктория",
+  "владимир",
+  "дарья",
+  "диана",
+  "дмитрий",
+  "евгений",
+  "евгения",
+  "егор",
+  "екатерина",
+  "елена",
+  "иван",
+  "илья",
+  "ирина",
+  "кирилл",
+  "константин",
+  "ксения",
+  "максим",
+  "маргарита",
+  "марина",
+  "мария",
+  "михаил",
+  "надежда",
+  "наталья",
+  "никита",
+  "николай",
+  "олег",
+  "ольга",
+  "павел",
+  "пётр",
+  "полина",
+  "роман",
+  "руслан",
+  "светлана",
+  "сергей",
+  "софия",
+  "станислав",
+  "татьяна",
+  "тимур",
+  "фёдор",
+  "юлия",
+  "юрий",
+  "ярослав",
 ]);
 
 type ToolUsage = {
@@ -209,7 +209,7 @@ type GroundingRequirement = {
    * человеку надо назвать тариф, иначе отказ читается как поломка.
    * `scope` — инструменты есть, но именно эта тема закрыта роли или тарифу.
    */
-  closedReason?: 'plan' | 'scope';
+  closedReason?: "plan" | "scope";
   strictNumbers: boolean;
   presetToolCall?: {
     name: string;
@@ -218,7 +218,7 @@ type GroundingRequirement = {
 };
 
 type GroundingReport = {
-  status: 'not_required' | 'verified' | 'blocked';
+  status: "not_required" | "verified" | "blocked";
   domain: string | null;
   required_tools: string[];
   evidence_tools: string[];
@@ -226,14 +226,14 @@ type GroundingReport = {
 
 type AiCoreCompletion = {
   ownerReview?: Awaited<
-    ReturnType<C9Orchestrator['reviewBusinessAndCancellationWindows']>
+    ReturnType<C9Orchestrator["reviewBusinessAndCancellationWindows"]>
   >;
   ownerReviewClarification?: true;
-  biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
-  lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
-  occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
+  biReport?: Awaited<ReturnType<C9Orchestrator["explainFinancialReport"]>>;
+  lifecycle?: Awaited<ReturnType<C9Orchestrator["checkClientReturn"]>>;
+  occupancy?: Awaited<ReturnType<C9Orchestrator["checkCancellationWindows"]>>;
   reply: string;
-  source: 'deepseek' | 'openai' | 'safe_fallback';
+  source: "deepseek" | "openai" | "safe_fallback";
   action: Record<string, unknown> | null;
   grounding?: GroundingReport;
   /**
@@ -275,12 +275,12 @@ const OPEN_BUSINESS_OVERVIEW_PATTERN =
  * фактические вопросы ловит подсказка и заземляет как обычно.
  */
 const NON_DATA_INTENTS = new Set<MayaBrainIntent>([
-  'booking',
-  'schedule_management',
-  'knowledge',
-  'support',
-  'catalog',
-  'loyalty',
+  "booking",
+  "schedule_management",
+  "knowledge",
+  "support",
+  "catalog",
+  "loyalty",
 ]);
 /**
  * Интенты про ДЕНЬГИ и показатели салона.
@@ -291,8 +291,8 @@ const NON_DATA_INTENTS = new Set<MayaBrainIntent>([
  * и он получает обезличенный список, а не отказ.
  */
 const MONEY_INTENTS = new Set<MayaBrainIntent>([
-  'finance',
-  'business_analytics',
+  "finance",
+  "business_analytics",
 ]);
 // 🔴 Граница слова обязательна: «се-ГОД-ня» содержит «год», и без неё запрос
 // «сравни сегодня с прошлой неделей» уезжал в годовое сравнение, а «сколько
@@ -436,43 +436,43 @@ const GROUNDING_SMALL_METRIC_PATTERN =
  * доказательством: всё остальное (запись, отмена, начисление) — действие.
  */
 const DATA_TOOL_DOMAINS: Record<string, string> = {
-  'inventory.goods.read': 'goods_catalog',
-  'analytics.business.query': 'business_query',
-  'analytics.employee.query': 'employee_query',
-  'analytics.business.profit': 'business_profit',
-  'expenses.period.complete': 'business_profit',
-  'expenses.read': 'business_expenses',
-  'customers.count': 'customer_count',
-  'clients.retention.scan': 'client_retention',
-  'clients.dormant.list': 'client_retention',
-  'clients.dossier.read': 'client_dossier',
-  'catalog.services.read': 'service_catalog',
-  'catalog.staff.read': 'staff_catalog',
-  'company.business-hours.read': 'company_profile',
-  'support.integration-status.read': 'integration_status',
-  'staff.schedule.read': 'staff_schedule',
+  "inventory.goods.read": "goods_catalog",
+  "analytics.business.query": "business_query",
+  "analytics.employee.query": "employee_query",
+  "analytics.business.profit": "business_profit",
+  "expenses.period.complete": "business_profit",
+  "expenses.read": "business_expenses",
+  "customers.count": "customer_count",
+  "clients.retention.scan": "client_retention",
+  "clients.dormant.list": "client_retention",
+  "clients.dossier.read": "client_dossier",
+  "catalog.services.read": "service_catalog",
+  "catalog.staff.read": "staff_catalog",
+  "company.business-hours.read": "company_profile",
+  "support.integration-status.read": "integration_status",
+  "staff.schedule.read": "staff_schedule",
   // 🔴 Свой график мастера обязан быть ИСТОЧНИКОМ ДАННЫХ наравне с командным.
   // Его тут не было, поэтому инструмент, выданный мастеру каталогом, не мог
   // стать доказательством ни в одном ходу: подсказка про график называла
   // только руководительский вариант, у мастера его нет — и семья считалась
   // закрытой. Мастер спрашивал про СВОЙ день и получал «недоступно для вашей
   // роли», хотя данные лежали рядом.
-  'staff.schedule.own.read': 'staff_schedule',
-  'operations.journal.read': 'operations_journal',
-  'booking.availability.read': 'booking_availability',
-  'appointments.own.list': 'client_appointments',
-  'loyalty.own.read': 'client_loyalty',
+  "staff.schedule.own.read": "staff_schedule",
+  "operations.journal.read": "operations_journal",
+  "booking.availability.read": "booking_availability",
+  "appointments.own.list": "client_appointments",
+  "loyalty.own.read": "client_loyalty",
 };
 /** Инструменты, которые предзагружаем: подсказка к ним однозначна. */
 const PRELOADABLE_TOOLS = new Set([
-  'analytics.business.query',
-  'analytics.employee.query',
-  'analytics.business.profit',
-  'expenses.read',
-  'clients.retention.scan',
-  'clients.dossier.read',
+  "analytics.business.query",
+  "analytics.employee.query",
+  "analytics.business.profit",
+  "expenses.read",
+  "clients.retention.scan",
+  "clients.dossier.read",
   // Гостевой «расскажи о салоне» — сразу публичный каталог, не ждём второй ход.
-  'catalog.staff.read',
+  "catalog.staff.read",
 ]);
 /**
  * Инструменты, чей результат — личные данные самого спрашивающего.
@@ -484,15 +484,15 @@ const PRELOADABLE_TOOLS = new Set([
  * невозможно «угадать неверно» — он либо отработал, либо нет.
  */
 const PII_SENSITIVE_TOOLS = new Set([
-  'appointments.own.list',
-  'loyalty.own.read',
+  "appointments.own.list",
+  "loyalty.own.read",
   // Поиск выполняется по имени/телефону внутри периметра, а наружу выходит
   // только обезличенное досье. Формулировку тоже собирает сервер: так даже
   // история услуг конкретного человека не отправляется внешней модели.
-  'clients.dossier.read',
+  "clients.dossier.read",
   // Единственный инструмент, отдающий ИМЕНА гостей списком. Ответ собирает
   // сервер: ни одно имя и ни один телефон не уходят во внешнюю модель.
-  'clients.dormant.list',
+  "clients.dormant.list",
 ]);
 /**
  * Инструменты, для которых проверенный сервером ответ нельзя переформулировать
@@ -500,24 +500,24 @@ const PII_SENSITIVE_TOOLS = new Set([
  * когорт и границы периодов, а свободный пересказ не должен менять цифры.
  */
 const SERVER_COMPOSED_REPLY_TOOLS = new Set([
-  'company.business-hours.read',
+  "company.business-hours.read",
   // Stored integration checks must never be paraphrased as a live provider probe.
-  'support.integration-status.read',
+  "support.integration-status.read",
   // Quoted internal guidance is data. Keep free-form rules out of model
   // instructions and preserve the confirmed wording for authorized staff.
-  'business.rules.read',
+  "business.rules.read",
   ...PII_SENSITIVE_TOOLS,
-  'clients.retention.scan',
+  "clients.retention.scan",
   // График — точный факт по дате. Его нельзя пересказывать из аналитики
   // записей или заменять предположением модели.
-  'staff.schedule.read',
-  'staff.schedule.own.read',
+  "staff.schedule.read",
+  "staff.schedule.own.read",
   // Дневной журнал нельзя превращать в месячную сводку или пересчитывать LLM.
-  'operations.journal.read',
+  "operations.journal.read",
   // Финансовый ответ должен дословно следовать серверному расчёту. Модель не
   // должна снова потребовать аренду или пересчитать прибыль самостоятельно.
-  'analytics.business.profit',
-  'expenses.period.complete',
+  "analytics.business.profit",
+  "expenses.period.complete",
 ]);
 /**
  * Для этих контрактов соседний источник не может служить доказательством.
@@ -525,16 +525,16 @@ const SERVER_COMPOSED_REPLY_TOOLS = new Set([
  * который нельзя честно восстановить из общей аналитики.
  */
 const STRICT_GROUNDING_HINT_TOOLS = new Set([
-  'company.business-hours.read',
-  'staff.schedule.read',
+  "company.business-hours.read",
+  "staff.schedule.read",
   // Свой график — та же семья и та же чувствительность: месячной сводкой
   // конкретный день не подменяют.
-  'staff.schedule.own.read',
-  'operations.journal.read',
-  'clients.retention.scan',
-  'clients.dossier.read',
-  'appointments.own.list',
-  'loyalty.own.read',
+  "staff.schedule.own.read",
+  "operations.journal.read",
+  "clients.retention.scan",
+  "clients.dossier.read",
+  "appointments.own.list",
+  "loyalty.own.read",
 ]);
 const ASSISTANT_MANAGER_ROLES = new Set<UserRole>([
   UserRole.TENANT_OWNER,
@@ -595,14 +595,14 @@ export class AiCoreService {
       { strict: false },
     );
     if (timeline === undefined)
-      this.modelFailure('conversation_history_unavailable');
+      this.modelFailure("conversation_history_unavailable");
     return timeline.readCurrentConversation(user);
   }
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
     const tenantId = this.requireTenant(user);
     const businessTimezone = await this.resolveBusinessTimezone(tenantId);
-    await this.rateLimit.assertTenant('ai_chat', {
+    await this.rateLimit.assertTenant("ai_chat", {
       tenantId,
       identity: user.userId,
     });
@@ -619,7 +619,7 @@ export class AiCoreService {
       );
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         reply: typedWidget.reply,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: typedWidget.action,
       });
     }
@@ -629,7 +629,7 @@ export class AiCoreService {
       this.readTurns.set(dto, {
         turn: userTurn,
         intentHash: this.orchestrator.conversationDigest([
-          'conversation-read-intent/1',
+          "conversation-read-intent/1",
           dto.surface,
           dto.audience ?? null,
           dto.messages,
@@ -651,54 +651,54 @@ export class AiCoreService {
     );
     if (
       !clientAudience &&
-      dto.surface === 'web' &&
+      dto.surface === "web" &&
       [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
         toolUser.role,
       ) &&
       isExplicitCancellationWindowRequest(this.latestUserText(dto.messages))
     ) {
       const turn = this.readTurns.get(dto);
-      if (!turn) this.modelFailure('conversation_history_unavailable');
+      if (!turn) this.modelFailure("conversation_history_unavailable");
       const occupancy = await this.orchestrator.checkCancellationWindows(turn);
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         reply: occupancy.reply,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: null,
         occupancy,
       });
     }
     if (
       !clientAudience &&
-      dto.surface === 'web' &&
+      dto.surface === "web" &&
       [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
         toolUser.role,
       ) &&
       isExplicitClientReturnRequest(this.latestUserText(dto.messages))
     ) {
       const turn = this.readTurns.get(dto);
-      if (!turn) this.modelFailure('conversation_history_unavailable');
+      if (!turn) this.modelFailure("conversation_history_unavailable");
       const lifecycle = await this.orchestrator.checkClientReturn(turn);
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         reply: lifecycle.reply,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: null,
         lifecycle,
       });
     }
     if (
       !clientAudience &&
-      dto.surface === 'web' &&
+      dto.surface === "web" &&
       [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
         toolUser.role,
       ) &&
       isExplicitFinancialReportRequest(this.latestUserText(dto.messages))
     ) {
       const turn = this.readTurns.get(dto);
-      if (!turn) this.modelFailure('conversation_history_unavailable');
+      if (!turn) this.modelFailure("conversation_history_unavailable");
       const biReport = await this.orchestrator.explainFinancialReport(turn);
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         reply: biReport.reply,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: null,
         biReport,
       });
@@ -713,7 +713,7 @@ export class AiCoreService {
     if (memoryCommand) {
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         reply: memoryCommand.reply,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: null,
       });
     }
@@ -759,11 +759,11 @@ export class AiCoreService {
             approval && bridge && !resolution
               ? `${scheduleCommand.reply}\nПодтверждение изменения графика недоступно в текущем профиле чата. Изменение не выполнено.`
               : scheduleCommand.reply,
-          source: 'safe_fallback',
+          source: "safe_fallback",
           // A declined canonical card must not become a legacy approval control.
           // Other surfaces keep their separately authorized approval path.
           action:
-            approval && bridge && ['web', 'native'].includes(dto.surface)
+            approval && bridge && ["web", "native"].includes(dto.surface)
               ? null
               : scheduleCommand.action,
         },
@@ -776,7 +776,7 @@ export class AiCoreService {
     if (clientBaseAccess) {
       return this.complete(user, dto, brain, false, [], [], {
         reply: clientBaseAccess.reply,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: null,
       });
     }
@@ -787,7 +787,7 @@ export class AiCoreService {
     if (assistantCommand) {
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         ...assistantCommand,
-        source: 'safe_fallback',
+        source: "safe_fallback",
         action: null,
       });
     }
@@ -840,10 +840,10 @@ export class AiCoreService {
       // ответ не зависит от формулировки модели и всегда закрывает тот же
       // отчётный период без фиктивной строки «аренда 0 ₽».
       if (
-        allowedNames.has('expenses.period.complete') &&
+        allowedNames.has("expenses.period.complete") &&
         this.explicitNoAdditionalExpenses(sanitized.messages)
       ) {
-        const toolName = 'expenses.period.complete';
+        const toolName = "expenses.period.complete";
         const argumentsForTool = ReportingPeriodResolver.hardenToolArguments(
           toolName,
           {},
@@ -869,25 +869,25 @@ export class AiCoreService {
               ),
             },
             {
-              widgetTrigger: 'T-2a',
+              widgetTrigger: "T-2a",
               requestId: dto.requestId,
               userTurn: this.persistedUserTurns.get(dto),
             },
           ),
         );
         const status =
-          typeof execution.status === 'string' ? execution.status : 'unknown';
+          typeof execution.status === "string" ? execution.status : "unknown";
         toolsUsed.push({
           name: toolName,
           status,
           execution_id:
-            typeof execution.execution_id === 'string'
+            typeof execution.execution_id === "string"
               ? execution.execution_id
               : null,
           ...this.widgetResolution(execution),
         });
-        if (status !== 'completed' || !('result' in execution)) {
-          this.modelFailure('ai_tool_result_unavailable');
+        if (status !== "completed" || !("result" in execution)) {
+          this.modelFailure("ai_tool_result_unavailable");
         }
         toolResults.push({
           name: toolName,
@@ -895,7 +895,7 @@ export class AiCoreService {
         });
         const completionRequirement: GroundingRequirement = {
           evidenceToolNames: [toolName],
-          fallbackDomain: 'business_profit',
+          fallbackDomain: "business_profit",
           closedForAccess: false,
           strictNumbers: true,
         };
@@ -904,7 +904,7 @@ export class AiCoreService {
           this.contextualUserText(sanitized.messages),
         );
         if (!reply) {
-          this.modelFailure('ai_tool_result_unavailable');
+          this.modelFailure("ai_tool_result_unavailable");
         }
         return this.complete(
           user,
@@ -915,11 +915,11 @@ export class AiCoreService {
           decisions,
           {
             reply,
-            source: 'safe_fallback',
+            source: "safe_fallback",
             action: null,
             grounding: this.groundingReport(
               completionRequirement,
-              'verified',
+              "verified",
               toolResults,
             ),
           },
@@ -927,7 +927,7 @@ export class AiCoreService {
         );
       }
       if (
-        allowedNames.has('expenses.period.complete') &&
+        allowedNames.has("expenses.period.complete") &&
         this.explicitNoRentOnly(sanitized.messages)
       ) {
         return this.complete(
@@ -939,8 +939,8 @@ export class AiCoreService {
           decisions,
           {
             reply:
-              'Поняла, аренды за этот период нет. Это само по себе не подтверждает полноту остальных расходов и чистую прибыль. Если есть другие расходы — расходники, реклама, коммунальные услуги или что-то ещё — напишите статью и сумму, и я добавлю их после вашего подтверждения.',
-            source: 'safe_fallback',
+              "Поняла, аренды за этот период нет. Это само по себе не подтверждает полноту остальных расходов и чистую прибыль. Если есть другие расходы — расходники, реклама, коммунальные услуги или что-то ещё — напишите статью и сумму, и я добавлю их после вашего подтверждения.",
+            source: "safe_fallback",
             action: null,
           },
           toolResults,
@@ -1003,7 +1003,7 @@ export class AiCoreService {
           // after reload or truncation. Keep UI/local dialogue intact; external
           // planning uses sanitized user turns and the existing semantic owner.
           messages: sanitized.project(
-            sanitized.messages.filter((message) => message.role === 'user'),
+            sanitized.messages.filter((message) => message.role === "user"),
           ),
           tools,
           toolResults: modelToolResults,
@@ -1040,11 +1040,11 @@ export class AiCoreService {
               decisions,
               {
                 reply: deterministicReply,
-                source: 'safe_fallback',
+                source: "safe_fallback",
                 action: null,
                 grounding: this.groundingReport(
                   requirement,
-                  'verified',
+                  "verified",
                   toolResults,
                 ),
               },
@@ -1060,12 +1060,12 @@ export class AiCoreService {
             decisions,
             {
               reply:
-                'MAYA AI пока не подключена к этой среде. Доступные функции защищены и станут доступны после настройки серверного AI-ключа.',
-              source: 'safe_fallback',
+                "MAYA AI пока не подключена к этой среде. Доступные функции защищены и станут доступны после настройки серверного AI-ключа.",
+              source: "safe_fallback",
               action: null,
               grounding: this.groundingReport(
                 requirement,
-                requirement ? 'blocked' : 'not_required',
+                requirement ? "blocked" : "not_required",
                 toolResults,
               ),
             },
@@ -1083,7 +1083,7 @@ export class AiCoreService {
             decision.semanticPlan,
             true,
           );
-        if (typeof decision.reply === 'string')
+        if (typeof decision.reply === "string")
           decision.reply = sanitized.present(decision.reply);
         decisions.push(decision);
         if (decision.semanticPlan) {
@@ -1107,7 +1107,7 @@ export class AiCoreService {
             toolsUsed.length === 0 &&
             !this.readTurns.get(dto)?.runId
           ) {
-            if (state === 'clarify') {
+            if (state === "clarify") {
               decision.semanticPlan =
                 withOwnerReviewClarification(activeSemanticPlan);
               return this.complete(
@@ -1119,14 +1119,14 @@ export class AiCoreService {
                 decisions,
                 {
                   reply: OWNER_REVIEW_QUESTION,
-                  source: 'safe_fallback',
+                  source: "safe_fallback",
                   action: null,
                   ownerReviewClarification: true,
                 },
               );
             }
             const turn = this.readTurns.get(dto);
-            if (!turn) this.modelFailure('conversation_history_unavailable');
+            if (!turn) this.modelFailure("conversation_history_unavailable");
             const ownerReview =
               await this.orchestrator.reviewBusinessAndCancellationWindows(
                 turn,
@@ -1140,7 +1140,7 @@ export class AiCoreService {
               decisions,
               {
                 reply: ownerReview.reply,
-                source: 'safe_fallback',
+                source: "safe_fallback",
                 action: null,
                 ownerReview,
               },
@@ -1155,8 +1155,8 @@ export class AiCoreService {
             decisions,
             {
               reply:
-                'Этот совместный обзор сейчас недоступен в данном контексте. Для отдельной проверки нужен новый запрос владельца в бизнес-чате.',
-              source: 'safe_fallback',
+                "Этот совместный обзор сейчас недоступен в данном контексте. Для отдельной проверки нужен новый запрос владельца в бизнес-чате.",
+              source: "safe_fallback",
               action: null,
             },
           );
@@ -1164,16 +1164,16 @@ export class AiCoreService {
         // Consume the existing validated semantic task contract; paraphrases need
         // no second planner/model call and never become generic unscoped reads.
         const occupancyTask = activeSemanticPlan?.tasks.find(
-          (task) => task.intent === 'schedule.review_cancellation_windows',
+          (task) => task.intent === "schedule.review_cancellation_windows",
         );
         if (
           occupancyTask &&
           !clientAudience &&
-          dto.surface === 'web' &&
+          dto.surface === "web" &&
           [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
             toolUser.role,
           ) &&
-          occupancyTask.permission.status === 'allowed'
+          occupancyTask.permission.status === "allowed"
         ) {
           if (
             step !== 0 ||
@@ -1181,7 +1181,7 @@ export class AiCoreService {
             activeSemanticPlan!.tasks.length !== 1 ||
             occupancyTask.requires_clarification ||
             Object.keys(occupancyTask.entities).length > 0 ||
-            occupancyTask.tool.status !== 'ready'
+            occupancyTask.tool.status !== "ready"
           ) {
             return this.complete(
               user,
@@ -1192,14 +1192,14 @@ export class AiCoreService {
               decisions,
               {
                 reply:
-                  'Сейчас эта проверка разбирает одну сохранённую возможность после отмены. Для отдельного периода, филиала, специалиста или нескольких задач нужен уточнённый сценарий. Проверить первую доступную сохранённую возможность?',
-                source: 'safe_fallback',
+                  "Сейчас эта проверка разбирает одну сохранённую возможность после отмены. Для отдельного периода, филиала, специалиста или нескольких задач нужен уточнённый сценарий. Проверить первую доступную сохранённую возможность?",
+                source: "safe_fallback",
                 action: null,
               },
             );
           }
           const turn = this.readTurns.get(dto);
-          if (!turn) this.modelFailure('conversation_history_unavailable');
+          if (!turn) this.modelFailure("conversation_history_unavailable");
           const occupancy =
             await this.orchestrator.checkCancellationWindows(turn);
           return this.complete(
@@ -1211,7 +1211,7 @@ export class AiCoreService {
             decisions,
             {
               reply: occupancy.reply,
-              source: 'safe_fallback',
+              source: "safe_fallback",
               action: null,
               occupancy,
             },
@@ -1222,17 +1222,17 @@ export class AiCoreService {
         if (
           toolUser.role === UserRole.CLIENT &&
           activeSemanticPlan?.tasks.length === 1 &&
-          activeSemanticPlan.tasks[0].permission.status === 'allowed' &&
+          activeSemanticPlan.tasks[0].permission.status === "allowed" &&
           (!decision.toolCall || allowedNames.has(decision.toolCall.name)) &&
-          activeSemanticPlan.tasks[0].tool.status === 'ready' &&
+          activeSemanticPlan.tasks[0].tool.status === "ready" &&
           [
-            'booking.prepare_personal',
-            'booking.find_availability',
-            'booking.create_own',
+            "booking.prepare_personal",
+            "booking.find_availability",
+            "booking.create_own",
           ].includes(activeSemanticPlan.tasks[0].intent) &&
-          allowedNames.has('catalog.staff.read') &&
-          allowedNames.has('catalog.services.read') &&
-          allowedNames.has('booking.availability.read')
+          allowedNames.has("catalog.staff.read") &&
+          allowedNames.has("catalog.services.read") &&
+          allowedNames.has("booking.availability.read")
         ) {
           const task = activeSemanticPlan.tasks[0];
           try {
@@ -1241,17 +1241,17 @@ export class AiCoreService {
             // binding. Resolve it anew through the CRM owner before deriving the
             // local booking day or asking for actionable availability.
             const hasBranchPreference =
-              'branch' in task.entities ||
+              "branch" in task.entities ||
               proposedArguments.branch_id !== undefined;
             const configuredBranch =
               await this.crm?.resolveConfiguredBookingBranch?.(tenantId);
             const branch = hasBranchPreference
               ? await this.crm?.resolveBookingBranchPreference(
                   tenantId,
-                  typeof task.entities.branch === 'string'
+                  typeof task.entities.branch === "string"
                     ? task.entities.branch
                     : null,
-                  typeof proposedArguments.branch_id === 'string'
+                  typeof proposedArguments.branch_id === "string"
                     ? proposedArguments.branch_id
                     : undefined,
                 )
@@ -1259,11 +1259,11 @@ export class AiCoreService {
             if (
               hasBranchPreference &&
               (!branch ||
-                ('branch' in task.entities &&
-                  (typeof task.entities.branch !== 'string' ||
+                ("branch" in task.entities &&
+                  (typeof task.entities.branch !== "string" ||
                     !task.entities.branch.trim())) ||
                 (proposedArguments.branch_id !== undefined &&
-                  typeof proposedArguments.branch_id !== 'string'))
+                  typeof proposedArguments.branch_id !== "string"))
             ) {
               return this.complete(
                 user,
@@ -1274,12 +1274,12 @@ export class AiCoreService {
                 decisions,
                 {
                   reply:
-                    'Уточните филиал салона. Не удалось однозначно проверить выбранный филиал; запись пока не подготовлена.',
-                  source: 'safe_fallback',
+                    "Уточните филиал салона. Не удалось однозначно проверить выбранный филиал; запись пока не подготовлена.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'blocked',
+                    "blocked",
                     toolResults,
                   ),
                 },
@@ -1296,12 +1296,12 @@ export class AiCoreService {
                 decisions,
                 {
                   reply:
-                    'Выбранный филиал сейчас недоступен для записи. Уточните филиал.',
-                  source: 'safe_fallback',
+                    "Выбранный филиал сейчас недоступен для записи. Уточните филиал.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'blocked',
+                    "blocked",
                     toolResults,
                   ),
                 },
@@ -1316,14 +1316,14 @@ export class AiCoreService {
               : null;
             const retainedScope = this.bookingPreferenceSources.get(dto);
             if (
-              task.intent !== 'booking.prepare_personal' &&
+              task.intent !== "booking.prepare_personal" &&
               retainedScope &&
               (!scope ||
                 scope.branchId !== retainedScope.branchId ||
                 scope.sourceRevision !== retainedScope.sourceRevision)
             )
               throw new BookingCatalogSourceChangedError(
-                'booking_catalog_source_changed',
+                "booking_catalog_source_changed",
               );
             const revalidateCatalog = async () => {
               if (
@@ -1334,7 +1334,7 @@ export class AiCoreService {
                 )) !== scope.sourceRevision
               )
                 throw new BookingCatalogSourceChangedError(
-                  'booking_catalog_source_changed',
+                  "booking_catalog_source_changed",
                 );
               if (
                 !scope &&
@@ -1342,7 +1342,7 @@ export class AiCoreService {
                 (await this.crm.resolveConfiguredBookingBranch(tenantId))
               )
                 throw new BookingCatalogSourceChangedError(
-                  'booking_catalog_source_changed',
+                  "booking_catalog_source_changed",
                 );
             };
             await revalidateCatalog();
@@ -1350,7 +1350,7 @@ export class AiCoreService {
             else this.bookingPreferenceSources.delete(dto);
             if (branch) task.entities.branch = branch.name;
             const dateKey =
-              task.intent === 'booking.create_own' ? 'date' : 'date_or_period';
+              task.intent === "booking.create_own" ? "date" : "date_or_period";
             const date = bookingPreferenceDate(
               task.entities[dateKey],
               configuredBranch?.timezone ??
@@ -1383,7 +1383,7 @@ export class AiCoreService {
                   },
                   {
                     suppressWidgetTrigger: !emit,
-                    widgetTrigger: 'T-2a',
+                    widgetTrigger: "T-2a",
                     requestId: dto.requestId,
                     userTurn: this.persistedUserTurns.get(dto),
                     bookingSelector: {
@@ -1399,27 +1399,27 @@ export class AiCoreService {
                 ...this.widgetResolution(execution),
                 name,
                 status:
-                  typeof execution.status === 'string'
+                  typeof execution.status === "string"
                     ? execution.status
-                    : 'unknown',
+                    : "unknown",
                 execution_id:
-                  typeof execution.execution_id === 'string'
+                  typeof execution.execution_id === "string"
                     ? execution.execution_id
                     : null,
               });
-              if (execution.status === 'completed')
+              if (execution.status === "completed")
                 toolResults.push({
                   name,
                   result: this.sanitizeToolResult(execution.result),
                 });
-              return execution.status === 'completed' ? execution.result : null;
+              return execution.status === "completed" ? execution.result : null;
             };
             const servicesPreference =
-              'services' in task.entities
+              "services" in task.entities
                 ? task.entities.services
                 : proposedArguments.service_ids;
             const employeePreference =
-              'employee' in task.entities
+              "employee" in task.entities
                 ? task.entities.employee
                 : proposedArguments.staff_id;
             // A current name mention must become a tenant catalog preference before
@@ -1429,10 +1429,10 @@ export class AiCoreService {
             const pendingStaffSource =
               servicesPreference === undefined &&
               employeePreference !== undefined
-                ? await readCatalog('catalog.staff.read')
+                ? await readCatalog("catalog.staff.read")
                 : null;
             const serviceSource = await readCatalog(
-              'catalog.services.read',
+              "catalog.services.read",
               servicesPreference === undefined,
             );
             if (servicesPreference === undefined) {
@@ -1456,13 +1456,13 @@ export class AiCoreService {
                 decisions,
                 {
                   reply: serviceSource
-                    ? 'Выберите услугу для записи.'
-                    : 'Не удалось проверить каталог салона. Запись пока не подготовлена.',
-                  source: 'safe_fallback',
+                    ? "Выберите услугу для записи."
+                    : "Не удалось проверить каталог салона. Запись пока не подготовлена.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    serviceSource ? 'verified' : 'blocked',
+                    serviceSource ? "verified" : "blocked",
                     toolResults,
                   ),
                 },
@@ -1473,7 +1473,21 @@ export class AiCoreService {
               serviceSource,
               servicesPreference,
             );
-            if (!services || services.length !== 1)
+            if (!services || services.length !== 1) {
+              // A service correction must not discard the already selected staff.
+              // The service READ above emitted no widget; bind only a current,
+              // unambiguous staff preference before the clarification is saved.
+              if (employeePreference !== undefined) {
+                const pendingStaff = bindBookingCatalog({
+                  staffSource: await readCatalog("catalog.staff.read"),
+                  serviceSource,
+                  employee: employeePreference,
+                  services: [],
+                  nameReferences: sanitized.nameReferences,
+                });
+                if (pendingStaff.staff)
+                  task.entities.employee = pendingStaff.staff.name;
+              }
               return this.complete(
                 user,
                 dto,
@@ -1486,20 +1500,21 @@ export class AiCoreService {
                     Array.isArray(servicesPreference) &&
                     servicesPreference.length > 1
                       ? MULTI_SERVICE_LIMITATION
-                      : 'Уточните одну услугу из каталога салона. Остальные пожелания сохранены.',
-                  source: 'safe_fallback',
+                      : "Уточните одну услугу из каталога салона. Остальные пожелания сохранены.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'blocked',
+                    "blocked",
                     toolResults,
                   ),
                 },
                 toolResults,
               );
+            }
             task.entities.services = services.map((service) => service.name);
             const staffSource = await readCatalog(
-              'catalog.staff.read',
+              "catalog.staff.read",
               employeePreference === undefined,
               services[0].id,
             );
@@ -1513,13 +1528,13 @@ export class AiCoreService {
                 decisions,
                 {
                   reply: staffSource
-                    ? 'Выберите мастера. Услугу и остальные пожелания сохранила.'
-                    : 'Не удалось проверить каталог мастеров. Запись пока не подготовлена.',
-                  source: 'safe_fallback',
+                    ? "Выберите мастера. Услугу и остальные пожелания сохранила."
+                    : "Не удалось проверить каталог мастеров. Запись пока не подготовлена.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    staffSource ? 'verified' : 'blocked',
+                    staffSource ? "verified" : "blocked",
                     toolResults,
                   ),
                 },
@@ -1529,22 +1544,22 @@ export class AiCoreService {
               staffSource,
               serviceSource,
               employee:
-                'employee' in task.entities
+                "employee" in task.entities
                   ? task.entities.employee
                   : proposedArguments.staff_id,
               services:
-                'services' in task.entities
+                "services" in task.entities
                   ? task.entities.services
                   : proposedArguments.service_ids,
               nameReferences: sanitized.nameReferences,
             });
             if (bound.staff) task.entities.employee = bound.staff.name;
-            if (bound.kind === 'resolved')
+            if (bound.kind === "resolved")
               task.entities.services = bound.services.map((s) => s.name);
             const multiService =
               Array.isArray(task.entities.services) &&
               task.entities.services.length > 1;
-            if (bound.kind === 'unresolved' || bound.services.length !== 1) {
+            if (bound.kind === "unresolved" || bound.services.length !== 1) {
               return this.complete(
                 user,
                 dto,
@@ -1555,22 +1570,22 @@ export class AiCoreService {
                 {
                   reply: multiService
                     ? MULTI_SERVICE_LIMITATION
-                    : bound.kind === 'unresolved' &&
-                        bound.reason === 'source_unavailable'
-                      ? 'Не удалось проверить каталог салона. Запись пока не подготовлена.'
-                      : bound.kind === 'unresolved' && bound.staff
-                        ? 'services' in task.entities
-                          ? 'Уточните услугу из каталога салона. Мастера сохранила.'
-                          : 'date' in task.entities ||
-                              'date_or_period' in task.entities
-                            ? 'Какую услугу выбрать? Мастера и дату сохранила.'
-                            : 'Какую услугу и на какую дату выбрать? Мастера сохранила.'
-                        : 'Уточните точное имя мастера из каталога салона. Запись пока не подготовлена.',
-                  source: 'safe_fallback',
+                    : bound.kind === "unresolved" &&
+                        bound.reason === "source_unavailable"
+                      ? "Не удалось проверить каталог салона. Запись пока не подготовлена."
+                      : bound.kind === "unresolved" && bound.staff
+                        ? "services" in task.entities
+                          ? "Уточните услугу из каталога салона. Мастера сохранила."
+                          : "date" in task.entities ||
+                              "date_or_period" in task.entities
+                            ? "Какую услугу выбрать? Мастера и дату сохранила."
+                            : "Какую услугу и на какую дату выбрать? Мастера сохранила."
+                        : "Уточните точное имя мастера из каталога салона. Запись пока не подготовлена.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'blocked',
+                    "blocked",
                     toolResults,
                   ),
                 },
@@ -1592,12 +1607,12 @@ export class AiCoreService {
                 {
                   reply:
                     this.semanticClarification(activeSemanticPlan) ??
-                    'Уточните дату и время для выбранных мастера и услуги.',
-                  source: 'safe_fallback',
+                    "Уточните дату и время для выбранных мастера и услуги.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'not_required',
+                    "not_required",
                     toolResults,
                   ),
                 },
@@ -1618,24 +1633,24 @@ export class AiCoreService {
                 decisions,
                 {
                   reply:
-                    'Во сколько вам удобно? Мастера, услугу и дату сохранила.',
-                  source: 'safe_fallback',
+                    "Во сколько вам удобно? Мастера, услугу и дату сохранила.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'not_required',
+                    "not_required",
                     toolResults,
                   ),
                 },
                 toolResults,
               );
             }
-            if (typeof date === 'string') {
+            if (typeof date === "string") {
               const execution = this.record(
                 await this.executeChatTool(
                   dto,
                   toolUser,
-                  'booking.availability.read',
+                  "booking.availability.read",
                   {
                     surface: dto.surface,
                     arguments: {
@@ -1649,11 +1664,11 @@ export class AiCoreService {
                       user.userId,
                       dto.requestId,
                       step,
-                      'booking.availability.read',
+                      "booking.availability.read",
                     ),
                   },
                   {
-                    widgetTrigger: 'T-2a',
+                    widgetTrigger: "T-2a",
                     bookingSelector: {
                       tenantId,
                       scope,
@@ -1664,19 +1679,19 @@ export class AiCoreService {
                   },
                 ),
               );
-              if (execution.status === 'completed')
+              if (execution.status === "completed")
                 toolResults.push({
-                  name: 'booking.availability.read',
+                  name: "booking.availability.read",
                   result: this.sanitizeToolResult(execution.result),
                 });
               toolsUsed.push({
-                name: 'booking.availability.read',
+                name: "booking.availability.read",
                 status:
-                  typeof execution.status === 'string'
+                  typeof execution.status === "string"
                     ? execution.status
-                    : 'unknown',
+                    : "unknown",
                 execution_id:
-                  typeof execution.execution_id === 'string'
+                  typeof execution.execution_id === "string"
                     ? execution.execution_id
                     : null,
                 ...this.widgetResolution(execution),
@@ -1690,13 +1705,13 @@ export class AiCoreService {
                 decisions,
                 {
                   reply: this.widgetResolution(execution).resolution
-                    ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
-                    : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
-                  source: 'safe_fallback',
+                    ? "Выберите подходящее время. Затем проверьте детали и подтвердите запись."
+                    : "Подходящее время пока не удалось подтвердить. Запись не создана.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    execution.status === 'completed' ? 'verified' : 'blocked',
+                    execution.status === "completed" ? "verified" : "blocked",
                     toolResults,
                   ),
                 },
@@ -1711,12 +1726,12 @@ export class AiCoreService {
               toolsUsed,
               decisions,
               {
-                reply: 'На какую дату проверить время у выбранного мастера?',
-                source: 'safe_fallback',
+                reply: "На какую дату проверить время у выбранного мастера?",
+                source: "safe_fallback",
                 action: null,
                 grounding: this.groundingReport(
                   requirement,
-                  'not_required',
+                  "not_required",
                   toolResults,
                 ),
               },
@@ -1736,12 +1751,12 @@ export class AiCoreService {
               decisions,
               {
                 reply:
-                  'Данные филиала изменились или сейчас недоступны. Уточните филиал и выбранную услугу заново; запись не создана.',
-                source: 'safe_fallback',
+                  "Данные филиала изменились или сейчас недоступны. Уточните филиал и выбранную услугу заново; запись не создана.",
+                source: "safe_fallback",
                 action: null,
                 grounding: this.groundingReport(
                   requirement,
-                  'blocked',
+                  "blocked",
                   toolResults,
                 ),
               },
@@ -1755,8 +1770,8 @@ export class AiCoreService {
               ? activeSemanticPlan.tasks[0]
               : null;
           const multiService =
-            task?.permission.status === 'allowed' &&
-            ['booking.find_availability', 'booking.create_own'].includes(
+            task?.permission.status === "allowed" &&
+            ["booking.find_availability", "booking.create_own"].includes(
               task.intent,
             ) &&
             Array.isArray(task.entities.services) &&
@@ -1774,13 +1789,13 @@ export class AiCoreService {
               decisions,
               {
                 reply: clarification,
-                source: 'safe_fallback',
+                source: "safe_fallback",
                 action: null,
                 // An ambiguity question states no business fact, therefore it
                 // neither needs nor pretends to have CRM evidence.
                 grounding: this.groundingReport(
                   requirement,
-                  'not_required',
+                  "not_required",
                   toolResults,
                 ),
               },
@@ -1813,7 +1828,7 @@ export class AiCoreService {
             if (numberRetries < 1 && step < maxToolSteps) {
               numberRetries += 1;
               corrections = [
-                `В ответе прозвучали служебные имена схемы: ${schemaLeak.join(', ')}. Перепиши ответ языком салона (барбер, гость, запись, касса, прайс) — без имён полей, инструментов и JSON-ключей.`,
+                `В ответе прозвучали служебные имена схемы: ${schemaLeak.join(", ")}. Перепиши ответ языком салона (барбер, гость, запись, касса, прайс) — без имён полей, инструментов и JSON-ключей.`,
               ];
               continue;
             }
@@ -1831,11 +1846,11 @@ export class AiCoreService {
               deterministicReply
                 ? {
                     reply: deterministicReply,
-                    source: 'safe_fallback',
+                    source: "safe_fallback",
                     action: null,
                     grounding: this.groundingReport(
                       requirement,
-                      requirement ? 'verified' : 'not_required',
+                      requirement ? "verified" : "not_required",
                       toolResults,
                     ),
                   }
@@ -1862,7 +1877,7 @@ export class AiCoreService {
             if (numberRetries < 1 && step < maxToolSteps) {
               numberRetries += 1;
               corrections = [
-                `Эти числа отсутствуют в tool_results: ${unsourced.join(', ')}. Перепиши ответ, оставив только значения, которые есть в результатах инструментов.`,
+                `Эти числа отсутствуют в tool_results: ${unsourced.join(", ")}. Перепиши ответ, оставив только значения, которые есть в результатах инструментов.`,
               ];
               continue;
             }
@@ -1880,12 +1895,12 @@ export class AiCoreService {
               deterministicReply
                 ? {
                     reply: deterministicReply,
-                    source: 'safe_fallback',
+                    source: "safe_fallback",
                     action: null,
                     unsourced,
                     grounding: this.groundingReport(
                       requirement,
-                      'verified',
+                      "verified",
                       toolResults,
                     ),
                   }
@@ -1912,7 +1927,7 @@ export class AiCoreService {
               action: null,
               grounding: this.groundingReport(
                 requirement,
-                requirement ? 'verified' : 'not_required',
+                requirement ? "verified" : "not_required",
                 toolResults,
               ),
             },
@@ -1920,10 +1935,10 @@ export class AiCoreService {
           );
         }
         if (step >= maxToolSteps) {
-          this.modelFailure('ai_model_tool_step_limit');
+          this.modelFailure("ai_model_tool_step_limit");
         }
         if (!allowedNames.has(decision.toolCall.name)) {
-          this.modelFailure('ai_model_tool_not_allowed');
+          this.modelFailure("ai_model_tool_not_allowed");
         }
         // 🔴 Здесь раньше стоял отказ: модель попросила инструмент не из
         // списка — и ход обрывался. Список составляла регулярка, угадывавшая
@@ -1947,7 +1962,7 @@ export class AiCoreService {
           new Date(),
           businessTimezone,
         );
-        if (decision.toolCall.name === 'staff.schedule.own.read') {
+        if (decision.toolCall.name === "staff.schedule.own.read") {
           // Local date binding uses the original utterance: PII redaction can
           // replace a numeric date before it reaches the external planner.
           const date = this.staffScheduleCommand.resolveReadDate(
@@ -1964,17 +1979,17 @@ export class AiCoreService {
               decisions,
               {
                 reply:
-                  'На какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».',
-                source: 'safe_fallback',
+                  "На какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».",
+                source: "safe_fallback",
                 action: null,
                 grounding: this.groundingReport(
                   {
-                    evidenceToolNames: ['staff.schedule.own.read'],
-                    fallbackDomain: 'staff_schedule',
+                    evidenceToolNames: ["staff.schedule.own.read"],
+                    fallbackDomain: "staff_schedule",
                     closedForAccess: false,
                     strictNumbers: true,
                   },
-                  'blocked',
+                  "blocked",
                   toolResults,
                 ),
               },
@@ -1982,16 +1997,16 @@ export class AiCoreService {
             );
           hardenedArguments = { ...hardenedArguments, date };
         }
-        if (decision.toolCall.name === 'catalog.service.price.update') {
+        if (decision.toolCall.name === "catalog.service.price.update") {
           // A proposed price/service from the model is never business intent.
           // Bind the exact owner utterance to a current catalog before preparing
           // the signed diff; the CRM owner still resolves tenant/provider authority.
-          const catalog = allowedNames.has('catalog.services.read')
+          const catalog = allowedNames.has("catalog.services.read")
             ? this.record(
                 await this.executeChatTool(
                   dto,
                   toolUser,
-                  'catalog.services.read',
+                  "catalog.services.read",
                   {
                     surface: dto.surface,
                     arguments: {},
@@ -2000,7 +2015,7 @@ export class AiCoreService {
                       user.userId,
                       dto.requestId,
                       step,
-                      'catalog.services.read',
+                      "catalog.services.read",
                     ),
                   },
                   { suppressWidgetTrigger: true },
@@ -2009,24 +2024,24 @@ export class AiCoreService {
             : null;
           if (catalog)
             toolsUsed.push({
-              name: 'catalog.services.read',
+              name: "catalog.services.read",
               status:
-                typeof catalog.status === 'string' ? catalog.status : 'unknown',
+                typeof catalog.status === "string" ? catalog.status : "unknown",
               execution_id:
-                typeof catalog.execution_id === 'string'
+                typeof catalog.execution_id === "string"
                   ? catalog.execution_id
                   : null,
             });
           const bound = bindServicePriceChat({
             userMessages: dto.messages
-              .filter((message) => message.role === 'user')
+              .filter((message) => message.role === "user")
               .map((message) => message.content),
             serviceSource:
-              catalog?.status === 'completed' && catalog.stale !== true
+              catalog?.status === "completed" && catalog.stale !== true
                 ? catalog.result
                 : null,
           });
-          if (bound.kind === 'clarify')
+          if (bound.kind === "clarify")
             return this.complete(
               user,
               dto,
@@ -2036,7 +2051,7 @@ export class AiCoreService {
               decisions,
               {
                 reply: servicePriceClarification(bound.reason),
-                source: 'safe_fallback',
+                source: "safe_fallback",
                 action: null,
               },
               toolResults,
@@ -2059,13 +2074,13 @@ export class AiCoreService {
         // Public consultation consumes the existing semantic intent, not a
         // phrase fastpath. Catalog reads supporting booking/compound plans keep
         // their existing continuation; this presentation grants no authority.
-        const goodsRead = decision.toolCall.name === 'inventory.goods.read';
+        const goodsRead = decision.toolCall.name === "inventory.goods.read";
         const publicConsultation =
-          decision.toolCall.name === 'catalog.staff.read' &&
+          decision.toolCall.name === "catalog.staff.read" &&
           activeSemanticPlan?.tasks.length === 1 &&
-          activeSemanticPlan.tasks[0].permission.status === 'allowed' &&
-          activeSemanticPlan.tasks[0].tool.status === 'ready' &&
-          ['employees.list_public', 'company.public_info'].includes(
+          activeSemanticPlan.tasks[0].permission.status === "allowed" &&
+          activeSemanticPlan.tasks[0].tool.status === "ready" &&
+          ["employees.list_public", "company.public_info"].includes(
             activeSemanticPlan.tasks[0].intent,
           );
         let execution: Record<string, unknown>;
@@ -2087,7 +2102,7 @@ export class AiCoreService {
                 ),
               },
               {
-                widgetTrigger: 'T-2a',
+                widgetTrigger: "T-2a",
                 // Consultation is a READ answer, not a booking selector.
                 ...(publicConsultation || goodsRead
                   ? { suppressWidgetTrigger: true }
@@ -2099,14 +2114,14 @@ export class AiCoreService {
           );
         } catch (error) {
           if (error instanceof BadRequestException) {
-            this.modelFailure('ai_model_tool_arguments_invalid');
+            this.modelFailure("ai_model_tool_arguments_invalid");
           }
           throw error;
         }
         const status =
-          typeof execution.status === 'string' ? execution.status : 'unknown';
+          typeof execution.status === "string" ? execution.status : "unknown";
         const executionId =
-          typeof execution.execution_id === 'string'
+          typeof execution.execution_id === "string"
             ? execution.execution_id
             : null;
         toolsUsed.push({
@@ -2115,7 +2130,7 @@ export class AiCoreService {
           execution_id: executionId,
           ...this.widgetResolution(execution),
         });
-        if (status === 'approval_required') {
+        if (status === "approval_required") {
           const approval = this.record(execution.approval);
           return this.complete(
             user,
@@ -2127,20 +2142,20 @@ export class AiCoreService {
             {
               reply:
                 [
-                  'catalog.service.price.update',
-                  'inventory.goods.receipt.prepare',
+                  "catalog.service.price.update",
+                  "inventory.goods.receipt.prepare",
                 ].includes(decision.toolCall.name) &&
-                typeof approval.summary === 'string'
+                typeof approval.summary === "string"
                   ? approval.summary
-                  : 'Действие подготовлено и ждёт вашего подтверждения.',
+                  : "Действие подготовлено и ждёт вашего подтверждения.",
               source: decision.provider,
               action: {
-                status: 'approval_required',
+                status: "approval_required",
                 approval: execution.approval ?? null,
               },
               grounding: this.groundingReport(
                 requirement,
-                requirement ? 'verified' : 'not_required',
+                requirement ? "verified" : "not_required",
                 toolResults,
               ),
             },
@@ -2151,7 +2166,7 @@ export class AiCoreService {
         // never enter a model final-reply stage, including UNKNOWN and missing receipts.
         if (
           tools.find((tool) => tool.name === decision.toolCall!.name)
-            ?.risk_tier !== 'read'
+            ?.risk_tier !== "read"
         ) {
           return this.complete(
             user,
@@ -2162,7 +2177,7 @@ export class AiCoreService {
             decisions,
             {
               reply: mutationReceiptReply(execution),
-              source: 'safe_fallback',
+              source: "safe_fallback",
               action: {
                 status: mutationReceiptStatus(execution),
                 execution_id: executionId,
@@ -2170,23 +2185,23 @@ export class AiCoreService {
               },
               grounding: this.groundingReport(
                 requirement,
-                mutationReceiptStatus(execution) === 'completed'
-                  ? 'verified'
-                  : 'blocked',
+                mutationReceiptStatus(execution) === "completed"
+                  ? "verified"
+                  : "blocked",
                 toolResults,
               ),
             },
             toolResults,
           );
         }
-        if (status !== 'completed' || !('result' in execution)) {
-          this.modelFailure('ai_tool_result_unavailable');
+        if (status !== "completed" || !("result" in execution)) {
+          this.modelFailure("ai_tool_result_unavailable");
         }
         const safeResult = this.sanitizeToolResult(execution.result);
         toolResults.push({
           name: decision.toolCall.name,
           result:
-            decision.toolCall.name === 'support.integration-status.read'
+            decision.toolCall.name === "support.integration-status.read"
               ? {
                   ...this.record(safeResult),
                   stale:
@@ -2211,10 +2226,10 @@ export class AiCoreService {
         // угаданной теме: инструмент нельзя «не угадать» — он либо отработал,
         // либо нет. Раньше промах темы означал бы утечку истории визитов.
         const personalPreparation =
-          decision.toolCall.name === 'catalog.services.read' &&
+          decision.toolCall.name === "catalog.services.read" &&
           activeSemanticPlan?.tasks.length === 1 &&
-          activeSemanticPlan.tasks[0].intent === 'booking.prepare_personal' &&
-          activeSemanticPlan.tasks[0].permission.status === 'allowed';
+          activeSemanticPlan.tasks[0].intent === "booking.prepare_personal" &&
+          activeSemanticPlan.tasks[0].permission.status === "allowed";
         if (
           this.requiresServerComposedReply(
             decision.toolCall.name,
@@ -2230,31 +2245,31 @@ export class AiCoreService {
               ? publicConsultationReply(
                   execution.result,
                   activeSemanticPlan!.tasks[0].intent ===
-                    'employees.list_public'
-                    ? 'staff'
-                    : 'salon',
+                    "employees.list_public"
+                    ? "staff"
+                    : "salon",
                   execution.stale === true,
                 )
               : personalPreparation
                 ? this.personalCatalogPreparationReply(execution)
-                : decision.toolCall.name === 'staff.schedule.own.read'
+                : decision.toolCall.name === "staff.schedule.own.read"
                   ? this.deterministicOwnStaffScheduleReply(
                       execution.result,
                       hardenedArguments.date,
                       execution.stale === true,
                     )
-                  : decision.toolCall.name === 'company.business-hours.read'
+                  : decision.toolCall.name === "company.business-hours.read"
                     ? this.deterministicCompanyProfileReply(
                         execution.result,
                         execution.stale === true,
                       )
-                    : decision.toolCall.name === 'appointments.own.list'
+                    : decision.toolCall.name === "appointments.own.list"
                       ? this.deterministicOwnAppointmentsReply(
                           execution.result,
                           execution.stale === true,
                         )
                       : decision.toolCall.name ===
-                          'support.integration-status.read'
+                          "support.integration-status.read"
                         ? integrationStatusReply(
                             execution.result,
                             execution.stale === true,
@@ -2288,11 +2303,11 @@ export class AiCoreService {
                   reply: deterministicReply,
                   // Текст собрал сервер, а не провайдер: источник называем
                   // честно, иначе в аудите шаблон не отличить от ответа модели.
-                  source: 'safe_fallback',
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     replyRequirement,
-                    sourceReply?.status ?? 'verified',
+                    sourceReply?.status ?? "verified",
                     toolResults,
                   ),
                 }
@@ -2301,12 +2316,12 @@ export class AiCoreService {
                 // разменять контур 152-ФЗ на удобство формулировки.
                 {
                   reply:
-                    'Ваши данные получены, но собрать по ним ответ не удалось. Загляните в раздел «Записи» или повторите вопрос чуть позже.',
-                  source: 'safe_fallback',
+                    "Ваши данные получены, но собрать по ним ответ не удалось. Загляните в раздел «Записи» или повторите вопрос чуть позже.",
+                  source: "safe_fallback",
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    'verified',
+                    "verified",
                     toolResults,
                   ),
                 },
@@ -2314,7 +2329,7 @@ export class AiCoreService {
           );
         }
       }
-      this.modelFailure('ai_model_tool_step_limit');
+      this.modelFailure("ai_model_tool_step_limit");
     } catch (error) {
       if (this.readTurns.get(dto)?.failed) {
         const partial = this.deterministicGroundedReply(
@@ -2331,12 +2346,12 @@ export class AiCoreService {
           {
             reply: partial
               ? `${partial}\n\nЧасть запроса не удалось проверить. Полного ответа пока нет.`
-              : 'Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.',
-            source: 'safe_fallback',
+              : "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+            source: "safe_fallback",
             action: null,
             grounding: this.groundingReport(
               requirement,
-              'blocked',
+              "blocked",
               toolResults,
             ),
           },
@@ -2360,8 +2375,8 @@ export class AiCoreService {
           .log({
             tenantId,
             userId: user.userId,
-            action: 'ai.core_turn_degraded',
-            entityType: 'ai_core_turn',
+            action: "ai.core_turn_degraded",
+            entityType: "ai_core_turn",
             entityId: dto.requestId,
             metadata: {
               surface: dto.surface,
@@ -2381,11 +2396,11 @@ export class AiCoreService {
           decisions,
           {
             reply: deterministicReply,
-            source: 'safe_fallback',
+            source: "safe_fallback",
             action: null,
             grounding: this.groundingReport(
               requirement,
-              'verified',
+              "verified",
               toolResults,
             ),
           },
@@ -2397,8 +2412,8 @@ export class AiCoreService {
       const failedDomain = requirement?.fallbackDomain;
       if (
         toolResults.length === 0 &&
-        this.safeErrorCode(error) !== 'ai_model_unavailable' &&
-        (failedDomain === 'business_query' || failedDomain === 'employee_query')
+        this.safeErrorCode(error) !== "ai_model_unavailable" &&
+        (failedDomain === "business_query" || failedDomain === "employee_query")
       ) {
         return this.complete(
           user,
@@ -2409,14 +2424,14 @@ export class AiCoreService {
           decisions,
           {
             reply:
-              failedDomain === 'employee_query'
-                ? 'Сейчас не отвечает источник личных показателей CRM. Это временная проблема данных, а не отсутствие ответа у MAYA. Повторите через минуту.'
-                : 'Сейчас не отвечает источник бизнес-данных CRM. Это временная проблема соединения, а не отсутствие ответа у MAYA. Повторите через минуту.',
-            source: 'safe_fallback',
+              failedDomain === "employee_query"
+                ? "Сейчас не отвечает источник личных показателей CRM. Это временная проблема данных, а не отсутствие ответа у MAYA. Повторите через минуту."
+                : "Сейчас не отвечает источник бизнес-данных CRM. Это временная проблема соединения, а не отсутствие ответа у MAYA. Повторите через минуту.",
+            source: "safe_fallback",
             action: null,
             grounding: this.groundingReport(
               requirement,
-              'blocked',
+              "blocked",
               toolResults,
             ),
           },
@@ -2430,8 +2445,8 @@ export class AiCoreService {
       await this.auditLog.tryLog({
         tenantId,
         userId: user.userId,
-        action: 'ai.core_turn_failed',
-        entityType: 'ai_core_turn',
+        action: "ai.core_turn_failed",
+        entityType: "ai_core_turn",
         entityId: dto.requestId,
         metadata: {
           surface: dto.surface,
@@ -2447,27 +2462,27 @@ export class AiCoreService {
 
   private executeChatTool(
     chat: AiCoreChatDto,
-    ...args: Parameters<AiToolRuntimeService['execute']>
-  ): ReturnType<AiToolRuntimeService['execute']> {
+    ...args: Parameters<AiToolRuntimeService["execute"]>
+  ): ReturnType<AiToolRuntimeService["execute"]> {
     const turn = this.readTurns.get(chat);
     const [user, name, dto] = args;
     // A public profile is prose, not the timed SCHEDULE contract. Its complete
     // server reply retains the source receipt without a raw-JSON widget beside it.
     const internal =
-      name === 'company.business-hours.read'
+      name === "company.business-hours.read"
         ? { ...args[3], suppressWidgetTrigger: true }
         : args[3];
     const read = () => this.runtime.execute(user, name, dto, internal);
     const capability = C9_CAPABILITIES.find((c) => c.capabilityKey === name);
     // Persisted web ingress currently supplies the canonical age. Other surfaces
     // retain their existing source path until their turn identity is connected.
-    if (!turn || capability?.mode !== 'READ') return read();
+    if (!turn || capability?.mode !== "READ") return read();
     return this.orchestrator.conversationRead(
       turn,
       name,
       dto.idempotencyKey as string,
       this.orchestrator.conversationDigest([
-        'conversation-source-input/1',
+        "conversation-source-input/1",
         name,
         dto.arguments,
         dto.surface,
@@ -2512,7 +2527,7 @@ export class AiCoreService {
     dto: AiCoreChatDto,
   ): Promise<void> {
     if (
-      !['web', 'native'].includes(dto.surface) ||
+      !["web", "native"].includes(dto.surface) ||
       this.moduleRef === undefined
     )
       return;
@@ -2538,9 +2553,9 @@ export class AiCoreService {
   ): Promise<{ reply: string } | null> {
     const text = this.latestUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е')
-      .replace(/[!?.,:;]+/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/ё/g, "е")
+      .replace(/[!?.,:;]+/g, " ")
+      .replace(/\s+/g, " ")
       .trim();
     if (!text) return null;
 
@@ -2568,7 +2583,7 @@ export class AiCoreService {
       if (!asksCapabilities) return null;
       return {
         reply:
-          'Я MAYA, администратор вашего салона. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, рассказать о барберах и атмосфере, показать ваши записи и проверить баллы. Цифры бизнеса и чужие данные я не раскрываю.',
+          "Я MAYA, администратор вашего салона. Помогу выбрать услугу и мастера, найти реальное свободное время, записаться, рассказать о барберах и атмосфере, показать ваши записи и проверить баллы. Цифры бизнеса и чужие данные я не раскрываю.",
       };
     }
 
@@ -2576,13 +2591,13 @@ export class AiCoreService {
       if (togglesOn || togglesOff) {
         return {
           reply:
-            'Настройки аналитики меняет владелец или администратор. Я продолжу отвечать на доступные вашей роли вопросы о рабочем дне и личных показателях.',
+            "Настройки аналитики меняет владелец или администратор. Я продолжу отвечать на доступные вашей роли вопросы о рабочем дне и личных показателях.",
         };
       }
       if (!asksCapabilities) return null;
       return {
         reply:
-          'Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна, доступные показатели и досье конкретного клиента из CRM по имени или телефону — без озвучивания персональных данных.',
+          "Я MAYA, ваша рабочая помощница. Могу показать личный план дня, записи, свободные окна, доступные показатели и досье конкретного клиента из CRM по имени или телефону — без озвучивания персональных данных.",
       };
     }
 
@@ -2608,9 +2623,9 @@ export class AiCoreService {
       );
       const changed = requested
         .map((capability) => this.assistantCapabilityTitle(capability))
-        .join(', ');
+        .join(", ");
       return {
-        reply: `${togglesOn ? 'Включила' : 'Отключила'}: ${changed}. ${this.assistantCapabilitiesSummary(updated.config.enabled_capabilities)}`,
+        reply: `${togglesOn ? "Включила" : "Отключила"}: ${changed}. ${this.assistantCapabilitiesSummary(updated.config.enabled_capabilities)}`,
       };
     }
 
@@ -2639,7 +2654,7 @@ export class AiCoreService {
     }
     const text = this.contextualUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е');
+      .replace(/ё/g, "е");
     if (
       // 🔴 Здесь ловится ТОЛЬКО мета-вопрос «а ты вообще видишь базу?».
       // Раньше вторая половина правила ловила голое «баз[ауиеы] клиент» без
@@ -2655,7 +2670,7 @@ export class AiCoreService {
     }
     return {
       reply:
-        'Да — к CRM-базе клиентов у меня доступ есть. Могу точно посчитать всю базу, лояльных и тех, кто не был больше 1–6 месяцев или года. По конкретному гостю подниму обезличенное досье: визиты, любимые услуги, цикл, траты и бонусы. Имена и телефоны списком вслух не читаю.',
+        "Да — к CRM-базе клиентов у меня доступ есть. Могу точно посчитать всю базу, лояльных и тех, кто не был больше 1–6 месяцев или года. По конкретному гостю подниму обезличенное досье: визиты, любимые услуги, цикл, траты и бонусы. Имена и телефоны списком вслух не читаю.",
     };
   }
 
@@ -2665,12 +2680,12 @@ export class AiCoreService {
     reply: string,
     toolResults: AiCoreToolResult[],
   ): string {
-    if (brain.persona !== 'admin' || !this.looksLikeUpsell(reply)) {
+    if (brain.persona !== "admin" || !this.looksLikeUpsell(reply)) {
       return reply;
     }
     const latest = this.latestUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е')
+      .replace(/ё/g, "е")
       .trim();
     const clientRefused =
       /(?:^|\s)(?:нет|не\s+надо|не\s+нужно|только|без\s+доп|без\s+дополнительн|ничего\s+больше)(?=\s|[.!?,]|$)/i.test(
@@ -2679,25 +2694,25 @@ export class AiCoreService {
       (/^(?:мужская\s+)?стрижк[а-яa-z]*[.!\s]*$/i.test(latest) &&
         messages.some(
           (message) =>
-            message.role === 'assistant' &&
+            message.role === "assistant" &&
             this.looksLikeUpsell(message.content),
         ));
     const upsellAlreadyMade = messages.some(
       (message) =>
-        message.role === 'assistant' && this.looksLikeUpsell(message.content),
+        message.role === "assistant" && this.looksLikeUpsell(message.content),
     );
     const continueBooking =
-      'Хорошо, без дополнительных услуг. Продолжаем запись: уточните мастера или удобное время.';
+      "Хорошо, без дополнительных услуг. Продолжаем запись: уточните мастера или удобное время.";
     if (clientRefused) {
       return continueBooking;
     }
     const catalogRead = toolResults.some(
       (result) =>
-        result.name === 'catalog.services.read' &&
+        result.name === "catalog.services.read" &&
         Array.isArray(this.record(result.result).services),
     );
     if (!catalogRead) {
-      return 'Сначала уточним основную услугу, мастера и удобное время. Дополнения предложу только после проверки каталога.';
+      return "Сначала уточним основную услугу, мастера и удобное время. Дополнения предложу только после проверки каталога.";
     }
     if (!clientRefused && !upsellAlreadyMade) {
       return reply;
@@ -2706,13 +2721,13 @@ export class AiCoreService {
     const cleaned = reply
       .split(/(?<=[.!?])\s+/u)
       .filter((sentence) => !this.looksLikeUpsell(sentence))
-      .join(' ')
+      .join(" ")
       .trim();
     return cleaned || continueBooking;
   }
 
   private looksLikeUpsell(text: string): boolean {
-    const normalized = text.toLowerCase().replace(/ё/g, 'е');
+    const normalized = text.toLowerCase().replace(/ё/g, "е");
     return /(?:можно|можем|хотите|предлагаю|давайте).{0,48}(?:добавить|дополнить|еще\s+услуг|доп[а-яa-z]*\s+услуг)|(?:добавим|добавляем).{0,48}(?:к\s+стрижке|к\s+услуге|еще)|обязательн[а-яa-z]*\s+апсейл/i.test(
       normalized,
     );
@@ -2726,23 +2741,23 @@ export class AiCoreService {
       }
     };
     add(
-      'daily_brief',
+      "daily_brief",
       /(ежедневн|утренн|дневн|сводк[а-яa-z]*\s+дн|план[а-яa-z]*\s+на\s+день)/i,
     );
     add(
-      'finance_analytics',
+      "finance_analytics",
       /(финанс|касс|деньг|выруч|оборот|средн[а-яa-z]*\s+чек)/i,
     );
     add(
-      'staff_performance',
+      "staff_performance",
       /(сотрудник|мастер|специалист|команд|персонал|исполнен[а-яa-z]*\s+план)/i,
     );
     add(
-      'client_return',
+      "client_return",
       /(возврат[а-яa-z]*\s+клиент|клиент[а-яa-z]*\s+верн|просроченн[а-яa-z]*\s+цикл)/i,
     );
     add(
-      'business_analytics',
+      "business_analytics",
       /(анализ[а-яa-z]*\s+бизнес|бизнес[а-яa-z]*\s+аналитик|общ[а-яa-z]*\s+показател)/i,
     );
     return result;
@@ -2761,9 +2776,9 @@ export class AiCoreService {
     const enabled = new Set(enabledCapabilities);
     const lines = ASSISTANT_CAPABILITY_CATALOG.map(
       (item) =>
-        `${enabled.has(item.key) ? 'включено' : 'выключено'} — ${item.title}`,
+        `${enabled.has(item.key) ? "включено" : "выключено"} — ${item.title}`,
     );
-    return `Ваши модули: ${lines.join('; ')}.`;
+    return `Ваши модули: ${lines.join("; ")}.`;
   }
 
   private async complete(
@@ -2787,12 +2802,12 @@ export class AiCoreService {
             .finishConversationReads(readTurn)
             .catch(() => ({
               run_id: readTurn.runId ?? null,
-              scope: 'deterministic_reads' as const,
-              state: 'UNCONFIRMED',
+              scope: "deterministic_reads" as const,
+              state: "UNCONFIRMED",
             }))
         : null);
     const grounding =
-      response.grounding ?? this.groundingReport(null, 'not_required', []);
+      response.grounding ?? this.groundingReport(null, "not_required", []);
     const usage = decisions.reduce(
       (totals, decision) => ({
         input_tokens: this.addTokenCount(
@@ -2822,7 +2837,7 @@ export class AiCoreService {
     const clientAudience = this.isClientAudience(user, dto.audience);
     const reportCard =
       !clientAudience &&
-      grounding.status === 'verified' &&
+      grounding.status === "verified" &&
       toolResults.length > 0
         ? buildChatReportCard(toolResults, {
             personal,
@@ -2898,16 +2913,16 @@ export class AiCoreService {
         response.action || !lastPlan
           ? null
           : {
-              version: 'maya.chat-semantic-context/1',
+              version: "maya.chat-semantic-context/1",
               ...(response.ownerReviewClarification &&
               isOwnerReviewTaskSet(lastPlan)
                 ? { ownerReviewClarification: OWNER_REVIEW_CLARIFICATION }
                 : {}),
               ...(lastPlan.tasks.length === 1 &&
               [
-                'booking.prepare_personal',
-                'booking.find_availability',
-                'booking.create_own',
+                "booking.prepare_personal",
+                "booking.find_availability",
+                "booking.create_own",
               ].includes(lastPlan.tasks[0].intent) &&
               this.bookingPreferenceSources.has(dto)
                 ? { bookingSource: this.bookingPreferenceSources.get(dto) }
@@ -2917,7 +2932,7 @@ export class AiCoreService {
                 this.requireTenant(user),
               ),
               plan: {
-                parent_request: '',
+                parent_request: "",
                 language: lastPlan.language,
                 dialogue_act: lastPlan.dialogue_act,
                 tasks: lastPlan.tasks.map((task) => ({
@@ -2926,8 +2941,8 @@ export class AiCoreService {
                   entities: Object.fromEntries(
                     Object.entries(task.entities).filter(
                       ([, value]) =>
-                        typeof value !== 'string' ||
-                        !value.startsWith('[name removed]'),
+                        typeof value !== "string" ||
+                        !value.startsWith("[name removed]"),
                     ),
                   ),
                   depends_on: task.depends_on,
@@ -2938,7 +2953,7 @@ export class AiCoreService {
                 context: lastPlan.context,
               },
             };
-      if (Buffer.byteLength(JSON.stringify(semanticContext), 'utf8') > 16_384)
+      if (Buffer.byteLength(JSON.stringify(semanticContext), "utf8") > 16_384)
         semanticContext = null;
       const transcriptProjection = {
         semanticPlan: semanticContext?.plan ?? null,
@@ -2953,16 +2968,16 @@ export class AiCoreService {
         userTurn,
         reply: response.reply,
         semanticContext,
-        completionHash: createHash('sha256')
+        completionHash: createHash("sha256")
           .update(this.canonicalJson(transcriptProjection))
-          .digest('hex'),
+          .digest("hex"),
       });
     }
     await this.auditLog.log({
       tenantId: this.requireTenant(user),
       userId: user.userId,
-      action: 'ai.core_turn_completed',
-      entityType: 'ai_core_turn',
+      action: "ai.core_turn_completed",
+      entityType: "ai_core_turn",
       entityId: dto.requestId,
       metadata: {
         surface: dto.surface,
@@ -2975,13 +2990,13 @@ export class AiCoreService {
         model_calls: decisions.length,
         tools_used: toolsUsed.map((tool) => tool.name),
         outcome:
-          typeof response.action?.status === 'string'
+          typeof response.action?.status === "string"
             ? response.action.status
-            : 'reply',
+            : "reply",
         brain_persona: brain.persona,
         brain_intent: brain.intent,
         conversation_intelligence_version: conversationAudit
-          ? 'maya-ci/1'
+          ? "maya-ci/1"
           : null,
         conversation_domains: conversationAudit?.domains ?? [],
         conversation_intents: conversationAudit?.intents ?? [],
@@ -3009,7 +3024,7 @@ export class AiCoreService {
     execution: Readonly<Record<string, unknown>>,
   ): {
     reply: string;
-    status: 'verified' | 'blocked';
+    status: "verified" | "blocked";
   } {
     const services = this.record(execution.result).services;
     const resolution = this.record(execution.resolution);
@@ -3020,28 +3035,28 @@ export class AiCoreService {
       Array.isArray(services) &&
       services.length > 0 &&
       resolution.matched === true &&
-      envelope.kind === 'SERVICE_SELECTOR' &&
+      envelope.kind === "SERVICE_SELECTOR" &&
       this.record(envelope.provenance).source_capability ===
-        'catalog.services.read' &&
+        "catalog.services.read" &&
       intents.some((value: unknown) => {
         const intent = this.record(value),
           target = this.record(intent.target);
         return (
-          intent.effect === 'NAVIGATE' &&
-          target.class === 'detail' &&
-          target.ref === 'fs.booking'
+          intent.effect === "NAVIGATE" &&
+          target.class === "detail" &&
+          target.ref === "fs.booking"
         );
       });
     return entry
       ? {
           reply:
-            'Показываю каталог услуг. Для личной записи откройте форму «Записаться для себя».',
-          status: 'verified',
+            "Показываю каталог услуг. Для личной записи откройте форму «Записаться для себя».",
+          status: "verified",
         }
       : {
           reply:
-            'Сейчас не удалось открыть форму личной записи. Попробуйте повторить запрос позже.',
-          status: 'blocked',
+            "Сейчас не удалось открыть форму личной записи. Попробуйте повторить запрос позже.",
+          status: "blocked",
         };
   }
 
@@ -3049,7 +3064,7 @@ export class AiCoreService {
     resolution?: Readonly<Record<string, unknown>>;
   } {
     const value = execution.resolution;
-    return value !== null && typeof value === 'object' && !Array.isArray(value)
+    return value !== null && typeof value === "object" && !Array.isArray(value)
       ? { resolution: value as Readonly<Record<string, unknown>> }
       : {};
   }
@@ -3061,7 +3076,7 @@ export class AiCoreService {
     effectiveRole: UserRole,
     retainAcceptedBookingServices?: (ids: readonly string[]) => void,
   ): Promise<ConversationSemanticPlan | null> {
-    if (dto.surface !== 'web' || !dto.conversationId || !this.moduleRef)
+    if (dto.surface !== "web" || !dto.conversationId || !this.moduleRef)
       return null;
     const timeline = this.moduleRef.get<AiTypedWidgetTriggerPort>(
       AI_TYPED_WIDGET_TRIGGER,
@@ -3077,8 +3092,8 @@ export class AiCoreService {
     if (!context) return null;
     const saved = this.record(context);
     if (
-      saved.version !== 'maya.chat-semantic-context/1' ||
-      typeof saved.savedAt !== 'string'
+      saved.version !== "maya.chat-semantic-context/1" ||
+      typeof saved.savedAt !== "string"
     )
       return null;
     const timezone = await this.resolveBusinessTimezone(
@@ -3099,12 +3114,12 @@ export class AiCoreService {
     if (
       plan.tasks.length === 1 &&
       [
-        'booking.prepare_personal',
-        'booking.find_availability',
-        'booking.create_own',
+        "booking.prepare_personal",
+        "booking.find_availability",
+        "booking.create_own",
       ].includes(plan.tasks[0].intent) &&
-      typeof retainedSource.branchId === 'string' &&
-      typeof retainedSource.sourceRevision === 'string'
+      typeof retainedSource.branchId === "string" &&
+      typeof retainedSource.sourceRevision === "string"
     ) {
       try {
         const configured = await this.crm?.resolveConfiguredBookingBranch?.(
@@ -3132,11 +3147,11 @@ export class AiCoreService {
     ) {
       for (const task of plan.tasks) {
         // A relative day cannot silently move when a conversation resumes later.
-        for (const key of ['date', 'date_or_period']) {
+        for (const key of ["date", "date_or_period"]) {
           const value = task.entities[key];
           if (
-            typeof value === 'string' &&
-            ['today', 'tomorrow', 'сегодня', 'завтра'].includes(value)
+            typeof value === "string" &&
+            ["today", "tomorrow", "сегодня", "завтра"].includes(value)
           )
             delete task.entities[key];
         }
@@ -3146,9 +3161,9 @@ export class AiCoreService {
     if (
       plan.tasks.length === 1 &&
       [
-        'booking.prepare_personal',
-        'booking.find_availability',
-        'booking.create_own',
+        "booking.prepare_personal",
+        "booking.find_availability",
+        "booking.create_own",
       ].includes(plan.tasks[0].intent)
     ) {
       const selected = await timeline.readBookingSelection?.(
@@ -3225,9 +3240,9 @@ export class AiCoreService {
       tasks.length > 0 &&
       tasks.every(
         (task) =>
-          task.data_class === 'A' ||
-          task.permission.status === 'denied' ||
-          task.tool.status === 'not_available' ||
+          task.data_class === "A" ||
+          task.permission.status === "denied" ||
+          task.tool.status === "not_available" ||
           task.requires_clarification,
       )
     );
@@ -3246,18 +3261,18 @@ export class AiCoreService {
 
   private async resolveBusinessTimezone(tenantId: string): Promise<string> {
     if (!this.prisma) {
-      return 'Europe/Moscow';
+      return "Europe/Moscow";
     }
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       select: { defaultTimezone: true },
     });
-    const timezone = tenant?.defaultTimezone?.trim() || 'Europe/Moscow';
+    const timezone = tenant?.defaultTimezone?.trim() || "Europe/Moscow";
     try {
-      new Intl.DateTimeFormat('ru-RU', { timeZone: timezone });
+      new Intl.DateTimeFormat("ru-RU", { timeZone: timezone });
       return timezone;
     } catch {
-      return 'Europe/Moscow';
+      return "Europe/Moscow";
     }
   }
 
@@ -3272,8 +3287,8 @@ export class AiCoreService {
     messages: AiCoreMessage[],
     allowedNames: Set<string>,
     brain: MayaBrainRoute,
-    rawLatestText = '',
-    rawPreviousUserText = '',
+    rawLatestText = "",
+    rawPreviousUserText = "",
     /**
      * 🔴 Cycle 04 closure B1. Пояс бизнеса — часть разбора календаря, а не
      * оформление. Без него «за 20 августа» в 01:30 по Москве превращалось в
@@ -3284,10 +3299,10 @@ export class AiCoreService {
     const latestText = this.latestUserText(messages);
     const previousUserText = this.previousUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е');
+      .replace(/ё/g, "е");
     const text = this.contextualUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е');
+      .replace(/ё/g, "е");
     const hinted = this.toolHint(text, brain);
     if (!this.isDataQuestion(brain, text, hinted !== null)) {
       return null;
@@ -3312,20 +3327,20 @@ export class AiCoreService {
       (name) => name in DATA_TOOL_DOMAINS,
     );
     const analyticsEvidenceTool = [
-      'analytics.business.profit',
-      'analytics.employee.query',
-      'analytics.business.query',
+      "analytics.business.profit",
+      "analytics.employee.query",
+      "analytics.business.query",
     ].find((name) => allowedNames.has(name));
     // Не только по интенту: клиент, спросивший «сколько заработал салон»,
     // распознаётся подсказкой в аналитику, которой у него нет никогда. Деньги
     // салона мимо роли не отдаём — это и роль, и деньги сразу.
     const moneyWithoutAnalytics =
       (MONEY_INTENTS.has(brain.intent) ||
-        (hintedDataTools.some((name) => name.startsWith('analytics.')) &&
+        (hintedDataTools.some((name) => name.startsWith("analytics.")) &&
           // A mixed hint is not financial authority. An allowed public/source
           // alternative must reach semantic planning under current policy.
           !hintedDataTools.some(
-            (name) => !name.startsWith('analytics.') && allowedNames.has(name),
+            (name) => !name.startsWith("analytics.") && allowedNames.has(name),
           ))) &&
       !analyticsEvidenceTool;
     // Третий и последний отказ: спросили про ЧУВСТВИТЕЛЬНУЮ семью — чужой
@@ -3350,10 +3365,10 @@ export class AiCoreService {
         fallbackDomain: sensitiveFamilyClosed
           ? (DATA_TOOL_DOMAINS[hintedDataTools[0]] ?? null)
           : moneyWithoutAnalytics
-            ? 'business_query'
+            ? "business_query"
             : null,
         closedForAccess: true,
-        closedReason: allowedNames.size === 0 ? 'plan' : 'scope',
+        closedReason: allowedNames.size === 0 ? "plan" : "scope",
         strictNumbers: true,
       };
     }
@@ -3372,16 +3387,16 @@ export class AiCoreService {
       businessTimezone,
     );
     const analyticsPreference =
-      brain.persona === 'director' &&
+      brain.persona === "director" &&
       (MONEY_INTENTS.has(brain.intent) ||
-        brain.intent === 'staff_operations' ||
+        brain.intent === "staff_operations" ||
         reportingPeriod.explicit ||
         STAFF_CONTRIBUTION_QUESTION_PATTERN.test(text) ||
         STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN.test(text) ||
         DATA_TOPIC_PATTERN.test(text) ||
         OPEN_BUSINESS_OVERVIEW_PATTERN.test(text) ||
         isComprehensiveBusinessReview(text, previousUserText))
-        ? ['analytics.business.query', 'analytics.employee.query'].find(
+        ? ["analytics.business.query", "analytics.employee.query"].find(
             (name) => allowedNames.has(name),
           )
         : undefined;
@@ -3496,7 +3511,7 @@ export class AiCoreService {
     if (hinted) {
       return true;
     }
-    if (brain.persona === 'director') {
+    if (brain.persona === "director") {
       // Владелец и команда приходят в MAYA за салоном: всё, кроме записи
       // клиента, правки расписания, базы знаний и поддержки, — вопрос о данных.
       return !NON_DATA_INTENTS.has(brain.intent);
@@ -3518,47 +3533,47 @@ export class AiCoreService {
    */
   private toolHint(text: string, brain?: MayaBrainRoute): string[] | null {
     if (COMPANY_PROFILE_READ_HINT_PATTERN.test(text))
-      return ['company.business-hours.read'];
+      return ["company.business-hours.read"];
     // Полный реестр проверяем раньше клиентского баланса и любой периодной
     // аналитики: «лояльные клиенты» — не «мои бонусы» и не гости месяца.
     if (
       CLIENT_RETENTION_HINT_PATTERN.test(text) &&
-      brain?.persona !== 'admin'
+      brain?.persona !== "admin"
     ) {
-      return ['clients.retention.scan'];
+      return ["clients.retention.scan"];
     }
     // Досье конкретного гостя проверяем до «моих баллов». Иначе фраза
     // «сколько бонусов у Ивана» открывала баланс самого сотрудника.
-    if (CLIENT_DOSSIER_HINT_PATTERN.test(text) && brain?.persona !== 'admin') {
-      return ['clients.dossier.read'];
+    if (CLIENT_DOSSIER_HINT_PATTERN.test(text) && brain?.persona !== "admin") {
+      return ["clients.dossier.read"];
     }
     if (LOYALTY_HINT_PATTERN.test(text)) {
-      return ['loyalty.own.read'];
+      return ["loyalty.own.read"];
     }
     if (OWN_APPOINTMENTS_HINT_PATTERN.test(text)) {
       // Гость — своя история визитов. Команда салона на ту же фразу смотрит
       // загрузку/записи в аналитике: иначе мастер получает пустой client-list.
-      if (brain?.persona === 'admin') {
-        return ['appointments.own.list'];
+      if (brain?.persona === "admin") {
+        return ["appointments.own.list"];
       }
       return [
-        'analytics.employee.query',
-        'analytics.business.query',
-        'appointments.own.list',
+        "analytics.employee.query",
+        "analytics.business.query",
+        "appointments.own.list",
       ];
     }
     if (
       STAFF_SCHEDULE_READ_HINT_PATTERN.test(text) &&
-      brain?.persona !== 'admin'
+      brain?.persona !== "admin"
     ) {
       // Подсказка называет ОБА варианта — командный и свой. Кто что получит,
       // решит движок прав: у руководителя останется первый, у мастера второй.
       // Раньше здесь стоял только командный, и вопрос мастера про свой график
       // упирался в отказ по роли.
-      return ['staff.schedule.read', 'staff.schedule.own.read'];
+      return ["staff.schedule.read", "staff.schedule.own.read"];
     }
     if (
-      brain?.persona !== 'admin' &&
+      brain?.persona !== "admin" &&
       EXPLICIT_CALENDAR_DAY_PATTERN.test(text) &&
       OPERATIONS_JOURNAL_HINT_PATTERN.test(text) &&
       !AVAILABILITY_HINT_PATTERN.test(text)
@@ -3568,13 +3583,13 @@ export class AiCoreService {
       // когда владелец переспросил «это мои данные, я мастер». Пусть она
       // доходит туда сразу, а не после ругани.
       return [
-        'operations.journal.read',
-        'analytics.employee.query',
-        'analytics.business.query',
+        "operations.journal.read",
+        "analytics.employee.query",
+        "analytics.business.query",
       ];
     }
     if (AVAILABILITY_HINT_PATTERN.test(text)) {
-      return ['booking.availability.read'];
+      return ["booking.availability.read"];
     }
     // 🔴 До справочника услуг. «Сколько стоит привести нового клиента» и «какая
     // прибыль» — вопросы экономики салона, и оба раньше уезжали не туда: первый
@@ -3585,20 +3600,20 @@ export class AiCoreService {
         !PROFIT_BREAKDOWN_ESCAPE_PATTERN.test(text))
     ) {
       return [
-        'analytics.business.profit',
-        'analytics.business.query',
-        'analytics.employee.query',
+        "analytics.business.profit",
+        "analytics.business.query",
+        "analytics.employee.query",
       ];
     }
     if (EXPENSE_STRUCTURE_QUESTION_PATTERN.test(text)) {
       return [
-        'expenses.read',
-        'analytics.business.profit',
-        'analytics.business.query',
+        "expenses.read",
+        "analytics.business.profit",
+        "analytics.business.query",
       ];
     }
-    if (brain?.persona === 'director' && isComprehensiveBusinessReview(text)) {
-      return ['analytics.business.query', 'analytics.employee.query'];
+    if (brain?.persona === "director" && isComprehensiveBusinessReview(text)) {
+      return ["analytics.business.query", "analytics.employee.query"];
     }
     if (
       PRICE_HINT_PATTERN.test(text) &&
@@ -3607,20 +3622,20 @@ export class AiCoreService {
       !CLIENT_ACQUISITION_QUESTION_PATTERN.test(text) &&
       !/(подписк\w*|тариф\w*|maya|майя)/i.test(text)
     ) {
-      return ['catalog.services.read'];
+      return ["catalog.services.read"];
     }
     if (SALON_ABOUT_HINT_PATTERN.test(text)) {
-      return ['catalog.staff.read', 'catalog.services.read'];
+      return ["catalog.staff.read", "catalog.services.read"];
     }
     if (STAFF_HINT_PATTERN.test(text)) {
-      if (brain?.persona === 'admin') {
-        return ['catalog.staff.read', 'catalog.services.read'];
+      if (brain?.persona === "admin") {
+        return ["catalog.staff.read", "catalog.services.read"];
       }
       // Владельцу/команде — сначала поимённая аналитика, каталог запасной.
       return [
-        'analytics.business.query',
-        'analytics.employee.query',
-        'catalog.staff.read',
+        "analytics.business.query",
+        "analytics.employee.query",
+        "catalog.staff.read",
       ];
     }
     return null;
@@ -3636,11 +3651,11 @@ export class AiCoreService {
     toolName: string,
     text: string,
     previousUserText: string,
-    rawLatestText = '',
-    rawPreviousUserText = '',
+    rawLatestText = "",
+    rawPreviousUserText = "",
     businessTimezone?: string,
   ): Record<string, unknown> | null {
-    if (toolName === 'clients.dossier.read') {
+    if (toolName === "clients.dossier.read") {
       const query = this.clientDossierQuery(rawLatestText, rawPreviousUserText);
       return query ? { query } : null;
     }
@@ -3660,14 +3675,14 @@ export class AiCoreService {
    */
   private clientDossierQuery(
     rawText: string,
-    rawPreviousText = '',
+    rawPreviousText = "",
   ): string | null {
-    const text = rawText.replace(/\s+/g, ' ').trim();
+    const text = rawText.replace(/\s+/g, " ").trim();
     if (!text) return null;
 
     const phone = text.match(/\+?\d[\d\s().-]{2,}\d/);
     if (phone) {
-      const digits = phone[0].replace(/\D/g, '');
+      const digits = phone[0].replace(/\D/g, "");
       if (digits.length >= 4) return digits.slice(-11);
     }
 
@@ -3682,8 +3697,8 @@ export class AiCoreService {
     for (const pattern of patterns) {
       const match = text.match(pattern);
       const query = match?.[1]
-        ?.replace(/^(?:клиент[а-яёa-z]*|гост[а-яёa-z]*)\s+/i, '')
-        .replace(/[?!.;,]+$/g, '')
+        ?.replace(/^(?:клиент[а-яёa-z]*|гост[а-яёa-z]*)\s+/i, "")
+        .replace(/[?!.;,]+$/g, "")
         .trim();
       if (
         query &&
@@ -3730,7 +3745,7 @@ export class AiCoreService {
     toolResults: AiCoreToolResult[],
   ): string | null {
     for (let index = toolResults.length - 1; index >= 0; index -= 1) {
-      const domain = DATA_TOOL_DOMAINS[toolResults[index]?.name ?? ''];
+      const domain = DATA_TOOL_DOMAINS[toolResults[index]?.name ?? ""];
       if (domain) {
         return domain;
       }
@@ -3740,7 +3755,7 @@ export class AiCoreService {
 
   private groundingReport(
     requirement: GroundingRequirement | null,
-    status: GroundingReport['status'],
+    status: GroundingReport["status"],
     toolResults: AiCoreToolResult[],
   ): GroundingReport {
     return {
@@ -3769,17 +3784,17 @@ export class AiCoreService {
     const domain = this.groundingDomain(requirement, toolResults);
     return {
       reply: unavailableForCurrentAccess
-        ? requirement.closedReason === 'plan'
-          ? 'MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно.'
-          : 'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.'
-        : domain === 'staff_schedule'
-          ? 'Не смогла сейчас получить точный график из YClients. Общей аналитикой его не заменяю — попробуйте повторить запрос.'
-          : domain === 'operations_journal'
-            ? 'Не смогла сейчас получить точный журнал записей из YClients. Месячной сводкой его не заменяю — попробуйте повторить запрос.'
-            : 'Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.',
-      source: 'safe_fallback' as const,
+        ? requirement.closedReason === "plan"
+          ? "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно."
+          : "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные."
+        : domain === "staff_schedule"
+          ? "Не смогла сейчас получить точный график из YClients. Общей аналитикой его не заменяю — попробуйте повторить запрос."
+          : domain === "operations_journal"
+            ? "Не смогла сейчас получить точный журнал записей из YClients. Месячной сводкой его не заменяю — попробуйте повторить запрос."
+            : "Не смогла подтвердить данные в защищённом источнике MAYA. Чтобы не показать неверные цифры или факты, попробуйте повторить запрос позже.",
+      source: "safe_fallback" as const,
       action: null,
-      grounding: this.groundingReport(requirement, 'blocked', toolResults),
+      grounding: this.groundingReport(requirement, "blocked", toolResults),
     };
   }
 
@@ -3810,19 +3825,19 @@ export class AiCoreService {
   /** Render only the canonical C8 projection; never reconstruct Client segments. */
   private deterministicDormantClientsReply(value: unknown): string | null {
     const data = this.record(value);
-    if (data.contract !== 'c8.valuation.ai/1') return null;
+    if (data.contract !== "c8.valuation.ai/1") return null;
     const unavailable =
-      'Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.';
+      "Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.";
     if (data.configured !== true) return unavailable;
     const rows = Array.isArray(data.items) ? data.items : [];
     const boundedRows = rows.slice(0, 20);
     const lines = boundedRows.flatMap((raw, index) => {
       const row = this.record(raw);
       if (
-        typeof row.handle !== 'string' ||
+        typeof row.handle !== "string" ||
         !/^result_[0-9]+$/.test(row.handle) ||
         !row.rule ||
-        typeof row.rule !== 'object' ||
+        typeof row.rule !== "object" ||
         Array.isArray(row.rule) ||
         Object.getPrototypeOf(row.rule) !== Object.prototype ||
         !lifecycleSignal(row)
@@ -3832,29 +3847,29 @@ export class AiCoreService {
     });
     if (!lines.length) return unavailable;
     return [
-      'Результаты по подтверждённым правилам давности:',
+      "Результаты по подтверждённым правилам давности:",
       ...lines,
-      'Показаны оценки, а не список уникальных клиентов. Давность визита не означает готовность гостя вернуться. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.',
+      "Показаны оценки, а не список уникальных клиентов. Давность визита не означает готовность гостя вернуться. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.",
       data.moreAvailable === true || rows.length > 20
-        ? 'Показана ограниченная часть результатов, не весь список.'
-        : 'Результаты не подтверждают полный охват клиентской базы.',
+        ? "Показана ограниченная часть результатов, не весь список."
+        : "Результаты не подтверждают полный охват клиентской базы.",
       ...(lines.length < boundedRows.length
         ? [
-            'Часть результатов недоступна или не подтверждена; она не отнесена к активным или спящим гостям.',
+            "Часть результатов недоступна или не подтверждена; она не отнесена к активным или спящим гостям.",
           ]
         : []),
-    ].join('\n\n');
+    ].join("\n\n");
   }
 
   private deterministicReplyForTool(
     evidence: AiCoreToolResult,
     userText: string,
   ): string | null {
-    const text = userText.toLowerCase().replace(/ё/g, 'е');
+    const text = userText.toLowerCase().replace(/ё/g, "е");
     const measured = this.record(this.record(evidence.result).measurement);
     if (
-      measured.contract === 'c7.measurement.read/1' &&
-      (['analytics.business.profit', 'expenses.period.complete'].includes(
+      measured.contract === "c7.measurement.read/1" &&
+      (["analytics.business.profit", "expenses.period.complete"].includes(
         evidence.name,
       ) ||
         /прибыл|выруч|поступлен|касс|оборот|деньг|заработ|расход|зарплат/.test(
@@ -3864,18 +3879,18 @@ export class AiCoreService {
       const period = this.record(this.record(evidence.result).resolved_period);
       const notice =
         period.truncated_to_today === true
-          ? 'Месяц ещё не закончился: показаны факты на текущую дату. '
-          : '';
+          ? "Месяц ещё не закончился: показаны факты на текущую дату. "
+          : "";
       const qualification = /привести|привлеч|нов[а-я]* клиент/.test(text)
-        ? 'Стоимость привлечения клиента не измерена: расходы на рекламу и совпадение по времени не доказывают результат конкретного действия. '
+        ? "Стоимость привлечения клиента не измерена: расходы на рекламу и совпадение по времени не доказывают результат конкретного действия. "
         : /валов[а-я]*\s+прибыл/.test(text)
-          ? 'Валовая прибыль не измерена: нужна подтверждённая прямая себестоимость услуг. '
-          : '';
+          ? "Валовая прибыль не измерена: нужна подтверждённая прямая себестоимость услуг. "
+          : "";
       const causeBoundary =
         BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text) &&
         /выруч|оборот|поступлен/.test(text)
-          ? 'Причина изменения выручки не установлена: измерения показывают факты, но не доказывают причинную связь. '
-          : '';
+          ? "Причина изменения выручки не установлена: измерения показывают факты, но не доказывают причинную связь. "
+          : "";
       return (
         qualification +
         causeBoundary +
@@ -3884,28 +3899,28 @@ export class AiCoreService {
       );
     }
     switch (evidence.name) {
-      case 'support.integration-status.read':
+      case "support.integration-status.read":
         return integrationStatusReply(evidence.result).reply;
-      case 'business.rules.read': {
+      case "business.rules.read": {
         const data = this.record(evidence.result);
         if (
-          data.source !== 'tenant_confirmed_business_rules' ||
-          typeof data.revision !== 'number' ||
+          data.source !== "tenant_confirmed_business_rules" ||
+          typeof data.revision !== "number" ||
           !Array.isArray(data.rules)
         )
           return null;
-        if (data.status === 'not_configured')
-          return 'Утверждённые правила бизнеса пока не настроены. Уточните нужное правило у владельца.';
+        if (data.status === "not_configured")
+          return "Утверждённые правила бизнеса пока не настроены. Уточните нужное правило у владельца.";
         const rules = data.rules
           .map((value) => this.record(value).text)
-          .filter((value): value is string => typeof value === 'string');
+          .filter((value): value is string => typeof value === "string");
         if (!rules.length) return null;
-        return `Внутренние правила бизнеса, редакция ${data.revision}:\n\n${rules.map((rule) => `• ${rule}`).join('\n')}`;
+        return `Внутренние правила бизнеса, редакция ${data.revision}:\n\n${rules.map((rule) => `• ${rule}`).join("\n")}`;
       }
-      case 'analytics.business.query':
-      case 'analytics.employee.query': {
+      case "analytics.business.query":
+      case "analytics.employee.query": {
         const reply = this.deterministicAnalyticsQueryReply(
-          evidence.name === 'analytics.employee.query',
+          evidence.name === "analytics.employee.query",
           evidence.result,
           userText,
         );
@@ -3913,10 +3928,10 @@ export class AiCoreService {
           ? this.appendAnalyticsFreshness(reply, evidence.result)
           : null;
       }
-      case 'expenses.read':
+      case "expenses.read":
         return this.deterministicExpenseReply(evidence.result);
-      case 'expenses.period.complete':
-      case 'analytics.business.profit':
+      case "expenses.period.complete":
+      case "analytics.business.profit":
         return this.deterministicProfitReply(
           evidence.result,
           // Спросили про цену клиента — с неё и начинаем. Ответ на вопрос не
@@ -3924,17 +3939,17 @@ export class AiCoreService {
           CLIENT_ACQUISITION_QUESTION_PATTERN.test(text),
           GROSS_PROFIT_QUESTION_PATTERN.test(text),
         );
-      case 'clients.retention.scan':
+      case "clients.retention.scan":
         return this.deterministicClientRetentionReply(evidence.result, text);
-      case 'clients.dormant.list':
+      case "clients.dormant.list":
         return this.deterministicDormantClientsReply(evidence.result);
-      case 'clients.dossier.read':
+      case "clients.dossier.read":
         return this.deterministicClientDossierReply(evidence.result);
-      case 'staff.schedule.read':
+      case "staff.schedule.read":
         return this.deterministicStaffScheduleReply(evidence.result);
-      case 'operations.journal.read':
+      case "operations.journal.read":
         return this.deterministicOperationsJournalReply(evidence.result);
-      case 'booking.availability.read': {
+      case "booking.availability.read": {
         const slots = this.record(evidence.result).slots;
         if (!Array.isArray(slots)) {
           return null;
@@ -3942,16 +3957,16 @@ export class AiCoreService {
         const dateMatch = userText.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
         const dateLabel = dateMatch
           ? `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`
-          : 'выбранную дату';
+          : "выбранную дату";
         if (slots.length === 0) {
           return `На ${dateLabel} свободных окон нет. Проверить другую дату?`;
         }
-        return `На ${dateLabel} есть свободные окна: ${slots.length} ${this.pluralize(slots.length, 'вариант', 'варианта', 'вариантов')} времени. Уточните специалиста или услугу, чтобы сузить выбор.`;
+        return `На ${dateLabel} есть свободные окна: ${slots.length} ${this.pluralize(slots.length, "вариант", "варианта", "вариантов")} времени. Уточните специалиста или услугу, чтобы сузить выбор.`;
       }
-      case 'loyalty.own.read': {
+      case "loyalty.own.read": {
         const loyalty = this.record(evidence.result);
         const balance = this.safeMetricNumber(loyalty.balance);
-        const balanceLabel = `${this.formatMetricNumber(balance)} ${this.pluralize(balance, 'балл', 'балла', 'баллов')}`;
+        const balanceLabel = `${this.formatMetricNumber(balance)} ${this.pluralize(balance, "балл", "балла", "баллов")}`;
         /**
          * 🔴 Оговорка о владельце, а не украшение. Баланс ведёт внешний
          * журнал или карта провайдера, Maya его не считает и обещать списание
@@ -3960,10 +3975,10 @@ export class AiCoreService {
          */
         const balanceCaveat =
           loyalty.verification_required === false
-            ? ''
+            ? ""
             : loyalty.stale === true
-              ? ' Это последнее известное значение — при списании MAYA уточнит его у источника.'
-              : ' Точную сумму MAYA подтвердит у источника перед списанием.';
+              ? " Это последнее известное значение — при списании MAYA уточнит его у источника."
+              : " Точную сумму MAYA подтвердит у источника перед списанием.";
         if (!/(потрат|спис|оплат|на\s+что)/i.test(text)) {
           return `Ваш баланс: ${balanceLabel}.${balanceCaveat}`;
         }
@@ -3973,19 +3988,19 @@ export class AiCoreService {
               .slice(0, 3)
               .map((entry) => {
                 const item = this.record(entry);
-                if (typeof item.name !== 'string') {
+                if (typeof item.name !== "string") {
                   return null;
                 }
                 const points = this.safeMetricNumber(item.points_required);
-                return `${item.name} — ${this.formatMetricNumber(points)} ${this.pluralize(points, 'балл', 'балла', 'баллов')}`;
+                return `${item.name} — ${this.formatMetricNumber(points)} ${this.pluralize(points, "балл", "балла", "баллов")}`;
               })
               .filter((entry): entry is string => entry !== null)
           : [];
         return items.length > 0
-          ? `Ваш баланс: ${balanceLabel}. Можно рассмотреть: ${items.join('; ')}. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.`
+          ? `Ваш баланс: ${balanceLabel}. Можно рассмотреть: ${items.join("; ")}. Перед списанием MAYA ещё раз проверит сумму и попросит подтверждение.`
           : `Ваш баланс: ${balanceLabel}.${balanceCaveat} Подходящих услуг для списания сейчас нет.`;
       }
-      case 'appointments.own.list': {
+      case "appointments.own.list": {
         // This list contains personal data and may be presentation-truncated.
         // Only the server composer over the actual authorized read may use it.
         return null;
@@ -3998,19 +4013,19 @@ export class AiCoreService {
   private deterministicOwnAppointmentsReply(
     result: unknown,
     stale: boolean,
-  ): { reply: string; status: 'verified' | 'blocked' } {
+  ): { reply: string; status: "verified" | "blocked" } {
     const data = this.record(result);
     const unavailable = {
       reply:
-        'Не удалось подтвердить ваши записи и время визита. Попробуйте повторить запрос позже.',
-      status: 'blocked' as const,
+        "Не удалось подтвердить ваши записи и время визита. Попробуйте повторить запрос позже.",
+      status: "blocked" as const,
     };
     if (stale || data.stale === true || !Array.isArray(data.appointments))
       return unavailable;
     if (data.appointments.length === 0)
       return {
-        reply: 'В доступном списке нет записей. Источник: ваши записи в MAYA.',
-        status: 'verified',
+        reply: "В доступном списке нет записей. Источник: ваши записи в MAYA.",
+        status: "verified",
       };
 
     const upcoming: Array<{ instant: number; label: string }> = [];
@@ -4018,8 +4033,8 @@ export class AiCoreService {
     // Catalog labels are optional and bounded. Private identifiers/contact data
     // never enter the composed reply or a subsequent external model call.
     const label = (value: unknown): string | null =>
-      typeof value === 'string' && value.trim() && value.length <= 120
-        ? value.replace(/\s+/g, ' ').trim()
+      typeof value === "string" && value.trim() && value.length <= 120
+        ? value.replace(/\s+/g, " ").trim()
         : null;
     try {
       for (const entry of data.appointments) {
@@ -4028,7 +4043,7 @@ export class AiCoreService {
           !Object.values(AppointmentStatus).includes(
             item.status as AppointmentStatus,
           ) ||
-          typeof item.is_upcoming !== 'boolean'
+          typeof item.is_upcoming !== "boolean"
         )
           return unavailable;
         if (item.status === AppointmentStatus.CANCELED) {
@@ -4041,34 +4056,34 @@ export class AiCoreService {
         const start =
           item.start_at instanceof Date
             ? item.start_at
-            : typeof item.start_at === 'string' &&
+            : typeof item.start_at === "string" &&
                 /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(
                   item.start_at,
                 )
               ? new Date(item.start_at)
               : null;
         if (!start || !Number.isFinite(start.getTime())) return unavailable;
-        if (typeof item.start_at === 'string') {
+        if (typeof item.start_at === "string") {
           const canonicalInput = item.start_at.replace(
             /(?:\.(\d{1,3}))?Z$/,
             (_match, millis: string | undefined) =>
-              `.${(millis ?? '').padEnd(3, '0')}Z`,
+              `.${(millis ?? "").padEnd(3, "0")}Z`,
           );
           // JavaScript otherwise normalizes e.g. 30 February to another day.
           if (start.toISOString() !== canonicalInput) return unavailable;
         }
         if (start.getTime() < Date.now()) continue;
         const branch = this.record(item.branch);
-        if (typeof branch.timezone !== 'string' || !branch.timezone.trim())
+        if (typeof branch.timezone !== "string" || !branch.timezone.trim())
           return unavailable;
-        const time = new Intl.DateTimeFormat('ru-RU', {
+        const time = new Intl.DateTimeFormat("ru-RU", {
           timeZone: branch.timezone,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hourCycle: 'h23',
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hourCycle: "h23",
         }).format(start);
         const services = Array.isArray(item.services)
           ? item.services
@@ -4081,10 +4096,10 @@ export class AiCoreService {
           label: [
             `${time} (${branch.timezone})`,
             label(branch.name),
-            services.length ? services.join(', ') : null,
+            services.length ? services.join(", ") : null,
           ]
             .filter(Boolean)
-            .join(' — '),
+            .join(" — "),
         });
       }
     } catch {
@@ -4093,47 +4108,47 @@ export class AiCoreService {
     upcoming.sort((a, b) => a.instant - b.instant);
     return {
       reply: [
-        `В доступном списке ${data.appointments.length} ${this.pluralize(data.appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming.length}, отменённых: ${cancelled}.`,
-        upcoming.length ? 'Ближайшие записи:' : null,
+        `В доступном списке ${data.appointments.length} ${this.pluralize(data.appointments.length, "запись", "записи", "записей")}. Предстоящих: ${upcoming.length}, отменённых: ${cancelled}.`,
+        upcoming.length ? "Ближайшие записи:" : null,
         ...upcoming.slice(0, 3).map((entry) => entry.label),
-        'Источник: ваши записи в MAYA.',
+        "Источник: ваши записи в MAYA.",
       ]
         .filter(Boolean)
-        .join('\n'),
-      status: 'verified',
+        .join("\n"),
+      status: "verified",
     };
   }
 
   private deterministicCompanyProfileReply(
     result: unknown,
     stale: boolean,
-  ): { reply: string; status: 'verified' | 'blocked' } {
+  ): { reply: string; status: "verified" | "blocked" } {
     const data = this.record(result);
     const unavailable = {
       reply:
-        'Не удалось подтвердить адрес и часы работы по CRM. Попробуйте повторить запрос позже.',
-      status: 'blocked' as const,
+        "Не удалось подтвердить адрес и часы работы по CRM. Попробуйте повторить запрос позже.",
+      status: "blocked" as const,
     };
     const field = (value: unknown, limit: number): value is string | null =>
       value === null ||
-      (typeof value === 'string' &&
+      (typeof value === "string" &&
         value.trim().length > 0 &&
         value.length <= limit);
     if (
       stale ||
       data.stale === true ||
       data.verified !== true ||
-      data.source !== 'external_crm' ||
+      data.source !== "external_crm" ||
       !field(data.address, 500) ||
       !field(data.schedule, 1000) ||
       !field(data.timezone, 100) ||
-      typeof data.schedule_available !== 'boolean' ||
+      typeof data.schedule_available !== "boolean" ||
       data.schedule_available !== (data.schedule !== null)
     )
       return unavailable;
     if (data.timezone) {
       try {
-        new Intl.DateTimeFormat('ru-RU', { timeZone: data.timezone });
+        new Intl.DateTimeFormat("ru-RU", { timeZone: data.timezone });
       } catch {
         return unavailable;
       }
@@ -4141,18 +4156,18 @@ export class AiCoreService {
     const lines = [
       data.address
         ? `Адрес по CRM: ${data.address.trim()}.`
-        : 'Адрес не указан в CRM.',
+        : "Адрес не указан в CRM.",
       data.schedule
         ? `График работы по CRM: ${data.schedule.trim()}.`
-        : 'График работы не указан в CRM.',
+        : "График работы не указан в CRM.",
       ...(data.schedule && data.timezone
         ? [`Часовой пояс: ${data.timezone}.`]
         : []),
-      'Источник: CRM салона.',
+      "Источник: CRM салона.",
     ];
     return {
-      reply: lines.join('\n'),
-      status: data.address && data.schedule ? 'verified' : 'blocked',
+      reply: lines.join("\n"),
+      status: data.address && data.schedule ? "verified" : "blocked",
     };
   }
 
@@ -4160,31 +4175,31 @@ export class AiCoreService {
     result: unknown,
     requestedDate: unknown,
     stale: boolean,
-  ): { reply: string; status: 'verified' | 'blocked' } {
+  ): { reply: string; status: "verified" | "blocked" } {
     const data = this.record(result);
     const unavailable = {
       reply:
-        'Не удалось подтвердить ваш график на выбранную дату. Попробуйте повторить запрос позже или уточните график у администратора.',
-      status: 'blocked' as const,
+        "Не удалось подтвердить ваш график на выбранную дату. Попробуйте повторить запрос позже или уточните график у администратора.",
+      status: "blocked" as const,
     };
     if (
       data.available === false &&
-      data.reason === 'employee_is_not_linked_to_active_crm_staff'
+      data.reason === "employee_is_not_linked_to_active_crm_staff"
     )
       return {
         reply:
-          'Ваш график пока недоступен: не найдена активная привязка вашего аккаунта к мастеру в CRM. Попросите администратора проверить привязку.',
-        status: 'blocked',
+          "Ваш график пока недоступен: не найдена активная привязка вашего аккаунта к мастеру в CRM. Попросите администратора проверить привязку.",
+        status: "blocked",
       };
     if (
       stale ||
       data.stale === true ||
       data.available !== true ||
       data.verified !== true ||
-      data.source !== 'external_crm' ||
-      typeof data.date !== 'string' ||
+      data.source !== "external_crm" ||
+      typeof data.date !== "string" ||
       data.date !== requestedDate ||
-      typeof data.is_working !== 'boolean' ||
+      typeof data.is_working !== "boolean" ||
       !Array.isArray(data.slots) ||
       data.slots.length > 200
     )
@@ -4204,9 +4219,9 @@ export class AiCoreService {
       const label = `${date[3]}.${date[2]}.${date[1]}`;
       return {
         reply: data.is_working
-          ? `Ваш график на ${label}: ${slots.map((slot) => `${slot.from}–${slot.to}`).join(', ')}. Источник: YClients.`
+          ? `Ваш график на ${label}: ${slots.map((slot) => `${slot.from}–${slot.to}`).join(", ")}. Источник: YClients.`
           : `По графику на ${label} у вас выходной. Источник: YClients.`,
-        status: 'verified',
+        status: "verified",
       };
     } catch {
       return unavailable;
@@ -4215,7 +4230,7 @@ export class AiCoreService {
 
   private deterministicStaffScheduleReply(result: unknown): string | null {
     const data = this.record(result);
-    if (typeof data.date !== 'string' || !Array.isArray(data.staff)) {
+    if (typeof data.date !== "string" || !Array.isArray(data.staff)) {
       return null;
     }
     const dateMatch = data.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -4225,15 +4240,15 @@ export class AiCoreService {
     const rows = data.staff
       .map((entry) => {
         const staff = this.record(entry);
-        if (typeof staff.name !== 'string') {
+        if (typeof staff.name !== "string") {
           return null;
         }
         const slots = Array.isArray(staff.slots)
           ? staff.slots
               .map((slot) => {
                 const value = this.record(slot);
-                return typeof value.from === 'string' &&
-                  typeof value.to === 'string'
+                return typeof value.from === "string" &&
+                  typeof value.to === "string"
                   ? `${value.from}–${value.to}`
                   : null;
               })
@@ -4255,28 +4270,28 @@ export class AiCoreService {
     if (rows.length === 1) {
       const row = rows[0];
       return `График на ${dateLabel}: ${row.name} — ${
-        row.isWorking ? row.slots.join(', ') : 'выходной'
+        row.isWorking ? row.slots.join(", ") : "выходной"
       }. Источник: YClients.`;
     }
     const working = rows
       .filter((row) => row.isWorking)
-      .map((row) => `${row.name} ${row.slots.join(', ')}`);
+      .map((row) => `${row.name} ${row.slots.join(", ")}`);
     const off = rows.filter((row) => !row.isWorking).map((row) => row.name);
     return [
       `График на ${dateLabel}.`,
       working.length > 0
-        ? `Работают: ${working.join('; ')}.`
-        : 'По графику никто не работает.',
-      off.length > 0 ? `Выходной: ${off.join(', ')}.` : '',
-      'Источник: YClients.',
+        ? `Работают: ${working.join("; ")}.`
+        : "По графику никто не работает.",
+      off.length > 0 ? `Выходной: ${off.join(", ")}.` : "",
+      "Источник: YClients.",
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
   }
 
   private deterministicOperationsJournalReply(result: unknown): string | null {
     const data = this.record(result);
-    if (typeof data.date !== 'string' || !Array.isArray(data.staff)) {
+    if (typeof data.date !== "string" || !Array.isArray(data.staff)) {
       return null;
     }
     const dateMatch = data.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -4288,7 +4303,7 @@ export class AiCoreService {
       .map((entry) => {
         const row = this.record(entry);
         const appointments = this.record(row.appointments);
-        if (typeof row.name !== 'string') {
+        if (typeof row.name !== "string") {
           return null;
         }
         return {
@@ -4331,17 +4346,17 @@ export class AiCoreService {
             .map((entry) => {
               const appointment = this.record(entry);
               if (
-                typeof appointment.time !== 'string' ||
-                typeof appointment.end_time !== 'string'
+                typeof appointment.time !== "string" ||
+                typeof appointment.end_time !== "string"
               ) {
                 return null;
               }
               const services = Array.isArray(appointment.services)
                 ? appointment.services.filter(
-                    (service): service is string => typeof service === 'string',
+                    (service): service is string => typeof service === "string",
                   )
                 : [];
-              return `${appointment.time}–${appointment.end_time} — ${services.length > 0 ? services.join(', ') : 'услуга не указана'}`;
+              return `${appointment.time}–${appointment.end_time} — ${services.length > 0 ? services.join(", ") : "услуга не указана"}`;
             })
             .filter((entry): entry is string => entry !== null)
         : [];
@@ -4351,13 +4366,13 @@ export class AiCoreService {
         // не считает, и выдумывать его из статуса нельзя (реестр 4.33).
         `Предстоящих: ${row.confirmed}, проведённых: ${row.completed}, отмен: ${row.canceled}.`,
         row.workingMinutes > 0
-          ? `Занято ${row.bookedMinutes} из ${row.workingMinutes} мин${row.loadPercent === null ? '' : ` (${this.formatMetricNumber(row.loadPercent)}%)`}.`
-          : '',
-        appointments.length > 0 ? `Записи: ${appointments.join('; ')}.` : '',
-        'Источник: YClients.',
+          ? `Занято ${row.bookedMinutes} из ${row.workingMinutes} мин${row.loadPercent === null ? "" : ` (${this.formatMetricNumber(row.loadPercent)}%)`}.`
+          : "",
+        appointments.length > 0 ? `Записи: ${appointments.join("; ")}.` : "",
+        "Источник: YClients.",
       ]
         .filter(Boolean)
-        .join(' ');
+        .join(" ");
     }
     const total = this.safeMetricNumber(summary.total);
     const active = this.safeMetricNumber(summary.active);
@@ -4367,7 +4382,7 @@ export class AiCoreService {
       .slice(0, 12)
       .map(
         (row) =>
-          `${row.name} — ${row.active} активных, ${row.canceled} отмен${row.loadPercent === null ? '' : `, загрузка ${this.formatMetricNumber(row.loadPercent)}%`}`,
+          `${row.name} — ${row.active} активных, ${row.canceled} отмен${row.loadPercent === null ? "" : `, загрузка ${this.formatMetricNumber(row.loadPercent)}%`}`,
       );
     /**
      * 🔴 Cycle 04 P5. Присутствие — из наблюдения, а не из статуса.
@@ -4383,7 +4398,7 @@ export class AiCoreService {
     const notObserved = this.optionalMetricNumber(attendance.not_observed);
     const attendanceLine =
       arrived === null || attendanceNoShow === null
-        ? 'Присутствие за день не сверено.'
+        ? "Присутствие за день не сверено."
         : notObserved !== null && notObserved > 0
           ? `Присутствие: пришли ${this.formatMetricNumber(arrived)}, неявок ${this.formatMetricNumber(attendanceNoShow)}; по ${this.formatMetricNumber(notObserved)} записям отметки нет.`
           : `Присутствие: пришли ${this.formatMetricNumber(arrived)}, неявок ${this.formatMetricNumber(attendanceNoShow)}.`;
@@ -4391,9 +4406,9 @@ export class AiCoreService {
     return [
       `${dateLabel}: всего ${total} записей, активных ${active}, проведённых ${completed}, отмен ${canceled}.`,
       attendanceLine,
-      `По мастерам: ${byStaff.join('; ')}.`,
-      'Источник: YClients.',
-    ].join(' ');
+      `По мастерам: ${byStaff.join("; ")}.`,
+      "Источник: YClients.",
+    ].join(" ");
   }
 
   private deterministicClientRetentionReply(
@@ -4401,20 +4416,20 @@ export class AiCoreService {
     text: string,
   ): string | null {
     const data = this.record(evidence);
-    if (data.source !== 'external_crm') return null;
+    if (data.source !== "external_crm") return null;
     const fact = (x: unknown) =>
-      typeof x === 'number' && Number.isFinite(x) ? String(x) : 'неизвестно';
+      typeof x === "number" && Number.isFinite(x) ? String(x) : "неизвестно";
     const c8 = this.record(data.valuation);
     if (
       /лояльн|вернут|реактив|удерж|ценн/i.test(text) &&
-      c8.contract === 'c8.valuation.ai/1'
+      c8.contract === "c8.valuation.ai/1"
     ) {
       const rows = Array.isArray(c8.items)
         ? c8.items.map((x) => this.record(x))
         : [];
       const rank = rows.find(
         (x) =>
-          x.kind === 'RANKING' && x.current === true && x.available === true,
+          x.kind === "RANKING" && x.current === true && x.available === true,
       );
       if (rank) {
         const ranking = this.record(rank.ranking),
@@ -4428,69 +4443,69 @@ export class AiCoreService {
             : [];
           return (
             String(item.position) +
-            '. ' +
+            ". " +
             String(item.handle) +
-            ': ' +
+            ": " +
             indicators
               .map((v) => {
                 const x = this.record(v);
                 return (
                   String(x.basis) +
-                  ': ' +
+                  ": " +
                   (Array.isArray(x.values)
                     ? x.values
                         .map((v) => {
                           const f = this.record(v);
                           return f.value === null
-                            ? 'неизвестно'
-                            : (typeof f.value === 'string' ||
-                              typeof f.value === 'number' ||
-                              typeof f.value === 'boolean'
+                            ? "неизвестно"
+                            : (typeof f.value === "string" ||
+                              typeof f.value === "number" ||
+                              typeof f.value === "boolean"
                                 ? String(f.value)
-                                : 'неизвестно') +
-                                (f.unit === 'money_minor'
-                                  ? ' в минимальных денежных единицах ' +
+                                : "неизвестно") +
+                                (f.unit === "money_minor"
+                                  ? " в минимальных денежных единицах " +
                                     String(f.currency)
-                                  : '');
+                                  : "");
                         })
-                        .join(', ')
-                    : 'неизвестно')
+                        .join(", ")
+                    : "неизвестно")
                 );
               })
-              .join('; ')
+              .join("; ")
           );
         });
         return (
-          'Порядок по подтверждённому правилу ' +
+          "Порядок по подтверждённому правилу " +
           String(ranking.objectiveKey) +
-          ':\n' +
-          lines.join('\n') +
-          '\nОхват неполный; неизвестные данные выделены отдельно. Прогноз возврата недоступен и в порядок не входит. Это оценка, а не согласие на контакт или план отправки.'
+          ":\n" +
+          lines.join("\n") +
+          "\nОхват неполный; неизвестные данные выделены отдельно. Прогноз возврата недоступен и в порядок не входит. Это оценка, а не согласие на контакт или план отправки."
         );
       }
     }
     if (/лояльн|вернут|реактив|удерж|ценн/i.test(text))
-      return 'Ценность и давность визита требуют подтверждённого правила бизнеса и точных Client-фактов. Используйте оценки Maya в кабинете. Прогноз возврата пока недоступен; отбор не даёт разрешения на контакт или отправку.';
+      return "Ценность и давность визита требуют подтверждённого правила бизнеса и точных Client-фактов. Используйте оценки Maya в кабинете. Прогноз возврата пока недоступен; отбор не даёт разрешения на контакт или отправку.";
     const months = this.requestedInactivityMonths(text),
       inactivity = this.record(data.inactivity);
     const summary = `В CRM-реестре: ${fact(data.total_clients)} карточек, с двумя и более визитами — ${fact(data.repeat_clients)}, без визитов — ${fact(data.clients_without_visits)}. Неизвестное число визитов: ${fact(data.clients_with_unknown_visit_count)}; неизвестная дата последнего визита среди посещавших: ${fact(data.clients_with_unknown_last_visit)}.`;
     if (months !== null)
       return (
         summary +
-        ` По утверждению карточки CRM дата раньше ${months} календарных месяцев: ${fact(inactivity[months === 12 ? 'over_1_year' : 'over_' + months + '_month' + (months === 1 ? '' : 's')])}. Это календарный факт источника, не доказанный приход и не политика «спящего» клиента.`
+        ` По утверждению карточки CRM дата раньше ${months} календарных месяцев: ${fact(inactivity[months === 12 ? "over_1_year" : "over_" + months + "_month" + (months === 1 ? "" : "s")])}. Это календарный факт источника, не доказанный приход и не политика «спящего» клиента.`
       );
-    return summary + ' Эти числа не являются оценкой лояльности или прогнозом.';
+    return summary + " Эти числа не являются оценкой лояльности или прогнозом.";
   }
 
   private deterministicClientDossierReply(evidence: unknown): string | null {
     const data = this.record(evidence);
     if (data.found !== true) {
-      return typeof data.error === 'string'
+      return typeof data.error === "string"
         ? data.error
-        : 'Клиент не найден. Уточните имя или последние четыре цифры телефона.';
+        : "Клиент не найден. Уточните имя или последние четыре цифры телефона.";
     }
 
-    const segment = 'требуется подтверждённое правило C8';
+    const segment = "требуется подтверждённое правило C8";
     /**
      * 🔴 Cycle 04 closure B4. Фраза следует ИСТОЧНИКУ числа.
      *
@@ -4502,13 +4517,13 @@ export class AiCoreService {
      */
     const exactVisits = this.optionalMetricNumber(data.visits);
     const visitsScope =
-      typeof data.visits_scope === 'string' ? data.visits_scope : '';
+      typeof data.visits_scope === "string" ? data.visits_scope : "";
     const parts = [
       exactVisits === null
-        ? 'Сколько раз этот гость приходил, сейчас сказать не могу: карточка CRM числа визитов не назвала, а историю визитов прочитать не удалось.'
-        : visitsScope === 'recent_attended_history_fallback'
-          ? `Числа визитов карточка CRM не назвала. В прочитанной истории — ${exactVisits} ${this.pluralize(exactVisits, 'визит', 'визита', 'визитов')}: это нижняя граница, а не вся история гостя.`
-          : `По карточке CRM: ${exactVisits} ${this.pluralize(exactVisits, 'визит', 'визита', 'визитов')}. Сегмент — ${segment}.`,
+        ? "Сколько раз этот гость приходил, сейчас сказать не могу: карточка CRM числа визитов не назвала, а историю визитов прочитать не удалось."
+        : visitsScope === "recent_attended_history_fallback"
+          ? `Числа визитов карточка CRM не назвала. В прочитанной истории — ${exactVisits} ${this.pluralize(exactVisits, "визит", "визита", "визитов")}: это нижняя граница, а не вся история гостя.`
+          : `По карточке CRM: ${exactVisits} ${this.pluralize(exactVisits, "визит", "визита", "визитов")}. Сегмент — ${segment}.`,
     ];
 
     /**
@@ -4521,14 +4536,14 @@ export class AiCoreService {
      * состояние, и оно тоже произносится вслух, а не выглядит как «не был».
      */
     const humanDate = (value: unknown): string | null => {
-      if (typeof value !== 'string') return null;
+      if (typeof value !== "string") return null;
       const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
       return match ? `${match[3]}.${match[2]}.${match[1]}` : value;
     };
     const daysAgo = (value: unknown): string => {
       const days = this.optionalMetricNumber(value);
-      if (days === null || days <= 0) return '';
-      return `, ${days} ${this.pluralize(days, 'день', 'дня', 'дней')} назад`;
+      if (days === null || days <= 0) return "";
+      return `, ${days} ${this.pluralize(days, "день", "дня", "дней")} назад`;
     };
     const attendedDate = humanDate(data.last_attended_visit);
     const assertedDate = humanDate(data.last_visit);
@@ -4536,9 +4551,9 @@ export class AiCoreService {
       parts.push(
         `Последний подтверждённый приход — ${attendedDate}${daysAgo(data.days_since_attended_visit)}.`,
       );
-    } else if (data.last_attended_visit_state === 'unavailable') {
+    } else if (data.last_attended_visit_state === "unavailable") {
       parts.push(
-        'История визитов из CRM сейчас не прочиталась, поэтому подтверждённый приход я не назову — это не значит, что клиент не приходил.',
+        "История визитов из CRM сейчас не прочиталась, поэтому подтверждённый приход я не назову — это не значит, что клиент не приходил.",
       );
     }
     if (assertedDate && assertedDate !== attendedDate) {
@@ -4550,44 +4565,44 @@ export class AiCoreService {
     const services = Array.isArray(data.favorite_services)
       ? data.favorite_services.filter(
           (value): value is string =>
-            typeof value === 'string' && value.trim().length > 0,
+            typeof value === "string" && value.trim().length > 0,
         )
       : [];
     if (services.length > 0) {
       parts.push(
-        `Чаще всего в последних визитах: ${services.slice(0, 4).join(', ')}.`,
+        `Чаще всего в последних визитах: ${services.slice(0, 4).join(", ")}.`,
       );
     }
 
     const averageCycleDays = this.safeMetricNumber(data.avg_cycle_days);
     if (averageCycleDays > 0) {
       parts.push(
-        `Средний цикл между визитами — ${averageCycleDays} ${this.pluralize(averageCycleDays, 'день', 'дня', 'дней')}.`,
+        `Средний цикл между визитами — ${averageCycleDays} ${this.pluralize(averageCycleDays, "день", "дня", "дней")}.`,
       );
     }
 
-    if (typeof data.total_spent === 'number') {
+    if (typeof data.total_spent === "number") {
       parts.push(
         `Покупки по карточке — ${this.formatMetricNumber(data.total_spent)} ₽.`,
       );
     }
-    if (data.bonus_status === 'available') {
+    if (data.bonus_status === "available") {
       const bonus = this.safeMetricNumber(data.bonus_balance);
       const bonusLabel =
-        data.bonus_currency === 'RUB'
+        data.bonus_currency === "RUB"
           ? `${this.formatMetricNumber(bonus)} ₽`
-          : `${this.formatMetricNumber(bonus)} ${this.pluralize(bonus, 'балл', 'балла', 'баллов')}`;
+          : `${this.formatMetricNumber(bonus)} ${this.pluralize(bonus, "балл", "балла", "баллов")}`;
       parts.push(`Бонусный баланс — ${bonusLabel}.`);
     } else {
-      parts.push('Бонусный баланс CRM для этой карточки не вернула.');
+      parts.push("Бонусный баланс CRM для этой карточки не вернула.");
     }
 
     if (this.safeMetricNumber(data.matches_count) > 1) {
       parts.push(
-        'Нашла несколько совпадений и использовала первое; уточните последние четыре цифры телефона, если нужен другой клиент.',
+        "Нашла несколько совпадений и использовала первое; уточните последние четыре цифры телефона, если нужен другой клиент.",
       );
     }
-    return parts.join(' ');
+    return parts.join(" ");
   }
 
   private requestedInactivityMonths(
@@ -4612,7 +4627,7 @@ export class AiCoreService {
   }
 
   private inactivityMonthLabel(months: 1 | 2 | 3 | 4 | 5 | 6): string {
-    return months === 1 ? 'одного месяца' : `${months} месяцев`;
+    return months === 1 ? "одного месяца" : `${months} месяцев`;
   }
 
   /**
@@ -4628,33 +4643,33 @@ export class AiCoreService {
     // 🔴 Cycle 04 P8. Непрочитанная книга расходов — не «расходов не было».
     // Пустой разрез при недоступном источнике раньше произносился вслух как
     // измеренный ноль, да ещё и с предложением завести первый расход.
-    if (data.totals_basis === 'unavailable') {
-      return 'Книгу расходов за этот период прочитать не удалось, поэтому разбора по статьям сейчас не будет. Это не значит, что расходов нет.';
+    if (data.totals_basis === "unavailable") {
+      return "Книгу расходов за этот период прочитать не удалось, поэтому разбора по статьям сейчас не будет. Это не значит, что расходов нет.";
     }
     const rows = Array.isArray(data.by_category)
       ? data.by_category.map((row) => this.record(row))
       : [];
     if (rows.length === 0) {
-      return 'За этот период расходов не заведено ни одного. Назовите статью и сумму — запишу, и разбор по статьям появится.';
+      return "За этот период расходов не заведено ни одного. Назовите статью и сумму — запишу, и разбор по статьям появится.";
     }
     const named = rows
       .slice(0, 5)
       .map(
         (row) =>
-          `${this.categoryLabel(row)} — ${this.formatMoneyAmount(row) ?? '—'}`,
+          `${this.categoryLabel(row)} — ${this.formatMoneyAmount(row) ?? "—"}`,
       );
     const total = this.formatVerifiedMoneyEntries(data.totals);
-    return `Расходы за период по статьям: ${named.join(', ')}.${
-      total ? ` Всего ${total}.` : ''
+    return `Расходы за период по статьям: ${named.join(", ")}.${
+      total ? ` Всего ${total}.` : ""
     } Больше всего — «${this.categoryLabel(rows[0])}».`;
   }
 
   /** Человеческое имя статьи расходов из строки разреза. */
   private categoryLabel(row: Record<string, unknown>): string {
-    if (typeof row.label === 'string' && row.label.trim()) {
+    if (typeof row.label === "string" && row.label.trim()) {
       return row.label;
     }
-    return typeof row.category === 'string' ? row.category : 'без статьи';
+    return typeof row.category === "string" ? row.category : "без статьи";
   }
 
   /**
@@ -4682,26 +4697,26 @@ export class AiCoreService {
 
     const truncated =
       period.truncated_to_today === true
-        ? ' Месяц ещё не закончился, поэтому считаю по сегодняшний день.'
-        : '';
+        ? " Месяц ещё не закончился, поэтому считаю по сегодняшний день."
+        : "";
 
     if (grossProfitRequested) {
       const revenueTotal = this.formatMoneyAmount(revenue.total);
-      if (revenue.status === 'available' && revenueTotal) {
+      if (revenue.status === "available" && revenueTotal) {
         return `Валовый доход до расходов: ${revenueTotal}. Это подтверждённая касса.${truncated} Аренда здесь не нужна: она относится к расчёту чистой прибыли. Точную валовую прибыль пока не называю, потому что CRM не выделяет прямую себестоимость услуг — выплаты мастерам и расходники — отдельным подтверждённым показателем.`;
       }
-      return 'Аренда для валовой прибыли не нужна. Но CRM за этот период не отдала подтверждённую кассу и прямую себестоимость услуг, поэтому точную валовую прибыль я сейчас не назову.';
+      return "Аренда для валовой прибыли не нужна. Но CRM за этот период не отдала подтверждённую кассу и прямую себестоимость услуг, поэтому точную валовую прибыль я сейчас не назову.";
     }
 
-    if (net.status === 'available') {
+    if (net.status === "available") {
       const total = this.formatMoneyAmount(net.total);
       const revenueTotal = this.formatMoneyAmount(revenue.total);
       const margin =
-        typeof net.margin_percent === 'number'
+        typeof net.margin_percent === "number"
           ? ` Это ${this.formatMetricNumber(net.margin_percent)}% от поступлений.`
-          : '';
+          : "";
       profitParts.push(
-        `Чистая прибыль: ${total ?? '—'}. Поступления в кассу — ${revenueTotal ?? '—'}.${margin}${truncated}`,
+        `Чистая прибыль: ${total ?? "—"}. Поступления в кассу — ${revenueTotal ?? "—"}.${margin}${truncated}`,
       );
       const categories = Array.isArray(expenses.by_category)
         ? expenses.by_category
@@ -4709,20 +4724,20 @@ export class AiCoreService {
             .slice(0, 4)
             .map(
               (row) =>
-                `${this.categoryLabel(row)}: ${this.formatMoneyAmount(row) ?? '—'}`,
+                `${this.categoryLabel(row)}: ${this.formatMoneyAmount(row) ?? "—"}`,
             )
         : [];
       if (categories.length > 0) {
-        profitParts.push(`Расходы: ${categories.join(', ')}.`);
+        profitParts.push(`Расходы: ${categories.join(", ")}.`);
       }
       if (completeness.unrecorded_additional_expenses_assumed_zero === true) {
         profitParts.push(
-          'Не внесённые дополнительные расходы в этом расчёте приняты за 0 ₽. Если они есть, напишите, например: «Запиши расход на рекламу 30 000 ₽ за август» — после вашего подтверждения я добавлю расход и сразу пересчитаю прибыль.',
+          "Не внесённые дополнительные расходы в этом расчёте приняты за 0 ₽. Если они есть, напишите, например: «Запиши расход на рекламу 30 000 ₽ за август» — после вашего подтверждения я добавлю расход и сразу пересчитаю прибыль.",
         );
       }
     } else {
       const revenueTotal = this.formatMoneyAmount(revenue.total);
-      if (revenue.status === 'available' && revenueTotal) {
+      if (revenue.status === "available" && revenueTotal) {
         profitParts.push(
           `Поступления до вычета расходов: ${revenueTotal}. Это подтверждённая касса, а не чистая прибыль.${truncated}`,
         );
@@ -4731,7 +4746,7 @@ export class AiCoreService {
         Array.isArray(value)
           ? value
               .map((item) => this.record(item).label)
-              .filter((label): label is string => typeof label === 'string')
+              .filter((label): label is string => typeof label === "string")
           : [];
       const missing = labels(net.missing_categories);
       const understated = labels(net.understated_categories);
@@ -4739,111 +4754,111 @@ export class AiCoreService {
       // условий. Иначе порядок проверок здесь и в движке расходится, и MAYA
       // называет одну помеху, пока сервер считает главной другую.
       const reason =
-        typeof net.unavailable_reason === 'string'
+        typeof net.unavailable_reason === "string"
           ? net.unavailable_reason
-          : '';
-      if (reason.startsWith('expense_ledger_')) {
+          : "";
+      if (reason.startsWith("expense_ledger_")) {
         // 🔴 Cycle 04 P8. Книгу расходов движок проверяет ПЕРВОЙ, и когда она
         // не прочитана, ни одна другая ветка лестницы не верна. Раньше здесь
         // не было ветки вовсе, и MAYA рассказывала про расчёт зарплаты CRM с
         // советом «спросите за месяц» — совет, после которого ответа не будет,
         // потому что мешало другое.
         profitParts.push(
-          'Прибыль за период посчитать не могу: книгу расходов за него прочитать не удалось. Это сбой чтения, а не отсутствие расходов — повторите вопрос через минуту.',
+          "Прибыль за период посчитать не могу: книгу расходов за него прочитать не удалось. Это сбой чтения, а не отсутствие расходов — повторите вопрос через минуту.",
         );
-      } else if (reason.startsWith('salary_comes_only_from_the_crm_payroll')) {
+      } else if (reason.startsWith("salary_comes_only_from_the_crm_payroll")) {
         profitParts.push(
-          'Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю. Вносить зарплату руками не нужно и нельзя: она задвоится.',
+          "Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю. Вносить зарплату руками не нужно и нельзя: она задвоится.",
         );
-      } else if (revenue.status !== 'available') {
+      } else if (revenue.status !== "available") {
         // Сначала называем настоящий серверный блокер. Пока кассы нет, вопрос
         // про дополнительные расходы всё равно не приблизит владельца к ответу.
         const revenueReason =
-          typeof revenue.unavailable_reason === 'string'
+          typeof revenue.unavailable_reason === "string"
             ? revenue.unavailable_reason
-            : '';
+            : "";
         profitParts.push(
-          revenueReason.startsWith('crm_finance_did_not_answer')
-            ? 'Прибыль считается от подтверждённой кассы, а CRM за этот период её не отдала. Это сбой связи, а не отсутствие денег — повторите вопрос через минуту.'
-            : revenueReason.startsWith('crm_returned_cash_revenue_without')
-              ? 'Прибыль считается от подтверждённой кассы, а CRM вернула суммы без подтверждения. Показывать их как прибыль я не буду.'
-              : revenueReason.startsWith('crm_confirms_cash_for_the_whole')
-                ? 'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком. Спросите по всему салону.'
-                : 'Прибыль считается от подтверждённой кассы, а её за этот период нет: внутренний календарь хранит цены записей, а не пробитые деньги. Стоимость записанного я показать могу, но называть её прибылью не буду.',
+          revenueReason.startsWith("crm_finance_did_not_answer")
+            ? "Прибыль считается от подтверждённой кассы, а CRM за этот период её не отдала. Это сбой связи, а не отсутствие денег — повторите вопрос через минуту."
+            : revenueReason.startsWith("crm_returned_cash_revenue_without")
+              ? "Прибыль считается от подтверждённой кассы, а CRM вернула суммы без подтверждения. Показывать их как прибыль я не буду."
+              : revenueReason.startsWith("crm_confirms_cash_for_the_whole")
+                ? "Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком. Спросите по всему салону."
+                : "Прибыль считается от подтверждённой кассы, а её за этот период нет: внутренний календарь хранит цены записей, а не пробитые деньги. Стоимость записанного я показать могу, но называть её прибылью не буду.",
         );
       } else if (completeness.owner_confirmation_required === true) {
         profitParts.push(
-          'Есть ли за этот период дополнительные расходы кроме зарплаты из CRM? Если расходов нет, так и напишите — я сразу посчитаю чистую прибыль. Если есть, назовите статью и сумму, и я подготовлю запись на подтверждение.',
+          "Есть ли за этот период дополнительные расходы кроме зарплаты из CRM? Если расходов нет, так и напишите — я сразу посчитаю чистую прибыль. Если есть, назовите статью и сумму, и я подготовлю запись на подтверждение.",
         );
-      } else if (reason.startsWith('required_expense_categories_are_missing')) {
+      } else if (reason.startsWith("required_expense_categories_are_missing")) {
         profitParts.push(
           `Прибыль за период посчитать не могу: за него не внесена ${
-            missing.join(' и ') || 'часть обязательных статей расходов'
+            missing.join(" и ") || "часть обязательных статей расходов"
           }. Внесите — и я посчитаю. Хотите, запишу прямо сейчас: назовите сумму.`,
         );
       } else if (
-        reason.startsWith('recorded_expense_categories_are_implausibly_small')
+        reason.startsWith("recorded_expense_categories_are_implausibly_small")
       ) {
         profitParts.push(
           `Прибыль за период посчитать не могу: похоже, внесено не всё — сумма по статье «${understated.join(
-            '», «',
+            "», «",
           )}» слишком мала на фоне кассы за этот же период. Проверьте и добавьте недостающее, тогда посчитаю.`,
         );
-      } else if (reason.startsWith('crm_confirms_cash_for_the_whole_company')) {
+      } else if (reason.startsWith("crm_confirms_cash_for_the_whole_company")) {
         profitParts.push(
-          'Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком, разложить её по филиалам нечем. Спросите по всему салону.',
+          "Прибыль по отдельному филиалу не считается: касса подтверждается по компании целиком, разложить её по филиалам нечем. Спросите по всему салону.",
         );
       } else if (
-        reason.startsWith('expenses_and_confirmed_cash_are_recorded_in_diff')
+        reason.startsWith("expenses_and_confirmed_cash_are_recorded_in_diff")
       ) {
         profitParts.push(
-          'Прибыль за период посчитать не могу: расходы и касса записаны в разных валютах, а курса у меня нет. Приведите их к одной валюте, тогда посчитаю.',
+          "Прибыль за период посчитать не могу: расходы и касса записаны в разных валютах, а курса у меня нет. Приведите их к одной валюте, тогда посчитаю.",
         );
-      } else if (payroll.status !== 'available') {
+      } else if (payroll.status !== "available") {
         profitParts.push(
-          'Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю.',
+          "Прибыль за период посчитать не могу: зарплата берётся только из расчёта CRM, а за такой период CRM его не отдаёт — расчёт доступен максимум за месяц. Спросите за месяц, и я посчитаю.",
         );
       } else {
         profitParts.push(
-          'Прибыль за период посчитать не могу: расходы за него неполные. Скажите, каких статей не хватает, и я их запишу.',
+          "Прибыль за период посчитать не могу: расходы за него неполные. Скажите, каких статей не хватает, и я их запишу.",
         );
       }
     }
 
-    if (acquisition.status === 'available') {
+    if (acquisition.status === "available") {
       const cost = this.formatMoneyAmount(acquisition.cost_per_new_client);
       const lookback =
-        typeof acquisition.cohort_lookback_days === 'number'
+        typeof acquisition.cohort_lookback_days === "number"
           ? acquisition.cohort_lookback_days
           : null;
       acquisitionParts.push(
-        `Новый гость обходился в ${cost ?? '—'}${
+        `Новый гость обходился в ${cost ?? "—"}${
           lookback === null
-            ? ''
+            ? ""
             : ` — это те, кого не было у нас последние ${lookback} дней`
         }. Столько мы тратили на рекламу в расчёте на одного нового гостя, а не доказательство, что его привела реклама.`,
       );
     } else if (
       acquisition.unavailable_reason ===
-      'no_advertising_expenses_are_recorded_for_this_period'
+      "no_advertising_expenses_are_recorded_for_this_period"
     ) {
       acquisitionParts.push(
-        'Стоимость нового клиента посчитать не из чего: расходов на рекламу за период не внесено. Запишу их — назовите сумму, и число появится.',
+        "Стоимость нового клиента посчитать не из чего: расходов на рекламу за период не внесено. Запишу их — назовите сумму, и число появится.",
       );
     }
 
     const ordered = acquisitionFirst
       ? [...acquisitionParts, ...profitParts]
       : [...profitParts, ...acquisitionParts];
-    return ordered.length > 0 ? ordered.join(' ') : null;
+    return ordered.length > 0 ? ordered.join(" ") : null;
   }
 
   private appendAnalyticsFreshness(reply: string, evidence: unknown): string {
     const data = this.record(evidence);
     const freshness = this.record(data.freshness);
     if (
-      freshness.status !== 'stale' ||
-      typeof freshness.snapshot_at !== 'string'
+      freshness.status !== "stale" ||
+      typeof freshness.snapshot_at !== "string"
     ) {
       return reply;
     }
@@ -4853,20 +4868,20 @@ export class AiCoreService {
     }
     const period = this.record(data.period);
     const timezone =
-      typeof period.timezone === 'string'
+      typeof period.timezone === "string"
         ? period.timezone
-        : typeof data.timezone === 'string'
+        : typeof data.timezone === "string"
           ? data.timezone
-          : 'UTC';
+          : "UTC";
     let label: string;
     try {
-      label = new Intl.DateTimeFormat('ru-RU', {
+      label = new Intl.DateTimeFormat("ru-RU", {
         timeZone: timezone,
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       }).format(snapshotAt);
     } catch {
       label = snapshotAt.toISOString();
@@ -4884,14 +4899,14 @@ export class AiCoreService {
     const changes = this.record(data.changes);
     const current = this.record(data.current);
     const comparison = this.record(data.comparison);
-    const text = userText.toLowerCase().replace(/ё/g, 'е');
+    const text = userText.toLowerCase().replace(/ё/g, "е");
     const requestedDiagnosis = BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text)
       ? this.analyticsDiagnosis(data, personal)
       : null;
     const withDiagnosis = (reply: string) =>
       [reply, requestedDiagnosis]
         .filter((part): part is string => Boolean(part))
-        .join(' ');
+        .join(" ");
     if (isComprehensiveBusinessReview(userText)) {
       return this.deterministicComprehensiveAnalyticsReview(personal, data);
     }
@@ -4900,13 +4915,13 @@ export class AiCoreService {
         ? current.daily.map((entry) => this.record(entry)).slice(-31)
         : [];
       if (daily.length === 0) {
-        return 'Дневной разрез за выбранный период пока недоступен. Общую сумму за период я не буду выдавать за разбивку по дням.';
+        return "Дневной разрез за выбранный период пока недоступен. Общую сумму за период я не буду выдавать за разбивку по дням.";
       }
       const lines = daily.map((row) => {
-        const rawDate = typeof row.date === 'string' ? row.date : '';
-        const parts = rawDate.split('-');
+        const rawDate = typeof row.date === "string" ? row.date : "";
+        const parts = rawDate.split("-");
         const date =
-          parts.length === 3 ? `${parts[2]}.${parts[1]}` : rawDate || 'День';
+          parts.length === 3 ? `${parts[2]}.${parts[1]}` : rawDate || "День";
         /**
          * 🔴 Cycle 04 P5. Неизмеренное называется словом.
          *
@@ -4916,7 +4931,7 @@ export class AiCoreService {
         const count = (value: unknown) => {
           const parsed = this.optionalMetricNumber(value);
           return parsed === null
-            ? 'не измерено'
+            ? "не измерено"
             : this.formatMetricNumber(parsed);
         };
         const total =
@@ -4926,15 +4941,15 @@ export class AiCoreService {
         const bookedValue = this.formatMoneyEntries(
           Array.isArray(row.revenue) ? row.revenue : [],
         );
-        return `${date}: всего ${total === null ? 'не измерено' : this.formatMetricNumber(total)}, завершено ${count(row.completed)}, ожидают ${count(row.scheduled)}, отменено ${count(row.cancelled)}${bookedValue ? `; стоимость неотменённых записей ${bookedValue}` : ''}`;
+        return `${date}: всего ${total === null ? "не измерено" : this.formatMetricNumber(total)}, завершено ${count(row.completed)}, ожидают ${count(row.scheduled)}, отменено ${count(row.cancelled)}${bookedValue ? `; стоимость неотменённых записей ${bookedValue}` : ""}`;
       });
-      return `Сводка по дням за выбранный период:\n${lines.join('\n')}`;
+      return `Сводка по дням за выбранный период:\n${lines.join("\n")}`;
     }
     const comparisonLabel =
-      comparison.mode === 'previous_year_same_period'
-        ? 'с аналогичным периодом прошлого года'
-        : comparison.mode === 'previous_period'
-          ? 'с предыдущим равным периодом'
+      comparison.mode === "previous_year_same_period"
+        ? "с аналогичным периодом прошлого года"
+        : comparison.mode === "previous_period"
+          ? "с предыдущим равным периодом"
           : null;
     const metric = (key: string) => this.optionalMetricNumber(metrics[key]);
     const metricChange = (
@@ -4945,10 +4960,10 @@ export class AiCoreService {
       const change = this.record(changes[key]);
       const delta = this.optionalMetricNumber(change.delta);
       if (delta === null || !comparisonLabel) {
-        return '';
+        return "";
       }
       const percent = this.formatSignedPercent(change.percent_change);
-      return ` Изменение ${comparisonLabel}: ${this.signedValue(delta, formatter(Math.abs(delta)))}${percent ? ` (${percent})` : ''}.`;
+      return ` Изменение ${comparisonLabel}: ${this.signedValue(delta, formatter(Math.abs(delta)))}${percent ? ` (${percent})` : ""}.`;
     };
     /**
      * Величина здесь ВСЕГДА есть: аргумент — конечное число, и пустым массив
@@ -4965,7 +4980,7 @@ export class AiCoreService {
     const countLine = (
       label: string,
       key: string,
-      suffix = '',
+      suffix = "",
     ): string | null => {
       const value = metric(key);
       const previous = this.optionalMetricNumber(
@@ -4973,7 +4988,7 @@ export class AiCoreService {
       );
       return value === null
         ? null
-        : `${label}: ${this.formatMetricNumber(value)}${suffix}${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}${suffix}` : ''}.${metricChange(key)}`;
+        : `${label}: ${this.formatMetricNumber(value)}${suffix}${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}${suffix}` : ""}.${metricChange(key)}`;
     };
 
     // 🔴 Валовая прибыль и маржа — отдельные отказы, а не разновидность
@@ -4981,32 +4996,32 @@ export class AiCoreService {
     // вопрос про валовую прибыль получал ответ про бухгалтерскую чистую, то
     // есть про другой показатель.
     if (/валов[а-яa-z]*\s+прибыл[а-яa-z]*/i.test(text)) {
-      const revenueAmount = metric('revenue_amount_kopecks');
+      const revenueAmount = metric("revenue_amount_kopecks");
       const confirmedRevenue =
         revenueAmount === null
-          ? ''
+          ? ""
           : `Поступления до вычета расходов: ${money(revenueAmount)}. `;
       return `${confirmedRevenue}Валовая прибыль сейчас не рассчитывается: прямые затраты на оказание услуг в CRM не выделены отдельно. Я не подменю прибыль выручкой.`;
     }
     if (/(?<![а-яё])марж[аеиуы][а-яa-z]*/i.test(text)) {
-      return 'Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.';
+      return "Маржа сейчас не рассчитывается отдельным подтверждённым показателем. Нужна классификация прямых затрат, поэтому я не буду выводить её из выручки приблизительно.";
     }
     if (
       /(чист[а-яa-z]*|бухгалтер[а-яa-z]*)\s+прибыл|прибыл[а-яa-z]*/i.test(text)
     ) {
       // 🔴 Не подсовываем поступления как «ближайший показатель»: владелец
       // слышит это как ответ на вопрос про прибыль. Лучше честный отказ.
-      return 'Чистую прибыль из этого среза не подтверждаю — здесь операционные показатели, а не расчёт касса минус расходы. Не подменю прибыль поступлениями. Спроси отдельно «какая прибыль» — возьму именно её.';
+      return "Чистую прибыль из этого среза не подтверждаю — здесь операционные показатели, а не расчёт касса минус расходы. Не подменю прибыль поступлениями. Спроси отдельно «какая прибыль» — возьму именно её.";
     }
     if (!personal && STAFF_CONTRIBUTION_QUESTION_PATTERN.test(text)) {
       const staff = this.analyticsStaffRows(current);
-      const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
+      const period = this.analyticsPeriodHint(data) ?? "за выбранный период";
       const exactRevenue = staff
         .map((row) => {
-          const name = typeof row.name === 'string' ? row.name.trim() : '';
+          const name = typeof row.name === "string" ? row.name.trim() : "";
           const confirmed = this.record(row.confirmed_revenue);
           const amount = this.formatMoneyAmount(confirmed.amount);
-          return name && confirmed.status === 'available' && amount
+          return name && confirmed.status === "available" && amount
             ? `${name} — ${amount}`
             : null;
         })
@@ -5020,54 +5035,54 @@ export class AiCoreService {
           financeRevenue.staff_attribution_coverage_percent,
         );
         const coverageNote =
-          attributionStatus === 'partial'
+          attributionStatus === "partial"
             ? ` YClients точно связал с мастерами ${this.formatMetricNumber(coverage ?? 0)}% кассы услуг; нераспределённый остаток я не делю приблизительно.`
-            : '';
-        return `Подтверждённая касса по мастерам ${period}: ${exactRevenue.join('; ')}.${coverageNote} Это финансовые операции YClients, связанные с мастерами, а не стоимость записанных услуг.`;
+            : "";
+        return `Подтверждённая касса по мастерам ${period}: ${exactRevenue.join("; ")}.${coverageNote} Это финансовые операции YClients, связанные с мастерами, а не стоимость записанных услуг.`;
       }
       const workload = staff
         .slice(0, 6)
         .map((row) => {
-          const name = typeof row.name === 'string' ? row.name.trim() : '';
+          const name = typeof row.name === "string" ? row.name.trim() : "";
           const appointments = this.optionalMetricNumber(row.appointments);
           return name && appointments !== null
-            ? `${name} — ${this.formatMetricNumber(appointments)} ${this.pluralize(appointments, 'запись', 'записи', 'записей')}`
+            ? `${name} — ${this.formatMetricNumber(appointments)} ${this.pluralize(appointments, "запись", "записи", "записей")}`
             : null;
         })
         .filter((row): row is string => row !== null);
       return [
         `Подтверждённую кассовую выручку по каждому мастеру ${period} YClients не распределяет: касса подтверждается только по салону целиком. Поэтому честно назвать, кто сколько принёс, нельзя.`,
         workload.length > 0
-          ? `Ближайший проверенный срез — загрузка: ${workload.join('; ')}.`
+          ? `Ближайший проверенный срез — загрузка: ${workload.join("; ")}.`
           : null,
-        'Могу отдельно показать начисленную зарплату каждому мастеру — это другой показатель.',
+        "Могу отдельно показать начисленную зарплату каждому мастеру — это другой показатель.",
       ]
         .filter((part): part is string => part !== null)
-        .join(' ');
+        .join(" ");
     }
     if (!personal && STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN.test(text)) {
       const staff = this.analyticsStaffRows(current);
       const available = staff
         .map((row) => {
-          const name = typeof row.name === 'string' ? row.name.trim() : '';
+          const name = typeof row.name === "string" ? row.name.trim() : "";
           const salary = this.record(row.salary);
           const accrued = this.formatMoneyAmount(salary.accrued);
-          return name && salary.status === 'available' && accrued
+          return name && salary.status === "available" && accrued
             ? `${name} — ${accrued}`
             : null;
         })
         .filter((row): row is string => row !== null);
       if (available.length > 0) {
-        const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
-        return `Если под «заработал» имеется в виду начисление мастеру, то ${period}: ${available.join('; ')}. Это начисленная зарплата по расчёту YClients, не выручка, которую мастер принёс салону.`;
+        const period = this.analyticsPeriodHint(data) ?? "за выбранный период";
+        return `Если под «заработал» имеется в виду начисление мастеру, то ${period}: ${available.join("; ")}. Это начисленная зарплата по расчёту YClients, не выручка, которую мастер принёс салону.`;
       }
-      return 'Поимённые начисления мастерам за выбранный период YClients сейчас не подтвердил. Я не подменю их выручкой салона или стоимостью записей.';
+      return "Поимённые начисления мастерам за выбранный период YClients сейчас не подтвердил. Я не подменю их выручкой салона или стоимостью записей.";
     }
     if (/зарплат[а-яa-z]*/i.test(text) && !personal) {
       const payroll = this.record(this.record(current.finance).payroll);
       const accrued = this.formatMoneyAmount(payroll.accrued_total);
       if (
-        payroll.status === 'available' &&
+        payroll.status === "available" &&
         payroll.verified === true &&
         accrued
       ) {
@@ -5079,19 +5094,19 @@ export class AiCoreService {
           balance ? `Остаток к выплате: ${balance}.` : null,
         ]
           .filter((part): part is string => part !== null)
-          .join(' ');
+          .join(" ");
       }
-      return 'Подтверждённый расчёт зарплат за выбранный период недоступен. Я не буду рассчитывать его из выручки.';
+      return "Подтверждённый расчёт зарплат за выбранный период недоступен. Я не буду рассчитывать его из выручки.";
     }
     if (/(марж|валов[а-яa-z]*\s+прибыл)/i.test(text)) {
-      return 'В CRM нет распределения прямых затрат по услугам, поэтому валовую маржу достоверно рассчитать нельзя. Доступны поступления, средний чек, записи, клиенты, отмены и динамика услуг.';
+      return "В CRM нет распределения прямых затрат по услугам, поэтому валовую маржу достоверно рассчитать нельзя. Доступны поступления, средний чек, записи, клиенты, отмены и динамика услуг.";
     }
     if (
       /(roi|окупаемост[^а-яa-z]*реклам|эффективност[^а-яa-z]*реклам)/i.test(
         text,
       )
     ) {
-      return 'В CRM нет расходов на рекламу с атрибуцией к записям, поэтому marketing ROI пока не рассчитывается. Могу оценить динамику клиентов, записей и поступлений.';
+      return "В CRM нет расходов на рекламу с атрибуцией к записям, поэтому marketing ROI пока не рассчитывается. Могу оценить динамику клиентов, записей и поступлений.";
     }
     if (
       // 🔴 Было /(?:...|по).{0,24}клиент/ без границы слова, и предлог «по»
@@ -5103,21 +5118,21 @@ export class AiCoreService {
     ) {
       const line = countLine(
         personal
-          ? 'Ваших уникальных клиентов по неотменённым записям'
-          : 'Уникальных клиентов с CRM-картой по неотменённым записям',
-        'unique_clients',
+          ? "Ваших уникальных клиентов по неотменённым записям"
+          : "Уникальных клиентов с CRM-картой по неотменённым записям",
+        "unique_clients",
       );
       if (!line) {
-        return 'В журнале CRM нет подтверждённого идентификатора клиента для этого среза; записи и транзакции при этом доступны.';
+        return "В журнале CRM нет подтверждённого идентификатора клиента для этого среза; записи и транзакции при этом доступны.";
       }
       return withDiagnosis(line);
     }
     if (/(повторн|возвращ|удержан)/i.test(text)) {
-      const repeat = metric('repeat_clients_in_period');
-      const rate = metric('repeat_client_rate_percent');
+      const repeat = metric("repeat_clients_in_period");
+      const rate = metric("repeat_client_rate_percent");
       if (repeat !== null) {
         return withDiagnosis(
-          `Повторных клиентов внутри выбранного периода: ${this.formatMetricNumber(repeat)}${rate === null ? '' : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange('repeat_clients_in_period')}`,
+          `Повторных клиентов внутри выбранного периода: ${this.formatMetricNumber(repeat)}${rate === null ? "" : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange("repeat_clients_in_period")}`,
         );
       }
     }
@@ -5131,13 +5146,13 @@ export class AiCoreService {
        * На вопрос «сколько не пришло» отвечает только он; статус записи
        * остаётся статусом и называется своим именем.
        */
-      const observedNoShow = metric('attendance_no_show');
+      const observedNoShow = metric("attendance_no_show");
       if (observedNoShow !== null) {
         return withDiagnosis(
-          `Не пришли: ${this.formatMetricNumber(observedNoShow)}.${metricChange('attendance_no_show')}`,
+          `Не пришли: ${this.formatMetricNumber(observedNoShow)}.${metricChange("attendance_no_show")}`,
         );
       }
-      const statusNoShow = metric('appointments_no_show');
+      const statusNoShow = metric("appointments_no_show");
       if (statusNoShow !== null) {
         return withDiagnosis(
           `Присутствие за период не сверено, поэтому число неявок назвать не могу. Записей со статусом «не пришёл» у провайдера: ${this.formatMetricNumber(statusNoShow)} — это состояние записи, а не наблюдение за визитом.`,
@@ -5145,36 +5160,36 @@ export class AiCoreService {
       }
     }
     if (/отмен/i.test(text)) {
-      const cancelled = metric('appointments_cancelled');
-      const rate = metric('cancellation_rate_percent');
+      const cancelled = metric("appointments_cancelled");
+      const rate = metric("cancellation_rate_percent");
       if (cancelled !== null) {
         return withDiagnosis(
-          `Отменённых записей: ${this.formatMetricNumber(cancelled)}${rate === null ? '' : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange('appointments_cancelled')}`,
+          `Отменённых записей: ${this.formatMetricNumber(cancelled)}${rate === null ? "" : `, доля ${this.formatMetricNumber(rate)}%`}.${metricChange("appointments_cancelled")}`,
         );
       }
     }
     if (/средн[а-яa-z]*\s+чек/i.test(text)) {
       const key = personal
-        ? 'average_booked_value_amount_kopecks'
-        : 'average_ticket_amount_kopecks';
+        ? "average_booked_value_amount_kopecks"
+        : "average_ticket_amount_kopecks";
       const value = metric(key);
       return value === null
         ? personal
-          ? 'Личная кассовая выручка мастера не атрибутируется CRM. Доступна средняя стоимость записанных услуг.'
-          : 'Подтверждённый средний чек за выбранный период недоступен.'
-        : `${personal ? 'Средняя стоимость записанных услуг' : 'Средний чек'}: ${money(value)}.${metricChange(key, money)}`;
+          ? "Личная кассовая выручка мастера не атрибутируется CRM. Доступна средняя стоимость записанных услуг."
+          : "Подтверждённый средний чек за выбранный период недоступен."
+        : `${personal ? "Средняя стоимость записанных услуг" : "Средний чек"}: ${money(value)}.${metricChange(key, money)}`;
     }
     if (/(выруч|оборот|касс|доход|деньг|заработ)/i.test(text)) {
       const key = personal
-        ? 'booked_value_amount_kopecks'
-        : 'revenue_amount_kopecks';
+        ? "booked_value_amount_kopecks"
+        : "revenue_amount_kopecks";
       const value = metric(key);
       return value === null
         ? personal
-          ? 'Кассовую выручку конкретного мастера CRM не подтверждает. Могу показать стоимость его записанных услуг, загрузку и повторных клиентов.'
-          : 'Подтверждённые денежные поступления за выбранный период недоступны.'
+          ? "Кассовую выручку конкретного мастера CRM не подтверждает. Могу показать стоимость его записанных услуг, загрузку и повторных клиентов."
+          : "Подтверждённые денежные поступления за выбранный период недоступны."
         : withDiagnosis(
-            `${personal ? 'Стоимость записанных вам услуг' : 'Подтверждённые поступления'}: ${money(value)}.${metricChange(key, money)}${personal ? ' Это стоимость записей, а не кассовая выручка.' : ''}`,
+            `${personal ? "Стоимость записанных вам услуг" : "Подтверждённые поступления"}: ${money(value)}.${metricChange(key, money)}${personal ? " Это стоимость записей, а не кассовая выручка." : ""}`,
           );
     }
     if (/(услуг|стриж|бород|популяр|спрос)/i.test(text)) {
@@ -5186,7 +5201,7 @@ export class AiCoreService {
           this.optionalMetricNumber(entry.delta) !== null &&
           Number(entry.delta) < 0,
       );
-      if (declining && typeof declining.name === 'string') {
+      if (declining && typeof declining.name === "string") {
         const delta = this.safeMetricNumber(declining.delta);
         const currentAppointments = this.safeMetricNumber(
           declining.current_appointments,
@@ -5196,14 +5211,14 @@ export class AiCoreService {
         );
         const percent = this.formatSignedPercent(declining.percent_change);
         return withDiagnosis(
-          `Наибольшая просадка по услугам: ${declining.name} — ${this.formatMetricNumber(currentAppointments)} записей против ${this.formatMetricNumber(previousAppointments)}, изменение ${this.signedValue(delta, this.formatMetricNumber(Math.abs(delta)))}${percent ? ` (${percent})` : ''}.`,
+          `Наибольшая просадка по услугам: ${declining.name} — ${this.formatMetricNumber(currentAppointments)} записей против ${this.formatMetricNumber(previousAppointments)}, изменение ${this.signedValue(delta, this.formatMetricNumber(Math.abs(delta)))}${percent ? ` (${percent})` : ""}.`,
         );
       }
       const services = Array.isArray(current.service_summary)
         ? current.service_summary
             .slice(0, 3)
             .map((entry) => this.record(entry))
-            .filter((entry) => typeof entry.name === 'string')
+            .filter((entry) => typeof entry.name === "string")
         : [];
       if (services.length > 0) {
         return withDiagnosis(
@@ -5212,28 +5227,28 @@ export class AiCoreService {
               (entry) =>
                 `${String(entry.name)} — ${this.formatMetricNumber(this.safeMetricNumber(entry.appointments))}`,
             )
-            .join('; ')}.`,
+            .join("; ")}.`,
         );
       }
     }
     if (/(загруз|(?<![а-яёa-z])час|минут|занятост)/i.test(text)) {
-      const minutes = metric('booked_minutes');
+      const minutes = metric("booked_minutes");
       if (minutes !== null) {
         return withDiagnosis(
-          `Записанное рабочее время: ${this.formatDuration(minutes)}.${metricChange('booked_minutes', (value) => this.formatDuration(value))}`,
+          `Записанное рабочее время: ${this.formatDuration(minutes)}.${metricChange("booked_minutes", (value) => this.formatDuration(value))}`,
         );
       }
     }
     if (/(запис|визит|посещен)/i.test(text)) {
-      const total = metric('appointments_total');
-      const active = metric('appointments_active');
-      const scheduled = metric('appointments_scheduled');
-      const completed = metric('appointments_completed');
-      const cancelled = metric('appointments_cancelled');
-      const noShow = metric('appointments_no_show');
+      const total = metric("appointments_total");
+      const active = metric("appointments_active");
+      const scheduled = metric("appointments_scheduled");
+      const completed = metric("appointments_completed");
+      const cancelled = metric("appointments_cancelled");
+      const noShow = metric("appointments_no_show");
       if (total !== null) {
         return withDiagnosis(
-          `Всего записей: ${this.formatMetricNumber(total)}${completed === null ? '' : `, завершённых ${this.formatMetricNumber(completed)}`}${scheduled === null ? '' : `, ожидают визита ${this.formatMetricNumber(scheduled)}`}${cancelled === null ? '' : `, отменённых ${this.formatMetricNumber(cancelled)}`}${noShow === null ? '' : `, со статусом «не пришёл» ${this.formatMetricNumber(noShow)}`}${completed === null && scheduled === null && active !== null ? `, неотменённых ${this.formatMetricNumber(active)}` : ''}.${metricChange('appointments_total')}`,
+          `Всего записей: ${this.formatMetricNumber(total)}${completed === null ? "" : `, завершённых ${this.formatMetricNumber(completed)}`}${scheduled === null ? "" : `, ожидают визита ${this.formatMetricNumber(scheduled)}`}${cancelled === null ? "" : `, отменённых ${this.formatMetricNumber(cancelled)}`}${noShow === null ? "" : `, со статусом «не пришёл» ${this.formatMetricNumber(noShow)}`}${completed === null && scheduled === null && active !== null ? `, неотменённых ${this.formatMetricNumber(active)}` : ""}.${metricChange("appointments_total")}`,
         );
       }
     }
@@ -5244,8 +5259,8 @@ export class AiCoreService {
     // ответ на «сравни этот год с прошлым» терял ровно то число, ради
     // которого вопрос и задавали.
     const moneyKey = personal
-      ? 'booked_value_amount_kopecks'
-      : 'revenue_amount_kopecks';
+      ? "booked_value_amount_kopecks"
+      : "revenue_amount_kopecks";
     const moneyValue = metric(moneyKey);
     const moneyPrevious = this.optionalMetricNumber(
       this.record(changes[moneyKey]).previous,
@@ -5253,27 +5268,27 @@ export class AiCoreService {
     const summary = [
       moneyValue === null
         ? null
-        : `${personal ? 'стоимость записанных услуг' : 'поступления'} ${money(moneyValue)}${comparisonLabel && moneyPrevious !== null ? ` против ${money(moneyPrevious)}` : ''}`,
+        : `${personal ? "стоимость записанных услуг" : "поступления"} ${money(moneyValue)}${comparisonLabel && moneyPrevious !== null ? ` против ${money(moneyPrevious)}` : ""}`,
       (() => {
-        const value = metric('appointments_total');
+        const value = metric("appointments_total");
         const previous = this.optionalMetricNumber(
           this.record(changes.appointments_total).previous,
         );
         return value === null
           ? null
-          : `${this.formatMetricNumber(value)} записей${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ''}`;
+          : `${this.formatMetricNumber(value)} записей${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ""}`;
       })(),
       (() => {
-        const value = metric('unique_clients');
+        const value = metric("unique_clients");
         const previous = this.optionalMetricNumber(
           this.record(changes.unique_clients).previous,
         );
         return value === null
           ? null
-          : `${this.formatMetricNumber(value)} уникальных клиентов${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ''}`;
+          : `${this.formatMetricNumber(value)} уникальных клиентов${comparisonLabel && previous !== null ? ` против ${this.formatMetricNumber(previous)}` : ""}`;
       })(),
     ].filter((part): part is string => Boolean(part));
-    const insight = requestedDiagnosis ?? '';
+    const insight = requestedDiagnosis ?? "";
     if (summary.length === 0) {
       return null;
     }
@@ -5282,21 +5297,21 @@ export class AiCoreService {
     const periodHint = this.analyticsPeriodHint(data);
     const lead = periodHint
       ? `Смотри, кратко ${periodHint}: `
-      : 'Смотри, кратко по салону: ';
+      : "Смотри, кратко по салону: ";
     const changeBits = [
       moneyValue === null ? null : metricChange(moneyKey, money).trim(),
-      metricChange('appointments_total').trim(),
-      metricChange('unique_clients').trim(),
+      metricChange("appointments_total").trim(),
+      metricChange("unique_clients").trim(),
     ].filter((part): part is string => Boolean(part));
-    const body = summary.join(', ');
-    const changesSentence = changeBits.length ? ` ${changeBits.join(' ')}` : '';
+    const body = summary.join(", ");
+    const changesSentence = changeBits.length ? ` ${changeBits.join(" ")}` : "";
     const nextActionQuestion =
       /^что\s+(?:(?:мне|нам)\s+)?(?:сейчас\s+)?(?:сделать|делать)\s*[?!.]*$/i.test(
         text,
       )
-        ? ' Уточните цель: загрузка, возврат клиентов или финансы? По одной сводке нельзя обоснованно выбрать приоритет действия.'
-        : '';
-    return `${lead}${body}.${changesSentence}${nextActionQuestion || (insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.')}`;
+        ? " Уточните цель: загрузка, возврат клиентов или финансы? По одной сводке нельзя обоснованно выбрать приоритет действия."
+        : "";
+    return `${lead}${body}.${changesSentence}${nextActionQuestion || (insight ? ` ${insight}` : " Если нужно — разберём, что за этим стоит.")}`;
   }
 
   private deterministicComprehensiveAnalyticsReview(
@@ -5321,23 +5336,23 @@ export class AiCoreService {
       ]) ?? this.formatMetricNumber(value / 100);
     const facts: string[] = [];
     const moneyKey = personal
-      ? 'booked_value_amount_kopecks'
-      : 'revenue_amount_kopecks';
+      ? "booked_value_amount_kopecks"
+      : "revenue_amount_kopecks";
     const averageKey = personal
-      ? 'average_booked_value_amount_kopecks'
-      : 'average_ticket_amount_kopecks';
+      ? "average_booked_value_amount_kopecks"
+      : "average_ticket_amount_kopecks";
     const moneyValue = metric(moneyKey);
-    const appointments = metric('appointments_total');
-    const uniqueClients = metric('unique_clients');
+    const appointments = metric("appointments_total");
+    const uniqueClients = metric("unique_clients");
     const average = metric(averageKey);
-    const repeats = metric('repeat_clients_in_period');
-    const repeatRate = metric('repeat_client_rate_percent');
-    const cancellations = metric('appointments_cancelled');
-    const cancellationRate = metric('cancellation_rate_percent');
+    const repeats = metric("repeat_clients_in_period");
+    const repeatRate = metric("repeat_client_rate_percent");
+    const cancellations = metric("appointments_cancelled");
+    const cancellationRate = metric("cancellation_rate_percent");
 
     if (moneyValue !== null) {
       facts.push(
-        `${personal ? 'стоимость записанных услуг' : 'поступления'} ${money(moneyValue)}`,
+        `${personal ? "стоимость записанных услуг" : "поступления"} ${money(moneyValue)}`,
       );
     }
     if (appointments !== null) {
@@ -5350,17 +5365,17 @@ export class AiCoreService {
     }
     if (average !== null) {
       facts.push(
-        `${personal ? 'средняя стоимость записи' : 'средний чек'} ${money(average)}`,
+        `${personal ? "средняя стоимость записи" : "средний чек"} ${money(average)}`,
       );
     }
     if (repeats !== null) {
       facts.push(
-        `${this.formatMetricNumber(repeats)} повторных клиентов${repeatRate === null ? '' : ` (${this.formatMetricNumber(repeatRate)}%)`}`,
+        `${this.formatMetricNumber(repeats)} повторных клиентов${repeatRate === null ? "" : ` (${this.formatMetricNumber(repeatRate)}%)`}`,
       );
     }
     if (cancellations !== null) {
       facts.push(
-        `${this.formatMetricNumber(cancellations)} отмен${cancellationRate === null ? '' : ` (${this.formatMetricNumber(cancellationRate)}%)`}`,
+        `${this.formatMetricNumber(cancellations)} отмен${cancellationRate === null ? "" : ` (${this.formatMetricNumber(cancellationRate)}%)`}`,
       );
     }
     if (facts.length === 0) {
@@ -5368,15 +5383,15 @@ export class AiCoreService {
     }
 
     const comparisonLabel =
-      this.record(data.comparison).mode === 'previous_year_same_period'
-        ? 'к аналогичному периоду прошлого года'
-        : 'к предыдущему равному периоду';
+      this.record(data.comparison).mode === "previous_year_same_period"
+        ? "к аналогичному периоду прошлого года"
+        : "к предыдущему равному периоду";
     const dynamics = [
-      { key: moneyKey, label: personal ? 'стоимость записей' : 'поступления' },
-      { key: 'appointments_total', label: 'записи' },
-      { key: 'unique_clients', label: 'клиенты' },
-      { key: averageKey, label: personal ? 'стоимость записи' : 'средний чек' },
-      { key: 'booked_minutes', label: 'загрузка' },
+      { key: moneyKey, label: personal ? "стоимость записей" : "поступления" },
+      { key: "appointments_total", label: "записи" },
+      { key: "unique_clients", label: "клиенты" },
+      { key: averageKey, label: personal ? "стоимость записи" : "средний чек" },
+      { key: "booked_minutes", label: "загрузка" },
     ]
       .map(({ key, label }) => ({
         label,
@@ -5392,7 +5407,7 @@ export class AiCoreService {
       .slice(0, 5)
       .map(
         (entry) =>
-          `${entry.label} ${this.formatSignedPercent(entry.percent) ?? 'без изменения'}`,
+          `${entry.label} ${this.formatSignedPercent(entry.percent) ?? "без изменения"}`,
       );
 
     const serviceChanges = Array.isArray(data.service_changes)
@@ -5401,7 +5416,7 @@ export class AiCoreService {
     const weakestService = serviceChanges
       .filter(
         (entry) =>
-          typeof entry.name === 'string' &&
+          typeof entry.name === "string" &&
           this.optionalMetricNumber(entry.percent_change) !== null &&
           Number(entry.percent_change) < 0,
       )
@@ -5413,36 +5428,36 @@ export class AiCoreService {
     const serviceDiagnosis = weakestService
       ? `По услугам сильнее всего просела «${String(weakestService.name)}»: ${this.formatSignedPercent(weakestService.percent_change)}.`
       : null;
-    const period = this.analyticsPeriodHint(data) ?? 'за выбранный период';
+    const period = this.analyticsPeriodHint(data) ?? "за выбранный период";
 
     return [
-      `Полный срез ${period}: ${facts.join('; ')}.`,
+      `Полный срез ${period}: ${facts.join("; ")}.`,
       dynamics.length > 0
-        ? `Динамика ${comparisonLabel}: ${dynamics.join('; ')}.`
-        : 'Сравнение с предыдущим периодом сейчас недоступно, поэтому подтверждённую динамику не выдумываю.',
-      `Слабые места: ${[diagnosis, serviceDiagnosis].filter(Boolean).join(' ') || 'подтверждённого снижения в доступных показателях нет.'}`,
-    ].join('\n\n');
+        ? `Динамика ${comparisonLabel}: ${dynamics.join("; ")}.`
+        : "Сравнение с предыдущим периодом сейчас недоступно, поэтому подтверждённую динамику не выдумываю.",
+      `Слабые места: ${[diagnosis, serviceDiagnosis].filter(Boolean).join(" ") || "подтверждённого снижения в доступных показателях нет."}`,
+    ].join("\n\n");
   }
 
   private analyticsPeriodHint(data: Record<string, unknown>): string | null {
     const resolved = this.record(data.resolved_period);
-    if (typeof resolved.label_ru === 'string' && resolved.label_ru.trim()) {
+    if (typeof resolved.label_ru === "string" && resolved.label_ru.trim()) {
       return `за ${resolved.label_ru.trim()}`;
     }
     const periodTop = this.record(data.period);
-    if (typeof periodTop.label_ru === 'string' && periodTop.label_ru.trim()) {
+    if (typeof periodTop.label_ru === "string" && periodTop.label_ru.trim()) {
       return `за ${periodTop.label_ru.trim()}`;
     }
     const current = this.record(data.current);
     const period = this.record(current.period);
-    const label = typeof period.label === 'string' ? period.label.trim() : '';
+    const label = typeof period.label === "string" ? period.label.trim() : "";
     if (label) {
       return `за ${label}`;
     }
-    const mode = typeof period.mode === 'string' ? period.mode : '';
-    if (mode === 'today') return 'за сегодня';
-    if (mode === 'week' || mode === 'this_week') return 'за эту неделю';
-    if (mode === 'month' || mode === 'this_month') return 'за этот месяц';
+    const mode = typeof period.mode === "string" ? period.mode : "";
+    if (mode === "today") return "за сегодня";
+    if (mode === "week" || mode === "this_week") return "за эту неделю";
+    if (mode === "month" || mode === "this_month") return "за этот месяц";
     return null;
   }
 
@@ -5461,19 +5476,19 @@ export class AiCoreService {
     const changes = this.record(data.changes);
     const candidates = [
       {
-        key: 'unique_clients',
+        key: "unique_clients",
         label: personal
-          ? 'число ваших уникальных клиентов'
-          : 'число уникальных клиентов',
+          ? "число ваших уникальных клиентов"
+          : "число уникальных клиентов",
       },
-      { key: 'appointments_total', label: 'количество записей' },
+      { key: "appointments_total", label: "количество записей" },
       {
         key: personal
-          ? 'average_booked_value_amount_kopecks'
-          : 'average_ticket_amount_kopecks',
-        label: personal ? 'средняя стоимость записи' : 'средний чек',
+          ? "average_booked_value_amount_kopecks"
+          : "average_ticket_amount_kopecks",
+        label: personal ? "средняя стоимость записи" : "средний чек",
       },
-      { key: 'booked_minutes', label: 'записанное рабочее время' },
+      { key: "booked_minutes", label: "записанное рабочее время" },
     ]
       .map((candidate) => {
         const change = this.record(changes[candidate.key]);
@@ -5491,35 +5506,35 @@ export class AiCoreService {
       .sort((left, right) => left.percent - right.percent);
     const strongest = candidates[0];
     if (!strongest) {
-      return 'В доступных CRM-показателях нет подтверждённого снижения, поэтому конкретную причину просадки назвать нельзя.';
+      return "В доступных CRM-показателях нет подтверждённого снижения, поэтому конкретную причину просадки назвать нельзя.";
     }
 
     const averageKey = personal
-      ? 'average_booked_value_amount_kopecks'
-      : 'average_ticket_amount_kopecks';
+      ? "average_booked_value_amount_kopecks"
+      : "average_ticket_amount_kopecks";
     const averageChange = this.record(changes[averageKey]);
     const averagePercent = this.optionalMetricNumber(
       averageChange.percent_change,
     );
     const offset =
       averagePercent !== null && averagePercent > 0
-        ? ` При этом ${personal ? 'средняя стоимость записи' : 'средний чек'} вырос${personal ? 'ла' : ''} на ${this.formatMetricNumber(averagePercent)}%, поэтому он частично компенсирует падение потока.`
-        : '';
+        ? ` При этом ${personal ? "средняя стоимость записи" : "средний чек"} вырос${personal ? "ла" : ""} на ${this.formatMetricNumber(averagePercent)}%, поэтому он частично компенсирует падение потока.`
+        : "";
     return `Самое сильное подтверждённое ухудшение в доступных данных — ${strongest.label}: ${this.formatSignedPercent(strongest.percent)}.${offset}`;
   }
 
   private analyticsCurrency(current: Record<string, unknown>): string {
-    for (const key of ['revenue', 'average_ticket']) {
+    for (const key of ["revenue", "average_ticket"]) {
       const entries = current[key];
       if (!Array.isArray(entries) || entries.length === 0) {
         continue;
       }
       const currency = this.record(entries[0]).currency;
-      if (typeof currency === 'string' && currency.trim()) {
+      if (typeof currency === "string" && currency.trim()) {
         return currency;
       }
     }
-    return 'RUB';
+    return "RUB";
   }
 
   private formatDuration(minutes: number): string {
@@ -5549,27 +5564,27 @@ export class AiCoreService {
       .map((entry) => {
         const item = this.record(entry);
         const majorUnits =
-          typeof item.amount_major_units === 'number'
+          typeof item.amount_major_units === "number"
             ? item.amount_major_units
-            : typeof item.amount_kopecks === 'number'
+            : typeof item.amount_kopecks === "number"
               ? item.amount_kopecks / 100
               : null;
         if (majorUnits === null || !Number.isFinite(majorUnits)) {
           return null;
         }
         const currency =
-          typeof item.currency === 'string' ? item.currency.toUpperCase() : '';
+          typeof item.currency === "string" ? item.currency.toUpperCase() : "";
         const currencyLabel =
-          { RUB: '₽', USD: '$', EUR: '€', KZT: '₸' }[currency] || currency;
-        const amount = new Intl.NumberFormat('ru-RU', {
+          { RUB: "₽", USD: "$", EUR: "€", KZT: "₸" }[currency] || currency;
+        const amount = new Intl.NumberFormat("ru-RU", {
           maximumFractionDigits: 2,
         })
           .format(majorUnits)
-          .replace(/\u00a0/g, ' ');
-        return `${amount}${currencyLabel ? ` ${currencyLabel}` : ''}`;
+          .replace(/\u00a0/g, " ");
+        return `${amount}${currencyLabel ? ` ${currencyLabel}` : ""}`;
       })
       .filter((entry): entry is string => entry !== null);
-    return formatted.length > 0 ? formatted.join(', ') : null;
+    return formatted.length > 0 ? formatted.join(", ") : null;
   }
 
   /** То же самое; имя сохранено ради вызывающих, ждавших `null`. */
@@ -5580,9 +5595,9 @@ export class AiCoreService {
     const valid = value.filter((entry) => {
       const item = this.record(entry);
       return (
-        (typeof item.amount_major_units === 'number' &&
+        (typeof item.amount_major_units === "number" &&
           Number.isFinite(item.amount_major_units)) ||
-        (typeof item.amount_kopecks === 'number' &&
+        (typeof item.amount_kopecks === "number" &&
           Number.isFinite(item.amount_kopecks))
       );
     });
@@ -5594,18 +5609,18 @@ export class AiCoreService {
   }
 
   private safeMetricNumber(value: unknown): number {
-    return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+    return typeof value === "number" && Number.isFinite(value) ? value : 0;
   }
 
   private optionalMetricNumber(value: unknown): number | null {
-    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
   }
 
   private signedValue(value: number | null, formatted: string): string {
     if (value === null || value === 0) {
       return formatted;
     }
-    return value > 0 ? `+${formatted}` : `−${formatted.replace(/^-/, '')}`;
+    return value > 0 ? `+${formatted}` : `−${formatted.replace(/^-/, "")}`;
   }
 
   private formatSignedPercent(value: unknown): string | null {
@@ -5618,11 +5633,11 @@ export class AiCoreService {
   }
 
   private formatMetricNumber(value: number): string {
-    return new Intl.NumberFormat('ru-RU', {
+    return new Intl.NumberFormat("ru-RU", {
       maximumFractionDigits: 2,
     })
       .format(value)
-      .replace(/\u00a0/g, ' ');
+      .replace(/\u00a0/g, " ");
   }
 
   private pluralize(
@@ -5649,11 +5664,11 @@ export class AiCoreService {
   private latestUserText(messages: AiCoreMessage[]): string {
     for (let index = messages.length - 1; index >= 0; index -= 1) {
       const message = messages[index];
-      if (message?.role === 'user' && message.content.trim()) {
+      if (message?.role === "user" && message.content.trim()) {
         return message.content.trim();
       }
     }
-    return '';
+    return "";
   }
 
   /**
@@ -5666,9 +5681,9 @@ export class AiCoreService {
   private explicitNoAdditionalExpenses(messages: AiCoreMessage[]): boolean {
     const latest = this.latestUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е')
-      .replace(/[!?.,:;]+/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/ё/g, "е")
+      .replace(/[!?.,:;]+/g, " ")
+      .replace(/\s+/g, " ")
       .trim();
     const explicit =
       /^(?:у\s+меня\s+)?(?:никаких\s+)?(?:доп(?:олнительн[а-яa-z]*)?|других|прочих)\s+расход[а-яa-z]*(?:\s+у\s+меня)?\s+нет$/i.test(
@@ -5689,7 +5704,7 @@ export class AiCoreService {
       /^все\s+(?:внесено|указано|учтено)$/i.test(latest) ||
       (/^(?:это\s+)?все$/i.test(latest) &&
         /доп(?:олнительн[а-яa-z]*)?\s+расход|расход[а-яa-z]*\s+(?:кроме|помимо)\s+зарплат/i.test(
-          this.previousAssistantText(messages).toLowerCase().replace(/ё/g, 'е'),
+          this.previousAssistantText(messages).toLowerCase().replace(/ё/g, "е"),
         ));
     if (explicit) {
       return true;
@@ -5698,14 +5713,14 @@ export class AiCoreService {
       return false;
     }
     return /(?:доп(?:олнительн)?|друг)[а-яa-z]*\s+расход|расход[а-яa-z]*\s+(?:кроме|помимо)\s+зарплат/i.test(
-      this.previousAssistantText(messages).toLowerCase().replace(/ё/g, 'е'),
+      this.previousAssistantText(messages).toLowerCase().replace(/ё/g, "е"),
     );
   }
 
   private explicitNoRentOnly(messages: AiCoreMessage[]): boolean {
     const latest = this.latestUserText(messages)
       .toLowerCase()
-      .replace(/ё/g, 'е');
+      .replace(/ё/g, "е");
     // 🔴 Это ОТВЕТ про аренду, а не вопрос. Раньше подстрока проверялась без
     // оглядки на остальную реплику, и «Помещение своё, покажи прибыль за июль»
     // уходило в ветку «аренда 0 ₽»: вопрос про прибыль терялся целиком,
@@ -5732,24 +5747,24 @@ export class AiCoreService {
     for (let index = messages.length - 1; index >= 0; index -= 1) {
       const message = messages[index];
       if (!message?.content.trim()) continue;
-      if (message.role === 'user' && !latestUserFound) {
+      if (message.role === "user" && !latestUserFound) {
         latestUserFound = true;
         continue;
       }
-      if (latestUserFound && message.role === 'assistant') {
+      if (latestUserFound && message.role === "assistant") {
         return message.content.trim();
       }
     }
-    return '';
+    return "";
   }
 
   /** Последний явно названный период сохраняется через уточняющие ходы. */
   private previousReportingUserText(messages: AiCoreMessage[]): string {
     let latestUserFound = false;
-    let immediatePrevious = '';
+    let immediatePrevious = "";
     for (let index = messages.length - 1; index >= 0; index -= 1) {
       const message = messages[index];
-      if (message?.role !== 'user' || !message.content.trim()) continue;
+      if (message?.role !== "user" || !message.content.trim()) continue;
       if (!latestUserFound) {
         latestUserFound = true;
         continue;
@@ -5770,15 +5785,15 @@ export class AiCoreService {
       return true;
     }
     if (
-      (toolName === 'analytics.business.query' ||
-        toolName === 'analytics.employee.query') &&
+      (toolName === "analytics.business.query" ||
+        toolName === "analytics.employee.query") &&
       (APPOINTMENT_COUNT_QUESTION_PATTERN.test(userText) ||
         DAILY_ANALYTICS_BREAKDOWN_QUESTION_PATTERN.test(userText))
     ) {
       return true;
     }
     return (
-      toolName === 'analytics.business.query' &&
+      toolName === "analytics.business.query" &&
       (STAFF_CONTRIBUTION_QUESTION_PATTERN.test(userText) ||
         STAFF_PAYROLL_BREAKDOWN_QUESTION_PATTERN.test(userText))
     );
@@ -5790,8 +5805,8 @@ export class AiCoreService {
     if (!previous) {
       return latest;
     }
-    const normalizedLatest = latest.toLowerCase().replace(/ё/g, 'е');
-    const normalizedPrevious = previous.toLowerCase().replace(/ё/g, 'е');
+    const normalizedLatest = latest.toLowerCase().replace(/ё/g, "е");
+    const normalizedPrevious = previous.toLowerCase().replace(/ё/g, "е");
     const retentionFollowUp =
       CLIENT_RETENTION_HINT_PATTERN.test(normalizedPrevious) &&
       (CLIENT_RETENTION_HINT_PATTERN.test(normalizedLatest) ||
@@ -5830,16 +5845,16 @@ export class AiCoreService {
    */
   private userConversationText(messages: AiCoreMessage[]): string {
     return messages
-      .filter((message) => message.role === 'user')
+      .filter((message) => message.role === "user")
       .map((message) => message.content)
-      .join(' \n ');
+      .join(" \n ");
   }
 
   private previousUserText(messages: AiCoreMessage[]): string {
     let latestFound = false;
     for (let index = messages.length - 1; index >= 0; index -= 1) {
       const message = messages[index];
-      if (message?.role !== 'user' || !message.content.trim()) {
+      if (message?.role !== "user" || !message.content.trim()) {
         continue;
       }
       if (!latestFound) {
@@ -5848,7 +5863,7 @@ export class AiCoreService {
       }
       return message.content.trim();
     }
-    return '';
+    return "";
   }
 
   /**
@@ -5857,20 +5872,20 @@ export class AiCoreService {
    */
   private schemaLeakTokens(reply: string): string[] {
     const patterns: Array<[RegExp, string]> = [
-      [/\bbooked_value\b/i, 'booked_value'],
-      [/\bstaff_summary\b/i, 'staff_summary'],
-      [/\bstaff_changes\b/i, 'staff_changes'],
-      [/\bwarning_codes?\b/i, 'warning_codes'],
-      [/\bamount_kopecks\b/i, 'amount_kopecks'],
-      [/\brevenue_amount_kopecks\b/i, 'revenue_amount_kopecks'],
-      [/\btool_results?\b/i, 'tool_results'],
-      [/\bunavailable_metrics\b/i, 'unavailable_metrics'],
-      [/\bavailable_metrics\b/i, 'available_metrics'],
-      [/\bresolved_period\b/i, 'resolved_period'],
-      [/\banalytics\.(business|employee)\b/i, 'analytics.*'],
-      [/\bcatalog\.services\.read\b/i, 'catalog.services.read'],
-      [/\bnet_profit\.status\b/i, 'net_profit.status'],
-      [/\binput_schema\b/i, 'input_schema'],
+      [/\bbooked_value\b/i, "booked_value"],
+      [/\bstaff_summary\b/i, "staff_summary"],
+      [/\bstaff_changes\b/i, "staff_changes"],
+      [/\bwarning_codes?\b/i, "warning_codes"],
+      [/\bamount_kopecks\b/i, "amount_kopecks"],
+      [/\brevenue_amount_kopecks\b/i, "revenue_amount_kopecks"],
+      [/\btool_results?\b/i, "tool_results"],
+      [/\bunavailable_metrics\b/i, "unavailable_metrics"],
+      [/\bavailable_metrics\b/i, "available_metrics"],
+      [/\bresolved_period\b/i, "resolved_period"],
+      [/\banalytics\.(business|employee)\b/i, "analytics.*"],
+      [/\bcatalog\.services\.read\b/i, "catalog.services.read"],
+      [/\bnet_profit\.status\b/i, "net_profit.status"],
+      [/\binput_schema\b/i, "input_schema"],
     ];
     const found: string[] = [];
     for (const [pattern, label] of patterns) {
@@ -5920,8 +5935,8 @@ export class AiCoreService {
           !evidence.absolute.has(claim.value);
         if (
           !onlyDelta ||
-          claim.value.startsWith('-') ||
-          !this.directionConflict(reply, claim, 'positive')
+          claim.value.startsWith("-") ||
+          !this.directionConflict(reply, claim, "positive")
         ) {
           continue;
         }
@@ -5932,8 +5947,8 @@ export class AiCoreService {
       // серверном −9.2 — нормальная человеческая формулировка, её и добивались.
       // А вот «выросло на 9,2%» на тех же данных — переворот направления, и
       // раньше его случайно ловил сторож чисел. Ловим явно.
-      if (!claim.value.startsWith('-') && allowed.has(`-${claim.value}`)) {
-        if (!this.directionConflict(reply, claim, 'negative')) {
+      if (!claim.value.startsWith("-") && allowed.has(`-${claim.value}`)) {
+        if (!this.directionConflict(reply, claim, "negative")) {
           continue;
         }
         problems.push(`${claim.value} (в данных это снижение, а не рост)`);
@@ -5989,7 +6004,7 @@ export class AiCoreService {
   private directionConflict(
     reply: string,
     claim: { value: string; index: number },
-    actual: 'positive' | 'negative',
+    actual: "positive" | "negative",
   ): boolean {
     // 🔴 Только в пределах своей части предложения. Плоское окно в 48 символов
     // цепляло глагол СОСЕДНЕГО мастера: «У Стаса плюс 2 записи, у Ильи минус
@@ -5997,16 +6012,16 @@ export class AiCoreService {
     // переписывание. Режем по ближайшей границе клаузы.
     const raw = reply.slice(Math.max(0, claim.index - 48), claim.index);
     const boundary = Math.max(
-      raw.lastIndexOf(','),
-      raw.lastIndexOf(';'),
-      raw.lastIndexOf('.'),
-      raw.lastIndexOf('!'),
-      raw.lastIndexOf('?'),
-      raw.lastIndexOf('—'),
-      raw.lastIndexOf(' и '),
+      raw.lastIndexOf(","),
+      raw.lastIndexOf(";"),
+      raw.lastIndexOf("."),
+      raw.lastIndexOf("!"),
+      raw.lastIndexOf("?"),
+      raw.lastIndexOf("—"),
+      raw.lastIndexOf(" и "),
     );
     const window = boundary >= 0 ? raw.slice(boundary + 1) : raw;
-    return actual === 'negative'
+    return actual === "negative"
       ? GROWTH_WORD_PATTERN.test(window)
       : DECLINE_WORD_PATTERN.test(window);
   }
@@ -6061,7 +6076,7 @@ export class AiCoreService {
     // Типографский минус («−», U+2212) и тире модель ставит чаще дефиса, а
     // шаблон ниже знает только ASCII. Без этой замены «−9,2%» разбиралось как
     // «9,2» и теряло знак ещё до сверки.
-    const text = value.replace(/[−–—]/g, '-');
+    const text = value.replace(/[−–—]/g, "-");
     const claims = new Map<string, number>();
     for (const occurrence of this.numberOccurrences(text)) {
       if (!claims.has(occurrence.value)) {
@@ -6089,13 +6104,13 @@ export class AiCoreService {
     const absolute = new Set<string>();
     const delta = new Set<string>();
     const isChangeKey = (key: string) =>
-      key === 'delta' || key === 'percent_change';
+      key === "delta" || key === "percent_change";
     const walk = (node: unknown, inChange: boolean) => {
       if (Array.isArray(node)) {
         node.forEach((item) => walk(item, inChange));
         return;
       }
-      if (node !== null && typeof node === 'object') {
+      if (node !== null && typeof node === "object") {
         for (const [key, item] of Object.entries(
           node as Record<string, unknown>,
         )) {
@@ -6121,7 +6136,7 @@ export class AiCoreService {
       });
       return values;
     }
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && typeof value === "object") {
       Object.values(value as Record<string, unknown>).forEach((item) => {
         for (const number of this.groundingNumbers(item)) {
           values.add(number);
@@ -6134,7 +6149,7 @@ export class AiCoreService {
       values.add(normalized);
       return values;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // 🔴 Даты и метки времени НЕ разбираем на числа. Из
       // «2026-08-01T21:00:00.000Z» иначе выпадают 8, 1, 21, 0, 59 и прочая
       // мелочь, которая тут же становится «подтверждённой»: модель могла бы
@@ -6157,12 +6172,12 @@ export class AiCoreService {
   }
 
   private normalizeGroundingNumber(value: unknown): string | null {
-    if (typeof value !== 'string' && typeof value !== 'number') {
+    if (typeof value !== "string" && typeof value !== "number") {
       return null;
     }
     const normalized = String(value)
-      .replace(/[\s\u00a0]/g, '')
-      .replace(',', '.');
+      .replace(/[\s\u00a0]/g, "")
+      .replace(",", ".");
     if (!/^-?\d+(?:\.\d+)?$/.test(normalized)) {
       return null;
     }
@@ -6172,10 +6187,10 @@ export class AiCoreService {
     }
     return Number.isInteger(parsed)
       ? String(parsed)
-      : String(parsed).replace(/0+$/, '').replace(/\.$/, '');
+      : String(parsed).replace(/0+$/, "").replace(/\.$/, "");
   }
 
-  private sanitizeMessages(messages: AiCoreChatDto['messages']): {
+  private sanitizeMessages(messages: AiCoreChatDto["messages"]): {
     messages: AiCoreMessage[];
     redacted: boolean;
     nameReferences: ReadonlyMap<string, string>;
@@ -6186,9 +6201,9 @@ export class AiCoreService {
   } {
     let redacted = false;
     const nameReferences = new Map<string, string>();
-    const nonce = randomUUID().replaceAll('-', '');
+    const nonce = randomUUID().replaceAll("-", "");
     const lastUser = messages.findLastIndex(
-      (message) => message.role === 'user',
+      (message) => message.role === "user",
     );
     let mention = 0;
     const sanitized = messages.map((message, index) => {
@@ -6217,7 +6232,7 @@ export class AiCoreService {
     // Убираем самые старые реплики, пока не влезет; последнюю — вопрос, на
     // который отвечаем, — не трогаем никогда.
     const fits = (items: AiCoreMessage[]) =>
-      Buffer.byteLength(JSON.stringify(items), 'utf8') <= MAX_CHAT_INPUT_BYTES;
+      Buffer.byteLength(JSON.stringify(items), "utf8") <= MAX_CHAT_INPUT_BYTES;
     const trimmed = [...sanitized];
     while (trimmed.length > 1 && !fits(trimmed)) {
       trimmed.shift();
@@ -6225,8 +6240,8 @@ export class AiCoreService {
     if (!fits(trimmed)) {
       // Не влезает даже одно сообщение — вот это уже действительно ошибка ввода.
       throw new BadRequestException({
-        message: 'AI chat input is too large.',
-        error: { code: 'ai_chat_input_too_large' },
+        message: "AI chat input is too large.",
+        error: { code: "ai_chat_input_too_large" },
       });
     }
     // Same request-local mention owner as current text. Private values never
@@ -6249,7 +6264,7 @@ export class AiCoreService {
         )
           return token;
       }
-      const token = `[${names ? 'name' : 'reference'} removed]@${nonce}_${++mention}`;
+      const token = `[${names ? "name" : "reference"} removed]@${nonce}_${++mention}`;
       map.set(token, value);
       return token;
     };
@@ -6257,7 +6272,7 @@ export class AiCoreService {
       // Re-project private values returned by this request's model. Never let a
       // canonical argument restored for validation escape on a later iteration.
       for (const [token, raw] of references)
-        if (typeof raw === 'string' && value === raw) return token;
+        if (typeof raw === "string" && value === raw) return token;
       for (const [token, raw] of nameReferences)
         if (value === raw) return token;
       // Known current private values may also occur inside resumed prose. Prefer
@@ -6265,8 +6280,8 @@ export class AiCoreService {
       // replace numeric IDs ("40" may be a legitimate aggregate count).
       const known = new Map<string, Set<string>>();
       const remember = (raw: string, token: string) => {
-        if (raw.length < 2 || /^\d+$/.test(raw) || raw.startsWith('[')) return;
-        const key = raw.toLocaleLowerCase('ru-RU');
+        if (raw.length < 2 || /^\d+$/.test(raw) || raw.startsWith("[")) return;
+        const key = raw.toLocaleLowerCase("ru-RU");
         const tokens = known.get(key) ?? new Set<string>();
         tokens.add(token);
         known.set(key, tokens);
@@ -6278,14 +6293,14 @@ export class AiCoreService {
         for (const part of raw.split(/\s+/u)) remember(part, token);
       }
       for (const [token, raw] of references)
-        if (typeof raw === 'string') remember(raw, token);
+        if (typeof raw === "string") remember(raw, token);
       const alternatives = [...known.keys()]
         .sort((a, b) => b.length - a.length)
-        .map((raw) => raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        .map((raw) => raw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
       const pattern = alternatives.length
         ? new RegExp(
-            `(?<![\\p{L}\\p{N}_])(?:${alternatives.join('|')})(?![\\p{L}\\p{N}_])`,
-            'giu',
+            `(?<![\\p{L}\\p{N}_])(?:${alternatives.join("|")})(?![\\p{L}\\p{N}_])`,
+            "giu",
           )
         : null;
       const protectedText = value
@@ -6294,12 +6309,12 @@ export class AiCoreService {
           if (!pattern || /^\[(?:name|reference) removed\]@/.test(part))
             return part;
           return part.replace(pattern, (match) => {
-            const tokens = known.get(match.toLocaleLowerCase('ru-RU'))!;
+            const tokens = known.get(match.toLocaleLowerCase("ru-RU"))!;
             // Ambiguous name fragments hide identity and cannot select a master.
-            return tokens.size === 1 ? [...tokens][0] : '[name removed]';
+            return tokens.size === 1 ? [...tokens][0] : "[name removed]";
           });
         })
-        .join('');
+        .join("");
       // Do not redact the random digits of an existing opaque mention as a phone.
       return protectedText
         .split(/(\[(?:name|reference) removed\]@[a-f0-9]{32}_\d+)/g)
@@ -6307,26 +6322,26 @@ export class AiCoreService {
           if (/^\[(?:name|reference) removed\]@/.test(part) || !part.trim())
             return part;
           return (
-            (part.match(/^\s*/)?.[0] ?? '') +
+            (part.match(/^\s*/)?.[0] ?? "") +
             this.redactLikelyProperNames(
               this.redactSensitiveText(part, (name) => alias(name, true))
                 .content,
               (name) => alias(name, true),
             ).content +
-            (part.match(/\s*$/)?.[0] ?? '')
+            (part.match(/\s*$/)?.[0] ?? "")
           );
         })
-        .join('');
+        .join("");
     };
     const walk = (
       value: unknown,
       catalog: boolean,
-      key = '',
+      key = "",
       staff = false,
     ): unknown => {
       if (Array.isArray(value))
         return value.map((item) => walk(item, catalog, key, staff));
-      if (value !== null && typeof value === 'object') {
+      if (value !== null && typeof value === "object") {
         const row = value as Record<string, unknown>;
         return Object.fromEntries(
           Object.entries(row).map(([field, item]) => [
@@ -6335,8 +6350,8 @@ export class AiCoreService {
               item,
               catalog,
               field,
-              (staff && field !== 'services') ||
-                (field === 'result' && row.name === 'catalog.staff.read') ||
+              (staff && field !== "services") ||
+                (field === "result" && row.name === "catalog.staff.read") ||
                 /^(staff|staff_scope|staff_summary|staff_changes|masters|employees|provider)$/.test(
                   field,
                 ),
@@ -6344,9 +6359,9 @@ export class AiCoreService {
           ]),
         );
       }
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         if (
-          ['service', 'services'].includes(key) &&
+          ["service", "services"].includes(key) &&
           acceptedBookingServices.has(value)
         ) {
           for (const [token, id] of acceptedBookingServiceAliases)
@@ -6360,7 +6375,7 @@ export class AiCoreService {
           /^(employee|staff_name|employee_name|provider_name|client_name|display_name)$/.test(
             key,
           ) ||
-          (staff && key === 'name')
+          (staff && key === "name")
         )
           return alias(value, true);
         if (
@@ -6368,13 +6383,13 @@ export class AiCoreService {
           /^(branch|appointment|client|customer)$/.test(key) ||
           /_ids?$|Id$|Ids$/.test(key) ||
           /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(value) ||
-          (['service', 'services'].includes(key) && /^\d+$/.test(value))
+          (["service", "services"].includes(key) && /^\d+$/.test(value))
         )
           return alias(value, false);
         return safeText(value);
       }
       if (
-        typeof value === 'number' &&
+        typeof value === "number" &&
         ((catalog && /^(id|ids)$/.test(key)) ||
           /_ids?$|Id$|Ids$/.test(key) ||
           /^(branch|appointment|client|customer|service|services)$/.test(key))
@@ -6385,8 +6400,8 @@ export class AiCoreService {
       }
       return value;
     };
-    const restore = (value: unknown, semantic: boolean, key = ''): unknown => {
-      if (typeof value === 'string') {
+    const restore = (value: unknown, semantic: boolean, key = ""): unknown => {
+      if (typeof value === "string") {
         const raw = references.get(value);
         // Prefer current public catalog meaning. A recovered accepted service may
         // precede that READ; retain its exact private ID only until the fresh bind.
@@ -6394,18 +6409,18 @@ export class AiCoreService {
         if (
           raw !== undefined &&
           semantic &&
-          ['service', 'services'].includes(key)
+          ["service", "services"].includes(key)
         )
           return (
             serviceLabels.get(String(raw)) ??
             acceptedBookingServiceAliases.get(value) ??
-            '[reference unavailable]'
+            "[reference unavailable]"
           );
         return raw ?? value;
       }
       if (Array.isArray(value))
         return value.map((item) => restore(item, semantic, key));
-      if (value !== null && typeof value === 'object')
+      if (value !== null && typeof value === "object")
         return Object.fromEntries(
           Object.entries(value).map(([key, item]) => [
             key,
@@ -6427,14 +6442,14 @@ export class AiCoreService {
       project: <T>(value: T, catalog = false): T => {
         if (catalog && Array.isArray(value)) {
           for (const entry of value as AiCoreToolResult[]) {
-            if (entry.name !== 'catalog.services.read') continue;
+            if (entry.name !== "catalog.services.read") continue;
             const rows = this.record(entry.result).services;
             if (!Array.isArray(rows)) continue;
             for (const item of rows) {
               const row = this.record(item);
               if (
-                typeof row.id === 'string' &&
-                typeof row.name === 'string' &&
+                typeof row.id === "string" &&
+                typeof row.name === "string" &&
                 rows.filter((other) => this.record(other).id === row.id)
                   .length === 1
               )
@@ -6449,36 +6464,36 @@ export class AiCoreService {
       present: (value: string) =>
         value.replace(
           /\[name removed\]@[a-f0-9]{32}_\d+/g,
-          (token) => nameReferences.get(token) ?? '[name removed]',
+          (token) => nameReferences.get(token) ?? "[name removed]",
         ),
     };
   }
 
   private redactSensitiveText(
     value: string,
-    replaceName: (name: string) => string = () => '[name removed]',
+    replaceName: (name: string) => string = () => "[name removed]",
   ): {
     content: string;
     redacted: boolean;
   } {
     let content = this.stripControlCharacters(value)
-      .replace(/\s+/g, ' ')
+      .replace(/\s+/g, " ")
       .trim();
     const original = content;
     content = content
-      .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b/gi, '[secret removed]')
+      .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b/gi, "[secret removed]")
       .replace(
         /\b(?:sk|rk|dk|api)[-_][A-Za-z0-9_-]{16,}\b/gi,
-        '[secret removed]',
+        "[secret removed]",
       )
-      .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, '[email removed]')
-      .replace(/https?:\/\/[^\s]+/gi, '[link removed]')
+      .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "[email removed]")
+      .replace(/https?:\/\/[^\s]+/gi, "[link removed]")
       .replace(/(?<!\d)\+?\d[\d\s().-]{7,}\d(?!\d)/g, (candidate) =>
         /^\d{4}-\d{2}-\d{2}$/.test(candidate.trim())
           ? candidate
-          : '[phone removed]',
+          : "[phone removed]",
       )
-      .replace(/\b\d(?:[ -]?\d){11,18}\b/g, '[number removed]')
+      .replace(/\b\d(?:[ -]?\d){11,18}\b/g, "[number removed]")
       // 🔴 Без флага `i`. С ним класс [А-ЯЁA-Z] матчил и строчные буквы, то есть
       // вырезалось ЛЮБОЕ следующее слово, а не имя: вопрос «Какие мастера
       // просели за месяц?» превращался в «Какие мастера [name removed] за
@@ -6500,13 +6515,13 @@ export class AiCoreService {
 
   private redactLikelyProperNames(
     value: string,
-    replaceName: (name: string) => string = () => '[name removed]',
+    replaceName: (name: string) => string = () => "[name removed]",
   ): {
     content: string;
     redacted: boolean;
   } {
     const pattern = /[А-ЯЁа-яёA-Za-z][А-ЯЁа-яёA-Za-z-]{1,40}/gu;
-    let content = '';
+    let content = "";
     let cursor = 0;
     let redacted = false;
     for (const match of value.matchAll(pattern)) {
@@ -6533,9 +6548,9 @@ export class AiCoreService {
     step: number,
     toolName: string,
   ): string {
-    return `ai-chat-${createHash('sha256')
+    return `ai-chat-${createHash("sha256")
       .update(`${tenantId}\0${userId}\0${requestId}\0${step}\0${toolName}`)
-      .digest('hex')}`;
+      .digest("hex")}`;
   }
 
   private toolSignature(
@@ -6547,32 +6562,32 @@ export class AiCoreService {
 
   private canonicalJson(value: unknown): string {
     if (Array.isArray(value)) {
-      return `[${value.map((item) => this.canonicalJson(item)).join(',')}]`;
+      return `[${value.map((item) => this.canonicalJson(item)).join(",")}]`;
     }
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && typeof value === "object") {
       return `{${Object.entries(value as Record<string, unknown>)
         .sort(([left], [right]) => left.localeCompare(right))
         .map(
           ([key, item]) => `${JSON.stringify(key)}:${this.canonicalJson(item)}`,
         )
-        .join(',')}}`;
+        .join(",")}}`;
     }
     return JSON.stringify(value);
   }
 
   private maxToolSteps(): number {
-    const raw = this.configService.get<string>('AI_CORE_MAX_TOOL_STEPS');
+    const raw = this.configService.get<string>("AI_CORE_MAX_TOOL_STEPS");
     const value = raw ? Number(raw) : 3;
     if (!Number.isInteger(value) || value < 1 || value > 3) {
-      throw new Error('ai_core_max_tool_steps_invalid');
+      throw new Error("ai_core_max_tool_steps_invalid");
     }
     return value;
   }
 
   private plainReply(value: string): string {
     return this.stripControlCharacters(value)
-      .replace(/<[^>]{0,200}>/g, '')
-      .replace(/[<>]/g, '')
+      .replace(/<[^>]{0,200}>/g, "")
+      .replace(/[<>]/g, "")
       .trim()
       .slice(0, 3_500);
   }
@@ -6580,15 +6595,15 @@ export class AiCoreService {
   private stripControlCharacters(value: string): string {
     return Array.from(value, (character) => {
       const code = character.charCodeAt(0);
-      return code < 32 || code === 127 ? ' ' : character;
-    }).join('');
+      return code < 32 || code === 127 ? " " : character;
+    }).join("");
   }
 
   private sanitizeToolResult(value: unknown, depth = 0): unknown {
     if (depth > 8) {
       return null;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return this.redactSensitiveText(value).content;
     }
     if (Array.isArray(value)) {
@@ -6596,23 +6611,23 @@ export class AiCoreService {
         .slice(0, 200)
         .map((item) => this.sanitizeToolResult(item, depth + 1));
     }
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && typeof value === "object") {
       const blockedKeys = new Set([
-        'booking_selection',
-        'client_email',
-        'client_name',
-        'client_phone',
-        'customer_email',
-        'customer_name',
-        'customer_phone',
-        'email',
-        'encrypted_note',
-        'notes',
-        'password',
-        'phone',
-        'provider_payload',
-        'secret',
-        'token',
+        "booking_selection",
+        "client_email",
+        "client_name",
+        "client_phone",
+        "customer_email",
+        "customer_name",
+        "customer_phone",
+        "email",
+        "encrypted_note",
+        "notes",
+        "password",
+        "phone",
+        "provider_payload",
+        "secret",
+        "token",
       ]);
       return Object.fromEntries(
         Object.entries(value as Record<string, unknown>)
@@ -6634,7 +6649,7 @@ export class AiCoreService {
   }
 
   private record(value: unknown): Record<string, unknown> {
-    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
       return {};
     }
     return value as Record<string, unknown>;
@@ -6642,12 +6657,12 @@ export class AiCoreService {
 
   private isClientAudience(
     user: AuthenticatedUser,
-    audience?: 'client' | 'staff' | 'owner' | null,
+    audience?: "client" | "staff" | "owner" | null,
   ): boolean {
-    if (audience === 'client') {
+    if (audience === "client") {
       return true;
     }
-    if (audience === 'staff' || audience === 'owner') {
+    if (audience === "staff" || audience === "owner") {
       return false;
     }
     return user.role === UserRole.CLIENT || user.role === UserRole.CUSTOMER;
@@ -6667,10 +6682,10 @@ export class AiCoreService {
    */
   private effectiveToolUser(
     user: AuthenticatedUser,
-    audience?: 'client' | 'staff' | 'owner' | null,
+    audience?: "client" | "staff" | "owner" | null,
   ): AuthenticatedUser {
     if (
-      audience !== 'staff' ||
+      audience !== "staff" ||
       user.role === UserRole.CLIENT ||
       user.role === UserRole.CUSTOMER ||
       STAFF_SURFACE_ROLES.has(user.role)
@@ -6681,27 +6696,27 @@ export class AiCoreService {
   }
 
   private isBusinessOnlyTool(toolName: string): boolean {
-    if (toolName === 'business.rules.read') return true;
+    if (toolName === "business.rules.read") return true;
     return (
-      toolName.startsWith('analytics.') ||
-      toolName.startsWith('expenses.') ||
-      toolName === 'catalog.service.price.update' ||
-      toolName === 'customers.count' ||
-      toolName === 'clients.retention.scan' ||
-      toolName === 'clients.dossier.read' ||
-      toolName === 'staff.schedule.read' ||
-      toolName === 'staff.schedule.own.read' ||
-      toolName === 'operations.journal.read' ||
-      toolName === 'staff.schedule.update' ||
-      toolName === 'loyalty.internal.adjust'
+      toolName.startsWith("analytics.") ||
+      toolName.startsWith("expenses.") ||
+      toolName === "catalog.service.price.update" ||
+      toolName === "customers.count" ||
+      toolName === "clients.retention.scan" ||
+      toolName === "clients.dossier.read" ||
+      toolName === "staff.schedule.read" ||
+      toolName === "staff.schedule.own.read" ||
+      toolName === "operations.journal.read" ||
+      toolName === "staff.schedule.update" ||
+      toolName === "loyalty.internal.adjust"
     );
   }
 
   private requireTenant(user: AuthenticatedUser): string {
     if (!user.tenantId) {
       throw new ForbiddenException({
-        message: 'Tenant membership is required.',
-        error: { code: 'tenant_required' },
+        message: "Tenant membership is required.",
+        error: { code: "tenant_required" },
       });
     }
     return this.tenantContext.assertTenantId(user.tenantId);
@@ -6709,23 +6724,23 @@ export class AiCoreService {
 
   private modelFailure(code: string): never {
     throw new ServiceUnavailableException({
-      message: 'MAYA could not safely complete this turn.',
+      message: "MAYA could not safely complete this turn.",
       error: { code },
     });
   }
 
   private safeErrorCode(error: unknown): string {
     if (error instanceof ConflictException) {
-      return 'ai_core_conflict';
+      return "ai_core_conflict";
     }
     if (error instanceof HttpException) {
       const response: unknown = error.getResponse();
       const record = this.record(response);
       const nested = this.record(record.error);
-      if (typeof nested.code === 'string' && nested.code.length <= 80) {
+      if (typeof nested.code === "string" && nested.code.length <= 80) {
         return nested.code;
       }
     }
-    return 'ai_core_turn_failed';
+    return "ai_core_turn_failed";
   }
 }
