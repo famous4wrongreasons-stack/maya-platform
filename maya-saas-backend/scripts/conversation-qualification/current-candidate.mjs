@@ -31,6 +31,7 @@ const RUNTIME_SOURCES = [
   'src/orchestration/c9.registry.ts',
   'src/conversation-intelligence/conversation-taxonomy.ts',
   'scripts/conversation-qualification/current-candidate-budget.mjs',
+  'scripts/conversation-qualification/candidate-broker-server.mjs',
   'scripts/conversation-qualification/current-candidate.mjs',
   'scripts/conversation-qualification/current-candidate-offline.mjs',
   'scripts/conversation-qualification/current-candidate-serializer.ts',

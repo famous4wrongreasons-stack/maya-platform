@@ -12,9 +12,13 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   CandidateBudgetGate,
   CANDIDATE_LIMITS,
+  CORE_DIAGNOSTIC_PROFILE,
+  CORE_DIAGNOSTIC_LIMITS,
+  CORE_DIAGNOSTIC_LIMITS_SHA256,
   candidateReservation,
 } from './current-candidate-budget.mjs';
 import {
@@ -322,6 +326,351 @@ test('oversized output is unresolved, with full reservation kept', async (t) => 
   await assert.rejects(f.gate.fetch(endpoint, request()), /attempt_unresolved/);
   assert.ok(f.gate.stats.reservedNanoUsd > 0);
   assert.equal(f.gate.stats.halted, true);
+});
+
+test('core profile is closed, frozen and restrictive; the existing offline defaults stay unchanged', (t) => {
+  const f = fixture(t),
+    g = fixture(t, { profile: CORE_DIAGNOSTIC_PROFILE });
+  assert.deepEqual(f.rows()[0].limits, CANDIDATE_LIMITS);
+  assert.equal(f.rows()[0].profile, undefined);
+  assert.equal(f.rows()[0].paidAuthorized, false);
+  assert.equal(CANDIDATE_LIMITS.dialogs, 24);
+  assert.equal(CANDIDATE_LIMITS.turns, 64);
+  assert.equal(CANDIDATE_LIMITS.attempts, 96);
+  assert.equal(CANDIDATE_LIMITS.spendNanoUsd, 12_000_000_000);
+  assert.equal(CANDIDATE_LIMITS.durationMs, 3_600_000);
+  assert.ok(Object.isFrozen(CORE_DIAGNOSTIC_LIMITS));
+  assert.equal(CORE_DIAGNOSTIC_LIMITS.dialogs, 3);
+  assert.equal(CORE_DIAGNOSTIC_LIMITS.turns, 5);
+  assert.equal(CORE_DIAGNOSTIC_LIMITS.attempts, 12);
+  assert.equal(CORE_DIAGNOSTIC_LIMITS.spendNanoUsd, 2_000_000_000);
+  assert.equal(CORE_DIAGNOSTIC_LIMITS.durationMs, 600_000);
+  assert.equal(CORE_DIAGNOSTIC_LIMITS.concurrency, 1);
+  for (const key of [
+    'requestBytes',
+    'outputPerAttempt',
+    'timeoutMs',
+    'intervalMs',
+  ])
+    assert.equal(CORE_DIAGNOSTIC_LIMITS[key], CANDIDATE_LIMITS[key]);
+  assert.equal(
+    CORE_DIAGNOSTIC_LIMITS_SHA256,
+    createHash('sha256')
+      .update(JSON.stringify(CORE_DIAGNOSTIC_LIMITS))
+      .digest('hex'),
+  );
+  assert.equal(g.rows()[0].profile, CORE_DIAGNOSTIC_PROFILE);
+  assert.equal(g.rows()[0].limitsSha256, CORE_DIAGNOSTIC_LIMITS_SHA256);
+  assert.equal(g.rows()[0].paidAuthorized, false);
+  for (const profile of [
+    null,
+    '',
+    'core-diagnostic-unknown/1',
+    {},
+    { ...CORE_DIAGNOSTIC_LIMITS },
+  ])
+    assert.throws(
+      () => candidateReservation(endpoint, request(), profile),
+      /profile_refused/,
+    );
+});
+
+test('core independently caps three dialogs and five turns', (t) => {
+  const f = fixture(t, { profile: CORE_DIAGNOSTIC_PROFILE });
+  f.gate.endTurn();
+  f.gate.dialog();
+  f.gate.dialog();
+  assert.throws(() => f.gate.dialog(), /dialog_limit/);
+  for (let i = 1; i < 5; i++) {
+    f.gate.turn();
+    f.gate.endTurn();
+  }
+  assert.throws(() => f.gate.turn(), /turn_limit/);
+  assert.equal(f.gate.stats.dialogs, 3);
+  assert.equal(f.gate.stats.turns, 5);
+});
+
+test('core reserves every retry, admits at most twelve full-size attempts and stays below two dollars', async (t) => {
+  const f = fixture(t, {
+    profile: CORE_DIAGNOSTIC_PROFILE,
+    transport: async () => new Response('{}', { status: 503 }),
+  });
+  const r = request(
+    'x'.repeat(
+      CORE_DIAGNOSTIC_LIMITS.requestBytes - Buffer.byteLength(request('').body),
+    ),
+  );
+  const reservation = candidateReservation(
+    endpoint,
+    r,
+    CORE_DIAGNOSTIC_PROFILE,
+  );
+  assert.equal(reservation.bytes, 98_304);
+  for (let i = 0; i < 12; i++)
+    assert.equal((await f.gate.fetch(endpoint, r)).status, 503);
+  assert.equal(f.gate.stats.attempts, 12);
+  assert.equal(f.gate.stats.inputTokens, 1_228_800);
+  assert.equal(f.gate.stats.outputTokens, 24_576);
+  assert.equal(f.gate.stats.reservedNanoUsd, 12 * reservation.nanoUsd);
+  assert.ok(f.gate.stats.reservedNanoUsd <= 2_000_000_000);
+  const rows = f.rows().filter((row) => row.event === 'reserved');
+  assert.equal(rows.length, 12);
+  for (let i = 1; i < rows.length; i++)
+    assert.equal(rows[i].at - rows[i - 1].at, 6000);
+  await assert.rejects(f.gate.fetch(endpoint, r), /attempt_limit/);
+  assert.equal(f.rows().filter((row) => row.event === 'reserved').length, 12);
+});
+
+test('core expiry uses ten minutes and aborts the complete pending response body', async (t) => {
+  const f = fixture(t, { profile: CORE_DIAGNOSTIC_PROFILE });
+  f.setClock(600_000);
+  await assert.rejects(f.gate.fetch(endpoint, request()), /wall_time_limit/);
+  assert.equal(f.calls(), 0);
+  let cancelled = false;
+  const g = fixture(t, {
+    profile: CORE_DIAGNOSTIC_PROFILE,
+    transport: async () =>
+      new Response(
+        new ReadableStream({
+          cancel() {
+            cancelled = true;
+          },
+        }),
+      ),
+  });
+  g.setClock(599_995);
+  await assert.rejects(g.gate.fetch(endpoint, request()), /attempt_unresolved/);
+  assert.equal(cancelled, true);
+  assert.equal(g.gate.stats.attempts, 1);
+  await assert.rejects(g.gate.fetch(endpoint, request()), /gate_halted/);
+});
+
+test('core remains single-flight through response-body consumption and halts after cancellation', async (t) => {
+  let started;
+  const ready = new Promise((resolve) => {
+    started = resolve;
+  });
+  const abort = new AbortController();
+  let calls = 0;
+  const f = fixture(t, {
+    profile: CORE_DIAGNOSTIC_PROFILE,
+    transport: async () => {
+      calls++;
+      return new Response(
+        new ReadableStream({
+          start() {
+            started();
+          },
+        }),
+      );
+    },
+  });
+  const pending = f.gate.fetch(endpoint, {
+    ...request(),
+    signal: abort.signal,
+  });
+  await ready;
+  await assert.rejects(f.gate.fetch(endpoint, request()), /concurrency_limit/);
+  abort.abort();
+  await assert.rejects(pending, /attempt_unresolved/);
+  assert.equal(calls, 1);
+  assert.equal(f.gate.stats.attempts, 1);
+  assert.equal(f.gate.stats.halted, true);
+});
+
+function admittedFixture(t, patch = {}) {
+  const dir = mkdtempSync(join(tmpdir(), 'maya-core-admitted-unit-'));
+  const settings = {
+    ledgerPath: join(dir, 'ledger.jsonl'),
+    candidateCommit: 'b'.repeat(40),
+    manifestSha256: 'a'.repeat(64),
+    mode: 'ADMITTED_MODEL_ONLY',
+    profile: CORE_DIAGNOSTIC_PROFILE,
+    assertAdmission: () => {},
+    transport: async () => new Response('{}'),
+    ...patch,
+  };
+  let gate;
+  t.after(() => {
+    gate?.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
+  return {
+    settings,
+    create() {
+      gate = new CandidateBudgetGate(settings);
+      return gate;
+    },
+    rows: () =>
+      readFileSync(settings.ledgerPath, 'utf8')
+        .trim()
+        .split('\n')
+        .map(JSON.parse),
+  };
+}
+
+test('admitted mode refuses missing/foreign admission and custom clocks before creating any ledger', async (t) => {
+  for (const patch of [
+    { profile: undefined },
+    { profile: 'foreign' },
+    { assertAdmission: undefined },
+    { now: Date.now },
+    { wait: async () => {} },
+    { mode: 'LIVE' },
+    { mode: 'OFFLINE_SYNTHETIC_ONLY' },
+    { manifestSha256: { toString: () => 'a'.repeat(64) } },
+    { assertAdmission: () => false },
+    { assertAdmission: async () => {} },
+    {
+      assertAdmission: async () => {
+        throw new Error('PRIVATE_ADMISSION');
+      },
+    },
+    {
+      assertAdmission: () => {
+        throw new Error('PRIVATE_ADMISSION');
+      },
+    },
+  ]) {
+    const f = admittedFixture(t, patch);
+    assert.throws(
+      () => f.create(),
+      (error) => {
+        assert.match(error.message, /^candidate_/);
+        assert.doesNotMatch(error.message, /PRIVATE_ADMISSION/);
+        return true;
+      },
+    );
+    assert.equal(fs.existsSync(f.settings.ledgerPath), false);
+  }
+  await Promise.resolve(); // Rejected async validators are refused and contained.
+});
+
+test('synthetic admitted callback receives exact immutable binding at construction and immediately before transport', async (t) => {
+  const bindings = [];
+  let calls = 0;
+  const f = admittedFixture(t, {
+    assertAdmission: (binding) => {
+      assert.ok(Object.isFrozen(binding));
+      bindings.push(binding);
+    },
+    transport: async (_url, init) => {
+      calls++;
+      assert.equal(bindings.length, 3);
+      assert.equal(f.rows().at(-1).event, 'reserved');
+      assert.equal(init.headers, undefined);
+      assert.equal(init.redirect, 'error');
+      return new Response('{}');
+    },
+  });
+  const gate = f.create();
+  gate.dialog();
+  gate.turn();
+  await gate.fetch(endpoint, request());
+  assert.equal(calls, 1);
+  assert.deepEqual(bindings[0], {
+    candidateCommit: f.settings.candidateCommit,
+    manifestSha256: f.settings.manifestSha256,
+    profile: CORE_DIAGNOSTIC_PROFILE,
+    limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256,
+  });
+  assert.ok(bindings.every((binding) => binding === bindings[0]));
+  assert.equal(f.rows()[0].mode, 'ADMITTED_MODEL_ONLY');
+  assert.equal(f.rows()[0].paidAuthorized, true); // Synthetic validator only, zero paid calls.
+  assert.doesNotMatch(
+    readFileSync(f.settings.ledgerPath, 'utf8'),
+    /PRIVATE_TEST/,
+  );
+});
+
+test('a synthetic permit for another candidate or manifest refuses before ledger creation', (t) => {
+  for (const field of ['candidateCommit', 'manifestSha256']) {
+    const expected =
+      field === 'candidateCommit' ? 'b'.repeat(40) : 'a'.repeat(64);
+    const f = admittedFixture(t, {
+      [field]: 'c'.repeat(expected.length),
+      assertAdmission: (binding) => {
+        assert.equal(binding[field], expected);
+      },
+    });
+    assert.throws(() => f.create(), /^Error: candidate_admission_refused$/);
+    assert.equal(fs.existsSync(f.settings.ledgerPath), false);
+  }
+});
+
+test('revoked synthetic admission stops before reservation and cannot reopen by restoring a callback flag', async (t) => {
+  let allowed = true,
+    calls = 0;
+  const f = admittedFixture(t, {
+    assertAdmission: () => {
+      if (!allowed) throw new Error('PRIVATE_REVOCATION');
+    },
+    transport: async () => {
+      calls++;
+      return new Response('{}');
+    },
+  });
+  const gate = f.create();
+  gate.dialog();
+  gate.turn();
+  allowed = false;
+  await assert.rejects(
+    gate.fetch(endpoint, request()),
+    /^Error: candidate_admission_refused$/,
+  );
+  assert.equal(calls, 0);
+  assert.equal(gate.stats.attempts, 0);
+  assert.equal(gate.stats.halted, true);
+  allowed = true;
+  await assert.rejects(gate.fetch(endpoint, request()), /gate_halted/);
+});
+
+test('revocation during durable reservation dispatches nothing, retains charge and cannot reuse a closed ledger', async (t) => {
+  let allowed = true,
+    calls = 0;
+  const f = admittedFixture(t, {
+    assertAdmission: () => {
+      if (!allowed) throw new Error('PRIVATE_REVOKED_AFTER_FSYNC');
+    },
+    transport: async () => {
+      calls++;
+      return new Response('{}');
+    },
+  });
+  const gate = f.create();
+  gate.dialog();
+  gate.turn();
+  const original = fs.writeSync;
+  const write = t.mock.method(fs, 'writeSync', (fd, buffer, offset, length) => {
+    const written = original(fd, buffer, offset, length);
+    if (
+      buffer
+        .toString('utf8', offset, offset + length)
+        .includes('"event":"reserved"')
+    )
+      allowed = false;
+    return written;
+  });
+  try {
+    await assert.rejects(
+      gate.fetch(endpoint, request()),
+      /^Error: candidate_attempt_unresolved$/,
+    );
+  } finally {
+    write.mock.restore();
+  }
+  assert.equal(calls, 0);
+  assert.equal(gate.stats.attempts, 1);
+  assert.ok(gate.stats.reservedNanoUsd > 0);
+  assert.equal(gate.stats.halted, true);
+  assert.equal(f.rows().at(-1).event, 'halted_after_attempt');
+  assert.doesNotMatch(
+    readFileSync(f.settings.ledgerPath, 'utf8'),
+    /PRIVATE_REVOKED/,
+  );
+  gate.close();
+  allowed = true;
+  assert.throws(() => new CandidateBudgetGate(f.settings), /EEXIST/);
 });
 test('frozen manifest binds all 24 development variants, source proofs and pending HTTP status', () => {
   const m = freezeCurrentCandidate(backend, 'b'.repeat(40));

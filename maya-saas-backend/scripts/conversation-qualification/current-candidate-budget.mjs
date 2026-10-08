@@ -1,7 +1,8 @@
-/** Finite OFFLINE qualification gate. No credentials, default transport, live
- * mode, old permit, old ledger reuse or resume. A future broker admission is
- * separate work; this module does not authorize a paid request. */
+/** Finite qualification budget. No credentials, default transport, permit
+ * issuance, old ledger reuse or resume. Admitted transport requires an external
+ * server-owned fresh permit validator; the budget itself grants no authority. */
 import fs, { openSync, fsyncSync, closeSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
@@ -23,8 +24,30 @@ export const CANDIDATE_LIMITS = Object.freeze({
   outputNanoUsdPerToken: 3960,
   pricingStatus: 'HISTORICAL_2026_10_05_NOT_CURRENT_VERIFIED',
 });
+export const CORE_DIAGNOSTIC_PROFILE = 'core-diagnostic-20261008/1';
+export const CORE_DIAGNOSTIC_LIMITS = Object.freeze({
+  ...CANDIDATE_LIMITS,
+  dialogs: 3,
+  turns: 5,
+  attempts: 12,
+  inputTokens: 1_228_800,
+  outputTokens: 24_576,
+  spendNanoUsd: 2_000_000_000,
+  durationMs: 600_000,
+  concurrency: 1,
+  pricingStatus: 'CURRENT_PRICE_EVIDENCE_REQUIRED_FOR_ADMISSION',
+});
+export const CORE_DIAGNOSTIC_LIMITS_SHA256 = createHash('sha256')
+  .update(JSON.stringify(CORE_DIAGNOSTIC_LIMITS))
+  .digest('hex');
+function profileLimits(profile) {
+  if (profile === undefined) return CANDIDATE_LIMITS;
+  if (profile === CORE_DIAGNOSTIC_PROFILE) return CORE_DIAGNOSTIC_LIMITS;
+  throw new Error('candidate_profile_refused');
+}
 const endpoint = 'https://api.deepseek.com/chat/completions';
-export function candidateReservation(url, init) {
+export function candidateReservation(url, init, profile) {
+  const limits = profileLimits(profile);
   if (
     ![endpoint, 'https://api.deepseek.com/v1/chat/completions'].includes(
       String(url),
@@ -34,8 +57,7 @@ export function candidateReservation(url, init) {
   if (init?.method !== 'POST' || typeof init.body !== 'string')
     throw new Error('candidate_request_shape');
   const bytes = Buffer.byteLength(init.body, 'utf8');
-  if (bytes > CANDIDATE_LIMITS.requestBytes)
-    throw new Error('candidate_body_limit');
+  if (bytes > limits.requestBytes) throw new Error('candidate_body_limit');
   const body = JSON.parse(init.body);
   if (
     !body ||
@@ -53,13 +75,13 @@ export function candidateReservation(url, init) {
           'response_format',
         ].includes(k),
     ) ||
-    body.model !== CANDIDATE_LIMITS.model ||
+    body.model !== limits.model ||
     body.stream !== false ||
     body.thinking?.type !== 'disabled' ||
     Object.keys(body.thinking).length !== 1 ||
     !Number.isSafeInteger(body.max_tokens) ||
     body.max_tokens < 1 ||
-    body.max_tokens > CANDIDATE_LIMITS.outputPerAttempt ||
+    body.max_tokens > limits.outputPerAttempt ||
     !Array.isArray(body.messages) ||
     !body.messages.length ||
     body.messages.length > 64 ||
@@ -89,8 +111,8 @@ export function candidateReservation(url, init) {
     input,
     output,
     nanoUsd:
-      input * CANDIDATE_LIMITS.inputNanoUsdPerToken +
-      output * CANDIDATE_LIMITS.outputNanoUsdPerToken,
+      input * limits.inputNanoUsdPerToken +
+      output * limits.outputNanoUsdPerToken,
   });
 }
 
@@ -112,28 +134,61 @@ export class CandidateBudgetGate {
   #input = 0;
   #output = 0;
   #spend = 0;
+  #profile;
+  #limits;
+  #admission;
+  #binding;
   constructor({
     ledgerPath,
     manifestSha256,
     candidateCommit,
     mode,
+    profile,
     transport,
-    now = Date.now,
+    assertAdmission,
+    now,
     // Real timers may wake one clock tick early. The margin is waiting only;
     // the absolute six-second admission check below remains authoritative.
-    wait = (ms, signal) => delay(ms + 25, undefined, { signal }),
+    wait,
   }) {
-    if (mode !== 'OFFLINE_SYNTHETIC_ONLY' || typeof transport !== 'function')
-      throw new Error('candidate_offline_transport_required');
     if (
+      !['OFFLINE_SYNTHETIC_ONLY', 'ADMITTED_MODEL_ONLY'].includes(mode) ||
+      typeof transport !== 'function'
+    )
+      throw new Error('candidate_offline_transport_required');
+    this.#profile = profile;
+    this.#limits = profileLimits(profile);
+    if (
+      typeof manifestSha256 !== 'string' ||
+      typeof candidateCommit !== 'string' ||
       !/^[a-f0-9]{64}$/.test(manifestSha256) ||
       !/^[a-f0-9]{40}$/.test(candidateCommit)
     )
       throw new Error('candidate_binding_required');
+    if (mode === 'ADMITTED_MODEL_ONLY') {
+      if (
+        profile !== CORE_DIAGNOSTIC_PROFILE ||
+        typeof assertAdmission !== 'function' ||
+        now !== undefined ||
+        wait !== undefined
+      )
+        throw new Error('candidate_admitted_transport_required');
+      this.#binding = Object.freeze({
+        candidateCommit,
+        manifestSha256,
+        profile,
+        limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256,
+      });
+      this.#admission = assertAdmission;
+      this.#checkAdmission();
+    } else if (assertAdmission !== undefined) {
+      throw new Error('candidate_admission_mode_refused');
+    }
     this.#transport = transport;
-    this.#now = now;
-    this.#wait = wait;
-    this.#started = now();
+    this.#now = now ?? Date.now;
+    this.#wait =
+      wait ?? ((ms, signal) => delay(ms + 25, undefined, { signal }));
+    this.#started = this.#now();
     this.#lastCheck = this.#started;
     if (!Number.isSafeInteger(this.#started) || this.#started < 0)
       throw new Error('candidate_clock_invalid');
@@ -146,9 +201,12 @@ export class CandidateBudgetGate {
         mode,
         manifestSha256,
         candidateCommit,
-        limits: CANDIDATE_LIMITS,
+        ...(profile === undefined
+          ? {}
+          : { profile, limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256 }),
+        limits: this.#limits,
         startedAt: this.#started,
-        paidAuthorized: false,
+        paidAuthorized: mode === 'ADMITTED_MODEL_ONLY',
       });
       const fd = openSync(dirname(ledgerPath), 'r');
       try {
@@ -172,6 +230,22 @@ export class CandidateBudgetGate {
       reservedNanoUsd: this.#spend,
       halted: this.#halted,
     });
+  }
+  #checkAdmission() {
+    if (!this.#admission) return;
+    try {
+      const result = this.#admission(this.#binding);
+      if (result !== undefined) {
+        if (result && typeof result.then === 'function')
+          void Promise.resolve(result).catch(() => {});
+        throw new Error('candidate_admission_not_synchronous');
+      }
+    } catch {
+      // A validator may encounter sensitive paths or provider metadata. Neither
+      // its exception nor a returned permit is exposed or written to the ledger.
+      this.#halted = true;
+      throw new Error('candidate_admission_refused');
+    }
   }
   #append(row) {
     try {
@@ -208,7 +282,7 @@ export class CandidateBudgetGate {
       throw new Error('candidate_clock_invalid');
     }
     this.#lastCheck = time;
-    if (time - this.#started >= CANDIDATE_LIMITS.durationMs)
+    if (time - this.#started >= this.#limits.durationMs)
       throw new Error('candidate_wall_time_limit');
     return time;
   }
@@ -216,7 +290,7 @@ export class CandidateBudgetGate {
     this.#check();
     if (this.#busy || this.#activeTurn)
       throw new Error('candidate_turn_active');
-    if (this.#dialogs >= CANDIDATE_LIMITS.dialogs)
+    if (this.#dialogs >= this.#limits.dialogs)
       throw new Error('candidate_dialog_limit');
     this.#append({ event: 'dialog', number: this.#dialogs + 1 });
     this.#dialogs++;
@@ -225,7 +299,7 @@ export class CandidateBudgetGate {
     this.#check();
     if (!this.#dialogs || this.#busy || this.#activeTurn)
       throw new Error('candidate_turn_scope');
-    if (this.#turns >= CANDIDATE_LIMITS.turns)
+    if (this.#turns >= this.#limits.turns)
       throw new Error('candidate_turn_limit');
     this.#append({ event: 'turn', number: this.#turns + 1 });
     this.#turns++;
@@ -247,7 +321,7 @@ export class CandidateBudgetGate {
     this.#check();
     if (this.#busy) throw new Error('candidate_concurrency_limit');
     if (!this.#activeTurn) throw new Error('candidate_turn_scope');
-    const reservation = candidateReservation(destination, init);
+    const reservation = candidateReservation(destination, init, this.#profile);
     init.signal?.throwIfAborted();
     this.#busy = true;
     let timer,
@@ -260,24 +334,25 @@ export class CandidateBudgetGate {
         await this.#wait(
           Math.max(
             0,
-            CANDIDATE_LIMITS.intervalMs - (this.#check() - this.#lastDispatch),
+            this.#limits.intervalMs - (this.#check() - this.#lastDispatch),
           ),
           init.signal,
         );
       init.signal?.throwIfAborted();
+      this.#checkAdmission();
       const at = this.#check();
       if (
         this.#lastDispatch !== null &&
-        at - this.#lastDispatch < CANDIDATE_LIMITS.intervalMs
+        at - this.#lastDispatch < this.#limits.intervalMs
       )
         throw new Error('candidate_spacing_not_elapsed');
-      if (this.#attempts >= CANDIDATE_LIMITS.attempts)
+      if (this.#attempts >= this.#limits.attempts)
         throw new Error('candidate_attempt_limit');
-      if (this.#input + reservation.input > CANDIDATE_LIMITS.inputTokens)
+      if (this.#input + reservation.input > this.#limits.inputTokens)
         throw new Error('candidate_input_token_limit');
-      if (this.#output + reservation.output > CANDIDATE_LIMITS.outputTokens)
+      if (this.#output + reservation.output > this.#limits.outputTokens)
         throw new Error('candidate_output_token_limit');
-      if (this.#spend + reservation.nanoUsd > CANDIDATE_LIMITS.spendNanoUsd)
+      if (this.#spend + reservation.nanoUsd > this.#limits.spendNanoUsd)
         throw new Error('candidate_spend_limit');
       this.#append({
         event: 'reserved',
@@ -304,15 +379,18 @@ export class CandidateBudgetGate {
         timer = setTimeout(
           onAbort,
           Math.min(
-            CANDIDATE_LIMITS.timeoutMs,
-            CANDIDATE_LIMITS.durationMs - (at - this.#started),
+            this.#limits.timeoutMs,
+            this.#limits.durationMs - (at - this.#started),
           ),
         );
         if (init.signal?.aborted) onAbort();
       });
       const perform = async () => {
         controller.signal.throwIfAborted();
-        // Strip caller headers entirely: this offline gate has no credential use.
+        this.#checkAdmission();
+        this.#check();
+        // Strip caller headers entirely; any credential remains solely within
+        // the separately admitted broker's injected transport, never this gate.
         const response = await this.#transport(destination, {
           method: 'POST',
           body: init.body,
@@ -335,7 +413,7 @@ export class CandidateBudgetGate {
             const chunk = await reader.read();
             if (chunk.done) break;
             bytes += chunk.value.byteLength;
-            if (bytes > CANDIDATE_LIMITS.responseBytes)
+            if (bytes > this.#limits.responseBytes)
               throw new Error('candidate_response_limit');
             chunks.push(chunk.value);
           }

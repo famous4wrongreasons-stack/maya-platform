@@ -1,0 +1,13 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": "widgets-live/core-conversation-http\\.probe-spec\\.ts$",
+  "transform": {
+    "^.+\\.mjs$": "<rootDir>/widgets-live/support/core-conversation-mjs-transform.cjs",
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "globalSetup": "<rootDir>/widgets-live/support/global-setup.ts",
+  "setupFiles": ["<rootDir>/widgets-live/support/setup-environment.ts"],
+  "testTimeout": 660000
+}
