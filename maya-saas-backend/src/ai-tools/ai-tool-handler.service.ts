@@ -1744,6 +1744,8 @@ export class AiToolHandlerService {
             typeof args.local_staff_id === 'string'
               ? args.local_staff_id
               : undefined,
+          sourceHash:
+            typeof args.source_hash === 'string' ? args.source_hash : undefined,
           localDate: this.requiredString(args.date),
           slots: this.scheduleSlots(args.slots),
           expectedProviderRevision: this.requiredString(args.current_revision),

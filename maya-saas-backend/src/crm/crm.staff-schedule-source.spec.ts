@@ -210,6 +210,22 @@ describe('staff schedule exact source fence', () => {
     expect(f.adapter.getStaffScheduleDay).not.toHaveBeenCalled();
   });
 
+  it('refuses a prior approval source before reading the replacement company', async () => {
+    const f = fixture();
+    await f.run(async () => {
+      const source = await f.source();
+      f.integration.settingsJson.companyId = 43;
+      f.integration.settingsJson.branchBinding.companyId = 43;
+      await expect(
+        f.gateway.readStaffDay({
+          ...f.input,
+          sourceIdentityHash: source.sourceHash,
+        }),
+      ).rejects.toThrow();
+      expect(f.adapter.getStaffScheduleDay).not.toHaveBeenCalled();
+    });
+  });
+
   it('refuses source drift during provider observation', async () => {
     const f = fixture();
     await f.run(async () => {

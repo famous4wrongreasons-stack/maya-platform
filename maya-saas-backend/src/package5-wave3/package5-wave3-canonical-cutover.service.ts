@@ -76,6 +76,7 @@ export class Package5Wave3CanonicalCutoverService {
       externalStaffId: string;
       /** Original local identity from the immutable server-owned approval. */
       localStaffId?: string;
+      sourceHash?: string;
       localDate: string;
       expectedProviderRevision: string;
       slots: StaffDaySlot[];
@@ -123,6 +124,9 @@ export class Package5Wave3CanonicalCutoverService {
         localDate,
         expectedProviderRevision: input.expectedProviderRevision,
         slots: commandSlots,
+        ...(input.sourceHash !== undefined
+          ? { sourceIdentityHash: input.sourceHash }
+          : {}),
       },
       idempotencyKey,
     );

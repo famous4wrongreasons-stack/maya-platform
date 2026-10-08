@@ -72,6 +72,7 @@ export type Package5Wave3Command =
   | {
       operation: 'update_staff_schedule_day';
       sourceIntentRef: string;
+      sourceIdentityHash?: string;
       staffId: string;
       localDate: string;
       expectedProviderRevision: string;
@@ -127,6 +128,7 @@ export interface Package5Wave3ProviderGateway {
     branchId: string;
     externalStaffId: string;
     localDate: string;
+    sourceIdentityHash?: string;
   }): Promise<{
     revision: string;
     stateHash: string;
@@ -606,6 +608,7 @@ export class Package5Wave3ShadowService {
         branchId: staff.branchId,
         externalStaffId: link.externalId,
         localDate: command.localDate,
+        sourceIdentityHash: command.sourceIdentityHash,
       });
       if (current.revision !== command.expectedProviderRevision)
         throw new ConflictException('Provider staff day revision is stale');

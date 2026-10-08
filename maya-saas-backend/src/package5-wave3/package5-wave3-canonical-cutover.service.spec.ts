@@ -68,6 +68,7 @@ describe('Package5Wave3CanonicalCutoverService', () => {
     const command: Package5Wave3Command = {
       operation: 'update_staff_schedule_day',
       sourceIntentRef: 'schedule-replay-one',
+      sourceIdentityHash: 'b'.repeat(64),
       staffId: 'staff-1',
       localDate: '2026-10-10',
       expectedProviderRevision: 'a'.repeat(64),
@@ -111,6 +112,7 @@ describe('Package5Wave3CanonicalCutoverService', () => {
       localDate: command.localDate,
       expectedProviderRevision: command.expectedProviderRevision,
       slots: command.slots,
+      sourceIdentityHash: command.sourceIdentityHash,
     };
     const kernel = {
       readTrustedNormalizedInput: jest.fn().mockResolvedValue({
@@ -160,6 +162,7 @@ describe('Package5Wave3CanonicalCutoverService', () => {
     const input = {
       externalStaffId: 'provider-staff-1',
       localStaffId: command.staffId,
+      sourceHash: command.sourceIdentityHash,
       localDate: command.localDate,
       expectedProviderRevision: command.expectedProviderRevision,
       slots,
@@ -185,6 +188,13 @@ describe('Package5Wave3CanonicalCutoverService', () => {
       run,
     };
   };
+
+  it('rejects changed original source material during completed replay without consulting CRM', async () => {
+    const f = scheduleReplay([]);
+    f.input.sourceHash = 'c'.repeat(64);
+    await expect(f.run()).rejects.toThrow('changed material');
+    expect(f.provider.readStaffDay).not.toHaveBeenCalled();
+  });
 
   it.each([
     { slots: [] as StaffDaySlot[], normalized: [] as StaffDaySlot[] },
