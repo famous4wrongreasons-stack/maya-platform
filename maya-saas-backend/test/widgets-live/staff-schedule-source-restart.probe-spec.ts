@@ -809,7 +809,7 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
           pause.submission.widget_id,
         );
         for (const confirmed of [offReceipt, breakReceipt]) {
-          assert.equal(confirmed.outcome, 'CONFIRMED');
+          assert.equal(confirmed.outcome, 'ACCEPTED');
           assert.ok(confirmed.actionReceiptRef);
         }
 
@@ -969,7 +969,7 @@ describe('native schedule source [full-scope-existing-authority] [synthetic tran
         },
       });
       assert.equal(receipts.length, 1);
-      assert.equal(receipts[0].outcome, 'SUBMITTED');
+      assert.equal(receipts[0].outcome, 'ACCEPTED');
       assert.equal(receipts[0].actionReceiptRef, null);
       const originalResume = await resumeUnknown(
         s,
