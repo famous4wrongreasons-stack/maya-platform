@@ -1,0 +1,105 @@
+{
+  "contract": "maya.core-followup-dataset-freeze/1",
+  "dataset": "maya-saas-backend/datasets/conversation-intelligence/core-followup-frozen-20261008.json",
+  "datasetSha256": "926578b841249c06d8e63ae117c6e651aefca7e39565b3e2fb73bf086cbb817c",
+  "archiveSha256": "c601c175c00b0f4e91186b486c0b8bb42b4fd95cc425d6ddab47836bac1420db",
+  "validationSourceCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e",
+  "runtimeReferenceCommit": "746e0ae4e1efda0abf7918cbb63a5fe4d46861b9",
+  "executionCandidate": null,
+  "dialogs": 12,
+  "userTurns": 24,
+  "priorityCaseIds": [
+    "followup-client-carry-over",
+    "followup-client-entity-correction",
+    "followup-admin-typo-ambiguous-period",
+    "followup-owner-topic-switch",
+    "followup-owner-compound",
+    "followup-admin-general-chat"
+  ],
+  "priorityTurns": 13,
+  "sourceFiles": [
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sha256": "afe3c2143cd4bacd62e52a4acff54205bcf341b6c8d7304a06db9f9ac8b331cc",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sha256": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts",
+      "sha256": "ec61d1768ae49e00bdb0ecd45e0cd1d19a3264df2b71257b916dfac99d6c6bb9",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/current-candidate-http.probe-spec.ts",
+      "sha256": "1d955767a37add1c06114e7866dd9d76ca853afc8f00b8211fa2d5f9edbd9a4a",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+      "sha256": "35a45711b2a50df2c59469cd83a651e7094fc22a0eb2fbf38f228f64d43604b6",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+      "sha256": "bcb12a0184246ddf8263f2229e4e3e074996388159bba132ca9366ca07935c9f",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+      "sha256": "881a29f503e3f69b47f372e1bbc4c20c76c4a4c96c2acf18b8cb1b2170a4f092",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts",
+      "sha256": "4bd4812d96e9b66942b5789a83348a4d37adedf975ec35bc9351511565b811d5",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+      "sha256": "1f20ff3a618d8fa8aaa6a4c27406f4c1c57f38d31d529c8a9a93d1183d10c4ee",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/branch-booking-selector.probe-spec.ts",
+      "sha256": "4f884da6d3af5459414aba52d4a98bcb2082f555159d81a95f290e384fc88041",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/lifecycle-owner-react.probe-spec.ts",
+      "sha256": "e03436aecf4d7525e32b3aad3e6dffcc2bfb8d5565c4226b12f32daec384e4db",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/replay.mjs",
+      "sha256": "2743112c4ab780cb4ce85f6a51813c7364b4c10c7badcdc71e54c2dbf92c551b",
+      "verifiedAgainstCommit": "e9a6d803b7af14da5110938f8db7ef4a8face53e"
+    }
+  ],
+  "validation": {
+    "textsIdenticalToArchive": true,
+    "turnHashesVerified": 24,
+    "sourceFilesAndGitBlobsVerified": 13,
+    "sourceCaseHashesAndSelectorsIndependentlyReviewed": 14,
+    "reviewer": "/root/language_prerequisites",
+    "testSuiteRuns": 0,
+    "servicesStarted": 0,
+    "externalConnections": 0,
+    "newCorpusRowsGenerated": 0
+  },
+  "admission": {
+    "profileReady": false,
+    "paidAuthorized": false,
+    "currentThreeDialogFiveTurnProfileUnchanged": true,
+    "fixtureBinding": "pending finite per-case mapping; no blanket ordinary variant; unsupported ingress stays unsupported",
+    "separateUnknownAndRestartControls": true
+  }
+}

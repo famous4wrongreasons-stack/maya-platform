@@ -1,5 +1,9 @@
 # Real-model prerequisites after the branch source correction
 
+Latest live-code/setup distinction: [concrete next-action packet, 2026-10-08](MAYA-REAL-MODEL-NEXT-ACTION-20261008.md).
+The discovery/preflight observations below are historical; the separate core live
+broker was subsequently implemented at `746e0ae4`, but remote setup is still pending.
+
 **Status: discovery and local dry proof only. No live broker, credential admission or paid run is authorized or executed.** The historical full local candidate is `832c86c6e2a064636aca39bbbb5546c7d61e96d2`; the [full keyless checkpoint](MAYA-CURRENT-CANDIDATE-FULL-KEYLESS-CHECKPOINT-20261007.md) records all 24 dialogs / 33 turns and 65 source preflights through a separate broker after the branch correction. The later [metadata checkpoint](MAYA-PROFILE-METADATA-CHECKPOINT-20261007.md) tests an Occupancy subset at `2aea7291`; neither result is a full-corpus run of subsequent code. The frozen full corpus remains 24 authored development dialogs / 33 user turns / eight families with SHA `6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996`, with zero independent holdout families.
 
 The subsequent [metadata-only executable checkpoint](MAYA-PROFILE-METADATA-CHECKPOINT-20261007.md) at `2aea7291` adds `--preflight --profile-metadata`, actual local installed-binary evidence and exact machine-readable missing setup fields. It does not implement or admit the live broker. Its affected Occupancy subset (3 dialogs / 4 turns) passes with an explicit synthetic branch pair; the full `832c86c6` corpus remains historical rather than being relabeled as this newer candidate.
