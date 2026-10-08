@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       212 passed, 212 total
+Snapshots:   0 total
+Time:        0.874 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-topic-return-20261008/first-fix-unit.json

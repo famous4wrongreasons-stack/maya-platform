@@ -1,0 +1,36 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › current tenant-owned branch preferences in Client booking › returns to the same booking after a non-data question and changes only the date
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 10
+    + Received  +  1
+
+    - Array [
+    -   Object {
+    -     "branch_id": "branch-a",
+    -     "date": "2026-10-12",
+    -     "service_ids": Array [
+    -       "service-a",
+    -     ],
+    -     "staff_id": "staff-a",
+    -   },
+    - ]
+    + Array []
+
+      207 |       expect(f.runtime.execute).not.toHaveBeenCalled();
+      208 |       await f.turn({ date_or_period: '2026-10-12' });
+    > 209 |       expect(f.availabilityArgs()).toEqual([{
+          |                                    ^
+      210 |         date: '2026-10-12', branch_id: 'branch-a', staff_id: 'staff-a', service_ids: ['service-a'],
+      211 |       }]);
+      212 |       expect(f.runtime.execute.mock.calls.every((call) => !call[1].startsWith('appointments.'))).toBe(true);
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:209:36)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 206 skipped, 207 total
+Snapshots:   0 total
+Time:        0.7 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-topic-return-20261008/baseline-unit.json

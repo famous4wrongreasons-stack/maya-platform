@@ -1,0 +1,11 @@
+{
+  "status": "completed",
+  "exitCode": 255,
+  "seconds": 8.02,
+  "collectorSha256": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+  "target": "botadmin@api.mayaos.ru",
+  "remoteCommand": "python3 - --collect",
+  "stdoutBytes": 0,
+  "stderrBytes": 129,
+  "evidenceDirectory": "/tmp/maya-diagnostic-inventory-20261007"
+}

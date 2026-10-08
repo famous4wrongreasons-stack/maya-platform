@@ -1,0 +1,49 @@
+{
+  "contract": "maya.authorized-metadata-inventory-attempt/1",
+  "observedAt": "2026-10-08T08:24:07.664186+00:00",
+  "outcome": "SSH_TRANSPORT_FAILED_NO_INVENTORY",
+  "automaticReview": "PROCESS_CREATION_ALLOWED",
+  "retryCountAfterOriginalRejection": 1,
+  "exactArchivedCommandReused": true,
+  "originalRequestSha256": "a9717018c57646bf24e14b925295ac8cc907fb99c50f79b46a29f481ff1a2d97",
+  "exactCommandSha256": "afaef95e9e08ffea862f6f3d3cc9db982f3d5d667c84f7c8e62f617f24aeb53d",
+  "collectorSha256": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+  "authorizationEvidence": {
+    "questionMessageId": "Sentinel_2c213319dd7c8191947adccce5dce73d",
+    "questionTime": "2026-10-08 06:08 UTC",
+    "userMessageId": "Sentinel_9ec906b470c4819187f6b604c2dcdabc",
+    "userTime": "2026-10-08 08:19 UTC",
+    "answer": "разрешаю",
+    "scope": "exact previously rejected read-only inventory only"
+  },
+  "transport": {
+    "status": "completed",
+    "exitCode": 255,
+    "seconds": 8.02,
+    "collectorSha256": "1596be6da3d38772b772f8f81bcde4dfb50c33146018860dd494b74ea07e5ace",
+    "target": "botadmin@api.mayaos.ru",
+    "remoteCommand": "python3 - --collect",
+    "stdoutBytes": 0,
+    "stderrBytes": 129,
+    "evidenceDirectory": "/tmp/maya-diagnostic-inventory-20261007"
+  },
+  "collectorOutputObserved": false,
+  "inventoryEstablished": false,
+  "remoteExecution": "NOT_OBSERVED_TARGET_SSH_BANNER_TIMEOUT",
+  "furtherRetryOrWorkaround": false,
+  "runtimeOrDocumentationEdits": false,
+  "files": {
+    "transport-receipt.json": {
+      "bytes": 343,
+      "sha256": "a5af2aaca2e37a15c7afb9742da78f46a0f51bbbc21e44469852969aac8e9e16"
+    },
+    "ssh-stderr.txt": {
+      "bytes": 129,
+      "sha256": "dbcdbf46c97a84461faae0b51b15a0d34ad35cb467896faa28856e75b9f93056"
+    },
+    "stdout.json": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}
