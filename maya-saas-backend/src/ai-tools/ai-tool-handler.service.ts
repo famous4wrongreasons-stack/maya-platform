@@ -1247,54 +1247,14 @@ export class AiToolHandlerService {
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
   ) {
-    const rows = await this.prisma.inboxItem.findMany({
-      where: {
-        tenantId: principal.tenantId,
-        userId: principal.userId,
-        type: 'maya_task',
-        deletedAt: null,
-        archivedAt: null,
+    return this.requireCanonicalWave1().readOwnTasks(
+      principal.tenantId,
+      principal.userId,
+      {
+        status: this.requiredString(args.status),
+        period: this.requiredString(args.period),
       },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    });
-    const timezone = await this.reportingTimezone(principal.tenantId).catch(
-      () => 'UTC',
     );
-    const today = this.localDate(new Date(), timezone);
-    const statusFilter = this.requiredString(args.status);
-    const periodFilter = this.requiredString(args.period);
-    const tasks = rows
-      .map((row) => {
-        const payload = this.record(row.payloadJson);
-        const status =
-          typeof payload.status === 'string' ? payload.status : 'active';
-        const dueDate =
-          typeof payload.due_date === 'string' ? payload.due_date : null;
-        return {
-          id: row.id,
-          task: row.bodyText,
-          status,
-          due_date: dueDate,
-          created_at: row.createdAt.toISOString(),
-        };
-      })
-      .filter((task) => statusFilter === 'all' || task.status === 'active')
-      .filter((task) => {
-        if (periodFilter === 'today') return task.due_date === today;
-        if (periodFilter === 'overdue') {
-          return task.due_date !== null && task.due_date < today;
-        }
-        return true;
-      });
-
-    return {
-      tasks,
-      count: tasks.length,
-      scope: 'authenticated_user',
-      timezone,
-      as_of_date: today,
-    };
   }
 
   private async createTask(

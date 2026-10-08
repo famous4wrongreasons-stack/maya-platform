@@ -616,27 +616,29 @@ describe('AiTool extended capabilities', () => {
   });
 
   it('lists only the authenticated user persistent tasks', async () => {
+    const readOwnTasks = jest.fn().mockResolvedValue({
+      contract: 'maya.own-operational-tasks/1',
+      source: 'OperationalWorkItem',
+      scope: 'authenticated_user',
+      count: 1,
+      tasks: [
+        {
+          id: 'task-row-a',
+          canonical: true,
+          task: 'Проверить отмены',
+          status: 'active',
+          due_at: '2026-08-15T12:00:00.000Z',
+          due_date: '2026-08-15',
+        },
+      ],
+      historical_tasks: [],
+      historical_count: 0,
+      truncated: false,
+    });
     const service = createService({
-      prisma: {
-        tenant: {
-          findUnique: jest.fn().mockResolvedValue({
-            defaultTimezone: 'UTC',
-          }),
-        },
-        inboxItem: {
-          findMany: jest.fn().mockResolvedValue([
-            {
-              id: 'task-row-a',
-              bodyText: 'Проверить отмены',
-              payloadJson: {
-                status: 'active',
-                due_date: '2026-08-15',
-              },
-              createdAt: new Date('2026-08-14T08:00:00.000Z'),
-            },
-          ]),
-        },
-      } as unknown as PrismaService,
+      canonicalWave1: {
+        readOwnTasks,
+      } as unknown as Package5Wave1CanonicalCutoverService,
     });
 
     const result = await service.execute(
@@ -645,6 +647,12 @@ describe('AiTool extended capabilities', () => {
       { status: 'active', period: 'all' },
       'tasks-list-a',
     );
+
+    expect(readOwnTasks).toHaveBeenCalledTimes(1);
+    expect(readOwnTasks).toHaveBeenCalledWith('tenant-a', 'owner-a', {
+      status: 'active',
+      period: 'all',
+    });
 
     expect(result).toMatchObject({
       count: 1,

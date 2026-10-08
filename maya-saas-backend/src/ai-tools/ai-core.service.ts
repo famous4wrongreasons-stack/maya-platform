@@ -1,4 +1,5 @@
 import { goodsReadReply } from './goods-presentation';
+import { ownTasksReply } from './own-tasks-presentation';
 import {
   isOwnerReviewClarification,
   isOwnerReviewTaskSet,
@@ -436,6 +437,7 @@ const GROUNDING_SMALL_METRIC_PATTERN =
  * доказательством: всё остальное (запись, отмена, начисление) — действие.
  */
 const DATA_TOOL_DOMAINS: Record<string, string> = {
+  'tasks.list': 'own_operational_tasks',
   'inventory.goods.read': 'goods_catalog',
   'analytics.business.query': 'business_query',
   'analytics.employee.query': 'employee_query',
@@ -484,6 +486,7 @@ const PRELOADABLE_TOOLS = new Set([
  * невозможно «угадать неверно» — он либо отработал, либо нет.
  */
 const PII_SENSITIVE_TOOLS = new Set([
+  'tasks.list',
   'appointments.own.list',
   'loyalty.own.read',
   // Поиск выполняется по имени/телефону внутри периметра, а наружу выходит
@@ -2297,7 +2300,12 @@ export class AiCoreService {
                             execution.result,
                             execution.stale === true,
                           )
-                        : null;
+                        : decision.toolCall.name === 'tasks.list'
+                          ? ownTasksReply(
+                              execution.result,
+                              execution.stale === true,
+                            )
+                          : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(
@@ -3969,6 +3977,8 @@ export class AiCoreService {
       );
     }
     switch (evidence.name) {
+      case 'tasks.list':
+        return ownTasksReply(evidence.result).reply;
       case 'support.integration-status.read':
         return integrationStatusReply(evidence.result).reply;
       case 'business.rules.read': {

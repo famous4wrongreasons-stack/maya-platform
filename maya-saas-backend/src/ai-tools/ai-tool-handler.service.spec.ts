@@ -18,6 +18,7 @@ import { EncryptionService } from '../encryption/encryption.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
+import { Package5Wave1CanonicalCutoverService } from '../package5-wave1/package5-wave1-canonical-cutover.service';
 import { AiToolHandlerService } from './ai-tool-handler.service';
 
 import { ConflictException, ForbiddenException } from '@nestjs/common';
@@ -32,6 +33,93 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  describe('canonical task list source', () => {
+    it.each([false, true])(
+      'reads completed A23 state despite stale or archived Inbox (archived=%s)',
+      async (archived) => {
+        const inbox = {
+          id: 'task-inbox',
+          operationalWorkItemId: 'work-a',
+          bodyText: 'Stale projection text',
+          payloadJson: { status: 'active', due_date: '2026-10-08' },
+          createdAt: new Date('2026-10-07T12:00:00Z'),
+          archivedAt: archived ? new Date('2026-10-08T12:00:00Z') : null,
+        };
+        const database = {
+          membership: {
+            findUnique: jest.fn().mockResolvedValue({
+              status: 'active',
+              role: 'staff',
+              user: { status: 'active' },
+              tenant: { status: 'active' },
+            }),
+          },
+          tenant: {
+            findUnique: jest.fn().mockResolvedValue({ defaultTimezone: 'UTC' }),
+          },
+          inboxItem: {
+            findMany: jest
+              .fn()
+              .mockImplementation(
+                ({ where }: { where: Record<string, unknown> }) =>
+                  Promise.resolve(
+                    where.operationalWorkItemId === null ||
+                      (archived && where.archivedAt === null)
+                      ? []
+                      : [inbox],
+                  ),
+              ),
+          },
+          operationalWorkItem: {
+            findMany: jest.fn().mockResolvedValue([
+              {
+                id: 'work-a',
+                tenantId: 'tenant-a',
+                assigneeUserId: 'staff-a',
+                kind: 'task',
+                bodyText: 'Проверить отмены',
+                status: 'COMPLETED',
+                dueAt: new Date('2026-10-08T12:00:00Z'),
+                createdAt: inbox.createdAt,
+                inboxItems: [{ id: inbox.id }],
+              },
+            ]),
+          },
+        };
+        const prisma = database as unknown as PrismaService;
+        const tenantContext = new TenantContextService();
+        const canonical = new Package5Wave1CanonicalCutoverService(
+          prisma,
+          tenantContext,
+          {} as never,
+          {} as never,
+          {} as never,
+          {} as never,
+        );
+        const handler = createService({ prisma, canonicalWave1: canonical });
+        const actor = {
+          ...principal,
+          userId: 'staff-a',
+          role: UserRole.STAFF,
+        };
+        const result = await tenantContext.runAsAuthPrincipal(actor, () =>
+          handler.execute(
+            'tasks.list',
+            actor,
+            { status: 'all', period: 'all' },
+            'read-tasks',
+          ),
+        );
+        expect(result).toMatchObject({
+          scope: 'authenticated_user',
+          tasks: [
+            { id: 'task-inbox', task: 'Проверить отмены', status: 'completed' },
+          ],
+        });
+      },
+    );
   });
 
   describe('exact source-local availability preference — synthetic source facts', () => {
@@ -3142,6 +3230,7 @@ describe('AiToolHandlerService output minimization', () => {
     customersService?: CustomersService;
     staffService?: StaffService;
     canonicalWave3?: Package5Wave3CanonicalCutoverService;
+    canonicalWave1?: Package5Wave1CanonicalCutoverService;
   }) {
     const prisma =
       overrides.prisma ??
@@ -3193,7 +3282,7 @@ describe('AiToolHandlerService output minimization', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      overrides.canonicalWave1,
       overrides.canonicalWave3,
       undefined,
       measurementReaderDouble(),

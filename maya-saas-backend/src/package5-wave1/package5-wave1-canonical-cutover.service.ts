@@ -1,4 +1,5 @@
 import { GovernedSettingsReadService } from './governed-settings.read';
+import { readOwnOperationalTasks } from './operational-tasks.read';
 import {
   GOVERNED_OWNER_ROLES,
   governedCallerId,
@@ -232,6 +233,20 @@ export class Package5Wave1CanonicalCutoverService {
       channel: 'maya_inbox_push' as const,
       transactional: true as const,
     };
+  }
+
+  readOwnTasks(
+    tenantId: string,
+    actorUserId: string,
+    filters: { status: string; period: string },
+  ) {
+    return readOwnOperationalTasks(
+      this.prisma,
+      this.tenantContext,
+      tenantId,
+      actorUserId,
+      filters,
+    );
   }
 
   async createTask(

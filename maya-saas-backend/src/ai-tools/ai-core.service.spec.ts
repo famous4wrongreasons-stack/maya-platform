@@ -3330,6 +3330,121 @@ describe('AiCoreService', () => {
     },
   );
 
+  describe('canonical own tasks [scripted selection only]', () => {
+    const payload = {
+      contract: 'maya.own-operational-tasks/1',
+      source: 'OperationalWorkItem',
+      scope: 'authenticated_user',
+      timezone: 'Europe/Moscow',
+      as_of: '2026-10-08T09:00:00.000Z',
+      as_of_date: '2026-10-08',
+      filters: { status: 'all', period: 'all' },
+      tasks: [
+        {
+          id: null,
+          canonical: true,
+          task: 'PRIVATE task body',
+          content_truncated: false,
+          status: 'completed',
+          due_at: null,
+          due_date: null,
+          created_at: '2026-10-07T09:00:00.000Z',
+        },
+      ],
+      count: 1,
+      historical_tasks: [],
+      historical_count: 0,
+      historical_scope: 'unfiltered_retained_history',
+      canonical_truncated: false,
+      historical_truncated: false,
+      truncated: false,
+    };
+    it.each(['web', 'native'] as const)(
+      'composes the source reply on %s without another model turn or a write',
+      async (surface) => {
+        const mocks = createService(['tasks.list']);
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: {
+              name: 'tasks.list',
+              arguments: { status: 'all', period: 'all' },
+            },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          execution_id: 'private-read-id',
+          result: payload,
+        });
+        const output = await mocks.service.chat(user, {
+          ...dto,
+          surface,
+          messages: [
+            { role: 'assistant', content: 'Earlier PRIVATE task body' },
+            { role: 'user', content: 'Покажи мои задачи' },
+          ],
+        });
+        expect(output.reply).toContain('«PRIVATE task body» — выполнена');
+        expect(output.reply).not.toContain('private-read-id');
+        expect(output).toMatchObject({
+          action: null,
+          source: 'safe_fallback',
+          grounding: {
+            status: 'verified',
+            domain: 'own_operational_tasks',
+            evidence_tools: ['tasks.list'],
+          },
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+          'PRIVATE',
+        );
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute.mock.calls[0]?.slice(0, 3)).toEqual([
+          user,
+          'tasks.list',
+          expect.objectContaining({
+            arguments: { status: 'all', period: 'all' },
+            surface,
+          }),
+        ]);
+      },
+    );
+    it.each([
+      ['stale', true, payload],
+      ['incomplete', false, {}],
+    ] as const)(
+      'blocks %s source without a model recovery claim',
+      async (_case, stale, result) => {
+        const mocks = createService(['tasks.list']);
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: {
+              name: 'tasks.list',
+              arguments: { status: 'all', period: 'all' },
+            },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          execution_id: 'read-id',
+          result,
+          stale,
+        });
+        const output = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Покажи мои задачи' }],
+        });
+        expect(output.grounding?.status).toBe('blocked');
+        expect(output.reply).not.toContain('PRIVATE');
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      },
+    );
+  });
+
   describe('stored Admin integration status [scripted selection only]', () => {
     const tool = 'support.integration-status.read';
     const payload = {
