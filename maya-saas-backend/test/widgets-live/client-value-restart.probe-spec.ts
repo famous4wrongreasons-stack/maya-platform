@@ -853,7 +853,12 @@ describe('client value [actual HTTP, current React, C7/C8 owners, process and Po
       const denied = await http.executeTool(
         clientToken,
         name,
-        { surface: 'web', arguments: {}, idempotencyKey: randomUUID() },
+        {
+          surface: 'web',
+          arguments:
+            name === 'analytics.business.profit' ? { period: 'today' } : {},
+          idempotencyKey: randomUUID(),
+        },
         randomUUID(),
       );
       expect(denied.status).toBe(403);
