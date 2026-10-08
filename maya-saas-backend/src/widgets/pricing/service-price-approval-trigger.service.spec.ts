@@ -287,7 +287,11 @@ describe('YC-SP1 approval trigger: local owner/store doubles, no provider author
       }),
       expect.any(Date),
     );
-    const [request, linkage] = h.emitter.emitServicePriceApproval.mock.calls[0];
+    const [request, linkage, , , emissionTx] =
+      h.emitter.emitServicePriceApproval.mock.calls[0];
+    // The trigger holds this exact transaction's conversation lock during mint.
+    expect(emissionTx).toBe(h.tx);
+    expect(h.lock).toHaveBeenCalledWith(h.tx, actor.tenantId, 'conversation-a');
     expect(request).toMatchObject({
       kind: 'APPROVAL',
       turnId: 'assistant-turn',

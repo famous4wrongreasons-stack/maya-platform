@@ -306,6 +306,7 @@ export class ServicePriceApprovalTriggerService implements AiApprovalWidgetTrigg
           },
           now,
           predecessorWidgetId,
+          tx,
         );
         return resolution(
           minted.widgetId,

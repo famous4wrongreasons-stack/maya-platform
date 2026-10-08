@@ -14,6 +14,7 @@ import type { PrincipalView } from '../gate.types';
 import { envelopeBodyHash } from './envelope.factory';
 import { SCHEDULE_AE, SCHEDULE_TEMPLATE } from './schedule-intent-template';
 import { servicePriceApprovalMintRequest } from '../pricing/service-price-approval.presenter';
+import { goodsReceiptApprovalMintRequest } from '../inventory/goods-receipt-approval.presenter';
 
 class FakePrisma {
   $executeRaw = jest.fn().mockResolvedValue(1);
@@ -1069,6 +1070,126 @@ it('cancels the exact minted selector if the final source check fails', async ()
 });
 
 describe('erasure admission at the one minter', () => {
+  it.each(['price', 'goods'] as const)(
+    'keeps %s approval mint and its erasure fence in the caller transaction',
+    async (lane) => {
+      const { prisma, emitter } = make();
+      const now = new Date('2035-01-01T10:00:00.000Z');
+      const tx = new FakePrisma();
+      const transaction = jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(() => {
+          throw new Error('nested_transaction_while_caller_holds_conversation');
+        });
+      const shared = {
+        id: 'approval-a',
+        payloadHash: 'f'.repeat(64),
+        createdAt: now,
+        expiresAt: new Date(now.getTime() + 600_000),
+        summary: 'Synthetic local approval',
+      };
+      const origin = {
+        approvalId: shared.id,
+        payloadHash: shared.payloadHash,
+        userTurnId: 'user-turn',
+        conversationId: 'c1',
+        principalProofHash: principal().proofHash,
+      };
+      const priceRequest = servicePriceApprovalMintRequest(
+        {
+          ...shared,
+          serviceId: '42',
+          serviceName: 'Стрижка',
+          companyId: '101',
+          currentPrice: 1700,
+          proposedPrice: 1900,
+          origin: { ...origin, contract: 'maya.service-price-chat-approval/1' },
+        },
+        principal(),
+        'approval-turn',
+        600,
+      );
+      const goodsRequest = goodsReceiptApprovalMintRequest(
+        {
+          ...shared,
+          facts: {
+            goods_name: 'Synthetic item',
+            goods_id: '42',
+            company_id: '101',
+            store_name: 'Synthetic store',
+            store_id: '11',
+            quantity: '1.5',
+            unit_label: 'шт',
+            unit_id: '3',
+            unit_cost: '100.00',
+            currency: 'RUB',
+            line_total: '150.00',
+            received_at: now.toISOString(),
+          },
+          origin: { ...origin, contract: 'maya.goods-receipt-chat-approval/1' },
+        },
+        principal(),
+        'approval-turn',
+        600,
+      );
+      const linkage = {
+        approvalId: shared.id,
+        payloadHash: shared.payloadHash,
+        revalidate: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      };
+      const mint = (transactionClient: FakePrisma) =>
+        lane === 'price'
+          ? emitter.emitServicePriceApproval(
+              priceRequest,
+              linkage,
+              now,
+              null,
+              transactionClient as unknown as RequestTx,
+            )
+          : emitter.emitGoodsReceiptApproval(
+              goodsRequest,
+              linkage,
+              now,
+              null,
+              transactionClient as unknown as RequestTx,
+            );
+      const result = await mint(tx);
+      expect(transaction).not.toHaveBeenCalled();
+      expect(prisma.emissions).toHaveLength(0);
+      expect(prisma.records).toHaveLength(0);
+      expect(prisma.receipts).toHaveLength(0);
+      expect(tx.$executeRaw).toHaveBeenCalledTimes(1);
+      expect(tx.widgetTimelineTurn.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            tenantId: 't1',
+            conversationId: 'c1',
+            id: 'approval-turn',
+            principalProofHash: principal().proofHash,
+            erasedAt: null,
+          }) as unknown,
+        }),
+      );
+      expect(tx.emissions).toHaveLength(1);
+      expect(tx.receipts).toHaveLength(1);
+      expect(tx.emissions[0].widgetId).toBe(result.widgetId);
+      expect(
+        tx.records.filter((record) => record.effect === 'COMMIT'),
+      ).toHaveLength(2);
+      expect(linkage.revalidate).toHaveBeenCalledTimes(2);
+
+      // Passing tx must not bypass the fresh parent check or restore erased C content.
+      const erased = new FakePrisma();
+      erased.widgetTimelineTurn.findFirst.mockResolvedValue(null);
+      await expect(mint(erased)).rejects.toThrow('emission_turn_unavailable');
+      expect(transaction).not.toHaveBeenCalled();
+      expect(erased.$executeRaw).toHaveBeenCalledTimes(1);
+      expect(erased.emissions).toHaveLength(0);
+      expect(erased.records).toHaveLength(0);
+      expect(erased.receipts).toHaveLength(0);
+    },
+  );
+
   it('refuses a delayed emission after its exact parent was erased', async () => {
     const { prisma, emitter } = make();
     prisma.widgetTimelineTurn.findFirst.mockResolvedValue(null);

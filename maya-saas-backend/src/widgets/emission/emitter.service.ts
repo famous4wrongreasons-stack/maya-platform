@@ -566,6 +566,7 @@ export class WidgetEmitterService {
     linkage: ServicePriceApprovalEmissionContext,
     now = new Date(),
     supersedesWidgetId: string | null = null,
+    tx?: RequestTx,
   ): Promise<SealedEmission> {
     return this.emitServicePrice(
       request,
@@ -573,6 +574,7 @@ export class WidgetEmitterService {
       now,
       supersedesWidgetId,
       null,
+      tx,
     );
   }
 
@@ -597,6 +599,7 @@ export class WidgetEmitterService {
     now: Date,
     supersedesWidgetId: string | null,
     parentWidgetId: string | null,
+    tx?: RequestTx,
   ): Promise<SealedEmission> {
     const source = request.composerInput.source;
     const ref = servicePriceApprovalRef(
@@ -677,6 +680,12 @@ export class WidgetEmitterService {
       null,
       linkage,
       parentWidgetId,
+      null,
+      null,
+      null,
+      null,
+      null,
+      tx,
     );
   }
 
@@ -686,6 +695,7 @@ export class WidgetEmitterService {
     linkage: GoodsReceiptApprovalEmissionContext,
     now = new Date(),
     supersedesWidgetId: string | null = null,
+    tx?: RequestTx,
   ): Promise<SealedEmission> {
     return this.emitGoodsReceipt(
       request,
@@ -693,6 +703,7 @@ export class WidgetEmitterService {
       now,
       supersedesWidgetId,
       null,
+      tx,
     );
   }
 
@@ -717,6 +728,7 @@ export class WidgetEmitterService {
     now: Date,
     supersedesWidgetId: string | null,
     parentWidgetId: string | null,
+    tx?: RequestTx,
   ): Promise<SealedEmission> {
     const source = request.composerInput.source;
     const ref = goodsReceiptApprovalRef(
@@ -802,6 +814,7 @@ export class WidgetEmitterService {
       null,
       linkage,
       parentWidgetId,
+      tx,
     );
   }
 
@@ -1181,8 +1194,8 @@ export class WidgetEmitterService {
       }) as never,
     }));
     const persist = async (tx: RequestTx) => {
-      // All C writes share the erasure lock and a fresh parent check. Chat READ
-      // passes its existing transaction so dedupe and mint cannot deadlock on
+      // All C writes share the erasure lock and a fresh parent check. Chat READ and
+      // named approval triggers pass their transaction so dedupe and mint cannot deadlock on
       // two transactions holding/waiting for the same conversation lock.
       await TimelineStore.lockConversation(
         tx,

@@ -302,6 +302,7 @@ export class GoodsReceiptApprovalTriggerService implements AiGoodsApprovalWidget
           },
           now,
           predecessorWidgetId,
+          tx,
         );
         return resolution(
           minted.widgetId,
