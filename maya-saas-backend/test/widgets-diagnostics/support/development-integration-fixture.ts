@@ -324,6 +324,11 @@ export async function developmentIntegrationFixture(
         settingsJson: {
           syntheticTenantId: tenant.id,
           companyId: '99101',
+          branchBinding: {
+            contract: 'maya.crm-branch-binding/1',
+            companyId: '99101',
+            branchId: branch.id,
+          },
           currency: 'RUB',
         },
       },

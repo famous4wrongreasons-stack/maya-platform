@@ -828,7 +828,22 @@ describe('widgets-live harness', () => {
         'WidgetTimelineTurn.create',
       ]);
       expect(red.rowDelta).toEqual({ WidgetTimelineTurn: 1 });
-      expect(gw.recorder.locks(scope)).toHaveLength(3);
+      // appendTurn also takes the canonical conversation lock before its durable write.
+      // Pin both raw spellings as non-writes; NW must still report only the create above.
+      expect(
+        gw.recorder.locks(scope).map((op) => ({
+          operation: op.operation,
+          write: op.write,
+        })),
+      ).toEqual([
+        { operation: '$queryRaw', write: false },
+        { operation: '$queryRaw', write: false },
+        { operation: '$queryRaw', write: false },
+        { operation: '$executeRaw', write: false },
+      ]);
+      expect(gw.recorder.locks(scope)[3].sql).toMatch(
+        /^SELECT pg_advisory_xact_lock\(hashtextextended\(\?, 0\)\)$/,
+      );
     });
 
     it("HAR-9 [GW] the verifier rejects a manifest line whose record is missing from the server's mint provenance lines, or from the database before teardown (a Fixtures.widget record)", async () => {
@@ -1650,6 +1665,41 @@ describe('widgets-live harness', () => {
             expect.objectContaining({
               test_id: 'P-1',
               rule: 'V-OVERRIDE',
+              reason: expect.stringContaining(diagnostic) as string,
+            }),
+          ]),
+        );
+      },
+    );
+
+    it.each(['direct', 'nested'])(
+      'HAR-13 refuses controlled history preservation setup through a %s clause import',
+      (mode) => {
+        expect(verifyScenario(cleanPair()).status).toBe(0);
+        const scenario = cleanPair();
+        const diagnostic =
+          'test/widgets-diagnostics/support/history-erasure-populated.ts';
+        scenario.files[diagnostic] = fs.readFileSync(
+          path.join(BACKEND, diagnostic),
+          'utf8',
+        );
+        if (mode === 'direct') {
+          spec(
+            scenario,
+            "import { populateHistoryErasureFixture } from '../widgets-diagnostics/support/history-erasure-populated';",
+          );
+        } else {
+          spec(scenario, "import { populate } from './helpers/history-seed';");
+          scenario.files['test/widgets-live/helpers/history-seed.ts'] =
+            "export { populateHistoryErasureFixture as populate } from '../../widgets-diagnostics/support/history-erasure-populated';";
+        }
+        const verified = verifyScenario(scenario);
+        expect(verified.status).toBe(1);
+        expect(verified.report.violations).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              test_id: 'P-1',
+              rule: 'V-CONTROLLED',
               reason: expect.stringContaining(diagnostic) as string,
             }),
           ]),

@@ -42,7 +42,9 @@ async function canonicalTurnProof(ctx: HttpProofContext) {
       body: JSON.stringify(body),
     });
   // Before any widget exists this is ordinary typed chat. No model transport override.
-  const utterance = 'Dismiss';
+  // Exact control.dismiss@1 label and stored utteranceTemplate; never derive the
+  // expected USER bytes from the returned row or accept an arbitrary live label.
+  const utterance = 'Закрыть';
   const ordinaryRequest = {
     surface: 'web',
     requestId: randomUUID(),
@@ -70,6 +72,7 @@ async function canonicalTurnProof(ctx: HttpProofContext) {
     .map(object)
     .find((row) => row.effect === 'CONTROL');
   assert(control);
+  assert.equal(control.label, utterance);
   const tokenHash = createHash('sha256')
     .update(String(control.intent_token))
     .digest('hex');
@@ -102,6 +105,7 @@ async function canonicalTurnProof(ctx: HttpProofContext) {
     .map(object)
     .find((row) => row.effect === 'CONTROL');
   assert(nextControl);
+  assert.equal(nextControl.label, utterance);
   const tap = {
     contract: 'maya.widget.intent.submission/1',
     widget_id: next.widget_id,

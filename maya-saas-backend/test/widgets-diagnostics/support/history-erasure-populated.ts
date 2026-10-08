@@ -5,15 +5,18 @@ import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 
 // Bootstrap first: preserve the existing Nest module import order.
-import type { FixtureContext, GatewayHarness } from './bootstrap';
+import type {
+  FixtureContext,
+  GatewayHarness,
+} from '../../widgets-live/support/bootstrap';
 import {
   closedFixtureComposerInput,
   type Fixtures,
   type TenantFixture,
   type UserFixture,
-} from './fixtures';
-import { assertProofDatabase } from './proof-db-guard';
-import { WIDGETS_LIVE_TEST_LITERALS } from './environment';
+} from '../../widgets-live/support/fixtures';
+import { assertProofDatabase } from '../../widgets-live/support/proof-db-guard';
+import { WIDGETS_LIVE_TEST_LITERALS } from '../../widgets-live/support/environment';
 import type { AuthenticatedUser } from '../../../src/common/authenticated-user.interface';
 import { ActionEngineKernel } from '../../../src/action-engine/action-engine.kernel';
 import { ACTION_EXECUTION_REQUEST_CONTRACT } from '../../../src/action-engine/action-engine.contract';

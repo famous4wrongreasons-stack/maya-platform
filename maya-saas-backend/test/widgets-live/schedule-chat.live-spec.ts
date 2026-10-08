@@ -307,33 +307,33 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
       expect(writes).toHaveBeenCalledTimes(1);
     },
   );
-  it('clarifies missing material and uses multi-turn date and real staff parameters', async () => {
+  it('clarifies staff before the branch-local date and retains multi-turn parameters', async () => {
     const f = await salon();
     const first = await chat(f.token, 'Сделай выходной');
-    expect(first.reply).toContain('дату');
+    expect(first.reply).toBe('Какому мастеру изменить график?');
     expect(writes).not.toHaveBeenCalled();
     const second = await chat(
-      f.token,
-      'завтра',
-      'web',
-      [
-        { role: 'user', content: 'Сделай выходной' },
-        { role: 'assistant', content: first.reply },
-        { role: 'user', content: 'завтра' },
-      ],
-      first.user_turn.conversationId,
-    );
-    expect(second.reply).toContain('мастер');
-    const third = await chat(
       f.token,
       'Антону',
       'web',
       [
         { role: 'user', content: 'Сделай выходной' },
         { role: 'assistant', content: first.reply },
-        { role: 'user', content: 'завтра' },
-        { role: 'assistant', content: second.reply },
         { role: 'user', content: 'Антону' },
+      ],
+      first.user_turn.conversationId,
+    );
+    expect(second.reply).toBe('На какую дату изменить график?');
+    const third = await chat(
+      f.token,
+      'завтра',
+      'web',
+      [
+        { role: 'user', content: 'Сделай выходной' },
+        { role: 'assistant', content: first.reply },
+        { role: 'user', content: 'Антону' },
+        { role: 'assistant', content: second.reply },
+        { role: 'user', content: 'завтра' },
       ],
       first.user_turn.conversationId,
     );

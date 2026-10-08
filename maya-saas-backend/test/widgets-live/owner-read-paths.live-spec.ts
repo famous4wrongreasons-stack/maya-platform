@@ -12,6 +12,7 @@ import {
   Package5Wave1ExecutableService,
 } from '../../src/package5-wave1/package5-wave1.service';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
+import { canonicalUtcTransaction } from '../../src/prisma/canonical-utc-transaction';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -556,9 +557,16 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       },
     });
     expect(JSON.stringify(response)).not.toContain(client.id);
-    const revision = await db.prisma.c9StrategyRevision.findUniqueOrThrow({
-      where: { id: response.coordination.revision_id },
-    });
+    // Match the canonical C9 reader's transaction-local UTC decoding. The pg
+    // adapter otherwise decodes a non-UTC session's timestamptz text as UTC.
+    const revision = await canonicalUtcTransaction(
+      db.prisma,
+      (tx) =>
+        tx.c9StrategyRevision.findUniqueOrThrow({
+          where: { id: response.coordination.revision_id },
+        }),
+      { readOnly: true },
+    );
     const ref = (
       revision.evidenceRefsJson as unknown as {
         id: string;

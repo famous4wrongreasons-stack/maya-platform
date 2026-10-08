@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import { AiToolHandlerService } from '../../src/ai-tools/ai-tool-handler.service';
+import { bookingPreferenceDate } from '../../src/ai-tools/booking-catalog-binding';
 import captures from '../../src/ai-tools/fixtures/deepseek-v4-pro-semantic-slot-failures.json';
 import bounded from '../../src/ai-tools/fixtures/deepseek-v4-pro-bounded-recheck.json';
 import followups from '../../src/ai-tools/fixtures/deepseek-v4-pro-followup-failures.json';
@@ -37,7 +38,7 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
     await http?.close();
     await db?.close();
   });
-  it('routes a captured date alias through actual parser/read owner and preserves conversation on date follow-up', async () => {
+  it('normalizes historical captured aliases and retains the explicit date follow-up without inventing catalog references', async () => {
     const tenant = await fx.tenant(
       'Synthetic captured planner proof',
       CalendarSource.INTERNAL,
@@ -60,9 +61,16 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
         DEEPSEEK_AI_CORE_MODEL: 'deepseek-v4-pro',
       }),
     );
+    const inputs: AiCoreModelInput[] = [],
+      decisions: AiCoreModelDecision[] = [];
     jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation((input) => model.decide(input));
+      .mockImplementation(async (input) => {
+        inputs.push(input);
+        const decision = await model.decide(input);
+        if (decision) decisions.push(decision);
+        return decision;
+      });
     const captured = captures.find((c) => c.request === 5)!;
     let date = '2026-10-05';
     const transport = jest.spyOn(global, 'fetch').mockImplementation(() => {
@@ -70,6 +78,8 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
         semantic_plan: { tasks: { entities_json: string }[] };
         tool_call: { arguments_json: string };
       };
+      // The first output is the unchanged historical capture. The second is an
+      // explicit synthetic date-only follow-up derived from it, not a new model capture.
       if (date !== '2026-10-05') {
         const entities = JSON.parse(
           output.semantic_plan.tasks[0].entities_json,
@@ -119,8 +129,38 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
         .conversationId,
     ).toBe(ref.conversationId);
     expect(transport).toHaveBeenCalledTimes(2);
-    expect(JSON.stringify(read.mock.calls)).toContain('2026-10-05');
-    expect(JSON.stringify(read.mock.calls)).toContain('2026-10-06');
+    expect(decisions).toHaveLength(2);
+    expect(
+      decisions.map(
+        (decision) => decision.semanticPlan?.tasks[0].entities.date_or_period,
+      ),
+    ).toEqual(['2026-10-05', '2026-10-06']);
+    for (const decision of decisions) {
+      expect(decision.semanticPlan?.tasks[0].entities.services).toEqual([
+        'комплекс стрижка и борода',
+      ]);
+      expect(decision.semanticPlan?.tasks[0].entities).not.toHaveProperty(
+        'date',
+      );
+      expect(decision.semanticPlan?.tasks[0].entities).not.toHaveProperty(
+        'service',
+      );
+    }
+    expect(inputs[1].conversationPlan?.tasks[0].entities.date_or_period).toBe(
+      '2026-10-05',
+    );
+    // Captured names are not this tenant's fixture catalog; only its real catalog
+    // may be read. Historical date preferences are not proof of availability.
+    expect(read.mock.calls.map(([name]) => name)).toEqual([
+      'catalog.services.read',
+      'catalog.services.read',
+    ]);
+    for (const response of [first, second]) {
+      expect((response.body as { reply: string }).reply).toBe(
+        'Уточните одну услугу из каталога салона. Остальные пожелания сохранены.',
+      );
+      expect((response.body as { action: unknown }).action).toBeNull();
+    }
     expect(
       await db.prisma.actionExecution.count({
         where: {
@@ -227,11 +267,25 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
       replies.push(body.reply);
       messages.push({ role: 'assistant', content: body.reply });
     }
-    expect(inputs[1].conversationPlan?.tasks[0].entities.date_or_period).toBe(
+    const firstNowUtc = inputs[0].nowUtc;
+    const sourceTimezone = inputs[0].businessTimezone;
+    if (!firstNowUtc || !sourceTimezone)
+      throw new Error(
+        'Recorded replay requires the actual server clock and tenant timezone',
+      );
+    // The first request materializes the tenant-local day before encrypted persistence.
+    // Keep that selected day through restart; never re-evaluate tomorrow on the next turn.
+    const selectedDay = bookingPreferenceDate(
       'tomorrow',
+      sourceTimezone,
+      new Date(firstNowUtc),
+    );
+    expect(selectedDay).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(inputs[1].conversationPlan?.tasks[0].entities.date_or_period).toBe(
+      selectedDay,
     );
     expect(decisions[1].semanticPlan?.tasks[0].entities).toMatchObject({
-      date: 'tomorrow',
+      date: selectedDay,
       time: '17:00',
       services: ['моделирование бороды'],
     });
@@ -289,8 +343,23 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
     ).toBeNull();
     expect(
       await readContext(stored[0].principalProofHash, new Date()),
-    ).toMatchObject({ version: 'maya.chat-semantic-context/1' });
+    ).toMatchObject({
+      version: 'maya.chat-semantic-context/1',
+      plan: {
+        tasks: [
+          {
+            intent: 'booking.create_own',
+            entities: {
+              date: selectedDay,
+              time: '17:00',
+              services: ['моделирование бороды'],
+            },
+          },
+        ],
+      },
+    });
     expect(JSON.stringify(stored)).not.toContain('tomorrow');
+    expect(JSON.stringify(stored)).not.toContain(selectedDay);
     const history = await request(http.app.getHttpServer())
       .get('/api/ai/conversation')
       .set('Authorization', `Bearer ${token}`);
@@ -376,106 +445,142 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
       ),
     ).toBe(true);
   });
-  it('clarifies the exact bounded-live references absent from this synthetic catalog before any mutation receipt', async () => {
-    const tenant = await fx.tenant(
-      'Synthetic bounded invalid references',
-      CalendarSource.INTERNAL,
-    );
-    const user = await fx.user(tenant, UserRole.CLIENT);
-    await fx.bookingSource(tenant, user, true);
-    for (const feature of [
-      'ai.consultant',
-      'widgets.runtime',
-      'booking',
-      'booking.customer_app',
-      'crm.integration',
-    ] as const)
-      await fx.grantFeature(tenant, feature);
-    const token = await http.login(tenant.slug, user.email, user.password);
-    const model = new AiCoreModelService(
-      new ConfigService({
-        AI_CORE_PROVIDER: 'deepseek',
-        DEEPSEEK_API_KEY: 'captured-placeholder',
-        DEEPSEEK_AI_CORE_MODEL: 'deepseek-v4-pro',
-      }),
-    );
-    jest
-      .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation((input) => model.decide(input));
-    let index = 0;
-    jest.spyOn(global, 'fetch').mockImplementation(() =>
-      Promise.resolve(
-        new Response(
-          JSON.stringify({
-            choices: [
-              {
-                finish_reason: 'stop',
-                message: { content: bounded[index++].content },
+  it.each(['service', 'staff'] as const)(
+    'clarifies the missing %s from the unchanged bounded capture before any mutation receipt',
+    async (missing) => {
+      const tenant = await fx.tenant(
+        'Synthetic bounded invalid references',
+        CalendarSource.INTERNAL,
+      );
+      const user = await fx.user(tenant, UserRole.CLIENT);
+      const catalog = await fx.bookingSource(tenant, user, true);
+      if (missing === 'staff') {
+        // Only owned synthetic catalog data changes. The recorded model output is
+        // unchanged, and its absent employee never receives a fabricated live ID.
+        const changed = await db.prisma.internalService.updateMany({
+          where: { id: catalog.serviceId, tenantId: tenant.id },
+          data: { name: 'моделирование бороды' },
+        });
+        expect(changed.count).toBe(1);
+      }
+      for (const feature of [
+        'ai.consultant',
+        'widgets.runtime',
+        'booking',
+        'booking.customer_app',
+        'crm.integration',
+      ] as const)
+        await fx.grantFeature(tenant, feature);
+      const token = await http.login(tenant.slug, user.email, user.password);
+      const model = new AiCoreModelService(
+        new ConfigService({
+          AI_CORE_PROVIDER: 'deepseek',
+          DEEPSEEK_API_KEY: 'captured-placeholder',
+          DEEPSEEK_AI_CORE_MODEL: 'deepseek-v4-pro',
+        }),
+      );
+      const decisions: AiCoreModelDecision[] = [];
+      jest
+        .spyOn(http.app.get(AiCoreModelService), 'decide')
+        .mockImplementation(async (input) => {
+          const decision = await model.decide(input);
+          if (decision) decisions.push(decision);
+          return decision;
+        });
+      const read = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+      let index = 0;
+      jest.spyOn(global, 'fetch').mockImplementation(() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              choices: [
+                {
+                  finish_reason: 'stop',
+                  message: { content: bounded[index++].content },
+                },
+              ],
+              usage: {
+                prompt_tokens: 1,
+                completion_tokens: 1,
+                total_tokens: 2,
               },
-            ],
-            usage: {
-              prompt_tokens: 1,
-              completion_tokens: 1,
-              total_tokens: 2,
-            },
-          }),
-          { status: 200, headers: { 'content-type': 'application/json' } },
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
         ),
-      ),
-    );
-    const first = await request(http.app.getHttpServer())
-      .post('/api/ai/chat')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        surface: 'web',
-        requestId: randomUUID(),
-        messages: [
-          {
-            role: 'user',
-            content: 'Есть окна к Антону завтра на моделирование бороды?',
-          },
-        ],
-      });
-    expect(first.status).toBe(201);
-    const original = first.body as {
-      reply: string;
-      user_turn: { conversationId: string };
-    };
-    const second = await request(http.app.getHttpServer())
-      .post('/api/ai/chat')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        surface: 'web',
-        requestId: randomUUID(),
-        conversationId: original.user_turn.conversationId,
-        messages: [
-          {
-            role: 'user',
-            content: 'Есть окна к Антону завтра на моделирование бороды?',
-          },
-          { role: 'assistant', content: original.reply },
-          { role: 'user', content: 'Запиши меня на 17:00' },
-        ],
-      });
-    expect(second.status).toBe(201);
-    expect(JSON.stringify(second.body)).toContain(
-      'Уточните точное имя мастера',
-    );
-    expect((second.body as { action: unknown }).action).toBeNull();
-    expect(index).toBe(2);
-    expect(
-      await db.prisma.actionExecution.count({
-        where: {
-          tenantId: tenant.id,
-          actionClass: {
-            in: [
-              'create_appointment',
-              'cancel_appointment',
-              'reschedule_appointment',
+      );
+      const first = await request(http.app.getHttpServer())
+        .post('/api/ai/chat')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          surface: 'web',
+          requestId: randomUUID(),
+          messages: [
+            {
+              role: 'user',
+              content: 'Есть окна к Антону завтра на моделирование бороды?',
+            },
+          ],
+        });
+      expect(first.status).toBe(201);
+      const original = first.body as {
+        reply: string;
+        user_turn: { conversationId: string };
+      };
+      const second = await request(http.app.getHttpServer())
+        .post('/api/ai/chat')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          surface: 'web',
+          requestId: randomUUID(),
+          conversationId: original.user_turn.conversationId,
+          messages: [
+            {
+              role: 'user',
+              content: 'Есть окна к Антону завтра на моделирование бороды?',
+            },
+            { role: 'assistant', content: original.reply },
+            { role: 'user', content: 'Запиши меня на 17:00' },
+          ],
+        });
+      expect(second.status).toBe(201);
+      const expectedReply =
+        missing === 'service'
+          ? 'Уточните одну услугу из каталога салона. Остальные пожелания сохранены.'
+          : 'Уточните точное имя мастера из каталога салона. Запись пока не подготовлена.';
+      for (const response of [first, second]) {
+        expect((response.body as { reply: string }).reply).toBe(expectedReply);
+        expect((response.body as { action: unknown }).action).toBeNull();
+      }
+      expect(decisions[1].semanticPlan?.tasks[0].intent).toBe(
+        'booking.create_own',
+      );
+      expect(decisions[1].toolCall?.name).toBe('appointments.own.create');
+      expect(read.mock.calls.map(([name]) => name)).toEqual(
+        missing === 'service'
+          ? ['catalog.services.read', 'catalog.services.read']
+          : [
+              'catalog.services.read',
+              'catalog.staff.read',
+              'catalog.services.read',
+              'catalog.staff.read',
             ],
+      );
+      expect(index).toBe(2);
+      expect(
+        await db.prisma.actionExecution.count({
+          where: {
+            tenantId: tenant.id,
+            actionClass: {
+              in: [
+                'create_appointment',
+                'cancel_appointment',
+                'reschedule_appointment',
+              ],
+            },
           },
-        },
-      }),
-    ).toBe(0);
-  });
+        }),
+      ).toBe(0);
+    },
+  );
 });

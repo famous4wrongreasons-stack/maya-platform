@@ -16,7 +16,7 @@ import {
   readPopulatedHistorySnapshot,
   assertPopulatedHistoryErased,
   type PopulatedHistoryFixture,
-} from './support/history-erasure-populated';
+} from '../widgets-diagnostics/support/history-erasure-populated';
 import {
   Fixtures,
   type TenantFixture,

@@ -333,14 +333,18 @@ const runSuccessorCases = <C>(
       },
       `${scope}:tap`,
     );
-    // P-G15b proves the successor can traverse the complete admission path. U12b's canonical
-    // read routing terminates the widget effect at Gate 13; it does not make the successor minter
-    // a business-fact owner.
+    // The stored-text successor traverses admission and reaches Gate 13. It remains
+    // MINTED, so generic REFINE cannot mint another successor from it. The existing
+    // route's refusal is projected with its canonical code/reason, never null or success.
+    // Fourteen visited slots include 8-R; the stopped gate remains 13.
     expect(tapped).toEqual({
       contract: 'maya.widget.intent/1',
       outcome: 'terminate',
-      code: null,
-      reason_text: null,
+      code: 'effect_not_admissible',
+      reason_text: {
+        phrase_key: 'widget.refusal.effect_not_admissible',
+        rendered: 'Это действие не предусмотрено для этой карточки.',
+      },
       stopped_at_gate: '13',
       gates_run: 14,
       gates_total: 15,
