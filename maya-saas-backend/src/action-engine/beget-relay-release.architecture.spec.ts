@@ -1,6 +1,12 @@
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import {
+  readFileSync,
+  readdirSync,
+  mkdtempSync,
+  writeFileSync,
+  rmSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -294,9 +300,22 @@ describe('R01 live artifact and release/recovery protection', () => {
   it('[INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate', () => {
     const shell = resolve(root, '../maya-chat-shell/dist/web');
     const result = edge.verifyShellCandidate(shell);
-    // e437e114 split the runtime DOM boundary into shell/dom-port.js. The approved artifact
-    // therefore has 38 files; keep the census exact instead of accepting arbitrary extra files.
-    expect(result).toMatchObject({ files: 38, php: 0, icons: 3 });
+    // Preserve e437e114's 38-file baseline plus the four implemented runtime
+    // modules for personal booking, booking reasons and explicit privacy.
+    // No arbitrary extra artifact files become admitted by this exact census.
+    expect(result).toMatchObject({ files: 42, php: 0, icons: 3 });
+    const generations = readdirSync(join(shell, 'm'));
+    expect(generations).toHaveLength(1);
+    expect(generations[0]).toMatch(/^[a-f0-9]{16}$/);
+    for (const module of [
+      'net/booking-reasons.js',
+      'net/personal.js',
+      'shell/personal-booking.js',
+      'shell/privacy.js',
+    ])
+      expect(
+        readFileSync(join(shell, 'm', generations[0], 'src', module), 'utf8'),
+      ).not.toBe('');
     // A shell that claims the legacy install id would update the owner's existing PWA.
     expect(result.id).toBe('/maya-chat-shell/');
     expect(() =>

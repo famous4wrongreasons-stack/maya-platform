@@ -1035,7 +1035,7 @@ export class AiCoreModelService {
       PLANNER_WIRE_INSTRUCTIONS,
       'Use tool_call=null only when no tool is needed or the supplied tool_results are sufficient.',
       'When required_tools contains a tool without a matching result, select one suitable required tool.',
-      'Exception for an authenticated owner on web: the exact task set analytics.business_summary + schedule.review_cancellation_windows (+ optional analytics.recommendations) is delegated to existing C9; use tool_call=null. Its only executable scope is the last published tenant-wide financial snapshot plus one saved cancellation opportunity, with no entities or custom constraints. Preserve every requested date, period, branch, employee or goal in semantic entities; never silently replace a requested current period with that historical snapshot. The server asks about the bounded alternative when scope differs. A saved semantic clarification_question names that pending alternative; retain requested slots until the user explicitly accepts or corrects it.',
+      'Authenticated owner/web exception: analytics.business_summary + schedule.review_cancellation_windows (+ optional analytics.recommendations) uses existing C9; tool_call=null. Only executable scope: last published tenant-wide financial snapshot + one saved cancellation opportunity, no entities/constraints. Keep requested dates, periods, branches, staff and goals in entities; never silently substitute this scope. Retain requested slots and pending clarification_question until explicit acceptance/correction.',
       'JSON OUTPUT CONTRACT:',
       'Return exactly one JSON object. Do not use Markdown or add text outside JSON.',
       'The only top-level keys are semantic_plan and tool_call.',
@@ -1135,12 +1135,9 @@ export class AiCoreModelService {
           input.businessTimezone ?? 'Europe/Moscow',
         ),
       ),
-      response_contract: {
-        semantic_plan:
-          'maya-ci/1 plan with one to five canonical tasks and flat entities_json',
-        tool_call:
-          'null or one available tool call with arguments_json containing one JSON object string',
-      },
+      // The system's JSON OUTPUT CONTRACT and the provider schema already define
+      // the output. Do not repeat those instructions in the untrusted data body:
+      // the finite planner budget preserves every tool/intent field instead.
     };
   }
 

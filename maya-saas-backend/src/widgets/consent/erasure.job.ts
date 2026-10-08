@@ -85,6 +85,48 @@ export interface ConversationErasureResult {
 export class WidgetConversationErasureJob {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** One server-derived request identity is locked before principal/conversation admission. */
+  static async lockRequest(
+    tx: Pick<RequestTx, '$executeRaw'>,
+    requestPrefix: string,
+  ): Promise<void> {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${requestPrefix}, 0))`;
+  }
+
+  /** RT6 scope refusal only: no draft content or transcript leaves this store owner. */
+  static async hasUnlinkedDraftContent(
+    tx: Pick<RequestTx, '$queryRaw'>,
+    scope: Pick<
+      ConversationErasureRequest,
+      'tenantId' | 'subjectPrincipalProofHash'
+    >,
+  ): Promise<boolean> {
+    const [{ hasUnlinkedContent }] = await tx.$queryRaw<
+      { hasUnlinkedContent: boolean }[]
+    >`
+      SELECT EXISTS (
+        SELECT 1 FROM "WidgetDraft" d
+        WHERE d."tenantId" = ${scope.tenantId}
+          AND d."principalProofHash" = ${scope.subjectPrincipalProofHash}
+          AND d."diffJson" IS NOT NULL
+          AND d."diffJson" <> 'null'::jsonb
+          AND NOT EXISTS (
+            SELECT 1 FROM "WidgetIntentRecord" r
+            JOIN "WidgetEmission" e
+              ON e."tenantId" = r."tenantId" AND e."widgetId" = r."widgetId"
+            JOIN "WidgetTimelineTurn" t
+              ON t."tenantId" = e."tenantId" AND t."id" = e."turnId"
+            WHERE r."tenantId" = d."tenantId"
+              AND r."principalProofHash" = d."principalProofHash"
+              AND t."principalProofHash" = d."principalProofHash"
+              AND r."confirmationOfKind" = 'draft'
+              AND r."confirmationOfRef" = d."draftRef"
+          )
+      ) AS "hasUnlinkedContent"
+    `;
+    return hasUnlinkedContent;
+  }
+
   async run(
     request: ConversationErasureRequest,
     now = new Date(),

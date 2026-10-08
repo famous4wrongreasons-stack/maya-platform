@@ -1,6 +1,7 @@
 import { goodsReceiptDecisionReply } from '../inventory/goods-receipt-terminal.presenter';
 import { randomUUID } from 'node:crypto';
 import { TimelineStore } from '../stores/timeline.store';
+import { openWidgetNounHandle } from '../emission/seal.service';
 import {
   lockUserTurn,
   readUserTurnBinding,
@@ -133,6 +134,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         conversationId,
         beforeTurnId,
         now,
+        openWidgetNounHandle,
       );
     });
   }

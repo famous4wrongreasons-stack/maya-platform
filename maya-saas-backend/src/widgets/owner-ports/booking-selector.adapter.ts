@@ -2,8 +2,7 @@ import {
   BookingCatalogSourceChangedError,
   isBookingSourceUnavailable,
 } from '../../ai-tools/booking-catalog-binding';
-import { CrmService } from '../../crm/crm.service';
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { AiToolRuntimeService } from '../../ai-tools/ai-tool-runtime.service';
 import { AvailabilityCalendarService } from '../../crm/availability-calendar.service';
@@ -43,15 +42,13 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
   constructor(
     private readonly runtime: AiToolRuntimeService,
     private readonly availability: AvailabilityCalendarService,
-    @Optional() private readonly crm?: CrmService,
   ) {}
 
   /** Presentation source qualification only; CRM retains tenant and calendar authority. */
   async readCalendarSource(
     tenantId: string,
   ): Promise<'internal' | 'external' | null> {
-    if (!this.crm) return null;
-    return this.crm.getCalendarSource(tenantId);
+    return this.availability.getCalendarSource(tenantId);
   }
 
   async advance(input: Parameters<BookingSelectorOwnerPort['advance']>[0]) {
@@ -96,8 +93,7 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
     const revalidate = async () => {
       if (pinned) {
         if (
-          !this.crm ||
-          (await this.crm.readBranchAvailabilityRevision(
+          (await this.availability.readBranchAvailabilityRevision(
             input.routing.tenantId,
             pinned.branchId,
           )) !== pinned.sourceRevision
@@ -106,8 +102,9 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
             'booking_catalog_source_changed',
           );
       } else if (
-        this.crm &&
-        (await this.crm.resolveConfiguredBookingBranch(input.routing.tenantId))
+        await this.availability.resolveConfiguredBookingBranch(
+          input.routing.tenantId,
+        )
       ) {
         throw new BookingCatalogSourceChangedError(
           'booking_catalog_scope_required',

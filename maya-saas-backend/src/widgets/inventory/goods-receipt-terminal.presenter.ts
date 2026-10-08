@@ -1,3 +1,5 @@
+import type { GoodsReceiptApprovalSnapshot } from '../../ai-tools/ai-approval-widget-trigger.port';
+
 /** Exact immutable receipt facts only. No provider read, model text, photo or person data. */
 export const GOODS_RECEIPT_UNCONFIRMED =
   'Результат прихода не подтверждён. Повторная отправка остановлена; проверьте документ в YCLIENTS.';
@@ -7,7 +9,7 @@ const headlines = {
   UNKNOWN: GOODS_RECEIPT_UNCONFIRMED,
 } as const;
 export function goodsReceiptTerminalText(
-  facts: Readonly<Record<string, unknown>>,
+  facts: GoodsReceiptApprovalSnapshot['facts'],
   state: keyof typeof headlines,
 ): string {
   const required = [

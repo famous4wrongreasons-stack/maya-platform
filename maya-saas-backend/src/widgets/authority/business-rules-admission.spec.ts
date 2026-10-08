@@ -28,18 +28,29 @@ const reasons = [
 
 describe('F36b/P10 — owner decision 2026-10-05; no expanded authority or public outcome', () => {
   it('admits only the existing C9 row and preserves every previous registry object', () => {
-    // YC-SP1 is independently pinned as a local candidate; this historical
-    // F36b admission must continue to prove the unchanged pre-pricing registry.
-    const beforePricing = C9_CAPABILITIES.filter(
-      (row) => row.capabilityKey !== SERVICE_PRICE_TOOL,
+    // Pricing and the two finite goods rows were admitted later. Retain the
+    // historical F36b hashes over the exact pre-pricing/pre-goods registry.
+    const laterKeys = [
+      SERVICE_PRICE_TOOL,
+      'inventory.goods.read',
+      'inventory.goods.receipt.prepare',
+    ];
+    expect(
+      C9_CAPABILITIES.filter((row) => laterKeys.includes(row.capabilityKey))
+        .map((row) => row.capabilityKey)
+        .sort(),
+    ).toEqual([...laterKeys].sort());
+    const beforePricingAndGoods = C9_CAPABILITIES.filter(
+      (row) => !laterKeys.includes(row.capabilityKey),
     );
-    expect(c9Hash('registry/1', beforePricing)).toBe(
+    expect(beforePricingAndGoods).toHaveLength(57);
+    expect(c9Hash('registry/1', beforePricingAndGoods)).toBe(
       'd88986622d4226015298ba8b2255994ec7684bcbb5bde79883fdd2dd13732918',
     );
     expect(
       c9Hash(
         'registry/1',
-        beforePricing.filter((row) => row.capabilityKey !== admitted),
+        beforePricingAndGoods.filter((row) => row.capabilityKey !== admitted),
       ),
     ).toBe('4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63');
     expect(

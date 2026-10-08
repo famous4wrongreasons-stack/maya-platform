@@ -31,6 +31,8 @@ import path from 'node:path';
 
 import ts from 'typescript';
 
+import { withoutBookingAuditProfileProjection } from '../presentation-audit.spec-helper.spec';
+
 import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
 import { C9_CAP_BY_KEY } from '../authority/contract-bindings';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
@@ -389,7 +391,8 @@ const piiPathViolations = (files: readonly Source[]): string[] => {
 
 /**
  * The SUBMISSION's presentation members and the carriers beside them. No widget file may read one —
- * §3.8 declares `profile_id` ADVISORY (R3.8.3) and the DTO is the one place it is named.
+ * §3.8 declares `profile_id` ADVISORY (R3.8.3). §4.4.1 separately retains the claimed
+ * value as post-gateway audit metadata; only that exact AST projection is admitted below.
  */
 const SUBMITTED_PRESENTATION_INPUTS: readonly string[] = [
   'profile_id',
@@ -440,7 +443,13 @@ const presentationAntecedentViolations = (
   const out: string[] = [];
   for (const s of files) {
     if (PRESENTATION_READERS_ALLOWED.includes(s.key)) continue;
-    const { identifiers, strings } = codeTokens(s);
+    // Same exact AST sink as F88-7, not a file/identifier exemption. Predicates,
+    // queries, extra fields and a different DI binding remain visible to this fence.
+    const source =
+      s.key === 'widgets/widgets.module.ts'
+        ? parse(s.key, withoutBookingAuditProfileProjection(s.text))
+        : s;
+    const { identifiers, strings } = codeTokens(source);
     const forbidden = AUTHORITY_ANTECEDENT_SCOPE(s.key)
       ? [
           ...SUBMITTED_PRESENTATION_INPUTS,
@@ -952,6 +961,36 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
         parse('widgets/projection/planted.ts', text),
       ]).length,
     ).toBeGreaterThan(0);
+  });
+
+  it('ARCH-12-3 admits only the post-gateway audit sink, never a new predicate, query or gate binding', () => {
+    const source = fs.readFileSync(
+      path.join(WIDGETS, 'widgets.module.ts'),
+      'utf8',
+    );
+    const scan = (text: string) =>
+      presentationAntecedentViolations([
+        parse('widgets/widgets.module.ts', text),
+      ]);
+    expect(scan(source)).toEqual([]);
+    for (const text of [
+      source.replace('if (!actor.tenantId)', 'if (dto.profile_id)'),
+      source.replace(
+        'stores.recordAcceptedBookingSelection({',
+        'stores.query({',
+      ),
+      source.replace(
+        'provide: BOOKING_SELECTION_AUDIT',
+        'provide: EFFECT_ROUTE_AUDIT',
+      ),
+      source.replace(
+        'profileId: dto.profile_id,',
+        'profileId: dto.profile_id, where: dto.profile_id,',
+      ),
+    ])
+      expect(scan(text)).toContain(
+        'widgets/widgets.module.ts: reads profile_id',
+      );
   });
 
   it('ARCH-12-4 [BUILD] the projection does no arithmetic and writes no hasMore: false', () => {

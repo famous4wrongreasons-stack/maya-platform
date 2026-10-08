@@ -170,11 +170,108 @@ const OTHER_TYPED_FACT_CONTAINERS: Readonly<Record<string, string>> =
       'WidgetEnvelope facts and facts_origin written after projection',
   });
 
+/** F32b/F74b name one immutable goods receipt snapshot. Its `facts` member and
+ * the copied FactUsed array are not AdmissionFacts. Remove only these typed source
+ * expressions before applying the closed admission-fact scan; an extra ctx.facts,
+ * alias or untyped producer in the same file is still scanned. No file is waived. */
+const withoutGoodsSnapshotFacts = (unit: SourceUnit): string => {
+  const files = [
+    'inventory/goods-receipt-approval.presenter.ts',
+    'inventory/goods-receipt-terminal.presenter.ts',
+    'owner-ports/goods-receipt-approval.adapter.ts',
+  ];
+  if (!files.includes(unit.file)) return unit.source;
+  const sf = parseSource(unit.file, unit.source);
+  const spans: { start: number; end: number }[] = [];
+  const text = (node: ts.Node | undefined): string =>
+    node?.getText(sf).replace(/\s+/g, '') ?? '';
+  const functionOf = (
+    node: ts.Node,
+  ): ts.FunctionDeclaration | ts.MethodDeclaration | null => {
+    for (let p = node.parent; p; p = p.parent)
+      if (ts.isFunctionDeclaration(p) || ts.isMethodDeclaration(p)) return p;
+    return null;
+  };
+  const visit = (node: ts.Node): void => {
+    const owner = functionOf(node);
+    const name = text(owner?.name);
+    const parameter = (name: string, type: string): boolean =>
+      owner?.parameters.some(
+        (p) => text(p.name) === name && text(p.type) === type,
+      ) ?? false;
+    const snapshotPresenter =
+      unit.file === files[0] &&
+      name === 'goodsReceiptApprovalMintRequest' &&
+      text(owner?.type) === 'MintRequest' &&
+      parameter('snapshot', 'GoodsReceiptApprovalSnapshot');
+    const terminalPresenter =
+      unit.file === files[1] &&
+      name === 'goodsReceiptTerminalText' &&
+      parameter('facts', "GoodsReceiptApprovalSnapshot['facts']");
+    const ownerSnapshotType =
+      "Awaited<ReturnType<GoodsReceiptApprovalAdapter['read']>>";
+    const adapterSnapshot =
+      unit.file === files[2] &&
+      owner !== null &&
+      ((name === 'recordTerminal' && parameter('source', ownerSnapshotType)) ||
+        (name === 'decide' &&
+          owner.body?.statements.some(
+            (st) =>
+              ts.isVariableStatement(st) &&
+              st.declarationList.declarations.some(
+                (d) =>
+                  text(d.name) === 'source' &&
+                  text(d.type) === `${ownerSnapshotType}|undefined`,
+              ),
+          )));
+    const copiedSnapshot =
+      ts.isPropertyAccessExpression(node) &&
+      ((snapshotPresenter && text(node) === 'snapshot.facts') ||
+        (adapterSnapshot && text(node) === 'source.facts'));
+    const terminalSnapshot =
+      terminalPresenter &&
+      ts.isIdentifier(node) &&
+      node.text === 'facts' &&
+      !ts.isParameter(node.parent) &&
+      !(
+        ts.isPropertyAccessExpression(node.parent) && node.parent.name === node
+      );
+    const composerEvidence =
+      snapshotPresenter &&
+      ts.isPropertyAssignment(node) &&
+      text(node.name) === 'facts' &&
+      text(node.initializer) === '[fact]' &&
+      ts.isObjectLiteralExpression(node.parent) &&
+      ts.isPropertyAssignment(node.parent.parent) &&
+      text(node.parent.parent.name) === 'composerInput';
+    if (copiedSnapshot || terminalSnapshot || composerEvidence) {
+      spans.push({ start: node.getStart(sf), end: node.end });
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  let source = unit.source;
+  for (const span of spans.sort((a, b) => b.start - a.start)) {
+    // Preserve lines so a remaining violation still points to its real source location.
+    const original = source.slice(span.start, span.end);
+    const replacement = original.startsWith('facts:')
+      ? 'receiptEvidence: []'
+      : 'receiptValues';
+    source =
+      source.slice(0, span.start) +
+      replacement +
+      '\n'.repeat((original.match(/\n/g) ?? []).length) +
+      source.slice(span.end);
+  }
+  return source;
+};
+
 /** Every way `unit` reads or produces a fact its slot may not. */
 const factViolations = (unit: SourceUnit): string[] => {
   if (unit.slot === null && unit.file in OTHER_TYPED_FACT_CONTAINERS) return [];
   const out: string[] = [];
-  const sf = parseSource(unit.file, unit.source);
+  const sf = parseSource(unit.file, withoutGoodsSnapshotFacts(unit));
   const at = (n: ts.Node): string =>
     `${unit.file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
   const slotName = unit.slot === null ? 'no slot' : `slot ${unit.slot}`;
@@ -296,6 +393,56 @@ describe('T-ARCH-FACTS — who may produce and who may read each fact', () => {
         /\bfacts\b/,
       );
       expect(why.length).toBeGreaterThan(40);
+    }
+  });
+
+  it('goods snapshot projections are typed, finite, and never hide an added AdmissionFacts reader', () => {
+    for (const file of [
+      'inventory/goods-receipt-approval.presenter.ts',
+      'inventory/goods-receipt-terminal.presenter.ts',
+      'owner-ports/goods-receipt-approval.adapter.ts',
+    ]) {
+      const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+      expect(factViolations({ slot: null, file, source })).toEqual([]);
+      expect(
+        factViolations({
+          slot: null,
+          file,
+          source:
+            source + '\nconst invalid = (ctx: any) => ctx.facts.loweredTurn;\n',
+        }),
+      ).toEqual([expect.stringContaining('no slot reads loweredTurn')]);
+    }
+    const file = 'inventory/goods-receipt-terminal.presenter.ts';
+    const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    expect(
+      factViolations({
+        slot: null,
+        file,
+        source: source.replace(
+          "GoodsReceiptApprovalSnapshot['facts']",
+          'AdmissionFacts',
+        ),
+      }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('the goods approval edge reads the Class A turn only as the derived slot 13 helper', () => {
+    const file = 'routing/edges/approval-decision.edge.ts';
+    const units = pipeline.slotUnits.filter((u) => u.file === file);
+    expect(units.map((u) => u.slot)).toEqual(['13']);
+    expect(units.flatMap(factViolations)).toEqual([]);
+    const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    for (const slot of [null, '5', '10']) {
+      const violations = factViolations({ slot, file, source });
+      expect(violations).toEqual([
+        expect.stringContaining(
+          `${slot === null ? 'no slot' : `slot ${slot}`} reads loweredTurn`,
+        ),
+        expect.stringContaining(
+          `${slot === null ? 'no slot' : `slot ${slot}`} reads loweredTurn`,
+        ),
+      ]);
     }
   });
 

@@ -1,4 +1,7 @@
-import { bookingSelectionPreferences } from '../booking/booking-selection-preferences';
+import {
+  bookingSelectionPreferences,
+  type BookingNounOpener,
+} from '../booking/booking-selection-preferences';
 import { stableActionJson } from '../../action-engine/action-engine.identity';
 import { sha256Hex } from '../token.util';
 // K3 — the timeline store: conversation turns and emissions (§4.4.1, T_TIMELINE).
@@ -253,6 +256,7 @@ export class TimelineStore {
     conversationId: string,
     beforeTurnId: string,
     now: Date,
+    openNoun: BookingNounOpener,
   ) {
     await TimelineStore.lockConversation(tx, tenantId, conversationId);
     const turn = await tx.widgetTimelineTurn.findFirst({
@@ -322,7 +326,7 @@ export class TimelineStore {
         },
       },
     });
-    return bookingSelectionPreferences(records, tenantId);
+    return bookingSelectionPreferences(records, tenantId, openNoun);
   }
 
   /** Bounded history-only replay. The result is text, never a live intent or authority. */
@@ -730,17 +734,33 @@ export class TimelineStore {
     principalProofHash: string,
     now: Date,
   ): Promise<void> {
-    const row = await tx.widgetTimelineTurn.findFirst({
-      where: scoped(tenantId, {
-        conversationId,
-        principalProofHash,
+    const row = await TimelineStore.readLiveConversationAnchor(
+      tx,
+      { tenantId, conversationId, principalProofHash },
+      now,
+    );
+    if (row === null)
+      throw new ConflictException('conversation_scope_conflict');
+  }
+
+  /** Caller owns authority and the conversation lock; only the exact live row identity escapes. */
+  static readLiveConversationAnchor(
+    tx: Pick<TimelineClient, 'widgetTimelineTurn'>,
+    input: Pick<
+      TimelineTurnInput,
+      'tenantId' | 'conversationId' | 'principalProofHash'
+    >,
+    now: Date,
+  ): Promise<{ id: string } | null> {
+    return tx.widgetTimelineTurn.findFirst({
+      where: scoped(input.tenantId, {
+        conversationId: input.conversationId,
+        principalProofHash: input.principalProofHash,
         erasedAt: null,
         retentionUntil: { gt: now },
       }),
       select: { id: true },
     });
-    if (row === null)
-      throw new ConflictException('conversation_scope_conflict');
   }
 
   static async ensureAssistantExecutionTurn(

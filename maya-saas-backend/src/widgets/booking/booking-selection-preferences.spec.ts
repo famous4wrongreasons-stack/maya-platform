@@ -1,6 +1,6 @@
 /** Pure recovery seams with synthetic sealed nouns and explicit record snapshots.
  * These tests do not qualify HTTP admission, persistence, provider or model behavior. */
-import { SealService } from '../emission/seal.service';
+import { openWidgetNounHandle, SealService } from '../emission/seal.service';
 import { encodeSelectionDomain } from '../input-schema/codec';
 import type { OwnerNounIdentity } from '../noun-resolution/noun-handle.codec';
 import {
@@ -10,9 +10,15 @@ import {
 } from './booking-noun-identity';
 import {
   bookingClosedSelection,
-  bookingSelectionPreferences,
+  bookingSelectionPreferences as projectBookingSelectionPreferences,
   type BookingPreferenceRecord,
 } from './booking-selection-preferences';
+
+const bookingSelectionPreferences = (
+  records: readonly BookingPreferenceRecord[],
+  tenantId: string,
+) =>
+  projectBookingSelectionPreferences(records, tenantId, openWidgetNounHandle);
 
 const TENANT = 'synthetic-tenant-a';
 const SCOPE: BookingSlotScope = {
@@ -106,6 +112,30 @@ describe('Booking selection preferences — pure synthetic evidence seams', () =
     expect(bookingSelectionPreferences([record], TENANT)).toEqual(
       expectedService,
     );
+  });
+
+  it('requires the supplied verifier and refuses its missing or foreign noun without a fallback', () => {
+    const choice = handle('service', '81');
+    const record = accepted('service', choice);
+    const refused = jest.fn(() => null);
+    expect(
+      projectBookingSelectionPreferences([record], TENANT, refused),
+    ).toBeNull();
+    expect(refused).toHaveBeenCalledWith(choice);
+    const foreign = jest.fn(() => ({
+      tenantId: 'foreign-tenant',
+      noun: 'service',
+      ownerKind: BOOKING_NOUN_OWNERS.service,
+      ownerRef: '81',
+    }));
+    expect(
+      projectBookingSelectionPreferences([record], TENANT, foreign),
+    ).toBeNull();
+    const verified = jest.fn(openWidgetNounHandle);
+    expect(
+      projectBookingSelectionPreferences([record], TENANT, verified),
+    ).toEqual(expectedService);
+    expect(verified).toHaveBeenCalledWith(choice);
   });
 
   it('recovers service and staff with the exact same original branch/source scope', () => {

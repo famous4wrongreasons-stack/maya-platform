@@ -242,3 +242,42 @@ describe('TimelineStore authoritative clock', () => {
     expect(query).toHaveBeenCalledWith(['SELECT clock_timestamp() AS now']);
   });
 });
+
+describe('TimelineStore privacy anchor projection', () => {
+  const scope = {
+    tenantId: INPUT.tenantId,
+    conversationId: INPUT.conversationId,
+    principalProofHash: INPUT.principalProofHash,
+  };
+
+  it('reads only the exact live principal/conversation identity on the caller transaction', async () => {
+    const findFirst = jest.fn().mockResolvedValue({ id: 'owned-turn' });
+    const tx = { widgetTimelineTurn: { findFirst } } as unknown as RequestTx;
+    expect(
+      await TimelineStore.readLiveConversationAnchor(tx, scope, NOW),
+    ).toEqual({ id: 'owned-turn' });
+    expect(findFirst).toHaveBeenCalledTimes(1);
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { ...scope, erasedAt: null, retentionUntil: { gt: NOW } },
+      select: { id: true },
+    });
+  });
+
+  it('keeps an absent live anchor unavailable and preserves the existing assertion refusal', async () => {
+    const findFirst = jest.fn().mockResolvedValue(null);
+    const tx = { widgetTimelineTurn: { findFirst } } as unknown as RequestTx;
+    expect(
+      await TimelineStore.readLiveConversationAnchor(tx, scope, NOW),
+    ).toBeNull();
+    await expect(
+      TimelineStore.assertConversation(
+        tx,
+        scope.tenantId,
+        scope.conversationId,
+        scope.principalProofHash,
+        NOW,
+      ),
+    ).rejects.toThrow('conversation_scope_conflict');
+    expect(findFirst).toHaveBeenCalledTimes(2);
+  });
+});

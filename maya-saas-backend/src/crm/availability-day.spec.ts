@@ -6,6 +6,10 @@ import {
 } from './appointment-time.utils';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { presentBookingSelector } from '../widgets/booking/booking-selector.presenter';
+import {
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 
 const cases = [
   ['UTC', '2026-10-01T23:59:59Z', '2026-10-02'],
@@ -22,6 +26,80 @@ const cases = [
 ] as const;
 
 describe('L5/L24 canonical one-day availability', () => {
+  it('projects only current CRM calendar/branch reads and preserves tenant and source refusals', async () => {
+    const context = new TenantContextService();
+    const branch = {
+      id: 'branch',
+      name: 'Synthetic branch',
+      timezone: 'Europe/Moscow',
+      sourceRevision: 'a'.repeat(64),
+    };
+    const source = {
+      getCalendarSource: jest.fn().mockResolvedValue('external'),
+      readBranchAvailabilityRevision: jest
+        .fn()
+        .mockResolvedValue(branch.sourceRevision),
+      resolveConfiguredBookingBranch: jest.fn().mockResolvedValue(branch),
+    };
+    const owner = new AvailabilityCalendarService(
+      {} as PrismaService,
+      context,
+      source,
+    );
+    await context.runAsSystemTenant('tenant', async () => {
+      await expect(owner.getCalendarSource('tenant')).resolves.toBe('external');
+      await expect(
+        owner.resolveConfiguredBookingBranch('tenant'),
+      ).resolves.toBe(branch);
+      await expect(
+        owner.readBranchAvailabilityRevision('tenant', 'branch'),
+      ).resolves.toBe(branch.sourceRevision);
+      expect(source.getCalendarSource).toHaveBeenCalledWith('tenant');
+      expect(source.resolveConfiguredBookingBranch).toHaveBeenCalledWith(
+        'tenant',
+      );
+      expect(source.readBranchAvailabilityRevision).toHaveBeenCalledWith(
+        'tenant',
+        'branch',
+      );
+      for (const denial of [
+        new ForbiddenException('Source denied'),
+        new ServiceUnavailableException({
+          error: { code: 'booking_branch_source_unavailable' },
+        }),
+      ]) {
+        source.resolveConfiguredBookingBranch.mockRejectedValueOnce(denial);
+        await expect(
+          owner.resolveConfiguredBookingBranch('tenant'),
+        ).rejects.toBe(denial);
+      }
+      await expect(owner.getCalendarSource('foreign')).rejects.toThrow();
+      await expect(
+        owner.resolveConfiguredBookingBranch('foreign'),
+      ).rejects.toThrow();
+      await expect(
+        owner.readBranchAvailabilityRevision('foreign', 'branch'),
+      ).rejects.toThrow();
+    });
+    expect(source.getCalendarSource).toHaveBeenCalledTimes(1);
+    expect(source.resolveConfiguredBookingBranch).toHaveBeenCalledTimes(3);
+    expect(source.readBranchAvailabilityRevision).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not infer an internal calendar or unscoped branch when the source projection is absent', async () => {
+    const context = new TenantContextService();
+    const owner = new AvailabilityCalendarService({} as PrismaService, context);
+    await context.runAsSystemTenant('tenant', async () => {
+      await expect(owner.getCalendarSource('tenant')).resolves.toBeNull();
+      await expect(
+        owner.resolveConfiguredBookingBranch('tenant'),
+      ).rejects.toThrow(ServiceUnavailableException);
+      await expect(
+        owner.readBranchAvailabilityRevision('tenant', 'branch'),
+      ).rejects.toThrow(ServiceUnavailableException);
+    });
+  });
+
   it.each(cases)(
     'L5-CALENDAR %s at %s selects local calendar %s',
     (timezone, now, date) => {

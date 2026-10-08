@@ -74,6 +74,7 @@ describe('fixed no-handoff certificate threshold', () => {
           ([key, row]) => [key, bookingTemplateAsIntentRow(row)] as const,
         ),
         ...Object.entries(INTENT_TEMPLATE_INVENTORY.servicePrice),
+        ...Object.entries(INTENT_TEMPLATE_INVENTORY.goodsReceipt),
         ...Object.entries(INTENT_TEMPLATE_INVENTORY.schedule),
       ]
         .map(
@@ -122,8 +123,16 @@ describe('fixed no-handoff certificate threshold', () => {
         'commit.service-price.approve@1',
         'commit.service-price.reject@1',
         'navigate.service-price.detail@1',
+        'commit.goods-receipt.approve@1',
+        'commit.goods-receipt.reject@1',
+        'navigate.goods-receipt.detail@1',
       ]),
     );
+    expect(Object.keys(INTENT_TEMPLATE_INVENTORY.goodsReceipt).sort()).toEqual([
+      'commit.goods-receipt.approve@1',
+      'commit.goods-receipt.reject@1',
+      'navigate.goods-receipt.detail@1',
+    ]);
     expect(
       Object.values(PROFILE_REGISTRY.tuples).every(
         (row) => !row.kinds.includes('SETTINGS_DRAFT'),
@@ -140,6 +149,7 @@ describe('fixed no-handoff certificate threshold', () => {
       'general',
       'booking',
       'servicePrice',
+      'goodsReceipt',
       'schedule',
     ] as const) {
       const partial = { ...INTENT_TEMPLATE_INVENTORY };

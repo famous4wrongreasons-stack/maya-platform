@@ -198,7 +198,11 @@ describe('COMMIT OUTSIDE CONFIRMATION: IMPOSSIBLE', () => {
   });
 });
 
-describe('Legacy booking owner admits none of the 93 current MONEY keys', () => {
+describe('Legacy booking owner admits none of the 94 current MONEY keys', () => {
+  const additions = [
+    'crm.service.fixed-price.update.v1',
+    'crm.goods.receipt.create.v1',
+  ];
   const rows = () => {
     const r = new ActionCapabilityRegistry() as unknown as Record<
       string,
@@ -213,24 +217,41 @@ describe('Legacy booking owner admits none of the 93 current MONEY keys', () => 
     )();
   };
 
-  it('the predicate selects the prior 92 MONEY keys plus exact YC-SP1 from 227', () => {
-    // Preserve the historical census after removing only the exact YC-SP1 addition.
+  it('preserves the 92/226 census plus only exact YC-SP1 and goods receipt additions', () => {
+    // These approved capabilities do not widen the separate booking COMMIT allowlist.
     const money = rows().filter(isMoney);
-    expect(money).toHaveLength(93);
-    expect(rows()).toHaveLength(227);
+    expect(money).toHaveLength(94);
+    expect(rows()).toHaveLength(228);
     expect(
-      money.filter(
-        (row) => row.capability !== 'crm.service.fixed-price.update.v1',
-      ),
+      rows().filter((row) => !additions.includes(row.capability)),
+    ).toHaveLength(226);
+    expect(
+      money.filter((row) => !additions.includes(row.capability)),
     ).toHaveLength(92);
+    expect(
+      money
+        .filter((row) => additions.includes(row.capability))
+        .map((row) => row.capability)
+        .sort(),
+    ).toEqual([...additions].sort());
   });
 
   it('reproduces the contract’s documented WRONG answer for the bare token', () => {
-    // Historical 92 vs 12 plus one financial YC-SP1 row: the incomplete bare-token
-    // predicate must still select only 13 of the current 93 MONEY capabilities.
+    // Preserve the historical WRONG 12/92 answer; each approved addition has
+    // the bare financial facet, which still misses most MONEY capabilities.
+    const bare = rows().filter((c) =>
+      (c.riskFacets ?? []).includes('financial'),
+    );
+    expect(bare).toHaveLength(14);
     expect(
-      rows().filter((c) => (c.riskFacets ?? []).includes('financial')),
-    ).toHaveLength(13);
+      bare.filter((row) => !additions.includes(row.capability)),
+    ).toHaveLength(12);
+    expect(
+      bare
+        .filter((row) => additions.includes(row.capability))
+        .map((row) => row.capability)
+        .sort(),
+    ).toEqual([...additions].sort());
     expect(MONEY_FACETS).toHaveLength(16);
     expect(MONEY_TARGET_KINDS).toHaveLength(27);
   });
@@ -239,7 +260,7 @@ describe('Legacy booking owner admits none of the 93 current MONEY keys', () => 
     const money = rows().filter(isMoney);
     const admitted = money.filter((c) => isAllowlisted(c.capability));
     expect(admitted).toEqual([]);
-    expect(money.length).toBe(93);
+    expect(money.length).toBe(94);
   });
 
   it('crm.visit.payment.v1 is money and is not mintable', () => {

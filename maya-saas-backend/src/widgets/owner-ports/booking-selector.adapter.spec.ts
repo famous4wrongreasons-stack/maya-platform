@@ -7,6 +7,9 @@ import { SealService } from '../emission/seal.service';
 import { BookingSelectorAdapter } from './booking-selector.adapter';
 
 const availability = {
+  getCalendarSource: jest.fn().mockResolvedValue(null),
+  readBranchAvailabilityRevision: jest.fn().mockResolvedValue(null),
+  resolveConfiguredBookingBranch: jest.fn().mockResolvedValue(null),
   nextAvailabilityDay: jest
     .fn()
     .mockResolvedValue({ date: '2026-10-02', timezone: 'UTC', branchId: null }),
@@ -72,8 +75,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
       const crm = { getCalendarSource: jest.fn().mockResolvedValue(source) };
       const adapter = new BookingSelectorAdapter(
         runtime as never,
-        availability as never,
-        crm as never,
+        { ...availability, ...crm } as never,
       );
 
       await expect(adapter.readCalendarSource(TENANT)).resolves.toBe(source);
@@ -102,8 +104,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
     const crm = { getCalendarSource: jest.fn().mockRejectedValue(denial) };
     const adapter = new BookingSelectorAdapter(
       runtime as never,
-      availability as never,
-      crm as never,
+      { ...availability, ...crm } as never,
     );
 
     await expect(adapter.readCalendarSource(OTHER_TENANT)).rejects.toBe(denial);
@@ -226,8 +227,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
     };
     const adapter = new BookingSelectorAdapter(
       runtime as never,
-      availability as never,
-      crm as never,
+      { ...availability, ...crm } as never,
     );
     const service = handle(
       TENANT,
@@ -295,8 +295,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
     };
     const adapter = new BookingSelectorAdapter(
       runtime as never,
-      availability as never,
-      crm as never,
+      { ...availability, ...crm } as never,
     );
     const service = handle(
       TENANT,

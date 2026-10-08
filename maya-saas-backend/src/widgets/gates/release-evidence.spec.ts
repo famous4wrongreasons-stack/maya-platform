@@ -7,6 +7,7 @@ import {
 import fs from 'node:fs';
 import path from 'node:path';
 import { AE_WIDGET_COMMIT_ALLOWLIST } from '../booking/booking-allowlist';
+import { AE_CAPABILITY_GAP_LEDGER } from '../authority/ae-capability-gap-ledger.runtime';
 import {
   AE_PROPOSE_PAIRING,
   hasExactlyOnePairing,
@@ -83,20 +84,41 @@ describe('Final release evidence scope', () => {
   });
 });
 
-// Current V1.4 candidate: the exact catalogue-price subtype is the sole MONEY
-// addition. This structural check does not issue new §4.5 release evidence.
-it('AR-FR6D-SCOPE pins only YC-SP1 inside MONEY and retains the payment emission gap', () => {
+// Exact approved MONEY subtypes: YC-SP1 and F32b/F74b's single goods receipt.
+// This structural check does not issue new §4.5 release evidence.
+it('AR-FR6D-SCOPE pins only the approved price and goods subtypes and retains every other MONEY gap', () => {
   const registry = new ActionCapabilityRegistry();
-  expect(Object.keys(RUNTIME_ALLOWLIST)).toHaveLength(11);
+  const keys = Object.keys(RUNTIME_ALLOWLIST);
+  expect(
+    keys.filter((key) => key !== 'crm.goods.receipt.create.v1'),
+  ).toHaveLength(11);
+  expect(keys).toHaveLength(12);
   const money = Object.keys(RUNTIME_ALLOWLIST).filter((key) =>
     MONEY(registry.get(key)),
   );
-  expect(money).toEqual(['crm.service.fixed-price.update.v1']);
-  expect(RUNTIME_ALLOWLIST[money[0]]).toMatchObject({
-    family: 'catalogue_price_configuration',
+  expect(money.sort()).toEqual([
+    'crm.goods.receipt.create.v1',
+    'crm.service.fixed-price.update.v1',
+  ]);
+  expect(RUNTIME_ALLOWLIST['crm.service.fixed-price.update.v1']).toMatchObject(
+    {
+      family: 'catalogue_price_configuration',
+      confirmation_kind: 'APPROVAL',
+      min_verification: 'SESSION_VERIFIED',
+      propose: { space: 'C9', key: 'catalog.service.price.update' },
+    },
+  );
+  expect(RUNTIME_ALLOWLIST['crm.goods.receipt.create.v1']).toEqual({
+    family: 'inventory_receipt_purchase_cost',
     confirmation_kind: 'APPROVAL',
     min_verification: 'SESSION_VERIFIED',
-    propose: { space: 'C9', key: 'catalog.service.price.update' },
+    requires_ae_approval: false,
+    propose: { space: 'C9', key: 'inventory.goods.receipt.prepare' },
   });
+  for (const cap of registry.list().filter((row) => MONEY(row))) {
+    if (money.includes(cap.capability)) continue;
+    expect(RUNTIME_ALLOWLIST[cap.capability]).toBeUndefined();
+    expect(AE_CAPABILITY_GAP_LEDGER[cap.capability]).toBeDefined();
+  }
   expect(emittable('PAYMENT_HANDOFF')).toBe(false);
 });

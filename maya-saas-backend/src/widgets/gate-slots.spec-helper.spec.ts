@@ -75,12 +75,59 @@ const walk = (dir: string): string[] =>
     return e.isDirectory() ? walk(full) : [full];
   });
 
+/** The router's executable destination helpers share its slot. This closed
+ * namespace is traversed by value import, not by a hand-written slot/file table.
+ * Type-only imports do not run an edge. Other modules keep their own boundary
+ * (notably owner-ports and pure presentation), and any AdmissionFacts read there
+ * remains a no-slot violation rather than silently acquiring a reader slot. */
+export const routingEdgeClosure = (
+  roots: readonly string[],
+  read: (file: string) => string = readWidget,
+): readonly string[] => {
+  const seen = new Set(roots);
+  const pending = [...roots];
+  while (pending.length > 0) {
+    const file = pending.pop()!;
+    const sf = parseSource(file, read(file));
+    for (const st of sf.statements) {
+      if (
+        !ts.isImportDeclaration(st) ||
+        !ts.isStringLiteral(st.moduleSpecifier) ||
+        !st.moduleSpecifier.text.startsWith('.') ||
+        st.importClause?.isTypeOnly
+      )
+        continue;
+      const clause = st.importClause;
+      const bindings = clause?.namedBindings;
+      if (
+        clause &&
+        !clause.name &&
+        bindings &&
+        ts.isNamedImports(bindings) &&
+        bindings.elements.every((el) => el.isTypeOnly)
+      )
+        continue;
+      const next = path.posix.normalize(
+        path.posix.join(
+          path.posix.dirname(file),
+          `${st.moduleSpecifier.text}.ts`,
+        ),
+      );
+      if (!next.startsWith('routing/edges/') || seen.has(next)) continue;
+      seen.add(next);
+      pending.push(next);
+    }
+  }
+  return [...seen].sort();
+};
+
 export const pipelineSources = (
   gatewaySource: string = readWidget(GATEWAY),
 ): PipelineSources => {
   const sf = parseSource(GATEWAY, gatewaySource);
 
   const importedFrom = new Map<string, string>();
+  const importedValues = new Map<string, string>();
   for (const st of sf.statements) {
     if (
       !ts.isImportDeclaration(st) ||
@@ -90,11 +137,12 @@ export const pipelineSources = (
       continue;
     const bindings = st.importClause?.namedBindings;
     if (!bindings || !ts.isNamedImports(bindings)) continue;
-    for (const el of bindings.elements)
-      importedFrom.set(
-        el.name.text,
-        path.posix.normalize(`${st.moduleSpecifier.text}.ts`),
-      );
+    for (const el of bindings.elements) {
+      const file = path.posix.normalize(`${st.moduleSpecifier.text}.ts`);
+      importedFrom.set(el.name.text, file);
+      if (!st.importClause?.isTypeOnly && !el.isTypeOnly)
+        importedValues.set(el.name.text, file);
+    }
   }
 
   /**
@@ -145,7 +193,7 @@ export const pipelineSources = (
     const files = new Set<string>();
     const visit = (n: ts.Node): void => {
       if (ts.isIdentifier(n)) {
-        const f = importedFrom.get(n.text);
+        const f = importedValues.get(n.text);
         if (f !== undefined) files.add(f);
       }
       // `this.<member>`: the file the member's declared type is imported from (see `memberFile`).
@@ -159,7 +207,7 @@ export const pipelineSources = (
       ts.forEachChild(n, visit);
     };
     visit(element);
-    for (const f of [...files].sort()) {
+    for (const f of routingEdgeClosure([...files])) {
       mapped.add(f);
       slotUnits.push({ slot, file: f, source: readWidget(f) });
     }
@@ -416,6 +464,38 @@ describe('pipeline slot sources', () => {
     expect(p.gatewayRest.source).not.toMatch(/n: '1'/);
     expect(p.otherUnits.map((u) => u.file)).toContain('gates/facts.ts');
     expect(p.otherUnits.map((u) => u.file)).not.toContain('gates/gate5.ts');
+  });
+
+  it('derives slot 13 destination edges from runtime imports, including transitive helpers', () => {
+    const pipeline = pipelineSources();
+    const slotsOf = (file: string) =>
+      pipeline.slotUnits.filter((u) => u.file === file).map((u) => u.slot);
+    expect(slotsOf('routing/edges/approval-decision.edge.ts')).toEqual(['13']);
+    expect(slotsOf('routing/edges/actuating-input.ts')).toEqual(['13']);
+    expect(pipeline.otherUnits.map((u) => u.file)).not.toContain(
+      'routing/edges/approval-decision.edge.ts',
+    );
+    const root = 'routing/probe.ts';
+    const sources: Record<string, string> = {
+      [root]: "import { edge } from './edges/a';",
+      'routing/edges/a.ts':
+        "import { helper } from './b'; export const edge = helper;",
+      'routing/edges/b.ts': 'export const helper = 1;',
+    };
+    expect(routingEdgeClosure([root], (file) => sources[file])).toEqual([
+      'routing/edges/a.ts',
+      'routing/edges/b.ts',
+      root,
+    ]);
+    for (const source of [
+      "import type { edge } from './edges/a';",
+      "import { type edge } from './edges/a';",
+    ])
+      expect(
+        routingEdgeClosure([root], (file) =>
+          file === root ? source : sources[file],
+        ),
+      ).toEqual([root]);
   });
 
   it('follows a context member through each spelling that reaches it, and classifies each use', () => {

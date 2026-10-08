@@ -1,7 +1,10 @@
 import { observedGoodsItem } from '../crm/yclients-goods-read';
 import { ActionCapabilityRegistry } from '../action-engine/action-engine.registry';
 import { c9Capability } from '../orchestration/c9.registry';
-import { AE_WIDGET_COMMIT_ALLOWLIST } from '../widgets/authority/ae-commit-allowlist.runtime';
+import {
+  AE_WIDGET_COMMIT_ALLOWLIST,
+  MONEY,
+} from '../widgets/authority/ae-commit-allowlist.runtime';
 import { AE_CAPABILITY_GAP_LEDGER } from '../widgets/authority/ae-capability-gap-ledger.runtime';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import { goodsReadReply } from './goods-presentation';
@@ -42,7 +45,7 @@ describe('goods source reply and finite registrations', () => {
       ).status,
     ).toBe('blocked');
   });
-  it('registers one READ and one proposal with owner rights while preserving money widget refusal', () => {
+  it('registers one READ and one proposal with only the approved goods MONEY subtype', () => {
     const tools = new AiToolRegistryService();
     expect(tools.get('inventory.goods.read').allowedRoles).toEqual([
       'tenant_owner',
@@ -56,7 +59,19 @@ describe('goods source reply and finite registrations', () => {
       'crm.goods.receipt.create.v1',
     );
     expect(cap.riskFacets).toContain('financial');
-    expect(AE_WIDGET_COMMIT_ALLOWLIST[cap.capability]).toBeUndefined();
-    expect(AE_CAPABILITY_GAP_LEDGER[cap.capability]).toBeDefined();
+    expect(MONEY(cap)).toBe(true);
+    expect(AE_WIDGET_COMMIT_ALLOWLIST[cap.capability]).toEqual({
+      family: 'inventory_receipt_purchase_cost',
+      confirmation_kind: 'APPROVAL',
+      min_verification: 'SESSION_VERIFIED',
+      requires_ae_approval: false,
+      propose: { space: 'C9', key: 'inventory.goods.receipt.prepare' },
+    });
+    expect(AE_CAPABILITY_GAP_LEDGER[cap.capability]).toBeUndefined();
+    expect(AE_WIDGET_COMMIT_ALLOWLIST['crm.visit.payment.v1']).toBeUndefined();
+    expect(AE_CAPABILITY_GAP_LEDGER['crm.visit.payment.v1']).toBeDefined();
+    expect(
+      AE_WIDGET_COMMIT_ALLOWLIST['crm.goods.receipt.create.v2'],
+    ).toBeUndefined();
   });
 });

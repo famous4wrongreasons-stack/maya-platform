@@ -1,5 +1,6 @@
 import { decodeSelectionDomain } from '../input-schema/codec';
-import { openWidgetNounHandle } from '../emission/seal.service';
+import type { OwnerNounIdentity } from '../noun-resolution/noun-handle.codec';
+import type { Handle } from '../noun-resolution/noun-handles';
 import {
   decodeBookingCatalogOwnerRef,
   isBookingNounIdentity,
@@ -53,11 +54,15 @@ export interface BookingPreferenceRecord {
   submissionAudits: { inputsClosedJson: unknown; erasedAt: Date | null }[];
 }
 
+/** Supplied only by the server composition owner; this shared projection holds no key. */
+export type BookingNounOpener = (handle: Handle) => OwnerNounIdentity | null;
+
 /** NEW explicit chat preference recovery only. Caller owns current principal/conversation/TTL
  * filtering. Any uncertain adjudication, different retry input, erasure or overflow refuses. */
 export function bookingSelectionPreferences(
   records: readonly BookingPreferenceRecord[],
   tenantId: string,
+  openNoun: BookingNounOpener,
 ): {
   selectedAt: string;
   services: string[];
@@ -67,7 +72,7 @@ export function bookingSelectionPreferences(
 } | null {
   if (!records.length || records.length > 32) return null;
   const open = (handle: string, noun: 'service' | 'staff') => {
-    const identity = openWidgetNounHandle(handle as never);
+    const identity = openNoun(handle as Handle);
     return identity?.tenantId === tenantId &&
       isBookingNounIdentity(identity, noun)
       ? decodeBookingCatalogOwnerRef(identity.ownerRef)

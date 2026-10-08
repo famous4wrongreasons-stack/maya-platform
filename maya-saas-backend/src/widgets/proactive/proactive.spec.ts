@@ -427,13 +427,32 @@ describe('K13 — no C10 autonomy', () => {
     const openers = rows.filter(
       (c) => c.mode === 'PROPOSE_ONLY' || c.mode === 'OWNER_HANDOFF',
     );
-    // V1.4 YC-SP1 adds exactly one PROPOSE_ONLY price key to the prior 57.
-    // READ membership and the two OWNER_HANDOFF keys are unchanged.
-    expect(rows).toHaveLength(58);
-    expect(reads).toHaveLength(42);
-    expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(14);
+    // Preserve the YC-SP1 census (57 + one price proposal). The later finite
+    // goods delta adds exactly one READ and one PROPOSE_ONLY, never an initiator.
+    const goodsKeys = [
+      'inventory.goods.read',
+      'inventory.goods.receipt.prepare',
+    ];
+    const beforeGoods = rows.filter((c) => !goodsKeys.includes(c.capabilityKey));
+    expect(beforeGoods).toHaveLength(58);
+    expect(beforeGoods.filter((c) => c.mode === 'READ')).toHaveLength(42);
+    expect(
+      beforeGoods.filter((c) => c.mode === 'PROPOSE_ONLY'),
+    ).toHaveLength(14);
+    expect(
+      rows
+        .filter((c) => goodsKeys.includes(c.capabilityKey))
+        .map((c) => [c.capabilityKey, c.mode])
+        .sort(),
+    ).toEqual([
+      ['inventory.goods.read', 'READ'],
+      ['inventory.goods.receipt.prepare', 'PROPOSE_ONLY'],
+    ]);
+    expect(rows).toHaveLength(60);
+    expect(reads).toHaveLength(43);
+    expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(15);
     expect(rows.filter((c) => c.mode === 'OWNER_HANDOFF')).toHaveLength(2);
-    expect(openers).toHaveLength(16);
+    expect(openers).toHaveLength(17);
     for (const r of reads)
       expect(isRunOpening({ space: 'C9', key: r.capabilityKey })).toBe(false);
     for (const o of openers)

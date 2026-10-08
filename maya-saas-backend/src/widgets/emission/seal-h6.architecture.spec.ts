@@ -231,6 +231,45 @@ describe('P-SEAL — SEAL-5: no seal key under the gateway', () => {
     expect(closure.size).toBeGreaterThan(10);
   });
 
+  it('SEAL-5 booking preference recovery requires an explicit verifier without importing key custody into the store', () => {
+    const helper = path.join(
+      WIDGETS,
+      'booking/booking-selection-preferences.ts',
+    );
+    expect(valueImports(helper).map(srcKey)).not.toContain(
+      'widgets/emission/seal.service.ts',
+    );
+    const project = parse(helper).statements.find(
+      (node): node is ts.FunctionDeclaration =>
+        ts.isFunctionDeclaration(node) &&
+        node.name?.text === 'bookingSelectionPreferences',
+    );
+    expect(project).toBeDefined();
+    expect(project!.parameters).toHaveLength(3);
+    const opener = project!.parameters[2];
+    expect(opener.name.getText()).toBe('openNoun');
+    expect(opener.questionToken).toBeUndefined();
+    expect(opener.initializer).toBeUndefined();
+    const store = fs.readFileSync(
+      path.join(WIDGETS, 'stores/timeline.store.ts'),
+      'utf8',
+    );
+    expect(store).toContain(
+      'bookingSelectionPreferences(records, tenantId, openNoun)',
+    );
+    expect(store).not.toContain('openWidgetNounHandle');
+    const composition = fs.readFileSync(
+      path.join(WIDGETS, 'composition/typed-step0.ts'),
+      'utf8',
+    );
+    expect(composition).toMatch(
+      /readBookingSelection\([\s\S]*?now,\s*openWidgetNounHandle,\s*\)/,
+    );
+    expect([...closure].map(srcKey)).not.toContain(
+      'widgets/composition/typed-step0.ts',
+    );
+  });
+
   it('SEAL-5 [BUILD] nothing the gateway reaches at run time holds or reads the key', () => {
     // "Holds the key" is constructing `ActionIdentityService` with secrets, or reading a secret —
     // not merely being able to see the class. The gateway already reaches the class's MODULE, through

@@ -374,6 +374,8 @@ const STORE_METHOD_ALLOWLIST = new Set([
   'appendUserTurn',
   'readUserTurn',
   'assertConversation',
+  'readLiveConversationAnchor', // privacy metadata only; never transcript content
+  'assertNotErased', // private late-writer fence inside the single turn owner
   'ensureAssistantExecutionTurn',
   'appendTurn',
   'ensureAssistantTurn',
@@ -641,6 +643,36 @@ describe('T-ARCH-STORE-METHODS — no second method reaches the turn table (9.11
       expect([name, declarationOf(sf, name) !== null]).toEqual([name, true]);
       expect(STORE_METHOD_ALLOWLIST.has(name)).toBe(true);
     }
+  });
+
+  it('T-ARCH-STORE-ERASURE privacy reaches only a live identity projection and the existing RT6 job', () => {
+    const source = parseSrc('widgets/stores/timeline.store.ts');
+    for (const name of ['readLiveConversationAnchor', 'assertNotErased']) {
+      const method = declarationOf(source, name);
+      expect(method).not.toBeNull();
+      const text = method!.getText(source);
+      expect(
+        prismaOps(parseSource('erasure.ts', `class Owner { ${text} }`)),
+      ).toEqual(['widgetTimelineTurn.findFirst']);
+      expect(text).toContain('scoped(input.tenantId');
+      expect(text).toContain('conversationId: input.conversationId');
+      expect(text).toContain('principalProofHash: input.principalProofHash');
+      expect(text).toContain('select: { id: true }');
+      expect(text).not.toMatch(
+        /\btextContent\b|\bspokenTranscript\b|\bsemanticContext\b/,
+      );
+    }
+    const owner = parseSrc('widgets/consent/history-erasure.owner.ts');
+    expect(
+      prismaOps(owner).filter(
+        (op) =>
+          op.startsWith('widgetTimelineTurn.') || op.startsWith('$execute'),
+      ),
+    ).toEqual([]);
+    expect(owner.getFullText()).not.toContain('JOIN "WidgetTimelineTurn"');
+    expect(callsOf(owner, 'readLiveConversationAnchor')).toBe(1);
+    expect(callsOf(owner, 'hasUnlinkedDraftContent')).toBe(1);
+    expect(callsOf(owner, 'lockRequest')).toBe(1);
   });
 
   it('T-ARCH-STORE-BOOKING preference recovery reads only identity and retained closed choices, never text or authority', () => {

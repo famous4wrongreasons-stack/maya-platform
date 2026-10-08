@@ -409,9 +409,8 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
     ctx(rec({ effect: 'COMMIT', capabilitySpace: 'AE', capabilityKey: key }));
 
   it('S-REG-AE: an unregistered AE key refuses at the registration check', async () => {
-    expect(detail(await gate6(ae('not.registered.v1')))).toBe(
-      'unregistered AE key',
-    );
+    for (const key of ['not.registered.v1', 'crm.goods.receipt.create.v2'])
+      expect(detail(await gate6(ae(key)))).toBe('unregistered AE key');
   });
 
   it('U6-L2: consent and identity keys reach ordinary condition (a); AL-2 owns their classification veto', async () => {
@@ -446,7 +445,12 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
 
   it('S-B / S-C positive: each allowlisted key is carried PAST (a), (b) and (c) to the held (d)', async () => {
     // Reaching `(d)` is the statement that (a), (b) and (c) admitted, so this is their positive.
-    expect(ALLOWLISTED).toHaveLength(11);
+    // Preserve the prior YC-SP1 set; F32b/F74b adds only the exact goods receipt.
+    expect(
+      ALLOWLISTED.filter((key) => key !== 'crm.goods.receipt.create.v1'),
+    ).toHaveLength(11);
+    expect(ALLOWLISTED).toContain('crm.goods.receipt.create.v1');
+    expect(ALLOWLISTED).toHaveLength(12);
     for (const key of ALLOWLISTED) {
       const v = await gate6(ae(key));
       expect({ key, detail: detail(v) }).toEqual({

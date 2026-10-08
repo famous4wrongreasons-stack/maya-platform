@@ -64,6 +64,53 @@ const statementOf = (execute: jest.Mock): string => {
 };
 
 describe('P-RT6 — conversation erasure job', () => {
+  it('keeps the request advisory lock as one exact storage statement on the supplied transaction', async () => {
+    const prefix = `maya.privacy.history-erasure/1:${'a'.repeat(64)}:`;
+    const execute = jest.fn().mockResolvedValue(1);
+    await WidgetConversationErasureJob.lockRequest(
+      { $executeRaw: execute },
+      prefix,
+    );
+    expect(execute).toHaveBeenCalledTimes(1);
+    const [parts, value] = execute.mock.calls[0] as [
+      TemplateStringsArray,
+      string,
+    ];
+    expect(parts.join('?')).toBe(
+      'SELECT pg_advisory_xact_lock(hashtextextended(?, 0))',
+    );
+    expect(value).toBe(prefix);
+  });
+
+  it.each([false, true])(
+    'projects orphan content as a scoped boolean only: %s',
+    async (hasUnlinkedContent) => {
+      const query = jest.fn().mockResolvedValue([{ hasUnlinkedContent }]);
+      expect(
+        await WidgetConversationErasureJob.hasUnlinkedDraftContent(
+          { $queryRaw: query },
+          REQUEST,
+        ),
+      ).toBe(hasUnlinkedContent);
+      expect(query).toHaveBeenCalledTimes(1);
+      const [parts, ...values] = query.mock.calls[0] as [
+        TemplateStringsArray,
+        ...unknown[],
+      ];
+      const sql = parts.join('?');
+      expect(values).toEqual([
+        REQUEST.tenantId,
+        REQUEST.subjectPrincipalProofHash,
+      ]);
+      expect(sql).toContain('SELECT EXISTS (');
+      expect(sql).toContain('JOIN "WidgetTimelineTurn" t');
+      expect(sql).toContain('t."principalProofHash" = d."principalProofHash"');
+      expect(sql).toContain('r."confirmationOfKind" = \'draft\'');
+      expect(sql).toContain('r."confirmationOfRef" = d."draftRef"');
+      expect(sql).not.toMatch(/\b(?:INSERT|UPDATE|DELETE)\b/);
+    },
+  );
+
   it('RT6-MAP-1 exactly maps every schema C/X field and no A field', () => {
     expect(WIDGET_ERASURE_CLASS_MAP).toEqual(schemaErasableFields());
   });

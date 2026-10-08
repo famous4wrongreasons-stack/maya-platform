@@ -11,6 +11,7 @@ import type { PrismaService } from '../../prisma/prisma.service';
 import type { PrincipalResolver, RequestTx } from '../authority/principal-view';
 import type { PrincipalView } from '../gate.types';
 import { timelineLockKey } from '../stores/timeline.store';
+import { sha256Hex } from '../token.util';
 import type { ConversationErasureRequest } from './erasure.job';
 import { WidgetConversationErasureJob } from './erasure.job';
 import { HistoryErasureOwner } from './history-erasure.owner';
@@ -248,6 +249,62 @@ const fixture = () => {
 };
 
 describe('K12 authenticated history erasure owner — synthetic mechanics', () => {
+  it('replays an original JSON-array request/scope hash without rewriting its completion', async () => {
+    const f = fixture();
+    const namespace = 'maya.privacy.history-erasure/1';
+    // These are the original pre-H6-fix bytes, not the new canonicaliser under test.
+    const requestDigest = sha256Hex(
+      JSON.stringify([namespace, ACTOR.tenantId, ACTOR.userId, REQUEST]),
+    );
+    const scopeDigest = sha256Hex(
+      JSON.stringify([
+        `${namespace}/scope`,
+        ACTOR.tenantId,
+        ACTOR.userId,
+        PRINCIPAL.proofHash,
+        CONVERSATION,
+      ]),
+    );
+    const erasureRequestRef = `${namespace}:${requestDigest}:${scopeDigest}`;
+    f.tombstones.push({
+      tenantId: ACTOR.tenantId!,
+      erasureRequestRef,
+      erasedAt: NOW,
+      store: 'timeline',
+      rowKey: 'WidgetTimelineTurn/turn-0',
+    });
+    f.state.now = new Date(NOW.getTime() + 60_000);
+    expect(
+      await f.owner.erase(ACTOR, CONVERSATION, { requestId: REQUEST }),
+    ).toEqual({
+      contract: namespace,
+      outcome: 'COMPLETED',
+      requestId: REQUEST,
+      conversationId: CONVERSATION,
+      erasedAt: NOW.toISOString(),
+    });
+    expect(f.job).not.toHaveBeenCalled();
+    expect(f.findLive).not.toHaveBeenCalled();
+    expect(f.repair).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        tenantId: ACTOR.tenantId,
+        conversationId: CONVERSATION,
+        subjectPrincipalProofHash: PRINCIPAL.proofHash,
+        erasureRequestRef,
+      },
+      f.state.now,
+    );
+    expect(f.trace).toEqual([
+      '1:request-lock',
+      'principal',
+      '1:conversation-lock',
+      'principal',
+      'clock',
+      'replay',
+    ]);
+  });
+
   it('repairs only the completed exact request and keeps the original turn completion despite clock rollback', async () => {
     const f = fixture();
     const first = await f.owner.erase(ACTOR, CONVERSATION, {

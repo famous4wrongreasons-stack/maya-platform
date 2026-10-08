@@ -201,6 +201,12 @@ function createHarness(
   const executions: Record<string, unknown>[] = [];
 
   const prisma = {
+    tenant: {
+      findUnique: jest.fn().mockResolvedValue({
+        calendarSource: 'internal',
+        defaultTimezone: 'Europe/Moscow',
+      }),
+    },
     staff: { findMany: jest.fn().mockResolvedValue([]) },
     crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
     client: { findMany: jest.fn().mockResolvedValue([]) },
@@ -252,6 +258,7 @@ function createHarness(
   } as unknown as EncryptionService;
   const auditLog = {
     log: jest.fn().mockResolvedValue({ id: 'audit-a' }),
+    tryLog: jest.fn().mockResolvedValue({ id: 'audit-a' }),
   } as unknown as AuditLogService;
   const entitlements = {
     getEffectiveEntitlements: jest.fn().mockResolvedValue({
@@ -382,6 +389,7 @@ function createHarness(
     decide,
     executed,
     approvals,
+    auditLog,
     scheduleTryHandle: scheduleCommandStub.tryHandle,
   };
 }
@@ -630,10 +638,24 @@ describe('КОРПУС: роли остались на своих данных',
   });
 
   it('клиент: «свободные окна завтра» — реальные слоты', async () => {
-    const result = await askAs(CLIENT, 'Свободные окна завтра есть?');
+    const harness = createHarness(CLIENT);
+    const answer = await harness.ask('Свободные окна завтра есть?');
 
-    expect(result.tools).toEqual(['booking.availability.read']);
-    expect(result.domain).toBe('booking_availability');
+    expect(answer.tools_used).toHaveLength(1);
+    expect(answer.tools_used).toMatchObject([
+      {
+        name: 'booking.availability.read',
+        status: 'completed',
+      },
+    ]);
+    expect(harness.executed).toEqual([
+      {
+        name: 'booking.availability.read',
+        arguments: { date: '2026-08-08T00:00:00.000Z' },
+      },
+    ]);
+    expect(answer.grounding.domain).toBe('booking_availability');
+    expect(harness.auditLog.tryLog).not.toHaveBeenCalled();
   });
 
   it('мастер: «сколько у меня записей» — личная аналитика, а не отказ', async () => {

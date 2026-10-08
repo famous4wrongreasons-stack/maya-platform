@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
+import { stableActionJson } from '../../action-engine/action-engine.identity';
 import { PrismaService } from '../../prisma/prisma.service';
 import { meets } from '../authority/ladder';
 import type { PrincipalResolver, RequestTx } from '../authority/principal-view';
@@ -57,7 +58,7 @@ export class HistoryErasureOwner {
       throw new ForbiddenException('history_erasure_principal_unavailable');
     const tenantId = actor.tenantId;
     const requestDigest = sha256Hex(
-      JSON.stringify([REQUEST_NAMESPACE, tenantId, actor.userId, requestId]),
+      stableActionJson([REQUEST_NAMESPACE, tenantId, actor.userId, requestId]),
     );
     const requestPrefix = `${REQUEST_NAMESPACE}:${requestDigest}:`;
     const complete = (erasedAt: Date): HistoryErasureCompletion => {
@@ -76,7 +77,7 @@ export class HistoryErasureOwner {
       async (tx) => {
         // Serialize the request identity BEFORE any conversation lock. The same
         // request cannot concurrently be admitted for two different conversations.
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${requestPrefix}, 0))`;
+        await WidgetConversationErasureJob.lockRequest(tx, requestPrefix);
         const initial = await this.currentPrincipal(tx, actor, tenantId);
         await TimelineStore.lockConversation(tx, tenantId, conversationId);
         // Preserve the writers' principal→conversation lock order. Tenant and
@@ -87,7 +88,7 @@ export class HistoryErasureOwner {
           throw new ForbiddenException('history_erasure_principal_unavailable');
         const now = await TimelineStore.readDatabaseClock(tx);
         const scopeDigest = sha256Hex(
-          JSON.stringify([
+          stableActionJson([
             `${REQUEST_NAMESPACE}/scope`,
             tenantId,
             actor.userId,
@@ -136,16 +137,15 @@ export class HistoryErasureOwner {
           return completion;
         }
 
-        const liveTurn = await tx.widgetTimelineTurn.findFirst({
-          where: {
+        const liveTurn = await TimelineStore.readLiveConversationAnchor(
+          tx,
+          {
             tenantId,
             conversationId,
             principalProofHash: principal.proofHash,
-            erasedAt: null,
-            retentionUntil: { gt: now },
           },
-          select: { id: true },
-        });
+          now,
+        );
         if (!liveTurn)
           throw new NotFoundException(
             'history_erasure_conversation_unavailable',
@@ -154,29 +154,11 @@ export class HistoryErasureOwner {
         // WidgetDraft has no conversation column. Retained metadata links are
         // the sole provenance. A content-bearing orphan of this exact subject
         // cannot be assigned to the selected conversation by guessing.
-        const [{ hasUnlinkedContent }] = await tx.$queryRaw<
-          { hasUnlinkedContent: boolean }[]
-        >`
-          SELECT EXISTS (
-            SELECT 1 FROM "WidgetDraft" d
-            WHERE d."tenantId" = ${tenantId}
-              AND d."principalProofHash" = ${principal.proofHash}
-              AND d."diffJson" IS NOT NULL
-              AND d."diffJson" <> 'null'::jsonb
-              AND NOT EXISTS (
-                SELECT 1 FROM "WidgetIntentRecord" r
-                JOIN "WidgetEmission" e
-                  ON e."tenantId" = r."tenantId" AND e."widgetId" = r."widgetId"
-                JOIN "WidgetTimelineTurn" t
-                  ON t."tenantId" = e."tenantId" AND t."id" = e."turnId"
-                WHERE r."tenantId" = d."tenantId"
-                  AND r."principalProofHash" = d."principalProofHash"
-                  AND t."principalProofHash" = d."principalProofHash"
-                  AND r."confirmationOfKind" = 'draft'
-                  AND r."confirmationOfRef" = d."draftRef"
-              )
-          ) AS "hasUnlinkedContent"
-        `;
+        const hasUnlinkedContent =
+          await WidgetConversationErasureJob.hasUnlinkedDraftContent(tx, {
+            tenantId,
+            subjectPrincipalProofHash: principal.proofHash,
+          });
         if (hasUnlinkedContent)
           throw new ConflictException('history_erasure_unlinked_draft_content');
 

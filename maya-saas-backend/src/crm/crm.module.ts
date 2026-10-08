@@ -104,7 +104,22 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
-    AvailabilityCalendarService,
+    {
+      provide: AvailabilityCalendarService,
+      useFactory: (
+        prisma: PrismaService,
+        context: TenantContextService,
+        crm: CrmService,
+      ) =>
+        new AvailabilityCalendarService(prisma, context, {
+          getCalendarSource: (tenantId) => crm.getCalendarSource(tenantId),
+          readBranchAvailabilityRevision: (tenantId, branchId) =>
+            crm.readBranchAvailabilityRevision(tenantId, branchId),
+          resolveConfiguredBookingBranch: (tenantId) =>
+            crm.resolveConfiguredBookingBranch(tenantId),
+        }),
+      inject: [PrismaService, TenantContextService, CrmService],
+    },
     ClientReverificationService,
     ClientReverificationCandidateService,
     PhoneAuthDeliveryService,
