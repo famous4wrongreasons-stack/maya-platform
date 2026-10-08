@@ -56,6 +56,25 @@ test('category cannot be selected as an existing item; selected item requires an
   assert.ok(candidate); candidate.props.onClick();
   assert.deepEqual(p.calls, [{ name: 'selectItem', args: ['12'] }]);
 });
+test('a labeled write-off unit stays selectable when the same sale unit has no label', () => {
+  const p = panel({ phase: 'detail', lines: [{ ...line, unitLabel: null }], selectedLine: 1,
+    item: { ...item, saleUnitLabel: null } });
+  const units = p.buttons.filter(b => String(b.props.children).includes('единица №'));
+  assert.equal(units.length, 1);
+  assert.equal(units[0].props['aria-pressed'], false);
+  assert.doesNotMatch(p.text, /Единицы товара не определены/);
+  assert.deepEqual(p.calls, [], 'catalogue metadata does not auto-select a unit');
+  units[0].props.onClick();
+  assert.deepEqual(p.calls, [{ name: 'editReview', args: [{ unitId: '2' }] }]);
+  assert.equal(p.buttons.find(b => b.props.children === 'Подготовить предложение прихода').props.disabled, true);
+});
+test('a unit with no catalog label is not inferred from OCR text or another identifier', () => {
+  const p = panel({ phase: 'detail', lines: [line], selectedLine: 1,
+    item: { ...item, saleUnitLabel: null, writeOffUnitLabel: null } });
+  assert.equal(p.buttons.filter(b => String(b.props.children).includes('единица №')).length, 0);
+  assert.match(p.text, /Единицы товара не определены/);
+  assert.deepEqual(p.calls, []);
+});
 test('uncertain preparation blocks repeat dispatch but permits clearing ephemeral fields', () => {
   const p = panel({ phase: 'uncertain', failure: 'unknown', lines: [line], selectedLine: 1, item, review: { ...review, priceKind: 'receipt_purchase_unit' } });
   assert.match(p.text, /повторная отправка отключена/);

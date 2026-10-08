@@ -60,8 +60,8 @@ export function GoodsPhotoPanel({ view, port, disabled, t }: {
   const item = view.item;
   const units = item === null ? [] : [
     ...(item.saleUnitId === null || item.saleUnitLabel === null ? [] : [{ id: item.saleUnitId, label: item.saleUnitLabel }]),
-    ...(item.writeOffUnitId === null || item.writeOffUnitLabel === null || item.writeOffUnitId === item.saleUnitId ? [] : [{ id: item.writeOffUnitId, label: item.writeOffUnitLabel }]),
-  ];
+    ...(item.writeOffUnitId === null || item.writeOffUnitLabel === null ? [] : [{ id: item.writeOffUnitId, label: item.writeOffUnitLabel }]),
+  ].filter((unit, index, available) => available.findIndex(candidate => candidate.id === unit.id) === index);
   return <section aria-label="Товар по фото накладной" style={{ color: t.ink, margin: '20px 0', maxWidth: 620, fontSize: 15, lineHeight: '23px' }}>
     <h2 style={{ margin: '0 0 12px', fontSize: 20, lineHeight: '27px' }}>Товар по фото накладной</h2>
     <p>Выберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.</p>
