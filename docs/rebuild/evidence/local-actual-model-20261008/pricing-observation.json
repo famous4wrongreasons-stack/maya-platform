@@ -1,0 +1,13 @@
+{
+  "contract": "maya.public-pricing-observation/1",
+  "verifiedAt": "2026-10-08T23:02:42.000Z",
+  "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "endpointSource": "https://api-docs.deepseek.com/",
+  "model": "deepseek-v4-pro",
+  "publishedVersion": "DeepSeek-V4-Pro-0813",
+  "endpoint": "https://api.deepseek.com/chat/completions",
+  "inputNanoUsdPerToken": 1320,
+  "outputNanoUsdPerToken": 3960,
+  "interpretation": "Conservative peak cache-miss input and peak output; no account/balance API access",
+  "paidAuthorized": false
+}

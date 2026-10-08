@@ -1,0 +1,38 @@
+{
+  "contract": "maya.core-conversation-permit/1",
+  "runId": "75f01f49-ec6d-4ef1-bf71-283681b278bc",
+  "nonce": "87d294f666838d50d243e831911c9d3a1988944381946f5b9401a0c8ea5fba98",
+  "candidateCommit": "5cc0b7178ccdbf3d6cdb50be5de3f3cd7a43dbf5",
+  "manifestSha256": "3388afc329e037bd5885bb6fb2194a6148ff9f116be992dd6bcb2ae7d7de6072",
+  "profile": "core-diagnostic-20261008/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "ownerApprovalRef": "Sentinel_6165ce8c24948191be7d5f8dd0bc242e",
+  "startsAt": "2026-10-08T23:31:22.361Z",
+  "expiresAt": "2026-10-08T23:41:22.361Z",
+  "revoked": false,
+  "target": {
+    "host": "localhost",
+    "workDirectory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+    "brokerUid": 501,
+    "runnerUid": 501,
+    "brokerSocket": {
+      "path": "/private/tmp/mcl-20261008-handoff/channel/b.sock",
+      "gid": 20
+    }
+  },
+  "credentialSource": {
+    "kind": "terminal-stdin",
+    "reference": "owner-terminal-stdin-once",
+    "owner": 501,
+    "reader": 501
+  },
+  "pricing": {
+    "model": "deepseek-v4-pro",
+    "inputNanoUsdPerToken": 1320,
+    "outputNanoUsdPerToken": 3960,
+    "reference": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "sha256": "61ee662f07d95ea921ba47cdc502cae1a5acca2c8de30259cca94d0588659ac9",
+    "verifiedAt": "2026-10-08T23:02:42.000Z"
+  },
+  "claimPath": "/private/tmp/mcl-20261008-handoff/permit.json.claim"
+}

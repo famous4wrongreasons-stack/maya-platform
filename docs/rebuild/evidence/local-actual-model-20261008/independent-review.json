@@ -1,0 +1,18 @@
+{
+  "reviewer": "/root/checkpoint_review",
+  "result": "QUALIFIED_DIAGNOSTIC_FINDINGS_CONFIRMED_NOT_ACCEPTANCE",
+  "execution": "read-only artifact review; no model/test rerun",
+  "verified": [
+    "3 provider HTTP200 responses versus4 serializers",
+    "fourth request99820>98304 bytes blocked beforebroker",
+    "client followup repeatsfallback; no action or pendingapproval",
+    "provider usage totals and both tariff calculations",
+    "socket and postmaster.pid absent; pg-stop log confirms shutdown"
+  ],
+  "limitations": [
+    "modelCoverage rawlabel wrongly covers fourth predispatch-refused turn",
+    "brokerPID and sixgroup absence supported by parent directchecks and runnerreport; independent ps was sandboxblocked and not retried",
+    "accountbilling and balance not verified"
+  ],
+  "noRerun": true
+}

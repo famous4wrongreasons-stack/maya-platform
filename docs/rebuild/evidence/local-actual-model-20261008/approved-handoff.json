@@ -1,0 +1,18 @@
+{
+  "status": "FIRST_PERMIT_ISSUED_WAITING_FOR_MANUAL_TTY",
+  "approvalRef": "Sentinel_6165ce8c24948191be7d5f8dd0bc242e",
+  "readinessRef": "Sentinel_6542aa252c588191a18eb3336e874871",
+  "candidateCommit": "5cc0b7178ccdbf3d6cdb50be5de3f3cd7a43dbf5",
+  "manifestSha256": "3388afc329e037bd5885bb6fb2194a6148ff9f116be992dd6bcb2ae7d7de6072",
+  "runId": "75f01f49-ec6d-4ef1-bf71-283681b278bc",
+  "permitSha256": "650208ad848a0eab893d48464d73e67583300f5130aabbe548e3b0c8037fa3f2",
+  "startsAt": "2026-10-08T23:31:22.361Z",
+  "expiresAt": "2026-10-08T23:41:22.361Z",
+  "launcherSha256": {
+    "Start MAYA model.command": "6592f1a2394610546a8948726e159dcd5e2c7e8eb2db2e9bf0235d8eade2eddd",
+    "Run MAYA once.command": "9f9fe7168534c6413e91925fd08ab5230b2212c792723502f5437dafb05d4f9c"
+  },
+  "secretValuesRead": 0,
+  "providerCalls": 0,
+  "claimCreated": false
+}

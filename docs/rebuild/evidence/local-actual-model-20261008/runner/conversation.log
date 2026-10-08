@@ -1,0 +1,30 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_7897ef27cf83 on 127.0.0.1:63085 (local)
+[33m[Nest] 42074  - [39m10/08/2026, 11:33:10 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:candidate_body_limit (попытка 1)[39m
+[33m[Nest] 42074  - [39m10/08/2026, 11:33:10 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:candidate_body_limit[39m
+FAIL test/widgets-live/core-conversation-http.probe-spec.ts (21.481 s)
+  Core conversation [actual HTTP, bounded broker, development diagnostic only]
+    ✕ replays exactly the frozen three dialogs and retains actual HTTP replies before qualification (18511 ms)
+
+  ● Core conversation [actual HTTP, bounded broker, development diagnostic only] › replays exactly the frozen three dialogs and retains actual HTTP replies before qualification
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "replayed_ungraded"
+    Received: "stopped"
+
+      1182 |       },
+      1183 |     });
+    > 1184 |     expect((result as { status: string }).status).toBe('replayed_ungraded');
+           |                                                   ^
+      1185 |     expect(responses).toHaveLength(5);
+      1186 |     expect(forbidden).toEqual([]);
+      1187 |     expect(gate!.stats).toMatchObject({ dialogs: 3, turns: 5, halted: false });
+
+      at Object.<anonymous> (widgets-live/core-conversation-http.probe-spec.ts:1184:51)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        21.513 s, estimated 27 s
+Ran all test suites.
+Test results written to: ../../../../../../../../private/tmp/mcl-20261008-handoff/runner/conversation-jest.json

@@ -1,0 +1,68 @@
+{
+  "contract": "maya.local-actual-model-outcome/1",
+  "status": "STOPPED_LOCAL_REQUEST_BODY_LIMIT_NOT_ACCEPTANCE",
+  "candidateCommit": "5cc0b7178ccdbf3d6cdb50be5de3f3cd7a43dbf5",
+  "runId": "75f01f49-ec6d-4ef1-bf71-283681b278bc",
+  "manifestSha256": "3388afc329e037bd5885bb6fb2194a6148ff9f116be992dd6bcb2ae7d7de6072",
+  "providerRequests": 3,
+  "providerResponses200": 3,
+  "appModelStages": 4,
+  "actualHttpTurns": 4,
+  "plannedHttpTurns": 5,
+  "stoppedAtCase": "core-owner-compound-clarification",
+  "stoppedAtTurn": 2,
+  "cause": "candidate_body_limit",
+  "rejectedRequestBytes": 99820,
+  "requestLimitBytes": 98304,
+  "rejectedBeforeProvider": true,
+  "thirdDialogStarted": false,
+  "usage": {
+    "prompt_tokens": 49674,
+    "completion_tokens": 1017,
+    "total_tokens": 50691,
+    "prompt_cache_hit_tokens": 1280,
+    "prompt_cache_miss_tokens": 48394
+  },
+  "cost": {
+    "reservedUsd": "0.33911196",
+    "usageEstimatePeakUsd": "0.06796372",
+    "usageEstimateOffPeakUsd": "0.03398186",
+    "basis": "Provider-reported usage; official published pricing checked 2026-10-08T23:02:42Z; 23:33 UTC is off-peak",
+    "accountBillingVerified": false,
+    "accountBalanceQueried": false
+  },
+  "businessEffects": {
+    "realCrmNetworkCalls": 0,
+    "forbidden": [],
+    "businessWrites": [],
+    "allObservedBusinessHashesUnchanged": true
+  },
+  "qualityFindings": [
+    "Both client turns returned the same safe fallback availability prompt; no appointment proposal/action recorded",
+    "Owner compound request asked for bounded scope clarification; its confirmation produced HTTP503 before provider dispatch",
+    "C9 finance/occupancy recommendation revision and third administrator refusal dialog were not reached",
+    "Model observation historyRoles were user-only on follow-up turns; investigate assistant-history transfer without claiming full history acceptance"
+  ],
+  "cleanup": {
+    "checkedAt": "2026-10-08T23:35:56.635486+00:00",
+    "brokerPid": 41257,
+    "brokerProcessAbsent": true,
+    "socketAbsent": true,
+    "postmasterPidAbsent": true,
+    "runnerCompletedExitCode": 1,
+    "ownedGroupsAbsent": {
+      "initdb": true,
+      "pg-start": true,
+      "createdb": true,
+      "migrations": true,
+      "conversation": true,
+      "pg-stop": true
+    },
+    "clusterStopped": true,
+    "sourcesUnchanged": true,
+    "permitAndClaimRetained": true,
+    "rearmed": false
+  },
+  "qualification": "ACTUAL_MODEL_DIAGNOSTIC_ON_SYNTHETIC_DATA_FAILED_NOT_GENERAL_QUALITY_ACCEPTANCE",
+  "noNewPaidRunAuthorized": true
+}

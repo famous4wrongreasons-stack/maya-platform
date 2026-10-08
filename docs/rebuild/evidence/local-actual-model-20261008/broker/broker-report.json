@@ -1,0 +1,53 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "ADMITTED_LOCAL_MODEL_HTTP",
+  "runId": "75f01f49-ec6d-4ef1-bf71-283681b278bc",
+  "candidateCommit": "5cc0b7178ccdbf3d6cdb50be5de3f3cd7a43dbf5",
+  "manifestSha256": "3388afc329e037bd5885bb6fb2194a6148ff9f116be992dd6bcb2ae7d7de6072",
+  "paidAuthorized": true,
+  "credentialsLoaded": true,
+  "upstreamCalls": 3,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-08T23:31:30.958Z",
+  "expiresAt": "2026-10-08T23:41:22.361Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68497,
+      "bodySha256": "72b66ee6cd2222e0e0f3eea206c250627cef5f001f7c92a6d7c28c7b15bfee63",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 69458,
+      "bodySha256": "c464980b3f4b4b23597c9046561a3c5a24351a93c8a48f46a872a4c6762b4dd5",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 95860,
+      "bodySha256": "722f9d20550d493c851787742d9b6a3c5caeaa536b738663543f577276b8322a",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED",
+  "socketPath": "/private/tmp/mcl-20261008-handoff/channel/b.sock",
+  "stopReason": "explicit_finish",
+  "connectionsAtStop": 1,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-08T23:33:10.315Z",
+  "stats": {
+    "dialogs": 2,
+    "turns": 3,
+    "attempts": 3,
+    "inputTokens": 246103,
+    "outputTokens": 3600,
+    "reservedNanoUsd": 339111960,
+    "halted": false
+  }
+}

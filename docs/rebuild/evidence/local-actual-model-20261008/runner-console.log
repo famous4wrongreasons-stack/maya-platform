@@ -1,0 +1,10 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START conversation
+{"status":"failed","clusterStopped":true,"output":"/private/tmp/mcl-20261008-handoff/runner","manifestSha256":"3388afc329e037bd5885bb6fb2194a6148ff9f116be992dd6bcb2ae7d7de6072","qualification":"REAL_MODEL_SYNTHETIC_DATA_UNGRADED"}

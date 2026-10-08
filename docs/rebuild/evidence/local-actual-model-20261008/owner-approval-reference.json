@@ -1,0 +1,24 @@
+{
+  "contract": "maya.local-run-transcript-reference/1",
+  "status": "APPROVED_WAITING_FOR_MAC_READINESS_NOT_A_PERMIT",
+  "sourceThreadId": "01a10b14-bd01-7513-8d9f-86c0c75010f5",
+  "questionRef": "Sentinel_52536c06ca108191895513c2f6bdf117",
+  "questionAt": "2026-10-08T23:01:00.000Z",
+  "answerRef": "Sentinel_6165ce8c24948191be7d5f8dd0bc242e",
+  "answerAt": "2026-10-08T23:05:00.000Z",
+  "answer": "Разрешаю",
+  "scope": {
+    "runs": 1,
+    "providerRequestsIncludingRetries": 12,
+    "spendUsd": 2,
+    "durationMs": 600000,
+    "account": "existing owner DeepSeek account",
+    "syntheticOnly": true,
+    "yclientsWrites": false,
+    "persistentCredentialGrant": false,
+    "secretEnteredBy": "owner only, hidden broker TTY"
+  },
+  "candidateCommit": "5cc0b7178ccdbf3d6cdb50be5de3f3cd7a43dbf5",
+  "manifestSha256": "3388afc329e037bd5885bb6fb2194a6148ff9f116be992dd6bcb2ae7d7de6072",
+  "readiness": "Parent will confirm owner is at Mac; no timer starts before that."
+}
