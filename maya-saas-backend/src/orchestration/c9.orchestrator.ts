@@ -440,7 +440,47 @@ export class C9Orchestrator {
       turn.intentHash,
       'lifecycle',
     );
-    return (await this.prepareClientReturn(root, turn.intentHash)).expose();
+    const prepared = await this.prepareClientReturn(root, turn.intentHash);
+    const response = await prepared.expose();
+    await this.lifecycle.authorize(root.id);
+    await this.assertLifecycleExposure(
+      root,
+      (response.recommendation.agent.findings as C9Object[]).length
+        ? prepared.refs
+        : [],
+    );
+    return response;
+  }
+
+  /** Recheck the exact exposed facts after awaited reads, without rediscovery. */
+  private async assertLifecycleExposure(
+    root: ConversationRoot,
+    lifecycleRefs: C9Object[],
+    otherRefs: C9Object[] = [],
+  ) {
+    const exposedRefs = [...otherRefs, ...lifecycleRefs];
+    await this.store.transaction(undefined, async (tx, principal, now) => {
+      await this.store.lock(tx, principal, root.id, true, now);
+      await this.store.validateRefs(tx, principal, exposedRefs, now);
+      if (!principal.userId) c9Deny('source_reader_authority');
+      // Publication metadata alone does not qualify current policy/dependencies.
+      await this.lifecycle!.assertCurrent(
+        principal.tenantId,
+        principal.userId,
+        lifecycleRefs,
+      );
+      const exposedAt = Date.now();
+      if (
+        root.validUntil.getTime() <= exposedAt ||
+        exposedRefs.some((ref) =>
+          ['validUntil', 'retentionUntil'].some(
+            (key) =>
+              typeof ref[key] === 'string' && Date.parse(ref[key]) <= exposedAt,
+          ),
+        )
+      )
+        c9Deny('source_expired');
+    });
   }
 
   private async prepareClientReturn(
@@ -922,31 +962,11 @@ export class C9Orchestrator {
       ).length
         ? clientReturn.refs
         : [];
-      const exposedRefs = [...financial.refs, ...exposedClientRefs];
-      await this.store.transaction(undefined, async (tx, principal, now) => {
-        await this.store.lock(tx, principal, root.id, true, now);
-        await this.store.validateRefs(tx, principal, exposedRefs, now);
-        if (!principal.userId) c9Deny('source_reader_authority');
-        // C8 can remain PUBLISHED while its policy/dependencies are no longer current.
-        // Recheck that source-owned qualification after both domains finish.
-        await this.lifecycle!.assertCurrent(
-          principal.tenantId,
-          principal.userId,
-          exposedClientRefs,
-        );
-        const exposedAt = Date.now();
-        if (
-          root.validUntil.getTime() <= exposedAt ||
-          exposedRefs.some((ref) =>
-            ['validUntil', 'retentionUntil'].some(
-              (key) =>
-                typeof ref[key] === 'string' &&
-                Date.parse(ref[key]) <= exposedAt,
-            ),
-          )
-        )
-          c9Deny('source_expired');
-      });
+      await this.assertLifecycleExposure(
+        root,
+        exposedClientRefs,
+        financial.refs,
+      );
       const findings = (bi.analysis.agent.findings as C9Object[]).map((f) =>
         String(f.statement),
       );

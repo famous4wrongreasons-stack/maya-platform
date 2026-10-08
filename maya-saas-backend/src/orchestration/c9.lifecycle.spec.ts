@@ -66,6 +66,18 @@ function fixture() {
     resultJson: null,
   };
   const store = {
+    transaction: jest.fn(
+      (
+        _: unknown,
+        fn: (
+          tx: unknown,
+          principal: { tenantId: string; userId: string },
+          now: Date,
+        ) => unknown,
+      ) => fn({}, { tenantId: 'tenant', userId: 'owner' }, new Date()),
+    ),
+    lock: jest.fn().mockResolvedValue(root),
+    validateRefs: jest.fn().mockResolvedValue([]),
     conversationReadRun: jest.fn().mockResolvedValue(root),
     snapshot: jest.fn(() =>
       Promise.resolve({ run: root, revisions: revision ? [revision] : [] }),
@@ -112,6 +124,7 @@ function fixture() {
   };
   const source = {
     authorize: jest.fn().mockResolvedValue({}),
+    assertCurrent: jest.fn().mockResolvedValue(undefined),
     select: jest.fn(() =>
       Promise.resolve(JSON.parse(JSON.stringify(selection))),
     ),
@@ -311,6 +324,51 @@ describe('explicit C9 Lifecycle (synthetic durable adapter)', () => {
     const replay = await f.create().checkClientReturn(f.turn);
     expect(replay.coordination.revision).toBe(1);
     expect(replay.reply).not.toContain('Different owner edit');
+  });
+  it('refuses late policy drift after findings were built without replacing saved work', async () => {
+    const f = fixture();
+    f.source.assertCurrent.mockRejectedValue(
+      new BadRequestException('c9_source_changed'),
+    );
+    await expect(f.create().checkClientReturn(f.turn)).rejects.toThrow(
+      'c9_source_changed',
+    );
+    expect(f.answer).toHaveBeenCalledTimes(1);
+    expect(f.context.build).toHaveBeenCalledTimes(2);
+    expect(f.source.assertCurrent).toHaveBeenCalledWith(
+      'tenant',
+      'owner',
+      f.selection.refs,
+    );
+    expect(f.store.validateRefs).toHaveBeenCalledWith(
+      expect.anything(),
+      { tenantId: 'tenant', userId: 'owner' },
+      f.selection.refs,
+      expect.any(Date),
+    );
+    expect(f.receipt.state).toBe('SETTLED');
+    expect(f.work.claim).toHaveBeenCalledTimes(1);
+    expect(f.store.revision).toHaveBeenCalledTimes(1);
+    expect(f.work.hold).not.toHaveBeenCalled();
+  });
+  it('rechecks authority after projection and refuses revocation without another dispatch', async () => {
+    const f = fixture();
+    const build = f.context.build.getMockImplementation()!;
+    f.context.build.mockImplementation(async (...args) => {
+      const result = await build(...args);
+      if (f.receipt.state === 'SETTLED')
+        f.source.authorize.mockRejectedValue(
+          new ForbiddenException('membership revoked'),
+        );
+      return result;
+    });
+    await expect(f.create().checkClientReturn(f.turn)).rejects.toThrow(
+      'membership revoked',
+    );
+    expect(f.answer).toHaveBeenCalledTimes(1);
+    expect(f.source.assertCurrent).not.toHaveBeenCalled();
+    expect(f.work.claim).toHaveBeenCalledTimes(1);
+    expect(f.store.revision).toHaveBeenCalledTimes(1);
   });
   it('cleanup of the exact revision cannot trigger newest fallback or discovery', async () => {
     const f = fixture();

@@ -1094,6 +1094,9 @@ describe('C9 lifecycle failure [actual HTTP, canonical work, process and Postgre
         expect(await businessState(s.tenant.id)).toBe(afterTransition);
         // This is the RED acceptance assertion for standalone. A generic 500 or
         // unrelated refusal is NOT accepted as evidence of a correct source fence.
+        expect(result!.body.reply ?? '').not.toMatch(
+          /Оценка 1:|условие давности визитов/,
+        );
         if (result!.status === 400) {
           expect(result!.body.message).toBe('c9_source_changed');
           expect(result!.body.recommendation).toBeUndefined();
