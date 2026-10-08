@@ -112,6 +112,74 @@ test('tampered manifest refuses before opening fixture', async () => {
   );
 });
 
+test('missing or changed conversation correlation stops before any follow-up or retry', async () => {
+  for (const missingAt of [1, 2]) {
+    for (const invalidId of [undefined, '', '   ', 'foreign-conversation']) {
+      if (missingAt === 1 && invalidId === 'foreign-conversation') continue;
+      let calls = 0,
+        closed = 0;
+      const records = [];
+      const result = await replayPilot(freezePilot(source, 2), {
+        budget: budget(),
+        record: (row) => records.push(row),
+        openDialog: async () => ({
+          close: async () => {
+            closed++;
+          },
+          chat: async () => {
+            calls++;
+            return {
+              reply: 'Actual reply',
+              userTurn: {
+                conversationId:
+                  calls === missingAt ? invalidId : 'own-conversation',
+              },
+            };
+          },
+        }),
+      });
+      assert.equal(result.status, 'stopped');
+      assert.equal(calls, missingAt);
+      assert.equal(closed, 1);
+      assert.equal(records.at(-1).outcome, 'unresolved');
+      assert.equal(records.at(-1).reply, undefined);
+    }
+  }
+});
+
+test('retains the current 3500-character reply in actual history and refuses an oversized response', async () => {
+  for (const length of [3500, 3501]) {
+    const calls = [],
+      records = [];
+    const result = await replayPilot(freezePilot(source, 1), {
+      budget: budget(),
+      record: (row) => records.push(row),
+      openDialog: async () => ({
+        close: async () => {},
+        chat: async (body) => {
+          calls.push(body);
+          return {
+            reply: 'я'.repeat(length),
+            userTurn: { conversationId: 'own-conversation' },
+          };
+        },
+      }),
+    });
+    if (length === 3500) {
+      assert.equal(result.status, 'replayed_ungraded');
+      assert.deepEqual(calls[1].messages[1], {
+        role: 'assistant',
+        content: 'я'.repeat(length),
+      });
+      assert.equal(records[0].reply.length, length);
+    } else {
+      assert.equal(result.status, 'stopped');
+      assert.equal(calls.length, 1);
+      assert.equal(records[0].outcome, 'unresolved');
+    }
+  }
+});
+
 test('client-first slice covers only booking groups and keeps independent families visible', () => {
   const manifest = freezePilot(source, 12, ['client']);
   assert.ok(manifest.cases.every((c) => c.role === 'client'));

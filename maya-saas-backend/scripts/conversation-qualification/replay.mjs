@@ -146,18 +146,17 @@ export async function replayPilot(manifest, { openDialog, budget, record }) {
           if (
             typeof result?.reply !== 'string' ||
             !result.reply.trim() ||
-            result.reply.length > 2000
+            result.reply.length > 3500
           )
             throw new Error('chat_response_invalid');
           const nextId = result.userTurn?.conversationId;
           if (
-            nextId !== undefined &&
-            (typeof nextId !== 'string' ||
-              !nextId ||
-              (conversationId && conversationId !== nextId))
+            typeof nextId !== 'string' ||
+            !nextId.trim() ||
+            (conversationId && conversationId !== nextId)
           )
             throw new Error('conversation_scope_changed');
-          conversationId = nextId ?? conversationId;
+          conversationId = nextId;
           messages.push({ role: 'assistant', content: result.reply });
           await record({
             caseId: item.id,
