@@ -42,19 +42,26 @@ function fixture(t, mode = 'ADMITTED_MODEL_HTTP') {
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const manifestPath = path.join(dir, 'manifest.json'),
     permitPath = path.join(dir, 'permit.json');
+  const localStdin = mode === 'ADMITTED_LOCAL_MODEL_HTTP';
+  if (localStdin) {
+    fs.mkdirSync(path.join(dir, 'dedicated-socket'));
+    fs.chmodSync(path.join(dir, 'dedicated-socket'), 0o700);
+  }
   const target = {
-    host: 'SYNTHETIC.invalid',
+    host: localStdin ? 'localhost' : 'SYNTHETIC.invalid',
     workDirectory: fs.realpathSync(process.cwd()),
     brokerUid: process.getuid(),
-    runnerUid: process.getuid() + 1,
+    runnerUid: process.getuid() + (localStdin ? 0 : 1),
     brokerSocket: {
       path: path.join(dir, 'dedicated-socket', 'model.sock'),
       gid: process.getgid(),
     },
   };
   const credentialSource = {
-    kind: 'file',
-    reference: '/NEVER_OPENED/SYNTHETIC/credential',
+    kind: localStdin ? 'terminal-stdin' : 'file',
+    reference: localStdin
+      ? 'owner-terminal-stdin-once'
+      : '/NEVER_OPENED/SYNTHETIC/credential',
     owner: process.getuid(),
     reader: process.getuid(),
   };
@@ -83,7 +90,7 @@ function fixture(t, mode = 'ADMITTED_MODEL_HTTP') {
     return sha(bytes);
   };
   const manifestSha = write(manifestPath, raw);
-  const manifest = readCoreManifest(manifestPath, manifestSha);
+  const manifest = readCoreManifest(manifestPath, manifestSha, { localStdin });
   const permit = {
     contract: 'maya.core-conversation-permit/1',
     runId: raw.runId,
@@ -454,3 +461,119 @@ test('noncanonical duplicate keys and parent symlinks refuse without echoing pri
     readCoreManifest(path.join(alias, 'manifest.json'), f.manifestSha),
   );
 });
+
+test('local manifests require the explicit opt-in; remote never infers authority from equal UIDs', (t) => {
+  const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP');
+  denied(() => readCoreManifest(f.manifestPath, f.manifestSha));
+  for (const options of [
+    {},
+    { localStdin: 'true' },
+    { localStdin: true, extra: true },
+  ])
+    denied(() => readCoreManifest(f.manifestPath, f.manifestSha, options));
+  for (const edit of [
+    (raw) => {
+      raw.mode = 'ADMITTED_MODEL_HTTP';
+    },
+    (raw) => {
+      raw.admissionContext.target.host = 'remote.invalid';
+    },
+    (raw) => {
+      raw.admissionContext.target.runnerUid++;
+    },
+    (raw) => {
+      raw.admissionContext.credentialSource.kind = 'file';
+    },
+    (raw) => {
+      raw.admissionContext.credentialSource.kind = 'environment';
+    },
+    (raw) => {
+      raw.admissionContext.credentialSource.reference = '/NEVER_OPENED';
+    },
+    (raw) => {
+      raw.admissionContext.credentialSource.owner++;
+    },
+  ]) {
+    const raw = structuredClone(f.raw);
+    edit(raw);
+    const pin = f.write(f.manifestPath, raw);
+    denied(() => readCoreManifest(f.manifestPath, pin, { localStdin: true }));
+  }
+});
+test('local opt-in cannot admit an ordinary remote or dry manifest', (t) => {
+  const f = fixture(t);
+  denied(() =>
+    readCoreManifest(f.manifestPath, f.manifestSha, { localStdin: true }),
+  );
+  f.raw.admissionContext.target.runnerUid =
+    f.raw.admissionContext.target.brokerUid;
+  denied(() =>
+    readCoreManifest(f.manifestPath, f.write(f.manifestPath, f.raw)),
+  );
+});
+test(
+  'local owner mode claims once and permits the same owner runner, with no credential I/O',
+  { skip: process.platform !== 'darwin' },
+  (t) => {
+    const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP');
+    const check = claimCorePermit(f.options);
+    check(f.binding);
+    assertCoreAdmission({ ...f.options, role: 'runner' })(f.binding);
+    denied(() => claimCorePermit(f.options));
+    fs.chmodSync(f.dir, 0o750);
+    denied(() => check(f.binding));
+    fs.chmodSync(f.dir, 0o700);
+    denied(() => check(f.binding)); // sticky refusal even after permissions restored
+  },
+);
+test(
+  'local socket outer root and parent must remain private, canonical and owned',
+  { skip: process.platform !== 'darwin' },
+  (t) => {
+    const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP');
+    const parent = path.dirname(f.options.target.brokerSocket.path);
+    fs.chmodSync(parent, 0o2770);
+    denied(() => claimCorePermit(f.options));
+    fs.chmodSync(parent, 0o700);
+    fs.renameSync(parent, parent + '-actual');
+    fs.symlinkSync(parent + '-actual', parent);
+    denied(() => claimCorePermit(f.options));
+    assert.equal(fs.existsSync(f.options.claimPath), false);
+  },
+);
+test('local admission refuses Linux and wrong GID before a claim', (t) => {
+  const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP');
+  const descriptor = Object.getOwnPropertyDescriptor(process, 'platform');
+  try {
+    Object.defineProperty(process, 'platform', { value: 'linux' });
+    denied(() => claimCorePermit(f.options));
+  } finally {
+    Object.defineProperty(process, 'platform', descriptor);
+  }
+  t.mock.method(process, 'getgid', () => f.options.target.brokerSocket.gid + 1);
+  denied(() => claimCorePermit(f.options));
+  assert.equal(fs.existsSync(f.options.claimPath), false);
+});
+test(
+  'local revocation halts the existing claim without replay',
+  { skip: process.platform !== 'darwin' },
+  (t) => {
+    const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP');
+    const check = claimCorePermit(f.options);
+    f.permit.revoked = true;
+    f.write(f.options.path, f.permit);
+    denied(() => check(f.binding));
+    denied(() => assertCoreAdmission({ ...f.options, role: 'runner' }));
+    denied(() => claimCorePermit(f.options));
+  },
+);
+test(
+  'local expired permit cannot prompt or claim',
+  { skip: process.platform !== 'darwin' },
+  (t) => {
+    const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP');
+    t.mock.method(Date, 'now', () => at + 60000);
+    denied(() => claimCorePermit(f.options));
+    assert.equal(fs.existsSync(f.options.claimPath), false);
+  },
+);

@@ -12,11 +12,12 @@ export type CoreSocketRequestInit = Pick<
 /** OS metadata only. Never creates, deletes, changes permissions or grants model authority. */
 export function assertCoreSocket(
   target: CoreSocketTarget,
-  options?: { beforeListen?: boolean },
+  options?: { beforeListen?: boolean; localStdin?: boolean },
 ): void;
 /** Only string request bodies are accepted at runtime. Redirects are returned, never followed. */
 export function socketRequest(
   target: CoreSocketTarget,
   route: '/status' | '/chat/completions' | '/finish',
   init?: CoreSocketRequestInit,
+  options?: Readonly<{ localStdin: boolean }>,
 ): Promise<Response>;

@@ -36,10 +36,13 @@ const numericId = (value) =>
 /** Check the pinned OS boundary, not a claim of owner/model authorization.
  * Parent must provision the dedicated directory and UID/GID membership first.
  * A fresh broker may bind only an absent path; this helper cannot reset it. */
-export function assertCoreSocket(target, { beforeListen = false } = {}) {
+export function assertCoreSocket(
+  target,
+  { beforeListen = false, localStdin = false } = {},
+) {
   try {
     requireThat(
-      typeof beforeListen === 'boolean',
+      typeof beforeListen === 'boolean' && typeof localStdin === 'boolean',
       'core_socket_metadata_refused',
     );
     requireThat(
@@ -73,13 +76,28 @@ export function assertCoreSocket(target, { beforeListen = false } = {}) {
       'core_socket_metadata_refused',
     );
     const parent = fs.lstatSync(directory);
+    if (localStdin) {
+      const root = path.dirname(directory);
+      const outer = fs.lstatSync(root);
+      requireThat(
+        process.platform === 'darwin' &&
+          target.brokerUid > 0 &&
+          target.brokerUid === target.runnerUid &&
+          process.getgid() === socket.gid &&
+          fs.realpathSync(root) === root &&
+          outer.isDirectory() &&
+          outer.uid === target.brokerUid &&
+          (outer.mode & 0o7777) === 0o700,
+        'core_socket_metadata_refused',
+      );
+    }
     requireThat(
       parent.isDirectory() &&
         !parent.isSymbolicLink() &&
         fs.realpathSync(directory) === directory &&
         parent.uid === target.brokerUid &&
         parent.gid === socket.gid &&
-        (parent.mode & 0o7777) === 0o2710,
+        (parent.mode & 0o7777) === (localStdin ? 0o700 : 0o2710),
       'core_socket_metadata_refused',
     );
     let stat;
@@ -95,7 +113,7 @@ export function assertCoreSocket(target, { beforeListen = false } = {}) {
         !stat.isSymbolicLink() &&
         stat.uid === target.brokerUid &&
         stat.gid === socket.gid &&
-        (stat.mode & 0o7777) === 0o660,
+        (stat.mode & 0o7777) === (localStdin ? 0o600 : 0o660),
       'core_socket_metadata_refused',
     );
   } catch {
@@ -106,7 +124,18 @@ export function assertCoreSocket(target, { beforeListen = false } = {}) {
 
 /** Exact UTF-8 bytes over one Unix HTTP connection. A Response is returned only
  * after the complete bounded body arrives. No request/response data is logged. */
-export async function socketRequest(target, route, init = {}) {
+export async function socketRequest(
+  target,
+  route,
+  init = {},
+  options = { localStdin: false },
+) {
+  requireThat(
+    options &&
+      Object.keys(options).length === 1 &&
+      typeof options.localStdin === 'boolean',
+    'core_socket_metadata_refused',
+  );
   requireThat(ROUTES.has(route), 'core_socket_route_refused');
   requireThat(
     init &&
@@ -169,7 +198,7 @@ export async function socketRequest(target, route, init = {}) {
   }
   if (method === 'POST') headers['content-length'] = String(body.length);
   headers.connection = 'close';
-  assertCoreSocket(target);
+  assertCoreSocket(target, options);
   const aborted = () => new DOMException('core_socket_aborted', 'AbortError');
   if (signal?.aborted) throw aborted();
   return new Promise((resolve, reject) => {

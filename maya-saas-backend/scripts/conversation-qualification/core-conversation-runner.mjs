@@ -49,7 +49,10 @@ assert.ok(
   values.prepare !== values.run && Boolean(values.prepare || values.run),
   'core_runner_explicit_action',
 );
-assert.ok(['dry', 'admitted'].includes(values.mode), 'core_runner_mode');
+assert.ok(
+  ['dry', 'admitted', 'admitted-local'].includes(values.mode),
+  'core_runner_mode',
+);
 assert.ok(
   values.output &&
     path.isAbsolute(values.output) &&
@@ -62,7 +65,13 @@ for (const name of ['.env', '.env.local'])
     false,
     'core_runner_no_env_files',
   );
-const live = values.mode === 'admitted';
+const localStdin = values.mode === 'admitted-local';
+const live = values.mode !== 'dry';
+const manifestMode = localStdin
+  ? 'ADMITTED_LOCAL_MODEL_HTTP'
+  : live
+    ? 'ADMITTED_MODEL_HTTP'
+    : 'DRY_HTTP';
 if (live && values.run)
   assert.ok(values.manifest, 'core_runner_live_prepared_manifest_required');
 if (!live)
@@ -88,7 +97,7 @@ if (values.manifest) {
   );
   manifestPath = fs.realpathSync(values.manifest);
   manifestSha256 = values['manifest-sha256'];
-  manifest = readCoreManifest(manifestPath, manifestSha256);
+  manifest = readCoreManifest(manifestPath, manifestSha256, { localStdin });
 } else {
   assert.ok(
     !values['manifest-sha256'],
@@ -104,19 +113,16 @@ if (values.manifest) {
     assert.ok(bytes.length <= 16384, 'core_runner_context_limit');
     context = JSON.parse(bytes);
   }
-  const raw = captureCoreManifest(
-    live ? 'ADMITTED_MODEL_HTTP' : 'DRY_HTTP',
-    context,
-  );
+  const raw = captureCoreManifest(manifestMode, context);
   manifestPath = path.join(output, 'candidate-manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(raw, null, 2) + '\n', {
     flag: 'wx',
     mode: 0o644,
   });
   manifestSha256 = coreHash(fs.readFileSync(manifestPath));
-  manifest = readCoreManifest(manifestPath, manifestSha256);
+  manifest = readCoreManifest(manifestPath, manifestSha256, { localStdin });
 }
-assert.equal(manifest.mode, live ? 'ADMITTED_MODEL_HTTP' : 'DRY_HTTP');
+assert.equal(manifest.mode, manifestMode);
 assertCoreSources(manifest);
 if (values.prepare) {
   console.log(
@@ -217,7 +223,7 @@ let broker,
   startAttempted = false,
   boundLiveBroker = false;
 const control = { cancelled: null, terminateActive: null };
-for (const signal of ['SIGTERM', 'SIGINT'])
+for (const signal of ['SIGTERM', 'SIGINT', 'SIGHUP'])
   process.on(signal, () => {
     control.cancelled ??= signal;
     control.terminateActive?.();
@@ -232,6 +238,7 @@ try {
         redirect: 'error',
         signal: AbortSignal.timeout(5000),
       },
+      { localStdin },
     ).then((r) => r.json());
     assert.equal(status.manifestSha256, manifestSha256);
     assert.equal(status.runId, manifest.runId);
@@ -327,7 +334,11 @@ try {
   }
   assertCoreSources(manifest);
   const probeEnv = {
-    JEST_CORE_CONVERSATION_MODE: live ? 'live' : 'dry',
+    JEST_CORE_CONVERSATION_MODE: localStdin
+      ? 'live-local'
+      : live
+        ? 'live'
+        : 'dry',
     JEST_CORE_CONVERSATION_OUTPUT: output,
     ...(!live
       ? { JEST_CORE_CONVERSATION_BROKER_URL: brokerUrl + '/chat/completions' }
@@ -399,6 +410,7 @@ try {
           redirect: 'error',
           signal: AbortSignal.timeout(5000),
         },
+        { localStdin },
       );
       report.brokerStopRequested = stopped.ok;
     } catch {

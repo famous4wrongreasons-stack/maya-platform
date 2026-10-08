@@ -143,7 +143,7 @@ function readPinned(file, expectedSha, maxBytes, pin) {
     if (fd !== undefined) fs.closeSync(fd);
   }
 }
-function validateManifest(value) {
+function validateManifest(value, localStdin) {
   record(value, [
     'contract',
     'mode',
@@ -164,7 +164,11 @@ function validateManifest(value) {
     'admissionContext',
   ]);
   requireThat(value.contract === 'maya.core-conversation-run/1');
-  requireThat(['DRY_HTTP', 'ADMITTED_MODEL_HTTP'].includes(value.mode));
+  requireThat(
+    localStdin
+      ? value.mode === 'ADMITTED_LOCAL_MODEL_HTTP'
+      : ['DRY_HTTP', 'ADMITTED_MODEL_HTTP'].includes(value.mode),
+  );
   requireThat(value.profile === CORE_DIAGNOSTIC_PROFILE);
   hex(value.candidateCommit, 40);
   uuid(value.runId);
@@ -177,8 +181,8 @@ function validateManifest(value) {
   if (value.mode === 'DRY_HTTP') requireThat(value.admissionContext === null);
   else {
     record(value.admissionContext, ['target', 'credentialSource']);
-    validateTarget(value.admissionContext.target);
-    validateCredential(value.admissionContext.credentialSource);
+    validateTarget(value.admissionContext.target, localStdin);
+    validateCredential(value.admissionContext.credentialSource, localStdin);
     requireThat(
       value.admissionContext.credentialSource.reader ===
         value.admissionContext.target.brokerUid,
@@ -215,19 +219,25 @@ function validateManifest(value) {
   }
 }
 
-export function readCoreManifest(file, sha256) {
+export function readCoreManifest(
+  file,
+  sha256,
+  options = { localStdin: false },
+) {
   try {
+    record(options, ['localStdin']);
+    requireThat(typeof options.localStdin === 'boolean');
     hex(sha256);
     const read = readPinned(file, sha256, 2 * 1024 * 1024);
-    validateManifest(read.value);
+    validateManifest(read.value, options.localStdin);
     const value = freeze({ ...read.value, manifestSha256: read.sha256 });
-    manifests.set(value, { file, pin: read });
+    manifests.set(value, { file, pin: read, localStdin: options.localStdin });
     return value;
   } catch {
     deny();
   }
 }
-function validateTarget(target) {
+function validateTarget(target, localStdin = false) {
   record(target, [
     'host',
     'workDirectory',
@@ -242,7 +252,13 @@ function validateTarget(target) {
       (n) => Number.isSafeInteger(n) && n >= 0,
     ),
   );
-  requireThat(target.brokerUid !== target.runnerUid);
+  requireThat(
+    localStdin
+      ? target.host === 'localhost' &&
+          target.brokerUid > 0 &&
+          target.brokerUid === target.runnerUid
+      : target.brokerUid !== target.runnerUid,
+  );
   record(target.brokerSocket, ['path', 'gid']);
   absolute(target.brokerSocket.path);
   requireThat(
@@ -258,14 +274,50 @@ function validateTarget(target) {
   // This pins only the socket declaration. The broker separately verifies the
   // dedicated direct parent, actual socket type, ownership and access modes.
 }
-function validateCredential(source) {
+function validateCredential(source, localStdin = false) {
   record(source, ['kind', 'reference', 'owner', 'reader']);
-  requireThat(source.kind === 'file');
-  absolute(source.reference);
+  if (localStdin) {
+    requireThat(
+      source.kind === 'terminal-stdin' &&
+        source.reference === 'owner-terminal-stdin-once' &&
+        source.owner === source.reader &&
+        source.owner > 0,
+    );
+  } else {
+    requireThat(source.kind === 'file');
+    absolute(source.reference);
+  }
   requireThat(
     [source.owner, source.reader].every(
       (n) => Number.isSafeInteger(n) && n >= 0,
     ),
+  );
+}
+// This mode trusts the owner's processes. It does not claim cross-UID isolation.
+function checkLocalBoundary(target) {
+  requireThat(
+    process.platform === 'darwin' &&
+      process.getuid() === target.brokerUid &&
+      process.getgid() === target.brokerSocket.gid,
+  );
+  const parent = path.dirname(target.brokerSocket.path);
+  const root = path.dirname(parent);
+  requireThat(root !== path.parse(root).root && root !== target.workDirectory);
+  requireThat(
+    fs.realpathSync(root) === root && fs.realpathSync(parent) === parent,
+  );
+  const outer = fs.lstatSync(root),
+    inner = fs.lstatSync(parent);
+  requireThat(
+    outer.isDirectory() &&
+      outer.uid === target.brokerUid &&
+      (outer.mode & 0o7777) === 0o700,
+  );
+  requireThat(
+    inner.isDirectory() &&
+      inner.uid === target.brokerUid &&
+      inner.gid === target.brokerSocket.gid &&
+      (inner.mode & 0o7777) === 0o700,
   );
 }
 function bindingOf(manifest) {
@@ -299,10 +351,16 @@ function configuration(options) {
     'ownerApprovalRef',
   ]);
   const manifestPin = manifests.get(options.manifest);
-  requireThat(manifestPin && options.manifest.mode === 'ADMITTED_MODEL_HTTP');
+  requireThat(
+    manifestPin &&
+      options.manifest.mode ===
+        (manifestPin.localStdin
+          ? 'ADMITTED_LOCAL_MODEL_HTTP'
+          : 'ADMITTED_MODEL_HTTP'),
+  );
   requireThat(['broker', 'runner'].includes(options.role));
-  validateTarget(options.target);
-  validateCredential(options.credentialSource);
+  validateTarget(options.target, manifestPin.localStdin);
+  validateCredential(options.credentialSource, manifestPin.localStdin);
   label(options.ownerApprovalRef);
   requireThat(
     JSON.stringify(options.target) ===
@@ -366,8 +424,9 @@ function checkPermit(config, previous, time) {
   checkBinding(bindingOf(permit), bindingOf(config.manifest));
   label(permit.ownerApprovalRef);
   requireThat(permit.ownerApprovalRef === config.ownerApprovalRef);
-  validateTarget(permit.target);
-  validateCredential(permit.credentialSource);
+  validateTarget(permit.target, config.manifestPin.localStdin);
+  validateCredential(permit.credentialSource, config.manifestPin.localStdin);
+  if (config.manifestPin.localStdin) checkLocalBoundary(config.target);
   requireThat(JSON.stringify(permit.target) === JSON.stringify(config.target));
   requireThat(
     JSON.stringify(permit.credentialSource) ===

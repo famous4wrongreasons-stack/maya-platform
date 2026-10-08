@@ -15,7 +15,7 @@ export type CoreTarget = Readonly<{
   }>;
 }>;
 export type CoreCredentialReference = Readonly<{
-  kind: 'file';
+  kind: 'file' | 'terminal-stdin';
   reference: string;
   owner: number;
   reader: number;
@@ -23,7 +23,7 @@ export type CoreCredentialReference = Readonly<{
 export type CoreManifest = CoreAdmissionBinding &
   Readonly<{
     contract: 'maya.core-conversation-run/1';
-    mode: 'DRY_HTTP' | 'ADMITTED_MODEL_HTTP';
+    mode: 'DRY_HTTP' | 'ADMITTED_MODEL_HTTP' | 'ADMITTED_LOCAL_MODEL_HTTP';
     sourceHashes: Readonly<Record<string, string>>;
     datasetSha256: string;
     dialogs: 3;
@@ -66,7 +66,11 @@ export type CoreAdmissionAssertion = ((binding: CoreAdmissionBinding) => void) &
     expiresAt: number;
   }>;
 /** Reads only a bounded, pinned nonsecret declaration; grants no authority. */
-export function readCoreManifest(path: string, sha256: string): CoreManifest;
+export function readCoreManifest(
+  path: string,
+  sha256: string,
+  options?: Readonly<{ localStdin: boolean }>,
+): CoreManifest;
 /** Observe an already created claim, including from the separate runner UID. */
 export function assertCoreAdmission(
   options: CoreAdmissionOptions,

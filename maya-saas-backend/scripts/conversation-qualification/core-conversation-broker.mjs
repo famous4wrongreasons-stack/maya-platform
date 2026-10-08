@@ -15,6 +15,7 @@ import {
   claimCorePermit,
 } from './core-conversation-admission.mjs';
 import { assertCoreSocket } from './core-conversation-socket.mjs';
+import { readLocalTerminalCredential } from './core-local-terminal-credential.mjs';
 import { serveCandidateBroker } from './candidate-broker-server.mjs';
 import { assertCoreSources, coreHash } from './core-conversation-source.mjs';
 const { values } = parseArgs({
@@ -30,7 +31,7 @@ const { values } = parseArgs({
   strict: true,
 });
 assert.ok(
-  ['dry', 'admitted'].includes(values.mode),
+  ['dry', 'admitted', 'admitted-local'].includes(values.mode),
   'core_broker_explicit_mode',
 );
 assert.ok(
@@ -43,11 +44,18 @@ assert.ok(
   ),
   'core_broker_ambient_credentials',
 );
-const pinned = readCoreManifest(values.manifest, values['manifest-sha256']);
-const live = values.mode === 'admitted';
+const localStdin = values.mode === 'admitted-local';
+const pinned = readCoreManifest(values.manifest, values['manifest-sha256'], {
+  localStdin,
+});
+const live = values.mode !== 'dry';
 assert.equal(
   pinned.mode,
-  live ? 'ADMITTED_MODEL_HTTP' : 'DRY_HTTP',
+  localStdin
+    ? 'ADMITTED_LOCAL_MODEL_HTTP'
+    : live
+      ? 'ADMITTED_MODEL_HTTP'
+      : 'DRY_HTTP',
   'core_broker_manifest_mode',
 );
 assertCoreSources(pinned);
@@ -59,7 +67,10 @@ assert.ok(
 );
 let admission;
 if (live) {
-  assertCoreSocket(pinned.admissionContext.target, { beforeListen: true });
+  assertCoreSocket(pinned.admissionContext.target, {
+    beforeListen: true,
+    localStdin,
+  });
   assert.ok(
     values.permit && values['permit-sha256'] && values['owner-approval-ref'],
     'core_broker_explicit_permit',
@@ -101,15 +112,30 @@ const report = {
     ? 'ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED'
     : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
 };
-let gate, credentialIdentity;
-const save = () =>
+let gate, credentialIdentity, localCredential, broker;
+let localStopQueued = false;
+const save = () => {
+  // Drop the reference on every terminal stop; JS strings are not securely erasable.
+  if (report.stopped) localCredential = undefined;
+  if (localStdin && report.rejections.length > 0 && !localStopQueued) {
+    localStopQueued = true;
+    localCredential = undefined;
+    queueMicrotask(() => {
+      void broker?.stop('local_request_refused');
+    });
+  }
   fs.writeFileSync(
     reportPath,
     JSON.stringify({ ...report, stats: gate?.stats ?? null }, null, 2) + '\n',
     { mode: 0o600 },
   );
+};
 save();
 function readCredential() {
+  if (localStdin) {
+    if (!localCredential) throw new Error('core_local_credential_unavailable');
+    return localCredential;
+  }
   const source = pinned.admissionContext.credentialSource;
   assert.equal(source.kind, 'file', 'core_broker_credential_kind');
   assert.ok(
@@ -160,11 +186,10 @@ function readCredential() {
         );
     }
     const key = raw.subarray(0, read).toString('utf8').trim();
-    assert.match(
-      key,
-      /^[A-Za-z0-9_-]{16,512}$/,
-      'core_broker_scalar_credential_required',
-    );
+    if (!/^[A-Za-z0-9_-]{16,512}$/.test(key)) {
+      raw.fill(0);
+      throw new Error('core_broker_scalar_credential_required');
+    }
     const identity = JSON.stringify([
       stat.dev,
       stat.ino,
@@ -233,12 +258,48 @@ const binding = {
   profile: CORE_DIAGNOSTIC_PROFILE,
   limitsSha256: pinned.limitsSha256,
 };
+if (localStdin) {
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'];
+  for (const signal of signals) process.on(signal, cancel);
+  const revocation = setInterval(() => {
+    try {
+      admission(binding);
+    } catch {
+      controller.abort();
+    }
+  }, 100);
+  try {
+    admission(binding);
+    const remaining = expiresAt - Date.now();
+    if (remaining <= 0) throw new Error('core_local_permit_expired');
+    localCredential = await readLocalTerminalCredential({
+      signal: controller.signal,
+      timeoutMs: Math.min(30000, remaining),
+    });
+    admission(binding);
+    controller.signal.throwIfAborted();
+    report.credentialsLoaded = true;
+    save();
+  } catch {
+    report.inputAborted = true;
+    report.stopped = true;
+    report.stopReason = 'local_credential_input_refused';
+    report.stoppedAt = new Date().toISOString();
+    save();
+    throw new Error('core_local_credential_input_refused');
+  } finally {
+    clearInterval(revocation);
+    for (const signal of signals) process.off(signal, cancel);
+  }
+}
 const transport = async (url, init) => {
   assert.ok(Date.now() < expiresAt, 'core_broker_expired');
   assertCoreSources(pinned);
   if (!live) return canned();
   admission(binding);
-  assertCoreSocket(pinned.admissionContext.target);
+  assertCoreSocket(pinned.admissionContext.target, { localStdin });
   const key = readCredential();
   // Recheck after credential I/O, before the only external edge in this profile.
   admission(binding);
@@ -256,7 +317,7 @@ const transport = async (url, init) => {
     },
   });
 };
-serveCandidateBroker({
+broker = serveCandidateBroker({
   report,
   save,
   expiresAt,
@@ -287,15 +348,19 @@ serveCandidateBroker({
     ? {
         listenTarget: pinned.admissionContext.target.brokerSocket.path,
         onListen: () => {
-          fs.chmodSync(pinned.admissionContext.target.brokerSocket.path, 0o660);
-          assertCoreSocket(pinned.admissionContext.target);
+          admission(binding);
+          fs.chmodSync(
+            pinned.admissionContext.target.brokerSocket.path,
+            localStdin ? 0o600 : 0o660,
+          );
+          assertCoreSocket(pinned.admissionContext.target, { localStdin });
         },
       }
     : {}),
   statusExtra: () => {
     if (live) {
       admission(binding);
-      assertCoreSocket(pinned.admissionContext.target);
+      assertCoreSocket(pinned.admissionContext.target, { localStdin });
     }
     return {
       manifestSha256: pinned.manifestSha256,
@@ -361,3 +426,7 @@ serveCandidateBroker({
     );
   },
 });
+if (localStdin)
+  process.on('SIGHUP', () => {
+    void broker.stop('SIGHUP');
+  });

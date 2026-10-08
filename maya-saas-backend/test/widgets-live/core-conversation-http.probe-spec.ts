@@ -69,7 +69,7 @@ const ownerApprovalRef = process.env.JEST_CORE_CONVERSATION_OWNER_APPROVAL_REF;
 const proof = assertProofDatabase();
 if (
   !/^maya_widget_gate_proof_c9occ_[a-z0-9_]+$/.test(proof.database) ||
-  !['dry', 'live'].includes(mode ?? '') ||
+  !['dry', 'live', 'live-local'].includes(mode ?? '') ||
   !output ||
   !path.isAbsolute(output) ||
   !manifestPath ||
@@ -83,7 +83,7 @@ if (
         brokerUrl,
       ) ||
       Number(new URL(brokerUrl).port) > 65535)) ||
-  (mode === 'live' && brokerUrl !== undefined)
+  (mode !== 'dry' && brokerUrl !== undefined)
 )
   throw new Error(
     'Use the owned core conversation HTTP runner with exact fresh bindings',
@@ -174,11 +174,18 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       mode: 0o600,
     });
   beforeAll(async () => {
-    const verifiedManifest = readCoreManifest(manifestPath, manifestSha256!);
+    const verifiedManifest = readCoreManifest(manifestPath, manifestSha256!, {
+      localStdin: mode === 'live-local',
+    });
     manifest = verifiedManifest as unknown as DiagnosticManifest;
     expect(manifest).toMatchObject({
       contract: 'maya.core-conversation-run/1',
-      mode: mode === 'dry' ? 'DRY_HTTP' : 'ADMITTED_MODEL_HTTP',
+      mode:
+        mode === 'dry'
+          ? 'DRY_HTTP'
+          : mode === 'live-local'
+            ? 'ADMITTED_LOCAL_MODEL_HTTP'
+            : 'ADMITTED_MODEL_HTTP',
       profile: CORE_DIAGNOSTIC_PROFILE,
       candidateCommit: sourceHead,
       dialogs: 3,
@@ -207,7 +214,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     }
     // A runner may assert an existing broker claim, never create a permit/claim.
     let admission: ReturnType<typeof assertCoreAdmission> | undefined;
-    if (mode === 'live') {
+    if (mode !== 'dry') {
       if (
         !permitPath ||
         !path.isAbsolute(permitPath) ||
@@ -227,7 +234,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       });
     }
     const budgetMode =
-      mode === 'live'
+      mode !== 'dry'
         ? {
             mode: 'ADMITTED_MODEL_ONLY' as const,
             assertAdmission: (
@@ -262,11 +269,12 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           },
         };
         const response =
-          mode === 'live'
+          mode !== 'dry'
             ? await socketRequest(
                 verifiedManifest.admissionContext!.target,
                 '/chat/completions',
                 relayInit,
+                { localStdin: mode === 'live-local' },
               )
             : await rawFetch(brokerUrl!, relayInit);
         // Capture the actual synthetic-dialog model output before any parser or

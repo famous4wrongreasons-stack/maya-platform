@@ -109,7 +109,12 @@ export function assertCoreSources(manifest) {
   );
 }
 export function captureCoreManifest(mode, admissionContext = null) {
-  assert.ok(['DRY_HTTP', 'ADMITTED_MODEL_HTTP'].includes(mode), 'core_mode');
+  assert.ok(
+    ['DRY_HTTP', 'ADMITTED_MODEL_HTTP', 'ADMITTED_LOCAL_MODEL_HTTP'].includes(
+      mode,
+    ),
+    'core_mode',
+  );
   assert.equal(
     mode === 'DRY_HTTP',
     admissionContext === null,
