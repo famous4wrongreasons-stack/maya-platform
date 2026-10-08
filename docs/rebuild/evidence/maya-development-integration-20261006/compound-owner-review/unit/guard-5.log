@@ -1,0 +1,13 @@
+✔ guard permits actual login/history/exact explicit chat and bundle reads only (0.559041ms)
+✔ guard refuses outside origins, mutation/voice/provider routes, unexpected requests and credentials (2.423625ms)
+✔ request-stage guard continues admitted HTTP, blocks forbidden HTTP, never fulfills a response (0.395875ms)
+✔ guard admits only bounded read-only widget history, never render observations or intents (0.139834ms)
+✔ compound browser admits only its three exact owner prompts, isolated from the occupancy mode (0.444334ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35.614459

@@ -1,0 +1,74 @@
+{
+  "kind": "authored verification receipt from observed tool exits; raw logs linked separately",
+  "codeCommit": "de0d19ec8aa6afd949451468de426ed602b6042e",
+  "checks": [
+    {
+      "check": "Targeted backend Jest including original Occupancy/BI/Lifecycle and denial census",
+      "exitCode": 0,
+      "suites": 9,
+      "tests": 138,
+      "log": "unit/targeted-138.log"
+    },
+    {
+      "check": "tsc --project test/tsconfig.widgets-live.json; production/probe imported types",
+      "exitCode": 0,
+      "heapMb": 3072,
+      "log": "unit/types.log"
+    },
+    {
+      "check": "ESLint all 12 changed TS source/spec/probe files",
+      "exitCode": 0,
+      "heapMb": 4096,
+      "log": "unit/lint.log"
+    },
+    {
+      "check": "Owned runner node --test, including cancellation cleanup",
+      "exitCode": 0,
+      "tests": 9,
+      "log": "unit/runner-9.log"
+    },
+    {
+      "check": "Existing browser guard node --test with closed compound extension",
+      "exitCode": 0,
+      "tests": 5,
+      "log": "unit/guard-5.log"
+    },
+    {
+      "check": "Actual local HTTP/PG prepare + separate process/PG restart + resume",
+      "exitCode": 0,
+      "stages": 2,
+      "rawReports": [
+        "http-pg/prepare.json",
+        "http-pg/resume.json"
+      ]
+    },
+    {
+      "check": "Actual current React Chrome via local HTTP, reload/re-login/clarification continuation",
+      "exitCode": 0,
+      "checkpoints": 4,
+      "rawReports": [
+        "react/browser.json",
+        "react/browser/browser.json"
+      ]
+    }
+  ],
+  "redEvidence": {
+    "log": "unit/ingress-red.log",
+    "failedTests": 3,
+    "meaning": "Baseline rejects compound ingress, loses scoped clarification meaning, parser requires a generic tool."
+  },
+  "review": {
+    "method": "independent read-only code and proof review",
+    "resolvedFindings": [
+      "Final exact C7 refs check after deferred window exposure",
+      "Reuse existing route_domain_budget denial vocabulary; REN-2 census preserved"
+    ],
+    "artifactHashReview": "Separate final manifest review required"
+  },
+  "limits": [
+    "Provider GET responses and model JSON choices are synthetic. No language-quality/paid-model/real-provider acceptance.",
+    "Browser reload/re-login and separate HTTP backend/PG restart are different proofs.",
+    "No live CRM mutation, outbound notification, background C10 admission, website change, push, merge or deployment.",
+    "Long plain-text composition and floating-header overlap in old history are not design acceptance."
+  ]
+}

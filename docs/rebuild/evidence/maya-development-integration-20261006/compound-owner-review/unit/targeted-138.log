@@ -1,0 +1,28 @@
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:conversation_plan_missing
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_output_missing
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_unexpected_tool_call
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_api_key_missing
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)
+[Nest] 63744  - 10/08/2026, 3:49:41 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:deepseek_base_url_invalid
+
+Test Suites: 9 passed, 9 total
+Tests:       138 passed, 138 total
+Snapshots:   0 total
+Time:        0.929 s, estimated 1 s
+Ran all test suites matching src/orchestration/c9.business-occupancy.spec.ts|src/orchestration/c9.occupancy.spec.ts|src/orchestration/c9.bi.spec.ts|src/orchestration/c9.lifecycle.spec.ts|src/ai-tools/ai-core.occupancy.spec.ts|src/ai-tools/ai-core-model.service.spec.ts|src/ai-tools/owner-review-plan.spec.ts|src/conversation-intelligence/conversation-capability.spec.ts|src/widgets/rendering/denial-projection.ratchet.spec.ts.

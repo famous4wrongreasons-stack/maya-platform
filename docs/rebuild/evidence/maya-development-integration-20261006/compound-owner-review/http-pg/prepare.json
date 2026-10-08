@@ -1,0 +1,684 @@
+{
+  "contract": "maya.explicit-business-occupancy-http-pg-proof/1",
+  "stage": "prepare",
+  "pid": 64075,
+  "postgresStarted": "2026-10-08 00:50:10.923371+00",
+  "database": "maya_widget_gate_proof_c9occ_5db368758b4c",
+  "nativeYclientsAdapter": true,
+  "syntheticProviderTransport": true,
+  "scriptedSemanticPlanner": true,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "browserAcceptance": false,
+  "c10AutonomousAdmission": false,
+  "c7Measurement": "owner-published business_period MeasurementRevision",
+  "providerReadCalls": 10,
+  "providerWriteCalls": 0,
+  "modelCalls": 5,
+  "businessWrites": 0,
+  "actionExecutions": 0,
+  "source": {
+    "period": {
+      "from": "2026-10-07T00:00:00.000Z",
+      "to": "2026-10-07T23:59:59.999Z"
+    },
+    "revisionId": "b3fd632f-a141-4a14-a95d-d5b604508134",
+    "snapshotHash": "b0103be0d738df8a81645c62e5f6a3b9dc4ef8103cda4776c5b2a24a088e3453"
+  },
+  "confirmedRunId": "a11ba661-0d78-4237-b4f4-395c511f613c",
+  "heldRunId": "0b9ffa61-cf7e-4368-9052-28c1c2b762a9",
+  "observations": {
+    "b48b3f6b-2a10-40f0-b439-a48f1c3104f7:0": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "compound",
+      "replies": [
+        "Объединила опубликованный финансовый отчёт и проверку одной сохранённой возможности после отмены. У этих источников разные периоды наблюдения.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 00:50:14,109 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nПосле снятия записи сохранилось окно 10.10.2026, 12:00 — 10.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nПрактический следующий шаг — отдельно проверить доступное время на дату найденного окна. Финансовый снимок не доказывает спрос на это время и не объясняет причину отмены."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "b48b3f6b-2a10-40f0-b439-a48f1c3104f7",
+            "analysis": {
+              "contract": "maya.c9-bi-report-response/1",
+              "mode": "as_reported",
+              "outcome": "PARTIAL",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "BUSINESS_INTELLIGENCE",
+                "intent": "c9.business_overview",
+                "findings": [
+                  {
+                    "statement": "Опубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 00:50:14,109 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.",
+                    "evidence_refs": [
+                      "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "c7.measurement.read",
+                    "status": "measured_incomplete",
+                    "as_of": "2026-10-08T00:50:14.109Z",
+                    "evidence_refs": [
+                      "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "ae4ccde6aa068787734157646b58d12259d9a0ddc94263ba64627c61748bcb6b",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "canonical_booked_history_coverage_not_proven_complete",
+                        "expense_period_completeness_not_declared",
+                        "fiscal_cash_not_proven",
+                        "net_requires_complete_cash_refund_and_expense_evidence",
+                        "refund_coverage_not_supported",
+                        "source_observations_are_not_historical_reconstruction"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "low",
+                "limitations": [
+                  "canonical_booked_history_coverage_not_proven_complete",
+                  "expense_period_completeness_not_declared",
+                  "fiscal_cash_not_proven",
+                  "net_requires_complete_cash_refund_and_expense_evidence",
+                  "refund_coverage_not_supported",
+                  "source_observations_are_not_historical_reconstruction"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "ae4ccde6aa068787734157646b58d12259d9a0ddc94263ba64627c61748bcb6b",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "canonical_booked_history_coverage_not_proven_complete",
+                    "expense_period_completeness_not_declared",
+                    "fiscal_cash_not_proven",
+                    "net_requires_complete_cash_refund_and_expense_evidence",
+                    "refund_coverage_not_supported",
+                    "source_observations_are_not_historical_reconstruction"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "60e85904-293c-4733-938c-a5875a53aeca",
+                "sourceHandles": [
+                  "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                ]
+              },
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "После снятия записи сохранилось окно 10.10.2026, 12:00 — 10.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки.",
+                    "evidence_refs": [
+                      "h_373490f1ca92f460fd9f7ad97a3db14054b67f28f94dcdaba6cd97a09b7b7ed9"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured",
+                    "as_of": "2026-10-08T00:50:14.455Z",
+                    "evidence_refs": [
+                      "h_373490f1ca92f460fd9f7ad97a3db14054b67f28f94dcdaba6cd97a09b7b7ed9"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "d441c00a393c25bcfbe39e79202f1acec07bd41faeab3d4ba8f60b82f434ad8b",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "high",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "d441c00a393c25bcfbe39e79202f1acec07bd41faeab3d4ba8f60b82f434ad8b",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_373490f1ca92f460fd9f7ad97a3db14054b67f28f94dcdaba6cd97a09b7b7ed9"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "cbe8baaa-06b7-4aa4-82f6-09898775752c",
+                "asOf": "2026-10-08T00:50:14.455Z",
+                "opportunityRefs": [
+                  {
+                    "sourceType": "Opportunity",
+                    "id": "cb1f9bd9-efbc-47f3-8875-e67599d80ace",
+                    "tenantId": "cmuytkw9g0000fvc9tbqf5ciw",
+                    "subjectKind": "appointment",
+                    "subjectRef": "appointment_098718b70ecb54908036101bc909fc48",
+                    "contractVersion": 1,
+                    "identityHash": "417efbb91445b9e4e2dde5230b615346dd74d542f989b33de1344b9c33644c35",
+                    "inputHash": "be12149a82193bdc0bfc5bf612b39a2f0975da6e2881a012ab052b25c16fddb9",
+                    "observedAt": "2026-10-08T00:50:14.455Z",
+                    "validUntil": "2026-10-10T10:00:00.000Z",
+                    "retentionUntil": null,
+                    "status": "VERIFIED",
+                    "completeness": "COMPLETE",
+                    "unavailableReason": null
+                  },
+                  {
+                    "sourceType": "AgentTask",
+                    "id": "e12c0425-0975-47ab-af5a-387f194f6500",
+                    "tenantId": "cmuytkw9g0000fvc9tbqf5ciw",
+                    "subjectKind": "assignment",
+                    "subjectRef": "e12c0425-0975-47ab-af5a-387f194f6500",
+                    "contractVersion": 1,
+                    "identityHash": "af6f6cfc0d09219442f2516b23c8d5988e8198ac021b4340b2b79a98419b812a",
+                    "inputHash": "af6f6cfc0d09219442f2516b23c8d5988e8198ac021b4340b2b79a98419b812a",
+                    "observedAt": "2026-10-08T00:50:14.455Z",
+                    "validUntil": "2026-10-10T10:00:00.000Z",
+                    "retentionUntil": null,
+                    "status": "VERIFIED",
+                    "completeness": "COMPLETE",
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_44b7084b411537f31bc97a9969bfb51e"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "a11ba661-0d78-4237-b4f4-395c511f613c",
+              "scope": "explicit_business_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "42bf7db7-23b6-40f9-9fca-979e70e2f3e0",
+              "revision": 1,
+              "replayed": false,
+              "current": false,
+              "domains": [
+                "OCCUPANCY",
+                "BUSINESS_INTELLIGENCE"
+              ]
+            },
+            "user_turn": {
+              "turnId": "f31aa697-3452-4dc0-ace7-942a6fc262dc",
+              "conversationId": "d2e4ba3d-4d89-4e2f-be73-ce9116490ce1"
+            },
+            "reply": "Объединила опубликованный финансовый отчёт и проверку одной сохранённой возможности после отмены. У этих источников разные периоды наблюдения.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 00:50:14,109 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nПосле снятия записи сохранилось окно 10.10.2026, 12:00 — 10.10.2026, 13:00 (Europe/Moscow). CRM подтвердила рабочий график и доступность этого интервала на момент проверки. Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nПрактический следующий шаг — отдельно проверить доступное время на дату найденного окна. Финансовый снимок не доказывает спрос на это время и не объясняет причину отмены.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "b48b3f6b-2a10-40f0-b439-a48f1c3104f7:1": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "compound",
+      "replies": [
+        "Объединила опубликованный финансовый отчёт и проверку одной сохранённой возможности после отмены. У этих источников разные периоды наблюдения.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 00:50:14,109 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nЭто сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСейчас актуальное свободное окно не подтверждено. Не стоит строить план заполнения на этом результате; для текущей доступности нужен новый явный запрос."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "b48b3f6b-2a10-40f0-b439-a48f1c3104f7",
+            "analysis": {
+              "contract": "maya.c9-bi-report-response/1",
+              "mode": "as_reported",
+              "outcome": "PARTIAL",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "BUSINESS_INTELLIGENCE",
+                "intent": "c9.business_overview",
+                "findings": [
+                  {
+                    "statement": "Опубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 00:50:14,109 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.",
+                    "evidence_refs": [
+                      "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "c7.measurement.read",
+                    "status": "measured_incomplete",
+                    "as_of": "2026-10-08T00:50:14.109Z",
+                    "evidence_refs": [
+                      "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "ae4ccde6aa068787734157646b58d12259d9a0ddc94263ba64627c61748bcb6b",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "canonical_booked_history_coverage_not_proven_complete",
+                        "expense_period_completeness_not_declared",
+                        "fiscal_cash_not_proven",
+                        "net_requires_complete_cash_refund_and_expense_evidence",
+                        "refund_coverage_not_supported",
+                        "source_observations_are_not_historical_reconstruction"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "low",
+                "limitations": [
+                  "canonical_booked_history_coverage_not_proven_complete",
+                  "expense_period_completeness_not_declared",
+                  "fiscal_cash_not_proven",
+                  "net_requires_complete_cash_refund_and_expense_evidence",
+                  "refund_coverage_not_supported",
+                  "source_observations_are_not_historical_reconstruction"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "ae4ccde6aa068787734157646b58d12259d9a0ddc94263ba64627c61748bcb6b",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "canonical_booked_history_coverage_not_proven_complete",
+                    "expense_period_completeness_not_declared",
+                    "fiscal_cash_not_proven",
+                    "net_requires_complete_cash_refund_and_expense_evidence",
+                    "refund_coverage_not_supported",
+                    "source_observations_are_not_historical_reconstruction"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "60e85904-293c-4733-938c-a5875a53aeca",
+                "sourceHandles": [
+                  "h_5374106a50b9c9d7ec5a816b747c52dc21f77f00cbd58cb631e2e310a10792bd"
+                ]
+              },
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "recommendation": {
+              "contract": "maya.c9-occupancy-response/1",
+              "outcome": "AVAILABLE",
+              "agent": {
+                "contract": "AgentResult@1",
+                "agent_id": "OCCUPANCY",
+                "intent": "c9.cancellation_windows",
+                "findings": [
+                  {
+                    "statement": "Это сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен».",
+                    "evidence_refs": [
+                      "h_a03e709d00444b68169e25d1f7bee4a70f9c0036a43615a4335cf08181bcd3ec"
+                    ]
+                  }
+                ],
+                "facts_used": [
+                  {
+                    "capability": "booking.availability.read",
+                    "status": "measured_incomplete",
+                    "as_of": "2026-10-08T00:50:14.455Z",
+                    "evidence_refs": [
+                      "h_a03e709d00444b68169e25d1f7bee4a70f9c0036a43615a4335cf08181bcd3ec"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "06ac86b5cad55bec50d1cf8031094e1feac5bd1a75ce56435791e2bfa72aaee9",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "provider_schedule_and_available_slot_confirmed",
+                        "historical_read_not_revalidated"
+                      ]
+                    }
+                  }
+                ],
+                "confidence": "low",
+                "limitations": [
+                  "provider_schedule_and_available_slot_confirmed",
+                  "historical_read_not_revalidated"
+                ],
+                "proposed_action_intents": [],
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "06ac86b5cad55bec50d1cf8031094e1feac5bd1a75ce56435791e2bfa72aaee9",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "provider_schedule_and_available_slot_confirmed",
+                    "historical_read_not_revalidated"
+                  ]
+                },
+                "evidence_refs": [
+                  "h_a03e709d00444b68169e25d1f7bee4a70f9c0036a43615a4335cf08181bcd3ec"
+                ]
+              },
+              "evidence": {
+                "workReceiptId": "cbe8baaa-06b7-4aa4-82f6-09898775752c",
+                "asOf": "2026-10-08T00:50:14.455Z",
+                "opportunityRefs": [
+                  {
+                    "id": "cb1f9bd9-efbc-47f3-8875-e67599d80ace",
+                    "status": "VERIFIED",
+                    "tenantId": "cmuytkw9g0000fvc9tbqf5ciw",
+                    "inputHash": "be12149a82193bdc0bfc5bf612b39a2f0975da6e2881a012ab052b25c16fddb9",
+                    "observedAt": "2026-10-08T00:50:14.455Z",
+                    "sourceType": "Opportunity",
+                    "subjectRef": "appointment_098718b70ecb54908036101bc909fc48",
+                    "validUntil": "2026-10-10T10:00:00.000Z",
+                    "subjectKind": "appointment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "417efbb91445b9e4e2dde5230b615346dd74d542f989b33de1344b9c33644c35",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  },
+                  {
+                    "id": "e12c0425-0975-47ab-af5a-387f194f6500",
+                    "status": "VERIFIED",
+                    "tenantId": "cmuytkw9g0000fvc9tbqf5ciw",
+                    "inputHash": "af6f6cfc0d09219442f2516b23c8d5988e8198ac021b4340b2b79a98419b812a",
+                    "observedAt": "2026-10-08T00:50:14.455Z",
+                    "sourceType": "AgentTask",
+                    "subjectRef": "e12c0425-0975-47ab-af5a-387f194f6500",
+                    "validUntil": "2026-10-10T10:00:00.000Z",
+                    "subjectKind": "assignment",
+                    "completeness": "COMPLETE",
+                    "identityHash": "af6f6cfc0d09219442f2516b23c8d5988e8198ac021b4340b2b79a98419b812a",
+                    "retentionUntil": null,
+                    "contractVersion": 1,
+                    "unavailableReason": null
+                  }
+                ],
+                "scheduleRef": "schedule_44b7084b411537f31bc97a9969bfb51e"
+              },
+              "options": [
+                {
+                  "key": "check_date",
+                  "title": "По новому запросу проверить доступное время на эту дату"
+                },
+                {
+                  "key": "c9.no_action",
+                  "title": "Ничего не делать"
+                }
+              ],
+              "noSideEffects": true,
+              "executionAuthority": false,
+              "reasoning": "deterministic"
+            },
+            "coordination": {
+              "run_id": "a11ba661-0d78-4237-b4f4-395c511f613c",
+              "scope": "explicit_business_occupancy",
+              "state": "PROPOSED",
+              "revision_id": "42bf7db7-23b6-40f9-9fca-979e70e2f3e0",
+              "revision": 1,
+              "replayed": true,
+              "current": false,
+              "domains": [
+                "OCCUPANCY",
+                "BUSINESS_INTELLIGENCE"
+              ]
+            },
+            "user_turn": {
+              "turnId": "f31aa697-3452-4dc0-ace7-942a6fc262dc",
+              "conversationId": "d2e4ba3d-4d89-4e2f-be73-ce9116490ce1"
+            },
+            "reply": "Объединила опубликованный финансовый отчёт и проверку одной сохранённой возможности после отмены. У этих источников разные периоды наблюдения.\n\nОпубликованный финансовый снимок, версия 1.\nПериод: 07.10.2026, 00:00 — 08.10.2026, 00:00 (конец не включён; UTC).\nЧистую прибыль не подтверждаю: нужны подтверждённые поступления и возвраты, полная сопоставимая база расходов. Неизвестное не считаю нулём.\nДанные неполные; суммы относятся только к указанным источникам.\nДанные на 08.10.2026, 00:50:14,109 (UTC).\nЭто сохранённые измерения, без пересчёта текущего состояния. Причина изменения выручки не установлена.\nСтоимость записанных услуг: 123,45 ₽.\nОборот операций по данным CRM (не подтверждённая касса): 2 000,00 ₽.\nПодтверждённые начисления зарплаты: 500,00 ₽.\nПодтверждённые поступления: не измерено.\nПодтверждённые возвраты: не измерено.\nЧистая прибыль: не измерено.\n\nЭто сохранённый результат предыдущей проверки, а не подтверждение текущей доступности. Для новой проверки отправьте новый запрос «Проверь окна после отмен». Причина и автор отмены не установлены. Спрос, доход и вероятность заполнения не оценивались. Варианты: По новому запросу проверить доступное время на эту дату; Ничего не делать. Предложение сохранено, версия 1. Записи и цены не менялись, сообщения клиентам не отправлялись.\n\nСейчас актуальное свободное окно не подтверждено. Не стоит строить план заполнения на этом результате; для текущей доступности нужен новый явный запрос.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "0139b77a-0316-4735-b660-d2c4af48da9f:2": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "compound",
+      "replies": [
+        "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "0139b77a-0316-4735-b660-d2c4af48da9f",
+            "coordination": {
+              "run_id": "0b9ffa61-cf7e-4368-9052-28c1c2b762a9",
+              "scope": "deterministic_reads",
+              "state": "UNCONFIRMED"
+            },
+            "user_turn": {
+              "turnId": "f2aa7d80-90e2-4884-a1a6-19745d1e4046",
+              "conversationId": "489e5fcc-433c-4e58-ba53-3a169246c0a7"
+            },
+            "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "blocked",
+              "domain": "business_query",
+              "required_tools": [
+                "analytics.business.query",
+                "catalog.services.read",
+                "booking.availability.read",
+                "appointments.own.list",
+                "analytics.business.profit",
+                "catalog.staff.read",
+                "clients.retention.scan",
+                "clients.dossier.read",
+                "staff.schedule.read",
+                "staff.schedule.own.read",
+                "operations.journal.read",
+                "company.business-hours.read",
+                "support.integration-status.read"
+              ],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "0139b77a-0316-4735-b660-d2c4af48da9f:3": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "compound",
+      "replies": [
+        "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет."
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "0139b77a-0316-4735-b660-d2c4af48da9f",
+            "coordination": {
+              "run_id": "0b9ffa61-cf7e-4368-9052-28c1c2b762a9",
+              "scope": "deterministic_reads",
+              "state": "UNCONFIRMED"
+            },
+            "user_turn": {
+              "turnId": "f2aa7d80-90e2-4884-a1a6-19745d1e4046",
+              "conversationId": "489e5fcc-433c-4e58-ba53-3a169246c0a7"
+            },
+            "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "blocked",
+              "domain": "business_query",
+              "required_tools": [
+                "analytics.business.query",
+                "catalog.services.read",
+                "booking.availability.read",
+                "appointments.own.list",
+                "analytics.business.profit",
+                "catalog.staff.read",
+                "clients.retention.scan",
+                "clients.dossier.read",
+                "staff.schedule.read",
+                "staff.schedule.own.read",
+                "operations.journal.read",
+                "company.business-hours.read",
+                "support.integration-status.read"
+              ],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    },
+    "c701c65f-e97e-46e7-8912-4a53be2a2c06:4": {
+      "contract": "maya.explicit-occupancy-carrier-proof/1",
+      "mode": "compound_scoped",
+      "replies": [
+        "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и проверку одной сохранённой возможности после отмены. Это не обзор за отдельно запрошенный период, филиал или специалиста. Подойдёт такой ограниченный обзор без дополнительных условий?"
+      ],
+      "exchanges": [
+        {
+          "method": "POST",
+          "route": "/api/ai/chat",
+          "status": 201,
+          "body": {
+            "request_id": "c701c65f-e97e-46e7-8912-4a53be2a2c06",
+            "user_turn": {
+              "turnId": "8fd8744d-0042-4e90-ade9-6d221f5aa283",
+              "conversationId": "be32f6d2-1e0d-43c2-abdd-a98fdec085a6"
+            },
+            "reply": "Могу объединить последний опубликованный финансовый отчёт по всему бизнесу и проверку одной сохранённой возможности после отмены. Это не обзор за отдельно запрошенный период, филиал или специалиста. Подойдёт такой ограниченный обзор без дополнительных условий?",
+            "source": "safe_fallback",
+            "redacted_input": false,
+            "action": null,
+            "tools_used": [],
+            "grounding": {
+              "status": "not_required",
+              "domain": null,
+              "required_tools": [],
+              "evidence_tools": []
+            },
+            "brain": {
+              "persona": "director",
+              "intent": "business_analytics"
+            }
+          }
+        }
+      ],
+      "projection": "current-shell",
+      "rendering": "current-react-ReplyText-SSR",
+      "browserAcceptance": false
+    }
+  }
+}

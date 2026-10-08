@@ -1,0 +1,56 @@
+FAIL src/ai-tools/ai-core.occupancy.spec.ts
+  ● finite owner review compound ingress (synthetic, not real model acceptance) › delegates the finite plan once to the existing C9 owner and preserves one coherent completion
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      177 |     f.model.decide.mockResolvedValue(compoundDecision());
+      178 |     const result = await f.service.chat(user, dto('Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг'));
+    > 179 |     expect(f.orchestration.reviewBusinessAndCancellationWindows).toHaveBeenCalledTimes(1);
+          |                                                                  ^
+      180 |     expect(f.orchestration.checkCancellationWindows).not.toHaveBeenCalled();
+      181 |     expect(f.runtime.execute).not.toHaveBeenCalled();
+      182 |     expect(f.model.decide).toHaveBeenCalledTimes(1);
+
+      at Object.<anonymous> (ai-tools/ai-core.occupancy.spec.ts:179:66)
+
+  ● finite owner review compound ingress (synthetic, not real model acceptance) › asks and persists the exact bounded alternative instead of silently replacing the requested period
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "последний опубликованный финансовый отчёт"
+    Received string:    "Сейчас эта проверка разбирает одну сохранённую возможность после отмены. Для отдельного периода, филиала, специалиста или нескольких задач нужен уточнённый сценарий. Проверить первую доступную сохранённую возможность?"
+
+      188 |     f.model.decide.mockResolvedValue(compoundDecision({ period: 'today' }));
+      189 |     const result = await f.service.chat(user, dto('Дай обзор за сегодня, проверь окна после отмен и посоветуй следующий шаг'));
+    > 190 |     expect(result.reply).toContain('последний опубликованный финансовый отчёт');
+          |                          ^
+      191 |     expect(result.reply).toContain('по всему бизнесу');
+      192 |     expect(f.orchestration.reviewBusinessAndCancellationWindows).not.toHaveBeenCalled();
+      193 |     expect(f.runtime.execute).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (ai-tools/ai-core.occupancy.spec.ts:190:26)
+
+FAIL src/ai-tools/ai-core-model.service.spec.ts
+  ● AiCoreModelService › finite owner review parser accepts a delegated null tool call without weakening generic ready tasks
+
+    ai_core_required_tool_missing
+
+      1208 |         !this.semanticPlanMayFinishWithoutTool(semanticPlan)
+      1209 |       ) {
+    > 1210 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1211 |       }
+      1212 |       return { toolCall: null, semanticPlan };
+      1213 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1210:15)
+      at Object.<anonymous> (ai-tools/ai-core-model.service.spec.ts:37:47)
+
+Test Suites: 2 failed, 2 total
+Tests:       3 failed, 32 skipped, 35 total
+Snapshots:   0 total
+Time:        0.711 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts".

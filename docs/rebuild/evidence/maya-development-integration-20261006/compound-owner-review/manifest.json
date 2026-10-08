@@ -1,0 +1,387 @@
+{
+  "contract": "maya.compound-owner-review-checkpoint/1",
+  "baselineCommit": "8a22fe4a",
+  "codeAndProofCommit": "de0d19ec8aa6afd949451468de426ed602b6042e",
+  "qualification": {
+    "explicitRequestOnly": true,
+    "nativeYclientsAdapter": true,
+    "syntheticProviderTransport": true,
+    "scriptedPlanner": true,
+    "realModelAcceptance": false,
+    "realProviderAcceptance": false,
+    "c10Complete": false,
+    "websiteTouched": false,
+    "businessEffectsDuringRequests": 0
+  },
+  "rawArtifacts": [
+    {
+      "path": "http-pg/carrier-bundle.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/carrier-bundle.log"
+    },
+    {
+      "path": "http-pg/manifest.json",
+      "sha256": "a1307caac420933c45a95e19cf68e7447f1ac3fe07925a9efe998a71b50413a5",
+      "bytes": 602,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/manifest.json"
+    },
+    {
+      "path": "http-pg/migrations.log",
+      "sha256": "5f9e47cdf2f8a80d029adfe2cc8f90f49bba20474e6f28df0da946eacff3dc62",
+      "bytes": 14720,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/migrations.log"
+    },
+    {
+      "path": "http-pg/pg-restart.log",
+      "sha256": "54e9c01c95f08e7d84cd4e20890086bcfabb3078ef68206865d452c81e491917",
+      "bytes": 1347,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/pg-restart.log"
+    },
+    {
+      "path": "http-pg/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/pg-start.log"
+    },
+    {
+      "path": "http-pg/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/pg-stop.log"
+    },
+    {
+      "path": "http-pg/prepare-jest.json",
+      "sha256": "7f89811d24cfeb575025fa53e330b2e67c30fbd74cb666e6805c8a73f93d83ef",
+      "bytes": 1463,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/prepare-jest.json"
+    },
+    {
+      "path": "http-pg/prepare.json",
+      "sha256": "80f41a87e86499f16c30efc2a24cc392e61d14c461b5103ab1ead5e4f0010f57",
+      "bytes": 42460,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/prepare.json"
+    },
+    {
+      "path": "http-pg/resume-jest.json",
+      "sha256": "f3c69c685cca517991bc7505aca2bb6630b46298772ef3495053f64354aa594e",
+      "bytes": 1462,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/resume-jest.json"
+    },
+    {
+      "path": "http-pg/resume.json",
+      "sha256": "c667981379c1a4a307eee30c50545831844df97134fb16505d1fb5272fb5087d",
+      "bytes": 40341,
+      "originalPath": "/tmp/maya-compound-http-pg-20261008-01/resume.json"
+    },
+    {
+      "path": "react/browser-jest.json",
+      "sha256": "c0f854231ddeaec05c98563c256bb7e6d7cc192a6d4af620c0dc5cc813c1df6c",
+      "bytes": 1464,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/browser-jest.json"
+    },
+    {
+      "path": "react/browser.json",
+      "sha256": "196ea7358c207ea7b57aa118086b70c00e6c35dd25d85e14d99ab03dc0688c32",
+      "bytes": 27577,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/browser.json"
+    },
+    {
+      "path": "react/browser/browser.json",
+      "sha256": "491f7123f397b2fad8b6c96b268565da40fe3d305007d01fd5dbb932bb180c54",
+      "bytes": 47766,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/output/playwright/browser.json"
+    },
+    {
+      "path": "react/browser/compound-available.png",
+      "sha256": "c0686bd3560ad376275b8498300b36f1d576e531c16026d331afbf28c2479788",
+      "bytes": 170949,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/output/playwright/compound-available.png"
+    },
+    {
+      "path": "react/browser/compound-clarification.png",
+      "sha256": "33a1da083a4d77f40de48f5b284b64fb16c167f2c62cdab36d7fda939d42a5b7",
+      "bytes": 201624,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/output/playwright/compound-clarification.png"
+    },
+    {
+      "path": "react/browser/compound-continued.png",
+      "sha256": "34d56c36227385d75f2f2059c0640b45ecdd92409952f5a0f8b88c8854318508",
+      "bytes": 197863,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/output/playwright/compound-continued.png"
+    },
+    {
+      "path": "react/browser/compound-question-after-relogin.png",
+      "sha256": "37329a5998e70a8763bec650fa2d04a7d1343e34418c8907aa14f86e7811cdc3",
+      "bytes": 204302,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/output/playwright/compound-question-after-relogin.png"
+    },
+    {
+      "path": "react/manifest.json",
+      "sha256": "3c97f7d1eacb4d653cfeb952d030fde70462d377788e4415f61ff5fe8b3efc59",
+      "bytes": 563,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/manifest.json"
+    },
+    {
+      "path": "react/migrations.log",
+      "sha256": "5a35093a5bfc37795c07f6fe5de32caedc71b215130cc3d49bc5491800ae0d11",
+      "bytes": 14720,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/migrations.log"
+    },
+    {
+      "path": "react/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/pg-start.log"
+    },
+    {
+      "path": "react/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/pg-stop.log"
+    },
+    {
+      "path": "react/react-web-build.log",
+      "sha256": "fc1a7ccd5d70ac3488c4b8e57385799e7264f987e526af1e103297a721195d82",
+      "bytes": 185,
+      "originalPath": "/tmp/maya-compound-react-20261008-01/react-web-build.log"
+    },
+    {
+      "path": "unit/guard-5.log",
+      "sha256": "681207783615fe07cf47c8543b314ca1ab7c7a98f721fb1a2334c0b6b62281a0",
+      "bytes": 651,
+      "originalPath": "/tmp/maya-compound-browser-guard-20261008.log"
+    },
+    {
+      "path": "unit/ingress-red.log",
+      "sha256": "4490e2c057ce7c8df44a020559fc455b4ed9f11bd2fccb05847e5a1954eb29f1",
+      "bytes": 3592,
+      "originalPath": "/tmp/maya-owner-review-ingress-red-20261008.log"
+    },
+    {
+      "path": "unit/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-compound-lint-verified-20261008.log"
+    },
+    {
+      "path": "unit/runner-9.log",
+      "sha256": "46f59b28cdc7c4c1672b8fdf4500dbc6dbf836309879a73e6f46f937c9fe2363",
+      "bytes": 1636,
+      "originalPath": "/tmp/maya-compound-runner-20261008.log"
+    },
+    {
+      "path": "unit/targeted-138.log",
+      "sha256": "185c2ef2f983de744881d0f1c5393784de5834b718d939d5a014f6c6e83ac75d",
+      "bytes": 3788,
+      "originalPath": "/tmp/maya-compound-targeted-final-20261008-02.log"
+    },
+    {
+      "path": "unit/types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-compound-types-final-20261008.log"
+    }
+  ],
+  "sourceBindings": [
+    {
+      "path": "maya-carrier-react/test/build-harness.mjs",
+      "sha256": "a672b28664159f08f82f4bd3f6adcd706faaea5d0333d6387d986433c08c03d7",
+      "bytes": 813
+    },
+    {
+      "path": "maya-carrier-react/test/occupancy-browser-guard.mjs",
+      "sha256": "25c55e369376bb028e126b1afb4dd8e4ebc644299bdd973f79c83c37657124c1",
+      "bytes": 3932
+    },
+    {
+      "path": "maya-carrier-react/test/occupancy-browser-guard.test.mjs",
+      "sha256": "5d29d687614636696c07774a52a528ed77d193124de58ca2f3fe45126f49dfe7",
+      "bytes": 4436
+    },
+    {
+      "path": "maya-carrier-react/test/occupancy-browser-probe.mjs",
+      "sha256": "f2c7920afea8ed0a71c3f4364cc1429df26f900d8f119bf61b018b609ed5130a",
+      "bytes": 20954
+    },
+    {
+      "path": "maya-carrier-react/test/occupancy-probe.mjs",
+      "sha256": "5cfad6c281b6ea40e8b5e0dc33cee79eca30d46334ffc4b62f74e4a4d5d007b7",
+      "bytes": 6224
+    },
+    {
+      "path": "maya-carrier-react/test/pipeline.tsx",
+      "sha256": "67af9d420be2635bbb6477524c39b88e4a5ec7167926afe2b39bf29a18202313",
+      "bytes": 3705
+    },
+    {
+      "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+      "sha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+      "bytes": 10280
+    },
+    {
+      "path": "maya-saas-backend/scripts/c9-occupancy-proof.test.mjs",
+      "sha256": "75dad605a4b5d5bc05b22103fc8fdcc3296589118057b9d2e65cfff4a4bc01a6",
+      "bytes": 7776
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts",
+      "sha256": "cd6ba399cd40b483f34a03cd05f15bf80522eadedef0c553e6d8953e1d2e2b7a",
+      "bytes": 40061
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "sha256": "2aa719a4320cc7e4a6107115639c9dfbd91403885df9134dfba984f48838be68",
+      "bytes": 90739
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.occupancy.spec.ts",
+      "sha256": "5b64449074d1959ca944595f6784ae06a62f6cf51848555276b9d141762aff31",
+      "bytes": 19845
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "d03a211ac7758886a6aed88ea2eb0a7078fef595e7c36b265b64240819e0fa1d",
+      "bytes": 317260
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts",
+      "sha256": "e4b357a3e7bbbeb49f6003f7fa214ffdb23d91ed73af0e39a033ce01d3247e5c",
+      "bytes": 3242
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/owner-review-plan.ts",
+      "sha256": "d27950bb21c239823e6863215437439c541b560a81b66820e45178dca2a4be64",
+      "bytes": 3116
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-capability.spec.ts",
+      "sha256": "b7314891090760e990e7a74af19ee4d6d0b686dc97d2991e8daf75a9f99be181",
+      "bytes": 5744
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts",
+      "sha256": "8975ed3970bd01529563fc66ca25db58864a893bbdc167da3922dab44f9eb3d9",
+      "bytes": 57902
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.agents.ts",
+      "sha256": "9575d0ecc65deaaf68aebefd35d9cc1de6201bc9066c74316879280a68ca7c4e",
+      "bytes": 8444
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.bi-source.ts",
+      "sha256": "d66dcbd433d3ba761a9036e42ab8e61221d72b6ba315bdfc9a92f588056e85c3",
+      "bytes": 4797
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.business-occupancy.spec.ts",
+      "sha256": "2f9cdeba75e18ec9f4dfd4597e9712724b3f8329e4da374541b7fff903a0e760",
+      "bytes": 15571
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.context.ts",
+      "sha256": "c75a0ec032d03f4573bf286fb1cf99d1b927cb65b311f0b446889ca5cd8bd8cc",
+      "bytes": 4019
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.occupancy-source.ts",
+      "sha256": "9c0ce2b38641a312f73254f56fc6b61581b6ed4f484ff986d97d9250e783b6d7",
+      "bytes": 15976
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "sha256": "1620d39f7e7992b78518f7c96b1360f3daeba0b79a39e85401edb33a567883bd",
+      "bytes": 45392
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.sources.ts",
+      "sha256": "8cf3daf8c88dae89fb67f39c26e3db003db716314c4a295635fe7626992243c6",
+      "bytes": 7942
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.store.ts",
+      "sha256": "dca4569d40fba799e3d4244eb570ee66e3fc02ce61ebdd0c0fcee1c675c79783",
+      "bytes": 27714
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.strategy.ts",
+      "sha256": "3d03f3046330814fea0e39defd0fcfb0cb58486e883762f15d010c77c2791b1d",
+      "bytes": 7935
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.work.ts",
+      "sha256": "9752b80b35503b7d54b0c3af06999c0d4c98130faaabaaa6bd6949aec5c451a3",
+      "bytes": 18901
+    },
+    {
+      "path": "maya-saas-backend/src/widgets/rendering/denial-projection.ratchet.spec.ts",
+      "sha256": "4a680f6d6f78707fa8ebbe6ebaf6cb29512b9a780535245e8865b52ccc8b6082",
+      "bytes": 6341
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+      "sha256": "bcb12a0184246ddf8263f2229e4e3e074996388159bba132ca9366ca07935c9f",
+      "bytes": 78243
+    }
+  ],
+  "builtArtifacts": [
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+      "bytes": 1970
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+      "bytes": 4476
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+      "bytes": 5951
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+      "bytes": 1977
+    },
+    {
+      "path": "maya-carrier-react/dist/web/index.html",
+      "sha256": "1f5a6ef76f9c5f64adedca327884416989f09c026acf1e0f9bbafa51d2e04c42",
+      "bytes": 847
+    },
+    {
+      "path": "maya-carrier-react/dist/web/m/YWOMJK5I/main.js",
+      "sha256": "d36f331a83c872dfff1e9effddbf4dc60d647c71d194549296e4f9e316469348",
+      "bytes": 1447950
+    },
+    {
+      "path": "maya-carrier-react/dist/web/manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+      "bytes": 670
+    },
+    {
+      "path": "maya-carrier-react/dist/web/styles.css",
+      "sha256": "4bbeeccd8e2457798e336b04c6446b9dfe23e640ec8cc736db00b708f15c89cb",
+      "bytes": 4333
+    },
+    {
+      "path": "maya-carrier-react/test/.bundle.mjs",
+      "sha256": "a32bb29ef7b75749dbcb9631bb2aa5b04e51f0aecdb58a3a3bc6a6e914d324f0",
+      "bytes": 121734
+    }
+  ],
+  "excluded": [
+    "Private restart receipts, credentials and auth request/response bodies",
+    "Raw prepare/resume/browser process logs and postgres.log",
+    "PostgreSQL data directories, Chrome private profile and dependencies"
+  ],
+  "authoredArtifacts": [
+    {
+      "path": "verification.json",
+      "sha256": "e394fa9dd69e5e3ab7537224261bbc9796608409e5f8219b5d125f871d71a4f5",
+      "bytes": 2533
+    }
+  ]
+}
