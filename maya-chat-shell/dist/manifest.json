@@ -122,7 +122,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "095698e3285df50439ca980be5cb7b196fb13225462ac6f52267f49f7a073e37"
+        "sha256": "3dd29820e012a17abf6f5cd9757d7f8b1131e702dd2f260bca09ebe149630063"
       },
       {
         "path": "src/shell/personal-booking.ts",
@@ -130,7 +130,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "3d886d5b18d8c92f505f9a57ec2e75bd0df35d254ce6b53e5101a5b91bfa91be"
+        "sha256": "62e0d83d75268b27c35f516122266aed09bf1bcf3f4e59304f7a1d6b1ea04b3a"
       },
       {
         "path": "src/shell/privacy.ts",
@@ -138,7 +138,7 @@
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "bd1e2452ceedbeace5ca4d08f73e452196bd5ddfab94aa9f654477dbdd90e370"
+        "sha256": "60c45f75032f7b4b1d8a7107128f462a836c7f4af47a9e2e15a9fb9b03863e2f"
       },
       {
         "path": "src/shell/view.ts",
@@ -150,8 +150,8 @@
       }
     ]
   },
-  "bytes": 536284,
-  "digest": "508680ab63cd22ddb03f40c960562e4f2dc4dff7311f7d555e155ae998e2296f",
+  "bytes": 540316,
+  "digest": "fbc6c059b8a73580b7eae697c36a9d14fb979fe766fa8e1e5d8fe2a8da304ffb",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -159,8 +159,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "06bec7673b32d8a906baa97841721c20f95b093c81b89d6031aebfe7ca32de11",
-    "modulePath": "m/06bec7673b32d8a9/",
+    "digest": "4e5dd911dd823a441f5aae205635a487939fb098476fece2f25c0c050a1e7990",
+    "modulePath": "m/4e5dd911dd823a44/",
     "files": [
       {
         "path": "entry/main.js",
@@ -294,8 +294,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "6c3460b901957e01f1d289d92477bad4f8f23bddfcc94511a43d947a49f47ac1",
-        "bytes": 44041
+        "sha256": "dc70253f4720d35051148610f2abb9d0ffcc47b43bd94c9fde2f1838adaa9597",
+        "bytes": 47664
       },
       {
         "path": "src/shell/personal-booking.js",
@@ -314,8 +314,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "c5e870cdb12483924423a6224cea98a678846beaf5261ee6f48096407b56a072",
-        "bytes": 9427
+        "sha256": "f7ed02804f8e75493a7f49f6b2340e60d2b237ead7f24c1628ebc16aa438a521",
+        "bytes": 9549
       },
       {
         "path": "src/shell/view.js",
@@ -343,7 +343,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "5d97c07455bc14a769264bbe5a61649665e258d6ae8d5a6179330f3084919799",
+      "sha256": "40031c83cd452fdf77fef57783289deaacce7b670cfad13c0b1c80b228c03312",
       "bytes": 1344
     },
     "assets": [
