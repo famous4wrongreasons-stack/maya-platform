@@ -1,0 +1,73 @@
+{
+  "kind": "authored verification receipt; observed tool exits and raw reports are separate",
+  "codeAndProofCommit": "e9fc42572b110486ce10d40f8bc14b098359fb40",
+  "checks": [
+    {
+      "check": "Focused backend Jest",
+      "exitCode": 0,
+      "suites": 11,
+      "tests": 520,
+      "log": "unit/targeted-520.log"
+    },
+    {
+      "check": "Finite runner guards",
+      "exitCode": 0,
+      "tests": 4,
+      "log": "unit/runner-4.log"
+    },
+    {
+      "check": "tsc imported production/probe",
+      "exitCode": 0,
+      "heapMb": 3072,
+      "log": "unit/types.log"
+    },
+    {
+      "check": "Final candidate scoped ESLint across all 19 changed TypeScript source/spec/probe files",
+      "exitCode": 0,
+      "heapMb": 4096,
+      "logs": [
+        "unit/final-lint.log"
+      ]
+    },
+    {
+      "check": "Actual HTTP/PG prepare, separate process/PG restart, resume",
+      "exitCode": 0,
+      "stages": 2,
+      "attempt": 3
+    }
+  ],
+  "cleanup": [
+    {
+      "attempt": 1,
+      "status": "failed",
+      "clusterStopped": true,
+      "pidFileAbsent": true,
+      "sourceHead": "0ad3d1c77bbb781999b9c66a4bbc1c9031d9928c"
+    },
+    {
+      "attempt": 2,
+      "status": "failed",
+      "clusterStopped": true,
+      "pidFileAbsent": true,
+      "sourceHead": "b14fe22aff390a72bf9b8cd44d0baaa60df2bdc2"
+    },
+    {
+      "attempt": 3,
+      "status": "passed",
+      "clusterStopped": true,
+      "pidFileAbsent": true,
+      "sourceHead": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    }
+  ],
+  "review": {
+    "runtime": "Two independent read-only scopes cover ingress and CRM/Wave3/native adapter; concrete strict conflict/redirect/source forwarding/child deadline findings closed.",
+    "artifactReview": "Separate independent artifact verification is recorded in the checkpoint after this authored receipt"
+  },
+  "limits": [
+    "full-scope existing authority only; closed profile still excludes required SETTINGS_DRAFT editor",
+    "synthetic native provider; zero model calls; no real-model/provider or browser/device acceptance",
+    "UNKNOWN remains manual-required; changed-source gateway proof is separate read-only call",
+    "no legacy UNKNOWN migration acceptance",
+    "observed non-schedule table perimeter is Appointment/MarketingDeliveryAttempt/TeamMessage; not exhaustive outbound census"
+  ]
+}

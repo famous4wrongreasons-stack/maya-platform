@@ -1,0 +1,153 @@
+{
+  "stage": "prepare",
+  "sourceHead": "b14fe22aff390a72bf9b8cd44d0baaa60df2bdc2",
+  "sourceBindingsDigest": "0cff77002603a1bb678e2f4a9ba37a10cca505b52dd34066e08591ab4902c0f9",
+  "approvalScope": "full-scope-existing-authority",
+  "realNativeAdapter": true,
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "closedProfileAcceptance": false,
+  "browserAcceptance": false,
+  "presentation": "existing current carrier and React SSR helper",
+  "transport": [
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "company",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "records",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "records",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "PUT",
+      "resource": "company",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1op0000097c9zqd39ju3",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "company",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "records",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "records",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "PUT",
+      "resource": "company",
+      "company": 99102
+    },
+    {
+      "tenantId": "cmuyv1p53000l97c9yno1w993",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99102
+    }
+  ],
+  "modelCalls": 0,
+  "unexpected": [],
+  "providerPuts": {
+    "cmuyv1op0000097c9zqd39ju3": 1,
+    "cmuyv1p53000l97c9yno1w993": 1
+  }
+}

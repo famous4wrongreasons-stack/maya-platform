@@ -1,5 +1,12 @@
 # Native Staff Schedule Chat Commands
 
+> Current development qualification (2026-10-08): source-qualified approvals preserve
+> the original YCLIENTS company/branch/link and use branch-local dates. The current
+> `closed-input.no-handoff@1` profile still excludes SETTINGS_DRAFT; historical full
+> scope approval evidence does not establish closed-profile availability.
+> See [current source checkpoint](../rebuild/MAYA-NATIVE-SCHEDULE-SOURCE-CHECKPOINT-20261008.md)
+> and [exact profile choice](../rebuild/MAYA-DEVELOPMENT-PROFILE-CHOICE-20261006.md).
+
 > Development branch (2026-10-05): canonical app/web chat now carries the existing
 > single-day schedule approval through SETTINGS_DRAFT and the existing Wave3 AE owner.
 > Synthetic HTTP + actual carrier/React-render proof is complete; no production promotion.
@@ -7,9 +14,10 @@
 
 ## Статус И Область
 
-Команды управления графиком являются ограниченным app/web сценарием Maya
-OS. Они доступны в нативном приложении и не меняют production PWA. Источником
-архитектурных правил является спецификация Maya OS из PR #21.
+Реализован ограниченный app/web владелец команд графика Maya OS. Доступность
+подтверждения зависит от профиля виджетов: текущий closed profile исключает
+SETTINGS_DRAFT до решения, указанного выше. Production PWA не изменён.
+Источником архитектурных правил остаётся спецификация Maya OS из PR #21.
 
 Первая версия поддерживает три действия на один день одного мастера:
 
@@ -59,7 +67,8 @@ Tool `staff.schedule.update` разрешён на поверхностях `nat
 - `staff_id`;
 - `date`;
 - `operation`: `close_day`, `set_break` или `set_hours`;
-- `current_revision`;
+- `current_revision`, qualified by the original source;
+- `source_hash` and `local_staff_id` as a server-projected immutable pair;
 - `current_slots`;
 - `slots` после изменения.
 

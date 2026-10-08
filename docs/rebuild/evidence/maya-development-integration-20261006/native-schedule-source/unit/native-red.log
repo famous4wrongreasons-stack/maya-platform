@@ -1,0 +1,71 @@
+[Nest] 71507  - 08/06/2026, 12:00:00 PM    WARN [YclientsCRMAdapter] previewStaffScheduleDayChange: record fetch truncated (page_limit_reached) after 25 pages; absence conclusions are not allowed
+FAIL src/crm/adapters/yclients-crm.adapter.spec.ts
+  ● YclientsCRMAdapter › native single-day schedule write safety › refuses an incomplete page_limit conflict source during preview and before a write
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": false, "revision": "7888f8f32f1d74103491ef9251fc5f619b542cd593662d34ae5615e2e0422f6a", "slots": [], "staff_id": "7"}}
+
+      3256 |       async (incomplete) => {
+      3257 |         const preview = source({ incomplete });
+    > 3258 |         await expect(
+           |               ^
+      3259 |           preview.adapter.previewStaffScheduleDayChange({
+      3260 |             tenantId: 'tenant-1',
+      3261 |             staffId: '7',
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3258:15
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › refuses an incomplete repeated_page conflict source during preview and before a write
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": false, "revision": "7888f8f32f1d74103491ef9251fc5f619b542cd593662d34ae5615e2e0422f6a", "slots": [], "staff_id": "7"}}
+
+      3256 |       async (incomplete) => {
+      3257 |         const preview = source({ incomplete });
+    > 3258 |         await expect(
+           |               ^
+      3259 |           preview.adapter.previewStaffScheduleDayChange({
+      3260 |             tenantId: 'tenant-1',
+      3261 |             staffId: '7',
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3258:15
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › leaves divergent readback unverified after exactly one PUT without compensation or rollback claim
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "response": Object {
+          "error": Object {
+            "code": "staff_schedule_update_unverified",
+          },
+    -     "message": "YClients не подтвердил новый график. Результат изменения неизвестен.",
+    +     "message": "YClients не подтвердил новый график. Изменение откачено.",
+        },
+      }
+
+      3284 |     it('leaves divergent readback unverified after exactly one PUT without compensation or rollback claim', async () => {
+      3285 |       const f = source({ failure: 'divergent' });
+    > 3286 |       await expect(f.apply()).rejects.toMatchObject({
+           |                                       ^
+      3287 |         response: {
+      3288 |           message:
+      3289 |             'YClients не подтвердил новый график. Результат изменения неизвестен.',
+
+      at Object.toMatchObject (../node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (crm/adapters/yclients-crm.adapter.spec.ts:3286:39)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 110 skipped, 2 passed, 115 total
+Snapshots:   0 total
+Time:        0.378 s, estimated 1 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts".

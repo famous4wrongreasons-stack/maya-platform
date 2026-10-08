@@ -1,0 +1,90 @@
+FAIL src/ai-tools/staff-schedule-command.service.spec.ts
+  ● StaffScheduleCommandService › uses the resolved branch day rather than the tenant day at midnight
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "tenant-a", "7"
+
+    Number of calls: 0
+
+      47 |     );
+      48 |
+    > 49 |     expect(mocks.crm.resolveStaffScheduleSource).toHaveBeenCalledWith(
+         |                                                  ^
+      50 |       'tenant-a',
+      51 |       '7',
+      52 |     );
+
+      at Object.<anonymous> (ai-tools/staff-schedule-command.service.spec.ts:49:50)
+
+  ● StaffScheduleCommandService › refuses an unavailable schedule source before reading a provider day
+
+    expect(received).toBeNull()
+
+    Received: {"approval": {"id": "approval-a"}, "status": "approval_required"}
+
+      77 |       chat('web', 'Закрой Антону завтра'),
+      78 |     );
+    > 79 |     expect(result?.action).toBeNull();
+         |                            ^
+      80 |     expect(result?.reply).toContain('источник графика');
+      81 |     expect(mocks.crm.getStaffScheduleDay).not.toHaveBeenCalled();
+      82 |     expect(mocks.crm.previewStaffScheduleDayChange).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (ai-tools/staff-schedule-command.service.spec.ts:79:28)
+
+  ● StaffScheduleCommandService › refuses a source changed during read without creating approval
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+       96 |         chat('web', 'Закрой Антону завтра'),
+       97 |       );
+    >  98 |       expect(mocks.crm.resolveStaffScheduleSource).toHaveBeenCalledTimes(1);
+          |                                                    ^
+       99 |       expect(result?.action).toBeNull();
+      100 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      101 |     },
+
+      at ai-tools/staff-schedule-command.service.spec.ts:98:52
+
+  ● StaffScheduleCommandService › refuses a source changed during preview without creating approval
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+       96 |         chat('web', 'Закрой Антону завтра'),
+       97 |       );
+    >  98 |       expect(mocks.crm.resolveStaffScheduleSource).toHaveBeenCalledTimes(1);
+          |                                                    ^
+       99 |       expect(result?.action).toBeNull();
+      100 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      101 |     },
+
+      at ai-tools/staff-schedule-command.service.spec.ts:98:52
+
+  ● StaffScheduleCommandService › refuses when the current slots changed between planning and preview
+
+    expect(received).toBeNull()
+
+    Received: {"approval": {"id": "approval-a"}, "status": "approval_required"}
+
+      113 |       chat('web', 'Закрой Антону завтра'),
+      114 |     );
+    > 115 |     expect(result?.action).toBeNull();
+          |                            ^
+      116 |     expect(result?.reply).toContain('График изменился');
+      117 |     expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      118 |   });
+
+      at Object.<anonymous> (ai-tools/staff-schedule-command.service.spec.ts:115:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 35 skipped, 40 total
+Snapshots:   0 total
+Time:        0.513 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/staff-schedule-command.service.spec.ts".

@@ -1,0 +1,43 @@
+{
+  "kind": "staff-schedule-native-source-http-pg-restart",
+  "status": "failed",
+  "sourceHead": "0ad3d1c77bbb781999b9c66a4bbc1c9031d9928c",
+  "sourceBindings": {
+    "scripts/staff-schedule-source-proof.mjs": "1d8e12237b50babcb4cf6864e995f349c348e7679d17a0346f855e342e77ca9f",
+    "scripts/c9-occupancy-proof.mjs": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+    "test/widgets-live/staff-schedule-source-restart.probe-spec.ts": "b81044fc1cf986ab4e66110d8d4881db7c9e9f6c2ba6cbbc0ac4c6a75d0632b3",
+    "test/widgets-live/support/schedule-carrier-proof.mjs": "d8ed0786f5493dbe8ce5bf811ccf49cc5c0b1a044a58cc1ff2995431235f8ed7",
+    "src/ai-tools/staff-schedule-command.service.ts": "bcc7a647c2108fe3c8af8a7d340dce5573ddd40a846e12703d80c9290f0e1a17",
+    "src/ai-tools/ai-tool-handler.service.ts": "3c24f195971925dc2427e691f589459a3ad1bff8667e9d78a39c8f53057b4902",
+    "src/crm/adapters/yclients-crm.adapter.ts": "4f0e199f71f1fbc29df25cbb53f4edf641e9dc7890bf15e66b18a083bb95032f",
+    "src/crm/crm.service.ts": "9493726adfd873b4ca903abb9fcbf67155b2711c2d8af15daf9b6f4af3a1f65b",
+    "src/package5-wave3/package5-wave3.service.ts": "049634634c8c78c8552ed41fbc0d9bafdacc8bac2a9350e457c19816d511507d",
+    "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3b7e2878566f75bf4bc94619d0fb162f7bdbd88a86623880f995674a4f876734",
+    "src/package5-wave3/package5-wave3-production-gateway.service.ts": "010dbc8c49a380e1dbaf24e612895fefda787ddd09c00ce9d0bba925523bdf68",
+    "src/action-engine/action-engine.runtime.ts": "7c035d4c12fb17329907cfc450fce6e81d2233ce78baa87be4ed489c663b9c3d"
+  },
+  "sourceBindingsDigest": "a6b98220c6d139bc687a24f8551699caa42c86ac42202cf4ebb8ec153e146165",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-staff-schedule-63Q5PH/pg",
+  "database": "maya_widget_gate_proof_staffschedule_19f295fd8559",
+  "port": 63366,
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "carrier-bundle"
+  ],
+  "approvalScope": "full-scope-existing-authority",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "closedProfileAcceptance": false,
+  "browserAcceptance": false,
+  "presentation": "current carrier + React SSR",
+  "resources": {
+    "nodeHeapMb": 1536,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1
+  },
+  "clusterStopped": true
+}

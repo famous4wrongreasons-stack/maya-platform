@@ -1,0 +1,388 @@
+{
+  "contract": "maya.native-schedule-source-checkpoint/1",
+  "baselineCommit": "ce643dd704164c7d27ea883b2e2bc57ecb438f76",
+  "codeAndProofCommit": "e9fc42572b110486ce10d40f8bc14b098359fb40",
+  "qualification": {
+    "nativeYclientsAdapter": true,
+    "syntheticProviderTransport": true,
+    "modelCalls": 0,
+    "realModelAcceptance": false,
+    "realProviderAcceptance": false,
+    "closedProfileAcceptance": false,
+    "browserAcceptance": false,
+    "presentation": "headless current carrier + React SSR",
+    "c10Complete": false,
+    "websiteTouched": false
+  },
+  "rawArtifacts": [
+    {
+      "path": "http-pg/attempt-01/manifest.json",
+      "sha256": "fa504c0d7ed1fd4fccfb03ada1fee570c0a10e446c2ba01ac69f431257a2d466",
+      "bytes": 2387,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-01/manifest.json"
+    },
+    {
+      "path": "http-pg/attempt-01/prepare-jest.json",
+      "sha256": "21715404cb2b4b518e731ec792e76bf57a636207474547502547b72f365b20d7",
+      "bytes": 3268,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-01/prepare-jest.json"
+    },
+    {
+      "path": "http-pg/attempt-01/prepare-observations.json",
+      "sha256": "a3a821f191e7ff1886a0ea1787a12e573c2096492c50da909ac1b3188d2dce52",
+      "bytes": 2102,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-01/prepare-observations.json"
+    },
+    {
+      "path": "http-pg/attempt-01/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-01/pg-start.log"
+    },
+    {
+      "path": "http-pg/attempt-01/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-01/pg-stop.log"
+    },
+    {
+      "path": "http-pg/attempt-01/carrier-bundle.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-01/carrier-bundle.log"
+    },
+    {
+      "path": "http-pg/attempt-02/manifest.json",
+      "sha256": "03c3c3cf3d75659385094fa4ae4eb2bfa6b19a83bec5acd228a3310fcb0a5b6f",
+      "bytes": 2387,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-02/manifest.json"
+    },
+    {
+      "path": "http-pg/attempt-02/prepare-jest.json",
+      "sha256": "a2ff7bdda51de228c880352e03ffea6b227a96c5706a1346d54a0f7b961e6712",
+      "bytes": 3137,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-02/prepare-jest.json"
+    },
+    {
+      "path": "http-pg/attempt-02/prepare-observations.json",
+      "sha256": "b9b10b07af4e9d4f895c87da61a8ef57e32cbcb79c631b6d618ff1c46c18ca19",
+      "bytes": 3630,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-02/prepare-observations.json"
+    },
+    {
+      "path": "http-pg/attempt-02/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-02/pg-start.log"
+    },
+    {
+      "path": "http-pg/attempt-02/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-02/pg-stop.log"
+    },
+    {
+      "path": "http-pg/attempt-02/carrier-bundle.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-02/carrier-bundle.log"
+    },
+    {
+      "path": "http-pg/attempt-03/manifest.json",
+      "sha256": "0b2eb7eaa2157e775a1a29b1e9c41e1cd2636cfdbd8477240799d0baeaae7be8",
+      "bytes": 2434,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/manifest.json"
+    },
+    {
+      "path": "http-pg/attempt-03/prepare-jest.json",
+      "sha256": "b5a40df40bf26f0b38a24da62828753d10fb6c92523ab9183988561baf44b50e",
+      "bytes": 1382,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/prepare-jest.json"
+    },
+    {
+      "path": "http-pg/attempt-03/prepare-observations.json",
+      "sha256": "23478aa1d718b5eea5e701a7ed87286196fe7b39f4452fc801576a7bdceaff03",
+      "bytes": 9171,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/prepare-observations.json"
+    },
+    {
+      "path": "http-pg/attempt-03/resume-jest.json",
+      "sha256": "56439730b22fb0f796fac5c601404069709887d5f95b8bf82abb4707c4da1fbf",
+      "bytes": 1409,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/resume-jest.json"
+    },
+    {
+      "path": "http-pg/attempt-03/resume-observations.json",
+      "sha256": "f920a7ddf7c7206ea3c8a92cd3d6820a9d8b37253283c405c1ad19155f0c44bd",
+      "bytes": 4624,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/resume-observations.json"
+    },
+    {
+      "path": "http-pg/attempt-03/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/pg-start.log"
+    },
+    {
+      "path": "http-pg/attempt-03/pg-restart.log",
+      "sha256": "dccffdb01a7c20cc9d109b76c30361a654d7db5239af93affa0cc9ba40f574bb",
+      "bytes": 1345,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/pg-restart.log"
+    },
+    {
+      "path": "http-pg/attempt-03/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/pg-stop.log"
+    },
+    {
+      "path": "http-pg/attempt-03/carrier-bundle.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-staff-schedule-source-http-20261008-03/carrier-bundle.log"
+    },
+    {
+      "path": "unit/targeted-520.log",
+      "sha256": "22d3a044273ed25f7a16434613691c2d35d68ace08d4bde50d1a6a3a303c8898",
+      "bytes": 846,
+      "originalPath": "/tmp/maya-schedule-source-regressions-20261008.log"
+    },
+    {
+      "path": "unit/targeted-520.json",
+      "sha256": "f27eca2ea48fbfebc84497970062ae914923d205b9bf9a4ab751b2ba75e29e5a",
+      "bytes": 235537,
+      "originalPath": "/tmp/maya-schedule-source-unit-20261008.json"
+    },
+    {
+      "path": "unit/types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-schedule-source-types-20261008.log"
+    },
+    {
+      "path": "unit/runtime-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-schedule-source-lint-20261008.log"
+    },
+    {
+      "path": "unit/strict-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-schedule-strict-lint-20261008.log"
+    },
+    {
+      "path": "unit/probe-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-schedule-probe-lint-20261008.log"
+    },
+    {
+      "path": "unit/runner-4.log",
+      "sha256": "75889f05970f674cb94d1342704d29b4f5284b6e933d40648e9b475f7d959181",
+      "bytes": 484,
+      "originalPath": "/tmp/maya-schedule-source-runner-20261008.log"
+    },
+    {
+      "path": "unit/native-red.log",
+      "sha256": "ed3d5626bf11bee32578c55a2cd811dd200fbb7f01603a59661dd57eb9527551",
+      "bytes": 4088,
+      "originalPath": "/tmp/maya-schedule-native-red-20261008.log"
+    },
+    {
+      "path": "unit/ingress-red.log",
+      "sha256": "ebce6c7e5892169486b5099ac76d5367a33da6ebadbf898ec3bfa5b3cd8830c7",
+      "bytes": 3588,
+      "originalPath": "/tmp/maya-schedule-source-ingress-red-20261008.log"
+    },
+    {
+      "path": "unit/strict-conflicts-red.log",
+      "sha256": "21fc79f496bdccbb700cc4e9beb9cd21ee577bbdfd3b82556f9f80793b05bd58",
+      "bytes": 10450,
+      "originalPath": "/tmp/maya-schedule-strict-conflicts-red-20261008.log"
+    },
+    {
+      "path": "unit/final-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "originalPath": "/tmp/maya-schedule-final-lint-20261008.log"
+    }
+  ],
+  "authoredArtifacts": [
+    {
+      "path": "verification.json",
+      "sha256": "8e2d5f472bd771db1fe841f0dbcc3c7f2ba66f607c98150e9e94b932cef581ad",
+      "bytes": 2337
+    }
+  ],
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+      "sha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+      "bytes": 10280,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/scripts/staff-schedule-source-proof.mjs",
+      "sha256": "1d8e12237b50babcb4cf6864e995f349c348e7679d17a0346f855e342e77ca9f",
+      "bytes": 9438,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/scripts/staff-schedule-source-proof.test.mjs",
+      "sha256": "a1116bfa64c3d50a4062d93af9a0acbb16ec93978c17852ebcc98894ff203c85",
+      "bytes": 2453,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/action-engine.runtime.ts",
+      "sha256": "7c035d4c12fb17329907cfc450fce6e81d2233ce78baa87be4ed489c663b9c3d",
+      "bytes": 20353,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts",
+      "sha256": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+      "bytes": 11412,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.development-integration.spec.ts",
+      "sha256": "3fb0d696fb9229339dc0b0763ed1646daa7428ff3ce4bf4fc24d49e639f7c976",
+      "bytes": 14135,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+      "sha256": "0849354a83e2a17d72ad422729bae90ecae0e28ba87c0eece88909461cba92cd",
+      "bytes": 231746,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "3c24f195971925dc2427e691f589459a3ad1bff8667e9d78a39c8f53057b4902",
+      "bytes": 146527,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts",
+      "sha256": "232231267605cffde47881a62ab5883ddadcc671255e54774595033e98757f0a",
+      "bytes": 21794,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+      "sha256": "447a12ee941b9903fa0e020203069bf655d7b6a933ae8146b8f8dbc74eac3146",
+      "bytes": 47655,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "sha256": "dffc9ca5aa98bd09a7a4d7766f5ce3674e37be506e99ee719c1c3fa1ac125a79",
+      "bytes": 56587,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/staff-schedule-command.service.spec.ts",
+      "sha256": "687ccf7396c3de1582e7dde3d5529380f1a2ddd3ac539d668c824d2c8d180665",
+      "bytes": 23150,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/staff-schedule-command.service.ts",
+      "sha256": "bcc7a647c2108fe3c8af8a7d340dce5573ddd40a846e12703d80c9290f0e1a17",
+      "bytes": 41412,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.spec.ts",
+      "sha256": "605719852a2b68ebf3e2df87d52fe3ef9411674be0d17fa77f495dbba97b3c0a",
+      "bytes": 130663,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "sha256": "4f0e199f71f1fbc29df25cbb53f4edf641e9dc7890bf15e66b18a083bb95032f",
+      "bytes": 162635,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+      "sha256": "02e2cf04c5393cd1d6da6e156388a193595356a92b74a15f8475c0daeb7ea9f6",
+      "bytes": 27163,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "9493726adfd873b4ca903abb9fcbf67155b2711c2d8af15daf9b6f4af3a1f65b",
+      "bytes": 211594,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.staff-schedule-source.spec.ts",
+      "sha256": "a80cdf06cf61d1093076f9640fe0625a17c1a5705a5690c8f11fab62b9b9ec23",
+      "bytes": 11397,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/crm/staff-schedule.utils.ts",
+      "sha256": "b14dbdea354400771e27e16a0b46ead214e111d5c65c776140984b285316afb9",
+      "bytes": 3026,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts",
+      "sha256": "a176c797643ef1bb4c5a1d7b65c0c12452b2a117d998cb17c3cf9a313781cc70",
+      "bytes": 16693,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sha256": "3b7e2878566f75bf4bc94619d0fb162f7bdbd88a86623880f995674a4f876734",
+      "bytes": 14142,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts",
+      "sha256": "010dbc8c49a380e1dbaf24e612895fefda787ddd09c00ce9d0bba925523bdf68",
+      "bytes": 6416,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "sha256": "049634634c8c78c8552ed41fbc0d9bafdacc8bac2a9350e457c19816d511507d",
+      "bytes": 57316,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/staff-schedule-source-restart.probe-spec.ts",
+      "sha256": "2b29003722db5ace7c25d815c41945a624f35bd8e8e51c57323379ce79d500a1",
+      "bytes": 35146,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/schedule-carrier-proof.mjs",
+      "sha256": "d8ed0786f5493dbe8ce5bf811ccf49cc5c0b1a044a58cc1ff2995431235f8ed7",
+      "bytes": 2185,
+      "commit": "e9fc42572b110486ce10d40f8bc14b098359fb40"
+    }
+  ],
+  "builtArtifacts": [
+    {
+      "path": "maya-carrier-react/test/.bundle.mjs",
+      "sha256": "a32bb29ef7b75749dbcb9631bb2aa5b04e51f0aecdb58a3a3bc6a6e914d324f0",
+      "bytes": 121734,
+      "observation": "after successful own carrier-bundle build and stages; no subsequent build"
+    }
+  ],
+  "excluded": [
+    "private restart credentials and sealed submissions",
+    "raw auth process logs",
+    "PostgreSQL data and raw server log",
+    "dependencies"
+  ],
+  "failedAttemptsRetained": [
+    1,
+    2
+  ]
+}

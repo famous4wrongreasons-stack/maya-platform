@@ -1,0 +1,86 @@
+{
+  "stage": "prepare",
+  "sourceHead": "0ad3d1c77bbb781999b9c66a4bbc1c9031d9928c",
+  "sourceBindingsDigest": "a6b98220c6d139bc687a24f8551699caa42c86ac42202cf4ebb8ec153e146165",
+  "approvalScope": "full-scope-existing-authority",
+  "realNativeAdapter": true,
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "closedProfileAcceptance": false,
+  "browserAcceptance": false,
+  "presentation": "existing current carrier and React SSR helper",
+  "transport": [
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "company",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "records",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "records",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "PUT",
+      "resource": "company",
+      "company": 99101
+    },
+    {
+      "tenantId": "cmuyv00q10000ozc99z0n947q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99101
+    }
+  ],
+  "modelCalls": 0,
+  "unexpected": [],
+  "providerPuts": {
+    "cmuyv00q10000ozc99z0n947q": 1
+  }
+}

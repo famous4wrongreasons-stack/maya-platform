@@ -1,0 +1,149 @@
+FAIL src/crm/adapters/yclients-crm.adapter.spec.ts
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven blank conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven html conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven absent conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven null conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven false-string conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven missing-duration conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › rejects an unproven zero-duration conflict response before PUT
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"conflict_times": [], "current": {"date": "2026-08-06", "is_working": true, "revision": "abe544e49f70e4041a4fd2cb4270a92c25c53abfc29b5c734fb803524bc8af15", "slots": [{"from": "10:00", "to": "20:00"}], "staff_id": "7"}, "proposed": {"date": "2026-08-06", "is_working": true, "revision": "c7289b21ee50bab375cddae5a3a96c0e7035349bd76f2300b78d945e15825474", "slots": [{"from": "10:00", "to": "18:00"}], "staff_id": "7"}}
+
+      3267 |     ])('rejects an unproven %s conflict response before PUT', async (_label, recordsResponse) => {
+      3268 |       const f = source({ recordsResponse });
+    > 3269 |       await expect(f.adapter.previewStaffScheduleDayChange({ tenantId: 'tenant-1', staffId: '7', date,
+           |             ^
+      3270 |         slots: [{ from: '10:00', to: '18:00' }], timezone: 'Europe/Moscow' })).rejects.toThrow();
+      3271 |       await expect(f.apply()).rejects.toThrow();
+      3272 |       expect(f.state.puts).toBe(0);
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at crm/adapters/yclients-crm.adapter.spec.ts:3269:13
+
+  ● YclientsCRMAdapter › native single-day schedule write safety › forbids automatic redirect replay for the single schedule PUT
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "error"
+    Received: undefined
+
+      3277 |       const calls = (global.fetch as jest.MockedFunction<typeof fetch>).mock.calls;
+      3278 |       expect(calls.filter(([, init]) => init?.method === 'PUT')).toHaveLength(1);
+    > 3279 |       expect(calls.find(([, init]) => init?.method === 'PUT')?.[1]?.redirect).toBe('error');
+           |                                                                               ^
+      3280 |     });
+      3281 |     it.each(['page_limit', 'repeated_page'] as const)(
+      3282 |       'refuses an incomplete %s conflict source during preview and before a write',
+
+      at Object.<anonymous> (crm/adapters/yclients-crm.adapter.spec.ts:3279:79)
+
+Test Suites: 1 failed, 1 total
+Tests:       8 failed, 117 skipped, 1 passed, 126 total
+Snapshots:   0 total
+Time:        0.342 s, estimated 1 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts".

@@ -1,0 +1,111 @@
+{
+  "stage": "resume",
+  "sourceHead": "e9fc42572b110486ce10d40f8bc14b098359fb40",
+  "sourceBindingsDigest": "4d94c491a69b20c3449668a6181cb5ff513be409110e82d0b50c15860764d273",
+  "approvalScope": "full-scope-existing-authority",
+  "realNativeAdapter": true,
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "closedProfileAcceptance": false,
+  "browserAcceptance": false,
+  "presentation": "existing current carrier and React SSR helper",
+  "confirmedRestart": [
+    {
+      "action": {
+        "id": "c4c14a79-ccd3-425e-9832-51ddf489f22e",
+        "state": "SUCCEEDED",
+        "normalizedInputHash": "2a3452c4a69e442cb2553a1991937c56947c40f154d5fff389e5f0becdd5ba01",
+        "inputDigest": "87c8e8f5d854ddf01ecf119b4334563371dbee787d79a5e4d03d15de53d201e9",
+        "sourceIdentityHash": "acf7d29ae945c991bc3fabc0650f07a622c0483cfddfa1c7abaca24099fb4b31",
+        "expectedProviderRevision": "8df17cdc0f9186bcf51cdbcd96aa8828c7af540e5bd7df12b2798d90d98040ce",
+        "evidenceDigest": "9d534a97113550e3335dea5f14eab491c461d1ae1b9cc2ed2b8b88f7587d72b1",
+        "executionAttempts": 1,
+        "reconciliationAttempts": 0
+      },
+      "receipt": {
+        "id": "3f6b8239-1fb9-472a-8d4d-95409dc10fe4",
+        "outcome": "ACCEPTED",
+        "actionReceiptRef": "c4c14a79-ccd3-425e-9832-51ddf489f22e",
+        "submittedAt": "2026-10-08T01:32:41.085Z"
+      }
+    },
+    {
+      "action": {
+        "id": "2e8e2e1b-2fea-4b69-89ce-a65b77b99bab",
+        "state": "SUCCEEDED",
+        "normalizedInputHash": "675b6e135f3d67e6d3d1d0537e765630a61c495c5eb961a48efe3e23191f1616",
+        "inputDigest": "65e62ed687719930d86c2a66e4ef0f678e9b20d053be903784c89664330aabfc",
+        "sourceIdentityHash": "e5e60d7564dc712448b8cf058273c3132e155ace7311b3a858f9d58b51d80769",
+        "expectedProviderRevision": "4bb119ef77a77f089e5869f24f1c5c854e6ea50587dbf11774f300a49358ba62",
+        "evidenceDigest": "072011950b1fd05cd803938b2223c5ec48e709f23dad0c9685105daff3d1ea81",
+        "executionAttempts": 1,
+        "reconciliationAttempts": 0
+      },
+      "receipt": {
+        "id": "5250cce3-405e-43ba-a405-d02dde064a02",
+        "outcome": "ACCEPTED",
+        "actionReceiptRef": "2e8e2e1b-2fea-4b69-89ce-a65b77b99bab",
+        "submittedAt": "2026-10-08T01:32:41.568Z"
+      }
+    }
+  ],
+  "processRestart": {
+    "preparePid": 87926,
+    "resumePid": 87988,
+    "preparePgStarted": "2026-10-08 01:32:38.494372+00",
+    "resumePgStarted": "2026-10-08 01:32:42.816166+00"
+  },
+  "widgetReplay": {
+    "httpStatus": 200,
+    "retainedOutcome": "ACCEPTED",
+    "providerPutsAfterRestart": 0
+  },
+  "originalResume": {
+    "errorCode": "ACTION_RECONCILIATION_MANUAL_REQUIRED",
+    "after": {
+      "id": "1c70f76c-1046-4d31-bbf6-74888e471a50",
+      "state": "UNKNOWN",
+      "normalizedInputHash": "ecbdc83a54dc84c306f43b5b8ec18d59fa7d028f7cbadac3cf070633135ef2a4",
+      "inputDigest": "865ff30ad0700b1e4424cb53e0f2a1326e601321dd7816a4b4d0f61ffdb74261",
+      "sourceIdentityHash": "153fc76c63a14f67967ff544df1d606b977437a91ac9a05bc8b0c6e8379c85ee",
+      "expectedProviderRevision": "232949fa807ff61941957d4dd5a97f904d84bb43a225303e4382d6e67a844e3a",
+      "evidenceDigest": "646f6f29a6fdfca36fafc6fa917ee2b4083622ffba27d6a55f5accc61f6ec434",
+      "executionAttempts": 1,
+      "reconciliationAttempts": 8
+    }
+  },
+  "changedSourceResume": {
+    "errorCode": "ACTION_RECONCILIATION_MANUAL_REQUIRED",
+    "after": {
+      "id": "1c70f76c-1046-4d31-bbf6-74888e471a50",
+      "state": "UNKNOWN",
+      "normalizedInputHash": "ecbdc83a54dc84c306f43b5b8ec18d59fa7d028f7cbadac3cf070633135ef2a4",
+      "inputDigest": "865ff30ad0700b1e4424cb53e0f2a1326e601321dd7816a4b4d0f61ffdb74261",
+      "sourceIdentityHash": "153fc76c63a14f67967ff544df1d606b977437a91ac9a05bc8b0c6e8379c85ee",
+      "expectedProviderRevision": "232949fa807ff61941957d4dd5a97f904d84bb43a225303e4382d6e67a844e3a",
+      "evidenceDigest": "646f6f29a6fdfca36fafc6fa917ee2b4083622ffba27d6a55f5accc61f6ec434",
+      "executionAttempts": 1,
+      "reconciliationAttempts": 8
+    },
+    "currentSourceHash": "8a64aa310c912a38fde97341a92f422fc6cd02233f1b29bfcac1c994819b6cab",
+    "directGatewayReconciliation": "STILL_UNKNOWN",
+    "providerCalls": 0
+  },
+  "transport": [
+    {
+      "tenantId": "cmuyv3ici001ruec9e2fmwh0q",
+      "method": "GET",
+      "resource": "schedule",
+      "company": 99104
+    }
+  ],
+  "modelCalls": 0,
+  "unexpected": [],
+  "providerPuts": {
+    "cmuyv3hal0000uec9o2g90eow": 1,
+    "cmuyv3hrp000luec9j078dq0u": 1,
+    "cmuyv3i3e0016uec9ijuwrdni": 0,
+    "cmuyv3ici001ruec9e2fmwh0q": 1
+  }
+}

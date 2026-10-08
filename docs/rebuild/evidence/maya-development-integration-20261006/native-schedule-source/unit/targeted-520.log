@@ -1,0 +1,7 @@
+
+Test Suites: 11 passed, 11 total
+Tests:       520 passed, 520 total
+Snapshots:   0 total
+Time:        2.003 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.development-integration.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts", "src/crm/crm.staff-schedule-source.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/package5-wave3/package5-wave3-branch-binding.spec.ts", "src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts", "src/action-engine/package5-wave3-executable.contract.spec.ts", "src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-schedule-source-unit-20261008.json
