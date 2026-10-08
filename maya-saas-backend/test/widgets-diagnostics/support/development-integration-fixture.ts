@@ -18,6 +18,7 @@ import type {
 } from '../../../src/crm/crm-adapter.interface';
 import { staffScheduleRevision } from '../../../src/crm/staff-schedule.utils';
 import { servicePriceSnapshot } from '../../../src/crm/yclients-service-price.contract';
+import { observedServiceCatalog } from '../../../src/crm/service-catalog-read';
 import { OpportunityLifecycleRunner } from '../../../src/crm/opportunity-lifecycle.runner';
 import { DOMAIN_EVENT_TYPE } from '../../../src/domain';
 import { TenantContextService } from '../../../src/tenancy/tenant-context.service';
@@ -163,6 +164,7 @@ export async function developmentIntegrationFixture(
       const edge: Pick<
         CRMAdapter,
         | 'getServices'
+        | 'readServiceCatalog'
         | 'getStaff'
         | 'getServicePriceSnapshot'
         | 'updateServiceFixedPrice'
@@ -183,6 +185,13 @@ export async function developmentIntegrationFixture(
             },
           ]);
         },
+        // The current catalog owner requires qualified observed facts. Reuse the
+        // same tenant-checked synthetic rows; never fall back inside production CRM.
+        readServiceCatalog: async (requested) =>
+          observedServiceCatalog(
+            await edge.getServices(requested),
+            'synthetic',
+          ),
         getStaff: (requested) => {
           bound(requested);
           return Promise.resolve([{ id: '71', name: 'Антон Соколов' }]);

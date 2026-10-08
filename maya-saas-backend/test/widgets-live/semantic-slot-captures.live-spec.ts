@@ -8,6 +8,7 @@ import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import { AiToolHandlerService } from '../../src/ai-tools/ai-tool-handler.service';
 import { bookingPreferenceDate } from '../../src/ai-tools/booking-catalog-binding';
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
 import captures from '../../src/ai-tools/fixtures/deepseek-v4-pro-semantic-slot-failures.json';
 import bounded from '../../src/ai-tools/fixtures/deepseek-v4-pro-bounded-recheck.json';
 import followups from '../../src/ai-tools/fixtures/deepseek-v4-pro-followup-failures.json';
@@ -182,7 +183,7 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
       CalendarSource.INTERNAL,
     );
     const user = await fx.user(tenant, UserRole.CLIENT);
-    await fx.bookingSource(tenant, user, true);
+    const bookingSource = await fx.bookingSource(tenant, user, true);
     for (const feature of [
       'ai.consultant',
       'widgets.runtime',
@@ -289,7 +290,11 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
       time: '17:00',
       services: ['моделирование бороды'],
     });
-    expect(replies[2]).toContain('Запись пока не подготовлена.');
+    // The recorded service is absent from the current catalog. The server asks
+    // for that missing noun before any staff/date selection or booking action.
+    expect(replies[2]).toBe(
+      'Уточните одну услугу из каталога салона. Остальные пожелания сохранены.',
+    );
     expect(replies[2]).not.toContain('Подтверждаю запись');
     expect(
       await db.prisma.actionExecution.count({
@@ -382,11 +387,22 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
         resolution: { receipt: { envelope: Record<string, unknown> } };
       }
     ).resolution.receipt.envelope;
+    expect(envelope.kind).toBe('SERVICE_SELECTOR');
+    // After explicit catalog selection, the driver supplies a new dated READ.
+    // This is separate from the recorded semantic replay, not a resumed model choice.
     const payload = {
       baseUrl: await http.listenLoopback(),
       accessToken: token,
       tenantName: 'Synthetic follow-up',
       envelope,
+      availabilityRequest: {
+        date: localCalendarDate(
+          sourceTimezone,
+          new Date(Date.now() + 2 * 86_400_000),
+        ),
+        staff_id: bookingSource.staffId,
+        service_ids: [bookingSource.serviceId],
+      },
     };
     const shell = await new Promise<{ assistantLines: string[] }>(
       (resolve, reject) => {
