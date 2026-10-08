@@ -1,0 +1,19 @@
+{
+  "contract": "maya.local-proof-launch-notes/1",
+  "provenance": "Summary of observed exec tool outputs; not an original stdout artifact",
+  "attempts": [
+    {
+      "name": "ordering-01",
+      "result": "EPERM binding 127.0.0.1 in sandbox; no PostgreSQL/service started"
+    },
+    {
+      "name": "populated-01",
+      "result": "git diff --quiet refused tracked generated shell manifest before output directory/service creation; manifest committed as e30ce40e"
+    },
+    {
+      "name": "populated-02",
+      "result": "HTTP emitted canonical stopped_at_gate string '9'; test expected number 9. Runtime unchanged; exact expectation fixed at 835e3e9c. Failed report/log retained; owned cluster stopped."
+    }
+  ],
+  "externalActions": 0
+}

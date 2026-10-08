@@ -1,0 +1,54 @@
+# MAYA: receipt recovery and populated history erasure — 2026-10-08
+
+**Useful result:** a submitted booking now offers an explicit **«Проверить результат»** READ in the current React chat. An unavailable initial receipt can be read again without reloading or resubmitting the action. Erasure also removes historical narrative accidentally retained beside terminal audit facts, including a narrowly scoped repair when the same completed erasure request is repeated. Populated canonical booking, consent facts, Client binding, loyalty and AE/audit remain unchanged after deletion and a separate backend/PostgreSQL restart.
+
+Runtime: `97bab7ab`; generated shell manifest: `e30ce40e`; final proof candidate: `835e3e9c`. The last change only corrects a test's expectation from numeric `9` to the canonical HTTP string `"9"`. This supersedes the text-only fixture and seven old L27 failures in the [previous checkpoint](MAYA-HISTORY-ERASURE-UI-CHECKPOINT-20261007.md), within the limits below.
+
+## What changed
+
+1. **Receipt recovery within existing owners.** The existing headless widget port reads one bounded page of 20 current widgets only after an explicit click. It matches widget/tenant/principal/turn/parent, publishes canonical terminal lines with existing dedupe, preserves the first confirmed receipt, and rejects contradictory or missing results. Offline failure keeps the known result and permits another manual READ. Clear, sign-out, privacy erasure and replacement cancel pending work; late replies cannot repopulate the chat. There is no token ingestion, revived COMMIT, polling or new authority owner. The affordance is separate shell chrome in the lane; it does not modify the sealed historical card or introduce a new detail contract.
+2. **Audit facts no longer store conversation narrative.** `IntentAuditStore` persists only terminal outcome and action receipt reference. The existing current-principal reader reconstructs closed presentation wording; a specific refusal requires the immutable COMMIT/AE adjudication receipt. Historical arbitrary text is not replayed. Erased emissions/turns are excluded from this read.
+3. **Narrow legacy cleanup.** The existing erasure transaction strips extra JSON members only from emissions already tombstoned by that exact request and tenant/conversation/principal. New content tombstones name the exact removed JSON pointers. A repeated completed request can repair those same rows, preserving their original `erasedAt`, all A facts and the original turn-based completion timestamp. A clean repeat writes nothing and cannot select a newly created row. This is cleanup under the existing narrative-C classification, with no new schema, retention decision or store. The compatibility fixture covers the old writer's valid outcome/reference shape with extra C fields; malformed A values are not qualified.
+
+The seven earlier L27 failures were reproduced on the prior baseline, not introduced by privacy erasure. Four expected obsolete repeated controls; three exposed useful receipt-delivery behavior through an invalid control path. The tests now exercise the explicit READ and its adverse cases. The fixture no longer invents a tokened CONTROL on a terminal PWA card, and a different confirmed reference for the same widget is refused rather than treated as another legitimate result.
+
+## Executed evidence
+
+[Archive and bindings](evidence/maya-development-integration-20261006/history-retention/manifest.json).
+
+| Check | Observed result | Qualification |
+|---|---|---|
+| Backend affected unit/schema/architecture | 121 tests, 8 suites PASS | Includes erasure map, original completion repair, terminal storage/read and effect-router architecture |
+| Runtime/net/shell/privacy | 260 PASS | Seven additional local-API tests explicitly skip without a connected fixture; they are not passes |
+| Current React SSR | 101 PASS | Includes receipt button states and its separation from sealed controls |
+| Browser transport guard | 3 PASS | Existing finite privacy route guard |
+| K3 structural checks | 10/10 PASS | Existing widget authority/owner boundary checks |
+| Types/build/lint | Scoped widgets-live types, scoped ESLint, shell build and React types PASS | Full default backend `tsc` exceeded its heap cap and is not aggregate acceptance; initial low-heap checks are retained |
+| Actual RT6 HTTP/PG | 17/17 PASS at `97bab7ab` | Temporary owned DB; production backend source identical to final candidate; current authority, ordering, late writers and replay |
+| Populated current React + compiled entry | prepare 1/1 and resume 1/1 PASS at `835e3e9c` | Actual `dist/src/main.js`, `NODE_ENV=test`, separate backend processes and observed PostgreSQL stop/start |
+| Ordinary bound-branch booking + receipt recovery | 3 scenarios / 27 checkpoints / 27 screenshots PASS at `835e3e9c` | Existing native synthetic transport and scripted decisions; real provider/model acceptance excluded |
+
+The populated fixture has one appointment, two AE-backed consent facts, one loyalty transaction, five ActionExecutions, a full Client/channel binding, canonical owner reads and retained approval/audit/receipt data. Historical booking/metric emissions, render/adjudication receipts, all seven existing C/X models and a sibling conversation are nonempty before erasure. Full canonical rows and existing owner reads compare byte for byte before/after; terminal A projection and the sibling rows also remain unchanged.
+
+The browser observes a historical confirmed receipt before deletion and its absence after reload/relogin/restart. The frozen body is verified through the actual READ; it is not claimed as a rendered interactive historical card. An unconsumed, unexpired, unsuperseded old control with erased content receives exact `superseded / handle_stale / stopped_at_gate: "9"` through HTTP, with no canonical effect. The explicit legacy completed-request fixture adds exactly one content tombstone; its subsequent clean replay adds zero. A new backend process returns the original completion and unchanged tombstone hash.
+
+All owned processes and clusters stop. The archive excludes private restart credentials, raw backend auth logs, PG data and local dependencies. Original failed logs are kept byte-for-byte; generated artifact/source hashes bind the tested versions. Initial sandbox loopback failure occurred before service creation. The first populated launch refused a dirty generated manifest; the next failed only on the gate ID type in the test, after successful preservation/browser assertions. The corrected run passes without changing runtime behavior.
+
+## Review and limits
+
+Independent read-only review closed the exact erasure gate oracle and complete Client snapshot gaps. It verified three Git trees, all 2,898 backend/React artifact hashes, the two process/PG identities, immutable preservation hashes and stopped owned clusters. It also verified the 17-case run's four trees against its commit and identical production source. Final review also verified all 122 artifact hashes (121 byte-exact raw copies plus one authored launch summary), 31 source bindings and all 1,722 ordinary-proof hashes against Git. Success/UNKNOWN/stale result screenshots were inspected; stale-source reread remains unavailable without creating a receipt. Review has no unresolved blocker within these qualifications.
+
+Seven populated-history screenshots were inspected: receipt before erasure and sibling-only history after reload/restart are visible. Partial headless painting of uncertain/completed privacy screens and their inherited serif font remain visual limitations. No full design acceptance is claimed. The separate design task can reuse the existing `privacy` port and the new lane receipt affordance; no foreign design worktree or working website was edited.
+
+Consent **facts/effective read and their AE receipts** are qualified. A consent register/export owner is not registered; AiApprovalRequest and payment owners are outside this fixture. This is a scope statement, not a new permission requirement for safe local work. Approval coverage here is the retained existing AE approval fields. The fixture uses a synthetic verifier for Client linking and a controlled fixture kernel for historical booking/approval; it is not a real booking acceptance. Actual UNKNOWN-to-CONFIRMED refresh is covered by injected runtime tests; the browser covers retained UNKNOWN and successful receipts, not an actual reconciliation transition.
+
+RT7 states an owner boundary. RT8 and `GAP-HISTORY-ERASE` still require their existing total-classification/fixture/package-gate/ledger review; no historical ledger artifact is rewritten as a new certificate. The current functional fixes do not establish overall MAYA, C10, real-model or YCLIENTS acceptance. External egress is expected zero by the finite fixtures but not independently measured. No push, merge, deployment, phone, real data erasure or autonomous trigger was performed. `NOT_ISSUED`.
+
+## Prioritized remaining product work
+
+1. **Finish the ordinary booking outcome path:** qualify an actual UNKNOWN-to-CONFIRMED receipt transition without resend, then native reschedule UNKNOWN through restart and semantic exact-time filtering. These extend existing owners and the finite bound-branch flow; historical ISO-only slots without a source witness continue to refuse.
+2. **Complete privacy acceptance:** run the existing RT5/RT6/package-gate and ledger review against this populated fixture; inspect remaining registered approval/receipt surfaces and finish privacy screen presentation in its design lane. Keep the missing consent register/export explicitly separate from consent-fact preservation.
+3. **Qualify real YCLIENTS/model behavior:** current company/branch binding, source checks and local native adapter proofs are established, but real responses, integration rights, broad dialogue quality and operational headroom are not observed here. The existing exact remote metadata permission remains pending; no SSH retry or workaround was attempted.
+4. **Resolve the two existing product decisions:** initial Client channel trust and scoped C10 background principal/trigger/bounds. Explicit verified-Client and explicit C9 work remain usable. Broader [approved-domain remaining work](MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md) stays with its current owners; no second orchestrator or general agent framework is needed.
+
+The exact paused metadata action and original automatic-review reason remain in the [previous checkpoint](MAYA-HISTORY-ERASURE-UI-CHECKPOINT-20261007.md#exact-remote-metadata-blocker-unchanged). Automatic review rejected unapproved SSH access collecting private infrastructure metadata. The parent is handling the existing exact permission question; local proof approval does not authorize SSH, setup, credentials or paid calls.

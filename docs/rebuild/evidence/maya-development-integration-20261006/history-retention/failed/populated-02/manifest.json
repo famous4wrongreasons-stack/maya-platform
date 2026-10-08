@@ -1,0 +1,38 @@
+{
+  "contract": "maya.history-erasure-react-owned-restart/1",
+  "status": "failed",
+  "commit": "e30ce40e3849f12b236f4019bb2671dbb8347e5e",
+  "sourceTrees": {
+    "maya-saas-backend": "2d340800e3cd6927b9aef4a0fe00c43c602f4cd8",
+    "maya-carrier-react": "f03a64e73960b989068a4918126a148597b928f5",
+    "maya-chat-shell": "b5ef26d974067ddccb2aab275a4de05a88473dbe"
+  },
+  "database": "maya_widget_gate_proof_c9occ_273215abc79a",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-erasure-react-szNz7M/pg",
+  "port": 55381,
+  "completed": [
+    "backend-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "clusterStopped": true,
+  "scope": "current React and compiled dist/src/main.js in NODE_ENV=test, real HTTP; separate backend Node processes and PostgreSQL stop/start",
+  "authentication": "existing debug email on synthetic fixture accounts; no credential/token injection into the browser",
+  "retryScope": "UI manual same-UUID retry before restart; retained same-UUID HTTP replay after restart; no client retry journal",
+  "productionConfiguration": false,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "externalEgressMeasured": false,
+  "resources": {
+    "jestWorkers": 1,
+    "browserCount": 1,
+    "backendHeapMiB": 1536,
+    "probeHeapMiB": 1536,
+    "chromeHeapMiB": 256,
+    "pgSharedBuffersMiB": 64,
+    "pgMaxConnections": 30
+  }
+}

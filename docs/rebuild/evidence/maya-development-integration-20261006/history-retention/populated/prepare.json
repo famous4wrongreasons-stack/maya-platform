@@ -1,0 +1,53 @@
+{
+  "contract": "maya.history-erasure-compiled-react/1",
+  "stage": "prepare",
+  "status": "passed",
+  "actualCompiledEntry": "dist/src/main.js",
+  "nodeEnvironment": "test",
+  "syntheticFixtures": true,
+  "debugEmail": true,
+  "modelProvider": "safe",
+  "productionConfiguration": false,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "externalEgressMeasured": false,
+  "backendPid": 42130,
+  "probePid": 42079,
+  "pgStarted": "2026-10-08T00:15:08.653Z",
+  "populatedOwnerReadsAndAuditPreserved": true,
+  "legacyTerminalContentErased": true,
+  "canonicalRowsHash": "cd94855e9da59e4da50e465c47d563c5149d5ef81f0eee07e87081f4103a3d52",
+  "canonicalOwnerReadsHash": "1b4b563ec9b180ba654ef467b72d257fba3c94c8c0bceaf7b0b53d00b2633053",
+  "retainedWidgetFactsHash": "a707fd93566ee06bdada6b7f10f7d3547220729287af9a18fee84ce011f18323",
+  "oldControlRefusal": {
+    "outcome": "superseded",
+    "code": "handle_stale",
+    "gate": "9"
+  },
+  "oldUnconsumedControlRefused": true,
+  "completedLegacyRepair": {
+    "exactOriginalCompletion": true,
+    "sameEmissionErasedAt": true,
+    "additionalContentTombstones": 1,
+    "repeatedRepairWrites": 0,
+    "newRowsSelected": false
+  },
+  "noCanonicalAppointmentOrActionCreated": true,
+  "fixtureQualifications": [
+    "synthetic fixture, not real booking/model/provider acceptance",
+    "booking receipt and approval use existing controlled fixture kernel; no COMMIT dispatch",
+    "consent register/export owner is unregistered; consent facts/effective read/AE receipts only",
+    "AE approval fields preserved; AiApprovalRequest and payment owners are outside this fixture",
+    "legacy repair covers historical valid outcome/ref shape with extra C fields; malformed A values are not qualified",
+    "legacy C/X copies are explicitly seeded without modifying A/seal/authority",
+    "appointment Client association is explicit fixture linkage; legacy repository lacks this argument"
+  ],
+  "canonicalFixtureCounts": {
+    "appointments": 1,
+    "consentFacts": 2,
+    "loyaltyTransactions": 1,
+    "actionExecutions": 5
+  },
+  "otherConversationSurvives": true,
+  "backendStopped": true
+}

@@ -1,0 +1,126 @@
+{
+  "contract": "maya.history-erasure-react-browser/1",
+  "stage": "prepare",
+  "status": "passed",
+  "actualReact": true,
+  "actualHttp": true,
+  "authentication": "existing synthetic debug email",
+  "backend": "compiled production entry, NODE_ENV=test",
+  "fixtureCoverage": "synthetic populated historical booking/metric envelopes, render and adjudication receipts, C/X fields, local draft and canonical owners; consent register owner unavailable",
+  "realModelAcceptance": false,
+  "productionConfiguration": false,
+  "screenshots": [
+    "before-erasure.png",
+    "confirmation.png",
+    "uncertain.png",
+    "offline-retry-uncertain.png",
+    "completed.png",
+    "reloaded.png"
+  ],
+  "checks": {
+    "populatedReceiptVisibleBeforeErasure": true,
+    "frozenHistoricalBodyReadWithoutLiveControls": true,
+    "localDraftAndSelectionCleared": true,
+    "composerAndVoiceBlockedWhileUncertain": true,
+    "offlineRetryDoesNotReachBackend": true,
+    "manualRetrySameRequest": true,
+    "droppedResponseAfterCommittedDeletion": true,
+    "sameCompletionTimestamp": true,
+    "erasedMarkerAbsent": true,
+    "siblingConversationSurvives": true,
+    "populatedHistoricalReceiptRemoved": true,
+    "historicalActionsNotRestored": true,
+    "noModelOrBusinessIntents": true
+  },
+  "guard": {
+    "blocked": [],
+    "errors": []
+  },
+  "http": [
+    {
+      "path": "/api/auth/email/start",
+      "method": "POST",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "path": "/api/auth/email/verify",
+      "method": "POST",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "path": "/api/widgets/resolve",
+      "method": "POST",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "path": "/api/privacy/conversations/a5fdd287-df0d-4519-8742-2ace2c2c5033/erasure",
+      "method": "POST",
+      "status": 200,
+      "failed": true
+    },
+    {
+      "path": "/api/privacy/conversations/a5fdd287-df0d-4519-8742-2ace2c2c5033/erasure",
+      "method": "POST",
+      "status": null,
+      "failed": true
+    },
+    {
+      "path": "/api/privacy/conversations/a5fdd287-df0d-4519-8742-2ace2c2c5033/erasure",
+      "method": "POST",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "path": "/api/auth/email/start",
+      "method": "POST",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "path": "/api/auth/email/verify",
+      "method": "POST",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "path": "/api/widgets/resolve",
+      "method": "POST",
+      "status": 200,
+      "failed": false
+    }
+  ],
+  "observedCompletions": {
+    "count": 2,
+    "droppedCount": 1,
+    "truncated": false,
+    "entries": [
+      {
+        "dropped": true,
+        "requestId": "9f60ed2a-4209-41b6-9a60-f7c5fe07be28",
+        "conversationId": "a5fdd287-df0d-4519-8742-2ace2c2c5033",
+        "erasedAt": "2026-10-08T00:15:12.537Z"
+      },
+      {
+        "dropped": false,
+        "requestId": "9f60ed2a-4209-41b6-9a60-f7c5fe07be28",
+        "conversationId": "a5fdd287-df0d-4519-8742-2ace2c2c5033",
+        "erasedAt": "2026-10-08T00:15:12.537Z"
+      }
+    ]
+  }
+}

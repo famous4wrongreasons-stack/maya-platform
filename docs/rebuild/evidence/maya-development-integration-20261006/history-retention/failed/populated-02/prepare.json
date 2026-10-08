@@ -1,0 +1,23 @@
+{
+  "contract": "maya.history-erasure-compiled-react/1",
+  "stage": "prepare",
+  "status": "failed",
+  "actualCompiledEntry": "dist/src/main.js",
+  "nodeEnvironment": "test",
+  "syntheticFixtures": true,
+  "debugEmail": true,
+  "modelProvider": "safe",
+  "productionConfiguration": false,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "externalEgressMeasured": false,
+  "backendPid": 41069,
+  "probePid": 41016,
+  "pgStarted": "2026-10-08T00:13:32.008Z",
+  "populatedOwnerReadsAndAuditPreserved": true,
+  "legacyTerminalContentErased": true,
+  "canonicalRowsHash": "961418258b13af93a9b7ba8a04094668cdf395493741e01e1e153a5efbb47dd5",
+  "canonicalOwnerReadsHash": "276805f022345719671f8752e494206e738766111fb0f55564669dbe22c11c67",
+  "retainedWidgetFactsHash": "a77189b12f7b94385fc59020ed3cbf1d90640c1deb3f606db45128a539b1a06a",
+  "backendStopped": true
+}
