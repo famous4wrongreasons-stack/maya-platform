@@ -1194,7 +1194,7 @@ describe('SB-1 canonical create with personal context', () => {
     ],
     revalidate: jest.fn().mockResolvedValue(undefined),
   });
-  const ownerRun = <T,>(h: ReturnType<typeof setup>, fn: () => T) =>
+  const ownerRun = <T>(h: ReturnType<typeof setup>, fn: () => T) =>
     h.context.runAsAuthPrincipal(
       { tenantId: 'tenant-1', userId: 'user-1', role: 'tenant_owner' },
       fn,

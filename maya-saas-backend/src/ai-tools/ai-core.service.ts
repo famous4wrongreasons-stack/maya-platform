@@ -6486,7 +6486,7 @@ export class AiCoreService {
             acceptedBookingServices.add(id);
         }
       },
-      project: <T,>(value: T, catalog = false): T => {
+      project: <T>(value: T, catalog = false): T => {
         if (catalog && Array.isArray(value)) {
           for (const entry of value as AiCoreToolResult[]) {
             if (entry.name !== 'catalog.services.read') continue;
@@ -6506,7 +6506,7 @@ export class AiCoreService {
         }
         return walk(value, catalog) as T;
       },
-      resolveReferences: <T,>(value: T, semantic = false): T =>
+      resolveReferences: <T>(value: T, semantic = false): T =>
         restore(value, semantic) as T,
       present: (value: string) =>
         value.replace(
