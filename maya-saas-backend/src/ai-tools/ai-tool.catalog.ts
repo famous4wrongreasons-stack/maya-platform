@@ -721,7 +721,7 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'clients.dossier.read',
     description:
-      'Staff/owner CRM client dossier by name (≥3 letters) or phone digits (≥4): exact CRM visit count, last visit, recent favorite services, average cycle, lifetime spend, loyalty status and current bonus balance. Call for "что за клиент", "расскажи про <имя>", "сколько визитов у <имя>", "что обычно берёт", "сколько бонусов у <имя>". 152-ФЗ: never echo phone or real name — the server returns display_name "клиент" only. Read-only.',
+      'Staff/owner CRM client dossier by name (≥3 letters) or phone digits (≥4): source-qualified visit count, last visit, recent favorite services, average cycle, spend and bonus balance. Multiple matches require a more precise explicit search; no first-match dossier or candidate records are returned. Call for "что за клиент", "расскажи про <имя>", "сколько визитов у <имя>", "что обычно берёт", "сколько бонусов у <имя>". 152-ФЗ: never echo phone or real name — the server returns display_name "клиент" only. Read-only.',
     inputSchema: {
       type: 'object',
       additionalProperties: false,

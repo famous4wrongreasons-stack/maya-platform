@@ -455,6 +455,122 @@ describe('AiToolHandlerService output minimization', () => {
     expect(getStaffScheduleDay).not.toHaveBeenCalled();
   });
 
+  describe('explicit unique client dossier', () => {
+    afterEach(() => jest.restoreAllMocks());
+    function fixture() {
+      const first = {
+        id: '42',
+        name: 'Иван Петров',
+        phone: '+79991234567',
+        visits_count: 39,
+        sold_amount: 62150,
+        last_visit_date: '2026-07-20',
+      };
+      const second = {
+        ...first,
+        id: '43',
+        name: 'Иван Сидоров',
+        phone: '+79997654321',
+        visits_count: 7,
+      };
+      const searchClients = jest
+        .fn()
+        .mockImplementation((_tenant: string, query: string) =>
+          Promise.resolve(
+            query === 'Иван Сидоров' ? [second] : [first, second],
+          ),
+        );
+      const getClientVisitHistory = jest.fn().mockResolvedValue([]);
+      const getStateForCrmClient = jest.fn().mockResolvedValue({
+        balance: 11,
+        currency: 'RUB',
+        authority: 'maya',
+        authority_scope: 'resolved',
+      });
+      const recency = jest.spyOn(
+        ClientRecencyFactsService.prototype,
+        'forProviderClient',
+      );
+      const handler = createService({
+        crmService: {
+          searchClients,
+          getClientVisitHistory,
+        } as unknown as CrmService,
+        loyaltyService: { getStateForCrmClient } as unknown as LoyaltyService,
+      });
+      const read = (query: string) =>
+        handler.execute(
+          'clients.dossier.read',
+          { ...principal, role: UserRole.STAFF, userId: 'master-a' },
+          { query },
+          'synthetic-dossier-read',
+        );
+      return {
+        searchClients,
+        getClientVisitHistory,
+        getStateForCrmClient,
+        recency,
+        read,
+      };
+    }
+
+    it('returns only ambiguity before any history, loyalty or recency read', async () => {
+      const f = fixture();
+      const result = await f.read('Иван');
+      expect(f.getClientVisitHistory).not.toHaveBeenCalled();
+      expect(f.getStateForCrmClient).not.toHaveBeenCalled();
+      expect(f.recency).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        found: false,
+        status: 'ambiguous',
+        requires_clarification: true,
+        error:
+          'Нашла несколько клиентов. Уточните имя и фамилию или последние четыре цифры телефона.',
+      });
+    });
+
+    it('reads only the unique customer after a fresh explicit more precise query', async () => {
+      const f = fixture();
+      await f.read('Иван');
+      const result = await f.read('Иван Сидоров');
+      expect(f.searchClients.mock.calls).toEqual([
+        ['tenant-a', 'Иван'],
+        ['tenant-a', 'Иван Сидоров'],
+      ]);
+      expect(f.getClientVisitHistory.mock.calls).toEqual([
+        ['tenant-a', '43', 30],
+      ]);
+      expect(f.getStateForCrmClient.mock.calls).toEqual([['tenant-a', '43']]);
+      expect(f.recency).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({
+        found: true,
+        matches_count: 1,
+        visits: 7,
+      });
+      expect(JSON.stringify(result)).not.toMatch(/Иван|Сидоров|7999/);
+    });
+
+    it.each(['empty', 'source-error'])(
+      'keeps %s distinct from ambiguous search without reading candidate facts',
+      async (outcome) => {
+        const f = fixture();
+        if (outcome === 'empty') f.searchClients.mockResolvedValue([]);
+        else f.searchClients.mockRejectedValue(new Error('source unavailable'));
+        const result = await f.read('Иван');
+        expect(result).toEqual({
+          found: false,
+          error:
+            outcome === 'empty'
+              ? 'Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).'
+              : 'Поиск клиентов в CRM сейчас недоступен.',
+        });
+        expect(f.getClientVisitHistory).not.toHaveBeenCalled();
+        expect(f.getStateForCrmClient).not.toHaveBeenCalled();
+        expect(f.recency).not.toHaveBeenCalled();
+      },
+    );
+  });
+
   it('builds a redacted CRM client dossier for staff', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-12T09:00:00.000Z'));
@@ -466,14 +582,6 @@ describe('AiToolHandlerService output minimization', () => {
         visits_count: 39,
         sold_amount: 62_150,
         last_visit_date: '2026-07-20',
-      },
-      {
-        id: '43',
-        name: 'Иван Сидоров',
-        phone: null,
-        visits_count: null,
-        sold_amount: null,
-        last_visit_date: null,
       },
     ]);
     const getClientVisitHistory = jest.fn().mockResolvedValue([
@@ -520,7 +628,7 @@ describe('AiToolHandlerService output minimization', () => {
     expect(result).toMatchObject({
       found: true,
       display_name: 'клиент',
-      matches_count: 2,
+      matches_count: 1,
       visits: 39,
       visits_scope: 'full_crm_card',
       last_visit: '2026-07-20',
@@ -534,14 +642,14 @@ describe('AiToolHandlerService output minimization', () => {
       loyalty_segment: null,
       loyalty_rule:
         'Ценность и давность оцениваются только по подтверждённому правилу C8.',
-      bonus_balance: null,
-      bonus_currency: null,
-      bonus_observed_from: null,
-      bonus_authority: null,
-      bonus_authority_scope: 'unknown',
-      bonus_is_authoritative: false,
-      bonus_status: 'unavailable',
-      note: 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.',
+      bonus_balance: 2133,
+      bonus_currency: 'RUB',
+      bonus_observed_from: 'maya',
+      bonus_authority: 'maya',
+      bonus_authority_scope: 'resolved',
+      bonus_is_authoritative: true,
+      bonus_status: 'available',
+      note: 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
     });
     expect(getClientLoyalty).not.toHaveBeenCalled();
     expect(JSON.stringify(result)).not.toContain('Иван');

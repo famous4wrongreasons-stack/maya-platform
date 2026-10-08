@@ -3330,6 +3330,164 @@ describe('AiCoreService', () => {
     },
   );
 
+  describe('exact client dossier selection [scripted model only]', () => {
+    const tool = 'clients.dossier.read';
+    const ambiguous = {
+      found: false,
+      status: 'ambiguous',
+      requires_clarification: true,
+      error:
+        'Нашла несколько клиентов. Уточните имя и фамилию или последние четыре цифры телефона.',
+    };
+    const selected = {
+      found: true,
+      matches_count: 1,
+      display_name: 'клиент',
+      visits: 7,
+      visits_scope: 'full_crm_card',
+      total_spent: 1234,
+      total_spent_scope: 'full_crm_card',
+      favorite_services: ['PRIVATE_SERVICE_SENTINEL'],
+      bonus_status: 'unavailable',
+    };
+    function fixture(result: unknown = ambiguous, stale = false) {
+      const mocks = createService([tool]);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: null,
+          toolCall: { name: tool, arguments: { query: 'клиент' } },
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'private-dossier-read',
+        result,
+        stale,
+      });
+      return mocks;
+    }
+    it('clarifies before dossier disclosure, then binds the next explicit query to a fresh read inside the server', async () => {
+      const mocks = fixture();
+      mocks.runtime.execute
+        .mockResolvedValueOnce({
+          status: 'completed',
+          execution_id: 'read-ambiguous',
+          result: ambiguous,
+        })
+        .mockResolvedValueOnce({
+          status: 'completed',
+          execution_id: 'read-selected',
+          result: selected,
+        });
+      const first = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Досье клиента Иван' }],
+      });
+      expect(first.reply).toBe(ambiguous.error);
+      expect(first).toMatchObject({
+        action: null,
+        grounding: {
+          status: 'blocked',
+          domain: 'client_dossier',
+          evidence_tools: [tool],
+        },
+      });
+      const second = await mocks.service.chat(user, {
+        ...dto,
+        requestId: 'request_refine_dossier',
+        messages: [
+          { role: 'user', content: 'Досье клиента Иван' },
+          {
+            role: 'assistant',
+            content: first.reply + ' PRIVATE_OLD_DOSSIER_FACT',
+          },
+          { role: 'user', content: 'Досье клиента Иван Петров' },
+        ],
+      });
+      expect(second.reply).toContain('По карточке CRM: 7 визитов');
+      expect(second.reply).toContain('PRIVATE_SERVICE_SENTINEL');
+      expect(second).toMatchObject({
+        action: null,
+        grounding: { status: 'verified', domain: 'client_dossier' },
+      });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(2);
+      expect(
+        mocks.runtime.execute.mock.calls.map((call) => call[2].arguments),
+      ).toEqual([{ query: 'Иван' }, { query: 'Иван Петров' }]);
+      expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(
+        /Иван|Петров|PRIVATE_/,
+      );
+      expect(second.reply).not.toMatch(
+        /Иван|Петров|private-dossier-read|использовала первое/,
+      );
+    });
+    it.each([
+      ['old ambiguous receipt', { ...selected, matches_count: 2 }, false],
+      ['stale unique result', selected, true],
+      [
+        'incomplete identity result',
+        { ...selected, matches_count: undefined },
+        false,
+      ],
+      ['malformed result', {}, false],
+    ] as const)(
+      'does not disclose facts from %s',
+      async (_label, result, stale) => {
+        const mocks = fixture(result, stale);
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Досье клиента Иван' }],
+        });
+        expect(answer.action).toBeNull();
+        expect(answer.grounding.status).toBe('blocked');
+        expect(answer.reply).not.toMatch(
+          /7 визитов|1234|PRIVATE_SERVICE|использовала первое/,
+        );
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      },
+    );
+    it.each([
+      ['иван петров', 'иван петров'],
+      ['Иван   Петров', 'Иван Петров'],
+      ['7346', '7346'],
+      ['+7 (999) 123-45-67', '79991234567'],
+    ])(
+      'keeps the entire explicit private query inside the server: %s',
+      async (input, query) => {
+        const mocks = fixture(selected);
+        await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: `Досье клиента ${input}` }],
+        });
+        expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({
+          query,
+        });
+        const external = JSON.stringify(mocks.model.decide.mock.calls);
+        expect(external).not.toContain(input);
+        expect(external).not.toContain(query);
+        expect(external).not.toMatch(/Петров|петров|PRIVATE_SERVICE/);
+      },
+    );
+    it.each([
+      'Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).',
+      'Поиск клиентов в CRM сейчас недоступен.',
+    ])(
+      'keeps not-found and failed-source explanations distinct: %s',
+      async (error) => {
+        const mocks = fixture({ found: false, error });
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Досье клиента Иван' }],
+        });
+        expect(answer.reply).toBe(error);
+        expect(answer.grounding.status).toBe('blocked');
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+  });
+
   describe('canonical own tasks [scripted selection only]', () => {
     const payload = {
       contract: 'maya.own-operational-tasks/1',

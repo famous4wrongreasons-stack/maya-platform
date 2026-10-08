@@ -647,6 +647,18 @@ export class AiToolHandlerService {
       };
     }
 
+    // A search match is not a selected client. The dossier contract requires
+    // clarification before reading or exposing any candidate's private facts.
+    if (matches.length !== 1) {
+      return {
+        found: false,
+        status: 'ambiguous',
+        requires_clarification: true,
+        error:
+          'Нашла несколько клиентов. Уточните имя и фамилию или последние четыре цифры телефона.',
+      };
+    }
+
     const client = matches[0];
     // 🔴 Владелец баланса спрашивается у границы, а не подразумевается.
     // До P5 досье брало карту провайдера напрямую и выдавало её за баланс —
@@ -671,11 +683,9 @@ export class AiToolHandlerService {
           ok: false as const,
           reason: this.historyFailureReason(error),
         })),
-      matches.length === 1
-        ? this.loyaltyService
-            .getStateForCrmClient(principal.tenantId, client.id)
-            .catch(() => null)
-        : Promise.resolve(null),
+      this.loyaltyService
+        .getStateForCrmClient(principal.tenantId, client.id)
+        .catch(() => null),
       this.reportingTimezone(principal.tenantId).catch(() => 'UTC'),
     ]);
 
@@ -833,10 +843,7 @@ export class AiToolHandlerService {
       bonus_authority_scope: loyalty?.authority_scope ?? 'unknown',
       bonus_is_authoritative: Boolean(loyalty),
       bonus_status: loyalty ? 'available' : 'unavailable',
-      note:
-        matches.length > 1
-          ? 'Найдено несколько совпадений — взято первое. Телефон и имя не показывай; это история и привычки для тёплого приёма.'
-          : 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
+      note: 'Телефон и имя не показывай. Это история и привычки клиента — для тёплого приёма и совета.',
     };
   }
 

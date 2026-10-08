@@ -343,7 +343,7 @@ const CLIENT_ACQUISITION_QUESTION_PATTERN =
   /(сколько\s+стоит\s+(?:нам\s+|мне\s+)?(?:привест|привлеч|получ|нов[а-яё]+\s+клиент|один\s+клиент|клиент)|(?:во\s+)?сколько\s+(?:нам\s+|мне\s+)?обходится\s+(?:нов[а-яё]+\s+)?клиент|(?:во\s+)?сколько\s+обходится\s+(?:нам|мне)\s+(?:нов[а-яё]+\s+)?клиент|цена\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент[а-яё]*|стоимост[ьи]\s+(?:привлечени[а-яё]*|одного\s+клиент[а-яё]*|нов[а-яё]+\s+клиент[а-яё]*)|привлечени[ея]\s+(?:одного\s+)?(?:нов[а-яё]+\s+)?клиент)/i;
 /**
  * Досье конкретного клиента из CRM (не счётчик и не «кого вернуть»).
- * Имя в запросе нужно модели передать в query инструмента.
+ * Поисковая строка связывается сервером; модель выбирает инструмент без ПД.
  */
 const CLIENT_DOSSIER_HINT_PATTERN =
   /(?:досье|что\s+за\s+клиент|расскажи\s+(?:про|о)\s+|что\s+(?:ему|ей)\s+предложит|что\s+(?:(?:он|она)|.{2,40})\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)|что\s+обычно\s+(?:берет|берёт)|привычк[аи]\s+(?:этого\s+)?клиент|перед\s+(?:его|её|ее|этим)\s+визит|сколько\s+(?:(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у|у\s+(?!меня\b).{2,40}\s+(?:визит|посещени|балл|бонус))|(?:насколько|как).{2,40}\s+лоял[а-яёa-z]*|как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит))/i;
@@ -2305,7 +2305,12 @@ export class AiCoreService {
                               execution.result,
                               execution.stale === true,
                             )
-                          : null;
+                          : decision.toolCall.name === 'clients.dossier.read'
+                            ? this.deterministicClientDossierReply(
+                                execution.result,
+                                execution.stale === true,
+                              )
+                            : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(
@@ -4024,7 +4029,7 @@ export class AiCoreService {
       case 'clients.dormant.list':
         return this.deterministicDormantClientsReply(evidence.result);
       case 'clients.dossier.read':
-        return this.deterministicClientDossierReply(evidence.result);
+        return this.deterministicClientDossierReply(evidence.result).reply;
       case 'staff.schedule.read':
         return this.deterministicStaffScheduleReply(evidence.result);
       case 'operations.journal.read':
@@ -4591,13 +4596,35 @@ export class AiCoreService {
     return summary + ' Эти числа не являются оценкой лояльности или прогнозом.';
   }
 
-  private deterministicClientDossierReply(evidence: unknown): string | null {
+  private deterministicClientDossierReply(
+    evidence: unknown,
+    stale = false,
+  ): { reply: string; status: 'verified' | 'blocked' } {
     const data = this.record(evidence);
+    const unavailable = {
+      reply:
+        'Актуальное досье клиента не подтверждено. Уточните имя и фамилию или последние четыре цифры телефона для нового поиска.',
+      status: 'blocked' as const,
+    };
+    if (stale || data.stale === true) return unavailable;
+    // An old cached response may contain the former first-match dossier.
+    // Its figures are not evidence about the client the user intended.
+    if (
+      data.status === 'ambiguous' ||
+      (typeof data.matches_count === 'number' && data.matches_count > 1)
+    )
+      return {
+        reply:
+          'Нашла несколько клиентов. Уточните имя и фамилию или последние четыре цифры телефона.',
+        status: 'blocked',
+      };
     if (data.found !== true) {
-      return typeof data.error === 'string'
-        ? data.error
-        : 'Клиент не найден. Уточните имя или последние четыре цифры телефона.';
+      return {
+        reply: typeof data.error === 'string' ? data.error : unavailable.reply,
+        status: 'blocked',
+      };
     }
+    if (data.matches_count !== 1) return unavailable;
 
     const segment = 'требуется подтверждённое правило C8';
     /**
@@ -4691,12 +4718,7 @@ export class AiCoreService {
       parts.push('Бонусный баланс CRM для этой карточки не вернула.');
     }
 
-    if (this.safeMetricNumber(data.matches_count) > 1) {
-      parts.push(
-        'Нашла несколько совпадений и использовала первое; уточните последние четыре цифры телефона, если нужен другой клиент.',
-      );
-    }
-    return parts.join(' ');
+    return { reply: parts.join(' '), status: 'verified' };
   }
 
   private requestedInactivityMonths(
@@ -6575,6 +6597,14 @@ export class AiCoreService {
       .trim();
     const original = content;
     content = content
+      // The whole explicit dossier query is private, including an unknown
+      // surname, lowercase name or short phone fragment. The CRM argument is
+      // independently bound from the original user turn inside this server.
+      .replace(
+        /((?:досье(?:\s+клиента)?|что\s+за\s+клиент)\s+)([^\r\n]{3,80})$/giu,
+        (_match: string, prefix: string, query: string) =>
+          `${prefix}${replaceName(query.trim())}`,
+      )
       .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b/gi, '[secret removed]')
       .replace(
         /\b(?:sk|rk|dk|api)[-_][A-Za-z0-9_-]{16,}\b/gi,
