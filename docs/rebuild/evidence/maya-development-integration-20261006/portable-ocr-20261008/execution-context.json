@@ -1,0 +1,46 @@
+{
+  "contract": "maya.portable-ocr-execution-context/1",
+  "recordedAt": "2026-10-08T13:55:01.786159+00:00",
+  "qualification": "Human-readable record of tool outcomes; not a production approval or signed permission receipt",
+  "modelPreparation": {
+    "sizeBeforeDownloadReported": true,
+    "modelBytes": 7974826,
+    "licenseBytes": 11358,
+    "license": "Apache-2.0",
+    "apiFee": 0,
+    "toolEscalationAllowed": true,
+    "payload": "Three fixed pinned public GitHub GETs; no images, credentials or documents",
+    "runtimeInstall": false
+  },
+  "nativeCorpus": {
+    "context": "ordinary sandbox",
+    "engine": "installed Tesseract CLI 5.5.3",
+    "latestAttempt": "actual-attempt3",
+    "workers": 11,
+    "inputs": "synthetic raster fixtures only",
+    "externalAPIs": false
+  },
+  "httpAttempt1": {
+    "context": "ordinary sandbox",
+    "outcome": "listen EPERM 127.0.0.1 before PG/browser/OCR",
+    "approvalReviewRejection": false
+  },
+  "httpAttempt2": {
+    "context": "require_escalated explicitly allowed by tool",
+    "scope": "Same finite current React/HTTP/local OCR test; new owned loopback PG, one Jest worker, Node heap3072 MiB, PG64/4 MiB and30 connections, owned Chrome profile",
+    "status": "passed",
+    "clusterStopped": true,
+    "ownedProcessGroupsClosedAbsent": true,
+    "externalAPIs": false
+  },
+  "notPerformed": [
+    "Linux image build/run",
+    "Docker/VM installation",
+    "live YCLIENTS",
+    "paid LLM/model API",
+    "real customer invoice",
+    "production/SSH/phone",
+    "working website change",
+    "push/merge"
+  ]
+}

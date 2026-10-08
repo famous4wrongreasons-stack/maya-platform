@@ -1,0 +1,68 @@
+{
+  "kind": "static-review-snapshot",
+  "baseHead": "adbe075656138109b00e33ee4c845fddf7aaf60a",
+  "qualifiedVerdict": "PASS",
+  "executionPerformed": false,
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 2280,
+      "sha256": "1256dc8069e66d99ef0a128a7c46b5d9b581924379cb93fd7f7847298de6dcfa"
+    },
+    {
+      "path": "maya-saas-backend/.dockerignore",
+      "bytes": 110,
+      "sha256": "8a75dea5abbb58eda8b8d43bdba4f5e517fc40dd7265cb6231c1516fd6fb61a3"
+    },
+    {
+      "path": "maya-saas-backend/Dockerfile",
+      "bytes": 1056,
+      "sha256": "4a306fa5009418a3dddcf538f1c21d5b9dfbc200aaf73cfadd817ddfad83a960"
+    },
+    {
+      "path": "maya-saas-backend/package.json",
+      "bytes": 7991,
+      "sha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201"
+    },
+    {
+      "path": "maya-saas-backend/scripts/goods-photo-ocr-models.json",
+      "bytes": 851,
+      "sha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897"
+    },
+    {
+      "path": "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+      "bytes": 7792,
+      "sha256": "3d3d8580e585bf6811d29a429d1449108e03dfb22b8b2e0570d1f88efcb239c3"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+      "bytes": 7400,
+      "sha256": "b51f2d9c5e20ea0592f3a3b061637985beeec2c9f619e747e7c922c2051be196"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-tesseract.spec.ts",
+      "bytes": 12608,
+      "sha256": "cc27aa0a7a846536d5d9d013d0e8516e882a640e14c9d4603ae95c50ff2e200b"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts",
+      "bytes": 5567,
+      "sha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts",
+      "bytes": 12570,
+      "sha256": "ccf6b1e12955e12aae126561cdc27fcf5c7bc93c21221562a746ca7cbedfd164"
+    },
+    {
+      "path": "maya-saas-backend/src/config/runtime-config.ts",
+      "bytes": 16928,
+      "sha256": "58cea2f2b5ed30dc02393b1c9229e6fdb560820d9e79c2fb73ea024da4c2fb90"
+    },
+    {
+      "path": "maya-saas-backend/src/config/runtime-config.spec.ts",
+      "bytes": 15042,
+      "sha256": "f684fcf6db7662f615b706d516d8695907f4cf02bbc77c76d56f9917121cf96a"
+    }
+  ]
+}

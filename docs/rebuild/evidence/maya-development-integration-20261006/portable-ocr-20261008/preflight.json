@@ -1,0 +1,226 @@
+{
+  "contract": "maya.linux-ocr.preflight/1",
+  "capturedAt": "2026-10-08T13:27:20.071655+00:00",
+  "recommendation": "native_tesseract_cli_with_pinned_tessdata_fast",
+  "repoHeadReadAtPreflight": "adbe075656138109b00e33ee4c845fddf7aaf60a",
+  "runtimeBase": "node:24-alpine (existing mutable tag; actual Linux image digest/architecture not resolved here)",
+  "native": {
+    "referenceAlpine": "3.23",
+    "referenceArchitecture": "x86_64",
+    "version": "5.5.1-r0",
+    "license": "Apache-2.0",
+    "directPackages": [
+      {
+        "name": "tesseract-ocr",
+        "version": "5.5.1-r0",
+        "repository": "community",
+        "packageBytes": 1993646,
+        "installedBytes": 4765641,
+        "license": "Apache-2.0",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libcairo.so.2",
+          "so:libfontconfig.so.1",
+          "so:libgcc_s.so.1",
+          "so:libglib-2.0.so.0",
+          "so:libgobject-2.0.so.0",
+          "so:libgomp.so.1",
+          "so:libharfbuzz.so.0",
+          "so:libicui18n.so.76",
+          "so:libicuuc.so.76",
+          "so:libleptonica.so.6",
+          "so:libpango-1.0.so.0",
+          "so:libpangocairo-1.0.so.0",
+          "so:libstdc++.so.6"
+        ],
+        "apkChecksum": "Q1KdTizY2h6YgIa5pEi5spyIYKDmM="
+      },
+      {
+        "name": "tesseract-ocr-data-eng",
+        "version": "5.5.1-r0",
+        "repository": "community",
+        "packageBytes": 10845911,
+        "installedBytes": 23466654,
+        "license": "Apache-2.0",
+        "dependencies": [
+          "tesseract-ocr=5.5.1-r0"
+        ],
+        "apkChecksum": "Q1Sb+36i8Vr0S2oe5fTxn3hPanowY="
+      },
+      {
+        "name": "tesseract-ocr-data-rus",
+        "version": "5.5.1-r0",
+        "repository": "community",
+        "packageBytes": 8580956,
+        "installedBytes": 19920885,
+        "license": "Apache-2.0",
+        "dependencies": [
+          "tesseract-ocr=5.5.1-r0"
+        ],
+        "apkChecksum": "Q14ipJHQXiQEhV1dmqkSr9wxeCEeo="
+      }
+    ],
+    "metadataClosureAlternatives": [
+      {
+        "icuProvider": "icu-data-en",
+        "assumedShell": "busybox-binsh",
+        "apkPackageBytes": 16115345,
+        "apkInstalledBytes": 39654687,
+        "withFastModelBytesInstalled": 47629513,
+        "qualification": "Metadata dependency traversal, not apk solver/build result. Includes base libraries already in node image; excludes filesystem allocation, package-manager indexes and license file 11358 bytes. No actual Linux execution."
+      },
+      {
+        "icuProvider": "icu-data-full",
+        "assumedShell": "busybox-binsh",
+        "apkPackageBytes": 27432722,
+        "apkInstalledBytes": 68497871,
+        "withFastModelBytesInstalled": 76472697,
+        "qualification": "Metadata dependency traversal, not apk solver/build result. Includes base libraries already in node image; excludes filesystem allocation, package-manager indexes and license file 11358 bytes. No actual Linux execution."
+      }
+    ],
+    "leptonicaLicense": "BSD-2-Clause",
+    "allDependencyLicensesFile": "preflight-alpine-metadata.json"
+  },
+  "models": {
+    "repository": "https://github.com/tesseract-ocr/tessdata_fast",
+    "sourceCommit": "87416418657359cb625c412a48b6e1d6d41c29bd",
+    "license": "Apache-2.0",
+    "files": [
+      {
+        "name": "eng.traineddata",
+        "size": 4113088,
+        "gitBlob": "bbef4675053b5b468cdb477053e28b1c698ba08e",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      {
+        "name": "rus.traineddata",
+        "size": 3861738,
+        "gitBlob": "b146cb2263acbc6383f8e92ea0ce759537687bb8",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/rus.traineddata",
+        "sha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225"
+      },
+      {
+        "name": "LICENSE",
+        "size": 11358,
+        "gitBlob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/LICENSE",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    ],
+    "modelBytes": 7974826,
+    "allThreeFileBytes": 7986184,
+    "sha256Provenance": "Parent-authorized download manifest; this subagent fetched only public metadata, not models."
+  },
+  "wasm": {
+    "tesseractJs": {
+      "name": "tesseract.js",
+      "version": "7.0.0",
+      "license": "Apache-2.0",
+      "dependencies": {
+        "bmp-js": "^0.1.0",
+        "is-url": "^1.2.4",
+        "zlibjs": "^0.3.1",
+        "idb-keyval": "^6.2.0",
+        "node-fetch": "^2.6.9",
+        "tesseract.js-core": "^7.0.0",
+        "regenerator-runtime": "^0.13.3",
+        "wasm-feature-detect": "^1.8.0",
+        "opencollective-postinstall": "^2.0.3"
+      },
+      "dist": {
+        "shasum": "4106fb6245efab40c57b94bc1798368807526be8",
+        "tarball": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-7.0.0.tgz",
+        "fileCount": 79,
+        "integrity": "sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA==",
+        "signatures": [
+          {
+            "sig": "MEUCIGgQx2/pZtPHH8cok7QDnVw1Clt2Ij4iFhJ3fseCj6H5AiEA1nB+PKYqAEovrqFbiGlol6+XwycIrNTs+27IjVHWqlk=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 1411341
+      },
+      "repository": {
+        "url": "git+https://github.com/naptha/tesseract.js.git",
+        "type": "git"
+      },
+      "scripts": {
+        "lint": "eslint src",
+        "test": "npm-run-all -p -r start test:all",
+        "wait": "rimraf dist && wait-on http://localhost:3000/dist/tesseract.min.js",
+        "build": "rimraf dist && webpack --config scripts/webpack.config.prod.js && rollup -c scripts/rollup.esm.mjs",
+        "start": "node scripts/server.js",
+        "lint:fix": "eslint --fix src",
+        "test:all": "npm-run-all wait test:browser test:node:all",
+        "test:node": "nyc mocha --exit --bail --require ./scripts/test-helper.mjs",
+        "postinstall": "opencollective-postinstall || true",
+        "test:browser": "karma start karma.conf.js",
+        "test:node:all": "npm run test:node -- ./tests/*.test.mjs",
+        "prepublishOnly": "npm run build",
+        "profile:worker": "webpack-bundle-analyzer dist/worker-stats.json",
+        "profile:tesseract": "webpack-bundle-analyzer dist/tesseract-stats.json"
+      }
+    },
+    "core7": {
+      "name": "tesseract.js-core",
+      "version": "7.0.0",
+      "license": "Apache-2.0",
+      "engines": null,
+      "dependencies": null,
+      "dist": {
+        "shasum": "596aa1ab5c130adab12f21059e6aa1a1cecc0bab",
+        "tarball": "https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-7.0.0.tgz",
+        "fileCount": 22,
+        "integrity": "sha512-WnNH518NzmbSq9zgTPeoF8c+xmilS8rFIl1YKbk/ptuuc7p6cLNELNuPAzcmsYw450ca6bLa8j3t0VAtq435Vw==",
+        "signatures": [
+          {
+            "sig": "MEUCIA6qJEwYfDBh9jFNrosZVJPBq85KmG+d+rRhU70NCf5uAiEAy0LciDMdViHHCc5zHWrz1RKpMkvYp/eZBHur0EkJCgg=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 45262431
+      }
+    },
+    "coreLatest6IsNotMatching7": true,
+    "directPackagesPlusFastModelsUnpackedBytes": 54648598,
+    "exactTransitiveClosureResolved": false,
+    "runtimeLanguageDownloadDefault": true,
+    "requiredControls": [
+      "fixed local language assets",
+      "cacheMethod:none",
+      "gzip:false for raw traineddata",
+      "Node local worker/core packages only",
+      "Buffer image input only",
+      "no document text logging",
+      "one bounded worker/process with explicit cleanup"
+    ],
+    "rejectedForCurrentSlice": "Additional dependency/worker surface not needed for existing process boundary; no runtime or Alpine test performed."
+  },
+  "cost": {
+    "paidApi": false,
+    "perCallProviderFee": false,
+    "resources": "Local CPU/RAM and one-time asset/image transfer; actual latency/RSS unmeasured."
+  },
+  "status": {
+    "research": "complete",
+    "packaging": "prepared_source_only",
+    "modelOrPackageArtifactsDownloadedByThisSubagent": false,
+    "packageInstallCompileOcrDockerPgTestsRunByThisSubagent": false,
+    "linuxAcceptance": false
+  },
+  "blockers": [
+    "Actual Linux runner/container unavailable locally (no docker/podman/colima in supplied inventory).",
+    "Existing node:24-alpine tag is mutable; record actual image digest, APK versions, architecture and dependency solver output before Linux acceptance.",
+    "Actual Russian/English OCR accuracy, latency, RSS, offline/no-photo-files and timeout cleanup need native Tesseract proof; Vision proof is not this proof.",
+    "APK closure metadata is not image delta or verified install; exact providers/base overlap resolved at build."
+  ],
+  "packagingFiles": [
+    "maya-saas-backend/scripts/goods-photo-ocr-models.json",
+    "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+    "maya-saas-backend/Dockerfile",
+    "maya-saas-backend/.dockerignore",
+    ".gitignore",
+    "maya-saas-backend/package.json"
+  ]
+}

@@ -1,0 +1,702 @@
+{
+  "capturedAt": "2026-10-08T13:20:15.025200+00:00",
+  "metadataOnly": true,
+  "architecture": "x86_64",
+  "alpine": "3.23",
+  "sources": [
+    {
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/APKINDEX.tar.gz",
+      "metadataCompressedBytes": 523571,
+      "sha256": "8fb9609921712fa3fcd3a794ae4034c2d2e5af3ec226737972cd2bbb0e2045f5"
+    },
+    {
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.23/community/x86_64/APKINDEX.tar.gz",
+      "metadataCompressedBytes": 2383367,
+      "sha256": "f3695d4d222263997540960b37b0a6d2d833f81ecc714060398a82e7eb167c6d"
+    }
+  ],
+  "direct": [
+    {
+      "name": "tesseract-ocr",
+      "version": "5.5.1-r0",
+      "repository": "community",
+      "packageBytes": 1993646,
+      "installedBytes": 4765641,
+      "license": "Apache-2.0",
+      "dependencies": [
+        "so:libc.musl-x86_64.so.1",
+        "so:libcairo.so.2",
+        "so:libfontconfig.so.1",
+        "so:libgcc_s.so.1",
+        "so:libglib-2.0.so.0",
+        "so:libgobject-2.0.so.0",
+        "so:libgomp.so.1",
+        "so:libharfbuzz.so.0",
+        "so:libicui18n.so.76",
+        "so:libicuuc.so.76",
+        "so:libleptonica.so.6",
+        "so:libpango-1.0.so.0",
+        "so:libpangocairo-1.0.so.0",
+        "so:libstdc++.so.6"
+      ],
+      "apkChecksum": "Q1KdTizY2h6YgIa5pEi5spyIYKDmM="
+    },
+    {
+      "name": "tesseract-ocr-data-eng",
+      "version": "5.5.1-r0",
+      "repository": "community",
+      "packageBytes": 10845911,
+      "installedBytes": 23466654,
+      "license": "Apache-2.0",
+      "dependencies": [
+        "tesseract-ocr=5.5.1-r0"
+      ],
+      "apkChecksum": "Q1Sb+36i8Vr0S2oe5fTxn3hPanowY="
+    },
+    {
+      "name": "tesseract-ocr-data-rus",
+      "version": "5.5.1-r0",
+      "repository": "community",
+      "packageBytes": 8580956,
+      "installedBytes": 19920885,
+      "license": "Apache-2.0",
+      "dependencies": [
+        "tesseract-ocr=5.5.1-r0"
+      ],
+      "apkChecksum": "Q14ipJHQXiQEhV1dmqkSr9wxeCEeo="
+    }
+  ],
+  "runtimePackageDependencyClosure": {
+    "method": "Follow current APKINDEX exact package/soname providers. Includes base libraries already present in node image; does not solve or install APKs. Unsatisfied/ambiguous providers reported.",
+    "packages": [
+      {
+        "name": "brotli-libs",
+        "version": "1.2.0-r0",
+        "repository": "main",
+        "packageBytes": 429601,
+        "installedBytes": 980488,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1CBRpRgLzXSdB6Rb9y0yaHg7FC0I="
+      },
+      {
+        "name": "cairo",
+        "version": "1.18.4-r0",
+        "repository": "main",
+        "packageBytes": 514703,
+        "installedBytes": 1082208,
+        "license": "LGPL-2.1-or-later OR MPL-1.1",
+        "dependencies": [
+          "so:libX11.so.6",
+          "so:libXext.so.6",
+          "so:libXrender.so.1",
+          "so:libc.musl-x86_64.so.1",
+          "so:libfontconfig.so.1",
+          "so:libfreetype.so.6",
+          "so:libpixman-1.so.0",
+          "so:libpng16.so.16",
+          "so:libxcb-render.so.0",
+          "so:libxcb-shm.so.0",
+          "so:libxcb.so.1",
+          "so:libz.so.1"
+        ],
+        "apkChecksum": "Q1ErVOZEpkRRIFwyZ/GGiD3YTqG3c="
+      },
+      {
+        "name": "fontconfig",
+        "version": "2.17.1-r0",
+        "repository": "main",
+        "packageBytes": 163063,
+        "installedBytes": 530633,
+        "license": "MIT",
+        "dependencies": [
+          "/bin/sh",
+          "so:libc.musl-x86_64.so.1",
+          "so:libexpat.so.1",
+          "so:libfreetype.so.6"
+        ],
+        "apkChecksum": "Q1gDewB1FqZdJGRCp4GgX2JwczlNA="
+      },
+      {
+        "name": "freetype",
+        "version": "2.14.3-r0",
+        "repository": "main",
+        "packageBytes": 354363,
+        "installedBytes": 673920,
+        "license": "FTL OR GPL-2.0-or-later",
+        "dependencies": [
+          "so:libbrotlidec.so.1",
+          "so:libbz2.so.1",
+          "so:libc.musl-x86_64.so.1",
+          "so:libpng16.so.16",
+          "so:libz.so.1"
+        ],
+        "apkChecksum": "Q1gwrde/9ytGVtvgi1tXBN28FiZgo="
+      },
+      {
+        "name": "fribidi",
+        "version": "1.0.16-r2",
+        "repository": "main",
+        "packageBytes": 31218,
+        "installedBytes": 148008,
+        "license": "LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1axDZygsdg2AcKKBpC3URrxsD1Zk="
+      },
+      {
+        "name": "giflib",
+        "version": "5.2.2-r2",
+        "repository": "main",
+        "packageBytes": 15595,
+        "installedBytes": 34416,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1X7i2J89NcR0DXVDNlQycguXNEIM="
+      },
+      {
+        "name": "glib",
+        "version": "2.86.3-r0",
+        "repository": "main",
+        "packageBytes": 2057083,
+        "installedBytes": 5380144,
+        "license": "LGPL-2.1-or-later",
+        "dependencies": [
+          "/bin/sh",
+          "so:libc.musl-x86_64.so.1",
+          "so:libffi.so.8",
+          "so:libintl.so.8",
+          "so:libmount.so.1",
+          "so:libpcre2-8.so.0",
+          "so:libz.so.1"
+        ],
+        "apkChecksum": "Q1jOdwUTonkNkDK1eHEACaXUxlV+Q="
+      },
+      {
+        "name": "graphite2",
+        "version": "1.3.14-r6",
+        "repository": "main",
+        "packageBytes": 64767,
+        "installedBytes": 120512,
+        "license": "LGPL-2.1-or-later OR MPL-1.1",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1ghiwMvNfSBlrzzbbq9Jyw6NoCHs="
+      },
+      {
+        "name": "harfbuzz",
+        "version": "12.2.0-r0",
+        "repository": "main",
+        "packageBytes": 642521,
+        "installedBytes": 1410336,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libfreetype.so.6",
+          "so:libglib-2.0.so.0",
+          "so:libgraphite2.so.3"
+        ],
+        "apkChecksum": "Q1Im0aovkZ9leorBTZ1teSHUo1goE="
+      },
+      {
+        "name": "icu-libs",
+        "version": "76.1-r1",
+        "repository": "main",
+        "packageBytes": 1920286,
+        "installedBytes": 4762632,
+        "license": "ICU",
+        "dependencies": [
+          "icu-data=76.1-r1",
+          "so:libc.musl-x86_64.so.1",
+          "so:libgcc_s.so.1",
+          "so:libstdc++.so.6"
+        ],
+        "apkChecksum": "Q1Wy55i6IPgx1k5UUmQxxS2Y4+35A="
+      },
+      {
+        "name": "leptonica",
+        "version": "1.86.0-r0",
+        "repository": "community",
+        "packageBytes": 1108357,
+        "installedBytes": 2616232,
+        "license": "custom",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libgif.so.7",
+          "so:libjpeg.so.8",
+          "so:libpng16.so.16",
+          "so:libtiff.so.6",
+          "so:libwebp.so.7",
+          "so:libwebpmux.so.3",
+          "so:libz.so.1"
+        ],
+        "apkChecksum": "Q1IDNTb99ZjqbuMdebWgyumcFNux4="
+      },
+      {
+        "name": "libblkid",
+        "version": "2.41.6-r1",
+        "repository": "main",
+        "packageBytes": 95032,
+        "installedBytes": 199488,
+        "license": "LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libeconf.so.0"
+        ],
+        "apkChecksum": "Q1Hzvje52fXlRyi9XAAe3MxeYLVfg="
+      },
+      {
+        "name": "libbsd",
+        "version": "0.12.2-r0",
+        "repository": "main",
+        "packageBytes": 30410,
+        "installedBytes": 64272,
+        "license": "BSD-3-Clause",
+        "dependencies": [
+          "musl",
+          "so:libc.musl-x86_64.so.1",
+          "so:libmd.so.0"
+        ],
+        "apkChecksum": "Q1M5cLFX7a01nQWiw+bzRg5yVUnIs="
+      },
+      {
+        "name": "libbz2",
+        "version": "1.0.8-r6",
+        "repository": "main",
+        "packageBytes": 35471,
+        "installedBytes": 78480,
+        "license": "bzip2-1.0.6",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1hk02PaEe4kx5IODQUtLaf4QpJR4="
+      },
+      {
+        "name": "libeconf",
+        "version": "0.8.3-r0",
+        "repository": "main",
+        "packageBytes": 26053,
+        "installedBytes": 65672,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1lpOQqxbo8nP5flINBpoMd5ir1BA="
+      },
+      {
+        "name": "libexpat",
+        "version": "2.8.5-r0",
+        "repository": "main",
+        "packageBytes": 61353,
+        "installedBytes": 140992,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1qPXqdpfSWZCU+lc5AP2EHlHnsfg="
+      },
+      {
+        "name": "libffi",
+        "version": "3.5.2-r0",
+        "repository": "main",
+        "packageBytes": 18342,
+        "installedBytes": 38960,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1+lG/Ao9Adov+HH70lLH+P4WQwZ8="
+      },
+      {
+        "name": "libgcc",
+        "version": "15.2.0-r2",
+        "repository": "main",
+        "packageBytes": 80358,
+        "installedBytes": 173920,
+        "license": "GPL-2.0-or-later AND LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1V/zL6e6/I/LE847iok+LC91Qj/c="
+      },
+      {
+        "name": "libgomp",
+        "version": "15.2.0-r2",
+        "repository": "main",
+        "packageBytes": 153736,
+        "installedBytes": 338704,
+        "license": "GPL-2.0-or-later AND LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1wyR67mZlZZy++2qQ42Ea7q0ESI0="
+      },
+      {
+        "name": "libintl",
+        "version": "0.24.1-r1",
+        "repository": "main",
+        "packageBytes": 39495,
+        "installedBytes": 136912,
+        "license": "LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1AiIyS7Tf016KPsghyG61r71Do68="
+      },
+      {
+        "name": "libjpeg-turbo",
+        "version": "3.1.2-r0",
+        "repository": "main",
+        "packageBytes": 203545,
+        "installedBytes": 657232,
+        "license": "BSD-3-Clause AND IJG AND Zlib",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1qgJft+z5vWXvKv5H43QGOVIeCc4="
+      },
+      {
+        "name": "libmd",
+        "version": "1.1.0-r0",
+        "repository": "main",
+        "packageBytes": 22963,
+        "installedBytes": 51120,
+        "license": "BSD-3-Clause AND BSD-2-Clause AND ISC AND Beerware AND Public Domain",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1znxXvR9mKNqLoNPyrBj22Mk8A0Y="
+      },
+      {
+        "name": "libmount",
+        "version": "2.41.6-r1",
+        "repository": "main",
+        "packageBytes": 127345,
+        "installedBytes": 272976,
+        "license": "LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libblkid.so.1",
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1Bq6NXx7ahNnvv0o/pwzUGqOF43I="
+      },
+      {
+        "name": "libpng",
+        "version": "1.6.59-r0",
+        "repository": "main",
+        "packageBytes": 95875,
+        "installedBytes": 186280,
+        "license": "Libpng",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libz.so.1"
+        ],
+        "apkChecksum": "Q1c2g7sAW/nMlXh5uNLjS0GX99Scw="
+      },
+      {
+        "name": "libsharpyuv",
+        "version": "1.6.0-r0",
+        "repository": "main",
+        "packageBytes": 11999,
+        "installedBytes": 26240,
+        "license": "BSD-3-Clause",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1m785WKxi4WMITN51MnYkblb/KYs="
+      },
+      {
+        "name": "libstdc++",
+        "version": "15.2.0-r2",
+        "repository": "main",
+        "packageBytes": 961296,
+        "installedBytes": 2804104,
+        "license": "GPL-2.0-or-later AND LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libgcc_s.so.1"
+        ],
+        "apkChecksum": "Q1Uo13QXoWcGRor4UvKFmtAPF24mY="
+      },
+      {
+        "name": "libwebp",
+        "version": "1.6.0-r0",
+        "repository": "main",
+        "packageBytes": 276584,
+        "installedBytes": 558984,
+        "license": "BSD-3-Clause",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libsharpyuv.so.0"
+        ],
+        "apkChecksum": "Q1Rvef5AbOYRBYpsDOmV6+hfe3PHo="
+      },
+      {
+        "name": "libwebpmux",
+        "version": "1.6.0-r0",
+        "repository": "main",
+        "packageBytes": 21182,
+        "installedBytes": 46704,
+        "license": "BSD-3-Clause",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libwebp.so.7"
+        ],
+        "apkChecksum": "Q1P6fS3ZevU511ilLjqkpWqGOhkvY="
+      },
+      {
+        "name": "libx11",
+        "version": "1.8.12-r1",
+        "repository": "main",
+        "packageBytes": 867087,
+        "installedBytes": 2326088,
+        "license": "X11",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libxcb.so.1"
+        ],
+        "apkChecksum": "Q1aJs27EfWyau5y9DHBnukY2Vo29U="
+      },
+      {
+        "name": "libxau",
+        "version": "1.0.12-r0",
+        "repository": "main",
+        "packageBytes": 5613,
+        "installedBytes": 13936,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1idK8narjyw4q4JXbaGY1e3ZT80E="
+      },
+      {
+        "name": "libxcb",
+        "version": "1.17.0-r1",
+        "repository": "main",
+        "packageBytes": 236109,
+        "installedBytes": 965712,
+        "license": "MIT",
+        "dependencies": [
+          "so:libXau.so.6",
+          "so:libXdmcp.so.6",
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1YbBviD6PjS2O42Dk2sBKwDf8yhM="
+      },
+      {
+        "name": "libxdmcp",
+        "version": "1.1.5-r1",
+        "repository": "main",
+        "packageBytes": 9364,
+        "installedBytes": 26384,
+        "license": "MIT",
+        "dependencies": [
+          "so:libbsd.so.0",
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1maJMD6EigrXviabnMqjUlLdpbZ0="
+      },
+      {
+        "name": "libxext",
+        "version": "1.3.6-r2",
+        "repository": "main",
+        "packageBytes": 25286,
+        "installedBytes": 68496,
+        "license": "MIT",
+        "dependencies": [
+          "so:libX11.so.6",
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1kvtPEsIXBAPWpIx0heyu5AyEvuI="
+      },
+      {
+        "name": "libxft",
+        "version": "2.3.9-r0",
+        "repository": "main",
+        "packageBytes": 38059,
+        "installedBytes": 83912,
+        "license": "MIT",
+        "dependencies": [
+          "so:libX11.so.6",
+          "so:libXrender.so.1",
+          "so:libc.musl-x86_64.so.1",
+          "so:libfontconfig.so.1",
+          "so:libfreetype.so.6"
+        ],
+        "apkChecksum": "Q17zsYizfJ+9SjSJJFGC8vOZHh5uc="
+      },
+      {
+        "name": "libxrender",
+        "version": "0.9.12-r0",
+        "repository": "main",
+        "packageBytes": 16238,
+        "installedBytes": 42880,
+        "license": "MIT",
+        "dependencies": [
+          "so:libX11.so.6",
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1FqzN7EWYrUKjIBI0qrYORNYH8bA="
+      },
+      {
+        "name": "musl",
+        "version": "1.2.5-r23",
+        "repository": "main",
+        "packageBytes": 414071,
+        "installedBytes": 666216,
+        "license": "MIT",
+        "dependencies": [],
+        "apkChecksum": "Q1G2xQQm08BlbpxaVnpaWWAcf0MHo="
+      },
+      {
+        "name": "pango",
+        "version": "1.56.4-r0",
+        "repository": "main",
+        "packageBytes": 260895,
+        "installedBytes": 631420,
+        "license": "LGPL-2.1-or-later",
+        "dependencies": [
+          "so:libX11.so.6",
+          "so:libXft.so.2",
+          "so:libXrender.so.1",
+          "so:libc.musl-x86_64.so.1",
+          "so:libcairo.so.2",
+          "so:libfontconfig.so.1",
+          "so:libfreetype.so.6",
+          "so:libfribidi.so.0",
+          "so:libgio-2.0.so.0",
+          "so:libglib-2.0.so.0",
+          "so:libgobject-2.0.so.0",
+          "so:libharfbuzz.so.0"
+        ],
+        "apkChecksum": "Q1tYY/qAY8K6gk2DIX6QKifKNq3LY="
+      },
+      {
+        "name": "pcre2",
+        "version": "10.49-r0",
+        "repository": "main",
+        "packageBytes": 323103,
+        "installedBytes": 798368,
+        "license": "BSD-3-Clause",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1jy5WKPWTL4Io3M/SP3/2TODtkFc="
+      },
+      {
+        "name": "pixman",
+        "version": "0.46.4-r0",
+        "repository": "main",
+        "packageBytes": 240295,
+        "installedBytes": 571184,
+        "license": "MIT",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1RB5sGWDfipkk98QIH4gE1zWj19g="
+      },
+      {
+        "name": "tesseract-ocr",
+        "version": "5.5.1-r0",
+        "repository": "community",
+        "packageBytes": 1993646,
+        "installedBytes": 4765641,
+        "license": "Apache-2.0",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libcairo.so.2",
+          "so:libfontconfig.so.1",
+          "so:libgcc_s.so.1",
+          "so:libglib-2.0.so.0",
+          "so:libgobject-2.0.so.0",
+          "so:libgomp.so.1",
+          "so:libharfbuzz.so.0",
+          "so:libicui18n.so.76",
+          "so:libicuuc.so.76",
+          "so:libleptonica.so.6",
+          "so:libpango-1.0.so.0",
+          "so:libpangocairo-1.0.so.0",
+          "so:libstdc++.so.6"
+        ],
+        "apkChecksum": "Q1KdTizY2h6YgIa5pEi5spyIYKDmM="
+      },
+      {
+        "name": "tiff",
+        "version": "4.7.2-r0",
+        "repository": "main",
+        "packageBytes": 170645,
+        "installedBytes": 473016,
+        "license": "libtiff",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1",
+          "so:libjpeg.so.8",
+          "so:libwebp.so.7",
+          "so:libz.so.1",
+          "so:libzstd.so.1"
+        ],
+        "apkChecksum": "Q1MiUn3r92A4eWuMDjsiTIxa8n1/k="
+      },
+      {
+        "name": "zlib",
+        "version": "1.3.2-r1",
+        "repository": "main",
+        "packageBytes": 56205,
+        "installedBytes": 108376,
+        "license": "Zlib",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q1jut3bNPRHp/JoWp0GWNhtIWnnQE="
+      },
+      {
+        "name": "zstd-libs",
+        "version": "1.5.7-r2",
+        "repository": "main",
+        "packageBytes": 373813,
+        "installedBytes": 710336,
+        "license": "BSD-3-Clause OR GPL-2.0-or-later",
+        "dependencies": [
+          "so:libc.musl-x86_64.so.1"
+        ],
+        "apkChecksum": "Q11Qe4rDxDNaQEBawg5JusnUNkK+Y="
+      }
+    ],
+    "packageBytes": 14593025,
+    "installedBytes": 35832534,
+    "unresolved": [
+      {
+        "dependency": "/bin/sh",
+        "from": "glib",
+        "candidates": [
+          "busybox-binsh",
+          "dash-binsh",
+          "yash-binsh"
+        ]
+      },
+      {
+        "dependency": "/bin/sh",
+        "from": "fontconfig",
+        "candidates": [
+          "busybox-binsh",
+          "dash-binsh",
+          "yash-binsh"
+        ]
+      },
+      {
+        "dependency": "icu-data=76.1-r1",
+        "from": "icu-libs",
+        "candidates": [
+          "icu-data-en",
+          "icu-data-full"
+        ]
+      }
+    ]
+  },
+  "packageOrModelArtifactsDownloaded": false
+}

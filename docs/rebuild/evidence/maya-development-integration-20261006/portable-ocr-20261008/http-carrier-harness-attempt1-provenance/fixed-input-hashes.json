@@ -1,0 +1,23 @@
+{
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/rus.traineddata": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package-lock.json": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-ocr-models.json": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs": "3d3d8580e585bf6811d29a429d1449108e03dfb22b8b2e0570d1f88efcb239c3",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts": "af65ed15ffdf31a839def2f2b3ca6a631385ba814e455484a5dacf6494c2eb05",
+  "/opt/homebrew/bin/tesseract": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+  "/tmp/maya-linux-ocr-20261008/actual-attempt2/actual-corpus.json": "68d7428e6fef5520d4921fe7a5171ea117e74beaee3df805e8567f7be67beb2e",
+  "/tmp/maya-linux-ocr-20261008/actual-attempt2/source-hashes.json": "2159b7e17c99ece2f15add25e1a5aef4a99c6554c823520d5b0438538c660b1a",
+  "/tmp/maya-linux-ocr-20261008/actual-corpus-proof.mjs": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+  "/tmp/maya-linux-ocr-20261008/assert-corpus.mjs": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b",
+  "/tmp/maya-linux-ocr-20261008/corpus-attempt2/manifest.json": "cb1a5c9919b876de758c09fd70b5bd0961296218819f73e9de2fb1147c9b80db",
+  "/tmp/maya-linux-ocr-20261008/corpus-attempt2/ru-changed-pixels.webp": "61571ad3e5388f366419005ef3124fb539ee92a2ed80b0789b1485ed2dc8240e",
+  "/tmp/maya-linux-ocr-20261008/corpus-attempt2/ru-fractions-dot.png": "43f49cd1665ef6efda039b3a588be5ea6c125c94255b3b2e38a87003a4ef0a26",
+  "/tmp/maya-linux-ocr-20261008/corpus-attempt2/unsupported-price-header.jpg": "af7380e4907007ca019f3d1d57e78b4e708fc043d31ed29de12814a481b02656",
+  "/tmp/maya-linux-ocr-20261008/corpus-plan.mjs": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+  "/tmp/maya-linux-ocr-20261008/generate-corpus.mjs": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b"
+}

@@ -1,0 +1,1489 @@
+{
+  "contract": "maya.portable-ocr-independent-review/1",
+  "reviewedAt": "2026-10-08T13:51:01.291313+00:00",
+  "reviewer": "/root/independent_review",
+  "headAtReview": "7fe7bab96295bb459a037dade2fc7a6ca5c379fd",
+  "binding": "Exact current selected source SHA256 overlay; not an assertion that all evidence was run at HEAD.",
+  "disposition": "QUALIFIED_NO_OPEN_PRODUCTION_BLOCKER",
+  "methods": {
+    "repositoryReadOnly": true,
+    "testsRun": false,
+    "ocrRun": false,
+    "servicesStarted": false,
+    "networkCalls": false,
+    "hashOnlyVerification": true,
+    "writtenFiles": [
+      "/tmp/maya-linux-ocr-20261008/final-independent-review.md",
+      "/tmp/maya-linux-ocr-20261008/final-independent-review.json"
+    ]
+  },
+  "resolvedFindings": [
+    {
+      "severity": "P2",
+      "finding": "Blocking FIFO model open could stall before the native timeout.",
+      "resolution": "O_NONBLOCK added to runtime and preparation reader; regular-file checks retained; exact-flags/nonregular unit and actual owned FIFO evidence.",
+      "status": "CLOSED"
+    },
+    {
+      "severity": "P2-harness",
+      "finding": "Auth verify guard regex coerced code arrays/numbers.",
+      "resolution": "Explicit string guard and array/number/null/object negatives now present.",
+      "status": "CLOSED_STATIC_REVIEW"
+    }
+  ],
+  "currentSourceBindings": {
+    "maya-saas-backend/.dockerignore": "8a75dea5abbb58eda8b8d43bdba4f5e517fc40dd7265cb6231c1516fd6fb61a3",
+    "maya-saas-backend/.env.example": "31f050512e8fee4c617a7cb6063faedcb22d7b8ac793deb197b7c98e01bc82b5",
+    "maya-saas-backend/Dockerfile": "4a306fa5009418a3dddcf538f1c21d5b9dfbc200aaf73cfadd817ddfad83a960",
+    "maya-saas-backend/package.json": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+    "maya-saas-backend/scripts/goods-photo-ocr-models.json": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+    "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+    "maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+    "maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts": "7435dd96cc9a36c216ff2ab40b657db4aa0e09486cfbb7db9dd405623caf77d5",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract.spec.ts": "19f9c470b5a3e2a1ab764b2dc5a108b6fd6b723098b3edad0ffdbfa9082a23d8",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+    "maya-saas-backend/src/config/runtime-config.spec.ts": "f684fcf6db7662f615b706d516d8695907f4cf02bbc77c76d56f9917121cf96a",
+    "maya-saas-backend/src/config/runtime-config.ts": "58cea2f2b5ed30dc02393b1c9229e6fdb560820d9e79c2fb73ea024da4c2fb90"
+  },
+  "actualRuns": {
+    "1": {
+      "status": "failed",
+      "qualification": "failed",
+      "sourceUnchangedDuringRun": true,
+      "workerCount": 10,
+      "version": [
+        "tesseract 5.5.3",
+        " leptonica-1.87.0",
+        "  libgif 5.2.2 : libjpeg 8d (libjpeg-turbo 3.1.3) : libpng 1.6.58 : libtiff 4.7.2 : zlib 1.2.12 : libwebp 1.6.0 : libopenjp2 2.5.4",
+        " Found NEON"
+      ],
+      "outcomeCounts": {
+        "exact-provisional": 2,
+        "limited-refusal": 2
+      },
+      "failureCount": 6,
+      "sourceBindings": [
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts",
+          "recordedSha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+          "currentSha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+          "recordedSha256": "b51f2d9c5e20ea0592f3a3b061637985beeec2c9f619e747e7c922c2051be196",
+          "currentSha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+          "currentMatches": false
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts",
+          "recordedSha256": "ccf6b1e12955e12aae126561cdc27fcf5c7bc93c21221562a746ca7cbedfd164",
+          "currentSha256": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+          "currentMatches": false
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-ocr-models.json",
+          "recordedSha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+          "currentSha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+          "recordedSha256": "3d3d8580e585bf6811d29a429d1449108e03dfb22b8b2e0570d1f88efcb239c3",
+          "currentSha256": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+          "currentMatches": false
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/eng.traineddata",
+          "recordedSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+          "currentSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/rus.traineddata",
+          "recordedSha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+          "currentSha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/LICENSE",
+          "recordedSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "currentSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json",
+          "recordedSha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+          "currentSha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package-lock.json",
+          "recordedSha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+          "currentSha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+          "currentMatches": true
+        },
+        {
+          "path": "/opt/homebrew/bin/tesseract",
+          "recordedSha256": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+          "currentSha256": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/actual-corpus-proof.mjs",
+          "recordedSha256": "1e42eec57f003b876318d569aad83c74ea3dea2b02af2c1876fd7ee68b3da70f",
+          "currentSha256": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+          "currentMatches": false
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/corpus-plan.mjs",
+          "recordedSha256": "52862f81e5af5656298acf88c73ad76000867b048758dd82f987c18c0dd2f536",
+          "currentSha256": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+          "currentMatches": false
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/generate-corpus.mjs",
+          "recordedSha256": "325fb2953710906221ab235406cf6529ba9166805a3f0da45a434838b7505e4f",
+          "currentSha256": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b",
+          "currentMatches": false
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/assert-corpus.mjs",
+          "recordedSha256": "7fd3e8ec4291565ec52927921bbc8bf17fa97c8335680ef92721d1d4f0a9e559",
+          "currentSha256": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b",
+          "currentMatches": false
+        }
+      ],
+      "inputChecks": [
+        {
+          "key": "ru-fractions-dot",
+          "imageSha256": "43f49cd1665ef6efda039b3a588be5ea6c125c94255b3b2e38a87003a4ef0a26",
+          "imageSize": 47744,
+          "svgSha256": "52df14e022e81aa3b4db60d4448ab68b7403aeb8e2f97adbcc66e2933d4199ad",
+          "matches": true
+        },
+        {
+          "key": "ru-changed-pixels",
+          "imageSha256": "61571ad3e5388f366419005ef3124fb539ee92a2ed80b0789b1485ed2dc8240e",
+          "imageSize": 21338,
+          "svgSha256": "b80d3f35e1e3223250edd39464c726ae9c88a7c6516c588755fdb789275ebbc5",
+          "matches": true
+        },
+        {
+          "key": "ru-fractions-comma",
+          "imageSha256": "3b12160188915c7919c55416f208a6a62c91f0ef02cf0ac218e8c544bee6e6cb",
+          "imageSize": 90030,
+          "svgSha256": "146eb3370fcee395a3bc43236da219631640b83531d277abf01d6d6c7065679c",
+          "matches": true
+        },
+        {
+          "key": "ru-ambiguous-comma",
+          "imageSha256": "349f7cf976ab9ca20f65a5ad10fd1a0cb38f75f0d7d4fdb6d213cd7c5a16519f",
+          "imageSize": 36705,
+          "svgSha256": "13b4c352298fb1fb6dd852bd1a650fa7ca6518ed052ddc19b60c87f151fccc3d",
+          "matches": true
+        },
+        {
+          "key": "english-webp",
+          "imageSha256": "4e1b7f396a37bc2ef664a1f0f5b96d621fc3c7c8a619e721f149bfcaca004b02",
+          "imageSize": 19066,
+          "svgSha256": "78262460cb468089f2cb48a0d00083b52b075fd1020cdc61733f6b2eee6b8b96",
+          "matches": true
+        },
+        {
+          "key": "printed-total-disagrees",
+          "imageSha256": "ecc4f51b6c3db6f496d8dfaf016cc43567b6133407744cfe6ebb8dc4dfd7dd75",
+          "imageSize": 37608,
+          "svgSha256": "b3b1e30086d2c91bae496674d50ab259b2383f53dac09851fb5e095b493fdaa7",
+          "matches": true
+        },
+        {
+          "key": "jpeg-exif-rotation",
+          "imageSha256": "902a2d3531db213dfd7950910e8011bf178d9acb798caa06fc1e2a79fc5d1e91",
+          "imageSize": 89945,
+          "svgSha256": "52df14e022e81aa3b4db60d4448ab68b7403aeb8e2f97adbcc66e2933d4199ad",
+          "matches": true
+        },
+        {
+          "key": "occluded-price",
+          "imageSha256": "e077a6aaa9ab6714f75990bf623306e3963fca0d7e657369a1e57a4001625084",
+          "imageSize": 36350,
+          "svgSha256": "b147c45099edbc2b54526788968adadd2c15772c1cd79613a4d228d9caf2e5d3",
+          "matches": true
+        },
+        {
+          "key": "missing-price",
+          "imageSha256": "18ab80292daa50bfd3496d707e743cc1ca64019de4e463d5557b5b708da52979",
+          "imageSize": 14028,
+          "svgSha256": "2a7871904fea441b23785f46367541f68d4514fc1169baebb4b9db365733553d",
+          "matches": true
+        },
+        {
+          "key": "unsupported-price-header",
+          "imageSha256": "af7380e4907007ca019f3d1d57e78b4e708fc043d31ed29de12814a481b02656",
+          "imageSize": 76333,
+          "svgSha256": "b6852d5ede52e0df4a2bd09e562b180857d70c3b996cc94b625f6818edc967d9",
+          "matches": true
+        }
+      ],
+      "stdoutChecks": [
+        {
+          "key": "ru-fractions-dot",
+          "pid": 37573,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "e0b4bc5ed3fdce9365f49f94897f2e4f0fe0b65f91251077cb11893fe2504492",
+          "matches": true
+        },
+        {
+          "key": "ru-changed-pixels",
+          "pid": 37575,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "04abad1da364a4c06d405c17720e3ef3127408d8ad8c318b52894628faa729bd",
+          "matches": true
+        },
+        {
+          "key": "ru-fractions-comma",
+          "pid": 37577,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "5d3d8674f866f5d4f0546ace4160790c693f4b09c3d0e2217ef376fb4ac835c0",
+          "matches": true
+        },
+        {
+          "key": "ru-ambiguous-comma",
+          "pid": 37578,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "aac08a21d373460aa36a45560d461b300e9f53b38b2160b7069a02a1121bed90",
+          "matches": true
+        },
+        {
+          "key": "english-webp",
+          "pid": 37580,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "d9c69aadeb439af196acf6870c016325eb112c5cbc14b6667ecbdced73f099d5",
+          "matches": true
+        },
+        {
+          "key": "printed-total-disagrees",
+          "pid": 37582,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "68722499a4f26cf242482e79aaf8c870e3f5f18d5b1832de12645e044a3f3a98",
+          "matches": true
+        },
+        {
+          "key": "jpeg-exif-rotation",
+          "pid": 37584,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "b19c0a7ef9d4bf1b8e9c50ff4cd6f1cea0b48119902dc3c4aaef661a02dd8610",
+          "matches": true
+        },
+        {
+          "key": "occluded-price",
+          "pid": 37586,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "74bcf519a6a74e7c5a414471db5a74d4b115641964e10634a3276e1e79d81e79",
+          "matches": true
+        },
+        {
+          "key": "missing-price",
+          "pid": 37587,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "edb86f798dcc5237a08e2c10840dfd95a0794ade10c39feced033d906dd1d885",
+          "matches": true
+        },
+        {
+          "key": "unsupported-price-header",
+          "pid": 37589,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "a5392813ae670c0d2f4f405a53b3e1328857c01b0a19688464632c47edfd7c32",
+          "matches": true
+        }
+      ],
+      "frozenHarnessCopyChecks": [
+        {
+          "file": "actual-corpus-proof.mjs",
+          "matches": true
+        }
+      ]
+    },
+    "2": {
+      "status": "passed",
+      "qualification": "qualified",
+      "sourceUnchangedDuringRun": true,
+      "workerCount": 11,
+      "version": [
+        "tesseract 5.5.3",
+        " leptonica-1.87.0",
+        "  libgif 5.2.2 : libjpeg 8d (libjpeg-turbo 3.1.3) : libpng 1.6.58 : libtiff 4.7.2 : zlib 1.2.12 : libwebp 1.6.0 : libopenjp2 2.5.4",
+        " Found NEON"
+      ],
+      "outcomeCounts": {
+        "safe-manual-review": 6,
+        "exact-provisional": 2,
+        "limited-refusal": 2,
+        "partial-manual-review": 1
+      },
+      "failureCount": 0,
+      "sourceBindings": [
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts",
+          "recordedSha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+          "currentSha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+          "recordedSha256": "af65ed15ffdf31a839def2f2b3ca6a631385ba814e455484a5dacf6494c2eb05",
+          "currentSha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+          "currentMatches": false
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts",
+          "recordedSha256": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+          "currentSha256": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-ocr-models.json",
+          "recordedSha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+          "currentSha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+          "recordedSha256": "3d3d8580e585bf6811d29a429d1449108e03dfb22b8b2e0570d1f88efcb239c3",
+          "currentSha256": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+          "currentMatches": false
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/eng.traineddata",
+          "recordedSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+          "currentSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/rus.traineddata",
+          "recordedSha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+          "currentSha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/LICENSE",
+          "recordedSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "currentSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json",
+          "recordedSha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+          "currentSha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package-lock.json",
+          "recordedSha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+          "currentSha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+          "currentMatches": true
+        },
+        {
+          "path": "/opt/homebrew/bin/tesseract",
+          "recordedSha256": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+          "currentSha256": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/actual-corpus-proof.mjs",
+          "recordedSha256": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+          "currentSha256": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/corpus-plan.mjs",
+          "recordedSha256": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+          "currentSha256": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/generate-corpus.mjs",
+          "recordedSha256": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b",
+          "currentSha256": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/assert-corpus.mjs",
+          "recordedSha256": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b",
+          "currentSha256": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b",
+          "currentMatches": true
+        }
+      ],
+      "inputChecks": [
+        {
+          "key": "ru-fractions-dot",
+          "imageSha256": "43f49cd1665ef6efda039b3a588be5ea6c125c94255b3b2e38a87003a4ef0a26",
+          "imageSize": 47744,
+          "svgSha256": "52df14e022e81aa3b4db60d4448ab68b7403aeb8e2f97adbcc66e2933d4199ad",
+          "matches": true
+        },
+        {
+          "key": "ru-changed-pixels",
+          "imageSha256": "61571ad3e5388f366419005ef3124fb539ee92a2ed80b0789b1485ed2dc8240e",
+          "imageSize": 21338,
+          "svgSha256": "b80d3f35e1e3223250edd39464c726ae9c88a7c6516c588755fdb789275ebbc5",
+          "matches": true
+        },
+        {
+          "key": "ru-fractions-comma",
+          "imageSha256": "3b12160188915c7919c55416f208a6a62c91f0ef02cf0ac218e8c544bee6e6cb",
+          "imageSize": 90030,
+          "svgSha256": "146eb3370fcee395a3bc43236da219631640b83531d277abf01d6d6c7065679c",
+          "matches": true
+        },
+        {
+          "key": "ru-ambiguous-comma",
+          "imageSha256": "349f7cf976ab9ca20f65a5ad10fd1a0cb38f75f0d7d4fdb6d213cd7c5a16519f",
+          "imageSize": 36705,
+          "svgSha256": "13b4c352298fb1fb6dd852bd1a650fa7ca6518ed052ddc19b60c87f151fccc3d",
+          "matches": true
+        },
+        {
+          "key": "english-webp",
+          "imageSha256": "4e1b7f396a37bc2ef664a1f0f5b96d621fc3c7c8a619e721f149bfcaca004b02",
+          "imageSize": 19066,
+          "svgSha256": "78262460cb468089f2cb48a0d00083b52b075fd1020cdc61733f6b2eee6b8b96",
+          "matches": true
+        },
+        {
+          "key": "printed-total-disagrees",
+          "imageSha256": "ecc4f51b6c3db6f496d8dfaf016cc43567b6133407744cfe6ebb8dc4dfd7dd75",
+          "imageSize": 37608,
+          "svgSha256": "b3b1e30086d2c91bae496674d50ab259b2383f53dac09851fb5e095b493fdaa7",
+          "matches": true
+        },
+        {
+          "key": "jpeg-exif-rotation",
+          "imageSha256": "902a2d3531db213dfd7950910e8011bf178d9acb798caa06fc1e2a79fc5d1e91",
+          "imageSize": 89945,
+          "svgSha256": "52df14e022e81aa3b4db60d4448ab68b7403aeb8e2f97adbcc66e2933d4199ad",
+          "matches": true
+        },
+        {
+          "key": "occluded-price",
+          "imageSha256": "e077a6aaa9ab6714f75990bf623306e3963fca0d7e657369a1e57a4001625084",
+          "imageSize": 36350,
+          "svgSha256": "b147c45099edbc2b54526788968adadd2c15772c1cd79613a4d228d9caf2e5d3",
+          "matches": true
+        },
+        {
+          "key": "missing-price",
+          "imageSha256": "18ab80292daa50bfd3496d707e743cc1ca64019de4e463d5557b5b708da52979",
+          "imageSize": 14028,
+          "svgSha256": "2a7871904fea441b23785f46367541f68d4514fc1169baebb4b9db365733553d",
+          "matches": true
+        },
+        {
+          "key": "unsupported-price-header",
+          "imageSha256": "af7380e4907007ca019f3d1d57e78b4e708fc043d31ed29de12814a481b02656",
+          "imageSize": 76333,
+          "svgSha256": "b6852d5ede52e0df4a2bd09e562b180857d70c3b996cc94b625f6818edc967d9",
+          "matches": true
+        },
+        {
+          "key": "blurred-price",
+          "imageSha256": "232fe36a0e167e20464148f809accc53c3e3a2afdc8dea6bfd948caf76ffdf33",
+          "imageSize": 44780,
+          "svgSha256": "c3f86300077a7152d598adcd1c240fdfbb6a9807cdf309c8a1d25cd1bea03106",
+          "matches": true
+        }
+      ],
+      "stdoutChecks": [
+        {
+          "key": "ru-fractions-dot",
+          "pid": 43288,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "e0b4bc5ed3fdce9365f49f94897f2e4f0fe0b65f91251077cb11893fe2504492",
+          "matches": true
+        },
+        {
+          "key": "ru-changed-pixels",
+          "pid": 43290,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "04abad1da364a4c06d405c17720e3ef3127408d8ad8c318b52894628faa729bd",
+          "matches": true
+        },
+        {
+          "key": "ru-fractions-comma",
+          "pid": 43291,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "5d3d8674f866f5d4f0546ace4160790c693f4b09c3d0e2217ef376fb4ac835c0",
+          "matches": true
+        },
+        {
+          "key": "ru-ambiguous-comma",
+          "pid": 43292,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "aac08a21d373460aa36a45560d461b300e9f53b38b2160b7069a02a1121bed90",
+          "matches": true
+        },
+        {
+          "key": "english-webp",
+          "pid": 43294,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "d9c69aadeb439af196acf6870c016325eb112c5cbc14b6667ecbdced73f099d5",
+          "matches": true
+        },
+        {
+          "key": "printed-total-disagrees",
+          "pid": 43295,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "68722499a4f26cf242482e79aaf8c870e3f5f18d5b1832de12645e044a3f3a98",
+          "matches": true
+        },
+        {
+          "key": "jpeg-exif-rotation",
+          "pid": 43296,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "b19c0a7ef9d4bf1b8e9c50ff4cd6f1cea0b48119902dc3c4aaef661a02dd8610",
+          "matches": true
+        },
+        {
+          "key": "occluded-price",
+          "pid": 43299,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "74bcf519a6a74e7c5a414471db5a74d4b115641964e10634a3276e1e79d81e79",
+          "matches": true
+        },
+        {
+          "key": "missing-price",
+          "pid": 43301,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "edb86f798dcc5237a08e2c10840dfd95a0794ade10c39feced033d906dd1d885",
+          "matches": true
+        },
+        {
+          "key": "unsupported-price-header",
+          "pid": 43305,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "a5392813ae670c0d2f4f405a53b3e1328857c01b0a19688464632c47edfd7c32",
+          "matches": true
+        },
+        {
+          "key": "blurred-price",
+          "pid": 43311,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "52ba143874c1bbcd674969a4ce2e6e44b75144318196dcfd564241822dfb4aec",
+          "matches": true
+        }
+      ],
+      "frozenHarnessCopyChecks": [
+        {
+          "file": "actual-corpus-proof.mjs",
+          "matches": true
+        },
+        {
+          "file": "corpus-plan.mjs",
+          "matches": true
+        },
+        {
+          "file": "generate-corpus.mjs",
+          "matches": true
+        },
+        {
+          "file": "assert-corpus.mjs",
+          "matches": true
+        }
+      ]
+    },
+    "3": {
+      "status": "passed",
+      "qualification": "qualified",
+      "sourceUnchangedDuringRun": true,
+      "workerCount": 11,
+      "version": [
+        "tesseract 5.5.3",
+        " leptonica-1.87.0",
+        "  libgif 5.2.2 : libjpeg 8d (libjpeg-turbo 3.1.3) : libpng 1.6.58 : libtiff 4.7.2 : zlib 1.2.12 : libwebp 1.6.0 : libopenjp2 2.5.4",
+        " Found NEON"
+      ],
+      "outcomeCounts": {
+        "safe-manual-review": 6,
+        "exact-provisional": 2,
+        "limited-refusal": 2,
+        "partial-manual-review": 1
+      },
+      "failureCount": 0,
+      "sourceBindings": [
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts",
+          "recordedSha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+          "currentSha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+          "recordedSha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+          "currentSha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts",
+          "recordedSha256": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+          "currentSha256": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-ocr-models.json",
+          "recordedSha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+          "currentSha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+          "recordedSha256": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+          "currentSha256": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/eng.traineddata",
+          "recordedSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+          "currentSha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/rus.traineddata",
+          "recordedSha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+          "currentSha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/LICENSE",
+          "recordedSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "currentSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json",
+          "recordedSha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+          "currentSha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+          "currentMatches": true
+        },
+        {
+          "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package-lock.json",
+          "recordedSha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+          "currentSha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+          "currentMatches": true
+        },
+        {
+          "path": "/opt/homebrew/bin/tesseract",
+          "recordedSha256": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+          "currentSha256": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/actual-corpus-proof.mjs",
+          "recordedSha256": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+          "currentSha256": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/corpus-plan.mjs",
+          "recordedSha256": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+          "currentSha256": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/generate-corpus.mjs",
+          "recordedSha256": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b",
+          "currentSha256": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b",
+          "currentMatches": true
+        },
+        {
+          "path": "/tmp/maya-linux-ocr-20261008/assert-corpus.mjs",
+          "recordedSha256": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b",
+          "currentSha256": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b",
+          "currentMatches": true
+        }
+      ],
+      "inputChecks": [
+        {
+          "key": "ru-fractions-dot",
+          "imageSha256": "43f49cd1665ef6efda039b3a588be5ea6c125c94255b3b2e38a87003a4ef0a26",
+          "imageSize": 47744,
+          "svgSha256": "52df14e022e81aa3b4db60d4448ab68b7403aeb8e2f97adbcc66e2933d4199ad",
+          "matches": true
+        },
+        {
+          "key": "ru-changed-pixels",
+          "imageSha256": "61571ad3e5388f366419005ef3124fb539ee92a2ed80b0789b1485ed2dc8240e",
+          "imageSize": 21338,
+          "svgSha256": "b80d3f35e1e3223250edd39464c726ae9c88a7c6516c588755fdb789275ebbc5",
+          "matches": true
+        },
+        {
+          "key": "ru-fractions-comma",
+          "imageSha256": "3b12160188915c7919c55416f208a6a62c91f0ef02cf0ac218e8c544bee6e6cb",
+          "imageSize": 90030,
+          "svgSha256": "146eb3370fcee395a3bc43236da219631640b83531d277abf01d6d6c7065679c",
+          "matches": true
+        },
+        {
+          "key": "ru-ambiguous-comma",
+          "imageSha256": "349f7cf976ab9ca20f65a5ad10fd1a0cb38f75f0d7d4fdb6d213cd7c5a16519f",
+          "imageSize": 36705,
+          "svgSha256": "13b4c352298fb1fb6dd852bd1a650fa7ca6518ed052ddc19b60c87f151fccc3d",
+          "matches": true
+        },
+        {
+          "key": "english-webp",
+          "imageSha256": "4e1b7f396a37bc2ef664a1f0f5b96d621fc3c7c8a619e721f149bfcaca004b02",
+          "imageSize": 19066,
+          "svgSha256": "78262460cb468089f2cb48a0d00083b52b075fd1020cdc61733f6b2eee6b8b96",
+          "matches": true
+        },
+        {
+          "key": "printed-total-disagrees",
+          "imageSha256": "ecc4f51b6c3db6f496d8dfaf016cc43567b6133407744cfe6ebb8dc4dfd7dd75",
+          "imageSize": 37608,
+          "svgSha256": "b3b1e30086d2c91bae496674d50ab259b2383f53dac09851fb5e095b493fdaa7",
+          "matches": true
+        },
+        {
+          "key": "jpeg-exif-rotation",
+          "imageSha256": "902a2d3531db213dfd7950910e8011bf178d9acb798caa06fc1e2a79fc5d1e91",
+          "imageSize": 89945,
+          "svgSha256": "52df14e022e81aa3b4db60d4448ab68b7403aeb8e2f97adbcc66e2933d4199ad",
+          "matches": true
+        },
+        {
+          "key": "occluded-price",
+          "imageSha256": "e077a6aaa9ab6714f75990bf623306e3963fca0d7e657369a1e57a4001625084",
+          "imageSize": 36350,
+          "svgSha256": "b147c45099edbc2b54526788968adadd2c15772c1cd79613a4d228d9caf2e5d3",
+          "matches": true
+        },
+        {
+          "key": "missing-price",
+          "imageSha256": "18ab80292daa50bfd3496d707e743cc1ca64019de4e463d5557b5b708da52979",
+          "imageSize": 14028,
+          "svgSha256": "2a7871904fea441b23785f46367541f68d4514fc1169baebb4b9db365733553d",
+          "matches": true
+        },
+        {
+          "key": "unsupported-price-header",
+          "imageSha256": "af7380e4907007ca019f3d1d57e78b4e708fc043d31ed29de12814a481b02656",
+          "imageSize": 76333,
+          "svgSha256": "b6852d5ede52e0df4a2bd09e562b180857d70c3b996cc94b625f6818edc967d9",
+          "matches": true
+        },
+        {
+          "key": "blurred-price",
+          "imageSha256": "232fe36a0e167e20464148f809accc53c3e3a2afdc8dea6bfd948caf76ffdf33",
+          "imageSize": 44780,
+          "svgSha256": "c3f86300077a7152d598adcd1c240fdfbb6a9807cdf309c8a1d25cd1bea03106",
+          "matches": true
+        }
+      ],
+      "stdoutChecks": [
+        {
+          "key": "ru-fractions-dot",
+          "pid": 47854,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "e0b4bc5ed3fdce9365f49f94897f2e4f0fe0b65f91251077cb11893fe2504492",
+          "matches": true
+        },
+        {
+          "key": "ru-changed-pixels",
+          "pid": 47855,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "04abad1da364a4c06d405c17720e3ef3127408d8ad8c318b52894628faa729bd",
+          "matches": true
+        },
+        {
+          "key": "ru-fractions-comma",
+          "pid": 47859,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "5d3d8674f866f5d4f0546ace4160790c693f4b09c3d0e2217ef376fb4ac835c0",
+          "matches": true
+        },
+        {
+          "key": "ru-ambiguous-comma",
+          "pid": 47861,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "aac08a21d373460aa36a45560d461b300e9f53b38b2160b7069a02a1121bed90",
+          "matches": true
+        },
+        {
+          "key": "english-webp",
+          "pid": 47863,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "d9c69aadeb439af196acf6870c016325eb112c5cbc14b6667ecbdced73f099d5",
+          "matches": true
+        },
+        {
+          "key": "printed-total-disagrees",
+          "pid": 47864,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "68722499a4f26cf242482e79aaf8c870e3f5f18d5b1832de12645e044a3f3a98",
+          "matches": true
+        },
+        {
+          "key": "jpeg-exif-rotation",
+          "pid": 47866,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "b19c0a7ef9d4bf1b8e9c50ff4cd6f1cea0b48119902dc3c4aaef661a02dd8610",
+          "matches": true
+        },
+        {
+          "key": "occluded-price",
+          "pid": 47868,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "74bcf519a6a74e7c5a414471db5a74d4b115641964e10634a3276e1e79d81e79",
+          "matches": true
+        },
+        {
+          "key": "missing-price",
+          "pid": 47870,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "edb86f798dcc5237a08e2c10840dfd95a0794ade10c39feced033d906dd1d885",
+          "matches": true
+        },
+        {
+          "key": "unsupported-price-header",
+          "pid": 47872,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "a5392813ae670c0d2f4f405a53b3e1328857c01b0a19688464632c47edfd7c32",
+          "matches": true
+        },
+        {
+          "key": "blurred-price",
+          "pid": 47873,
+          "closed": true,
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "52ba143874c1bbcd674969a4ce2e6e44b75144318196dcfd564241822dfb4aec",
+          "matches": true
+        }
+      ],
+      "frozenHarnessCopyChecks": [
+        {
+          "file": "actual-corpus-proof.mjs",
+          "matches": true
+        },
+        {
+          "file": "corpus-plan.mjs",
+          "matches": true
+        },
+        {
+          "file": "generate-corpus.mjs",
+          "matches": true
+        },
+        {
+          "file": "assert-corpus.mjs",
+          "matches": true
+        }
+      ]
+    }
+  },
+  "historicalExpectedSourcePreserved": [
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/attempt1-provenance/corpus-plan.mjs",
+      "sha256": "52862f81e5af5656298acf88c73ad76000867b048758dd82f987c18c0dd2f536",
+      "matchesOriginalAttempt1": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/attempt1-provenance/generate-corpus.mjs",
+      "sha256": "325fb2953710906221ab235406cf6529ba9166805a3f0da45a434838b7505e4f",
+      "matchesOriginalAttempt1": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/attempt1-provenance/assert-corpus.mjs",
+      "sha256": "7fd3e8ec4291565ec52927921bbc8bf17fa97c8335680ef92721d1d4f0a9e559",
+      "matchesOriginalAttempt1": true
+    }
+  ],
+  "preFollowupGitBindings": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/goods-photo-ocr-models.json",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    },
+    {
+      "path": "maya-saas-backend/package.json",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    },
+    {
+      "path": "maya-saas-backend/package-lock.json",
+      "commit": "dc6684cba67659664910578ef96afe06781f7551",
+      "matches": true
+    }
+  ],
+  "modelCopies": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/eng.traineddata",
+      "bytes": 4113088,
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "gitBlob": "bbef4675053b5b468cdb477053e28b1c698ba08e",
+      "matchesSizeSha256GitBlob": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/downloaded-models/eng.traineddata",
+      "bytes": 4113088,
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "gitBlob": "bbef4675053b5b468cdb477053e28b1c698ba08e",
+      "matchesSizeSha256GitBlob": true
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/rus.traineddata",
+      "bytes": 3861738,
+      "sha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+      "gitBlob": "b146cb2263acbc6383f8e92ea0ce759537687bb8",
+      "matchesSizeSha256GitBlob": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/downloaded-models/rus.traineddata",
+      "bytes": 3861738,
+      "sha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+      "gitBlob": "b146cb2263acbc6383f8e92ea0ce759537687bb8",
+      "matchesSizeSha256GitBlob": true
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "gitBlob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "matchesSizeSha256GitBlob": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/downloaded-models/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "gitBlob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "matchesSizeSha256GitBlob": true
+    }
+  ],
+  "assetGuardRuns": [
+    {
+      "attempt": 1,
+      "status": "passed",
+      "caseCount": 10,
+      "allCasesUnchanged": true,
+      "sourceBindingsCurrent": [
+        {
+          "file": "prepare-goods-photo-ocr-models.mjs",
+          "matches": false
+        },
+        {
+          "file": "goods-photo-ocr-models.json",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "status": "passed",
+      "caseCount": 10,
+      "allCasesUnchanged": true,
+      "sourceBindingsCurrent": [
+        {
+          "file": "prepare-goods-photo-ocr-models.mjs",
+          "matches": true
+        },
+        {
+          "file": "goods-photo-ocr-models.json",
+          "matches": true
+        }
+      ]
+    }
+  ],
+  "fifoObservation": {
+    "contract": "maya.actual-filesystem-fifo-model-refusal/1",
+    "platform": "darwin",
+    "sourceSha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+    "fixture": "ACTUAL_OWNED_FIFO_NO_WRITER",
+    "exitCode": 0,
+    "signal": null,
+    "stdout": "{\"code\":\"goods_photo_parser_not_configured\",\"elapsedMs\":0.28354199999998286,\"workers\":0}\n",
+    "stderr": "",
+    "sourceUnchanged": true,
+    "status": "passed",
+    "ownedFifoRemoved": true
+  },
+  "localRuns": [
+    {
+      "attempt": 1,
+      "status": "FAIL",
+      "completedStages": [],
+      "sourceUnchangedDuringRun": true,
+      "harnessUnchangedDuringRun": true,
+      "allOwnedGroupsClosedAndAbsent": true,
+      "sourceMismatchNow": [
+        "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts",
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts"
+      ],
+      "unit": {
+        "success": false,
+        "numPassedTests": 212,
+        "numFailedTests": 0,
+        "numPassedTestSuites": 8,
+        "numFailedTestSuites": 1
+      }
+    },
+    {
+      "attempt": 2,
+      "status": "PASS",
+      "completedStages": [
+        "targeted-unit",
+        "backend-types",
+        "widgets-live-types",
+        "changed-typescript-lint",
+        "contract-check",
+        "k3",
+        "shell-types",
+        "shell-photo",
+        "shell-build",
+        "carrier-types",
+        "carrier-photo",
+        "carrier-build",
+        "models-verify",
+        "models-syntax"
+      ],
+      "sourceUnchangedDuringRun": true,
+      "harnessUnchangedDuringRun": true,
+      "allOwnedGroupsClosedAndAbsent": true,
+      "sourceMismatchNow": [
+        "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts",
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts"
+      ],
+      "unit": {
+        "success": true,
+        "numPassedTests": 233,
+        "numFailedTests": 0,
+        "numPassedTestSuites": 9,
+        "numFailedTestSuites": 0
+      }
+    },
+    {
+      "attempt": 3,
+      "status": "PASS",
+      "completedStages": [
+        "probe-types",
+        "browser-guard",
+        "http-syntax-0",
+        "http-syntax-1",
+        "http-syntax-2",
+        "http-syntax-3"
+      ],
+      "sourceUnchangedDuringRun": true,
+      "harnessUnchangedDuringRun": true,
+      "allOwnedGroupsClosedAndAbsent": true,
+      "sourceMismatchNow": [
+        "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts",
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts"
+      ]
+    },
+    {
+      "attempt": 4,
+      "status": "FAIL",
+      "completedStages": [
+        "targeted-unit",
+        "backend-types",
+        "widgets-live-types"
+      ],
+      "sourceUnchangedDuringRun": true,
+      "harnessUnchangedDuringRun": true,
+      "allOwnedGroupsClosedAndAbsent": true,
+      "sourceMismatchNow": [
+        "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts"
+      ],
+      "unit": {
+        "success": true,
+        "numPassedTests": 234,
+        "numFailedTests": 0,
+        "numPassedTestSuites": 9,
+        "numFailedTestSuites": 0
+      }
+    },
+    {
+      "attempt": 5,
+      "status": "PASS",
+      "completedStages": [
+        "changed-typescript-lint",
+        "contract-check",
+        "k3",
+        "shell-types",
+        "shell-photo",
+        "shell-build",
+        "carrier-types",
+        "carrier-photo",
+        "carrier-build",
+        "models-verify",
+        "models-syntax"
+      ],
+      "sourceUnchangedDuringRun": true,
+      "harnessUnchangedDuringRun": true,
+      "allOwnedGroupsClosedAndAbsent": true,
+      "sourceMismatchNow": []
+    }
+  ],
+  "httpHarness": {
+    "status": "PREPARED_ONLY_AT_THIS_REVIEW",
+    "noExpectedInjectionObserved": true,
+    "sourceBindMustUseFreshActual3": true,
+    "files": [
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/README.md",
+        "bytes": 6876,
+        "sha256": "004d728ee3774a954285dd3facc39d1b266d26a4bf8c6932cef5823a5d113391"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr-browser-guard.mjs",
+        "bytes": 3081,
+        "sha256": "306e7a04a419bf70974d2d702d194f64758f6e94a296d13a5e29ed03eb010558"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr-browser-guard.test.mjs",
+        "bytes": 2561,
+        "sha256": "674011404026f502f3ae8f864a74deab3a151946a7e77542a4bd1524b88ccdb7"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr-browser.mjs",
+        "bytes": 14950,
+        "sha256": "4dad8defa09616ddd79372b70d67abcc880c456012549250343d97aed7703376"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr.probe-spec.ts",
+        "bytes": 18464,
+        "sha256": "69eaa145b5d575c7bc1218e69f8cd2f3e3eb14f93857d511cf95f892ce2371b4"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/bind-native-inputs.mjs",
+        "bytes": 4355,
+        "sha256": "29fffb5a9c9934b50fa9f9317da4a96b39339ddf22cfe9693a35adb4a7109844"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/fixed-input-hashes.json",
+        "bytes": 3484,
+        "sha256": "0874cb10340214ef2c45d733123baea257bf905af8ff15ffa0194dcfd418f26e"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/freeze.json",
+        "bytes": 1811,
+        "sha256": "c5db3da9929d4c97e096c572029b123671ea0d770db288552c9c30a3de8e09dc"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/jest-proof.json",
+        "bytes": 979,
+        "sha256": "7df87760d93692e0f319d4396f79f2ce1d091240e90903d57a8ba64bbab0692a"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/loopback-only.cjs",
+        "bytes": 606,
+        "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/native-proof.mjs",
+        "bytes": 12009,
+        "sha256": "6483799e5091dc58c450bfabfcb5409194f3a0b60e1736a6788f7e74d7c6903f"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/owned-stage.mjs",
+        "bytes": 4513,
+        "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04"
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-carrier-harness/tsconfig.proof.json",
+        "bytes": 1100,
+        "sha256": "0738581f9b0fd265eb80f4a0238df574dcd7f5cba304054e2185f2dcee6752ae"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/actual-attempt1/actual-corpus.json",
+      "bytes": 32421,
+      "sha256": "800ff73b9cb46aa07b0ebfa27ab71bd3224ee5f0bd23bab8e9c7639987fcc9aa"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/actual-attempt1/source-hashes.json",
+      "bytes": 2651,
+      "sha256": "88a0e1931316aa494e519d99e64ca11adf78a4def108498c39d1bb85898c7f64"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/actual-attempt2/actual-corpus.json",
+      "bytes": 37875,
+      "sha256": "68d7428e6fef5520d4921fe7a5171ea117e74beaee3df805e8567f7be67beb2e"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/actual-attempt2/source-hashes.json",
+      "bytes": 2651,
+      "sha256": "2159b7e17c99ece2f15add25e1a5aef4a99c6554c823520d5b0438538c660b1a"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/actual-attempt3/actual-corpus.json",
+      "bytes": 37875,
+      "sha256": "ac4ddb474f33d308e8fb17c9ef27f09bd2b1c97a9e8691ea50da0275309345d0"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/actual-attempt3/source-hashes.json",
+      "bytes": 2651,
+      "sha256": "9bd34548f38b69afbabb6f8693d9391a3991d383515b65a903b08cf9fd09ef07"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/assets-guard-attempt1/report.json",
+      "bytes": 3707,
+      "sha256": "15e1ac1769b68591c30da5fa54e72fe3e49aa6fe405cc2a155ec4e267cda9b3a"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/assets-guard-attempt2/report.json",
+      "bytes": 3707,
+      "sha256": "ad994d45183d78d7abbe5634564fb717fe0af6268fae7720372db158593b4402"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/attempt1-provenance/assert-corpus.mjs",
+      "bytes": 8463,
+      "sha256": "7fd3e8ec4291565ec52927921bbc8bf17fa97c8335680ef92721d1d4f0a9e559"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/attempt1-provenance/corpus-plan.mjs",
+      "bytes": 7021,
+      "sha256": "52862f81e5af5656298acf88c73ad76000867b048758dd82f987c18c0dd2f536"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/attempt1-provenance/generate-corpus.mjs",
+      "bytes": 6505,
+      "sha256": "325fb2953710906221ab235406cf6529ba9166805a3f0da45a434838b7505e4f"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/corpus-attempt1/manifest.json",
+      "bytes": 9058,
+      "sha256": "c6582442ba167dd19d198ab1a7e2756798e6accae05047c479b6aea95ff3fa25"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/corpus-attempt2/manifest.json",
+      "bytes": 10736,
+      "sha256": "cb1a5c9919b876de758c09fd70b5bd0961296218819f73e9de2fb1147c9b80db"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/fifo-guard-attempt1/fifo-guard-proof.mjs",
+      "bytes": 3147,
+      "sha256": "bcab3c53b9a64b91cac0487b5afb86dae8f31e7fc808cb9da890c5eabb54fd91"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/fifo-guard-attempt1/report.json",
+      "bytes": 460,
+      "sha256": "297e502975bd80e4b585dfd6a185019050709386b93ce4dc6c4071db2cea1a4c"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/fifo-guard-attempt1/runner.cjs",
+      "bytes": 1007,
+      "sha256": "4271f2ee95a21c09eb312b797300cc3fe138ef2abefb3591c933e39427cb96b4"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt1/report.json",
+      "bytes": 9872,
+      "sha256": "15c27a0a5fe5bdefe6138e36870eb5050f5bbbde21bf5896966d4cd6b132ca8e"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt1/targeted-unit.json",
+      "bytes": 104054,
+      "sha256": "7c8c2e5d22bdc3b69ec54f8842a6a871efd5b62027349eebac2e206af5c0d584"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt2/report.json",
+      "bytes": 14077,
+      "sha256": "eb2cf9a7de65324e657c4b4df00b1469802e9a3d7db75497be1174876ef6b9f7"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt2/targeted-unit.json",
+      "bytes": 114298,
+      "sha256": "2656dea6c1bb4398e500f51c170c28e7d40b7e4aa4595835411a1e81b3e7eea7"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt3/report.json",
+      "bytes": 8349,
+      "sha256": "2d5d7a5260ac5ba88def4c5a17b90b650aa434212555b5012ab928d584b6a489"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt4/report.json",
+      "bytes": 10475,
+      "sha256": "b0fd0295a23e932c2bed5f785d84b651cefce9bbcdab27e7d66aefc1e4725c33"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt4/targeted-unit.json",
+      "bytes": 114822,
+      "sha256": "899921cdaf60ba67f1459f6913c915ac8760537e8518acb0927878ebd3d3bd6a"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/local-attempt5/report.json",
+      "bytes": 10882,
+      "sha256": "65ee89e69261fa42bec787fc38bea16bd6a25f610c8e239979b95686a8bdb078"
+    }
+  ],
+  "limits": [
+    "Actual native engine evidence is macOS arm64 Tesseract 5.5.3, not an executed Linux/Docker image.",
+    "Two exact provisional corpus cases; six unknown-unit manual-review cases; one unknown-price partial case; two grammar refusals. No general invoice accuracy acceptance.",
+    "OCR scores are uncalibrated; manual review and recognition_acceptance NOT_ACCEPTED remain mandatory; no inferred catalog identity, price meaning, arithmetic or permission.",
+    "The initial exact-OCR failure remains failed. Null-unit qualification is a new incomplete-result policy, not relabeling incorrect non-null transcription as exact.",
+    "Local attempt4 as a whole remains FAIL at one test-source lint assertion; its 234/9 unit and type stages passed. Local attempt5 completes final formatted-source static/build/gates; do not sum repeated cohorts.",
+    "Assets must remain immutable to the service. Native RSS/global CPU/distributed queue and native machine-wide egress are not independently measured by this review.",
+    "Docker node/APK versions remain mutable; future Linux qualification needs exact image digest/architecture/packages and actual offline recognition/resource/cleanup.",
+    "HTTP/current React upload proof is prepared and not accepted in this report; no restart, live provider/model, real document, schema/retention/authority, deployment or C10/release-certificate claim.",
+    "F32b/F74b are already approved. Provider permission semantics and multiple-company source-qualified schema decisions remain independent of OCR."
+  ],
+  "finalCandidateGitBindings": {
+    "commit": "7fe7bab96295bb459a037dade2fc7a6ca5c379fd",
+    "count": 13,
+    "checks": [
+      {
+        "path": "maya-saas-backend/.dockerignore",
+        "sha256": "8a75dea5abbb58eda8b8d43bdba4f5e517fc40dd7265cb6231c1516fd6fb61a3",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/.env.example",
+        "sha256": "31f050512e8fee4c617a7cb6063faedcb22d7b8ac793deb197b7c98e01bc82b5",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/Dockerfile",
+        "sha256": "4a306fa5009418a3dddcf538f1c21d5b9dfbc200aaf73cfadd817ddfad83a960",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/package.json",
+        "sha256": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/goods-photo-ocr-models.json",
+        "sha256": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs",
+        "sha256": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts",
+        "sha256": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts",
+        "sha256": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts",
+        "sha256": "7435dd96cc9a36c216ff2ab40b657db4aa0e09486cfbb7db9dd405623caf77d5",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/goods-photo-tesseract.spec.ts",
+        "sha256": "19f9c470b5a3e2a1ab764b2dc5a108b6fd6b723098b3edad0ffdbfa9082a23d8",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+        "sha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/config/runtime-config.spec.ts",
+        "sha256": "f684fcf6db7662f615b706d516d8695907f4cf02bbc77c76d56f9917121cf96a",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/config/runtime-config.ts",
+        "sha256": "58cea2f2b5ed30dc02393b1c9229e6fdb560820d9e79c2fb73ea024da4c2fb90",
+        "matches": true
+      }
+    ]
+  }
+}

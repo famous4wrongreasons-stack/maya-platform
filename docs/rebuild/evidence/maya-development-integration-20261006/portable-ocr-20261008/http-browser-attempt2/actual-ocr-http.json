@@ -1,0 +1,168 @@
+{
+  "contract": "maya.actual-ocr-http-preview-proof/1",
+  "status": "passed",
+  "parser": "ACTUAL_CONFIGURED_GOODS_PHOTO_PARSER_NO_SPY",
+  "images": "SYNTHETIC_PIXELS",
+  "integration": "SYNTHETIC_ACTIVE_METADATA_NOT_A17_ACCEPTANCE",
+  "nativeProofSha256": "ac4ddb474f33d308e8fb17c9ef27f09bd2b1c97a9e8691ea50da0275309345d0",
+  "currentReactAcceptance": true,
+  "realDocumentAcceptance": false,
+  "deploymentAcceptance": false,
+  "linuxExecutionAcceptance": false,
+  "platform": "darwin",
+  "restartClaim": false,
+  "nativeObserver": "REAL_SPAWN_CALL_THROUGH_UNCHANGED",
+  "anonymousUpload": {
+    "status": 401,
+    "noNativeWorker": true,
+    "noRows": true
+  },
+  "opened": {
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "uploaded": {
+    "body": {
+      "contract": "maya.goods-photo.preview/1",
+      "source_revision": "184132de366013c5019764a1928ef32be35fc0a801f3ec403585fe83adff16fb",
+      "photo_sha256": "43f49cd1665ef6efda039b3a588be5ea6c125c94255b3b2e38a87003a4ef0a26",
+      "lines": [
+        {
+          "source_line": 1,
+          "name": "Шампунь Кедр",
+          "quantity": "2.5",
+          "unit_label": "шт",
+          "unit_price": "300.00",
+          "line_total": "750.00",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        },
+        {
+          "source_line": 2,
+          "name": "Маска для волос",
+          "quantity": "0.75",
+          "unit_label": null,
+          "unit_price": "480.00",
+          "line_total": "360.00",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        }
+      ],
+      "recognition_acceptance": "NOT_ACCEPTED",
+      "review_required": true,
+      "original_stored": false,
+      "persistent_draft": false,
+      "notice": "Предварительные поля. Проверьте совпадение товара, единицы, количество и смысл цены. Неоднозначности нужно исправить до подтверждения прихода."
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "changed": {
+    "body": {
+      "contract": "maya.goods-photo.preview/1",
+      "source_revision": "184132de366013c5019764a1928ef32be35fc0a801f3ec403585fe83adff16fb",
+      "photo_sha256": "61571ad3e5388f366419005ef3124fb539ee92a2ed80b0789b1485ed2dc8240e",
+      "lines": [
+        {
+          "source_line": 1,
+          "name": "Шампунь Липа",
+          "quantity": "3.5",
+          "unit_label": "шт",
+          "unit_price": "320.00",
+          "line_total": "1120.00",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        },
+        {
+          "source_line": 2,
+          "name": "Маска для волос",
+          "quantity": "0.75",
+          "unit_label": null,
+          "unit_price": "480.00",
+          "line_total": "360.00",
+          "price_kind": null,
+          "parser_confidence": null,
+          "review_required": true
+        }
+      ],
+      "recognition_acceptance": "NOT_ACCEPTED",
+      "review_required": true,
+      "original_stored": false,
+      "persistent_draft": false,
+      "notice": "Предварительные поля. Проверьте совпадение товара, единицы, количество и смысл цены. Неоднозначности нужно исправить до подтверждения прихода."
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "unsupported": {
+    "body": {
+      "message": "goods_photo_ocr_table_unsupported",
+      "error": "Bad Request",
+      "statusCode": 400
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "malformed": {
+    "body": {
+      "message": "goods_photo_image_invalid",
+      "error": "Bad Request",
+      "statusCode": 400
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "revoked": {
+    "body": {
+      "message": "Active tenant membership is required",
+      "error": "Unauthorized",
+      "statusCode": 401
+    },
+    "noBusinessWrites": true,
+    "noC9ReadOrApproval": true
+  },
+  "checkpoints": [
+    "opened",
+    "uploaded",
+    "changed",
+    "unsupported",
+    "malformed",
+    "revoked"
+  ],
+  "forbidden": [],
+  "nativeWorkers": [
+    {
+      "pid": 49588,
+      "exited": true,
+      "stdoutBytes": 1546,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "e0b4bc5ed3fdce9365f49f94897f2e4f0fe0b65f91251077cb11893fe2504492"
+    },
+    {
+      "pid": 49590,
+      "exited": true,
+      "stdoutBytes": 1551,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "04abad1da364a4c06d405c17720e3ef3127408d8ad8c318b52894628faa729bd"
+    },
+    {
+      "pid": 49592,
+      "exited": true,
+      "stdoutBytes": 1264,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "a5392813ae670c0d2f4f405a53b3e1328857c01b0a19688464632c47edfd7c32"
+    }
+  ],
+  "blockedProviderOrExternalFetchAttempts": 0,
+  "blockedModelAttempts": 0,
+  "qualification": "LOCAL_SYNTHETIC_IMAGES_ONLY_NO_GENERAL_INVOICE_ACCEPTANCE"
+}

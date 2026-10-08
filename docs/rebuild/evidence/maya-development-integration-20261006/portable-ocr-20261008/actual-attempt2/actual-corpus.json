@@ -1,0 +1,567 @@
+{
+  "contract": "maya.native-tesseract-actual-corpus-proof/1",
+  "status": "passed",
+  "observer": "REAL_SPAWN_CALL_THROUGH_UNCHANGED",
+  "scriptedOcr": false,
+  "modelApiCalls": 0,
+  "providerCalls": 0,
+  "unexpectedNodeNetwork": 0,
+  "workers": [
+    {
+      "key": "ru-fractions-dot",
+      "pid": 43288,
+      "exited": true,
+      "stdoutBytes": 1546,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "e0b4bc5ed3fdce9365f49f94897f2e4f0fe0b65f91251077cb11893fe2504492",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1939\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.865822\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t91.404350\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t92.092247\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t86.975815\tNOT\n5\t1\t1\t1\t1\t5\t452\t28\t14\t50\t86.975815\tA\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t95.291763\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t95.291763\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1939\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.876831\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.605919\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.064743\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1920\t41\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t184\t41\t96.479393\tШампунь\n5\t1\t1\t2\t2\t2\t264\t298\t94\t41\t96.693169\tКедр\n5\t1\t1\t2\t2\t3\t961\t298\t58\t33\t96.095680\t2.5\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t93.949440\tшт\n5\t1\t1\t2\t2\t5\t1472\t298\t131\t33\t96.528664\t300.00\n5\t1\t1\t2\t2\t6\t1852\t298\t131\t33\t96.665779\t750.00\n4\t1\t1\t2\t3\t0\t63\t438\t1920\t39\t-1\t\n5\t1\t1\t2\t3\t1\t63\t438\t123\t33\t96.775452\tМаска\n5\t1\t1\t2\t3\t2\t200\t447\t73\t30\t96.149933\tдля\n5\t1\t1\t2\t3\t3\t291\t447\t115\t24\t95.661804\tволос\n5\t1\t1\t2\t3\t4\t962\t438\t82\t33\t94.020744\t0.75\n5\t1\t1\t2\t3\t5\t1210\t447\t23\t23\t88.083885\tn\n5\t1\t1\t2\t3\t6\t1471\t438\t132\t33\t96.862366\t480.00\n5\t1\t1\t2\t3\t7\t1852\t438\t131\t33\t96.176598\t360.00\n4\t1\t1\t2\t4\t0\t63\t618\t1937\t33\t-1\t\n5\t1\t1\t2\t4\t1\t63\t618\t111\t33\t96.595894\tИтого\n5\t1\t1\t2\t4\t2\t1855\t618\t145\t33\t96.642609\t1110.00\n"
+    },
+    {
+      "key": "ru-changed-pixels",
+      "pid": 43290,
+      "exited": true,
+      "stdoutBytes": 1551,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "04abad1da364a4c06d405c17720e3ef3127408d8ad8c318b52894628faa729bd",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1946\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.030197\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.167892\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.137878\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.605843\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.605843\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.442101\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.390976\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1946\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.876831\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.605919\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.064743\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1941\t41\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t184\t41\t96.229683\tШампунь\n5\t1\t1\t2\t2\t2\t261\t298\t99\t33\t96.688911\tЛипа\n5\t1\t1\t2\t2\t3\t962\t298\t57\t33\t95.664787\t3.5\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t92.858604\tшт\n5\t1\t1\t2\t2\t5\t1472\t298\t131\t33\t96.288170\t320.00\n5\t1\t1\t2\t2\t6\t1855\t298\t149\t33\t96.334724\t1120.00\n4\t1\t1\t2\t3\t0\t63\t438\t1920\t39\t-1\t\n5\t1\t1\t2\t3\t1\t63\t438\t123\t33\t96.775452\tМаска\n5\t1\t1\t2\t3\t2\t200\t447\t73\t30\t96.149933\tдля\n5\t1\t1\t2\t3\t3\t291\t447\t115\t24\t95.661804\tволос\n5\t1\t1\t2\t3\t4\t962\t438\t82\t33\t94.020744\t0.75\n5\t1\t1\t2\t3\t5\t1210\t447\t23\t23\t88.083885\tn\n5\t1\t1\t2\t3\t6\t1471\t438\t132\t33\t96.862366\t480.00\n5\t1\t1\t2\t3\t7\t1852\t438\t131\t33\t96.176598\t360.00\n4\t1\t1\t2\t4\t0\t63\t618\t1944\t33\t-1\t\n5\t1\t1\t2\t4\t1\t63\t618\t111\t33\t96.109756\tИтого\n5\t1\t1\t2\t4\t2\t1855\t618\t152\t33\t96.639313\t1480.00\n"
+    },
+    {
+      "key": "ru-fractions-comma",
+      "pid": 43291,
+      "exited": true,
+      "stdoutBytes": 1544,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "5d3d8674f866f5d4f0546ace4160790c693f4b09c3d0e2217ef376fb4ac835c0",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t613\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t95.582153\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.090378\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.106125\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.071754\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.071754\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.177399\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.148758\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1925\t502\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.830826\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.891014\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.284668\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.070267\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.457489\tСумма\n4\t1\t1\t2\t2\t0\t64\t298\t1919\t41\t-1\t\n5\t1\t1\t2\t2\t1\t64\t298\t170\t33\t96.534500\tБальзам\n5\t1\t1\t2\t2\t2\t253\t298\t141\t41\t95.744255\tБерёза\n5\t1\t1\t2\t2\t3\t965\t298\t54\t38\t96.424248\t1,5\n5\t1\t1\t2\t2\t4\t1210\t307\t23\t23\t92.727753\tn\n5\t1\t1\t2\t2\t5\t1471\t298\t132\t38\t96.268013\t240,50\n5\t1\t1\t2\t2\t6\t1852\t298\t131\t38\t95.955170\t360,75\n4\t1\t1\t2\t3\t0\t63\t438\t1920\t41\t-1\t\n5\t1\t1\t2\t3\t1\t63\t438\t99\t41\t96.854004\tКрем\n5\t1\t1\t2\t3\t2\t177\t447\t72\t30\t96.854004\tдля\n5\t1\t1\t2\t3\t3\t267\t447\t63\t32\t96.601234\tрук\n5\t1\t1\t2\t3\t4\t962\t438\t82\t38\t96.619263\t0,25\n5\t1\t1\t2\t3\t5\t1213\t447\t32\t23\t79.610497\tKr\n5\t1\t1\t2\t3\t6\t1472\t438\t131\t38\t96.318504\t800,00\n5\t1\t1\t2\t3\t7\t1851\t438\t132\t38\t96.227249\t200,00\n4\t1\t1\t2\t4\t0\t63\t618\t1920\t38\t-1\t\n5\t1\t1\t2\t4\t1\t63\t618\t111\t33\t95.942924\tИтого\n5\t1\t1\t2\t4\t2\t1852\t618\t131\t38\t95.367615\t560,75\n"
+    },
+    {
+      "key": "ru-ambiguous-comma",
+      "pid": 43292,
+      "exited": true,
+      "stdoutBytes": 1206,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "aac08a21d373460aa36a45560d461b300e9f53b38b2160b7069a02a1121bed90",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t613\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.030197\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.167892\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.137878\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.605843\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.605843\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.442101\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.390976\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1925\t502\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.876831\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.605919\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.064743\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t62\t298\t1921\t41\t-1\t\n5\t1\t1\t2\t2\t1\t62\t298\t124\t41\t96.422150\tСироп\n5\t1\t1\t2\t2\t2\t205\t298\t99\t33\t96.762604\tМята\n5\t1\t1\t2\t2\t3\t965\t298\t103\t38\t96.645004\t1,250\n5\t1\t1\t2\t2\t4\t1210\t307\t23\t23\t92.877831\tn\n5\t1\t1\t2\t2\t5\t1475\t298\t128\t38\t96.861740\t100,00\n5\t1\t1\t2\t2\t6\t1855\t298\t128\t38\t96.681473\t125,00\n4\t1\t1\t2\t3\t0\t63\t618\t1920\t38\t-1\t\n5\t1\t1\t2\t3\t1\t63\t618\t111\t33\t96.109756\tИтого\n5\t1\t1\t2\t3\t2\t1855\t618\t128\t38\t96.283569\t125,00\n"
+    },
+    {
+      "key": "english-webp",
+      "pid": 43294,
+      "exited": true,
+      "stdoutBytes": 1456,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "d9c69aadeb439af196acf6870c016325eb112c5cbc14b6667ecbdced73f099d5",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1940\t620\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.865822\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t91.404350\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t92.092247\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t86.975815\tNOT\n5\t1\t1\t1\t1\t5\t452\t28\t14\t50\t86.975815\tA\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t95.291763\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t95.291763\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1940\t497\t-1\t\n4\t1\t1\t2\t1\t0\t63\t154\t1938\t50\t-1\t\n5\t1\t1\t2\t1\t1\t63\t154\t214\t50\t96.732483\tDescription\n5\t1\t1\t2\t1\t2\t962\t158\t66\t41\t95.546951\tQty\n5\t1\t1\t2\t1\t3\t1213\t154\t75\t50\t96.517197\tUnit\n5\t1\t1\t2\t1\t4\t1473\t154\t95\t50\t96.910347\tPrice\n5\t1\t1\t2\t1\t5\t1850\t158\t151\t33\t96.552727\tAmount\n4\t1\t1\t2\t2\t0\t62\t298\t1921\t41\t-1\t\n5\t1\t1\t2\t2\t1\t62\t298\t118\t33\t96.501289\tCedar\n5\t1\t1\t2\t2\t2\t194\t298\t185\t41\t96.586754\tShampoo\n5\t1\t1\t2\t2\t3\t961\t298\t58\t33\t96.732239\t2.5\n5\t1\t1\t2\t2\t4\t1213\t307\t64\t32\t96.934853\tpcs\n5\t1\t1\t2\t2\t5\t1472\t298\t131\t33\t96.596535\t300.00\n5\t1\t1\t2\t2\t6\t1852\t298\t131\t33\t95.716766\t750.00\n4\t1\t1\t2\t3\t0\t63\t438\t1920\t41\t-1\t\n5\t1\t1\t2\t3\t1\t63\t438\t99\t33\t96.219078\tHand\n5\t1\t1\t2\t3\t2\t180\t438\t127\t33\t96.157516\tCream\n5\t1\t1\t2\t3\t3\t965\t438\t11\t32\t95.125786\t1\n5\t1\t1\t2\t3\t4\t1213\t447\t64\t32\t96.934853\tpcs\n5\t1\t1\t2\t3\t5\t1475\t438\t128\t33\t96.675201\t125.50\n5\t1\t1\t2\t3\t6\t1855\t438\t128\t33\t96.675201\t125.50\n4\t1\t1\t2\t4\t0\t61\t614\t1922\t49\t-1\t\n5\t1\t1\t2\t4\t1\t61\t614\t89\t49\t96.910698\tTotal\n5\t1\t1\t2\t4\t2\t1852\t618\t131\t33\t96.538002\t875.50\n"
+    },
+    {
+      "key": "printed-total-disagrees",
+      "pid": 43295,
+      "exited": true,
+      "stdoutBytes": 1211,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "68722499a4f26cf242482e79aaf8c870e3f5f18d5b1832de12645e044a3f3a98",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.030197\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.167892\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.137878\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.605843\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.605843\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.442101\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.390976\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1925\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.876831\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.605919\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.064743\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1920\t41\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t184\t41\t96.624733\tШампунь\n5\t1\t1\t2\t2\t2\t262\t298\t123\t33\t96.787956\tСосна\n5\t1\t1\t2\t2\t3\t961\t298\t21\t32\t97.021416\t2\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t92.858604\tшт\n5\t1\t1\t2\t2\t5\t1472\t298\t131\t33\t96.595772\t300.00\n5\t1\t1\t2\t2\t6\t1852\t298\t131\t33\t96.692924\t950.00\n4\t1\t1\t2\t3\t0\t63\t618\t1920\t33\t-1\t\n5\t1\t1\t2\t3\t1\t63\t618\t111\t33\t96.109756\tИтого\n5\t1\t1\t2\t3\t2\t1852\t618\t131\t33\t96.967674\t950.00\n"
+    },
+    {
+      "key": "jpeg-exif-rotation",
+      "pid": 43296,
+      "exited": true,
+      "stdoutBytes": 1546,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "b19c0a7ef9d4bf1b8e9c50ff4cd6f1cea0b48119902dc3c4aaef661a02dd8610",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1939\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.748871\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t92.493538\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t92.478470\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t88.148613\tNOT\n5\t1\t1\t1\t1\t5\t452\t28\t14\t50\t88.148613\tA\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t94.976944\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t94.976944\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1939\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.953415\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t94.806999\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.683517\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.427773\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.687180\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1920\t41\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t184\t41\t96.418877\tШампунь\n5\t1\t1\t2\t2\t2\t264\t298\t94\t41\t96.418877\tКедр\n5\t1\t1\t2\t2\t3\t961\t298\t58\t33\t96.020630\t2.5\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t93.869469\tшт\n5\t1\t1\t2\t2\t5\t1472\t298\t131\t33\t96.289581\t300.00\n5\t1\t1\t2\t2\t6\t1852\t298\t131\t33\t96.718758\t750.00\n4\t1\t1\t2\t3\t0\t63\t438\t1920\t39\t-1\t\n5\t1\t1\t2\t3\t1\t63\t438\t123\t33\t96.765778\tМаска\n5\t1\t1\t2\t3\t2\t200\t447\t73\t30\t96.230972\tдля\n5\t1\t1\t2\t3\t3\t291\t447\t115\t24\t95.783936\tволос\n5\t1\t1\t2\t3\t4\t962\t438\t82\t33\t93.752853\t0.75\n5\t1\t1\t2\t3\t5\t1210\t447\t23\t23\t89.327225\tn\n5\t1\t1\t2\t3\t6\t1471\t438\t132\t33\t96.920731\t480.00\n5\t1\t1\t2\t3\t7\t1852\t438\t131\t33\t96.364136\t360.00\n4\t1\t1\t2\t4\t0\t63\t618\t1937\t33\t-1\t\n5\t1\t1\t2\t4\t1\t63\t618\t111\t33\t96.648682\tИтого\n5\t1\t1\t2\t4\t2\t1855\t618\t145\t33\t96.587898\t1110.00\n"
+    },
+    {
+      "key": "occluded-price",
+      "pid": 43299,
+      "exited": true,
+      "stdoutBytes": 1204,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "74bcf519a6a74e7c5a414471db5a74d4b115641964e10634a3276e1e79d81e79",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.649643\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t44\t91\t21\t92.680153\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t92.925140\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t54.104748\tМОТ\n5\t1\t1\t1\t1\t5\t447\t39\t15\t36\t54.104748\tА\n5\t1\t1\t1\t1\t6\t476\t44\t75\t21\t94.045563\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.374771\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t155\t1925\t496\t-1\t\n4\t1\t1\t2\t1\t0\t61\t155\t1925\t49\t-1\t\n5\t1\t1\t2\t1\t1\t61\t159\t117\t40\t96.937164\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t155\t60\t49\t94.684959\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t159\t101\t40\t95.800941\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t63\t261\t1919\t93\t-1\t\n5\t1\t1\t2\t2\t1\t63\t299\t88\t32\t96.691429\tГель\n5\t1\t1\t2\t2\t2\t168\t299\t181\t32\t96.742043\tРомашка\n5\t1\t1\t2\t2\t3\t961\t298\t21\t32\t97.021416\t2\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t92.858604\tшт\n5\t1\t1\t2\t2\t5\t1458\t261\t318\t93\t22.767744\tpo\n5\t1\t1\t2\t2\t6\t1852\t298\t130\t33\t96.875092\t600.00\n4\t1\t1\t2\t3\t0\t63\t618\t1919\t33\t-1\t\n5\t1\t1\t2\t3\t1\t63\t619\t111\t32\t96.109756\tИтого\n5\t1\t1\t2\t3\t2\t1852\t618\t130\t33\t96.013893\t600.00\n"
+    },
+    {
+      "key": "missing-price",
+      "pid": 43301,
+      "exited": true,
+      "stdoutBytes": 1162,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "edb86f798dcc5237a08e2c10840dfd95a0794ade10c39feced033d906dd1d885",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.030197\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.167892\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.137878\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.605843\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.605843\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.442101\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.390976\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1925\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.876831\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.605919\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.064743\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1920\t33\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t114\t33\t96.689346\tМыло\n5\t1\t1\t2\t2\t2\t193\t298\t148\t33\t96.464783\tОблако\n5\t1\t1\t2\t2\t3\t965\t298\t54\t33\t96.676720\t1.5\n5\t1\t1\t2\t2\t4\t1213\t307\t32\t23\t84.512642\tKr\n5\t1\t1\t2\t2\t5\t1851\t298\t132\t33\t96.052406\t450.00\n4\t1\t1\t2\t3\t0\t63\t618\t1920\t33\t-1\t\n5\t1\t1\t2\t3\t1\t63\t618\t111\t33\t96.109756\tИтого\n5\t1\t1\t2\t3\t2\t1851\t618\t132\t33\t96.958740\t450.00\n"
+    },
+    {
+      "key": "unsupported-price-header",
+      "pid": 43305,
+      "exited": true,
+      "stdoutBytes": 1264,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "a5392813ae670c0d2f4f405a53b3e1328857c01b0a19688464632c47edfd7c32",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t95.582153\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.090378\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.106125\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.071754\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.071754\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.177399\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.148758\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1925\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.830826\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.891014\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.284668\tЕд.\n5\t1\t1\t2\t1\t4\t1472\t158\t231\t41\t91.764206\tЗакупочная\n5\t1\t1\t2\t1\t5\t1721\t167\t93\t30\t96.532524\tцена\n5\t1\t1\t2\t1\t6\t1852\t158\t134\t41\t96.697525\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1920\t41\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t99\t41\t96.841232\tКрем\n5\t1\t1\t2\t2\t2\t179\t298\t148\t33\t96.776398\tОблако\n5\t1\t1\t2\t2\t3\t965\t298\t11\t32\t95.204224\t1\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t92.437523\tшт\n5\t1\t1\t2\t2\t5\t1471\t298\t132\t33\t96.667542\t250.00\n5\t1\t1\t2\t2\t6\t1851\t298\t132\t33\t96.680084\t250.00\n4\t1\t1\t2\t3\t0\t63\t618\t1920\t33\t-1\t\n5\t1\t1\t2\t3\t1\t63\t618\t111\t33\t95.942924\tИтого\n5\t1\t1\t2\t3\t2\t1851\t618\t132\t33\t96.680084\t250.00\n"
+    },
+    {
+      "key": "blurred-price",
+      "pid": 43311,
+      "exited": true,
+      "stdoutBytes": 1163,
+      "stderrBytes": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "52ba143874c1bbcd674969a4ce2e6e44b75144318196dcfd564241822dfb4aec",
+      "syntheticTsv": "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n1\t1\t0\t0\t0\t0\t0\t0\t2200\t760\t-1\t\n2\t1\t1\t0\t0\t0\t61\t43\t1925\t608\t-1\t\n3\t1\t1\t1\t0\t0\t61\t43\t671\t22\t-1\t\n4\t1\t1\t1\t1\t0\t61\t43\t671\t22\t-1\t\n5\t1\t1\t1\t1\t1\t61\t43\t168\t22\t96.030197\tSYNTHETIC\n5\t1\t1\t1\t1\t2\t238\t43\t91\t22\t93.167892\tTABLE\n5\t1\t1\t1\t1\t3\t339\t56\t30\t2\t93.137878\t—\n5\t1\t1\t1\t1\t4\t380\t43\t87\t22\t91.605843\tМОТ\n5\t1\t1\t1\t1\t5\t448\t28\t13\t51\t91.605843\tА\n5\t1\t1\t1\t1\t6\t476\t43\t75\t22\t96.442101\tREAL\n5\t1\t1\t1\t1\t7\t561\t43\t171\t22\t96.390976\tDOCUMENT\n3\t1\t1\t2\t0\t0\t61\t154\t1925\t497\t-1\t\n4\t1\t1\t2\t1\t0\t61\t154\t1925\t50\t-1\t\n5\t1\t1\t2\t1\t1\t61\t158\t117\t41\t96.876831\tТовар\n5\t1\t1\t2\t1\t2\t963\t158\t132\t33\t95.662125\tКол-во\n5\t1\t1\t2\t1\t3\t1213\t154\t60\t50\t94.605919\tЕд.\n5\t1\t1\t2\t1\t4\t1473\t158\t101\t41\t95.064743\tЦена\n5\t1\t1\t2\t1\t5\t1852\t158\t134\t41\t96.731941\tСумма\n4\t1\t1\t2\t2\t0\t63\t298\t1920\t41\t-1\t\n5\t1\t1\t2\t2\t1\t63\t298\t99\t41\t96.960754\tКрем\n5\t1\t1\t2\t2\t2\t177\t298\t173\t39\t96.514389\tЛаванда\n5\t1\t1\t2\t2\t3\t961\t298\t21\t32\t97.021416\t2\n5\t1\t1\t2\t2\t4\t1213\t307\t52\t23\t92.858604\tшт\n5\t1\t1\t2\t2\t5\t1852\t298\t131\t33\t96.238876\t700.00\n4\t1\t1\t2\t3\t0\t63\t618\t1920\t33\t-1\t\n5\t1\t1\t2\t3\t1\t63\t618\t111\t33\t96.109756\tИтого\n5\t1\t1\t2\t3\t2\t1852\t618\t131\t33\t96.238876\t700.00\n"
+    }
+  ],
+  "version": [
+    "tesseract 5.5.3",
+    " leptonica-1.87.0",
+    "  libgif 5.2.2 : libjpeg 8d (libjpeg-turbo 3.1.3) : libpng 1.6.58 : libtiff 4.7.2 : zlib 1.2.12 : libwebp 1.6.0 : libopenjp2 2.5.4",
+    " Found NEON"
+  ],
+  "observations": {
+    "contract": "maya.synthetic-goods-photo-observations/1",
+    "actualProcessor": {
+      "engine": "Tesseract native CLI rus+eng fast LSTM",
+      "platform": "darwin",
+      "executionMode": "actual-image-bytes"
+    },
+    "cases": [
+      {
+        "key": "ru-fractions-dot",
+        "imageSha256": "43f49cd1665ef6efda039b3a588be5ea6c125c94255b3b2e38a87003a4ef0a26",
+        "elapsedMs": 145,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Шампунь Кедр",
+              "quantity": "2.5",
+              "unit_label": "шт",
+              "unit_price": "300.00",
+              "line_total": "750.00",
+              "price_kind": null,
+              "confidence": null
+            },
+            {
+              "name": "Маска для волос",
+              "quantity": "0.75",
+              "unit_label": null,
+              "unit_price": "480.00",
+              "line_total": "360.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "ru-changed-pixels",
+        "imageSha256": "61571ad3e5388f366419005ef3124fb539ee92a2ed80b0789b1485ed2dc8240e",
+        "elapsedMs": 148,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Шампунь Липа",
+              "quantity": "3.5",
+              "unit_label": "шт",
+              "unit_price": "320.00",
+              "line_total": "1120.00",
+              "price_kind": null,
+              "confidence": null
+            },
+            {
+              "name": "Маска для волос",
+              "quantity": "0.75",
+              "unit_label": null,
+              "unit_price": "480.00",
+              "line_total": "360.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "ru-fractions-comma",
+        "imageSha256": "3b12160188915c7919c55416f208a6a62c91f0ef02cf0ac218e8c544bee6e6cb",
+        "elapsedMs": 158,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Бальзам Берёза",
+              "quantity": "1.5",
+              "unit_label": null,
+              "unit_price": "240.50",
+              "line_total": "360.75",
+              "price_kind": null,
+              "confidence": null
+            },
+            {
+              "name": "Крем для рук",
+              "quantity": "0.25",
+              "unit_label": null,
+              "unit_price": "800.00",
+              "line_total": "200.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "ru-ambiguous-comma",
+        "imageSha256": "349f7cf976ab9ca20f65a5ad10fd1a0cb38f75f0d7d4fdb6d213cd7c5a16519f",
+        "elapsedMs": 126,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Сироп Мята",
+              "quantity": null,
+              "unit_label": null,
+              "unit_price": "100.00",
+              "line_total": "125.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "english-webp",
+        "imageSha256": "4e1b7f396a37bc2ef664a1f0f5b96d621fc3c7c8a619e721f149bfcaca004b02",
+        "elapsedMs": 141,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Cedar Shampoo",
+              "quantity": "2.5",
+              "unit_label": "pcs",
+              "unit_price": "300.00",
+              "line_total": "750.00",
+              "price_kind": null,
+              "confidence": null
+            },
+            {
+              "name": "Hand Cream",
+              "quantity": "1",
+              "unit_label": "pcs",
+              "unit_price": "125.50",
+              "line_total": "125.50",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "printed-total-disagrees",
+        "imageSha256": "ecc4f51b6c3db6f496d8dfaf016cc43567b6133407744cfe6ebb8dc4dfd7dd75",
+        "elapsedMs": 124,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Шампунь Сосна",
+              "quantity": "2",
+              "unit_label": "шт",
+              "unit_price": "300.00",
+              "line_total": "950.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "jpeg-exif-rotation",
+        "imageSha256": "902a2d3531db213dfd7950910e8011bf178d9acb798caa06fc1e2a79fc5d1e91",
+        "elapsedMs": 159,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Шампунь Кедр",
+              "quantity": "2.5",
+              "unit_label": "шт",
+              "unit_price": "300.00",
+              "line_total": "750.00",
+              "price_kind": null,
+              "confidence": null
+            },
+            {
+              "name": "Маска для волос",
+              "quantity": "0.75",
+              "unit_label": null,
+              "unit_price": "480.00",
+              "line_total": "360.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "occluded-price",
+        "imageSha256": "e077a6aaa9ab6714f75990bf623306e3963fca0d7e657369a1e57a4001625084",
+        "elapsedMs": 142,
+        "outcome": {
+          "status": "refused",
+          "errorCode": "goods_photo_ocr_table_unsupported"
+        }
+      },
+      {
+        "key": "missing-price",
+        "imageSha256": "18ab80292daa50bfd3496d707e743cc1ca64019de4e463d5557b5b708da52979",
+        "elapsedMs": 132,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Мыло Облако",
+              "quantity": "1.5",
+              "unit_label": null,
+              "unit_price": null,
+              "line_total": "450.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      },
+      {
+        "key": "unsupported-price-header",
+        "imageSha256": "af7380e4907007ca019f3d1d57e78b4e708fc043d31ed29de12814a481b02656",
+        "elapsedMs": 146,
+        "outcome": {
+          "status": "refused",
+          "errorCode": "goods_photo_ocr_table_unsupported"
+        }
+      },
+      {
+        "key": "blurred-price",
+        "imageSha256": "232fe36a0e167e20464148f809accc53c3e3a2afdc8dea6bfd948caf76ffdf33",
+        "elapsedMs": 126,
+        "outcome": {
+          "status": "parsed",
+          "lines": [
+            {
+              "name": "Крем Лаванда",
+              "quantity": "2",
+              "unit_label": "шт",
+              "unit_price": null,
+              "line_total": "700.00",
+              "price_kind": null,
+              "confidence": null
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "evaluation": {
+    "contract": "maya.synthetic-goods-photo-corpus-evaluation/1",
+    "qualification": "ASSERTIONS_OVER_CALLER_RECORDED_ACTUAL_OBSERVATIONS; SAFE_NULL_UNIT_IS_MANUAL_REVIEW_NOT_EXACT_OCR; EXECUTION_PROVENANCE_REQUIRES_SEPARATE_HARNESS_EVIDENCE",
+    "actualProcessor": {
+      "engine": "Tesseract native CLI rus+eng fast LSTM",
+      "platform": "darwin",
+      "executionMode": "actual-image-bytes"
+    },
+    "status": "qualified",
+    "syntheticPixelsOnly": true,
+    "realDocumentAcceptance": false,
+    "providerWriteAcceptance": false,
+    "manualReviewRequired": true,
+    "exactOcrAcceptance": false,
+    "unitNullPolicy": "Only the unit literal may additionally be null. Every other fact must match the original expectation; an incorrect non-null unit fails.",
+    "scope": "Single horizontal five-column table with single-line names. Not general invoice acceptance.",
+    "cases": [
+      {
+        "key": "ru-fractions-dot",
+        "status": "safe-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [
+          {
+            "row": 2,
+            "expectedLiteral": "л",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          }
+        ],
+        "extractedRows": 2,
+        "requiredManualReview": "Verify every field, existing item, store, unit, date, currency and purchase-price meaning.",
+        "limitation": "Unit literal was not recognized. Null is a safe incomplete result, not exact OCR recognition or a unit mapping."
+      },
+      {
+        "key": "ru-changed-pixels",
+        "status": "safe-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [
+          {
+            "row": 2,
+            "expectedLiteral": "л",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          }
+        ],
+        "extractedRows": 2,
+        "requiredManualReview": "Same mandatory owner review; changed pixels provide no catalog authority.",
+        "limitation": "Unit literal was not recognized. Null is a safe incomplete result, not exact OCR recognition or a unit mapping."
+      },
+      {
+        "key": "ru-fractions-comma",
+        "status": "safe-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [
+          {
+            "row": 1,
+            "expectedLiteral": "л",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          },
+          {
+            "row": 2,
+            "expectedLiteral": "кг",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          }
+        ],
+        "extractedRows": 2,
+        "requiredManualReview": "Confirm decimal separator and units; no unit conversion or currency inference.",
+        "limitation": "Unit literal was not recognized. Null is a safe incomplete result, not exact OCR recognition or a unit mapping."
+      },
+      {
+        "key": "ru-ambiguous-comma",
+        "status": "safe-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [
+          {
+            "row": 1,
+            "expectedLiteral": "л",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          }
+        ],
+        "extractedRows": 1,
+        "requiredManualReview": "Quantity requires an explicit human value; totals must not resolve punctuation ambiguity.",
+        "limitation": "Missing or ambiguous cells remain null; explicit owner input is required. Unit literal was not recognized. Null is a safe incomplete result, not exact OCR recognition or a unit mapping."
+      },
+      {
+        "key": "english-webp",
+        "status": "exact-provisional",
+        "exactTranscription": true,
+        "missingUnitLabels": [],
+        "extractedRows": 2,
+        "requiredManualReview": "Generic Price does not establish purchase-price meaning; no catalog matching.",
+        "limitation": null
+      },
+      {
+        "key": "printed-total-disagrees",
+        "status": "exact-provisional",
+        "exactTranscription": true,
+        "missingUnitLabels": [],
+        "extractedRows": 1,
+        "requiredManualReview": "Resolve the discrepancy manually. Never calculate 600.00, derive 475.00 or substitute footer total.",
+        "limitation": null
+      },
+      {
+        "key": "jpeg-exif-rotation",
+        "status": "safe-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [
+          {
+            "row": 2,
+            "expectedLiteral": "л",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          }
+        ],
+        "extractedRows": 2,
+        "requiredManualReview": "EXIF rotation qualification only; arbitrary perspective, skew and wrapped rows remain unsupported.",
+        "limitation": "Unit literal was not recognized. Null is a safe incomplete result, not exact OCR recognition or a unit mapping."
+      },
+      {
+        "key": "occluded-price",
+        "status": "limited-refusal",
+        "refusal": "goods_photo_ocr_table_unsupported",
+        "exactTranscription": false,
+        "requiredManualReview": "Price is unreadable. Require explicit manual input or reject the table; never divide total by quantity.",
+        "limitation": "No extracted rows. This case is a qualified refusal, not recognition success."
+      },
+      {
+        "key": "missing-price",
+        "status": "safe-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [
+          {
+            "row": 1,
+            "expectedLiteral": "кг",
+            "actualLiteral": null,
+            "qualification": "UNKNOWN_UNIT_REQUIRES_MANUAL_INPUT; NOT_EXACT_TRANSCRIPTION"
+          }
+        ],
+        "extractedRows": 1,
+        "requiredManualReview": "Provide the missing purchase unit price manually; line total is not a substitute.",
+        "limitation": "Missing or ambiguous cells remain null; explicit owner input is required. Unit literal was not recognized. Null is a safe incomplete result, not exact OCR recognition or a unit mapping."
+      },
+      {
+        "key": "unsupported-price-header",
+        "status": "limited-refusal",
+        "refusal": "goods_photo_ocr_table_unsupported",
+        "exactTranscription": false,
+        "requiredManualReview": "Use manual entry. Do not broaden header grammar or claim purchase-price authority in the proof.",
+        "limitation": "No extracted rows. This case is a qualified refusal, not recognition success."
+      },
+      {
+        "key": "blurred-price",
+        "status": "partial-manual-review",
+        "exactTranscription": false,
+        "missingUnitLabels": [],
+        "extractedRows": 1,
+        "requiredManualReview": "Price is visually unclear after raster blur: require manual input or a table refusal, never reconstruct it from quantity and total.",
+        "limitation": "Missing or ambiguous cells remain null; explicit owner input is required."
+      }
+    ],
+    "failures": [],
+    "exactProvisionalCases": [
+      "english-webp",
+      "printed-total-disagrees"
+    ],
+    "safeManualReviewCases": [
+      "ru-fractions-dot",
+      "ru-changed-pixels",
+      "ru-fractions-comma",
+      "ru-ambiguous-comma",
+      "jpeg-exif-rotation",
+      "missing-price"
+    ],
+    "partialManualReviewCases": [
+      "blurred-price"
+    ],
+    "refusedCases": [
+      "occluded-price",
+      "unsupported-price-header"
+    ]
+  },
+  "sourceUnchanged": true
+}

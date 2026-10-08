@@ -1,0 +1,17 @@
+{
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/goods-photo-ocr-models.json": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/eng.traineddata": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/rus.traineddata": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/ocr-assets/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package.json": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+  "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/package-lock.json": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+  "/opt/homebrew/bin/tesseract": "16020f485da1f534089d82608797d98f71322c67dee772438fb755ad9b4f79b5",
+  "/tmp/maya-linux-ocr-20261008/actual-corpus-proof.mjs": "57a3c9eaaea5d16fb36be683ab8588aa6ca9be6643c435f5b6e41c9bed314f79",
+  "/tmp/maya-linux-ocr-20261008/corpus-plan.mjs": "d07b7c562d1c906f42c0516b4c0ffc07081e610ceb63d08f9373895fa3f94d85",
+  "/tmp/maya-linux-ocr-20261008/generate-corpus.mjs": "0b2968a339da5cb773bce4120d08f46e1b778cfba0ca5dbe14fff92c42197b8b",
+  "/tmp/maya-linux-ocr-20261008/assert-corpus.mjs": "dc613e048c2c525ec5ee41d1cf169be716b7919cce7cfebe7a5a1c3d7bc4de8b"
+}

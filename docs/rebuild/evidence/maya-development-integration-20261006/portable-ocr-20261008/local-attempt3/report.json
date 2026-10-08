@@ -1,0 +1,210 @@
+{
+  "contract": "maya.actual-ocr-local-gates/1",
+  "source": "adbe075656138109b00e33ee4c845fddf7aaf60a",
+  "tree": "d3690a54603ce5af3b8034cc8434457a5d48c7ca",
+  "base": "adbe075656138109b00e33ee4c845fddf7aaf60a",
+  "started": "2026-10-08T13:43:19.235Z",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "probe-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "/tmp/maya-linux-ocr-20261008/http-carrier-harness/tsconfig.proof.json",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "browser-guard",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--test",
+        "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr-browser-guard.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-syntax-0",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--check",
+        "/tmp/maya-linux-ocr-20261008/http-carrier-harness/native-proof.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-syntax-1",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--check",
+        "/tmp/maya-linux-ocr-20261008/http-carrier-harness/bind-native-inputs.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-syntax-2",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--check",
+        "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr-browser.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "http-syntax-3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--check",
+        "/tmp/maya-linux-ocr-20261008/http-carrier-harness/actual-ocr-browser-guard.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "probe-types",
+      "elapsedMs": 5423
+    },
+    {
+      "name": "browser-guard",
+      "elapsedMs": 54
+    },
+    {
+      "name": "http-syntax-0",
+      "elapsedMs": 19
+    },
+    {
+      "name": "http-syntax-1",
+      "elapsedMs": 18
+    },
+    {
+      "name": "http-syntax-2",
+      "elapsedMs": 19
+    },
+    {
+      "name": "http-syntax-3",
+      "elapsedMs": 17
+    }
+  ],
+  "failures": [],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/.dockerignore": "8a75dea5abbb58eda8b8d43bdba4f5e517fc40dd7265cb6231c1516fd6fb61a3",
+    "maya-saas-backend/.env.example": "31f050512e8fee4c617a7cb6063faedcb22d7b8ac793deb197b7c98e01bc82b5",
+    "maya-saas-backend/Dockerfile": "4a306fa5009418a3dddcf538f1c21d5b9dfbc200aaf73cfadd817ddfad83a960",
+    "maya-saas-backend/package.json": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+    "maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+    "maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+    "maya-saas-backend/src/config/runtime-config.spec.ts": "f684fcf6db7662f615b706d516d8695907f4cf02bbc77c76d56f9917121cf96a",
+    "maya-saas-backend/src/config/runtime-config.ts": "58cea2f2b5ed30dc02393b1c9229e6fdb560820d9e79c2fb73ea024da4c2fb90",
+    "maya-saas-backend/scripts/goods-photo-ocr-models.json": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+    "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs": "3d3d8580e585bf6811d29a429d1449108e03dfb22b8b2e0570d1f88efcb239c3",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts": "0eae9deaf32bcff36e794ecb39e7753ee4915074e586e2676796d46f37f92f2a",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract.spec.ts": "19f9c470b5a3e2a1ab764b2dc5a108b6fd6b723098b3edad0ffdbfa9082a23d8",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts": "af65ed15ffdf31a839def2f2b3ca6a631385ba814e455484a5dacf6494c2eb05"
+  },
+  "launcherSha256": "01e0f82e4c88ad094f6337b31c7fda92bbb9010a2a7848a79aa634f55068f3bd",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "probe-types": {
+      "detached": true,
+      "pid": 45255,
+      "pgid": 45255,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "browser-guard": {
+      "detached": true,
+      "pid": 45300,
+      "pgid": 45300,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "http-syntax-0": {
+      "detached": true,
+      "pid": 45302,
+      "pgid": 45302,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "http-syntax-1": {
+      "detached": true,
+      "pid": 45303,
+      "pgid": 45303,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "http-syntax-2": {
+      "detached": true,
+      "pid": 45304,
+      "pgid": 45304,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "http-syntax-3": {
+      "detached": true,
+      "pid": 45305,
+      "pgid": 45305,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "adbe075656138109b00e33ee4c845fddf7aaf60a",
+  "treeAtEnd": "d3690a54603ce5af3b8034cc8434457a5d48c7ca",
+  "dirtyAtEnd": "M .gitignore\n M docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md\n M docs/rebuild/MAYA-GOODS-PHOTO-ACTUAL-OCR-CHECKPOINT-20261008.md\n M docs/rebuild/MAYA-YCLIENTS-RECEIPT-ADAPTER-CHECKPOINT-20261007.md\n M maya-saas-backend/.dockerignore\n M maya-saas-backend/.env.example\n M maya-saas-backend/Dockerfile\n M maya-saas-backend/package.json\n M maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts\n M maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts\n M maya-saas-backend/src/config/runtime-config.spec.ts\n M maya-saas-backend/src/config/runtime-config.ts\n?? docs/rebuild/MAYA-GOODS-PHOTO-PORTABLE-OCR-CHECKPOINT-20261008.md\n?? maya-saas-backend/scripts/goods-photo-ocr-models.json\n?? maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs\n?? maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts\n?? maya-saas-backend/src/ai-tools/goods-photo-tesseract.spec.ts\n?? maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "01e0f82e4c88ad094f6337b31c7fda92bbb9010a2a7848a79aa634f55068f3bd",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T13:43:24.841Z"
+}

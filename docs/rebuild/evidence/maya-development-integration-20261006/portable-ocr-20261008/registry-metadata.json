@@ -1,0 +1,121 @@
+[
+  {
+    "name": "tesseract.js",
+    "version": "7.0.0",
+    "license": "Apache-2.0",
+    "dependencies": {
+      "bmp-js": "^0.1.0",
+      "is-url": "^1.2.4",
+      "zlibjs": "^0.3.1",
+      "idb-keyval": "^6.2.0",
+      "node-fetch": "^2.6.9",
+      "tesseract.js-core": "^7.0.0",
+      "regenerator-runtime": "^0.13.3",
+      "wasm-feature-detect": "^1.8.0",
+      "opencollective-postinstall": "^2.0.3"
+    },
+    "dist": {
+      "shasum": "4106fb6245efab40c57b94bc1798368807526be8",
+      "tarball": "https://registry.npmjs.org/tesseract.js/-/tesseract.js-7.0.0.tgz",
+      "fileCount": 79,
+      "integrity": "sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA==",
+      "signatures": [
+        {
+          "sig": "MEUCIGgQx2/pZtPHH8cok7QDnVw1Clt2Ij4iFhJ3fseCj6H5AiEA1nB+PKYqAEovrqFbiGlol6+XwycIrNTs+27IjVHWqlk=",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "unpackedSize": 1411341
+    },
+    "repository": {
+      "url": "git+https://github.com/naptha/tesseract.js.git",
+      "type": "git"
+    },
+    "scripts": {
+      "lint": "eslint src",
+      "test": "npm-run-all -p -r start test:all",
+      "wait": "rimraf dist && wait-on http://localhost:3000/dist/tesseract.min.js",
+      "build": "rimraf dist && webpack --config scripts/webpack.config.prod.js && rollup -c scripts/rollup.esm.mjs",
+      "start": "node scripts/server.js",
+      "lint:fix": "eslint --fix src",
+      "test:all": "npm-run-all wait test:browser test:node:all",
+      "test:node": "nyc mocha --exit --bail --require ./scripts/test-helper.mjs",
+      "postinstall": "opencollective-postinstall || true",
+      "test:browser": "karma start karma.conf.js",
+      "test:node:all": "npm run test:node -- ./tests/*.test.mjs",
+      "prepublishOnly": "npm run build",
+      "profile:worker": "webpack-bundle-analyzer dist/worker-stats.json",
+      "profile:tesseract": "webpack-bundle-analyzer dist/tesseract-stats.json"
+    }
+  },
+  {
+    "name": "tesseract.js-core",
+    "version": "6.1.2",
+    "license": "Apache-2.0",
+    "dist": {
+      "shasum": "bf131224abd35d9ffe104ddee1c8b6b88a512305",
+      "tarball": "https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-6.1.2.tgz",
+      "fileCount": 16,
+      "integrity": "sha512-pv4GjmramjdObhDyR1q85Td8X60Puu/lGQn7Kw2id05LLgHhAcWgnz6xSdMCSxBMWjQDmMyDXPTC2aqADdpiow==",
+      "signatures": [
+        {
+          "sig": "MEUCIQDWrUiNZitc3xJfus1W2XwtMIvt9oKA43WevM2Y9/62DQIgPnfkwG1Yn3WV8WCnG+I8sjrs1U//Hn2omqVX9EisrF4=",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "unpackedSize": 30606788
+    },
+    "repository": {
+      "url": "git+https://github.com/naptha/tesseract.js-core.git",
+      "type": "git"
+    },
+    "scripts": {
+      "test": "mocha ./tests/unit/*.test.js",
+      "example": "http-server -p 3000"
+    }
+  },
+  {
+    "name": "@tesseract.js-data/rus",
+    "version": "1.0.0",
+    "license": "MIT",
+    "dist": {
+      "shasum": "80f9f16b3ebbabeabfde00b4969784436eea3c67",
+      "tarball": "https://registry.npmjs.org/@tesseract.js-data/rus/-/rus-1.0.0.tgz",
+      "fileCount": 5,
+      "integrity": "sha512-GVOaLultru90gsuVGjXyPCKsg4SMeExnqSnzb8Gb+9zZ0F4wbA6bgWu/metQlcmU7OwTnYVd4UdSH9D4yBMZEA==",
+      "signatures": [
+        {
+          "sig": "MEYCIQCJbSxHElNBghm+xmfRdSHKtEWykDJz6Ln2k1AZZ9T+igIhAIPxgJwTAI6k8F/uBOqL8+AhEYiUc3BSn0rSb+JEn/Pi",
+          "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
+        }
+      ],
+      "unpackedSize": 11314969
+    },
+    "repository": {
+      "url": "git+https://github.com/naptha/tessdata.git",
+      "type": "git"
+    }
+  },
+  {
+    "name": "@tesseract.js-data/eng",
+    "version": "1.0.0",
+    "license": "MIT",
+    "dist": {
+      "shasum": "285a3f1fb419e8e67bdee93ce288b02bb9097f0a",
+      "tarball": "https://registry.npmjs.org/@tesseract.js-data/eng/-/eng-1.0.0.tgz",
+      "fileCount": 5,
+      "integrity": "sha512-mbTumm6KQPUHyzTPQaF3ObXYnx0SqqfV2nabqFVQBwD6Kl7PhGSLSzOlfFTWy0P3BjghaSKA2W9GB19Jk+ZcTg==",
+      "signatures": [
+        {
+          "sig": "MEUCIQDJcqeBLiKpn3PZs36uMUSBBDmXywi/0gIbk2iyhwllMQIgcu1FTnyYnn/dJcM7QYACqNn9sOY6y4sBVJpXn5JogR8=",
+          "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
+        }
+      ],
+      "unpackedSize": 13876967
+    },
+    "repository": {
+      "url": "git+https://github.com/naptha/tessdata.git",
+      "type": "git"
+    }
+  }
+]

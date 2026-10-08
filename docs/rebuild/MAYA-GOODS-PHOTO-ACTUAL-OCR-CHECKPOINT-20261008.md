@@ -1,5 +1,7 @@
 # Actual local goods-photo OCR — 2026-10-08
 
+**Subsequent development:** the [portable OCR checkpoint](MAYA-GOODS-PHOTO-PORTABLE-OCR-CHECKPOINT-20261008.md) adds a native Tesseract port and Linux packaging. This historical Apple Vision evidence retains its original Mac-only scope.
+
 Runtime: `b56ea887fcda770fb988db0e69904b7e95029242`, isolated `codex/maya-development-integration-20261006`. This continues the [photo review pipeline](MAYA-GOODS-PHOTO-REVIEW-CHECKPOINT-20261008.md) with an executable recognizer. Its successful extraction is no longer a DI spy returning literal rows.
 
 ## Useful result

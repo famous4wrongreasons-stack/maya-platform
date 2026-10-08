@@ -1,0 +1,70 @@
+{
+  "capturedAt": "2026-10-08T13:17:58.176556+00:00",
+  "metadataOnly": true,
+  "modelOrPackageBodiesDownloaded": false,
+  "results": [
+    {
+      "url": "https://api.github.com/repos/tesseract-ocr/tessdata_fast/commits/main",
+      "commit": "87416418657359cb625c412a48b6e1d6d41c29bd",
+      "tree": "c4f8a9213d56a853074161b93fe39422d399fe52",
+      "tree_url": "https://api.github.com/repos/tesseract-ocr/tessdata_fast/git/trees/c4f8a9213d56a853074161b93fe39422d399fe52",
+      "files": [
+        {
+          "path": "LICENSE",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "size": 11358,
+          "url": "https://api.github.com/repos/tesseract-ocr/tessdata_fast/git/blobs/d645695673349e3947e8e5ae42332d0ac3164cd7"
+        },
+        {
+          "path": "README.md",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "2b07ea0c9e16c155bb293548b25de18d63703bdf",
+          "size": 4353,
+          "url": "https://api.github.com/repos/tesseract-ocr/tessdata_fast/git/blobs/2b07ea0c9e16c155bb293548b25de18d63703bdf"
+        },
+        {
+          "path": "eng.traineddata",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "bbef4675053b5b468cdb477053e28b1c698ba08e",
+          "size": 4113088,
+          "url": "https://api.github.com/repos/tesseract-ocr/tessdata_fast/git/blobs/bbef4675053b5b468cdb477053e28b1c698ba08e"
+        },
+        {
+          "path": "rus.traineddata",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "b146cb2263acbc6383f8e92ea0ce759537687bb8",
+          "size": 3861738,
+          "url": "https://api.github.com/repos/tesseract-ocr/tessdata_fast/git/blobs/b146cb2263acbc6383f8e92ea0ce759537687bb8"
+        }
+      ]
+    },
+    {
+      "url": "https://registry.npmjs.org/tesseract.js-core/7.0.0",
+      "metadata": {
+        "name": "tesseract.js-core",
+        "version": "7.0.0",
+        "license": "Apache-2.0",
+        "engines": null,
+        "dependencies": null,
+        "dist": {
+          "shasum": "596aa1ab5c130adab12f21059e6aa1a1cecc0bab",
+          "tarball": "https://registry.npmjs.org/tesseract.js-core/-/tesseract.js-core-7.0.0.tgz",
+          "fileCount": 22,
+          "integrity": "sha512-WnNH518NzmbSq9zgTPeoF8c+xmilS8rFIl1YKbk/ptuuc7p6cLNELNuPAzcmsYw450ca6bLa8j3t0VAtq435Vw==",
+          "signatures": [
+            {
+              "sig": "MEUCIA6qJEwYfDBh9jFNrosZVJPBq85KmG+d+rRhU70NCf5uAiEAy0LciDMdViHHCc5zHWrz1RKpMkvYp/eZBHur0EkJCgg=",
+              "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+            }
+          ],
+          "unpackedSize": 45262431
+        }
+      }
+    }
+  ]
+}

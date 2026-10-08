@@ -1,0 +1,26 @@
+{
+  "contract": "maya.tesseract-http-harness-freeze/1",
+  "revision": 2,
+  "status": "PREPARED_NOT_EXECUTED",
+  "createdAt": "2026-10-08T13:48:39.732281+00:00",
+  "previousHarnessProvenance": "/tmp/maya-linux-ocr-20261008/http-carrier-harness-attempt1-provenance",
+  "previousFreezeSha256": "ac383fc11dceb1c21d12a463e29f685e798e93e3980deef0452b630fc4c9a513",
+  "nativePrerequisite": "/tmp/maya-linux-ocr-20261008/actual-attempt3/actual-corpus.json",
+  "nativePrerequisiteSha256": "ac4ddb474f33d308e8fb17c9ef27f09bd2b1c97a9e8691ea50da0275309345d0",
+  "bindingMetadataOnlyExecuted": true,
+  "ocrPgBrowserBuildTestsExecutedByAuthor": false,
+  "files": {
+    "README.md": "004d728ee3774a954285dd3facc39d1b266d26a4bf8c6932cef5823a5d113391",
+    "actual-ocr-browser-guard.mjs": "306e7a04a419bf70974d2d702d194f64758f6e94a296d13a5e29ed03eb010558",
+    "actual-ocr-browser-guard.test.mjs": "674011404026f502f3ae8f864a74deab3a151946a7e77542a4bd1524b88ccdb7",
+    "actual-ocr-browser.mjs": "4dad8defa09616ddd79372b70d67abcc880c456012549250343d97aed7703376",
+    "actual-ocr.probe-spec.ts": "69eaa145b5d575c7bc1218e69f8cd2f3e3eb14f93857d511cf95f892ce2371b4",
+    "bind-native-inputs.mjs": "29fffb5a9c9934b50fa9f9317da4a96b39339ddf22cfe9693a35adb4a7109844",
+    "fixed-input-hashes.json": "0874cb10340214ef2c45d733123baea257bf905af8ff15ffa0194dcfd418f26e",
+    "jest-proof.json": "7df87760d93692e0f319d4396f79f2ce1d091240e90903d57a8ba64bbab0692a",
+    "loopback-only.cjs": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+    "native-proof.mjs": "6483799e5091dc58c450bfabfcb5409194f3a0b60e1736a6788f7e74d7c6903f",
+    "owned-stage.mjs": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+    "tsconfig.proof.json": "0738581f9b0fd265eb80f4a0238df574dcd7f5cba304054e2185f2dcee6752ae"
+  }
+}

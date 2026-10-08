@@ -1,0 +1,278 @@
+{
+  "contract": "maya.actual-ocr-local-gates/1",
+  "source": "dc6684cba67659664910578ef96afe06781f7551",
+  "tree": "a101ad206a98a898f0c4b6b7d0b41ddaa97be97e",
+  "base": "adbe075656138109b00e33ee4c845fddf7aaf60a",
+  "started": "2026-10-08T13:45:18.540Z",
+  "status": "FAIL",
+  "commands": [
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/goods-photo.controller.spec.ts",
+        "src/ai-tools/goods-photo.contract.spec.ts",
+        "src/ai-tools/goods-photo.service.spec.ts",
+        "src/ai-tools/goods-photo-runtime.spec.ts",
+        "src/ai-tools/goods-photo-parser.service.spec.ts",
+        "src/ai-tools/goods-photo-ocr-rows.spec.ts",
+        "src/config/runtime-config.spec.ts",
+        "src/ai-tools/goods-photo-tesseract.spec.ts",
+        "src/ai-tools/goods-photo-tesseract-runtime.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-linux-ocr-20261008/local-attempt4/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-typescript-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/goods-photo-ocr-rows.ts",
+        "src/ai-tools/goods-photo-parser.service.ts",
+        "src/ai-tools/goods-photo-tesseract-runtime.spec.ts",
+        "src/ai-tools/goods-photo-tesseract.spec.ts",
+        "src/ai-tools/goods-photo-tesseract.ts",
+        "src/config/runtime-config.spec.ts",
+        "src/config/runtime-config.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "shell-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "build.mjs",
+        "--typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "shell-photo",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--test",
+        "test/goods-photo-net.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "shell-build",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "build.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-chat-shell",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "carrier-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "build.mjs",
+        "--typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "carrier-photo",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--test",
+        "test/goods-photo.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "carrier-build",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "build.mjs",
+        "--target=web"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "models-verify",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/prepare-goods-photo-ocr-models.mjs",
+        "--verify"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "models-syntax",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--check",
+        "scripts/prepare-goods-photo-ocr-models.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "targeted-unit",
+      "elapsedMs": 1176
+    },
+    {
+      "name": "backend-types",
+      "elapsedMs": 5594
+    },
+    {
+      "name": "widgets-live-types",
+      "elapsedMs": 6397
+    }
+  ],
+  "failures": [
+    {
+      "error": "canonical_owned_stage_exit_1_null\n\n1 !== 0\n"
+    }
+  ],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-saas-backend/.dockerignore": "8a75dea5abbb58eda8b8d43bdba4f5e517fc40dd7265cb6231c1516fd6fb61a3",
+    "maya-saas-backend/.env.example": "31f050512e8fee4c617a7cb6063faedcb22d7b8ac793deb197b7c98e01bc82b5",
+    "maya-saas-backend/Dockerfile": "4a306fa5009418a3dddcf538f1c21d5b9dfbc200aaf73cfadd817ddfad83a960",
+    "maya-saas-backend/package.json": "3de7eb4fd5f53aec13c4cae484dbb23ab3b307283580d7e66b3273ed1ef43201",
+    "maya-saas-backend/scripts/goods-photo-ocr-models.json": "3115bd341e5c9169ac322ddc99531b4b8cb3689449d5e5f9fd4b54c3efe2c897",
+    "maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs": "cbbc4668231666ef2091b5bc4f38a225e58ecc9abfffe642efa96d4e95744975",
+    "maya-saas-backend/src/ai-tools/goods-photo-ocr-rows.ts": "cfaa087864eadb8890989b9cf6733927e3b8be01d4350cd667fa743885869a4f",
+    "maya-saas-backend/src/ai-tools/goods-photo-parser.service.ts": "ca46382274a5431b16babf260221bc2d37f2ede0c1266269c464090d91bd8eb5",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts": "168c30c106cd5b5e77c0cdb4120efaed064e8e305e917adba860c6a4168e5a04",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract.spec.ts": "19f9c470b5a3e2a1ab764b2dc5a108b6fd6b723098b3edad0ffdbfa9082a23d8",
+    "maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+    "maya-saas-backend/src/config/runtime-config.spec.ts": "f684fcf6db7662f615b706d516d8695907f4cf02bbc77c76d56f9917121cf96a",
+    "maya-saas-backend/src/config/runtime-config.ts": "58cea2f2b5ed30dc02393b1c9229e6fdb560820d9e79c2fb73ea024da4c2fb90"
+  },
+  "launcherSha256": "00e14195ee35ca5f0b395b5b1fd36b3d0e480d36400d81e18d992a509be2eede",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "targeted-unit": {
+      "detached": true,
+      "pid": 46387,
+      "pgid": 46387,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "backend-types": {
+      "detached": true,
+      "pid": 46414,
+      "pgid": 46414,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "widgets-live-types": {
+      "detached": true,
+      "pid": 46491,
+      "pgid": 46491,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "changed-typescript-lint": {
+      "detached": true,
+      "pid": 46534,
+      "pgid": 46534,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "dc6684cba67659664910578ef96afe06781f7551",
+  "treeAtEnd": "a101ad206a98a898f0c4b6b7d0b41ddaa97be97e",
+  "dirtyAtEnd": "M docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md\n M docs/rebuild/MAYA-GOODS-PHOTO-ACTUAL-OCR-CHECKPOINT-20261008.md\n M docs/rebuild/MAYA-YCLIENTS-RECEIPT-ADAPTER-CHECKPOINT-20261007.md\n M maya-saas-backend/scripts/prepare-goods-photo-ocr-models.mjs\n M maya-saas-backend/src/ai-tools/goods-photo-tesseract-runtime.spec.ts\n M maya-saas-backend/src/ai-tools/goods-photo-tesseract.ts\n?? docs/rebuild/MAYA-GOODS-PHOTO-PORTABLE-OCR-CHECKPOINT-20261008.md",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "00e14195ee35ca5f0b395b5b1fd36b3d0e480d36400d81e18d992a509be2eede",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T13:45:34.988Z"
+}

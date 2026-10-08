@@ -1,0 +1,13 @@
+{
+  "contract": "maya.actual-filesystem-fifo-model-refusal/1",
+  "platform": "darwin",
+  "sourceSha256": "7c6577c225d0f5388459ddbc08e74f63ea7d3299f0a85fe3e86b9c64945a9e9f",
+  "fixture": "ACTUAL_OWNED_FIFO_NO_WRITER",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "{\"code\":\"goods_photo_parser_not_configured\",\"elapsedMs\":0.28354199999998286,\"workers\":0}\n",
+  "stderr": "",
+  "sourceUnchanged": true,
+  "status": "passed",
+  "ownedFifoRemoved": true
+}

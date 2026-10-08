@@ -1,0 +1,53 @@
+{
+  "metadataOnly": true,
+  "source": {
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/APKINDEX.tar.gz",
+    "metadataCompressedBytes": 523571,
+    "sha256": "8fb9609921712fa3fcd3a794ae4034c2d2e5af3ec226737972cd2bbb0e2045f5"
+  },
+  "choices": [
+    {
+      "name": "busybox",
+      "version": "1.37.0-r30",
+      "packageBytes": 504726,
+      "installedBytes": 813480,
+      "license": "GPL-2.0-only",
+      "dependencies": [
+        "so:libc.musl-x86_64.so.1"
+      ],
+      "apkChecksum": "Q18TR4AbuWsapA0X+CI3w/T/AqRyU="
+    },
+    {
+      "name": "busybox-binsh",
+      "version": "1.37.0-r30",
+      "packageBytes": 1565,
+      "installedBytes": 1,
+      "license": "GPL-2.0-only",
+      "dependencies": [
+        "busybox=1.37.0-r30"
+      ],
+      "apkChecksum": "Q1GI0tARCvpY6KPj5f1CSy2Zbfegk="
+    },
+    {
+      "name": "icu-data-en",
+      "version": "76.1-r1",
+      "packageBytes": 1016029,
+      "installedBytes": 3008672,
+      "license": "ICU",
+      "dependencies": [
+        "/bin/sh"
+      ],
+      "apkChecksum": "Q1B3+6pjcFLd2NYgKDHcGaU7X/9w4="
+    },
+    {
+      "name": "icu-data-full",
+      "version": "76.1-r1",
+      "packageBytes": 12333406,
+      "installedBytes": 31851856,
+      "license": "ICU",
+      "dependencies": [],
+      "apkChecksum": "Q1c4HsITzsa2Ny/76U49QNBbxfRyU="
+    }
+  ],
+  "note": "Explicit metadata alternatives, not an APK install simulation. busybox/binsh already expected in Alpine base; ICU choice is not silently selected."
+}

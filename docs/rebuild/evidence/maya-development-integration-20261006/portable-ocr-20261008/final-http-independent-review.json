@@ -1,0 +1,331 @@
+{
+  "contract": "maya.portable-ocr-http-independent-review/1",
+  "reviewedAt": "2026-10-08T13:55:15.832948+00:00",
+  "reviewer": "/root/independent_review",
+  "disposition": "QUALIFIED_NO_BLOCKER_FOR_SCOPED_LOCAL_HTTP_REACT_UPLOAD_PROOF",
+  "candidateCommit": "7fe7bab96295bb459a037dade2fc7a6ca5c379fd",
+  "methods": {
+    "repoReadOnly": true,
+    "testOrOcrExecution": false,
+    "servicesStarted": false,
+    "network": false,
+    "gitBlobAndSha256Verification": true,
+    "screenshotsViewed": 6,
+    "mainReviewUnchanged": true
+  },
+  "sourceIntegrity": {
+    "entries": 2023,
+    "categories": {
+      "trackedEntries": 1989,
+      "builtEntries": 8,
+      "modelAssetEntries": 3,
+      "externalOrScratchEntries": 23
+    },
+    "uniqueTrackedGitPaths": 1982,
+    "candidateGitTree": "3a16f6392357cada7a116e20811184add50a7ff3",
+    "currentFileMismatches": [],
+    "candidateGitBlobMismatches": [],
+    "aggregateSha256": "09a45423413b1041e2a97f0b67e4912a657111904ceb34b3335d39e159983f43",
+    "matchesManifestAggregate": true,
+    "archivedHarnessCopies": [
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/README.md",
+        "bytes": 6876,
+        "sha256": "004d728ee3774a954285dd3facc39d1b266d26a4bf8c6932cef5823a5d113391",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/actual-ocr-browser-guard.mjs",
+        "bytes": 3081,
+        "sha256": "306e7a04a419bf70974d2d702d194f64758f6e94a296d13a5e29ed03eb010558",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/actual-ocr-browser-guard.test.mjs",
+        "bytes": 2561,
+        "sha256": "674011404026f502f3ae8f864a74deab3a151946a7e77542a4bd1524b88ccdb7",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/actual-ocr-browser.mjs",
+        "bytes": 14950,
+        "sha256": "4dad8defa09616ddd79372b70d67abcc880c456012549250343d97aed7703376",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/actual-ocr.probe-spec.ts",
+        "bytes": 18464,
+        "sha256": "69eaa145b5d575c7bc1218e69f8cd2f3e3eb14f93857d511cf95f892ce2371b4",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/bind-native-inputs.mjs",
+        "bytes": 4355,
+        "sha256": "29fffb5a9c9934b50fa9f9317da4a96b39339ddf22cfe9693a35adb4a7109844",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/fixed-input-hashes.json",
+        "bytes": 3484,
+        "sha256": "0874cb10340214ef2c45d733123baea257bf905af8ff15ffa0194dcfd418f26e",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/jest-proof.json",
+        "bytes": 979,
+        "sha256": "7df87760d93692e0f319d4396f79f2ce1d091240e90903d57a8ba64bbab0692a",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/loopback-only.cjs",
+        "bytes": 606,
+        "sha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/native-proof.mjs",
+        "bytes": 12009,
+        "sha256": "6483799e5091dc58c450bfabfcb5409194f3a0b60e1736a6788f7e74d7c6903f",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/owned-stage.mjs",
+        "bytes": 4513,
+        "sha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+        "matchesRecordedSource": true
+      },
+      {
+        "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/harness/tsconfig.proof.json",
+        "bytes": 1100,
+        "sha256": "0738581f9b0fd265eb80f4a0238df574dcd7f5cba304054e2185f2dcee6752ae",
+        "matchesRecordedSource": true
+      }
+    ],
+    "fixedNativeInputs": 21
+  },
+  "proof": {
+    "jestTests": 1,
+    "jestSuites": 1,
+    "skips": 0,
+    "checkpoints": [
+      "opened",
+      "uploaded",
+      "changed",
+      "unsupported",
+      "malformed",
+      "revoked"
+    ],
+    "uploads": [
+      201,
+      201,
+      400,
+      400,
+      401
+    ],
+    "anonymous": {
+      "status": 401,
+      "noNativeWorker": true,
+      "noRows": true
+    },
+    "nativeWorkers": [
+      {
+        "pid": 49588,
+        "exited": true,
+        "stdoutBytes": 1546,
+        "stderrBytes": 0,
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "e0b4bc5ed3fdce9365f49f94897f2e4f0fe0b65f91251077cb11893fe2504492",
+        "inputKey": "ru-fractions-dot",
+        "matchesDirectNativeOutput": true
+      },
+      {
+        "pid": 49590,
+        "exited": true,
+        "stdoutBytes": 1551,
+        "stderrBytes": 0,
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "04abad1da364a4c06d405c17720e3ef3127408d8ad8c318b52894628faa729bd",
+        "inputKey": "ru-changed-pixels",
+        "matchesDirectNativeOutput": true
+      },
+      {
+        "pid": 49592,
+        "exited": true,
+        "stdoutBytes": 1264,
+        "stderrBytes": 0,
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "a5392813ae670c0d2f4f405a53b3e1328857c01b0a19688464632c47edfd7c32",
+        "inputKey": "unsupported-price-header",
+        "matchesDirectNativeOutput": true
+      }
+    ],
+    "forbiddenEdges": [],
+    "blockedModelAttempts": 0,
+    "blockedProviderOrExternalFetchAttempts": 0,
+    "guards": [
+      {
+        "blocked": [],
+        "errors": []
+      }
+    ],
+    "nativeObservationComparison": "Both returned preview bodies match the separate actual-attempt3 observations exactly after the existing service projection; all three native stdout digests match.",
+    "scope": "Synthetic owner/tenant/current membership plus synthetic active CRM metadata; actual AppModule, auth, HTTP, current React, image bytes, Sharp and native Tesseract. No parser/worker/row mock or expected-result injection."
+  },
+  "screenshots": [
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/opened.png",
+      "bytes": 56560,
+      "sha256": "cbf0e2a4483997bc3c1df32518cce8d52529503775477a07535f5348dc1a568c",
+      "checkpoint": "opened",
+      "width": 1280,
+      "height": 1100,
+      "pixelsInspected": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/uploaded.png",
+      "bytes": 84114,
+      "sha256": "2ba3ebda16baa4869d14b2859f2687c2e2d388a1be314a7180371087eaa6eb0e",
+      "checkpoint": "uploaded",
+      "width": 1280,
+      "height": 1100,
+      "pixelsInspected": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/changed.png",
+      "bytes": 83718,
+      "sha256": "ff291a3c429dcfa6e53d40ae2394cd97da08405b0e9e737d4cbbae71808f8e68",
+      "checkpoint": "changed",
+      "width": 1280,
+      "height": 1100,
+      "pixelsInspected": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/unsupported.png",
+      "bytes": 69423,
+      "sha256": "99d19b3be33777fcbdf2d6225c611d36df0102351be2eeb2f1510e238bb4c7d8",
+      "checkpoint": "unsupported",
+      "width": 1280,
+      "height": 1100,
+      "pixelsInspected": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/malformed.png",
+      "bytes": 62295,
+      "sha256": "33e6c7d990fa0eb4a867154e25f7ac922bc618eeaa5ff6a5f4c00ed6414f4aeb",
+      "checkpoint": "malformed",
+      "width": 1280,
+      "height": 1100,
+      "pixelsInspected": true
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/revoked.png",
+      "bytes": 28192,
+      "sha256": "19d7341fc5d3d2f25493e64a5395f5d16520b8de85a4a00a337e5ce19f0a75ea",
+      "checkpoint": "revoked",
+      "width": 1280,
+      "height": 1100,
+      "pixelsInspected": true
+    }
+  ],
+  "cleanup": {
+    "recordedOwnedGroups": {
+      "migrations": {
+        "detached": true,
+        "pid": 49460,
+        "pgid": 49460,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      },
+      "actual-ocr-browser": {
+        "detached": true,
+        "pid": 49470,
+        "pgid": 49470,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      }
+    },
+    "clusterStopped": true,
+    "postmasterPidAbsentAtReview": true,
+    "pgStopLogSha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "processCommandsRunByReviewer": false,
+    "qualification": "Recorded exact group absence and stop output plus read-only PID-file absence; not an independent process-list or whole-machine census."
+  },
+  "priorAttempt": {
+    "contract": "maya.tesseract-http-preflight-failure/1",
+    "status": "FAIL_BEFORE_PG",
+    "command": "native-proof.mjs --run --browser --expected-commit=7fe7bab96295bb459a037dade2fc7a6ca5c379fd",
+    "error": "listen EPERM: operation not permitted 127.0.0.1",
+    "node": "v24.15.0",
+    "stage": "freePort before proof environment and commands",
+    "pgStarted": false,
+    "nativeOcrStarted": false,
+    "browserStarted": false,
+    "qualification": "Sandbox restriction; not automatic approval rejection. Request explicit permitted execution for the same finite local proof."
+  },
+  "artifacts": [
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/manifest.json",
+      "bytes": 5681,
+      "sha256": "d8f3fa1b2a1a1ea06fbbeac862bb9074a56c913f43b1a68bae1d99d7107f0a9e"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/source-hashes.json",
+      "bytes": 264941,
+      "sha256": "1086df4cbd8073c6594884a60f7f94df020ea129da7cab870291cde6f1e9230d"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/actual-ocr-http.json",
+      "bytes": 5286,
+      "sha256": "01d1e72b9a9b86876de7406173355a1a5e2a3e3a1eed66b89561f253c764ea60"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/browser-jest.json",
+      "bytes": 1324,
+      "sha256": "108e787e8880ac8a1d2046fa2070dc464daecbfb8db2a30f2235836725bae859"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/output/playwright/browser.json",
+      "bytes": 12645,
+      "sha256": "12446a8619d45224c3c0085535605095655e856b6d1e06aad84cf37482b64a5f"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt2/synthetic-malformed.png",
+      "bytes": 16,
+      "sha256": "d9c9bcbbba3f78d5acb0e0223861c44f79e918c161d4ea7b571f5cc6df50797f"
+    },
+    {
+      "path": "/tmp/maya-linux-ocr-20261008/http-browser-attempt1/preflight-failure.json",
+      "bytes": 568,
+      "sha256": "e1b38c4ca14a7b5b502b6d1fc482c4d924c3c27e4139c4e3fdc2c88e215b3e4a"
+    }
+  ],
+  "limits": [
+    "macOS Tesseract 5.5.3 only; no Linux/container execution/deployment equivalence.",
+    "Upload/extraction preview only. No goods search/match/review/approval/receipt/AE workflow, chat language or C9 acceptance.",
+    "Synthetic integration metadata is not actual A17/provider admission. No real document, provider/model, production or paid acceptance.",
+    "Five explicit uploads and pre-request membership revocation; no in-flight revocation race, reload/restart, cross-tenant or load/concurrency acceptance.",
+    "NoBusinessWrites means the exact named fixture tenant counters and recorder families asserted by the probe; auth/setup/revocation and infrastructure writes exist and no global no-effects census is claimed.",
+    "Blocked network/model counters cover installed guards/observers, not machine-wide egress measurement.",
+    "Functional six screenshots are legible but preserve plain serif/default native-control styling; no polished design, mobile or broad accessibility qualification.",
+    "First sandbox listen EPERM remains FAIL_BEFORE_PG; it was not an automatic approval-review denial and is not relabeled passed.",
+    "No release certificate or MAYA/C10 completion."
+  ]
+}

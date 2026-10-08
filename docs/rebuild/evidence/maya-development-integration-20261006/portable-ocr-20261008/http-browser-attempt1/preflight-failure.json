@@ -1,0 +1,12 @@
+{
+  "contract": "maya.tesseract-http-preflight-failure/1",
+  "status": "FAIL_BEFORE_PG",
+  "command": "native-proof.mjs --run --browser --expected-commit=7fe7bab96295bb459a037dade2fc7a6ca5c379fd",
+  "error": "listen EPERM: operation not permitted 127.0.0.1",
+  "node": "v24.15.0",
+  "stage": "freePort before proof environment and commands",
+  "pgStarted": false,
+  "nativeOcrStarted": false,
+  "browserStarted": false,
+  "qualification": "Sandbox restriction; not automatic approval rejection. Request explicit permitted execution for the same finite local proof."
+}
