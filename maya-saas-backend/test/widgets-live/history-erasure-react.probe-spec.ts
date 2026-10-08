@@ -575,7 +575,7 @@ describe('history erasure current React and separate compiled entry restart [syn
       expect(refusal).toMatchObject({
         outcome: 'superseded',
         code: 'handle_stale',
-        stopped_at_gate: 9,
+        stopped_at_gate: '9',
         next_envelope: null,
         resolved_widget: null,
         owner_decision: null,
