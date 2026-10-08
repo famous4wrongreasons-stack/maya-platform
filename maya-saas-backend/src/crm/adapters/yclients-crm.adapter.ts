@@ -23,6 +23,13 @@ import {
   type GoodsItemRead,
 } from '../yclients-goods-read';
 import {
+  GOODS_SEARCH_SOURCE_LIMIT,
+  goodsSearchQuery,
+  goodsSearchUnavailable,
+  observedGoodsSearch,
+  type GoodsSearchRead,
+} from '../yclients-goods-search';
+import {
   assertCatalogIdentities,
   SERVICE_CATALOG_READ_CONTRACT,
   type ServiceCatalogRead,
@@ -497,6 +504,32 @@ export class YclientsCRMAdapter implements CRMAdapter {
           ? categoryTitlesById.get(service.category_id) || undefined
           : undefined),
     }));
+  }
+
+  /** One bounded current search. The pinned OpenAPI URL template uses term/count;
+   * parameter metadata instead names search_term/max_count. This qualified
+   * implementation follows the explicit template without a guessed fallback. */
+  async searchGoods(tenantId: string, query: string): Promise<GoodsSearchRead> {
+    void tenantId;
+    const term = goodsSearchQuery(query);
+    try {
+      const companyId = goodsId(this.settings.companyId);
+      const response = await this.request<unknown>(
+        `goods/search/${companyId}`,
+        {
+          method: 'GET',
+          query: new URLSearchParams({
+            term,
+            count: String(GOODS_SEARCH_SOURCE_LIMIT),
+          }),
+          preserveGoodsNumbers: true,
+        },
+      );
+      if (response.success !== true) goodsSearchUnavailable();
+      return observedGoodsSearch(response.data, term, companyId);
+    } catch (error) {
+      goodsSearchUnavailable(error);
+    }
   }
 
   /** One current exact-ID catalog read; no search/category or cached fallback. */

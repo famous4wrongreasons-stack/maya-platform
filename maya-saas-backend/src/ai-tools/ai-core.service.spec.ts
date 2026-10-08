@@ -3330,6 +3330,153 @@ describe('AiCoreService', () => {
     },
   );
 
+  describe('goods search [scripted model only]', () => {
+    const tool = 'inventory.goods.search';
+    it.each([
+      ['Найди товар по штрихкоду 0001234567890', '0001234567890'],
+      ['Найди по штрихкоду 0001234567890', '0001234567890'],
+      ['Найди товар по штрихкоду 0001234567890.', '0001234567890'],
+      ['Найди товар по артикулу: A-01/2', 'A-01/2'],
+      ['Найди по артикулу A-01/2.', 'A-01/2'],
+      ['Найди по артикулу «A-01.».', 'A-01.'],
+      ['Найди товар по штрихкоду «0001234567890» в YCLIENTS', '0001234567890'],
+    ])(
+      'binds an explicit code on the server despite model masking: %s',
+      async (prompt, query) => {
+        const mocks = createService([tool]);
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: { query: 'MODEL_GUESS' } },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          result: { ...search, query },
+        });
+        await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: prompt }],
+        });
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute.mock.calls[0][2].arguments).toEqual({
+          query,
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+          '0001234567890',
+        );
+      },
+    );
+    it.each([
+      'Найди товар по штрихкоду',
+      'Найди товар по штрихкоду 0001234567890 или 0001234567891',
+      'Найди товар по артикулу A01 и по артикулу A02',
+    ])(
+      'clarifies an incomplete or ambiguous explicit code instead of executing the model guess: %s',
+      async (prompt) => {
+        const mocks = createService([tool]);
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: { query: 'MODEL_GUESS' } },
+          }),
+        );
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: prompt }],
+        });
+        expect(answer.reply).toContain('один точный артикул или штрихкод');
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+    const search = {
+      contract: 'maya.goods-search.read/1',
+      source: 'external_crm',
+      scope: 'bounded_goods_and_categories_search',
+      company_id: '5',
+      query: 'шампунь',
+      as_of: '2026-10-08T12:00:00Z',
+      limit: 20,
+      exhaustive: false,
+      may_have_more: false,
+      rows: [
+        { kind: 'category', id: '4', title: 'Уход' },
+        { kind: 'item', id: '123', title: 'SOURCE_TITLE_SENTINEL' },
+      ],
+    };
+    it.each([false, true])(
+      'terminates after one C9 read with a server-composed answer and no item selection (stale=%s)',
+      async (stale) => {
+        const mocks = createService([tool, 'inventory.goods.read']);
+        const timeline = {
+          routeTypedUtterance: jest.fn().mockResolvedValue(null),
+          persistTypedTurn: jest.fn().mockResolvedValue({
+            turnId: 'search-turn',
+            conversationId: 'search-conversation',
+          }),
+          readConversationContext: jest.fn().mockResolvedValue({
+            version: 'maya.chat-context-window/1',
+            contexts: [],
+          }),
+          readBookingSelection: jest.fn().mockResolvedValue(null),
+          persistAssistantReply: jest.fn().mockResolvedValue(undefined),
+        };
+        Object.defineProperty(mocks.service, 'moduleRef', {
+          value: { get: () => timeline },
+        });
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: 'MODEL_INVENTED_PRICE_999',
+            toolCall: { name: tool, arguments: { query: 'шампунь' } },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          execution_id: 'search-read',
+          result: search,
+          stale,
+        });
+        const conversationRead = jest.fn(
+          (...args: Parameters<C9Orchestrator['conversationRead']>) =>
+            args[4](),
+        );
+        Object.defineProperty(mocks.service, 'orchestrator', {
+          value: {
+            conversationDigest: () => 'a'.repeat(64),
+            conversationRead,
+            finishConversationReads: jest.fn().mockResolvedValue(null),
+          },
+        });
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [
+            { role: 'user', content: 'Найди товар шампунь в YCLIENTS' },
+          ],
+        });
+        expect(answer).toMatchObject({
+          action: null,
+          grounding: {
+            domain: 'goods_catalog',
+            status: stale ? 'blocked' : 'verified',
+            evidence_tools: [tool],
+          },
+        });
+        expect(answer.reply).not.toContain('MODEL_INVENTED_PRICE_999');
+        if (stale) expect(answer.reply).not.toContain('SOURCE_TITLE_SENTINEL');
+        else
+          expect(answer.reply).toContain('Товар №123: SOURCE_TITLE_SENTINEL');
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute.mock.calls[0][1]).toBe(tool);
+        expect(conversationRead).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+          'SOURCE_TITLE_SENTINEL',
+        );
+      },
+    );
+  });
+
   describe('exact client dossier selection [scripted model only]', () => {
     const tool = 'clients.dossier.read';
     const ambiguous = {

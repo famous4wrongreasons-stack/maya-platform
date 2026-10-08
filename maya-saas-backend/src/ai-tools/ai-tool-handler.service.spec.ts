@@ -35,6 +35,48 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  describe('goods search binding', () => {
+    it('derives the source revision from the current actor and passes one normalized query without model-supplied source authority', async () => {
+      const goodsReadIdentity = jest.fn().mockResolvedValue('current-revision');
+      const observed = { contract: 'maya.goods-search.read/1', rows: [] };
+      const searchGoodsForActor = jest.fn().mockResolvedValue(observed);
+      const readGoodsItem = jest.fn();
+      const service = createService({
+        crmService: {
+          goodsReadIdentity,
+          searchGoodsForActor,
+          readGoodsItem,
+        } as unknown as CrmService,
+      });
+      const actor = {
+        ...principal,
+        userId: 'owner-a',
+        role: UserRole.TENANT_OWNER,
+      };
+      const args = await service.normalizeArguments(
+        'inventory.goods.search',
+        actor,
+        { query: '  шампунь   большой ', source_revision: 'model-guessed' },
+      );
+      expect(args).toEqual({
+        query: 'шампунь большой',
+        source_revision: 'current-revision',
+      });
+      expect(goodsReadIdentity).toHaveBeenCalledWith('tenant-a', 'owner-a');
+      expect(
+        await service.execute('inventory.goods.search', actor, args, ''),
+      ).toBe(observed);
+      expect(searchGoodsForActor).toHaveBeenCalledTimes(1);
+      expect(searchGoodsForActor).toHaveBeenCalledWith(
+        'tenant-a',
+        'owner-a',
+        'шампунь большой',
+        'current-revision',
+      );
+      expect(readGoodsItem).not.toHaveBeenCalled();
+    });
+  });
+
   describe('canonical task list source', () => {
     it.each([false, true])(
       'reads completed A23 state despite stale or archived Inbox (archived=%s)',

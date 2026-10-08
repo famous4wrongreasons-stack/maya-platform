@@ -1,3 +1,4 @@
+import { goodsSearchQuery } from '../crm/yclients-goods-search';
 import {
   preparedGoods,
   GOODS_RECEIPT_TOOL,
@@ -328,6 +329,9 @@ export class AiToolRegistryService {
       }
       case GOODS_RECEIPT_TOOL:
         return preparedGoods(args);
+      case 'inventory.goods.search':
+        this.assertAllowedKeys(args, ['query']);
+        return { query: goodsSearchQuery(args.query) };
       case 'inventory.goods.read':
         this.assertAllowedKeys(args, ['goods_id']);
         return { goods_id: goodsId(args.goods_id) };

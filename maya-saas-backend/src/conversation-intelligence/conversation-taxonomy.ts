@@ -864,6 +864,23 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       examples: ['Какие товары продаются лучше?'],
     }),
     intent(
+      'inventory.goods_search',
+      'inventory',
+      'Find YCLIENTS goods by a supplied name, article or barcode.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+        permission: 'inventory.read',
+        tools: ['inventory.goods.search'],
+        requiredSlots: ['product'],
+        synonyms: ['найти товар', 'поиск товара', 'товар по артикулу'],
+        examples: ['Найди в YCLIENTS шампунь'],
+        responseRule:
+          'Return observed goods and categories separately. Do not select the first result or infer prices, stock, absence from the complete catalog or mutation authority.',
+      },
+    ),
+    intent(
       'inventory.goods',
       'inventory',
       'Read one exact YCLIENTS goods item and qualified stock quantities.',

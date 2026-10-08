@@ -3,6 +3,7 @@ import type {
   GoodsReceiptResult,
 } from './goods-receipt.contract';
 import type { GoodsItemRead } from './yclients-goods-read';
+import type { GoodsSearchRead } from './yclients-goods-search';
 import type { ServiceCatalogRead } from './service-catalog-read';
 import { CrmProvider } from '../common/domain.enums';
 import type { ServicePriceSnapshot } from './yclients-service-price.contract';
@@ -527,6 +528,8 @@ export interface CRMAdapter {
     beforeDispatch: () => Promise<void>,
   ): Promise<GoodsReceiptResult>;
   readGoodsItem?(tenantId: string, goodsId: string): Promise<GoodsItemRead>;
+  /** Bounded current goods/category search; never an item card or mutation quote. */
+  searchGoods?(tenantId: string, query: string): Promise<GoodsSearchRead>;
   /** Exact management read; the public booking catalog cannot authorize pricing. */
   getServicePriceSnapshot?(
     serviceId: string,

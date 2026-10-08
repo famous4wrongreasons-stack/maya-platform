@@ -488,6 +488,26 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'inventory.goods.search',
+    description:
+      'Search current YCLIENTS goods and categories by a supplied name, article or barcode for the current owner/company. Returns at most 20 observed matches, categories separately from goods; no prices, stock, full-catalog completeness or automatic first-item selection. Ask the owner to specify the desired item ID before an exact goods read. This is read-only and never prepares a goods create/update or stock receipt.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['query'],
+      properties: { query: { type: 'string', minLength: 2, maxLength: 100 } },
+    },
+    allowedRoles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: ['commerce.store', 'crm.integration'],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 8000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'inventory.goods.read',
     description:
       'Read one exact YCLIENTS goods ID for the current owner and configured company. Returns observed prices, distinct sale/write-off units, fractional per-store quantity with unknown stock-unit basis. Never infer receipt quantity, suppliers or sale price from cost. Ask for an exact ID when missing; this is not a full catalog search.',

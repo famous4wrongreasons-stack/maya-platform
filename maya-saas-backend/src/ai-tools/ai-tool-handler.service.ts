@@ -1,3 +1,4 @@
+import { goodsSearchQuery } from '../crm/yclients-goods-search';
 import { GOODS_RECEIPT_TOOL } from '../crm/goods-receipt.contract';
 import { C8ReadService } from '../valuation/c8.read';
 import { MeasurementReadService } from '../measurement/measurement.read.service';
@@ -289,6 +290,13 @@ export class AiToolHandlerService {
         return this.readAvailability(principal.tenantId, args);
       case 'booking.group-availability.read':
         return this.readGroupAvailability(principal.tenantId, args);
+      case 'inventory.goods.search':
+        return this.crmService.searchGoodsForActor(
+          principal.tenantId,
+          principal.userId,
+          String(args.query),
+          String(args.source_revision),
+        );
       case 'inventory.goods.read':
         return this.crmService.readGoodsForActor(
           principal.tenantId,
@@ -2326,6 +2334,15 @@ export class AiToolHandlerService {
         principal.userId,
         args,
       );
+    if (toolName === 'inventory.goods.search') {
+      return {
+        query: goodsSearchQuery(args.query),
+        source_revision: await this.crmService.goodsReadIdentity(
+          principal.tenantId,
+          principal.userId,
+        ),
+      };
+    }
     if (toolName === 'inventory.goods.read') {
       return {
         goods_id: args.goods_id,

@@ -324,6 +324,7 @@ export class AiToolRuntimeService {
     await personal?.revalidate();
     await revalidateAvailability?.();
     await internal.bookingSelector?.revalidate();
+    await this.revalidateGoodsSearch(principal, definition, args);
     if (internal.suppressWidgetTrigger === true) return completed;
     const output = await this.attachReadWidget(
       user,
@@ -340,6 +341,7 @@ export class AiToolRuntimeService {
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
+    await this.revalidateGoodsSearch(principal, definition, args);
     return output;
   }
 
@@ -425,6 +427,7 @@ export class AiToolRuntimeService {
     await personal?.revalidate();
     await revalidateAvailability?.();
     await internal.bookingSelector?.revalidate();
+    await this.revalidateGoodsSearch(principal, definition, args);
     if (internal.suppressWidgetTrigger === true) return completed;
     const output = await this.attachReadWidget(
       user,
@@ -441,7 +444,25 @@ export class AiToolRuntimeService {
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
+    await this.revalidateGoodsSearch(principal, definition, args);
     return output;
+  }
+
+  /** Cached READs skip the source handler. Recheck the current goods owner and
+   * source after awaited persistence/presentation without issuing another GET. */
+  private async revalidateGoodsSearch(
+    principal: AiToolPrincipal,
+    definition: AiToolDefinition,
+    args: ValidatedAiToolArguments,
+  ): Promise<void> {
+    if (definition.name !== 'inventory.goods.search') return;
+    const current = await this.handler.normalizeArguments(
+      definition.name,
+      principal,
+      args,
+    );
+    if (current.source_revision !== args.source_revision)
+      this.executionConflict('goods_source_changed');
   }
 
   private async attachReadWidget(
@@ -2387,19 +2408,23 @@ export class AiToolRuntimeService {
               contract: 'maya.read-authority/1',
               ...(toolName === 'catalog.services.read'
                 ? { source_projection: SERVICE_CATALOG_READ_CONTRACT }
-                : toolName === 'inventory.goods.read'
-                  ? { source_projection: 'maya.goods-item.read/2' }
-                  : toolName === 'catalog.staff.read'
-                    ? // READ cache identity only; rejects legacy name-derived facts.
-                      {
-                        source_projection: 'maya.public-catalog-source-facts/1',
-                      }
-                    : toolName === 'booking.availability.read' ||
-                        toolName === 'booking.group-availability.read'
-                      ? {
-                          source_projection: 'maya.availability-source-scope/2',
+                : toolName === 'inventory.goods.search'
+                  ? { source_projection: 'maya.goods-search.read/1' }
+                  : toolName === 'inventory.goods.read'
+                    ? { source_projection: 'maya.goods-item.read/2' }
+                    : toolName === 'catalog.staff.read'
+                      ? // READ cache identity only; rejects legacy name-derived facts.
+                        {
+                          source_projection:
+                            'maya.public-catalog-source-facts/1',
                         }
-                      : {}),
+                      : toolName === 'booking.availability.read' ||
+                          toolName === 'booking.group-availability.read'
+                        ? {
+                            source_projection:
+                              'maya.availability-source-scope/2',
+                          }
+                        : {}),
               ...(bookingSelector &&
               ['catalog.services.read', 'catalog.staff.read'].includes(toolName)
                 ? {

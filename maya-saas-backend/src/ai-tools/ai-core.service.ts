@@ -1,3 +1,5 @@
+import { goodsSearchReply } from './goods-search-presentation';
+import { explicitGoodsSearchCode } from './goods-search-chat-selection';
 import { goodsReadReply } from './goods-presentation';
 import { ownTasksReply } from './own-tasks-presentation';
 import {
@@ -439,6 +441,7 @@ const GROUNDING_SMALL_METRIC_PATTERN =
 const DATA_TOOL_DOMAINS: Record<string, string> = {
   'tasks.list': 'own_operational_tasks',
   'inventory.goods.read': 'goods_catalog',
+  'inventory.goods.search': 'goods_catalog',
   'analytics.business.query': 'business_query',
   'analytics.employee.query': 'employee_query',
   'analytics.business.profit': 'business_profit',
@@ -1986,6 +1989,28 @@ export class AiCoreService {
           new Date(),
           businessTimezone,
         );
+        if (decision.toolCall.name === 'inventory.goods.search') {
+          const code = explicitGoodsSearchCode(
+            this.latestUserText(dto.messages),
+          );
+          if (code === null)
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Укажите один точный артикул или штрихкод товара для поиска.',
+                source: 'safe_fallback',
+                action: null,
+              },
+              toolResults,
+            );
+          if (code !== undefined) hardenedArguments = { query: code };
+        }
         if (decision.toolCall.name === 'clients.dossier.read') {
           const query = this.clientDossierQuery(
             this.latestUserText(dto.messages),
@@ -2133,7 +2158,10 @@ export class AiCoreService {
         // Public consultation consumes the existing semantic intent, not a
         // phrase fastpath. Catalog reads supporting booking/compound plans keep
         // their existing continuation; this presentation grants no authority.
-        const goodsRead = decision.toolCall.name === 'inventory.goods.read';
+        const goodsRead = [
+          'inventory.goods.read',
+          'inventory.goods.search',
+        ].includes(decision.toolCall.name);
         const publicConsultation =
           decision.toolCall.name === 'catalog.staff.read' &&
           activeSemanticPlan?.tasks.length === 1 &&
@@ -2301,7 +2329,9 @@ export class AiCoreService {
           publicConsultation
         ) {
           const sourceReply = goodsRead
-            ? goodsReadReply(execution.result, execution.stale === true)
+            ? decision.toolCall.name === 'inventory.goods.search'
+              ? goodsSearchReply(execution.result, execution.stale === true)
+              : goodsReadReply(execution.result, execution.stale === true)
             : publicConsultation
               ? publicConsultationReply(
                   execution.result,

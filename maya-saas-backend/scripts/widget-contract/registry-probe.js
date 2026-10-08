@@ -6,7 +6,7 @@ const {SERVICE_PRICE_CAPABILITY,SERVICE_PRICE_TOOL}=require('../../src/crm/yclie
 const {GOODS_RECEIPT_CAPABILITY,GOODS_RECEIPT_TOOL}=require('../../src/crm/goods-receipt.contract');
 
 // Preserve the pre-pricing census (226/221/48/57). Only the exact approved
-// pricing delta (aba6bfe7) and goods delta (38cb213a, F32b/F74b) are subtracted;
+// pricing delta, goods receipt delta and exact read-only goods-search delta are subtracted;
 // expose every admitted identity separately so an unknown/renamed/duplicate
 // entry cannot be hidden by increasing the current cardinality pin.
 const keys={
@@ -27,11 +27,13 @@ const goodsKeys={
   TOOL:[GOODS_RECEIPT_TOOL,'inventory.goods.read'],
   C9:[GOODS_RECEIPT_TOOL,'inventory.goods.read'],
 };
+const searchKeys={AE:[],POLICY:[],TOOL:['inventory.goods.search'],C9:['inventory.goods.search']};
 const census = {
   current:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.length])),
-  historical:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key!==pricingKey[space]&&!goodsKeys[space].includes(key)).length])),
+  historical:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key!==pricingKey[space]&&!goodsKeys[space].includes(key)&&!searchKeys[space].includes(key)).length])),
   pricing:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>key===pricingKey[space])])),
   goods:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>goodsKeys[space].includes(key))])),
+  search:Object.fromEntries(Object.entries(keys).map(([space,rows])=>[space,rows.filter(key=>searchKeys[space].includes(key))])),
 };
 
 // Additional output mode for the existing contract generator. Never activates a

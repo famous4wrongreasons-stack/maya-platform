@@ -765,7 +765,7 @@ try {
     { cwd: BE, encoding: 'utf8' },
   ).trim();
   const expected = {
-    current: { AE: 228, POLICY: 223, TOOL: 51, C9: 60 },
+    current: { AE: 228, POLICY: 223, TOOL: 52, C9: 61 },
     historical: { AE: 226, POLICY: 221, TOOL: 48, C9: 57 },
     pricing: {
       AE: ['crm.service.fixed-price.update.v1'],
@@ -779,6 +779,7 @@ try {
       TOOL: ['inventory.goods.receipt.prepare', 'inventory.goods.read'],
       C9: ['inventory.goods.receipt.prepare', 'inventory.goods.read'],
     },
+    search: { AE: [], POLICY: [], TOOL: ['inventory.goods.search'], C9: ['inventory.goods.search'] },
   };
   chk(
     'the four registry censuses preserve the historical baseline and exact approved deltas',

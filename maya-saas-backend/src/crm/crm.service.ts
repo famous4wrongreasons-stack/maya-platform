@@ -1,3 +1,7 @@
+import {
+  goodsSearchQuery,
+  type GoodsSearchRead,
+} from './yclients-goods-search';
 import { decodeCrmAppointmentKey } from '../domain/appointment-key';
 import { YclientsGoodsReceiptUnknownError } from './yclients-goods-receipt';
 import { EntitlementsService } from '../entitlements/entitlements.service';
@@ -1056,6 +1060,45 @@ export class CrmService {
     if (
       after.revision !== before.revision ||
       result.company_id !== before.companyId
+    )
+      throw new ConflictException('goods_source_changed');
+    return result;
+  }
+
+  /** One bounded source search under the same current owner/company fence as
+   * exact goods reads. Results do not select an item or authorize a receipt. */
+  async searchGoodsForActor(
+    tenantId: string,
+    userId: string,
+    query: string,
+    expectedRevision: string,
+  ): Promise<GoodsSearchRead> {
+    const exactQuery = goodsSearchQuery(query);
+    const before = await this.goodsContext(tenantId, userId);
+    if (before.revision !== expectedRevision)
+      throw new ConflictException('goods_source_changed');
+    if (!before.adapter.searchGoods)
+      throw new ServiceUnavailableException(
+        'qualified_goods_search_unavailable',
+      );
+    let result: GoodsSearchRead;
+    try {
+      result = await before.adapter.searchGoods(tenantId, exactQuery);
+    } catch (error) {
+      if (
+        error instanceof CrmOutcomeUnknownError ||
+        error instanceof CrmRecordGoneError
+      )
+        goodsReadUnavailable('goods_read_source_unavailable', error);
+      if (error instanceof CrmProviderResponseError)
+        goodsReadUnavailable('goods_read_provider_rejected', error);
+      throw error;
+    }
+    const after = await this.goodsContext(tenantId, userId);
+    if (
+      after.revision !== before.revision ||
+      result.company_id !== before.companyId ||
+      result.query !== exactQuery
     )
       throw new ConflictException('goods_source_changed');
     return result;

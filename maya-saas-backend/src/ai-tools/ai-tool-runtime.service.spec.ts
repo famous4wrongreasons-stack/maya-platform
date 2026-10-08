@@ -29,6 +29,106 @@ describe('AiToolRuntimeService', () => {
     membershipStatus: 'active',
   };
 
+  describe('goods search cached authority after awaited work', () => {
+    it.each([false, true])(
+      'withholds cached candidates when the source revision changes during lookup (replay=%s)',
+      async (replay) => {
+        const h = createHarness();
+        let revision = 'initial';
+        let saved: Record<string, unknown> | null = null;
+        jest
+          .spyOn(h.handler, 'normalizeArguments')
+          .mockImplementation((_name, _actor, args) =>
+            Promise.resolve({ ...args, source_revision: revision }),
+          );
+        h.executionFindUnique.mockImplementation(() => Promise.resolve(saved));
+        h.executionCreate.mockImplementation((input: unknown) => {
+          saved = { ...record(record(input).data), id: 'search-execution' };
+          return Promise.resolve(saved);
+        });
+        h.executionUpdate.mockImplementation((input: unknown) => {
+          saved = { ...saved, ...record(record(input).data) };
+          return Promise.resolve(saved);
+        });
+        h.handlerExecute.mockResolvedValue({
+          rows: [{ kind: 'item', id: '123', title: 'PRIVATE_SAVED_CANDIDATE' }],
+        });
+        const actor = { ...customer, role: UserRole.TENANT_OWNER };
+        const dto = {
+          surface: 'web' as const,
+          arguments: { query: 'шампунь' },
+          idempotencyKey: IDEMPOTENCY_KEY,
+        };
+        const run = (cachedReplay = false) =>
+          h.tenantContext.runAsSystemTenant('tenant-a', () =>
+            cachedReplay
+              ? h.runtime.replayCompletedRead(
+                  actor,
+                  'inventory.goods.search',
+                  dto,
+                  'search-execution',
+                  { suppressWidgetTrigger: true },
+                )
+              : h.runtime.execute(actor, 'inventory.goods.search', dto, {
+                  suppressWidgetTrigger: true,
+                }),
+          );
+        await expect(run()).resolves.toMatchObject({ status: 'completed' });
+        jest
+          .spyOn(h.prisma.aiToolExecution, 'findUnique')
+          .mockImplementation(() => {
+            revision = 'rotated';
+            return Promise.resolve(saved) as never;
+          });
+        await expect(run(replay)).rejects.toMatchObject({
+          status: 409,
+          response: { error: { code: 'goods_source_changed' } },
+        });
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('withholds candidates when access is revoked during async presentation', async () => {
+      let revoked = false;
+      const afterCompletedRead = jest.fn().mockImplementation(() => {
+        revoked = true;
+        return Promise.resolve(null);
+      });
+      const h = createHarness({ afterCompletedRead });
+      h.executionCreate.mockImplementation((input: unknown) =>
+        Promise.resolve({
+          ...record(record(input).data),
+          id: 'search-execution',
+        }),
+      );
+      jest
+        .spyOn(h.handler, 'normalizeArguments')
+        .mockImplementation((_name, _actor, args) =>
+          revoked
+            ? Promise.reject(
+                new ForbiddenException('goods_current_unscoped_owner_required'),
+              )
+            : Promise.resolve({ ...args, source_revision: 'initial' }),
+        );
+      h.handlerExecute.mockResolvedValue({
+        rows: [{ kind: 'item', id: '123', title: 'PRIVATE_CANDIDATE' }],
+      });
+      await expect(
+        h.tenantContext.runAsSystemTenant('tenant-a', () =>
+          h.runtime.execute(
+            { ...customer, role: UserRole.TENANT_OWNER },
+            'inventory.goods.search',
+            {
+              surface: 'web',
+              arguments: { query: 'шампунь' },
+              idempotencyKey: IDEMPOTENCY_KEY,
+            },
+          ),
+        ),
+      ).rejects.toThrow('goods_current_unscoped_owner_required');
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe.each(['appointments.own.list', 'loyalty.own.read'])(
     'current verified personal READ context: %s',
     (toolName) => {
@@ -1130,6 +1230,7 @@ function createHarness(
         : undefined,
     ),
     tenantContext,
+    prisma,
     approvalFindUnique,
     approvalCreate,
     approvalUpdateMany,
@@ -1148,6 +1249,7 @@ function createHarness(
     personalRevalidate,
     personal,
     handlerExecute,
+    handler,
     availabilityPreferenceCalendar,
     policyAssertCanExecute,
     policyAssertCanDecide,

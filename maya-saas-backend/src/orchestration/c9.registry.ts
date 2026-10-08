@@ -17,6 +17,7 @@ const domains: Record<string, readonly C9Domain[]> = {
   'catalog.staff.read': ['OCCUPANCY', 'ADMIN'],
   'inventory.goods.receipt.prepare': ['ADMIN'],
   'inventory.goods.read': ['ADMIN'],
+  'inventory.goods.search': ['ADMIN'],
   'inventory.stock.read': ['BUSINESS_INTELLIGENCE'],
   'commerce.certificates.read': ['ADMIN'],
   'commerce.memberships.read': ['ADMIN'],
