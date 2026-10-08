@@ -4,16 +4,32 @@ import { GoodsPhotoPicker } from './GoodsPhotoPicker.tsx';
 
 const failureText = (failure: GoodsPhotoFailureReason | null): string => {
   switch (failure) {
-    case 'recognition_unavailable': return 'Распознавание фото пока не подключено. Строки не извлечены.';
-    case 'invalid_photo': return 'Нужен один файл PNG, JPEG или WebP до 2 МиБ.';
-    case 'invalid_request': return 'Проверьте поля: количество, единицу, закупочную цену, валюту, склад и дату прихода.';
-    case 'source_unavailable': return 'Актуальные данные YCLIENTS недоступны. Сопоставление не завершено.';
-    case 'conflict': return 'Данные или версия предложения изменились. Текущее предложение нельзя повторно отправить с другими полями.';
-    case 'forbidden': return 'Подготовка прихода сейчас недоступна.';
-    case 'signed_out': return 'Сессия завершена.';
-    case 'unknown': return 'Ответ на подготовку предложения не получен. Проверьте текущий разговор; повторная отправка отключена.';
-    case 'unavailable': return 'Подготовка сейчас недоступна. Изменения на склад не подтверждены.';
-    case null: return '';
+    case 'recognition_unavailable':
+      return 'Распознавание фото пока не подключено. Строки не извлечены.';
+    case 'recognition_busy':
+      return 'Распознавание фото сейчас занято. Строки не извлечены.';
+    case 'recognition_failed':
+      return 'Не удалось распознать фото. Строки не извлечены.';
+    case 'unsupported_table':
+      return 'Поддерживается только простая таблица с пятью заголовками: «Наименование», «Количество», «Ед.», «Цена», «Сумма». Строки не извлечены.';
+    case 'invalid_photo':
+      return 'Нужен один файл PNG, JPEG или WebP до 2 МиБ.';
+    case 'invalid_request':
+      return 'Проверьте поля: количество, единицу, закупочную цену, валюту, склад и дату прихода.';
+    case 'source_unavailable':
+      return 'Актуальные данные YCLIENTS недоступны. Сопоставление не завершено.';
+    case 'conflict':
+      return 'Данные или версия предложения изменились. Текущее предложение нельзя повторно отправить с другими полями.';
+    case 'forbidden':
+      return 'Подготовка прихода сейчас недоступна.';
+    case 'signed_out':
+      return 'Сессия завершена.';
+    case 'unknown':
+      return 'Ответ на подготовку предложения не получен. Проверьте текущий разговор; повторная отправка отключена.';
+    case 'unavailable':
+      return 'Подготовка сейчас недоступна. Изменения на склад не подтверждены.';
+    case null:
+      return '';
   }
 };
 

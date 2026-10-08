@@ -72,3 +72,153 @@ test('review loss or malformed success stays unknown with no resend; 401 refresh
   assert.equal(n.calls.length, 2); assert.deepEqual(n.counts(), { authorizations: 1, refreshes: 1, refused: 1 });
   assert.equal(JSON.parse(n.calls[1].init.body).source_revision, sourceRevision);
 });
+test('preview recognizes only exact OCR message and HTTP status pairs, with one request and no retry', async () => {
+  const cases = [
+    [
+      503,
+      { message: 'goods_photo_parser_not_configured' },
+      'recognition_unavailable',
+    ],
+    [503, { message: 'goods_photo_ocr_busy' }, 'recognition_busy'],
+    ...['timeout', 'unavailable', 'output_limit', 'output_invalid'].map(
+      (code) => [
+        503,
+        { message: `goods_photo_ocr_${code}` },
+        'recognition_failed',
+      ],
+    ),
+    [
+      400,
+      { message: 'goods_photo_ocr_table_unsupported' },
+      'unsupported_table',
+    ],
+    [400, { message: 'goods_photo_ocr_busy' }, 'invalid_photo'],
+    [413, { message: 'goods_photo_ocr_table_unsupported' }, 'invalid_photo'],
+    [
+      503,
+      { message: 'goods_photo_ocr_table_unsupported' },
+      'source_unavailable',
+    ],
+    [500, { message: 'goods_photo_ocr_timeout' }, 'unavailable'],
+    [403, { message: 'goods_photo_ocr_busy' }, 'forbidden'],
+    [409, { message: 'goods_photo_ocr_timeout' }, 'conflict'],
+    [200, { message: 'goods_photo_ocr_busy' }, 'unavailable'],
+    [503, { message: 'goods_photo_ocr_timeout_extra' }, 'source_unavailable'],
+    [503, { message: ['goods_photo_ocr_busy'] }, 'source_unavailable'],
+    [
+      503,
+      {
+        error: {
+          message: 'goods_photo_ocr_busy',
+          code: 'goods_photo_ocr_busy',
+        },
+      },
+      'source_unavailable',
+    ],
+    [
+      503,
+      {
+        message: 'Current CRM read unavailable',
+        error: { code: 'goods_read_source_unavailable' },
+      },
+      'source_unavailable',
+    ],
+  ];
+  for (const [status, body, reason] of cases) {
+    const n = net([{ status, body }]);
+    assert.deepEqual(
+      await n.transport.goodsPhotoPreview(
+        new Blob(['abcdefghijkl'], { type: 'image/png' }),
+        signal(),
+      ),
+      { ok: false, failure: { reason } },
+      `${status}: ${JSON.stringify(body)}`,
+    );
+    assert.equal(n.calls.length, 1);
+    assert.deepEqual(n.counts(), {
+      authorizations: 1,
+      refreshes: 0,
+      refused: 0,
+    });
+  }
+});
+test('OCR error names do not reclassify source reads or uncertain proposal preparation', async () => {
+  for (const message of [
+    'goods_photo_parser_not_configured',
+    'goods_photo_ocr_busy',
+    'goods_photo_ocr_timeout',
+    'goods_photo_ocr_unavailable',
+    'goods_photo_ocr_output_limit',
+    'goods_photo_ocr_output_invalid',
+    'goods_photo_ocr_table_unsupported',
+  ]) {
+    for (const status of [400, 503]) {
+      const n = net(
+        Array.from({ length: 3 }, () => ({ status, body: { message } })),
+      );
+      const readReason =
+        status === 400 ? 'invalid_request' : 'source_unavailable';
+      assert.equal(
+        (
+          await n.transport.goodsPhotoSearch(
+            { ...context, query: 'шампунь' },
+            signal(),
+          )
+        ).failure.reason,
+        readReason,
+      );
+      assert.equal(
+        (
+          await n.transport.goodsPhotoItem(
+            { ...context, goods_id: '22' },
+            signal(),
+          )
+        ).failure.reason,
+        readReason,
+      );
+      assert.equal(
+        (
+          await n.transport.goodsPhotoReview(
+            { ...context, proposal: proposal() },
+            signal(),
+          )
+        ).failure.reason,
+        status === 400 ? 'invalid_request' : 'unknown',
+      );
+      assert.equal(n.calls.length, 3);
+    }
+  }
+});
+test('preview error classification does not invoke message accessors or inherit a message', async () => {
+  const originalParse = JSON.parse;
+  let getterCalls = 0;
+  const getter = Object.defineProperty({}, 'message', {
+    get() {
+      getterCalls++;
+      throw new Error('untrusted getter');
+    },
+  });
+  const inherited = Object.create({ message: 'goods_photo_ocr_busy' });
+  try {
+    for (const body of [getter, inherited]) {
+      // JSON cannot carry an accessor. Inject at the parsed-body edge to retain
+      // the classifier's own-data-property guarantee without a public test API.
+      JSON.parse = (raw, ...args) =>
+        raw === '{"descriptorProbe":true}' ? body : originalParse(raw, ...args);
+      const n = net([{ status: 503, body: { descriptorProbe: true } }]);
+      assert.equal(
+        (
+          await n.transport.goodsPhotoPreview(
+            new Blob(['abcdefghijkl'], { type: 'image/png' }),
+            signal(),
+          )
+        ).failure.reason,
+        'source_unavailable',
+      );
+      assert.equal(n.calls.length, 1);
+    }
+  } finally {
+    JSON.parse = originalParse;
+  }
+  assert.equal(getterCalls, 0);
+});

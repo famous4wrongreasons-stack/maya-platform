@@ -91,3 +91,45 @@ test('picker clears DOM filename and FileList reference before passing a single 
   assert.equal(currentTarget.value, ''); assert.deepEqual(selected, [photo]);
   assert.equal(input.props.multiple, undefined); assert.equal(input.props.accept, 'image/png,image/jpeg,image/webp');
 });
+test('OCR busy and failed states describe extraction rather than YCLIENTS and never dispatch on render', () => {
+  for (const [failure, message] of [
+    [
+      'recognition_busy',
+      'Распознавание фото сейчас занято. Строки не извлечены.',
+    ],
+    ['recognition_failed', 'Не удалось распознать фото. Строки не извлечены.'],
+  ]) {
+    const p = panel({ failure });
+    assert.ok(p.text.includes(message));
+    assert.doesNotMatch(
+      p.text,
+      /данные YCLIENTS недоступны|Сопоставление не завершено|повтор|успешно|Предварительные строки/,
+    );
+    assert.deepEqual(p.calls, []);
+    assert.equal(
+      p.buttons.some(
+        (b) => b.props.children === 'Подготовить предложение прихода',
+      ),
+      false,
+    );
+  }
+});
+test('unsupported table explains the exact five-header scope without inventing extraction or a retry', () => {
+  const p = panel({ failure: 'unsupported_table' });
+  assert.ok(
+    p.text.includes(
+      'Поддерживается только простая таблица с пятью заголовками: «Наименование», «Количество», «Ед.», «Цена», «Сумма». Строки не извлечены.',
+    ),
+  );
+  assert.doesNotMatch(
+    p.text,
+    /данные YCLIENTS недоступны|Сопоставление не завершено|повтор|Предварительные строки/,
+  );
+  assert.deepEqual(p.calls, []);
+  assert.equal(
+    p.buttons.some(
+      (b) => b.props.children === 'Подготовить предложение прихода',
+    ),
+    false,
+  );
+});

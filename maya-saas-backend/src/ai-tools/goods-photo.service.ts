@@ -2,23 +2,17 @@ import { createHash } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { CrmService } from '../crm/crm.service';
 import { goodsDecimal } from '../crm/yclients-goods-read';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
+import { GoodsPhotoParser } from './goods-photo-parser.service';
+export { GoodsPhotoParser } from './goods-photo-parser.service';
 
-/** Injectable processing edge. No real OCR, model, storage or network default. */
-@Injectable()
-export class GoodsPhotoParser {
-  parse(_bytes: Uint8Array): Promise<unknown> {
-    void _bytes;
-    throw new ServiceUnavailableException('goods_photo_parser_not_configured');
-  }
-}
 export type GoodsPhotoFile = { buffer: Buffer; mimetype: string; size: number };
 const row = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' && !Array.isArray(value)
@@ -31,7 +25,8 @@ const label = (v: unknown) =>
 @Injectable()
 export class GoodsPhotoService {
   constructor(
-    private readonly parser: GoodsPhotoParser,
+    @Inject(GoodsPhotoParser)
+    private readonly parser: Pick<GoodsPhotoParser, 'parse'>,
     private readonly crm: CrmService,
     private readonly policy: AiToolPolicyService,
     private readonly registry: AiToolRegistryService,

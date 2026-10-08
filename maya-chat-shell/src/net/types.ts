@@ -394,7 +394,19 @@ export interface PersonalTransport {
 
 // Explicit goods-photo workflow. Decimal source facts remain exact text.
 export type GoodsPhotoFile = Blob;
-export type GoodsPhotoFailureReason = 'invalid_photo' | 'recognition_unavailable' | 'invalid_request' | 'forbidden' | 'signed_out' | 'source_unavailable' | 'conflict' | 'unavailable' | 'unknown';
+export type GoodsPhotoFailureReason =
+  | 'invalid_photo'
+  | 'recognition_unavailable'
+  | 'recognition_busy'
+  | 'recognition_failed'
+  | 'unsupported_table'
+  | 'invalid_request'
+  | 'forbidden'
+  | 'signed_out'
+  | 'source_unavailable'
+  | 'conflict'
+  | 'unavailable'
+  | 'unknown';
 export interface GoodsPhotoFailure { readonly reason: GoodsPhotoFailureReason }
 export interface GoodsPhotoLine {
   readonly sourceLine: number; readonly name: string | null; readonly quantity: string | null;

@@ -729,23 +729,54 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
   };
 }
 
-const goodsPhotoOutcome = (ex: AuthorizedExchange, project: (body: unknown) => GoodsPhotoResponse | null, mode: 'preview' | 'read' | 'review'): Outcome<GoodsPhotoResponse, GoodsPhotoFailure> => {
+const goodsPhotoOutcome = (
+  ex: AuthorizedExchange,
+  project: (body: unknown) => GoodsPhotoResponse | null,
+  mode: 'preview' | 'read' | 'review',
+): Outcome<GoodsPhotoResponse, GoodsPhotoFailure> => {
   if (ex.kind === 'signed_out') return fail({ reason: 'signed_out' });
   // A failed authorization refresh never dispatched the owner action.
   if (ex.kind === 'unavailable') return fail({ reason: 'unavailable' });
-  if (ex.kind !== 'response') return fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' });
+  if (ex.kind !== 'response')
+    return fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' });
   if (isSuccess(ex.status)) {
     const value = project(ex.body);
-    return value === null ? fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' }) : { ok: true, value };
+    return value === null
+      ? fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' })
+      : { ok: true, value };
   }
-  if (ex.status === 400 || ex.status === 413) return fail({ reason: mode === 'preview' ? 'invalid_photo' : 'invalid_request' });
+  if (mode === 'preview' && (ex.status === 400 || ex.status === 503)) {
+    const descriptor =
+      ex.body && typeof ex.body === 'object'
+        ? Object.getOwnPropertyDescriptor(ex.body, 'message')
+        : undefined;
+    const message: unknown =
+      descriptor && 'value' in descriptor ? descriptor.value : undefined;
+    if (ex.status === 400 && message === 'goods_photo_ocr_table_unsupported')
+      return fail({ reason: 'unsupported_table' });
+    if (ex.status === 503) {
+      if (message === 'goods_photo_parser_not_configured')
+        return fail({ reason: 'recognition_unavailable' });
+      if (message === 'goods_photo_ocr_busy')
+        return fail({ reason: 'recognition_busy' });
+      if (
+        message === 'goods_photo_ocr_timeout' ||
+        message === 'goods_photo_ocr_unavailable' ||
+        message === 'goods_photo_ocr_output_limit' ||
+        message === 'goods_photo_ocr_output_invalid'
+      )
+        return fail({ reason: 'recognition_failed' });
+    }
+  }
+  if (ex.status === 400 || ex.status === 413)
+    return fail({
+      reason: mode === 'preview' ? 'invalid_photo' : 'invalid_request',
+    });
   if (ex.status === 403) return fail({ reason: 'forbidden' });
   if (ex.status === 409) return fail({ reason: 'conflict' });
   if (ex.status === 404) return fail({ reason: 'unavailable' });
-  if (ex.status === 503 && mode !== 'review') {
-    const descriptor = ex.body && typeof ex.body === 'object' ? Object.getOwnPropertyDescriptor(ex.body, 'message') : undefined;
-    return fail({ reason: mode === 'preview' && descriptor && 'value' in descriptor && descriptor.value === 'goods_photo_parser_not_configured' ? 'recognition_unavailable' : 'source_unavailable' });
-  }
+  if (ex.status === 503 && mode !== 'review')
+    return fail({ reason: 'source_unavailable' });
   return fail({ reason: mode === 'review' ? 'unknown' : 'unavailable' });
 };
 

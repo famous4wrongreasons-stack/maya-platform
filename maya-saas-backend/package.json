@@ -62,7 +62,8 @@
     "communication-shadow:proof:ts": "ts-node --project tsconfig.scripts.json --transpile-only scripts/communication-shadow-migration-proof.ts",
     "test:backend": "jest --testNamePattern='^(?!.*\\[INTEGRATION-ONLY\\]).*$'",
     "test:integration": "jest --testNamePattern='\\[INTEGRATION-ONLY\\]'",
-    "ci:dataset:sync": "ts-node --project tsconfig.scripts.json --transpile-only scripts/conversation-intelligence-dataset.ts sync"
+    "ci:dataset:sync": "ts-node --project tsconfig.scripts.json --transpile-only scripts/conversation-intelligence-dataset.ts sync",
+    "build:ocr:vision": "node scripts/build-goods-photo-ocr.mjs"
   },
   "prisma": {
     "seed": "ts-node --transpile-only prisma/seed.ts"
