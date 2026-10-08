@@ -33,7 +33,7 @@ assert.ok(
 assertProofDatabase();
 const KEYS = ['ambiguous', 'unique', 'none', 'unavailable'] as const;
 type ReadKey = (typeof KEYS)[number];
-const QUERIES = ['Иван', 'Иван Петров', 'Зиновий', 'Семён'];
+const QUERIES = ['7346', 'иван петров', 'Зиновий', 'Семён'];
 const REPLIES = {
   ambiguous:
     'Нашла несколько клиентов. Уточните имя и фамилию или последние четыре цифры телефона.',
@@ -44,7 +44,7 @@ const SERVICE = 'Синтетическая услуга PRIVATE_DOSSIER_HISTORY
 const SELECTED: CrmClientSearchResult = {
   id: 'synthetic-selected-client-private',
   name: 'Иван Петров',
-  phone: '+70000000101',
+  phone: '+70000007346',
   visits_count: 7,
   sold_amount: 8400,
   last_visit_date: '2026-09-30T10:00:00.000Z',
@@ -52,7 +52,7 @@ const SELECTED: CrmClientSearchResult = {
 const OTHER: CrmClientSearchResult = {
   id: 'synthetic-other-client-private',
   name: 'Иван Сидоров',
-  phone: '+70000000102',
+  phone: '+70000017346',
   visits_count: 91,
   sold_amount: 999999,
   last_visit_date: '2026-09-29T10:00:00.000Z',
@@ -78,6 +78,9 @@ const UNIQUE_FRAGMENTS = [
   'Средний цикл между визитами — 7 дней.',
 ];
 const PRIVATE_IDENTITIES = [
+  '7346',
+  'иван',
+  'петров',
   'Иван',
   'Петров',
   'Сидоров',

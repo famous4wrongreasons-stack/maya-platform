@@ -3453,6 +3453,11 @@ describe('AiCoreService', () => {
       ['Иван   Петров', 'Иван Петров'],
       ['7346', '7346'],
       ['+7 (999) 123-45-67', '79991234567'],
+      ['Иван Петров 7346', '7346'],
+      [
+        'Агафьян Хрубцков, телефон 7346, подробности последнего визита и история покупок за всё время',
+        '7346',
+      ],
     ])(
       'keeps the entire explicit private query inside the server: %s',
       async (input, query) => {
@@ -3467,9 +3472,114 @@ describe('AiCoreService', () => {
         const external = JSON.stringify(mocks.model.decide.mock.calls);
         expect(external).not.toContain(input);
         expect(external).not.toContain(query);
-        expect(external).not.toMatch(/Петров|петров|PRIVATE_SERVICE/);
+        expect(external).not.toMatch(
+          /Петров|петров|Агафьян|Хрубцков|PRIVATE_SERVICE/,
+        );
       },
     );
+    it.each([
+      ['Сколько визитов у 7346', '7346'],
+      ['Сколько у 7346 бонусов', '7346'],
+      ['Насколько 7346 лоялен', '7346'],
+      ['Какие услуги покупает 7346', '7346'],
+      ['Что 7346 обычно берёт', '7346'],
+      ['Что за клиент 7346', '7346'],
+      ['Расскажи про клиента 7346', '7346'],
+      ['Расскажи про иван петров', 'иван петров'],
+      ['Расскажи о клиенте Агафьян Хрубцков', 'Агафьян Хрубцков'],
+      ['Сколько визитов у клиента Агафьян Хрубцков', 'Агафьян Хрубцков'],
+      ['Сколько у Агафьян Хрубцков визитов', 'Агафьян Хрубцков'],
+      ['Как Агафьян Хрубцков лоялен', 'Агафьян Хрубцков'],
+      ['Какие услуги любит Агафьян Хрубцков', 'Агафьян Хрубцков'],
+      ['Что Агафьян Хрубцков обычно берёт', 'Агафьян Хрубцков'],
+    ])(
+      'masks the exact supported client query and retained user history: %s',
+      async (prompt, query) => {
+        const mocks = fixture(selected);
+        await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: prompt }],
+        });
+        expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({
+          query,
+        });
+        await mocks.service.chat(user, {
+          ...dto,
+          requestId: 'dossier-private-history-follow-up',
+          messages: [
+            { role: 'user', content: prompt },
+            { role: 'assistant', content: 'PRIVATE_DOSSIER_HISTORY' },
+            { role: 'user', content: 'Досье клиента Семён' },
+          ],
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+          query,
+        );
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(
+          /Хрубцков|петров|PRIVATE_DOSSIER/,
+        );
+      },
+    );
+    it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+      'keeps a generic public topic intact without a client query or read: %s',
+      async (prompt) => {
+        const mocks = createService(['analytics.business.query']);
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: 'Общее объяснение.',
+            toolCall: null,
+            semanticPlan: new ConversationIntelligenceService().validatePlan(
+              {
+                tasks: [
+                  {
+                    intent: 'general.explain_term',
+                    entities: { topic: 'Общая тема' },
+                    confidence: 1,
+                  },
+                ],
+              },
+              UserRole.TENANT_OWNER,
+              [],
+            ),
+          }),
+        );
+        const result = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: prompt }],
+        });
+        expect(result.reply).toBe('Общее объяснение.');
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide.mock.calls[0][0].messages).toEqual([
+          { role: 'user', content: prompt },
+        ]);
+      },
+    );
+    it('masks an overlong explicit identity and clarifies without a guessed query', async () => {
+      const mocks = fixture(selected);
+      const privateText = 'Агафьян Хрубцков ' + 'подробности '.repeat(10);
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Досье клиента ' + privateText }],
+      });
+      expect(result.grounding.status).toBe('blocked');
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(
+        /Агафьян|Хрубцков|подробности/,
+      );
+    });
+    it('does not let a model-invented dossier query select a client from a general topic', async () => {
+      const mocks = fixture(selected);
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Расскажи про погоду' }],
+      });
+      expect(result.reply).toContain('Уточните имя и фамилию');
+      expect(result.grounding.status).toBe('blocked');
+      expect(result.action).toBeNull();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    });
     it.each([
       'Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).',
       'Поиск клиентов в CRM сейчас недоступен.',

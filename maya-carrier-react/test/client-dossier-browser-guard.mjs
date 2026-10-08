@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 export const PROMPTS = Object.freeze({
-  ambiguous: "Досье клиента Иван",
-  unique: "Досье клиента Иван Петров",
+  ambiguous: "Сколько визитов у 7346",
+  unique: "Расскажи про иван петров",
   none: "Досье клиента Зиновий",
   unavailable: "Досье клиента Семён",
   revoked: "Досье клиента Иван",

@@ -318,7 +318,7 @@ async function main() {
       0,
       "Initial history must not dispatch a dossier read",
     );
-    let lastReply;
+    let lastReply, uniqueReply;
     for (const key of ["ambiguous", "unique", "none", "unavailable"]) {
       const before = page.apiRequests("/ai/chat").length;
       await sendClientRequest(page, PROMPTS[key]);
@@ -357,6 +357,7 @@ async function main() {
           );
       }
       lastReply = body.reply;
+      if (key === "unique") uniqueReply = body.reply;
       report.observations[key] = {
         reply: body.reply,
         grounding: body.grounding.status,
@@ -377,6 +378,14 @@ async function main() {
       ),
       "Dossier reply must survive actual reload and sign-in",
     );
+    assert.ok(uniqueReply, "Successful dossier reply was observed");
+    assert.ok(
+      await page.waitFor(
+        `Q.log()?.innerText.includes(${JSON.stringify(uniqueReply)})`,
+      ),
+      "Exact useful dossier reply must survive reload and sign-in",
+    );
+    report.observations.reload = { exactUniqueDossierRetained: true };
     assert.equal(
       page.apiRequests("/ai/chat").length,
       chatCount,

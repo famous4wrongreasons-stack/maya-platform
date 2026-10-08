@@ -346,7 +346,7 @@ const CLIENT_ACQUISITION_QUESTION_PATTERN =
  * Поисковая строка связывается сервером; модель выбирает инструмент без ПД.
  */
 const CLIENT_DOSSIER_HINT_PATTERN =
-  /(?:досье|что\s+за\s+клиент|расскажи\s+(?:про|о)\s+|что\s+(?:ему|ей)\s+предложит|что\s+(?:(?:он|она)|.{2,40})\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)|что\s+обычно\s+(?:берет|берёт)|привычк[аи]\s+(?:этого\s+)?клиент|перед\s+(?:его|её|ее|этим)\s+визит|сколько\s+(?:(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у|у\s+(?!меня\b).{2,40}\s+(?:визит|посещени|балл|бонус))|(?:насколько|как).{2,40}\s+лоял[а-яёa-z]*|как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит))/i;
+  /(?:досье|что\s+за\s+клиент|что\s+(?:ему|ей)\s+предложит|что\s+(?:(?:он|она)|.{2,40})\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)|что\s+обычно\s+(?:берет|берёт)|привычк[аи]\s+(?:этого\s+)?клиент|перед\s+(?:его|её|ее|этим)\s+визит|сколько\s+(?:(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у|у\s+(?!меня\b).{2,40}\s+(?:визит|посещени|балл|бонус))|(?:насколько|как).{2,40}\s+лоял[а-яёa-z]*|как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит))/i;
 /** Полный CRM-реестр, лояльность и накопительные периоды отсутствия. */
 const CLIENT_RETENTION_HINT_PATTERN =
   /(?:вс[ея]\s+(?:клиент|баз)|сколько\s+(?:у\s+нас\s+)?(?:всего\s+)?(?:клиент|гост)[а-яёa-z]*\s+(?:в\s+(?:нашей\s+|этой\s+)?баз|всего)|пол[а-яёa-z]*\s+баз[а-яёa-z]*\s+клиент|баз[а-яёa-z]*\s+(?:клиент|гост)|(?:клиент|гост)[а-яёa-z]*\s+в\s+(?:нашей\s+|этой\s+)?баз|лояльн[а-яёa-z]*\s+(?:клиент|гост)|(?:клиент|гост)[а-яёa-z]*\s+лояльн|(?:не\s+(?:был|были|ходил|ходили|ходят|приходил|приходили|приходят|посещал|посещали|посещают|посещало)|неактивн[а-яёa-z]*|спящ[а-яёa-z]*|уснувш[а-яёa-z]*|потерянн[а-яёa-z]*|ушедш[а-яёa-z]*).{0,55}(?:месяц|год|клиент|гост)|(?:клиент|гост)[а-яёa-z]*.{0,55}(?:не\s+(?:был|были|ходил|ходили|ходят|приходил|приходили|приходят|посещал|посещали|посещают|посещало)|неактивн|спящ|уснувш|потерянн|ушедш)|кого\s+(?:нужно\s+|можно\s+)?вернут|(?:как|чем).{0,24}вернут.{0,30}(?:клиент|гост)|как\s+(?:их|этих)\s+вернут|возврат[а-яёa-z]*\s+(?:клиент|гост)|анализ[а-яёa-z]*\s+(?:всей|полной)\s+баз|удержан[а-яёa-z]*\s+клиент)/i;
@@ -1986,6 +1986,41 @@ export class AiCoreService {
           new Date(),
           businessTimezone,
         );
+        if (decision.toolCall.name === 'clients.dossier.read') {
+          const query = this.clientDossierQuery(
+            this.latestUserText(dto.messages),
+            this.previousUserText(dto.messages),
+          );
+          // A model proposal is not a private client selection. Raw identity
+          // comes only from the same server query owner used before redaction.
+          if (!query)
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Уточните имя и фамилию клиента или последние четыре цифры телефона.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  {
+                    evidenceToolNames: ['clients.dossier.read'],
+                    fallbackDomain: 'client_dossier',
+                    closedForAccess: false,
+                    strictNumbers: true,
+                  },
+                  'blocked',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          hardenedArguments = { query };
+        }
         if (decision.toolCall.name === 'staff.schedule.own.read') {
           // Local date binding uses the original utterance: PII redaction can
           // replace a numeric date before it reaches the external planner.
@@ -3627,7 +3662,11 @@ export class AiCoreService {
     }
     // Досье конкретного гостя проверяем до «моих баллов». Иначе фраза
     // «сколько бонусов у Ивана» открывала баланс самого сотрудника.
-    if (CLIENT_DOSSIER_HINT_PATTERN.test(text) && brain?.persona !== 'admin') {
+    if (
+      (CLIENT_DOSSIER_HINT_PATTERN.test(text) ||
+        this.clientDossierSelection(text)) &&
+      brain?.persona !== 'admin'
+    ) {
       return ['clients.dossier.read'];
     }
     if (LOYALTY_HINT_PATTERN.test(text)) {
@@ -3760,38 +3799,9 @@ export class AiCoreService {
     rawText: string,
     rawPreviousText = '',
   ): string | null {
+    const selected = this.clientDossierSelection(rawText);
+    if (selected?.query) return selected.query;
     const text = rawText.replace(/\s+/g, ' ').trim();
-    if (!text) return null;
-
-    const phone = text.match(/\+?\d[\d\s().-]{2,}\d/);
-    if (phone) {
-      const digits = phone[0].replace(/\D/g, '');
-      if (digits.length >= 4) return digits.slice(-11);
-    }
-
-    const patterns = [
-      /(?:что\s+за\s+клиент|досье(?:\s+клиента)?|расскажи\s+(?:про|о))\s+(.+)$/i,
-      /сколько\s+(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у\s+(.+)$/i,
-      /сколько\s+у\s+(.+?)\s+(?:визит|посещени|балл|бонус)[а-яёa-z]*\b/i,
-      /(?:насколько|как)\s+(.+?)\s+лоял[а-яёa-z]*\b/i,
-      /как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит)\s+(.+)$/i,
-      /что\s+(.+?)\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)\b/i,
-    ];
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      const query = match?.[1]
-        ?.replace(/^(?:клиент[а-яёa-z]*|гост[а-яёa-z]*)\s+/i, '')
-        .replace(/[?!.;,]+$/g, '')
-        .trim();
-      if (
-        query &&
-        query.length >= 3 &&
-        query.length <= 80 &&
-        !/^(?:меня|мне|мой|мои|него|нее|неё|ему|ей)$/i.test(query)
-      ) {
-        return query;
-      }
-    }
     if (
       rawPreviousText &&
       /(?:что\s+(?:он|она)\s+(?:обычно\s+)?(?:берет|берёт|любит)|что\s+(?:ему|ей)\s+предложит|сколько\s+у\s+(?:него|нее|неё)\s+(?:визит|посещени|балл|бонус))/i.test(
@@ -3799,6 +3809,76 @@ export class AiCoreService {
       )
     ) {
       return this.clientDossierQuery(rawPreviousText);
+    }
+    return null;
+  }
+
+  /** One private query owner for both CRM binding and model redaction.
+   * Generic topics are not CRM client names. An unmarked generic phrase needs
+   * an already recognized personal-name cue; unknown names require "клиент".
+   * This uses existing name recognition, not a claim of universal PII detection.
+   */
+  private clientDossierSelection(rawText: string): {
+    query: string | null;
+    privateStart: number;
+    privateEnd: number;
+  } | null {
+    const text = rawText.replace(/\s+/g, ' ').trim();
+    const generic = text.match(/расскажи\s+(?:про|о)\s+(.+)$/di);
+    const genericQuery = generic?.[1] ?? '';
+    const namedGeneric =
+      Boolean(generic) &&
+      (/^(?:клиент[а-яёa-z]*|гост[а-яёa-z]*)\s+/i.test(genericQuery) ||
+        /^\[name removed\]@[a-f0-9]{32}_\d+$/.test(genericQuery) ||
+        (
+          genericQuery.match(/[А-ЯЁа-яёA-Za-z][А-ЯЁа-яёA-Za-z-]{1,40}/gu) ?? []
+        ).some((word) => COMMON_PERSON_NAME_FORMS.has(word.toLowerCase())));
+    const patterns = [
+      /(?:что\s+за\s+клиент|досье(?:\s+клиента)?)\s+(.+)$/di,
+      /сколько\s+(?:визит|посещени|балл|бонус)[а-яёa-z]*\s+у\s+(.+)$/di,
+      /сколько\s+у\s+(.+?)\s+(?:визит|посещени|балл|бонус)[а-яёa-z]*(?![а-яёa-z])/di,
+      /(?:насколько|как)\s+(.+?)\s+лоял[а-яёa-z]*(?![а-яёa-z])/di,
+      /как[а-яёa-z]*\s+услуг[а-яёa-z]*\s+(?:покупает|берет|берёт|выбирает|любит)\s+(.+)$/di,
+      /что\s+(.+?)\s+(?:обычно\s+)?(?:берет|берёт|брал|брала|любит)(?![а-яёa-z])/di,
+    ];
+    const matches = patterns.map((pattern) => text.match(pattern));
+    if (namedGeneric) matches.push(generic);
+    for (const match of matches) {
+      const query = match?.[1]
+        ?.replace(/^(?:клиент[а-яёa-z]*|гост[а-яёa-z]*)\s+/i, '')
+        .replace(/[?!.;,]+$/g, '')
+        .trim();
+      const span = match?.indices?.[1];
+      if (
+        query &&
+        span &&
+        !/^(?:меня|мне|мой|мои|него|нее|неё|ему|ей)$/i.test(query)
+      )
+        return {
+          query: (() => {
+            const phone = query.match(/\+?\d[\d\s().-]{2,}\d/);
+            const digits = phone?.[0].replace(/\D/g, '') ?? '';
+            return digits.length >= 4
+              ? digits.slice(-11)
+              : query.length >= 3 && query.length <= 80
+                ? query
+                : null;
+          })(),
+          privateStart: span[0],
+          privateEnd: span[1],
+        };
+    }
+    const clientContext =
+      CLIENT_DOSSIER_HINT_PATTERN.test(text) || namedGeneric;
+    const phone = text.match(/\+?\d[\d\s().-]{2,}\d/);
+    if (phone && clientContext) {
+      const digits = phone[0].replace(/\D/g, '');
+      if (digits.length >= 4)
+        return {
+          query: digits.slice(-11),
+          privateStart: phone.index!,
+          privateEnd: phone.index! + phone[0].length,
+        };
     }
     return null;
   }
@@ -6596,15 +6676,14 @@ export class AiCoreService {
       .replace(/\s+/g, ' ')
       .trim();
     const original = content;
+    const dossier = this.clientDossierSelection(content);
+    if (dossier) {
+      content =
+        content.slice(0, dossier.privateStart) +
+        replaceName(content.slice(dossier.privateStart, dossier.privateEnd)) +
+        content.slice(dossier.privateEnd);
+    }
     content = content
-      // The whole explicit dossier query is private, including an unknown
-      // surname, lowercase name or short phone fragment. The CRM argument is
-      // independently bound from the original user turn inside this server.
-      .replace(
-        /((?:досье(?:\s+клиента)?|что\s+за\s+клиент)\s+)([^\r\n]{3,80})$/giu,
-        (_match: string, prefix: string, query: string) =>
-          `${prefix}${replaceName(query.trim())}`,
-      )
       .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b/gi, '[secret removed]')
       .replace(
         /\b(?:sk|rk|dk|api)[-_][A-Za-z0-9_-]{16,}\b/gi,
