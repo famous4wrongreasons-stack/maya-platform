@@ -1,0 +1,56 @@
+FAIL src/ai-tools/ai-tool-handler.service.spec.ts
+  ● AiToolHandlerService output minimization › explicit unique client dossier › returns only ambiguity before any history, loyalty or recency read
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: "tenant-a", "42", 30
+
+      520 |       const f = fixture();
+      521 |       const result = await f.read('Иван');
+    > 522 |       expect(f.getClientVisitHistory).not.toHaveBeenCalled();
+          |                                           ^
+      523 |       expect(f.getStateForCrmClient).not.toHaveBeenCalled();
+      524 |       expect(f.recency).not.toHaveBeenCalled();
+      525 |       expect(result).toEqual({
+
+      at Object.<anonymous> (ai-tools/ai-tool-handler.service.spec.ts:522:43)
+
+  ● AiToolHandlerService output minimization › explicit unique client dossier › reads only the unique customer after a fresh explicit more precise query
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 5
+
+      Array [
+        Array [
+          "tenant-a",
+    +     "42",
+    +     30,
+    +   ],
+    +   Array [
+    +     "tenant-a",
+          "43",
+          30,
+        ],
+      ]
+
+      540 |         ['tenant-a', 'Иван Сидоров'],
+      541 |       ]);
+    > 542 |       expect(f.getClientVisitHistory.mock.calls).toEqual([
+          |                                                  ^
+      543 |         ['tenant-a', '43', 30],
+      544 |       ]);
+      545 |       expect(f.getStateForCrmClient.mock.calls).toEqual([['tenant-a', '43']]);
+
+      at Object.<anonymous> (ai-tools/ai-tool-handler.service.spec.ts:542:50)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 52 skipped, 54 total
+Snapshots:   0 total
+Time:        0.765 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-handler.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/baseline-unit.json

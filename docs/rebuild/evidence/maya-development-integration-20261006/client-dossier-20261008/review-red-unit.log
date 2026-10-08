@@ -1,0 +1,294 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Сколько визитов у 7346
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "7346"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Сколько визитов у 7346\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.088Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Сколько визитов у 7346\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@56b40c5baac74836854c44c74bd94687_2 [name removed]@56b40c5baac74836854c44c74bd94687_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.088Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Сколько у 7346 бонусов
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "7346"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Сколько у 7346 бонусов\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.116Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Сколько у 7346 бонусов\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@b75dac608cf049988c306b53ff2fd903_2 [name removed]@b75dac608cf049988c306b53ff2fd903_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.117Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Насколько 7346 лоялен
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "7346"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Насколько 7346 лоялен\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.117Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Насколько 7346 лоялен\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@9c273fa76f1d4096921d363d9327b68a_2 [name removed]@9c273fa76f1d4096921d363d9327b68a_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.117Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Какие услуги покупает 7346
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "7346"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Какие услуги покупает 7346\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.118Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Какие услуги покупает 7346\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@ce028df4d12146759e22bca1fa0e8990_2 [name removed]@ce028df4d12146759e22bca1fa0e8990_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.118Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Что 7346 обычно берёт
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "7346"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Что 7346 обычно берёт\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.118Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Что 7346 обычно берёт\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@26ea0baca11748528c99b2edf226275d_2 [name removed]@26ea0baca11748528c99b2edf226275d_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.119Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Расскажи про клиента 7346
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "7346"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Расскажи про клиента 7346\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.120Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Расскажи про клиента 7346\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@f44e6c952bd442e4bdb7308c43e688b8_2 [name removed]@f44e6c952bd442e4bdb7308c43e688b8_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.120Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Расскажи про иван петров
+
+    expect(received).not.toMatch(expected)
+
+    Expected pattern: not /Хрубцков|петров|PRIVATE_DOSSIER/
+    Received string:      "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Расскажи про [name removed]@99d22066faad4678b106acdc7210b639_1 петров\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.120Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Расскажи про [name removed]@34770f886fe44ddfa2016e1dfca70962_1 петров\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@34770f886fe44ddfa2016e1dfca70962_3 [name removed]@34770f886fe44ddfa2016e1dfca70962_2\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.120Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+      3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+    > 3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+           |                                                                 ^
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+      3509 |       'keeps a generic public topic intact without a client query or read: %s', async (prompt) => {
+
+      at ai-tools/ai-core.service.spec.ts:3506:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Расскажи о клиенте Агафьян Хрубцков
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "Агафьян Хрубцков"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Расскажи о клиенте Агафьян Хрубцков\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.121Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Расскажи о клиенте Агафьян Хрубцков\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@131a83226f6f4ef1933d40910b12df49_2 [name removed]@131a83226f6f4ef1933d40910b12df49_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.121Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Сколько визитов у клиента Агафьян Хрубцков
+
+    expect(received).not.toMatch(expected)
+
+    Expected pattern: not /Хрубцков|петров|PRIVATE_DOSSIER/
+    Received string:      "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Сколько визитов у клиента [name removed]@8c7adcfb8b48495ab1eb5ecfc7738922_1 Хрубцков\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.122Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Сколько визитов у клиента [name removed]@5329bb103a1c4b6c92f132af5df09c6e_1 Хрубцков\"},{\"role\":\"user\",\"content\":\"Досье [name removed]@5329bb103a1c4b6c92f132af5df09c6e_3 [name removed]@5329bb103a1c4b6c92f132af5df09c6e_2\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.122Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+      3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+    > 3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+           |                                                                 ^
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+      3509 |       'keeps a generic public topic intact without a client query or read: %s', async (prompt) => {
+
+      at ai-tools/ai-core.service.spec.ts:3506:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Сколько у Агафьян Хрубцков визитов
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "query": "Агафьян Хрубцков",
+    +   "query": "клиент",
+      }
+
+      3492 |         messages: [{role: 'user', content: prompt}],
+      3493 |       });
+    > 3494 |       expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({query});
+           |                                                                  ^
+      3495 |       await mocks.service.chat(user, {
+      3496 |         ...dto,
+      3497 |         requestId: 'dossier-private-history-follow-up',
+
+      at ai-tools/ai-core.service.spec.ts:3494:66
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Как Агафьян Хрубцков лоялен
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "query": "Агафьян Хрубцков",
+    +   "query": "клиент",
+      }
+
+      3492 |         messages: [{role: 'user', content: prompt}],
+      3493 |       });
+    > 3494 |       expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({query});
+           |                                                                  ^
+      3495 |       await mocks.service.chat(user, {
+      3496 |         ...dto,
+      3497 |         requestId: 'dossier-private-history-follow-up',
+
+      at ai-tools/ai-core.service.spec.ts:3494:66
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Какие услуги любит Агафьян Хрубцков
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "Агафьян Хрубцков"
+    Received string:        "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Какие услуги любит Агафьян Хрубцков\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.125Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Какие услуги любит Агафьян Хрубцков\"},{\"role\":\"user\",\"content\":\"Досье клиента [name removed]@45062c9e8e[phone removed]a2c56f66abb11_2\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:35:16.125Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3503 |       });
+      3504 |       expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+    > 3505 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(query);
+           |                                                                 ^
+      3506 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(/Хрубцков|петров|PRIVATE_DOSSIER/);
+      3507 |     });
+      3508 |     it.each(['Расскажи про погоду', 'Расскажи о тайм-менеджменте'])(
+
+      at ai-tools/ai-core.service.spec.ts:3505:65
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Что Агафьян Хрубцков обычно берёт
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "query": "Агафьян Хрубцков",
+    +   "query": "клиент",
+      }
+
+      3492 |         messages: [{role: 'user', content: prompt}],
+      3493 |       });
+    > 3494 |       expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({query});
+           |                                                                  ^
+      3495 |       await mocks.service.chat(user, {
+      3496 |         ...dto,
+      3497 |         requestId: 'dossier-private-history-follow-up',
+
+      at ai-tools/ai-core.service.spec.ts:3494:66
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › keeps a generic public topic intact without a client query or read: Расскажи про погоду
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Общее объяснение."
+    Received: "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно."
+
+      3516 |         }));
+      3517 |         const result = await mocks.service.chat(user, {...dto, messages: [{role: 'user', content: prompt}]});
+    > 3518 |         expect(result.reply).toBe('Общее объяснение.');
+           |                              ^
+      3519 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3520 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      3521 |         expect(mocks.model.decide.mock.calls[0][0].messages).toEqual([{role: 'user', content: prompt}]);
+
+      at ai-tools/ai-core.service.spec.ts:3518:30
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › keeps a generic public topic intact without a client query or read: Расскажи о тайм-менеджменте
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Общее объяснение."
+    Received: "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно."
+
+      3516 |         }));
+      3517 |         const result = await mocks.service.chat(user, {...dto, messages: [{role: 'user', content: prompt}]});
+    > 3518 |         expect(result.reply).toBe('Общее объяснение.');
+           |                              ^
+      3519 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3520 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      3521 |         expect(mocks.model.decide.mock.calls[0][0].messages).toEqual([{role: 'user', content: prompt}]);
+
+      at ai-tools/ai-core.service.spec.ts:3518:30
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › does not let a model-invented dossier query select a client from a general topic
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Уточните имя и фамилию"
+    Received string:    "По карточке CRM: 7 визитов. Сегмент — требуется подтверждённое правило C8. Чаще всего в последних визитах: PRIVATE_SERVICE_SENTINEL. Покупки по карточке — 1 234 ₽. Бонусный баланс CRM для этой карточки не вернула."
+
+      3525 |       const mocks = fixture(selected);
+      3526 |       const result = await mocks.service.chat(user, {...dto, messages: [{role: 'user', content: 'Расскажи про погоду'}]});
+    > 3527 |       expect(result.reply).toContain('Уточните имя и фамилию');
+           |                            ^
+      3528 |       expect(result.grounding.status).toBe('blocked');
+      3529 |       expect(result.action).toBeNull();
+      3530 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:3527:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       16 failed, 220 skipped, 12 passed, 248 total
+Snapshots:   0 total
+Time:        0.739 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/review-red-unit.json

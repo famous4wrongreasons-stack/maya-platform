@@ -1,0 +1,20 @@
+{
+  "contract": "maya.client-dossier-run-bindings/1",
+  "baseline": "e30f4e01b54cf3f33fff98e34d7c8e9f8d097152",
+  "finalRuntime": "6996a22cfd8b4a25f245bb61344560c6de902b27",
+  "launchers": {
+    "local-attempt1": "local-gates.mjs",
+    "local-attempt2": "local-gates-v2.mjs",
+    "local-attempt3": "local-gates-v2.mjs",
+    "browser-attempt1": "native-proof.mjs",
+    "browser-attempt2": "native-proof.mjs"
+  },
+  "acceptedLocal": "local-attempt3",
+  "acceptedBrowser": "browser-attempt2",
+  "intermediateBrowser": {
+    "path": "browser-attempt1",
+    "commit": "fbf47a6ba2cff883e3cbcac1bc0a906afdaba831",
+    "qualification": "Passed finite original prompts; privacy review found additional unsupported coverage. Superseded by final runtime and browser-attempt2."
+  },
+  "qualification": "Local actual HTTP/auth/C9/PostgreSQL/current React; finite synthetic CRM domain ports and scripted model; no real provider/model or process restart acceptance."
+}

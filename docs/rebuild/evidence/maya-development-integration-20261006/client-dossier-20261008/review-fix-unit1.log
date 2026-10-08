@@ -1,0 +1,110 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Сколько у 7346 бонусов
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"query": "7346"}
+    Received: undefined
+
+      3494 |           messages: [{ role: 'user', content: prompt }],
+      3495 |         });
+    > 3496 |         expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({
+           |                                                                    ^
+      3497 |           query,
+      3498 |         });
+      3499 |         await mocks.service.chat(user, {
+
+      at ai-tools/ai-core.service.spec.ts:3496:68
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Сколько у Агафьян Хрубцков визитов
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"query": "Агафьян Хрубцков"}
+    Received: undefined
+
+      3494 |           messages: [{ role: 'user', content: prompt }],
+      3495 |         });
+    > 3496 |         expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({
+           |                                                                    ^
+      3497 |           query,
+      3498 |         });
+      3499 |         await mocks.service.chat(user, {
+
+      at ai-tools/ai-core.service.spec.ts:3496:68
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Как Агафьян Хрубцков лоялен
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"query": "Агафьян Хрубцков"}
+    Received: undefined
+
+      3494 |           messages: [{ role: 'user', content: prompt }],
+      3495 |         });
+    > 3496 |         expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({
+           |                                                                    ^
+      3497 |           query,
+      3498 |         });
+      3499 |         await mocks.service.chat(user, {
+
+      at ai-tools/ai-core.service.spec.ts:3496:68
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › masks the exact supported client query and retained user history: Что Агафьян Хрубцков обычно берёт
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"query": "Агафьян Хрубцков"}
+    Received: undefined
+
+      3494 |           messages: [{ role: 'user', content: prompt }],
+      3495 |         });
+    > 3496 |         expect(mocks.runtime.execute.mock.calls[0]?.[2].arguments).toEqual({
+           |                                                                    ^
+      3497 |           query,
+      3498 |         });
+      3499 |         await mocks.service.chat(user, {
+
+      at ai-tools/ai-core.service.spec.ts:3496:68
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › keeps a generic public topic intact without a client query or read: Расскажи про погоду
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Общее объяснение."
+    Received: "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно."
+
+      3542 |           messages: [{ role: 'user', content: prompt }],
+      3543 |         });
+    > 3544 |         expect(result.reply).toBe('Общее объяснение.');
+           |                              ^
+      3545 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3546 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      3547 |         expect(mocks.model.decide.mock.calls[0][0].messages).toEqual([
+
+      at ai-tools/ai-core.service.spec.ts:3544:30
+
+  ● AiCoreService › exact client dossier selection [scripted model only] › keeps a generic public topic intact without a client query or read: Расскажи о тайм-менеджменте
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Общее объяснение."
+    Received: "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно."
+
+      3542 |           messages: [{ role: 'user', content: prompt }],
+      3543 |         });
+    > 3544 |         expect(result.reply).toBe('Общее объяснение.');
+           |                              ^
+      3545 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3546 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      3547 |         expect(mocks.model.decide.mock.calls[0][0].messages).toEqual([
+
+      at ai-tools/ai-core.service.spec.ts:3544:30
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       6 failed, 315 passed, 321 total
+Snapshots:   0 total
+Time:        1.125 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/review-fix-unit1.json

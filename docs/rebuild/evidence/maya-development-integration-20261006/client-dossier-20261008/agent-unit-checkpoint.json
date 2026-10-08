@@ -1,0 +1,18 @@
+{
+  "completed_at_utc": "2026-10-08T09:12:20.122533+00:00",
+  "baseline_runtime_head": "e30f4e01b54cf3f33fff98e34d7c8e9f8d097152",
+  "scope": "mocked source / real handler unit proof only; no HTTP, PostgreSQL, provider, model or browser run",
+  "baseline_command": "node --max-old-space-size=2048 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/ai-tool-handler.service.spec.ts --testNamePattern='explicit unique client dossier' --json --outputFile=/tmp/maya-client-dossier-20261008/baseline-unit.json",
+  "targeted_command": "node --max-old-space-size=2048 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/ai-tools/ai-tool-handler.service.spec.ts --json --outputFile=/tmp/maya-client-dossier-20261008/targeted-unit.json",
+  "candidate_sources": [
+    {
+      "path": "src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "0135433f04ff6231dfe291628f4e8328156f190f079e0b39a7a5a539e0826193"
+    },
+    {
+      "path": "src/ai-tools/ai-tool-handler.service.spec.ts",
+      "sha256": "41b16e677fc28aeaad2eb82730d3a2026cd9853ad73d1a1f1f9b2b2d3e2fe7d8"
+    }
+  ],
+  "baseline_spec_sha256": "802b06f2db797a5e681215e6f073a33a5ef5bfbe7f92f2380113c2e321c1fa1c"
+}

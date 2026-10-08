@@ -1,0 +1,73 @@
+{
+  "contract": "maya.client-dossier-independent-evidence-review/1",
+  "verdict": "QUALIFIED_PASS",
+  "candidate": "6996a22cfd8b4a25f245bb61344560c6de902b27",
+  "browserSourceHashes": 1850,
+  "localSourceHashes": 9,
+  "unionGitBlobsMatched": 1850,
+  "gitBlobMismatches": [],
+  "compactSourceMapHashMatched": true,
+  "launcherHashesMatched": {
+    "native-proof.mjs": "e43cd2d68db736ac6fe0c4598ad46f3e21f2d4fc9392d970e0f4e52a56e67575",
+    "local-gates-v2.mjs": "b536d1475ce6a2890bced35ec65377d35e9a4b02cfd7668d3b3ff425a6e040cb",
+    "owned-stage.mjs": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+    "loopback-only.cjs": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe"
+  },
+  "canonicalRunCommandHashMatched": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "localBinding": "Executed dirty worktree at fbf47a6b; all nine recorded file hashes equal committed 6996a22c blobs; no post-commit local rerun claim.",
+  "localTests": {
+    "passed": 433,
+    "suites": 5,
+    "pending": 0
+  },
+  "browserTests": {
+    "passed": 1,
+    "suites": 1,
+    "pending": 0
+  },
+  "checkpoints": [
+    "ambiguous",
+    "unique",
+    "none",
+    "unavailable",
+    "reload",
+    "revoked"
+  ],
+  "exactUniqueDossierRetained": true,
+  "localGroupsClosedAbsent": 8,
+  "browserGroupsClosedAbsent": 4,
+  "pgStopLogConfirmed": true,
+  "postmasterPidAbsent": true,
+  "artifactHashes": {
+    "browser-attempt2/browser-jest.json": "3e2b27737d8bccb61d3b0be40b9cf5fd5357fd270f3c12f50743ed93efeb78f9",
+    "browser-attempt2/browser.log": "534eeb74e3bcd7285157a3c11d60287e4de04251a0773afcef6df99dea8cf2c1",
+    "browser-attempt2/client-dossier-observations.json": "06f08362be1ee9b4ebc910475bdaba9a15cc0b26045483cee48e050a0b5257aa",
+    "browser-attempt2/createdb.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "browser-attempt2/initdb.log": "9e7cb7c1400ba78c22bb790d3bfa5ed2f3d66e283ce052c7761d2cc1cfefe1e2",
+    "browser-attempt2/manifest.json": "4efbadf31861d38c06e8c9f9601ad478212a6d321f6de148fc9143b65e3c6b0d",
+    "browser-attempt2/migrations.log": "3217f05bae1cd0755a7557c5374409fd2708451d35197e28a9d04a485d4f11e2",
+    "browser-attempt2/output/playwright/ambiguous.png": "2f0ce6b0b99a6a037ad5df6a06b5c28286380f8bc6280d48ef8f2fe23080678f",
+    "browser-attempt2/output/playwright/browser.json": "12276958dd01f1c94b68df98adc9548ea986f8341b55a428a90cf964efb128a2",
+    "browser-attempt2/output/playwright/none.png": "6d362e8e3b279ea150e90f6a92ed528e1e061709f5f35c3b6f340c29f2e2a01b",
+    "browser-attempt2/output/playwright/reload.png": "2d2fa0c572b1bf35bc4b0f9e76e7337f571e1040a608a626421fff6f590e81a0",
+    "browser-attempt2/output/playwright/revoked.png": "2a39419eca95787f4427db0c982ba814a83bff40daaad339b55e22748b25e7ab",
+    "browser-attempt2/output/playwright/unavailable.png": "fc432759e8b81c61618f14c80d96dccfada1595c8d5f87123e25e83846133c9c",
+    "browser-attempt2/output/playwright/unique.png": "49fef61f2670b82913b174e777d6f86436fe0b8d41367b7c024d0c92e886123b",
+    "browser-attempt2/pg-start.log": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "browser-attempt2/pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "browser-attempt2/postgres.log": "3c1c24405379fa29ff180132aee68bac262e6e8964115edd3a3a67fb82aecedf",
+    "browser-attempt2/react-web-build.log": "274071bfc1e01e6b95ce8b1427d9df4fe370c99cfa4f8c6f30e3be09c1e923ad",
+    "browser-attempt2/shell-runtime-build.log": "74aafb8ab6a77fe7b553f55e267c763646ebdb5f1684ecbcbf85dc256ee02246",
+    "browser-attempt2/source-hashes.json": "b89ee0a069e8281968156a817071642fd9fc3633f012b4fa02393e3dfd0b08c8",
+    "local-attempt3/backend-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "local-attempt3/browser-guard.log": "0afa33e245ecd9f047252d54b56b566f4700ea0c3d041f70db77d16c33794505",
+    "local-attempt3/changed-typescript-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "local-attempt3/contract-check.log": "4b4dcd3635a38a0dd137894ec21039362f726930d49a98fb954105d63a16fe21",
+    "local-attempt3/contract-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "local-attempt3/k3.log": "ac417a602e6a928bfc26d6082fe1bd715f735be5a31d917a44d5895f8ba216f1",
+    "local-attempt3/report.json": "6e4f92263c7ebc444c1bbe371238534fc4f19e0ff89c573c9be99458b3b8f4cf",
+    "local-attempt3/targeted-unit.json": "8211dd2e182fbf6425e54593cf9899716199318c3fea244218d142f5a363013f",
+    "local-attempt3/targeted-unit.log": "00a880ba09f9c56df3649573253820d6148b416d673bf3bb9e0d179d2afbde7f",
+    "local-attempt3/widgets-live-types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

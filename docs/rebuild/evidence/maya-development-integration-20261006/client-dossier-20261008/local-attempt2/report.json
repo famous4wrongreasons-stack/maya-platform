@@ -1,0 +1,278 @@
+{
+  "contract": "maya.client-dossier-local-gates/1",
+  "source": "fbf47a6ba2cff883e3cbcac1bc0a906afdaba831",
+  "tree": "fd7d884c972128b47b5c76eea7fdbe13f6de5814",
+  "base": "e30f4e01b54cf3f33fff98e34d7c8e9f8d097152",
+  "started": "2026-10-08T09:40:15.527Z",
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "browser-guard",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "--test",
+        "../maya-carrier-react/test/client-dossier-browser-guard.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "targeted-unit",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--maxWorkers=1",
+        "--workerIdleMemoryLimit=768MB",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/routing-regression.acceptance.spec.ts",
+        "src/ai-tools/ai-tool-registry.service.spec.ts",
+        "src/ai-tools/ai-tool-policy.service.spec.ts",
+        "--json",
+        "--outputFile=/tmp/maya-client-dossier-20261008/local-attempt2/targeted-unit.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "backend-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "widgets-live-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "changed-typescript-lint",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-core.service.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.ts",
+        "src/ai-tools/ai-tool.catalog.ts",
+        "test/widgets-live/client-dossier.probe-spec.ts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-types",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "contract-check",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    },
+    {
+      "name": "k3",
+      "command": "/usr/local/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend",
+      "timeoutMs": 180000
+    }
+  ],
+  "completed": [
+    {
+      "name": "browser-guard",
+      "elapsedMs": 66
+    },
+    {
+      "name": "targeted-unit",
+      "elapsedMs": 1481
+    },
+    {
+      "name": "backend-types",
+      "elapsedMs": 6487
+    },
+    {
+      "name": "widgets-live-types",
+      "elapsedMs": 7620
+    },
+    {
+      "name": "changed-typescript-lint",
+      "elapsedMs": 5190
+    },
+    {
+      "name": "contract-types",
+      "elapsedMs": 3014
+    },
+    {
+      "name": "contract-check",
+      "elapsedMs": 744
+    },
+    {
+      "name": "k3",
+      "elapsedMs": 2677
+    }
+  ],
+  "failures": [],
+  "node": "v24.15.0",
+  "heapMb": 3072,
+  "jestWorkers": 1,
+  "workerIdleMemoryLimit": "768MB",
+  "sourceHashes": {
+    "maya-carrier-react/test/client-dossier-browser-guard.mjs": "3acefcbed19615b15613a135b1f5ce4361797d0fc19cf91408b83b9894b0c66d",
+    "maya-carrier-react/test/client-dossier-browser-guard.test.mjs": "7217712123ec6afdc2f0455083cf32214b81df3a29008d62630fe9175e35563e",
+    "maya-carrier-react/test/client-dossier-browser-probe.mjs": "d54caaf932ab40ae2017f0df033f42926460ac9a46223d37674b21aa0a417548",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "a39110e1c630ce2481ac4c7f88259542d52812021f090dde89cc1c56e581a560",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "0d6a14df095f10008ad9e196e1b640acdf394c398e721b09768b43d994221fde",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": "41b16e677fc28aeaad2eb82730d3a2026cd9853ad73d1a1f1f9b2b2d3e2fe7d8",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "0135433f04ff6231dfe291628f4e8328156f190f079e0b39a7a5a539e0826193",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "408a22aa43e45e637c0df50ced3e08601c2ae33f064f41522a860e6361bec46f",
+    "maya-saas-backend/test/widgets-live/client-dossier.probe-spec.ts": "5c25e130eeaaa0ba18350a78393f0db242c6c3c2e9095a3157fbbd40c08ab4d0"
+  },
+  "launcherSha256": "b536d1475ce6a2890bced35ec65377d35e9a4b02cfd7668d3b3ff425a6e040cb",
+  "fenceSha256": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "networkQualification": "Loopback-only Node TCP preload; not a measured global call count. Unit/static gates do not start a database.",
+  "groups": {
+    "browser-guard": {
+      "detached": true,
+      "pid": 10498,
+      "pgid": 10498,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "targeted-unit": {
+      "detached": true,
+      "pid": 10500,
+      "pgid": 10500,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "backend-types": {
+      "detached": true,
+      "pid": 10534,
+      "pgid": 10534,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "widgets-live-types": {
+      "detached": true,
+      "pid": 10589,
+      "pgid": 10589,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "changed-typescript-lint": {
+      "detached": true,
+      "pid": 10643,
+      "pgid": 10643,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "contract-types": {
+      "detached": true,
+      "pid": 10688,
+      "pgid": 10688,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "contract-check": {
+      "detached": true,
+      "pid": 10709,
+      "pgid": 10709,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "k3": {
+      "detached": true,
+      "pid": 10729,
+      "pgid": 10729,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "sourceAtEnd": "fbf47a6ba2cff883e3cbcac1bc0a906afdaba831",
+  "treeAtEnd": "fd7d884c972128b47b5c76eea7fdbe13f6de5814",
+  "dirtyAtEnd": "M docs/rebuild/MAYA-APPROVED-DOMAINS-REMAINING-GAP-MAP-20261007.md\n M maya-carrier-react/test/client-dossier-browser-guard.mjs\n M maya-carrier-react/test/client-dossier-browser-probe.mjs\n M maya-saas-backend/src/ai-tools/ai-core.service.spec.ts\n M maya-saas-backend/src/ai-tools/ai-core.service.ts\n M maya-saas-backend/src/ai-tools/ai-tool.catalog.ts\n M maya-saas-backend/test/widgets-live/client-dossier.probe-spec.ts\n?? docs/rebuild/MAYA-YCLIENTS-MULTI-COMPANY-SCHEMA-DELTA-20261008.md",
+  "sourceUnchanged": true,
+  "launcherSha256AtEnd": "b536d1475ce6a2890bced35ec65377d35e9a4b02cfd7668d3b3ff425a6e040cb",
+  "fenceSha256AtEnd": "16b5aba6f1080f8d32d19d2059a4e8705a45b707f6b426aa58fcfaebceb951fe",
+  "supervisorSha256AtEnd": "619b7c592681951cd06e02c306c273c18c8c14bb693ad0e2eed4a063d777fe04",
+  "runCommandSha256AtEnd": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+  "harnessUnchanged": true,
+  "cancelled": null,
+  "finished": "2026-10-08T09:40:42.872Z"
+}

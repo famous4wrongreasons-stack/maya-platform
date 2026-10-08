@@ -1,0 +1,25 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › exact client dossier selection [scripted model only] › clarifies before dossier disclosure, then binds the next explicit query to a fresh read inside the server
+
+    expect(received).not.toMatch(expected)
+
+    Expected pattern: not /Иван|Петров|PRIVATE_/
+    Received string:      "[[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Досье клиента [name removed]@e9a28fba847948c586d44eeb0c3c78e6_1\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:14:30.762Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}],[{\"surface\":\"web\",\"persona\":\"director\",\"principalRole\":\"tenant_owner\",\"messages\":[{\"role\":\"user\",\"content\":\"Досье клиента [name removed]@df8037863a0d4d73b10e61c59239f995_1\"},{\"role\":\"user\",\"content\":\"Досье клиента [name removed]@df8037863a0d4d73b10e61c59239f995_2 Петров\"}],\"tools\":[{\"name\":\"clients.dossier.read\",\"description\":\"Tool clients.dossier.read\",\"input_schema\":{\"type\":\"object\"},\"risk_tier\":\"read\",\"approval_policy\":\"none\"}],\"toolResults\":[],\"allowToolCall\":true,\"requiredToolNames\":[\"clients.dossier.read\"],\"nowUtc\":\"2026-10-08T09:14:30.763Z\",\"businessTimezone\":\"Europe/Moscow\",\"memoryFacts\":[],\"corrections\":[],\"conversationPlan\":null}]]"
+
+      3416 |         mocks.runtime.execute.mock.calls.map((call) => call[2].arguments),
+      3417 |       ).toEqual([{ query: 'Иван' }, { query: 'Иван Петров' }]);
+    > 3418 |       expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toMatch(
+           |                                                                 ^
+      3419 |         /Иван|Петров|PRIVATE_/,
+      3420 |       );
+      3421 |       expect(second.reply).not.toMatch(
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:3418:65)
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 299 passed, 300 total
+Snapshots:   0 total
+Time:        1.209 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/root-unit-attempt1.json

@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       321 passed, 321 total
+Snapshots:   0 total
+Time:        1.091 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/review-fix-unit2.json

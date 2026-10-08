@@ -1,0 +1,13 @@
+✔ admits only owned loopback origin and current static/history reads (3.040541ms)
+✔ debug sign-in is scoped to the finite synthetic email and exact fields (0.17075ms)
+✔ allows finite dossier requests but no injected tool or mutation (0.332458ms)
+✔ retained assistant history may cross the real chat route without becoming a model fixture (0.404292ms)
+✔ permits only bounded passive widget resolution, never observations or receipt/action shortcuts (0.096042ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36.066583

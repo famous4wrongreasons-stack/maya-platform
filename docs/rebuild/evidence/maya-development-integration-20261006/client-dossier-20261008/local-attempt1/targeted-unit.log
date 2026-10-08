@@ -1,0 +1,12 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/routing-regression.acceptance.spec.ts
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/ai-tools/ai-tool-policy.service.spec.ts
+
+Test Suites: 5 passed, 5 total
+Tests:       413 passed, 413 total
+Snapshots:   0 total
+Time:        1.11 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/routing-regression.acceptance.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/ai-tool-policy.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/local-attempt1/targeted-unit.json

@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       56 passed, 56 total
+Snapshots:   0 total
+Time:        0.636 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-tool-handler.service.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-client-dossier-20261008/targeted-unit.json
