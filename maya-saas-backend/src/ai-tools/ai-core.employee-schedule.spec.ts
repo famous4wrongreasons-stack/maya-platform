@@ -9,7 +9,12 @@ import type { AiToolRuntimeService } from './ai-tool-runtime.service';
 
 /** Scripted planning JSON through the actual model parser and CI validator.
  * Runtime/CRM are finite component doubles, not provider or HTTP acceptance. */
-function fixture(twoTasks = false, maxSteps = '2', unresolved: string[] = []) {
+function fixture(
+  twoTasks = false,
+  maxSteps = '2',
+  unresolved: string[] = [],
+  knownBranch = false,
+) {
   const ci = new ConversationIntelligenceService();
   const parser = Object.create(AiCoreModelService.prototype) as {
     validatePlanningResponse(
@@ -105,7 +110,11 @@ function fixture(twoTasks = false, maxSteps = '2', unresolved: string[] = []) {
               {
                 id: 'schedule',
                 intent: 'schedule.get_team',
-                entities: { employee: 'Артём', date_or_period: 'tomorrow' },
+                entities: {
+                  employee: 'Артём',
+                  date_or_period: 'tomorrow',
+                  ...(knownBranch ? { branch: branch.name } : {}),
+                },
                 depends_on: twoTasks ? ['catalog'] : [],
                 confidence: 1,
                 requires_clarification: unresolved.length > 0,
@@ -265,10 +274,44 @@ describe('AiCore explicit employee schedule [actual parser, synthetic sources]',
     );
     expect(result.reply).toContain('актуальный график сейчас не подтверждён.');
     expect(result.reply).not.toContain('изменил');
+    expect(result.reply).not.toContain('Уточните');
     expect(result.reply).not.toContain('10:00');
     expect(f.execute).toHaveBeenCalledTimes(1);
     expect(f.decide).toHaveBeenCalledTimes(1);
   });
+  it.each(['branch-source', 'staff-source'])(
+    'retains an already supplied branch without asking again when %s is unavailable',
+    async (boundary) => {
+      const f = fixture(false, '2', [], true);
+      const failedRead =
+        boundary === 'branch-source'
+          ? f.crm.resolveConfiguredBookingBranch
+          : f.crm.resolveStaffScheduleSource;
+      failedRead.mockRejectedValue(
+        new ConflictException({
+          error: {
+            code:
+              boundary === 'branch-source'
+                ? 'booking_branch_source_unavailable'
+                : 'staff_schedule_source_unavailable',
+          },
+        }),
+      );
+      const result = await f.chat();
+      expect(f.plan()?.tasks.at(-1)?.entities.branch).toBe('Набережная');
+      expect(result.reply).toBe(
+        'Не удалось подтвердить актуальный источник графика и связь мастера с филиалом. Проверка пока недоступна; актуальный график сейчас не подтверждён.',
+      );
+      expect(result.reply).not.toMatch(/уточните|какой филиал|изменил/i);
+      expect(result.grounding.status).toBe('blocked');
+      expect(result.action).toBeNull();
+      expect(f.execute.mock.calls.map((call) => call[1])).toEqual(
+        boundary === 'branch-source' ? [] : ['catalog.staff.read'],
+      );
+      expect(f.decide).toHaveBeenCalledTimes(1);
+      expect(f.completion).toHaveBeenCalledTimes(1);
+    },
+  );
   it('does not downgrade revoked or foreign tenant authority to missing data', async () => {
     const f = fixture();
     f.crm.resolveConfiguredBookingBranch.mockRejectedValue(
