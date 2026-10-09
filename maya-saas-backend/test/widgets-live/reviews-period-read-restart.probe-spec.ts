@@ -1085,14 +1085,69 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       const restricted = await chat(await login(a, a.restricted), EXACT);
       expect(restricted.status).toBe(403);
       expect(registryReads).toHaveLength(beforeInvalid);
-      for (const actor of [a.clientActor, a.staffActor]) {
+      const roleRefusals: Record<string, unknown>[] = [];
+      for (const { actor, role } of [
+        { actor: a.clientActor, role: UserRole.CLIENT },
+        { actor: a.staffActor, role: UserRole.STAFF },
+      ]) {
         const n = registryReads.length;
-        const roleResponse = await chat(await login(a, actor), EXACT);
+        const actorToken = await login(a, actor);
+        const roleResponse = await chat(actorToken, EXACT);
         expect(roleResponse.status).toBe(201);
-        expect(roleResponse.body.reply).toBe(SCRIPTED_DENIAL);
+        expect(object(roleResponse.body.grounding).status).toBe('blocked');
+        expect(roleResponse.body.action).toBeNull();
+        expect(roleResponse.body.resolution).toBeUndefined();
         expect(roleResponse.body.tools_used ?? []).toEqual([]);
         expect(registryReads).toHaveLength(n);
         assertPrivateAbsent(roleResponse.body);
+        let provenance: string;
+        if (roleResponse.modelCalls === 0) {
+          expect(currentPlan()).toBeUndefined();
+          provenance = 'EXISTING_SERVER_PREMODEL_DENIAL';
+        } else {
+          expect(roleResponse.modelCalls).toBe(1);
+          const plan = currentPlan();
+          assert.ok(plan);
+          expect(plan.tasks).toHaveLength(1);
+          expect(plan.tasks[0].intent).toBe('reviews.list_recent');
+          expect(plan.tasks[0].permission.status).toBe('denied');
+          expect(plan.tasks[0].tool.status).toBe('not_available');
+          expect(roleResponse.body.reply).toBe(SCRIPTED_DENIAL);
+          provenance =
+            'SCRIPTED_SEMANTIC_POLICY_DENIAL_NOT_LANGUAGE_ACCEPTANCE';
+        }
+        const beforeDirectModels = modelCalls;
+        const direct = await request(http.app.getHttpServer())
+          .post('/api/ai/tools/reviews.list.read/execute')
+          .set('Authorization', `Bearer ${actorToken}`)
+          .send({
+            surface: 'web',
+            idempotencyKey: randomUUID(),
+            arguments: {
+              period: 'named_month',
+              month: window.month,
+              rating: 2,
+              limit: 20,
+              branch_id: a.branchId,
+            },
+          });
+        expect(direct.status).toBe(403);
+        expect(object(object(direct.body).error).code).toBe(
+          'ai_tool_forbidden',
+        );
+        expect(registryReads).toHaveLength(n);
+        expect(modelCalls).toBe(beforeDirectModels);
+        assertPrivateAbsent(direct.body);
+        roleRefusals.push({
+          role,
+          chatStatus: roleResponse.status,
+          chatModelCalls: roleResponse.modelCalls,
+          chatDenialProvenance: provenance,
+          directStatus: direct.status,
+          directCode: 'ai_tool_forbidden',
+          directModelCalls: 0,
+          registryReadsAdded: 0,
+        });
       }
       report.isolation = {
         foreignHistoryIsolated: true,
@@ -1100,8 +1155,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         foreignBranchRefused: true,
         restrictedBranchStatus: 403,
         clientAndStaffNoRegistryReads: true,
-        roleDenialProse:
-          'SCRIPTED_SEMANTIC_POLICY_DENIAL_NOT_LANGUAGE_ACCEPTANCE',
+        roleRefusals,
       };
       assert.ok(typeof first.body.reply === 'string');
       const firstReply = first.body.reply;
