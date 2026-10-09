@@ -72,6 +72,42 @@ function requireFeature(
     throw new Error('c8_required_fact_unavailable');
   return { ...f, value: f.value };
 }
+
+/** Qualify an immutable calendar dormancy input for CURRENT use only.
+ * Does not recompute the published value or modify history. Pure validation errors
+ * fail closed; database/configuration/authority errors stay with their owners.
+ */
+export function c8DormancyCalendarCurrent(
+  row: C8ResultRevision,
+  policyValue: unknown,
+): boolean {
+  try {
+    const policy = c8Policy(policyValue);
+    const rule = (policy.dormancyRules as C8Object[]).find(
+      (r) => r.ruleKey === row.ruleKey.slice('c8.dormancy/'.length),
+    );
+    if (!rule) return false;
+    if ((rule.elapsed as C8Object).unit !== 'calendar_month') return true;
+    if (
+      row.kind !== 'POLICY_SIGNAL' ||
+      row.subjectKind !== 'client' ||
+      row.ruleVersion !== 1 ||
+      row.basis !== 'proven_attendance_policy'
+    )
+      return false;
+    const f = requireFeature(features(row), 'last_proven_visit_at');
+    if (
+      f.unit !== 'instant' ||
+      f.basis !== 'proven_attendance' ||
+      f.currency !== null
+    )
+      return false;
+    c8ShiftWindow(new Date(f.value), rule.elapsed, row.timezone, 1);
+    return true;
+  } catch {
+    return false;
+  }
+}
 /** This function accepts already admitted, server-derived evidence. It cannot admit a source fact. */
 export function c8ComputeDeterministic(
   row: C8ResultRevision,

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { c8PopulationCurrent } from './c8.population';
+import { c8DormancyCalendarCurrent } from './c8.deterministic';
+import { GovernedSettingsReadService } from '../package5-wave1/governed-settings.read';
 import { randomUUID } from 'node:crypto';
 import {
   C8ResultRevision,
@@ -125,6 +127,7 @@ export class C8Store {
   constructor(
     private readonly db: PrismaService,
     private readonly context: TenantContextService,
+    private readonly governed: GovernedSettingsReadService,
   ) {}
   tenant(): string {
     const c = this.context.get();
@@ -795,6 +798,18 @@ export class C8Store {
       !policy.encryptedContent
     )
       return false;
+    if (row.state === 'PUBLISHED' && row.ruleKey.startsWith('c8.dormancy/')) {
+      const configuration = await this.governed.configuration(
+        tx,
+        row.tenantId,
+        'c8_valuation',
+      );
+      if (
+        configuration.previousRevisionId !== policy.id ||
+        !c8DormancyCalendarCurrent(row, configuration.content)
+      )
+        return false;
+    }
     const [r] = await tx.$queryRaw<
       { valid: boolean }[]
     >`SELECT "C8_validate_refs"(${row.tenantId},${encode(row.evidenceRefsJson)}::jsonb,${row.t0}) valid`;

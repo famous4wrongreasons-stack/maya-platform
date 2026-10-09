@@ -41,7 +41,7 @@ const db = new PrismaService(cfg);
 const context = new TenantContextService();
 const encryption = new EncryptionService(cfg);
 const governed = new GovernedSettingsReadService(db, context, encryption, cfg);
-const store = new C8Store(db, context);
+const store = new C8Store(db, context, governed);
 const sources = new C8Sources(store, governed);
 const checks: string[] = [];
 const proof = async (name: string, fn: () => unknown) => {
@@ -485,7 +485,7 @@ async function main() {
         );
         assert.equal(new Set(results.map((r) => r.id)).size, 1);
         evaluationId = results[0].id;
-        const restarted = new C8Store(db, context);
+        const restarted = new C8Store(db, context, governed);
         assert.equal(
           (await restarted.admitEvaluation(evalInput)).id,
           evaluationId,
@@ -1065,7 +1065,7 @@ async function main() {
             tx.$executeRaw`UPDATE "C8ResultRevision" SET "leaseGeneration"=1,"leaseTokenHash"=${oldToken},"leaseExpiresAt"=date_trunc('milliseconds',clock_timestamp())+interval '100 milliseconds' WHERE id=${pending.id}::uuid`,
         );
         await new Promise((resolve) => setTimeout(resolve, 125));
-        const restarted = new C8Store(db, context);
+        const restarted = new C8Store(db, context, governed);
         const fresh = await restarted.claim('C8ResultRevision', pending.id);
         assert.ok(fresh);
         assert.equal(fresh.generation, 2);

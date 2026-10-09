@@ -14,7 +14,7 @@ import {
   C8_BASES,
 } from './c8.contract';
 import { c8Eligibility } from './c8.eligibility';
-import { c8ShiftWindow } from './c8.time';
+import { C8CalendarInstantUnavailable, c8ShiftWindow } from './c8.time';
 import { c8ComputeDeterministic } from './c8.deterministic';
 import { C8_TARGET_DEFINITIONS } from './c8.targets';
 import { C8PopulationQuery } from './c8.population';
@@ -487,13 +487,23 @@ export class C8Producer {
           ? 'qualified_model_unavailable'
           : 'required_evidence_unavailable',
       ]);
-    else
-      await this.store.publishResult(lease, async (current, tx) =>
-        c8ComputeDeterministic(
-          current,
-          (await this.sources.policy(tx)).content,
-        ),
-      );
+    else {
+      try {
+        await this.store.publishResult(lease, async (current, tx) =>
+          c8ComputeDeterministic(
+            current,
+            (await this.sources.policy(tx)).content,
+          ),
+        );
+      } catch (error) {
+        if (!(error instanceof C8CalendarInstantUnavailable)) throw error;
+        // publishResult has rolled back. Terminalize this exact fenced lease;
+        // never retry forever or choose an unapproved calendar instant.
+        await this.store.publishUnavailable(lease, [
+          'calendar_instant_unavailable',
+        ]);
+      }
+    }
     return (await this.store.result(id))!;
   }
 }

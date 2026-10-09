@@ -42,7 +42,7 @@ const db = new PrismaService(cfg);
 const context = new TenantContextService();
 const encryption = new EncryptionService(cfg);
 const governed = new GovernedSettingsReadService(db, context, encryption, cfg);
-const store = new C8Store(db, context);
+const store = new C8Store(db, context, governed);
 const sources = new C8Sources(store, governed);
 const checks: string[] = [];
 const proof = async (name: string, fn: () => unknown) => {
