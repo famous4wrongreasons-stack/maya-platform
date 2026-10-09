@@ -4,6 +4,8 @@ Code: `f8327626979e09696c8d93e8573d72667eb2ae85`, on isolated `codex/maya-offlin
 
 **An explicit branch name/address request now reads the public profile of the currently bound CRM company.** It no longer silently answers that request with tenant-wide branding. **838 tests / 11 suites, scoped and production TypeScript, final changed-file ESLint and independent source review PASS.** This is component qualification, not new HTTP/PG, provider or model acceptance. [Raw evidence and exact source hashes](evidence/maya-public-company-source-20261009/checkpoint.json).
 
+Subsequent actual runtime qualification: [HTTP/auth/C9 + owned PostgreSQL restart](MAYA-PUBLIC-COMPANY-HTTP-CHECKPOINT-20261009.md), source `3bb2c17e057d882ff7ccc5e73a1663d3d6e2c4a6`. Historical component-only limits below describe this earlier checkpoint.
+
 ## Behavior and authority
 
 - The existing validated `company.public_info` task, with one explicit branch and a supported name/address field, uses the existing `catalog.staff.read` through the single C9. No public tool argument, role, registry, orchestrator or schema was added.

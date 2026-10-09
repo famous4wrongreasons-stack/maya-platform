@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_publiccompany_811268a79507 on 127.0.0.1:53330 (local)
+PASS test/widgets-live/public-company-read-restart.probe-spec.ts
+  public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ reads only the explicit bound public profile and preserves exact evidence through restart (673 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        1.497 s, estimated 8 s
+Ran all test suites within paths "test/widgets-live/public-company-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-public-company-http-20261009-r1/resume-jest.json

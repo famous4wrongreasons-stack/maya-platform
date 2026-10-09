@@ -1,0 +1,89 @@
+{
+  "contract": "maya.public-company.http-evidence-archive/1",
+  "files": {
+    "independent-review.json": {
+      "sha256": "7b6c3b17fbda49403dee4f16ead273ea202750d7feaeba59b818e4b9ade36dbd",
+      "bytes": 1607
+    },
+    "maya-public-company-driver-20261009.log": {
+      "sha256": "fcfdb6587e1496e5ad923b24219fde27a61162d26035600504e35500a2d909da",
+      "bytes": 497
+    },
+    "maya-public-company-http-cleanup-20261009.json": {
+      "sha256": "2ffbcdcfaf800bd47203b0192653fa53a7b263e69141f4720ee42a689afe565e",
+      "bytes": 235
+    },
+    "maya-public-company-http-lint-20261009-r1.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-company-http-types-20261009-r1.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-company-http-types-20261009.json": {
+      "sha256": "3d399f00040dd9a09bc367f00e36ea30f08342346bacf255043d109f61ed4e45",
+      "bytes": 642
+    },
+    "r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r1/initdb.log": {
+      "sha256": "6bf96322f4afeb9f2b55edd60de33b9585cae8be81733c5f67d17f070a211233",
+      "bytes": 950
+    },
+    "r1/manifest.json": {
+      "sha256": "46f66c820d06afabe4b9940bfd0a79586dbec4d0f3cdad6adaa8f8742edadd54",
+      "bytes": 231081
+    },
+    "r1/migrations.log": {
+      "sha256": "144c9a77252561b5f595db49d736d67f35f1e3a111e1acddfdfa507915d3bfea",
+      "bytes": 14728
+    },
+    "r1/pg-restart.log": {
+      "sha256": "b7686664dc16d54d622977bde714d999b13b6cbeb45d1eb73518eaa958842b35",
+      "bytes": 1345
+    },
+    "r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r1/postgres.log": {
+      "sha256": "e0e83edf5a8b59f14171feed465d329fea1562dfd35f7356706480e486be2f67",
+      "bytes": 1246
+    },
+    "r1/prepare-jest.json": {
+      "sha256": "8bde20b474486193fc1d05b10981dbe3874c46061d3cf034bfa33c5e787a76a2",
+      "bytes": 1416
+    },
+    "r1/prepare-observations.json": {
+      "sha256": "946e0b6987b515825685c25ad9e6c7ca71bd9b6d52a05cb2f34168dd3279b5e6",
+      "bytes": 19132
+    },
+    "r1/prepare.log": {
+      "sha256": "337f3cdd16cad7a172e2dafb715246578dfd92bbf93eef44548c27ca44aa9e00",
+      "bytes": 690
+    },
+    "r1/resume-jest.json": {
+      "sha256": "ae14f359faea5c99dba1c8576e735e3921de463ec04815a592bf6c47d463eeaa",
+      "bytes": 1415
+    },
+    "r1/resume-observations.json": {
+      "sha256": "2c22f504b145af8d363fc6aa774ca7b93387b94dc02a3321fbbf613eb3a5d77d",
+      "bytes": 5446
+    },
+    "r1/resume.log": {
+      "sha256": "9440b3f4edea547e1280281be1d37571607b61244fc74b675dbbf84d0a252fb0",
+      "bytes": 693
+    },
+    "remaining27-accounting.json": {
+      "sha256": "0bfa8c4635e5a4b59872494b33ed3a27b00ead3ba511b39ad1d275123b705c1b",
+      "bytes": 1542
+    }
+  }
+}

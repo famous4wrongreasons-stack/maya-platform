@@ -1,0 +1,430 @@
+{
+  "contract": "synthetic-public-company-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "3bb2c17e057d882ff7ccc5e73a1663d3d6e2c4a6",
+  "sourceBindingsDigest": "8825069fd904b1f0f46b74e2f4dd22af58454a5278059a4f68b0dcef4eabae1c",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "explicitValidatedBranchOnly": true,
+  "fullDialogueReclassification": false,
+  "full48Reclassification": false,
+  "c9ReadsPerPositive": 1,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+  "privateGuidanceSetup": "EXISTING_A22_OWNER_BEFORE_OBSERVATION",
+  "prepareReplay": {
+    "runHash": "5d73383498829da17e4d5b6da0bd6de7eeef7b14892b67a2bfa3c0eaa62cee74",
+    "graphHashUnchanged": "c002b87c417398e600b00c0c01a08daf177055039d51431493d729b0b60a13bb",
+    "providerReadsAdded": 0
+  },
+  "clientPublicRead": {
+    "status": 201,
+    "role": "CLIENT",
+    "clientIdentityGranted": false,
+    "runHash": "8daf8bcab3b08f99249aee9b2b5a0e3a7b890755a1a37d83bf273ce7154448cb",
+    "source": "SCOPED_NATIVE_PROFILE"
+  },
+  "clientInternalGuidance": {
+    "status": 403,
+    "privateFactsWithheld": true,
+    "providerReadsAdded": 0
+  },
+  "foreignArtifacts": {
+    "historyStatus": 200,
+    "historyIsolated": true,
+    "runStatus": 400
+  },
+  "missingProfile": {
+    "status": 201,
+    "nativeGets": 2,
+    "c9ReadAttempts": 1,
+    "detailStatus": 404,
+    "discovery": "EXACT_EMPTY",
+    "publicFactsWithheld": true
+  },
+  "sourceRefusals": {
+    "ambiguity": true,
+    "unknownBranch": true,
+    "foreignBranch": true,
+    "nonconfiguredBranch": true,
+    "missingBinding": true,
+    "compoundPreserved": true,
+    "branchRestrictedStatus": 403,
+    "providerReadsAdded": 0
+  },
+  "businessHash": "dc997ad7453817975c9bb9b24b0ee53deeb66393ccf3590cabbc8eb4cd824050",
+  "transport": [
+    {
+      "tenantHash": "440664c8a012342d46f39e0998f8c3f4a1fc26dc3176807ed6a27c2872262d07",
+      "resource": "company",
+      "company": 99401
+    },
+    {
+      "tenantHash": "440664c8a012342d46f39e0998f8c3f4a1fc26dc3176807ed6a27c2872262d07",
+      "resource": "company",
+      "company": 99401
+    },
+    {
+      "tenantHash": "2777e39243cc931ffd7cf1dc38693428841c22f09c487d13937e331da86ba28a",
+      "resource": "company",
+      "company": 99402
+    },
+    {
+      "tenantHash": "2777e39243cc931ffd7cf1dc38693428841c22f09c487d13937e331da86ba28a",
+      "resource": "company",
+      "company": 99402
+    },
+    {
+      "tenantHash": "2777e39243cc931ffd7cf1dc38693428841c22f09c487d13937e331da86ba28a",
+      "resource": "companies",
+      "company": 99402
+    },
+    {
+      "tenantHash": "4eddfc1b227b8d38582d9959fdfc5e025ecb0c63f697a45e66dd7555418e6bd8",
+      "resource": "company",
+      "company": 99403
+    },
+    {
+      "tenantHash": "049d81ab43076736ca4dc038ca10ca348444503aeb82e30fc64a190a5413fc1f",
+      "resource": "company",
+      "company": 99404
+    },
+    {
+      "tenantHash": "8968fe41c262c47a8f651dead8762340eb9d638b25370d1f9ef5c7c53e96d4ce",
+      "resource": "company",
+      "company": 99405
+    }
+  ],
+  "modelCalls": 18,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "97ca4a75d796b9dea55c6c792c600446a7d4a0b9c4165689e115d411e0e33a4f",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "По данным CRM для выбранного филиала:\nНазвание в профиле: Салон у реки 99401.\nАдрес в профиле: Набережная улица, 99401.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "97ca4a75d796b9dea55c6c792c600446a7d4a0b9c4165689e115d411e0e33a4f",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки.\nПо данным CRM для выбранного филиала:\nНазвание в профиле: Салон у реки 99401.\nАдрес в профиле: Набережная улица, 99401.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "dd23e8b26817183af81bf9930df57b6fbf926d146da3e3fef29d72a6be327ac4",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "По данным CRM для выбранного филиала:\nНазвание в профиле: Салон у реки 99401.\nАдрес в профиле: Набережная улица, 99401.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "44cd44f086ee05673ef65c1a9c2fa2a160a88236de260cc62b67028f6c88d264",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "По данным CRM для выбранного филиала:\nНазвание в профиле: Салон у реки 99402.\nАдрес в профиле: Набережная улица, 99402.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "098fc290191806efcc05f42807136e4e82098adb68aeea38fbf0603432235473",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить текущий источник публичных сведений выбранного филиала.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "8dc984909c10a6bf7d8d7a85c452746de6ff712a7d54771381af1b0a58371f9a",
+      "text": "Как называется филиал Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "В прочитанном профиле CRM этого филиала название не указано.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "8dc984909c10a6bf7d8d7a85c452746de6ff712a7d54771381af1b0a58371f9a",
+      "text": "Как называется филиал Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки.\nВ прочитанном профиле CRM этого филиала название не указано.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "26ec30f395bcc4634ab21545e64a96860651630ef961ad8502b3a44b8e5beac6",
+      "text": "Какой адрес у филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "В прочитанном профиле CRM этого филиала адрес не указан.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "26ec30f395bcc4634ab21545e64a96860651630ef961ad8502b3a44b8e5beac6",
+      "text": "Какой адрес у филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки.\nВ прочитанном профиле CRM этого филиала адрес не указан.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "2e8768f24d9e930336642faf0ac611e38f478a457b06d60269e9dbc994c64c77",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "В прочитанном профиле CRM этого филиала название и адрес не указаны.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "2e8768f24d9e930336642faf0ac611e38f478a457b06d60269e9dbc994c64c77",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки.\nВ прочитанном профиле CRM этого филиала название и адрес не указаны.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "438895f62326e7eb2cd6a6ef1d66b9c6768e3d5a5d12a0981f8dff2b54b10f18",
+      "text": "Какой адрес у филиала Дублированный?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно сопоставить указанный филиал с текущими данными CRM.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "22a1c235710eec1a007f5d469f6e8762b66d0c2fb5fd8490a68e85bfb02cbc00",
+      "text": "Какой адрес у филиала Несуществующий?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно сопоставить указанный филиал с текущими данными CRM.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "e03e3078587ae6e37f8bafabf11cedcca1e09cbe75c29ec4a6d252dddd06d418",
+      "text": "Foreign tenant branch (synthetic ID omitted)",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно сопоставить указанный филиал с текущими данными CRM.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "bc580263cf4376765f0528d4352d0ad17bfaf986f7ed4e3c4519107cbfa84a2d",
+      "text": "Какой адрес у другого филиала?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить текущий источник публичных сведений выбранного филиала.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "97ff6303ca141601d6101d04ded04944605e587e32b73c3de5cba0b308e0d5f6",
+      "text": "Покажи сотрудников и адрес филиала Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Уточните один филиал и отдельно запросите его название или адрес.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "47168930fa2c1f9c7d81d0c9a995490b153ccb0405a858b03a1e2b5352bc0948",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить текущий источник публичных сведений выбранного филиала.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "4971ad4b2c8fffb7f012d930f2ea9824fee9e1d72ab73dbd7401f1699dee2100",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 403,
+      "modelCalls": 1,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": "public_company_branch_forbidden"
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "5d73383498829da17e4d5b6da0bd6de7eeef7b14892b67a2bfa3c0eaa62cee74",
+      "actorHash": "42933726447159e0187fb49a364544092b6990e627e2c021872ad04bc867b465",
+      "company": 99401,
+      "references": [
+        {
+          "workHash": "2463457713a31e7c8eea6f646be9b86315fe34a6982bb267d6ede66e44a45816",
+          "executionHash": "7679b28347ea50c05bfaa43085daeeca3dd67840758bf98530656415f09b9415",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "2fd23fed233b16741df3fe1de054cdad06b3718d4eca35477bd5429952ef2df7",
+          "resultHash": "25813758c1d1996334191d998a0ee7cdd94c357433cf3b197da8b38e4cd5a1a0"
+        }
+      ]
+    },
+    {
+      "runHash": "5d73383498829da17e4d5b6da0bd6de7eeef7b14892b67a2bfa3c0eaa62cee74",
+      "actorHash": "42933726447159e0187fb49a364544092b6990e627e2c021872ad04bc867b465",
+      "company": 99401,
+      "references": [
+        {
+          "workHash": "2463457713a31e7c8eea6f646be9b86315fe34a6982bb267d6ede66e44a45816",
+          "executionHash": "7679b28347ea50c05bfaa43085daeeca3dd67840758bf98530656415f09b9415",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "2fd23fed233b16741df3fe1de054cdad06b3718d4eca35477bd5429952ef2df7",
+          "resultHash": "25813758c1d1996334191d998a0ee7cdd94c357433cf3b197da8b38e4cd5a1a0"
+        }
+      ]
+    },
+    {
+      "runHash": "8daf8bcab3b08f99249aee9b2b5a0e3a7b890755a1a37d83bf273ce7154448cb",
+      "actorHash": "d35ff44ca007df038ddda7e2039d33b2a8efbf54ca557f5a4528201c945e3e01",
+      "company": 99401,
+      "references": [
+        {
+          "workHash": "d43fb8e03fbb054b7341273b50ba5372a7819186e25605db10347af4918294d1",
+          "executionHash": "5d6b06df2872ff62170d79513a4461159a9e3e4d433f9f4b607f9880a177f2a5",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "597c192c7cb40f0862f1a1ebea08bd602f0bb99e69ad3b5e28784448cfde6b2f",
+          "resultHash": "25813758c1d1996334191d998a0ee7cdd94c357433cf3b197da8b38e4cd5a1a0"
+        }
+      ]
+    },
+    {
+      "runHash": "dfeccea47de069a8880925fc2008f6bd25375c2899a2beb38a8b225f5fe612b4",
+      "actorHash": "af076fa311975b2b03346ae292d91ca1734a92e5ae6c2d4f512695f52d41f38e",
+      "company": 99402,
+      "references": [
+        {
+          "workHash": "eeaf29eb5600a66d532e218e865454d0e2c33177f3ef209511e50b76134d67ce",
+          "executionHash": "e60c2fa439b3ae63feda42fb420bc6b813be1786ff8b0cc2a8c5f9b9ab28e678",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "38cbee10010c139d0bcfaefbf5db74d2859c76e04bb1c284db0758b1c6974553",
+          "resultHash": "86f71805bfb9344a0968bfc9022c77178173f108d5745ad039d2b6c755746c58"
+        }
+      ]
+    },
+    {
+      "runHash": "592670715bf0e7967b48999a4752a5febb5bb721b3c1cb6e5e9bc9c31c8b2e8a",
+      "actorHash": "62b713b393c5dc5a362aad6883141970fb00ddb5122a8748a402c1c11cf64c81",
+      "company": 99403,
+      "references": [
+        {
+          "workHash": "5e5cca43e22ae862a2100cad7cb8c8603a071786aa98033d3004dae2555fe2fe",
+          "executionHash": "d9cdd8b5656e47f3af6bae5cdc4f3a2e4d355384f01dd6ff2dce207d0cc2dff6",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "b5706ab9f40195972b36d618b3e46d162b59aad9566603f0767e3e28431ad3ad",
+          "resultHash": "9bb7c0755015621d1e249dead1a3259a79f9dd8394904ebcec79be6e2a2867ea"
+        }
+      ]
+    },
+    {
+      "runHash": "592670715bf0e7967b48999a4752a5febb5bb721b3c1cb6e5e9bc9c31c8b2e8a",
+      "actorHash": "62b713b393c5dc5a362aad6883141970fb00ddb5122a8748a402c1c11cf64c81",
+      "company": 99403,
+      "references": [
+        {
+          "workHash": "5e5cca43e22ae862a2100cad7cb8c8603a071786aa98033d3004dae2555fe2fe",
+          "executionHash": "d9cdd8b5656e47f3af6bae5cdc4f3a2e4d355384f01dd6ff2dce207d0cc2dff6",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "b5706ab9f40195972b36d618b3e46d162b59aad9566603f0767e3e28431ad3ad",
+          "resultHash": "9bb7c0755015621d1e249dead1a3259a79f9dd8394904ebcec79be6e2a2867ea"
+        }
+      ]
+    },
+    {
+      "runHash": "210d36b7ae319441aac8fe70fcfe80614e76dcade68deb5823d20c852c2d6570",
+      "actorHash": "2d469c9cb2dcbe327d1da623e444de0b057879641b96af1f7377bdfc8d9a4cad",
+      "company": 99404,
+      "references": [
+        {
+          "workHash": "dee5b71d7f1e87bb66ed3fd160d0be3d44885871e44740a60290bcd50b30f2c5",
+          "executionHash": "cae7907eefc8e895e3466e70f14841cd0ac5a9644bb8fb3047ce2160a4c6b1d9",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "fdcf4fe83dd6c19d3aeca46d4f4f64596645504abf0f6829c7f74d3e5a8ebe22",
+          "resultHash": "b6a0425dc1ee098c9892a550cea677c20aa0bdda70a213db7249fabd9b586c90"
+        }
+      ]
+    },
+    {
+      "runHash": "210d36b7ae319441aac8fe70fcfe80614e76dcade68deb5823d20c852c2d6570",
+      "actorHash": "2d469c9cb2dcbe327d1da623e444de0b057879641b96af1f7377bdfc8d9a4cad",
+      "company": 99404,
+      "references": [
+        {
+          "workHash": "dee5b71d7f1e87bb66ed3fd160d0be3d44885871e44740a60290bcd50b30f2c5",
+          "executionHash": "cae7907eefc8e895e3466e70f14841cd0ac5a9644bb8fb3047ce2160a4c6b1d9",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "fdcf4fe83dd6c19d3aeca46d4f4f64596645504abf0f6829c7f74d3e5a8ebe22",
+          "resultHash": "b6a0425dc1ee098c9892a550cea677c20aa0bdda70a213db7249fabd9b586c90"
+        }
+      ]
+    },
+    {
+      "runHash": "2141ef04186b474afcf816a37251af876df524d2534958720c1d5793b0ae4e77",
+      "actorHash": "a15dffdc7261fb511ca4a88de9e3e138e57d84122853894440e77af419085929",
+      "company": 99405,
+      "references": [
+        {
+          "workHash": "3517b4a6c64c5e7efcfbcf7a0b922284de502b2b417edd7db2d8e999c4b7862a",
+          "executionHash": "dd3b636ef111c814c3dd2f1746563e4bd8f5158378136ee2b12528c67f143546",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "400f667e74aaf16fc93c97b42789f19641d5e05267e5caba5636452e9723a1d8",
+          "resultHash": "d89c98f4b45f7865bc6080ac5e677685a6d137072169b87e2fe0b98000904e92"
+        }
+      ]
+    },
+    {
+      "runHash": "2141ef04186b474afcf816a37251af876df524d2534958720c1d5793b0ae4e77",
+      "actorHash": "a15dffdc7261fb511ca4a88de9e3e138e57d84122853894440e77af419085929",
+      "company": 99405,
+      "references": [
+        {
+          "workHash": "3517b4a6c64c5e7efcfbcf7a0b922284de502b2b417edd7db2d8e999c4b7862a",
+          "executionHash": "dd3b636ef111c814c3dd2f1746563e4bd8f5158378136ee2b12528c67f143546",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "400f667e74aaf16fc93c97b42789f19641d5e05267e5caba5636452e9723a1d8",
+          "resultHash": "d89c98f4b45f7865bc6080ac5e677685a6d137072169b87e2fe0b98000904e92"
+        }
+      ]
+    }
+  ]
+}

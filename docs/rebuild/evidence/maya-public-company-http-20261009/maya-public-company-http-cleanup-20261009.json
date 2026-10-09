@@ -1,0 +1,7 @@
+{
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-public-company-QxAKbi/pg",
+  "pgCtlStatusExitCode": 3,
+  "statusOutput": "pg_ctl: no server running",
+  "postmasterPidAbsent": true,
+  "processGroupCensus": false
+}

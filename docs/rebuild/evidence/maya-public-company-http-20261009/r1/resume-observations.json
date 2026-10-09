@@ -1,0 +1,134 @@
+{
+  "contract": "synthetic-public-company-read-observations/1",
+  "stage": "resume",
+  "sourceHead": "3bb2c17e057d882ff7ccc5e73a1663d3d6e2c4a6",
+  "sourceBindingsDigest": "8825069fd904b1f0f46b74e2f4dd22af58454a5278059a4f68b0dcef4eabae1c",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "explicitValidatedBranchOnly": true,
+  "fullDialogueReclassification": false,
+  "full48Reclassification": false,
+  "c9ReadsPerPositive": 1,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "5a195504d495dba0d7fab7b064fd9fcfacae52ecacd7eb2e32b83f27ced374d3"
+  },
+  "resumeReplay": {
+    "runHash": "5d73383498829da17e4d5b6da0bd6de7eeef7b14892b67a2bfa3c0eaa62cee74",
+    "graphHashUnchanged": "5a195504d495dba0d7fab7b064fd9fcfacae52ecacd7eb2e32b83f27ced374d3",
+    "providerReadsAdded": 0
+  },
+  "midReadCompanyCutover": {
+    "status": 201,
+    "providerReadsAdded": 1,
+    "previousCompany": 99402,
+    "currentCompany": 99412,
+    "sameOwnedTenant": true,
+    "capturedPublicFactsWithheld": true
+  },
+  "revocation": {
+    "duringReadStatus": 403,
+    "priorReadStatus": 401,
+    "duringReadProviderReads": 1,
+    "afterRevocationProviderReads": 0
+  },
+  "sourceDriftSameRequest": {
+    "requestHash": "97ca4a75d796b9dea55c6c792c600446a7d4a0b9c4165689e115d411e0e33a4f",
+    "status": 201,
+    "providerReadsAdded": 0
+  },
+  "businessHash": "dc997ad7453817975c9bb9b24b0ee53deeb66393ccf3590cabbc8eb4cd824050",
+  "transport": [
+    {
+      "tenantHash": "2777e39243cc931ffd7cf1dc38693428841c22f09c487d13937e331da86ba28a",
+      "resource": "company",
+      "company": 99402
+    },
+    {
+      "tenantHash": "440664c8a012342d46f39e0998f8c3f4a1fc26dc3176807ed6a27c2872262d07",
+      "resource": "company",
+      "company": 99401
+    }
+  ],
+  "modelCalls": 4,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "97ca4a75d796b9dea55c6c792c600446a7d4a0b9c4165689e115d411e0e33a4f",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки.\nПо данным CRM для выбранного филиала:\nНазвание в профиле: Салон у реки 99401.\nАдрес в профиле: Набережная улица, 99401.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "1621bf6a148789588bfb25da08201080ee2b0fb3d2af22f7c2851d662364858c",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить текущий источник публичных сведений выбранного филиала.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "1805d10c9d8145941b2584a5182d93ae0edbd0e3914565d5fed3ea5463ab0db6",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 403,
+      "modelCalls": 1,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": "conversation_principal_unavailable"
+    },
+    {
+      "requestHash": "d5d43b97024bbda719ab023eaa3fdce5f697307ef21685ba4898a5088e4f128a",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 401,
+      "modelCalls": 0,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": {
+        "sha256": "660377bd24b72001d86c6151b908727afd23709fefa1e26d94071475f65a4b93"
+      }
+    },
+    {
+      "requestHash": "97ca4a75d796b9dea55c6c792c600446a7d4a0b9c4165689e115d411e0e33a4f",
+      "text": "Как называются и где находятся помещения филиала Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить текущий источник публичных сведений выбранного филиала.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "5d73383498829da17e4d5b6da0bd6de7eeef7b14892b67a2bfa3c0eaa62cee74",
+      "actorHash": "42933726447159e0187fb49a364544092b6990e627e2c021872ad04bc867b465",
+      "company": 99401,
+      "references": [
+        {
+          "workHash": "2463457713a31e7c8eea6f646be9b86315fe34a6982bb267d6ede66e44a45816",
+          "executionHash": "7679b28347ea50c05bfaa43085daeeca3dd67840758bf98530656415f09b9415",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "2fd23fed233b16741df3fe1de054cdad06b3718d4eca35477bd5429952ef2df7",
+          "resultHash": "25813758c1d1996334191d998a0ee7cdd94c357433cf3b197da8b38e4cd5a1a0"
+        }
+      ]
+    }
+  ]
+}

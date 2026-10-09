@@ -1,0 +1,37 @@
+{
+  "contract": "maya.public-company.http-independent-review/1",
+  "reviewer": "/root/independent_review",
+  "verdict": "QUALIFIED_LOCAL_SYNTHETIC_PASS",
+  "sourceHead": "3bb2c17e057d882ff7ccc5e73a1663d3d6e2c4a6",
+  "sourceFilesVerifiedAgainstGit": 1850,
+  "sourceBindingsDigest": "8825069fd904b1f0f46b74e2f4dd22af58454a5278059a4f68b0dcef4eabae1c",
+  "manifestSha256": "46f66c820d06afabe4b9940bfd0a79586dbec4d0f3cdad6adaa8f8742edadd54",
+  "jestStagesPassed": 2,
+  "passingAssertionsByStage": [
+    833,
+    174
+  ],
+  "chatRequests": 23,
+  "chatStatuses": {
+    "201": 20,
+    "403": 2,
+    "401": 1
+  },
+  "scriptedPlannerCalls": 22,
+  "syntheticNativeGets": 10,
+  "unexpected": [],
+  "verified": [
+    "Exact original/cache/resume receipt objects, run/work/execution/input/result refs; three missing-field replay pairs",
+    "Full graph around each replay/restart and unchanged observed business snapshot",
+    "Actual binding cutover99402→99412 while reading old company, distinct from updatedAt-only same-key drift",
+    "In-flight conversation principal403 then pre-model auth401",
+    "Owner A22 setup before write baseline and CLIENT direct403",
+    "PG PID86004→86204 restart and final shutdown16:08:13.764UTC; postmaster.pid absent"
+  ],
+  "limits": [
+    "Finite business families after fixture setup, not global no-effects census",
+    "Revocation stopped at canonical conversation principal; do not attribute solely to runtime source guard",
+    "Replay has zero provider redispatch, but still invokes scripted planner",
+    "No live provider/model/browser or full48 reclassification"
+  ]
+}

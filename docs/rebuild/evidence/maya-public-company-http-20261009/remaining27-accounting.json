@@ -1,0 +1,39 @@
+{
+  "contract": "maya.public-company.remaining-accounting/1",
+  "baselineHttpSource": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+  "newStandaloneProofSource": "3bb2c17e057d882ff7ccc5e73a1663d3d6e2c4a6",
+  "newlyClosedFrozenCases": [],
+  "unchangedFrozenScore": {
+    "pass": 54,
+    "fail": 0,
+    "unsupported": 14,
+    "insufficient": 13,
+    "remaining": 27
+  },
+  "publicCases": [
+    "utt-company.public_info-037:1",
+    "utt-company.public_info-041:1"
+  ],
+  "exactBlockers": [
+    "Frozen scripted recipe emits company.public_info entities={} and loses requested branch",
+    "Frozen INTERNAL booking fixture lacks active external company/branch binding and CRM profile",
+    "Recorder/evaluator has no source-bound CRM branch projection and expects legacy branding provenance for masked address"
+  ],
+  "notChanged": [
+    "Frozen utterances, expectations, script, evaluator and source fixtures",
+    "Raw historical verdicts"
+  ],
+  "nextGap": {
+    "candidateCases": [
+      "current-admin-correction:2",
+      "utt-services.price-062:1",
+      "utt-services.price-067:1"
+    ],
+    "work": "Current employee identity/source → existing fresh readServiceCatalog with exact staff filter → existing C9 catalog READ; preserve unknown/range price and incomplete catalog",
+    "notClaimedClosed": true,
+    "limits": [
+      "Website getPublicBookingServices and pricing mutation lane remain unchanged",
+      "Native staff/company witness must be supplied by actual source; old fixtures are not automatically qualified"
+    ]
+  }
+}
