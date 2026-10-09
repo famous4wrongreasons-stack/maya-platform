@@ -1,5 +1,10 @@
 import { C9BiSource, BI_REPORT_CALL } from './c9.bi-source';
 import {
+  type FinancialReportRequest,
+  financialReportMonthLabel,
+  financialReportMonthMatches,
+} from './c9.bi-presentation';
+import {
   C9LifecycleSource,
   type LifecycleSelection,
 } from './c9.lifecycle-source';
@@ -704,30 +709,61 @@ export class C9Orchestrator {
   }
 
   /** One published C7 snapshot, no strategy or proposal from the read-only BI domain. */
-  async explainFinancialReport(turn: C9ConversationReads) {
+  async explainFinancialReport(
+    turn: C9ConversationReads,
+    request: FinancialReportRequest = { kind: 'latest' },
+  ) {
     if (!this.bi) c9Deny('context_fact_source_unavailable');
     const root = await this.store.conversationReadRun(
       turn.turn,
       turn.intentHash,
       'bi',
     );
-    return (await this.prepareFinancialReport(root, turn.intentHash)).expose();
+    return (
+      await this.prepareFinancialReport(root, turn.intentHash, request)
+    ).expose();
   }
 
   private async prepareFinancialReport(
     root: ConversationRoot,
     intentHash: string,
+    request: FinancialReportRequest = { kind: 'latest' },
   ) {
     const bi = this.bi;
     if (!bi) c9Deny('context_fact_source_unavailable');
-    const refs = await bi.select(root.id);
+    const refs = await bi.select(root.id, request);
+    const selectedMonth = request.kind === 'calendar_month';
+    const monthLabel = financialReportMonthLabel(request);
+    const assertRequestedPeriod = (facts: C9Object[]) => {
+      if (request.kind !== 'calendar_month') return;
+      if (
+        facts.length !== refs.length ||
+        facts.some((fact) => {
+          const period = c9Object(fact.period ?? {});
+          return (
+            financialReportMonthMatches(
+              {
+                from: period.from,
+                toExclusive: period.toExclusive,
+                timezone: period.timezone,
+              },
+              request,
+            ) !== true
+          );
+        })
+      )
+        c9Deny('source_read_receipt');
+    };
     const cap = c9Capability('c7.measurement.read', 'BUSINESS_INTELLIGENCE');
     const receipt = await this.work.reserve(root.id, {
       callKey: BI_REPORT_CALL,
       domain: 'BUSINESS_INTELLIGENCE',
       kind: 'TOOL_READ',
       taskKey: cap.capabilityKey,
-      inputHash: c9Hash('bi-report-request/1', [intentHash]),
+      inputHash: c9Hash(
+        'bi-report-request/1',
+        selectedMonth ? [intentHash, request] : [intentHash],
+      ),
       evidenceRefs: refs,
       reservation: {
         contract: 'maya.c9-reservation/1',
@@ -743,7 +779,10 @@ export class C9Orchestrator {
       },
     });
     const replayed = receipt.state === 'SETTLED';
-    const sourceDigest = c9Hash('bi-report-source/1', [refs]);
+    const sourceDigest = c9Hash(
+      'bi-report-source/1',
+      selectedMonth ? [refs, request] : [refs],
+    );
     if (replayed) {
       const result = c9Object(receipt.resultJson);
       if (
@@ -757,12 +796,13 @@ export class C9Orchestrator {
       const lease = await this.work.claim(root.id, receipt.id);
       if (!lease) c9Deny('read_work_in_progress_or_unknown');
       try {
-        await this.context.build(
+        const selected = await this.context.build(
           root.id,
           'BUSINESS_INTELLIGENCE',
           refs,
           'Объясни опубликованный финансовый снимок',
         );
+        assertRequestedPeriod(selected.context.facts);
         await this.work.settle(
           lease,
           {
@@ -770,6 +810,7 @@ export class C9Orchestrator {
             sourceDigest,
             mode: 'as_reported',
             sourceCount: refs.length,
+            ...(selectedMonth ? { requestedPeriod: request } : {}),
           },
           {
             contract: 'maya.c9-usage/1',
@@ -799,6 +840,7 @@ export class C9Orchestrator {
           refs,
           'Объясни опубликованный финансовый снимок',
         );
+        assertRequestedPeriod(context.facts);
         const answer = this.agents.answer(
           'BUSINESS_INTELLIGENCE',
           'c9.business_overview',
@@ -814,10 +856,14 @@ export class C9Orchestrator {
             refs.length
               ? replayed
                 ? 'Повторно открыт тот же опубликованный снимок; новая версия не выбиралась.'
-                : 'Найден последний доступный опубликованный финансовый отчёт на начало запроса.'
+                : selectedMonth
+                  ? `Найден опубликованный финансовый снимок за ${monthLabel}; границы месяца проверены в часовом поясе источника.`
+                  : 'Найден последний доступный опубликованный финансовый отчёт на начало запроса.'
               : replayed
                 ? 'Открыт сохранённый результат проверки наличия отчёта; новый поиск не выполнялся.'
-                : 'Проверено наличие опубликованного финансового снимка на начало запроса.',
+                : selectedMonth
+                  ? `Проверено наличие опубликованного финансового снимка за ${monthLabel} на начало запроса.`
+                  : 'Проверено наличие опубликованного финансового снимка на начало запроса.',
             ...findings,
             !findings.length
               ? 'Доступного опубликованного финансового снимка для объяснения нет. Это не означает нулевую выручку или прибыль.'
@@ -847,6 +893,7 @@ export class C9Orchestrator {
             noSideEffects: true,
             executionAuthority: false,
             reasoning: 'deterministic',
+            ...(selectedMonth ? { requestedPeriod: request } : {}),
           },
         };
       },

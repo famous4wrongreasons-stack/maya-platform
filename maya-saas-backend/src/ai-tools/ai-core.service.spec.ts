@@ -92,6 +92,7 @@ describe('AiCoreService', () => {
       mocks.model.decide.mockResolvedValue(
         decision({
           reply: 'Остановлено. Изменение записи не выполнено.',
+          toolCall: null,
           semanticPlan: new ConversationIntelligenceService().validatePlan(
             {
               dialogue_act: 'request',
@@ -933,7 +934,7 @@ describe('AiCoreService', () => {
         f.runtime.execute.mockClear();
         await f.turn({ date_or_period: '2026-10-09' });
         const modelContext = f.model.decide.mock.calls.at(-1)?.[0]
-          .conversationPlan as {
+          .conversationPlan as unknown as {
           tasks: { entities: { services: string[] } }[];
         };
         expect(modelContext.tasks[0].entities.services[0]).toMatch(
@@ -3319,6 +3320,7 @@ describe('AiCoreService', () => {
     });
 
     const result = await mocks.service.chat(customer, {
+      ...dto,
       surface: 'web',
       messages: [{ role: 'user', content: 'На что я могу потратить бонусы?' }],
     });
@@ -3447,6 +3449,75 @@ describe('AiCoreService', () => {
         ...dto,
         messages: [{ role: 'user', content: 'Когда я записан?' }],
       });
+    it.each([false, true])(
+      'preserves the reschedule intent after an authorized own READ, stale=%s',
+      async (stale) => {
+        const mocks = createService([tool, 'appointments.own.reschedule']);
+        const semanticPlan = new ConversationIntelligenceService().validatePlan(
+          {
+            tasks: [
+              {
+                id: 'own_list',
+                intent: 'booking.list_own',
+                entities: { period: 'nearest' },
+                confidence: 1,
+                depends_on: [],
+              },
+              {
+                id: 'move',
+                intent: 'booking.reschedule_own',
+                entities: { new_date: 'friday' },
+                confidence: 1,
+                depends_on: ['own_list'],
+              },
+            ],
+          },
+          UserRole.CLIENT,
+          [tool, 'appointments.own.reschedule'],
+        );
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: {} },
+            semanticPlan,
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          execution_id: 'own-read',
+          result: { appointments: [appointment()] },
+          stale,
+        });
+        const answer = await mocks.service.chat(client, {
+          ...dto,
+          messages: [
+            {
+              role: 'user',
+              content: 'Перенеси мою ближайшую запись на пятницу',
+            },
+          ],
+        });
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute.mock.calls[0][1]).toBe(tool);
+        expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+          suppressWidgetTrigger: true,
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(answer.action).toBeNull();
+        if (stale) {
+          expect(answer.grounding.status).toBe('blocked');
+          expect(answer.reply).not.toContain('Пожелание для переноса');
+          expect(answer.reply).not.toContain('Тестовый филиал');
+        } else {
+          expect(answer.grounding.status).toBe('verified');
+          expect(answer.reply).toContain('Пожелание для переноса: пятница.');
+          expect(answer.reply).toContain(
+            'Возможность переноса ещё не проверена.',
+          );
+          expect(answer.reply).toContain('Тестовый филиал');
+        }
+      },
+    );
     it('filters next week at tenant-local Monday boundaries before composing personal facts', async () => {
       const mocks = fixture({
         appointments: [
@@ -6911,7 +6982,7 @@ describe('AiCoreService', () => {
         // единственным обращением к инструменту остаётся выдумка модели.
         messages: [{ role: 'user', content: 'Привет' }],
       }),
-    ).rejects.toMatchObject<ServiceUnavailableException>({ status: 503 });
+    ).rejects.toMatchObject({ status: 503 });
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
     // Мягкая запись: мы внутри catch, и падение аудита подменило бы исходное
     // исключение. Сам факт записи по-прежнему обязателен.
@@ -7936,7 +8007,7 @@ describe('AiCoreService', () => {
     const long = 'а'.repeat(2_000);
     const messages = [
       ...Array.from({ length: 11 }, (_, index) => ({
-        role: index % 2 === 0 ? 'user' : 'assistant',
+        role: index % 2 === 0 ? ('user' as const) : ('assistant' as const),
         content: long,
       })),
       // Последняя реплика — пользовательская и намеренно не про данные:
@@ -8071,11 +8142,13 @@ describe('AiCoreService', () => {
   }
 
   function decision(
-    value: Pick<AiCoreModelDecision, 'reply' | 'toolCall'> &
-      Partial<Pick<AiCoreModelDecision, 'semanticPlan'>>,
+    value: Pick<AiCoreModelDecision, 'toolCall'> & {
+      reply: string | null;
+    } & Partial<Pick<AiCoreModelDecision, 'semanticPlan'>>,
   ): AiCoreModelDecision {
     return {
       ...value,
+      reply: value.reply ?? '',
       provider: 'deepseek',
       model: 'test-model',
       usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 },
@@ -8153,7 +8226,10 @@ describe('AiCoreService', () => {
       resolveReadDate:
         scheduleDateOwner.resolveReadDate.bind(scheduleDateOwner),
       tryHandle: jest
-        .fn<StaffScheduleCommandService['tryHandle']>()
+        .fn<
+          ReturnType<StaffScheduleCommandService['tryHandle']>,
+          Parameters<StaffScheduleCommandService['tryHandle']>
+        >()
         .mockResolvedValue(null),
     };
     const memory = {

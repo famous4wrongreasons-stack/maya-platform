@@ -199,6 +199,20 @@ export class ReportingPeriodResolver {
       );
     }
 
+    if (
+      /(?<![а-яё])(?:прошл|предыдущ)[а-яё]*\s+год(?:а|у|ом|е)?(?![а-яё])/i.test(
+        current,
+      ) &&
+      !/(сравн|по\s+сравнению|динамик|просел|вырос|рост|снизил|упал)/i.test(
+        current,
+      )
+    ) {
+      return this.pack(
+        this.semanticPeriod('previous_year', now, timezone)!,
+        true,
+        'current',
+      );
+    }
     if (/(?:за\s+)?вчера/i.test(previous)) {
       return this.pack({ period: 'yesterday' }, true, 'previous');
     }
@@ -255,6 +269,50 @@ export class ReportingPeriodResolver {
       return 'previous_period';
     }
     return 'none';
+  }
+
+  /** A validated semantic preference can retain a period across short follow-ups.
+   * It is not an instant or authority: the existing reporting owner still resolves
+   * these local calendar arguments and authorizes every actual READ. */
+  static semanticPeriod(
+    value: unknown,
+    now: Date = new Date(),
+    timezone: string = NEUTRAL_TIMEZONE,
+  ): ReportingPeriodToolArgs | null {
+    if (typeof value !== 'string') return null;
+    if (
+      [
+        'today',
+        'yesterday',
+        'week_to_date',
+        'month_to_date',
+        'year_to_date',
+        'last_7_days',
+        'last_30_days',
+        'last_week',
+        'last_month',
+      ].includes(value)
+    )
+      return { period: value };
+    if (value === 'previous_year') {
+      const year = this.businessToday(now, timezone).year - 1;
+      return {
+        period: 'named_range',
+        from_day: `${year}-01-01`,
+        to_day: `${year}-12-31`,
+      };
+    }
+    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value))
+      return { period: 'named_month', month: value };
+    if (/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(value)) {
+      const date = new Date(`${value}T00:00:00.000Z`);
+      if (
+        Number.isFinite(date.getTime()) &&
+        date.toISOString().slice(0, 10) === value
+      )
+        return { period: 'named_day', day: value };
+    }
+    return null;
   }
 
   /**

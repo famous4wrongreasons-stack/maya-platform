@@ -5,10 +5,127 @@ import {
 import { C9Object, c9Object } from './c9.contract';
 import { sourceInstantText } from '../common/source-instant-text';
 
+export type FinancialReportRequest =
+  { kind: 'latest' } | { kind: 'calendar_month'; year: number; month: number };
+
+const MONTHS = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+];
+
+/** Finite explicit snapshot request; no live analytics, comparison or scoped expansion. */
+export function parseExplicitFinancialReportRequest(
+  text: string,
+): FinancialReportRequest | null {
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/\s+/g, ' ');
+  if (
+    /^(?:объясни|покажи) последний опубликованный финансовый отчет[?!.]*$/u.test(
+      normalized,
+    )
+  )
+    return { kind: 'latest' };
+  const match =
+    /^(?:объясни|покажи) (?:опубликованные показатели|опубликованный финансовый отчет) за ([а-я]+) ([1-9]\d{3})(?: года)?[?!.]*$/u.exec(
+      normalized,
+    );
+  if (!match) return null;
+  const month = MONTHS.indexOf(match[1]) + 1;
+  return month
+    ? { kind: 'calendar_month', year: Number(match[2]), month }
+    : null;
+}
+
 export function isExplicitFinancialReportRequest(text: string): boolean {
-  return /^(?:объясни|покажи) последний опубликованный финансовый отчет[?!.]*$/u.test(
-    text.trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' '),
-  );
+  return parseExplicitFinancialReportRequest(text) !== null;
+}
+
+export function financialReportMonthLabel(
+  request: FinancialReportRequest,
+): string {
+  return request.kind === 'calendar_month'
+    ? `${MONTHS[request.month - 1]} ${request.year} года`
+    : '';
+}
+
+/** Exact source-local calendar boundaries. Null means corrupt/unknown metadata. */
+export function financialReportMonthMatches(
+  period: { from: unknown; toExclusive: unknown; timezone: unknown },
+  request: Extract<FinancialReportRequest, { kind: 'calendar_month' }>,
+): boolean | null {
+  const instant = (value: unknown): Date | null => {
+    if (value instanceof Date)
+      return Number.isFinite(value.getTime()) ? value : null;
+    if (
+      typeof value !== 'string' ||
+      !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(value)
+    )
+      return null;
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) &&
+      date.toISOString().replace('.000Z', 'Z') === value.replace('.000Z', 'Z')
+      ? date
+      : null;
+  };
+  const from = instant(period.from),
+    to = instant(period.toExclusive);
+  if (
+    !from ||
+    !to ||
+    from >= to ||
+    typeof period.timezone !== 'string' ||
+    !period.timezone
+  )
+    return null;
+  try {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: period.timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    });
+    const boundary = (date: Date, year: number, month: number) => {
+      const parts = Object.fromEntries(
+        formatter.formatToParts(date).map((p) => [p.type, p.value]),
+      );
+      return (
+        date.getUTCMilliseconds() === 0 &&
+        Number(parts.year) === year &&
+        Number(parts.month) === month &&
+        parts.day === '01' &&
+        parts.hour === '00' &&
+        parts.minute === '00' &&
+        parts.second === '00'
+      );
+    };
+    return (
+      boundary(from, request.year, request.month) &&
+      boundary(
+        to,
+        request.month === 12 ? request.year + 1 : request.year,
+        request.month === 12 ? 1 : request.month + 1,
+      )
+    );
+  } catch {
+    return null;
+  }
 }
 
 /** Restates only the C7 snapshot projection; no comparison, new arithmetic or causal inference. */

@@ -12,6 +12,7 @@ import {
   singleLifecyclePlanState,
   SINGLE_LIFECYCLE_CLARIFICATION,
   ownerReviewClarification,
+  ownerReviewClarificationReply,
   ownerReviewContinuationState,
   ownerReviewContinuationProjection,
 } from './owner-review-plan';
@@ -345,5 +346,138 @@ describe('finite owner review plan boundary', () => {
     expect(
       singleLifecyclePlanState(question, 'web', UserRole.TENANT_OWNER),
     ).toBe('clarify');
+  });
+  it('retains validated lifecycle refinements as constraints, never bounded acceptance or generic READ', () => {
+    const scopes = [
+      { period: 'more_than_two_months' },
+      { period: 'more_than_two_months', previous_frequency: 'regular' },
+      {
+        period: 'more_than_two_months',
+        previous_frequency: 'regular',
+        goal: 'return_priority',
+      },
+    ];
+    let pending = withOwnerReviewClarification(single());
+    for (const [index, entities] of scopes.entries()) {
+      // These are existing semantic entity names. No new tool args or taxonomy
+      // capability is created by retaining them on a bounded Lifecycle request.
+      const next = ci.validatePlan(
+        {
+          dialogue_act: 'request',
+          tasks: [{ intent: 'clients.dormant_list', entities, confidence: 1 }],
+        },
+        UserRole.TENANT_OWNER,
+        ['clients.dormant.list'],
+      )!;
+      expect(next.tasks[0].entities).toEqual(entities);
+      expect(
+        ownerReviewContinuationState(
+          pending,
+          next,
+          'web',
+          UserRole.TENANT_OWNER,
+          false,
+        ),
+      ).toBeNull();
+      expect(singleLifecyclePlanState(next, 'web', UserRole.TENANT_OWNER)).toBe(
+        'clarify',
+      );
+      const reply = ownerReviewClarificationReply(next);
+      expect(reply).toContain('более двух месяцев');
+      expect(reply.includes('Прежняя регулярность')).toBe(index >= 1);
+      expect(reply.includes('ранжирование не выполняется')).toBe(index === 2);
+      expect(reply.endsWith(SINGLE_LIFECYCLE_CLARIFICATION.question)).toBe(
+        true,
+      );
+      const saved = withOwnerReviewClarification(next);
+      expect(saved.tasks[0].entities).toEqual(entities);
+      expect(saved.tasks[0].clarification_question).toBe(
+        SINGLE_LIFECYCLE_CLARIFICATION.question,
+      );
+      expect(ownerReviewContinuationProjection(saved)).toEqual({
+        scope: SINGLE_LIFECYCLE_CLARIFICATION.scope,
+        question: SINGLE_LIFECYCLE_CLARIFICATION.question,
+        task_intents: ['clients.dormant_list'],
+      });
+      expect(() =>
+        ci.assertToolCallMatchesPlan(
+          { name: 'clients.dormant.list', arguments: {} },
+          saved,
+        ),
+      ).toThrow('conversation_tool_plan_mismatch');
+      const falselyAccepted = {
+        ...next,
+        dialogue_act: 'accept_bounded_review',
+      };
+      expect(
+        ownerReviewContinuationState(
+          pending,
+          falselyAccepted,
+          'web',
+          UserRole.TENANT_OWNER,
+          false,
+        ),
+      ).not.toBe('accept');
+      pending = saved;
+    }
+    // Reloaded encrypted preference may be accepted only by a separate explicit,
+    // unscoped choice. Repeating the prior question is not that choice.
+    const restored = ci.validatePlan(pending, UserRole.TENANT_OWNER, [
+      'clients.dormant.list',
+    ])!;
+    expect(restored.tasks[0].entities).toEqual(scopes[2]);
+    expect(
+      ownerReviewContinuationState(
+        restored,
+        restored,
+        'web',
+        UserRole.TENANT_OWNER,
+        false,
+      ),
+    ).toBe('unresolved');
+    const accepted = single();
+    accepted.dialogue_act = 'accept_bounded_review';
+    expect(
+      ownerReviewContinuationState(
+        restored,
+        accepted,
+        'web',
+        UserRole.TENANT_OWNER,
+        false,
+      ),
+    ).toBe('accept');
+    expect(
+      ownerReviewContinuationState(
+        restored,
+        accepted,
+        'web',
+        UserRole.TENANT_OWNER,
+        true,
+      ),
+    ).toBe('unresolved');
+  });
+
+  it('does not echo arbitrary constraints or change compound clarification or the saved marker', () => {
+    const unknown = single();
+    unknown.tasks[0].entities.goal = 'SECRET_SENTINEL';
+    unknown.tasks[0].entities.previous_frequency = ['regular'];
+    expect(ownerReviewClarificationReply(unknown)).toBe(
+      SINGLE_LIFECYCLE_CLARIFICATION.question,
+    );
+    expect(ownerReviewClarificationReply(plan())).toBe(OWNER_REVIEW_QUESTION);
+    const known = single();
+    known.tasks[0].entities.goal = 'return_priority';
+    expect(
+      isOwnerReviewClarification(
+        {
+          ...SINGLE_LIFECYCLE_CLARIFICATION,
+          question: ownerReviewClarificationReply(known),
+        },
+        known,
+      ),
+    ).toBe(false);
+    expect(
+      isOwnerReviewClarification(SINGLE_LIFECYCLE_CLARIFICATION, known),
+    ).toBe(true);
   });
 });

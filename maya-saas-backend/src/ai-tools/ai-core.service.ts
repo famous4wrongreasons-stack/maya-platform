@@ -12,6 +12,7 @@ import {
   isOwnerReviewTaskSet,
   isSingleLifecycleTaskSet,
   ownerReviewClarification,
+  ownerReviewClarificationReply,
   ownerReviewKind,
   ownerReviewPlanState,
   ownerReviewContinuationProjection,
@@ -21,7 +22,12 @@ import {
   withOwnerReviewClarification,
 } from './owner-review-plan';
 import { publicConsultationReply } from './public-consultation-presentation';
-import { isExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
+import { parseExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
+import { financialPeriodRequests } from './finance-period-binding';
+import {
+  financePeriodReply,
+  financeComparisonReply,
+} from './finance-period-reply';
 import { integrationStatusReply } from './integration-status-presentation';
 import {
   isExplicitClientReturnRequest,
@@ -100,6 +106,7 @@ import type {
 } from '../ai-brain/maya-brain.types';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiMemoryService } from './ai-memory.service';
+import { rescheduleOwnReadClarification } from './personal-reschedule-preparation';
 import type {
   AiCoreMessage,
   AiCoreModelDecision,
@@ -247,6 +254,7 @@ type AiCoreCompletion = {
     >
   >;
   ownerReviewClarification?: true;
+  financialPeriodReply?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
@@ -697,6 +705,9 @@ export class AiCoreService {
       this.contextualUserText(sanitized.messages),
       dto.audience ?? null,
     );
+    const financialReportRequest = parseExplicitFinancialReportRequest(
+      this.latestUserText(dto.messages),
+    );
     if (
       !clientAudience &&
       dto.surface === 'web' &&
@@ -739,11 +750,14 @@ export class AiCoreService {
       [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
         toolUser.role,
       ) &&
-      isExplicitFinancialReportRequest(this.latestUserText(dto.messages))
+      financialReportRequest
     ) {
       const turn = this.readTurns.get(dto);
       if (!turn) this.modelFailure('conversation_history_unavailable');
-      const biReport = await this.orchestrator.explainFinancialReport(turn);
+      const biReport = await this.orchestrator.explainFinancialReport(
+        turn,
+        financialReportRequest,
+      );
       return this.complete(user, dto, brain, sanitized.redacted, [], [], {
         reply: biReport.reply,
         source: 'safe_fallback',
@@ -1210,7 +1224,7 @@ export class AiCoreService {
                 toolsUsed,
                 decisions,
                 {
-                  reply: ownerReviewClarification(activeSemanticPlan).question,
+                  reply: ownerReviewClarificationReply(activeSemanticPlan),
                   source: 'safe_fallback',
                   action: null,
                   ownerReviewClarification: true,
@@ -1289,7 +1303,7 @@ export class AiCoreService {
                 toolsUsed,
                 decisions,
                 {
-                  reply: ownerReviewClarification(activeSemanticPlan).question,
+                  reply: ownerReviewClarificationReply(activeSemanticPlan),
                   source: 'safe_fallback',
                   action: null,
                   ownerReviewClarification: true,
@@ -2194,6 +2208,164 @@ export class AiCoreService {
           new Date(),
           businessTimezone,
         );
+        // A finite revenue request retains the CI-owned period across a short
+        // follow-up. Each side of a comparison is still a separately authorized
+        // registered C9 READ; no synthetic C7 reference or previous-window guess.
+        if (
+          toolsUsed.length === 0 &&
+          decision.toolCall.name === 'analytics.business.query' &&
+          tools.find((tool) => tool.name === decision.toolCall!.name)
+            ?.risk_tier === 'read' &&
+          activeSemanticPlan?.tasks.length === 1 &&
+          ['finance.revenue', 'finance.compare_periods'].includes(
+            activeSemanticPlan.tasks[0].intent,
+          )
+        ) {
+          const requests = financialPeriodRequests(
+            activeSemanticPlan,
+            this.latestUserText(dto.messages),
+            businessTimezone,
+          );
+          if (!requests || step + requests.length > maxToolSteps)
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Уточните точный период выручки; для сравнения укажите оба периода. Другой период не подставляю.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'blocked',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          if (requests.length === 1) {
+            const request = requests[0];
+            const task = activeSemanticPlan.tasks[0];
+            // Persist the same server-bound preference used by this READ.
+            // Otherwise a fresh explicit day would answer correctly but leave
+            // an inherited month for the next short follow-up.
+            activeSemanticPlan = {
+              ...activeSemanticPlan,
+              tasks: [
+                {
+                  ...task,
+                  entities: {
+                    ...task.entities,
+                    period:
+                      request.day ??
+                      request.month ??
+                      (request.period === 'named_range'
+                        ? task.entities.period
+                        : request.period),
+                  },
+                },
+              ],
+            };
+            decision.semanticPlan = activeSemanticPlan;
+          }
+          const values: unknown[] = [];
+          for (const [index, args] of requests.entries()) {
+            let execution: Record<string, unknown>;
+            try {
+              execution = this.record(
+                await this.executeChatTool(
+                  dto,
+                  toolUser,
+                  'analytics.business.query',
+                  {
+                    surface: dto.surface,
+                    arguments: args,
+                    idempotencyKey: this.toolIdempotencyKey(
+                      tenantId,
+                      user.userId,
+                      dto.requestId,
+                      step + index,
+                      'analytics.business.query',
+                    ),
+                  },
+                  {
+                    suppressWidgetTrigger: true,
+                    requestId: dto.requestId,
+                    userTurn: this.persistedUserTurns.get(dto),
+                  },
+                ),
+              );
+            } catch {
+              // A later owner refusal must not fall into the generic partial
+              // report composer. Withhold all earlier values on this path.
+              values.length = 0;
+              toolResults.length = 0;
+              toolsUsed.push({
+                name: 'analytics.business.query',
+                status: 'failed',
+                execution_id: null,
+              });
+              break;
+            }
+            const status =
+              typeof execution.status === 'string'
+                ? execution.status
+                : 'unknown';
+            toolsUsed.push({
+              name: 'analytics.business.query',
+              status,
+              execution_id:
+                typeof execution.execution_id === 'string'
+                  ? execution.execution_id
+                  : null,
+            });
+            if (
+              status !== 'completed' ||
+              execution.stale === true ||
+              !('result' in execution) ||
+              financePeriodReply(execution.result).status === 'blocked'
+            )
+              break;
+            values.push(execution.result);
+            toolResults.push({
+              name: 'analytics.business.query',
+              result: this.sanitizeToolResult(execution.result),
+            });
+          }
+          const presented =
+            requests.length === 2
+              ? financeComparisonReply(values[0], values[1])
+              : financePeriodReply(values[0]);
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: presented.reply,
+              source: 'safe_fallback',
+              action: null,
+              financialPeriodReply: true,
+              grounding: this.groundingReport(
+                {
+                  evidenceToolNames: ['analytics.business.query'],
+                  fallbackDomain: 'business',
+                  closedForAccess: false,
+                  strictNumbers: true,
+                },
+                presented.status,
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
+        }
         if (decision.toolCall.name === 'inventory.goods.search') {
           const code = explicitGoodsSearchCode(
             this.latestUserText(dto.messages),
@@ -2465,6 +2637,10 @@ export class AiCoreService {
             : undefined;
         const scopedPersonalRead =
           personalPeriod !== undefined && personalPeriod !== null;
+        const reschedulePreparation =
+          decision.toolCall.name === 'appointments.own.list'
+            ? rescheduleOwnReadClarification(activeSemanticPlan)
+            : null;
         let execution: Record<string, unknown>;
         try {
           execution = this.record(
@@ -2489,7 +2665,8 @@ export class AiCoreService {
                 ...(publicConsultation ||
                 goodsRead ||
                 serviceRenamePreview ||
-                scopedPersonalRead
+                scopedPersonalRead ||
+                reschedulePreparation !== null
                   ? { suppressWidgetTrigger: true }
                   : {}),
                 ...(serviceRenameSourceRevision
@@ -2683,11 +2860,13 @@ export class AiCoreService {
                                 )
                               : null;
           const deterministicReply =
-            sourceReply?.reply ??
-            this.deterministicGroundedReply(
-              toolResults,
-              this.contextualUserText(sanitized.messages),
-            );
+            sourceReply?.status === 'verified' && reschedulePreparation
+              ? `${sourceReply.reply}\n\n${reschedulePreparation}`
+              : (sourceReply?.reply ??
+                this.deterministicGroundedReply(
+                  toolResults,
+                  this.contextualUserText(sanitized.messages),
+                ));
           // A short follow-up can lack a heuristic data hint. The completed
           // current read still supplies its own domain and evidence identity.
           const replyRequirement: GroundingRequirement | null = sourceReply
@@ -3247,6 +3426,7 @@ export class AiCoreService {
     const clientAudience = this.isClientAudience(user, dto.audience);
     const reportCard =
       !clientAudience &&
+      !response.financialPeriodReply &&
       grounding.status === 'verified' &&
       toolResults.length > 0
         ? buildChatReportCard(toolResults, {

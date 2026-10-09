@@ -15,6 +15,16 @@ export type PeriodCorpusCase = {
 
 export const REPORTING_PERIOD_CORPUS: PeriodCorpusCase[] = [
   {
+    id: 'previous-whole-year-follow-up',
+    text: 'А прошлый год?',
+    previous: 'Какая выручка за этот год?',
+    expect: {
+      period: 'named_range',
+      from_day: '2025-01-01',
+      to_day: '2025-12-31',
+    },
+  },
+  {
     id: 'today-records',
     text: 'Сколько записей сегодня?',
     expect: { period: 'today' },

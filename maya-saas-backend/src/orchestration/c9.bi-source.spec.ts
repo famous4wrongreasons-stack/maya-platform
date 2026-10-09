@@ -20,11 +20,17 @@ function fixture() {
     publishedAt: new Date('2035-05-10T07:00:00Z'),
     expiresAt: new Date('2035-05-11T00:00:00Z'),
     completeness: 'PARTIAL',
+    periodFrom: new Date('2035-05-01T00:00:00Z'),
+    periodTo: new Date('2035-06-01T00:00:00Z'),
+    timezone: 'UTC',
   };
   const tx = {
     membership: { findFirst: jest.fn().mockResolvedValue(member) },
     c9WorkReceipt: { findFirst: jest.fn().mockResolvedValue(null) },
-    measurementRevision: { findFirst: jest.fn().mockResolvedValue(row) },
+    measurementRevision: {
+      findFirst: jest.fn().mockResolvedValue(row),
+      findMany: jest.fn().mockResolvedValue([row]),
+    },
   };
   const store = {
     lock: jest.fn().mockResolvedValue(root),
@@ -60,6 +66,113 @@ function fixture() {
 }
 
 describe('C9 BI exact published financial snapshot selection', () => {
+  const month = { kind: 'calendar_month', year: 2035, month: 5 } as const;
+  it('selects the requested source-local month without a tenant-timezone substitution or a live read', async () => {
+    const f = fixture();
+    f.row.periodFrom = new Date('2035-04-30T17:00:00Z');
+    f.row.periodTo = new Date('2035-05-31T17:00:00Z');
+    f.row.timezone = 'Asia/Novosibirsk';
+    expect(await f.source.select('run', month)).toMatchObject([
+      { id: 'source' },
+    ]);
+    expect(f.tx.measurementRevision.findFirst).not.toHaveBeenCalled();
+    expect(f.tx.measurementRevision.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          tenantId: 'tenant',
+          state: 'PUBLISHED',
+          branchId: null,
+          scopeJson: { path: ['branchIds'], equals: [] },
+          publishedAt: { lte: f.root.admittedAt },
+          expiresAt: { gt: f.root.admittedAt },
+          periodFrom: {
+            gte: new Date('2035-04-30T00:00:00Z'),
+            lte: new Date('2035-05-02T00:00:00Z'),
+          },
+          periodTo: {
+            gte: new Date('2035-05-31T00:00:00Z'),
+            lte: new Date('2035-06-02T00:00:00Z'),
+          },
+        }) as unknown,
+        orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
+        take: 51,
+      }),
+    );
+  });
+  it('does not accept UTC endpoints relabelled into a non-UTC month and chooses the newest exact match only', async () => {
+    const f = fixture();
+    f.tx.measurementRevision.findMany.mockResolvedValue([
+      { ...f.row, id: 'wrong-boundaries', timezone: 'Asia/Novosibirsk' },
+      { ...f.row, id: 'exact-month' },
+      { ...f.row, id: 'older-exact-month' },
+    ]);
+    expect(await f.source.select('run', month)).toMatchObject([
+      { id: 'exact-month' },
+    ]);
+  });
+  it('returns a qualified empty search when no exact month exists', async () => {
+    const f = fixture();
+    f.row.periodTo = new Date('2035-05-10T00:00:00Z');
+    await expect(f.source.select('run', month)).resolves.toEqual([]);
+    expect(f.tx.measurementRevision.findFirst).not.toHaveBeenCalled();
+  });
+  it.each(['missing', 'invalid', 'bounded'])(
+    'refuses %s metadata instead of declaring the requested month absent',
+    async (kind) => {
+      const f = fixture();
+      if (kind === 'bounded') {
+        f.tx.measurementRevision.findMany.mockResolvedValue(
+          Array.from({ length: 51 }, () => ({
+            ...f.row,
+            periodFrom: new Date('2035-05-01T00:01:00Z'),
+          })),
+        );
+      } else f.row.timezone = kind === 'missing' ? '' : 'Invalid/Timezone';
+      await expect(f.source.select('run', month)).rejects.toThrow(
+        kind === 'bounded'
+          ? 'c9_array_bounds'
+          : 'c9_context_fact_source_unavailable',
+      );
+    },
+  );
+  it('does not fall back to an older exact month after the selected one expires', async () => {
+    const f = fixture();
+    f.tx.measurementRevision.findMany.mockResolvedValue([
+      { ...f.row, expiresAt: f.now },
+      { ...f.row, id: 'older' },
+    ]);
+    await expect(f.source.select('run', month)).rejects.toThrow(
+      'c9_source_expired',
+    );
+  });
+  it('replays the saved month address without reselecting and rejects a foreign tenant receipt', async () => {
+    const f = fixture();
+    const refs = await f.source.select('run', month);
+    f.tx.measurementRevision.findMany.mockClear();
+    f.tx.c9WorkReceipt.findFirst.mockResolvedValue({
+      retentionUntil: f.row.expiresAt,
+      inputEvidenceRefsJson: refs,
+    });
+    expect(await f.source.select('run', month)).toEqual(refs);
+    expect(f.tx.measurementRevision.findMany).not.toHaveBeenCalled();
+    f.tx.c9WorkReceipt.findFirst.mockResolvedValue({
+      retentionUntil: f.row.expiresAt,
+      inputEvidenceRefsJson: [{ ...refs[0], tenantId: 'foreign' }],
+    });
+    await expect(f.source.select('run', month)).rejects.toThrow(
+      'c9_source_read_receipt',
+    );
+  });
+  it.each([0, 13, 1.5])(
+    'rejects invalid month %s before source selection',
+    async (value) => {
+      const f = fixture();
+      await expect(
+        f.source.select('run', { ...month, month: value }),
+      ).rejects.toThrow('c9_source_read_receipt');
+      expect(f.tx.measurementRevision.findMany).not.toHaveBeenCalled();
+    },
+  );
   it('selects one qualified tenant-wide address using the immutable first-admission cutoff', async () => {
     const f = fixture();
     const refs = await f.source.select('run');

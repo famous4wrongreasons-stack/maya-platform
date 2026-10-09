@@ -325,6 +325,120 @@ test('price READ preserves unreachable-preview finding; year/retention/profit re
   }
 });
 
+test('retention follow-ups retain each fresh constraint without selecting a READ or bounded acceptance', () => {
+  for (const id of [
+    'mt-retention_drill_down-0',
+    'mt-retention_drill_down-15',
+  ]) {
+    for (let turn = 1; turn <= 3; turn++) {
+      const response = call(model(), id, turn);
+      const plan = output(response);
+      assert.equal(plan.tool_call, null);
+      assert.equal(plan.semantic_plan.dialogue_act, 'request');
+      assert.equal(plan.semantic_plan.tasks.length, 1);
+      const task = plan.semantic_plan.tasks[0];
+      assert.equal(task.intent, 'clients.dormant_list');
+      assert.equal(task.requires_clarification, true);
+      assert.deepEqual(JSON.parse(task.entities_json), {
+        period: 'more_than_two_months',
+        ...(turn >= 2 ? { previous_frequency: 'regular' } : {}),
+        ...(turn === 3 ? { goal: 'return_priority' } : {}),
+      });
+      assert.equal(
+        response.maya_full_offline.limitation,
+        'C8_RULE_IS_NOT_TWO_MONTH_RANKING',
+      );
+    }
+  }
+});
+
+test('who-is-booked keeps journal intent, ambiguous staff and the new branch without a fabricated READ', () => {
+  for (const turn of [1, 2]) {
+    const plan = output(
+      call(model(), 'mt-ambiguous_entity_resolution-15', turn),
+    );
+    const task = plan.semantic_plan.tasks[0];
+    assert.equal(task.intent, 'operations.journal_day');
+    assert.equal(task.requires_clarification, true);
+    assert.equal(plan.tool_call, null);
+    assert.deepEqual(JSON.parse(task.entities_json), {
+      employee: 'Саше',
+      period: '2026-10-11',
+      ...(turn === 2 ? { branch: 'основной филиал' } : {}),
+    });
+    assert.match(task.clarification_question, /журнал/);
+    assert.match(task.clarification_question, /одного специалиста/);
+  }
+});
+
+test('reschedule first reads own appointments while retaining a blocked parent intent and requested Friday', () => {
+  const plan = output(call(model(), 'mt-cancel_pending_action-15', 1));
+  assert.equal(plan.tool_call.name, 'appointments.own.list');
+  assert.deepEqual(JSON.parse(plan.tool_call.arguments_json), {});
+  const [list, move] = plan.semantic_plan.tasks;
+  assert.equal(plan.semantic_plan.tasks.length, 2);
+  assert.equal(list.id, 'own_list');
+  assert.equal(list.intent, 'booking.list_own');
+  assert.deepEqual(JSON.parse(list.entities_json), { period: 'nearest' });
+  assert.deepEqual(list.depends_on, []);
+  assert.equal(list.requires_clarification, false);
+  assert.equal(move.intent, 'booking.reschedule_own');
+  assert.deepEqual(JSON.parse(move.entities_json), { new_date: 'friday' });
+  assert.deepEqual(move.depends_on, ['own_list']);
+  assert.equal(move.requires_clarification, true);
+  for (const turn of [2, 3]) {
+    const later = output(call(model(), 'mt-cancel_pending_action-15', turn));
+    assert.equal(later.tool_call, null);
+    assert.deepEqual(JSON.parse(later.semantic_plan.tasks[0].entities_json), {
+      new_date: 'friday',
+      new_time: '20:00',
+    });
+  }
+});
+
+test('missing published October fixture does not preempt a current cash READ or authorize an estimate', () => {
+  const id = 'current-bi-negative',
+    m = model();
+  const plan = output(call(m, id, 1));
+  assert.equal(plan.semantic_plan.tasks[0].intent, 'finance.revenue');
+  assert.equal(plan.semantic_plan.tasks[0].requires_clarification, false);
+  assert.deepEqual(JSON.parse(plan.semantic_plan.tasks[0].entities_json), {
+    period: '2026-10',
+  });
+  assert.equal(plan.tool_call.name, 'analytics.business.query');
+  assert.deepEqual(JSON.parse(plan.tool_call.arguments_json), {
+    period: 'named_month',
+    month: '2026-10',
+    comparison: 'none',
+  });
+  const evidence = measurement();
+  evidence.metrics = evidence.metrics.filter(
+    (row) => row.key === 'confirmed_cash',
+  );
+  const reply = call(
+    m,
+    id,
+    1,
+    {
+      tool_results: [
+        { name: 'analytics.business.query', result: { measurement: evidence } },
+      ],
+    },
+    true,
+  ).choices[0].message.content;
+  assert.match(reply, /касс.*не измерен/i);
+  assert.doesNotMatch(
+    reply,
+    /примерно.*\d|приблизительно.*\d|23456|2026-10.*выручка.*0/,
+  );
+  assert.equal(
+    m.observations.filter(
+      (row) => row.emittedTool === 'analytics.business.query',
+    ).length,
+    1,
+  );
+});
+
 test('inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope', () => {
   for (const [id, tool, limit] of [
     ['utt-inventory.stock-074', 'inventory.stock.read', /не даёт списка/],

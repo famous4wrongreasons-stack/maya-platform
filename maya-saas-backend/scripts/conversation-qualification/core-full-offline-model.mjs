@@ -430,18 +430,14 @@ function select(item, turn, input, people) {
         'BRANCH_AUTHORITY_NOT_ESTABLISHED',
       );
     case 'current-bi-ordinary':
+    case 'current-bi-negative':
+      // Missing publication is not evidence that live cash was read. The same
+      // existing period owner qualifies October; it never estimates unknowns.
       return recipe(
         'finance.revenue',
         { period: '2026-10' },
         'analytics.business.query',
         { period: 'named_month', month: '2026-10', comparison: 'none' },
-      );
-    case 'current-bi-negative':
-      return clarify(
-        'finance.revenue',
-        { period: '2026-10' },
-        'Подтверждённая выручка за октябрь недоступна. Оценивать её без источника нельзя.',
-        'MISSING_C7_NO_ESTIMATE',
       );
     case 'current-lifecycle-ordinary':
       return recipe('clients.dormant_list');
@@ -475,30 +471,45 @@ function select(item, turn, input, people) {
     case 'mt-retention_drill_down-15':
       return clarify(
         'clients.dormant_list',
-        { period: 'more_than_two_months' },
+        {
+          period: 'more_than_two_months',
+          ...(turn >= 2 ? { previous_frequency: 'regular' } : {}),
+          ...(turn === 3 ? { goal: 'return_priority' } : {}),
+        },
         'Имеющееся правило за другой срок не подтверждает отсутствие более двух месяцев, прежнюю регулярность или приоритет возврата.',
         'C8_RULE_IS_NOT_TWO_MONTH_RANKING',
       );
     case 'mt-ambiguous_entity_resolution-15':
       return clarify(
-        'schedule.get_team',
+        'operations.journal_day',
         {
           employee: person('Саше'),
-          date_or_period: tomorrow,
+          period: tomorrow,
           ...(turn === 2 ? { branch: 'основной филиал' } : {}),
         },
-        'Нужно выбрать одного специалиста: имя и филиал пока не дают подтверждённого однозначного соответствия.',
+        'Чтобы прочитать журнал записей, нужно выбрать одного специалиста: имя и филиал пока не дают подтверждённого однозначного соответствия.',
         'AMBIGUOUS_STAFF_BRANCH_MAPPING',
       );
     case 'mt-cancel_pending_action-15':
       return turn === 1
-        ? recipe(
-            'booking.list_own',
-            {},
-            'appointments.own.list',
-            {},
-            'Для переноса сначала выберите вашу запись и доступное время. Перенос не выполнен.',
-          )
+        ? {
+            ...recipe('booking.list_own', {}, 'appointments.own.list'),
+            tasks: [
+              {
+                ...task('booking.list_own', { period: 'nearest' }),
+                id: 'own_list',
+              },
+              {
+                ...task(
+                  'booking.reschedule_own',
+                  { new_date: 'friday' },
+                  'Выберите вашу запись для переноса и уточните время. Перенос не выполнен.',
+                ),
+                id: 'reschedule',
+                depends_on: ['own_list'],
+              },
+            ],
+          }
         : clarify(
             'booking.reschedule_own',
             { new_date: 'friday', new_time: '20:00' },

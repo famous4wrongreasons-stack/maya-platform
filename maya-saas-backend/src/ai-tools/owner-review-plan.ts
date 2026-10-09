@@ -88,6 +88,29 @@ export function ownerReviewClarification(plan: ConversationSemanticPlan) {
     : OWNER_REVIEW_CLARIFICATION;
 }
 
+/** Visible scope explanation only. The saved marker/question stays byte-exact. */
+export function ownerReviewClarificationReply(
+  plan: ConversationSemanticPlan,
+): string {
+  const question = ownerReviewClarification(plan).question;
+  if (!isSingleLifecycleTaskSet(plan)) return question;
+  const entities = plan.tasks[0].entities;
+  const limitations: string[] = [];
+  if (entities.period === 'more_than_two_months')
+    limitations.push(
+      'Отбор клиентов, отсутствующих более двух месяцев, этой проверкой не выполняется.',
+    );
+  if (entities.previous_frequency === 'regular')
+    limitations.push(
+      'Прежняя регулярность визитов этой проверкой не определяется.',
+    );
+  if (entities.goal === 'return_priority')
+    limitations.push(
+      'Кого вернуть в первую очередь, по такой проверке определить нельзя: ранжирование не выполняется.',
+    );
+  return [...limitations, question].join(' ');
+}
+
 export function isOwnerReviewTaskSet(
   plan: ConversationSemanticPlan | null | undefined,
 ): boolean {

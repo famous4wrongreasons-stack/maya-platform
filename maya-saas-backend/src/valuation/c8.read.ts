@@ -23,6 +23,63 @@ import {
 } from './c8.contract';
 import { c8Explanation } from './c8.explanation';
 import { c8TargetReadiness } from './c8.targets';
+import { c8Policy } from './c8.policy';
+import { isUsableTimezone } from '../tenants/salon-timezone';
+
+export type C8DormancyRuleParameters = {
+  elapsed: { unit: 'day' | 'calendar_month'; count: number };
+  comparison: 'gt' | 'gte';
+  evidence: 'proven_attendance';
+  minimumCoverage: 'COMPLETE' | 'PARTIAL';
+  serviceScope: { restricted: boolean; count: number };
+  timezone: string;
+};
+
+/** Exact current policy only. No names, identifiers, thresholds from defaults,
+ * feature rows or inferred population coverage enter this projection. */
+function dormancyRuleParameters(
+  row: C8ResultRevision,
+  policy: Awaited<ReturnType<C8Sources['policy']>>,
+): C8DormancyRuleParameters | null {
+  if (
+    policy.id !== row.policyRevisionId ||
+    policy.hash !== row.policyContentHash ||
+    row.ruleVersion !== 1 ||
+    !isUsableTimezone(row.timezone)
+  )
+    return null;
+  const content = c8Policy(policy.content);
+  const rules = content.dormancyRules as C8Object[];
+  const rule = rules.find(
+    (item) =>
+      typeof item.ruleKey === 'string' &&
+      'c8.dormancy/' + item.ruleKey === row.ruleKey,
+  );
+  if (!rule) return null;
+  const scope = row.scopeJson as C8Object;
+  const services = rule.serviceScope as string[];
+  if (
+    !Array.isArray(scope.serviceScope) ||
+    scope.serviceScope.length !== services.length ||
+    scope.serviceScope.some(
+      (id) => typeof id !== 'string' || !services.includes(id),
+    ) ||
+    new Set(scope.serviceScope).size !== services.length
+  )
+    return null;
+  const elapsed = rule.elapsed as C8Object;
+  return {
+    elapsed: {
+      unit: elapsed.unit as 'day' | 'calendar_month',
+      count: elapsed.count as number,
+    },
+    comparison: rule.comparison as 'gt' | 'gte',
+    evidence: 'proven_attendance',
+    minimumCoverage: rule.minimumCoverage as 'COMPLETE' | 'PARTIAL',
+    serviceScope: { restricted: services.length > 0, count: services.length },
+    timezone: row.timezone.trim(),
+  };
+}
 
 export type C8ReadQuery = {
   kind?: string;
@@ -121,7 +178,7 @@ export class C8ReadService {
     offset = 0,
   ) {
     await this.access(tenantId, userId, row);
-    const current = await this.system(tenantId, () =>
+    const observed = await this.system(tenantId, () =>
       this.store.transaction(async (tx) => {
         const newest = await tx.c8ResultRevision.findFirst({
           where: {
@@ -139,9 +196,29 @@ export class C8ReadService {
           ],
           select: { id: true },
         });
-        return newest?.id === row.id && (await this.store.refsCurrent(row, tx));
+        const current =
+          newest?.id === row.id && (await this.store.refsCurrent(row, tx));
+        let parameters: C8DormancyRuleParameters | null = null;
+        if (
+          current &&
+          row.state === 'PUBLISHED' &&
+          row.kind === 'POLICY_SIGNAL' &&
+          row.subjectKind === 'client' &&
+          row.qualification === 'VERIFIED' &&
+          ['COMPLETE', 'PARTIAL'].includes(row.completeness) &&
+          row.basis === 'proven_attendance_policy' &&
+          row.ruleKey.startsWith('c8.dormancy/')
+        ) {
+          const policy = await this.sources.policy(tx);
+          // The same C8/A22 transaction owns the policy lock. Never attach a
+          // newer policy's parameters to an older immutable result.
+          parameters = dormancyRuleParameters(row, policy);
+          if (!parameters) return { current: false, parameters: null };
+        }
+        return { current, parameters };
       }),
     );
+    const { current } = observed;
     const explanation = c8Explanation(row, current);
     const rank = row.rankingJson as C8Object | null;
     const members =
@@ -183,6 +260,8 @@ export class C8ReadService {
       });
     }
     await this.access(tenantId, userId, row); // Revocation while resolving dependencies also denies exposure.
+    if (observed.parameters && row.expiresAt <= new Date())
+      throw new NotFoundException('c8_result_unavailable');
     return {
       contract: 'c8.valuation.read/1' as const,
       id: row.id,
@@ -193,6 +272,10 @@ export class C8ReadService {
       mode: 'immutable_snapshot' as const,
       current,
       ...explanation,
+      rule: {
+        ...explanation.rule,
+        ...(observed.parameters ? { parameters: observed.parameters } : {}),
+      },
       horizonEnd: row.horizonEnd?.toISOString() ?? null,
       policyRevision: row.policyRevisionId,
       modelVersionId: row.modelVersionId,
