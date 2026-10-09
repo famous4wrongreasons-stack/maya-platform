@@ -924,6 +924,12 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       ]);
       const conversationId = object(first.body.user_turn).conversationId;
       assert.ok(typeof conversationId === 'string');
+      // GET /ai/conversation returns the conversation of the newest principal-
+      // scoped user turn, not an arbitrary conversationId query. Keep subsequent
+      // owner turns in this same conversation; replaying an old request alone
+      // does not change that immutable user turn's createdAt.
+      const ownerChat = (scenario: Scenario) =>
+        chat(token, scenario, randomUUID(), conversationId);
       const runId = await evidence(a, first.body),
         firstEvidenceHash = digest(sourceReceipts.at(-1));
       const graphBeforeReplay = await graph(a.tenant.id),
@@ -946,7 +952,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
         ['Марина', '72', '2200'],
       ] as const) {
         const n = transport.length;
-        const answer = await chat(token, price(employee));
+        const answer = await ownerChat(price(employee));
         assertVerified(answer);
         expect(answer.body.reply).toContain(employee);
         expect(answer.body.reply).toContain(SERVICE);
@@ -988,17 +994,17 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
         providerReadsAdded: 0,
       };
 
-      const range = await chat(token, price('Артём', 'Комплекс'));
+      const range = await ownerChat(price('Артём', 'Комплекс'));
       assertVerified(range);
       expect(String(range.body.reply).replace(/[\s\u00a0\u202f]/g, '')).toMatch(
         /2000[^\d]+2600/,
       );
       await evidence(a, range.body);
-      const zero = await chat(token, price('Артём', 'Консультация'));
+      const zero = await ownerChat(price('Артём', 'Консультация'));
       assertVerified(zero);
       expect(String(zero.body.reply)).toMatch(/\b0\b/);
       await evidence(a, zero.body);
-      const unknown = await chat(token, price('Артём', 'Уход'));
+      const unknown = await ownerChat(price('Артём', 'Уход'));
       assertVerified(unknown);
       expect(String(unknown.body.reply)).toMatch(
         /цен[^.\n]*(?:не|нет|неизвест)/i,
@@ -1011,7 +1017,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       );
       expect(currency.body.reply).not.toMatch(/RUB|₽|руб/);
       await evidence(unknownCurrency, currency.body);
-      const empty = await chat(token, {
+      const empty = await ownerChat({
         text: 'Какие услуги выполняет Никита в филиале Набережная?',
         employee: 'Никита',
         branch: BRANCH_NAME,
@@ -1059,7 +1065,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       // named but deliberately lacks this tenant's StaffProviderLink.
       for (const employee of ['Саша', 'Елена', 'Несуществующий']) {
         const n = transport.length;
-        const answer = await chat(token, {
+        const answer = await ownerChat({
           text: `Какие услуги выполняет ${employee}?`,
           employee,
         });
@@ -1068,12 +1074,12 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       }
       for (const service of ['Дублированная услуга', 'Несуществующая услуга']) {
         const n = transport.length;
-        assertBlocked(await chat(token, price('Артём', service)));
+        assertBlocked(await ownerChat(price('Артём', service)));
         assertNativeReads(n, a, '71');
       }
       const beforeBranch = transport.length;
       assertBlocked(
-        await chat(token, {
+        await ownerChat({
           ...LIST,
           text: `Какие услуги выполняет Артём в филиале ${b.branchId}?`,
           branch: b.branchId,
@@ -1081,7 +1087,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
         }),
       );
       assertBlocked(
-        await chat(token, {
+        await ownerChat({
           ...LIST,
           text: 'Какие услуги выполняет Артём в другом филиале?',
           branch: 'другой филиал',
@@ -1092,7 +1098,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       expect(restricted.status).toBe(403);
       expect(transport).toHaveLength(beforeBranch);
       const beforeMalformed = transport.length;
-      const malformed = await chat(token, {
+      const malformed = await ownerChat({
         text: 'Какие услуги выполняет Ольга?',
         employee: 'Ольга',
       });
@@ -1126,6 +1132,35 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       expect(
         turns.every((turn) => !turn.textContent?.includes('Услуги мастера')),
       ).toBe(true);
+      const beforeHistory = { models: modelCalls, reads: transport.length };
+      const currentHistory = await request(http.app.getHttpServer())
+        .get('/api/ai/conversation')
+        .set('Authorization', `Bearer ${token}`);
+      expect(currentHistory.status).toBe(200);
+      expect(object(currentHistory.body).conversationId).toBe(conversationId);
+      const currentTurns = object(currentHistory.body).turns;
+      assert.ok(Array.isArray(currentTurns));
+      expect(
+        currentTurns.some((turn: unknown) => {
+          const row = object(turn);
+          return (
+            row.role === 'assistant' &&
+            typeof row.text === 'string' &&
+            typeof first.body.reply === 'string' &&
+            row.text.includes(first.body.reply)
+          );
+        }),
+      ).toBe(true);
+      assertPrivateAbsent(currentHistory.body);
+      expect(modelCalls).toBe(beforeHistory.models);
+      expect(transport).toHaveLength(beforeHistory.reads);
+      report.prepareHistory = {
+        status: currentHistory.status,
+        conversationHash: digest(conversationId),
+        originalReplyRetained: true,
+        modelCallsAdded: 0,
+        providerReadsAdded: 0,
+      };
       await assertNoPrivateToolReads();
       expect(await business()).toBe(before);
       noWrites(mark);
