@@ -772,6 +772,117 @@ describe('AiCoreService', () => {
       }
     });
 
+    it.each([
+      'ready',
+      'stale',
+      'refused',
+      'foreign-source',
+      'no-widget',
+      'other-time',
+      'other-day',
+    ])(
+      'acknowledges a carried exact-time selection only with a fresh source widget: %s',
+      async (state) => {
+        const f = bookingFixture();
+        const execute = f.runtime.execute.getMockImplementation()!;
+        f.runtime.execute.mockImplementation((actor, name, input) => {
+          if (name !== 'booking.availability.read')
+            return execute(actor, name, input);
+          const args = input.arguments;
+          return Promise.resolve({
+            status: 'completed',
+            stale: state === 'stale',
+            result: {
+              timezone: 'Europe/Moscow',
+              ...(args.time
+                ? {
+                    requested_time:
+                      state === 'other-time' ? '18:00' : args.time,
+                    requested_date:
+                      state === 'other-day' ? '2026-10-12' : args.date,
+                  }
+                : {}),
+              booking_selection: {
+                tenantId: client.tenantId,
+                serviceId: 'service-a',
+                staffId: 'staff-a',
+              },
+              slots: [
+                {
+                  start:
+                    state === 'other-day'
+                      ? '2026-10-12T14:00:00Z'
+                      : state === 'other-time'
+                        ? '2026-10-11T15:00:00Z'
+                        : '2026-10-11T14:00:00Z',
+                  end:
+                    state === 'other-day'
+                      ? '2026-10-12T16:00:00Z'
+                      : '2026-10-11T16:00:00Z',
+                  staff_id: 'staff-a',
+                  branch_id: 'branch-a',
+                },
+              ],
+            },
+            ...(state === 'no-widget'
+              ? {}
+              : {
+                  resolution: {
+                    matched: state !== 'refused',
+                    receipt: {
+                      envelope: {
+                        kind: 'TIME_SLOT_SELECTOR',
+                        provenance: {
+                          source_capability:
+                            state === 'foreign-source' ? 'foreign.read' : name,
+                        },
+                      },
+                    },
+                  },
+                }),
+          });
+        });
+        const first = await f.turn({
+          ...initial,
+          date_or_period: '2026-10-11',
+        });
+        f.runtime.execute.mockClear();
+        const selected = await f.turn(
+          { time: '17:00' },
+          {},
+          'booking.create_own',
+        );
+        expect(f.availabilityArgs()).toEqual([
+          {
+            date: '2026-10-11',
+            time: '17:00',
+            branch_id: 'branch-a',
+            staff_id: 'staff-a',
+            service_ids: ['service-a'],
+          },
+        ]);
+        if (state === 'ready') {
+          expect(first.reply).toContain('Выберите подходящее время');
+          expect(selected.reply).toContain(
+            '2026-10-11 в 17:00 (Europe/Moscow)',
+          );
+          expect(selected.reply).toContain('проверить детали и подтвердить');
+          expect(selected.reply).not.toContain('Выберите подходящее время');
+          expect(selected.reply).toContain('Запись ещё не создана');
+        } else {
+          expect(selected.reply).not.toContain('найден выбранный вариант');
+          expect(selected.reply).not.toContain('Выберите подходящее время');
+        }
+        expect(selected.action).toBeNull();
+        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+          'catalog.services.read',
+          'catalog.staff.read',
+          'booking.availability.read',
+        ]);
+        expect(f.model.decide).toHaveBeenCalledTimes(2);
+      },
+    );
+
     it('retains the exact clock through an early missing-service clarification', async () => {
       const f = bookingFixture();
       const first = await f.turn({

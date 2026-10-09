@@ -1,6 +1,7 @@
 import { presentBookingSelector } from './booking-selector.presenter';
 import {
   BOOKING_NOUN_OWNERS,
+  decodeBookingSlotSelectionRef,
   encodeBookingSlotOwnerRef,
 } from './booking-noun-identity';
 
@@ -348,4 +349,217 @@ it('preserves INTERNAL provider-owned selection when the emitter confirms the so
       mint,
     })?.kind,
   ).toBe('TIME_SLOT_SELECTOR');
+});
+
+describe('requested booking time acknowledgement', () => {
+  const scopedSource = () => ({
+    timezone: 'Europe/Moscow',
+    requested_date: '2035-01-01',
+    requested_time: '10:00',
+    booking_selection: {
+      branchId: 'branch-a',
+      branchSourceRevision: 'a'.repeat(64),
+    },
+    slots: [
+      {
+        branch_id: 'branch-a',
+        start: '2035-01-01T07:00:00Z',
+        end: '2035-01-01T08:00:00Z',
+      },
+    ],
+  });
+
+  it('changes only the review phrases and preserves the exact scoped mint identity and choice', () => {
+    const mintSpy = jest.fn(mint);
+    const present = (source: unknown) =>
+      presentBookingSelector({
+        tenantId: 'tenant-a',
+        kind: 'TIME_SLOT_SELECTOR',
+        source,
+        inherited: { service: 'opaque-service', staff: 'opaque-staff' },
+        mint: mintSpy,
+      });
+    const source = scopedSource();
+    const generic = present({
+      ...source,
+      requested_date: undefined,
+      requested_time: undefined,
+    });
+    const reviewed = present(source);
+    expect(generic?.kind).toBe('TIME_SLOT_SELECTOR');
+    expect(reviewed?.kind).toBe('TIME_SLOT_SELECTOR');
+    if (
+      generic?.kind !== 'TIME_SLOT_SELECTOR' ||
+      reviewed?.kind !== 'TIME_SLOT_SELECTOR' ||
+      !('groups' in generic.body) ||
+      !('groups' in reviewed.body)
+    )
+      throw new Error('Expected both slot selectors');
+
+    expect(generic.body.prompt.rendered).toBe('Выберите время');
+    expect(generic.body.groups[0].label.rendered).toBe(
+      'Предложенные варианты времени',
+    );
+    expect(reviewed.body).toEqual({
+      ...generic.body,
+      prompt: {
+        phrase_key: 'booking.selector',
+        rendered: 'Проверьте выбранное время',
+      },
+      groups: [
+        {
+          ...generic.body.groups[0],
+          label: {
+            phrase_key: 'booking.selector',
+            rendered: 'Выбранное время',
+          },
+        },
+      ],
+    });
+    expect(mintSpy).toHaveBeenCalledTimes(2);
+    const identity = mintSpy.mock.calls[0][0];
+    expect(mintSpy.mock.calls[1][0]).toEqual(identity);
+    expect(identity).toMatchObject({
+      tenantId: 'tenant-a',
+      noun: 'slot',
+      ownerKind: BOOKING_NOUN_OWNERS.slot,
+    });
+    expect(identity.ownerRef).toMatch(/^slot_v2:/);
+    expect(decodeBookingSlotSelectionRef(identity.ownerRef)).toEqual({
+      start: '2035-01-01T07:00:00.000Z',
+      scope: { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) },
+    });
+    expect(reviewed.body.groups[0].slots).toMatchObject([
+      {
+        slot_ref: mint(identity),
+        staff_ref: 'opaque-staff',
+        start: { value: source.slots[0].start },
+        availability: {
+          state: 'NOT_MEASURED',
+          value: null,
+          reason_code: 'NOT_COLLECTED',
+          fact_ref: null,
+        },
+        intent_ref: 'i1',
+      },
+    ]);
+    expect(reviewed.body.none_fit_intent).toBe('i1');
+  });
+
+  it.each<[string, Record<string, unknown>]>([
+    ['missing date', { requested_date: undefined }],
+    ['missing time', { requested_time: undefined }],
+    ['different date', { requested_date: '2035-01-02' }],
+    ['different time', { requested_time: '11:00' }],
+    ['different timezone', { timezone: 'UTC' }],
+    [
+      'incomplete owner evidence',
+      { exact_time_unavailable: 'incomplete_source' },
+    ],
+    [
+      'ambiguous owner evidence',
+      { exact_time_unavailable: 'ambiguous_local_time' },
+    ],
+    [
+      'duplicate rows',
+      { slots: [...scopedSource().slots, ...scopedSource().slots] },
+    ],
+    [
+      'a matching slot beside a malformed row',
+      {
+        slots: [
+          ...scopedSource().slots,
+          { branch_id: 'branch-a', start: 'invalid', end: 'invalid' },
+        ],
+      },
+    ],
+    [
+      'two DST fold instants',
+      {
+        timezone: 'America/New_York',
+        requested_date: '2026-11-01',
+        requested_time: '01:30',
+        slots: [
+          {
+            branch_id: 'branch-a',
+            start: '2026-11-01T05:30:00Z',
+            end: '2026-11-01T06:00:00Z',
+          },
+          {
+            branch_id: 'branch-a',
+            start: '2026-11-01T06:30:00Z',
+            end: '2026-11-01T07:00:00Z',
+          },
+        ],
+      },
+    ],
+  ])('retains the generic prompt for %s', (_name, overrides) => {
+    const presented = presentBookingSelector({
+      tenantId: 'tenant-a',
+      kind: 'TIME_SLOT_SELECTOR',
+      inherited: { staff: 'opaque-staff' },
+      source: { ...scopedSource(), ...overrides },
+      mint,
+    });
+    expect(presented?.body).toMatchObject({
+      prompt: { rendered: 'Выберите время' },
+      groups: [{ label: { rendered: 'Предложенные варианты времени' } }],
+    });
+  });
+
+  it.each<[string, Record<string, unknown>]>([
+    ['missing original branch witness', { booking_selection: null }],
+    [
+      'foreign branch witness',
+      {
+        booking_selection: {
+          branchId: 'foreign-branch',
+          branchSourceRevision: 'a'.repeat(64),
+        },
+      },
+    ],
+    [
+      'invalid source revision',
+      {
+        booking_selection: {
+          branchId: 'branch-a',
+          branchSourceRevision: 'invalid',
+        },
+      },
+    ],
+    [
+      'canonical incomplete response',
+      {
+        exact_time_unavailable: 'incomplete_source',
+        booking_selection: null,
+        slots: [],
+      },
+    ],
+  ])('does not let requested-time metadata rescue %s', (_name, overrides) => {
+    const mintSpy = jest.fn(mint);
+    expect(
+      presentBookingSelector({
+        tenantId: 'tenant-a',
+        kind: 'TIME_SLOT_SELECTOR',
+        inherited: { staff: 'opaque-staff' },
+        source: { ...scopedSource(), ...overrides },
+        mint: mintSpy,
+      }),
+    ).toBeNull();
+    expect(mintSpy).not.toHaveBeenCalled();
+  });
+
+  it('still requires the inherited staff before minting the requested slot', () => {
+    const mintSpy = jest.fn(mint);
+    expect(
+      presentBookingSelector({
+        tenantId: 'tenant-a',
+        kind: 'TIME_SLOT_SELECTOR',
+        inherited: { service: 'opaque-service' },
+        source: scopedSource(),
+        mint: mintSpy,
+      }),
+    ).toBeNull();
+    expect(mintSpy).not.toHaveBeenCalled();
+  });
 });

@@ -18,9 +18,14 @@ import { assertCoreSocket } from './core-conversation-socket.mjs';
 import { readLocalTerminalCredential } from './core-local-terminal-credential.mjs';
 import { serveCandidateBroker } from './candidate-broker-server.mjs';
 import { assertCoreSources, coreHash } from './core-conversation-source.mjs';
+import {
+  createCoreRecordedReplay,
+  CORE_RECORDED_REPLAY_QUALIFICATION,
+} from './core-recorded-replay.mjs';
 const { values } = parseArgs({
   options: {
     mode: { type: 'string' },
+    'recorded-replay': { type: 'boolean' },
     manifest: { type: 'string' },
     'manifest-sha256': { type: 'string' },
     output: { type: 'string' },
@@ -33,6 +38,11 @@ const { values } = parseArgs({
 assert.ok(
   ['dry', 'admitted', 'admitted-local'].includes(values.mode),
   'core_broker_explicit_mode',
+);
+const recordedReplay = values['recorded-replay'] === true;
+assert.ok(
+  !recordedReplay || values.mode === 'dry',
+  'core_broker_recorded_replay_dry_only',
 );
 assert.ok(
   values.output && path.isAbsolute(values.output),
@@ -110,8 +120,13 @@ const report = {
   stopped: false,
   qualification: live
     ? 'ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED'
-    : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
+    : recordedReplay
+      ? CORE_RECORDED_REPLAY_QUALIFICATION
+      : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
+  recordedReplay,
+  ...(recordedReplay ? { recordedResponses: [] } : {}),
 };
+const replay = recordedReplay ? createCoreRecordedReplay() : null;
 let gate, credentialIdentity, localCredential, broker;
 let localStopQueued = false;
 const save = () => {
@@ -297,7 +312,15 @@ if (localStdin) {
 const transport = async (url, init) => {
   assert.ok(Date.now() < expiresAt, 'core_broker_expired');
   assertCoreSources(pinned);
-  if (!live) return canned();
+  if (!live) {
+    if (!replay) return canned();
+    const response = replay.respond(init.body);
+    report.recordedResponses.push(response.maya_recorded_replay);
+    save();
+    return new Response(JSON.stringify(response), {
+      headers: { 'content-type': 'application/json' },
+    });
+  }
   admission(binding);
   assertCoreSocket(pinned.admissionContext.target, { localStdin });
   const key = readCredential();
@@ -385,6 +408,13 @@ broker = serveCandidateBroker({
       );
   },
   onResponse: ({ caseId, turn, status, text }) => {
+    const replayEvidence = replay?.observations.at(-1);
+    if (replay) {
+      assert.ok(
+        replayEvidence?.caseId === caseId && replayEvidence?.turn === turn,
+        'core_broker_recorded_scope_refused',
+      );
+    }
     let safe = {
       caseId,
       turn,
@@ -421,7 +451,11 @@ broker = serveCandidateBroker({
     }
     fs.appendFileSync(
       path.join(values.output, 'model-responses.jsonl'),
-      JSON.stringify({ ...safe, qualification: report.qualification }) + '\n',
+      JSON.stringify({
+        ...safe,
+        qualification: report.qualification,
+        ...(replayEvidence ? { recordedReplay: replayEvidence } : {}),
+      }) + '\n',
       { mode: 0o600 },
     );
   },

@@ -85,6 +85,10 @@ interface Allowed {
 
 /** Non-widget modules any widget file may import. Closed: a module not listed here is refused. */
 const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
+  'common/booking-requested-slot.ts': {
+    why: 'Pure source-shape and instant-formatting presentation helper; no imports, DI, owner reads or execution authority.',
+    only: ['booking/booking-selector.presenter.ts'],
+  },
   'ai-tools/booking-catalog-binding.ts': {
     why: 'Canonical booking-source drift error and classifier; DI-free.',
     only: ['owner-ports/booking-selector.adapter.ts'],

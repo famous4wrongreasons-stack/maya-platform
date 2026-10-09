@@ -23,11 +23,13 @@ import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
 import { runOwnedStage, trackOwnedChild } from './owned-child-cleanup.mjs';
 import { coreConversationResources } from './core-conversation-resources.mjs';
+import { CORE_RECORDED_REPLAY_QUALIFICATION } from './core-recorded-replay.mjs';
 const { values } = parseArgs({
   options: {
     prepare: { type: 'boolean' },
     run: { type: 'boolean' },
     mode: { type: 'string' },
+    'recorded-replay': { type: 'boolean' },
     output: { type: 'string' },
     manifest: { type: 'string' },
     'manifest-sha256': { type: 'string' },
@@ -52,6 +54,11 @@ assert.ok(
 assert.ok(
   ['dry', 'admitted', 'admitted-local'].includes(values.mode),
   'core_runner_mode',
+);
+const recordedReplay = values['recorded-replay'] === true;
+assert.ok(
+  !recordedReplay || values.mode === 'dry',
+  'core_runner_recorded_replay_dry_only',
 );
 assert.ok(
   values.output &&
@@ -132,6 +139,7 @@ if (values.prepare) {
       manifestSha256,
       candidateCommit: manifest.candidateCommit,
       paidAuthorized: false,
+      recordedReplay,
       resources: {
         nodeHeapMb: resources.nodeHeapMb,
         brokerHeapMb: resources.brokerHeapMb,
@@ -208,7 +216,10 @@ const report = {
   },
   qualification: live
     ? 'REAL_MODEL_SYNTHETIC_DATA_UNGRADED'
-    : 'DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY',
+    : recordedReplay
+      ? CORE_RECORDED_REPLAY_QUALIFICATION
+      : 'DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY',
+  recordedReplay,
 };
 const save = () =>
   fs.writeFileSync(
@@ -285,6 +296,7 @@ try {
         'scripts/conversation-qualification/core-conversation-broker.mjs',
         '--mode',
         'dry',
+        ...(recordedReplay ? ['--recorded-replay'] : []),
         '--manifest',
         manifestPath,
         '--manifest-sha256',
@@ -334,6 +346,7 @@ try {
   }
   assertCoreSources(manifest);
   const probeEnv = {
+    ...(recordedReplay ? { JEST_CORE_CONVERSATION_RECORDED_REPLAY: '1' } : {}),
     JEST_CORE_CONVERSATION_MODE: localStdin
       ? 'live-local'
       : live

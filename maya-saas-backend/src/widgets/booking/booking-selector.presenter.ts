@@ -6,6 +6,7 @@ import type {
   WidgetKind,
 } from '../../widget-contract/kinds';
 import type { OwnerNounIdentity } from '../noun-resolution/noun-handle.codec';
+import { matchedRequestedBookingSlot } from '../../common/booking-requested-slot';
 import {
   BOOKING_NOUN_OWNERS,
   encodeBookingSlotOwnerRef,
@@ -310,17 +311,22 @@ const presentSlots = (
   }
   if (rendered.length === 0) return null;
   const starts = rendered.map((slot) => String(slot.start.value));
+  const requestedSlot = matchedRequestedBookingSlot(input.source);
   return {
     kind: 'TIME_SLOT_SELECTOR',
     body: {
-      prompt: phrase('Выберите время'),
+      prompt: phrase(
+        requestedSlot ? 'Проверьте выбранное время' : 'Выберите время',
+      ),
       timezone,
       window: { from: starts[0], to: starts[starts.length - 1] },
       grouping: 'flat',
       groups: [
         {
           group_id: 'available',
-          label: phrase('Предложенные варианты времени'),
+          label: phrase(
+            requestedSlot ? 'Выбранное время' : 'Предложенные варианты времени',
+          ),
           slots: rendered,
         },
       ],

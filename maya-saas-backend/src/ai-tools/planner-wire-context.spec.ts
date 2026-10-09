@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { UserRole } from '../common/domain.enums';
 import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
@@ -7,6 +9,7 @@ import { AiCoreModelService } from './ai-core-model.service';
 import { MAYA_AI_TOOL_CATALOG } from './ai-tool.catalog';
 import type { AiCoreModelInput, AiCoreToolDescriptor } from './ai-core.types';
 import { plannerWireContext } from './planner-wire-context';
+import { withOwnerReviewClarification } from './owner-review-plan';
 
 const ci = new ConversationIntelligenceService();
 const groups = [
@@ -71,8 +74,273 @@ const plan = {
   context: { carried_slots: [], replaced_slots: [], unresolved_references: [] },
 };
 
+type PlannerWire = ReturnType<typeof plannerWireContext>;
+function restoreTools(wire: PlannerWire) {
+  const schemas = wire.tool_input_schemas.map((value, i) => {
+    const refs = wire.tool_input_schema_property_refs[i];
+    if (!Object.keys(refs).length) return value;
+    const schema = value as Record<string, unknown>;
+    const properties = schema.properties as Record<string, unknown>;
+    for (const [name, index] of Object.entries(refs)) {
+      expect(Object.hasOwn(properties, name)).toBe(false);
+      expect(Number.isInteger(index)).toBe(true);
+      expect(index).toBeGreaterThanOrEqual(0);
+      expect(index).toBeLessThan(wire.tool_input_property_schemas.length);
+    }
+    return {
+      ...schema,
+      properties: Object.fromEntries<unknown>([
+        ...Object.entries(properties),
+        ...Object.entries(refs).map(([name, index]) => [
+          name,
+          wire.tool_input_property_schemas[index],
+        ]),
+      ]),
+    };
+  });
+  const tools = Array.isArray(wire.available_tools)
+    ? wire.available_tools
+    : wire.available_tools.rows.map((row) =>
+        Object.fromEntries(
+          (wire.available_tools as { columns: string[] }).columns.map(
+            (key, i) => [key, row[i]],
+          ),
+        ),
+      );
+  return tools.map((tool) => {
+    if (!('input_schema_ref' in tool)) return tool;
+    const { input_schema_ref, ...rest } = tool;
+    return { ...rest, input_schema: schemas[input_schema_ref as number] };
+  });
+}
+
 describe('Bounded planner stage wire context (no language acceptance)', () => {
   afterEach(() => jest.restoreAllMocks());
+  it('fits the recorded owner compound follow-up without dropping actual history or authority fields', async () => {
+    const directory = path.resolve(
+      __dirname,
+      '../../../docs/rebuild/evidence/local-actual-model-20261008',
+    );
+    const readPinned = (file: string, sha256: string) => {
+      const bytes = readFileSync(path.join(directory, file));
+      expect(createHash('sha256').update(bytes).digest('hex')).toBe(sha256);
+      return bytes.toString('utf8');
+    };
+    const report = JSON.parse(
+      readPinned(
+        'runner/http-report.json',
+        'b0e878148e478b67e0ae0a63d10948be38753047bf1ca03dd77ab18ce85fa03b',
+      ),
+    ) as {
+      modelObservations: Array<{
+        caseId: string;
+        turn: number;
+        actualTools: string[];
+        requiredTools: string[];
+        nowUtc: string;
+        timezone: string;
+      }>;
+      responses: Array<{
+        caseId: string;
+        turn: number;
+        userText: string;
+        actualReply: string | null;
+      }>;
+    };
+    const responses = readPinned(
+      'broker/model-responses.jsonl',
+      'a06c69f84c6733a3ff33c2b5e97e4a1e3058c26776534a781192e02a7f2a0620',
+    )
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line) as { caseId: string; content: string });
+    const caseId = 'core-owner-compound-clarification';
+    const observations = report.modelObservations.filter(
+      (row) => row.caseId === caseId,
+    );
+    const turns = report.responses.filter((row) => row.caseId === caseId);
+    expect(observations.map((row) => row.turn)).toEqual([1, 2]);
+    expect(turns.map((row) => row.turn)).toEqual([1, 2]);
+    expect(observations[1].actualTools).toEqual(observations[0].actualTools);
+    expect(observations[1].actualTools).toHaveLength(27);
+    expect(observations[1].requiredTools).toHaveLength(14);
+    const recorded = responses.find((row) => row.caseId === caseId)!;
+    const tools: AiCoreToolDescriptor[] = observations[0].actualTools.map(
+      (name) => {
+        const definition = MAYA_AI_TOOL_CATALOG.find((t) => t.name === name)!;
+        expect(definition).toBeDefined();
+        return {
+          name,
+          description: definition.description,
+          input_schema: definition.inputSchema,
+          risk_tier: definition.riskTier,
+          approval_policy: definition.approvalPolicy,
+        };
+      },
+    );
+    const config: Record<string, string> = {
+      DEEPSEEK_API_KEY: 'synthetic-recorded-response-only',
+      DEEPSEEK_AI_CORE_MODEL: 'deepseek-v4-pro',
+    };
+    const service = new AiCoreModelService({
+      get: (key: string) => config[key],
+    } as ConfigService);
+    const firstInput: AiCoreModelInput = {
+      surface: 'web',
+      persona: 'director',
+      principalRole: UserRole.TENANT_OWNER,
+      messages: [{ role: 'user', content: turns[0].userText }],
+      tools,
+      toolResults: [],
+      allowToolCall: true,
+      requiredToolNames: observations[0].requiredTools,
+      nowUtc: observations[0].nowUtc,
+      businessTimezone: observations[0].timezone,
+    };
+    // Real parser/CI validation and the same server clarification transformation.
+    // Recorded output is a mechanical regression fixture, never a new model answer.
+    const parsed = service['validatePlanningResponse'](
+      recorded.content,
+      firstInput,
+    );
+    const savedPlan = withOwnerReviewClarification(parsed.semanticPlan);
+    expect(savedPlan.tasks).toHaveLength(3);
+    expect(savedPlan.tasks[0].entities).toEqual({ period: 'today' });
+    expect(savedPlan.tasks[0].clarification_question).toBe(
+      turns[0].actualReply,
+    );
+    const actualReply = turns[0].actualReply;
+    if (typeof actualReply !== 'string')
+      throw new Error('recorded_reply_missing');
+    const fetchMock = jest.spyOn(globalThis, 'fetch').mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            choices: [
+              { message: { content: recorded.content }, finish_reason: 'stop' },
+            ],
+          }),
+        ),
+      ),
+    );
+    const sizes: Record<string, number> = {};
+    for (const history of ['recorded_user_only', 'actual_assistant_retained']) {
+      const input: AiCoreModelInput = {
+        ...firstInput,
+        messages: [
+          ...firstInput.messages,
+          ...(history === 'actual_assistant_retained'
+            ? [{ role: 'assistant' as const, content: actualReply }]
+            : []),
+          { role: 'user', content: turns[1].userText },
+        ],
+        requiredToolNames: observations[1].requiredTools,
+        nowUtc: observations[1].nowUtc,
+        conversationPlan: savedPlan,
+      };
+      await service['requestDeepSeekPlan'](input, false);
+      const raw = fetchMock.mock.calls.at(-1)![1]!.body as string;
+      sizes[history] = Buffer.byteLength(raw);
+      const body = JSON.parse(raw) as { messages: Array<{ content: string }> };
+      const data = JSON.parse(body.messages[1].content) as Record<
+        string,
+        unknown
+      >;
+      expect(data.conversation).toEqual(input.messages);
+      expect(data.semantic_plan).toEqual(savedPlan);
+      expect(data.required_tools).toEqual(observations[1].requiredTools);
+      expect(data.principal_role).toBe(UserRole.TENANT_OWNER);
+      expect(data.tool_results).toEqual([]);
+      expect(restoreTools(data as unknown as PlannerWire)).toEqual(tools);
+    }
+    console.info('recorded owner planner bytes', sizes);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(sizes.recorded_user_only).toBeLessThanOrEqual(98_304);
+    expect(sizes.actual_assistant_retained).toBeLessThanOrEqual(98_304);
+  });
+  it('interns only identical complete properties without reserving schema keywords or altering nested constraints', () => {
+    const shared = {
+      type: 'array',
+      minItems: 1,
+      maxItems: 8,
+      uniqueItems: true,
+      default: [],
+      description: 'Complete property, including nested constraints.',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['start', 'status'],
+        properties: {
+          start: { type: 'string', pattern: '^one$', minLength: 3 },
+          status: { enum: ['second', 'first'], const: 'first' },
+        },
+      },
+    };
+    const sourceSchemas: unknown[] = [
+      {
+        type: 'object',
+        additionalProperties: false,
+        required: ['slots', 'branch_id'],
+        properties: {
+          slots: shared,
+          branch_id: { type: 'string', minLength: 8, maxLength: 128 },
+          property_schema_ref: { const: 0 },
+          permitted: true,
+          refused: false,
+        },
+        // Original keywords must never be confused with transport metadata.
+        property_schema_ref: 12,
+        tool_input_schema_property_refs: { original: true },
+      },
+      {
+        type: 'object',
+        additionalProperties: { type: 'number', minimum: 1 },
+        required: ['slots'],
+        properties: {
+          slots: structuredClone(shared),
+          branch_id: { type: 'string', minLength: 1, maxLength: 128 },
+          alternative: { ...shared, maxItems: 7 },
+        },
+      },
+      { type: 'object', properties: {} },
+      { type: 'object', additionalProperties: false },
+      true,
+      false,
+      {
+        type: 'array',
+        items: { type: 'object', properties: { slots: shared } },
+      },
+    ];
+    const tools: AiCoreToolDescriptor[] = sourceSchemas.map(
+      (input_schema, i) => ({
+        name: 'synthetic.' + i,
+        description: 'Preserve this descriptor.',
+        input_schema,
+        risk_tier: 'high_write',
+        approval_policy: 'actor',
+      }),
+    );
+    const before = structuredClone(tools);
+    const wire = JSON.parse(
+      JSON.stringify(
+        plannerWireContext(tools, ci.plannerContract(UserRole.CLIENT, [])),
+      ),
+    ) as PlannerWire;
+    expect(restoreTools(wire)).toEqual(before);
+    expect(tools).toEqual(before);
+    expect(wire.tool_input_property_schemas).toEqual([shared]);
+    expect(wire.tool_input_schema_property_refs).toEqual([
+      { slots: 0 },
+      { slots: 0 },
+      {},
+      {},
+      {},
+      {},
+      {},
+    ]);
+    // No recursive rewriting of items/anyOf/$defs or nested property schemas.
+    expect(wire.tool_input_schemas[6]).toEqual(sourceSchemas[6]);
+  });
   it.each(groups)(
     '%s preserves every tool field and all canonical intent fields exactly',
     (_group, role, features) => {
@@ -84,24 +352,7 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
       const wire = JSON.parse(
         JSON.stringify(plannerWireContext(tools, contract)),
       ) as ReturnType<typeof plannerWireContext>;
-      const wireTools = Array.isArray(wire.available_tools)
-        ? wire.available_tools
-        : wire.available_tools.rows.map((row) =>
-            Object.fromEntries(
-              (wire.available_tools as { columns: string[] }).columns.map(
-                (key, i) => [key, row[i]],
-              ),
-            ),
-          );
-      const restoredTools = wireTools.map((t) => {
-        if (!('input_schema_ref' in t)) return t;
-        const { input_schema_ref, ...rest } = t;
-        return {
-          ...rest,
-          input_schema: wire.tool_input_schemas[input_schema_ref as number],
-        };
-      });
-      expect(restoredTools).toEqual(tools);
+      expect(restoreTools(wire)).toEqual(tools);
       const { intents, ...rest } = wire.conversation_contract;
       expect({
         ...rest,
@@ -120,7 +371,7 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
       }).toEqual(contract);
       expect(intents.columns).toHaveLength(13);
       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
-      expect(intents.rows).toHaveLength(89);
+      expect(intents.rows).toHaveLength(91);
       expect(Object.keys(intents.dictionaries)).toEqual([
         'domain',
         'action',

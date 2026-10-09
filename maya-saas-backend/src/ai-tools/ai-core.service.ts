@@ -46,6 +46,7 @@ import {
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
 import { CrmService } from '../crm/crm.service';
+import { matchedRequestedBookingSlot } from '../common/booking-requested-slot';
 import {
   mutationClarification,
   mutationReceiptReply,
@@ -1794,6 +1795,26 @@ export class AiCoreService {
                     : null,
                 ...this.widgetResolution(execution),
               });
+              const resolution = this.widgetResolution(execution).resolution;
+              const envelope = this.record(
+                this.record(resolution?.receipt).envelope,
+              );
+              const hasTimeSelector =
+                execution.status === 'completed' &&
+                execution.stale !== true &&
+                resolution?.matched === true &&
+                envelope.kind === 'TIME_SLOT_SELECTOR' &&
+                this.record(envelope.provenance).source_capability ===
+                  'booking.availability.read';
+              const matchedSlot = hasTimeSelector
+                ? matchedRequestedBookingSlot(execution.result)
+                : null;
+              const requestedSlot =
+                isExactBookingTime(timePreference) &&
+                matchedSlot?.time === timePreference &&
+                matchedSlot.date === date.slice(0, 10)
+                  ? matchedSlot
+                  : null;
               return this.complete(
                 user,
                 dto,
@@ -1802,27 +1823,29 @@ export class AiCoreService {
                 toolsUsed,
                 decisions,
                 {
-                  reply: this.widgetResolution(execution).resolution
-                    ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
-                    : execution.status === 'completed' &&
-                        isExactBookingTime(timePreference) &&
-                        this.record(execution.result).exact_time_unavailable ===
-                          'ambiguous_local_time'
-                      ? `На ${date.slice(0, 10)} в ${timePreference} источник возвращает неоднозначное локальное время. Точный вариант подтвердить не могу. Укажите другое время или дату. Запись не создана.`
+                  reply: requestedSlot
+                    ? `На ${requestedSlot.date} в ${requestedSlot.time} (${requestedSlot.timezone}) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.`
+                    : hasTimeSelector && !isExactBookingTime(timePreference)
+                      ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
                       : execution.status === 'completed' &&
                           isExactBookingTime(timePreference) &&
                           this.record(execution.result)
-                            .exact_time_unavailable === 'incomplete_source'
-                        ? `На ${date.slice(0, 10)} в ${timePreference} данных источника недостаточно для проверки точного времени. Запись не создана.`
+                            .exact_time_unavailable === 'ambiguous_local_time'
+                        ? `На ${date.slice(0, 10)} в ${timePreference} источник возвращает неоднозначное локальное время. Точный вариант подтвердить не могу. Укажите другое время или дату. Запись не создана.`
                         : execution.status === 'completed' &&
                             isExactBookingTime(timePreference) &&
-                            Array.isArray(
-                              this.record(execution.result).slots,
-                            ) &&
-                            (this.record(execution.result).slots as unknown[])
-                              .length === 0
-                          ? `На ${date.slice(0, 10)} в ${timePreference} не нашла подтверждённых свободных окон. Выберите другое время или дату. Запись не создана.`
-                          : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
+                            this.record(execution.result)
+                              .exact_time_unavailable === 'incomplete_source'
+                          ? `На ${date.slice(0, 10)} в ${timePreference} данных источника недостаточно для проверки точного времени. Запись не создана.`
+                          : execution.status === 'completed' &&
+                              isExactBookingTime(timePreference) &&
+                              Array.isArray(
+                                this.record(execution.result).slots,
+                              ) &&
+                              (this.record(execution.result).slots as unknown[])
+                                .length === 0
+                            ? `На ${date.slice(0, 10)} в ${timePreference} не нашла подтверждённых свободных окон. Выберите другое время или дату. Запись не создана.`
+                            : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
                   source: 'safe_fallback',
                   action: null,
                   grounding: this.groundingReport(

@@ -1,8 +1,10 @@
 /** Bounded development diagnostic: actual auth/HTTP/AiCore/DeepSeek serializer
- * and actual assistant history. No golden plan, model output substitution,
- * source-owner override or ordinary widgets harness change. The separately
- * owned broker provides canned transport in dry mode and admitted transport
- * in live mode; this process never reads a provider credential. */
+ * and actual HTTP reply history. Model input retains the canonical privacy
+ * filter and server-owned semantic continuation, not caller assistant prose.
+ * No corpus gold answer enters dialogue history, and source owners remain intact.
+ * The separately owned broker provides canned or explicitly qualified recorded
+ * replay transport in dry mode and admitted transport in live mode; this process
+ * never reads a provider credential. */
 import { ConfigService } from '@nestjs/config';
 import { execFileSync } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
@@ -13,6 +15,7 @@ import request from 'supertest';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import type { AiCoreModelInput } from '../../src/ai-tools/ai-core.types';
 import { AiToolPolicyService } from '../../src/ai-tools/ai-tool-policy.service';
+import { OWNER_REVIEW_QUESTION } from '../../src/ai-tools/owner-review-plan';
 import { CrmProvider, UserRole } from '../../src/common/domain.enums';
 import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
 import type { CRMAdapter } from '../../src/crm/crm-adapter.interface';
@@ -57,6 +60,10 @@ const { socketRequest } = nativeRequire(
   ),
 ) as typeof import('../../scripts/conversation-qualification/core-conversation-socket.mjs');
 const mode = process.env.JEST_CORE_CONVERSATION_MODE;
+const recordedReplayFlag = process.env.JEST_CORE_CONVERSATION_RECORDED_REPLAY;
+const recordedReplay = recordedReplayFlag === '1';
+const recordedReplayQualification =
+  'RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY';
 const output = process.env.JEST_CORE_CONVERSATION_OUTPUT;
 const brokerUrl = process.env.JEST_CORE_CONVERSATION_BROKER_URL;
 const manifestPath = process.env.JEST_CORE_CONVERSATION_MANIFEST_PATH;
@@ -70,6 +77,8 @@ const proof = assertProofDatabase();
 if (
   !/^maya_widget_gate_proof_c9occ_[a-z0-9_]+$/.test(proof.database) ||
   !['dry', 'live', 'live-local'].includes(mode ?? '') ||
+  (recordedReplayFlag !== undefined &&
+    (recordedReplayFlag !== '1' || mode !== 'dry')) ||
   !output ||
   !path.isAbsolute(output) ||
   !manifestPath ||
@@ -147,12 +156,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   let manifest: DiagnosticManifest;
   let active: CandidateSource | undefined;
   let turn = 0,
+    modelCallsForTurn = 0,
     modelCalls = 0,
     serializerCalls = 0,
-    brokerCalls = 0;
+    brokerCalls = 0,
+    modelOutputResponses = 0;
   let stopped: string | null = null;
   const sources = new Map<string, CandidateSource>();
   const caseSources = new Map<string, CandidateSource>();
+  const actualRepliesByCase = new Map<string, string[]>();
   const financeDays = new Map<string, string>();
   const forbidden: string[] = [];
   const financeReads: Array<{ route: string; company: string }> = [];
@@ -163,6 +175,22 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   const preflights: Record<string, unknown>[] = [];
   const replayRecords: Record<string, unknown>[] = [];
   let result: unknown = null;
+  const modelCoverageSince = (
+    modelBefore: number,
+    brokerBefore: number,
+    outputBefore: number,
+  ) =>
+    modelOutputResponses > outputBefore
+      ? recordedReplay
+        ? recordedReplayQualification
+        : mode === 'dry'
+          ? 'CANNED_TRANSPORT_ONLY'
+          : 'ACTUAL_MODEL_OUTPUT_UNGRADED'
+      : modelCalls === modelBefore
+        ? 'ZERO_MODEL_NOT_LANGUAGE_COVERAGE'
+        : brokerCalls === brokerBefore
+          ? 'NO_MODEL_OUTPUT_PRE_DISPATCH'
+          : 'NO_MODEL_OUTPUT_RECEIVED';
   const write = (name: string, value: unknown) =>
     writeFileSync(
       path.join(output, name),
@@ -403,6 +431,30 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       .spyOn(model, 'decide')
       .mockImplementation(async (input: AiCoreModelInput) => {
         modelCalls++;
+        modelCallsForTurn++;
+        const ownerFollowUp =
+          active?.item.id === 'core-owner-compound-clarification' &&
+          turn === 2 &&
+          modelCallsForTurn === 1;
+        const previousActualReply = active
+          ? actualRepliesByCase.get(active.item.id)?.at(-1)
+          : undefined;
+        const restoredClarificationMatchesActualReply = ownerFollowUp
+          ? typeof previousActualReply === 'string' &&
+            input.conversationPlan?.tasks.some(
+              (task) =>
+                task.requires_clarification &&
+                task.clarification_question === previousActualReply,
+            ) === true
+          : null;
+        // The ordinary canned dry transport never asks this owner question.
+        // Classify the actual server reply with its existing closed contract;
+        // compare against that captured reply, never a corpus/gold response.
+        const canonicalOwnerClarificationExpected =
+          ownerFollowUp && previousActualReply === OWNER_REVIEW_QUESTION;
+        const onlyUserHistoryForwarded = input.messages.every(
+          (message) => message.role === 'user',
+        );
         modelObservations.push({
           caseId: active?.item.id,
           turn,
@@ -410,7 +462,12 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           actualTools: input.tools.map((t) => t.name),
           requiredTools: input.requiredToolNames,
           historyRoles: input.messages.map((m) => m.role),
+          historyPolicy:
+            'SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD',
+          onlyUserHistoryForwarded,
           historySha256: hash(input.messages),
+          canonicalOwnerClarificationExpected,
+          restoredClarificationMatchesActualReply,
           priorPlanPresent: input.conversationPlan != null,
           priorPlanTasks:
             input.conversationPlan?.tasks.map((task) => ({
@@ -425,6 +482,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           nowUtc: input.nowUtc,
           timezone: input.businessTimezone,
         });
+        // Boolean-only assertions cannot dump private carried assistant prose.
+        expect(onlyUserHistoryForwarded).toBe(true);
+        if (canonicalOwnerClarificationExpected)
+          expect(restoredClarificationMatchesActualReply).toBe(true);
         return decide(input);
       });
     const policy = http.app.get(AiToolPolicyService),
@@ -520,16 +581,40 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             message?: { content?: unknown };
           }>;
           usage?: Record<string, unknown>;
+          maya_recorded_replay?: { origin?: unknown };
         };
+        const recordedOrigin = payload.maya_recorded_replay?.origin;
+        if (
+          recordedReplay
+            ? typeof recordedOrigin !== 'string' ||
+              ![
+                'RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING',
+                'SCRIPTED_SYNTHETIC_CONTINUATION',
+              ].includes(recordedOrigin)
+            : payload.maya_recorded_replay !== undefined
+        )
+          throw new Error('core_recorded_replay_response_binding_refused');
+        const content = payload.choices?.[0]?.message?.content;
+        // An invoked model method, serialized request or broker dispatch alone
+        // does not establish that this turn received any model output.
+        if (response.ok && typeof content === 'string' && content.length > 0)
+          modelOutputResponses++;
         append('actual-model-responses.jsonl', {
           caseId: active.item.id,
           turn,
           attempt: gate.stats.attempts,
           status: response.status,
-          content:
-            typeof payload.choices?.[0]?.message?.content === 'string'
-              ? payload.choices[0].message.content
-              : null,
+          origin: recordedReplay
+            ? recordedOrigin
+            : mode === 'dry'
+              ? 'CANNED_SYNTHETIC_RESPONSE'
+              : 'BROKER_MODEL_RESPONSE',
+          qualification: recordedReplay
+            ? recordedReplayQualification
+            : mode === 'dry'
+              ? 'CANNED_TRANSPORT_MECHANICS_ONLY'
+              : 'ACTUAL_BROKER_MODEL_OUTPUT_UNGRADED',
+          content: typeof content === 'string' ? content : null,
           finishReason: payload.choices?.[0]?.finish_reason ?? null,
           usage: Object.fromEntries(
             [
@@ -565,8 +650,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       contract: 'maya.core-conversation-http-diagnostic/1',
       mode,
       status: result ? (result as { status: string }).status : 'incomplete',
-      qualification:
-        'KNOWN_DERIVED_DEVELOPMENT_DIAGNOSTIC_NOT_HOLDOUT_NOT_ACCEPTANCE',
+      qualification: recordedReplay
+        ? recordedReplayQualification
+        : 'KNOWN_DERIVED_DEVELOPMENT_DIAGNOSTIC_NOT_HOLDOUT_NOT_ACCEPTANCE',
       sourceHead,
       sourceDigest,
       manifestSha256,
@@ -576,6 +662,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       modelCalls,
       serializerCalls,
       brokerCalls,
+      modelOutputResponses,
+      modelOutputResponsesMeaning:
+        'Successful broker envelopes with nonempty content; dry is canned, live requires matching broker evidence; not semantic acceptance',
       gate: gate?.stats ?? null,
       stopped,
       providerQualification: {
@@ -584,8 +673,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         finance: 'ACTUAL_C7_OWNER_NATIVE_YCLIENTS_ADAPTER_FINITE_SYNTHETIC_GET',
         realCrmNetworkCalls: 0,
       },
-      modelQualification:
-        mode === 'dry'
+      modelQualification: recordedReplay
+        ? recordedReplayQualification
+        : mode === 'dry'
           ? 'CANNED_TRANSPORT_MECHANICS_ONLY'
           : 'ACTUAL_BROKER_MODEL_OUTPUT_REQUIRES_BROKER_ADMISSION_AND_USAGE_EVIDENCE',
       restarts: 'NOT_EXERCISED',
@@ -1013,9 +1103,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         active = source;
         turn = 0;
         const priorReplies: string[] = [];
+        actualRepliesByCase.set(caseId, priorReplies);
         return Promise.resolve({
           chat: async (body) => {
             turn++;
+            modelCallsForTurn = 0;
             expect(
               body.messages
                 .filter((m) => m.role === 'user')
@@ -1033,6 +1125,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               modelBefore = modelCalls,
               wireBefore = serializerCalls,
               brokerBefore = brokerCalls,
+              outputBefore = modelOutputResponses,
               sourceBefore = source.reads.length;
             let response: { status: number; body: unknown };
             try {
@@ -1055,6 +1148,12 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 modelCalls: modelCalls - modelBefore,
                 serializerCalls: serializerCalls - wireBefore,
                 brokerCalls: brokerCalls - brokerBefore,
+                modelOutputResponses: modelOutputResponses - outputBefore,
+                modelCoverage: modelCoverageSince(
+                  modelBefore,
+                  brokerBefore,
+                  outputBefore,
+                ),
                 noRetry: true,
               };
               responses.push(failed);
@@ -1132,12 +1231,12 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               modelCalls: modelCalls - modelBefore,
               serializerCalls: serializerCalls - wireBefore,
               brokerCalls: brokerCalls - brokerBefore,
-              modelCoverage:
-                modelCalls === modelBefore
-                  ? 'ZERO_MODEL_NOT_LANGUAGE_COVERAGE'
-                  : mode === 'dry'
-                    ? 'CANNED_TRANSPORT_ONLY'
-                    : 'ACTUAL_MODEL_OUTPUT_UNGRADED',
+              modelOutputResponses: modelOutputResponses - outputBefore,
+              modelCoverage: modelCoverageSince(
+                modelBefore,
+                brokerBefore,
+                outputBefore,
+              ),
               sourceReads: source.reads.slice(sourceBefore),
               businessHashUnchanged: before === after,
               businessWrites: writes,
@@ -1162,6 +1261,63 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             expect(response.status).toBe(201);
             expect(typeof answer.reply).toBe('string');
             expect(typeof answer.user_turn?.conversationId).toBe('string');
+            // Offline regression expectations apply only to explicitly bound
+            // recorded outputs/synthetic continuations, never grade live model
+            // choices against a substituted gold answer.
+            if (
+              recordedReplay &&
+              caseId === 'core-client-create-followup' &&
+              turn === 2
+            ) {
+              expect(answer.action).toBeNull();
+              expect(approvals).toEqual([]);
+              expect(answer.reply).toContain('в 17:00 (Europe/Moscow)');
+              expect(answer.reply).not.toContain('Выберите подходящее время');
+              expect(answer.resolution).toMatchObject({
+                matched: true,
+                receipt: {
+                  envelope: {
+                    kind: 'TIME_SLOT_SELECTOR',
+                    body: { prompt: { rendered: 'Проверьте выбранное время' } },
+                  },
+                },
+              });
+            }
+            if (
+              recordedReplay &&
+              caseId === 'core-owner-compound-clarification' &&
+              turn === 2
+            ) {
+              expect(answer.action).toBeNull();
+              expect(answer.coordination).toMatchObject({
+                scope: 'explicit_business_occupancy',
+                current: true,
+                revision: 1,
+              });
+              expect(observation.financialEvidenceCount).toBeGreaterThan(0);
+              expect(observation.recommendation).toMatchObject({
+                noSideEffects: true,
+                executionAuthority: false,
+              });
+              expect(observation.recommendation!.evidenceCount).toBeGreaterThan(
+                0,
+              );
+              const matchingRuns = observation.persistedCoordination.filter(
+                (run) => run.runHash === observation.coordination?.runHash,
+              );
+              expect(matchingRuns).toHaveLength(1);
+              const persisted = matchingRuns[0];
+              expect(persisted?.currentRevision).toBe(1);
+              expect(
+                persisted?.revisions.filter(
+                  (revision) =>
+                    revision.version === 1 &&
+                    revision.revisionHash ===
+                      observation.coordination?.revisionHash &&
+                    (revision.evidenceCount ?? 0) > 0,
+                ),
+              ).toHaveLength(1);
+            }
             priorReplies.push(answer.reply!);
             return {
               reply: answer.reply!,
@@ -1169,6 +1325,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               evidence: {
                 modelCalls: modelCalls - modelBefore,
                 brokerCalls: brokerCalls - brokerBefore,
+                modelOutputResponses: modelOutputResponses - outputBefore,
                 actionStatus: answer.action?.status ?? null,
                 noBusinessEffects: true,
               },
@@ -1185,7 +1342,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     expect(responses).toHaveLength(5);
     expect(forbidden).toEqual([]);
     expect(gate!.stats).toMatchObject({ dialogs: 3, turns: 5, halted: false });
-    // No semantic correctness assertion uses a gold answer; evidence is reviewed
-    // against actual canonical source state after this development diagnostic.
+    // Live choices remain ungraded. The explicit offline replay additionally
+    // verifies regression outcomes against canonical source/persisted state.
   });
 });
