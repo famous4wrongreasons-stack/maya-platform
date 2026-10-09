@@ -1,0 +1,28 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_36e61f7b11ef on 127.0.0.1:65075 (local)
+FAIL test/widgets-live/core-conversation-http.probe-spec.ts (20.763 s)
+  Core conversation [actual HTTP, bounded broker, development diagnostic only]
+    ✕ replays exactly the frozen three dialogs and retains actual HTTP replies before qualification (18587 ms)
+
+  ● Core conversation [actual HTTP, bounded broker, development diagnostic only] › replays exactly the frozen three dialogs and retains actual HTTP replies before qualification
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "replayed_ungraded"
+    Received: "stopped"
+
+      1339 |       },
+      1340 |     });
+    > 1341 |     expect((result as { status: string }).status).toBe('replayed_ungraded');
+           |                                                   ^
+      1342 |     expect(responses).toHaveLength(5);
+      1343 |     expect(forbidden).toEqual([]);
+      1344 |     expect(gate!.stats).toMatchObject({ dialogs: 3, turns: 5, halted: false });
+
+      at Object.<anonymous> (widgets-live/core-conversation-http.probe-spec.ts:1341:51)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        20.781 s, estimated 22 s
+Ran all test suites.
+Test results written to: ../../../../../../../../private/tmp/maya-recorded-response-http-20261009-a/conversation-jest.json

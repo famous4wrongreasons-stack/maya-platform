@@ -1,0 +1,6 @@
+
+Test Suites: 6 passed, 6 total
+Tests:       422 passed, 422 total
+Snapshots:   0 total
+Time:        21.689 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core-model.semantic-slots.spec.ts", "src/ai-tools/planner-wire-context.spec.ts", "src/widgets/booking/booking-selector.presenter.spec.ts", "src/common/booking-requested-slot.spec.ts", "src/widgets/widget-import-graph.architecture.spec.ts".

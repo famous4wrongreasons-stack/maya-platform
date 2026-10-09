@@ -1,0 +1,10 @@
+  console.info
+    recorded owner planner bytes { recorded_user_only: 96248, actual_assistant_retained: 96774 }
+
+      at Object.<anonymous> (ai-tools/planner-wire-context.spec.ts:250:13)
+
+Test Suites: 1 passed, 1 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+Time:        0.422 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/planner-wire-context.spec.ts".

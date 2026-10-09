@@ -1,0 +1,18 @@
+✔ copied original records retain the archived hash and first three semantic outputs (10.04775ms)
+✔ request-local aliases replace only observed employee slots and retain the first wrong-day offset (0.380084ms)
+✔ only the two final finite continuations are scripted, with no historical usage or approval (0.627667ms)
+✔ missing, raw, conflicting or malformed employee evidence refuses permanently (0.727542ms)
+✔ wrong role, phase, turn, timezone and invalid clock refuse rather than infer a binding (0.272708ms)
+✔ repeat and skipped turns cannot rewind the fixed response sequence (0.204167ms)
+✔ business midnight drift between booking turns refuses an implicit date correction (0.146584ms)
+✔ full serialized body cap and model contract apply unchanged before replay (0.2545ms)
+✔ returned metadata and snapshots cannot rewrite provenance retained by the broker (0.130708ms)
+✔ both paid entry modes refuse replay before manifest, permit or output access (141.403334ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 193.506209

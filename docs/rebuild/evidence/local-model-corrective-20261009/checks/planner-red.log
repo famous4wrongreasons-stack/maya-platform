@@ -1,0 +1,189 @@
+  console.info
+    recorded owner planner bytes { recorded_user_only: 99976, actual_assistant_retained: 100502 }
+
+      at Object.<anonymous> (ai-tools/planner-wire-context.spec.ts:209:13)
+
+FAIL src/ai-tools/planner-wire-context.spec.ts
+  ● Bounded planner stage wire context (no language acceptance) › fits the recorded owner compound follow-up without dropping actual history or authority fields
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 98304
+    Received:    99976
+
+      209 |     console.info('recorded owner planner bytes', sizes);
+      210 |     expect(fetchMock).toHaveBeenCalledTimes(2);
+    > 211 |     expect(sizes.recorded_user_only).toBeLessThanOrEqual(98_304);
+          |                                      ^
+      212 |     expect(sizes.actual_assistant_retained).toBeLessThanOrEqual(98_304);
+      213 |   });
+      214 |   it.each(groups)(
+
+      at Object.<anonymous> (ai-tools/planner-wire-context.spec.ts:211:38)
+
+  ● Bounded planner stage wire context (no language acceptance) › booking preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, ["booking.availability.read"], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, ["appointments.own.list"], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, ["catalog.services.read"], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, true, ["appointments.own.create"], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, true, ["appointments.own.reschedule"], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, true, ["appointments.own.cancel"], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, ["appointments.own.list"], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, ["appointments.own.list"], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, ["booking.group-availability.read"], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, false, [], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › personal preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, ["booking.availability.read"], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, ["appointments.own.list"], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, ["catalog.services.read"], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, true, ["appointments.own.create"], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, true, ["appointments.own.reschedule"], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, true, ["appointments.own.cancel"], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, ["appointments.own.list"], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, ["appointments.own.list"], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, ["booking.group-availability.read"], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, false, [], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › admin preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, ["booking.availability.read"], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, [], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, ["catalog.services.read"], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, false, [], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, false, [], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, false, [], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, [], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, ["booking.group-availability.read"], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, true, ["staff.schedule.own.read"], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › staff_config preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, ["booking.availability.read"], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, [], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, ["catalog.services.read"], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, false, [], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, false, [], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, false, [], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, [], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, ["booking.group-availability.read"], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, true, ["staff.schedule.own.read"], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › bi preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, [], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, [], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, false, [], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, false, [], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, false, [], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, [], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, [], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, true, [], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › lifecycle preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, [], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, [], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, false, [], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, false, [], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, false, [], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, [], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, [], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, true, [], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › occupancy preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, ["booking.availability.read"], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, [], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, ["catalog.services.read"], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, false, [], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, false, [], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, false, [], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, [], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, ["booking.group-availability.read"], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, true, ["staff.schedule.own.read"], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › goods preserves every tool field and all canonical intent fields exactly
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 89
+    Received length: 91
+    Received array:  [["booking.find_availability", 0, "Find suitable booking slots.", 0, 0, 0, null, true, [], ["date_or_period"], …], ["booking.list_own", 0, "List the actor own appointments.", 0, 0, 0, null, true, [], [], …], ["booking.prepare_personal", 0, "Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.create_own", 0, "Create an appointment for the actor.", 1, 1, 0, null, false, [], ["services", "date", "time"], …], ["booking.reschedule_own", 0, "Reschedule the actor appointment.", 1, 1, 0, null, false, [], ["appointment", "new_date", "new_time"], …], ["booking.cancel_own", 0, "Cancel the actor appointment.", 1, 1, 0, null, false, [], ["appointment"], …], ["booking.get_employee", 0, "Tell who performs an appointment.", 0, 0, 0, null, true, [], [], …], ["booking.repeat_last", 0, "Repeat the last usual service bundle.", 0, 0, 0, null, true, [], [], …], ["booking.group_or_simultaneous", 0, "Find slots for multiple people.", 0, 0, 0, null, true, [], ["party_size", "services", "date_or_period"], …], ["schedule.get_own", 1, "Read the employee own work schedule.", 0, 0, 0, null, true, [], [], …], …]
+
+      259 |       expect(intents.columns).toHaveLength(13);
+      260 |       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
+    > 261 |       expect(intents.rows).toHaveLength(89);
+          |                            ^
+      262 |       expect(Object.keys(intents.dictionaries)).toEqual([
+      263 |         'domain',
+      264 |         'action',
+
+      at ai-tools/planner-wire-context.spec.ts:261:28
+
+  ● Bounded planner stage wire context (no language acceptance) › openai serializes occupancy through the real provider serializer on first and later planning passes
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 98304
+    Received:    100009
+
+      394 |           await service.decide(input);
+      395 |           const raw = fetchMock.mock.calls.at(-1)![1]!.body as string;
+    > 396 |           expect(Buffer.byteLength(raw)).toBeLessThanOrEqual(98_304);
+          |                                          ^
+      397 |           const body = JSON.parse(raw) as {
+      398 |             messages: Array<{ content: string }>;
+      399 |             input: string;
+
+      at ai-tools/planner-wire-context.spec.ts:396:42
+
+Test Suites: 1 failed, 1 total
+Tests:       10 failed, 19 passed, 29 total
+Snapshots:   0 total
+Time:        0.498 s
+Ran all test suites within paths "src/ai-tools/planner-wire-context.spec.ts".
