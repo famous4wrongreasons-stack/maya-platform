@@ -67,6 +67,7 @@ const { replayPilot, sha256 } = nativeRequire(
 const {
   CandidateBudgetGate,
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_UNION_PROFILE,
   CORE_OFFLINE_PROFILE,
 } = nativeRequire(
@@ -104,6 +105,9 @@ const { socketRequest } = nativeRequire(
     'scripts/conversation-qualification/core-conversation-socket.mjs',
   ),
 ) as typeof import('../../scripts/conversation-qualification/core-conversation-socket.mjs');
+const { startCoreReactBridge } = nativeRequire(
+  path.resolve('scripts/conversation-qualification/core-react-bridge.mjs'),
+) as typeof import('../../scripts/conversation-qualification/core-react-bridge.mjs');
 const mode = process.env.JEST_CORE_CONVERSATION_MODE;
 const recordedReplayFlag = process.env.JEST_CORE_CONVERSATION_RECORDED_REPLAY;
 const recordedReplay = recordedReplayFlag === '1';
@@ -274,6 +278,7 @@ function assertFiniteFollowupAvailability(
 
 describe('Core conversation [actual HTTP, bounded broker, development diagnostic only]', () => {
   let db: FixtureContext, http: HttpHarness;
+  let react: Awaited<ReturnType<typeof startCoreReactBridge>> | undefined;
   let gate: InstanceType<typeof CandidateBudgetGate> | undefined;
   let manifest: DiagnosticManifest;
   let profile: ReturnType<typeof coreConversationProfile>;
@@ -359,7 +364,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       )
     )
       throw new Error('core_semantic_fixture_refused');
-    if (recordedReplay && profile.id !== CORE_DIAGNOSTIC_PROFILE)
+    if (
+      recordedReplay &&
+      profile.id !== CORE_DIAGNOSTIC_PROFILE &&
+      profile.id !== CORE_UI_PROFILE
+    )
       throw new Error('core_recorded_replay_profile_refused');
     expect(manifest).toMatchObject({
       contract: 'maya.core-conversation-run/1',
@@ -469,6 +478,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     db = await bootFixtureContext();
     http = await bootHttp();
     const config = http.app.get(ConfigService);
+    if (profile.id === CORE_UI_PROFILE) {
+      config.set('EMAIL_LOGIN_ENABLED', 'true');
+      config.set('EMAIL_AUTH_PROVIDER', 'debug');
+    }
     for (const [key, value] of Object.entries({
       AI_CORE_PROVIDER: 'deepseek',
       DEEPSEEK_AI_CORE_MODEL: profile.limits.model,
@@ -923,8 +936,32 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       }
     });
     await seed();
+    if (profile.id === CORE_UI_PROFILE) {
+      react = await startCoreReactBridge({
+        backendOrigin: await http.listenLoopback(),
+        output,
+        candidateCommit: sourceHead!,
+        manifestSha256: manifestSha256!,
+        modelQualification:
+          mode === 'dry'
+            ? recordedReplayQualification
+            : 'ACTUAL_MODEL_OUTPUT_UNGRADED',
+        cases: manifest.cases.map((item) => ({
+          id: item.id,
+          email: caseSources.get(item.id)!.user.email,
+          userTurns: [...item.userTurns],
+        })),
+      });
+    }
   });
   afterAll(async () => {
+    let reactCleanupFailed = false;
+    try {
+      await react?.close();
+    } catch {
+      reactCleanupFailed = true;
+      stopped ??= 'core_ui_cleanup_unconfirmed';
+    }
     write('http-report.json', {
       contract: 'maya.core-conversation-http-diagnostic/1',
       mode,
@@ -991,7 +1028,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           ? 'CANNED_TRANSPORT_MECHANICS_ONLY'
           : 'ACTUAL_BROKER_MODEL_OUTPUT_REQUIRES_BROKER_ADMISSION_AND_USAGE_EVIDENCE',
       restarts: 'NOT_EXERCISED',
-      currentReact: 'NOT_EXERCISED',
+      currentReact: react
+        ? 'ACTUAL_REACT_LOGIN_CHAT_AND_RENDERED_REPLY'
+        : 'NOT_EXERCISED',
+      reactCleanupFailed,
       businessAcceptance: false,
       preflights,
       responses,
@@ -1017,6 +1057,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     delete process.env.YCLIENTS_PARTNER_TOKEN;
     await http?.close();
     await db?.close();
+    expect(reactCleanupFailed).toBe(false);
   });
   function financeResponse(url: URL, init?: RequestInit) {
     const company = url.hostname.slice(5).replace('.synthetic.invalid', ''),
@@ -2621,7 +2662,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         replayRecords.push(row);
         append('replay-records.jsonl', row);
       },
-      openDialog: ({ caseId, role }) => {
+      openDialog: async ({ caseId, role }) => {
         const source = caseSources.get(caseId)!;
         const item = manifest.cases.find((c) => c.id === caseId)!;
         expect(source).toBeDefined();
@@ -2630,7 +2671,8 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         turn = 0;
         const priorReplies: string[] = [];
         actualRepliesByCase.set(caseId, priorReplies);
-        return Promise.resolve({
+        await react?.open(caseId);
+        return {
           chat: async (body) => {
             turn++;
             modelCallsForTurn = 0;
@@ -2691,18 +2733,46 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               staffServiceBefore = staffServiceReads.length;
             let response: { status: number; body: unknown };
             try {
-              response = await request(http.app.getHttpServer())
-                .post('/api/ai/chat')
-                .set('Authorization', `Bearer ${source.token}`)
-                .send({
-                  ...body,
-                  audience:
-                    profile.id === CORE_OFFLINE_PROFILE
-                      ? coreFullOfflineRecipe(caseId).audience
-                      : item.audience,
-                })
-                .timeout({ response: 120000, deadline: 150000 });
-            } catch {
+              if (react) {
+                const browserResponse = await react.chat(
+                  item.userTurns[turn - 1],
+                );
+                expect(browserResponse.request.messages).toEqual(body.messages);
+                expect(browserResponse.request.conversationId).toBe(
+                  body.conversationId,
+                );
+                append('react-request-binding.jsonl', {
+                  caseId,
+                  turn,
+                  replayRequestId: body.requestId,
+                  actualRequestId: browserResponse.request.requestId,
+                  requestSource: 'UNMODIFIED_CURRENT_REACT_BODY',
+                });
+                // The UI owns the actual request id and body. Only replace this
+                // observer's local reference after the real response was captured.
+                body = browserResponse.request;
+                response = browserResponse;
+              } else {
+                response = await request(http.app.getHttpServer())
+                  .post('/api/ai/chat')
+                  .set('Authorization', `Bearer ${source.token}`)
+                  .send({
+                    ...body,
+                    audience:
+                      profile.id === CORE_OFFLINE_PROFILE
+                        ? coreFullOfflineRecipe(caseId).audience
+                        : item.audience,
+                  })
+                  .timeout({ response: 120000, deadline: 150000 });
+              }
+            } catch (error) {
+              if (react && error instanceof Error && 'observed' in error)
+                append('react-failed-observation.jsonl', {
+                  caseId,
+                  turn,
+                  observed: error.observed,
+                  qualification: 'BROWSER_OBSERVED_FAILURE_NOT_SUCCESSFUL_TURN',
+                });
               stopped ??= 'http_transport_unresolved';
               const failed = {
                 caseId,
@@ -3227,11 +3297,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               },
             };
           },
-          close: () => {
+          close: async () => {
+            await react?.closeDialog();
             active = undefined;
-            return Promise.resolve();
           },
-        });
+        };
       },
     });
     if (profile.id === CORE_OFFLINE_PROFILE) {

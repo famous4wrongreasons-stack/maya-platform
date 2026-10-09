@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
 import {
   CandidateBudgetGate,
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_OFFLINE_PROFILE,
   candidateReservation,
 } from './current-candidate-budget.mjs';
@@ -116,7 +117,8 @@ export async function startCoreBroker(values, batch = null) {
     'core_broker_profile_offline_only',
   );
   assert.ok(
-    !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
+    !recordedReplay ||
+      [CORE_DIAGNOSTIC_PROFILE, CORE_UI_PROFILE].includes(profile.id),
     'core_broker_recorded_replay_profile',
   );
   const fullOffline = profile.id === CORE_OFFLINE_PROFILE;

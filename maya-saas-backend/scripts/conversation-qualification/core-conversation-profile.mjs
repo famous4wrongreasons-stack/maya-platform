@@ -2,6 +2,7 @@
  * they neither issue a permit nor admit credentials or start model transport. */
 import {
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_DIAGNOSTIC_LIMITS,
   CORE_DIAGNOSTIC_LIMITS_SHA256,
   CORE_FOLLOWUP_PROFILE,
@@ -28,6 +29,8 @@ const diagnostic = Object.freeze({
   dialogs: 3,
   userTurns: 5,
 });
+const ui = Object.freeze({ ...diagnostic, id: CORE_UI_PROFILE });
+
 const followup = Object.freeze({
   id: CORE_FOLLOWUP_PROFILE,
   datasetPath:
@@ -72,6 +75,7 @@ const offline = Object.freeze({
 
 export function coreConversationProfile(profile = CORE_DIAGNOSTIC_PROFILE) {
   if (profile === CORE_DIAGNOSTIC_PROFILE) return diagnostic;
+  if (profile === CORE_UI_PROFILE) return ui;
   if (profile === CORE_FOLLOWUP_PROFILE) return followup;
   if (profile === CORE_UNION_PROFILE) return union;
   if (profile === CORE_OFFLINE_PROFILE) return offline;

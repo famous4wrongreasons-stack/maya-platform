@@ -24,6 +24,8 @@ export const CANDIDATE_LIMITS = Object.freeze({
   outputNanoUsdPerToken: 3960,
   pricingStatus: 'HISTORICAL_2026_10_05_NOT_CURRENT_VERIFIED',
 });
+// Same finite 3/5 budget, separately bound to current React transport.
+export const CORE_UI_PROFILE = 'core-react-diagnostic-20261009/1';
 export const CORE_DIAGNOSTIC_PROFILE = 'core-diagnostic-20261008/1';
 export const CORE_DIAGNOSTIC_LIMITS = Object.freeze({
   ...CANDIDATE_LIMITS,
@@ -91,7 +93,8 @@ export const CORE_OFFLINE_LIMITS_SHA256 = createHash('sha256')
   .digest('hex');
 function profileLimits(profile) {
   if (profile === undefined) return CANDIDATE_LIMITS;
-  if (profile === CORE_DIAGNOSTIC_PROFILE) return CORE_DIAGNOSTIC_LIMITS;
+  if ([CORE_DIAGNOSTIC_PROFILE, CORE_UI_PROFILE].includes(profile))
+    return CORE_DIAGNOSTIC_LIMITS;
   if (profile === CORE_FOLLOWUP_PROFILE) return CORE_FOLLOWUP_LIMITS;
   if (profile === CORE_UNION_PROFILE) return CORE_UNION_LIMITS;
   if (profile === CORE_OFFLINE_PROFILE) return CORE_OFFLINE_LIMITS;
@@ -223,6 +226,7 @@ export class CandidateBudgetGate {
       if (
         ![
           CORE_DIAGNOSTIC_PROFILE,
+          CORE_UI_PROFILE,
           CORE_FOLLOWUP_PROFILE,
           CORE_UNION_PROFILE,
         ].includes(profile) ||

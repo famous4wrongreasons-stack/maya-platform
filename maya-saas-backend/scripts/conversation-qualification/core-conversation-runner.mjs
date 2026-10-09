@@ -21,6 +21,7 @@ import {
 import { socketRequest } from './core-conversation-socket.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_UNION_PROFILE,
   CORE_OFFLINE_PROFILE,
 } from './current-candidate-budget.mjs';
@@ -92,7 +93,8 @@ assert.ok(
   'core_runner_profile_offline_only',
 );
 assert.ok(
-  !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
+  !recordedReplay ||
+    [CORE_DIAGNOSTIC_PROFILE, CORE_UI_PROFILE].includes(profile.id),
   'core_runner_recorded_replay_profile',
 );
 const semanticFailureFixture = values['semantic-failure-fixture'];
@@ -323,6 +325,13 @@ try {
     receipt: path.join(privateRoot, 'unused-private.json'),
     output,
   }).slice(0, 4);
+  if (profile.id === CORE_UI_PROFILE)
+    setup.push({
+      name: 'react-web-build',
+      command: process.execPath,
+      args: ['build.mjs', '--target=web'],
+      cwd: path.resolve(coreBackend, '../maya-carrier-react'),
+    });
   for (const spec of setup) {
     assertCoreSources(manifest);
     if (admission)
@@ -335,7 +344,7 @@ try {
     if (spec.name === 'pg-start') startAttempted = true;
     console.log('START ' + spec.name);
     await runOwnedStage(
-      { ...spec, cwd: coreBackend, timeoutMs: 180000 },
+      { ...spec, cwd: spec.cwd ?? coreBackend, timeoutMs: 180000 },
       env,
       output,
       control,

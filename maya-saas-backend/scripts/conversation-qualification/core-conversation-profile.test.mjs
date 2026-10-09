@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
 } from './current-candidate-budget.mjs';
@@ -128,4 +129,14 @@ test('union is the exact ordered A+B cases with a pooled fixed cap and no execut
   assert.equal(data.executionAuthorized, false);
   assert.equal(data.candidateCommit, null);
   assert.equal(data.candidateManifestSha256, null);
+});
+
+test('React uses the unchanged finite diagnostic corpus and budget with distinct admission identity', () => {
+  const a = coreConversationProfile(),
+    ui = coreConversationProfile(CORE_UI_PROFILE);
+  assert.notEqual(ui.id, a.id);
+  assert.deepEqual({ ...ui, id: a.id }, a);
+  assert.equal(ui.limits.attempts, 12);
+  assert.equal(ui.limits.spendNanoUsd, 2000000000);
+  assert.equal(ui.limits.durationMs, 600000);
 });

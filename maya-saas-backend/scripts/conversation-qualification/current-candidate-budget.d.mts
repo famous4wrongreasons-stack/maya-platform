@@ -16,6 +16,7 @@ export const CANDIDATE_LIMITS: Readonly<{
   outputNanoUsdPerToken: number;
   pricingStatus: string;
 }>;
+export const CORE_UI_PROFILE: 'core-react-diagnostic-20261009/1';
 export const CORE_DIAGNOSTIC_PROFILE: 'core-diagnostic-20261008/1';
 export const CORE_DIAGNOSTIC_LIMITS: typeof CANDIDATE_LIMITS &
   Readonly<{ concurrency: 1 }>;
@@ -31,6 +32,7 @@ export const CORE_OFFLINE_LIMITS: typeof CORE_DIAGNOSTIC_LIMITS;
 export const CORE_OFFLINE_LIMITS_SHA256: string;
 export type CoreConversationProfileId =
   | typeof CORE_DIAGNOSTIC_PROFILE
+  | typeof CORE_UI_PROFILE
   | typeof CORE_FOLLOWUP_PROFILE
   | typeof CORE_UNION_PROFILE
   | typeof CORE_OFFLINE_PROFILE;

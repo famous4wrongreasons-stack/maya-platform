@@ -13,6 +13,7 @@ import {
 } from './core-conversation-admission.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
 } from './current-candidate-budget.mjs';
@@ -714,3 +715,30 @@ test(
     assert.equal(fs.existsSync(f.options.claimPath), false);
   },
 );
+
+test('React 3/5 profile refuses backend-only or frozen9 permit even with matching budget hash', (t) => {
+  const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP', CORE_UI_PROFILE);
+  for (const profile of [CORE_DIAGNOSTIC_PROFILE, CORE_UNION_PROFILE]) {
+    f.options.sha256 = f.write(f.options.path, { ...f.permit, profile });
+    denied(() => claimCorePermit(f.options));
+    assert.equal(fs.existsSync(f.options.claimPath), false);
+  }
+  f.options.sha256 = f.write(f.options.path, f.permit);
+  const validate = claimCorePermit(f.options);
+  validate(f.binding);
+  denied(() => validate({ ...f.binding, profile: CORE_DIAGNOSTIC_PROFILE }));
+});
+
+test('React profile keeps ten-minute expiry and single-use claim', (t) => {
+  const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP', CORE_UI_PROFILE);
+  f.options.sha256 = f.write(f.options.path, {
+    ...f.permit,
+    expiresAt: stamp(at + 600001),
+  });
+  denied(() => claimCorePermit(f.options));
+  f.options.sha256 = f.write(f.options.path, f.permit);
+  const validate = claimCorePermit(f.options);
+  denied(() => claimCorePermit(f.options));
+  t.mock.method(Date, 'now', () => at + 60000);
+  denied(() => validate(f.binding));
+});

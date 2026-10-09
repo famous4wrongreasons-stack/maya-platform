@@ -15,6 +15,7 @@ import { assertCoreSocket } from './core-conversation-socket.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_UI_PROFILE,
   CORE_UNION_PROFILE,
   CORE_OFFLINE_PROFILE,
 } from './current-candidate-budget.mjs';
@@ -160,11 +161,50 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
       '256',
     ],
   };
+  if (profile.id === CORE_UI_PROFILE)
+    plan.uiAcceptance = {
+      carrier: 'current React',
+      transport: 'canonical login/chat via owned same-origin relay',
+      qualification: 'PREPARED_NOT_AUTHORIZED',
+      approvalHandoff: path.join(output, 'approved-run.json'),
+      launchCommand: path.join(output, 'launch.command'),
+      approvalFields: [
+        'candidateCommit',
+        'manifestSha256',
+        'ownerApprovalRef',
+        'permitSha256',
+      ],
+      effects: 'SYNTHETIC_SOURCES_READ_AND_PROPOSAL_ONLY_NO_BUSINESS_DISPATCH',
+    };
   fs.writeFileSync(
     path.join(output, 'local-plan.json'),
     JSON.stringify(plan, null, 2) + '\n',
     { flag: 'wx', mode: 0o600 },
   );
+  if (profile.id === CORE_UI_PROFILE) {
+    const quote = (value) => "'" + value.replaceAll("'", "'\\''") + "'";
+    const planPath = path.join(output, 'local-plan.json');
+    const planPin = coreHash(fs.readFileSync(planPath));
+    const argv = [
+      process.execPath,
+      '--max-old-space-size=256',
+      'scripts/conversation-qualification/core-ui-local.mjs',
+      '--run',
+      '--plan',
+      planPath,
+      '--plan-sha256',
+      planPin,
+    ];
+    fs.writeFileSync(
+      path.join(output, 'launch.command'),
+      '#!/bin/sh\nset -eu\ncd ' +
+        quote(coreBackend) +
+        '\nexec env -i PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin HOME=/Users/stanislavmosin TMPDIR=/tmp TZ=UTC ' +
+        argv.map(quote).join(' ') +
+        '\n',
+      { flag: 'wx', mode: 0o700 },
+    );
+  }
   return plan;
 }
 
