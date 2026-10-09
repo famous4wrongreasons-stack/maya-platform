@@ -1,0 +1,7 @@
+
+Test Suites: 1 skipped, 1 passed, 1 of 2 total
+Tests:       285 skipped, 44 passed, 329 total
+Snapshots:   0 total
+Time:        0.856 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/booking-catalog-binding.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-unknown-staff-core-20261009-r1.json

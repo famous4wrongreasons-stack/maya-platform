@@ -45,6 +45,35 @@ const staffPreference = (list: Row[], preference: unknown): Row | null => {
   );
   return matches.length === 1 ? matches[0] : null;
 };
+export type BookingStaffBinding =
+  | { kind: 'resolved'; staff: Row }
+  | {
+      kind: 'unresolved';
+      reason: 'source_unavailable' | 'staff_ambiguous_or_missing';
+    };
+
+/** Resolve an explicit employee before asking for another booking slot. The
+ * caller owns current tenant/branch/source validation and supplies null for a
+ * stale or failed read; no service read is needed to establish this preference. */
+export function bindBookingStaff(input: {
+  staffSource: unknown;
+  employee: unknown;
+  nameReferences: ReadonlyMap<string, string>;
+}): BookingStaffBinding {
+  const staff = rows(input.staffSource, 'staff');
+  if (staff === null)
+    return { kind: 'unresolved', reason: 'source_unavailable' };
+  const reference =
+    typeof input.employee === 'string' &&
+    input.employee.startsWith('[name removed]')
+      ? input.nameReferences.get(input.employee)
+      : input.employee;
+  const selected = staffPreference(staff, reference);
+  return selected
+    ? { kind: 'resolved', staff: selected }
+    : { kind: 'unresolved', reason: 'staff_ambiguous_or_missing' };
+}
+
 export function bindBookingServices(
   source: unknown,
   preferences: unknown,
@@ -77,18 +106,12 @@ export function bindBookingCatalog(input: {
   services: unknown;
   nameReferences: ReadonlyMap<string, string>;
 }): BookingCatalogBinding {
-  const staff = rows(input.staffSource, 'staff');
   const services = rows(input.serviceSource, 'services');
-  if (staff === null || services === null)
+  if (services === null)
     return { kind: 'unresolved', reason: 'source_unavailable' };
-  const reference =
-    typeof input.employee === 'string' &&
-    input.employee.startsWith('[name removed]')
-      ? input.nameReferences.get(input.employee)
-      : input.employee;
-  const selected = staffPreference(staff, reference);
-  if (!selected)
-    return { kind: 'unresolved', reason: 'staff_ambiguous_or_missing' };
+  const staff = bindBookingStaff(input);
+  if (staff.kind === 'unresolved') return staff;
+  const selected = staff.staff;
   const preferences = Array.isArray(input.services)
     ? input.services
     : [input.services];

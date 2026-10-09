@@ -1,0 +1,98 @@
+{
+  "contract": "maya.unknown-staff.evidence/1",
+  "baseCommit": "67bb7c63a138908227e260ed774917ea74731747",
+  "qualification": "SYNTHETIC_SCRIPTED_TARGET_HTTP_AND_LOCAL_UNIT_ONLY",
+  "full48Rerun": false,
+  "entries": [
+    {
+      "path": "maya-unknown-staff-binding-root-20261009-r1.json",
+      "sha256": "d81c42249af73af33d71d562470be7d5da1b6e75b75665646b97ac35dd3429e4",
+      "bytes": 11194
+    },
+    {
+      "path": "maya-unknown-staff-binding-root-20261009-r1.log",
+      "sha256": "553c0e363b0a4c72303e8a4de7876033669a39ea5d572e8b442f6ce09b289d6b",
+      "bytes": 297
+    },
+    {
+      "path": "maya-unknown-staff-core-20261009-r1.json",
+      "sha256": "4e3c4f326f9e06e764d208e6a137272cb904d692ceae010756760e3cd57df3f5",
+      "bytes": 164166
+    },
+    {
+      "path": "maya-unknown-staff-core-20261009-r1.log",
+      "sha256": "8d27a425077c73a9d0fdd327b58021ddbe35024d884a8b3aac06dd3f5d838201",
+      "bytes": 375
+    },
+    {
+      "path": "maya-unknown-staff-http-runner-20261009.mjs",
+      "sha256": "d3c1c8ea1587aeace399b2ae5864d780f7cc3de2a166d1e2216b3403408d455d",
+      "bytes": 3887
+    },
+    {
+      "path": "maya-unknown-staff-lint-20261009-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "maya-unknown-staff-types-20261009-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "target-http-r1/actual-responses.json",
+      "sha256": "0b88147f98460ec7a6935be568bd92be878d3c340d0c6c4646e340d6fbad089f",
+      "bytes": 64262
+    },
+    {
+      "path": "target-http-r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "target-http-r1/initdb.log",
+      "sha256": "69db04e612e328cad9e4c7a5543317b978a9653501ce866a291af6a0c91136ff",
+      "bytes": 948
+    },
+    {
+      "path": "target-http-r1/manifest.json",
+      "sha256": "af72f712b0370679e22c54f4e9053c240e063b68c6c8559d36def43086219d2d",
+      "bytes": 1409
+    },
+    {
+      "path": "target-http-r1/migrations.log",
+      "sha256": "0a60e3ccf0c9aa8d66068d55c99bfa4b2f0eb21ae16ec04e2ba2c2537b0de803",
+      "bytes": 14720
+    },
+    {
+      "path": "target-http-r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "target-http-r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "target-http-r1/postgres.log",
+      "sha256": "42beb14a15e75208cf07ae72abde8c1bb4bfbc30885504ef41a92ea7e5036171",
+      "bytes": 1246
+    },
+    {
+      "path": "target-http-r1/source-delta.patch",
+      "sha256": "cc25821b3d5404e0605f02216028d6a9b40e1ed59feb35ed7eaf9a21be1346fa",
+      "bytes": 11100
+    },
+    {
+      "path": "target-http-r1/target-http-jest.json",
+      "sha256": "744f52042aa571dcfe45d8a84bc93048ef4c30af3b03e3d7d9d33eb68e92a9d9",
+      "bytes": 3611
+    },
+    {
+      "path": "target-http-r1/target-http.log",
+      "sha256": "136dc547b11fb73b4ebe078f4532844371b21490f58dcd3d5e190897721cb638",
+      "bytes": 1768
+    }
+  ]
+}

@@ -586,11 +586,16 @@ describe('AiCoreService', () => {
           messages: [{ role: 'user', content: 'Хочу у Антона' }],
         });
         expect(first.action).toBeNull();
-        expect(first.reply).toBe('Выберите услугу для записи.');
-        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
-          'catalog.staff.read',
-          'catalog.services.read',
-        ]);
+        expect(first.reply).toBe(
+          ambiguous
+            ? 'Не удалось однозначно найти указанного мастера в каталоге салона. Уточните точное имя мастера; запись пока не подготовлена.'
+            : 'Выберите услугу для записи.',
+        );
+        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual(
+          ambiguous
+            ? ['catalog.staff.read']
+            : ['catalog.staff.read', 'catalog.services.read'],
+        );
         expect(f.runtime.execute.mock.calls[0][0].tenantId).toBe(
           client.tenantId,
         );
@@ -634,6 +639,47 @@ describe('AiCoreService', () => {
             /\[name removed\]@[a-f0-9]{32}_\d+/,
           );
         }
+      },
+    );
+
+    it.each(['unknown', 'failed', 'stale', 'malformed'] as const)(
+      'addresses %s staff before reading services or minting a selector',
+      async (state) => {
+        const f = bookingFixture();
+        const delegated = f.runtime.execute.getMockImplementation();
+        if (!delegated) throw new Error('fixture runtime missing');
+        if (state !== 'unknown')
+          f.runtime.execute.mockImplementation(
+            (...args: Parameters<AiToolRuntimeService['execute']>) =>
+              args[1] === 'catalog.staff.read'
+                ? Promise.resolve({
+                    status: state === 'failed' ? 'failed' : 'completed',
+                    stale: state === 'stale',
+                    result:
+                      state === 'malformed'
+                        ? { staff: null }
+                        : { staff: [{ id: 'staff-a', name: 'Антон' }] },
+                  })
+                : delegated(...args),
+          );
+        const response = await f.turn({
+          employee: state === 'unknown' ? 'foreign-staff' : 'Антон',
+          date_or_period: '2026-10-11',
+        });
+        expect(response.reply).toBe(
+          state === 'unknown'
+            ? 'Не удалось однозначно найти указанного мастера в каталоге салона. Уточните точное имя мастера; запись пока не подготовлена.'
+            : 'Не удалось проверить каталог мастеров. Запись пока не подготовлена.',
+        );
+        expect(response.action).toBeNull();
+        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+          'catalog.staff.read',
+        ]);
+        expect(f.runtime.execute.mock.calls[0][3]).toMatchObject({
+          suppressWidgetTrigger: true,
+        });
+        expect(f.availabilityArgs()).toEqual([]);
+        expect(f.model.decide).toHaveBeenCalledTimes(1);
       },
     );
 

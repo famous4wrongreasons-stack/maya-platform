@@ -16,7 +16,7 @@ import {
 } from './support/http-bootstrap';
 import type { Fixtures } from './support/fixtures';
 
-describe('STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]', () => {
+describe('STOP, personal read and current staff binding [HTTP] [PG] [SCRIPTED]', () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
   const tenants: string[] = [],
     evidence: unknown[] = [];
@@ -104,6 +104,96 @@ describe('STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]', () 
       );
     return { tenant, user, token, chat };
   }
+  it.each([false, true])(
+    'checks explicit staff against the current tenant catalog before services (foreign=%s)',
+    async (foreign) => {
+      const f = await salon(UserRole.CLIENT);
+      const source = await fx.bookingSource(f.tenant, f.user, true);
+      let staffId = source.staffId;
+      if (foreign) {
+        const other = await fx.tenant(
+          'Other synthetic salon',
+          CalendarSource.INTERNAL,
+        );
+        tenants.push(other.id);
+        const staff = await db.prisma.internalProvider.create({
+          data: {
+            tenantId: other.id,
+            displayName: 'Other synthetic provider',
+            active: true,
+          },
+        });
+        staffId = staff.id;
+      }
+      const decide = jest
+        .spyOn(http.app.get(AiCoreModelService), 'decide')
+        .mockResolvedValue(
+          decision({
+            reply: '',
+            semanticPlan: new ConversationIntelligenceService().validatePlan(
+              {
+                dialogue_act: 'request',
+                tasks: [
+                  {
+                    intent: 'booking.find_availability',
+                    entities: { employee: staffId },
+                  },
+                ],
+              },
+              UserRole.CLIENT,
+              [
+                'catalog.staff.read',
+                'catalog.services.read',
+                'booking.availability.read',
+              ],
+            ),
+          }),
+        );
+      const response = await f.chat('Хочу записаться к указанному мастеру');
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({ action: null });
+      const reply = (response.body as { reply: string }).reply;
+      expect(reply).toBe(
+        foreign
+          ? 'Не удалось однозначно найти указанного мастера в каталоге салона. Уточните точное имя мастера; запись пока не подготовлена.'
+          : 'Выберите услугу для записи.',
+      );
+      const reads = await db.prisma.aiToolExecution.findMany({
+        where: { tenantId: f.tenant.id },
+        select: { toolName: true, status: true },
+        orderBy: { createdAt: 'asc' },
+      });
+      expect(reads.map((read) => read.toolName)).toEqual(
+        foreign
+          ? ['catalog.staff.read']
+          : ['catalog.staff.read', 'catalog.services.read'],
+      );
+      const emissions = await db.prisma.widgetEmission.count({
+        where: { tenantId: f.tenant.id },
+      });
+      expect(emissions).toBe(foreign ? 0 : 1);
+      expect(
+        await db.prisma.actionExecution.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(0);
+      expect(
+        await db.prisma.appointment.count({ where: { tenantId: f.tenant.id } }),
+      ).toBe(0);
+      expect(decide).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+      evidence.push({
+        case: foreign
+          ? 'foreign_staff_before_missing_service'
+          : 'current_staff_before_missing_service',
+        response: response.body as unknown,
+        reads,
+        emissions,
+        actionExecutions: 0,
+        appointments: 0,
+      });
+    },
+  );
   it('retains STOP across an old in-flight completion and a fresh authenticated next turn', async () => {
     const f = await salon(UserRole.CLIENT);
     const decide = jest

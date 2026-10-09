@@ -37,6 +37,7 @@ import {
 import {
   bindBookingCatalog,
   bindBookingServices,
+  bindBookingStaff,
   BookingCatalogSourceChangedError,
   isBookingSourceUnavailable,
   bookingPreferenceDate,
@@ -1575,12 +1576,14 @@ export class AiCoreService {
                     ? execution.execution_id
                     : null,
               });
-              if (execution.status === 'completed')
+              const current =
+                execution.status === 'completed' && execution.stale !== true;
+              if (current)
                 toolResults.push({
                   name,
                   result: this.sanitizeToolResult(execution.result),
                 });
-              return execution.status === 'completed' ? execution.result : null;
+              return current ? execution.result : null;
             };
             const servicesPreference =
               'services' in task.entities
@@ -1594,27 +1597,45 @@ export class AiCoreService {
             // returning the service question; request-local aliases cannot be persisted.
             // Read it before the emitting services READ, whose source pin then also
             // refuses a changed binding before a new selector can be minted.
-            const pendingStaffSource =
+            if (
               servicesPreference === undefined &&
               employeePreference !== undefined
-                ? await readCatalog('catalog.staff.read')
-                : null;
+            ) {
+              const pendingStaff = bindBookingStaff({
+                staffSource: await readCatalog('catalog.staff.read'),
+                employee: employeePreference,
+                nameReferences: sanitized.nameReferences,
+              });
+              if (pendingStaff.kind === 'unresolved')
+                return this.complete(
+                  user,
+                  dto,
+                  brain,
+                  sanitized.redacted,
+                  toolsUsed,
+                  decisions,
+                  {
+                    reply:
+                      pendingStaff.reason === 'source_unavailable'
+                        ? 'Не удалось проверить каталог мастеров. Запись пока не подготовлена.'
+                        : 'Не удалось однозначно найти указанного мастера в каталоге салона. Уточните точное имя мастера; запись пока не подготовлена.',
+                    source: 'safe_fallback',
+                    action: null,
+                    grounding: this.groundingReport(
+                      requirement,
+                      'blocked',
+                      toolResults,
+                    ),
+                  },
+                  toolResults,
+                );
+              task.entities.employee = pendingStaff.staff.name;
+            }
             const serviceSource = await readCatalog(
               'catalog.services.read',
               servicesPreference === undefined,
             );
             if (servicesPreference === undefined) {
-              if (pendingStaffSource) {
-                const pendingStaff = bindBookingCatalog({
-                  staffSource: pendingStaffSource,
-                  serviceSource,
-                  employee: employeePreference,
-                  services: [],
-                  nameReferences: sanitized.nameReferences,
-                });
-                if (pendingStaff.staff)
-                  task.entities.employee = pendingStaff.staff.name;
-              }
               return this.complete(
                 user,
                 dto,

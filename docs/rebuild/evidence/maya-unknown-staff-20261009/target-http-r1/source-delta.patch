@@ -1,0 +1,262 @@
+diff --git a/maya-saas-backend/src/ai-tools/ai-core.service.ts b/maya-saas-backend/src/ai-tools/ai-core.service.ts
+index 37f8c40e..ec2aa408 100644
+--- a/maya-saas-backend/src/ai-tools/ai-core.service.ts
++++ b/maya-saas-backend/src/ai-tools/ai-core.service.ts
+@@ -37,6 +37,7 @@ import {
+ import {
+   bindBookingCatalog,
+   bindBookingServices,
++  bindBookingStaff,
+   BookingCatalogSourceChangedError,
+   isBookingSourceUnavailable,
+   bookingPreferenceDate,
+@@ -1575,12 +1576,14 @@ export class AiCoreService {
+                     ? execution.execution_id
+                     : null,
+               });
+-              if (execution.status === 'completed')
++              const current =
++                execution.status === 'completed' && execution.stale !== true;
++              if (current)
+                 toolResults.push({
+                   name,
+                   result: this.sanitizeToolResult(execution.result),
+                 });
+-              return execution.status === 'completed' ? execution.result : null;
++              return current ? execution.result : null;
+             };
+             const servicesPreference =
+               'services' in task.entities
+@@ -1594,27 +1597,45 @@ export class AiCoreService {
+             // returning the service question; request-local aliases cannot be persisted.
+             // Read it before the emitting services READ, whose source pin then also
+             // refuses a changed binding before a new selector can be minted.
+-            const pendingStaffSource =
++            if (
+               servicesPreference === undefined &&
+               employeePreference !== undefined
+-                ? await readCatalog('catalog.staff.read')
+-                : null;
++            ) {
++              const pendingStaff = bindBookingStaff({
++                staffSource: await readCatalog('catalog.staff.read'),
++                employee: employeePreference,
++                nameReferences: sanitized.nameReferences,
++              });
++              if (pendingStaff.kind === 'unresolved')
++                return this.complete(
++                  user,
++                  dto,
++                  brain,
++                  sanitized.redacted,
++                  toolsUsed,
++                  decisions,
++                  {
++                    reply:
++                      pendingStaff.reason === 'source_unavailable'
++                        ? 'Не удалось проверить каталог мастеров. Запись пока не подготовлена.'
++                        : 'Не удалось однозначно найти указанного мастера в каталоге салона. Уточните точное имя мастера; запись пока не подготовлена.',
++                    source: 'safe_fallback',
++                    action: null,
++                    grounding: this.groundingReport(
++                      requirement,
++                      'blocked',
++                      toolResults,
++                    ),
++                  },
++                  toolResults,
++                );
++              task.entities.employee = pendingStaff.staff.name;
++            }
+             const serviceSource = await readCatalog(
+               'catalog.services.read',
+               servicesPreference === undefined,
+             );
+             if (servicesPreference === undefined) {
+-              if (pendingStaffSource) {
+-                const pendingStaff = bindBookingCatalog({
+-                  staffSource: pendingStaffSource,
+-                  serviceSource,
+-                  employee: employeePreference,
+-                  services: [],
+-                  nameReferences: sanitized.nameReferences,
+-                });
+-                if (pendingStaff.staff)
+-                  task.entities.employee = pendingStaff.staff.name;
+-              }
+               return this.complete(
+                 user,
+                 dto,
+diff --git a/maya-saas-backend/src/ai-tools/booking-catalog-binding.ts b/maya-saas-backend/src/ai-tools/booking-catalog-binding.ts
+index 925a5c5f..8014377f 100644
+--- a/maya-saas-backend/src/ai-tools/booking-catalog-binding.ts
++++ b/maya-saas-backend/src/ai-tools/booking-catalog-binding.ts
+@@ -45,6 +45,35 @@ const staffPreference = (list: Row[], preference: unknown): Row | null => {
+   );
+   return matches.length === 1 ? matches[0] : null;
+ };
++export type BookingStaffBinding =
++  | { kind: 'resolved'; staff: Row }
++  | {
++      kind: 'unresolved';
++      reason: 'source_unavailable' | 'staff_ambiguous_or_missing';
++    };
++
++/** Resolve an explicit employee before asking for another booking slot. The
++ * caller owns current tenant/branch/source validation and supplies null for a
++ * stale or failed read; no service read is needed to establish this preference. */
++export function bindBookingStaff(input: {
++  staffSource: unknown;
++  employee: unknown;
++  nameReferences: ReadonlyMap<string, string>;
++}): BookingStaffBinding {
++  const staff = rows(input.staffSource, 'staff');
++  if (staff === null)
++    return { kind: 'unresolved', reason: 'source_unavailable' };
++  const reference =
++    typeof input.employee === 'string' &&
++    input.employee.startsWith('[name removed]')
++      ? input.nameReferences.get(input.employee)
++      : input.employee;
++  const selected = staffPreference(staff, reference);
++  return selected
++    ? { kind: 'resolved', staff: selected }
++    : { kind: 'unresolved', reason: 'staff_ambiguous_or_missing' };
++}
++
+ export function bindBookingServices(
+   source: unknown,
+   preferences: unknown,
+@@ -77,18 +106,12 @@ export function bindBookingCatalog(input: {
+   services: unknown;
+   nameReferences: ReadonlyMap<string, string>;
+ }): BookingCatalogBinding {
+-  const staff = rows(input.staffSource, 'staff');
+   const services = rows(input.serviceSource, 'services');
+-  if (staff === null || services === null)
++  if (services === null)
+     return { kind: 'unresolved', reason: 'source_unavailable' };
+-  const reference =
+-    typeof input.employee === 'string' &&
+-    input.employee.startsWith('[name removed]')
+-      ? input.nameReferences.get(input.employee)
+-      : input.employee;
+-  const selected = staffPreference(staff, reference);
+-  if (!selected)
+-    return { kind: 'unresolved', reason: 'staff_ambiguous_or_missing' };
++  const staff = bindBookingStaff(input);
++  if (staff.kind === 'unresolved') return staff;
++  const selected = staff.staff;
+   const preferences = Array.isArray(input.services)
+     ? input.services
+     : [input.services];
+diff --git a/maya-saas-backend/test/widgets-live/conversation-stop-personal.probe-spec.ts b/maya-saas-backend/test/widgets-live/conversation-stop-personal.probe-spec.ts
+index 14e8fe96..336a5d35 100644
+--- a/maya-saas-backend/test/widgets-live/conversation-stop-personal.probe-spec.ts
++++ b/maya-saas-backend/test/widgets-live/conversation-stop-personal.probe-spec.ts
+@@ -16,7 +16,7 @@ import {
+ } from './support/http-bootstrap';
+ import type { Fixtures } from './support/fixtures';
+ 
+-describe('STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]', () => {
++describe('STOP, personal read and current staff binding [HTTP] [PG] [SCRIPTED]', () => {
+   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
+   const tenants: string[] = [],
+     evidence: unknown[] = [];
+@@ -104,6 +104,96 @@ describe('STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]', ()
+       );
+     return { tenant, user, token, chat };
+   }
++  it.each([false, true])(
++    'checks explicit staff against the current tenant catalog before services (foreign=%s)',
++    async (foreign) => {
++      const f = await salon(UserRole.CLIENT);
++      const source = await fx.bookingSource(f.tenant, f.user, true);
++      let staffId = source.staffId;
++      if (foreign) {
++        const other = await fx.tenant(
++          'Other synthetic salon',
++          CalendarSource.INTERNAL,
++        );
++        tenants.push(other.id);
++        const staff = await db.prisma.internalProvider.create({
++          data: {
++            tenantId: other.id,
++            displayName: 'Other synthetic provider',
++            active: true,
++          },
++        });
++        staffId = staff.id;
++      }
++      const decide = jest
++        .spyOn(http.app.get(AiCoreModelService), 'decide')
++        .mockResolvedValue(
++          decision({
++            reply: '',
++            semanticPlan: new ConversationIntelligenceService().validatePlan(
++              {
++                dialogue_act: 'request',
++                tasks: [
++                  {
++                    intent: 'booking.find_availability',
++                    entities: { employee: staffId },
++                  },
++                ],
++              },
++              UserRole.CLIENT,
++              [
++                'catalog.staff.read',
++                'catalog.services.read',
++                'booking.availability.read',
++              ],
++            ),
++          }),
++        );
++      const response = await f.chat('Хочу записаться к указанному мастеру');
++      expect(response.status).toBe(201);
++      expect(response.body).toMatchObject({ action: null });
++      const reply = (response.body as { reply: string }).reply;
++      expect(reply).toBe(
++        foreign
++          ? 'Не удалось однозначно найти указанного мастера в каталоге салона. Уточните точное имя мастера; запись пока не подготовлена.'
++          : 'Выберите услугу для записи.',
++      );
++      const reads = await db.prisma.aiToolExecution.findMany({
++        where: { tenantId: f.tenant.id },
++        select: { toolName: true, status: true },
++        orderBy: { createdAt: 'asc' },
++      });
++      expect(reads.map((read) => read.toolName)).toEqual(
++        foreign
++          ? ['catalog.staff.read']
++          : ['catalog.staff.read', 'catalog.services.read'],
++      );
++      const emissions = await db.prisma.widgetEmission.count({
++        where: { tenantId: f.tenant.id },
++      });
++      expect(emissions).toBe(foreign ? 0 : 1);
++      expect(
++        await db.prisma.actionExecution.count({
++          where: { tenantId: f.tenant.id },
++        }),
++      ).toBe(0);
++      expect(
++        await db.prisma.appointment.count({ where: { tenantId: f.tenant.id } }),
++      ).toBe(0);
++      expect(decide).toHaveBeenCalledTimes(1);
++      expect(globalThis.fetch).not.toHaveBeenCalled();
++      evidence.push({
++        case: foreign
++          ? 'foreign_staff_before_missing_service'
++          : 'current_staff_before_missing_service',
++        response: response.body as unknown,
++        reads,
++        emissions,
++        actionExecutions: 0,
++        appointments: 0,
++      });
++    },
++  );
+   it('retains STOP across an old in-flight completion and a fresh authenticated next turn', async () => {
+     const f = await salon(UserRole.CLIENT);
+     const decide = jest

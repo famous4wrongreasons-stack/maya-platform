@@ -1,5 +1,6 @@
 import {
   bindBookingCatalog,
+  bindBookingStaff,
   bookingPreferenceDate,
 } from './booking-catalog-binding';
 const reference = '[name removed]@request1_1';
@@ -19,6 +20,87 @@ const input = () => ({
   employee: reference,
   services: ['Стрижка'],
   nameReferences: new Map([[reference, 'Стаса']]),
+});
+describe('explicit staff preference before missing-service clarification', () => {
+  it('addresses an unknown employee even when no service was supplied', () => {
+    const pending = {
+      ...input(),
+      employee: 'foreign-staff',
+      services: undefined,
+    };
+    const expected = {
+      kind: 'unresolved',
+      reason: 'staff_ambiguous_or_missing',
+    };
+    expect(bindBookingStaff(pending)).toEqual(expected);
+    expect(bindBookingCatalog(pending)).toEqual(expected);
+  });
+
+  it('resolves a current name reference without requiring or reading a service source', () => {
+    const current = input();
+    expect(
+      bindBookingStaff({
+        staffSource: current.staffSource,
+        employee: current.employee,
+        nameReferences: current.nameReferences,
+      }),
+    ).toEqual({ kind: 'resolved', staff: { id: 's', name: 'Стас' } });
+    expect(bindBookingCatalog({ ...current, services: undefined })).toEqual({
+      kind: 'unresolved',
+      reason: 'service_ambiguous_or_missing',
+      staff: { id: 's', name: 'Стас' },
+    });
+  });
+
+  it('does not silently choose among current staff with colliding names', () => {
+    expect(
+      bindBookingStaff({
+        ...input(),
+        staffSource: {
+          staff: [
+            { id: 's', name: 'Стас' },
+            { id: 'other', name: 'Стас' },
+          ],
+        },
+      }),
+    ).toEqual({ kind: 'unresolved', reason: 'staff_ambiguous_or_missing' });
+  });
+
+  it.each([null, {}, { staff: null }, { staff: [{ id: 's' }] }])(
+    'keeps an unavailable, rejected-stale or malformed source distinct from an unknown employee: %j',
+    (staffSource) => {
+      // The current-source owner maps stale/failed execution to null. This pure
+      // preference binder must not reinterpret that refusal as a missing person.
+      expect(
+        bindBookingStaff({
+          ...input(),
+          employee: 'foreign-staff',
+          staffSource,
+        }),
+      ).toEqual({ kind: 'unresolved', reason: 'source_unavailable' });
+    },
+  );
+
+  it('uses only the current catalog and request-local alias, never an earlier resolved employee', () => {
+    const current = input();
+    expect(bindBookingStaff(current).kind).toBe('resolved');
+    expect(
+      bindBookingStaff({
+        ...current,
+        staffSource: { staff: [{ id: 'a', name: 'Александр' }] },
+      }),
+    ).toEqual({ kind: 'unresolved', reason: 'staff_ambiguous_or_missing' });
+    expect(bindBookingStaff({ ...current, nameReferences: new Map() })).toEqual(
+      { kind: 'unresolved', reason: 'staff_ambiguous_or_missing' },
+    );
+    expect(
+      bindBookingCatalog({
+        ...current,
+        employee: 'foreign-staff',
+        serviceSource: null,
+      }),
+    ).toEqual({ kind: 'unresolved', reason: 'source_unavailable' });
+  });
 });
 describe('semantic-selected references against current public catalog', () => {
   it('uses existing name forms against the catalog after opaque mention selection', () => {

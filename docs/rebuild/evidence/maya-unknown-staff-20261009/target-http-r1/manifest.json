@@ -1,0 +1,34 @@
+{
+  "qualification": "SYNTHETIC_SCRIPTED_TARGET_HTTP_PG",
+  "sourceHead": "67bb7c63a138908227e260ed774917ea74731747",
+  "sourceHashes": {
+    "src/ai-tools/booking-catalog-binding.ts": "a0a116e1cecbaf91455af955c60acad442beec5160fbf06dc3168acd2cba2f5b",
+    "src/ai-tools/ai-core.service.ts": "f6f8476c6782bb3f68d49c55271feffd1f8a008f73ecb2f2aa28100fae0b5693",
+    "src/ai-tools/ai-tool-handler.service.ts": "472d9bb8c9bb3a1eb2d52301a5de0edb0ecbb52d2bc0e837e4532807da60c9e4",
+    "src/crm/client-appointment-read.service.ts": "b10c2e734f1d991ced7ed7c049e4bedc3032a2f9353841e193afa28d9e950190",
+    "src/widgets/stores/timeline.store.ts": "ce18b6a2f1bcb760f96328dfd83fb38908943ba443581980a6d568695d674a85",
+    "test/widgets-live/conversation-stop-personal.probe-spec.ts": "02eb9de655071693c51a6cbc5442dab50260de8a0516abfb33d5d30041378ab4"
+  },
+  "workingTreeDelta": true,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "target-http"
+  ],
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-stop-personal-t3gX08/pg",
+  "database": "maya_widget_gate_proof_c9occ_3db919ba8c2c",
+  "port": 63903,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "resources": {
+    "nodeHeapMb": 2048,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64
+  },
+  "clusterStopped": true,
+  "pidAbsent": true,
+  "sourceUnchanged": true
+}
