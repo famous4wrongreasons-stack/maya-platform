@@ -29,7 +29,7 @@ const invalid = (): never => {
   });
 };
 
-/** Copy the closed two-tool witness so caller mutation cannot change its hash. */
+/** Copy the closed catalog/schedule/journal witness so caller mutation cannot change its hash. */
 export function staffScheduleReadScope(
   name: string,
   args: Readonly<Record<string, unknown>>,
@@ -50,7 +50,7 @@ export function staffScheduleReadScope(
     });
   }
   if (
-    name !== 'staff.schedule.read' ||
+    !['staff.schedule.read', 'operations.journal.read'].includes(name) ||
     keys.length !== 3 ||
     keys.some(
       (key) => !['branchId', 'sourceRevision', 'staffSource'].includes(key),

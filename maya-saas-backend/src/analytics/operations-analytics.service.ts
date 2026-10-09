@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,7 +12,7 @@ import { AppointmentPeriodReader } from '../business-facts/appointment-period.re
 import type { AttendanceFacts } from '../business-facts/attendance-facts.service';
 import { AttendanceFactsService } from '../business-facts/attendance-facts.service';
 import type { CrmFinancialSummary } from '../crm/crm-adapter.interface';
-import { CrmService } from '../crm/crm.service';
+import { CrmService, type StaffScheduleSource } from '../crm/crm.service';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -768,9 +769,26 @@ export class OperationsAnalyticsService {
    */
   async getDayOperations(
     tenantId: string,
-    params: { date: string; staffExternalId?: string | null },
+    params: {
+      date: string;
+      staffExternalId?: string | null;
+      source?: StaffScheduleSource;
+    },
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const source =
+      params.source === undefined
+        ? undefined
+        : Object.freeze({ ...params.source });
+    const staffExternalId = params.staffExternalId ?? null;
+    const date = params.date;
+    if (
+      source &&
+      (!staffExternalId || staffExternalId !== source.externalStaffId)
+    )
+      throw new ConflictException({
+        error: { code: 'journal_read_source_changed' },
+      });
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: scopedTenantId },
       select: { defaultTimezone: true, calendarSource: true },
@@ -780,16 +798,37 @@ export class OperationsAnalyticsService {
     }
     const external =
       (tenant.calendarSource as CalendarSource) === CalendarSource.EXTERNAL;
-    const timezone = tenant.defaultTimezone;
-    const staffExternalId = params.staffExternalId ?? null;
+    if (source && !external)
+      throw new ConflictException({
+        error: { code: 'journal_read_source_changed' },
+      });
+    const currentSource = source
+      ? await this.crmService.resolveStaffScheduleSource(
+          scopedTenantId,
+          source.externalStaffId,
+          source,
+        )
+      : undefined;
+    if (
+      source &&
+      currentSource &&
+      (Object.keys(source).length !== 6 ||
+        Object.entries(currentSource).some(
+          ([key, value]) => source[key as keyof StaffScheduleSource] !== value,
+        ))
+    )
+      throw new ConflictException({
+        error: { code: 'journal_read_source_changed' },
+      });
+    const timezone = currentSource?.timezone ?? tenant.defaultTimezone;
     /**
      * Границы локального дня — из общего примитива границы календаря, а не из
      * собственной арифметики: смещение пояса живёт там и только там.
      * Последняя миллисекунда суток: сутки это [00:00 … 23:59:59.999].
      */
-    const from = localDateMinuteToUtc(params.date, 0, timezone);
+    const from = localDateMinuteToUtc(date, 0, timezone);
     const to = new Date(
-      localDateMinuteToUtc(params.date, 24 * 60, timezone).getTime() - 1,
+      localDateMinuteToUtc(date, 24 * 60, timezone).getTime() - 1,
     );
     const period: BusinessPeriod = {
       from: from.toISOString(),
@@ -805,6 +844,7 @@ export class OperationsAnalyticsService {
             to,
             staffExternalId,
             timezone,
+            source,
           )
         : this.prisma.appointment
             .findMany({
@@ -851,7 +891,7 @@ export class OperationsAnalyticsService {
        */
       this.attendanceFacts
         .periodAttendance(scopedTenantId, period, {
-          branchId: null,
+          branchId: currentSource?.branchId ?? null,
           staffExternalId,
           attendanceSupported: external,
         })
@@ -874,13 +914,22 @@ export class OperationsAnalyticsService {
       // Когорты клиентов дневному срезу не нужны и не читаются.
       { status: 'unavailable', reason: 'not_requested_for_day_operations' },
       true,
-      await this.staffIdsByExternal(scopedTenantId),
+      source
+        ? new Map([[source.externalStaffId, source.staffId]])
+        : await this.staffIdsByExternal(scopedTenantId),
       this.appointmentsObservation(read.read),
       attendance,
     );
 
+    if (source)
+      await this.crmService.resolveStaffScheduleSource(
+        scopedTenantId,
+        source.externalStaffId,
+        source,
+      );
+
     return {
-      date: params.date,
+      date,
       timezone,
       period: overview.period,
       data_source: overview.data_source,
@@ -1126,6 +1175,7 @@ export class OperationsAnalyticsService {
     to: Date,
     providerId: string | null,
     timezone: string,
+    source?: StaffScheduleSource,
   ): Promise<{
     appointments: AnalyticsAppointment[];
     read: AppointmentPeriodRead;
@@ -1139,6 +1189,7 @@ export class OperationsAnalyticsService {
     };
     const read = await this.periodReader.readProviderJournal(tenantId, period, {
       providerId,
+      ...(source ? { source } : {}),
     });
 
     const appointments = read.items.map((appointment) => {

@@ -30,325 +30,329 @@ describe('AiToolRuntimeService', () => {
     membershipStatus: 'active',
   };
 
-  describe('finite current staff schedule READ scope', () => {
-    const scope = (): StaffScheduleReadScope => ({
-      branchId: 'branch-a',
-      sourceRevision: 'a'.repeat(64),
-      staffSource: {
-        provider: 'yclients',
-        staffId: 'local-staff',
+  describe.each(['staff.schedule.read', 'operations.journal.read'])(
+    'finite current employee day READ scope %s',
+    (dayTool) => {
+      const scope = (): StaffScheduleReadScope => ({
         branchId: 'branch-a',
-        externalStaffId: '71',
-        timezone: 'Europe/Moscow',
-        sourceHash: 'b'.repeat(64),
-      },
-    });
-    function fixture(widget?: AiReadWidgetTriggerPort) {
-      const h = createHarness(widget);
-      const membership = {
-        id: 'membership-a',
-        tenantId: 'tenant-a',
-        userId: customer.userId,
-        role: UserRole.TENANT_OWNER,
-        branchId: null as string | null,
-        status: 'active',
-        user: { status: 'active' },
-        tenant: { status: 'active' },
-      };
-      h.membershipFindUnique.mockResolvedValue(membership);
-      let saved: Record<string, unknown> | null = null;
-      let changed = false;
-      h.executionFindUnique.mockImplementation(() => Promise.resolve(saved));
-      h.executionCreate.mockImplementation((input: unknown) => {
-        saved = { ...record(record(input).data), id: 'schedule-read' };
-        return Promise.resolve(saved);
+        sourceRevision: 'a'.repeat(64),
+        staffSource: {
+          provider: 'yclients',
+          staffId: 'local-staff',
+          branchId: 'branch-a',
+          externalStaffId: '71',
+          timezone: 'Europe/Moscow',
+          sourceHash: 'b'.repeat(64),
+        },
       });
-      h.executionUpdate.mockImplementation((input: unknown) => {
-        saved = { ...saved, ...record(record(input).data) };
-        return Promise.resolve(saved);
-      });
-      h.handlerExecute.mockResolvedValue({
-        staff: [{ id: '71', name: 'PRIVATE_SCOPED_RESULT' }],
-      });
-      const guard = jest
-        .spyOn(h.handler, 'assertStaffScheduleReadScope')
-        .mockImplementation(() => {
-          if (changed)
-            return Promise.reject(
-              new ConflictException('staff_schedule_read_source_changed'),
-            );
-          return Promise.resolve();
+      function fixture(widget?: AiReadWidgetTriggerPort) {
+        const h = createHarness(widget);
+        const membership = {
+          id: 'membership-a',
+          tenantId: 'tenant-a',
+          userId: customer.userId,
+          role: UserRole.TENANT_OWNER,
+          branchId: null as string | null,
+          status: 'active',
+          user: { status: 'active' },
+          tenant: { status: 'active' },
+        };
+        h.membershipFindUnique.mockResolvedValue(membership);
+        let saved: Record<string, unknown> | null = null;
+        let changed = false;
+        h.executionFindUnique.mockImplementation(() => Promise.resolve(saved));
+        h.executionCreate.mockImplementation((input: unknown) => {
+          saved = { ...record(record(input).data), id: 'schedule-read' };
+          return Promise.resolve(saved);
         });
-      const run = (
-        replay = false,
-        supplied = scope(),
-        name = 'staff.schedule.read',
-      ) =>
-        h.tenantContext.runAsSystemTenant('tenant-a', () => {
-          const dto = {
-            surface: 'web' as const,
-            idempotencyKey: IDEMPOTENCY_KEY,
-            arguments:
-              name === 'staff.schedule.read'
+        h.executionUpdate.mockImplementation((input: unknown) => {
+          saved = { ...saved, ...record(record(input).data) };
+          return Promise.resolve(saved);
+        });
+        h.handlerExecute.mockResolvedValue({
+          staff: [{ id: '71', name: 'PRIVATE_SCOPED_RESULT' }],
+        });
+        const guard = jest
+          .spyOn(h.handler, 'assertStaffScheduleReadScope')
+          .mockImplementation(() => {
+            if (changed)
+              return Promise.reject(
+                new ConflictException('staff_schedule_read_source_changed'),
+              );
+            return Promise.resolve();
+          });
+        const run = (replay = false, supplied = scope(), name = dayTool) =>
+          h.tenantContext.runAsSystemTenant('tenant-a', () => {
+            const dto = {
+              surface: 'web' as const,
+              idempotencyKey: IDEMPOTENCY_KEY,
+              arguments: [
+                'staff.schedule.read',
+                'operations.journal.read',
+              ].includes(name)
                 ? { staff_id: '71', date: '2026-10-10' }
                 : {},
-          };
-          const internal = {
-            staffScheduleReadScope: supplied,
-            suppressWidgetTrigger: widget === undefined,
-          };
-          const actor = { ...customer, role: UserRole.TENANT_OWNER };
-          return replay
-            ? h.runtime.replayCompletedRead(
-                actor,
-                name,
-                dto,
-                'schedule-read',
-                internal,
-              )
-            : h.runtime.execute(actor, name, dto, internal);
-        });
-      return {
-        ...h,
-        guard,
-        run,
-        membership,
-        saved: () => saved,
-        change: () => {
-          changed = true;
-        },
-      };
-    }
-    it('retains the server witness in the existing authority hash and replays the same source without another handler call', async () => {
-      const h = fixture();
-      await expect(h.run()).resolves.toMatchObject({
-        status: 'completed',
-        replayed: false,
-      });
-      const actor = record(
-        (h.handlerExecute.mock.calls[0] as readonly unknown[])[1],
-      );
-      expect(actor.staffScheduleReadSource).toEqual(scope());
-      expect(record(actor.readAuthority).sourceScopeHash).toMatch(
-        /^[a-f0-9]{64}$/,
-      );
-      await expect(h.run(true)).resolves.toMatchObject({
-        status: 'completed',
-        replayed: true,
-      });
-      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-      expect(
-        h.guard.mock.calls.every((call) => call[1] === 'staff.schedule.read'),
-      ).toBe(true);
-    });
-    it('applies the same bounded current revision to the catalog prerequisite without requiring a staff selection', async () => {
-      const h = fixture();
-      const source = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
-      await expect(
-        h.run(false, source, 'catalog.staff.read'),
-      ).resolves.toMatchObject({ status: 'completed' });
-      await expect(
-        h.run(true, source, 'catalog.staff.read'),
-      ).resolves.toMatchObject({ replayed: true });
-      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-      expect(
-        record((h.handlerExecute.mock.calls[0] as readonly unknown[])[1])
-          .staffScheduleReadSource,
-      ).toEqual(source);
-    });
-    it.each([false, true])(
-      'refuses a changed current source before cache lookup/provider, replay=%s',
-      async (replay) => {
-        const h = fixture();
-        await h.run();
-        h.executionFindUnique.mockClear();
-        h.change();
-        await expect(h.run(replay)).rejects.toThrow(
-          'staff_schedule_read_source_changed',
-        );
-        expect(h.executionFindUnique).not.toHaveBeenCalled();
-        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-      },
-    );
-    it.each([false, true])(
-      'does not reuse a completed key under a different valid witness, replay=%s',
-      async (replay) => {
-        const h = fixture();
-        await h.run();
-        await expect(
-          h.run(replay, { ...scope(), sourceRevision: 'c'.repeat(64) }),
-        ).rejects.toThrow(ConflictException);
-        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-      },
-    );
-    it.each([false, true])(
-      'withholds a saved result if source changes while cache lookup awaits, replay=%s',
-      async (replay) => {
-        const h = fixture();
-        await h.run();
-        // The canonical receipt fixture wraps the original Prisma mock with
-        // its own saved-read lookup; intercept that actual lookup boundary.
-        const find = h.prisma.aiToolExecution.findUnique.bind(
-          h.prisma.aiToolExecution,
-        );
-        jest
-          .spyOn(h.prisma.aiToolExecution, 'findUnique')
-          .mockImplementation((input) => {
-            h.change();
-            return find(input);
+            };
+            const internal = {
+              staffScheduleReadScope: supplied,
+              suppressWidgetTrigger: widget === undefined,
+            };
+            const actor = { ...customer, role: UserRole.TENANT_OWNER };
+            return replay
+              ? h.runtime.replayCompletedRead(
+                  actor,
+                  name,
+                  dto,
+                  'schedule-read',
+                  internal,
+                )
+              : h.runtime.execute(actor, name, dto, internal);
           });
-        await expect(h.run(replay)).rejects.toThrow(
+        return {
+          ...h,
+          guard,
+          run,
+          membership,
+          saved: () => saved,
+          change: () => {
+            changed = true;
+          },
+        };
+      }
+      it('retains the server witness in the existing authority hash and replays the same source without another handler call', async () => {
+        const h = fixture();
+        await expect(h.run()).resolves.toMatchObject({
+          status: 'completed',
+          replayed: false,
+        });
+        const actor = record(
+          (h.handlerExecute.mock.calls[0] as readonly unknown[])[1],
+        );
+        expect(actor.staffScheduleReadSource).toEqual(scope());
+        expect(record(actor.readAuthority).sourceScopeHash).toMatch(
+          /^[a-f0-9]{64}$/,
+        );
+        await expect(h.run(true)).resolves.toMatchObject({
+          status: 'completed',
+          replayed: true,
+        });
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        expect(h.guard.mock.calls.every((call) => call[1] === dayTool)).toBe(
+          true,
+        );
+      });
+      it('applies the same bounded current revision to the catalog prerequisite without requiring a staff selection', async () => {
+        const h = fixture();
+        const source = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+        await expect(
+          h.run(false, source, 'catalog.staff.read'),
+        ).resolves.toMatchObject({ status: 'completed' });
+        await expect(
+          h.run(true, source, 'catalog.staff.read'),
+        ).resolves.toMatchObject({ replayed: true });
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        expect(
+          record((h.handlerExecute.mock.calls[0] as readonly unknown[])[1])
+            .staffScheduleReadSource,
+        ).toEqual(source);
+      });
+      it.each([false, true])(
+        'refuses a changed current source before cache lookup/provider, replay=%s',
+        async (replay) => {
+          const h = fixture();
+          await h.run();
+          h.executionFindUnique.mockClear();
+          h.change();
+          await expect(h.run(replay)).rejects.toThrow(
+            'staff_schedule_read_source_changed',
+          );
+          expect(h.executionFindUnique).not.toHaveBeenCalled();
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        },
+      );
+      it.each([false, true])(
+        'does not reuse a completed key under a different valid witness, replay=%s',
+        async (replay) => {
+          const h = fixture();
+          await h.run();
+          await expect(
+            h.run(replay, { ...scope(), sourceRevision: 'c'.repeat(64) }),
+          ).rejects.toThrow(ConflictException);
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        },
+      );
+      it.each([false, true])(
+        'withholds a saved result if source changes while cache lookup awaits, replay=%s',
+        async (replay) => {
+          const h = fixture();
+          await h.run();
+          // The canonical receipt fixture wraps the original Prisma mock with
+          // its own saved-read lookup; intercept that actual lookup boundary.
+          const find = h.prisma.aiToolExecution.findUnique.bind(
+            h.prisma.aiToolExecution,
+          );
+          jest
+            .spyOn(h.prisma.aiToolExecution, 'findUnique')
+            .mockImplementation((input) => {
+              h.change();
+              return find(input);
+            });
+          await expect(h.run(replay)).rejects.toThrow(
+            'staff_schedule_read_source_changed',
+          );
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        },
+      );
+      it('rechecks after execution-row creation before invoking the provider handler', async () => {
+        const h = fixture();
+        h.executionCreate.mockImplementation((input: unknown) => {
+          h.change();
+          return Promise.resolve({
+            ...record(record(input).data),
+            id: 'schedule-read',
+          });
+        });
+        await expect(h.run()).rejects.toThrow(
           'staff_schedule_read_source_changed',
         );
-        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-      },
-    );
-    it('rechecks after execution-row creation before invoking the provider handler', async () => {
-      const h = fixture();
-      h.executionCreate.mockImplementation((input: unknown) => {
-        h.change();
-        return Promise.resolve({
-          ...record(record(input).data),
-          id: 'schedule-read',
-        });
+        expect(h.handlerExecute).not.toHaveBeenCalled();
       });
-      await expect(h.run()).rejects.toThrow(
-        'staff_schedule_read_source_changed',
-      );
-      expect(h.handlerExecute).not.toHaveBeenCalled();
-    });
-    it('withholds result when policy is revoked during source work', async () => {
-      const h = fixture();
-      h.handlerExecute.mockImplementation(() => {
-        h.policyAssertCanExecute.mockRejectedValue(
-          new ForbiddenException('revoked'),
-        );
-        return Promise.resolve({ staff: [{ id: '71' }] });
-      });
-      await expect(h.run()).rejects.toThrow('revoked');
-      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-    });
-    it.each([
-      'membership',
-      'tenant',
-      'actor',
-      'role',
-      'branch',
-      'revoked',
-      'disabled-user',
-      'disabled-tenant',
-    ])(
-      'rejects current %s identity drift before source/provider work',
-      async (kind) => {
+      it('withholds result when policy is revoked during source work', async () => {
         const h = fixture();
-        if (kind === 'membership') h.membership.id = 'replacement-membership';
-        if (kind === 'tenant') h.membership.tenantId = 'foreign-tenant';
-        if (kind === 'actor') h.membership.userId = 'foreign-user';
-        if (kind === 'role') h.membership.role = UserRole.CUSTOMER;
-        if (kind === 'branch') h.membership.branchId = 'other-branch';
-        if (kind === 'revoked') h.membership.status = 'inactive';
-        if (kind === 'disabled-user') h.membership.user.status = 'inactive';
-        if (kind === 'disabled-tenant') h.membership.tenant.status = 'inactive';
+        h.handlerExecute.mockImplementation(() => {
+          h.policyAssertCanExecute.mockRejectedValue(
+            new ForbiddenException('revoked'),
+          );
+          return Promise.resolve({ staff: [{ id: '71' }] });
+        });
+        await expect(h.run()).rejects.toThrow('revoked');
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      });
+      it.each([
+        'membership',
+        'tenant',
+        'actor',
+        'role',
+        'branch',
+        'revoked',
+        'disabled-user',
+        'disabled-tenant',
+      ])(
+        'rejects current %s identity drift before source/provider work',
+        async (kind) => {
+          const h = fixture();
+          if (kind === 'membership') h.membership.id = 'replacement-membership';
+          if (kind === 'tenant') h.membership.tenantId = 'foreign-tenant';
+          if (kind === 'actor') h.membership.userId = 'foreign-user';
+          if (kind === 'role') h.membership.role = UserRole.CUSTOMER;
+          if (kind === 'branch') h.membership.branchId = 'other-branch';
+          if (kind === 'revoked') h.membership.status = 'inactive';
+          if (kind === 'disabled-user') h.membership.user.status = 'inactive';
+          if (kind === 'disabled-tenant')
+            h.membership.tenant.status = 'inactive';
+          await expect(h.run()).rejects.toMatchObject({
+            response: {
+              error: { code: 'staff_schedule_read_principal_changed' },
+            },
+          });
+          expect(h.guard).not.toHaveBeenCalled();
+          expect(h.executionFindUnique).not.toHaveBeenCalled();
+          expect(h.handlerExecute).not.toHaveBeenCalled();
+        },
+      );
+      it.each([false, true])(
+        'withholds cached source after actual membership revocation during lookup, replay=%s',
+        async (replay) => {
+          const h = fixture();
+          await h.run();
+          const find = h.prisma.aiToolExecution.findUnique.bind(
+            h.prisma.aiToolExecution,
+          );
+          jest
+            .spyOn(h.prisma.aiToolExecution, 'findUnique')
+            .mockImplementation((input) => {
+              h.membership.status = 'inactive';
+              return find(input);
+            });
+          await expect(h.run(replay)).rejects.toMatchObject({
+            response: {
+              error: { code: 'staff_schedule_read_principal_changed' },
+            },
+          });
+          expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+        },
+      );
+      it('withholds newly read data after actual user revocation during provider work', async () => {
+        const h = fixture();
+        h.handlerExecute.mockImplementation(() => {
+          h.membership.user.status = 'inactive';
+          return Promise.resolve({ staff: [{ id: '71' }] });
+        });
         await expect(h.run()).rejects.toMatchObject({
           response: {
             error: { code: 'staff_schedule_read_principal_changed' },
           },
         });
-        expect(h.guard).not.toHaveBeenCalled();
-        expect(h.executionFindUnique).not.toHaveBeenCalled();
-        expect(h.handlerExecute).not.toHaveBeenCalled();
-      },
-    );
-    it.each([false, true])(
-      'withholds cached source after actual membership revocation during lookup, replay=%s',
-      async (replay) => {
-        const h = fixture();
-        await h.run();
-        const find = h.prisma.aiToolExecution.findUnique.bind(
-          h.prisma.aiToolExecution,
-        );
-        jest
-          .spyOn(h.prisma.aiToolExecution, 'findUnique')
-          .mockImplementation((input) => {
-            h.membership.status = 'inactive';
-            return find(input);
-          });
-        await expect(h.run(replay)).rejects.toMatchObject({
-          response: {
-            error: { code: 'staff_schedule_read_principal_changed' },
-          },
-        });
         expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-      },
-    );
-    it('withholds newly read data after actual user revocation during provider work', async () => {
-      const h = fixture();
-      h.handlerExecute.mockImplementation(() => {
-        h.membership.user.status = 'inactive';
-        return Promise.resolve({ staff: [{ id: '71' }] });
       });
-      await expect(h.run()).rejects.toMatchObject({
-        response: { error: { code: 'staff_schedule_read_principal_changed' } },
+      it('passes the source guard to the widget owner and withholds a result after awaited widget drift', async () => {
+        let change = () => {};
+        const afterCompletedRead = jest.fn().mockImplementation(() => {
+          change();
+          return Promise.resolve(null);
+        });
+        const h = fixture({ afterCompletedRead });
+        change = h.change;
+        await expect(h.run()).rejects.toThrow(
+          'staff_schedule_read_source_changed',
+        );
+        expect(afterCompletedRead).toHaveBeenCalledTimes(1);
+        expect(
+          record((afterCompletedRead.mock.calls[0] as readonly unknown[])[0])
+            .revalidateSource,
+        ).toEqual(expect.any(Function));
       });
-      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
-    });
-    it('passes the source guard to the widget owner and withholds a result after awaited widget drift', async () => {
-      let change = () => {};
-      const afterCompletedRead = jest.fn().mockImplementation(() => {
-        change();
-        return Promise.resolve(null);
-      });
-      const h = fixture({ afterCompletedRead });
-      change = h.change;
-      await expect(h.run()).rejects.toThrow(
-        'staff_schedule_read_source_changed',
+      it.each([
+        'wrong-tool',
+        'catalog-staff',
+        'missing-staff',
+        'foreign-branch',
+        'different-id',
+        'array-provider',
+        'extra',
+      ])(
+        'rejects malformed/misapplied %s witness before source/cache/provider work',
+        async (kind) => {
+          const h = fixture();
+          let value: unknown = scope();
+          let name = dayTool;
+          if (kind === 'wrong-tool') name = 'catalog.services.read';
+          if (kind === 'catalog-staff') name = 'catalog.staff.read';
+          if (kind === 'missing-staff')
+            value = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
+          if (kind === 'foreign-branch')
+            value = { ...scope(), branchId: 'foreign' };
+          if (kind === 'different-id')
+            value = {
+              ...scope(),
+              staffSource: { ...scope().staffSource, externalStaffId: '72' },
+            };
+          if (kind === 'array-provider')
+            value = {
+              ...scope(),
+              staffSource: { ...scope().staffSource, provider: ['yclients'] },
+            };
+          if (kind === 'extra') value = { ...scope(), authority: true };
+          await expect(
+            h.run(false, value as StaffScheduleReadScope, name),
+          ).rejects.toThrow(ConflictException);
+          expect(h.guard).not.toHaveBeenCalled();
+          expect(h.executionFindUnique).not.toHaveBeenCalled();
+          expect(h.handlerExecute).not.toHaveBeenCalled();
+        },
       );
-      expect(afterCompletedRead).toHaveBeenCalledTimes(1);
-      expect(
-        record((afterCompletedRead.mock.calls[0] as readonly unknown[])[0])
-          .revalidateSource,
-      ).toEqual(expect.any(Function));
-    });
-    it.each([
-      'wrong-tool',
-      'catalog-staff',
-      'missing-staff',
-      'foreign-branch',
-      'different-id',
-      'array-provider',
-      'extra',
-    ])(
-      'rejects malformed/misapplied %s witness before source/cache/provider work',
-      async (kind) => {
-        const h = fixture();
-        let value: unknown = scope();
-        let name = 'staff.schedule.read';
-        if (kind === 'wrong-tool') name = 'catalog.services.read';
-        if (kind === 'catalog-staff') name = 'catalog.staff.read';
-        if (kind === 'missing-staff')
-          value = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
-        if (kind === 'foreign-branch')
-          value = { ...scope(), branchId: 'foreign' };
-        if (kind === 'different-id')
-          value = {
-            ...scope(),
-            staffSource: { ...scope().staffSource, externalStaffId: '72' },
-          };
-        if (kind === 'array-provider')
-          value = {
-            ...scope(),
-            staffSource: { ...scope().staffSource, provider: ['yclients'] },
-          };
-        if (kind === 'extra') value = { ...scope(), authority: true };
-        await expect(
-          h.run(false, value as StaffScheduleReadScope, name),
-        ).rejects.toThrow(ConflictException);
-        expect(h.guard).not.toHaveBeenCalled();
-        expect(h.executionFindUnique).not.toHaveBeenCalled();
-        expect(h.handlerExecute).not.toHaveBeenCalled();
-      },
-    );
-  });
+    },
+  );
 
   describe('goods search cached authority after awaited work', () => {
     it.each([false, true])(

@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 
 import type { BusinessPeriod, PeriodRead } from '../domain';
 import { collectPeriodRecords } from '../domain';
 import { CRM_JOURNAL_MAX_WINDOW_MS } from '../crm/crm-provider-limits';
-import { CrmService } from '../crm/crm.service';
+import { CrmService, type StaffScheduleSource } from '../crm/crm.service';
 
 /**
  * Запись журнала провайдера — форма выводится СТРУКТУРНО из границы CRM.
@@ -52,8 +52,29 @@ export class AppointmentPeriodReader {
   async readProviderJournal(
     tenantId: string,
     period: BusinessPeriod,
-    options?: { providerId?: string | null; now?: Date },
+    options?: {
+      providerId?: string | null;
+      now?: Date;
+      source?: StaffScheduleSource;
+    },
   ): Promise<AppointmentPeriodRead> {
+    const providerId = options?.providerId;
+    const source =
+      options?.source === undefined
+        ? undefined
+        : Object.freeze({ ...options.source });
+    // A qualified day cannot silently fall back to a tenant-wide read. The
+    // CRM boundary validates the exact current witness for every window.
+    const mismatch = () =>
+      new ConflictException({ error: { code: 'journal_read_source_changed' } });
+    if (
+      source &&
+      (!source.externalStaffId ||
+        providerId !== source.externalStaffId ||
+        period.timezone !== source.timezone)
+    )
+      throw mismatch();
+    period = { ...period };
     const now = options?.now ?? new Date();
     const from = new Date(period.from);
     const to = new Date(period.to);
@@ -63,6 +84,7 @@ export class AppointmentPeriodReader {
       Number.isNaN(to.getTime()) ||
       from.getTime() >= to.getTime()
     ) {
+      if (source) throw mismatch();
       // Пустой период — это полный ответ на пустой вопрос, а не сбой.
       return {
         ...collectPeriodRecords<ProviderJournalRecord>([], period, SELECTORS),
@@ -97,18 +119,33 @@ export class AppointmentPeriodReader {
             {
               from: range.from,
               to: range.to,
-              ...(options?.providerId
-                ? { providerId: options.providerId }
-                : {}),
+              ...(providerId ? { providerId } : {}),
             },
             // 🔴 Отменённые нужны. Без флага удалённая запись не доходит сюда
             // вовсе, счётчик отмен всегда ноль, и владельцу отвечали «отмен
             // нет» вместо «не вижу».
-            { includeCanceled: true },
+            { includeCanceled: true, ...(source ? { source } : {}) },
           ),
         ),
       );
       for (const journal of wave) {
+        // A wrong-staff response is not an empty/complete scoped journal. Do
+        // not hide it by filtering rows or infer identity from client fields.
+        if (
+          source &&
+          (!journal ||
+            journal.calendar_source !== 'external' ||
+            !['complete', 'truncated'].includes(journal.completeness) ||
+            journal.timezone !== source.timezone ||
+            journal.provider_id !== source.externalStaffId ||
+            !Array.isArray(journal.appointments) ||
+            journal.appointments.some(
+              (item) => item?.provider?.id !== source.externalStaffId,
+            ))
+        )
+          throw new ConflictException({
+            error: { code: 'journal_read_result_unavailable' },
+          });
         windows.push({
           items: journal.appointments,
           completeness: journal.completeness,

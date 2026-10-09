@@ -1630,6 +1630,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
           ? this.toNumericId(params.providerId, 'providerId')
           : undefined,
         withDeleted: includeCanceled,
+        requireProgress: true,
       }),
       this.getStaff(params.tenantId),
       this.getServices(params.tenantId),
@@ -1640,11 +1641,24 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const servicesById = new Map(
       services.map((service) => [service.id, service]),
     );
-    const appointments = records
-      .filter(
+    const selectedRecords = records.filter(
+      (record) => includeCanceled || !record.deleted,
+    );
+    // A dropped malformed record is an unknown journal, never a complete empty
+    // day. Canceled records are omitted only when the caller explicitly excludes them.
+    if (
+      selectedRecords.some(
         (record) =>
-          record.id !== undefined && (includeCanceled || !record.deleted),
+          record.id === undefined ||
+          record.id === null ||
+          String(record.id).trim() === '' ||
+          String(record.staff_id ?? record.staff?.id ?? '').trim() === '',
       )
+    )
+      throw new ConflictException({
+        error: { code: 'journal_read_result_unavailable' },
+      });
+    const appointments = selectedRecords
       .map((record) =>
         this.mapJournalAppointment(
           record,

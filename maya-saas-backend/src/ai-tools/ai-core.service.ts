@@ -1,4 +1,8 @@
 import {
+  employeeJournalTask,
+  readEmployeeJournal,
+} from './employee-journal-read';
+import {
   bindServiceRenameChat,
   serviceRenameClarification,
   serviceRenameReply,
@@ -261,6 +265,7 @@ type AiCoreCompletion = {
   ownerReviewClarification?: true;
   financialPeriodReply?: true;
   employeeScheduleReply?: true;
+  employeeJournalReply?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
@@ -2020,24 +2025,37 @@ export class AiCoreService {
         const employeeSchedule = decision.semanticPlan
           ? employeeScheduleTask(decision.semanticPlan)
           : null;
+        const employeeJournal = decision.semanticPlan
+          ? employeeJournalTask(decision.semanticPlan)
+          : null;
+        const employeeDayTask = employeeSchedule ?? employeeJournal;
+        const employeeDayTool = employeeJournal
+          ? 'operations.journal.read'
+          : 'staff.schedule.read';
         if (
-          employeeSchedule &&
+          employeeDayTask &&
           !clientAudience &&
           step === 0 &&
-          toolsUsed.length === 0 &&
-          allowedNames.has('catalog.staff.read') &&
-          allowedNames.has('staff.schedule.read')
+          toolsUsed.length === 0
         ) {
           let presented: { reply: string; status: 'verified' | 'blocked' } = {
-            reply:
-              'Проверка графика выбранного сотрудника сейчас недоступна в этом контексте.',
+            reply: employeeJournal
+              ? 'Проверка журнала выбранного сотрудника сейчас недоступна в этом контексте.'
+              : 'Проверка графика выбранного сотрудника сейчас недоступна в этом контексте.',
             status: 'blocked',
           };
-          if (this.crm && maxToolSteps >= 2) {
+          if (
+            this.crm &&
+            maxToolSteps >= 2 &&
+            allowedNames.has('catalog.staff.read') &&
+            allowedNames.has(employeeDayTool)
+          ) {
             try {
-              presented = await readEmployeeSchedule({
+              presented = await (
+                employeeJournal ? readEmployeeJournal : readEmployeeSchedule
+              )({
                 actor: toolUser,
-                task: employeeSchedule,
+                task: employeeDayTask,
                 nameReferences: sanitized.nameReferences,
                 unresolvedReferences:
                   decision.semanticPlan!.context.unresolved_references,
@@ -2085,8 +2103,8 @@ export class AiCoreService {
                 },
               });
               if (presented.status === 'verified') {
-                employeeSchedule.requires_clarification = false;
-                employeeSchedule.clarification_question = null;
+                employeeDayTask.requires_clarification = false;
+                employeeDayTask.clarification_question = null;
                 decision.semanticPlan!.context.unresolved_references = [];
               }
             } catch (error) {
@@ -2103,6 +2121,8 @@ export class AiCoreService {
                   'staff_schedule_source_unavailable',
                   'staff_schedule_read_source_changed',
                   'staff_schedule_read_result_unavailable',
+                  'journal_read_source_changed',
+                  'journal_read_result_unavailable',
                   'ai_tool_staff_schedule_source_changed',
                   'ai_tool_idempotency_conflict',
                 ].includes(sourceCode)
@@ -2110,8 +2130,9 @@ export class AiCoreService {
                 throw error;
               toolResults.length = 0;
               presented = {
-                reply:
-                  'Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён.',
+                reply: employeeJournal
+                  ? 'Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены.'
+                  : 'Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён.',
                 status: 'blocked',
               };
             }
@@ -2127,11 +2148,15 @@ export class AiCoreService {
               reply: presented.reply,
               source: 'safe_fallback',
               action: null,
-              employeeScheduleReply: true,
+              ...(employeeJournal
+                ? { employeeJournalReply: true as const }
+                : { employeeScheduleReply: true as const }),
               grounding: this.groundingReport(
                 {
-                  evidenceToolNames: ['staff.schedule.read'],
-                  fallbackDomain: 'staff_schedule',
+                  evidenceToolNames: [employeeDayTool],
+                  fallbackDomain: employeeJournal
+                    ? 'operations_journal'
+                    : 'staff_schedule',
                   closedForAccess: false,
                   strictNumbers: true,
                 },
@@ -3530,7 +3555,11 @@ export class AiCoreService {
         ? await this.orchestrator
             .finishConversationReads(readTurn)
             .catch((error: unknown) => {
-              if (response.employeeScheduleReply) throw error;
+              if (
+                response.employeeScheduleReply ||
+                response.employeeJournalReply
+              )
+                throw error;
               return {
                 run_id: readTurn.runId ?? null,
                 scope: 'deterministic_reads' as const,
@@ -3539,7 +3568,7 @@ export class AiCoreService {
             })
         : null);
     if (
-      response.employeeScheduleReply &&
+      (response.employeeScheduleReply || response.employeeJournalReply) &&
       response.grounding?.status === 'verified' &&
       readTurn &&
       coordination?.state !== 'COMPLETED'
@@ -3578,6 +3607,7 @@ export class AiCoreService {
       !clientAudience &&
       !response.financialPeriodReply &&
       !response.employeeScheduleReply &&
+      !response.employeeJournalReply &&
       grounding.status === 'verified' &&
       toolResults.length > 0
         ? buildChatReportCard(toolResults, {

@@ -5193,12 +5193,63 @@ export class CrmService {
   async getJournal(
     tenantId: string,
     query: ListCrmJournalDto,
-    options?: { includeCanceled?: boolean },
+    options?: { includeCanceled?: boolean; source?: StaffScheduleSource },
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    await this.assertExternalSource(scopedTenantId);
+    const rawSource = options?.source;
+    const providerId = query.providerId;
     const from = new Date(query.from);
     const to = new Date(query.to);
+    const includeCanceled = options?.includeCanceled === true;
+    // This is server metadata, never caller-selected authority. Copy it before
+    // any await so the exact witness cannot change during a provider read.
+    if (
+      rawSource !== undefined &&
+      (!rawSource ||
+        typeof rawSource !== 'object' ||
+        Array.isArray(rawSource) ||
+        Object.keys(rawSource).length !== 6 ||
+        Object.keys(rawSource).some(
+          (key) =>
+            ![
+              'provider',
+              'staffId',
+              'branchId',
+              'externalStaffId',
+              'timezone',
+              'sourceHash',
+            ].includes(key),
+        ) ||
+        typeof rawSource.provider !== 'string' ||
+        !['yclients', 'altegio'].includes(rawSource.provider) ||
+        [rawSource.staffId, rawSource.branchId, rawSource.externalStaffId].some(
+          (value) =>
+            typeof value !== 'string' ||
+            !value.length ||
+            value.length > 128 ||
+            value.trim() !== value ||
+            [...value].some((character) => {
+              const code = character.charCodeAt(0);
+              return code < 32 || code === 127;
+            }),
+        ) ||
+        !isUsableTimezone(rawSource.timezone) ||
+        typeof rawSource.sourceHash !== 'string' ||
+        rawSource.sourceHash.length !== 64 ||
+        !/^[a-f0-9]{64}$/u.test(rawSource.sourceHash) ||
+        providerId !== rawSource.externalStaffId)
+    )
+      throw this.staffScheduleSourceUnavailable();
+    const source =
+      rawSource === undefined ? undefined : Object.freeze({ ...rawSource });
+    await this.assertExternalSource(scopedTenantId);
+    const currentSource = source
+      ? await this.resolveStaffScheduleSource(
+          scopedTenantId,
+          source.externalStaffId,
+          source,
+        )
+      : undefined;
 
     if (
       Number.isNaN(from.getTime()) ||
@@ -5221,12 +5272,27 @@ export class CrmService {
     }
 
     const [tenant, adapter] = await Promise.all([
-      this.prisma.tenant.findUnique({
-        where: { id: scopedTenantId },
-        select: { defaultTimezone: true },
-      }),
+      source
+        ? Promise.resolve(null)
+        : this.prisma.tenant.findUnique({
+            where: { id: scopedTenantId },
+            select: { defaultTimezone: true },
+          }),
       this.getAdapterForTenant(scopedTenantId),
     ]);
+
+    const revalidate = async () => {
+      if (!source) return;
+      if ((await this.getAdapterForTenant(scopedTenantId)) !== adapter)
+        throw this.staffScheduleSourceUnavailable();
+      // Check metadata after the adapter lookup, including its awaited reads.
+      await this.resolveStaffScheduleSource(
+        scopedTenantId,
+        source.externalStaffId,
+        source,
+      );
+    };
+    await revalidate();
 
     if (!adapter.getJournal) {
       throw new ConflictException({
@@ -5235,16 +5301,18 @@ export class CrmService {
       });
     }
 
-    return adapter.getJournal({
+    const journal = await adapter.getJournal({
       tenantId: scopedTenantId,
       from: from.toISOString(),
       to: to.toISOString(),
-      timezone: resolveSalonTimezone({
-        tenantTimezone: tenant?.defaultTimezone,
-      }),
-      providerId: query.providerId,
-      includeCanceled: options?.includeCanceled === true,
+      timezone:
+        currentSource?.timezone ??
+        resolveSalonTimezone({ tenantTimezone: tenant?.defaultTimezone }),
+      providerId,
+      includeCanceled,
     });
+    await revalidate();
+    return journal;
   }
 
   /**

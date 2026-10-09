@@ -37,6 +37,181 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  describe('bound employee journal READ source [synthetic owner boundary]', () => {
+    function fixture() {
+      const scope: StaffScheduleReadScope = {
+        branchId: 'branch-a',
+        sourceRevision: 'a'.repeat(64),
+        staffSource: {
+          provider: 'yclients',
+          staffId: 'local-staff',
+          branchId: 'branch-a',
+          externalStaffId: '71',
+          timezone: 'Pacific/Kiritimati',
+          sourceHash: 'b'.repeat(64),
+        },
+      };
+      const configured = jest.fn().mockResolvedValue({
+        id: scope.branchId,
+        sourceRevision: scope.sourceRevision,
+        timezone: scope.staffSource!.timezone,
+      });
+      const source = jest.fn().mockResolvedValue(scope.staffSource);
+      const getStaff = jest
+        .fn()
+        .mockResolvedValue([{ id: '71', name: 'Synthetic staff' }]);
+      const day = {
+        date: '2026-10-10',
+        timezone: 'Pacific/Kiritimati',
+        summary: {},
+        staff: [],
+        masters: [],
+        attendance: { state: 'unavailable', not_observed: 1 },
+        completeness: {
+          appointments: {
+            status: 'incomplete',
+            source: 'provider_journal',
+            reason: 'source_read_truncated',
+          },
+        },
+        records: [
+          {
+            id: 'PRIVATE_RECORD',
+            clientId: 'PRIVATE_CLIENT',
+            notes: 'PRIVATE_NOTES',
+            startAt: new Date('2026-10-09T20:00:00.000Z'),
+            durationMinutes: 60,
+            staffExternalId: '71',
+            staffName: 'UNTRUSTED_PROVIDER_NAME',
+            status: 'confirmed',
+            services: [{ name: 'Стрижка' }],
+            totalPriceKopecks: 10000,
+            currency: 'RUB',
+          },
+        ],
+      };
+      const getDayOperations = jest.fn().mockResolvedValue(day);
+      const service = createService({
+        crmService: {
+          resolveConfiguredBookingBranch: configured,
+          resolveStaffScheduleSource: source,
+          getStaff,
+        } as unknown as CrmService,
+        analyticsService: {
+          getDayOperations,
+        } as unknown as OperationsAnalyticsService,
+      });
+      const actor: AiToolPrincipal = {
+        ...principal,
+        role: UserRole.TENANT_OWNER,
+        staffScheduleReadSource: scope,
+      };
+      const args = { date: day.date, staff_id: '71' };
+      return {
+        scope,
+        configured,
+        source,
+        getStaff,
+        day,
+        getDayOperations,
+        actor,
+        run: () =>
+          service.execute(
+            'operations.journal.read',
+            actor,
+            args,
+            'journal-read',
+          ),
+      };
+    }
+    it('passes the same source into the canonical day owner and preserves partial observation without private identities', async () => {
+      const f = fixture();
+      const result = await f.run();
+      expect(f.getDayOperations).toHaveBeenCalledWith('tenant-a', {
+        date: '2026-10-10',
+        staffExternalId: '71',
+        source: f.scope.staffSource,
+      });
+      expect(result).toMatchObject({
+        verified: true,
+        pii_redacted: true,
+        timezone: 'Pacific/Kiritimati',
+        read_scope: {
+          contract: 'maya.employee-journal-read/1',
+          branch_id: 'branch-a',
+          timezone: 'Pacific/Kiritimati',
+          source_hash: 'b'.repeat(64),
+          staff_id: '71',
+        },
+        staff_scope: { name: 'Synthetic staff' },
+        completeness: { status: 'incomplete', zero_means_none: false },
+        attendance: { state: 'unavailable', arrived: null, no_show: null },
+        appointments: [
+          {
+            time: '10:00',
+            end_time: '11:00',
+            staff_name: 'Synthetic staff',
+            services: ['Стрижка'],
+          },
+        ],
+      });
+      for (const value of [
+        'PRIVATE_RECORD',
+        'PRIVATE_CLIENT',
+        'PRIVATE_NOTES',
+        'UNTRUSTED_PROVIDER_NAME',
+      ])
+        expect(JSON.stringify(result)).not.toContain(value);
+    });
+    it.each([
+      'date',
+      'timezone',
+      'foreign-staff',
+      'missing-completeness',
+      'array-completeness',
+    ])('withholds an unqualified canonical %s result', async (kind) => {
+      const f = fixture();
+      const result: Record<string, unknown> = { ...f.day };
+      if (kind === 'date') result.date = '1999-01-01';
+      if (kind === 'timezone') result.timezone = 'UTC';
+      if (kind === 'foreign-staff')
+        result.records = [{ ...f.day.records[0], staffExternalId: 'foreign' }];
+      if (kind === 'missing-completeness') result.completeness = {};
+      if (kind === 'array-completeness')
+        result.completeness = { appointments: { status: ['complete'] } };
+      f.getDayOperations.mockResolvedValue(result);
+      await expect(f.run()).rejects.toMatchObject({
+        response: { error: { code: 'journal_read_result_unavailable' } },
+      });
+    });
+    it('rejects source drift during canonical journal read', async () => {
+      const f = fixture();
+      f.getDayOperations.mockImplementation(() => {
+        f.configured.mockResolvedValue({ id: 'different-branch' });
+        return Promise.resolve(f.day);
+      });
+      await expect(f.run()).rejects.toMatchObject({
+        response: { error: { code: 'staff_schedule_read_source_changed' } },
+      });
+    });
+    it('does not turn duplicate current staff IDs into a first-match journal read', async () => {
+      const f = fixture();
+      f.getStaff.mockResolvedValue([
+        { id: '71', name: 'First' },
+        { id: '71', name: 'Second' },
+      ]);
+      await expect(f.run()).rejects.toThrow(ConflictException);
+      expect(f.getDayOperations).not.toHaveBeenCalled();
+    });
+    it('cannot authorize a client from a server source witness', async () => {
+      const f = fixture();
+      f.actor.role = UserRole.CUSTOMER;
+      await expect(f.run()).rejects.toThrow(ForbiddenException);
+      expect(f.configured).not.toHaveBeenCalled();
+      expect(f.getDayOperations).not.toHaveBeenCalled();
+    });
+  });
+
   describe('bound staff schedule READ source', () => {
     function fixture() {
       const scope: StaffScheduleReadScope = {

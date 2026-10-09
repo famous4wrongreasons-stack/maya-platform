@@ -2023,6 +2023,14 @@ export class AiToolHandlerService {
       });
     }
 
+    const sourceScope = principal.staffScheduleReadSource;
+    if (sourceScope)
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'operations.journal.read',
+        args,
+        sourceScope,
+      );
     const date = this.requiredString(args.date);
     const requestedStaffId =
       typeof args.staff_id === 'string' ? args.staff_id : null;
@@ -2036,6 +2044,21 @@ export class AiToolHandlerService {
     const selectedStaff = requestedStaffId
       ? activeStaff.find((member) => member.id === requestedStaffId)
       : null;
+    if (sourceScope) {
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'operations.journal.read',
+        args,
+        sourceScope,
+      );
+      if (
+        activeStaff.filter((member) => member.id === requestedStaffId)
+          .length !== 1
+      )
+        throw new ConflictException({
+          error: { code: 'journal_read_result_unavailable' },
+        });
+    }
     if (requestedStaffId && !selectedStaff) {
       throw new BadRequestException({
         message: 'The requested active staff member was not found in CRM.',
@@ -2057,8 +2080,35 @@ export class AiToolHandlerService {
      */
     const day = await this.analyticsService.getDayOperations(
       principal.tenantId,
-      { date, staffExternalId: requestedStaffId },
+      {
+        date,
+        staffExternalId: requestedStaffId,
+        ...(sourceScope ? { source: sourceScope.staffSource } : {}),
+      },
     );
+
+    if (sourceScope) {
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'operations.journal.read',
+        args,
+        sourceScope,
+      );
+      const sourceCompleteness = this.record(
+        this.record(day.completeness).appointments,
+      ).status;
+      if (
+        day.date !== date ||
+        day.timezone !== sourceScope.staffSource?.timezone ||
+        !Array.isArray(day.records) ||
+        day.records.some((row) => row.staffExternalId !== requestedStaffId) ||
+        typeof sourceCompleteness !== 'string' ||
+        !['complete', 'incomplete'].includes(sourceCompleteness)
+      )
+        throw new ConflictException({
+          error: { code: 'journal_read_result_unavailable' },
+        });
+    }
 
     const staffById = new Map(activeStaff.map((member) => [member.id, member]));
     const canonicalRows = new Map(
@@ -2143,7 +2193,7 @@ export class AiToolHandlerService {
         time: this.localTime(startAt.toISOString(), day.timezone),
         end_time: this.localTime(endAt.toISOString(), day.timezone),
         status: appointment.status,
-        staff_name: appointment.staffName,
+        staff_name: sourceScope ? selectedStaff!.name : appointment.staffName,
         services: appointment.services.map((service) => service.name),
         duration_minutes: appointment.durationMinutes,
         booked_value:
@@ -2166,6 +2216,17 @@ export class AiToolHandlerService {
       verified: true,
       source: 'yclients',
       pii_redacted: true,
+      ...(sourceScope?.staffSource
+        ? {
+            read_scope: {
+              contract: 'maya.employee-journal-read/1' as const,
+              branch_id: sourceScope.branchId,
+              timezone: sourceScope.staffSource.timezone,
+              source_hash: sourceScope.staffSource.sourceHash,
+              staff_id: sourceScope.staffSource.externalStaffId,
+            },
+          }
+        : {}),
       date,
       timezone: day.timezone,
       staff_scope: selectedStaff
