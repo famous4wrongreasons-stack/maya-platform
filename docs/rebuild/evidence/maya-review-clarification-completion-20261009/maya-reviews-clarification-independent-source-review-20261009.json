@@ -1,0 +1,122 @@
+{
+  "contract": "maya.independent-source-review/1",
+  "reviewer": "independent_review",
+  "createdAt": "2026-10-09T17:50:34.645568+00:00",
+  "verdict": "QUALIFIED_SOURCE_REVIEW_NO_REMAINING_BLOCKER",
+  "sourceHead": "586c71779eb3743a318436e5316811375b3204af",
+  "worktreeClean": true,
+  "reviewedWorktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics",
+  "scope": "Reviews clarification evaluator v2, finite persisted observer, score accounting, exact frozen-request supplemental continuation/restart probe. Eight files; no production runtime behavior changes.",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.mjs",
+      "bytes": 96084,
+      "sha256": "d760fe2c3e54212277528c200cd1d99238db49b2647e0a82b94fbe6587feafb5",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.d.mts",
+      "bytes": 3073,
+      "sha256": "4076118afc921b9216aa3f9b036b5a1f1c57632781e3269cc8d56574b07b7ebe",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.test.mjs",
+      "bytes": 69654,
+      "sha256": "284f85065a4d5e5784ef064f935e629122f69126566f348cea20836a1b42b333",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.mjs",
+      "bytes": 8337,
+      "sha256": "3c86ecd940b7ddd7e1051448ac8ac1b78f553e4086f81495d43aef39663d63c9",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.test.mjs",
+      "bytes": 11638,
+      "sha256": "f547ab8251332dfc26ca519292da7e7eeb2533c769eb7d1626ff92911e409f5e",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/reviews-period-read-proof.mjs",
+      "bytes": 11173,
+      "sha256": "542e496f441fb7ac8ba3095a105f2c9a789a2c4cafe25cd80584cb82dd47c9b4",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts",
+      "bytes": 125764,
+      "sha256": "a7f403ff72a32de1109a9fd40079044d08ab7f8620416f2bcf3c004cea91713c",
+      "byteIdenticalToGit": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts",
+      "bytes": 68619,
+      "sha256": "b482fb6845442d5b73cfe51b6aa4c3a2351ffa61f06c22f01f68b99771ec5527",
+      "byteIdenticalToGit": true
+    }
+  ],
+  "corpus": {
+    "path": "maya-saas-backend/datasets/conversation-intelligence/core-offline-48-20261009.json",
+    "sha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+    "byteIdenticalToGit": true,
+    "originalCases": 48,
+    "originalTurns": 81,
+    "frozenReviewCaseIds": [
+      "utt-reviews.list_recent-062",
+      "utt-reviews.list_recent-067"
+    ],
+    "supplementalVariantDoesNotAddUniqueOriginalCase": true,
+    "originalEvidenceRewritten": false,
+    "evidenceCheckScope": "Commit contains only eight reviewed files and does not change corpus or archived evidence. A full old-archive checksum census was not repeated."
+  },
+  "findings": [],
+  "closedReviewFindings": [
+    {
+      "id": "DECLARATION_V2_SYNC",
+      "resolution": "The d.mts declaration now includes clarification_pending, the assessment contract, finite added input fields and optional goalCompleted:false / AWAITING_RATING_CHOICE fields."
+    },
+    {
+      "id": "EMPTY_ASSISTANT_EXECUTION_SIBLING",
+      "resolution": "persistedCompletion skips null/non-chat assistant candidates before decoding, keeps take:3 and exactly one same-parent/exact-reply/versioned-ID match. Malformed purported chat completions still fail."
+    },
+    {
+      "id": "PENDING_AFTER_RESTART_COVERAGE",
+      "resolution": "Separate ADMIN variant of original062 ends prepare with persisted pending and zero source/C9 work. Resume checks exact pending context/history, then fresh numeric-only rating2 request, one owner READ with exact retained tenant month, then same-run/receipt replay with zero additional READ. Existing completed chains are checked first against original saved graph."
+    },
+    {
+      "id": "MISSING_CIVIL_ANCHOR_TRISTATE",
+      "origin": "Parent-observed component failure, subsequently reviewed statically",
+      "resolution": "Persisted shape/identity, task/question, civil validity and timezone contradictions are separated from missing current-civil comparison data. Missing anchor stays insufficient; known malformed or contradictory facts fail."
+    }
+  ],
+  "supportedSourceConclusions": [
+    "Pending is restricted to the two exact frozen first turns: one allowed reviews task, unresolved rating, exact server question and prior civil month, no branch injection, no source/C9 work or effect/action/approval, bounded model work and current actor evidence.",
+    "Observer reads retained live parent and immutable assistant completion; checks exact parent/reply/versioned ID and principalProofHash against current C9Authority. It supplies no model input or permission. Source digests bypass the generic PII sanitizer.",
+    "Pending never increases PASS or completed goals. Proposed diagnostic counts57/0/12/10/2 yield22 nonpending unresolved+2pending=24unclosed, with nonzero exit. This arithmetic is not a claim that this candidate has executed.",
+    "Archived reassessment is explicitly labelled with original score digest and evaluator head. Missing new observations cannot gain pending retroactively. Pure scorer leaves inputs unchanged; caller/archive owner must verify supplied old-score digest and preserve output files.",
+    "Initial supplemental texts/roles are dataset-pinned, with no initial semantic branch or numeric rating. New explicit rating2 followups require actual persisted C9 work/AiToolExecution and encrypted canonical registry result with independent Honolulu month bounds, exact rows/count/limit/has_more and privacy checks.",
+    "Pending-after-restart variant accepts only the legitimate new graph after its fresh READ, then requires replay graph stability. It is a variant of062, not a third unique original goal.",
+    "Driver source binding now includes exact corpus bytes; existing production roles, tool registry, owner permissions, schema, provider integrations, pricing and website code are untouched."
+  ],
+  "limits": [
+    "Source-only review. Reviewer executed no tests/services/HTTP/PG/model/network/credential/desktop actions.",
+    "No actual success for this new supplemental candidate asserted here. Parent-run gates and actual proof need separate evidence qualification.",
+    "Scripted numeric followups remain separate from original81 turns and do not relabel original unanswered questions PASS or establish real model quality.",
+    "Harness requires restart within the same actual calendar month. Natural month-boundary rollover is not demonstrated.",
+    "No-business-effects claim is limited to observed families after canonical synthetic setup; setup writes are real fixture writes.",
+    "Previous failed runs remain failures and old artifacts are not recertified by this source review.",
+    "No overall MAYA/C10, production/provider, browser, paid-model or frozen9/handoff acceptance."
+  ],
+  "validationPerformedByReviewer": {
+    "staticSourceAndDiffRead": true,
+    "eightSourceFilesComparedWithExactGit": true,
+    "datasetSha256AndGitCompared": true,
+    "productionOrEvidenceFilesEdited": false,
+    "testsExecuted": false,
+    "servicesStarted": false,
+    "newReviewReportOnlyWritten": true
+  },
+  "reviewMetadataNote": "Initial metadata capture found HEAD had been committed during its uncommitted-diff assertion and aborted before writing. This final record compares all reviewed bytes against the committed clean HEAD."
+}

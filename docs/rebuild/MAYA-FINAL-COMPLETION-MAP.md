@@ -1302,3 +1302,23 @@ review PASS.** Native malformed record loss and paid-only completed wording are
 qualified without new Client authority. New journal HTTP/PG/browser/live-provider
 acceptance is not issued. Original two-Sasha cases, remaining29, frozen9/handoff and
 overall MAYA/C10 status remain unchanged; no background autonomy.
+
+### 2026-10-09 — reviews clarification completed in separate continuations
+
+[Review completion checkpoint](MAYA-REVIEW-CLARIFICATION-COMPLETION-20261009.md),
+source `586c71779eb3743a318436e5316811375b3204af`: exact original review requests
+062/067 now have separate actual HTTP completion proofs after an explicit numeric
+rating. One additional variant continues a persisted pending question after
+application/PostgreSQL restart; current source/actor checks, one C9 READ and saved
+replay evidence pass without business writes. 137 local tests, types/lint and
+1164+433 HTTP assertions pass. Runtime remains the previously qualified review
+calendar owner; no numeric bad-rating threshold or text sentiment is invented.
+
+New actual original81 v2 score: **57 PASS / 0 FAIL / 12 unsupported / 10 insufficient /
+2 clarification_pending**; all prior PASS retained. **22 nonpending unresolved +
+2 unanswered original questions =24 unclosed**, exit2. Supplemental completions do
+not rewrite original utterances, scripts or archived evidence and do not increase
+PASS. Next safe selected vertical is journal date retention through staff
+clarification across midnight, still requiring RED and runtime evidence.
+Scripted model/synthetic facts only; live YCLIENTS/model/browser, multi-company
+binding and full MAYA/C10 remain NOT_ISSUED. Working website untouched.

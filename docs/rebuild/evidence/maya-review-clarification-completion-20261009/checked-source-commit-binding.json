@@ -1,0 +1,18 @@
+{
+  "actualHttpSourceCommit": "586c71779eb3743a318436e5316811375b3204af",
+  "localGateRanBeforeSourceCommit": true,
+  "localGatePriorHead": "34f3b60864d1ee9ffd05ee8d9078d0c93fe68c8d",
+  "exactCheckedFilesMatchedGit": 8,
+  "allGateChecksPassed": true,
+  "checkedFiles": {
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.d.mts": "4076118afc921b9216aa3f9b036b5a1f1c57632781e3269cc8d56574b07b7ebe",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.mjs": "d760fe2c3e54212277528c200cd1d99238db49b2647e0a82b94fbe6587feafb5",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.test.mjs": "284f85065a4d5e5784ef064f935e629122f69126566f348cea20836a1b42b333",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.mjs": "3c86ecd940b7ddd7e1051448ac8ac1b78f553e4086f81495d43aef39663d63c9",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.test.mjs": "f547ab8251332dfc26ca519292da7e7eeb2533c769eb7d1626ff92911e409f5e",
+    "maya-saas-backend/scripts/reviews-period-read-proof.mjs": "542e496f441fb7ac8ba3095a105f2c9a789a2c4cafe25cd80584cb82dd47c9b4",
+    "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts": "a7f403ff72a32de1109a9fd40079044d08ab7f8620416f2bcf3c004cea91713c",
+    "maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts": "b482fb6845442d5b73cfe51b6aa4c3a2351ffa61f06c22f01f68b99771ec5527"
+  },
+  "checksReceiptSha256": "4afba2ec271aef1e9f9b2708f15318afb77a782a816801cb5e49b73cc3056706"
+}

@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_debf546ccfed on 127.0.0.1:64682 (local)
+PASS test/widgets-live/core-conversation-http.probe-spec.ts (31.943 s)
+  Core conversation [actual HTTP, bounded broker, development diagnostic only]
+    ✓ replays exactly the selected frozen dialogs and retains actual HTTP replies before qualification (23741 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        31.963 s
+Ran all test suites.
+Test results written to: ../../../../../../../../private/tmp/maya-offline48-review-clarification-v2-20261009-r1/conversation-jest.json

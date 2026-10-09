@@ -1,0 +1,30 @@
+{
+  "contract": "maya.review-rating-source-semantics/1",
+  "qualification": "SOURCE_REVIEW_NOT_MODEL_OR_PROVIDER_ACCEPTANCE",
+  "findings": [
+    "BusinessReview.rating is the source-supplied integer1..5; DTO and DB CHECK constrain the domain.",
+    "Ingest forwards rating unchanged; AC4 identity keeps numeric rating separately from review text.",
+    "Existing analyzeReviews counts ratings and topic frequencies; shared result topic covers both positive and negative wording. No text sentiment classification is implemented there.",
+    "The CI low-rating test proves routing readiness only; no approved numeric threshold for low/bad/negative was found in reviewed canonical sources.",
+    "Numeric rating vs all-ratings clarification is material; asking it is pending, not completion. Supplemental explicit rating2 changes the request and can complete a bounded supported READ."
+  ],
+  "sourceFiles": {
+    "maya-saas-backend/src/business-content/dto/business-review.dto.ts": "f422283480eeabafebbdddc6dbff5edc967d01830298b5ba0d561d508cda2d53",
+    "maya-saas-backend/prisma/schema.prisma": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977",
+    "maya-saas-backend/prisma/migrations/20260814190000_business_content_registry/migration.sql": "5e7c942953a1e2caeb99a432ff5639fc6c05d2cd06fe086bc7c9d8daf0bc5faa",
+    "maya-saas-backend/src/business-content/business-content.service.ts": "db8ff78f04ed512bac53c80768d8ae2af9bb52cb6eacbbf7ad5b3639b0f7be8e",
+    "maya-saas-backend/src/package5-wave4/package5-wave4.service.ts": "16630d572e0379bb2eaf9fe3e65aa9542a6c62b20341efc103be83a1842fe94f",
+    "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts": "2c9b9ac14291d8b53bcc49a5db6014da2757426b75a766df52acb2dca829fafd",
+    "docs/rebuild/CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md": "e614f1a72a5dcf61967586b95e4651d519efdacb70c48dae97fe73a138e0f736"
+  },
+  "sourceLocations": {
+    "dto": "business-review.dto.ts:59",
+    "constraint": "migration.sql:70",
+    "forwarding": "business-content.service.ts:233",
+    "analysis": "business-content.service.ts:527",
+    "topics": "business-content.service.ts:637",
+    "canonical": "package5-wave4.service.ts:1779",
+    "approvedContract": "CYCLE-06-BLOCKING-PACKAGE-5-B34-REVIEW-AUTHORITY-CONTRACT-DECISION.md:101",
+    "routingTest": "conversation-intelligence.service.spec.ts:189"
+  }
+}

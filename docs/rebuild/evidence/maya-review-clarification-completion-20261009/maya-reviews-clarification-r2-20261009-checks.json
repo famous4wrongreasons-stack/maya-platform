@@ -1,0 +1,64 @@
+{
+  "sourceHead": "34f3b60864d1ee9ffd05ee8d9078d0c93fe68c8d",
+  "sourceFiles": {
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.d.mts": "4076118afc921b9216aa3f9b036b5a1f1c57632781e3269cc8d56574b07b7ebe",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.mjs": "d760fe2c3e54212277528c200cd1d99238db49b2647e0a82b94fbe6587feafb5",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.test.mjs": "284f85065a4d5e5784ef064f935e629122f69126566f348cea20836a1b42b333",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.mjs": "3c86ecd940b7ddd7e1051448ac8ac1b78f553e4086f81495d43aef39663d63c9",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.test.mjs": "f547ab8251332dfc26ca519292da7e7eeb2533c769eb7d1626ff92911e409f5e",
+    "maya-saas-backend/scripts/reviews-period-read-proof.mjs": "542e496f441fb7ac8ba3095a105f2c9a789a2c4cafe25cd80584cb82dd47c9b4",
+    "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts": "a7f403ff72a32de1109a9fd40079044d08ab7f8620416f2bcf3c004cea91713c",
+    "maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts": "b482fb6845442d5b73cfe51b6aa4c3a2351ffa61f06c22f01f68b99771ec5527"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "unit",
+      "exit": 0,
+      "seconds": 4.77,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "--test",
+        "scripts/conversation-qualification/core-full-offline-assessment.test.mjs",
+        "scripts/conversation-qualification/core-full-offline-score.test.mjs",
+        "scripts/conversation-qualification/core-full-offline-report.test.mjs",
+        "scripts/conversation-qualification/core-full-offline-model.test.mjs",
+        "scripts/conversation-qualification/core-offline-profile.test.mjs",
+        "scripts/conversation-qualification/core-conversation-source.test.mjs",
+        "scripts/conversation-qualification/core-conversation-admission.test.mjs",
+        "scripts/reviews-period-read-proof.test.mjs"
+      ],
+      "logSha256": "64d88661ed40376f2b3ec9984f2797e80d256c91497e1bf93454305f4a909cf4"
+    },
+    {
+      "name": "types",
+      "exit": 0,
+      "seconds": 6.72,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/private/tmp/maya-reviews-clarification-20261009-types.json",
+        "--incremental",
+        "false"
+      ],
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "seconds": 4.84,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "test/widgets-live/core-conversation-http.probe-spec.ts",
+        "test/widgets-live/reviews-period-read-restart.probe-spec.ts"
+      ],
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

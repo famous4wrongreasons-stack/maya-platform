@@ -1,0 +1,335 @@
+{
+  "contract": "maya.review-clarification.independent-evidence-review/1",
+  "reviewer": "independent_review",
+  "reviewedAtUtc": "2026-10-09T17:58:06.793915+00:00",
+  "verdict": "QUALIFIED_EVIDENCE_REVIEW_NO_BLOCKING_MISMATCH",
+  "sourceHead": "586c71779eb3743a318436e5316811375b3204af",
+  "blockers": [],
+  "method": "Read-only source, JSON, byte/hash, Git blob and existing assertion review. No tests, evaluator reruns, services, HTTP, PG, network, model, credentials or desktop actions executed by reviewer. Only this new review artifact written.",
+  "sourceReview": {
+    "path": "/private/tmp/maya-reviews-clarification-independent-source-review-20261009.json",
+    "sha256": "58e9181d384023a2ade5fa767d5b7db224957f5393e5663b23cd30fdce1742e4"
+  },
+  "standalone": {
+    "root": "/private/tmp/maya-reviews-clarification-http-20261009-r1",
+    "sourceBindingsVerifiedAgainstExactGit": 1862,
+    "sourceBindingsDigest": "9dcb040e3a09eef0868fe94646ed8911eb38680a2f1b4199a908b1194120504f",
+    "manifestSha256": "8c62a89729702bbeb98fb857a00a277e24b2846e8e03aec41b60165029345032",
+    "status": "passed",
+    "jest": [
+      {
+        "file": "prepare-jest.json",
+        "passedTests": 1,
+        "passingAssertions": 1164
+      },
+      {
+        "file": "resume-jest.json",
+        "passedTests": 1,
+        "passingAssertions": 433
+      }
+    ],
+    "chatRequests": 32,
+    "chatStatuses": {
+      "201": 29,
+      "403": 2,
+      "401": 1
+    },
+    "directTool403ControlsAdditionalToChatCount": 2,
+    "scriptedPlannerCalls": 29,
+    "ownerListReviewsInvocations": 12,
+    "ownerInvocationBreakdown": {
+      "freshResultsDelivered": 9,
+      "injectedUnavailable": 1,
+      "withheldAfterTimezoneOrAuthorityChange": 2
+    },
+    "savedResultReplaysWithoutNewOwnerRead": 5,
+    "replayStillUsesScriptedPlanner": true,
+    "sourceReceiptsTotalIncludingReplays": 14,
+    "uniqueSourceReceipts": 9,
+    "supplementalReceiptAndContextLinkChecks": 12,
+    "allSourceResultHashesJoinObservedOwnerResults": true,
+    "uniqueOriginalGoals": 2,
+    "originalCaseIds": [
+      "utt-reviews.list_recent-062",
+      "utt-reviews.list_recent-067"
+    ],
+    "originalCorpusPassCountIncreased": false,
+    "canonicalSetupReviewRows": 38,
+    "setupWritesExcludedFromNoWriteBaseline": true,
+    "businessHashBeforeAfter": "a8b399dad869289c5b31ee177c54b08d3bd49106f27699070110a03dd53f146b",
+    "unexpected": [],
+    "restart": {
+      "applicationPidChanged": true,
+      "postgresStartedChanged": true,
+      "graphHashUnchanged": "8259de964204ca691ae9165a77765b5a9f483f69b072b53b19b901f02ed3a9c7"
+    },
+    "pendingRestartVariant": {
+      "originalCaseId": "utt-reviews.list_recent-062",
+      "newUniqueOriginalGoal": false,
+      "pendingContextHash": "6e146d0eda396f63be6ba65f4448df4748602e65cada4f17d4ceef4ef58729b1",
+      "freshNumericOnlyUserTurnHash": "84c4822085534426a0b05faa5669a208075021f99478bd86bf4f4f88aa7dc06f",
+      "retainedMonth": "2026-09",
+      "timezone": "Pacific/Honolulu",
+      "branch": null,
+      "sourceReceiptHash": "9bbb398dd8aad47edb856bd9bd0843c54ce11f9d5e652e9a9f5b6370b6456e39",
+      "runHash": "4b58edbbf140970a21ac4916ebf5278883226febdf723759e237be7e0ba8fc72",
+      "registryReadsForCompletion": 1,
+      "registryReadsForReplay": 0,
+      "c9GraphChangedOnlyForLegitimateFreshReadThenStableReplay": true
+    },
+    "windowChecks": {
+      "branch": {
+        "from": "2026-08-31T10:00:00.000Z",
+        "toExclusive": "2026-09-30T10:00:00.000Z",
+        "month": "2026-09",
+        "timezone": "Pacific/Kiritimati"
+      },
+      "tenant": {
+        "from": "2026-09-01T10:00:00.000Z",
+        "toExclusive": "2026-10-01T10:00:00.000Z",
+        "month": "2026-09",
+        "timezone": "Pacific/Honolulu"
+      }
+    },
+    "roleBoundary": "CLIENT and STAFF direct tool403 plus actual pre-model chat blocked with zero model and owner reads. No scripted refusal prose accepted as permission proof.",
+    "freshnessAndPrivacy": "Current/future months refuse; foreign tenant/branch/history/run denied; incomplete/unavailable distinguished from valid empty; during-read timezone and membership changes withhold result; revoked later auth401; cached timezone drift blocks without new READ.",
+    "cleanupEvidence": {
+      "manifestClusterStopped": true,
+      "manifestSourceUnchanged": true,
+      "verificationFile": "/private/tmp/maya-reviews-clarification-http-20261009-r1/source-and-cleanup-verification.json",
+      "pgStatusExitReportedByRootOSCheck": 3,
+      "postmasterPidAbsentReported": true,
+      "reviewerStartedOrProbedNoProcesses": true
+    }
+  },
+  "original81": {
+    "root": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1",
+    "sourceBindingsVerifiedAgainstExactGit": 2533,
+    "manifestSha256": "7d40d7658a7653ca30ff08afbbc65eaf0a02d59cd3d6c8bc1cafd2120bfa453a",
+    "scoreSha256": "1f356033af104806774b1ef5b3134ba2ca4f1ac5f04e6d3109f4d9ef9c9488b2",
+    "httpReportLogicalJsonSha256": "c9503db6aed0e5fcb7f5b76b86f80b660a5507f5931d185731d3f0831248c868",
+    "httpReportRawByteSha256": "84f1d728f48d1f57cb4757e823926d3cabf006c44a0ea52ba492c6e1ecedae91",
+    "expectationSha256": "880c6c535512004d4005c762d14d3e4a68a95c13f6abf89b8e9f9035e32d2a1b",
+    "assessmentContract": "maya.offline48.turn-assessment/2",
+    "plannedCases": 48,
+    "plannedTurns": 81,
+    "actualTurns": 81,
+    "httpStatuses": {
+      "201": 80,
+      "401": 1
+    },
+    "skipped": 0,
+    "unresolved": 0,
+    "unexecuted": 0,
+    "counts": {
+      "pass": 57,
+      "semantic_fail": 0,
+      "unsupported": 12,
+      "insufficient_evidence": 10,
+      "clarification_pending": 2
+    },
+    "criticalSafety": {
+      "failedTurns": 0,
+      "missingEvidenceTurns": 0
+    },
+    "unclosedTurns": 24,
+    "remainingNonPendingTurns": 22,
+    "pendingClarificationTurns": 2,
+    "exitCode": 2,
+    "status": "completed-with-semantic-limitations",
+    "all81ReplyStatusResponseHashAuditHashHistoryHashJoinsVerified": true,
+    "finalTurnAuditEqualsHttpResponses": true,
+    "twoPendingObservationsMatchFinalResponseAndPersistedIdentityProjection": true,
+    "pendingObservationReceipts": [
+      {
+        "caseId": "utt-reviews.list_recent-062",
+        "turn": 1,
+        "requestHash": "858448a10ef71cc45b8ef5d50a76cd1b959968ce58edbacaf97c5e5efc46a9f7",
+        "responseHash": "cf18381d3a38a21930d60cefc10c9d23e8481d63241d4c8fe1b2c39b52103a73",
+        "reviewClarification": {
+          "contract": "maya.review-clarification-observation/1",
+          "sameTenant": true,
+          "sameActor": true,
+          "parentTurnMatches": true,
+          "replyMatches": true,
+          "immutableIdMatches": true,
+          "month": "2026-09",
+          "timezone": "Europe/Moscow",
+          "branchId": null,
+          "rating": null,
+          "requiresClarification": true,
+          "question": "За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?",
+          "contextHash": "56feeb77a68b9c4e7166212dfaab3991e8fe494095dd2c7cb550652197640175",
+          "replyHash": "b23d0d9d9ca0bcdbf134466915aa3f1958b428a14f235d9a1a4c7b1a97896de7",
+          "goalCompleted": false,
+          "phase": "AWAITING_RATING_CHOICE"
+        }
+      },
+      {
+        "caseId": "utt-reviews.list_recent-067",
+        "turn": 1,
+        "requestHash": "3b1128385e9e54a364095808cb15801fa8d2206ae6dcdf4b13edb25b73bf5156",
+        "responseHash": "cd5bd1f97576e8d1868606a0df70cb3017fe810954d9aa077c00e3943ecd1f73",
+        "reviewClarification": {
+          "contract": "maya.review-clarification-observation/1",
+          "sameTenant": true,
+          "sameActor": true,
+          "parentTurnMatches": true,
+          "replyMatches": true,
+          "immutableIdMatches": true,
+          "month": "2026-09",
+          "timezone": "Europe/Moscow",
+          "branchId": null,
+          "rating": null,
+          "requiresClarification": true,
+          "question": "За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?",
+          "contextHash": "53bd5de48f4876f7bcfa0b222f12ad208522e1ce4473f79ba0737f27014bcfe1",
+          "replyHash": "b23d0d9d9ca0bcdbf134466915aa3f1958b428a14f235d9a1a4c7b1a97896de7",
+          "goalCompleted": false,
+          "phase": "AWAITING_RATING_CHOICE"
+        }
+      }
+    ],
+    "oldScorePath": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/docs/rebuild/evidence/maya-offline48-after-reviews-20261009/r1/semantic-score.json",
+    "oldScoreSha256": "530a06b0bc22af8772ca45544a87e74badb4b8db3f06e0e3b10d74a0f487ae37",
+    "statusDelta": [
+      {
+        "case": "utt-reviews.list_recent-062:1",
+        "before": "semantic_fail",
+        "after": "clarification_pending"
+      },
+      {
+        "case": "utt-reviews.list_recent-067:1",
+        "before": "semantic_fail",
+        "after": "clarification_pending"
+      }
+    ],
+    "other79StatusesUnchanged": true,
+    "previous57PassesRetained": true,
+    "all81ExpectedDescriptorHashesAndUserTextsUnchanged": true,
+    "originalInputsByteUnchangedFromB81": [
+      "datasets/conversation-intelligence/core-offline-48-20261009.json",
+      "scripts/conversation-qualification/core-full-offline-model.mjs",
+      "test/widgets-live/support/core-full-offline-fixtures.ts"
+    ],
+    "scriptedSuccessfulBrokerResponses": 86,
+    "upstreamCalls": 0,
+    "credentialsLoaded": false,
+    "all81BusinessHashUnchanged": true,
+    "all81BusinessWritesEmpty": true,
+    "forbidden": [],
+    "cleanup": {
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "brokerClosed": true,
+      "sixOwnedGroupsClosedAndAbsent": true,
+      "sourceUnchanged": true,
+      "rootOSPgStatusExit": 3
+    },
+    "early401ProjectionQualification": "actual-http-turns.jsonl was written before expectedRefusal/historyUnchanged enrichment on current-lifecycle-negative:1. Its reply/status/responseHash match; final http-report/offline-turn-audit include the later separate expected401 and unchanged-history evidence. These audit objects are not claimed byte-identical."
+  },
+  "checkpointDoc": {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/docs/rebuild/MAYA-REVIEW-CLARIFICATION-COMPLETION-20261009.md",
+    "sha256AtReview": "6781e00c29375dd48d78a83a93ead00c88062bd9da5cede1beb6fb8843644133",
+    "claimsVerdict": "SUPPORTED_WITH_EXPLICIT_LIMITS",
+    "twelveInvocationsFiveReplaysThirtyTwoChatsAndTwoGoalsPlusOneVariantCorrect": true
+  },
+  "limits": [
+    "Scripted planner and synthetic canonical source facts; no real model, live provider, browser, full MAYA/C10 or business acceptance.",
+    "Original 81 retain two unanswered clarification turns; separate explicit rating followups qualify completion of two unique goals without adding PASS to the original corpus.",
+    "The two evidence roots are separate fixtures: original81 uses Europe/Moscow; standalone tenant continuation uses Pacific/Honolulu and branch controls use Pacific/Kiritimati. They are linked by exact frozen utterance/case/dataset, not by shared tenant, actor, request, or source rows.",
+    "Restart spans separate app process and PG stop/start, with unchanged pending/context/source hashes and fresh numeric continuation; same calendar month only, no natural month rollover. Public evidence exposes changed-PID/PG-start booleans backed by probe assertions; reviewer did not read private saved login/state or independently operate process tools.",
+    "READ replay is a saved result with current authority/scope checks; it performs no new owner READ but does call the scripted planner. No fresh-source claim for saved values.",
+    "No-write claim covers observed business families after canonical setup; 38 review setup writes and timeline/C9/execution evidence writes are expected. No global OS-egress or universal-write census.",
+    "Existing unsupported and insufficient-evidence rows remain open; zero semantic FAIL is not product readiness.",
+    "Component gate137 PASS is parent-reported and not rerun by reviewer; existing standalone Jest reports were read.",
+    "Historical v1 raw score and evidence were not edited or regraded in place; only a new actual run with explicit v2 assessment is compared."
+  ],
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-reviews-clarification-http-20261009-r1/manifest.json",
+      "size": 232650,
+      "sha256": "8c62a89729702bbeb98fb857a00a277e24b2846e8e03aec41b60165029345032"
+    },
+    {
+      "path": "/private/tmp/maya-reviews-clarification-http-20261009-r1/prepare-observations.json",
+      "size": 51876,
+      "sha256": "28ff660809b34ca6294c098cc5420a3a41c955bd501bdd1cd38f664d286241c9"
+    },
+    {
+      "path": "/private/tmp/maya-reviews-clarification-http-20261009-r1/resume-observations.json",
+      "size": 24129,
+      "sha256": "ba1a9ae3f560451bccedeec4ee40b42fed06b1a5d634bb6c39f533649cd56652"
+    },
+    {
+      "path": "/private/tmp/maya-reviews-clarification-http-20261009-r1/prepare-jest.json",
+      "size": 1451,
+      "sha256": "27c907891cfc57b5f48fdf5cb35b0c4cd9dab2f11a8e810611bce66d1a4e2603"
+    },
+    {
+      "path": "/private/tmp/maya-reviews-clarification-http-20261009-r1/resume-jest.json",
+      "size": 1450,
+      "sha256": "91a9959998d1e8ba9e5b31a1484ad26e1e6fbf7058e6c0a2b03a5bddd8a077ef"
+    },
+    {
+      "path": "/private/tmp/maya-reviews-clarification-http-20261009-r1/source-and-cleanup-verification.json",
+      "size": 818,
+      "sha256": "0bc7c00d8e07020d1fcb0e2a169f1d0ad26351aebbde3b838b386b9d12011c60"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/candidate-manifest.json",
+      "size": 397319,
+      "sha256": "7d40d7658a7653ca30ff08afbbc65eaf0a02d59cd3d6c8bc1cafd2120bfa453a"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/runner-report.json",
+      "size": 3806,
+      "sha256": "88d61b0b697381899b777972d0449eef507a4bc0b5ff9d336e70f64cbbf2a5e3"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/broker-report.json",
+      "size": 87536,
+      "sha256": "b770d83988993c3da4ead861582d34e5bdbed32db88d14d598b59d17567c404f"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/http-report.json",
+      "size": 1934137,
+      "sha256": "84f1d728f48d1f57cb4757e823926d3cabf006c44a0ea52ba492c6e1ecedae91"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/semantic-score.json",
+      "size": 1303443,
+      "sha256": "1f356033af104806774b1ef5b3134ba2ca4f1ac5f04e6d3109f4d9ef9c9488b2"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/offline-review-clarification-receipts.jsonl",
+      "size": 1704,
+      "sha256": "ddc11e0e66b6adaedfd8c0d54c48749e2e092a9fcb4ed018654a1db3c4d4bb28"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/offline-turn-audit.jsonl",
+      "size": 914712,
+      "sha256": "26dfdec78363d0356932fdc6696f7836d65fe0fe91cad0f5355aeb6e4585abcd"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/actual-http-turns.jsonl",
+      "size": 914581,
+      "sha256": "a1fa32a4835fca6e5f9dbea2c48cc393e0934ee5979e2b67f7d8bd2d6d505e86"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/http-response-journal.jsonl",
+      "size": 65895,
+      "sha256": "cf0f77cda1e44f9ecdbd95c94a1939e1803ec8c4708cc642cac56daaa8b0b8ad"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/offline-expected-refusals.jsonl",
+      "size": 163,
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-review-clarification-v2-20261009-r1/source-and-delta-verification.json",
+      "size": 2704,
+      "sha256": "260b1a58185dbd08ac57590caabe8b3924bbcdf8cdc53d934fb8c96e6b9f42b3"
+    }
+  ]
+}
