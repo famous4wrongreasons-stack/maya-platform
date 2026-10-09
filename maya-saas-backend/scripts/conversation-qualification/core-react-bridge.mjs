@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
-import { coreBackend } from './core-conversation-source.mjs';
+// This helper is called only by the source-bound Jest runner in backend cwd.
+const coreBackend = path.resolve(process.cwd());
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 
 export async function startCoreReactBridge(input) {
