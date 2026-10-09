@@ -53,8 +53,8 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
   let db: FixtureContext, http: HttpHarness;
   let token: string, foreignToken: string, tenantId: string, userId: string;
   let conversationId: string;
-  let modelCalls = 0,
-    completed = false;
+  let modelCalls = 0;
+  const checkpoints: string[] = [];
   let nextTasks: unknown[] = [];
   const transcripts: unknown[] = [];
   let runtime: jest.SpyInstance,
@@ -84,6 +84,7 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
     const fx = fixturesForHttp(db, http);
     const tenant = await fx.tenant('general-chat', CalendarSource.INTERNAL);
     const user = await fx.user(tenant, UserRole.EMPLOYEE);
+    await fx.staff(tenant, user, 'synthetic employee');
     tenantId = tenant.id;
     userId = user.id;
     for (const feature of [
@@ -98,6 +99,7 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
       CalendarSource.INTERNAL,
     );
     const outsider = await fx.user(foreign, UserRole.EMPLOYEE);
+    await fx.staff(foreign, outsider, 'synthetic foreign employee');
     for (const feature of [
       'ai.admin',
       'ai.consultant',
@@ -150,7 +152,8 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
         JSON.stringify(
           {
             qualification: 'ACTUAL_HTTP_AUTH_HISTORY_PG_SCRIPTED_SEMANTICS',
-            status: completed ? 'passed' : 'failed',
+            status: checkpoints.length === 3 ? 'passed' : 'failed',
+            checkpoints,
             corpusSource: corpusRow.id,
             transcripts,
             modelDecisions: modelCalls,
@@ -232,6 +235,7 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
     transcripts.push({ history: object(saved.body) });
     expect(modelCalls).toBe(3);
     noReads();
+    checkpoints.push('general-facts-general-history');
   });
   it('does not let a compound general plus closed-data plan bypass the source boundary', async () => {
     const response = await chat(
@@ -246,9 +250,12 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
     });
     expect(response.body.reply).not.toContain('999999');
     noReads();
+    checkpoints.push('mixed-closed-data-refusal');
   });
   it('rejects a foreign conversation and current membership revocation before model work', async () => {
+    expect(conversationId).toMatch(/^[a-f0-9-]{36}$/);
     const before = modelCalls;
+    expect(before).toBe(4);
     const foreign = await chat(corpusRow.utterance, [general], foreignToken);
     expect(foreign.status).toBeGreaterThanOrEqual(400);
     await db.prisma.membership.updateMany({
@@ -262,6 +269,6 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
     expect(await db.prisma.actionExecution.count()).toBe(0);
     expect(await db.prisma.aiToolExecution.count()).toBe(0);
     expect(await db.prisma.marketingDeliveryAttempt.count()).toBe(0);
-    completed = true;
+    checkpoints.push('foreign-and-revoked-refusals-zero-effects');
   });
 });
