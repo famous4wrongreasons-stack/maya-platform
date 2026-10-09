@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
 import {
   CandidateBudgetGate,
   CORE_DIAGNOSTIC_PROFILE,
+  CORE_OFFLINE_PROFILE,
   candidateReservation,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
@@ -106,8 +107,23 @@ export async function startCoreBroker(values, batch = null) {
   });
   const profile = coreConversationProfile(pinned.profile);
   assert.ok(
+    profile.id !== CORE_OFFLINE_PROFILE ||
+      (values.mode === 'dry' &&
+        !values.permit &&
+        !values['permit-sha256'] &&
+        !values['owner-approval-ref'] &&
+        batch === null),
+    'core_broker_profile_offline_only',
+  );
+  assert.ok(
     !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
     'core_broker_recorded_replay_profile',
+  );
+  // Paused WIP: no 48-case scripted planner has been integrated yet.
+  assert.notEqual(
+    profile.id,
+    CORE_OFFLINE_PROFILE,
+    'core_broker_offline_fixture_pending',
   );
   const live = values.mode !== 'dry';
   assert.equal(

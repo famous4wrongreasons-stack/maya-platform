@@ -1,4 +1,4 @@
-/** Three fixed development profiles only. Declarations bind source and budget;
+/** Fixed development profiles with a separate offline-only corpus. Declarations bind source and budget;
  * they neither issue a permit nor admit credentials or start model transport. */
 import {
   CORE_DIAGNOSTIC_PROFILE,
@@ -10,6 +10,9 @@ import {
   CORE_UNION_PROFILE,
   CORE_UNION_LIMITS,
   CORE_UNION_LIMITS_SHA256,
+  CORE_OFFLINE_PROFILE,
+  CORE_OFFLINE_LIMITS,
+  CORE_OFFLINE_LIMITS_SHA256,
 } from './current-candidate-budget.mjs';
 
 const diagnostic = Object.freeze({
@@ -53,9 +56,24 @@ const union = Object.freeze({
   userTurns: 18,
 });
 
+const offline = Object.freeze({
+  id: CORE_OFFLINE_PROFILE,
+  datasetPath:
+    'maya-saas-backend/datasets/conversation-intelligence/core-offline-48-20261009.json',
+  datasetSha256:
+    '9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b',
+  casesSha256:
+    '1720a8996b29299560d868c859f2ca36435f56daf2ffd22113144dae9bd8d488',
+  limits: CORE_OFFLINE_LIMITS,
+  limitsSha256: CORE_OFFLINE_LIMITS_SHA256,
+  dialogs: 48,
+  userTurns: 81,
+});
+
 export function coreConversationProfile(profile = CORE_DIAGNOSTIC_PROFILE) {
   if (profile === CORE_DIAGNOSTIC_PROFILE) return diagnostic;
   if (profile === CORE_FOLLOWUP_PROFILE) return followup;
   if (profile === CORE_UNION_PROFILE) return union;
+  if (profile === CORE_OFFLINE_PROFILE) return offline;
   throw new Error('core_profile_refused');
 }

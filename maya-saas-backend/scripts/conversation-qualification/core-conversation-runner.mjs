@@ -22,6 +22,7 @@ import { socketRequest } from './core-conversation-socket.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_UNION_PROFILE,
+  CORE_OFFLINE_PROFILE,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
@@ -77,6 +78,15 @@ assert.ok(
 );
 const profile = coreConversationProfile(values.profile);
 assert.ok(
+  profile.id !== CORE_OFFLINE_PROFILE ||
+    (values.mode === 'dry' &&
+      !values.permit &&
+      !values['permit-sha256'] &&
+      !values['owner-approval-ref'] &&
+      !values['admission-context']),
+  'core_runner_profile_offline_only',
+);
+assert.ok(
   !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
   'core_runner_recorded_replay_profile',
 );
@@ -88,6 +98,12 @@ assert.ok(
       profile.id === CORE_UNION_PROFILE &&
       !recordedReplay),
   'core_runner_semantic_fixture_refused',
+);
+// Paused WIP: the 48-case HTTP fixtures/planner/report are not integrated yet.
+// Preserve inert preparation, but refuse execution before output or services.
+assert.ok(
+  profile.id !== CORE_OFFLINE_PROFILE || values.run !== true,
+  'core_offline_implementation_incomplete',
 );
 assert.ok(
   values.output &&
@@ -460,13 +476,12 @@ try {
       stat.isFile() && !stat.isSymbolicLink() && stat.size <= 8 * 1024 * 1024,
       'core_union_report_unconfirmed',
     );
-    const summary = summarizeCoreUnionReport(
-      JSON.parse(fs.readFileSync(httpReportPath, 'utf8')),
-      {
-        manifestSha256,
-        candidateCommit: manifest.candidateCommit,
-      },
-    );
+    const httpReport = JSON.parse(fs.readFileSync(httpReportPath, 'utf8'));
+    const reportBinding = {
+      manifestSha256,
+      candidateCommit: manifest.candidateCommit,
+    };
+    const summary = summarizeCoreUnionReport(httpReport, reportBinding);
     report.status = summary.status;
     report.dialogueExecutionStatus = summary.executionStatus;
     report.semanticStatus = summary.semanticStatus;
@@ -532,7 +547,10 @@ try {
       report.postmasterPidAbsent = !fs.existsSync(
         path.join(cluster, 'postmaster.pid'),
       );
-      if (profile.id === CORE_UNION_PROFILE && !report.postmasterPidAbsent)
+      if (
+        [CORE_UNION_PROFILE, CORE_OFFLINE_PROFILE].includes(profile.id) &&
+        !report.postmasterPidAbsent
+      )
         throw new Error('core_union_cluster_cleanup_unconfirmed');
     } catch {
       report.clusterStopped = false;

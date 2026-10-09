@@ -46,16 +46,19 @@ import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
+  CORE_OFFLINE_PROFILE,
 } from './current-candidate-budget.mjs';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-/** Existing callers keep the 12-minute bound. Only closed B/union profiles permit
+/** Existing callers keep the 12-minute bound. Only closed B/union/offline profiles permit
  * their 20/30-minute diagnostic plus a finite one-minute harness allowance. The
  * process-group termination grace remains unchanged and independent. */
 export function assertOwnedStageTimeout(timeoutMs, profileId) {
   const profile = coreConversationProfile(profileId);
-  const maximum = [CORE_FOLLOWUP_PROFILE, CORE_UNION_PROFILE].includes(
-    profile.id,
-  )
+  const maximum = [
+    CORE_FOLLOWUP_PROFILE,
+    CORE_UNION_PROFILE,
+    CORE_OFFLINE_PROFILE,
+  ].includes(profile.id)
     ? profile.limits.durationMs + 60000
     : 720000;
   assert.ok(

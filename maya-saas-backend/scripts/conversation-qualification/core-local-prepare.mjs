@@ -16,10 +16,16 @@ import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_UNION_PROFILE,
+  CORE_OFFLINE_PROFILE,
 } from './current-candidate-budget.mjs';
 
 export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
   const profile = coreConversationProfile(profileId);
+  assert.notEqual(
+    profile.id,
+    CORE_OFFLINE_PROFILE,
+    'core_local_profile_offline_only',
+  );
   assert.ok(
     process.platform === 'darwin' && process.getuid() > 0,
     'core_local_mac_owner_required',

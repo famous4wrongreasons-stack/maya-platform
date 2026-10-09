@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { CORE_OFFLINE_PROFILE } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 const manifests = new WeakMap();
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -161,6 +162,7 @@ function validateManifest(value, localStdin) {
       : ['DRY_HTTP', 'ADMITTED_MODEL_HTTP'].includes(value.mode),
   );
   const profile = coreConversationProfile(value.profile);
+  requireThat(profile.id !== CORE_OFFLINE_PROFILE || value.mode === 'DRY_HTTP');
   hex(value.candidateCommit, 40);
   uuid(value.runId);
   instant(value.createdAt);
@@ -339,6 +341,7 @@ function configuration(options) {
     'credentialSource',
     'ownerApprovalRef',
   ]);
+  requireThat(options.manifest?.profile !== CORE_OFFLINE_PROFILE);
   const manifestPin = manifests.get(options.manifest);
   requireThat(
     manifestPin &&

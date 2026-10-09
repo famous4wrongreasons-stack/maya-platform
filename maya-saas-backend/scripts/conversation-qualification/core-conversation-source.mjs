@@ -6,7 +6,10 @@ import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
+import {
+  CORE_DIAGNOSTIC_PROFILE,
+  CORE_OFFLINE_PROFILE,
+} from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 export const coreBackend = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -16,6 +19,7 @@ export const coreRepo = path.dirname(coreBackend);
 export const coreHash = (bytes) =>
   createHash('sha256').update(bytes).digest('hex');
 const scopes = [
+  'docs/rebuild/evidence/conversation-coverage-20261009/frozen-proposal.json',
   'maya-saas-backend/src',
   'maya-saas-backend/prisma',
   'maya-saas-backend/scripts/conversation-qualification',
@@ -69,6 +73,10 @@ export function assertCoreInventory(
 export function assertCoreSources(manifest) {
   assert.equal(typeof manifest.profile, 'string', 'core_profile_required');
   const profile = coreConversationProfile(manifest.profile);
+  assert.ok(
+    profile.id !== CORE_OFFLINE_PROFILE || manifest.mode === 'DRY_HTTP',
+    'core_profile_offline_only',
+  );
   assert.equal(
     manifest.datasetSha256,
     profile.datasetSha256,
@@ -113,13 +121,23 @@ export function assertCoreSources(manifest) {
     manifest.sourceHashes[profile.datasetPath],
     'core_dataset_binding',
   );
-  assert.deepEqual(
-    manifest.cases,
-    JSON.parse(
-      fs.readFileSync(path.join(coreRepo, profile.datasetPath), 'utf8'),
-    ).cases,
-    'core_cases_changed',
+  const dataset = JSON.parse(
+    fs.readFileSync(path.join(coreRepo, profile.datasetPath), 'utf8'),
   );
+  assert.deepEqual(manifest.cases, dataset.cases, 'core_cases_changed');
+  if (profile.id === CORE_OFFLINE_PROFILE) {
+    assert.equal(
+      manifest.sourceHashes[dataset.sourceProposal.path],
+      dataset.sourceProposal.sha256,
+      'core_offline_proposal_pin',
+    );
+    for (const [name, expected] of Object.entries(dataset.sourceHashes))
+      assert.equal(
+        manifest.sourceHashes[name],
+        expected,
+        'core_offline_source_pin',
+      );
+  }
 }
 export function captureCoreManifest(
   mode,
@@ -127,6 +145,11 @@ export function captureCoreManifest(
   profileId = CORE_DIAGNOSTIC_PROFILE,
 ) {
   const profile = coreConversationProfile(profileId);
+  assert.ok(
+    profile.id !== CORE_OFFLINE_PROFILE ||
+      (mode === 'DRY_HTTP' && admissionContext === null),
+    'core_profile_offline_only',
+  );
   assert.ok(
     ['DRY_HTTP', 'ADMITTED_MODEL_HTTP', 'ADMITTED_LOCAL_MODEL_HTTP'].includes(
       mode,

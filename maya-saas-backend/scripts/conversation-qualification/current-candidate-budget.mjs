@@ -68,11 +68,30 @@ export const CORE_UNION_LIMITS = Object.freeze({
 export const CORE_UNION_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_UNION_LIMITS))
   .digest('hex');
+// Synthetic mechanical reservation only. This profile can never be admitted.
+export const CORE_OFFLINE_PROFILE = 'core-offline-48-20261009/1';
+export const CORE_OFFLINE_LIMITS = Object.freeze({
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 48,
+  turns: 81,
+  attempts: 324,
+  inputTokens: 33_177_600,
+  outputTokens: 663_552,
+  spendNanoUsd: 0,
+  inputNanoUsdPerToken: 0,
+  outputNanoUsdPerToken: 0,
+  durationMs: 1_800_000,
+  pricingStatus: 'OFFLINE_SYNTHETIC_RESERVATION_ONLY_NO_LIVE_CAP',
+});
+export const CORE_OFFLINE_LIMITS_SHA256 = createHash('sha256')
+  .update(JSON.stringify(CORE_OFFLINE_LIMITS))
+  .digest('hex');
 function profileLimits(profile) {
   if (profile === undefined) return CANDIDATE_LIMITS;
   if (profile === CORE_DIAGNOSTIC_PROFILE) return CORE_DIAGNOSTIC_LIMITS;
   if (profile === CORE_FOLLOWUP_PROFILE) return CORE_FOLLOWUP_LIMITS;
   if (profile === CORE_UNION_PROFILE) return CORE_UNION_LIMITS;
+  if (profile === CORE_OFFLINE_PROFILE) return CORE_OFFLINE_LIMITS;
   throw new Error('candidate_profile_refused');
 }
 const endpoint = 'https://api.deepseek.com/chat/completions';
@@ -186,6 +205,8 @@ export class CandidateBudgetGate {
       typeof transport !== 'function'
     )
       throw new Error('candidate_offline_transport_required');
+    if (profile === CORE_OFFLINE_PROFILE && mode !== 'OFFLINE_SYNTHETIC_ONLY')
+      throw new Error('candidate_profile_offline_only');
     this.#profile = profile;
     this.#limits = profileLimits(profile);
     if (

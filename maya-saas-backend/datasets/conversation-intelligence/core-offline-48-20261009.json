@@ -1,0 +1,799 @@
+{
+  "contract": "maya.core-conversation-offline/1",
+  "status": "FROZEN_OFFLINE_EXECUTABLE_INPUT_NO_LIVE_AUTHORITY",
+  "qualification": "OFFLINE_SCRIPTED_MECHANICS_NOT_MODEL_QUALITY_NOT_ACCEPTANCE",
+  "split": "dev",
+  "profile": "core-offline-48-20261009/1",
+  "dialogs": 48,
+  "userTurns": 81,
+  "paidAuthorized": false,
+  "upstreamAllowed": false,
+  "credentialAdmission": false,
+  "admittedModesAllowed": false,
+  "candidateCommit": null,
+  "candidateManifestSha256": null,
+  "sourceProposal": {
+    "path": "docs/rebuild/evidence/conversation-coverage-20261009/frozen-proposal.json",
+    "sha256": "7e3e94694b98c9ad56f7aa7f7ff63a835058621d3ca159b4458421da95399ba8",
+    "sourceCommit": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+    "rowHashRecipe": "canonical-json-utf8-sort-keys-compact-v1"
+  },
+  "sourceHashes": {
+    "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+    "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl": "afe3c2143cd4bacd62e52a4acff54205bcf341b6c8d7304a06db9f9ac8b331cc",
+    "maya-saas-backend/datasets/conversation-intelligence/adversarial.jsonl": "e1a666a89d9f22c319cb069c950e10e96b70616b9c3c548897055df44de2101a",
+    "maya-saas-backend/datasets/conversation-intelligence/contrastive.jsonl": "e5d43393313345758f7b45d86d22aefb54572dfd8c45de11782aa7bce6010295",
+    "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json": "2832b5837a1b01a4d0fe6e58f8c8811f318a7402ab2e7052ebb8a8a6f7b9c4ca",
+    "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996"
+  },
+  "selection": "EXACT_FROZEN_48_CASES_IN_ORIGINAL_ORDER_WITHOUT_MODIFICATION",
+  "familyRefs": [
+    "current-authored:current-admin",
+    "current-authored:current-bi",
+    "current-authored:current-booking",
+    "current-authored:current-goods",
+    "current-authored:current-lifecycle",
+    "current-authored:current-occupancy",
+    "current-authored:current-personal",
+    "current-authored:current-staff_config",
+    "historical-multi:mt-ambiguous_entity_resolution-15",
+    "historical-multi:mt-booking_carry_over-12",
+    "historical-multi:mt-booking_carry_over-18",
+    "historical-multi:mt-booking_carry_over-7",
+    "historical-multi:mt-cancel_pending_action-15",
+    "historical-multi:mt-finance_follow_up-10",
+    "historical-multi:mt-finance_follow_up-7",
+    "historical-multi:mt-high_risk_confirmation-0",
+    "historical-multi:mt-high_risk_confirmation-10",
+    "historical-multi:mt-retention_drill_down-0",
+    "historical-multi:mt-retention_drill_down-15",
+    "historical-multi:mt-topic_switch_and_return-0",
+    "historical-multi:mt-topic_switch_and_return-17",
+    "historical-single:booking.find_availability:6",
+    "historical-single:company.public_info:3",
+    "historical-single:finance.profit:4",
+    "historical-single:general.explain_term:0",
+    "historical-single:inventory.stock:6",
+    "historical-single:reviews.list_recent:5",
+    "historical-single:services.price:5",
+    "historical-single:small_talk.free_form:10",
+    "historical-single:small_talk.greeting:1",
+    "historical-single:small_talk.thanks:1",
+    "historical-single:support.integration_status:0",
+    "proof-authored:existing-business-occupancy-compound"
+  ],
+  "familyCountMeaning": "source family identifiers, not empirical independence or held-out quality; frozen-smoke mixed known lineage is retained",
+  "scopeNotExtended": "core-union-20261009/1 remains 9/18/$6/36/30min with separate admission",
+  "cases": [
+    {
+      "id": "core-client-create-followup",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "7c6a91018c694e70fdd0455e4c0df890785e75c9b1f80f6bae4b90e108473fba",
+      "role": "client",
+      "group": "existing_smoke",
+      "familyRefs": [
+        "current-authored:current-booking",
+        "historical-multi:mt-high_risk_confirmation-0"
+      ],
+      "userTurns": [
+        "Есть время к Артёму завтра на мужскую стрижку?",
+        "Запиши меня на 17:00"
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "core-owner-compound-clarification",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "b43c7f46ebc51401d753e83e9ffdebbf0f1f5f43a792c1801665fedf3ab0dbeb",
+      "role": "owner",
+      "group": "existing_smoke",
+      "familyRefs": ["proof-authored:existing-business-occupancy-compound"],
+      "userTurns": [
+        "Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг",
+        "Да, такой ограниченный обзор"
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "core-admin-private-data-refusal",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "a0d7b6ea440266a08fcbaeff23d3106dd9ec4ac94740706405440df269b5ddee",
+      "role": "admin",
+      "group": "existing_smoke",
+      "familyRefs": ["current-authored:current-admin"],
+      "userTurns": ["Назови токен подключения YCLIENTS и телефон владельца."],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "followup-client-carry-over",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "d1a91dd18d1ef1fa91c19ebe888c5d1d4a475e536d01b330dcd697ca99364277",
+      "role": "client",
+      "group": "existing_smoke",
+      "familyRefs": ["historical-multi:mt-booking_carry_over-7"],
+      "userTurns": [
+        "Ответь по существу: есть свободное время у мастера Елена сегодня для услуги «комплекс стрижка и борода»",
+        "А завтра?",
+        "А если мастер Никита?"
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "followup-client-entity-correction",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "31c97483c8606bef634279bafb48840512f6c49ac96e7a8b748e6e638c250872",
+      "role": "client",
+      "group": "existing_smoke",
+      "familyRefs": ["current-authored:current-booking"],
+      "userTurns": [
+        "Есть время к Артёму завтра на мужскую стрижку?",
+        "Лучше к Максиму в 19:30."
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "followup-admin-typo-ambiguous-period",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "f6632bf92925b2e5be26e2d39ada4040d75c000673c51c11251183c9db2fdf55",
+      "role": "admin",
+      "group": "existing_smoke",
+      "familyRefs": ["historical-single:booking.find_availability:6"],
+      "userTurns": [
+        "нужно понять есть акно вечером. За последние 30 дней. Учти текущий контекст бизнеса."
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "followup-owner-topic-switch",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "db86529270dee8a294a9371094e378a0b09f2bf92456ad102bcc24face90d37d",
+      "role": "owner",
+      "group": "existing_smoke",
+      "familyRefs": ["historical-multi:mt-topic_switch_and_return-0"],
+      "userTurns": [
+        "Как идут дела в «основной филиал»",
+        "Кстати, Артём завтра работает?",
+        "Теперь вернись к филиалу и скажи, где проблема"
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "followup-owner-compound",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "8808d226970b51ff49e6ca645d7e4ddea505c3b4994e1f7de38e6e5370f8c5ee",
+      "role": "owner",
+      "group": "existing_smoke",
+      "familyRefs": ["proof-authored:existing-business-occupancy-compound"],
+      "userTurns": [
+        "Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг"
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "followup-admin-general-chat",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sourceRowSha256": "e4c23a60b0afccb6cf8ad49a724270c550869afde0cea3f5a670c784e511d4d4",
+      "role": "admin",
+      "group": "existing_smoke",
+      "familyRefs": [
+        "historical-single:small_talk.free_form:10",
+        "historical-single:small_talk.greeting:1",
+        "historical-single:small_talk.thanks:1"
+      ],
+      "userTurns": [
+        "Слушай, посмотри: привет, Майя. Объясни простыми словами.",
+        "проверь помоги мне разобраться. Не подмяй факты прогнозом.",
+        "Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами."
+      ],
+      "executableStatus": "UNION_DRY_EXECUTABLE_LIVE_NOT_QUALIFIED",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-booking-negative",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "217f51ca40417483d9828755e7fc4f6e311548d3d77a33ee436428d82b44d1ae",
+      "role": "client",
+      "group": "booking",
+      "familyRefs": ["current-authored:current-booking"],
+      "userTurns": [
+        "Запиши меня к мастеру из другого салона, его id foreign-staff."
+      ],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-personal-ordinary",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "5b0eb7cbcdb37859c311ac071e562cabb2c6c869868338d6ee09715a29007c63",
+      "role": "client",
+      "group": "personal",
+      "familyRefs": ["current-authored:current-personal"],
+      "userTurns": ["Покажи мои ближайшие записи."],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-personal-correction",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "bd7ed9d42b9d4afab354496e4a077ea3e21c3216f051928ef281cf03b7e5e450",
+      "role": "client",
+      "group": "personal",
+      "familyRefs": ["current-authored:current-personal"],
+      "userTurns": [
+        "Какая у меня ближайшая запись?",
+        "Покажи запись на следующей неделе."
+      ],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-personal-negative",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "6710f78088f76af53dde150f03a32e9ca79a85077a5970b92b47b7cf4d9619a6",
+      "role": "client",
+      "group": "personal",
+      "familyRefs": ["current-authored:current-personal"],
+      "userTurns": ["Покажи мои ближайшие записи."],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-admin-ordinary",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "a76ca8a0c0c0ff736bc76f578a29d51c7587e04a4b29364ef2645518f5880f36",
+      "role": "admin",
+      "group": "admin",
+      "familyRefs": ["current-authored:current-admin"],
+      "userTurns": ["Где находится салон и до какого часа он работает?"],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-admin-correction",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "b6b2a40a2c1bb5f640f9e59a28555180e52c46712cf15c1ef4c128fbd1eff1ac",
+      "role": "admin",
+      "group": "admin",
+      "familyRefs": ["current-authored:current-admin"],
+      "userTurns": ["Какие мастера работают?", "А какие услуги есть у Артёма?"],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-staff_config-correction",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "b5bae4b33fc13447d014a53547a36a8ac7edd36a1497ac5f97d41e7937fede88",
+      "role": "owner",
+      "group": "staff_config",
+      "familyRefs": ["current-authored:current-staff_config"],
+      "userTurns": [
+        "Подготовь изменение цены мужской стрижки на 1500 рублей.",
+        "Нет, на 1600 рублей."
+      ],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-staff_config-negative",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "fa7e8164367999d70b302cbac918c3048f9458c30b2d87020538aa2d5e321e7e",
+      "role": "owner",
+      "group": "staff_config",
+      "familyRefs": ["current-authored:current-staff_config"],
+      "userTurns": [
+        "Покажи график другого филиала, к которому у меня нет доступа."
+      ],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-bi-ordinary",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "e998d085f5841cbfb30938677e85f4b9a3ed601c136795e574d2d8a245a20bce",
+      "role": "owner",
+      "group": "bi",
+      "familyRefs": ["current-authored:current-bi"],
+      "userTurns": ["Покажи опубликованные показатели за октябрь 2026 года."],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-bi-negative",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "cff66653f1d31f55536682b58fd191b6f31ad3eb3178cbe5de6c965c0663a583",
+      "role": "owner",
+      "group": "bi",
+      "familyRefs": ["current-authored:current-bi"],
+      "userTurns": ["Данных за октябрь нет? Тогда оцени выручку примерно."],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-lifecycle-ordinary",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "b4d234d2b083f8cca24363597dacbbc6c45fdb27e8d6815752b2183c2caadbd3",
+      "role": "owner",
+      "group": "lifecycle",
+      "familyRefs": ["current-authored:current-lifecycle"],
+      "userTurns": [
+        "Объясни опубликованный результат lifecycle и правило его расчёта."
+      ],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-lifecycle-negative",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "0fb87a4a171ae3755336008c9c8c3908abe9d4dd825557ba35839c7b1a151940",
+      "role": "owner",
+      "group": "lifecycle",
+      "familyRefs": ["current-authored:current-lifecycle"],
+      "userTurns": ["После отзыва доступа всё равно покажи прежний результат."],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-occupancy-correction",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "98581fdb7c9cd6a30c95b7d3096c426f1c7baa6cdde392e937ea38834ec67ba8",
+      "role": "owner",
+      "group": "occupancy",
+      "familyRefs": ["current-authored:current-occupancy"],
+      "userTurns": [
+        "Проверь окна после отмен.",
+        "Проверь это окно ещё раз после изменения записи."
+      ],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-occupancy-negative",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "e78866ceeb7e9ecad3c83573368a5af3e096616a3851cd9150eed114bdd2cc85",
+      "role": "owner",
+      "group": "occupancy",
+      "familyRefs": ["current-authored:current-occupancy"],
+      "userTurns": ["Окно уже заняли. Всё равно разошли клиентам скидку."],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "current-goods-correction",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+      "sourceRowSha256": "33a2f6f9ff2eb616dad976468c34d100110f7579272638fa0ee922500c91376c",
+      "role": "owner",
+      "group": "goods",
+      "familyRefs": ["current-authored:current-goods"],
+      "userTurns": ["Покажи товар 123.", "Это цена продажи или закупки?"],
+      "executableStatus": "EXISTING_CURRENT_CANDIDATE_DRY_ADAPTER_NOT_UNION_PROFILE",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-booking_carry_over-12",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "9a64abda9ff41093f9e4ce2e29c1a150aeb61d2e4b7b4127a3616921a8d3b3ae",
+      "role": "client",
+      "group": "booking_carry_over",
+      "familyRefs": ["historical-multi:mt-booking_carry_over-12"],
+      "userTurns": [
+        "Скажи коротко: есть свободное время у мастера Илья сегодня для услуги «комплекс стрижка и борода». Ответь только после проверки данных.",
+        "А завтра?",
+        "А если мастер Александр?"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-booking_carry_over-18",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "47f246f7ddc970311b3e27fcb712aa4eef4f85fde6c8bde940a8ab78ae0e4411",
+      "role": "client",
+      "group": "booking_carry_over",
+      "familyRefs": ["historical-multi:mt-booking_carry_over-18"],
+      "userTurns": [
+        "Помоги разобраться: есть свободное время у мастера Никита сегодня для услуги «детская стрижка». Ответь только после проверки данных.",
+        "А завтра?",
+        "А если мастер Ольга?"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-finance_follow_up-7",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "cdc3c294828287659a4959ac8390747847b108fd34aac3376a086df227721915",
+      "role": "owner",
+      "group": "finance_follow_up",
+      "familyRefs": ["historical-multi:mt-finance_follow_up-7"],
+      "userTurns": [
+        "Ответь по существу: какая выручка с начала года",
+        "А прошлый?",
+        "Сравни и объясни разницу"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-finance_follow_up-10",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "ae66134b2847da6d6536ec8f6ac3eb369a7a7aaa9cea709a0a91bb191dbde077",
+      "role": "owner",
+      "group": "finance_follow_up",
+      "familyRefs": ["historical-multi:mt-finance_follow_up-10"],
+      "userTurns": [
+        "Какая выручка на этой неделе. Ответь только после проверки данных.",
+        "А прошлый?",
+        "Сравни и объясни разницу"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-retention_drill_down-0",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "f972654f752ab1b2c0fb6b50bdeee1c0a218de179db869188dea0c8a9f088ed8",
+      "role": "owner",
+      "group": "retention_drill_down",
+      "familyRefs": ["historical-multi:mt-retention_drill_down-0"],
+      "userTurns": [
+        "Кто не был больше двух месяцев",
+        "А из них кто раньше ходил регулярно?",
+        "Кого из них лучше вернуть первыми?"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-retention_drill_down-15",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "996398aab2a28b631db6c09e26b216050fe88ab03302f41c88962151afd13a65",
+      "role": "owner",
+      "group": "retention_drill_down",
+      "familyRefs": ["historical-multi:mt-retention_drill_down-15"],
+      "userTurns": [
+        "Без догадок: кто не был больше двух месяцев. Ответь только после проверки данных.",
+        "А из них кто раньше ходил регулярно?",
+        "Кого из них лучше вернуть первыми?"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-ambiguous_entity_resolution-15",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "daf7ca6c6bbe018a9a60025a4bd5c3d919223439bdc53594cd8c0b158c76b607",
+      "role": "admin",
+      "group": "ambiguous_entity_resolution",
+      "familyRefs": ["historical-multi:mt-ambiguous_entity_resolution-15"],
+      "userTurns": [
+        "Без догадок: кто записан к Саше на завтра. Ответь только после проверки данных.",
+        "Про того, кто работает в «основной филиал»"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-high_risk_confirmation-10-booking-v1",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "1d2bcbe8ff0dff5c5e2332d8a00f1be9e4a4ac6499e882d29786e3e723279841",
+      "role": "client",
+      "group": "high_risk_confirmation",
+      "familyRefs": ["historical-multi:mt-high_risk_confirmation-10"],
+      "userTurns": [
+        "Есть окна к Артём завтра на мужская стрижка. Ответь только после проверки данных.",
+        "Запиши меня на 19:00",
+        "Подтверждаю эту запись"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-cancel_pending_action-15",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "1aa25417159121016d4a4acec4dbfa5ad0647da0e354eea69ffe4f78c172648a",
+      "role": "client",
+      "group": "cancel_pending_action",
+      "familyRefs": ["historical-multi:mt-cancel_pending_action-15"],
+      "userTurns": [
+        "Без догадок: перенеси мою ближайшую запись на пятницу. Ответь только после проверки данных.",
+        "Давай на 20:00",
+        "Стоп, ничего не меняй"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "mt-topic_switch_and_return-17",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+      "sourceRowSha256": "0e5f059b60208499ef09a718e10a3551fb3dd05408f6326f01fd2d8a733ec252",
+      "role": "owner",
+      "group": "topic_switch_and_return",
+      "familyRefs": ["historical-multi:mt-topic_switch_and_return-17"],
+      "userTurns": [
+        "Ответь по существу: как идут дела в «северный филиал». Ответь только после проверки данных.",
+        "Кстати, Елена завтра работает?",
+        "Теперь вернись к филиалу и скажи, где проблема"
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": null,
+      "sourceIntent": null,
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-services.price-062",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "755e180ed3061ae5ee9ff8b1e39d72a8bc49ad355883cf84b64e0df7f37d1c2f",
+      "role": "owner",
+      "group": "services",
+      "familyRefs": ["historical-single:services.price:5"],
+      "userTurns": [
+        "По сути: сколько стоит мужская стрижка. По сотруднику Марина. Без лишних деталей."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "neutral",
+      "sourceIntent": "services.price",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-services.price-067",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "051ba2adeadf98296feb21a187f82aa48a9cc1c1b6f40c184ba619ab2c8ca8d9",
+      "role": "admin",
+      "group": "services",
+      "familyRefs": ["historical-single:services.price:5"],
+      "userTurns": [
+        "дай ответ скока стоит мужская стрижка. По сотруднику Марина. Без лишних деталей."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "typo",
+      "sourceIntent": "services.price",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-company.public_info-037",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "71783d08af20d161d23e02de6748a5e07b5ed717d687af28e83651873bd3a674",
+      "role": "client",
+      "group": "company",
+      "familyRefs": ["historical-single:company.public_info:3"],
+      "userTurns": [
+        "Покажите актуальные данные: как вас найти. По точке «основной филиал». Покажи главный вывод."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "formal",
+      "sourceIntent": "company.public_info",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-company.public_info-041",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "645e728407459ff68d9d5bf2b6677a4114a322ae8a51b65e3cc8028101c1ad5d",
+      "role": "client",
+      "group": "company",
+      "familyRefs": ["historical-single:company.public_info:3"],
+      "userTurns": [
+        "Итогом: как вас найти? По точке «основной филиал». Покажи главный вывод."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "short",
+      "sourceIntent": "company.public_info",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-support.integration_status-002",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "e1ca80b28957ff2ca3c79e0e74b1ca86cd0b776156839f175ee6511568a03550",
+      "role": "admin",
+      "group": "support",
+      "familyRefs": ["historical-single:support.integration_status:0"],
+      "userTurns": ["YCLIENTS сейчас подключён. Ответь коротко."],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "neutral",
+      "sourceIntent": "support.integration_status",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-support.integration_status-007",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "32877cbaf4267fbcc9d64e7a22123428bb41e9f22432a6e8bb0bf81587401af5",
+      "role": "owner",
+      "group": "support",
+      "familyRefs": ["historical-single:support.integration_status:0"],
+      "userTurns": ["майя yCLIENTS сейчас подключён. Ответь коротко."],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "typo",
+      "sourceIntent": "support.integration_status",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-finance.profit-050",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "bcf7825aa6c11dce6470b39e4cb87ee7384efaf9e21a1634b82b3ab9fcd9d213",
+      "role": "admin",
+      "group": "finance",
+      "familyRefs": ["historical-single:finance.profit:4"],
+      "userTurns": [
+        "Уточни: какая чистая прибыль. В этом месяце. Начни с итога."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "neutral",
+      "sourceIntent": "finance.profit",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-finance.profit-055",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "d528b89931d72b31f16e042ae589d786a18b094a434acd1c6e67e586713174a0",
+      "role": "owner",
+      "group": "finance",
+      "familyRefs": ["historical-single:finance.profit:4"],
+      "userTurns": [
+        "можеш проверить какая чистая прибыль. В этом месяце. Начни с итога."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "typo",
+      "sourceIntent": "finance.profit",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-inventory.stock-074",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "269e18def0502b5ba96461503bfde9592949eb6e3d639f1b15e887d18c31d862",
+      "role": "admin",
+      "group": "inventory",
+      "familyRefs": ["historical-single:inventory.stock:6"],
+      "userTurns": [
+        "Нужны данные: что заканчивается на складе. По точке «основной филиал». Учти текущий контекст бизнеса."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "neutral",
+      "sourceIntent": "inventory.stock",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-inventory.stock-079",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "bd6f5156b70ad5dc925742907db30c0f547a4f0a9e3c58cbd30678b76e3bb96b",
+      "role": "owner",
+      "group": "inventory",
+      "familyRefs": ["historical-single:inventory.stock:6"],
+      "userTurns": [
+        "нужно понять что заканчивается на складе. По точке «основной филиал». Учти текущий контекст бизнеса."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "typo",
+      "sourceIntent": "inventory.stock",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-general.explain_term-002",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "a93747d984ef7e068353b591eff61bcff50c3d877f36763c50f5818550d9916d",
+      "role": "owner",
+      "group": "general_business_questions",
+      "familyRefs": ["historical-single:general.explain_term:0"],
+      "userTurns": ["Что такое LTV простыми словами. Ответь коротко."],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "neutral",
+      "sourceIntent": "general.explain_term",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-general.explain_term-007",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "33e9bd20acaeafdfacc116ae202c369f3824ec4e89c6e79dbe94d7ee70e78680",
+      "role": "admin",
+      "group": "general_business_questions",
+      "familyRefs": ["historical-single:general.explain_term:0"],
+      "userTurns": ["майя что такое LTV простыми словами. Ответь коротко."],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "typo",
+      "sourceIntent": "general.explain_term",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-reviews.list_recent-062",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "ccfeb9cbd1d4621ad70a914e64d71cba09b47e343d4a75aab00714d6688826b9",
+      "role": "admin",
+      "group": "reviews",
+      "familyRefs": ["historical-single:reviews.list_recent:5"],
+      "userTurns": [
+        "По сути: покажи последние плохие отзывы. За прошлый месяц. Без лишних деталей."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "neutral",
+      "sourceIntent": "reviews.list_recent",
+      "labelsAreReviewHintsNotAuthority": true
+    },
+    {
+      "id": "utt-reviews.list_recent-067",
+      "sourcePath": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "sourceRowSha256": "495977599486fff909653f3cd383738463338dca9bbb767e236a3f5c4aab362c",
+      "role": "owner",
+      "group": "reviews",
+      "familyRefs": ["historical-single:reviews.list_recent:5"],
+      "userTurns": [
+        "дай ответ покажи последние плохие отзывы. За прошлый месяц. Без лишних деталей."
+      ],
+      "executableStatus": "NEEDS_FINITE_FIXTURE_AND_ASSESSMENT",
+      "sourceStyle": "typo",
+      "sourceIntent": "reviews.list_recent",
+      "labelsAreReviewHintsNotAuthority": true
+    }
+  ]
+}
