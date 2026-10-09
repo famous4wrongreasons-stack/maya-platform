@@ -1,0 +1,29 @@
+widgets-live: proof database maya_widget_gate_proof_employeeschedule_d6a282dd52f1 on 127.0.0.1:59635 (local)
+FAIL test/widgets-live/employee-schedule-read-restart.probe-spec.ts (5.243 s)
+  employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (625 ms)
+
+  ● employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM] › qualifies only actual scoped READ results, survives restart, and refuses source/authority drift
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 409
+
+      529 |     staff = roster[0],
+      530 |   ) {
+    > 531 |     expect(response.status).toBe(201);
+          |                             ^
+      532 |     expect(response.body.action).toBeNull();
+      533 |     expect(object(response.body.grounding).status).toBe('verified');
+      534 |     const [year, month, day] = tomorrow().split('-');
+
+      at assertPositive (widgets-live/employee-schedule-read-restart.probe-spec.ts:531:29)
+      at Object.<anonymous> (widgets-live/employee-schedule-read-restart.probe-spec.ts:624:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        5.272 s
+Ran all test suites within paths "test/widgets-live/employee-schedule-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-schedule-http-20261009-r1/prepare-jest.json

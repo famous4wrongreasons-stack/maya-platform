@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_employeeschedule_517d87bd4dec on 127.0.0.1:59888 (local)
+PASS test/widgets-live/employee-schedule-read-restart.probe-spec.ts
+  employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (1835 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        2.764 s, estimated 6 s
+Ran all test suites within paths "test/widgets-live/employee-schedule-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-schedule-http-20261009-r2/prepare-jest.json

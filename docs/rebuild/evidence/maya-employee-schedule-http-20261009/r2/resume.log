@@ -1,0 +1,29 @@
+widgets-live: proof database maya_widget_gate_proof_employeeschedule_517d87bd4dec on 127.0.0.1:59888 (local)
+FAIL test/widgets-live/employee-schedule-read-restart.probe-spec.ts
+  employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (212 ms)
+
+  ● employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM] › qualifies only actual scoped READ results, survives restart, and refuses source/authority drift
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "График на 11.10.2026: Артём — 10:00–20:00.
+    Филиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись."
+    Received string:    "{\"contract\":\"maya.conversation-history/1\",\"conversationId\":\"7bc83372-9efa-4a22-923f-23f8921f7bc4\",\"truncated\":false,\"interrupted\":false,\"turns\":[{\"id\":\"2112a70d-cc07-444c-a186-77018316d39c\",\"role\":\"user\",\"text\":\"Кстати, Артём завтра работает?\",\"createdAt\":\"2026-10-09T14:28:23.064Z\",\"completed\":true},{\"id\":\"a549f41b-48c6-4669-ae5d-a0e58e15ddc0\",\"role\":\"assistant\",\"text\":\"Сохранённый результат проверки. График на 11.10.2026: Артём — 10:00–20:00.\\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.\",\"createdAt\":\"2026-10-09T14:28:23.515Z\",\"completed\":true},{\"id\":\"f3074799-1cec-4783-a5d7-178722320534\",\"role\":\"user\",\"text\":\"Саша завтра работает?\",\"createdAt\":\"2026-10-09T14:28:23.533Z\",\"completed\":true},{\"id\":\"0d49f552-4854-4fd8-a344-37c08e068ec4\",\"role\":\"assistant\",\"text\":\"Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; график пока не подтверждён.\",\"createdAt\":\"2026-10-09T14:28:23.635Z\",\"completed\":true},{\"id\":\"226c6a79-127f-4d2d-a794-3f1560c829f7\",\"role\":\"user\",\"text\":\"Саша Иванов завтра работает в «основной филиал»?\",\"createdAt\":\"2026-10-09T14:28:23.645Z\",\"completed\":true},{\"id\":\"e1d24b32-fff7-4033-a206-741a02f9f4cc\",\"role\":\"assistant\",\"text\":\"График на 11.10.2026: Саша Иванов — 11:00–19:00.\\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.\",\"createdAt\":\"2026-10-09T14:28:23.916Z\",\"completed\":true},{\"id\":\"5d5b448a-d340-47c0-aa36-d180f52c220b\",\"role\":\"user\",\"text\":\"Кстати, Елена завтра работает?\",\"createdAt\":\"2026-10-09T14:28:23.926Z\",\"completed\":true},{\"id\":\"9d204169-682b-4912-a5c0-46e11bbdfd62\",\"role\":\"assistant\",\"text\":\"График на 11.10.2026: Елена — 09:00–17:00.\\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.\",\"createdAt\":\"2026-10-09T14:28:24.180Z\",\"completed\":true},{\"id\":\"07355d09-113f-419e-a57b-6148ddbe5a1c\",\"role\":\"user\",\"text\":\"Артём завтра работает в «другой филиал»?\",\"createdAt\":\"2026-10-09T14:28:24.190Z\",\"completed\":true},{\"id\":\"c1b9ba43-61c3-4dab-ae3c-2752e5b73f8b\",\"role\":\"assistant\",\"text\":\"Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён.\",\"createdAt\":\"2026-10-09T14:28:24.203Z\",\"completed\":true},{\"id\":\"c8711cef-ee81-464e-a862-3ee0dbdee5b7\",\"role\":\"user\",\"text\":\"Артём завтра работает в филиале cmv128w4d0011gec9l5uuxnpa?\",\"createdAt\":\"2026-10-09T14:28:24.214Z\",\"completed\":true},{\"id\":\"3a08cb3c-3095-4259-af10-c93c6b85bd54\",\"role\":\"assistant\",\"text\":\"Не удалось подтвердить актуальную связь сотрудника с филиалом и его график. Уточните сотрудника и филиал или повторите проверку после обновления источника.\",\"createdAt\":\"2026-10-09T14:28:24.225Z\",\"completed\":true}]}"
+
+      770 |         .set('Authorization', `Bearer ${token}`);
+      771 |       expect(history.status).toBe(200);
+    > 772 |       expect(JSON.stringify(history.body)).toContain(saved.firstReply);
+          |                                            ^
+      773 |       expect(transport).toEqual([]);
+      774 |       expect(modelCalls).toBe(0);
+      775 |       const replay = await chat(
+
+      at Object.<anonymous> (widgets-live/employee-schedule-read-restart.probe-spec.ts:772:44)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.091 s, estimated 3 s
+Ran all test suites within paths "test/widgets-live/employee-schedule-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-schedule-http-20261009-r2/resume-jest.json

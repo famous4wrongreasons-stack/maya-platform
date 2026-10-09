@@ -68,7 +68,9 @@ R1 сохранён: fixture прислала выдуманный conversationI
 Все три owned кластера остановлены: pg_ctl status=3, PID-файлов нет.
 Ни одного process-group cleanup claim не сделано. Исходники в каждом запуске
 проверены до stages и после cleanup; terminal cancellation не считается PASS.
-Private restart receipts не включены в архив.
+Private restart receipts не включены в архив. Четыре исходных log файла содержат
+пустую строку в конце и дают artifact-only diff warnings; bytes сохранены.
+Source/probe diff check чист.
 
 ## Что осталось
 
