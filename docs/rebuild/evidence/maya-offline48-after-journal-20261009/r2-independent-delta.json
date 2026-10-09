@@ -1,0 +1,18 @@
+{
+  "contract": "maya.full48-independent-delta/1",
+  "reviewer": "classification_external_review",
+  "sourceHead": "b6cd4d00e6d374ab2a9466f4f40144b345456e9e",
+  "counts": {
+    "pass": 54,
+    "semantic_fail": 1,
+    "unsupported": 14,
+    "insufficient_evidence": 12
+  },
+  "verifiedResponseAuditBindings": 81,
+  "verifiedReplyHashes": 80,
+  "expected401WithoutReply": true,
+  "deltaFromR1": "Three booking F→P; journalT1 F→I; T2 remains failure for known_branch_not_reasked; other77 statuses unchanged.",
+  "corpusScriptEvaluatorFixturesUnchanged": true,
+  "remaining27": true,
+  "scoreSha256": "1ebf0ddb7f01e8b2fdff4fd3734991076055b75dbbab0dbf3048d1cfbf017eec"
+}

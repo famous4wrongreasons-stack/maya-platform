@@ -1,0 +1,8 @@
+{
+  "clusterStopped": true,
+  "postmasterPidAbsent": true,
+  "sourcesUnchanged": true,
+  "brokerClosed": true,
+  "allOwnedCommandGroupsAbsent": true,
+  "pgCtlStatusExitCode": 3
+}

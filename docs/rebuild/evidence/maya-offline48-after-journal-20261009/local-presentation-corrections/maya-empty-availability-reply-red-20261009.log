@@ -1,0 +1,94 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › current tenant-owned branch preferences in Client booking › reports a source-qualified empty booking day only from the current bounded READ: current-empty
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "На 2026-10-09 по выбранным условиям свободные окна не найдены."
+    Received string:    "Подходящее время пока не удалось подтвердить. Запись не создана."
+
+      1050 |         });
+      1051 |         if (state === 'current-empty' || state === 'current-bound-empty') {
+    > 1052 |           expect(response.reply).toContain('На 2026-10-09 по выбранным условиям свободные окна не найдены.');
+           |                                  ^
+      1053 |           expect(response.reply).toContain('Запись не создана.');
+      1054 |         } else {
+      1055 |           expect(response.reply).not.toContain('по выбранным условиям свободные окна не найдены');
+
+      at ai-tools/ai-core.service.spec.ts:1052:34
+
+  ● AiCoreService › current tenant-owned branch preferences in Client booking › reports a source-qualified empty booking day only from the current bounded READ: current-bound-empty
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "На 2026-10-09 по выбранным условиям свободные окна не найдены."
+    Received string:    "Подходящее время пока не удалось подтвердить. Запись не создана."
+
+      1050 |         });
+      1051 |         if (state === 'current-empty' || state === 'current-bound-empty') {
+    > 1052 |           expect(response.reply).toContain('На 2026-10-09 по выбранным условиям свободные окна не найдены.');
+           |                                  ^
+      1053 |           expect(response.reply).toContain('Запись не создана.');
+      1054 |         } else {
+      1055 |           expect(response.reply).not.toContain('по выбранным условиям свободные окна не найдены');
+
+      at ai-tools/ai-core.service.spec.ts:1052:34
+
+FAIL src/ai-tools/ai-core.employee-journal.spec.ts
+  ● AiCore explicit employee journal [actual parser, synthetic sources] › bounds source-unavailable to one model call and no second tool
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Не удалось подтвердить актуальный источник журнала и связь мастера с филиалом."
+    Received string:    "Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены."
+
+      288 |     const result = await f.chat();
+      289 |     expect(result.grounding.status).toBe('blocked');
+    > 290 |     expect(result.reply).toContain('Не удалось подтвердить актуальный источник журнала и связь мастера с филиалом.');
+          |                          ^
+      291 |     expect(result.reply).toContain('актуальные записи сейчас не подтверждены.');
+      292 |     expect(result.reply).not.toContain('изменил');
+      293 |     expect(result.reply).not.toContain('10:00');
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal.spec.ts:290:26)
+
+  ● AiCore explicit employee journal [actual parser, synthetic sources] › retains source conflict or revocation from journal owner: HTTP 409
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "источник журнала"
+    Received string:    "Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены."
+
+      404 |         const result = await f.chat();
+      405 |         expect(result.grounding.status).toBe('blocked');
+    > 406 |         expect(result.reply).toContain('источник журнала');
+          |                              ^
+      407 |         expect(result.reply).not.toContain('10:00');
+      408 |       }
+      409 |       expect(f.execute).toHaveBeenCalledTimes(2);
+
+      at ai-tools/ai-core.employee-journal.spec.ts:406:30
+
+FAIL src/ai-tools/ai-core.employee-schedule.spec.ts
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › bounds source-unavailable to one model call and no second tool
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Не удалось подтвердить актуальный источник графика и связь мастера с филиалом."
+    Received string:    "Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён."
+
+      261 |     const result = await f.chat();
+      262 |     expect(result.grounding.status).toBe('blocked');
+    > 263 |     expect(result.reply).toContain('Не удалось подтвердить актуальный источник графика и связь мастера с филиалом.');
+          |                          ^
+      264 |     expect(result.reply).toContain('актуальный график сейчас не подтверждён.');
+      265 |     expect(result.reply).not.toContain('изменил');
+      266 |     expect(result.reply).not.toContain('10:00');
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-schedule.spec.ts:263:26)
+
+Test Suites: 3 failed, 3 total
+Tests:       5 failed, 358 passed, 363 total
+Snapshots:   0 total
+Time:        1.335 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-empty-availability-reply-red-20261009.json

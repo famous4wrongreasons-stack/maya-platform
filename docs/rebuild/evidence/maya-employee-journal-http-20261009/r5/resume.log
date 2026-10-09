@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_employeejournal_143aee4952ee on 127.0.0.1:50586 (local)
+PASS test/widgets-live/employee-journal-read-restart.probe-spec.ts
+  employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (524 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        1.323 s, estimated 3 s
+Ran all test suites within paths "test/widgets-live/employee-journal-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-journal-http-20261009-r5/resume-jest.json

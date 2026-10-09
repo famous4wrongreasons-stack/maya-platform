@@ -1,0 +1,7 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       367 passed, 367 total
+Snapshots:   0 total
+Time:        1.169 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-known-branch-unavailable-reply-20261009.json

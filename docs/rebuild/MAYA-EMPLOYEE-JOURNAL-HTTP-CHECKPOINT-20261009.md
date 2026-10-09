@@ -3,7 +3,7 @@
 **Подтверждён отдельный explicit READ через настоящий HTTP/auth/C9 и изолированную
 PostgreSQL:** журнал выбранного сотрудника за день, полный или неполный источник,
 сохранённые evidence и повтор после перезапуска. Успешный runtime source:
-`28cad8fa2fe155c81dc130eb7545881fd340d860`. Независимый source/evidence review —
+`4f88e8178e337d9f4d4b6740acbce1685e97a92e` (R5). Независимый source/evidence review —
 qualified PASS. Это synthetic integration proof, не приёмка живого YCLIENTS,
 модели, браузера или всей MAYA/C10.
 
@@ -13,8 +13,10 @@ qualified PASS. Это synthetic integration proof, не приёмка живо
 Предыдущий успешный runtime source расписания:
 `23a01139574202d8d39e9baee89c5375fdf8a7ba` —
 [отдельный schedule proof](MAYA-EMPLOYEE-SCHEDULE-HTTP-CHECKPOINT-20261009.md).
-Новые изменения после journal code относятся к fixtures/proof, не расширяют
-продуктовые права или фоновые полномочия.
+Последующие `b6cd4d00` и `4f88e817` уточняют ответы об успешном пустом availability
+и неподтверждённом staff source, включая сохранение уже известного филиала.
+[367 component tests и повтор 48/81](MAYA-OFFLINE48-AFTER-JOURNAL-20261009.md)
+проверяют эту correction; продуктовые права и фоновые полномочия не расширены.
 
 ## Что выполнено
 
@@ -55,7 +57,8 @@ STAFF имеет действующую Staff71/user/branch identity и полу
 
 ## Результаты и сохранённые неуспешные попытки
 
-R4: **prepare + PG restart + resume PASS**, две Jest stages; 14 chat HTTP запросов
+R4 на `28cad8fa` и финальный R5 на `4f88e817`:
+**prepare + PG restart + resume PASS**. В каждом — две Jest stages; 14 chat HTTP запросов
 (11×201, 2×403, 1×401), 12 scripted planner calls, 15 synthetic native GET (14+1).
 Direct-tool/foreign-run/history проверки считаются отдельно от 14 chat запросов.
 Два C9 READ не равны числу native GET. Конечный business snapshot неизменен,
@@ -74,15 +77,15 @@ Driver tests — 4 PASS; narrow types/lint/diff — PASS. Отдельный fix
 Это не сумма с прежними 875 tests и не новый aggregate gate.
 
 [Архив и hashes](evidence/maya-employee-journal-http-20261009/archive-manifest.json),
-[R4 manifest](evidence/maya-employee-journal-http-20261009/r4/manifest.json),
-[prepare observations](evidence/maya-employee-journal-http-20261009/r4/prepare-observations.json),
-[resume observations](evidence/maya-employee-journal-http-20261009/r4/resume-observations.json),
-[independent review](evidence/maya-employee-journal-http-20261009/independent-review.json).
+[R5 manifest](evidence/maya-employee-journal-http-20261009/r5/manifest.json),
+[prepare observations](evidence/maya-employee-journal-http-20261009/r5/prepare-observations.json),
+[resume observations](evidence/maya-employee-journal-http-20261009/r5/resume-observations.json),
+[independent review](evidence/maya-employee-journal-http-20261009/r5-independent-review.json).
 Все 1 847 source hashes сверены с Git; source digest
-`6030b5c082ff0c8d1e8dc01e3ec3255a960a61a2665effe767928cc3b2c3ea3f`.
-Manifest SHA256: `56322037d177a72ac59c45b76fdb96d585cdd086772014450d5c91d60da34659`.
+`607764a43e244b616efb277e00023a1d9e20ce4df45d4e5e5661239c7a3d93ac`.
+Manifest SHA256: `671ef993dc63a980b48c5977463d36edae6035080524e48094428b867fedbfa0`.
 
-У всех четырёх попыток source unchanged, owned PG stopped, `postmaster.pid`
+У всех пяти попыток source unchanged, owned PG stopped, `postmaster.pid`
 отсутствует, дополнительный `pg_ctl status` завершён с 3. Process-group absence
 этот driver не доказывает. Raw logs сохранены без нормализации конечных переводов строк.
 

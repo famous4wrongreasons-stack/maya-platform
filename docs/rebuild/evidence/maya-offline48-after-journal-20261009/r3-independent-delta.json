@@ -1,0 +1,29 @@
+{
+  "contract": "maya.full48-independent-delta/1",
+  "reviewer": "classification_external_review",
+  "sourceHead": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+  "counts": {
+    "pass": 54,
+    "semantic_fail": 0,
+    "unsupported": 14,
+    "insufficient_evidence": 13
+  },
+  "criticalSafety": {
+    "failedTurns": 0,
+    "missingEvidenceTurns": 0
+  },
+  "baseline52PassPreserved": true,
+  "onlyNewBaselinePasses": [
+    "followup-owner-topic-switch:2",
+    "mt-topic_switch_and_return-17:2"
+  ],
+  "attribution": "Product wiring plus explicit two-case Staff/StaffProviderLink fixture enrichment729b78ee; not code-only.",
+  "journalCases": "Both insufficient; zero READ and persisted work; known branch retained without repeated question.",
+  "corpusScriptEvaluatorUnchanged": true,
+  "remaining27": true,
+  "verifiedResponseAuditBindings": 81,
+  "verifiedReplyHashes": 80,
+  "expected401WithoutReply": true,
+  "limitation": "First schedule read_scope.source_hash contains phone-redaction damage in curated audit; exact cryptographic comparison of that field is unavailable. Scoped receipts, staff identity, result and source code guards were verified. Raw evidence was not rewritten.",
+  "scoreSha256": "7f0de2d4ebc86720386d42b7b5659a2bf2642296c03bbf3b0e183d9f2f581a05"
+}

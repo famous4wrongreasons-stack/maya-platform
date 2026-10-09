@@ -1,0 +1,7 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       363 passed, 363 total
+Snapshots:   0 total
+Time:        1.297 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-empty-availability-reply-final-20261009.json

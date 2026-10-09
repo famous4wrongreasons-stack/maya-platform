@@ -1,0 +1,19 @@
+{
+  "contract": "maya.employee-journal-independent-review/1",
+  "reviewer": "independent_review",
+  "verdict": "QUALIFIED_PASS",
+  "sourceHead": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+  "sourceFilesExactGit": 1847,
+  "sourceBindingsDigest": "607764a43e244b616efb277e00023a1d9e20ce4df45d4e5e5661239c7a3d93ac",
+  "manifestSha256": "671ef993dc63a980b48c5977463d36edae6035080524e48094428b867fedbfa0",
+  "jestStagesPassed": 2,
+  "chatRequests": 14,
+  "scriptedPlannerCalls": 12,
+  "finiteNativeGets": 15,
+  "sameOriginalCacheRestartReferences": true,
+  "sameBusinessHash": true,
+  "neutralUnavailableReplyObserved": true,
+  "allFiveClustersStopped": true,
+  "allFiveSourcesUnchanged": true,
+  "limitations": "All R4 qualifications remain; STAFF server pre-model refusal, CLIENT scripted prose after actual parser denial; no live model/provider/browser, company cutover, global side-effect census or full48 reclassification."
+}

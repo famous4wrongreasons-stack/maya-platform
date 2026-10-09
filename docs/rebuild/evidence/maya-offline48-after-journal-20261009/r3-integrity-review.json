@@ -1,0 +1,21 @@
+{
+  "contract": "maya.full48-integrity-review/1",
+  "reviewer": "checkpoint_review",
+  "reviewerAuthoredEvaluator": true,
+  "independentSemanticOracleAcceptance": false,
+  "sourceHead": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+  "sourceFilesExactGit": 2516,
+  "corpusCasesExpectationsUnchanged": true,
+  "actualResponseAuditHistoryBindings": 81,
+  "all18OwnedGroupsAcrossThreeRunsAbsent": true,
+  "allThreeBrokersAndClustersStopped": true,
+  "providerCalls": 0,
+  "credentialsLoaded": false,
+  "businessWrites": 0,
+  "priorRawArchivesUnchanged": true,
+  "exitCode": 2,
+  "limitations": [
+    "Partial phone-redaction damage of first schedule source_hash prevents exact field comparison; does not demonstrate runtime drift.",
+    "Real model, React, restart and UNKNOWN recovery are not exercised by full48."
+  ]
+}

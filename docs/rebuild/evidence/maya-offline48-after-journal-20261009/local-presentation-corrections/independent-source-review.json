@@ -1,0 +1,17 @@
+{
+  "contract": "maya.empty-availability-independent-source-review/1",
+  "reviewer": "independent_review",
+  "sourceHead": "b6cd4d00e6d374ab2a9466f4f40144b345456e9e",
+  "verdict": "NO_SOURCE_BLOCKERS",
+  "facts": [
+    "New non-exact empty answer requires current completed exact tool/execution wrapper, closed result shape, matching timezone and tenant/staff/service/branch revision",
+    "Stale/malformed/incomplete/unpresented non-exact result is blocked",
+    "Journal/schedule unavailable no longer claims observed source change",
+    "No authority, write, selector bypass, new READ or extra model call"
+  ],
+  "qualifications": [
+    "Existing exact-time branches are unchanged; not a blanket claim about every availability path",
+    "Reviewer did not run tests or services",
+    "Actual HTTP at this source reviewed separately"
+  ]
+}

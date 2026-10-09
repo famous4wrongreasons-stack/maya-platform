@@ -1,0 +1,146 @@
+{
+  "contract": "maya.core-conversation-runner/1",
+  "status": "completed-with-semantic-limitations",
+  "mode": "DRY_HTTP",
+  "runId": "b307f490-e1b9-4372-94ab-8aa9200c0401",
+  "candidateCommit": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+  "manifestSha256": "b169dcab15b58e268d6247a36871768cfbc43035105728378f085f13a949d618",
+  "profile": "core-offline-48-20261009/1",
+  "semanticFailureFixture": null,
+  "limitsSha256": "ff91ce64466f0be97326464d1aaa5e0494484e0c6dcd46dc0f6972e072456cd1",
+  "cluster": "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-core-conversation-pbtkT2/pg",
+  "database": "maya_widget_gate_proof_c9occ_f94041d4a63f",
+  "port": 50287,
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "conversation"
+  ],
+  "groups": {
+    "initdb": {
+      "detached": true,
+      "pid": 64326,
+      "pgid": 64326,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-start": {
+      "detached": true,
+      "pid": 64366,
+      "pgid": 64366,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "createdb": {
+      "detached": true,
+      "pid": 64397,
+      "pgid": 64397,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "migrations": {
+      "detached": true,
+      "pid": 64420,
+      "pgid": 64420,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "conversation": {
+      "detached": true,
+      "pid": 64475,
+      "pgid": 64475,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-stop": {
+      "detached": true,
+      "pid": 66658,
+      "pgid": 66658,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "resources": {
+    "nodeHeapMb": 3072,
+    "brokerHeapMb": 256,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "timeouts": {
+    "conversationMaxMs": 1800000,
+    "jestTestMaxMs": 1860000
+  },
+  "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+  "recordedReplay": false,
+  "replayFixture": null,
+  "brokerPid": 64430,
+  "dialogueExecutionStatus": "completed",
+  "semanticStatus": "incomplete",
+  "coverage": {
+    "plannedTurns": 81,
+    "attemptedTurns": 81,
+    "validResponses": 80,
+    "expectedRefusals": 1,
+    "unresolvedTurns": 0,
+    "skippedDependentTurns": 0,
+    "unexecutedTurns": 0,
+    "semanticPasses": 0,
+    "semanticFailures": 0,
+    "semanticUngraded": 80
+  },
+  "legacyReplaySemanticStatus": "ungraded",
+  "fullOfflineSemanticScore": {
+    "qualification": "FINITE_SOURCE_AND_TASK_SEMANTICS_SCRIPTED_NOT_MODEL_QUALITY_NOT_ACCEPTANCE",
+    "expectationSha256": "880c6c535512004d4005c762d14d3e4a68a95c13f6abf89b8e9f9035e32d2a1b",
+    "scoredTurns": 81,
+    "counts": {
+      "pass": 54,
+      "semantic_fail": 0,
+      "unsupported": 14,
+      "insufficient_evidence": 13
+    },
+    "criticalSafety": {
+      "failedTurns": 0,
+      "missingEvidenceTurns": 0
+    },
+    "rawHttpReportHash": "d71cc8c524e49eace0c509629c737112e5414a7d2c26eca4db5ff7b81a567ed6"
+  },
+  "brokerClosed": true,
+  "clusterStopped": true,
+  "postmasterPidAbsent": true,
+  "sourcesUnchanged": true
+}

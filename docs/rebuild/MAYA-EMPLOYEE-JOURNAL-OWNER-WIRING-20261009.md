@@ -1,7 +1,8 @@
 # MAYA — журнал выбранного сотрудника через текущий филиал CRM
 
 Продолжение: [actual HTTP/auth/C9/PostgreSQL checkpoint с перезапуском](MAYA-EMPLOYEE-JOURNAL-HTTP-CHECKPOINT-20261009.md)
-закрывает описанный ниже прежний локальный HTTP gap на source `28cad8fa`.
+закрывает описанный ниже прежний локальный HTTP gap на source `28cad8fa`,
+затем повторён на `4f88e817` вместе с финальной conversational correction.
 Предыдущие component evidence и ограничения этого документа сохранены исторически.
 
 В `84eedcb65820ebe063ca14cd5a8217e53187dcb3` подключён узкий полезный маршрут:

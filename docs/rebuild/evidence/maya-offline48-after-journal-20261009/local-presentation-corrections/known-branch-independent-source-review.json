@@ -1,0 +1,13 @@
+{
+  "contract": "maya.known-branch-independent-source-review/1",
+  "reviewer": "independent_review",
+  "sourceHead": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+  "verdict": "NO_SOURCE_BLOCKERS",
+  "runtimeDelta": "Two neutral unavailable phrases; no repeated branch/staff question",
+  "fourNewComponentRegressions": "Real parser/CI retain known branch at initial 0 READ or after one catalog READ; no action, one model decision/completion",
+  "qualifications": [
+    "Completion seam is synthetic, not durable restart evidence",
+    "No authority, tools, scopes, fixtures, corpus or evaluator changes",
+    "Actual HTTP checked separately"
+  ]
+}

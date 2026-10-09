@@ -30,5 +30,13 @@
     "sourceUnchanged": true,
     "pgCtlStatusExitCode": 3,
     "postmasterPidAbsent": true
+  },
+  {
+    "run": "r5",
+    "manifestStatus": "passed",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "pgCtlStatusExitCode": 3,
+    "postmasterPidAbsent": true
   }
 ]
