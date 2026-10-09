@@ -365,15 +365,21 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
               unresolved_references: [],
             },
           },
-          tool_call: active.compound
-            ? { name: 'catalog.staff.read', arguments: {} }
-            : {
-                name: 'operations.journal.read',
-                arguments: {
-                  date: '1999-01-01',
-                  staff_id: 'untrusted-model-id',
+          // Keep the forbidden semantic intent for role-policy validation, but
+          // do not invent a tool call outside this principal's advertised tools.
+          tool_call: !input.tools.some(
+            (tool) => tool.name === 'operations.journal.read',
+          )
+            ? null
+            : active.compound
+              ? { name: 'catalog.staff.read', arguments: {} }
+              : {
+                  name: 'operations.journal.read',
+                  arguments: {
+                    date: '1999-01-01',
+                    staff_id: 'untrusted-model-id',
+                  },
                 },
-              },
         }),
         input,
       );
