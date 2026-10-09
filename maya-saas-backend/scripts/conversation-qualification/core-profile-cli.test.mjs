@@ -12,6 +12,7 @@ import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_FOLLOWUP_PROFILE,
+  CORE_UNION_PROFILE,
 } from './current-candidate-budget.mjs';
 
 const backend = fileURLToPath(new URL('../../', import.meta.url));
@@ -89,6 +90,7 @@ test('runner retains implicit A and accepts each exact profile before requiring 
       undefined,
       CORE_DIAGNOSTIC_PROFILE,
       CORE_FOLLOWUP_PROFILE,
+      CORE_UNION_PROFILE,
     ])
       refusal(
         'conversation-runner',
@@ -204,5 +206,55 @@ test('local preparation keeps its explicit action and closed CLI without invokin
     'local-prepare',
     ['--prepare', '--profile', CORE_FOLLOWUP_PROFILE, '--permit', 'unused'],
     'Unknown option',
+  );
+});
+
+test('union rejects A-only recorded fixtures before output or service work', () => {
+  refusal(
+    'conversation-runner',
+    [
+      '--run',
+      '--mode',
+      'dry',
+      '--profile',
+      CORE_UNION_PROFILE,
+      '--recorded-replay',
+    ],
+    'core_runner_recorded_replay_profile',
+  );
+});
+
+test('semantic failure injection is closed, dry union only and refuses before output', () => {
+  for (const [mode, profile, selection] of [
+    ['admitted-local', CORE_UNION_PROFILE, 'first-client-turn'],
+    ['admitted', CORE_UNION_PROFILE, 'first-client-turn'],
+    ['dry', CORE_DIAGNOSTIC_PROFILE, 'first-client-turn'],
+    ['dry', CORE_UNION_PROFILE, 'arbitrary'],
+  ])
+    refusal(
+      'conversation-runner',
+      [
+        '--run',
+        '--mode',
+        mode,
+        '--profile',
+        profile,
+        '--semantic-failure-fixture',
+        selection,
+      ],
+      'core_runner_semantic_fixture_refused',
+    );
+  refusal(
+    'conversation-runner',
+    [
+      '--run',
+      '--mode',
+      'dry',
+      '--profile',
+      CORE_UNION_PROFILE,
+      '--semantic-failure-fixture',
+      'first-client-turn',
+    ],
+    'core_runner_new_output',
   );
 });

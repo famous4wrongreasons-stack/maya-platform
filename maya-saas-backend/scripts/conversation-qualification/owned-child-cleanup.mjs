@@ -43,17 +43,21 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
-import { CORE_FOLLOWUP_PROFILE } from './current-candidate-budget.mjs';
+import {
+  CORE_FOLLOWUP_PROFILE,
+  CORE_UNION_PROFILE,
+} from './current-candidate-budget.mjs';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-/** Existing callers keep the 12-minute bound. Only the closed B profile permits
- * its 20-minute diagnostic plus a finite one-minute harness allowance. The
+/** Existing callers keep the 12-minute bound. Only closed B/union profiles permit
+ * their 20/30-minute diagnostic plus a finite one-minute harness allowance. The
  * process-group termination grace remains unchanged and independent. */
 export function assertOwnedStageTimeout(timeoutMs, profileId) {
   const profile = coreConversationProfile(profileId);
-  const maximum =
-    profile.id === CORE_FOLLOWUP_PROFILE
-      ? profile.limits.durationMs + 60000
-      : 720000;
+  const maximum = [CORE_FOLLOWUP_PROFILE, CORE_UNION_PROFILE].includes(
+    profile.id,
+  )
+    ? profile.limits.durationMs + 60000
+    : 720000;
   assert.ok(
     Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= maximum,
     'owned_stage_timeout_invalid',

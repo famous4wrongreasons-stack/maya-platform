@@ -7,19 +7,20 @@ import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_FOLLOWUP_PROFILE,
+  CORE_UNION_PROFILE,
 } from './current-candidate-budget.mjs';
 
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const read = (name) =>
   fs.readFileSync(new URL('../../../' + name, import.meta.url));
 
-test('the default A and explicit B are the only immutable profiles', () => {
+test('the default A and explicit B and union are immutable closed profiles', () => {
   const a = coreConversationProfile();
   const b = coreConversationProfile(CORE_FOLLOWUP_PROFILE);
   assert.equal(a, coreConversationProfile(CORE_DIAGNOSTIC_PROFILE));
   assert.deepEqual([a.dialogs, a.userTurns], [3, 5]);
   assert.deepEqual([b.dialogs, b.userTurns], [6, 13]);
-  for (const p of [a, b]) {
+  for (const p of [a, b, coreConversationProfile(CORE_UNION_PROFILE)]) {
     assert.ok(Object.isFrozen(p) && Object.isFrozen(p.limits));
     assert.equal(p.limitsSha256, sha(JSON.stringify(p.limits)));
     const raw = read(p.datasetPath);
@@ -82,7 +83,10 @@ test('B is exactly the first six frozen cases with group as the sole case additi
   assert.notEqual(modelInput, historicalModelInput);
   assert.match(modelInput, /HTTP replay retains actual/);
   assert.match(modelInput, /user-only dialogue messages/);
-  assert.match(modelInput, /semantic continuation restored from encrypted storage/);
+  assert.match(
+    modelInput,
+    /semantic continuation restored from encrypted storage/,
+  );
   assert.match(modelInput, /does not mean forwarding raw assistant text/);
   assert.deepEqual(data.caseReviewPolicy, frozen.caseReviewPolicy);
   assert.deepEqual(data.separateControls, frozen.separateControls);
@@ -94,4 +98,34 @@ test('B is exactly the first six frozen cases with group as the sole case additi
     data.sourceDataset.fixtureRequirementsAreHistoricalPreparationMetadata,
     true,
   );
+});
+
+test('union is the exact ordered A+B cases with a pooled fixed cap and no execution authority', () => {
+  const p = coreConversationProfile(CORE_UNION_PROFILE),
+    data = JSON.parse(read(p.datasetPath));
+  const a = coreConversationProfile(),
+    b = coreConversationProfile(CORE_FOLLOWUP_PROFILE);
+  assert.deepEqual(data.cases, [
+    ...JSON.parse(read(a.datasetPath)).cases,
+    ...JSON.parse(read(b.datasetPath)).cases,
+  ]);
+  assert.equal(new Set(data.cases.map((c) => c.id)).size, 9);
+  assert.deepEqual(
+    data.sourceDatasets,
+    [a, b].map((x) => ({ path: x.datasetPath, sha256: x.datasetSha256 })),
+  );
+  assert.deepEqual(p.limits, {
+    ...a.limits,
+    dialogs: 9,
+    turns: 18,
+    attempts: 36,
+    inputTokens: 3686400,
+    outputTokens: 73728,
+    spendNanoUsd: 6000000000,
+    durationMs: 1800000,
+  });
+  assert.equal(data.paidAuthorized, false);
+  assert.equal(data.executionAuthorized, false);
+  assert.equal(data.candidateCommit, null);
+  assert.equal(data.candidateManifestSha256, null);
 });

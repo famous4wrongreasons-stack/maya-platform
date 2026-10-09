@@ -110,7 +110,10 @@ export function freezePilot(
  * comes from the actual response. No automatic retry of a failed/unknown chat mutation.
  * This module opens no network and reads no credential. It does not grade language correctness.
  */
-export async function replayPilot(manifest, { openDialog, budget, record }) {
+export async function replayPilot(
+  manifest,
+  { openDialog, budget, record, semanticFailure, assessTurn },
+) {
   const { manifestSha256, ...unsigned } = manifest;
   if (sha256(canonical(unsigned)) !== manifestSha256)
     throw new Error('manifest_hash_mismatch');
@@ -119,24 +122,55 @@ export async function replayPilot(manifest, { openDialog, budget, record }) {
     manifest.split !== 'dev' ||
     manifest.dialogs !== manifest.cases.length ||
     manifest.dialogs > 50 ||
-    manifest.userTurns > 200
+    manifest.userTurns > 200 ||
+    manifest.userTurns !==
+      manifest.cases.reduce((n, c) => n + c.userTurns.length, 0)
   )
     throw new Error('manifest_limits_invalid');
+  const assessed = semanticFailure !== undefined || assessTurn !== undefined;
+  if (
+    assessed &&
+    (semanticFailure !== 'next_independent_dialog' ||
+      typeof assessTurn !== 'function')
+  )
+    throw new Error('replay_assessment_contract');
   const outcomes = [];
+  const turns = manifest.cases.flatMap((c) =>
+    c.userTurns.map((_, i) => ({
+      caseId: c.id,
+      turn: i + 1,
+      outcome: 'unexecuted',
+    })),
+  );
+  let stopped = false,
+    attempted = 0,
+    assessedPasses = 0,
+    assessedFailures = 0,
+    assessedUngraded = 0;
   for (const item of manifest.cases) {
-    budget.dialog();
-    const dialog = await openDialog({ caseId: item.id, role: item.role });
+    let dialog,
+      caseOutcome = 'replayed_ungraded';
+    const failedCheckIds = [];
     const messages = [];
     let conversationId;
     try {
+      budget.dialog();
+      dialog = await openDialog({ caseId: item.id, role: item.role });
       for (const [index, text] of item.userTurns.entries()) {
-        budget.turn();
-        messages.push({ role: 'user', content: text });
+        const ledger = turns.find(
+          (t) => t.caseId === item.id && t.turn === index + 1,
+        );
         const requestId = sha256(`${manifestSha256}/${item.id}/${index}`).slice(
           0,
           32,
         );
+        let activeTurn = false;
         try {
+          budget.turn();
+          activeTurn = true;
+          messages.push({ role: 'user', content: text });
+          attempted++;
+          ledger.outcome = 'unresolved';
           const result = await dialog.chat({
             surface: 'web',
             requestId,
@@ -158,6 +192,7 @@ export async function replayPilot(manifest, { openDialog, budget, record }) {
             throw new Error('conversation_scope_changed');
           conversationId = nextId;
           messages.push({ role: 'assistant', content: result.reply });
+          ledger.outcome = 'response';
           await record({
             caseId: item.id,
             turn: index + 1,
@@ -166,33 +201,118 @@ export async function replayPilot(manifest, { openDialog, budget, record }) {
             reply: result.reply,
             evidence: result.evidence ?? null,
           });
+          if (assessed) {
+            const assessment = await assessTurn({
+              caseId: item.id,
+              turn: index + 1,
+              result,
+            });
+            if (
+              !assessment ||
+              typeof assessment !== 'object' ||
+              Array.isArray(assessment) ||
+              Object.keys(assessment).sort().join(',') !==
+                'failedCheckIds,status' ||
+              !['pass', 'fail', 'ungraded'].includes(assessment.status) ||
+              !Array.isArray(assessment.failedCheckIds) ||
+              assessment.failedCheckIds.length > 32 ||
+              assessment.failedCheckIds.some(
+                (id) =>
+                  typeof id !== 'string' || !/^[a-z][a-z0-9_]{0,79}$/.test(id),
+              ) ||
+              new Set(assessment.failedCheckIds).size !==
+                assessment.failedCheckIds.length ||
+              (assessment.status === 'fail') !==
+                assessment.failedCheckIds.length > 0
+            )
+              throw new Error('replay_assessment_invalid');
+            await record({
+              caseId: item.id,
+              turn: index + 1,
+              outcome: 'semantic_assessment',
+              ...assessment,
+            });
+            if (assessment.status === 'pass') assessedPasses++;
+            if (assessment.status === 'ungraded') assessedUngraded++;
+            if (assessment.status === 'fail') {
+              assessedFailures++;
+              caseOutcome = 'semantic_fail';
+              failedCheckIds.push(...assessment.failedCheckIds);
+              for (let next = index + 1; next < item.userTurns.length; next++) {
+                turns.find(
+                  (t) => t.caseId === item.id && t.turn === next + 1,
+                ).outcome = 'skipped_dependent_after_semantic_fail';
+                await record({
+                  caseId: item.id,
+                  turn: next + 1,
+                  outcome: 'skipped_dependent_after_semantic_fail',
+                });
+              }
+              break;
+            }
+          }
         } catch {
-          // Adapter/provider exceptions can contain credentials. Never serialize them.
+          // No exception text: providers, fixtures and assessors may hold private data.
+          stopped = true;
+          caseOutcome = 'unresolved';
           await record({
             caseId: item.id,
             turn: index + 1,
             requestId,
             outcome: 'unresolved',
           });
-          outcomes.push({ caseId: item.id, outcome: 'unresolved' });
-          // Stop the batch on any unknown result; remaining turns/cases are unexecuted.
-          return {
-            status: 'stopped',
-            outcomes,
-            qualification: 'not_evaluated',
-          };
+          break;
         } finally {
-          budget.endTurn();
+          if (activeTurn) budget.endTurn();
         }
       }
-      outcomes.push({ caseId: item.id, outcome: 'replayed_ungraded' });
+    } catch {
+      stopped = true;
+      caseOutcome = 'unresolved';
     } finally {
-      await dialog.close();
+      try {
+        await dialog?.close();
+      } catch {
+        stopped = true;
+        caseOutcome = 'unresolved';
+      }
     }
+    outcomes.push({
+      caseId: item.id,
+      outcome: caseOutcome,
+      ...(failedCheckIds.length ? { failedCheckIds } : {}),
+    });
+    if (stopped) break;
   }
+  if (stopped)
+    for (const item of manifest.cases.slice(outcomes.length))
+      outcomes.push({ caseId: item.id, outcome: 'not_started_after_stop' });
+  const count = (outcome) => turns.filter((t) => t.outcome === outcome).length;
   return {
-    status: 'replayed_ungraded',
+    status: stopped
+      ? 'stopped'
+      : assessedFailures
+        ? 'completed_with_semantic_failures'
+        : 'replayed_ungraded',
+    executionStatus: stopped ? 'stopped' : 'completed',
+    semanticStatus: assessedFailures
+      ? 'fail'
+      : assessedPasses
+        ? 'pass'
+        : 'ungraded',
     outcomes,
     qualification: 'not_evaluated',
+    coverage: {
+      plannedTurns: manifest.userTurns,
+      attemptedTurns: attempted,
+      validResponses: count('response'),
+      unresolvedTurns: count('unresolved'),
+      skippedDependentTurns: count('skipped_dependent_after_semantic_fail'),
+      unexecutedTurns: count('unexecuted'),
+      semanticPasses: assessedPasses,
+      semanticFailures: assessedFailures,
+      semanticUngraded: assessedUngraded,
+    },
+    turnOutcomes: turns,
   };
 }

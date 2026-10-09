@@ -13,7 +13,10 @@ import {
 import { readCoreManifest } from './core-conversation-admission.mjs';
 import { assertCoreSocket } from './core-conversation-socket.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
-import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
+import {
+  CORE_DIAGNOSTIC_PROFILE,
+  CORE_UNION_PROFILE,
+} from './current-candidate-budget.mjs';
 
 export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
   const profile = coreConversationProfile(profileId);
@@ -109,7 +112,26 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
       recipient: 'local broker only',
       timeoutMs: 30000,
       storage: 'memory only',
+      inputsPerRun: 1,
     },
+    ...(profile.id === CORE_UNION_PROFILE
+      ? {
+          batch: {
+            runner: 'existing core conversation runner',
+            brokerInstances: 1,
+            logicalBudgetCaps: 1,
+            ledgerFiles: ['broker-ledger.jsonl', 'runner-budget-ledger.jsonl'],
+            accounting:
+              'broker enforces provider cap; runner mirrors the same profile',
+            semanticFailure:
+              'record actual reply; skip dependent turns; continue next independent dialogue',
+            hardStop:
+              'transport or usage unknown, unsafe effect, budget, expiry or revocation',
+            automaticResume: false,
+            keychainAccess: false,
+          },
+        }
+      : {}),
     limits: manifest.limits,
     commandsRequireSanitizedEnvironment: true,
     brokerArgv: [

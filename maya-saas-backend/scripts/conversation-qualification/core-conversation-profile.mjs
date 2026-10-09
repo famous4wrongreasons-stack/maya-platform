@@ -1,4 +1,4 @@
-/** Two fixed development batches only. Declarations bind source and budget;
+/** Three fixed development profiles only. Declarations bind source and budget;
  * they neither issue a permit nor admit credentials or start model transport. */
 import {
   CORE_DIAGNOSTIC_PROFILE,
@@ -7,6 +7,9 @@ import {
   CORE_FOLLOWUP_PROFILE,
   CORE_FOLLOWUP_LIMITS,
   CORE_FOLLOWUP_LIMITS_SHA256,
+  CORE_UNION_PROFILE,
+  CORE_UNION_LIMITS,
+  CORE_UNION_LIMITS_SHA256,
 } from './current-candidate-budget.mjs';
 
 const diagnostic = Object.freeze({
@@ -36,8 +39,23 @@ const followup = Object.freeze({
   userTurns: 13,
 });
 
+const union = Object.freeze({
+  id: CORE_UNION_PROFILE,
+  datasetPath:
+    'maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json',
+  datasetSha256:
+    'a3210eac84354f2d1837a90f94e3a6932e4f1eab28047702ff173dee0634946a',
+  casesSha256:
+    '269fdb3331f2fa66b063a1e5c2be2922280f365101ca9cda1e0fa5056abce7e8',
+  limits: CORE_UNION_LIMITS,
+  limitsSha256: CORE_UNION_LIMITS_SHA256,
+  dialogs: 9,
+  userTurns: 18,
+});
+
 export function coreConversationProfile(profile = CORE_DIAGNOSTIC_PROFILE) {
   if (profile === CORE_DIAGNOSTIC_PROFILE) return diagnostic;
   if (profile === CORE_FOLLOWUP_PROFILE) return followup;
+  if (profile === CORE_UNION_PROFILE) return union;
   throw new Error('core_profile_refused');
 }

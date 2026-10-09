@@ -23,8 +23,13 @@ export const CORE_DIAGNOSTIC_LIMITS_SHA256: string;
 export const CORE_FOLLOWUP_PROFILE: 'core-followup-20261009/1';
 export const CORE_FOLLOWUP_LIMITS: typeof CORE_DIAGNOSTIC_LIMITS;
 export const CORE_FOLLOWUP_LIMITS_SHA256: string;
+export const CORE_UNION_PROFILE: 'core-union-20261009/1';
+export const CORE_UNION_LIMITS: typeof CORE_DIAGNOSTIC_LIMITS;
+export const CORE_UNION_LIMITS_SHA256: string;
 export type CoreConversationProfileId =
-  typeof CORE_DIAGNOSTIC_PROFILE | typeof CORE_FOLLOWUP_PROFILE;
+  | typeof CORE_DIAGNOSTIC_PROFILE
+  | typeof CORE_FOLLOWUP_PROFILE
+  | typeof CORE_UNION_PROFILE;
 export type CandidateAdmissionBinding = Readonly<{
   candidateCommit: string;
   manifestSha256: string;

@@ -9,6 +9,7 @@ import {
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_FOLLOWUP_PROFILE,
+  CORE_UNION_PROFILE,
 } from './current-candidate-budget.mjs';
 function child() {
   const c = new EventEmitter();
@@ -76,7 +77,11 @@ test('only explicit B admits its finite diagnostic and harness allowance', () =>
 });
 
 test('neither profile accepts zero, fractional, nonnumeric or unbounded stage durations', () => {
-  for (const profile of [CORE_DIAGNOSTIC_PROFILE, CORE_FOLLOWUP_PROFILE])
+  for (const profile of [
+    CORE_DIAGNOSTIC_PROFILE,
+    CORE_FOLLOWUP_PROFILE,
+    CORE_UNION_PROFILE,
+  ])
     for (const value of [0, -1, 1.1, NaN, Infinity, '1200000', null])
       assert.throws(() => assertOwnedStageTimeout(value, profile), {
         message: 'owned_stage_timeout_invalid',
@@ -93,5 +98,18 @@ test('an omitted B opt-in refuses before file creation or child spawn', async ()
       {},
     ),
     { message: 'owned_stage_timeout_invalid' },
+  );
+});
+
+test('union alone admits its finite 30-minute diagnostic plus one-minute allowance', () => {
+  assertOwnedStageTimeout(1800000, CORE_UNION_PROFILE);
+  assertOwnedStageTimeout(1860000, CORE_UNION_PROFILE);
+  assert.throws(
+    () => assertOwnedStageTimeout(1860001, CORE_UNION_PROFILE),
+    /owned_stage_timeout_invalid/,
+  );
+  assert.throws(
+    () => assertOwnedStageTimeout(1800000, CORE_FOLLOWUP_PROFILE),
+    /owned_stage_timeout_invalid/,
   );
 });

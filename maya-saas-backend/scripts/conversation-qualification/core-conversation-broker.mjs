@@ -24,6 +24,42 @@ import {
   CORE_RECORDED_REPLAY_QUALIFICATION,
 } from './core-recorded-replay.mjs';
 import { createCoreActualDefectsReplay } from './core-actual-defects-replay.mjs';
+import { checkAbUsage } from './core-local-ab-checks.mjs';
+
+// One pending response witness, not another budget. The existing gate already
+// reserved these exact serialized bytes before invoking the live transport.
+// Keep the refusal latched even if reporting or the caller's halt callback fails.
+export function createCoreUsageFence({ profile, onUnknown }) {
+  let pending = null;
+  let halted = false;
+  function refuse() {
+    const first = !halted;
+    halted = true;
+    pending = null;
+    try {
+      if (first) onUnknown();
+    } catch {
+      // A reporting failure may contain a private path; the latch is already set.
+    }
+    throw new Error('core_broker_usage_unknown');
+  }
+  return Object.freeze({
+    reserve(url, init) {
+      if (halted || pending !== null) refuse();
+      pending = candidateReservation(url, init, profile);
+    },
+    response(status, text) {
+      if (halted) refuse();
+      const reservation = pending;
+      pending = null;
+      try {
+        return checkAbUsage(status, text, reservation);
+      } catch {
+        refuse();
+      }
+    },
+  });
+}
 // Import-safe for the finite local A+B launcher. Shared input never enters CLI,
 // runner, environment, files or IPC; all ordinary permit checks remain mandatory.
 export async function startCoreBroker(values, batch = null) {
@@ -143,6 +179,9 @@ export async function startCoreBroker(values, batch = null) {
         ? CORE_RECORDED_REPLAY_QUALIFICATION
         : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
     recordedReplay,
+    usageValidation: live
+      ? 'REQUIRED_BEFORE_APP_DELIVERY'
+      : 'OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE',
     replayFixture: replayFixture ?? null,
     ...(recordedReplay ? { recordedResponses: [] } : {}),
   };
@@ -154,18 +193,33 @@ export async function startCoreBroker(values, batch = null) {
       : createCoreRecordedReplay()
     : null;
   let gate, credentialIdentity, localCredential, broker;
-  let localStopQueued = false;
+  let liveStopQueued = false;
+  function stopAfterRefusal(reason) {
+    if (!live || liveStopQueued) return;
+    liveStopQueued = true;
+    localCredential = undefined;
+    // Queue cleanup before a batch halt/report can itself fail on disk I/O.
+    queueMicrotask(() => {
+      void broker?.stop(
+        localStdin ? 'local_request_refused' : 'core_request_refused',
+      );
+    });
+    batch?.halt(reason);
+  }
+  const usageFence = live
+    ? createCoreUsageFence({
+        profile: profile.id,
+        onUnknown: () => {
+          report.usageValidation = 'UNKNOWN_STOP';
+          stopAfterRefusal('unknown');
+        },
+      })
+    : null;
   const save = () => {
     // Drop the reference on every terminal stop; JS strings are not securely erasable.
     if (report.stopped) localCredential = undefined;
-    if (localStdin && report.rejections.length > 0 && !localStopQueued) {
-      localStopQueued = true;
-      localCredential = undefined;
-      batch?.halt('request_refused');
-      queueMicrotask(() => {
-        void broker?.stop('local_request_refused');
-      });
-    }
+    if (live && report.rejections.length > 0)
+      stopAfterRefusal('request_refused');
     fs.writeFileSync(
       reportPath,
       JSON.stringify({ ...report, stats: gate?.stats ?? null }, null, 2) + '\n',
@@ -366,6 +420,7 @@ export async function startCoreBroker(values, batch = null) {
     // Recheck after credential I/O, before the only external edge in this profile.
     admission(binding);
     init.signal.throwIfAborted();
+    usageFence.reserve(url, init);
     report.upstreamCalls++;
     save();
     return fetch(url, {
@@ -446,6 +501,10 @@ export async function startCoreBroker(values, batch = null) {
         );
     },
     onResponse: ({ caseId, turn, status, text }) => {
+      // Kernel calls this after the existing gate bounded the full body, and
+      // before writing any provider bytes to the application response.
+      // Optional A+B bookkeeping must never be the admission for actual usage.
+      if (live) usageFence.response(status, text);
       batch?.response({ caseId, turn, status, text });
       const replayEvidence = replay?.observations.at(-1);
       if (replay) {
@@ -461,6 +520,7 @@ export async function startCoreBroker(values, batch = null) {
         content: null,
         finishReason: null,
         usage: null,
+        actualUsageValidated: live,
       };
       if (status === 200) {
         const body = JSON.parse(text),

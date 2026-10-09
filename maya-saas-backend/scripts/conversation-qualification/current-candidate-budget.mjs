@@ -54,10 +54,25 @@ export const CORE_FOLLOWUP_LIMITS = Object.freeze({
 export const CORE_FOLLOWUP_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_FOLLOWUP_LIMITS))
   .digest('hex');
+export const CORE_UNION_PROFILE = 'core-union-20261009/1';
+export const CORE_UNION_LIMITS = Object.freeze({
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 9,
+  turns: 18,
+  attempts: 36,
+  inputTokens: 3_686_400,
+  outputTokens: 73_728,
+  spendNanoUsd: 6_000_000_000,
+  durationMs: 1_800_000,
+});
+export const CORE_UNION_LIMITS_SHA256 = createHash('sha256')
+  .update(JSON.stringify(CORE_UNION_LIMITS))
+  .digest('hex');
 function profileLimits(profile) {
   if (profile === undefined) return CANDIDATE_LIMITS;
   if (profile === CORE_DIAGNOSTIC_PROFILE) return CORE_DIAGNOSTIC_LIMITS;
   if (profile === CORE_FOLLOWUP_PROFILE) return CORE_FOLLOWUP_LIMITS;
+  if (profile === CORE_UNION_PROFILE) return CORE_UNION_LIMITS;
   throw new Error('candidate_profile_refused');
 }
 const endpoint = 'https://api.deepseek.com/chat/completions';
@@ -182,7 +197,11 @@ export class CandidateBudgetGate {
       throw new Error('candidate_binding_required');
     if (mode === 'ADMITTED_MODEL_ONLY') {
       if (
-        ![CORE_DIAGNOSTIC_PROFILE, CORE_FOLLOWUP_PROFILE].includes(profile) ||
+        ![
+          CORE_DIAGNOSTIC_PROFILE,
+          CORE_FOLLOWUP_PROFILE,
+          CORE_UNION_PROFILE,
+        ].includes(profile) ||
         typeof assertAdmission !== 'function' ||
         now !== undefined ||
         wait !== undefined

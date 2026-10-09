@@ -39,12 +39,23 @@ const nativeRequire = createRequire(__filename);
 const { replayPilot, sha256 } = nativeRequire(
   path.resolve('scripts/conversation-qualification/replay.mjs'),
 ) as typeof import('../../scripts/conversation-qualification/replay.mjs');
-const { CandidateBudgetGate, CORE_DIAGNOSTIC_PROFILE, CORE_FOLLOWUP_PROFILE } =
+const { CandidateBudgetGate, CORE_DIAGNOSTIC_PROFILE, CORE_UNION_PROFILE } =
   nativeRequire(
     path.resolve(
       'scripts/conversation-qualification/current-candidate-budget.mjs',
     ),
   ) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
+const { assessCoreTurn, hasExactReviewedSlot, CORE_FOLLOWUP_CASE_IDS } =
+  nativeRequire(
+    path.resolve(
+      'scripts/conversation-qualification/core-conversation-assessment.mjs',
+    ),
+  ) as typeof import('../../scripts/conversation-qualification/core-conversation-assessment.mjs');
+const followupCaseIds = new Set(CORE_FOLLOWUP_CASE_IDS);
+type SemanticAssessment =
+  import('../../scripts/conversation-qualification/replay.mjs').SemanticAssessment;
+type ReplayResult =
+  import('../../scripts/conversation-qualification/replay.mjs').ReplayResult;
 const { coreConversationProfile } = nativeRequire(
   path.resolve(
     'scripts/conversation-qualification/core-conversation-profile.mjs',
@@ -63,6 +74,8 @@ const { socketRequest } = nativeRequire(
 const mode = process.env.JEST_CORE_CONVERSATION_MODE;
 const recordedReplayFlag = process.env.JEST_CORE_CONVERSATION_RECORDED_REPLAY;
 const recordedReplay = recordedReplayFlag === '1';
+const semanticFailureFixture =
+  process.env.JEST_CORE_CONVERSATION_SEMANTIC_FAILURE_FIXTURE;
 const replayFixture = process.env.JEST_CORE_CONVERSATION_REPLAY_FIXTURE;
 const recordedReplayQualification =
   'RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY';
@@ -205,7 +218,8 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   const responses: Record<string, unknown>[] = [];
   const preflights: Record<string, unknown>[] = [];
   const replayRecords: Record<string, unknown>[] = [];
-  let result: unknown = null;
+  let result: ReplayResult | null = null;
+  const semanticAssessments = new Map<string, SemanticAssessment>();
   const modelCoverageSince = (
     modelBefore: number,
     brokerBefore: number,
@@ -238,6 +252,16 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     });
     manifest = verifiedManifest as unknown as DiagnosticManifest;
     profile = coreConversationProfile(verifiedManifest.profile);
+    if (
+      semanticFailureFixture !== undefined &&
+      !(
+        semanticFailureFixture === 'first-client-turn' &&
+        mode === 'dry' &&
+        profile.id === CORE_UNION_PROFILE &&
+        !recordedReplay
+      )
+    )
+      throw new Error('core_semantic_fixture_refused');
     if (recordedReplay && profile.id !== CORE_DIAGNOSTIC_PROFILE)
       throw new Error('core_recorded_replay_profile_refused');
     expect(manifest).toMatchObject({
@@ -409,7 +433,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             date: string;
           }) => {
             read('schedule', tenantId);
-            if (profile.id === CORE_FOLLOWUP_PROFILE) {
+            if (followupCaseIds.has(source.item.id)) {
               expect(staffId).toBe('71');
               expect(date.slice(0, 10)).toBe(source.clockBinding.tomorrow);
             }
@@ -425,7 +449,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             params: Parameters<CRMAdapter['getAvailableSlots']>[0],
           ) => {
             read('availability', params.tenantId);
-            if (profile.id === CORE_FOLLOWUP_PROFILE)
+            if (followupCaseIds.has(source.item.id))
               assertFiniteFollowupAvailability(source, params);
             return Promise.resolve([
               {
@@ -523,7 +547,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         });
         // Boolean-only assertions cannot dump private carried assistant prose.
         expect(onlyUserHistoryForwarded).toBe(true);
-        if (canonicalOwnerClarificationExpected)
+        if (
+          canonicalOwnerClarificationExpected &&
+          profile.id !== CORE_UNION_PROFILE
+        )
           expect(restoredClarificationMatchesActualReply).toBe(true);
         return decide(input);
       });
@@ -657,6 +684,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               ? 'CANNED_SYNTHETIC_RESPONSE'
               : 'BROKER_MODEL_RESPONSE',
           replayFixture: replayFixture ?? null,
+          semanticFailureFixture: semanticFailureFixture ?? null,
+          semanticQualification:
+            mode === 'dry'
+              ? 'SCRIPTED_DRY_MECHANICS_NOT_MODEL_QUALITY'
+              : 'FINITE_OBSERVED_FACT_CHECKS_NOT_GENERAL_LANGUAGE_ACCEPTANCE',
           qualification: recordedReplay
             ? recordedReplayQualification
             : mode === 'dry'
@@ -697,11 +729,19 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     write('http-report.json', {
       contract: 'maya.core-conversation-http-diagnostic/1',
       mode,
-      status: result ? (result as { status: string }).status : 'incomplete',
+      status: result?.status ?? 'incomplete',
+      executionStatus: result?.executionStatus ?? 'incomplete',
+      semanticStatus: result?.semanticStatus ?? 'ungraded',
+      coverage: result?.coverage ?? null,
       qualification: recordedReplay
         ? recordedReplayQualification
         : 'KNOWN_DERIVED_DEVELOPMENT_DIAGNOSTIC_NOT_HOLDOUT_NOT_ACCEPTANCE',
       replayFixture: replayFixture ?? null,
+      semanticFailureFixture: semanticFailureFixture ?? null,
+      semanticQualification:
+        mode === 'dry'
+          ? 'SCRIPTED_DRY_MECHANICS_NOT_MODEL_QUALITY'
+          : 'FINITE_OBSERVED_FACT_CHECKS_NOT_GENERAL_LANGUAGE_ACCEPTANCE',
       sourceHead,
       sourceDigest,
       manifestSha256,
@@ -957,7 +997,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         });
         expect(response.status).toBe(201);
         expect(preflights.at(-1)?.exact17Available).toBe(true);
-        if (profile.id === CORE_FOLLOWUP_PROFILE) {
+        if (followupCaseIds.has(source.item.id)) {
           const other = await db.prisma.internalProvider.findFirstOrThrow({
             where: {
               tenantId: source.tenant.id,
@@ -1026,7 +1066,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           }
         }
       } else if (item.role === 'owner') {
-        if (profile.id === CORE_FOLLOWUP_PROFILE) {
+        if (followupCaseIds.has(source.item.id)) {
           const query = {
             tenantId: source.tenant.id,
             timezone: 'Europe/Moscow',
@@ -1402,6 +1442,23 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     });
     result = await replayPilot(replayManifest, {
       budget: gate!,
+      ...(profile.id === CORE_UNION_PROFILE
+        ? {
+            semanticFailure: 'next_independent_dialog' as const,
+            assessTurn: ({
+              caseId,
+              turn,
+            }: {
+              caseId: string;
+              turn: number;
+            }) => {
+              const assessment = semanticAssessments.get(`${caseId}:${turn}`);
+              if (!assessment)
+                throw new Error('core_semantic_observation_missing');
+              return assessment;
+            },
+          }
+        : {}),
       record: (row) => {
         replayRecords.push(row);
         append('replay-records.jsonl', row);
@@ -1585,20 +1642,25 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             expect(typeof answer.reply).toBe('string');
             expect(typeof answer.user_turn?.conversationId).toBe('string');
             if (caseId === 'followup-admin-general-chat') {
-              expect(modelCalls - modelBefore).toBeGreaterThan(0);
-              expect(modelOutputResponses - outputBefore).toBeGreaterThan(0);
+              if (profile.id !== CORE_UNION_PROFILE) {
+                expect(modelCalls - modelBefore).toBeGreaterThan(0);
+                expect(modelOutputResponses - outputBefore).toBeGreaterThan(0);
+              }
               expect(answer.tools_used).toEqual([]);
               expect(observation.sourceReads).toEqual([]);
               expect(answer.action).toBeNull();
-              expect(answer.grounding?.status).toBe('not_required');
-              expect(answer.reply).not.toContain(
-                'недоступен для вашей текущей роли',
-              );
+              if (profile.id !== CORE_UNION_PROFILE) {
+                expect(answer.grounding?.status).toBe('not_required');
+                expect(answer.reply).not.toContain(
+                  'недоступен для вашей текущей роли',
+                );
+              }
               expect(approvals).toEqual([]);
               const inputObservations = modelObservations.filter(
                 (entry) => entry.caseId === caseId && entry.turn === turn,
               );
-              expect(inputObservations.length).toBeGreaterThan(0);
+              if (profile.id !== CORE_UNION_PROFILE)
+                expect(inputObservations.length).toBeGreaterThan(0);
               for (const entry of inputObservations) {
                 expect(entry.role).toBe(UserRole.ADMINISTRATOR);
                 expect(entry.sourceProjections).toEqual([]);
@@ -1721,6 +1783,68 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               expect(observation.readReceiptPresent).toBe(false);
               expect(approvals).toEqual([]);
             }
+            if (profile.id === CORE_UNION_PROFILE) {
+              const inputRows = modelObservations.filter(
+                (row) => row.caseId === caseId && row.turn === turn,
+              );
+              const saved = observation.persistedCoordination.some(
+                (run) =>
+                  run.runHash === observation.coordination?.runHash &&
+                  run.currentRevision === observation.coordination?.revision &&
+                  run.revisions.some(
+                    (revision) =>
+                      revision.version === observation.coordination?.revision &&
+                      revision.revisionHash ===
+                        observation.coordination?.revisionHash &&
+                      (revision.evidenceCount ?? 0) > 0,
+                  ),
+              );
+              const assessment: SemanticAssessment =
+                mode === 'dry'
+                  ? semanticFailureFixture === 'first-client-turn' &&
+                    caseId === 'core-client-create-followup' &&
+                    turn === 1
+                    ? {
+                        status: 'fail',
+                        failedCheckIds: ['synthetic_dry_assertion_failure'],
+                      }
+                    : { status: 'ungraded', failedCheckIds: [] }
+                  : assessCoreTurn({
+                      caseId,
+                      turn,
+                      reply: answer.reply!,
+                      previousReply: priorReplies.at(-1) ?? null,
+                      modelResponses: modelOutputResponses - outputBefore,
+                      currentSelection: hasExactReviewedSlot(
+                        answer.resolution,
+                        {
+                          start: source.startsAt,
+                          timezone: 'Europe/Moscow',
+                          tenantId: source.tenant.id,
+                        },
+                      ),
+                      ownerEvidenceBounded:
+                        observation.coordination?.scope ===
+                          'explicit_business_occupancy' &&
+                        saved &&
+                        observation.financialEvidenceCount > 0 &&
+                        observation.recommendation?.noSideEffects === true &&
+                        observation.recommendation.executionAuthority ===
+                          false &&
+                        observation.recommendation.evidenceCount > 0,
+                      ownerContextRestored: inputRows.some(
+                        (row) =>
+                          row.pendingOwnerReviewPresent === true &&
+                          row.restoredClarificationMatchesActualReply === true,
+                      ),
+                      groundingStatus: answer.grounding?.status ?? null,
+                      readCount: observation.sourceReads.length,
+                      toolCount: Array.isArray(answer.tools_used)
+                        ? answer.tools_used.length
+                        : 0,
+                    });
+              semanticAssessments.set(`${caseId}:${turn}`, assessment);
+            }
             priorReplies.push(answer.reply!);
             return {
               reply: answer.reply!,
@@ -1741,12 +1865,40 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         });
       },
     });
-    expect((result as { status: string }).status).toBe('replayed_ungraded');
-    expect(responses).toHaveLength(profile.userTurns);
+    if (profile.id === CORE_UNION_PROFILE) {
+      expect(result.executionStatus).toBe('completed');
+      expect([
+        'replayed_ungraded',
+        'completed_with_semantic_failures',
+      ]).toContain(result.status);
+      expect(
+        result.coverage.validResponses + result.coverage.skippedDependentTurns,
+      ).toBe(profile.userTurns);
+      expect(
+        result.coverage.unresolvedTurns + result.coverage.unexecutedTurns,
+      ).toBe(0);
+      expect(responses).toHaveLength(result.coverage.attemptedTurns);
+      expect(result.outcomes).toHaveLength(profile.dialogs);
+      if (semanticFailureFixture === 'first-client-turn') {
+        expect(result.coverage).toMatchObject({
+          attemptedTurns: 17,
+          validResponses: 17,
+          skippedDependentTurns: 1,
+          semanticFailures: 1,
+        });
+        expect(result.outcomes[0]).toMatchObject({
+          outcome: 'semantic_fail',
+          failedCheckIds: ['synthetic_dry_assertion_failure'],
+        });
+      }
+    } else {
+      expect(result.status).toBe('replayed_ungraded');
+      expect(responses).toHaveLength(profile.userTurns);
+    }
     expect(forbidden).toEqual([]);
     expect(gate!.stats).toMatchObject({
       dialogs: profile.dialogs,
-      turns: profile.userTurns,
+      turns: result.coverage.attemptedTurns,
       halted: false,
     });
     if (replayFixture !== undefined) {

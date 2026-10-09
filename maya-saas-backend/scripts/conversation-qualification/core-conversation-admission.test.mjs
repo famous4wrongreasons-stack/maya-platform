@@ -14,6 +14,7 @@ import {
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_FOLLOWUP_PROFILE,
+  CORE_UNION_PROFILE,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 
@@ -186,6 +187,65 @@ test('B exact frozen manifest is inert, and A/B scope, cases, budget or profile 
     const sha256 = f.write(f.manifestPath, { ...f.raw, ...patch });
     denied(() => readCoreManifest(f.manifestPath, sha256));
   }
+});
+test('union manifest binds all nine dialogues and eighteen turns without admission authority', (t) => {
+  const f = fixture(t, 'DRY_HTTP', CORE_UNION_PROFILE);
+  assert.equal(f.manifest.dialogs, 9);
+  assert.equal(f.manifest.userTurns, 18);
+  assert.equal(f.manifest.limits.attempts, 36);
+  assert.equal(f.manifest.limits.spendNanoUsd, 6_000_000_000);
+  for (const key of [
+    'paidAuthorized',
+    'upstreamAllowed',
+    'credentialAdmission',
+  ])
+    assert.equal(f.manifest[key], false);
+  denied(() => claimCorePermit(f.options));
+  assert.equal(fs.existsSync(f.options.claimPath), false);
+  for (const patch of [
+    { profile: CORE_DIAGNOSTIC_PROFILE },
+    { profile: CORE_FOLLOWUP_PROFILE },
+    { cases: f.raw.cases.slice(0, 8) },
+    { cases: [...f.raw.cases].reverse() },
+    { limits: { ...f.raw.limits, attempts: 37 } },
+  ]) {
+    const pin = f.write(f.manifestPath, { ...f.raw, ...patch });
+    denied(() => readCoreManifest(f.manifestPath, pin));
+  }
+});
+test('union refuses old A/B permits before claim; its synthetic permit is single-use and expires at thirty minutes', (t) => {
+  const f = fixture(t, 'ADMITTED_MODEL_HTTP', CORE_UNION_PROFILE);
+  for (const id of [CORE_DIAGNOSTIC_PROFILE, CORE_FOLLOWUP_PROFILE]) {
+    const old = coreConversationProfile(id);
+    f.options.sha256 = f.write(f.options.path, {
+      ...f.permit,
+      profile: old.id,
+      limitsSha256: old.limitsSha256,
+    });
+    denied(() => claimCorePermit(f.options));
+    assert.equal(fs.existsSync(f.options.claimPath), false);
+  }
+  f.permit.expiresAt = stamp(at + 1_800_001);
+  f.options.sha256 = f.write(f.options.path, f.permit);
+  denied(() => claimCorePermit(f.options));
+  assert.equal(fs.existsSync(f.options.claimPath), false);
+  f.permit.expiresAt = stamp(at + 1_800_000);
+  f.options.sha256 = f.write(f.options.path, f.permit);
+  const validate = claimCorePermit(f.options);
+  assert.equal(validate(f.binding), undefined);
+  denied(() => claimCorePermit(f.options));
+  t.mock.method(Date, 'now', () => at + 1_800_000);
+  denied(() => validate(f.binding));
+});
+test('union observes revocation and cannot resume with restored permit bytes', (t) => {
+  const f = fixture(t, 'ADMITTED_LOCAL_MODEL_HTTP', CORE_UNION_PROFILE);
+  const validate = claimCorePermit(f.options);
+  assert.equal(validate(f.binding), undefined);
+  f.write(f.options.path, { ...f.permit, revoked: true });
+  denied(() => validate(f.binding));
+  f.write(f.options.path, f.permit);
+  denied(() => validate(f.binding));
+  denied(() => claimCorePermit(f.options));
 });
 test('B synthetic expired-in-2000 permit uses its twenty-minute ceiling; A remains ten minutes', (t) => {
   const f = fixture(t, 'ADMITTED_MODEL_HTTP', CORE_FOLLOWUP_PROFILE);

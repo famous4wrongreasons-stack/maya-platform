@@ -19,12 +19,16 @@ import {
   assertCoreAdmission,
 } from './core-conversation-admission.mjs';
 import { socketRequest } from './core-conversation-socket.mjs';
-import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
+import {
+  CORE_DIAGNOSTIC_PROFILE,
+  CORE_UNION_PROFILE,
+} from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
 import { runOwnedStage, trackOwnedChild } from './owned-child-cleanup.mjs';
 import { coreConversationResources } from './core-conversation-resources.mjs';
 import { CORE_RECORDED_REPLAY_QUALIFICATION } from './core-recorded-replay.mjs';
+import { summarizeCoreUnionReport } from './core-conversation-assessment.mjs';
 const { values } = parseArgs({
   options: {
     prepare: { type: 'boolean' },
@@ -33,6 +37,7 @@ const { values } = parseArgs({
     profile: { type: 'string' },
     'recorded-replay': { type: 'boolean' },
     'replay-fixture': { type: 'string' },
+    'semantic-failure-fixture': { type: 'string' },
     output: { type: 'string' },
     manifest: { type: 'string' },
     'manifest-sha256': { type: 'string' },
@@ -74,6 +79,15 @@ const profile = coreConversationProfile(values.profile);
 assert.ok(
   !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
   'core_runner_recorded_replay_profile',
+);
+const semanticFailureFixture = values['semantic-failure-fixture'];
+assert.ok(
+  semanticFailureFixture === undefined ||
+    (semanticFailureFixture === 'first-client-turn' &&
+      values.mode === 'dry' &&
+      profile.id === CORE_UNION_PROFILE &&
+      !recordedReplay),
+  'core_runner_semantic_fixture_refused',
 );
 assert.ok(
   values.output &&
@@ -220,6 +234,7 @@ const report = {
   candidateCommit: manifest.candidateCommit,
   manifestSha256,
   profile: profile.id,
+  semanticFailureFixture: semanticFailureFixture ?? null,
   limitsSha256: profile.limitsSha256,
   cluster,
   database,
@@ -376,6 +391,12 @@ try {
     ...(replayFixture
       ? { JEST_CORE_CONVERSATION_REPLAY_FIXTURE: replayFixture }
       : {}),
+    ...(semanticFailureFixture
+      ? {
+          JEST_CORE_CONVERSATION_SEMANTIC_FAILURE_FIXTURE:
+            semanticFailureFixture,
+        }
+      : {}),
     JEST_CORE_CONVERSATION_MODE: localStdin
       ? 'live-local'
       : live
@@ -432,6 +453,26 @@ try {
   );
   report.completed.push('conversation');
   report.status = 'passed-ungraded';
+  if (profile.id === CORE_UNION_PROFILE) {
+    const httpReportPath = path.join(output, 'http-report.json');
+    const stat = fs.lstatSync(httpReportPath);
+    assert.ok(
+      stat.isFile() && !stat.isSymbolicLink() && stat.size <= 8 * 1024 * 1024,
+      'core_union_report_unconfirmed',
+    );
+    const summary = summarizeCoreUnionReport(
+      JSON.parse(fs.readFileSync(httpReportPath, 'utf8')),
+      {
+        manifestSha256,
+        candidateCommit: manifest.candidateCommit,
+      },
+    );
+    report.status = summary.status;
+    report.dialogueExecutionStatus = summary.executionStatus;
+    report.semanticStatus = summary.semanticStatus;
+    report.coverage = summary.coverage;
+    process.exitCode = summary.exitCode;
+  }
 } catch (error) {
   report.status = 'failed';
   report.failure = error.message;
@@ -460,8 +501,14 @@ try {
         { localStdin },
       );
       report.brokerStopRequested = stopped.ok;
+      if (profile.id === CORE_UNION_PROFILE && !stopped.ok)
+        throw new Error('core_union_broker_cleanup_unconfirmed');
     } catch {
       report.brokerStopRequested = false;
+      if (profile.id === CORE_UNION_PROFILE) {
+        report.status = 'failed-broker-cleanup';
+        process.exitCode = 1;
+      }
     }
     report.liveBrokerCleanupRequiresBrokerReport = true;
   }
@@ -485,6 +532,8 @@ try {
       report.postmasterPidAbsent = !fs.existsSync(
         path.join(cluster, 'postmaster.pid'),
       );
+      if (profile.id === CORE_UNION_PROFILE && !report.postmasterPidAbsent)
+        throw new Error('core_union_cluster_cleanup_unconfirmed');
     } catch {
       report.clusterStopped = false;
       report.status = 'failed-cluster-stop';

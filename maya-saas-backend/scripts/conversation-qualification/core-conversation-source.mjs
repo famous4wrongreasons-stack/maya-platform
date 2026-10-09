@@ -1,4 +1,4 @@
-// Existing candidate/corpus ownership, narrowed to two frozen core batches.
+// Existing candidate/corpus ownership, narrowed to fixed frozen core profiles.
 // A manifest binds source bytes; it never authorizes a model request.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
