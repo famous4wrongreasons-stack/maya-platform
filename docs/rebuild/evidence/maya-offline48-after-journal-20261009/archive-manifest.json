@@ -1,0 +1,129 @@
+{
+  "contract": "maya.full48-after-journal-evidence/1",
+  "files": {
+    "r1/actual-http-turns.jsonl": {
+      "sha256": "e8e3406fc3a5761aa8ce44a1cb263ddd4f8165701e08d2ec2dd21c127b3c6c10",
+      "bytes": 916209
+    },
+    "r1/actual-model-responses.jsonl": {
+      "sha256": "9e012ee471e1f095e7297e7fa2877789bd5bd0657dcd9cffb9933a7346ddbf8a",
+      "bytes": 94390
+    },
+    "r1/broker-ledger.jsonl": {
+      "sha256": "c26b0409fd1ed4b961e1ae83dafd00dc78a564706bda4fb88dbf11dc84e0f315",
+      "bytes": 23318
+    },
+    "r1/broker-report.json": {
+      "sha256": "921b530f897bcdd682875e8d70a867708a81b9f0ed25e1c2c019066b73a8e94e",
+      "bytes": 90548
+    },
+    "r1/broker.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r1/candidate-manifest.json": {
+      "sha256": "0e9472dd5a609b979b20637317b3c73cee5f006c807749a219fe33be77c912b3",
+      "bytes": 394893
+    },
+    "r1/conversation-jest.json": {
+      "sha256": "841edcbb8f02f5ad2d4fd9e6bad4b15cf0adc0bcadcec25b0ba4242cc42968ec",
+      "bytes": 1418
+    },
+    "r1/conversation.log": {
+      "sha256": "ab132c610a110d1e3115bb86444051b6eb720cc1af0f8b6b13e7ac6587616e0a",
+      "bytes": 616
+    },
+    "r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r1/http-report.json": {
+      "sha256": "4abce6ab1ed3a26b4dfb0aa859c03e40cd2368b84d6c601904bdf737740c9b60",
+      "bytes": 1940899
+    },
+    "r1/http-response-journal.jsonl": {
+      "sha256": "b758514ff810d6d6864fdad4b8d22f7c00a9fc91c4860c7c5386dbcfa0f20070",
+      "bytes": 67173
+    },
+    "r1/initdb.log": {
+      "sha256": "2df7e920b571f545a0ceb7b78ce53aebcd942c7237c913127ab3ce4eba0d55b6",
+      "bytes": 972
+    },
+    "r1/migrations.log": {
+      "sha256": "c874f6f66f17f7d3f5c70986faf08a2e813f997c04958bef12b82e76a108ea6c",
+      "bytes": 14720
+    },
+    "r1/model-responses.jsonl": {
+      "sha256": "fd5cfe233d12efbd5e2aa226a095c25d930859a9119d40d1dda4ffb7a732e75c",
+      "bytes": 141070
+    },
+    "r1/offline-completion-audit.jsonl": {
+      "sha256": "98b39fbfb617642820fe6d162bc1c36f3f1e6666fbd94110b3eee133e328526b",
+      "bytes": 329538
+    },
+    "r1/offline-expected-refusals.jsonl": {
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9",
+      "bytes": 163
+    },
+    "r1/offline-source-snapshots.json": {
+      "sha256": "24aa14bb1273bbfe5e8fd4369dd9dbb897c410adc1374bf3e4f205c12ca61481",
+      "bytes": 150430
+    },
+    "r1/offline-source-transitions.jsonl": {
+      "sha256": "3dada5242ccfd857337226be005b64e68f7e7b9839767b892bbee159bc5957e1",
+      "bytes": 187
+    },
+    "r1/offline-turn-audit.jsonl": {
+      "sha256": "9ea59f1ba52bee64669ea21ea86037a7a85773cc8129f7805b90477cc1c82ac3",
+      "bytes": 916340
+    },
+    "r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r1/postgres.log": {
+      "sha256": "29ede2f9ffa9fb17fdd310438a23018d136e256d82e1a5805f33b87d95828042",
+      "bytes": 1246
+    },
+    "r1/replay-binding.json": {
+      "sha256": "abcb95b6aea86c3ee42ec1f736fea6949712a0f495f437b798ec94e3a2e35567",
+      "bytes": 20207
+    },
+    "r1/replay-records.jsonl": {
+      "sha256": "92ba26d4056f5c0e85aa1fd2eeb90bf86713a02ba9e20a5ba78516fe8438c1e7",
+      "bytes": 67082
+    },
+    "r1/runner-budget-ledger.jsonl": {
+      "sha256": "e7f245a8387661d0bcac326a88051f3a4e79d4f90f1b384aee64e3a7c29f9c63",
+      "bytes": 23556
+    },
+    "r1/runner-report.json": {
+      "sha256": "8a5e1aa752d0c847b9ae8b9d39e018915b582ceae36d654ea6ab3148b682d0f1",
+      "bytes": 3764
+    },
+    "r1/semantic-score.json": {
+      "sha256": "cc7c4c03bb695ca29bb778f2b7e576e4f711a88269925f9ab6fa06fd6b00480b",
+      "bytes": 1303127
+    },
+    "r1/serialized-attempts.jsonl": {
+      "sha256": "d5e44289b7dd0e0c5026661bf4d096d6fb174fe37df6470437916c17728559a9",
+      "bytes": 18862
+    },
+    "r1-cleanup.json": {
+      "sha256": "97c2079f5cecc8cb07e39c0eb7bb1ce07cf49958d1a5e785b0aa910ee18a0991",
+      "bytes": 179
+    },
+    "r1-independent-delta.json": {
+      "sha256": "a85cb53d1e34cca7b0010b5c0ccae05e54c7eea1635a78ed596e03df663d4e06",
+      "bytes": 1208
+    },
+    "r1-integrity-review.json": {
+      "sha256": "44977d7ed1f0d17484405eaab90b462896e10de0824b294cfc3d2ab7ac73d0e5",
+      "bytes": 634
+    }
+  }
+}

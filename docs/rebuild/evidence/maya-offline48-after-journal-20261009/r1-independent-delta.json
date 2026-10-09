@@ -1,0 +1,32 @@
+{
+  "contract": "maya.full48-independent-delta/1",
+  "reviewer": "classification_external_review",
+  "scope": "read-only independent semantic delta",
+  "sourceHead": "28cad8fa2fe155c81dc130eb7545881fd340d860",
+  "counts": {
+    "pass": 51,
+    "semantic_fail": 5,
+    "unsupported": 14,
+    "insufficient_evidence": 11
+  },
+  "changedRows": 7,
+  "unchangedStatuses": 74,
+  "actualTurns": 81,
+  "criticalSafety": {
+    "failedTurns": 0,
+    "missingEvidenceTurns": 0
+  },
+  "verified": [
+    "81 HTTP response/audit/history bindings, including 80 replies and one expected 401 without reply",
+    "Corpus, scripted model and evaluator unchanged",
+    "Two schedule PASS have actual scoped C9 READs and require explicit two-case Staff/link fixture enrichment729b78ee",
+    "Three booking failures are lawful empty current reads after minimum notice exhausts today; no lost READ or carryover",
+    "Two journal cases still have no journal READ; initial missing branchBinding does not prove any source changed"
+  ],
+  "previousRemaining29": {
+    "twoScheduleClosedInSyntheticProof": 2,
+    "stillIncomplete": 27,
+    "additionalObservedBookingPresentationFailures": 3
+  },
+  "reclassificationPerformed": false
+}

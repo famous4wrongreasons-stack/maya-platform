@@ -1,0 +1,19 @@
+{
+  "contract": "maya.full48-integrity-review/1",
+  "reviewer": "checkpoint_review",
+  "reviewerAuthoredEvaluator": true,
+  "independentSemanticOracleAcceptance": false,
+  "sourceHead": "28cad8fa2fe155c81dc130eb7545881fd340d860",
+  "sourceFilesExactGit": 2516,
+  "corpusCasesExpectationsUnchanged": true,
+  "actualResponseAuditHistoryBindings": 81,
+  "allOwnedCommandGroupsAbsent": true,
+  "brokerClosed": true,
+  "clusterStopped": true,
+  "postmasterPidAbsent": true,
+  "providerCalls": 0,
+  "credentialsLoaded": false,
+  "businessWrites": 0,
+  "statusRemains": "completed-with-semantic-failures",
+  "priorEvidenceUnchanged": true
+}
