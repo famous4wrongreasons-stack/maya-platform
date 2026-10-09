@@ -1,0 +1,194 @@
+{
+  "qualification": "ACTUAL_HTTP_AUTH_HISTORY_PG_SCRIPTED_SEMANTICS",
+  "status": "passed",
+  "checkpoints": [
+    "general-facts-general-history",
+    "mixed-closed-data-refusal",
+    "foreign-and-revoked-refusals-zero-effects"
+  ],
+  "corpusSource": "utt-general.explain_term-016",
+  "transcripts": [
+    {
+      "content": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+      "status": 201,
+      "body": {
+        "request_id": "a2a34f39-c69a-460e-bc24-43d6bcaa8cd5",
+        "user_turn": {
+          "turnId": "77b3869d-36ef-4b5c-a5cd-3186f7f55917",
+          "conversationId": "bfb62ee1-f4fc-408e-826b-35868d70ebf0"
+        },
+        "reply": "Средний чек — сумма продаж, разделённая на количество чеков. Здесь я объясняю термин без расчёта данных салона.",
+        "source": "openai",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "finance"
+        }
+      }
+    },
+    {
+      "content": "Какая выручка бизнеса за этот месяц?",
+      "status": 201,
+      "body": {
+        "request_id": "5ddd76ed-e67a-49e2-be6d-997a955abfc5",
+        "user_turn": {
+          "turnId": "cc950205-7839-4e4f-aee6-25fc498eb90c",
+          "conversationId": "bfb62ee1-f4fc-408e-826b-35868d70ebf0"
+        },
+        "reply": "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "blocked",
+          "domain": "business_query",
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "finance"
+        }
+      }
+    },
+    {
+      "content": "Объясни средний чек простыми словами",
+      "status": 201,
+      "body": {
+        "request_id": "4c8cc16a-1569-42f8-b5d9-4cd3472a9892",
+        "user_turn": {
+          "turnId": "a6c8f93b-b8c7-4dbf-a631-b82145a3c993",
+          "conversationId": "bfb62ee1-f4fc-408e-826b-35868d70ebf0"
+        },
+        "reply": "Средний чек — сумма продаж, разделённая на количество чеков. Здесь я объясняю термин без расчёта данных салона.",
+        "source": "openai",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "finance"
+        }
+      }
+    },
+    {
+      "history": {
+        "contract": "maya.conversation-history/1",
+        "conversationId": "bfb62ee1-f4fc-408e-826b-35868d70ebf0",
+        "truncated": false,
+        "interrupted": false,
+        "turns": [
+          {
+            "id": "77b3869d-36ef-4b5c-a5cd-3186f7f55917",
+            "role": "user",
+            "text": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+            "createdAt": "2026-10-09T20:39:18.769Z",
+            "completed": true
+          },
+          {
+            "id": "ccdd0d1c-8854-4e58-a9aa-5c4001c85067",
+            "role": "assistant",
+            "text": "Средний чек — сумма продаж, разделённая на количество чеков. Здесь я объясняю термин без расчёта данных салона.",
+            "createdAt": "2026-10-09T20:39:18.790Z",
+            "completed": true
+          },
+          {
+            "id": "cc950205-7839-4e4f-aee6-25fc498eb90c",
+            "role": "user",
+            "text": "Какая выручка бизнеса за этот месяц?",
+            "createdAt": "2026-10-09T20:39:18.805Z",
+            "completed": true
+          },
+          {
+            "id": "bef93320-3800-47b3-a40b-465fb1eba599",
+            "role": "assistant",
+            "text": "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
+            "createdAt": "2026-10-09T20:39:18.821Z",
+            "completed": true
+          },
+          {
+            "id": "a6c8f93b-b8c7-4dbf-a631-b82145a3c993",
+            "role": "user",
+            "text": "Объясни средний чек простыми словами",
+            "createdAt": "2026-10-09T20:39:18.834Z",
+            "completed": true
+          },
+          {
+            "id": "67ad02ec-3fee-4341-a8df-9f2014f138e8",
+            "role": "assistant",
+            "text": "Средний чек — сумма продаж, разделённая на количество чеков. Здесь я объясняю термин без расчёта данных салона.",
+            "createdAt": "2026-10-09T20:39:18.845Z",
+            "completed": true
+          }
+        ]
+      }
+    },
+    {
+      "content": "Объясни выручку и покажи выручку бизнеса за этот месяц",
+      "status": 201,
+      "body": {
+        "request_id": "68040607-cc4e-43e4-a529-f2b02dfc607a",
+        "user_turn": {
+          "turnId": "5400e76f-2cac-4c8a-a8fa-a69b224a9b9e",
+          "conversationId": "bfb62ee1-f4fc-408e-826b-35868d70ebf0"
+        },
+        "reply": "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "blocked",
+          "domain": "business_query",
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "finance"
+        }
+      }
+    },
+    {
+      "content": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+      "status": 409,
+      "body": {
+        "message": "conversation_scope_conflict",
+        "error": "Conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "content": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+      "status": 401,
+      "body": {
+        "message": "Active tenant membership is required",
+        "error": "Unauthorized",
+        "statusCode": 401
+      }
+    }
+  ],
+  "modelDecisions": 4,
+  "runtimeExecutions": 0,
+  "c9Reads": 0,
+  "outboundFetches": 0,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "browserAcceptance": false,
+  "restartClaim": false
+}

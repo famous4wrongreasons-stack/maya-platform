@@ -1,0 +1,37 @@
+{
+  "reviewer": "/root/independent_review",
+  "scope": "Read-only source and saved evidence review before exec-server disconnection; final agent status retrieved after recovery.",
+  "componentTests": 508,
+  "componentSuites": 5,
+  "httpTests": 3,
+  "httpProofSource": "918b3525dab775a7beedb090366066d8ec0c2902",
+  "sourceHashesVerified": 12,
+  "modelDecisions": 4,
+  "runtimeExecutions": 0,
+  "c9Reads": 0,
+  "outboundFetches": 0,
+  "denials": [
+    {
+      "status": 409,
+      "message": "conversation_scope_conflict"
+    },
+    {
+      "status": 401,
+      "message": "Active tenant membership is required"
+    }
+  ],
+  "resolvedFindings": [
+    "Canonical Staff fixture link",
+    "Require all three checkpoints before passed conversation projection",
+    "Assert exact 409 and 401 denial contracts",
+    "Named SIGINT/SIGTERM callbacks in post-proof driver"
+  ],
+  "latestReview": "Original signal-handling defect is fixed in 57af858d; runtime and test files remain identical to R3. Active-stage cancellation reaches catch, which overwrites status cancelled with failed; cancelledBy remains correct. R3 stays bound to 918b3525; no interruption execution was verified.",
+  "productAndFinalEvidenceBlocker": false,
+  "limits": [
+    "Scripted model semantics",
+    "No real provider/model or browser acceptance",
+    "R1 failed and false-passed conversation projection excluded",
+    "Post-proof driver source/syntax only, no interruption execution"
+  ]
+}

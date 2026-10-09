@@ -1,0 +1,51 @@
+{
+  "qualification": "ACTUAL_HTTP_AUTH_HISTORY_PG_SCRIPTED_SEMANTICS",
+  "status": "passed",
+  "corpusSource": "utt-general.explain_term-016",
+  "transcripts": [
+    {
+      "content": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+      "status": 403,
+      "body": {
+        "message": "conversation_principal_unavailable",
+        "error": "Forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "content": "Объясни выручку и покажи выручку бизнеса за этот месяц",
+      "status": 403,
+      "body": {
+        "message": "conversation_principal_unavailable",
+        "error": "Forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "content": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+      "status": 403,
+      "body": {
+        "message": "conversation_principal_unavailable",
+        "error": "Forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "content": "Что там по теме: что такое. Объясни простыми словами. Тема — средний чек.",
+      "status": 401,
+      "body": {
+        "message": "Active tenant membership is required",
+        "error": "Unauthorized",
+        "statusCode": 401
+      }
+    }
+  ],
+  "modelDecisions": 0,
+  "runtimeExecutions": 0,
+  "c9Reads": 0,
+  "outboundFetches": 0,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "browserAcceptance": false,
+  "restartClaim": false
+}

@@ -1,0 +1,143 @@
+{
+  "verifiedAt": "2026-10-09T21:20:36.435585+00:00",
+  "head": "57af858d77fadbee2d417becd45806c6dd62525b",
+  "compositionBaseline": "2c2523fc182e24ddd6c7e4f26c02e75b33a08199",
+  "httpProofSource": "918b3525dab775a7beedb090366066d8ec0c2902",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "proofHash": "87cfcd156b55ba48d503595913e5257df1734a22ce3c2b28d35cea8cdf788ced",
+      "currentHash": "87cfcd156b55ba48d503595913e5257df1734a22ce3c2b28d35cea8cdf788ced",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "proofHash": "362d4b683dcb63e31139cd750990d32d6b89783ca03211ce5d17eca7d096c48d",
+      "currentHash": "362d4b683dcb63e31139cd750990d32d6b89783ca03211ce5d17eca7d096c48d",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "proofHash": "7a1ea3577f32b8d05879f31adcb8729a8b227cd915208194154fa451d88bb845",
+      "currentHash": "7a1ea3577f32b8d05879f31adcb8729a8b227cd915208194154fa451d88bb845",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts",
+      "proofHash": "8dc80a3a5215efc952215ae76cbf8ea1b96bab4f3f0a745e9a785a3fbec35f22",
+      "currentHash": "8dc80a3a5215efc952215ae76cbf8ea1b96bab4f3f0a745e9a785a3fbec35f22",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts",
+      "proofHash": "67fcaa73aa65c381dfbc40e36871ad12991719091d9bf118ec5bfd083f47e590",
+      "currentHash": "67fcaa73aa65c381dfbc40e36871ad12991719091d9bf118ec5bfd083f47e590",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+      "proofHash": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+      "currentHash": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/general-chat.probe-spec.ts",
+      "proofHash": "b010357e98d0a05fa0be0c317e1d68d691c4359cffa70435c871370d9de3f22e",
+      "currentHash": "b010357e98d0a05fa0be0c317e1d68d691c4359cffa70435c871370d9de3f22e",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts",
+      "proofHash": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140",
+      "currentHash": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/bootstrap.ts",
+      "proofHash": "4e9853f4b18b7d09b08abe72e75e57c89006c8e29a81794714d72bf6a2f5fd31",
+      "currentHash": "4e9853f4b18b7d09b08abe72e75e57c89006c8e29a81794714d72bf6a2f5fd31",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/environment.ts",
+      "proofHash": "4d25a97539e69ef59d6d7283e31eb68cf9b1922aad60ce4e837314bf73115ffe",
+      "currentHash": "4d25a97539e69ef59d6d7283e31eb68cf9b1922aad60ce4e837314bf73115ffe",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+      "proofHash": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+      "currentHash": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+      "matchesProof": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/general-chat-proof.mjs",
+      "proofHash": "741c6f06b5e64c0a7a1f0e53c30503088f9f264757cd8cada902ccf31f8721b1",
+      "currentHash": "5f75d533d936edcc3cd8caa50fb97d0110ac3cc52378fcfea4228e9fd54844a3",
+      "matchesProof": false
+    }
+  ],
+  "postProofChanges": [
+    "maya-saas-backend/scripts/general-chat-proof.mjs"
+  ],
+  "runtimeUnchangedSince": "e2ff6395486da105a5affba459b6b9c6ee72e9ac",
+  "datasetsAndCarriersUnchanged": true,
+  "launcherSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+  "clusters": [
+    {
+      "attempt": "http-r1",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-general-chat-kW9gc5/pg",
+      "statusExitCode": 3,
+      "pidAbsent": true
+    },
+    {
+      "attempt": "http-r2",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-general-chat-Ds1A2v/pg",
+      "statusExitCode": 3,
+      "pidAbsent": true
+    },
+    {
+      "attempt": "http-r3",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-general-chat-SAIn67/pg",
+      "statusExitCode": 3,
+      "pidAbsent": true
+    }
+  ],
+  "foreignWorktrees": [
+    {
+      "worktree": "maya-offline48-semantics",
+      "head": "97624aa633f4c2cd1d3b5412ec27e6d18f48dc07",
+      "status": ""
+    },
+    {
+      "worktree": "maya-conversation-batch",
+      "head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+      "status": ""
+    },
+    {
+      "worktree": "maya-union-handoff",
+      "head": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+      "status": ""
+    }
+  ],
+  "buildArtifacts": {
+    "maya-saas-backend/dist/src/main.js": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+    "maya-saas-backend/dist/src/ai-tools/ai-core.service.js": "876d053e79839fbb41c9fd7c95e96c2b27d6ad82bd3d851f9b6830d467d4805a",
+    "maya-saas-backend/dist/scripts/release-preflight.js": "fdc9c04b535d336bf6443198e6e4baa4b87cbe9c438ad8a3bfe1127854e71288"
+  },
+  "httpStatuses": [
+    201,
+    201,
+    201,
+    201,
+    409,
+    401
+  ],
+  "manifestSha256": "b7446a31d359baa205b6b2e1a65dc1ea92a5dca9e0fb410232e0e2a96453924f",
+  "conversationSha256": "8b235177d8b4746fb4e90d34c8659f114b8702511aef3bd47dfc1676aab7a6bf",
+  "testsRerunDuringRecovery": false,
+  "processRecovery": "Read-only ps inspection: no Jest or proof driver remains; all three owned PG status checks report stopped. Other long-lived services were left untouched.",
+  "realModelAcceptance": false,
+  "restartAcceptance": false,
+  "fullMayaAcceptance": "NOT_ISSUED"
+}

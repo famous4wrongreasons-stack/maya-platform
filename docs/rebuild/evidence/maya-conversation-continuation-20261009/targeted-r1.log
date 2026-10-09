@@ -1,0 +1,222 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › never substitutes business analytics for an unavailable staff schedule
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Кто работает сегодня?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.655Z", "persona": "director", "principalRole": "tenant_owner", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool analytics.business.query", "input_schema": {"type": "object"}, "name": "analytics.business.query", "risk_tier": "read"}]}
+
+      2756 |
+      2757 |     expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    > 2758 |     expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                    ^
+      2759 |     expect(result).toMatchObject({
+      2760 |       source: 'safe_fallback',
+      2761 |       grounding: {
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:2758:36)
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › retains pre-model protected-source refusal for Объясни простыми словами выручку after ordinary conversation
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Слушай, посмотри: привет, Майя. Объясни простыми словами.", "role": "user"}, {"content": "Объясни простыми словами выручку", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.692Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}, {"approval_policy": "none", "description": "Tool catalog.services.read", "input_schema": {"type": "object"}, "name": "catalog.services.read", "risk_tier": "read"}]}
+
+      2855 |         );
+      2856 |         expect(out.grounding.status).toBe('blocked');
+    > 2857 |         expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                        ^
+      2858 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      2859 |       },
+      2860 |     );
+
+      at ai-tools/ai-core.service.spec.ts:2857:40
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › retains pre-model protected-source refusal for Не подменяй факты прогнозом. Какая выручка? after ordinary conversation
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Слушай, посмотри: привет, Майя. Объясни простыми словами.", "role": "user"}, {"content": "Не подменяй факты прогнозом. Какая выручка?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.693Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}, {"approval_policy": "none", "description": "Tool catalog.services.read", "input_schema": {"type": "object"}, "name": "catalog.services.read", "risk_tier": "read"}]}
+
+      2855 |         );
+      2856 |         expect(out.grounding.status).toBe('blocked');
+    > 2857 |         expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                        ^
+      2858 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      2859 |       },
+      2860 |     );
+
+      at ai-tools/ai-core.service.spec.ts:2857:40
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › retains pre-model protected-source refusal for Дай прогноз выручки after ordinary conversation
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Слушай, посмотри: привет, Майя. Объясни простыми словами.", "role": "user"}, {"content": "Дай прогноз выручки", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.693Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}, {"approval_policy": "none", "description": "Tool catalog.services.read", "input_schema": {"type": "object"}, "name": "catalog.services.read", "risk_tier": "read"}]}
+
+      2855 |         );
+      2856 |         expect(out.grounding.status).toBe('blocked');
+    > 2857 |         expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                        ^
+      2858 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      2859 |       },
+      2860 |     );
+
+      at ai-tools/ai-core.service.spec.ts:2857:40
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › retains pre-model protected-source refusal for Покажи рост прибыли after ordinary conversation
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Слушай, посмотри: привет, Майя. Объясни простыми словами.", "role": "user"}, {"content": "Покажи рост прибыли", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.694Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}, {"approval_policy": "none", "description": "Tool catalog.services.read", "input_schema": {"type": "object"}, "name": "catalog.services.read", "risk_tier": "read"}]}
+
+      2855 |         );
+      2856 |         expect(out.grounding.status).toBe('blocked');
+    > 2857 |         expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                        ^
+      2858 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      2859 |       },
+      2860 |     );
+
+      at ai-tools/ai-core.service.spec.ts:2857:40
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › retains pre-model protected-source refusal for Какой график у мастера завтра? after ordinary conversation
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Слушай, посмотри: привет, Майя. Объясни простыми словами.", "role": "user"}, {"content": "Какой график у мастера завтра?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.694Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}, {"approval_policy": "none", "description": "Tool catalog.services.read", "input_schema": {"type": "object"}, "name": "catalog.services.read", "risk_tier": "read"}]}
+
+      2855 |         );
+      2856 |         expect(out.grounding.status).toBe('blocked');
+    > 2857 |         expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                        ^
+      2858 |         expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      2859 |       },
+      2860 |     );
+
+      at ai-tools/ai-core.service.spec.ts:2857:40
+
+  ● AiCoreService › does not let a public staff tool substitute protected evidence: Какая выручка бизнеса за месяц?
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Какая выручка бизнеса за месяц?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.700Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}]}
+
+      3266 |       );
+      3267 |       expect(out.grounding).toMatchObject({ status: 'blocked' });
+    > 3268 |       expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                      ^
+      3269 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3270 |     },
+      3271 |   );
+
+      at ai-tools/ai-core.service.spec.ts:3268:38
+
+  ● AiCoreService › does not let a public staff tool substitute protected evidence: Какой график у мастера завтра?
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Какой график у мастера завтра?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.700Z", "persona": "director", "principalRole": "administrator", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool catalog.staff.read", "input_schema": {"type": "object"}, "name": "catalog.staff.read", "risk_tier": "read"}]}
+
+      3266 |       );
+      3267 |       expect(out.grounding).toMatchObject({ status: 'blocked' });
+    > 3268 |       expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                      ^
+      3269 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      3270 |     },
+      3271 |   );
+
+      at ai-tools/ai-core.service.spec.ts:3268:38
+
+  ● AiCoreService › explains access denial without pretending the protected source is offline
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Какая выручка бизнеса за этот месяц?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.731Z", "persona": "admin", "principalRole": "customer", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": [{"approval_policy": "none", "description": "Tool appointments.own.list", "input_schema": {"type": "object"}, "name": "appointments.own.list", "risk_tier": "read"}]}
+
+      4233 |       },
+      4234 |     });
+    > 4235 |     expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                    ^
+      4236 |     expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      4237 |   });
+      4238 |
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:4235:36)
+
+  ● AiCoreService › names the plan when the assistant is not part of it at all
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"allowToolCall": true, "businessTimezone": "Europe/Moscow", "conversationPlan": null, "corrections": [], "memoryFacts": [], "messages": [{"content": "Какая выручка бизнеса за этот месяц?", "role": "user"}], "nowUtc": "2026-10-09T20:31:09.731Z", "persona": "director", "principalRole": "tenant_owner", "requiredToolNames": [], "surface": "web", "toolResults": [], "tools": []}
+
+      4257 |       grounding: { status: 'blocked' },
+      4258 |     });
+    > 4259 |     expect(mocks.model.decide).not.toHaveBeenCalled();
+           |                                    ^
+      4260 |     expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      4261 |   });
+      4262 |
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:4259:36)
+
+PASS src/ai-tools/ai-core-model.service.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       10 failed, 404 passed, 414 total
+Snapshots:   0 total
+Time:        1.203 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core-model.service.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-conversation-continuation-20261009/targeted-r1.json
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 2)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:conversation_plan_missing[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:conversation_plan_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 2)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_output_missing[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:deepseek_output_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_required_tool_missing[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:final_reply:ai_core_unexpected_tool_call (попытка 2)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:ai_core_unexpected_tool_call[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_api_key_missing (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_api_key_missing[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_base_url_invalid (попытка 1)[39m
+[33m[Nest] 44735  - [39m10/09/2026, 11:31:09 PM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_base_url_invalid[39m

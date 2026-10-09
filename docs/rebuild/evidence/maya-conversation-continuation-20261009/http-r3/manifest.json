@@ -1,0 +1,40 @@
+{
+  "qualification": "ACTUAL_HTTP_AUTH_HISTORY_PG_SCRIPTED_SEMANTICS",
+  "sourceHead": "918b3525dab775a7beedb090366066d8ec0c2902",
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "87cfcd156b55ba48d503595913e5257df1734a22ce3c2b28d35cea8cdf788ced",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.ts": "362d4b683dcb63e31139cd750990d32d6b89783ca03211ce5d17eca7d096c48d",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "7a1ea3577f32b8d05879f31adcb8729a8b227cd915208194154fa451d88bb845",
+    "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts": "8dc80a3a5215efc952215ae76cbf8ea1b96bab4f3f0a745e9a785a3fbec35f22",
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts": "67fcaa73aa65c381dfbc40e36871ad12991719091d9bf118ec5bfd083f47e590",
+    "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+    "maya-saas-backend/test/widgets-live/general-chat.probe-spec.ts": "b010357e98d0a05fa0be0c317e1d68d691c4359cffa70435c871370d9de3f22e",
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140",
+    "maya-saas-backend/test/widgets-live/support/bootstrap.ts": "4e9853f4b18b7d09b08abe72e75e57c89006c8e29a81794714d72bf6a2f5fd31",
+    "maya-saas-backend/test/widgets-live/support/environment.ts": "4d25a97539e69ef59d6d7283e31eb68cf9b1922aad60ce4e837314bf73115ffe",
+    "maya-saas-backend/scripts/c9-occupancy-proof.mjs": "37e571548f31e23d4b5e4ae777bca4bb8265f27831cc8ec4e186275e8fff1a5b",
+    "maya-saas-backend/scripts/general-chat-proof.mjs": "741c6f06b5e64c0a7a1f0e53c30503088f9f264757cd8cada902ccf31f8721b1"
+  },
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "general-chat-http"
+  ],
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-general-chat-SAIn67/pg",
+  "database": "maya_widget_gate_proof_c9occ_6b0933f78b0d",
+  "port": 63898,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "browserAcceptance": false,
+  "resources": {
+    "nodeHeapMb": 1536,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64
+  },
+  "clusterStopped": true,
+  "pidAbsent": true,
+  "sourceUnchanged": true
+}

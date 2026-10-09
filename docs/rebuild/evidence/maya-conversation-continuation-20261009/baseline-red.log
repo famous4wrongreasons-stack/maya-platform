@@ -1,0 +1,391 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  AiCoreService
+    ○ skipped a stale history replay cannot append UNKNOWN after the original request saved SUCCEEDED
+    ○ skipped routes a native conversation through the real schedule preview owner
+    ○ skipped routes a web conversation through the real schedule preview owner
+    ○ skipped uses client authority for schedule commands in a client audience even for the owner
+    ○ skipped renders canonical dormancy signals without legacy contacts or inferred activity
+    ○ skipped returns C8 unavailability through chat after the selected dormancy read when model continuation fails
+    ○ skipped plans user booking turns before heuristic data preloads without exporting assistant history: На сегодня на 16:30 к Стасу
+    ○ skipped plans user booking turns before heuristic data preloads without exporting assistant history: Нет, лучше завтра к другому мастеру
+    ○ skipped plans user booking turns before heuristic data preloads without exporting assistant history: Хочу на стрижку в пятницу вечером
+    ○ skipped plans user booking turns before heuristic data preloads without exporting assistant history: Давай вместо завтра послезавтра
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: ready
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: empty
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: malformed
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: stale
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: no-resolution
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: refused-resolution
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: wrong-source
+    ○ skipped personal preparation announces a form only for a fresh actually minted catalog entry: no-navigation
+    ○ skipped does not substitute a heuristic analytics read when semantic planning is unavailable
+    ○ skipped persists an explicit REMEMBER command without invoking the model
+    ○ skipped passes tenant-scoped remembered notes to the model
+    ○ skipped introduces MAYA and lists personal analytics settings without calling a model
+    ○ skipped enables a named analytics capability directly from chat
+    ○ skipped returns a safe fallback without calling tools when no model is configured
+    ○ skipped redacts PII, executes an allowed read tool and lets the model answer from its result
+    ○ skipped stops at the immutable approval instead of letting the model write
+    ○ skipped binds a direct pricing proposal and refuses caller-only correction history
+    ○ skipped binds a direct pricing proposal and refuses caller-only correction history
+    ○ skipped does not prepare pricing from ambiguous intent or stale catalog: Установи цену Стрижка на 10%
+    ○ skipped does not prepare pricing from ambiguous intent or stale catalog: Установи цену Массаж 1900
+    ○ skipped does not prepare pricing from ambiguous intent or stale catalog: Установи цену Стрижка 1900
+    ○ skipped withholds owner pricing from the client audience even if the owner is signed in
+    ○ skipped redacts standalone likely names before the external model boundary
+    ○ skipped preserves an ISO booking date while redacting a phone number
+    ○ skipped does not call unavailable exact source ambiguous_local_time an empty or occupied calendar
+    ○ skipped does not call unavailable exact source incomplete_source an empty or occupied calendar
+    ○ skipped composes the exact filtered READ result without a second model answer suggesting another time
+    ○ skipped lets the model describe only the slots the availability tool returned
+    ○ skipped keeps ordinary capitalized words so the model can understand the request
+    ○ skipped retries once and blocks a factual reply when the model skips its tool
+    ○ skipped accepts financial figures only when the server tool returned them
+    ○ skipped blocks a figure that differs from the completed tool result
+    ○ skipped never substitutes business analytics for an unavailable staff schedule
+    ○ skipped не требует источник, когда смысловой план назвал ход болтовнёй
+    ○ skipped routes an unseen owner paraphrase through semantic planning instead of a monthly-summary default
+    ○ skipped asks one semantic clarification and executes no tool when meaning is uncertain
+    ○ skipped composes semantic public staff consultation: Какие у вас мастера?
+    ○ skipped composes semantic public staff consultation: Какие у вас мастера?
+    ○ skipped composes semantic public staff consultation: Какие у вас мастера?
+    ○ skipped lets administrator ask a public staff question without analytics entitlement
+    ○ skipped lets tenant_owner ask a public staff question without analytics entitlement
+    ○ skipped does not let a public staff tool substitute protected evidence: Какая выручка бизнеса за месяц?
+    ○ skipped does not let a public staff tool substitute protected evidence: Какой график у мастера завтра?
+    ○ skipped keeps a compound public catalog plan in its existing continuation
+    ○ skipped keeps owner in client audience on salon story without business analytics
+    ○ skipped 🔴 баланс чужого журнала произносится с оговоркой, а не как факт Maya
+    ○ skipped grounds a customer loyalty balance in the authenticated customer tool
+    ○ skipped grounds a request to spend bonuses before suggesting a service
+    ○ skipped grounds the authenticated customer appointment history
+    ○ skipped composes the reviews empty result once without inferring registry configuration
+    ○ skipped composes the reviews stale result once without inferring registry configuration
+    ○ skipped composes the reviews missing-scope result once without inferring registry configuration
+    ○ skipped explains access denial without pretending the protected source is offline
+    ○ skipped names the plan when the assistant is not part of it at all
+    ○ skipped не отказывает мастеру в его собственных данных: Сколько у меня ещё записей сегодня
+    ○ skipped не отказывает мастеру в его собственных данных: Какой у меня график завтра
+    ○ skipped uses employee analytics rather than business totals for staff
+    ○ skipped loads verified CRM context for an open-ended owner business question
+    ○ skipped does not load a CRM report for a simple owner greeting
+    ○ skipped blocks a repeated client upsell after the client asks for only a haircut
+    ○ skipped does not let a client upsell bypass the verified service catalog
+    ○ skipped allows one client upsell after the service catalog is verified
+    ○ skipped lets the native model explain a weakest-service query from verified data
+    ○ skipped answers from verified business data when the model is temporarily unavailable
+    ○ skipped keeps a weak-spots follow-up comprehensive when the model is unavailable
+    ○ skipped answers a compound year comparison without bypassing canonical opportunities
+    ○ skipped does not invent an action when an owner asks what to do about a revenue decline
+    ○ skipped explains the strongest verified factor when an owner asks why business declined
+    ○ skipped distinguishes a CRM outage from a Maya reasoning failure
+    ○ skipped uses only the current employee query to give a master performance advice
+    ○ skipped refuses to label operating data as gross profit
+    ○ skipped returns only the verified CRM payroll aggregate for salary questions
+    ○ skipped returns verified payroll by master when the model is unavailable
+    ○ skipped never substitutes payroll for money brought in by each master
+    ○ skipped does not turn unavailable CRM revenue into zero
+    ○ skipped answers exact appointment statuses without asking the model to recalculate
+    ○ skipped answers a daily breakdown from exact CRM status buckets
+    ○ skipped answers a year-over-year question from the universal business query
+    ○ skipped names last year revenue in the deterministic year-over-year summary
+    ○ skipped keeps a customer-count follow-up inside the same year-over-year window
+    ○ skipped recognizes a direct customer decline comparison with the previous year
+    ○ skipped fails closed when the model requests a tool unavailable to the role
+    ○ skipped asks the model to rewrite an unsourced number and ships the corrected answer
+    ○ skipped treats conversation as context, with explicit user scenario=false, not assistant numeric evidence
+    ○ skipped treats conversation as context, with explicit user scenario=true, not assistant numeric evidence
+    ○ skipped falls back to the deterministic text when the model repeats an unsourced number
+    ○ skipped lets the model say a decline in words while the server keeps the minus sign
+    ○ skipped does not mistake decline wording next to an absolute figure for an error
+    ○ skipped catches a decline described as growth even though the figure itself is real
+    ○ skipped lets the model name a money change in roubles when the server counted it in kopecks
+    ○ skipped still rejects a money figure that is not in the data at any scale
+    ○ skipped does not treat an hour inside a timestamp as a confirmed metric
+    ○ skipped lets a per-master service drop through the number guard by name
+    ○ skipped projects actual serialized model requests through read, correction and server label presentation
+    ○ skipped restores only registered accepted service preferences and rejects foreign or forged private references
+    ○ skipped keeps nonnumeric catalog service IDs out of serialized resumed semantic context
+    ○ skipped lets a salon-wide sentence without any master name through untouched
+    ○ skipped keeps a full three-part answer with per-master detail intact
+    ○ skipped leaves the model answer byte-for-byte alone instead of rewriting master labels
+    ○ skipped trims a long conversation instead of refusing to answer it
+    ○ skipped gives the model the server time instead of letting it guess the calendar
+    explicit preparation stop
+      ○ skipped closes the current preparation for client before model, tool or card dispatch
+      ○ skipped closes the current preparation for tenant_owner before model, tool or card dispatch
+      ○ skipped does not restore a stopped plan through the retained context window on the next turn
+      ○ skipped does not replace a different request (Отмени мою запись) with preparation stop
+      ○ skipped does not replace a different request (Что значит «стоп»?) with preparation stop
+      ○ skipped does not replace a different request (Не останавливай подготовку) with preparation stop
+      ○ skipped does not acknowledge a stop when the existing conversation owner refuses the principal
+    current tenant-owned branch preferences in Client booking
+      ○ skipped returns to the same booking after a non-data question and changes only the date
+      ○ skipped does not recover older booking across barrier
+      ○ skipped does not recover older booking across business-task
+      ○ skipped does not recover older booking across window-limit
+      ○ skipped does not recover older booking across invalid-plan
+      ○ skipped starts a new booking without carrying old preferences after a non-data question
+      ○ skipped keeps the latest general context when interrupted booking source is changed
+      ○ skipped keeps the latest general context when interrupted booking source is unavailable
+      ○ skipped preserves original context age across general questions for date tomorrow
+      ○ skipped preserves original context age across general questions for date 2026-10-11
+      ○ skipped retains only unambiguous current staff before the service question (ambiguous=false)
+      ○ skipped retains only unambiguous current staff before the service question (ambiguous=true)
+      ○ skipped addresses unknown staff before reading services or minting a selector
+      ○ skipped addresses failed staff before reading services or minting a selector
+      ○ skipped addresses stale staff before reading services or minting a selector
+      ○ skipped addresses malformed staff before reading services or minting a selector
+      ○ skipped refuses drift after the staff-only preference read before emitting a service selector
+      ○ skipped retains staff while clarifying rejected services: ["Стрижка", "Борода"]
+      ○ skipped retains staff while clarifying rejected services: ["Неизвестная услуга"]
+      ○ skipped continues ordinary service → staff → explicit day with bounded fresh reads and retained source preferences
+      ○ skipped refuses a source change between retained preferences and the next model decision
+      ○ skipped pins the selected catalog source through availability admission and refuses a last-moment binding change
+      ○ skipped restores accepted numeric service 81 through the private model placeholder before fresh catalog binding
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: current-empty
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: current-bound-empty
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: failed
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: stale
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: missing-execution
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: wrong-tool
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: missing-slots
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: malformed-slots
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: nonempty-unpresented
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: invalid-timezone
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: wrong-timezone
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: missing-selection
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: foreign-tenant
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: wrong-staff
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: wrong-service
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: wrong-branch
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: changed-source
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: incomplete
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: ambiguous
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: unknown-completeness
+      ○ skipped reports a source-qualified empty booking day only from the current bounded READ: exact-time
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: ready
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: stale
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: refused
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: foreign-source
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: no-widget
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: other-time
+      ○ skipped acknowledges a carried exact-time selection only with a fresh source widget: other-day
+      ○ skipped retains the exact clock through an early missing-service clarification
+      ○ skipped replaces an earlier exact clock with the current time_of_day correction when preparing a booking
+      ○ skipped clarifies a compound daypart correction instead of reusing the old clock, then retains the corrected day and service
+      ○ skipped carries exact time corrections into fresh READs without losing branch/staff/date and gives an honest empty result
+      ○ skipped retains every other choice across date, service, staff and branch corrections and intent transition
+      ○ skipped refuses foreign branch before actionable availability
+      ○ skipped refuses ambiguous branch before actionable availability
+      ○ skipped refuses conflicting fresh ID before actionable availability
+      ○ skipped revalidates a branch supplied only as a fresh ID and stores its public preference for the next correction
+      ○ skipped retains the branch-local day while clarifying a missing service
+      ○ skipped offers a current staff selector and retains semantic branch, service and local day
+      ○ skipped offers a current staff selector and retains proposed branch ID, service and local day
+      ○ skipped refuses a foreign branch on a partial request before catalog reads or staff selection
+      ○ skipped does not reuse a retained branch when its current source binding is unavailable
+    ordinary administrator conversation without financial authority
+      ○ skipped lets semantic planning answer Слушай, посмотри: привет, Майя. Объясни простыми словами. with unchanged role and no source calls
+      ○ skipped lets semantic planning answer проверь помоги мне разобраться. Не подмяй факты прогнозом. with unchanged role and no source calls
+      ○ skipped lets semantic planning answer Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами. with unchanged role and no source calls
+      ○ skipped retains pre-model protected-source refusal for Объясни простыми словами выручку after ordinary conversation
+      ○ skipped retains pre-model protected-source refusal for Не подменяй факты прогнозом. Какая выручка? after ordinary conversation
+      ○ skipped retains pre-model protected-source refusal for Дай прогноз выручки after ordinary conversation
+      ○ skipped retains pre-model protected-source refusal for Покажи рост прибыли after ordinary conversation
+      ○ skipped retains pre-model protected-source refusal for Какой график у мастера завтра? after ordinary conversation
+      ○ skipped does not grant administrator an unavailable forecast capability after semantic disambiguation
+      ○ skipped does not grant client an unavailable forecast capability after semantic disambiguation
+      ○ skipped does not discard source grounding merely because routing is general
+    general explanations before heuristic access refusal
+      ✕ answers existing corpus utt-general.explain_term-016 without reading CRM when analytics is unavailable (12 ms)
+      ✕ answers existing corpus utt-general.explain_term-024 without reading CRM when analytics is unavailable (6 ms)
+    personal appointment details in the canonical chat
+      ○ skipped preserves the reschedule intent after an authorized own READ, stale=false
+      ○ skipped preserves the reschedule intent after an authorized own READ, stale=true
+      ○ skipped filters next week at tenant-local Monday boundaries before composing personal facts
+      ○ skipped answers an empty next week instead of displaying a nearer appointment outside it
+      ○ skipped does not coerce an unsupported explicit period to an unfiltered list: {"period":["upcoming"]}
+      ○ skipped does not coerce an unsupported explicit period to an unfiltered list: {"period":["next_week"]}
+      ○ skipped does not coerce an unsupported explicit period to an unfiltered list: {"period":"last_month"}
+      ○ skipped describes an empty available list without denying history hidden by the source setting
+      ○ skipped answers the next appointment at its branch time without exposing history to another model call
+      ○ skipped shows a lawful branchless appointment in the owner-qualified tenant display timezone without inventing a branch
+      ○ skipped refuses an unqualified or invalid branchless display timezone 0
+      ○ skipped refuses an unqualified or invalid branchless display timezone 1
+      ○ skipped refuses an unqualified or invalid branchless display timezone 2
+      ○ skipped refuses an unqualified or invalid branchless display timezone 3
+      ○ skipped does not export a prior personal reply through same conversation model input
+      ○ skipped does not export a prior personal reply through restored conversation model input
+      ○ skipped counts the complete raw list and displays only three earliest upcoming appointments
+      ○ skipped withholds private history in the actual serialized next model request, including a refused personal reread
+      ○ skipped does not offer a canceled future appointment as the next visit
+      ○ skipped does not offer a cached upcoming flag after its actual instant has passed
+      ○ skipped accepts canonical reader/persisted instant 2026-10-07T09:00:00.000Z
+      ○ skipped accepts canonical reader/persisted instant 2026-10-07T09:00:00Z
+      ○ skipped accepts canonical reader/persisted instant 2026-10-07T09:00:00.1Z
+      ○ skipped does not turn missing list into a verified empty history or invented date
+      ○ skipped does not turn null list into a verified empty history or invented date
+      ○ skipped does not turn malformed entry into a verified empty history or invented date
+      ○ skipped does not turn missing upcoming time into a verified empty history or invented date
+      ○ skipped does not turn normalized invalid calendar date into a verified empty history or invented date
+      ○ skipped does not turn timezone-free datetime into a verified empty history or invented date
+      ○ skipped does not turn missing branch timezone into a verified empty history or invented date
+      ○ skipped does not turn unknown status into a verified empty history or invented date
+      ○ skipped does not turn invalid timezone into a verified empty history or invented date
+      ○ skipped refuses stale appointment times instead of claiming the snapshot is current
+    service rename preview [scripted model only; no approval lane]
+      ○ skipped binds literal user request, passes through one C9 owner and terminates without a second model reply (stale=false)
+      ○ skipped binds literal user request, passes through one C9 owner and terminates without a second model reply (stale=true)
+      ○ skipped refuses inferred or absent selections: да, подтверждаю
+      ○ skipped refuses inferred or absent selections: Не переименуй услугу «Стрижка» в «Новое»
+      ○ skipped refuses inferred or absent selections: Переименуй услугу «Массаж» в «Новое»
+      ○ skipped refuses same service ID after company rotation between catalog and preview
+      ○ skipped does not expose the management preview to the client audience
+    goods search [scripted model only]
+      ○ skipped binds an explicit code on the server despite model masking: Найди товар по штрихкоду 0001234567890
+      ○ skipped binds an explicit code on the server despite model masking: Найди по штрихкоду 0001234567890
+      ○ skipped binds an explicit code on the server despite model masking: Найди товар по штрихкоду 0001234567890.
+      ○ skipped binds an explicit code on the server despite model masking: Найди товар по артикулу: A-01/2
+      ○ skipped binds an explicit code on the server despite model masking: Найди по артикулу A-01/2.
+      ○ skipped binds an explicit code on the server despite model masking: Найди по артикулу «A-01.».
+      ○ skipped binds an explicit code on the server despite model masking: Найди товар по штрихкоду «0001234567890» в YCLIENTS
+      ○ skipped clarifies an incomplete or ambiguous explicit code instead of executing the model guess: Найди товар по штрихкоду
+      ○ skipped clarifies an incomplete or ambiguous explicit code instead of executing the model guess: Найди товар по штрихкоду 0001234567890 или 0001234567891
+      ○ skipped clarifies an incomplete or ambiguous explicit code instead of executing the model guess: Найди товар по артикулу A01 и по артикулу A02
+      ○ skipped terminates after one C9 read with a server-composed answer and no item selection (stale=false)
+      ○ skipped terminates after one C9 read with a server-composed answer and no item selection (stale=true)
+    exact client dossier selection [scripted model only]
+      ○ skipped clarifies before dossier disclosure, then binds the next explicit query to a fresh read inside the server
+      ○ skipped does not disclose facts from old ambiguous receipt
+      ○ skipped does not disclose facts from stale unique result
+      ○ skipped does not disclose facts from incomplete identity result
+      ○ skipped does not disclose facts from malformed result
+      ○ skipped keeps the entire explicit private query inside the server: иван петров
+      ○ skipped keeps the entire explicit private query inside the server: Иван   Петров
+      ○ skipped keeps the entire explicit private query inside the server: 7346
+      ○ skipped keeps the entire explicit private query inside the server: +7 (999) 123-45-67
+      ○ skipped keeps the entire explicit private query inside the server: Иван Петров 7346
+      ○ skipped keeps the entire explicit private query inside the server: Агафьян Хрубцков, телефон 7346, подробности последнего визита и история покупок за всё время
+      ○ skipped masks the exact supported client query and retained user history: Сколько визитов у 7346
+      ○ skipped masks the exact supported client query and retained user history: Сколько у 7346 бонусов
+      ○ skipped masks the exact supported client query and retained user history: Насколько 7346 лоялен
+      ○ skipped masks the exact supported client query and retained user history: Какие услуги покупает 7346
+      ○ skipped masks the exact supported client query and retained user history: Что 7346 обычно берёт
+      ○ skipped masks the exact supported client query and retained user history: Что за клиент 7346
+      ○ skipped masks the exact supported client query and retained user history: Расскажи про клиента 7346
+      ○ skipped masks the exact supported client query and retained user history: Расскажи про иван петров
+      ○ skipped masks the exact supported client query and retained user history: Расскажи о клиенте Агафьян Хрубцков
+      ○ skipped masks the exact supported client query and retained user history: Сколько визитов у клиента Агафьян Хрубцков
+      ○ skipped masks the exact supported client query and retained user history: Сколько у Агафьян Хрубцков визитов
+      ○ skipped masks the exact supported client query and retained user history: Как Агафьян Хрубцков лоялен
+      ○ skipped masks the exact supported client query and retained user history: Какие услуги любит Агафьян Хрубцков
+      ○ skipped masks the exact supported client query and retained user history: Что Агафьян Хрубцков обычно берёт
+      ○ skipped keeps a generic public topic intact without a client query or read: Расскажи про погоду
+      ○ skipped keeps a generic public topic intact without a client query or read: Расскажи о тайм-менеджменте
+      ○ skipped masks an overlong explicit identity and clarifies without a guessed query
+      ○ skipped does not let a model-invented dossier query select a client from a general topic
+      ○ skipped keeps not-found and failed-source explanations distinct: Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).
+      ○ skipped keeps not-found and failed-source explanations distinct: Поиск клиентов в CRM сейчас недоступен.
+    canonical own tasks [scripted selection only]
+      ○ skipped composes the source reply on web without another model turn or a write
+      ○ skipped composes the source reply on native without another model turn or a write
+      ○ skipped blocks stale source without a model recovery claim
+      ○ skipped blocks incomplete source without a model recovery claim
+    stored Admin integration status [scripted selection only]
+      ○ skipped answers the selected READ on native with one model selection and unchanged actor
+      ○ skipped answers the selected READ on web with one model selection and unchanged actor
+      ○ skipped keeps stale source blocked without a recovery recommendation
+      ○ skipped keeps incomplete source blocked without a recovery recommendation
+      ○ skipped does not reuse a successful status after source access is revoked
+    public company profile consultation
+      ○ skipped answers the client address and hours from the public CRM profile without another model call
+      ○ skipped preserves an address when discovery has no hours instead of inventing them
+      ○ skipped does not claim company profile facts from unverified
+      ○ skipped does not claim company profile facts from wrong source
+      ○ skipped does not claim company profile facts from stale
+      ○ skipped does not claim company profile facts from contradictory availability
+      ○ skipped does not claim company profile facts from missing hours
+      ○ skipped does not claim company profile facts from unbounded hours
+      ○ skipped keeps known hours but marks a missing address instead of substituting the salon name
+      ○ skipped rereads current public facts for a short address follow-up without carrying old hours
+      ○ skipped refuses a model-only public address answer before a current source read
+      ○ skipped does not require the salon profile for another domain: Как изменить email-адрес?
+      ○ skipped does not require the salon profile for another domain: Что такое IP-адрес?
+      ○ skipped does not require the salon profile for another domain: Какой у вас адрес электронной почты?
+      ○ skipped does not require the salon profile for another domain: Какой ваш адрес сайта?
+      ○ skipped does not require the salon profile for another domain: Где находится настройка уведомлений?
+      ○ skipped does not require the salon profile for another domain: Когда открывается запись на ноябрь?
+      ○ skipped keeps a client dossier address question in the existing dossier domain
+    own schedule
+      ○ skipped composes own schedule from the current source: true
+      ○ skipped composes own schedule from the current source: false
+      ○ skipped refuses to invent an own schedule when unlinked
+      ○ skipped refuses to invent an own schedule when working without intervals
+      ○ skipped refuses to invent an own schedule when missing work status
+      ○ skipped refuses to invent an own schedule when unverified
+      ○ skipped refuses to invent an own schedule when stale
+      ○ skipped refuses to invent an own schedule when wrong source
+      ○ skipped refuses to invent an own schedule when wrong date
+      ○ skipped refuses to invent an own schedule when broken interval
+      ○ skipped refuses to invent an own schedule when contradictory day off
+      ○ skipped binds own schedule date to the current request: Завтра я работаю?
+      ○ skipped binds own schedule date to the current request: А послезавтра?
+      ○ skipped binds own schedule date to the current request: Сегодня я работаю?
+      ○ skipped binds own schedule date to the current request: Мой график 2026-10-02
+      ○ skipped binds own schedule date to the current request: Мой график 02.10.2026
+      ○ skipped binds own schedule date to the current request: Мой график 02.10.26.
+      ○ skipped binds own schedule tomorrow across local midnight in Europe/Moscow
+      ○ skipped binds own schedule tomorrow across local midnight in America/Los_Angeles
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график
+      ○ skipped clarifies an own schedule date without trusting model args: Сегодня или завтра?
+      ○ skipped clarifies an own schedule date without trusting model args: На 31.02.2026
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график 07.10.026
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график 07.10.326
+      ○ skipped clarifies an own schedule date without trusting model args: Мой график не завтра, а в пятницу
+      ○ skipped clarifies an own schedule date without trusting model args: С 07.10 до пятницы
+      ○ skipped clarifies an own schedule date without trusting model args: Не на завтра, а на следующий день
+      ○ skipped clarifies an own schedule date without trusting model args: Завтра и в пятницу
+      ○ skipped refuses an own schedule that would be truncated by result sanitization
+      ○ skipped does not expose the staff own schedule in an owner client audience
+      ○ skipped rereads the own schedule for a short next-day follow-up instead of reusing the prior shift
+
+  ● AiCoreService › general explanations before heuristic access refusal › answers existing corpus utt-general.explain_term-016 without reading CRM when analytics is unavailable
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Средний чек — это сумма продаж, разделённая на количество чеков. Это общее объяснение, без расчёта показателей салона."
+    Received: "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные."
+
+      2954 |           ...dto, messages: [{ role: 'user', content: row.utterance }],
+      2955 |         });
+    > 2956 |         expect(response.reply).toBe(reply);
+           |                                ^
+      2957 |         expect(response.grounding.status).toBe('not_required');
+      2958 |         expect(response.action).toBeNull();
+      2959 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+
+      at ai-tools/ai-core.service.spec.ts:2956:32
+
+  ● AiCoreService › general explanations before heuristic access refusal › answers existing corpus utt-general.explain_term-024 without reading CRM when analytics is unavailable
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Средний чек — это сумма продаж, разделённая на количество чеков. Это общее объяснение, без расчёта показателей салона."
+    Received: "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные."
+
+      2954 |           ...dto, messages: [{ role: 'user', content: row.utterance }],
+      2955 |         });
+    > 2956 |         expect(response.reply).toBe(reply);
+           |                                ^
+      2957 |         expect(response.grounding.status).toBe('not_required');
+      2958 |         expect(response.action).toBeNull();
+      2959 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+
+      at ai-tools/ai-core.service.spec.ts:2956:32
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 335 skipped, 337 total
+Snapshots:   0 total
+Time:        2.712 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".

@@ -1,0 +1,14 @@
+[
+  {
+    "check": "targeted-r4",
+    "exitCode": 0
+  },
+  {
+    "check": "lint-r2",
+    "exitCode": 0
+  },
+  {
+    "check": "http-types-r2",
+    "exitCode": 0
+  }
+]

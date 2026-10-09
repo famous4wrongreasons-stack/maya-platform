@@ -1,0 +1,14 @@
+[
+  {
+    "check": "types",
+    "exitCode": 0
+  },
+  {
+    "check": "http-types",
+    "exitCode": 0
+  },
+  {
+    "check": "lint",
+    "exitCode": 1
+  }
+]
