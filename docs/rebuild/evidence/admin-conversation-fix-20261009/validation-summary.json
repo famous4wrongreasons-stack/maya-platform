@@ -1,0 +1,70 @@
+{
+  "qualification": "LOCAL_SYNTHETIC_ROUTING_FIX_NOT_REAL_MODEL_OR_PROVIDER_ACCEPTANCE",
+  "testedSourceCommit": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa",
+  "httpManifestSha256": "bfce2d4909bec6d2934388a2c91f8e918d6e6cee1bf56d1b051ceb94301822e7",
+  "frozenA": "0d90de11710e7212286a7e74755c8a12b55d116b",
+  "priorBCandidate": "a80e6c4d5218704b29d2b25bd75b1bacb419c053",
+  "newCandidateRef": "codex/maya-admin-routing-candidate-20261009",
+  "cause": [
+    "Unbounded рост matched простыми, falsely producing business_analytics intent.",
+    "Bare прогноз in an instruction not to replace facts was treated as a financial request.",
+    "Existing moneyWithoutAnalytics access guard correctly rejected that wrong topic before model.decide."
+  ],
+  "runtimeChange": "Two coarse-router regex changes only; Cyrillic word boundary for growth and no financial topic inferred from bare forecast. Existing semantic planner, AiCore grounding, role taxonomy and tool policy unchanged.",
+  "unitRegression": {
+    "suites": 4,
+    "tests": 342,
+    "passed": 342,
+    "log": "maya-admin-routing-regression-20261009.log"
+  },
+  "types": {
+    "command": "node --max-old-space-size=3072 node_modules/typescript/bin/tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false",
+    "exitCode": 0
+  },
+  "lint": {
+    "scope": "four modified TypeScript files",
+    "exitCode": 0
+  },
+  "historicalFailures": "before log reproduces routing defects; intermediate targeted tests also contain corrected negative-test expectations: current taxonomy permits ADMIN forecast intent but the tool is unavailable, while CLIENT is denied; forced unavailable dispatch throws existing ai_model_tool_not_allowed rather than returning a success reply. Role fixtures were not upgraded.",
+  "http": {
+    "dialogs": 6,
+    "turns": 13,
+    "http201": 13,
+    "cannedOutputs": 13,
+    "businessHashesUnchanged": 13,
+    "businessWrites": 0,
+    "extraToolsOnGeneralTurns": 0,
+    "crmReadsOnGeneralTurns": 0,
+    "maxRequestBytes": 93540,
+    "gate": {
+      "dialogs": 6,
+      "turns": 13,
+      "attempts": 13,
+      "inputTokens": 1089432,
+      "outputTokens": 15600,
+      "reservedNanoUsd": 1499826240,
+      "halted": false
+    }
+  },
+  "negativeControls": {
+    "separateFromFrozen13Turns": true,
+    "protectedFinanceRefusalsBeforeModel": 4,
+    "directUnavailableAnalyticsHttpStatus": 403,
+    "unauthenticatedHttpStatus": 401,
+    "sourceReads": 0,
+    "modelCalls": 0,
+    "businessHashUnchanged": true
+  },
+  "paidCalls": 0,
+  "realYclientsCalls": 0,
+  "permitCreated": false,
+  "claimCreated": false,
+  "keyPromptPerformed": false,
+  "limitations": [
+    "All13model outputs are canned. Real-model language acceptance remains untested.",
+    "Unit natural responses are scripted plans, not model acceptance.",
+    "Source preflight is distinct from chat domain traversal; no claim about real booking, C9, restart, React or C10 completion.",
+    "Role/capability negatives prove access and dispatch fences; arbitrary real-model prose is not qualified.",
+    "No new paid authorization; prior spent grant is not reusable."
+  ]
+}

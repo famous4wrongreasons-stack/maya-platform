@@ -1,0 +1,10 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START conversation
+{"status":"passed-ungraded","clusterStopped":true,"output":"/private/tmp/maya-admin-routing-http-20261009-a","manifestSha256":"bfce2d4909bec6d2934388a2c91f8e918d6e6cee1bf56d1b051ceb94301822e7","qualification":"DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY"}

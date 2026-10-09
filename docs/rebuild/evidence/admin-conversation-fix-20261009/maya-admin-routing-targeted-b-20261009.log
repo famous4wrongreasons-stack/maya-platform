@@ -1,0 +1,40 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › ordinary administrator conversation without financial authority › does not grant administrator an unavailable forecast capability after semantic disambiguation
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      7165 |
+      7166 |   private modelFailure(code: string): never {
+    > 7167 |     throw new ServiceUnavailableException({
+           |           ^
+      7168 |       message: 'MAYA could not safely complete this turn.',
+      7169 |       error: { code },
+      7170 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:7167:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:2080:16)
+      at ai-tools/ai-core.service.spec.ts:2527:21
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › does not grant client an unavailable forecast capability after semantic disambiguation
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      7165 |
+      7166 |   private modelFailure(code: string): never {
+    > 7167 |     throw new ServiceUnavailableException({
+           |           ^
+      7168 |       message: 'MAYA could not safely complete this turn.',
+      7169 |       error: { code },
+      7170 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:7167:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:2080:16)
+      at ai-tools/ai-core.service.spec.ts:2527:21
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       2 failed, 288 skipped, 18 passed, 308 total
+Snapshots:   0 total
+Time:        0.715 s, estimated 1 s
+Ran all test suites within paths "src/ai-brain/maya-brain-router.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-admin-routing-targeted-b-20261009.json

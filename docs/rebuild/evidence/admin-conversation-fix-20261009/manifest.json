@@ -1,0 +1,193 @@
+{
+  "contract": "maya.admin-conversation-fix-evidence/1",
+  "createdAt": "2026-10-09T01:36:18.955140+00:00",
+  "qualification": "SYNTHETIC_LOCAL_ROUTING_AND_PERMISSION_PROOF",
+  "files": [
+    {
+      "path": "dry-http/actual-http-turns.jsonl",
+      "bytes": 14437,
+      "sha256": "c26a86b61c822d871a54eb21275ea59f791e142b5f45a07b7823b8166578085c"
+    },
+    {
+      "path": "dry-http/actual-model-responses.jsonl",
+      "bytes": 10041,
+      "sha256": "6fd6a60008737fa7cb2cb8c5efb5eb48296cda6baa745e79e0a3101395adbe00"
+    },
+    {
+      "path": "dry-http/broker-ledger.jsonl",
+      "bytes": 4391,
+      "sha256": "6f6574e5ee8679e63ed95c40c834bbd3ff4c3fcae4da3f7f8c28a78279606c8e"
+    },
+    {
+      "path": "dry-http/broker-report.json",
+      "bytes": 3810,
+      "sha256": "0245389a3111c9d0e78c5ec4fcb3a7bac96f9ec36267f66c9a5b907509d807c5"
+    },
+    {
+      "path": "dry-http/broker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "dry-http/candidate-manifest.json",
+      "bytes": 369533,
+      "sha256": "bfce2d4909bec6d2934388a2c91f8e918d6e6cee1bf56d1b051ceb94301822e7"
+    },
+    {
+      "path": "dry-http/conversation-jest.json",
+      "bytes": 1420,
+      "sha256": "343e79cca2fadc889378b55268f6c2754c33b9be1a8ef62843bf03a92b9cec47"
+    },
+    {
+      "path": "dry-http/conversation.log",
+      "bytes": 610,
+      "sha256": "2378033bc77dd1a5324cfc31003d1cbfa65f83a79fe4ecdfef94672f1fa7c6b7"
+    },
+    {
+      "path": "dry-http/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "dry-http/fixture-preflight.json",
+      "bytes": 8269,
+      "sha256": "553d627427615121ee5206a3b12daf153a06c81eb1eac567b60000eafc9436a1"
+    },
+    {
+      "path": "dry-http/http-report.json",
+      "bytes": 70253,
+      "sha256": "354ded1b3f0243013f54bd697eae6d8797b5c438394faa2ff6b654403632a147"
+    },
+    {
+      "path": "dry-http/http-response-journal.jsonl",
+      "bytes": 5058,
+      "sha256": "e5a94aea1889fb7b9fdda155b27f603d7f20f0a788cdd580fafab840cd31d47c"
+    },
+    {
+      "path": "dry-http/initdb.log",
+      "bytes": 884,
+      "sha256": "1ebc628aab6397b612130cb4fcc9af59566077f70dd3cf619e205e07510d9a7c"
+    },
+    {
+      "path": "dry-http/migrations.log",
+      "bytes": 14720,
+      "sha256": "bc0778f467791acb71259ae790c8c630b3e1b4cc82c67a9530861974655fd6e9"
+    },
+    {
+      "path": "dry-http/model-responses.jsonl",
+      "bytes": 9465,
+      "sha256": "ce47a96c7d78123340666815b3daa9a2cb185f29b2ee1d649271316fd6f8977b"
+    },
+    {
+      "path": "dry-http/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "dry-http/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "dry-http/postgres.log",
+      "bytes": 1246,
+      "sha256": "157d24c74af9ffca9d8eb8613462672062691be59ee99872bd12922164a1c78b"
+    },
+    {
+      "path": "dry-http/replay-binding.json",
+      "bytes": 2234,
+      "sha256": "d43e839cfb10be9dd8e16471cc4efa9924373a6abde0e2762a7b6f36d35dab39"
+    },
+    {
+      "path": "dry-http/replay-records.jsonl",
+      "bytes": 3914,
+      "sha256": "aca6710c3c40ae25ab95463a205162faa1faa89c5504eacbcde973305c9ec83e"
+    },
+    {
+      "path": "dry-http/runner-budget-ledger.jsonl",
+      "bytes": 4391,
+      "sha256": "524d930e7b9b8d8c513b4ad49c16eb283371af156221a5bc944cb52d83275583"
+    },
+    {
+      "path": "dry-http/runner-report.json",
+      "bytes": 2691,
+      "sha256": "5d21f62b3d87080b2630e9185b15061c43351c68cc79550a80b42e5ff77f259b"
+    },
+    {
+      "path": "dry-http/serialized-attempts.jsonl",
+      "bytes": 2770,
+      "sha256": "8141b0e15975be85b734d84cc9283e8491c2fb3c4a50bbabee79650ca418ff78"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 1735,
+      "sha256": "07106351036115e731a0563a5f1d0ed9e224a82655d7a15fafa3c641ae21d90b"
+    },
+    {
+      "path": "maya-admin-routing-before-20261009.json",
+      "bytes": 180696,
+      "sha256": "34e18f98b5d7bfe50c1974ea5cda613968b7afa44b8537181804a401153f22c1"
+    },
+    {
+      "path": "maya-admin-routing-before-20261009.log",
+      "bytes": 8504,
+      "sha256": "d25fb9e94ce273bb0b4b0a1b37b417fcb1c9db035c0a4cd872ca52730b386436"
+    },
+    {
+      "path": "maya-admin-routing-cleanup-20261009.json",
+      "bytes": 1041,
+      "sha256": "c4415dfe071e0c1e59c2a19d9aae02196100185c07c5c8b4b16e050575db0c22"
+    },
+    {
+      "path": "maya-admin-routing-http-20261009-a-launcher.log",
+      "bytes": 391,
+      "sha256": "b3753f4e124c3f3f7c22076f77cf3e77aa8c756f5ed60d94654a3ffa072922fa"
+    },
+    {
+      "path": "maya-admin-routing-lint-20261009.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "maya-admin-routing-regression-20261009.json",
+      "bytes": 166566,
+      "sha256": "5ecf57a0f0f54b0c36ad16833b232ef026c2bed5ed3f84360e5df56fe21e5b0e"
+    },
+    {
+      "path": "maya-admin-routing-regression-20261009.log",
+      "bytes": 474,
+      "sha256": "cd54a5045e6524fc511e28a837247db2c0b9bbd616663c20fcb5a3e7257e5aa4"
+    },
+    {
+      "path": "maya-admin-routing-targeted-20261009.json",
+      "bytes": 155482,
+      "sha256": "f19d55a3f66739ced22415d680f6dec55ba88deff57efab80d7e7e9919790163"
+    },
+    {
+      "path": "maya-admin-routing-targeted-20261009.log",
+      "bytes": 1135,
+      "sha256": "1eee509107a4c53b0f1548d31e89a06387405bc251a001299d1e6a36d165b9bd"
+    },
+    {
+      "path": "maya-admin-routing-targeted-b-20261009.json",
+      "bytes": 155565,
+      "sha256": "55cd812b260516e79922692abdf1cfd69bb3afae19789d3892d1707deee38f78"
+    },
+    {
+      "path": "maya-admin-routing-targeted-b-20261009.log",
+      "bytes": 1897,
+      "sha256": "b0b2cde9c0b655b41ffe375a8b08573b5ea0f1150216f6fb2b209970b4ee6358"
+    },
+    {
+      "path": "maya-admin-routing-types-20261009.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "validation-summary.json",
+      "bytes": 3142,
+      "sha256": "e8fc1a5e8cc96eb339bc98862a1517e8d188c57d490506127294701687ee5910"
+    }
+  ],
+  "totalBytes": 1206873
+}

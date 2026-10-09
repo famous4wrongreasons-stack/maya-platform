@@ -1,0 +1,25 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › ordinary administrator conversation without financial authority › does not grant a forecast capability after semantic disambiguation
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "denied"
+    Received: "allowed"
+
+      2511 |         toolNames,
+      2512 |       );
+    > 2513 |       expect(plan?.tasks[0].permission.status).toBe('denied');
+           |                                                ^
+      2514 |       mocks.model.decide.mockResolvedValueOnce(
+      2515 |         decision({
+      2516 |           reply: 'Выручка составит 999999 рублей.',
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:2513:48)
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 288 skipped, 18 passed, 307 total
+Snapshots:   0 total
+Time:        0.625 s, estimated 3 s
+Ran all test suites within paths "src/ai-brain/maya-brain-router.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-admin-routing-targeted-20261009.json

@@ -1,0 +1,208 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › ordinary administrator conversation without financial authority › lets semantic planning answer Слушай, посмотри: привет, Майя. Объясни простыми словами. with unchanged role and no source calls
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      2453 |           },
+      2454 |         );
+    > 2455 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+           |                                    ^
+      2456 |         expect(mocks.model.decide.mock.calls[0][0].principalRole).toBe(role);
+      2457 |         expect(
+      2458 |           mocks.model.decide.mock.calls[0][0].tools.map((t) => t.name),
+
+      at ai-tools/ai-core.service.spec.ts:2455:36
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › lets semantic planning answer проверь помоги мне разобраться. Не подмяй факты прогнозом. with unchanged role and no source calls
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      2453 |           },
+      2454 |         );
+    > 2455 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+           |                                    ^
+      2456 |         expect(mocks.model.decide.mock.calls[0][0].principalRole).toBe(role);
+      2457 |         expect(
+      2458 |           mocks.model.decide.mock.calls[0][0].tools.map((t) => t.name),
+
+      at ai-tools/ai-core.service.spec.ts:2455:36
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › lets semantic planning answer Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами. with unchanged role and no source calls
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      2453 |           },
+      2454 |         );
+    > 2455 |         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+           |                                    ^
+      2456 |         expect(mocks.model.decide.mock.calls[0][0].principalRole).toBe(role);
+      2457 |         expect(
+      2458 |           mocks.model.decide.mock.calls[0][0].tools.map((t) => t.name),
+
+      at ai-tools/ai-core.service.spec.ts:2455:36
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › does not grant a forecast capability after semantic disambiguation
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "denied"
+    Received: "allowed"
+
+      2511 |         toolNames,
+      2512 |       );
+    > 2513 |       expect(plan?.tasks[0].permission.status).toBe('denied');
+           |                                                ^
+      2514 |       mocks.model.decide.mockResolvedValueOnce(
+      2515 |         decision({
+      2516 |           reply: 'Выручка составит 999999 рублей.',
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:2513:48)
+
+  ● AiCoreService › ordinary administrator conversation without financial authority › does not discard source grounding merely because routing is general
+
+    expect(jest.fn()).toHaveBeenCalled()
+
+    Expected number of calls: >= 1
+    Received number of calls:    0
+
+      2549 |         },
+      2550 |       );
+    > 2551 |       expect(mocks.model.decide).toHaveBeenCalled();
+           |                                  ^
+      2552 |       expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      2553 |       expect(out.grounding.status).toBe('blocked');
+      2554 |       expect(out.reply).not.toContain('99');
+
+      at Object.<anonymous> (ai-tools/ai-core.service.spec.ts:2551:34)
+
+FAIL src/ai-brain/maya-brain-router.service.spec.ts
+  ● MayaBrainRouterService › ordinary administrator wording is not financial authority: Слушай, посмотри: привет, Майя. Объясни простыми словами.
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "intent": "general",
+    +   "intent": "business_analytics",
+        "persona": "director",
+      }
+
+      16 |     'ordinary administrator wording is not financial authority: %s',
+      17 |     (text, intent) => {
+    > 18 |       expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+         |                                                                    ^
+      19 |         persona: 'director',
+      20 |         intent,
+      21 |       });
+
+      at ai-brain/maya-brain-router.service.spec.ts:18:68
+
+  ● MayaBrainRouterService › ordinary administrator wording is not financial authority: проверь помоги мне разобраться. Не подмяй факты прогнозом.
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "intent": "support",
+    +   "intent": "business_analytics",
+        "persona": "director",
+      }
+
+      16 |     'ordinary administrator wording is not financial authority: %s',
+      17 |     (text, intent) => {
+    > 18 |       expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+         |                                                                    ^
+      19 |         persona: 'director',
+      20 |         intent,
+      21 |       });
+
+      at ai-brain/maya-brain-router.service.spec.ts:18:68
+
+  ● MayaBrainRouterService › ordinary administrator wording is not financial authority: Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами.
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "intent": "general",
+    +   "intent": "business_analytics",
+        "persona": "director",
+      }
+
+      16 |     'ordinary administrator wording is not financial authority: %s',
+      17 |     (text, intent) => {
+    > 18 |       expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+         |                                                                    ^
+      19 |         persona: 'director',
+      20 |         intent,
+      21 |       });
+
+      at ai-brain/maya-brain-router.service.spec.ts:18:68
+
+  ● MayaBrainRouterService › ordinary administrator wording is not financial authority: Дай прогноз
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "intent": "general",
+    +   "intent": "business_analytics",
+        "persona": "director",
+      }
+
+      16 |     'ordinary administrator wording is not financial authority: %s',
+      17 |     (text, intent) => {
+    > 18 |       expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+         |                                                                    ^
+      19 |         persona: 'director',
+      20 |         intent,
+      21 |       });
+
+      at ai-brain/maya-brain-router.service.spec.ts:18:68
+
+  ● MayaBrainRouterService › ordinary presentation wording preserves the requested protected topic: Объясни простыми словами выручку
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "intent": "finance",
+    +   "intent": "business_analytics",
+        "persona": "director",
+      }
+
+      32 |     'ordinary presentation wording preserves the requested protected topic: %s',
+      33 |     (text, intent) => {
+    > 34 |       expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+         |                                                                    ^
+      35 |         persona: 'director',
+      36 |         intent,
+      37 |       });
+
+      at ai-brain/maya-brain-router.service.spec.ts:34:68
+
+Test Suites: 2 failed, 2 total
+Tests:       10 failed, 288 skipped, 9 passed, 307 total
+Snapshots:   0 total
+Time:        2.477 s
+Ran all test suites within paths "src/ai-brain/maya-brain-router.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-admin-routing-before-20261009.json

@@ -1,0 +1,47 @@
+{
+  "qualification": "INDEPENDENT_READ_ONLY_REVIEW_SYNTHETIC_ROUTING_EVIDENCE",
+  "runtimeReviewer": "independent_review",
+  "artifactReviewer": "checkpoint_review",
+  "result": "QUALIFIED_PASS_NO_BLOCKERS",
+  "sourceCommit": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa",
+  "runtimeScope": "Only two coarse-router regex changes; AiCore, CI and policy runtime unchanged.",
+  "sourceBindingsVerified": 2446,
+  "sourceMismatches": 0,
+  "manifestSha256": "bfce2d4909bec6d2934388a2c91f8e918d6e6cee1bf56d1b051ceb94301822e7",
+  "datasetAndCasesUnchanged": true,
+  "http201": 13,
+  "cannedPlannerOutputs": 13,
+  "stableDistinctConversations": 6,
+  "actualPriorReplyMismatches": 0,
+  "generalAdminTurns": {
+    "count": 3,
+    "role": "administrator",
+    "policyToolsIdenticalToPreviousB": true,
+    "analyticsToolsPresent": false,
+    "grounding": "not_required",
+    "executedTools": 0,
+    "sourceReads": 0,
+    "actions": 0,
+    "approvals": 0
+  },
+  "negativeControls": {
+    "protectedFinancePreModelRefusals": 4,
+    "directValidAnalyticsReadStatus": 403
+  },
+  "businessHashesUnchanged": 13,
+  "businessWrites": 0,
+  "upstreamCalls": 0,
+  "credentialsLoaded": false,
+  "tests": {
+    "passed": 342,
+    "total": 342,
+    "suites": 4
+  },
+  "cleanup": "Six groups and broker absent according to saved direct OS receipt; PG stop log successful; reviewer independently confirmed missing postmaster.pid.",
+  "limits": [
+    "Canned/scripted transport is not real-model language acceptance.",
+    "All13sourceReads empty and coordination null; preflight is not conversational C9 traversal.",
+    "Access and dispatch fences do not qualify arbitrary financial prose from a real model."
+  ],
+  "reviewerExecutedTestsServicesOrNetwork": false
+}

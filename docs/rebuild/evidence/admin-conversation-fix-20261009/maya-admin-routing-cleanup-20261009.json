@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-09T01:34:14.432Z",
+  "candidate": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa",
+  "groups": [
+    {
+      "name": "initdb",
+      "pgid": 10736,
+      "closed": true,
+      "reportedAbsent": true,
+      "osAbsent": true
+    },
+    {
+      "name": "pg-start",
+      "pgid": 10759,
+      "closed": true,
+      "reportedAbsent": true,
+      "osAbsent": true
+    },
+    {
+      "name": "createdb",
+      "pgid": 10778,
+      "closed": true,
+      "reportedAbsent": true,
+      "osAbsent": true
+    },
+    {
+      "name": "migrations",
+      "pgid": 10789,
+      "closed": true,
+      "reportedAbsent": true,
+      "osAbsent": true
+    },
+    {
+      "name": "conversation",
+      "pgid": 10829,
+      "closed": true,
+      "reportedAbsent": true,
+      "osAbsent": true
+    },
+    {
+      "name": "pg-stop",
+      "pgid": 11817,
+      "closed": true,
+      "reportedAbsent": true,
+      "osAbsent": true
+    }
+  ],
+  "brokerPid": 10808,
+  "brokerOsAbsent": true,
+  "postmasterPidAbsent": true,
+  "clusterStopped": true
+}

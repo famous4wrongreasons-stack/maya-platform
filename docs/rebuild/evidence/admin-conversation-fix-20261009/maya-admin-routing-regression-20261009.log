@@ -1,0 +1,7 @@
+
+Test Suites: 4 passed, 4 total
+Tests:       342 passed, 342 total
+Snapshots:   0 total
+Time:        0.954 s, estimated 1 s
+Ran all test suites within paths "src/ai-brain/maya-brain-router.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/ai-tools/ai-tool-policy.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-admin-routing-regression-20261009.json

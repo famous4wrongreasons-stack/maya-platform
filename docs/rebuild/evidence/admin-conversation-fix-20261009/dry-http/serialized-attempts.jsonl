@@ -1,0 +1,13 @@
+{"caseId":"followup-client-carry-over","turn":1,"bytes":68145,"bodySha256":"4d090c74182f50bab161b1c9be938008ababa6108fb9188db35cc0e5f0d5e2f7","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-carry-over","turn":2,"bytes":68971,"bodySha256":"005706a8a1537bdb66ddc2afb3aa9f3107af398097f34657dd1e6d567478ef5d","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-carry-over","turn":3,"bytes":69083,"bodySha256":"6d4740b54fcddb5a58220e7d2f11aab616d7510c1407f3ae0b70e12c64eb6961","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-entity-correction","turn":1,"bytes":68037,"bodySha256":"107ce0126ae631761cb4cbf172c03108f708f24560f1f33e77d60d0d761fca31","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-entity-correction","turn":2,"bytes":68920,"bodySha256":"f12f9540e8fe8cff5c6314c39397b12df7e27df64135b6f1a33c77cf699b5cc1","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-admin-typo-ambiguous-period","turn":1,"bytes":79849,"bodySha256":"7b781f0c59fe5349784c9d67abc845da974c0aff61360120ef3b200fb29ff149","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-topic-switch","turn":1,"bytes":92379,"bodySha256":"985fe15db6a526190d0617cbfdfb0d7c7cfb59bd16b23a0e76cd7fdafadb2826","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-topic-switch","turn":2,"bytes":93419,"bodySha256":"a4f4b264d8642d0c0f6762b60b1cc49744ebfba94a451eb334ae1916623c8bc2","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-topic-switch","turn":3,"bytes":93540,"bodySha256":"d49905a87275f63ba6201fa4a94f0d7d375881cc73d043f185e4fd31e2e68152","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-compound","turn":1,"bytes":92454,"bodySha256":"4555f291c6c79e51a1e4fd21ada0d04c7f661921494f6cbce5b95c3eaa575adc","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-admin-general-chat","turn":1,"bytes":79801,"bodySha256":"0eec8ff995347d65ef181cf477597f9588dcfb5d1a6258ab93c2ee594de0cdb9","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-admin-general-chat","turn":2,"bytes":80577,"bodySha256":"bb5ba73428940f44ec0aa8c365b2c3854173867a0890e09f70cf5feed9ba39ae","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-admin-general-chat","turn":3,"bytes":81009,"bodySha256":"b26bad8a4d83abb9bf08fc502030cc3d7d35a5bb4c79818c57dd3bab5fda6496","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
