@@ -61,7 +61,11 @@ function values(record, required, optional = []) {
 }
 
 export function createLocalAbBudget(options) {
-  const settings = values(options, ['ledgerPath'], ['now']);
+  const settings = values(
+    options,
+    ['ledgerPath'],
+    ['now', 'priorInputMs', 'absoluteExpiresAt'],
+  );
   if (
     !settings ||
     typeof settings.ledgerPath !== 'string' ||
@@ -71,6 +75,14 @@ export function createLocalAbBudget(options) {
     (settings.now !== undefined && typeof settings.now !== 'function')
   )
     throw new Error('local_ab_options_invalid');
+  const priorInputMs = settings.priorInputMs ?? 0;
+  if (
+    !safe(priorInputMs) ||
+    priorInputMs >= limits.A.durationMs ||
+    (settings.absoluteExpiresAt !== undefined &&
+      !safe(settings.absoluteExpiresAt))
+  )
+    throw new Error('local_ab_prior_time_invalid');
   const now = settings.now ?? Date.now;
   let startedAt;
   try {
@@ -80,7 +92,11 @@ export function createLocalAbBudget(options) {
   }
   if (!safe(startedAt) || !safe(startedAt + durationMs))
     throw new Error('local_ab_clock_invalid');
-  const expiresAt = startedAt + durationMs;
+  const expiresAt = Math.min(
+    startedAt + durationMs - priorInputMs,
+    settings.absoluteExpiresAt ?? Infinity,
+  );
+  if (expiresAt <= startedAt) throw new Error('local_ab_wall_time_limit');
   let lastCheck = startedAt,
     lastReservedAt = null,
     activeStage = null;
@@ -101,6 +117,7 @@ export function createLocalAbBudget(options) {
     Object.freeze({
       startedAt,
       expiresAt,
+      priorInputMs,
       activeStage,
       ...total,
       lastReservedAt,
@@ -166,6 +183,7 @@ export function createLocalAbBudget(options) {
       contract: 'maya.local-ab-budget/1',
       startedAt,
       expiresAt,
+      priorInputMs,
       limits: {
         attempts: limits.A.attempts + limits.B.attempts,
         spendNanoUsd: limits.A.spendNanoUsd + limits.B.spendNanoUsd,
@@ -214,7 +232,10 @@ export function createLocalAbBudget(options) {
         refuse('stage_order');
       const current = stages[stage];
       current.startedAt = at;
-      current.expiresAt = Math.min(expiresAt, at + limits[stage].durationMs);
+      current.expiresAt = Math.min(
+        expiresAt,
+        at + limits[stage].durationMs - (stage === 'A' ? priorInputMs : 0),
+      );
       activeStage = stage;
       append({
         event: 'stage_started',

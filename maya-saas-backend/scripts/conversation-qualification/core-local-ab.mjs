@@ -29,6 +29,14 @@ import {
 } from './core-local-ab-checks.mjs';
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 import { cleanupAbRunner } from './core-local-ab-cleanup.mjs';
+import {
+  waitForAbReadiness,
+  READINESS_PROMPT,
+} from './core-local-ab-readiness.mjs';
+import {
+  capturePreviousInputTimeout,
+  assertPreviousInputTimeout,
+} from './core-local-ab-previous.mjs';
 
 export const AB_CANDIDATES = Object.freeze({
   A: '0d90de11710e7212286a7e74755c8a12b55d116b',
@@ -139,6 +147,7 @@ export async function prepareAb({
   bDirectory,
   pricing,
   ownerApprovalRef,
+  previousInputRoot,
 }) {
   cleanEnvironment();
   checkPricing(pricing);
@@ -160,6 +169,9 @@ export async function prepareAb({
     ['B', bDirectory],
   ])
     stageHead(directory, stage);
+  const previousInputTimeout = previousInputRoot
+    ? capturePreviousInputTimeout(previousInputRoot, ownerApprovalRef)
+    : null;
   // Capture own harness before creating any plan; this snapshot is not paid authority.
   const harness = captureCoreManifest('DRY_HTTP', null, CORE_FOLLOWUP_PROFILE);
   fs.mkdirSync(output, { mode: 0o700 });
@@ -193,6 +205,7 @@ export async function prepareAb({
     output,
     ownerApprovalRef,
     pricing,
+    previousInputTimeout,
     harnessPath,
     harnessSha256: coreHash(fs.readFileSync(harnessPath)),
     stages,
@@ -277,10 +290,18 @@ function readPlan(file, sha256, ownerApprovalRef) {
     (fs.statSync(plan.output).mode & 0o7777) === 0o700,
     'core_ab_private_root',
   );
+  if (plan.previousInputTimeout)
+    assertPreviousInputTimeout(plan.previousInputTimeout, ownerApprovalRef);
   return plan;
 }
 
-export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
+export async function runAb({
+  planPath,
+  planSha256,
+  ownerApprovalRef,
+  signal,
+  releaseReadinessTerminal,
+}) {
   cleanEnvironment();
   const plan = readPlan(planPath, planSha256, ownerApprovalRef);
   checkPricing(plan.pricing);
@@ -328,8 +349,21 @@ export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
       );
     stages.push({ ...stage, manifest, root, source });
   }
+  signal?.throwIfAborted();
+  const previous = plan.previousInputTimeout;
+  if (previous)
+    assert.ok(
+      Date.now() < previous.previousExpiresAt,
+      'core_ab_original_deadline_expired',
+    );
   const budget = createLocalAbBudget({
     ledgerPath: path.join(plan.output, 'ab-ledger.jsonl'),
+    ...(previous
+      ? {
+          priorInputMs: previous.inputElapsedMs,
+          absoluteExpiresAt: previous.previousExpiresAt,
+        }
+      : {}),
   });
   const reportPath = path.join(plan.output, 'ab-report.json');
   const report = {
@@ -340,6 +374,7 @@ export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
     startedAt: new Date(budget.startedAt).toISOString(),
     expiresAt: new Date(budget.expiresAt).toISOString(),
     qualification: 'REAL_MODEL_SYNTHETIC_DATA_UNGRADED',
+    previousInputTimeout: plan.previousInputTimeout,
     credentialInputs: 0,
     stages: [],
   };
@@ -377,6 +412,7 @@ export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
     }
   };
   const cancel = () => halt('cancelled');
+  signal?.addEventListener('abort', cancel, { once: true });
   for (const signal of ['SIGTERM', 'SIGINT', 'SIGHUP'])
     process.on(signal, cancel);
   const globalTimer = setTimeout(
@@ -453,6 +489,7 @@ export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
             signal: AbortSignal.any([signal, controller.signal]),
             timeoutMs,
           });
+          if (stage.stage === 'A') releaseReadinessTerminal?.();
           report.credentialInputs = credential.inputCount;
           save();
         },
@@ -616,6 +653,7 @@ export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
     });
     for (const signal of ['SIGTERM', 'SIGINT', 'SIGHUP'])
       process.off(signal, cancel);
+    signal?.removeEventListener('abort', cancel);
     process.chdir(coreBackend);
     try {
       budget.close();
@@ -639,6 +677,91 @@ export async function runAb({ planPath, planSha256, ownerApprovalRef }) {
   return report;
 }
 
+// Readiness creates no budget, permit, claim, model transport or deadline.
+export async function readyThenRunAb(options) {
+  cleanEnvironment();
+  const plan = readPlan(
+    options.planPath,
+    options.planSha256,
+    options.ownerApprovalRef,
+  );
+  checkPricing(plan.pricing);
+  assertCoreSources(
+    readCoreManifest(plan.harnessPath, plan.harnessSha256, {
+      localStdin: false,
+    }),
+  );
+  const file = path.join(plan.output, 'readiness-report.json');
+  const state = {
+    status: 'starting-readiness',
+    planSha256: options.planSha256,
+    launcherPid: process.pid,
+    credentialReaderStarted: false,
+    budgetStarted: false,
+    promptShown: false,
+    priorInputElapsedMs: plan.previousInputTimeout?.inputElapsedMs ?? 0,
+    originalExpiresAt: plan.previousInputTimeout?.previousExpiresAt ?? null,
+  };
+  writeNew(file, state);
+  const save = () => fs.writeFileSync(file, canonical(state), { mode: 0o600 });
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  for (const name of ['SIGINT', 'SIGTERM', 'SIGHUP']) process.on(name, cancel);
+  let releaseTTY;
+  try {
+    releaseTTY = await waitForAbReadiness({
+      signal: controller.signal,
+      onPrompt: () => {
+        state.status = 'waiting-for-enter';
+        state.promptShown = true;
+        state.prompt = READINESS_PROMPT;
+        state.shownAt = new Date().toISOString();
+        save();
+      },
+    });
+    controller.signal.throwIfAborted();
+    // Re-read exact previous zero-request proof; an expired scope stops before admission.
+    const current = readPlan(
+      options.planPath,
+      options.planSha256,
+      options.ownerApprovalRef,
+    );
+    if (current.previousInputTimeout)
+      assert.ok(
+        Date.now() < current.previousInputTimeout.previousExpiresAt,
+        'core_ab_original_deadline_expired',
+      );
+    state.status = 'enter-confirmed';
+    state.credentialReaderStarted = null;
+    state.budgetStarted = null;
+    state.enteredAt = new Date().toISOString();
+    save();
+    const result = await runAb({
+      ...options,
+      signal: controller.signal,
+      releaseReadinessTerminal: releaseTTY,
+    });
+    state.status = 'run-terminal';
+    state.runStatus = result.status;
+    state.credentialReaderStarted = result.credentialInputs > 0;
+    state.budgetStarted = true;
+    save();
+    return result;
+  } catch (error) {
+    state.failureCode = /^(core_ab|local_ab)_[a-z_]+$/.test(error?.message)
+      ? error.message
+      : 'core_ab_readiness_refused';
+    state.status = 'readiness-or-run-refused';
+    save();
+    process.exitCode = 1;
+    return null;
+  } finally {
+    releaseTTY?.();
+    for (const name of ['SIGINT', 'SIGTERM', 'SIGHUP'])
+      process.off(name, cancel);
+  }
+}
+
 if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href
@@ -651,6 +774,7 @@ if (
       'a-directory': { type: 'string' },
       'b-directory': { type: 'string' },
       pricing: { type: 'string' },
+      'previous-input-timeout': { type: 'string' },
       plan: { type: 'string' },
       'plan-sha256': { type: 'string' },
       'owner-approval-ref': { type: 'string' },
@@ -670,13 +794,14 @@ if (
           bDirectory: values['b-directory'],
           pricing: JSON.parse(fs.readFileSync(values.pricing, 'utf8')),
           ownerApprovalRef: values['owner-approval-ref'],
+          previousInputRoot: values['previous-input-timeout'],
         }),
         null,
         2,
       ),
     );
   else
-    await runAb({
+    await readyThenRunAb({
       planPath: values.plan,
       planSha256: values['plan-sha256'],
       ownerApprovalRef: values['owner-approval-ref'],

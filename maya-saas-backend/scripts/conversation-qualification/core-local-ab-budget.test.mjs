@@ -328,3 +328,31 @@ test('close is durable and idempotent, unfinished sessions halt, any restart ref
   assert.equal(fs.readFileSync(f.ledgerPath, 'utf8'), before);
   assert.throws(() => b.beginStage('B'), /local_ab_closed/);
 });
+
+test('prior zero-input timeout deducts A active time and preserves original absolute deadline', (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-ab-prior-budget-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const b = createLocalAbBudget({
+    ledgerPath: path.join(root, 'ledger'),
+    now: () => 100000,
+    priorInputMs: 30405,
+    absoluteExpiresAt: 1000000,
+  });
+  assert.equal(b.expiresAt, 1000000);
+  assert.equal(b.beginStage('A').expiresAt, 100000 + 600000 - 30405);
+  assert.equal(b.stats.attempts, 0);
+  assert.equal(b.stats.reservedNanoUsd, 0);
+  b.close();
+  const expired = path.join(root, 'expired');
+  assert.throws(
+    () =>
+      createLocalAbBudget({
+        ledgerPath: expired,
+        now: () => 100000,
+        priorInputMs: 30405,
+        absoluteExpiresAt: 100000,
+      }),
+    /wall_time_limit/,
+  );
+  assert.equal(fs.existsSync(expired), false);
+});

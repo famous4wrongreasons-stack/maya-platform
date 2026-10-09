@@ -10,13 +10,20 @@ import { EventEmitter } from 'node:events';
 import { syncBuiltinESMExports } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { READINESS_PROMPT } from './core-local-ab-readiness.mjs';
 
 const file = fileURLToPath(import.meta.url);
 const backend = path.resolve(path.dirname(file), '../..');
 const canonical = (value) => JSON.stringify(value, null, 2) + '\n';
 const syntheticCredential = 'synthetic-test-only-not-a-provider-key';
 const approvalRef = 'synthetic-test-only';
-const scenarios = ['complete', 'unknown', 'deadline', 'bad-plan-pin'];
+const scenarios = [
+  'complete',
+  'unknown',
+  'deadline',
+  'bad-plan-pin',
+  'readiness',
+];
 
 function findFrozenWorktrees(candidates, execFileSync) {
   const listing = execFileSync('git', ['worktree', 'list', '--porcelain'], {
@@ -66,6 +73,7 @@ async function syntheticWorker(scenario, root) {
   const RealDate = Date;
   const originalCwd = process.cwd();
   const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
   const originalSpawn = childProcess.spawn;
   const originalExec = childProcess.execFileSync;
   const originalKill = process.kill;
@@ -83,6 +91,31 @@ async function syntheticWorker(scenario, root) {
   globalThis.Date = SyntheticDate;
   let inputCount = 0,
     fakeFetches = 0;
+  let readinessCount = 0,
+    readinessWaiting = false,
+    readinessTimers = 0,
+    readinessEnteredAt;
+  const assertBeforeReadiness = () => {
+    assert.equal(inputCount, 0);
+    assert.equal(fakeFetches, 0);
+    assert.equal(readinessTimers, 0);
+    assert.ok(!fs.existsSync(path.join(root, 'run', 'ab-ledger.jsonl')));
+    assert.ok(!fs.existsSync(path.join(root, 'run', 'ab-report.json')));
+    for (const stage of ['a', 'b']) {
+      for (const name of [
+        'permit.json',
+        'permit.json.claim',
+        'runner',
+        'broker/broker-report.json',
+        'broker/broker-ledger.jsonl',
+      ])
+        assert.ok(!fs.existsSync(path.join(root, 'run', stage, name)));
+    }
+  };
+  globalThis.setTimeout = (...args) => {
+    if (readinessWaiting) readinessTimers++;
+    return originalSetTimeout(...args);
+  };
   const spawnedStages = [],
     observedCredentials = [],
     failures = [],
@@ -95,11 +128,33 @@ async function syntheticWorker(scenario, root) {
     destroyed: false,
     readableEnded: false,
     readableEncoding: null,
+    readableLength: 0,
     setRawMode(value) {
       this.isRaw = value;
     },
     pause() {},
     resume() {
+      if (scenario === 'readiness' && readinessCount === 0) {
+        readinessCount++;
+        assertBeforeReadiness();
+        assert.equal(this.isRaw, true);
+        queueMicrotask(() => {
+          clock += 60000;
+          assertBeforeReadiness();
+          readinessEnteredAt = clock;
+          readinessWaiting = false;
+          input.emit('data', Buffer.from('\n'));
+        });
+        return;
+      }
+      if (scenario === 'readiness') {
+        assert.equal(readinessCount, 1);
+        assert.equal(
+          this.isRaw,
+          true,
+          'handoff remains raw until hidden input finishes',
+        );
+      }
       inputCount++;
       queueMicrotask(() =>
         input.emit('data', Buffer.from(syntheticCredential + '\n')),
@@ -111,6 +166,10 @@ async function syntheticWorker(scenario, root) {
     isTTY: true,
     destroyed: false,
     write(value) {
+      if (scenario === 'readiness' && value === READINESS_PROMPT) {
+        assertBeforeReadiness();
+        return true;
+      }
       assert.equal(
         value,
         'Provider key (hidden; Enter submits, Ctrl-C cancels):\n',
@@ -179,6 +238,12 @@ async function syntheticWorker(scenario, root) {
   };
   let socketRequest, roots;
   childProcess.spawn = (command, argv, options) => {
+    if (scenario === 'readiness')
+      assert.equal(
+        input.isRaw,
+        false,
+        'readiness raw mode is released after accepted input',
+      );
     assert.equal(command, process.execPath);
     const runnerPath = argv[1];
     const stage = Object.keys(roots).find(
@@ -369,7 +434,7 @@ async function syntheticWorker(scenario, root) {
   };
   syncBuiltinESMExports();
   try {
-    const { AB_CANDIDATES, prepareAb, runAb } =
+    const { AB_CANDIDATES, prepareAb, runAb, readyThenRunAb } =
       await import('./core-local-ab.mjs');
     ({ socketRequest } = await import('./core-conversation-socket.mjs'));
     roots = findFrozenWorktrees(AB_CANDIDATES, originalExec);
@@ -401,7 +466,8 @@ async function syntheticWorker(scenario, root) {
       assert.deepEqual(spawnedStages, []);
       assert.ok(!fs.existsSync(path.join(root, 'run', 'ab-ledger.jsonl')));
     } else {
-      const report = await runAb({
+      readinessWaiting = scenario === 'readiness';
+      const report = await (scenario === 'readiness' ? readyThenRunAb : runAb)({
         planPath: prepared.planPath,
         planSha256: prepared.planSha256,
         ownerApprovalRef: approvalRef,
@@ -412,6 +478,24 @@ async function syntheticWorker(scenario, root) {
         .split('\n')
         .map(JSON.parse);
       const reserved = rows.filter((row) => row.event === 'reserved');
+      if (scenario === 'readiness') {
+        assert.equal(readinessCount, 1);
+        assert.equal(readinessTimers, 0);
+        assert.equal(
+          rows[0].startedAt,
+          readinessEnteredAt,
+          'the minute waiting for Enter is outside the run budget',
+        );
+        const readiness = JSON.parse(
+          fs.readFileSync(
+            path.join(root, 'run', 'readiness-report.json'),
+            'utf8',
+          ),
+        );
+        assert.equal(readiness.status, 'run-terminal');
+        assert.equal(readiness.promptShown, true);
+        assert.equal(readiness.runStatus, 'passed-ungraded');
+      }
       assert.equal(inputCount, 1);
       assert.equal(report.credentialInputs, 1);
       assert.equal(report.launcherCredentialCleared, true);
@@ -431,7 +515,7 @@ async function syntheticWorker(scenario, root) {
           (value) => value === 'Bearer ' + syntheticCredential,
         ),
       );
-      if (scenario === 'complete') {
+      if (scenario === 'complete' || scenario === 'readiness') {
         assert.equal(report.status, 'passed-ungraded');
         assert.deepEqual(spawnedStages, ['A', 'B']);
         assert.equal(fakeFetches, 18);
@@ -481,12 +565,17 @@ async function syntheticWorker(scenario, root) {
       );
     assert.equal(input.isRaw, false);
     assert.equal(input.listenerCount('data'), 0);
+    if (scenario === 'readiness') {
+      assert.deepEqual(input.eventNames(), []);
+      assert.deepEqual(output.eventNames(), []);
+    }
     console.log('SYNTHETIC_AB_ASSERTIONS_PASSED:' + scenario);
   } finally {
     process.chdir(originalCwd);
     process.exitCode = 0; // Expected negative runAb outcomes do not fail the test worker.
     globalThis.Date = RealDate;
     globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
     childProcess.spawn = originalSpawn;
     childProcess.execFileSync = originalExec;
     process.kill = originalKill;

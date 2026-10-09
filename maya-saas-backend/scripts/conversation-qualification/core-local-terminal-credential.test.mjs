@@ -375,3 +375,15 @@ test('encoded string data is never accepted as a terminal credential', async (t)
   await assert.rejects(result, code('input_refused'));
   cleaned(f);
 });
+
+test('prebuffered input refuses before hidden prompt or timer', async (t) => {
+  const f = fixture(t);
+  f.input.readableLength = 1;
+  await assert.rejects(
+    readLocalTerminalCredential(f.options),
+    code('tty_required'),
+  );
+  assert.deepEqual(f.output.writes, []);
+  assert.deepEqual(f.input.rawChanges, []);
+  assert.equal(f.input.listenerCount('data'), 0);
+});

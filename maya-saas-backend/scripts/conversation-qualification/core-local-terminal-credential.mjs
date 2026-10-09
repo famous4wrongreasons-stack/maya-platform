@@ -61,6 +61,7 @@ function optionsFor(value) {
     typeof input.isRaw !== 'boolean' ||
     input.readableEnded === true ||
     input.readableEncoding != null ||
+    (input.readableLength !== undefined && input.readableLength !== 0) ||
     !['setRawMode', 'pause', 'resume'].every(
       (name) => typeof input[name] === 'function',
     ) ||
