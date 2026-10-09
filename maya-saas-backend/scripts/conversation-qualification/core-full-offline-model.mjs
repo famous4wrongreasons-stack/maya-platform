@@ -33,8 +33,17 @@ const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // AiCore projects the restored semantic plan before the conversation, so a
 // previously selected branch label can become an opaque reference on a follow-up.
 // Another plaintext name/branch, changed time or added text still refuses.
-function matchTurn(expected, actual) {
+function matchTurn(expected, actual, publicSalonAlias = null) {
   requireThat(typeof actual === 'string');
+  // catalog.staff.read's privacy projection also aliases salon.name, then its
+  // component words in current prose. Only the one finite public-info case
+  // may replace this word with the exact token returned by its current catalog.
+  // This does not accept a different name, a reference token or changed text.
+  if (
+    publicSalonAlias &&
+    actual === expected.replace('салон', publicSalonAlias)
+  )
+    return {};
   let cursor = 0,
     pattern = '^';
   const names = [];
@@ -792,10 +801,20 @@ export function createCoreFullOfflineModel({ cases }) {
             input.conversation.length === context.turn &&
             input.conversation.every((m) => m.role === 'user'),
         );
+        const salonName =
+          item.id === 'current-admin-ordinary'
+            ? results(input, 'catalog.staff.read').at(-1)?.result?.salon?.name
+            : null;
+        const publicSalonAlias =
+          typeof salonName === 'string' &&
+          salonName.trim() === salonName &&
+          new RegExp('^' + ALIAS + '$').test(salonName)
+            ? salonName
+            : null;
         const people = Object.assign(
           {},
           ...input.conversation.map((message, i) =>
-            matchTurn(item.userTurns[i], message.content),
+            matchTurn(item.userTurns[i], message.content, publicSalonAlias),
           ),
         );
         const selected = select(item, context.turn, input, people);

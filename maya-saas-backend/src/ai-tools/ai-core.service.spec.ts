@@ -3401,6 +3401,120 @@ describe('AiCoreService', () => {
         ...dto,
         messages: [{ role: 'user', content: 'Когда я записан?' }],
       });
+    it('filters next week at tenant-local Monday boundaries before composing personal facts', async () => {
+      const mocks = fixture({
+        appointments: [
+          appointment({
+            start_at: '2026-10-11T20:59:00.000Z',
+            services: [{ name: 'OUT_BEFORE' }],
+          }),
+          appointment({
+            start_at: '2026-10-11T21:00:00.000Z',
+            services: [{ name: 'IN_START' }],
+          }),
+          appointment({
+            start_at: '2026-10-18T20:59:00.000Z',
+            services: [{ name: 'IN_END' }],
+          }),
+          appointment({
+            start_at: '2026-10-18T21:00:00.000Z',
+            services: [{ name: 'OUT_AFTER' }],
+          }),
+        ],
+      });
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: null,
+          toolCall: { name: tool, arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'booking.list_own',
+                  entities: { period: 'next_week' },
+                },
+              ],
+            },
+            UserRole.CLIENT,
+            [tool],
+          ),
+        }),
+      );
+      const response = await mocks.service.chat(client, {
+        ...dto,
+        messages: [{ role: 'user', content: 'А на следующей неделе?' }],
+      });
+      expect(response.grounding.status).toBe('verified');
+      expect(response.reply).toContain(
+        'Следующая неделя: 2026-10-12 — 2026-10-18 (Europe/Moscow)',
+      );
+      expect(response.reply).toContain('Предстоящих: 2');
+      expect(response.reply).toContain('IN_START');
+      expect(response.reply).toContain('IN_END');
+      expect(response.reply).not.toMatch(/OUT_BEFORE|OUT_AFTER/);
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+        suppressWidgetTrigger: true,
+      });
+    });
+    it('answers an empty next week instead of displaying a nearer appointment outside it', async () => {
+      const mocks = fixture({ appointments: [appointment()] });
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: null,
+          toolCall: { name: tool, arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'booking.list_own',
+                  entities: { period: 'next_week' },
+                },
+              ],
+            },
+            UserRole.CLIENT,
+            [tool],
+          ),
+        }),
+      );
+      const response = await ask(mocks);
+      expect(response.reply).toContain('Следующая неделя');
+      expect(response.reply).toContain('нет записей');
+      expect(response.reply).not.toMatch(/07.10.2026|16:00/);
+      expect(response.grounding.status).toBe('verified');
+    });
+    it.each([
+      { period: ['upcoming'] },
+      { period: ['next_week'] },
+      { period: 'last_month' },
+    ])(
+      'does not coerce an unsupported explicit period to an unfiltered list: %j',
+      async ({ period }) => {
+        const mocks = fixture({ appointments: [appointment()] });
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: {} },
+            semanticPlan: new ConversationIntelligenceService().validatePlan(
+              {
+                dialogue_act: 'request',
+                tasks: [{ intent: 'booking.list_own', entities: { period } }],
+              },
+              UserRole.CLIENT,
+              [tool],
+            ),
+          }),
+        );
+        const response = await ask(mocks);
+        expect(response.reply).not.toContain('16:00');
+        expect(response.grounding.status).toBe('blocked');
+        expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+          suppressWidgetTrigger: true,
+        });
+      },
+    );
     it('describes an empty available list without denying history hidden by the source setting', async () => {
       const reply = await ask(fixture({ appointments: [] }));
       expect(reply.grounding.status).toBe('verified');

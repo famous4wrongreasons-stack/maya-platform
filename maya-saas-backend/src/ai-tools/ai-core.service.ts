@@ -2436,6 +2436,14 @@ export class AiCoreService {
           ['employees.list_public', 'company.public_info'].includes(
             activeSemanticPlan.tasks[0].intent,
           );
+        const personalPeriod =
+          decision.toolCall.name === 'appointments.own.list'
+            ? activeSemanticPlan?.tasks.find(
+                (task) => task.intent === 'booking.list_own',
+              )?.entities.period
+            : undefined;
+        const scopedPersonalRead =
+          personalPeriod !== undefined && personalPeriod !== null;
         let execution: Record<string, unknown>;
         try {
           execution = this.record(
@@ -2457,7 +2465,10 @@ export class AiCoreService {
               {
                 widgetTrigger: 'T-2a',
                 // Consultation is a READ answer, not a booking selector.
-                ...(publicConsultation || goodsRead || serviceRenamePreview
+                ...(publicConsultation ||
+                goodsRead ||
+                serviceRenamePreview ||
+                scopedPersonalRead
                   ? { suppressWidgetTrigger: true }
                   : {}),
                 ...(serviceRenameSourceRevision
@@ -2630,6 +2641,8 @@ export class AiCoreService {
                         ? this.deterministicOwnAppointmentsReply(
                             execution.result,
                             execution.stale === true,
+                            personalPeriod,
+                            businessTimezone,
                           )
                         : decision.toolCall.name ===
                             'support.integration-status.read'
@@ -4507,6 +4520,8 @@ export class AiCoreService {
   private deterministicOwnAppointmentsReply(
     result: unknown,
     stale: boolean,
+    requestedPeriod?: unknown,
+    businessTimezone?: string,
   ): { reply: string; status: 'verified' | 'blocked' } {
     const data = this.record(result);
     const unavailable = {
@@ -4516,9 +4531,75 @@ export class AiCoreService {
     };
     if (stale || data.stale === true || !Array.isArray(data.appointments))
       return unavailable;
-    if (data.appointments.length === 0)
+    const instant = (value: unknown): Date | null => {
+      const date =
+        value instanceof Date
+          ? value
+          : typeof value === 'string' &&
+              /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value)
+            ? new Date(value)
+            : null;
+      if (!date || !Number.isFinite(date.getTime())) return null;
+      if (
+        typeof value === 'string' &&
+        date.toISOString() !==
+          value.replace(
+            /(?:\.(\d{1,3}))?Z$/,
+            (_match, millis: string | undefined) =>
+              `.${(millis ?? '').padEnd(3, '0')}Z`,
+          )
+      )
+        return null;
+      return date;
+    };
+    let appointments: unknown[] = data.appointments;
+    let periodLabel: string | null = null;
+    if (requestedPeriod === 'next_week') {
+      // Civil date arithmetic only. The existing tenant clock owns today and
+      // appointment day membership; UTC here is not the user's display zone.
+      if (!businessTimezone) return unavailable;
+      try {
+        const today = localCalendarDate(businessTimezone);
+        const from = new Date(`${today}T00:00:00Z`);
+        from.setUTCDate(from.getUTCDate() + 7 - ((from.getUTCDay() + 6) % 7));
+        const fromDay = from.toISOString().slice(0, 10);
+        const to = new Date(from.getTime());
+        to.setUTCDate(to.getUTCDate() + 7);
+        const toDay = to.toISOString().slice(0, 10);
+        const last = new Date(to.getTime());
+        last.setUTCDate(last.getUTCDate() - 1);
+        const filtered: unknown[] = [];
+        for (const entry of appointments) {
+          const start = instant(this.record(entry).start_at);
+          if (!start) return unavailable;
+          const day = localCalendarDate(businessTimezone, start);
+          if (day >= fromDay && day < toDay) filtered.push(entry);
+        }
+        appointments = filtered;
+        periodLabel = `Следующая неделя: ${fromDay} — ${last.toISOString().slice(0, 10)} (${businessTimezone}).`;
+      } catch {
+        return unavailable;
+      }
+    } else if (
+      requestedPeriod !== undefined &&
+      requestedPeriod !== null &&
+      (typeof requestedPeriod !== 'string' ||
+        !['nearest', 'upcoming'].includes(requestedPeriod))
+    ) {
       return {
-        reply: 'В доступном списке нет записей. Источник: ваши записи в MAYA.',
+        reply:
+          'Не удалось подтвердить запрошенный период записей. Уточните даты; общий список не заменяет ответ за выбранный период.',
+        status: 'blocked',
+      };
+    }
+    if (appointments.length === 0)
+      return {
+        reply: [
+          periodLabel,
+          'В доступном списке нет записей. Источник: ваши записи в MAYA.',
+        ]
+          .filter(Boolean)
+          .join('\n'),
         status: 'verified',
       };
 
@@ -4531,7 +4612,7 @@ export class AiCoreService {
         ? value.replace(/\s+/g, ' ').trim()
         : null;
     try {
-      for (const entry of data.appointments) {
+      for (const entry of appointments) {
         const item = this.record(entry);
         if (
           !Object.values(AppointmentStatus).includes(
@@ -4545,27 +4626,8 @@ export class AiCoreService {
           continue;
         }
         if (!item.is_upcoming) continue;
-        // The canonical reader returns Date or its persisted ISO serialization.
-        // Do not parse timezone-free input as the machine's local timezone.
-        const start =
-          item.start_at instanceof Date
-            ? item.start_at
-            : typeof item.start_at === 'string' &&
-                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(
-                  item.start_at,
-                )
-              ? new Date(item.start_at)
-              : null;
-        if (!start || !Number.isFinite(start.getTime())) return unavailable;
-        if (typeof item.start_at === 'string') {
-          const canonicalInput = item.start_at.replace(
-            /(?:\.(\d{1,3}))?Z$/,
-            (_match, millis: string | undefined) =>
-              `.${(millis ?? '').padEnd(3, '0')}Z`,
-          );
-          // JavaScript otherwise normalizes e.g. 30 February to another day.
-          if (start.toISOString() !== canonicalInput) return unavailable;
-        }
+        const start = instant(item.start_at);
+        if (!start) return unavailable;
         if (start.getTime() < Date.now()) continue;
         const branch = this.record(item.branch);
         const tenantDisplayTimezone =
@@ -4615,7 +4677,8 @@ export class AiCoreService {
     upcoming.sort((a, b) => a.instant - b.instant);
     return {
       reply: [
-        `В доступном списке ${data.appointments.length} ${this.pluralize(data.appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming.length}, отменённых: ${cancelled}.`,
+        periodLabel,
+        `В доступном списке ${appointments.length} ${this.pluralize(appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming.length}, отменённых: ${cancelled}.`,
         upcoming.length ? 'Ближайшие записи:' : null,
         ...upcoming.slice(0, 3).map((entry) => entry.label),
         'Источник: ваши записи в MAYA.',

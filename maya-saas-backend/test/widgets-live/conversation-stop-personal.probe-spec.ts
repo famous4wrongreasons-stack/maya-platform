@@ -236,6 +236,40 @@ describe('STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]', () 
       expect(reply).toContain('филиал записи не указан');
       expect(decide).toHaveBeenCalledTimes(1);
       expect(decide.mock.calls[0][0].toolResults).toEqual([]);
+      const emissionsBefore = await db.prisma.widgetEmission.count({
+        where: { tenantId: f.tenant.id },
+      });
+      decide.mockResolvedValueOnce(
+        decision({
+          reply: '',
+          toolCall: { name: 'appointments.own.list', arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'booking.list_own',
+                  entities: { period: 'next_week' },
+                },
+              ],
+            },
+            role,
+            ['appointments.own.list'],
+          ),
+        }),
+      );
+      const scoped = await f.chat('А на следующей неделе?');
+      expect(scoped.status).toBe(201);
+      expect((scoped.body as { reply: string }).reply).toContain(
+        'Следующая неделя',
+      );
+      expect(
+        await db.prisma.widgetEmission.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(emissionsBefore);
+      expect(decide).toHaveBeenCalledTimes(2);
+      expect(decide.mock.calls[1][0].toolResults).toEqual([]);
       const link = await db.prisma.clientChannelLink.findFirstOrThrow({
         where: { tenantId: f.tenant.id, clientId: own.id, revokedAt: null },
       });
@@ -277,6 +311,8 @@ describe('STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]', () 
       evidence.push({
         case: 'personal_' + role,
         response: response.body as unknown,
+        scopedResponse: scoped.body as unknown,
+        scopedWidgetEmissionDelta: 0,
         revoked: { status: revoked.status, body: revoked.body as unknown },
         appointmentsUnchanged: true,
         actionExecutions: 0,

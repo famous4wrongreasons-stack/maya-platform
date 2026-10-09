@@ -547,6 +547,95 @@ test('address and closing time retain both tasks and read actual company hours a
   assert.deepEqual(JSON.parse(next.tool_call.arguments_json), {});
 });
 
+test('public catalog projection may alias the salon word before the next planner/final phase without halting', () => {
+  // r1 attempt29 was tool_planning after catalog.staff.read. AiCore projects
+  // salon.name as a name in that catalog context and hides its component words
+  // in user prose. This alias is an exact current source token, not free text.
+  const id = 'current-admin-ordinary',
+    m = model();
+  const salon = '[name removed]@' + 'd'.repeat(32) + '_1';
+  const patch = {
+    conversation: [
+      { role: 'user', content: item(id).userTurns[0].replace('салон', salon) },
+    ],
+    tool_results: [
+      {
+        name: 'catalog.staff.read',
+        result: {
+          salon: { name: salon, address: '[private data removed]' },
+          staff: [],
+        },
+      },
+    ],
+  };
+  assert.equal(output(call(m, id, 1)).tool_call.name, 'catalog.staff.read');
+  const next = output(call(m, id, 1, patch));
+  assert.equal(next.tool_call.name, 'company.business-hours.read');
+  assert.equal(
+    next.semantic_plan.parent_request,
+    patch.conversation[0].content,
+  );
+  const final = call(
+    m,
+    id,
+    1,
+    {
+      ...patch,
+      available_tools: undefined,
+      known_tools: [{ name: 'company.business-hours.read' }],
+    },
+    true,
+  );
+  assert.equal(final.maya_full_offline.phase, 'final_response');
+  assert.equal(final.maya_full_offline.actualProviderCalls, 0);
+  assert.match(
+    final.choices[0].message.content,
+    /Подтверждённого результата чтения пока нет/,
+  );
+  assert.equal(m.observations.length, 3);
+});
+
+test('public salon alias acceptance requires exact current catalog token and unchanged surrounding request', () => {
+  const id = 'current-admin-ordinary';
+  const salon = '[name removed]@' + 'd'.repeat(32) + '_1';
+  const staff = '[name removed]@' + 'd'.repeat(32) + '_2';
+  const content = item(id).userTurns[0].replace('салон', salon);
+  for (const patch of [
+    { conversation: [{ role: 'user', content }], tool_results: [] },
+    {
+      conversation: [{ role: 'user', content }],
+      tool_results: [
+        { name: 'catalog.staff.read', result: { salon: { name: staff } } },
+      ],
+    },
+    {
+      conversation: [{ role: 'user', content: content + ' в 23:00' }],
+      tool_results: [
+        { name: 'catalog.staff.read', result: { salon: { name: salon } } },
+      ],
+    },
+    {
+      conversation: [
+        {
+          role: 'user',
+          content: content.replace(
+            salon,
+            '[reference removed]@' + 'd'.repeat(32) + '_1',
+          ),
+        },
+      ],
+      tool_results: [
+        { name: 'catalog.staff.read', result: { salon: { name: salon } } },
+      ],
+    },
+  ]) {
+    const m = model();
+    denied(() => call(m, id, 1, patch));
+    denied(() => call(m, id, 1));
+    assert.deepEqual(m.observations, []);
+  }
+});
+
 test('service finals use actual catalog values and qualify absent employee mapping; no exact price from ranges/null', () => {
   for (const id of [
     'current-admin-correction',
