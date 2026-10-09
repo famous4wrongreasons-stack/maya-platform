@@ -1,3 +1,5 @@
+import type { AiToolPrincipal } from './ai-tool.types';
+import type { StaffScheduleReadScope } from './staff-schedule-read-scope';
 import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { BusinessStateService } from '../business-state/business-state.service';
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
@@ -33,6 +35,232 @@ describe('AiToolHandlerService output minimization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  describe('bound staff schedule READ source', () => {
+    function fixture() {
+      const scope: StaffScheduleReadScope = {
+        branchId: 'branch-a',
+        sourceRevision: 'a'.repeat(64),
+        staffSource: {
+          provider: 'yclients',
+          staffId: 'local-staff',
+          branchId: 'branch-a',
+          externalStaffId: '71',
+          timezone: 'Europe/Moscow',
+          sourceHash: 'b'.repeat(64),
+        },
+      };
+      const configured = jest.fn().mockResolvedValue({
+        id: 'branch-a',
+        sourceRevision: scope.sourceRevision,
+        timezone: 'Europe/Moscow',
+      });
+      const source = jest.fn().mockResolvedValue(scope.staffSource);
+      const getStaff = jest
+        .fn()
+        .mockResolvedValue([
+          { id: '71', name: 'Synthetic staff', title: 'Мастер' },
+        ]);
+      const schedule = {
+        staff_id: '71',
+        date: '2026-10-10',
+        is_working: true,
+        slots: [{ from: '10:00', to: '20:00' }],
+        revision: 'revision',
+      };
+      const getStaffScheduleDay = jest.fn().mockResolvedValue(schedule);
+      const service = createService({
+        crmService: {
+          resolveConfiguredBookingBranch: configured,
+          resolveStaffScheduleSource: source,
+          getStaff,
+          getStaffScheduleDay,
+        } as unknown as CrmService,
+      });
+      const actor: AiToolPrincipal = {
+        ...principal,
+        role: UserRole.TENANT_OWNER,
+        staffScheduleReadSource: scope,
+      };
+      const args = { staff_id: '71', date: '2026-10-10' };
+      return {
+        scope,
+        configured,
+        source,
+        getStaff,
+        getStaffScheduleDay,
+        schedule,
+        service,
+        actor,
+        args,
+        run: () =>
+          service.execute('staff.schedule.read', actor, args, 'schedule-read'),
+      };
+    }
+    it('uses the exact current branch/staff witness for the provider READ and emits only bounded source metadata', async () => {
+      const f = fixture();
+      await expect(f.run()).resolves.toMatchObject({
+        verified: true,
+        date: '2026-10-10',
+        staff: [
+          {
+            id: '71',
+            name: 'Synthetic staff',
+            slots: [{ from: '10:00', to: '20:00' }],
+          },
+        ],
+        read_scope: {
+          contract: 'maya.staff-schedule-read/1',
+          branch_id: 'branch-a',
+          timezone: 'Europe/Moscow',
+          source_hash: 'b'.repeat(64),
+          staff_id: '71',
+        },
+      });
+      expect(f.getStaffScheduleDay).toHaveBeenCalledTimes(1);
+      expect(f.getStaffScheduleDay).toHaveBeenCalledWith('tenant-a', {
+        staffId: '71',
+        date: '2026-10-10',
+        source: f.scope.staffSource,
+      });
+      expect(f.source).toHaveBeenCalledWith(
+        'tenant-a',
+        '71',
+        f.scope.staffSource,
+      );
+    });
+    it.each([
+      'foreign-branch',
+      'revision',
+      'timezone',
+      'staff-source',
+      'unavailable',
+      'actor-branch',
+    ])('refuses %s before roster/provider reads', async (kind) => {
+      const f = fixture();
+      if (kind === 'foreign-branch')
+        f.configured.mockResolvedValue({
+          id: 'other-branch',
+          sourceRevision: f.scope.sourceRevision,
+        });
+      if (kind === 'revision')
+        f.configured.mockResolvedValue({
+          id: 'branch-a',
+          sourceRevision: 'c'.repeat(64),
+        });
+      if (kind === 'timezone')
+        f.configured.mockResolvedValue({
+          id: 'branch-a',
+          sourceRevision: f.scope.sourceRevision,
+          timezone: 'UTC',
+        });
+      if (kind === 'staff-source')
+        f.source.mockResolvedValue({
+          ...f.scope.staffSource,
+          sourceHash: 'c'.repeat(64),
+        });
+      if (kind === 'unavailable')
+        f.configured.mockRejectedValue(
+          new ConflictException('current_source_unavailable'),
+        );
+      if (kind === 'actor-branch')
+        f.actor.readAuthority = {
+          membershipId: 'membership',
+          membershipStatus: 'active',
+          branchId: 'foreign',
+        };
+      await expect(f.run()).rejects.toThrow(ConflictException);
+      expect(f.getStaff).not.toHaveBeenCalled();
+      expect(f.getStaffScheduleDay).not.toHaveBeenCalled();
+    });
+    it('revalidates drift after roster read before schedule provider dispatch', async () => {
+      const f = fixture();
+      f.getStaff.mockImplementation(() => {
+        f.configured.mockResolvedValue(null);
+        return Promise.resolve([{ id: '71', name: 'Synthetic staff' }]);
+      });
+      await expect(f.run()).rejects.toThrow(ConflictException);
+      expect(f.getStaffScheduleDay).not.toHaveBeenCalled();
+    });
+    it('withholds provider response after current company/branch changes', async () => {
+      const f = fixture();
+      f.getStaffScheduleDay.mockImplementation(() => {
+        f.configured.mockResolvedValue(null);
+        return Promise.resolve(f.schedule);
+      });
+      await expect(f.run()).rejects.toThrow(ConflictException);
+      expect(f.getStaffScheduleDay).toHaveBeenCalledTimes(1);
+    });
+    it.each([
+      'staff',
+      'date',
+      'invalid-time',
+      'overlap',
+      'working-flag',
+      'too-many',
+    ])(
+      'does not turn malformed %s provider output into a verified schedule',
+      async (kind) => {
+        const f = fixture();
+        if (kind === 'staff') f.schedule.staff_id = '72';
+        if (kind === 'date') f.schedule.date = '2026-10-11';
+        if (kind === 'invalid-time') f.schedule.slots[0].from = '25:00';
+        if (kind === 'overlap')
+          f.schedule.slots.push({ from: '11:00', to: '12:00' });
+        if (kind === 'working-flag') f.schedule.is_working = false;
+        if (kind === 'too-many')
+          f.schedule.slots = Array.from({ length: 97 }, () => ({
+            from: '10:00',
+            to: '20:00',
+          }));
+        await expect(f.run()).rejects.toMatchObject({
+          response: {
+            error: { code: 'staff_schedule_read_result_unavailable' },
+          },
+        });
+      },
+    );
+    it('does not expose provider-only fields on a qualified slot', async () => {
+      const f = fixture();
+      f.getStaffScheduleDay.mockResolvedValue({
+        ...f.schedule,
+        slots: [{ from: '10:00', to: '20:00', private_note: 'PRIVATE_NOTE' }],
+      });
+      const result: unknown = await f.run();
+      expect(result).toMatchObject({
+        staff: [{ slots: [{ from: '10:00', to: '20:00' }] }],
+      });
+      expect(JSON.stringify(result)).not.toContain('PRIVATE_NOTE');
+    });
+    it('preserves a qualified day off and refuses duplicate current roster identity', async () => {
+      const f = fixture();
+      f.schedule.is_working = false;
+      f.schedule.slots = [];
+      await expect(f.run()).resolves.toMatchObject({
+        staff: [{ is_working: false, slots: [] }],
+      });
+      f.getStaffScheduleDay.mockClear();
+      f.getStaff.mockResolvedValue([
+        { id: '71', name: 'First' },
+        { id: '71', name: 'Second' },
+      ]);
+      await expect(f.run()).rejects.toThrow(ConflictException);
+      expect(f.getStaffScheduleDay).not.toHaveBeenCalled();
+    });
+    it('current metadata checks do not call provider data readers and keep the actual tenant argument', async () => {
+      const f = fixture();
+      await f.service.assertStaffScheduleReadScope(
+        f.actor,
+        'catalog.staff.read',
+        {},
+        { branchId: 'branch-a', sourceRevision: f.scope.sourceRevision },
+      );
+      expect(f.configured).toHaveBeenCalledWith('tenant-a');
+      expect(f.source).not.toHaveBeenCalled();
+      expect(f.getStaff).not.toHaveBeenCalled();
+      expect(f.getStaffScheduleDay).not.toHaveBeenCalled();
+    });
   });
 
   describe('goods search binding', () => {

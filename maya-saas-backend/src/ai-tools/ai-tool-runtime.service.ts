@@ -1,4 +1,8 @@
 import {
+  staffScheduleReadScope,
+  type StaffScheduleReadScope,
+} from './staff-schedule-read-scope';
+import {
   AI_GOODS_APPROVAL_WIDGET_TRIGGER,
   type AiGoodsApprovalWidgetTriggerPort,
   type GoodsReceiptChatOrigin,
@@ -156,6 +160,7 @@ export class AiToolRuntimeService {
       readonly goodsReviewOnly?: true;
       /** One server-owned source for the explicit catalog → rename preview READ pair. */
       readonly serviceRenameSourceRevision?: string;
+      readonly staffScheduleReadScope?: StaffScheduleReadScope;
       /** Transient metadata witness for the existing typed booking successor. */
       readonly onAvailabilityScope?: (check: () => Promise<void>) => void;
       readonly bookingSelector?: Parameters<
@@ -179,6 +184,12 @@ export class AiToolRuntimeService {
       this.approvalConflict('goods_review_context_invalid');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    const revalidateStaffSchedule = await this.bindStaffScheduleReadScope(
+      principal,
+      definition,
+      validated,
+      internal.staffScheduleReadScope,
+    );
     await this.revalidateServiceRenameSource(
       principal,
       definition,
@@ -294,6 +305,7 @@ export class AiToolRuntimeService {
     );
     if (revalidateAvailability)
       internal.onAvailabilityScope?.(revalidateAvailability);
+    await revalidateStaffSchedule?.();
     await internal.bookingSelector?.revalidate();
     const inputHash = this.inputHash(
       toolName,
@@ -328,6 +340,7 @@ export class AiToolRuntimeService {
           );
     }
 
+    await revalidateStaffSchedule?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateServiceRenameSource(
       principal,
@@ -346,9 +359,11 @@ export class AiToolRuntimeService {
           : (dto.idempotencyKey ?? randomUUID()),
       approval: null,
       serviceRenameSourceRevision,
+      revalidateReadSource: revalidateStaffSchedule,
     });
     await personal?.revalidate();
     await revalidateAvailability?.();
+    await revalidateStaffSchedule?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateOwnerSourceRead(principal, definition, args);
     await this.revalidateServiceRenameSource(
@@ -357,6 +372,7 @@ export class AiToolRuntimeService {
       args,
       serviceRenameSourceRevision,
     );
+    await revalidateStaffSchedule?.();
     if (
       internal.suppressWidgetTrigger === true ||
       serviceRenameSourceRevision !== undefined
@@ -372,12 +388,13 @@ export class AiToolRuntimeService {
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
-      revalidateAvailability,
+      revalidateStaffSchedule ?? revalidateAvailability,
       internal.bookingSelector,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
     await this.revalidateOwnerSourceRead(principal, definition, args);
+    await revalidateStaffSchedule?.();
     return output;
   }
 
@@ -399,6 +416,12 @@ export class AiToolRuntimeService {
       this.executionConflict('ai_tool_read_replay_only');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    const revalidateStaffSchedule = await this.bindStaffScheduleReadScope(
+      principal,
+      definition,
+      validated,
+      internal.staffScheduleReadScope,
+    );
     await this.revalidateServiceRenameSource(
       principal,
       definition,
@@ -420,6 +443,7 @@ export class AiToolRuntimeService {
       definition,
       args,
     );
+    await revalidateStaffSchedule?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateServiceRenameSource(
       principal,
@@ -485,6 +509,7 @@ export class AiToolRuntimeService {
         };
     await personal?.revalidate();
     await revalidateAvailability?.();
+    await revalidateStaffSchedule?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateOwnerSourceRead(principal, definition, args);
     await this.revalidateServiceRenameSource(
@@ -493,6 +518,7 @@ export class AiToolRuntimeService {
       args,
       serviceRenameSourceRevision,
     );
+    await revalidateStaffSchedule?.();
     if (
       internal.suppressWidgetTrigger === true ||
       serviceRenameSourceRevision !== undefined
@@ -508,13 +534,90 @@ export class AiToolRuntimeService {
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
-      revalidateAvailability,
+      revalidateStaffSchedule ?? revalidateAvailability,
       internal.bookingSelector,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
     await this.revalidateOwnerSourceRead(principal, definition, args);
+    await revalidateStaffSchedule?.();
     return output;
+  }
+
+  private async bindStaffScheduleReadScope(
+    principal: AiToolPrincipal,
+    definition: AiToolDefinition,
+    args: ValidatedAiToolArguments,
+    raw: StaffScheduleReadScope | undefined,
+  ): Promise<(() => Promise<void>) | undefined> {
+    if (raw === undefined) return;
+    if (definition.riskTier !== 'read' || definition.approvalPolicy !== 'none')
+      this.executionConflict('staff_schedule_read_scope_invalid');
+    const scope = staffScheduleReadScope(definition.name, args, raw);
+    const revalidate = async () => {
+      await this.assertStaffScheduleReadPrincipal(principal);
+      await this.handler.assertStaffScheduleReadScope(
+        principal,
+        definition.name,
+        args,
+        scope,
+      );
+      // Features remain the existing policy owner's decision. Reread the
+      // captured membership after all awaited source/feature work, too.
+      await this.policy.assertCanExecute(principal, definition);
+      await this.assertStaffScheduleReadPrincipal(principal);
+    };
+    await revalidate();
+    principal.staffScheduleReadSource = scope;
+    principal.readAuthority = {
+      membershipId: principal.readAuthority?.membershipId ?? null,
+      membershipStatus: principal.readAuthority?.membershipStatus ?? null,
+      branchId: principal.readAuthority?.branchId ?? null,
+      ...principal.readAuthority,
+      sourceScopeHash: createHash('sha256')
+        .update(this.canonicalJson(['staff-schedule-read/1', scope]))
+        .digest('hex'),
+    };
+    return revalidate;
+  }
+
+  /** Current identity snapshot for this finite scoped READ, not a new grant. */
+  private async assertStaffScheduleReadPrincipal(principal: AiToolPrincipal) {
+    this.tenantContext.assertTenantId(principal.tenantId);
+    const current = await this.prisma.membership.findUnique({
+      where: {
+        userId_tenantId: {
+          userId: principal.userId,
+          tenantId: principal.tenantId,
+        },
+      },
+      select: {
+        id: true,
+        tenantId: true,
+        userId: true,
+        role: true,
+        branchId: true,
+        status: true,
+        user: { select: { status: true } },
+        tenant: { select: { status: true } },
+      },
+    });
+    if (
+      !current ||
+      !principal.readAuthority?.membershipId ||
+      principal.readAuthority.membershipStatus !== 'active' ||
+      current.id !== principal.readAuthority.membershipId ||
+      current.tenantId !== principal.tenantId ||
+      current.userId !== principal.userId ||
+      current.role.toString() !== principal.role.toString() ||
+      current.branchId !== principal.readAuthority.branchId ||
+      current.status !== 'active' ||
+      current.user.status !== 'active' ||
+      current.tenant.status !== 'active'
+    )
+      throw new ForbiddenException({
+        error: { code: 'staff_schedule_read_principal_changed' },
+      });
   }
 
   private serviceRenameSourceContext(
@@ -1931,9 +2034,11 @@ export class AiToolRuntimeService {
     approval: ApprovalRecord | null;
     admissionGuard?: (transaction: Prisma.TransactionClient) => Promise<void>;
     serviceRenameSourceRevision?: string;
+    revalidateReadSource?: () => Promise<void>;
   }) {
     if (params.definition.riskTier !== 'read')
       return this.executeCanonicalTool(params);
+    await params.revalidateReadSource?.();
     await this.revalidateServiceRenameSource(
       params.principal,
       params.definition,
@@ -1948,6 +2053,7 @@ export class AiToolRuntimeService {
         },
       },
     });
+    await params.revalidateReadSource?.();
     await this.revalidateServiceRenameSource(
       params.principal,
       params.definition,
@@ -2039,6 +2145,7 @@ export class AiToolRuntimeService {
     });
 
     try {
+      await params.revalidateReadSource?.();
       await this.revalidateServiceRenameSource(
         params.principal,
         params.definition,
@@ -2054,6 +2161,7 @@ export class AiToolRuntimeService {
         ),
         params.definition.timeoutMs,
       );
+      await params.revalidateReadSource?.();
       await this.revalidateServiceRenameSource(
         params.principal,
         params.definition,

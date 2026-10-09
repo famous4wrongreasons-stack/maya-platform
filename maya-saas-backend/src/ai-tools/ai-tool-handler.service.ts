@@ -1,3 +1,8 @@
+import {
+  staffScheduleReadScope,
+  type StaffScheduleReadScope,
+} from './staff-schedule-read-scope';
+import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
 import { goodsSearchQuery } from '../crm/yclients-goods-search';
 import { GOODS_RECEIPT_TOOL } from '../crm/goods-receipt.contract';
 import { C8ReadService } from '../valuation/c8.read';
@@ -1839,6 +1844,52 @@ export class AiToolHandlerService {
     };
   }
 
+  /** Metadata-only checks from the existing CRM owner; never a provider read. */
+  async assertStaffScheduleReadScope(
+    principal: AiToolPrincipal,
+    toolName: string,
+    args: ValidatedAiToolArguments,
+    raw: StaffScheduleReadScope,
+  ): Promise<void> {
+    const scope = staffScheduleReadScope(toolName, args, raw);
+    const denied = () =>
+      new ConflictException({
+        error: { code: 'staff_schedule_read_source_changed' },
+      });
+    if (
+      principal.readAuthority?.branchId &&
+      principal.readAuthority.branchId !== scope.branchId
+    )
+      throw denied();
+    const checkBranch = async () => {
+      const branch = await this.crmService.resolveConfiguredBookingBranch(
+        principal.tenantId,
+      );
+      if (
+        !branch ||
+        branch.id !== scope.branchId ||
+        branch.sourceRevision !== scope.sourceRevision ||
+        (scope.staffSource && branch.timezone !== scope.staffSource.timezone)
+      )
+        throw denied();
+    };
+    await checkBranch();
+    if (scope.staffSource) {
+      const current = await this.crmService.resolveStaffScheduleSource(
+        principal.tenantId,
+        scope.staffSource.externalStaffId,
+        scope.staffSource,
+      );
+      if (
+        Object.entries(scope.staffSource).some(
+          ([key, value]) => current[key as keyof typeof current] !== value,
+        )
+      )
+        throw denied();
+    }
+    await checkBranch();
+  }
+
   private async readStaffScheduleDay(
     principal: AiToolPrincipal,
     args: ValidatedAiToolArguments,
@@ -1849,6 +1900,14 @@ export class AiToolHandlerService {
         error: { code: 'staff_schedule_forbidden' },
       });
     }
+    const sourceScope = principal.staffScheduleReadSource;
+    if (sourceScope)
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'staff.schedule.read',
+        args,
+        sourceScope,
+      );
     const date = this.requiredString(args.date);
     const requestedStaffId =
       typeof args.staff_id === 'string' ? args.staff_id : null;
@@ -1856,6 +1915,18 @@ export class AiToolHandlerService {
     const selectedStaff = requestedStaffId
       ? activeStaff.filter((member) => member.id === requestedStaffId)
       : activeStaff;
+    if (sourceScope) {
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'staff.schedule.read',
+        args,
+        sourceScope,
+      );
+      if (selectedStaff.length !== 1)
+        throw new ConflictException({
+          error: { code: 'staff_schedule_read_source_changed' },
+        });
+    }
     if (requestedStaffId && selectedStaff.length === 0) {
       throw new BadRequestException({
         message: 'The requested active staff member was not found in CRM.',
@@ -1867,14 +1938,51 @@ export class AiToolHandlerService {
       selectedStaff.slice(0, 50).map(async (member) => {
         const schedule = await this.crmService.getStaffScheduleDay(
           principal.tenantId,
-          { staffId: member.id, date },
+          {
+            staffId: member.id,
+            date,
+            ...(sourceScope ? { source: sourceScope.staffSource } : {}),
+          },
         );
+        if (sourceScope) {
+          await this.assertStaffScheduleReadScope(
+            principal,
+            'staff.schedule.read',
+            args,
+            sourceScope,
+          );
+          try {
+            if (
+              schedule.staff_id !== member.id ||
+              schedule.date !== date ||
+              typeof schedule.is_working !== 'boolean' ||
+              !Array.isArray(schedule.slots) ||
+              schedule.slots.length > 96 ||
+              schedule.is_working !== schedule.slots.length > 0 ||
+              schedule.slots.some(
+                (slot) =>
+                  typeof slot?.from !== 'string' ||
+                  typeof slot?.to !== 'string' ||
+                  !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(slot.from) ||
+                  !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(slot.to),
+              )
+            )
+              throw new Error('unqualified_schedule');
+            normalizeScheduleSlots(schedule.slots);
+          } catch {
+            throw new ConflictException({
+              error: { code: 'staff_schedule_read_result_unavailable' },
+            });
+          }
+        }
         return {
           id: member.id,
           name: member.name,
           title: member.title ?? null,
           is_working: schedule.is_working,
-          slots: schedule.slots,
+          slots: sourceScope
+            ? schedule.slots.map(({ from, to }) => ({ from, to }))
+            : schedule.slots,
         };
       }),
     );
@@ -1883,6 +1991,17 @@ export class AiToolHandlerService {
       source: 'crm',
       date,
       staff,
+      ...(sourceScope?.staffSource
+        ? {
+            read_scope: {
+              contract: 'maya.staff-schedule-read/1' as const,
+              branch_id: sourceScope.branchId,
+              timezone: sourceScope.staffSource.timezone,
+              source_hash: sourceScope.staffSource.sourceHash,
+              staff_id: sourceScope.staffSource.externalStaffId,
+            },
+          }
+        : {}),
     };
   }
 

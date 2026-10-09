@@ -1,6 +1,10 @@
 // Async Prisma mocks retain Promise-shaped interfaces; unsafe values are limited to fixture storage.
 /* eslint-disable @typescript-eslint/require-await, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
-import { AiToolReceiptService } from '../../src/ai-tools/ai-tool-receipt.service';
+import {
+  AiToolReceiptService,
+  type AiReceiptInvocation,
+} from '../../src/ai-tools/ai-tool-receipt.service';
+import type { ValidatedAiToolArguments } from '../../src/ai-tools/ai-tool.types';
 import { admitWithInvocationReceipt } from '../../src/action-engine/action-invocation-receipt.context';
 
 /** Compatibility adapter for pre-existing money/presentation unit fixtures
@@ -59,8 +63,11 @@ export function canonicalReceiptFixture(
   };
   const service = new AiToolReceiptService(db, encryption);
   const realRun = service.run.bind(service);
-  service.run = (invocation, work) =>
-    realRun(invocation, async (args) => {
+  service.run = <T>(
+    invocation: AiReceiptInvocation,
+    work: (args: ValidatedAiToolArguments) => Promise<T>,
+  ): Promise<T> =>
+    realRun<T>(invocation, async (args) => {
       const id = `canonical-fixture:${invocation.id}`;
       const admitted = await admitWithInvocationReceipt(
         {
@@ -93,8 +100,9 @@ export function canonicalReceiptFixture(
           return Promise.resolve(actions.get(id));
         },
       );
-      if (admitted.state === 'SUCCEEDED') return admitted.safeResultSummaryJson;
-      if (running.has(id)) return running.get(id);
+      if (admitted.state === 'SUCCEEDED')
+        return admitted.safeResultSummaryJson as T;
+      if (running.has(id)) return running.get(id) as Promise<T>;
       const operation = work(args).then(
         (value) => {
           Object.assign(actions.get(id), {

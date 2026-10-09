@@ -9,6 +9,10 @@ import { goodsReadReply } from './goods-presentation';
 import { reviewsReply } from './reviews-presentation';
 import { ownTasksReply } from './own-tasks-presentation';
 import {
+  employeeScheduleTask,
+  readEmployeeSchedule,
+} from './employee-schedule-read';
+import {
   isOwnerReviewClarification,
   isOwnerReviewTaskSet,
   isSingleLifecycleTaskSet,
@@ -256,6 +260,7 @@ type AiCoreCompletion = {
   >;
   ownerReviewClarification?: true;
   financialPeriodReply?: true;
+  employeeScheduleReply?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
@@ -2012,6 +2017,131 @@ export class AiCoreService {
             );
           }
         }
+        const employeeSchedule = decision.semanticPlan
+          ? employeeScheduleTask(decision.semanticPlan)
+          : null;
+        if (
+          employeeSchedule &&
+          !clientAudience &&
+          step === 0 &&
+          toolsUsed.length === 0 &&
+          allowedNames.has('catalog.staff.read') &&
+          allowedNames.has('staff.schedule.read')
+        ) {
+          let presented: { reply: string; status: 'verified' | 'blocked' } = {
+            reply:
+              'Проверка графика выбранного сотрудника сейчас недоступна в этом контексте.',
+            status: 'blocked',
+          };
+          if (this.crm && maxToolSteps >= 2) {
+            try {
+              presented = await readEmployeeSchedule({
+                actor: toolUser,
+                task: employeeSchedule,
+                nameReferences: sanitized.nameReferences,
+                unresolvedReferences:
+                  decision.semanticPlan!.context.unresolved_references,
+                crm: this.crm,
+                read: async (name, args, staffScheduleReadScope) => {
+                  const execution = this.record(
+                    await this.executeChatTool(
+                      dto,
+                      toolUser,
+                      name,
+                      {
+                        surface: dto.surface,
+                        arguments: args,
+                        idempotencyKey: this.toolIdempotencyKey(
+                          tenantId,
+                          user.userId,
+                          dto.requestId,
+                          toolsUsed.length,
+                          name,
+                        ),
+                      },
+                      { suppressWidgetTrigger: true, staffScheduleReadScope },
+                    ),
+                  );
+                  toolsUsed.push({
+                    name,
+                    status:
+                      typeof execution.status === 'string'
+                        ? execution.status
+                        : 'unknown',
+                    execution_id:
+                      typeof execution.execution_id === 'string'
+                        ? execution.execution_id
+                        : null,
+                  });
+                  if (
+                    execution.status === 'completed' &&
+                    execution.stale !== true
+                  )
+                    toolResults.push({
+                      name,
+                      result: this.sanitizeToolResult(execution.result),
+                    });
+                  return execution;
+                },
+              });
+              if (presented.status === 'verified') {
+                employeeSchedule.requires_clarification = false;
+                employeeSchedule.clarification_question = null;
+                decision.semanticPlan!.context.unresolved_references = [];
+              }
+            } catch (error) {
+              const sourceCode =
+                error instanceof HttpException
+                  ? this.record(this.record(error.getResponse()).error).code
+                  : null;
+              if (
+                !(error instanceof HttpException) ||
+                ![409, 503].includes(error.getStatus()) ||
+                typeof sourceCode !== 'string' ||
+                ![
+                  'booking_branch_source_unavailable',
+                  'staff_schedule_source_unavailable',
+                  'staff_schedule_read_source_changed',
+                  'staff_schedule_read_result_unavailable',
+                  'ai_tool_staff_schedule_source_changed',
+                  'ai_tool_idempotency_conflict',
+                ].includes(sourceCode)
+              )
+                throw error;
+              toolResults.length = 0;
+              presented = {
+                reply:
+                  'Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён.',
+                status: 'blocked',
+              };
+            }
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: presented.reply,
+              source: 'safe_fallback',
+              action: null,
+              employeeScheduleReply: true,
+              grounding: this.groundingReport(
+                {
+                  evidenceToolNames: ['staff.schedule.read'],
+                  fallbackDomain: 'staff_schedule',
+                  closedForAccess: false,
+                  strictNumbers: true,
+                },
+                presented.status,
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
+        }
         if (!decision.toolCall) {
           const task =
             activeSemanticPlan?.tasks.length === 1
@@ -3399,12 +3529,22 @@ export class AiCoreService {
       (readTurn
         ? await this.orchestrator
             .finishConversationReads(readTurn)
-            .catch(() => ({
-              run_id: readTurn.runId ?? null,
-              scope: 'deterministic_reads' as const,
-              state: 'UNCONFIRMED',
-            }))
+            .catch((error: unknown) => {
+              if (response.employeeScheduleReply) throw error;
+              return {
+                run_id: readTurn.runId ?? null,
+                scope: 'deterministic_reads' as const,
+                state: 'UNCONFIRMED',
+              };
+            })
         : null);
+    if (
+      response.employeeScheduleReply &&
+      response.grounding?.status === 'verified' &&
+      readTurn &&
+      coordination?.state !== 'COMPLETED'
+    )
+      this.modelFailure('conversation_history_unavailable');
     const grounding =
       response.grounding ?? this.groundingReport(null, 'not_required', []);
     const usage = decisions.reduce(
@@ -3437,6 +3577,7 @@ export class AiCoreService {
     const reportCard =
       !clientAudience &&
       !response.financialPeriodReply &&
+      !response.employeeScheduleReply &&
       grounding.status === 'verified' &&
       toolResults.length > 0
         ? buildChatReportCard(toolResults, {

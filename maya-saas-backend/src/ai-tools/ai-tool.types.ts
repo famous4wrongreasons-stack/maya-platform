@@ -1,3 +1,4 @@
+import type { StaffScheduleReadScope } from './staff-schedule-read-scope';
 import type { UserRole } from '../common/domain.enums';
 import type { MayaFeatureKey } from '../common/feature-catalog';
 
@@ -28,6 +29,8 @@ export interface AiToolPrincipal {
   userId: string;
   role: UserRole;
   surface: AiToolSurface;
+  /** Transient source witness for the finite schedule READ, never a grant. */
+  staffScheduleReadSource?: StaffScheduleReadScope;
   /** Current authenticated membership scope; included only in read cache identity. */
   readAuthority?: {
     membershipId: string | null;
