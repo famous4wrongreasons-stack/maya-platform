@@ -57,6 +57,11 @@ const MAX_TEXT = 262144;
 const MAX_STRING = 16384;
 const MAX_ARRAY = 512;
 const MAX_KEYS = 256;
+// Invoke Date intrinsics with an explicit receiver, never methods, toJSON, or
+// accessors on the observed Date. Strings still pass the privacy projection.
+const dateGetTime = (value: Date): number => Date.prototype.getTime.call(value);
+const dateToISOString = (value: Date): string =>
+  Date.prototype.toISOString.call(value);
 const data = (value: unknown, key: string): PropertyDescriptor | undefined =>
   value !== null && typeof value === 'object' && !types.isProxy(value)
     ? Object.getOwnPropertyDescriptor(value, key)
@@ -191,8 +196,8 @@ function sanitizer(
       return UNAVAILABLE;
     }
     if (types.isDate(value)) {
-      const instant = Date.prototype.getTime.call(value);
-      if (Number.isFinite(instant)) return new Date(instant).toISOString();
+      const instant = dateGetTime(value);
+      if (Number.isFinite(instant)) return text(dateToISOString(value), key);
       reasons.add('unsupported_value');
       return UNAVAILABLE;
     }

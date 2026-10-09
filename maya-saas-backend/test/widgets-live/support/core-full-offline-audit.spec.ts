@@ -1,5 +1,6 @@
 /** Synthetic in-memory arguments only; no complete(), application, DB or transport. */
 import { createHash } from 'node:crypto';
+import { runInNewContext } from 'node:vm';
 import {
   captureCoreFullOfflineAudit,
   projectCoreFullOfflinePublicCompany,
@@ -42,6 +43,110 @@ function args(
 }
 
 describe('full offline actual completion audit capture', () => {
+  it('captures actual appointment Date instants, including another realm, without invoking Date overrides', () => {
+    const start = new Date('2026-10-10T14:00:00.000Z');
+    const end: unknown = runInNewContext(
+      "new Date('2026-10-10T14:30:00.000Z')",
+    );
+    let overrides = 0;
+    for (const name of ['getTime', 'toISOString', 'toJSON'])
+      Object.defineProperty(start, name, {
+        enumerable: true,
+        get() {
+          overrides++;
+          throw new Error('must_not_invoke_date_override');
+        },
+      });
+    const captured = captureCoreFullOfflineAudit(
+      args(
+        [],
+        [
+          {
+            name: 'appointments.own.list',
+            result: { appointments: [{ start_at: start, end_at: end }] },
+          },
+        ],
+      ),
+      scope,
+    );
+    expect(captured.toolResults[0].result).toEqual({
+      appointments: [
+        {
+          start_at: '2026-10-10T14:00:00.000Z',
+          end_at: '2026-10-10T14:30:00.000Z',
+        },
+      ],
+    });
+    expect(captured.completeness.status).toBe('complete');
+    expect(overrides).toBe(0);
+    expect(Date.prototype.getTime.call(start)).toBe(1791640800000);
+  });
+
+  it('marks invalid Dates, Date proxies and unbranded Date-shaped objects incomplete instead of serializing empty facts', () => {
+    let traps = 0;
+    const proxy = new Proxy(new Date('2026-10-10T14:00:00.000Z'), {
+      get() {
+        traps++;
+        throw Error('must_not_invoke_proxy');
+      },
+      ownKeys() {
+        traps++;
+        throw Error('must_not_invoke_proxy');
+      },
+    });
+    for (const value of [
+      new Date(NaN),
+      proxy,
+      Object.create(Date.prototype) as unknown,
+      new Map(),
+    ]) {
+      const captured = captureCoreFullOfflineAudit(
+        args(
+          [],
+          [
+            {
+              name: 'appointments.own.list',
+              result: { start_at: value },
+            },
+          ],
+        ),
+        scope,
+      );
+      expect(captured.toolResults[0].result).toEqual({
+        start_at: '[audit unavailable]',
+      });
+      expect(captured.completeness.status).toBe('incomplete');
+      expect(captured.completeness.reasons).toContain('unsupported_value');
+    }
+    expect(traps).toBe(0);
+  });
+
+  it('retains privacy-key and known-private-value precedence for Date instants', () => {
+    const instant = '2026-10-10T14:00:00.000Z';
+    const date = new Date(instant);
+    expect(
+      sanitizeCoreFullOfflineAuditValue(
+        { start_at: date, observed_id: date, address: date, api_key: date },
+        [],
+      ),
+    ).toEqual({
+      start_at: instant,
+      observed_id: hash(instant),
+      address: '[private omitted]',
+      api_key: '[private omitted]',
+    });
+    expect(
+      sanitizeCoreFullOfflineAuditValue({ start_at: date, observed_id: date }, [
+        instant,
+      ]),
+    ).toEqual({
+      start_at: '[private omitted]',
+      observed_id: '[private omitted]',
+    });
+    expect(
+      sanitizeCoreFullOfflineAuditValue({ address: new Date(NaN) }, []),
+    ).toEqual({ address: '[private omitted]' });
+  });
   it('preserves explicitly selected public branding address without changing generic address privacy', () => {
     const company = {
       name: 'Салон MAYA',
