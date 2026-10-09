@@ -30,6 +30,9 @@ import {
   fixturesForHttp,
   type HttpHarness,
 } from './support/http-bootstrap';
+// Initialize the existing application/bootstrap import graph before the CRM
+// value import, as in the standalone staff-services HTTP proof.
+import { CrmService } from '../../src/crm/crm.service';
 import {
   bindCandidateSource,
   type CandidateSource,
@@ -39,6 +42,7 @@ import {
   coreFullOfflineRecipe,
   configureCoreFullOfflineAfterBind,
   coreFullOfflineExternalFacts,
+  CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS,
 } from './support/core-full-offline-fixtures';
 import { occupancyFixtureEdge } from './support/c9-occupancy-fixture-edge';
 import { assertProofDatabase } from './support/proof-db-guard';
@@ -279,6 +283,14 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   const actualRepliesByCase = new Map<string, string[]>();
   const financeDays = new Map<string, string>();
   const observedCompanyProfiles = createCoreFullOfflinePublicCompanyRecorder();
+  const staffServiceReads: Array<{
+    caseId: string;
+    turn: number;
+    sequence: number;
+    observed: ReturnType<
+      ReturnType<typeof coreFullOfflineExternalFacts>['readServiceCatalog']
+    >['observed'];
+  }> = [];
   const forbidden: string[] = [];
   const financeReads: Array<{ route: string; company: string }> = [];
   const modelObservations: Record<string, unknown>[] = [];
@@ -499,8 +511,36 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               finite ? finite.getServices(tenantId, staffId) : services,
             );
           },
-          readServiceCatalog: (tenantId: string) => {
+          readServiceCatalog: (
+            tenantId: string,
+            options?: Readonly<{ staffId: string }>,
+          ) => {
             read('service-catalog', tenantId);
+            if (options !== undefined) {
+              if (
+                !finite ||
+                active !== source ||
+                CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS[source.item.id] !== turn
+              )
+                throw new Error('core_full_offline_staff_service_turn_refused');
+              const actual = finite.readServiceCatalog(
+                tenantId,
+                options,
+                config.settings,
+              );
+              const event = {
+                caseId: source.item.id,
+                turn,
+                sequence: staffServiceReads.length + 1,
+                observed: actual.observed,
+              };
+              // Actual completed adapter call only, never setup inventory or
+              // evaluator-derived facts. These fixed metadata hashes bypass
+              // the text/phone sanitizer deliberately.
+              staffServiceReads.push(event);
+              append('offline-staff-service-source-reads.jsonl', event);
+              return Promise.resolve(actual.catalog);
+            }
             return Promise.resolve(
               observedServiceCatalog(
                 finite ? finite.getServices(tenantId) : services,
@@ -2179,6 +2219,196 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       })),
     );
   }
+  async function staffServiceEvidence(
+    source: CandidateSource,
+    answer: Wire,
+    mark: number,
+  ) {
+    const events = staffServiceReads.slice(mark);
+    expect(events).toHaveLength(1);
+    const event = events[0];
+    expect(event.caseId).toBe(source.item.id);
+    expect(event.turn).toBe(turn);
+    expect(event.observed.actualArgs).toEqual({
+      tenantHash: hash(source.tenant.id),
+      options: { staffId: '71' },
+    });
+    expect(event.observed.sourceWitness).toMatchObject({
+      tenantHash: hash(source.tenant.id),
+      companyHash: hash(source.company),
+      branchHash: hash(source.branchId),
+    });
+    expect(event.observed.returnedStaffId).toBe('71');
+    expect(event.observed.returnedServiceIds).toEqual(['81']);
+    expect(answer.action).toBeNull();
+    expect(answer.resolution).toBeUndefined();
+    expect(answer.grounding?.status).toBe('verified');
+    expect(answer.reply).toContain(
+      source.item.id === 'current-admin-correction' ? 'Артём' : 'Марина',
+    );
+    expect(answer.reply).toContain('Мужская стрижка');
+    expect(answer.reply).toContain('2000 RUB');
+    expect(answer.reply).toContain('30 мин');
+    expect(answer.coordination).toMatchObject({
+      state: 'COMPLETED',
+      scope: 'deterministic_reads',
+    });
+    const runId = answer.coordination?.run_id;
+    if (typeof runId !== 'string')
+      throw new Error('offline_staff_service_run_required');
+    expect(answer.tools_used).toEqual([
+      expect.objectContaining({
+        name: 'catalog.staff.read',
+        status: 'completed',
+      }),
+      expect.objectContaining({
+        name: 'catalog.services.read',
+        status: 'completed',
+      }),
+    ]);
+    const current = await http.app.get(TenantContextService).runAsAuthPrincipal(
+      {
+        tenantId: source.tenant.id,
+        userId: source.user.id,
+        role: source.user.role,
+      },
+      async () => ({
+        staff: await http.app
+          .get(CrmService)
+          .resolveStaffScheduleSource(source.tenant.id, '71'),
+        branch: await http.app
+          .get(CrmService)
+          .resolveConfiguredBookingBranch(source.tenant.id),
+      }),
+    );
+    expect(current.branch?.id).toBe(source.branchId);
+    expect(current.staff.branchId).toBe(source.branchId);
+    expect(hash(current.staff.staffId)).toBe(
+      event.observed.sourceWitness.localStaffHash,
+    );
+    expect(current.staff.externalStaffId).toBe(event.observed.returnedStaffId);
+    const rows = await db.prisma.c9WorkReceipt.findMany({
+      where: { tenantId: source.tenant.id, runId },
+      orderBy: { taskKey: 'asc' },
+    });
+    expect(rows.map((row) => row.taskKey)).toEqual([
+      'catalog.services.read',
+      'catalog.staff.read',
+    ]);
+    const receipts: Record<string, unknown>[] = [];
+    for (const row of rows) {
+      expect(row.state).toBe('SETTLED');
+      expect(row.kind).toBe('TOOL_READ');
+      const ref = auditRecord(row.resultJson);
+      expect(ref.sourceType).toBe('AiToolExecution');
+      if (typeof ref.executionId !== 'string')
+        throw new Error('offline_staff_service_execution_required');
+      const execution = await db.prisma.aiToolExecution.findUniqueOrThrow({
+        where: { id: ref.executionId },
+      });
+      expect(execution).toMatchObject({
+        tenantId: source.tenant.id,
+        actorUserId: source.user.id,
+        toolName: row.taskKey,
+        status: 'completed',
+      });
+      expect(answer.tools_used).toContainEqual(
+        expect.objectContaining({
+          name: row.taskKey,
+          execution_id: execution.id,
+        }),
+      );
+      if (!execution.encryptedResult)
+        throw new Error('offline_staff_service_result_required');
+      const result = auditRecord(
+        JSON.parse(db.encryption.decrypt(execution.encryptedResult)),
+      );
+      let scopeMetadata: Record<string, unknown> = {};
+      if (row.taskKey === 'catalog.services.read') {
+        const scope = auditRecord(result.read_scope);
+        expect(scope).toEqual({
+          contract: 'maya.staff-service-catalog.read/1',
+          branch_id: source.branchId,
+          source_revision: current.branch?.sourceRevision,
+          source_hash: current.staff.sourceHash,
+          staff_id: '71',
+        });
+        expect(scope.source_hash).toMatch(/^[a-f0-9]{64}$/);
+        expect(scope.source_revision).toMatch(/^[a-f0-9]{64}$/);
+        const catalog = { ...result };
+        delete catalog.read_scope;
+        expect(hash(catalog)).toBe(event.observed.catalogSha256);
+        expect(hash(result.services)).toBe(event.observed.returnedFactsSha256);
+        expect(event.observed.relationSha256).toBe(
+          hash({
+            tenantId: source.tenant.id,
+            companyId: Number(source.company),
+            branchId: source.branchId,
+            localStaffId: current.staff.staffId,
+            externalStaffId: scope.staff_id,
+            services: result.services,
+          }),
+        );
+        expect(result.services).toEqual([
+          {
+            id: '81',
+            name: 'Мужская стрижка',
+            price: 2000,
+            price_min: 2000,
+            price_max: 2000,
+            duration_minutes: 30,
+            currency: 'RUB',
+            category: null,
+            limitations: [],
+          },
+        ]);
+        scopeMetadata = {
+          sourceHash: scope.source_hash,
+          sourceRevision: scope.source_revision,
+          branchHash: hash(scope.branch_id),
+          returnedStaffId: scope.staff_id,
+        };
+      }
+      receipts.push({
+        taskKey: row.taskKey,
+        state: row.state,
+        kind: row.kind,
+        workHash: hash(row.id),
+        executionHash: hash(execution.id),
+        inputHash: execution.inputHash,
+        resultSha256: hash(result),
+        ...scopeMetadata,
+      });
+    }
+    // Copy only the closed metadata projection, preserving raw opaque digests.
+    // Check the saved bytes against the projection from actual DB/adapter reads.
+    const receipt = {
+      caseId: source.item.id,
+      turn,
+      qualification: 'SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY',
+      actorHash: hash(source.user.id),
+      runHash: hash(runId),
+      scopedReadCount: events.length,
+      sourceRead: event,
+      settledWorkCount: receipts.length,
+      receipts,
+    };
+    const file = 'offline-staff-service-scoped-receipts.jsonl';
+    if (typeof output !== 'string')
+      throw new Error('offline_staff_service_output_required');
+    append(file, receipt);
+    const saved = readFileSync(path.join(output, file), 'utf8')
+      .trim()
+      .split('\n');
+    expect(saved.length).toBeLessThanOrEqual(3);
+    expect(JSON.parse(saved.at(-1)!)).toEqual(receipt);
+    expect(hash(JSON.parse(saved.at(-1)!))).toBe(hash(receipt));
+    return {
+      receiptSha256: hash(receipt),
+      scopedReadCount: events.length,
+      settledWorkCount: receipts.length,
+    };
+  }
   it('replays exactly the selected frozen dialogs and retains actual HTTP replies before qualification', async () => {
     const unsigned = {
       version: 1,
@@ -2331,7 +2561,8 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               wireBefore = serializerCalls,
               brokerBefore = brokerCalls,
               outputBefore = modelOutputResponses,
-              sourceBefore = source.reads.length;
+              sourceBefore = source.reads.length,
+              staffServiceBefore = staffServiceReads.length;
             let response: { status: number; body: unknown };
             try {
               response = await request(http.app.getHttpServer())
@@ -2461,6 +2692,13 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 outputBefore,
               ),
               sourceReads: source.reads.slice(sourceBefore),
+              ...(profile.id === CORE_OFFLINE_PROFILE &&
+              CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS[caseId] === turn
+                ? {
+                    staffServiceSourceReads:
+                      staffServiceReads.slice(staffServiceBefore),
+                  }
+                : {}),
               ...(profile.id === CORE_OFFLINE_PROFILE
                 ? {
                     fixtureBoundary:
@@ -2532,6 +2770,23 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             expect(writes).toEqual([]);
             expect(after).toBe(before);
             expect(forbidden).toEqual([]);
+            if (
+              profile.id === CORE_OFFLINE_PROFILE &&
+              CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS[caseId] === turn
+            ) {
+              const evidence = await staffServiceEvidence(
+                source,
+                answer,
+                staffServiceBefore,
+              );
+              append('offline-staff-service-turn-links.jsonl', {
+                caseId,
+                turn,
+                actualReplySha256: hash(answer.reply),
+                responseSha256: hash(answer),
+                ...evidence,
+              });
+            }
             for (const approval of approvals)
               expect(approval).toMatchObject({
                 status: 'pending',

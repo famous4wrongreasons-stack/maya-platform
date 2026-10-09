@@ -11,6 +11,7 @@ import { servicePriceSnapshot } from '../../../src/crm/yclients-service-price.co
 import { normalizeCrmBranchBinding } from '../../../src/crm/crm-provider-settings';
 import { UserRole } from '../../../src/common/domain.enums';
 import type { CRMAdapter } from '../../../src/crm/crm-adapter.interface';
+import type { ServiceCatalogRead } from '../../../src/crm/service-catalog-read';
 import type {
   Practitioner,
   ServiceOffering,
@@ -395,6 +396,29 @@ export type ConfiguredSource = {
   serviceIds: string[];
 };
 const configured = new WeakMap<CandidateSource, ConfiguredSource>();
+// Forward-only, explicitly authored synthetic facts for three frozen turns.
+// A general services list never proves this staff-to-service relation.
+export const CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS: Readonly<
+  Record<string, number>
+> = Object.freeze({
+  'current-admin-correction': 2,
+  'utt-services.price-062': 1,
+  'utt-services.price-067': 1,
+});
+const staffServiceFixtures = new WeakMap<
+  CandidateSource,
+  {
+    tenantId: string;
+    companyId: number;
+    branchId: string;
+    staffId: string;
+    linkId: string;
+    integrationId: string;
+  }
+>();
+const fixtureHash = (value: unknown) =>
+  createHash('sha256').update(JSON.stringify(value)).digest('hex');
+
 export async function configureCoreFullOfflineAfterBind(
   db: FixtureContext,
   source: CandidateSource,
@@ -423,6 +447,84 @@ export async function configureCoreFullOfflineAfterBind(
   });
   let scheduleFixture: { member: Practitioner; integrationId: string } | null =
     null;
+  let staffServiceFixture: {
+    member: Practitioner;
+    integrationId: string;
+    companyId: number;
+    settings: Record<string, unknown>;
+  } | null = null;
+  if (Object.hasOwn(CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS, source.item.id)) {
+    const integration = await db.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: {
+        id: true,
+        tenantId: true,
+        provider: true,
+        status: true,
+        settingsJson: true,
+      },
+    });
+    assert.ok(
+      integration &&
+        integration.tenantId === tenantId &&
+        integration.provider === 'yclients' &&
+        integration.status === 'active' &&
+        branch.id === source.branchId &&
+        branch.tenantId === tenantId &&
+        branch.timezone === 'Europe/Moscow' &&
+        branch.timezone === source.clockBinding.businessTimezone,
+      'core_full_offline_staff_service_source_required',
+    );
+    const settings = integration.settingsJson;
+    assert.ok(
+      settings && typeof settings === 'object' && !Array.isArray(settings),
+      'core_full_offline_staff_service_settings_required',
+    );
+    assert.ok(
+      /^[1-9][0-9]*$/.test(source.company) &&
+        Number.isSafeInteger(Number(source.company)) &&
+        (typeof settings.companyId === 'number' ||
+          typeof settings.companyId === 'string') &&
+        /^[1-9][0-9]*$/.test(String(settings.companyId)) &&
+        String(settings.companyId) === source.company &&
+        settings.syntheticTenantId === tenantId,
+      'core_full_offline_staff_service_company_required',
+    );
+    // These three old fixtures have no branch binding. Add that declared fact;
+    // do not repair an incompatible pre-existing binding.
+    const binding = normalizeCrmBranchBinding(
+      settings.branchBinding,
+      settings.companyId,
+    );
+    assert.ok(
+      !Object.hasOwn(settings, 'branchBinding') ||
+        (binding?.branchId === branch.id &&
+          binding.companyId === Number(source.company)),
+      'core_full_offline_staff_service_binding_conflict',
+    );
+    const roster = coreFullOfflineExternalFacts(source).getStaff(tenantId);
+    const members = roster.filter((member) => member.id === '71');
+    assert.ok(
+      members.length === 1 && members[0].name.trim().length > 0,
+      'core_full_offline_staff_service_member_required',
+    );
+    const links = await db.prisma.staffProviderLink.findMany({
+      where: { tenantId, provider: 'yclients', externalId: '71' },
+      select: { id: true },
+      take: 2,
+    });
+    assert.equal(
+      links.length,
+      0,
+      'core_full_offline_staff_service_link_exists',
+    );
+    staffServiceFixture = {
+      member: members[0],
+      integrationId: integration.id,
+      companyId: Number(source.company),
+      settings,
+    };
+  }
   if (
     ['followup-owner-topic-switch', 'mt-topic_switch_and_return-17'].includes(
       source.item.id,
@@ -499,6 +601,72 @@ export async function configureCoreFullOfflineAfterBind(
     secondaryStaffId: null,
     serviceIds: [],
   };
+  if (staffServiceFixture) {
+    const fixture = staffServiceFixture;
+    if (!Object.hasOwn(fixture.settings, 'branchBinding'))
+      await db.prisma.crmIntegration.update({
+        where: { id: fixture.integrationId, tenantId },
+        data: {
+          settingsJson: {
+            ...fixture.settings,
+            branchBinding: {
+              contract: 'maya.crm-branch-binding/1',
+              companyId: fixture.companyId,
+              branchId: branch.id,
+            },
+          },
+        },
+      });
+    const staff = await db.prisma.staff.create({
+      data: {
+        tenantId,
+        branchId: branch.id,
+        encryptedDisplayName: db.encryption.encrypt(fixture.member.name),
+        active: true,
+      },
+    });
+    const link = await db.prisma.staffProviderLink.create({
+      data: {
+        tenantId,
+        staffId: staff.id,
+        provider: 'yclients',
+        externalId: '71',
+      },
+    });
+    result.primaryStaffId = staff.id;
+    source.privateValues.push(staff.id, link.id);
+    source.sourceRefs.push(
+      {
+        owner: 'OFFLINE_STAFF_SERVICE_BRANCH_BINDING',
+        id: fixture.integrationId,
+        status: 'EXPLICIT_SYNTHETIC_COMPANY_BRANCH_PAIR',
+      },
+      {
+        owner: 'OFFLINE_STAFF_SERVICE_STAFF',
+        id: staff.id,
+        status: 'ADDED_ACTIVE_IN_BOUND_BRANCH_FROM_CURRENT_ROSTER',
+      },
+      {
+        owner: 'OFFLINE_STAFF_SERVICE_PROVIDER_LINK',
+        id: link.id,
+        status: 'ADDED_UNIQUE_YCLIENTS_71',
+      },
+      {
+        owner: 'OFFLINE_STAFF_SERVICE_RELATION',
+        id: '71:81',
+        status:
+          'EXPLICIT_SYNTHETIC_2000_RUB_30_MIN_NOT_GENERAL_CATALOG_INFERENCE',
+      },
+    );
+    staffServiceFixtures.set(source, {
+      tenantId,
+      companyId: fixture.companyId,
+      branchId: branch.id,
+      staffId: staff.id,
+      linkId: link.id,
+      integrationId: fixture.integrationId,
+    });
+  }
   if (scheduleFixture) {
     const staff = await db.prisma.staff.create({
       data: {
@@ -636,6 +804,99 @@ export function coreFullOfflineExternalFacts(source: CandidateSource) {
     return tomorrow;
   };
   return {
+    readServiceCatalog(
+      tenantId: string,
+      options: Readonly<{ staffId: string }>,
+      settings: Record<string, unknown> | undefined,
+    ) {
+      tenant(tenantId);
+      const fixture = staffServiceFixtures.get(source);
+      assert.ok(
+        Object.hasOwn(CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS, source.item.id) &&
+          fixture &&
+          fixture.tenantId === tenantId &&
+          fixture.branchId === source.branchId &&
+          String(fixture.companyId) === source.company,
+        'core_full_offline_staff_service_fixture_required',
+      );
+      assert.ok(
+        options &&
+          typeof options === 'object' &&
+          !Array.isArray(options) &&
+          Object.keys(options).join(',') === 'staffId' &&
+          options.staffId === '71',
+        'core_full_offline_staff_service_args_refused',
+      );
+      const binding = normalizeCrmBranchBinding(
+        settings?.branchBinding,
+        settings?.companyId,
+      );
+      assert.ok(
+        settings?.syntheticTenantId === tenantId &&
+          (typeof settings.companyId === 'number' ||
+            typeof settings.companyId === 'string') &&
+          /^[1-9][0-9]*$/.test(String(settings?.companyId)) &&
+          String(settings?.companyId) === String(fixture.companyId) &&
+          binding?.companyId === fixture.companyId &&
+          binding.branchId === fixture.branchId,
+        'core_full_offline_staff_service_adapter_scope_refused',
+      );
+      // Authored relation, intentionally independent of getServices(). Staff 72
+      // being in the roster does not grant it any service or price fact here.
+      const relation = {
+        tenantId: fixture.tenantId,
+        companyId: fixture.companyId,
+        branchId: fixture.branchId,
+        localStaffId: fixture.staffId,
+        externalStaffId: '71',
+        services: [
+          {
+            id: '81',
+            name: 'Мужская стрижка',
+            price: 2000,
+            price_min: 2000,
+            price_max: 2000,
+            duration_minutes: 30,
+            currency: 'RUB',
+            category: null,
+            limitations: [],
+          },
+        ],
+      };
+      const catalog: ServiceCatalogRead = {
+        contract: 'maya.service-catalog.read/1',
+        source: 'external_crm',
+        scope: 'public_booking_catalog',
+        as_of: new Date().toISOString(),
+        catalog_exhaustive: false,
+        services: structuredClone(relation.services),
+      };
+      // No PII, credentials or raw local identities. Keep these exact digests
+      // outside the generic text/phone sanitizer in the supplemental receipt.
+      return {
+        catalog,
+        observed: {
+          qualification: 'EXPLICIT_SCRIPTED_SYNTHETIC_STAFF_SERVICE_FACTS',
+          relationSha256: fixtureHash(relation),
+          actualArgs: {
+            tenantHash: fixtureHash(tenantId),
+            options: { staffId: options.staffId },
+          },
+          sourceWitness: {
+            tenantHash: fixtureHash(fixture.tenantId),
+            companyHash: fixtureHash(String(fixture.companyId)),
+            branchHash: fixtureHash(fixture.branchId),
+            localStaffHash: fixtureHash(fixture.staffId),
+            linkHash: fixtureHash(fixture.linkId),
+            integrationHash: fixtureHash(fixture.integrationId),
+          },
+          returnedStaffId: relation.externalStaffId,
+          returnedServiceIds: relation.services.map((row) => row.id),
+          returnedFactsSha256: fixtureHash(catalog.services),
+          catalogSha256: fixtureHash(catalog),
+        },
+      };
+    },
     getServices(tenantId: string, staffId?: string) {
       tenant(tenantId);
       if (staffId !== undefined && !staff.some((entry) => entry.id === staffId))
