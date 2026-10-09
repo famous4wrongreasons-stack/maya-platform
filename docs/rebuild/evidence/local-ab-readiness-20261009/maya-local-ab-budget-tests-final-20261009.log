@@ -1,0 +1,18 @@
+✔ fresh A+B reserves all 36 bounded calls durably, never writes message or credentials (255.07675ms)
+✔ A and B call ceilings are inclusive and an extra attempt irreversibly halts (328.92125ms)
+✔ only A then explicitly clean B may start, each exactly once (154.023875ms)
+✔ failed or UNKNOWN A retains its reservation and permanently forbids B (104.93575ms)
+✔ the six-second interval crosses the clean A→B boundary and early reserve latches (50.317042ms)
+✔ construction starts the 30-minute clock, each stage clamps, exact expiry halts (69.928333ms)
+✔ rollback, nonfinite and throwing clocks fail closed without logging raw errors (73.981333ms)
+✔ malformed or underpriced reservations cannot bypass the existing formula or leak fields (167.920208ms)
+✔ fsync failure after reservation is UNKNOWN, retains counters, and cannot admit B (18.612625ms)
+✔ close is durable and idempotent, unfinished sessions halt, any restart refuses (31.767333ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1303.645959

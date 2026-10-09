@@ -1,0 +1,12 @@
+✔ SCRIPTED/SYNTHETIC real A+B launcher: complete (9347.144041ms)
+✔ SCRIPTED/SYNTHETIC real A+B launcher: unknown (1907.253834ms)
+✔ SCRIPTED/SYNTHETIC real A+B launcher: deadline (1540.741ms)
+✔ SCRIPTED/SYNTHETIC real A+B launcher: bad-plan-pin (736.266459ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13565.862875

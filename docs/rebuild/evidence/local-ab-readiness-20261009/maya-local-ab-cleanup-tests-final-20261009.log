@@ -1,0 +1,16 @@
+✔ terminal report, absent recorded groups and no pidfile confirm without any spawn or signal (2.2075ms)
+✔ only recorded live groups receive TERM then bounded KILL; exact owned PG stops independently (1.395292ms)
+✔ missing, oversized, linked, wrong manifest or unsafe directories refuse before process operations (6.4265ms)
+✔ unknown, repeated, non-detached and runner PGIDs never authorize signals (4.176917ms)
+✔ a resurrected PGID, live runner or partial running report remains unconfirmed (2.205417ms)
+✔ foreign, linked or changed pidfile cannot direct a pg_ctl stop (3.675709ms)
+✔ PG stop failure or surviving postmaster cannot become cleanup confirmation (1.863041ms)
+✔ one failed group check does not block checking others, but unknown liveness never permits KILL (0.994083ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58.948166
