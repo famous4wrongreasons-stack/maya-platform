@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import {
   ForbiddenException,
@@ -2753,7 +2755,7 @@ describe('AiCoreService', () => {
     });
 
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
-    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({
       source: 'safe_fallback',
       grounding: {
@@ -2836,7 +2838,7 @@ describe('AiCoreService', () => {
       'Покажи рост прибыли',
       'Какой график у мастера завтра?',
     ])(
-      'retains pre-model protected-source refusal for %s after ordinary conversation',
+      'retains protected-source refusal without a current semantic answer for %s after ordinary conversation',
       async (text) => {
         const mocks = createService(toolNames);
         const out = await mocks.service.chat(
@@ -2852,7 +2854,7 @@ describe('AiCoreService', () => {
           },
         );
         expect(out.grounding.status).toBe('blocked');
-        expect(mocks.model.decide).not.toHaveBeenCalled();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
         expect(mocks.runtime.execute).not.toHaveBeenCalled();
       },
     );
@@ -2923,6 +2925,302 @@ describe('AiCoreService', () => {
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
       expect(out.grounding.status).toBe('blocked');
       expect(out.reply).not.toContain('99');
+    });
+  });
+
+  describe('general explanations before heuristic access refusal', () => {
+    const parser = new AiCoreModelService(
+      new ConfigService(),
+      new ConversationIntelligenceService(),
+    );
+    const generalTask = {
+      intent: 'general.explain_term',
+      entities_json: JSON.stringify({ topic: 'revenue' }),
+      confidence: 1,
+    };
+    const parse = (
+      input: AiCoreModelInput,
+      tasks: unknown[],
+      tool: unknown = null,
+    ) =>
+      parser['validatePlanningResponse'](
+        JSON.stringify({
+          semantic_plan: { dialogue_act: 'question', tasks },
+          tool_call: tool,
+        }),
+        input,
+      );
+    const corpus = readFileSync(
+      resolve(
+        __dirname,
+        '../../datasets/conversation-intelligence/utterances.jsonl',
+      ),
+      'utf8',
+    )
+      .trim()
+      .split('\n')
+      .map(
+        (line) =>
+          JSON.parse(line) as {
+            id: string;
+            utterance: string;
+            intent: string;
+            entities: Record<string, string>;
+          },
+      );
+    it.each(['utt-general.explain_term-016', 'utt-general.explain_term-024'])(
+      'answers existing corpus %s without reading CRM when analytics is unavailable',
+      async (id) => {
+        const row = corpus.find((entry) => entry.id === id)!;
+        const mocks = createService(['catalog.staff.read']);
+        const reply =
+          'Средний чек — это сумма продаж, разделённая на количество чеков. Это общее объяснение, без расчёта показателей салона.';
+        mocks.model.decide.mockImplementation((input) => {
+          const parsed = parser['validatePlanningResponse'](
+            JSON.stringify({
+              semantic_plan: {
+                dialogue_act: 'question',
+                tasks: [
+                  {
+                    intent: row.intent,
+                    entities_json: JSON.stringify(row.entities),
+                    confidence: 1,
+                  },
+                ],
+              },
+              tool_call: null,
+            }),
+            input,
+          );
+          return Promise.resolve(decision({ ...parsed, reply }));
+        });
+        const response = await mocks.service.chat(
+          { ...user, role: UserRole.EMPLOYEE },
+          {
+            ...dto,
+            messages: [{ role: 'user', content: row.utterance }],
+          },
+        );
+        expect(response.reply).toBe(reply);
+        expect(response.grounding.status).toBe('not_required');
+        expect(response.action).toBeNull();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+    it.each([
+      UserRole.CLIENT,
+      UserRole.EMPLOYEE,
+      UserRole.ADMINISTRATOR,
+      UserRole.TENANT_OWNER,
+    ])(
+      'lets %s explain a financial term without granting financial facts',
+      async (role) => {
+        const mocks = createService(['catalog.staff.read']);
+        const reply = 'Выручка — сумма продаж до вычета расходов.';
+        mocks.model.decide.mockImplementation((input) =>
+          Promise.resolve(
+            decision({
+              ...parse(input, [generalTask]),
+              reply,
+            }),
+          ),
+        );
+        const response = await mocks.service.chat(
+          { ...user, role },
+          {
+            ...dto,
+            messages: [
+              { role: 'user', content: 'Объясни простыми словами выручку' },
+            ],
+          },
+        );
+        expect(response).toMatchObject({
+          reply,
+          action: null,
+          grounding: { status: 'not_required' },
+        });
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide.mock.calls[0][0]).toMatchObject({
+          principalRole: role,
+          toolResults: [],
+        });
+      },
+    );
+    it.each(['native', 'web'] as const)(
+      'asks one semantic question for a missing general topic on %s',
+      async (surface) => {
+        const mocks = createService(['catalog.staff.read']);
+        mocks.model.decide.mockImplementation((input) =>
+          Promise.resolve(
+            decision({
+              ...parse(input, [
+                {
+                  ...generalTask,
+                  entities_json: '{}',
+                  clarification_question: 'Какой финансовый термин объяснить?',
+                },
+              ]),
+              reply: 'SHOULD_NOT_REPLACE_QUESTION',
+            }),
+          ),
+        );
+        const response = await mocks.service.chat(user, {
+          ...dto,
+          surface,
+          messages: [
+            { role: 'user', content: 'Объясни про выручку или прибыль' },
+          ],
+        });
+        expect(response.reply).toBe('Какой финансовый термин объяснить?');
+        expect(response.grounding.status).toBe('not_required');
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+    it.each([
+      'denied',
+      'unavailable',
+      'mixed',
+      'substitute-public',
+      'unplanned',
+      'unconfigured',
+      'failed',
+      'invalid-plan',
+    ])(
+      'keeps closed factual requests bounded with zero reads: %s',
+      async (state) => {
+        const mocks = createService(['catalog.staff.read']);
+        const role =
+          state === 'denied' ? UserRole.CLIENT : UserRole.TENANT_OWNER;
+        mocks.model.decide.mockImplementation((input) => {
+          if (state === 'unconfigured') return Promise.resolve(null);
+          if (state === 'invalid-plan')
+            return Promise.resolve(
+              decision({
+                ...parse(input, [
+                  { intent: 'invented.intent', entities_json: '{}' },
+                ]),
+                reply: 'INVALID',
+              }),
+            );
+          if (state === 'failed')
+            return Promise.reject(
+              new Error('synthetic model transport failure'),
+            );
+          if (state === 'unplanned')
+            return Promise.resolve(
+              decision({ reply: 'Выручка 999999 рублей.', toolCall: null }),
+            );
+          const dataTask = {
+            intent: 'finance.revenue',
+            entities_json: JSON.stringify({ period: 'this_month' }),
+            confidence: 1,
+          };
+          const tasks =
+            state === 'substitute-public'
+              ? [
+                  {
+                    intent: 'employees.list_public',
+                    entities_json: '{}',
+                    confidence: 1,
+                  },
+                ]
+              : state === 'mixed'
+                ? [generalTask, dataTask]
+                : [dataTask];
+          const tool =
+            state === 'substitute-public'
+              ? { name: 'catalog.staff.read', arguments_json: '{}' }
+              : null;
+          return Promise.resolve(
+            decision({
+              ...parse(input, tasks, tool),
+              reply: 'Выручка 999999 рублей.',
+            }),
+          );
+        });
+        const response = await mocks.service.chat(
+          { ...user, role },
+          {
+            ...dto,
+            messages: [
+              { role: 'user', content: 'Какая выручка бизнеса за этот месяц?' },
+            ],
+          },
+        );
+        expect(response.reply).toContain(
+          'недоступен для вашей текущей роли или тарифа',
+        );
+        expect(response.reply).not.toMatch(/999999|не отвечает|AI-ключ/);
+        expect(response).toMatchObject({
+          action: null,
+          tools_used: [],
+          grounding: { status: 'blocked', evidence_tools: [] },
+        });
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('does not dispatch a tool smuggled into a general answer', async () => {
+      const mocks = createService(['catalog.staff.read']);
+      // The real parser refuses this mismatch; assert the same outer boundary
+      // even for an injected malformed decision that bypasses that parser.
+      const semanticPlan = new ConversationIntelligenceService().validatePlan(
+        {
+          tasks: [
+            {
+              intent: 'general.explain_term',
+              entities: { topic: 'revenue' },
+              confidence: 1,
+            },
+          ],
+        },
+        user.role,
+        ['catalog.staff.read'],
+      );
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          semanticPlan,
+          toolCall: { name: 'catalog.staff.read', arguments: {} },
+          reply: 'FORGED',
+        }),
+      );
+      const response = await mocks.service.chat(user, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Объясни выручку' }],
+      });
+      expect(response.grounding.status).toBe('blocked');
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+    });
+    it('keeps an owner in client audience while explaining a term', async () => {
+      const mocks = createService([
+        'catalog.staff.read',
+        'analytics.business.query',
+      ]);
+      mocks.model.decide.mockImplementation((input) => {
+        expect(input.principalRole).toBe(UserRole.TENANT_OWNER);
+        expect(input.persona).toBe('admin');
+        expect(input.tools.map((tool) => tool.name)).toEqual([
+          'catalog.staff.read',
+        ]);
+        return Promise.resolve(
+          decision({
+            ...parse(input, [generalTask]),
+            reply: 'Общее объяснение выручки.',
+          }),
+        );
+      });
+      const response = await mocks.service.chat(user, {
+        ...dto,
+        audience: 'client',
+        messages: [{ role: 'user', content: 'Объясни выручку' }],
+      });
+      expect(response.reply).toBe('Общее объяснение выручки.');
+      expect(response.grounding.status).toBe('not_required');
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -3229,7 +3527,7 @@ describe('AiCoreService', () => {
         },
       );
       expect(out.grounding).toMatchObject({ status: 'blocked' });
-      expect(mocks.model.decide).not.toHaveBeenCalled();
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
     },
   );
@@ -4196,7 +4494,7 @@ describe('AiCoreService', () => {
         domain: 'business_query',
       },
     });
-    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
     expect(mocks.runtime.execute).not.toHaveBeenCalled();
   });
 

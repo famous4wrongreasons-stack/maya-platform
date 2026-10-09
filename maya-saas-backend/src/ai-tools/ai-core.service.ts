@@ -1066,13 +1066,12 @@ export class AiCoreService {
           toolResults,
         );
       }
-      // Единственный оставшийся отказ ДО модели: вопрос про данные, а данных
-      // этой роли или тарифу не выдано вовсе. Молчать здесь нельзя — человек
-      // должен услышать причину.
-      if (
-        requirement &&
-        (requirement.closedForAccess || requiredToolNames.length === 0)
-      ) {
+      // A lexical data hint is not a permission decision about an explanation.
+      // Resolve meaning first; the closed-source guard below still runs before
+      // any tool or domain owner and cannot authorize a read.
+      // Keep the existing no-capability/plan boundary; this change only serves
+      // a principal with an already available assistant tool profile.
+      if (requirement?.closedForAccess && allowedNames.size === 0) {
         return this.complete(
           user,
           dto,
@@ -1153,6 +1152,18 @@ export class AiCoreService {
             : {}),
         });
         if (!decision) {
+          if (requirement?.closedForAccess) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              this.groundingFallback(requirement, toolResults, true),
+              toolResults,
+            );
+          }
           const deterministicReply = this.deterministicGroundedReply(
             toolResults,
             this.contextualUserText(sanitized.messages),
@@ -1213,6 +1224,39 @@ export class AiCoreService {
         if (typeof decision.reply === 'string')
           decision.reply = sanitized.present(decision.reply);
         decisions.push(decision);
+        if (requirement?.closedForAccess) {
+          const generalAnswer =
+            decision.toolCall === null &&
+            decision.semanticPlan !== null &&
+            decision.semanticPlan !== undefined &&
+            decision.semanticPlan.tasks.length > 0 &&
+            decision.semanticPlan.tasks.every(
+              (task) =>
+                task.data_class === 'A' &&
+                task.action === 'answer' &&
+                task.tool.status === 'not_needed' &&
+                task.permission.status !== 'denied' &&
+                !task.requires_confirmation &&
+                ['general_business_questions', 'small_talk'].includes(
+                  task.domain,
+                ),
+            );
+          if (!generalAnswer) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              this.groundingFallback(requirement, toolResults, true),
+              toolResults,
+            );
+          }
+          requirement = null;
+          requiredToolNames = [];
+          requirementSatisfied = true;
+        }
         if (step === 0 && decision.semanticPlan) {
           const pending = this.pendingOwnerReviews.get(dto);
           const transition = ownerReviewContinuationState(
@@ -3857,6 +3901,18 @@ export class AiCoreService {
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
+      if (requirement?.closedForAccess) {
+        return this.complete(
+          user,
+          dto,
+          brain,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          this.groundingFallback(requirement, toolResults, true),
+          toolResults,
+        );
+      }
       // Match the explicit Lifecycle command: source-owner/turn refusals must
       // not become a fabricated CRM connectivity explanation or generic retry.
       if (lifecycleDelegated) throw error;
