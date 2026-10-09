@@ -22,7 +22,7 @@ async function click(page, name) {
   assert.equal(await page.click(`Q.all('button').find(el => Q.visible(el) && Q.name(el) === ${JSON.stringify(name)})`), true);
 }
 assert.equal(process.connected, true, 'Use the owned core UI runner');
-let config, report, output, browser, chromeChild, chromeProfile, active, closing;
+let config, report, output, browser, chromeChild, chromeProfile, active, closing, currentObservation;
 const servers = [], guards = [], opened = new Set();
 const save = () => { if (output) fs.writeFileSync(path.join(output, 'browser.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 }); };
 const cleanup = () => closing ??= (async () => {
@@ -104,6 +104,8 @@ async function chat({ prompt }) {
   assert.ok(active);
   const { page, guard, item } = active;
   assert.equal(prompt, item.userTurns[active.turn]);
+  const row = { caseId: item.id, turn: ++active.turn, userText: prompt, actualReply: null, status: null, requestId: null, visible: false, responseParsed: false, transportFailed: null };
+  currentObservation = row; report.turns.push(row); save();
   active.messages.push({ role: 'user', content: prompt });
   guard.expectTurn(active.messages, active.conversationId);
   const before = page.apiRequests('/ai/chat').length;
@@ -111,8 +113,7 @@ async function chat({ prompt }) {
   assert.ok(await page.waitFor('!!Q.byName("button", /^Отправить$/) && !Q.byName("button", /^Отправить$/).disabled'));
   await click(page, 'Отправить');
   const request = await until(() => page.apiRequests('/ai/chat').slice(before).find(r => r.finishedAt || r.failed), 135000);
-  const row = { caseId: item.id, turn: ++active.turn, userText: prompt, actualReply: null, status: request.status ?? null, requestId: null, visible: false, responseParsed: false, transportFailed: Boolean(request.failed) };
-  report.turns.push(row); save();
+  row.status = request.status ?? null; row.transportFailed = Boolean(request.failed); save();
   assert.ok(!request.failed); assert.equal(page.apiRequests('/ai/chat').length, before + 1);
   const rawResponse = await page.responseBody(request.requestId);
   row.responseBytes = Buffer.byteLength(rawResponse);
@@ -153,12 +154,12 @@ async function chat({ prompt }) {
 async function dispatch(command, value) {
   if (command === 'start') return start(value);
   if (command === 'open') return open(value);
-  if (command === 'chat') return chat(value);
+  if (command === 'chat') { currentObservation = null; return chat(value); }
   if (command === 'close-dialog') { assert.ok(active); await active.page.close(); active = undefined; return; }
   if (command === 'finish') {
     assert.equal(report.turns.length, 5); assert.equal(report.logins.length, 3);
     for (const guard of guards) { assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []); }
-    report.status = 'transport_pass_language_ungraded'; await cleanup(); return;
+    report.status = 'transport_pass_language_ungraded'; await cleanup(); assert.equal(report.cleanup.chromeExited, true); return;
   }
   throw new Error('core_ui_command_refused');
 }
@@ -172,7 +173,7 @@ process.on('message', message => {
       if (message.command === 'finish') process.disconnect();
     } catch {
       if (report) { report.status = 'failed'; report.blocked = guards.flatMap(g => g.blocked); save(); }
-      process.send?.({ id: message.id, ok: false, observed: message.command === 'chat' ? report?.turns.at(-1) : null });
+      process.send?.({ id: message.id, ok: false, observed: message.command === 'chat' ? currentObservation : null });
       await cleanup(); process.exitCode = 1; process.disconnect();
     }
   });

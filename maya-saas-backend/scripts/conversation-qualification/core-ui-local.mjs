@@ -16,22 +16,81 @@ import {
 import { CORE_UI_PROFILE } from './current-candidate-budget.mjs';
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 
-export function readUiLaunch(planPath, planSha256) {
-  assert.match(planSha256 ?? '', /^[a-f0-9]{64}$/, 'core_ui_plan_pin');
-  const read = (file) => {
-    const stat = fs.lstatSync(file);
+export function readUiLaunchFile(file) {
+  const fd = fs.openSync(
+    file,
+    fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK,
+  );
+  try {
+    const before = fs.fstatSync(fd);
     assert.ok(
-      stat.isFile() &&
-        !stat.isSymbolicLink() &&
-        stat.nlink === 1 &&
-        stat.uid === process.getuid() &&
-        (stat.mode & 0o022) === 0 &&
-        stat.size > 0 &&
-        stat.size <= 16384,
+      before.isFile() &&
+        before.nlink === 1 &&
+        before.uid === process.getuid() &&
+        (before.mode & 0o022) === 0 &&
+        before.size > 0 &&
+        before.size <= 16384,
       'core_ui_launch_file',
     );
-    return fs.readFileSync(file);
-  };
+    const bytes = Buffer.alloc(before.size + 1);
+    let count = 0;
+    while (count < bytes.length) {
+      const n = fs.readSync(fd, bytes, count, bytes.length - count, null);
+      if (!n) break;
+      count += n;
+    }
+    const identity = (stat) =>
+      [
+        'dev',
+        'ino',
+        'mode',
+        'uid',
+        'gid',
+        'nlink',
+        'size',
+        'mtimeMs',
+        'ctimeMs',
+      ]
+        .map((key) => stat[key])
+        .join(':');
+    const current = fs.lstatSync(file);
+    assert.ok(
+      count === before.size &&
+        !current.isSymbolicLink() &&
+        identity(before) === identity(fs.fstatSync(fd)) &&
+        identity(before) === identity(current),
+      'core_ui_launch_file_changed',
+    );
+    return bytes.subarray(0, count);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+// Independent owned finalizers must all run; cancellation during cleanup wins
+// over a successful runner exit. This helper opens no resource or authority.
+export async function finishUiLaunch({
+  stopRunner,
+  stopBroker,
+  closeLog,
+  removeSignals,
+  cancelled,
+}) {
+  let failure;
+  for (const finish of [stopRunner, stopBroker, closeLog, removeSignals]) {
+    try {
+      await finish();
+    } catch (error) {
+      failure ??= error;
+    }
+  }
+  assert.equal(cancelled(), false, 'core_ui_cancelled');
+  if (failure) throw new Error('core_ui_cleanup_unconfirmed');
+}
+
+export function readUiLaunch(planPath, planSha256) {
+  assert.match(planSha256 ?? '', /^[a-f0-9]{64}$/, 'core_ui_plan_pin');
+  const read = readUiLaunchFile;
   assert.equal(fs.realpathSync(planPath), planPath, 'core_ui_canonical_plan');
   const bytes = read(planPath);
   assert.equal(coreHash(bytes), planSha256, 'core_ui_plan_changed');
@@ -98,10 +157,23 @@ export async function runUiLaunch(options) {
     stopChild,
     logFd,
     cancelled = false;
+  let stopChildPromise, stopBrokerPromise, cancellationCleanupError;
+  const stopRunner = () =>
+    stopChild
+      ? (stopChildPromise ??= stopChild({ graceMs: 60000 }))
+      : Promise.resolve();
+  const stopBroker = () =>
+    broker
+      ? (stopBrokerPromise ??= broker.stop('local_ui_finished'))
+      : Promise.resolve();
   const cancel = () => {
     cancelled = true;
-    void stopChild?.({ graceMs: 60000 });
-    void broker?.stop('local_ui_cancelled');
+    void stopRunner().catch((error) => {
+      cancellationCleanupError ??= error;
+    });
+    void stopBroker().catch((error) => {
+      cancellationCleanupError ??= error;
+    });
   };
   for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'])
     process.on(signal, cancel);
@@ -165,21 +237,27 @@ export async function runUiLaunch(options) {
     });
     assert.equal(result, 0, 'core_ui_runner_failed');
     assert.equal(cancelled, false, 'core_ui_cancelled');
-    return {
-      status: 'COMPLETED_REQUIRES_ACTUAL_REPLY_REVIEW',
-      candidateCommit: plan.candidateCommit,
-      output,
-    };
   } finally {
-    try {
-      await stopChild?.({ graceMs: 60000 });
-    } finally {
-      await broker?.stop('local_ui_finished');
-      if (logFd !== undefined) fs.closeSync(logFd);
-      for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'])
-        process.off(signal, cancel);
-    }
+    await finishUiLaunch({
+      stopRunner,
+      stopBroker,
+      closeLog: () => {
+        if (logFd !== undefined) fs.closeSync(logFd);
+      },
+      removeSignals: () => {
+        for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'])
+          process.off(signal, cancel);
+      },
+      cancelled: () => cancelled,
+    });
   }
+  assert.equal(cancelled, false, 'core_ui_cancelled');
+  if (cancellationCleanupError) throw new Error('core_ui_cleanup_unconfirmed');
+  return {
+    status: 'COMPLETED_REQUIRES_ACTUAL_REPLY_REVIEW',
+    candidateCommit: plan.candidateCommit,
+    output,
+  };
 }
 
 if (

@@ -1029,7 +1029,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           : 'ACTUAL_BROKER_MODEL_OUTPUT_REQUIRES_BROKER_ADMISSION_AND_USAGE_EVIDENCE',
       restarts: 'NOT_EXERCISED',
       currentReact: react
-        ? 'ACTUAL_REACT_LOGIN_CHAT_AND_RENDERED_REPLY'
+        ? !reactCleanupFailed && result?.executionStatus === 'completed'
+          ? 'ACTUAL_REACT_LOGIN_CHAT_AND_RENDERED_REPLY'
+          : 'ATTEMPTED_CURRENT_REACT_SEE_BROWSER_FAILURE_EVIDENCE'
         : 'NOT_EXERCISED',
       reactCleanupFailed,
       businessAcceptance: false,
