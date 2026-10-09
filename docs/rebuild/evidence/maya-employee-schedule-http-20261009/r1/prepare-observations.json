@@ -1,0 +1,35 @@
+{
+  "contract": "synthetic-employee-schedule-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "ce53ab0f18a0427ef20b26154d82fd68abdeca48",
+  "sourceBindingsDigest": "ceaeb24d31a01ed0391997b9c3e6149c70969a01c96da1acb72c61140c5067c9",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "originalOwnerTurns": [
+    "Кстати, Артём завтра работает?",
+    "Кстати, Елена завтра работает?"
+  ],
+  "isolatedUtterancesOnly": true,
+  "fullDialogueReclassification": false,
+  "journalAmbiguityAcceptance": false,
+  "transport": [],
+  "modelCalls": 0,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "17d222b9c4f5100d8a249a084f703d09e7710f20ce9b451c0c9cf0e84a6545a1",
+      "text": "Кстати, Артём завтра работает?",
+      "status": 409,
+      "modelCalls": 0,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null
+    }
+  ]
+}

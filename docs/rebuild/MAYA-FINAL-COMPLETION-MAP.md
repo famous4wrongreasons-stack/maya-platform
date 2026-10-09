@@ -1262,3 +1262,15 @@ older entries above retain their original, narrower evidence qualifications.
   the old permit is closed. No new SSH, secret read or paid call is authorized here.
   Warehouse/OCR/Linux portability, design, multi-company schema and background
   autonomy remain outside this stage. Working website untouched. `NOT_ISSUED`.
+
+### 2026-10-09 — employee schedule HTTP/source qualification
+
+[Employee schedule HTTP checkpoint](MAYA-EMPLOYEE-SCHEDULE-HTTP-CHECKPOINT-20261009.md)
+qualifies runtime `23a01139574202d8d39e9baee89c5375fdf8a7ba` through actual
+HTTP/auth/C9/runtime/native CRM with explicit synthetic company→branch and staff
+links. Two separate Jest stages pass across process/PG restart; 12 chat checkpoints
+cover exact staff/date/branch, ambiguity, foreign scope, current revocation,
+same-run replay and metadata drift. Independent review verified all 1840 Git-bound
+source hashes and preserved failed attempts. All three owned clusters stopped.
+Scripted model/synthetic transport only; no live provider/model/browser/A17 or full
+dialogue acceptance. Remaining29, frozen9/handoff and overall MAYA/C10 status unchanged.

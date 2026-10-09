@@ -1,0 +1,158 @@
+{
+  "contract": "synthetic-employee-schedule-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "daa67757a6831c36580a6099a789a0cd3a1fd268",
+  "sourceBindingsDigest": "c582bb10a31c134af13f0cc7d9458ace8fa462476f369551dbb9487466cc954a",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "originalOwnerTurns": [
+    "Кстати, Артём завтра работает?",
+    "Кстати, Елена завтра работает?"
+  ],
+  "isolatedUtterancesOnly": true,
+  "fullDialogueReclassification": false,
+  "journalAmbiguityAcceptance": false,
+  "sourceReceipts": [
+    {
+      "workHash": "49cb7e816b15345361083714103d57d2e9155d1a59ae686343ccf919614c6d33",
+      "executionHash": "dfbe98d8de392aa1bb3e80e33304aecceab3a7a3b1c60fd3c1c70562ff3a2ff1",
+      "taskKey": "catalog.staff.read",
+      "inputHash": "26e57891027feb947f172dcd1f73e037ca01a54f4824e48c1e36a2fe5e471e42",
+      "resultHash": "b0a4706ec1235e59182c72a32577c2ad6fcc4a67f1d88eff6aa43b8f50acbd91"
+    },
+    {
+      "workHash": "480ecc776f59b6fd24d117c28834ded04a7f545ac3fd98682782f20f39c2b383",
+      "executionHash": "cda70476a1555bddd714cdb58550f4161d5bf3d55d3dd027e56705ced06b3f37",
+      "taskKey": "staff.schedule.read",
+      "inputHash": "3aeb6774ea990728c9ce7200f3b80806e94ecc70ae28bed41133bd575baeb36b",
+      "resultHash": "20c3991c4e1f86066ca1829dc80c7a3ced103cf2ad9612ce92d0e8c11e044a76"
+    }
+  ],
+  "prepareReplay": {
+    "runHash": "ecaa494341c02bfb6537aeda11ae608aeb4f01579f34441fb73ffba19ca98387",
+    "graphHashUnchanged": "ec37d69a6ebb225cc48153ca81673b17bf5314ab59cb7c8e502191c343d786b0"
+  },
+  "foreignRun": {
+    "status": 400,
+    "runHash": "ecaa494341c02bfb6537aeda11ae608aeb4f01579f34441fb73ffba19ca98387"
+  },
+  "foreignHistory": {
+    "status": 200,
+    "isolated": true
+  },
+  "businessHash": "45433c2a25022f5a010a969858dc26141efa99ea33b73eff1d2be4eea6cd3b6e",
+  "transport": [
+    {
+      "tenantHash": "411ac4374a0c691188ad21871efbafd24999048c612612c350c15ad7fb343eb0",
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "411ac4374a0c691188ad21871efbafd24999048c612612c350c15ad7fb343eb0",
+      "resource": "schedule",
+      "staffId": "71",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "411ac4374a0c691188ad21871efbafd24999048c612612c350c15ad7fb343eb0",
+      "resource": "schedule",
+      "staffId": "72",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "411ac4374a0c691188ad21871efbafd24999048c612612c350c15ad7fb343eb0",
+      "resource": "schedule",
+      "staffId": "74",
+      "date": "2026-10-11"
+    }
+  ],
+  "modelCalls": 8,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "1d5d876a28628a19fd69793ea2e684687c856612d053ade8a664be7c03e468c3",
+      "text": "Кстати, Артём завтра работает?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "График на 11.10.2026: Артём — 10:00–20:00.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "1d5d876a28628a19fd69793ea2e684687c856612d053ade8a664be7c03e468c3",
+      "text": "Кстати, Артём завтра работает?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки. График на 11.10.2026: Артём — 10:00–20:00.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "4ca9b504d064a3561211893e4a8c5fd26c4b1cfc2810cc852ab951a4636da0d3",
+      "text": "Саша завтра работает?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; график пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "7368a90ff60d2f4ca0d9ddb3e9e8d4df358c5144da4fca20749710882eef4e79",
+      "text": "Саша Иванов завтра работает в «основной филиал»?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "График на 11.10.2026: Саша Иванов — 11:00–19:00.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "1a82da7d096ad1f2b27e635d946e1a83088ef90da0ac6059d0d2192fe8db7bc8",
+      "text": "Кстати, Елена завтра работает?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "График на 11.10.2026: Елена — 09:00–17:00.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati. Источник: прочитанный график CRM. Свободные окна этим чтением не проверялись.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "0b031f1d21ca9ce06c1dead4e7f066bb38512570f53e51d3cd35bc3ce366786a",
+      "text": "Артём завтра работает в «другой филиал»?",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "9f16fb92bf8d20776870f75e6e8d2b817b91828c71ec2d02ce4355df8fc7caa2",
+      "text": "Foreign tenant branch preference (synthetic ID omitted)",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить актуальную связь сотрудника с филиалом и его график. Уточните сотрудника и филиал или повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "0b88e8c6561749b86557a82c070d6bcd210ad14476888335332ce4e28ff53ea1",
+      "text": "Кстати, Артём завтра работает?",
+      "status": 403,
+      "modelCalls": 1,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": "staff_schedule_branch_forbidden"
+    }
+  ]
+}

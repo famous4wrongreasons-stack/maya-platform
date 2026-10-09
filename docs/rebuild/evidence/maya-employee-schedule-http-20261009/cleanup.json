@@ -1,0 +1,26 @@
+[
+  {
+    "run": "r1",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "postmasterPidAbsent": true,
+    "statusExit": 3,
+    "status": "pg_ctl: no server running"
+  },
+  {
+    "run": "r2",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "postmasterPidAbsent": true,
+    "statusExit": 3,
+    "status": "pg_ctl: no server running"
+  },
+  {
+    "run": "r3",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "postmasterPidAbsent": true,
+    "statusExit": 3,
+    "status": "pg_ctl: no server running"
+  }
+]

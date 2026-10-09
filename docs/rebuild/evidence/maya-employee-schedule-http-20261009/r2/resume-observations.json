@@ -1,0 +1,30 @@
+{
+  "contract": "synthetic-employee-schedule-read-observations/1",
+  "stage": "resume",
+  "sourceHead": "daa67757a6831c36580a6099a789a0cd3a1fd268",
+  "sourceBindingsDigest": "c582bb10a31c134af13f0cc7d9458ace8fa462476f369551dbb9487466cc954a",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "originalOwnerTurns": [
+    "Кстати, Артём завтра работает?",
+    "Кстати, Елена завтра работает?"
+  ],
+  "isolatedUtterancesOnly": true,
+  "fullDialogueReclassification": false,
+  "journalAmbiguityAcceptance": false,
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "78a9c1432ec8ea50ff4bb7d6014d5d885b8d8cdb76a974c1fb5e66616e933554"
+  },
+  "transport": [],
+  "modelCalls": 0,
+  "unexpected": [],
+  "checkpoints": []
+}
