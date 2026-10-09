@@ -30,7 +30,11 @@ import {
   singleLifecyclePlanState,
   withOwnerReviewClarification,
 } from './owner-review-plan';
-import { publicConsultationReply } from './public-consultation-presentation';
+import {
+  publicConsultationReply,
+  publicCompanyField,
+  publicCompanyProfileReply,
+} from './public-consultation-presentation';
 import { parseExplicitFinancialReportRequest } from '../orchestration/c9.bi-presentation';
 import { financialPeriodRequests } from './finance-period-binding';
 import {
@@ -267,6 +271,7 @@ type AiCoreCompletion = {
   financialPeriodReply?: true;
   employeeScheduleReply?: true;
   employeeJournalReply?: true;
+  publicCompanyReply?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
@@ -1212,6 +1217,187 @@ export class AiCoreService {
             requiredToolNames = [];
             requirementSatisfied = true;
           }
+        }
+        // A requested branch must never be silently answered with tenant-wide branding.
+        // Only this finite public task selects the profile projection; it grants no access.
+        const requestedCompany = decision.semanticPlan?.tasks.find(
+          (task) =>
+            task.intent === 'company.public_info' &&
+            task.permission.status === 'allowed' &&
+            (Object.hasOwn(task.entities, 'branch') ||
+              decision.semanticPlan!.context.unresolved_references.includes(
+                'branch',
+              )),
+        );
+        if (requestedCompany) {
+          const sourceUnavailableReply =
+            'Не удалось подтвердить текущий источник публичных сведений выбранного филиала.';
+          let presented: { reply: string; status: 'verified' | 'blocked' } = {
+            reply:
+              'Уточните один филиал и отдельно запросите его название или адрес.',
+            status: 'blocked',
+          };
+          const field = publicCompanyField(requestedCompany.entities.field);
+          const plan = decision.semanticPlan!;
+          const preference = requestedCompany.entities.branch;
+          const eligible =
+            plan.tasks.length === 1 &&
+            ['request', 'correction', 'clarification_answer'].includes(
+              plan.dialogue_act,
+            ) &&
+            requestedCompany.domain === 'company' &&
+            requestedCompany.action === 'read' &&
+            requestedCompany.data_class === 'C' &&
+            requestedCompany.permission.required === 'company.public.read' &&
+            requestedCompany.tool.status === 'ready' &&
+            requestedCompany.tool.name === 'catalog.staff.read' &&
+            !requestedCompany.requires_confirmation &&
+            requestedCompany.depends_on.length === 0 &&
+            Object.keys(requestedCompany.entities).every((key) =>
+              ['field', 'branch'].includes(key),
+            ) &&
+            plan.context.unresolved_references.length === 0 &&
+            typeof preference === 'string' &&
+            preference.trim().length > 0 &&
+            !requestedCompany.requires_clarification;
+          if (eligible && field === null) {
+            presented.reply =
+              'Запрошенные сведения о выбранном филиале сейчас не подтверждены. Могу проверить его название или адрес.';
+          } else if (
+            eligible &&
+            field &&
+            this.crm &&
+            step === 0 &&
+            toolsUsed.length === 0 &&
+            maxToolSteps >= 1 &&
+            allowedNames.has('catalog.staff.read')
+          ) {
+            try {
+              const configured =
+                await this.crm.resolveConfiguredBookingBranch(tenantId);
+              if (
+                configured &&
+                toolUser.branchId &&
+                toolUser.branchId !== configured.id
+              )
+                throw new ForbiddenException('public_company_branch_forbidden');
+              const selected = configured
+                ? await this.crm.resolveBookingBranchPreference(
+                    tenantId,
+                    preference,
+                  )
+                : null;
+              if (
+                configured &&
+                selected &&
+                selected.id === configured.id &&
+                selected.timezone === configured.timezone
+              ) {
+                const scope = {
+                  branchId: configured.id,
+                  sourceRevision: configured.sourceRevision,
+                  publicProjection: 'company_profile' as const,
+                };
+                const execution = this.record(
+                  await this.executeChatTool(
+                    dto,
+                    toolUser,
+                    'catalog.staff.read',
+                    {
+                      surface: dto.surface,
+                      arguments: {},
+                      idempotencyKey: this.toolIdempotencyKey(
+                        tenantId,
+                        user.userId,
+                        dto.requestId,
+                        step,
+                        'catalog.staff.read',
+                      ),
+                    },
+                    {
+                      suppressWidgetTrigger: true,
+                      staffScheduleReadScope: scope,
+                    },
+                  ),
+                );
+                toolsUsed.push({
+                  name: 'catalog.staff.read',
+                  status:
+                    typeof execution.status === 'string'
+                      ? execution.status
+                      : 'unknown',
+                  execution_id:
+                    typeof execution.execution_id === 'string'
+                      ? execution.execution_id
+                      : null,
+                });
+                presented = publicCompanyProfileReply(execution, scope, field);
+                if (presented.status === 'verified')
+                  toolResults.push({
+                    name: 'catalog.staff.read',
+                    result: this.sanitizeToolResult(execution.result),
+                  });
+              } else {
+                presented = {
+                  reply:
+                    !configured || selected
+                      ? sourceUnavailableReply
+                      : 'Не удалось однозначно сопоставить указанный филиал с текущими данными CRM.',
+                  status: 'blocked',
+                };
+              }
+            } catch (error) {
+              const code =
+                error instanceof HttpException
+                  ? this.record(this.record(error.getResponse()).error).code
+                  : null;
+              if (
+                !(error instanceof HttpException) ||
+                ![409, 503].includes(error.getStatus()) ||
+                typeof code !== 'string' ||
+                ![
+                  'booking_branch_source_unavailable',
+                  'staff_schedule_read_source_changed',
+                  'crm_company_profile_source_unavailable',
+                  'crm_company_profile_unavailable',
+                  'crm_company_profile_not_supported',
+                  'ai_tool_staff_schedule_source_changed',
+                  'ai_tool_idempotency_conflict',
+                ].includes(code)
+              )
+                throw error;
+              toolResults.length = 0;
+              presented = {
+                reply: sourceUnavailableReply,
+                status: 'blocked',
+              };
+            }
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: presented.reply,
+              source: 'safe_fallback',
+              action: null,
+              publicCompanyReply: true,
+              grounding: this.groundingReport(
+                {
+                  evidenceToolNames: ['catalog.staff.read'],
+                  fallbackDomain: 'public_company',
+                  closedForAccess: false,
+                  strictNumbers: true,
+                },
+                presented.status,
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
         }
         if (activeSemanticPlan && isOwnerReviewTaskSet(activeSemanticPlan)) {
           const state = ownerReviewPlanState(
@@ -3606,7 +3792,8 @@ export class AiCoreService {
             .catch((error: unknown) => {
               if (
                 response.employeeScheduleReply ||
-                response.employeeJournalReply
+                response.employeeJournalReply ||
+                response.publicCompanyReply
               )
                 throw error;
               return {
@@ -3617,7 +3804,9 @@ export class AiCoreService {
             })
         : null);
     if (
-      (response.employeeScheduleReply || response.employeeJournalReply) &&
+      (response.employeeScheduleReply ||
+        response.employeeJournalReply ||
+        response.publicCompanyReply) &&
       response.grounding?.status === 'verified' &&
       readTurn &&
       coordination?.state !== 'COMPLETED'
@@ -3657,6 +3846,7 @@ export class AiCoreService {
       !response.financialPeriodReply &&
       !response.employeeScheduleReply &&
       !response.employeeJournalReply &&
+      !response.publicCompanyReply &&
       grounding.status === 'verified' &&
       toolResults.length > 0
         ? buildChatReportCard(toolResults, {

@@ -510,7 +510,12 @@ export interface CrmRevenueSummary {
 
 export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
-  getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
+  /** Scoped public READs preserve absent source titles; legacy discovery labels remain unchanged. */
+  getCompanyProfile?(
+    options?: Readonly<{
+      preserveMissingTitle?: boolean;
+    }>,
+  ): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
   /** Fresh observed catalog facts, before legacy numeric defaults. Not a mutation quote. */
   readServiceCatalog?(tenantId: string): Promise<ServiceCatalogRead>;

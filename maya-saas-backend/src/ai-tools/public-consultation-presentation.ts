@@ -1,5 +1,16 @@
 type Reply = { reply: string; status: 'verified' | 'blocked' };
 
+export function publicCompanyField(
+  value: unknown,
+): 'profile' | 'name' | 'address' | null {
+  if (value === undefined || value === null) return 'profile';
+  if (typeof value !== 'string') return null;
+  const field = value.trim().toLowerCase();
+  if (['name', 'title', 'название'].includes(field)) return 'name';
+  if (['address', 'адрес'].includes(field)) return 'address';
+  return null;
+}
+
 const record = (value: unknown): Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -14,6 +25,74 @@ function text(value: unknown, max = 240): string | null {
     .replace(/\s+/g, ' ')
     .trim();
   return clean && clean.length <= max ? clean : null;
+}
+
+/** Presentation of the exact scoped CRM result. A marker is evidence correlation,
+ * not authority; the CRM owner and runtime already checked current access/source. */
+export function publicCompanyProfileReply(
+  executionValue: unknown,
+  expected: { branchId: string; sourceRevision: string },
+  field: 'profile' | 'name' | 'address',
+): Reply {
+  const unavailable: Reply = {
+    reply:
+      'Не удалось подтвердить адрес или название указанного филиала по текущим данным CRM.',
+    status: 'blocked',
+  };
+  const execution = record(executionValue),
+    data = record(execution.result);
+  const scope = record(data.public_scope),
+    salon = record(data.salon);
+  if (
+    execution.status !== 'completed' ||
+    (execution.stale !== undefined && execution.stale !== false) ||
+    (execution.replayed !== undefined &&
+      typeof execution.replayed !== 'boolean') ||
+    Object.keys(data).length !== 2 ||
+    !Object.hasOwn(data, 'salon') ||
+    Object.keys(scope).length !== 5 ||
+    scope.contract !== 'maya.company-public-profile.read/1' ||
+    scope.projection !== 'company_profile' ||
+    scope.branch_id !== expected.branchId ||
+    scope.source_revision !== expected.sourceRevision ||
+    typeof scope.company_id !== 'string' ||
+    !/^\d{1,15}$/.test(scope.company_id) ||
+    Object.keys(salon).length !== 2 ||
+    !Object.hasOwn(salon, 'name') ||
+    !Object.hasOwn(salon, 'address') ||
+    (salon.name !== null && typeof salon.name !== 'string') ||
+    (salon.address !== null && typeof salon.address !== 'string')
+  )
+    return unavailable;
+  const name = text(salon.name),
+    address = text(salon.address, 512);
+  // An invalid nonempty value is unavailable, not proof that a field is absent.
+  if (
+    (!name && typeof salon.name === 'string' && salon.name.trim() !== '') ||
+    (!address &&
+      typeof salon.address === 'string' &&
+      salon.address.trim() !== '')
+  )
+    return unavailable;
+  const saved =
+    execution.replayed === true ? ['Сохранённый результат проверки.'] : [];
+  const missing = (description: string): Reply => ({
+    reply: [
+      ...saved,
+      `В прочитанном профиле CRM этого филиала ${description}.`,
+    ].join('\n'),
+    status: 'verified',
+  });
+  if (field === 'address' && !address) return missing('адрес не указан');
+  if (field === 'name' && !name) return missing('название не указано');
+  if (!name && !address) return missing('название и адрес не указаны');
+  const lines = [
+    ...saved,
+    'По данным CRM для выбранного филиала:',
+    ...(name && field !== 'address' ? [`Название в профиле: ${name}.`] : []),
+    ...(address && field !== 'name' ? [`Адрес в профиле: ${address}.`] : []),
+  ];
+  return { reply: lines.join('\n'), status: 'verified' };
 }
 
 export function publicConsultationReply(

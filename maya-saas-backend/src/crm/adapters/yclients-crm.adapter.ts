@@ -372,6 +372,23 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   async discoverCompanies(): Promise<CrmCompanyOption[]> {
+    return this.readCompanyOptions(false);
+  }
+
+  private companyTitle(
+    company: YclientsCompanyApiItem,
+    preserveMissingTitle: boolean,
+  ): string {
+    return (
+      company.title?.trim() ||
+      company.public_title?.trim() ||
+      (preserveMissingTitle ? '' : `Филиал ${String(company.id)}`)
+    );
+  }
+
+  private async readCompanyOptions(
+    preserveMissingTitle: boolean,
+  ): Promise<CrmCompanyOption[]> {
     const query = new URLSearchParams();
     query.set('my', '1');
     const response = await this.request<YclientsCompanyApiItem[]>('companies', {
@@ -388,10 +405,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
       .slice(0, 200)
       .map((company) => {
         const id = String(company.id);
-        const title =
-          company.title?.trim() ||
-          company.public_title?.trim() ||
-          `Филиал ${id}`;
+        const title = this.companyTitle(company, preserveMissingTitle);
         const address = company.address?.trim() || null;
 
         return { id, title, address };
@@ -438,7 +452,10 @@ export class YclientsCRMAdapter implements CRMAdapter {
     return null;
   }
 
-  async getCompanyProfile(): Promise<CrmCompanyProfile | null> {
+  async getCompanyProfile(
+    options?: Readonly<{ preserveMissingTitle?: boolean }>,
+  ): Promise<CrmCompanyProfile | null> {
+    const preserveMissingTitle = options?.preserveMissingTitle === true;
     const companyId = this.getCompanyId();
 
     try {
@@ -451,10 +468,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
         const id = String(company.id);
         return {
           id,
-          title:
-            company.title?.trim() ||
-            company.public_title?.trim() ||
-            `Филиал ${id}`,
+          title: this.companyTitle(company, preserveMissingTitle),
           address: company.address?.trim() || null,
           logo_url: company.logo?.trim() || null,
           timezone: this.toIanaTimezone(company),
@@ -466,9 +480,9 @@ export class YclientsCRMAdapter implements CRMAdapter {
       // even when the optional detailed profile endpoint is restricted.
     }
 
-    const discovered = (await this.discoverCompanies()).find(
-      (company) => company.id === String(companyId),
-    );
+    const discovered = (
+      await this.readCompanyOptions(preserveMissingTitle)
+    ).find((company) => company.id === String(companyId));
     if (!discovered) {
       return null;
     }

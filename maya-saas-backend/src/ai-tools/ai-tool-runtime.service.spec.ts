@@ -156,6 +156,47 @@ describe('AiToolRuntimeService', () => {
             .staffScheduleReadSource,
         ).toEqual(source);
       });
+      it('keeps public projection separate from old branding/catalog cache and replays its exact marker', async () => {
+        const scope = {
+          branchId: 'branch-a',
+          sourceRevision: 'a'.repeat(64),
+          publicProjection: 'company_profile' as const,
+        };
+        const f = fixture();
+        await f.run(false, scope, 'catalog.staff.read');
+        await expect(
+          f.run(true, scope, 'catalog.staff.read'),
+        ).resolves.toMatchObject({ replayed: true });
+        expect(
+          record((f.handlerExecute.mock.calls[0] as readonly unknown[])[1])
+            .staffScheduleReadSource,
+        ).toEqual(scope);
+        expect(f.handlerExecute).toHaveBeenCalledTimes(1);
+        await expect(
+          f.run(
+            true,
+            { branchId: scope.branchId, sourceRevision: scope.sourceRevision },
+            'catalog.staff.read',
+          ),
+        ).rejects.toThrow(ConflictException);
+        f.change();
+        await expect(f.run(true, scope, 'catalog.staff.read')).rejects.toThrow(
+          'staff_schedule_read_source_changed',
+        );
+        expect(f.handlerExecute).toHaveBeenCalledTimes(1);
+      });
+      it('rejects public projection on day tools or mixed with a staff witness before dispatch', async () => {
+        const f = fixture();
+        const mixed = {
+          ...scope(),
+          publicProjection: 'company_profile' as const,
+        };
+        await expect(f.run(false, mixed)).rejects.toThrow(ConflictException);
+        await expect(f.run(false, mixed, 'catalog.staff.read')).rejects.toThrow(
+          ConflictException,
+        );
+        expect(f.handlerExecute).not.toHaveBeenCalled();
+      });
       it.each([false, true])(
         'refuses a changed current source before cache lookup/provider, replay=%s',
         async (replay) => {

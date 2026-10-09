@@ -37,6 +37,122 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  describe('bound public company profile [synthetic CRM owner]', () => {
+    function fixture() {
+      const scope: StaffScheduleReadScope = {
+        branchId: 'branch-a',
+        sourceRevision: 'a'.repeat(64),
+        publicProjection: 'company_profile',
+      };
+      const configured = jest.fn().mockResolvedValue({
+        id: scope.branchId,
+        sourceRevision: scope.sourceRevision,
+      });
+      const profile = jest.fn().mockResolvedValue({
+        id: '101',
+        title: 'Public company',
+        address: 'Public street 1',
+        schedule: 'PRIVATE_HOURS',
+        phone: 'PRIVATE_PHONE',
+      });
+      const roster = jest.fn().mockResolvedValue([]),
+        branding = jest.fn().mockResolvedValue({ name: 'UNRELATED_BRANDING' });
+      const service = createService({
+        crmService: {
+          resolveConfiguredBookingBranch: configured,
+          getCompanyProfile: profile,
+        } as unknown as CrmService,
+        staffService: { listStaff: roster } as unknown as StaffService,
+        prisma: {
+          tenant: { findUnique: branding },
+        } as unknown as PrismaService,
+      });
+      const actor: AiToolPrincipal = {
+        ...principal,
+        staffScheduleReadSource: scope,
+      };
+      return {
+        service,
+        scope,
+        configured,
+        profile,
+        roster,
+        branding,
+        actor,
+        run: () =>
+          service.execute(
+            'catalog.staff.read',
+            actor,
+            {},
+            'public-read-synthetic',
+          ),
+      };
+    }
+    it('projects only exact CRM title/address and source marker, without roster or tenant branding', async () => {
+      const f = fixture();
+      await expect(f.run()).resolves.toEqual({
+        salon: { name: 'Public company', address: 'Public street 1' },
+        public_scope: {
+          contract: 'maya.company-public-profile.read/1',
+          projection: 'company_profile',
+          branch_id: 'branch-a',
+          source_revision: f.scope.sourceRevision,
+          company_id: '101',
+        },
+      });
+      expect(f.profile).toHaveBeenCalledWith('tenant-a', {
+        branchId: 'branch-a',
+        sourceRevision: f.scope.sourceRevision,
+      });
+      expect(f.roster).not.toHaveBeenCalled();
+      expect(f.branding).not.toHaveBeenCalled();
+    });
+    it('leaves missing address unknown and never substitutes tenant branding', async () => {
+      const f = fixture();
+      f.profile.mockResolvedValue({
+        id: '101',
+        title: 'Public company',
+        address: null,
+      });
+      await expect(f.run()).resolves.toMatchObject({
+        salon: { address: null },
+      });
+      expect(f.branding).not.toHaveBeenCalled();
+    });
+    it.each(['before', 'after'])(
+      'refuses source drift %s profile read',
+      async (when) => {
+        const f = fixture();
+        if (when === 'before') f.configured.mockResolvedValue(null);
+        else
+          f.profile.mockImplementation(() => {
+            f.configured.mockResolvedValue(null);
+            return Promise.resolve({
+              id: '101',
+              title: 'Old company',
+              address: 'OLD_ADDRESS',
+            });
+          });
+        await expect(f.run()).rejects.toThrow(ConflictException);
+        expect(f.profile).toHaveBeenCalledTimes(when === 'before' ? 0 : 1);
+        expect(f.roster).not.toHaveBeenCalled();
+        expect(f.branding).not.toHaveBeenCalled();
+      },
+    );
+    it('keeps ordinary scoped staff catalogs on their existing path without company GET', async () => {
+      const f = fixture();
+      delete f.actor.staffScheduleReadSource;
+      f.actor.staffScheduleReadSource = {
+        branchId: f.scope.branchId,
+        sourceRevision: f.scope.sourceRevision,
+      };
+      await f.run();
+      expect(f.profile).not.toHaveBeenCalled();
+      expect(f.roster).toHaveBeenCalledTimes(1);
+      expect(f.branding).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('bound employee journal READ source [synthetic owner boundary]', () => {
     function fixture() {
       const scope: StaffScheduleReadScope = {

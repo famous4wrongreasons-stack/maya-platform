@@ -7,6 +7,8 @@ import { isUsableTimezone } from '../tenants/salon-timezone';
 export type StaffScheduleReadScope = Readonly<{
   branchId: string;
   sourceRevision: string;
+  /** Selects only the public company profile, never a staff or booking grant. */
+  publicProjection?: 'company_profile';
   staffSource?: Readonly<StaffScheduleSource>;
 }>;
 
@@ -39,14 +41,25 @@ export function staffScheduleReadScope(
     return invalid();
   const keys = Object.keys(value);
   if (name === 'catalog.staff.read') {
+    const publicProfile = value.publicProjection === 'company_profile';
     if (
-      keys.length !== 2 ||
-      keys.some((key) => !['branchId', 'sourceRevision'].includes(key))
+      keys.length !== (publicProfile ? 3 : 2) ||
+      keys.some(
+        (key) =>
+          ![
+            'branchId',
+            'sourceRevision',
+            ...(publicProfile ? ['publicProjection'] : []),
+          ].includes(key),
+      )
     )
       return invalid();
     return Object.freeze({
       branchId: value.branchId,
       sourceRevision: value.sourceRevision,
+      ...(publicProfile
+        ? { publicProjection: 'company_profile' as const }
+        : {}),
     });
   }
   if (

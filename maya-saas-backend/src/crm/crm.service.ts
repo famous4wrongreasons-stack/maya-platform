@@ -610,21 +610,170 @@ export class CrmService {
    * This method deliberately returns only the provider public profile. Tokens,
    * adapter settings and integration records never leave CrmService.
    */
-  async getCompanyProfile(tenantId: string): Promise<CrmCompanyProfile> {
+  async getCompanyProfile(
+    tenantId: string,
+    options?: Readonly<{ branchId: string; sourceRevision: string }>,
+  ): Promise<CrmCompanyProfile> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
-    const adapter = await this.getAdapterForTenant(scopedTenantId);
+    let assertCurrent: ((adapter: CRMAdapter) => Promise<void>) | undefined;
+    let companyId: string | undefined;
+    let loadAdapter = () => this.getAdapterForTenant(scopedTenantId);
+    if (options !== undefined) {
+      if (
+        !options ||
+        typeof options !== 'object' ||
+        Array.isArray(options) ||
+        Object.keys(options).sort().join(',') !== 'branchId,sourceRevision' ||
+        typeof options.branchId !== 'string' ||
+        options.branchId.trim() !== options.branchId ||
+        !/^[A-Za-z0-9_-]{1,128}$/.test(options.branchId) ||
+        options.branchId.length > 128 ||
+        typeof options.sourceRevision !== 'string' ||
+        options.sourceRevision.length !== 64 ||
+        !/^[a-f0-9]{64}$/.test(options.sourceRevision)
+      )
+        throw new ConflictException({
+          error: { code: 'crm_company_profile_scope_invalid' },
+        });
+      // Copy before any await: changing the caller's witness cannot change the
+      // selected branch or qualify a response from another configuration.
+      const scope = Object.freeze({
+        branchId: options.branchId,
+        sourceRevision: options.sourceRevision,
+      });
+      const unavailable = () =>
+        new ConflictException({
+          error: { code: 'crm_company_profile_source_unavailable' },
+        });
+      loadAdapter = async () => {
+        try {
+          return await this.getAdapterForTenant(scopedTenantId);
+        } catch (error) {
+          if (
+            error instanceof BadRequestException ||
+            error instanceof NotFoundException ||
+            error instanceof ConflictException ||
+            error instanceof ServiceUnavailableException
+          )
+            throw unavailable();
+          throw error;
+        }
+      };
+      const identity = (integration: StoredCrmIntegration) =>
+        JSON.stringify([
+          integration.id,
+          integration.tenantId,
+          integration.provider,
+          integration.status,
+          integration.updatedAt,
+          integration.baseUrl,
+          integration.settingsJson,
+        ]);
+      const current = async () => {
+        try {
+          const integration = await this.getStoredIntegration(scopedTenantId);
+          const capturedIdentity = identity(integration);
+          const settings = integration.settingsJson;
+          if (
+            integration.tenantId !== scopedTenantId ||
+            !['yclients', 'altegio'].includes(integration.provider) ||
+            integration.status !== 'active' ||
+            !settings ||
+            typeof settings !== 'object' ||
+            Array.isArray(settings)
+          )
+            throw unavailable();
+          const fields = settings as Record<string, unknown>;
+          if (!['number', 'string'].includes(typeof fields.companyId))
+            throw unavailable();
+          const binding = normalizeCrmBranchBinding(
+            fields.branchBinding,
+            fields.companyId,
+          );
+          const branch =
+            await this.resolveConfiguredBookingBranch(scopedTenantId);
+          if (
+            !binding ||
+            binding.branchId !== scope.branchId ||
+            !branch ||
+            branch.id !== scope.branchId ||
+            branch.sourceRevision !== scope.sourceRevision ||
+            !isUsableTimezone(branch.timezone) ||
+            identity(await this.getStoredIntegration(scopedTenantId)) !==
+              capturedIdentity
+          )
+            throw unavailable();
+          return {
+            identity: capturedIdentity,
+            companyId: String(binding.companyId),
+          };
+        } catch (error) {
+          // A revoked/foreign principal remains an authority refusal. Missing
+          // or changed metadata is a scoped source refusal, never a fallback.
+          if (
+            error instanceof BadRequestException ||
+            error instanceof NotFoundException ||
+            error instanceof ConflictException ||
+            error instanceof ServiceUnavailableException
+          )
+            throw unavailable();
+          throw error;
+        }
+      };
+      const captured = await current();
+      companyId = captured.companyId;
+      assertCurrent = async (adapter) => {
+        if ((await current()).identity !== captured.identity)
+          throw unavailable();
+        // The configured metadata must also describe the captured adapter.
+        // A later current revision cannot qualify an earlier adapter response.
+        if ((await loadAdapter()) !== adapter) throw unavailable();
+        if ((await current()).identity !== captured.identity)
+          throw unavailable();
+      };
+    }
+    const adapter = await loadAdapter();
+    await assertCurrent?.(adapter);
     if (!adapter.getCompanyProfile) {
       throw new ConflictException({
         message: 'CRM company profile is not available for this provider.',
         error: { code: 'crm_company_profile_not_supported' },
       });
     }
-    const profile = await adapter.getCompanyProfile();
+    const profile = assertCurrent
+      ? await adapter.getCompanyProfile({ preserveMissingTitle: true })
+      : await adapter.getCompanyProfile();
     if (!profile) {
       throw new ConflictException({
         message: 'CRM company profile is unavailable.',
         error: { code: 'crm_company_profile_unavailable' },
       });
+    }
+    if (assertCurrent) {
+      // Preserve the public provider facts, including absent schedule/timezone.
+      // Snapshot only this existing contract before the final metadata awaits.
+      const snapshot: CrmCompanyProfile = {
+        id: profile.id,
+        title: profile.title,
+        address: profile.address,
+        logo_url: profile.logo_url,
+        timezone: profile.timezone,
+        schedule: profile.schedule,
+      };
+      await assertCurrent(adapter);
+      if (
+        typeof snapshot.id !== 'string' ||
+        snapshot.id !== companyId ||
+        typeof snapshot.title !== 'string' ||
+        ![snapshot.address, snapshot.logo_url, snapshot.schedule].every(
+          (value) => value === null || typeof value === 'string',
+        ) ||
+        (snapshot.timezone !== null && !isUsableTimezone(snapshot.timezone))
+      )
+        throw new ConflictException({
+          error: { code: 'crm_company_profile_unavailable' },
+        });
+      return snapshot;
     }
     return profile;
   }

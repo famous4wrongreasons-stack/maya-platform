@@ -251,7 +251,7 @@ export class AiToolHandlerService {
           idempotencyKey,
         );
       case 'catalog.staff.read':
-        return this.readStaff(principal.tenantId);
+        return this.readStaff(principal);
       case 'customers.count':
         return this.customersService.countCustomers(principal.tenantId);
       case 'valuations.read':
@@ -578,7 +578,38 @@ export class AiToolHandlerService {
    * Display labels stay available to authorized server presentation/catalog
    * binding. AiCore projects request-local aliases at the external model boundary.
    */
-  private async readStaff(tenantId: string) {
+  private async readStaff(principal: AiToolPrincipal) {
+    const tenantId = principal.tenantId;
+    const scope = principal.staffScheduleReadSource;
+    if (scope?.publicProjection === 'company_profile') {
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'catalog.staff.read',
+        {},
+        scope,
+      );
+      const profile = await this.crmService.getCompanyProfile(tenantId, {
+        branchId: scope.branchId,
+        sourceRevision: scope.sourceRevision,
+      });
+      await this.assertStaffScheduleReadScope(
+        principal,
+        'catalog.staff.read',
+        {},
+        scope,
+      );
+      // No tenant branding, roster, phone or opening hours is qualified by this READ.
+      return {
+        salon: { name: profile.title, address: profile.address },
+        public_scope: {
+          contract: 'maya.company-public-profile.read/1',
+          projection: 'company_profile',
+          branch_id: scope.branchId,
+          source_revision: scope.sourceRevision,
+          company_id: profile.id,
+        },
+      };
+    }
     const [staff, tenant] = await Promise.all([
       this.staffService.listStaff(tenantId),
       this.prisma.tenant.findUnique({
