@@ -1,0 +1,169 @@
+{
+  "contract": "maya.local-ab-run/1",
+  "status": "failed-no-continuation",
+  "planSha256": "6860c7f9aabe2003f6828d0659bd7ee581f8af61bb8fbee3657dcdd6fc3bb5b9",
+  "harnessCommit": "05323be98ae8d85cb2d98f2c292b8f7e9510f108",
+  "startedAt": "2026-10-09T07:37:25.615Z",
+  "expiresAt": "2026-10-09T07:47:13.013Z",
+  "qualification": "REAL_MODEL_SYNTHETIC_DATA_UNGRADED",
+  "previousInputTimeout": {
+    "root": "/private/tmp/maya-ab-live-20261009",
+    "sha256ByFile": {
+      "ab-plan.json": "b3a86f99147bd17d753a9aa7a4062b665cd59a9dbe95e72666c4c61556456494",
+      "ab-report.json": "4ac1b36fc66fc017a74d669a6945b46f293e8fb00dc4f8b99985718a33e633db",
+      "ab-ledger.jsonl": "e096df6241280c526f50faf8a6b2d8f2f2bab2d176519f5d8160a361ec8e2cde",
+      "a/broker/broker-report.json": "876f5559aa796e1cb8fb8b1df2ebc1d3c7bfcabab2918524a026c8ecb2a9a3ec",
+      "a/permit.json": "c85db85d7e014d92de117bb7683115bba678246b2bb37914f00a71b9e6155294",
+      "a/permit.json.claim": "e3b7a87b9cb921e6185dcf1f4b25f609ae64fb7168678c82e6be8f0dce3b3662",
+      "input-refusal-cleanup.json": "8e99820054892c897792de093c3269ba2b00f2ea53542a9d09b70ea5e2c945b8",
+      "b/candidate-manifest.json": "ff2404986241b5f2e67b1b8d11159b0718de4e68e6c0ebee57bdfc70db33bf7a"
+    },
+    "inputElapsedMs": 30405,
+    "previousExpiresAt": 1791532033013
+  },
+  "credentialInputs": 1,
+  "stages": [
+    {
+      "stage": "A",
+      "candidateCommit": "0d90de11710e7212286a7e74755c8a12b55d116b",
+      "manifestSha256": "9de0f86391d11f651e8fb35b5fe443b5ff76a88febe18543f65186a13109c76b",
+      "permitSha256": "37a3bb35d5182008e8cb2483928b73db81fb6f5ac43ef55ed0f3327389988f95",
+      "startsAt": "2026-10-09T07:37:25.816Z",
+      "expiresAt": "2026-10-09T07:46:55.411Z",
+      "runnerPid": 78166,
+      "status": "running",
+      "usage": [
+        {
+          "caseId": "core-client-create-followup",
+          "turn": 1,
+          "promptTokens": 14412,
+          "completionTokens": 312,
+          "totalTokens": 14724
+        },
+        {
+          "caseId": "core-client-create-followup",
+          "turn": 2,
+          "promptTokens": 14643,
+          "completionTokens": 320,
+          "totalTokens": 14963
+        },
+        {
+          "caseId": "core-owner-compound-clarification",
+          "turn": 1,
+          "promptTokens": 19429,
+          "completionTokens": 386,
+          "totalTokens": 19815
+        },
+        {
+          "caseId": "core-owner-compound-clarification",
+          "turn": 2,
+          "promptTokens": 20257,
+          "completionTokens": 416,
+          "totalTokens": 20673
+        },
+        {
+          "caseId": "core-admin-private-data-refusal",
+          "turn": 1,
+          "promptTokens": 16716,
+          "completionTokens": 175,
+          "totalTokens": 16891
+        },
+        {
+          "caseId": "core-admin-private-data-refusal",
+          "turn": 1,
+          "promptTokens": 16696,
+          "completionTokens": 175,
+          "totalTokens": 16871
+        }
+      ],
+      "cleanup": {
+        "confirmed": true,
+        "groupChecks": [
+          {
+            "name": "initdb",
+            "pgid": 78186,
+            "absent": true,
+            "termSent": false,
+            "killSent": false
+          },
+          {
+            "name": "pg-start",
+            "pgid": 78207,
+            "absent": true,
+            "termSent": false,
+            "killSent": false
+          },
+          {
+            "name": "createdb",
+            "pgid": 78228,
+            "absent": true,
+            "termSent": false,
+            "killSent": false
+          },
+          {
+            "name": "migrations",
+            "pgid": 78240,
+            "absent": true,
+            "termSent": false,
+            "killSent": false
+          },
+          {
+            "name": "conversation",
+            "pgid": 78268,
+            "absent": true,
+            "termSent": false,
+            "killSent": false
+          },
+          {
+            "name": "pg-stop",
+            "pgid": 78857,
+            "absent": true,
+            "termSent": false,
+            "killSent": false
+          }
+        ],
+        "pgStopped": true,
+        "postmasterPidAbsent": true
+      }
+    }
+  ],
+  "failureCode": "core_ab_run_refused",
+  "launcherCredentialCleared": true,
+  "finishedAt": "2026-10-09T07:38:24.672Z",
+  "stats": {
+    "startedAt": 1791531445615,
+    "expiresAt": 1791532033013,
+    "priorInputMs": 30405,
+    "activeStage": "A",
+    "attempts": 6,
+    "inputTokens": 509415,
+    "outputTokens": 7200,
+    "reservedNanoUsd": 700939800,
+    "lastReservedAt": 1791531499904,
+    "halted": true,
+    "haltReason": "explicit_halt",
+    "closed": true,
+    "stages": {
+      "A": {
+        "startedAt": 1791531445816,
+        "expiresAt": 1791532015411,
+        "completed": false,
+        "clean": null,
+        "attempts": 6,
+        "inputTokens": 509415,
+        "outputTokens": 7200,
+        "reservedNanoUsd": 700939800
+      },
+      "B": {
+        "startedAt": null,
+        "expiresAt": null,
+        "completed": false,
+        "clean": null,
+        "attempts": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "reservedNanoUsd": 0
+      }
+    }
+  }
+}

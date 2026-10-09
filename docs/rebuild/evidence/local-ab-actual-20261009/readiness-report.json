@@ -1,0 +1,14 @@
+{
+  "status": "run-terminal",
+  "planSha256": "6860c7f9aabe2003f6828d0659bd7ee581f8af61bb8fbee3657dcdd6fc3bb5b9",
+  "launcherPid": 77774,
+  "credentialReaderStarted": true,
+  "budgetStarted": true,
+  "promptShown": true,
+  "priorInputElapsedMs": 30405,
+  "originalExpiresAt": 1791532033013,
+  "prompt": "Нажмите Enter, когда готовы ввести ключ. Затем дождитесь отдельного скрытого приглашения. Сейчас ключ не вводите.\n",
+  "shownAt": "2026-10-09T07:36:57.839Z",
+  "enteredAt": "2026-10-09T07:37:25.177Z",
+  "runStatus": "failed-no-continuation"
+}

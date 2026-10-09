@@ -1,0 +1,77 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "ADMITTED_LOCAL_MODEL_HTTP",
+  "runId": "f334d318-1bfa-42af-91b7-868695ad1d83",
+  "candidateCommit": "0d90de11710e7212286a7e74755c8a12b55d116b",
+  "profile": "core-diagnostic-20261008/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "manifestSha256": "9de0f86391d11f651e8fb35b5fe443b5ff76a88febe18543f65186a13109c76b",
+  "paidAuthorized": true,
+  "credentialsLoaded": true,
+  "upstreamCalls": 6,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T07:37:26.017Z",
+  "expiresAt": "2026-10-09T07:46:55.411Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68037,
+      "bodySha256": "0d990e4336f600e40512d16c60ffc83cf1a5fb66221132bff8633b4ac00b6234",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 68998,
+      "bodySha256": "e784dcfa1ed455174bc2bbce870bb55372485315c59b5c693de78798eeae0911",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92132,
+      "bodySha256": "bd645f8cb779fd6022b055da23dd36a417632348bb1b555862c474ca76c01fa1",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 96131,
+      "bodySha256": "32cfac9819b8a820091f63ec838fe4dc1a20f19b5a4a0a551ce39efab0701dec",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 79791,
+      "bodySha256": "ac752347596c551d0383a0a8ecd3bd155508a284b3fb84cf7d44b4bbd1b63765",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 79750,
+      "bodySha256": "0765a63c7df7043fa4588f02726e7166ce61217f6e4b0fd7571ce3d245aefe5f",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED",
+  "recordedReplay": false,
+  "socketPath": "/private/tmp/maya-ab-ready-retry2-20261009/a/channel/b.sock",
+  "stopReason": "explicit_finish",
+  "connectionsAtStop": 1,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T07:38:24.448Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 6,
+    "inputTokens": 509415,
+    "outputTokens": 7200,
+    "reservedNanoUsd": 700939800,
+    "halted": false
+  }
+}

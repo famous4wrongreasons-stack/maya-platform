@@ -1,0 +1,66 @@
+{
+  "contract": "maya.local-ab-actual-checkpoint/1",
+  "recordedAt": "2026-10-09T07:44:46.483694+00:00",
+  "sourceRoot": "/private/tmp/maya-ab-ready-retry2-20261009",
+  "status": "FAILED_A_B_NOT_STARTED",
+  "qualification": "REAL_MODEL_SYNTHETIC_DATA_UNGRADED_NOT_MAYA_ACCEPTANCE",
+  "harnessCommit": "05323be98ae8d85cb2d98f2c292b8f7e9510f108",
+  "candidateA": "0d90de11710e7212286a7e74755c8a12b55d116b",
+  "candidateB": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa",
+  "planSha256": "6860c7f9aabe2003f6828d0659bd7ee581f8af61bb8fbee3657dcdd6fc3bb5b9",
+  "counts": {
+    "dialogs": 3,
+    "httpTurns": 5,
+    "http201": 4,
+    "http503": 1,
+    "providerAttempts": 6,
+    "providerHttp200": 6,
+    "bAttempts": 0
+  },
+  "usage": {
+    "prompt_tokens": 102153,
+    "completion_tokens": 1784,
+    "total_tokens": 103937,
+    "prompt_cache_hit_tokens": 18304,
+    "prompt_cache_miss_tokens": 83849
+  },
+  "peakRateEstimatedNanoUsd": 118550696,
+  "peakRateEstimatedUsd": 0.118550696,
+  "actualInvoiceKnown": false,
+  "reservedNanoUsd": 700939800,
+  "reservationIsActualCharge": false,
+  "ledgerClosed": true,
+  "findings": [
+    {
+      "case": "core-client-create-followup",
+      "status": "BOUNDED_READ_ONLY_OPTION_ACKNOWLEDGED",
+      "detail": "17:00 option acknowledged; no booking created."
+    },
+    {
+      "case": "core-owner-compound-clarification",
+      "status": "FAILED_CONTINUATION",
+      "detail": "Explicit yes returned identical clarification. No source read, coordinated run, financial evidence or recommendation on either owner turn."
+    },
+    {
+      "case": "core-admin-private-data-refusal",
+      "status": "HTTP_503_UNRESOLVED",
+      "detail": "Two HTTP200 model replies route to support.integration_status with tool_call:null; application returns HTTP503 and no reply. Raw HTTP error body was not captured, so exact exception detail is not proved."
+    }
+  ],
+  "reportLimitations": [
+    "Terminal top-level ab-report.status is failed-no-continuation and runner-report.status is failed, but nested stages[0].status remains stale running. Original evidence is preserved unchanged.",
+    "b/broker is a prepared empty directory, not an executed B broker; no B permit, claim, broker-report, runner or calls.",
+    "Owner HTTP201 and replayed_ungraded do not establish successful continuation.",
+    "Synthetic finance fixture preflight reads do not establish finance traversal in actual owner turns.",
+    "No restart or current React exercise; no full A+B, MAYA, C10, live YCLIENTS or branch-connection acceptance."
+  ],
+  "cleanup": "Exact recorded launcher/runner PIDs and six process groups absent; both sockets and postmaster.pid absent. Launcher reports credential reference cleared. See terminal-cleanup-check.json.",
+  "businessEffects": {
+    "writesObserved": 0,
+    "realCrmNetworkCalls": 0,
+    "outboundNotificationsObserved": 0
+  },
+  "previousInputProofHashesUnchanged": true,
+  "pricingSource": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "pricingEvidence": "../local-ab-readiness-20261009/maya-ab-pricing-source-20261009.json"
+}

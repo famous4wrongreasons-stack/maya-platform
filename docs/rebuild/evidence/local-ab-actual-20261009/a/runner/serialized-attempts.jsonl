@@ -1,0 +1,6 @@
+{"caseId":"core-client-create-followup","turn":1,"bytes":68037,"bodySha256":"0d990e4336f600e40512d16c60ffc83cf1a5fb66221132bff8633b4ac00b6234","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-client-create-followup","turn":2,"bytes":68998,"bodySha256":"e784dcfa1ed455174bc2bbce870bb55372485315c59b5c693de78798eeae0911","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-owner-compound-clarification","turn":1,"bytes":92132,"bodySha256":"bd645f8cb779fd6022b055da23dd36a417632348bb1b555862c474ca76c01fa1","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-owner-compound-clarification","turn":2,"bytes":96131,"bodySha256":"32cfac9819b8a820091f63ec838fe4dc1a20f19b5a4a0a551ce39efab0701dec","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-admin-private-data-refusal","turn":1,"bytes":79791,"bodySha256":"ac752347596c551d0383a0a8ecd3bd155508a284b3fb84cf7d44b4bbd1b63765","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-admin-private-data-refusal","turn":1,"bytes":79750,"bodySha256":"0765a63c7df7043fa4588f02726e7166ce61217f6e4b0fd7571ce3d245aefe5f","outputLimit":1200,"jsonMode":false,"messageRoles":["system","user"]}

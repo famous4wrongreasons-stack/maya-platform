@@ -1,0 +1,50 @@
+{
+  "contract": "maya.local-ab-plan/1",
+  "output": "/private/tmp/maya-ab-ready-retry2-20261009",
+  "ownerApprovalRef": "Sentinel_519ee1e68e1c8191adeb5359313624ca",
+  "pricing": {
+    "model": "deepseek-v4-pro",
+    "inputNanoUsdPerToken": 1320,
+    "outputNanoUsdPerToken": 3960,
+    "reference": "deepseek-official-pricing-20261009",
+    "sha256": "4ede4a8e98d4890dbd10c3035877c9bcd0a8d294e7f14ff55ead21a6d74b9a59",
+    "verifiedAt": "2026-10-09T07:07:01.000Z"
+  },
+  "previousInputTimeout": {
+    "root": "/private/tmp/maya-ab-live-20261009",
+    "sha256ByFile": {
+      "ab-plan.json": "b3a86f99147bd17d753a9aa7a4062b665cd59a9dbe95e72666c4c61556456494",
+      "ab-report.json": "4ac1b36fc66fc017a74d669a6945b46f293e8fb00dc4f8b99985718a33e633db",
+      "ab-ledger.jsonl": "e096df6241280c526f50faf8a6b2d8f2f2bab2d176519f5d8160a361ec8e2cde",
+      "a/broker/broker-report.json": "876f5559aa796e1cb8fb8b1df2ebc1d3c7bfcabab2918524a026c8ecb2a9a3ec",
+      "a/permit.json": "c85db85d7e014d92de117bb7683115bba678246b2bb37914f00a71b9e6155294",
+      "a/permit.json.claim": "e3b7a87b9cb921e6185dcf1f4b25f609ae64fb7168678c82e6be8f0dce3b3662",
+      "input-refusal-cleanup.json": "8e99820054892c897792de093c3269ba2b00f2ea53542a9d09b70ea5e2c945b8",
+      "b/candidate-manifest.json": "ff2404986241b5f2e67b1b8d11159b0718de4e68e6c0ebee57bdfc70db33bf7a"
+    },
+    "inputElapsedMs": 30405,
+    "previousExpiresAt": 1791532033013
+  },
+  "harnessPath": "/private/tmp/maya-ab-ready-retry2-20261009/harness-manifest.json",
+  "harnessSha256": "b6d5b8edd01e48cca8a041bb44d874663494cbbf24f19d109bf011ecd68926b9",
+  "stages": [
+    {
+      "stage": "A",
+      "manifestPath": "/private/tmp/maya-ab-ready-retry2-20261009/a/candidate-manifest.json",
+      "manifestSha256": "9de0f86391d11f651e8fb35b5fe443b5ff76a88febe18543f65186a13109c76b",
+      "workDirectory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-a/maya-saas-backend"
+    },
+    {
+      "stage": "B",
+      "manifestPath": "/private/tmp/maya-ab-ready-retry2-20261009/b/candidate-manifest.json",
+      "manifestSha256": "8e38bf1b1848db93ba066b6b2949075be7580f7766a12b73f5f24d06f124747d",
+      "workDirectory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-b-fixed/maya-saas-backend"
+    }
+  ],
+  "limits": {
+    "spendNanoUsd": 6000000000,
+    "attempts": 36,
+    "durationMs": 1800000
+  },
+  "status": "PREPARED_NO_PERMIT_NO_CREDENTIAL"
+}

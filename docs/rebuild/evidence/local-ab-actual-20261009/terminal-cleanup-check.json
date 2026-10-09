@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-10-09T07:43:19.390801+00:00",
+  "processAbsent": {
+    "77774": true,
+    "78166": true
+  },
+  "processGroupAbsent": {
+    "78186": true,
+    "78207": true,
+    "78228": true,
+    "78240": true,
+    "78268": true,
+    "78857": true
+  },
+  "postmasterPidAbsent": true,
+  "socketAbsent": {
+    "a/channel/b.sock": true,
+    "b/channel/b.sock": true
+  },
+  "stageBAbsent": {
+    "b/permit.json": true,
+    "b/permit.json.claim": true,
+    "b/broker": false,
+    "b/runner": true
+  },
+  "priorProofHashesUnchanged": {
+    "ab-plan.json": true,
+    "ab-report.json": true,
+    "ab-ledger.jsonl": true,
+    "a/broker/broker-report.json": true,
+    "a/permit.json": true,
+    "a/permit.json.claim": true,
+    "input-refusal-cleanup.json": true,
+    "b/candidate-manifest.json": true
+  },
+  "sources": {
+    "maya-local-ab": {
+      "head": "05323be98ae8d85cb2d98f2c292b8f7e9510f108",
+      "clean": true
+    },
+    "maya-retest-candidate-a": {
+      "head": "0d90de11710e7212286a7e74755c8a12b55d116b",
+      "clean": true
+    },
+    "maya-retest-candidate-b-fixed": {
+      "head": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa",
+      "clean": true
+    }
+  }
+}

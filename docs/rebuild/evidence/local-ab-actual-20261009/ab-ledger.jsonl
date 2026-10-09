@@ -1,0 +1,10 @@
+{"event":"opened","contract":"maya.local-ab-budget/1","startedAt":1791531445615,"expiresAt":1791532033013,"priorInputMs":30405,"limits":{"attempts":36,"spendNanoUsd":6000000000,"durationMs":1800000,"A":{"attempts":12,"spendNanoUsd":2000000000,"durationMs":600000},"B":{"attempts":24,"spendNanoUsd":4000000000,"durationMs":1200000}}}
+{"event":"stage_started","stage":"A","at":1791531445816,"expiresAt":1791532015411}
+{"event":"reserved","stage":"A","at":1791531465022,"input":72133,"output":1200,"nanoUsd":99967560,"stageAttempt":1,"attempt":1,"stageNanoUsd":99967560,"totalNanoUsd":99967560}
+{"event":"reserved","stage":"A","at":1791531471206,"input":73094,"output":1200,"nanoUsd":101236080,"stageAttempt":2,"attempt":2,"stageNanoUsd":201203640,"totalNanoUsd":201203640}
+{"event":"reserved","stage":"A","at":1791531477376,"input":96228,"output":1200,"nanoUsd":131772960,"stageAttempt":3,"attempt":3,"stageNanoUsd":332976600,"totalNanoUsd":332976600}
+{"event":"reserved","stage":"A","at":1791531486094,"input":100227,"output":1200,"nanoUsd":137051640,"stageAttempt":4,"attempt":4,"stageNanoUsd":470028240,"totalNanoUsd":470028240}
+{"event":"reserved","stage":"A","at":1791531493717,"input":83887,"output":1200,"nanoUsd":115482840,"stageAttempt":5,"attempt":5,"stageNanoUsd":585511080,"totalNanoUsd":585511080}
+{"event":"reserved","stage":"A","at":1791531499904,"input":83846,"output":1200,"nanoUsd":115428720,"stageAttempt":6,"attempt":6,"stageNanoUsd":700939800,"totalNanoUsd":700939800}
+{"event":"halted","reason":"explicit_halt","at":1791531499904}
+{"event":"closed","startedAt":1791531445615,"expiresAt":1791532033013,"priorInputMs":30405,"activeStage":"A","attempts":6,"inputTokens":509415,"outputTokens":7200,"reservedNanoUsd":700939800,"lastReservedAt":1791531499904,"halted":true,"haltReason":"explicit_halt","closed":true,"stages":{"A":{"startedAt":1791531445816,"expiresAt":1791532015411,"completed":false,"clean":null,"attempts":6,"inputTokens":509415,"outputTokens":7200,"reservedNanoUsd":700939800},"B":{"startedAt":null,"expiresAt":null,"completed":false,"clean":null,"attempts":0,"inputTokens":0,"outputTokens":0,"reservedNanoUsd":0}}}

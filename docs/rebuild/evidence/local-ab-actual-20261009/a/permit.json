@@ -1,0 +1,38 @@
+{
+  "contract": "maya.core-conversation-permit/1",
+  "runId": "f334d318-1bfa-42af-91b7-868695ad1d83",
+  "nonce": "34c45c3060af38a3d69991fa146bf38e1ff8cc9d79102f05607198478f4ca7fe",
+  "candidateCommit": "0d90de11710e7212286a7e74755c8a12b55d116b",
+  "manifestSha256": "9de0f86391d11f651e8fb35b5fe443b5ff76a88febe18543f65186a13109c76b",
+  "profile": "core-diagnostic-20261008/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "ownerApprovalRef": "Sentinel_519ee1e68e1c8191adeb5359313624ca",
+  "startsAt": "2026-10-09T07:37:25.816Z",
+  "expiresAt": "2026-10-09T07:46:55.411Z",
+  "revoked": false,
+  "target": {
+    "host": "localhost",
+    "workDirectory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-a/maya-saas-backend",
+    "brokerUid": 501,
+    "runnerUid": 501,
+    "brokerSocket": {
+      "path": "/private/tmp/maya-ab-ready-retry2-20261009/a/channel/b.sock",
+      "gid": 20
+    }
+  },
+  "credentialSource": {
+    "kind": "terminal-stdin",
+    "reference": "owner-terminal-stdin-once",
+    "owner": 501,
+    "reader": 501
+  },
+  "pricing": {
+    "model": "deepseek-v4-pro",
+    "inputNanoUsdPerToken": 1320,
+    "outputNanoUsdPerToken": 3960,
+    "reference": "deepseek-official-pricing-20261009",
+    "sha256": "4ede4a8e98d4890dbd10c3035877c9bcd0a8d294e7f14ff55ead21a6d74b9a59",
+    "verifiedAt": "2026-10-09T07:07:01.000Z"
+  },
+  "claimPath": "/private/tmp/maya-ab-ready-retry2-20261009/a/permit.json.claim"
+}
