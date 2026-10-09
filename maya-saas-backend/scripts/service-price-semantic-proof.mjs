@@ -44,6 +44,11 @@ const files = [
   'maya-saas-backend/src/ai-tools/ai-core-model.service.ts',
   'maya-saas-backend/src/ai-tools/ai-core.service.ts',
   'maya-saas-backend/src/ai-tools/service-price-chat-binding.ts',
+  'maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts',
+  'maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts',
+  'maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts',
+  'maya-saas-backend/src/crm/crm.service.ts',
+  'maya-saas-backend/test/widgets-live/support/service-price-chat-process.ts',
   'maya-saas-backend/test/widgets-live/service-price.live-spec.ts',
   'maya-carrier-react/test/service-price-http-fixture.test.mjs',
 ];
@@ -62,6 +67,7 @@ try {
     manifest.completed.push(spec.name); save();
   }
   fs.copyFileSync(path.join(fixtureDirectory, 'service-price-carrier.json'), path.join(output, 'service-price-carrier.json'));
+  if (fs.existsSync(path.join(fixtureDirectory, 'price-clarification.json'))) fs.copyFileSync(path.join(fixtureDirectory, 'price-clarification.json'), path.join(output, 'price-clarification.json'));
   manifest.status = 'passed';
 } catch (error) { manifest.status = 'failed'; throw error; }
 finally {

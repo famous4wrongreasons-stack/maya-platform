@@ -88,6 +88,9 @@ import {
 } from './booking-catalog-binding';
 import {
   bindServicePriceChat,
+  bindServicePriceTurn,
+  retainedServicePrice,
+  type ServicePricePreference,
   servicePriceClarification,
 } from './service-price-chat-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
@@ -628,6 +631,11 @@ const STAFF_SURFACE_ROLES = new Set<UserRole>([
 
 @Injectable()
 export class AiCoreService {
+  private readonly servicePricePreferences = new WeakMap<
+    AiCoreChatDto,
+    ServicePricePreference
+  >();
+  private readonly servicePriceContextChanged = new WeakSet<AiCoreChatDto>();
   private readonly journalCalendarPreferences = new WeakMap<
     AiCoreChatDto,
     JournalCalendarPreference
@@ -944,6 +952,7 @@ export class AiCoreService {
     let numberRetries = 0;
     let corrections: string[] = [];
     let lifecycleDelegated = false;
+    let preparedServicePrice: ServicePricePreference | null = null;
 
     try {
       // Короткое «нет» после вопроса MAYA про дополнительные расходы — это не
@@ -1263,6 +1272,124 @@ export class AiCoreService {
             requiredToolNames = [];
             requirementSatisfied = true;
           }
+        }
+        const priceTask =
+          decision.semanticPlan?.tasks.length === 1
+            ? decision.semanticPlan.tasks[0]
+            : null;
+        if (
+          dto.surface === 'web' &&
+          priceTask?.intent === 'services.price_update' &&
+          priceTask.permission.status === 'allowed' &&
+          priceTask.tool.alternatives.includes(
+            'catalog.service.price.update',
+          ) &&
+          priceTask.confidence >= 0.75 &&
+          step === 0
+        ) {
+          if (!this.crm) this.modelFailure('service_price_source_unavailable');
+          const scope = {
+            tenantId,
+            userId: user.userId,
+            sourceRevision: await this.crm.servicePriceReadIdentity(
+              tenantId,
+              user.userId,
+            ),
+          };
+          const catalog = allowedNames.has('catalog.services.read')
+            ? this.record(
+                await this.executeChatTool(
+                  dto,
+                  toolUser,
+                  'catalog.services.read',
+                  {
+                    surface: dto.surface,
+                    arguments: {},
+                    idempotencyKey: this.toolIdempotencyKey(
+                      tenantId,
+                      user.userId,
+                      `${dto.requestId}:${scope.sourceRevision}`,
+                      step,
+                      'catalog.services.read',
+                    ),
+                  },
+                  { suppressWidgetTrigger: true },
+                ),
+              )
+            : null;
+          if (catalog)
+            toolsUsed.push({
+              name: 'catalog.services.read',
+              status:
+                typeof catalog.status === 'string' ? catalog.status : 'unknown',
+              execution_id:
+                typeof catalog.execution_id === 'string'
+                  ? catalog.execution_id
+                  : null,
+            });
+          const currentSource = await this.crm.servicePriceReadIdentity(
+            tenantId,
+            user.userId,
+          );
+          const bound = bindServicePriceTurn({
+            text: this.latestUserText(dto.messages),
+            serviceSource:
+              currentSource === scope.sourceRevision &&
+              catalog?.status === 'completed' &&
+              catalog.stale !== true
+                ? catalog.result
+                : null,
+            scope,
+            previous: this.servicePricePreferences.get(dto) ?? null,
+          });
+          if (bound.preference)
+            this.servicePricePreferences.set(dto, bound.preference);
+          else this.servicePricePreferences.delete(dto);
+          // Only the server-bound preference is retained or sent on to the existing tool.
+          priceTask.entities = bound.preference
+            ? {
+                requested_price: bound.preference.requestedPrice,
+                ...(bound.preference.service
+                  ? { service: bound.preference.service.name }
+                  : {}),
+              }
+            : {};
+          priceTask.requires_clarification = bound.binding.kind === 'clarify';
+          priceTask.clarification_question =
+            bound.binding.kind === 'clarify' ? (bound.reply ?? null) : null;
+          if (bound.binding.kind === 'clarify') {
+            decision.toolCall = null;
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  this.servicePriceContextChanged.has(dto) && !bound.preference
+                    ? 'Контекст филиала или YCLIENTS изменился. Укажите услугу и новую цену заново.'
+                    : (bound.reply ??
+                      servicePriceClarification(bound.binding.reason)),
+                source: 'safe_fallback',
+                action: null,
+              },
+              toolResults,
+            );
+          }
+          preparedServicePrice = bound.preference;
+          decision.toolCall = {
+            name: 'catalog.service.price.update',
+            arguments: bound.binding.arguments,
+          };
+          this.conversationLayer().assertToolCallMatchesPlan(
+            decision.toolCall,
+            decision.semanticPlan!,
+          );
+          requirement = null;
+          requiredToolNames = [];
+          requirementSatisfied = true;
         }
         if (requestsReviewCalendar(decision.semanticPlan ?? null)) {
           const plan = decision.semanticPlan!;
@@ -3319,7 +3446,24 @@ export class AiCoreService {
           // Neither the model's target nor its proposed text survive this binding.
           hardenedArguments = bound.arguments;
         }
-        if (decision.toolCall.name === 'catalog.service.price.update') {
+        let servicePriceSourceRevision: string | undefined;
+        if (
+          decision.toolCall.name === 'catalog.service.price.update' &&
+          dto.surface === 'web'
+        ) {
+          const price = preparedServicePrice;
+          if (!price?.service)
+            this.modelFailure('service_price_context_unavailable');
+          hardenedArguments = {
+            service_id: price.service.id,
+            price_rubles: price.requestedPrice,
+          };
+          servicePriceSourceRevision = price.sourceRevision;
+        }
+        if (
+          decision.toolCall.name === 'catalog.service.price.update' &&
+          dto.surface !== 'web'
+        ) {
           // A proposed price/service from the model is never business intent.
           // Bind the exact owner utterance to a current catalog before preparing
           // the signed diff; the CRM owner still resolves tenant/provider authority.
@@ -3454,6 +3598,13 @@ export class AiCoreService {
                   : {}),
                 ...(serviceRenameSourceRevision
                   ? { serviceRenameSourceRevision }
+                  : {}),
+                ...(servicePriceSourceRevision
+                  ? {
+                      servicePriceSourceRevision,
+                      servicePriceServiceName:
+                        preparedServicePrice!.service!.name,
+                    }
                   : {}),
                 requestId: dto.requestId,
                 userTurn: this.persistedUserTurns.get(dto),
@@ -4326,11 +4477,18 @@ export class AiCoreService {
             lastPlan,
           )
         : null;
+      const servicePrice =
+        lastPlan?.tasks.length === 1 &&
+        lastPlan.tasks[0].intent === 'services.price_update' &&
+        (!response.action || response.action.status === 'approval_required')
+          ? this.servicePricePreferences.get(dto)
+          : undefined;
       let semanticContext =
-        response.action || !lastPlan
+        (response.action && !servicePrice) || !lastPlan
           ? null
           : {
               version: 'maya.chat-semantic-context/1',
+              ...(servicePrice ? { servicePrice } : {}),
               ...(journalCalendar ? { journalCalendar } : {}),
               ...(response.ownerReviewClarification &&
               (isOwnerReviewTaskSet(lastPlan) ||
@@ -4399,6 +4557,7 @@ export class AiCoreService {
         semanticContext = null;
       const transcriptProjection = {
         semanticPlan: semanticContext?.plan ?? null,
+        ...(servicePrice ? { servicePrice } : {}),
         // A new source preference is a new immutable completion revision.
         // Existing replies without this marker retain their original fingerprint.
         ...(journalCalendar ? { journalCalendar } : {}),
@@ -4596,6 +4755,35 @@ export class AiCoreService {
     }
     const { saved, savedDate, plan } = selected;
     const fallback = selected !== latest ? latest.plan : null;
+    if (
+      plan.tasks.length === 1 &&
+      plan.tasks[0].intent === 'services.price_update'
+    ) {
+      if (
+        !this.crm ||
+        saved.servicePrice === undefined ||
+        plan.tasks[0].permission.status !== 'allowed'
+      )
+        return null;
+      const scope = {
+        tenantId: this.requireTenant(user),
+        userId: user.userId,
+        sourceRevision: await this.crm.servicePriceReadIdentity(
+          this.requireTenant(user),
+          user.userId,
+        ),
+      };
+      const retained = retainedServicePrice(saved.servicePrice, scope);
+      if (!retained) {
+        this.servicePriceContextChanged.add(dto);
+        return null;
+      }
+      this.servicePricePreferences.set(dto, retained);
+      plan.tasks[0].entities = {
+        requested_price: retained.requestedPrice,
+        ...(retained.service ? { service: retained.service.name } : {}),
+      };
+    }
     const journalTask = plan.tasks.at(-1);
     if (journalTask?.intent === 'operations.journal_day') {
       const calendar = journalCalendarPreference(saved.journalCalendar, plan);

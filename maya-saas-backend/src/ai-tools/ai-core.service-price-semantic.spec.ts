@@ -278,7 +278,11 @@ describe('service price update semantic contract [actual parser/CI]', () => {
 
 function chatFixture(
   messages: string[],
-  options: { stale?: boolean; corrected?: boolean } = {},
+  options: {
+    stale?: boolean;
+    corrected?: boolean;
+    continuation?: boolean;
+  } = {},
 ) {
   const execute = jest
     .fn<
@@ -307,13 +311,31 @@ function chatFixture(
     (source: AiCoreModelInput): Promise<AiCoreModelDecision> =>
       Promise.resolve({
         ...model['validatePlanningResponse'](
-          wire({
-            entities: {
-              service: TITLE,
-              requested_price: options.corrected ? 1600 : 1500,
-            },
-            dialogueAct: options.corrected ? 'correction' : 'request',
-          }),
+          wire(
+            options.continuation
+              ? (() => {
+                  const text = source.messages.at(-1)?.content ?? '';
+                  if (text.includes('Подготовь'))
+                    return { entities: { requested_price: 9999 }, tool: null };
+                  return text.includes('1600')
+                    ? {
+                        dialogueAct: 'correction',
+                        entities: { requested_price: 1600 },
+                      }
+                    : {
+                        dialogueAct: 'clarification',
+                        entities: { service: TITLE },
+                        ...(source.conversationPlan ? {} : { tool: null }),
+                      };
+                })()
+              : {
+                  entities: {
+                    service: TITLE,
+                    requested_price: options.corrected ? 1600 : 1500,
+                  },
+                  dialogueAct: options.corrected ? 'correction' : 'request',
+                },
+          ),
           source,
         ),
         reply: 'UNVERIFIED_SCRIPTED_TEXT',
@@ -322,13 +344,23 @@ function chatFixture(
         usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
       }),
   );
+  let savedContext: unknown = null;
+  let sourceRevision = 'a'.repeat(64);
   const timeline = {
     routeTypedUtterance: jest.fn().mockResolvedValue(null),
     persistTypedTurn: jest.fn().mockResolvedValue({
       turnId: 'price-turn',
       conversationId: 'price-conversation',
     }),
-    persistAssistantReply: jest.fn().mockResolvedValue(undefined),
+    persistAssistantReply: jest
+      .fn()
+      .mockImplementation((value: { semanticContext: unknown }) => {
+        savedContext = JSON.parse(JSON.stringify(value.semanticContext));
+        return Promise.resolve();
+      }),
+    readConversationContext: jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(savedContext)),
   };
   const c9 = {
     conversationDigest: () => 'a'.repeat(64),
@@ -337,29 +369,36 @@ function chatFixture(
     ),
     finishConversationReads: jest.fn().mockResolvedValue(null),
   };
-  const service = new AiCoreService(
-    {
-      get: (key: string) =>
-        key === 'AI_CORE_MAX_TOOL_STEPS' ? '2' : undefined,
-    } as never,
-    { assertTenantId: (tenant: string) => tenant } as never,
-    { assertTenant: jest.fn().mockResolvedValue(undefined) } as never,
-    { listTools: jest.fn().mockResolvedValue({ tools }), execute } as never,
-    { decide } as never,
-    { log: jest.fn(), tryLog: jest.fn() } as never,
-    {
-      getAssistant: jest.fn().mockResolvedValue({
-        config: { enabled_capabilities: ['business_analytics'] },
-      }),
-    } as never,
-    { tryHandle: jest.fn().mockResolvedValue(null) } as never,
-    new MayaBrainRouterService(),
-    c9 as never,
-    undefined,
-    ci,
-    undefined,
-    { get: () => timeline } as never,
-  );
+  const makeService = () =>
+    new AiCoreService(
+      {
+        get: (key: string) =>
+          key === 'AI_CORE_MAX_TOOL_STEPS' ? '2' : undefined,
+      } as never,
+      { assertTenantId: (tenant: string) => tenant } as never,
+      { assertTenant: jest.fn().mockResolvedValue(undefined) } as never,
+      { listTools: jest.fn().mockResolvedValue({ tools }), execute } as never,
+      { decide } as never,
+      { log: jest.fn(), tryLog: jest.fn() } as never,
+      {
+        getAssistant: jest.fn().mockResolvedValue({
+          config: { enabled_capabilities: ['business_analytics'] },
+        }),
+      } as never,
+      { tryHandle: jest.fn().mockResolvedValue(null) } as never,
+      new MayaBrainRouterService(),
+      c9 as never,
+      undefined,
+      ci,
+      undefined,
+      { get: () => timeline } as never,
+      {
+        servicePriceReadIdentity: jest
+          .fn()
+          .mockImplementation(() => Promise.resolve(sourceRevision)),
+      } as never,
+    );
+  let service = makeService();
   const actor = {
     userId: 'owner',
     tenantId: 'tenant',
@@ -375,11 +414,19 @@ function chatFixture(
     decide,
     c9,
     timeline,
-    chat: () =>
+    restart: () => {
+      service = makeService();
+    },
+    changeSource: () => {
+      sourceRevision = 'b'.repeat(64);
+    },
+    saved: () => savedContext,
+    chat: (turns = messages, resumed = false) =>
       service.chat(actor, {
         surface: 'web',
         requestId: 'price_semantic_request_123',
-        messages: messages.map((content) => ({
+        ...(resumed ? { conversationId: 'price-conversation' } : {}),
+        messages: turns.map((content) => ({
           role: 'user' as const,
           content,
         })),
@@ -394,7 +441,16 @@ describe('AiCore price preparation [actual semantic parser, synthetic owners]', 
       const f = chatFixture(corrected ? [PREPARE, CORRECTION] : [PREPARE], {
         corrected,
       });
-      const result = await f.chat();
+      if (corrected) {
+        await f.chat([PREPARE]);
+        f.execute.mockClear();
+        f.decide.mockClear();
+        f.timeline.persistAssistantReply.mockClear();
+      }
+      const result = await f.chat(
+        corrected ? [CORRECTION] : [PREPARE],
+        corrected,
+      );
       expect(f.decide).toHaveBeenCalledTimes(1);
       expect(f.execute.mock.calls.map((call) => call[1])).toEqual([
         READ,
@@ -441,4 +497,89 @@ describe('AiCore price preparation [actual semantic parser, synthetic owners]', 
       expect(result.reply).not.toContain('9999');
     },
   );
+});
+
+describe('server-owned pricing clarification continuation', () => {
+  it('preserves the raw price through service-only clarification, a new AiCore instance, and price-only correction', async () => {
+    const f = chatFixture([], { continuation: true });
+    const first = await f.chat([
+      'Подготовь изменение цены мужской стрижки на 1500 рублей.',
+    ]);
+    expect(first.action).toBeNull();
+    expect(first.reply).toContain('1\u00a0500');
+    expect(first.reply.match(/\?/g)).toHaveLength(1);
+    expect(f.saved()).toMatchObject({
+      servicePrice: { requestedPrice: 1500, service: null },
+    });
+    f.restart();
+    const clarified = await f.chat([TITLE], true);
+    expect(clarified.action?.status).toBe('approval_required');
+    expect(
+      f.execute.mock.calls.filter((call) => call[1] === WRITE).at(-1)?.[2]
+        .arguments,
+    ).toEqual({ service_id: '81', price_rubles: 1500 });
+    expect(f.saved()).toMatchObject({
+      servicePrice: {
+        requestedPrice: 1500,
+        service: { id: '81', name: TITLE },
+      },
+    });
+    f.restart();
+    const corrected = await f.chat(['Нет, на 1600 рублей.'], true);
+    expect(corrected.action?.status).toBe('approval_required');
+    expect(
+      f.execute.mock.calls.filter((call) => call[1] === WRITE).at(-1)?.[2]
+        .arguments,
+    ).toEqual({ service_id: '81', price_rubles: 1600 });
+    expect(
+      f.execute.mock.calls
+        .filter((call) => call[1] === WRITE)
+        .map((call) => call[3]),
+    ).toEqual([
+      expect.objectContaining({ servicePriceSourceRevision: 'a'.repeat(64) }),
+      expect.objectContaining({ servicePriceSourceRevision: 'a'.repeat(64) }),
+    ]);
+  });
+
+  it('cannot dispatch a restored preference through a compound plan without binding this turn', async () => {
+    const f = chatFixture([], { continuation: true });
+    await f.chat(['Подготовь изменение цены мужской стрижки на 1500 рублей.']);
+    await f.chat([TITLE], true);
+    f.execute.mockClear();
+    f.decide.mockImplementation((source) => {
+      const candidate = JSON.parse(wire()) as {
+        semantic_plan: { tasks: unknown[] };
+      };
+      candidate.semantic_plan.tasks.push({
+        id: 'other',
+        intent: 'services.price',
+        entities_json: JSON.stringify({ service: TITLE }),
+        confidence: 1,
+      });
+      return Promise.resolve({
+        ...model['validatePlanningResponse'](JSON.stringify(candidate), source),
+        reply: 'SCRIPTED',
+        provider: 'openai',
+        model: 'synthetic-compound-price-attempt',
+        usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      });
+    });
+    await expect(f.chat(['Расскажи про услуги'], true)).rejects.toThrow();
+    expect(f.execute.mock.calls.some((call) => call[1] === WRITE)).toBe(false);
+  });
+
+  it('does not revive the old amount from caller history after current source changed', async () => {
+    const f = chatFixture([], { continuation: true });
+    await f.chat(['Подготовь изменение цены мужской стрижки на 1500 рублей.']);
+    f.restart();
+    f.changeSource();
+    const result = await f.chat([PREPARE, TITLE], true);
+    expect(result.action).toBeNull();
+    expect(
+      f.execute.mock.calls.filter((call) => call[1] === WRITE),
+    ).toHaveLength(0);
+    expect(f.saved()).not.toHaveProperty('servicePrice');
+    const reads = f.execute.mock.calls.filter((call) => call[1] === READ);
+    expect(reads[0][2].idempotencyKey).not.toBe(reads[1][2].idempotencyKey);
+  });
 });

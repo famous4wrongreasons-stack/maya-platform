@@ -2748,6 +2748,13 @@ export class AiToolHandlerService {
    *
    * Для всех остальных инструментов это тождественное преобразование.
    */
+  async servicePriceReadIdentity(principal: AiToolPrincipal): Promise<string> {
+    return this.crmService.servicePriceReadIdentity(
+      principal.tenantId,
+      principal.userId,
+    );
+  }
+
   async normalizeArguments(
     toolName: string,
     principal: AiToolPrincipal,

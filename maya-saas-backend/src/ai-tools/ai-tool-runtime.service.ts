@@ -163,6 +163,9 @@ export class AiToolRuntimeService {
       readonly goodsReviewOnly?: true;
       /** One server-owned source for the explicit catalog → rename preview READ pair. */
       readonly serviceRenameSourceRevision?: string;
+      /** Current catalog/preference source, never caller or model supplied. */
+      readonly servicePriceSourceRevision?: string;
+      readonly servicePriceServiceName?: string;
       readonly staffScheduleReadScope?: StaffScheduleReadScope;
       readonly reviewCalendarReadScope?: ReviewCalendarReadScope;
       /** Transient metadata witness for the existing typed booking successor. */
@@ -180,6 +183,19 @@ export class AiToolRuntimeService {
   ) {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
+    const priceSource = internal.servicePriceSourceRevision;
+    const revalidatePriceSource = async () => {
+      if (priceSource === undefined) return;
+      if (
+        toolName !== 'catalog.service.price.update' ||
+        !/^[a-f0-9]{64}$/.test(priceSource) ||
+        typeof internal.servicePriceServiceName !== 'string' ||
+        !internal.servicePriceServiceName ||
+        (await this.handler.servicePriceReadIdentity(principal)) !== priceSource
+      )
+        this.approvalConflict('service_price_source_changed');
+    };
+    await revalidatePriceSource();
     const serviceRenameSourceRevision = this.serviceRenameSourceContext(
       definition,
       internal.serviceRenameSourceRevision,
@@ -278,6 +294,13 @@ export class AiToolRuntimeService {
             priceMinor(validated.price_rubles)
         )
           this.approvalConflict('ai_approval_idempotency_conflict');
+        if (
+          priceSource !== undefined &&
+          (savedArgs.integration_revision !== priceSource ||
+            savedArgs.service_name !== internal.servicePriceServiceName)
+        )
+          this.approvalConflict('service_price_source_changed');
+        await revalidatePriceSource();
         const pending = await this.requestApproval(
           principal,
           definition,
@@ -302,6 +325,13 @@ export class AiToolRuntimeService {
       principal,
       validated,
     );
+    if (
+      priceSource !== undefined &&
+      (args.integration_revision !== priceSource ||
+        args.service_name !== internal.servicePriceServiceName)
+    )
+      this.approvalConflict('service_price_source_changed');
+    await revalidatePriceSource();
     const revalidateAvailability = await this.bindAvailabilityReadScope(
       principal,
       definition,

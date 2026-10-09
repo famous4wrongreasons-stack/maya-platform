@@ -2255,7 +2255,7 @@ describe('AiCoreService', () => {
       { role: 'user' as const, content: 'Нет, 1900 рублей' },
     ],
   ])(
-    'binds a pricing proposal to user text and catalog instead of model numbers',
+    'binds a direct pricing proposal and refuses caller-only correction history',
     async (...messages) => {
       const mocks = createService([
         'catalog.services.read',
@@ -2264,6 +2264,19 @@ describe('AiCoreService', () => {
       mocks.model.decide.mockResolvedValue(
         decision({
           reply: '',
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              tasks: [
+                {
+                  intent: 'services.price_update',
+                  entities: { service: 'Стрижка', requested_price: 1900 },
+                  confidence: 1,
+                },
+              ],
+            },
+            UserRole.TENANT_OWNER,
+            ['catalog.service.price.update'],
+          ),
           toolCall: {
             name: 'catalog.service.price.update',
             arguments: {
@@ -2305,6 +2318,15 @@ describe('AiCoreService', () => {
         ),
       );
       const result = await mocks.service.chat(user, { ...dto, messages });
+      if (messages.length > 1) {
+        expect(result.action).toBeNull();
+        expect(
+          mocks.runtime.execute.mock.calls.some(
+            (call) => call[1] === 'catalog.service.price.update',
+          ),
+        ).toBe(false);
+        return;
+      }
       expect(result.reply).toBe(previewSummary);
       expect(result.resolution).toBe(resolution);
       expect(
@@ -2335,6 +2357,19 @@ describe('AiCoreService', () => {
       mocks.model.decide.mockResolvedValue(
         decision({
           reply: '',
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              tasks: [
+                {
+                  intent: 'services.price_update',
+                  entities: { service: 'Стрижка', requested_price: 1900 },
+                  confidence: 1,
+                },
+              ],
+            },
+            UserRole.TENANT_OWNER,
+            ['catalog.service.price.update'],
+          ),
           toolCall: {
             name: 'catalog.service.price.update',
             arguments: { service_id: '42', price_rubles: 1900 },
@@ -8439,6 +8474,7 @@ describe('AiCoreService', () => {
       .fn()
       .mockResolvedValue({ defaultTimezone: businessTimezone });
     const crm = {
+      servicePriceReadIdentity: jest.fn().mockResolvedValue('a'.repeat(64)),
       serviceRenameReadIdentity: jest.fn().mockResolvedValue('a'.repeat(64)),
       resolveConfiguredBookingBranch: jest.fn().mockResolvedValue(null),
       readBranchAvailabilityRevision: jest.fn().mockResolvedValue(null),

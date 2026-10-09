@@ -1790,6 +1790,19 @@ export class CrmService {
         integration.encryptedApiToken,
       ),
     });
+    const currentMembership = await this.prisma.membership.findUnique({
+      where: { userId_tenantId: { userId, tenantId } },
+      include: { user: true },
+    });
+    if (
+      !currentMembership ||
+      currentMembership.status !== 'active' ||
+      currentMembership.user.status !== 'active' ||
+      currentMembership.branchId ||
+      currentMembership.id !== membership.id ||
+      currentMembership.role !== membership.role
+    )
+      throw new ForbiddenException('Service price current owner changed');
     return {
       adapter: adapter as CRMAdapter &
         Required<
@@ -1800,6 +1813,14 @@ export class CrmService {
         >,
       revision,
     };
+  }
+
+  /** Metadata/current-principal witness for retained price preferences; no provider write. */
+  async servicePriceReadIdentity(
+    tenantId: string,
+    userId: string,
+  ): Promise<string> {
+    return (await this.servicePriceContext(tenantId, userId)).revision;
   }
 
   async prepareServicePriceChange(
@@ -1814,6 +1835,10 @@ export class CrmService {
       userId,
     );
     const current = await adapter.getServicePriceSnapshot(serviceId);
+    if (
+      (await this.servicePriceContext(tenantId, userId)).revision !== revision
+    )
+      priceUnavailable('service_price_source_changed');
     if (current.priceMinor === amount)
       priceUnavailable('service_price_already_current');
     return {

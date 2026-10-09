@@ -229,6 +229,29 @@ export class ConversationIntelligenceService {
           }
         }
       }
+      // Finite same-task price continuation. These are preferences only; the
+      // pricing owner rebinds raw text and retained source before any proposal.
+      if (
+        previous?.intent === 'services.price_update' &&
+        definition.id === previous.intent &&
+        allowed &&
+        previous.permission.status === 'allowed' &&
+        ['clarification', 'answer', 'correction'].includes(
+          String(candidate.dialogue_act),
+        )
+      ) {
+        for (const key of ['service', 'requested_price']) {
+          if (!(key in entities) && key in previous.entities) {
+            entities[key] = previous.entities[key];
+            carried.add(key);
+          } else if (
+            key in entities &&
+            key in previous.entities &&
+            entities[key] !== previous.entities[key]
+          )
+            replaced.add(key);
+        }
+      }
       const candidateClarification = rawTask.requires_clarification === true;
       const confidence = this.confidence(rawTask.confidence);
       const missingSlots = definition.requiredSlots.filter(

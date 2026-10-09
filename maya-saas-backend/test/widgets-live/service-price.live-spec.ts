@@ -1,3 +1,5 @@
+import { fork } from 'node:child_process';
+import { widgetsLiveChildEnvironment } from './support/environment';
 import { createHash, randomUUID } from 'node:crypto';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -494,6 +496,54 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
     };
     return { ...f, chat, send };
   }
+  async function freshProcessChat(
+    token: string,
+    text: string,
+    conversationId?: string,
+  ): Promise<{ status: number; body: ChatApproval; pid: number }> {
+    const { env } = widgetsLiveChildEnvironment(process.env, {
+      NODE_OPTIONS: '--max-old-space-size=1024',
+    });
+    return new Promise((resolveTurn, reject) => {
+      const child = fork(
+        resolve(__dirname, 'support/service-price-chat-process.ts'),
+        [],
+        {
+          env,
+          execArgv: ['-r', 'ts-node/register/transpile-only'],
+          stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
+        },
+      );
+      let stderr = '',
+        result: { status: number; body: ChatApproval; pid: number } | null =
+          null;
+      child.stderr?.on('data', (data: Buffer) => {
+        stderr = (stderr + data.toString()).slice(-8000);
+      });
+      child.once('message', (message: unknown) => {
+        result = message as typeof result;
+      });
+      const timer = setTimeout(() => {
+        child.kill('SIGKILL');
+      }, 45_000);
+      child.once('error', reject);
+      child.once('exit', (code) => {
+        clearTimeout(timer);
+        if (code !== 0 || !result)
+          reject(
+            new Error(`Synthetic price process failed: ${code}; ${stderr}`),
+          );
+        else resolveTurn(result);
+      });
+      child.send({
+        token,
+        text,
+        conversationId,
+        providerOrigin: providerUrl,
+        requestId: randomUUID(),
+      });
+    });
+  }
   function decisionIntent(
     envelope: ApprovalEnvelope,
     decision: 'approve' | 'reject',
@@ -917,6 +967,164 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
     expect(f.state.writes).toHaveLength(1);
   });
 
+  it('YC-SP1-CONTEXT: service-only clarification restores 1500 across actual application process restarts, then replaces it with 1600', async () => {
+    const f = await salon('Price persisted clarification');
+    await fx.grantFeature(f.tenant, 'widgets.runtime');
+    f.state.row.title = 'Мужская стрижка';
+    const original = await freshProcessChat(
+      f.token,
+      'Подготовь изменение цены мужской стрижки на 1500 рублей.',
+    );
+    expect(original.status).toBe(201);
+    expect(original.body.action).toBeNull();
+    expect(original.body.reply).toContain('1\u00a0500');
+    expect(original.body.reply.match(/\?/g)).toHaveLength(1);
+    expect(
+      await db.prisma.aiApprovalRequest.count({
+        where: { tenantId: f.tenant.id },
+      }),
+    ).toBe(0);
+    const conversation = original.body.user_turn!.conversationId;
+    const clarified = await freshProcessChat(
+      f.token,
+      'Мужская стрижка',
+      conversation,
+    );
+    expect(clarified.status).toBe(201);
+    expect(clarified.pid).not.toBe(original.pid);
+    expect(clarified.body.action).toMatchObject({
+      status: 'approval_required',
+      approval: {
+        payload_preview: {
+          service: 'Мужская стрижка',
+          current_price_rubles: 2000,
+          proposed_price_rubles: 1500,
+        },
+      },
+    });
+    const corrected = await freshProcessChat(
+      f.token,
+      'Нет, на 1600 рублей.',
+      conversation,
+    );
+    expect(corrected.status).toBe(201);
+    expect(corrected.pid).not.toBe(clarified.pid);
+    expect(corrected.body.action).toMatchObject({
+      status: 'approval_required',
+      approval: {
+        payload_preview: {
+          service: 'Мужская стрижка',
+          current_price_rubles: 2000,
+          proposed_price_rubles: 1600,
+        },
+      },
+    });
+    const before = clarified.body.resolution!.receipt!.envelope!;
+    const after = corrected.body.resolution!.receipt!.envelope!;
+    expect(after.body.approval_ref).not.toBe(before.body.approval_ref);
+    expect(
+      (await tapApproval(f.token, before, 'approve')).body,
+    ).not.toMatchObject({ receipt_outcome: 'ACCEPTED' });
+    expect(f.state.writes).toHaveLength(0);
+    await observeApproval(f.token, after);
+    expect((await tapApproval(f.token, after, 'approve')).body).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: { status: 'completed' },
+    });
+    expect(f.state.writes).toHaveLength(1);
+    expect(f.state.row.price_min).toBe(1600);
+    expect(await actions(f.tenant.id)).toEqual([
+      expect.objectContaining({ state: 'SUCCEEDED' }),
+    ]);
+    const owned = carrierEvidenceDirectory();
+    if (owned)
+      writeFileSync(
+        resolve(owned, 'price-clarification.json'),
+        JSON.stringify(
+          {
+            contract: 'maya.price-clarification-proof/1',
+            scripted: true,
+            stages: [original, clarified, corrected],
+            writes: f.state.writes.length,
+            actions: await actions(f.tenant.id),
+            postgresRestart: false,
+          },
+          null,
+          2,
+        ) + '\n',
+      );
+  });
+
+  it('YC-SP1-CONTEXT: tenant and configured branch changes cannot borrow the saved price', async () => {
+    const f = await widgetSalon('Price clarification scope', 'Мужская стрижка');
+    const branchA = await db.prisma.branch.create({
+      data: { tenantId: f.tenant.id, name: 'Synthetic A' },
+    });
+    const branchB = await db.prisma.branch.create({
+      data: { tenantId: f.tenant.id, name: 'Synthetic B' },
+    });
+    const oldIntegration = await db.prisma.crmIntegration.findUniqueOrThrow({
+      where: { tenantId: f.tenant.id },
+    });
+    await db.prisma.crmIntegration.update({
+      where: { id: oldIntegration.id },
+      data: {
+        settingsJson: {
+          ...(oldIntegration.settingsJson as Record<string, string>),
+          branchBinding: {
+            contract: 'maya.crm-branch-binding/1',
+            companyId: Number(f.state.row.company_id),
+            branchId: branchA.id,
+          },
+        },
+      },
+    });
+    const first = await f.send(
+      'Подготовь изменение цены мужской стрижки на 1500 рублей.',
+    );
+    const foreign = await salon('Price foreign continuation');
+    await fx.grantFeature(foreign.tenant, 'widgets.runtime');
+    const denied = await request(http.app.getHttpServer())
+      .post('/api/ai/chat')
+      .set('Authorization', `Bearer ${foreign.token}`)
+      .send({
+        surface: 'web',
+        audience: 'owner',
+        requestId: randomUUID(),
+        conversationId: first.user_turn!.conversationId,
+        messages: [{ role: 'user', content: 'Мужская стрижка' }],
+      });
+    expect(denied.status).toBeGreaterThanOrEqual(400);
+    const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+      where: { tenantId: f.tenant.id },
+    });
+    await db.prisma.crmIntegration.update({
+      where: { id: integration.id },
+      data: {
+        settingsJson: {
+          ...(integration.settingsJson as Record<string, string>),
+          branchBinding: {
+            contract: 'maya.crm-branch-binding/1',
+            companyId: Number(f.state.row.company_id),
+            branchId: branchB.id,
+          },
+        },
+      },
+    });
+    const changed = await f.send('Мужская стрижка');
+    expect(changed.action).toBeNull();
+    expect(changed.reply).toContain('Контекст филиала');
+    for (const tenant of [f.tenant, foreign.tenant]) {
+      expect(
+        await db.prisma.aiApprovalRequest.count({
+          where: { tenantId: tenant.id },
+        }),
+      ).toBe(0);
+      expect(await actions(tenant.id)).toHaveLength(0);
+    }
+    expect(f.state.writes).toHaveLength(0);
+  });
+
   it.each([
     'provider_revision',
     'membership',
@@ -1101,6 +1309,7 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
 
   it('carries an owner price correction through natural chat and excludes the tool from client audience', async () => {
     const f = await salon('Price natural conversation');
+    await fx.grantFeature(f.tenant, 'widgets.runtime');
     f.state.row.title = 'Стрижка';
     const model = jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')

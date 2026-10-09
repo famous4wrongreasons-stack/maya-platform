@@ -36,6 +36,54 @@ describe('AiToolRuntimeService', () => {
     membershipStatus: 'active',
   };
 
+  it.each(['fresh-source', 'fresh-name', 'saved-source', 'saved-name'])(
+    'rejects a pricing source/name mismatch before mint or same-key return: %s',
+    async (mode) => {
+      const h = createHarness();
+      const args = {
+        service_id: '42',
+        price_rubles: 1500,
+        company_id: '123',
+        integration_revision: mode.endsWith('source')
+          ? 'b'.repeat(64)
+          : 'a'.repeat(64),
+        current_revision: 'c'.repeat(64),
+        current_price_rubles: 2000,
+        service_name: mode.endsWith('name') ? 'Другая услуга' : 'Стрижка',
+        currency: 'RUB',
+      };
+      if (mode.startsWith('saved'))
+        h.approvalFindUnique.mockResolvedValue(
+          approvalRecord({
+            toolName: 'catalog.service.price.update',
+            encryptedArguments:
+              'encrypted:' +
+              Buffer.from(JSON.stringify(args)).toString('base64url'),
+          }),
+        );
+      else jest.spyOn(h.handler, 'normalizeArguments').mockResolvedValue(args);
+      await expect(
+        h.tenantContext.runAsSystemTenant('tenant-a', () =>
+          h.runtime.execute(
+            { ...customer, role: UserRole.TENANT_OWNER },
+            'catalog.service.price.update',
+            {
+              surface: 'web',
+              idempotencyKey: IDEMPOTENCY_KEY,
+              arguments: { service_id: '42', price_rubles: 1500 },
+            },
+            {
+              servicePriceSourceRevision: 'a'.repeat(64),
+              servicePriceServiceName: 'Стрижка',
+            },
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(h.approvalCreate).not.toHaveBeenCalled();
+      expect(h.handlerExecute).not.toHaveBeenCalled();
+    },
+  );
+
   describe('exact local review calendar scope', () => {
     function fixture() {
       const h = createHarness();
@@ -1703,6 +1751,7 @@ function createHarness(
     .fn()
     .mockResolvedValue({ branchId: 'maya-branch', timezone: 'Europe/Moscow' });
   const handler = {
+    servicePriceReadIdentity: jest.fn().mockResolvedValue('a'.repeat(64)),
     assertStaffScheduleReadScope: jest.fn().mockResolvedValue(undefined),
     resolveReviewCalendarScope: jest.fn(),
     availabilityPreferenceCalendar,
