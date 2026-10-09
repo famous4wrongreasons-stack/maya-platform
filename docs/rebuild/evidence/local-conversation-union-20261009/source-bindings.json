@@ -1,0 +1,14 @@
+[
+  {
+    "run": "failed-loader",
+    "candidateCommit": "c503cdcb83f110283863f2b21854051fe3034331",
+    "manifestSha256": "bcce9576beb200047fd9c3a3efd569aa535e25e13275c9a749c7c69b6da8e96d",
+    "gitSourceHashesVerified": 2471
+  },
+  {
+    "run": "dry-http",
+    "candidateCommit": "e7703c77db47349e77291db616803a8ba6583262",
+    "manifestSha256": "989eef5ff1f95f1d7c48f02037f0ad73a41cf225640e61de3e3034795daf19dc",
+    "gitSourceHashesVerified": 2471
+  }
+]

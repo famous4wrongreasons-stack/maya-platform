@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-09T08:32:46.159474+00:00",
+  "runs": [
+    {
+      "run": "failed-loader",
+      "brokerPid": 7156,
+      "brokerAbsent": true,
+      "groupsAbsent": {
+        "initdb": true,
+        "pg-start": true,
+        "createdb": true,
+        "migrations": true,
+        "conversation": true,
+        "pg-stop": true
+      },
+      "postmasterPidAbsent": true,
+      "runnerClusterStopped": true,
+      "runnerSourcesUnchanged": true
+    },
+    {
+      "run": "dry-http",
+      "brokerPid": 9208,
+      "brokerAbsent": true,
+      "groupsAbsent": {
+        "initdb": true,
+        "pg-start": true,
+        "createdb": true,
+        "migrations": true,
+        "conversation": true,
+        "pg-stop": true
+      },
+      "postmasterPidAbsent": true,
+      "runnerClusterStopped": true,
+      "runnerSourcesUnchanged": true
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "qualification": "READ_ONLY_JSON_GIT_HASH_AND_COPY_VERIFICATION_NO_EXECUTION",
+  "sourceBindings": [
+    {
+      "run": "failed-loader",
+      "candidateCommit": "c503cdcb83f110283863f2b21854051fe3034331",
+      "manifestSha256": "bcce9576beb200047fd9c3a3efd569aa535e25e13275c9a749c7c69b6da8e96d",
+      "gitSourceHashesVerified": 2471
+    },
+    {
+      "run": "dry-http",
+      "candidateCommit": "e7703c77db47349e77291db616803a8ba6583262",
+      "manifestSha256": "989eef5ff1f95f1d7c48f02037f0ad73a41cf225640e61de3e3034795daf19dc",
+      "gitSourceHashesVerified": 2471
+    }
+  ],
+  "currentSourceHashesVerified": 2471,
+  "rawDryArchiveCopiesByteIdentical": 23,
+  "rawCopyNames": [
+    "runner-report.json",
+    "pg-start.log",
+    "runner-budget-ledger.jsonl",
+    "replay-binding.json",
+    "actual-model-responses.jsonl",
+    "actual-http-turns.jsonl",
+    "http-response-journal.jsonl",
+    "broker-ledger.jsonl",
+    "conversation.log",
+    "serialized-attempts.jsonl",
+    "migrations.log",
+    "replay-records.jsonl",
+    "pg-stop.log",
+    "postgres.log",
+    "broker.log",
+    "fixture-preflight.json",
+    "candidate-manifest.json",
+    "createdb.log",
+    "initdb.log",
+    "model-responses.jsonl",
+    "broker-report.json",
+    "http-report.json",
+    "conversation-jest.json"
+  ],
+  "outsideRawDirectoryPendingOrigin": [],
+  "httpCases": 9,
+  "http201": 17,
+  "all18Accounted": {
+    "plannedTurns": 18,
+    "attemptedTurns": 17,
+    "validResponses": 17,
+    "unresolvedTurns": 0,
+    "skippedDependentTurns": 1,
+    "unexecutedTurns": 0,
+    "semanticPasses": 0,
+    "semanticFailures": 1,
+    "semanticUngraded": 16
+  },
+  "distinctConversations": 9,
+  "historyActualReplyCarryExact": true,
+  "appBrokerRequestTuplesMatched": 17,
+  "maxRequestBytes": 94190,
+  "ledgersClosedSameCounters": {
+    "event": "closed",
+    "dialogs": 9,
+    "turns": 17,
+    "attempts": 17,
+    "inputTokens": 1450298,
+    "outputTokens": 20400,
+    "reservedNanoUsd": 1995177360,
+    "halted": false
+  },
+  "upstreamCalls": 0,
+  "credentialsLoaded": false,
+  "paidAuthorized": false,
+  "forbidden": [],
+  "observedBusinessWrites": 0,
+  "jest": {
+    "numPassedTests": 1,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 1,
+    "numFailedTestSuites": 0,
+    "success": true
+  },
+  "failedLoaderJest": {
+    "numTotalTests": 0,
+    "numFailedTestSuites": 1,
+    "success": false
+  },
+  "failedLoaderRunnerStatus": "failed",
+  "runnerStatus": "completed-with-semantic-failures",
+  "clusterStopped": true,
+  "postmasterPidAbsentReadOnlyObserved": true,
+  "groupsClosedAbsentRecorded": 6,
+  "brokerStoppedRecorded": true,
+  "liveCleanupOSNotReexecuted": true,
+  "externalCaptureCopiesVerified": [
+    {
+      "archivePath": "dry-http/launch.log",
+      "origin": "/tmp/maya-conversation-batch-20261009/dry-r2-launch.log",
+      "sha256": "e8d67589b11215f488bcab5ae01ff0a6c1439281bd2cc8b52db25be0ed978b93",
+      "bytes": 400
+    },
+    {
+      "archivePath": "failed-loader/launch.log",
+      "origin": "/tmp/maya-conversation-batch-20261009/dry-launch.log",
+      "sha256": "cd059dce31954a50b9561bc9a158279ab7e01c2b0723275104fbac7275e58466",
+      "bytes": 371
+    }
+  ]
+}

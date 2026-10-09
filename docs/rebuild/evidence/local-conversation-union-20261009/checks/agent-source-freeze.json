@@ -1,0 +1,103 @@
+{
+  "qualification": "LOCAL_UNIT_TYPES_LINT_ONLY_NO_HTTP_NO_MODEL_NO_CREDENTIALS",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-conversation-batch",
+  "base": "c6db033e02009bda523c393e65e45ba61c3bcefc",
+  "recordedAt": "2026-10-09T08:23:50.935920+00:00",
+  "files": [
+    {
+      "path": "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json",
+      "sha256": "a3210eac84354f2d1837a90f94e3a6932e4f1eab28047702ff173dee0634946a",
+      "bytes": 32539
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts",
+      "sha256": "dbad9244ae0a0d0ca61b1616f546d34f9506a35e601fd398501e781a23cee0ca",
+      "bytes": 74926
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.mjs",
+      "sha256": "bc37b012e0877657560ed93f7227657f16a270c4fab057bea0f87b06d06f35ac",
+      "bytes": 16489
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.d.mts",
+      "sha256": "0e02fe748feb8f148ba729cecfb31b842cc57e49fa5cb8ad7f6fdd89e89a92f7",
+      "bytes": 2526
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-profile.mjs",
+      "sha256": "b2afccee4fb3c8b856656b7477f3c62ad7d5fa5f3eae4c66f4f82ad7190bdf59",
+      "bytes": 2110
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-profile.d.mts",
+      "sha256": "c590e36a43f3ae7ec271eca1797a4c93ce8a13087a796ac46e37b032db7492ef",
+      "bytes": 573
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-profile.test.mjs",
+      "sha256": "2bb034d52995c71c84b959c5fc74e63a22bdb09db3e5d5891f86a60a7f2dcc2f",
+      "bytes": 4997
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/replay.mjs",
+      "sha256": "5b81a91ac725df9529c562ada04d84154d21837f8a1ba1e0db36fd477e245319",
+      "bytes": 11052
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/replay.d.mts",
+      "sha256": "b8b2209c53514d9f1c86ee91fb91657bc023620650a87443b8a6064cdbb85629",
+      "bytes": 2307
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/replay-semantic.test.mjs",
+      "sha256": "1f0b14410041b4051251ecbfa970fe9c6b5576d2d814873c4f23dc9c540b778c",
+      "bytes": 5493
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-union-budget.test.mjs",
+      "sha256": "d8da057db218efea980aebfae1d99e1740f6f7fff686d42dcd70b6e2de6f5c8c",
+      "bytes": 3751
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-assessment.mjs",
+      "sha256": "0f0d8b6b283818b4667fbfb8fa5d8792049a685f7312af7cf871b00bbc482372",
+      "bytes": 8168
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-assessment.d.mts",
+      "sha256": "f1f45acf54304b5abaa821db21600ff25a39b86d69c01b64c2effeeca4f12e63",
+      "bytes": 1069
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-assessment.test.mjs",
+      "sha256": "b0c709a1144736212c5ce7e807322e0920eae1870c518cc1059adc7fcd31773a",
+      "bytes": 7629
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-runner.mjs",
+      "sha256": "f857f7cdfb3270ce70d772e3531a3e3359aea68a06938da0959465577aa46d0e",
+      "bytes": 17201
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-profile-cli.test.mjs",
+      "sha256": "97f115cf7731e95d9857364d4ff0c98709b7b4eb42ae2a5e8248324373dc2d38",
+      "bytes": 7729
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/owned-child-cleanup.mjs",
+      "sha256": "658dfd24f25a47ffe71ca58125f36614231225913c72513135b53eb50adb89c2",
+      "bytes": 6841
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/owned-child-cleanup.test.mjs",
+      "sha256": "1d76c6bfc3cf786af397c0b065953f5ae19013230c42a858dd7bff7895037e98",
+      "bytes": 3516
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-conversation-source.mjs",
+      "sha256": "28d1e90742bdcac3ca58a9ad510361a3f6cae55a296041fe9e3a753760d1b77b",
+      "bytes": 5752
+    }
+  ]
+}

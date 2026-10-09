@@ -1,0 +1,10 @@
+{
+  "qualification": "PURE_SYNTHETIC_USAGE_FENCE_NO_HTTP_PERMIT_PROVIDER_OR_MODEL_ACCEPTANCE",
+  "tests": 46,
+  "passed": 46,
+  "sourceHashes": {
+    "scripts/conversation-qualification/core-conversation-broker.mjs": "06432422e90e801da828fe5cc67eedff79909d07763815f1b5104bc9e2b4e21a",
+    "scripts/conversation-qualification/core-conversation-broker-usage.test.mjs": "69172ceb41ec29519e1c346aa7f4fabfa706cd9d3c9a44744243811903692a16"
+  },
+  "limits": "Existing candidate reservation/checkAbUsage reused; no additional budget or refund. Parent owns assembled broker HTTP/static qualification."
+}

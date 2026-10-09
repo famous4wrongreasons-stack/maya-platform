@@ -1,0 +1,156 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "809a27bf-d898-400b-9835-6dbef338e239",
+  "candidateCommit": "e7703c77db47349e77291db616803a8ba6583262",
+  "profile": "core-union-20261009/1",
+  "limitsSha256": "87bfa6d7b9084dfdab06ff31c4e1ff3200df53e693dcfa2e4529519a9a5895a4",
+  "manifestSha256": "989eef5ff1f95f1d7c48f02037f0ad73a41cf225640e61de3e3034795daf19dc",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T08:30:30.742Z",
+  "expiresAt": "2026-10-09T09:00:30.742Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "8aca094555100ee87dcad373c3dae98b141abf5064b3c6966ecba18bfdced455",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92782,
+      "bodySha256": "6ad0ebe065684ec423cf2fd378576e7cf847e365935f10cc77dce952d223a691",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 94122,
+      "bodySha256": "66d1d1a1ddfd3194c4cb400c2090beb9ed811514ac104c643427076042b25581",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80441,
+      "bodySha256": "de1322627c122b69f8fa82a3ced8da23e815c28b078ea86d9be3b486aaea12c5",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "bytes": 68795,
+      "bodySha256": "035bfc579b07fe32371ef5e921bd11b7e4809215100dedd5ebda0c0d9883fbb9",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "bytes": 69621,
+      "bodySha256": "ce7297217f918ea5f6a443abbcfb1e59d243b64e94c3a229f1b794969c09e0c8",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "bytes": 69733,
+      "bodySha256": "cc702c3f0434218902383860c3ee17454139118aa3ba458c2982203831ba29bb",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "4a3a295ccd0d5216bf05e3349807bb43dd154af137b5dc434210c379c2fb6552",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "bytes": 69570,
+      "bodySha256": "aecf1cdda2000115b430dd21d34ebd9e9634397e78da649eb4cb2e6f36a44263",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "bytes": 80499,
+      "bodySha256": "c6479be024df6068f5c3becd1e6871b7279a1c33085c7d574bc5d37f52070e58",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "bytes": 93029,
+      "bodySha256": "16d4c7bf7f76cae30363f9745bdbfcecbcf8ac570c659316f3ab67b72896d606",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "bytes": 94069,
+      "bodySha256": "3a616b8f98652451ea8d5ddf37d40b4085ed9ab0d0f43f85758ee33e5810f337",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "bytes": 94190,
+      "bodySha256": "5a934a5bf87aea364c16f068a8ef5e846b6211ec101eecdd3f505cff877a7f6e",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "bytes": 93104,
+      "bodySha256": "194380aa180ee1f73f1e2ee3b8e5a4339d627a681e8f6c6f43403a51a229ad0d",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "bytes": 80451,
+      "bodySha256": "038448ac37c2be6a4e991a1938f6f1ab9d39bca3f81a2f2221f0ecacbde67e4c",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "bytes": 81227,
+      "bodySha256": "0b9c506d988237c676940a1f8ad4a0e00e32d826f4bf5326dde0d9650e985013",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "bytes": 81659,
+      "bodySha256": "4ee2d7c7fa67ceea1d8a093c0443740501cc50d75c75bf318acc867bbb0b884d",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "CANNED_WIRING_ONLY_NOT_MODEL_QUALITY",
+  "recordedReplay": false,
+  "usageValidation": "OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE",
+  "replayFixture": null,
+  "port": 56782,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T08:32:10.486Z",
+  "stats": {
+    "dialogs": 9,
+    "turns": 17,
+    "attempts": 17,
+    "inputTokens": 1450298,
+    "outputTokens": 20400,
+    "reservedNanoUsd": 1995177360,
+    "halted": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "qualification": "ARCHIVED_PILOT_ARITHMETIC_NOT_CURRENT_PRICING_NOT_INVOICE_NOT_AUTHORIZATION",
+  "sources": {
+    "local-actual-model-20261008/terminal-outcome.json": "1b4ecc31a2c0d921e81e722dfda1e64099a30353000ad952054bd9018c59cda3",
+    "local-ab-actual-20261009/summary.json": "7ef6d76b784e21321f6b7ab5c327d946774a65fbee0cc80550ccb1ca980b9efb"
+  },
+  "observedProviderResponses": 9,
+  "pooledTokens": {
+    "input": 151827,
+    "output": 2801
+  },
+  "estimates": [
+    {
+      "providerResponses": 18,
+      "inputTokens": 303654.0,
+      "outputTokens": 5602.0,
+      "historicalPeakObservedCacheUsd": 0.37302883200000003,
+      "historicalPeakNoCacheUsd": 0.4230072
+    },
+    {
+      "providerResponses": 22,
+      "inputTokens": 371132.6666666667,
+      "outputTokens": 6846.88888888889,
+      "historicalPeakObservedCacheUsd": 0.4559241280000001,
+      "historicalPeakNoCacheUsd": 0.5170088
+    },
+    {
+      "providerResponses": 36,
+      "inputTokens": 607308.0,
+      "outputTokens": 11204.0,
+      "historicalPeakObservedCacheUsd": 0.7460576640000001,
+      "historicalPeakNoCacheUsd": 0.8460144
+    }
+  ],
+  "worst36ReservationsUsd": 5.15801088,
+  "proposedSpendCapUsd": 6,
+  "bRealModelPilotObserved": false
+}

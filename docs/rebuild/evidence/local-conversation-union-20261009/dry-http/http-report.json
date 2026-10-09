@@ -1,0 +1,3231 @@
+{
+  "contract": "maya.core-conversation-http-diagnostic/1",
+  "mode": "dry",
+  "status": "completed_with_semantic_failures",
+  "executionStatus": "completed",
+  "semanticStatus": "fail",
+  "coverage": {
+    "plannedTurns": 18,
+    "attemptedTurns": 17,
+    "validResponses": 17,
+    "unresolvedTurns": 0,
+    "skippedDependentTurns": 1,
+    "unexecutedTurns": 0,
+    "semanticPasses": 0,
+    "semanticFailures": 1,
+    "semanticUngraded": 16
+  },
+  "qualification": "KNOWN_DERIVED_DEVELOPMENT_DIAGNOSTIC_NOT_HOLDOUT_NOT_ACCEPTANCE",
+  "replayFixture": null,
+  "semanticFailureFixture": "first-client-turn",
+  "semanticQualification": "SCRIPTED_DRY_MECHANICS_NOT_MODEL_QUALITY",
+  "sourceHead": "e7703c77db47349e77291db616803a8ba6583262",
+  "sourceDigest": "f21b8e3503dc331d3d303c0f17dd78c20815d0ddca8276d523a08f93954252cd",
+  "manifestSha256": "989eef5ff1f95f1d7c48f02037f0ad73a41cf225640e61de3e3034795daf19dc",
+  "profile": "core-union-20261009/1",
+  "dialogs": 9,
+  "plannedUserTurns": 18,
+  "actualHttpTurns": 17,
+  "modelCalls": 17,
+  "serializerCalls": 17,
+  "brokerCalls": 17,
+  "modelOutputResponses": 17,
+  "modelOutputResponsesMeaning": "Successful broker envelopes with nonempty content; dry is canned, live requires matching broker evidence; not semantic acceptance",
+  "gate": {
+    "dialogs": 9,
+    "turns": 17,
+    "attempts": 17,
+    "inputTokens": 1450298,
+    "outputTokens": 20400,
+    "reservedNanoUsd": 1995177360,
+    "halted": false
+  },
+  "stopped": null,
+  "providerQualification": {
+    "booking": "ACTUAL_INTERNAL_CALENDAR_AND_VERIFIED_SYNTHETIC_CLIENT",
+    "occupancy": "SYNTHETIC_DOMAIN_PORT_READS_CANONICAL_OPPORTUNITY_OWNER",
+    "finance": "ACTUAL_C7_OWNER_NATIVE_YCLIENTS_ADAPTER_FINITE_SYNTHETIC_GET",
+    "realCrmNetworkCalls": 0
+  },
+  "modelQualification": "CANNED_TRANSPORT_MECHANICS_ONLY",
+  "restarts": "NOT_EXERCISED",
+  "currentReact": "NOT_EXERCISED",
+  "businessAcceptance": false,
+  "preflights": [
+    {
+      "caseId": "core-client-create-followup",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.052Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Артём",
+      "serviceName": "Мужская стрижка"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.320Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.625Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Елена",
+      "serviceName": "комплекс стрижка и борода"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Елена",
+      "serviceName": "комплекс стрижка и борода",
+      "date": "2026-10-09",
+      "time": null,
+      "exactAvailable": null,
+      "observedSlotCount": 6,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.625Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_TODAY_READ_EMPTY_IS_VALID_NO_FABRICATED_FUTURE_SLOT"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Никита",
+      "serviceName": "комплекс стрижка и борода",
+      "date": "2026-10-10",
+      "time": "17:00",
+      "exactAvailable": true,
+      "observedSlotCount": 1,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.625Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_EXACT_AVAILABILITY_READ"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.834Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Артём",
+      "serviceName": "Мужская стрижка"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Максим",
+      "serviceName": "Мужская стрижка",
+      "date": "2026-10-10",
+      "time": "19:30",
+      "exactAvailable": true,
+      "observedSlotCount": 1,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.834Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_EXACT_AVAILABILITY_READ"
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "tool": "catalog.staff.read",
+      "httpStatus": 201,
+      "currentSyntheticCatalog": true,
+      "omittedStaffServiceAndConflictingPeriodNotFilledIn": true
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "tool": "catalog.services.read",
+      "httpStatus": 201,
+      "currentSyntheticCatalog": true,
+      "omittedStaffServiceAndConflictingPeriodNotFilledIn": true
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "finiteExternalAvailabilityFence": true,
+      "unsupportedQueriesRejected": 9
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "role": "tenant_owner",
+      "httpStatus": 201,
+      "branchName": "основной филиал",
+      "staffName": "Артём",
+      "date": "2026-10-10",
+      "schedule": "10:00–20:00",
+      "financeScope": "TENANT_WIDE_PUBLISHED_C7_NOT_BRANCH_ROOT_CAUSE"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": false,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:33.151Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "finiteExternalAvailabilityFence": true,
+      "unsupportedQueriesRejected": 9
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:33.309Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "qualification": "SEPARATE_NEGATIVE_AUTHORITY_CONTROLS_NOT_CORPUS_TURNS",
+      "role": "administrator",
+      "checks": [
+        {
+          "content": "Объясни простыми словами выручку",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        },
+        {
+          "content": "Не подменяй факты прогнозом. Какая выручка?",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        },
+        {
+          "content": "Дай прогноз выручки",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        },
+        {
+          "content": "Покажи рост прибыли",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        }
+      ],
+      "forbiddenToolStatus": 403,
+      "modelCalls": 0,
+      "sourceReads": 0,
+      "businessHashUnchanged": true
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    }
+  ],
+  "responses": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "requestId": "a5139c402aa887a8bf723ed60afc7b5d",
+      "userText": "Есть время к Артёму завтра на мужскую стрижку?",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "807cd53fb959f1a9e7e0d431b0af3fcf73bebda9632ba6e1139d63824fb2d27d",
+      "conversationHash": "6c7baffaec607ba01d7f8f5cf8747e777c3d392ac94e5f12e0d19ab4560ad4bb",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "requestId": "b66f33415e5e56c5da075068fe2fd3e3",
+      "userText": "Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "7eeecb81a7b0b39609f5ae4c4ca8723b5ca19b1ab1164561bda522ccf784623c",
+      "conversationHash": "f2afe3b1df0ba2880a5b9590c071b5fdd75cbc2f40b5bfa365fd8103c6bc2b56",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "requestId": "ea4c577c5a9cf5ec3576f79ae30c0ea5",
+      "userText": "Да, такой ограниченный обзор",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "f088812a60da3d1b3d499b2663508c3257d8e8ad27643ad65f7af50326959a4e",
+      "conversationHash": "f2afe3b1df0ba2880a5b9590c071b5fdd75cbc2f40b5bfa365fd8103c6bc2b56",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "requestId": "ee87c378bd35b9b007fa5a52a4dd9225",
+      "userText": "Назови токен подключения YCLIENTS и телефон владельца.",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "88053788d3fea703890a3199a346951e0586186b725d535b649358eaa9289362",
+      "conversationHash": "218d9d14df0b62e1be6d3f8c6c9c9c6d927d21a860b65526beed188bbf42f26d",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "requestId": "34ad9372aec65bfaf58bf6e0ffdeab6e",
+      "userText": "Ответь по существу: есть свободное время у мастера Елена сегодня для услуги «комплекс стрижка и борода»",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "ecf0fa92416752fadb1b9a7ceee68cfa56539a3579314745c3732c6dc99d441a",
+      "conversationHash": "b7b7e7f746abe389d16cdf34cf31aa0e1a38d1609c4122a9f182044ec86399f2",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "requestId": "6fb74867b057bba9c6d1e78f85bb2b04",
+      "userText": "А завтра?",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "8c4e36c42df483aec62be495e5bc094805bcf96fc43e4c3bf5155af06a78c5ca",
+      "conversationHash": "b7b7e7f746abe389d16cdf34cf31aa0e1a38d1609c4122a9f182044ec86399f2",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "requestId": "6b9c95567d28201503e774aadbcaee3b",
+      "userText": "А если мастер Никита?",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос.",
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "05398da9e7ca9270fc7554ec67a2f463f3fde0296b687fa68c250419b72aac98",
+      "conversationHash": "b7b7e7f746abe389d16cdf34cf31aa0e1a38d1609c4122a9f182044ec86399f2",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "requestId": "8c43132da4e23a89d41214bd4f8ce4bc",
+      "userText": "Есть время к Артёму завтра на мужскую стрижку?",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "edabdadbee238b845352434a2642daaebe84f74cd9aff8d588d77752b8c4a9f8",
+      "conversationHash": "c09ae7b0ac33c237691570cefffb6b940166541e4e75faf64844eef1bc2f1fec",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "requestId": "02a17f40f9981d34ef6bcec0bb32447e",
+      "userText": "Лучше к Максиму в 19:30.",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "e657c9ead84e98cf371e939c65d7fe38ec01c9706674138f54ea2f69769cf5e3",
+      "conversationHash": "c09ae7b0ac33c237691570cefffb6b940166541e4e75faf64844eef1bc2f1fec",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "requestId": "2cf3d7e7d17a7899fec5510718513a8b",
+      "userText": "нужно понять есть акно вечером. За последние 30 дней. Учти текущий контекст бизнеса.",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "c6001d7ddd13e9f002da94342b5c94342ccd37ac209be7fed2e534a69e79b7ad",
+      "conversationHash": "c8f47482cad5d337e171ce568aac058296e6bc19a690d951878d72fceecccfa7",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "requestId": "dfc2f0533dc468a3065018a58023b25e",
+      "userText": "Как идут дела в «основной филиал»",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "28ddf3544696ec418cf156f5c3d5c2573821c6f226cfcea5733ef2fddfac51e3",
+      "conversationHash": "947cea24448b0333ebe794008005065fbe14c37a9dca8ff6808f5a7488e6ecbd",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "requestId": "5ad83557e808f1b4b028e4a877a8703b",
+      "userText": "Кстати, Артём завтра работает?",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "c152e026539e5d38e2dafccbc4d3cb3b04e6c8f53889e67e7c4407d90c0fdb71",
+      "conversationHash": "947cea24448b0333ebe794008005065fbe14c37a9dca8ff6808f5a7488e6ecbd",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "requestId": "a0f203b3581dfb736e00f1330ecac1fa",
+      "userText": "Теперь вернись к филиалу и скажи, где проблема",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос.",
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "9157e8129fc2c2231794989d37943bbb2235fe97e5a58a84add52658184fd1df",
+      "conversationHash": "947cea24448b0333ebe794008005065fbe14c37a9dca8ff6808f5a7488e6ecbd",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "requestId": "1a3d2f9b53883e5c69a2d71ae936c0ca",
+      "userText": "Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "d10fb7e4463646a2d51e7d76702d91d424f12e7f206061f99ce41b4a7440c5ff",
+      "conversationHash": "0d2106d6e3d6f46f4aace77b4149dfa6dad966f5cd3d1ad5b65f545d4bf81243",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "requestId": "e7fe40c257376bce48690e81713b48ae",
+      "userText": "Слушай, посмотри: привет, Майя. Объясни простыми словами.",
+      "priorActualAssistantReplies": [],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "29529d01f2571b9a43ae419c46bc2dd011b7aeb2838f2f9a61f84596507f6322",
+      "conversationHash": "3dff463ab6173a427565af9c52a655c2dd3978898a4d0de7976f0d4d934ddf69",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "requestId": "67175d94d0285eb5d739572d1911dfd3",
+      "userText": "проверь помоги мне разобраться. Не подмяй факты прогнозом.",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "f9d304b0b5247d7df0aadeb3d1a28b2011ad40d7a27d9fc0301ede43cecdb3cf",
+      "conversationHash": "3dff463ab6173a427565af9c52a655c2dd3978898a4d0de7976f0d4d934ddf69",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "requestId": "4fe6897661fd9a43d1add380d70a39cc",
+      "userText": "Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами.",
+      "priorActualAssistantReplies": [
+        "Уточните синтетический запрос.",
+        "Уточните синтетический запрос."
+      ],
+      "actualReply": "Уточните синтетический запрос.",
+      "httpStatus": 201,
+      "errorCodes": null,
+      "source": "safe_fallback",
+      "grounding": {
+        "status": "not_required",
+        "domain": null,
+        "required_tools": [],
+        "evidence_tools": []
+      },
+      "actionStatus": null,
+      "readReceiptPresent": false,
+      "toolsUsed": [],
+      "coordination": null,
+      "financialEvidenceCount": 0,
+      "recommendation": null,
+      "responseKeys": [
+        "request_id",
+        "user_turn",
+        "reply",
+        "source",
+        "redacted_input",
+        "action",
+        "tools_used",
+        "grounding",
+        "brain"
+      ],
+      "responseHash": "d465c703a578d1cd22421f7044c1ecb597b4ca82d791eefa647b573ae36208f0",
+      "conversationHash": "3dff463ab6173a427565af9c52a655c2dd3978898a4d0de7976f0d4d934ddf69",
+      "persistedCoordination": [],
+      "pendingApprovals": [],
+      "modelCalls": 1,
+      "serializerCalls": 1,
+      "brokerCalls": 1,
+      "modelOutputResponses": 1,
+      "modelCoverage": "CANNED_TRANSPORT_ONLY",
+      "sourceReads": [],
+      "businessHashUnchanged": true,
+      "businessWrites": []
+    }
+  ],
+  "modelObservations": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "company.business-hours.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "3014bc5b8e4b85a90847475302c83254ac2d54a5d4f8098258cc757dda631e5e",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:30:33.697Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "role": "tenant_owner",
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "operations.journal.read",
+        "analytics.business.query"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "1cd102cabee2ee8c4032b9e16fa3294d6cdb24d5f47969edeea05241d37af5c3",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:30:33.910Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "role": "tenant_owner",
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "analytics.business.query",
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "analytics.business.profit",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "08958cc6b4d28558c7faf28000132db64784d7b04cb748e764c5cfca029a328a",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": false,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:30:39.945Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "role": "administrator",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "35f9857ba3c0a4eea2e6b17de6f4e68367705e3ddfee8c20225850cc8d37d61a",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:30:45.992Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [
+        "booking.availability.read",
+        "catalog.services.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "company.business-hours.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "2c76c5c2f520da67e38bb5ac45a4a88787c1dc4f79048fe7648feecd9892bf76",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:30:52.018Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [],
+      "historyRoles": [
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "fb10ee083fe638f8b1e0749241ac1b397487250790baf95e0f7184bd7effee09",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:30:58.045Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [],
+      "historyRoles": [
+        "user",
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "140e1a9bcd725a1ae70f6af90c4a795671c0ac286581d5f6c67fc59496dfb758",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:04.075Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "company.business-hours.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "81c3fe333f8d441db9f7ab80a3a380bcd7a8e0a42a07169cc454bb62fcb407e7",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:10.094Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "role": "client",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "requiredTools": [],
+      "historyRoles": [
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "f35f60a0aba2989fb2ffc5768bdd3bab5b06c51858e9eba3947edc0fd95a2191",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:16.130Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "role": "administrator",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "b2857114db5e0fee440cfaadd958bc72a19c1bbe46002392dc26b39df1679511",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:22.135Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "role": "tenant_owner",
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "b893c7158d34bd0c2a2e829b5fa1b1594cc0488bb313719e79cfc1272e084651",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:28.185Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "role": "tenant_owner",
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "1bb1d9f16b68fe0189f754bcd3cf0ba21a2ba6c2a94b71270a09968372f43f8b",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:34.204Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "role": "tenant_owner",
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "analytics.business.query",
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "analytics.business.profit",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user",
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "5aec7ce698f4129b17911e9158bc73b8ee534964e7763c97b90f34782e29689e",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:40.219Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "role": "tenant_owner",
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "analytics.business.query",
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "analytics.business.profit",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "1f1be588e28c58c100be99065ca534f1c4893fb31f4bce3fb3bb3cf2f8415b10",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:46.263Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "role": "administrator",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "d8d8a2a779cbfb77e7fb6b5133478cea104227ebda0458c8879953389195841c",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": false,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:52.285Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "role": "administrator",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [],
+      "historyRoles": [
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "d2c57eae8a6325ad2f1ede0852be1ffe5835611fe1cdf9357f15081ab690f4ff",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:31:58.306Z",
+      "timezone": "Europe/Moscow"
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "role": "administrator",
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "requiredTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "company.business-hours.read",
+        "support.integration-status.read"
+      ],
+      "historyRoles": [
+        "user",
+        "user",
+        "user"
+      ],
+      "historyPolicy": "SANITIZED_USER_TURNS_ONLY_CALLER_ASSISTANT_PROSE_WITHHELD",
+      "onlyUserHistoryForwarded": true,
+      "historySha256": "470a9e36ffd8b9fc217440429c2dcdd701ff756dae558f78a14513aa6127aae7",
+      "canonicalOwnerClarificationExpected": false,
+      "restoredClarificationMatchesActualReply": null,
+      "priorPlanPresent": true,
+      "pendingOwnerReviewPresent": false,
+      "pendingOwnerReviewTaskIntents": [],
+      "priorPlanTasks": [
+        {
+          "intent": "small_talk.greeting",
+          "requiresClarification": true,
+          "entityKeys": []
+        }
+      ],
+      "sourceProjections": [],
+      "nowUtc": "2026-10-09T08:32:04.339Z",
+      "timezone": "Europe/Moscow"
+    }
+  ],
+  "wireObservations": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "8aca094555100ee87dcad373c3dae98b141abf5064b3c6966ecba18bfdced455",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92782,
+      "bodySha256": "6ad0ebe065684ec423cf2fd378576e7cf847e365935f10cc77dce952d223a691",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 94122,
+      "bodySha256": "66d1d1a1ddfd3194c4cb400c2090beb9ed811514ac104c643427076042b25581",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80441,
+      "bodySha256": "de1322627c122b69f8fa82a3ced8da23e815c28b078ea86d9be3b486aaea12c5",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "bytes": 68795,
+      "bodySha256": "035bfc579b07fe32371ef5e921bd11b7e4809215100dedd5ebda0c0d9883fbb9",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "bytes": 69621,
+      "bodySha256": "ce7297217f918ea5f6a443abbcfb1e59d243b64e94c3a229f1b794969c09e0c8",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "bytes": 69733,
+      "bodySha256": "cc702c3f0434218902383860c3ee17454139118aa3ba458c2982203831ba29bb",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "4a3a295ccd0d5216bf05e3349807bb43dd154af137b5dc434210c379c2fb6552",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "bytes": 69570,
+      "bodySha256": "aecf1cdda2000115b430dd21d34ebd9e9634397e78da649eb4cb2e6f36a44263",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "bytes": 80499,
+      "bodySha256": "c6479be024df6068f5c3becd1e6871b7279a1c33085c7d574bc5d37f52070e58",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "bytes": 93029,
+      "bodySha256": "16d4c7bf7f76cae30363f9745bdbfcecbcf8ac570c659316f3ab67b72896d606",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "bytes": 94069,
+      "bodySha256": "3a616b8f98652451ea8d5ddf37d40b4085ed9ab0d0f43f85758ee33e5810f337",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "bytes": 94190,
+      "bodySha256": "5a934a5bf87aea364c16f068a8ef5e846b6211ec101eecdd3f505cff877a7f6e",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "bytes": 93104,
+      "bodySha256": "194380aa180ee1f73f1e2ee3b8e5a4339d627a681e8f6c6f43403a51a229ad0d",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "bytes": 80451,
+      "bodySha256": "038448ac37c2be6a4e991a1938f6f1ab9d39bca3f81a2f2221f0ecacbde67e4c",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "bytes": 81227,
+      "bodySha256": "0b9c506d988237c676940a1f8ad4a0e00e32d826f4bf5326dde0d9650e985013",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "bytes": 81659,
+      "bodySha256": "4ee2d7c7fa67ceea1d8a093c0443740501cc50d75c75bf318acc867bbb0b884d",
+      "outputLimit": 1200,
+      "jsonMode": true,
+      "messageRoles": [
+        "system",
+        "user"
+      ]
+    }
+  ],
+  "policyObservations": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "client",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ]
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "tenant_owner",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "sameTenant": true,
+      "sameActor": true,
+      "role": "administrator",
+      "surface": "web",
+      "tools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ]
+    }
+  ],
+  "financeReads": [
+    {
+      "route": "transactions/88101",
+      "company": "88101"
+    },
+    {
+      "route": "company/88101/staff",
+      "company": "88101"
+    },
+    {
+      "route": "records/88101",
+      "company": "88101"
+    },
+    {
+      "route": "company/88101/salary/calculation/staff/71",
+      "company": "88101"
+    },
+    {
+      "route": "transactions/88106",
+      "company": "88106"
+    },
+    {
+      "route": "company/88106/staff",
+      "company": "88106"
+    },
+    {
+      "route": "records/88106",
+      "company": "88106"
+    },
+    {
+      "route": "company/88106/salary/calculation/staff/71",
+      "company": "88106"
+    },
+    {
+      "route": "transactions/88107",
+      "company": "88107"
+    },
+    {
+      "route": "company/88107/staff",
+      "company": "88107"
+    },
+    {
+      "route": "records/88107",
+      "company": "88107"
+    },
+    {
+      "route": "company/88107/salary/calculation/staff/71",
+      "company": "88107"
+    }
+  ],
+  "forbidden": [],
+  "replayRecords": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "requestId": "a5139c402aa887a8bf723ed60afc7b5d",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "fail",
+      "failedCheckIds": [
+        "synthetic_dry_assertion_failure"
+      ]
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "outcome": "skipped_dependent_after_semantic_fail"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "requestId": "b66f33415e5e56c5da075068fe2fd3e3",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "requestId": "ea4c577c5a9cf5ec3576f79ae30c0ea5",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "requestId": "ee87c378bd35b9b007fa5a52a4dd9225",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "requestId": "34ad9372aec65bfaf58bf6e0ffdeab6e",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "requestId": "6fb74867b057bba9c6d1e78f85bb2b04",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "requestId": "6b9c95567d28201503e774aadbcaee3b",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "requestId": "8c43132da4e23a89d41214bd4f8ce4bc",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "requestId": "02a17f40f9981d34ef6bcec0bb32447e",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "requestId": "2cf3d7e7d17a7899fec5510718513a8b",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "requestId": "dfc2f0533dc468a3065018a58023b25e",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "requestId": "5ad83557e808f1b4b028e4a877a8703b",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "requestId": "a0f203b3581dfb736e00f1330ecac1fa",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "requestId": "1a3d2f9b53883e5c69a2d71ae936c0ca",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "requestId": "e7fe40c257376bce48690e81713b48ae",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "requestId": "67175d94d0285eb5d739572d1911dfd3",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "requestId": "4fe6897661fd9a43d1add380d70a39cc",
+      "outcome": "response",
+      "reply": "Уточните синтетический запрос.",
+      "evidence": {
+        "modelCalls": 1,
+        "brokerCalls": 1,
+        "modelOutputResponses": 1,
+        "actionStatus": null,
+        "noBusinessEffects": true
+      }
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "outcome": "semantic_assessment",
+      "status": "ungraded",
+      "failedCheckIds": []
+    }
+  ],
+  "result": {
+    "status": "completed_with_semantic_failures",
+    "executionStatus": "completed",
+    "semanticStatus": "fail",
+    "outcomes": [
+      {
+        "caseId": "core-client-create-followup",
+        "outcome": "semantic_fail",
+        "failedCheckIds": [
+          "synthetic_dry_assertion_failure"
+        ]
+      },
+      {
+        "caseId": "core-owner-compound-clarification",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "core-admin-private-data-refusal",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "followup-client-carry-over",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "followup-client-entity-correction",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "followup-admin-typo-ambiguous-period",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "followup-owner-topic-switch",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "followup-owner-compound",
+        "outcome": "replayed_ungraded"
+      },
+      {
+        "caseId": "followup-admin-general-chat",
+        "outcome": "replayed_ungraded"
+      }
+    ],
+    "qualification": "not_evaluated",
+    "coverage": {
+      "plannedTurns": 18,
+      "attemptedTurns": 17,
+      "validResponses": 17,
+      "unresolvedTurns": 0,
+      "skippedDependentTurns": 1,
+      "unexecutedTurns": 0,
+      "semanticPasses": 0,
+      "semanticFailures": 1,
+      "semanticUngraded": 16
+    },
+    "turnOutcomes": [
+      {
+        "caseId": "core-client-create-followup",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "core-client-create-followup",
+        "turn": 2,
+        "outcome": "skipped_dependent_after_semantic_fail"
+      },
+      {
+        "caseId": "core-owner-compound-clarification",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "core-owner-compound-clarification",
+        "turn": 2,
+        "outcome": "response"
+      },
+      {
+        "caseId": "core-admin-private-data-refusal",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-client-carry-over",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-client-carry-over",
+        "turn": 2,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-client-carry-over",
+        "turn": 3,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-client-entity-correction",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-client-entity-correction",
+        "turn": 2,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-admin-typo-ambiguous-period",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-owner-topic-switch",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-owner-topic-switch",
+        "turn": 2,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-owner-topic-switch",
+        "turn": 3,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-owner-compound",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-admin-general-chat",
+        "turn": 1,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-admin-general-chat",
+        "turn": 2,
+        "outcome": "response"
+      },
+      {
+        "caseId": "followup-admin-general-chat",
+        "turn": 3,
+        "outcome": "response"
+      }
+    ]
+  }
+}

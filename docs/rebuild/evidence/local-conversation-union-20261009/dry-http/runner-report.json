@@ -1,0 +1,128 @@
+{
+  "contract": "maya.core-conversation-runner/1",
+  "status": "completed-with-semantic-failures",
+  "mode": "DRY_HTTP",
+  "runId": "809a27bf-d898-400b-9835-6dbef338e239",
+  "candidateCommit": "e7703c77db47349e77291db616803a8ba6583262",
+  "manifestSha256": "989eef5ff1f95f1d7c48f02037f0ad73a41cf225640e61de3e3034795daf19dc",
+  "profile": "core-union-20261009/1",
+  "semanticFailureFixture": "first-client-turn",
+  "limitsSha256": "87bfa6d7b9084dfdab06ff31c4e1ff3200df53e693dcfa2e4529519a9a5895a4",
+  "cluster": "/private/tmp/maya-core-conversation-iZGKGG/pg",
+  "database": "maya_widget_gate_proof_c9occ_f2062a02f725",
+  "port": 56771,
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "conversation"
+  ],
+  "groups": {
+    "initdb": {
+      "detached": true,
+      "pid": 9146,
+      "pgid": 9146,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-start": {
+      "detached": true,
+      "pid": 9166,
+      "pgid": 9166,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "createdb": {
+      "detached": true,
+      "pid": 9185,
+      "pgid": 9185,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "migrations": {
+      "detached": true,
+      "pid": 9199,
+      "pgid": 9199,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "conversation": {
+      "detached": true,
+      "pid": 9229,
+      "pgid": 9229,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-stop": {
+      "detached": true,
+      "pid": 10192,
+      "pgid": 10192,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "resources": {
+    "nodeHeapMb": 3072,
+    "brokerHeapMb": 256,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "timeouts": {
+    "conversationMaxMs": 1800000,
+    "jestTestMaxMs": 1860000
+  },
+  "qualification": "DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY",
+  "recordedReplay": false,
+  "replayFixture": null,
+  "brokerPid": 9208,
+  "dialogueExecutionStatus": "completed",
+  "semanticStatus": "fail",
+  "coverage": {
+    "plannedTurns": 18,
+    "attemptedTurns": 17,
+    "validResponses": 17,
+    "unresolvedTurns": 0,
+    "skippedDependentTurns": 1,
+    "unexecutedTurns": 0,
+    "semanticPasses": 0,
+    "semanticFailures": 1,
+    "semanticUngraded": 16
+  },
+  "brokerClosed": true,
+  "clusterStopped": true,
+  "postmasterPidAbsent": true,
+  "sourcesUnchanged": true
+}

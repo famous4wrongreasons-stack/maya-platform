@@ -1,0 +1,32 @@
+{
+  "rawDirectoryCopies": {
+    "failed-loader": "/private/tmp/maya-union-dry-20261009",
+    "dry-http": "/private/tmp/maya-union-dry-20261009-r2"
+  },
+  "launcherCaptures": {
+    "failed-loader/launch.log": "/tmp/maya-conversation-batch-20261009/dry-launch.log",
+    "dry-http/launch.log": "/tmp/maya-conversation-batch-20261009/dry-r2-launch.log"
+  },
+  "checks": {
+    "final-targeted-tests.log": "/tmp/maya-conversation-batch-20261009/final-targeted-tests.log",
+    "final-metadata-tests.log": "/tmp/maya-conversation-batch-20261009/final-metadata-tests.log",
+    "usage-tests.log": "/tmp/maya-conversation-batch-20261009/broker-usage/unit.log",
+    "usage-freeze.json": "/tmp/maya-conversation-batch-20261009/broker-usage/freeze.json",
+    "agent-source-freeze.json": "/private/tmp/maya-union-agent-files-20261009.json",
+    "final-predicate-tests.log": "/private/tmp/maya-union-final-predicate-tests-20261009.log",
+    "widgets-live-types.log": "/private/tmp/maya-union-final-types-20261009.log",
+    "scoped-lint.log": "/private/tmp/maya-union-final-lint-20261009.log",
+    "transform-check.log": "/tmp/maya-conversation-batch-20261009/transform-check.log",
+    "cost-arithmetic.json": "/tmp/maya-conversation-batch-20261009/cost-arithmetic.json",
+    "independent-review.md": "/tmp/maya-conversation-batch-20261009/independent-review.md",
+    "independent-dry-evidence.json": "/tmp/maya-conversation-batch-20261009/independent-dry-evidence.json"
+  },
+  "generatedLocalChecks": [
+    "cleanup.json",
+    "source-bindings.json",
+    "summary.json",
+    "provenance.json",
+    "manifest.json"
+  ],
+  "noModelCredentialOrKeychainAccess": true
+}

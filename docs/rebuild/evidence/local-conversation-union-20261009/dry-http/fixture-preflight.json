@@ -1,0 +1,311 @@
+{
+  "preflights": [
+    {
+      "caseId": "core-client-create-followup",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.052Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Артём",
+      "serviceName": "Мужская стрижка"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.320Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.625Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Елена",
+      "serviceName": "комплекс стрижка и борода"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Елена",
+      "serviceName": "комплекс стрижка и борода",
+      "date": "2026-10-09",
+      "time": null,
+      "exactAvailable": null,
+      "observedSlotCount": 6,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.625Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_TODAY_READ_EMPTY_IS_VALID_NO_FABRICATED_FUTURE_SLOT"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Никита",
+      "serviceName": "комплекс стрижка и борода",
+      "date": "2026-10-10",
+      "time": "17:00",
+      "exactAvailable": true,
+      "observedSlotCount": 1,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.625Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_EXACT_AVAILABILITY_READ"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.834Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Артём",
+      "serviceName": "Мужская стрижка"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Максим",
+      "serviceName": "Мужская стрижка",
+      "date": "2026-10-10",
+      "time": "19:30",
+      "exactAvailable": true,
+      "observedSlotCount": 1,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:32.834Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_EXACT_AVAILABILITY_READ"
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "tool": "catalog.staff.read",
+      "httpStatus": 201,
+      "currentSyntheticCatalog": true,
+      "omittedStaffServiceAndConflictingPeriodNotFilledIn": true
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "tool": "catalog.services.read",
+      "httpStatus": 201,
+      "currentSyntheticCatalog": true,
+      "omittedStaffServiceAndConflictingPeriodNotFilledIn": true
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "finiteExternalAvailabilityFence": true,
+      "unsupportedQueriesRejected": 9
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "role": "tenant_owner",
+      "httpStatus": 201,
+      "branchName": "основной филиал",
+      "staffName": "Артём",
+      "date": "2026-10-10",
+      "schedule": "10:00–20:00",
+      "financeScope": "TENANT_WIDE_PUBLISHED_C7_NOT_BRANCH_ROOT_CAUSE"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": false,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:33.151Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "finiteExternalAvailabilityFence": true,
+      "unsupportedQueriesRejected": 9
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T08:30:33.309Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "qualification": "SEPARATE_NEGATIVE_AUTHORITY_CONTROLS_NOT_CORPUS_TURNS",
+      "role": "administrator",
+      "checks": [
+        {
+          "content": "Объясни простыми словами выручку",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        },
+        {
+          "content": "Не подменяй факты прогнозом. Какая выручка?",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        },
+        {
+          "content": "Дай прогноз выручки",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        },
+        {
+          "content": "Покажи рост прибыли",
+          "httpStatus": 201,
+          "grounding": "blocked"
+        }
+      ],
+      "forbiddenToolStatus": 403,
+      "modelCalls": 0,
+      "sourceReads": 0,
+      "businessHashUnchanged": true
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    }
+  ],
+  "unauthenticatedStatus": 401,
+  "modelCalls": 0,
+  "brokerCalls": 0,
+  "sourceQualification": "FINITE_SYNTHETIC_FACTS_WITH_CANONICAL_OWNERS",
+  "financeReads": [
+    {
+      "route": "transactions/88101",
+      "company": "88101"
+    },
+    {
+      "route": "company/88101/staff",
+      "company": "88101"
+    },
+    {
+      "route": "records/88101",
+      "company": "88101"
+    },
+    {
+      "route": "company/88101/salary/calculation/staff/71",
+      "company": "88101"
+    },
+    {
+      "route": "transactions/88106",
+      "company": "88106"
+    },
+    {
+      "route": "company/88106/staff",
+      "company": "88106"
+    },
+    {
+      "route": "records/88106",
+      "company": "88106"
+    },
+    {
+      "route": "company/88106/salary/calculation/staff/71",
+      "company": "88106"
+    },
+    {
+      "route": "transactions/88107",
+      "company": "88107"
+    },
+    {
+      "route": "company/88107/staff",
+      "company": "88107"
+    },
+    {
+      "route": "records/88107",
+      "company": "88107"
+    },
+    {
+      "route": "company/88107/salary/calculation/staff/71",
+      "company": "88107"
+    }
+  ]
+}

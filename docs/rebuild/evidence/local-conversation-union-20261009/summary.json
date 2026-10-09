@@ -1,0 +1,84 @@
+{
+  "qualification": "SCRIPTED_DRY_HTTP_MECHANICS_NOT_MODEL_QUALITY_NOT_MAYA_ACCEPTANCE",
+  "runtimeCommit": "6453923b5b3ba4c6b6593518673f8fdac8cc7dd5",
+  "proofCommit": "e7703c77db47349e77291db616803a8ba6583262",
+  "unitTests": {
+    "distinct": 117,
+    "passed": 117,
+    "metadataRerun": 31,
+    "metadataRerunIsAdditionalCoverage": false
+  },
+  "runnerExitCode": 2,
+  "runnerStatus": "completed-with-semantic-failures",
+  "coverage": {
+    "plannedTurns": 18,
+    "attemptedTurns": 17,
+    "validResponses": 17,
+    "unresolvedTurns": 0,
+    "skippedDependentTurns": 1,
+    "unexecutedTurns": 0,
+    "semanticPasses": 0,
+    "semanticFailures": 1,
+    "semanticUngraded": 16
+  },
+  "cases": [
+    {
+      "caseId": "core-client-create-followup",
+      "outcome": "semantic_fail",
+      "failedCheckIds": [
+        "synthetic_dry_assertion_failure"
+      ]
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "outcome": "replayed_ungraded"
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "outcome": "replayed_ungraded"
+    }
+  ],
+  "upstreamCalls": 0,
+  "credentialsLoaded": false,
+  "http201": 17,
+  "businessHashUnchangedAll": true,
+  "businessWrites": 0,
+  "pendingApprovals": 0,
+  "failedLoaderAttemptPreserved": true,
+  "exactSourceFilesPerRun": 2471,
+  "realModelAcceptance": false,
+  "paidAuthorizationCreated": false,
+  "keychainAccess": false,
+  "liveBrokerCompletionQualified": false,
+  "sourceProviderQualification": {
+    "booking": "ACTUAL_INTERNAL_CALENDAR_AND_VERIFIED_SYNTHETIC_CLIENT",
+    "occupancy": "SYNTHETIC_DOMAIN_PORT_READS_CANONICAL_OPPORTUNITY_OWNER",
+    "finance": "ACTUAL_C7_OWNER_NATIVE_YCLIENTS_ADAPTER_FINITE_SYNTHETIC_GET",
+    "realCrmNetworkCalls": 0
+  },
+  "futurePreparation": "Run core-local-prepare after final checkpoint commit; preparation binds that exact HEAD and creates no permit."
+}

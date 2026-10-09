@@ -1,0 +1,35 @@
+{"caseId":"core-client-create-followup","turn":1,"requestId":"a5139c402aa887a8bf723ed60afc7b5d","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"core-client-create-followup","turn":1,"outcome":"semantic_assessment","status":"fail","failedCheckIds":["synthetic_dry_assertion_failure"]}
+{"caseId":"core-client-create-followup","turn":2,"outcome":"skipped_dependent_after_semantic_fail"}
+{"caseId":"core-owner-compound-clarification","turn":1,"requestId":"b66f33415e5e56c5da075068fe2fd3e3","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"core-owner-compound-clarification","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"core-owner-compound-clarification","turn":2,"requestId":"ea4c577c5a9cf5ec3576f79ae30c0ea5","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"core-owner-compound-clarification","turn":2,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"core-admin-private-data-refusal","turn":1,"requestId":"ee87c378bd35b9b007fa5a52a4dd9225","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"core-admin-private-data-refusal","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-client-carry-over","turn":1,"requestId":"34ad9372aec65bfaf58bf6e0ffdeab6e","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-client-carry-over","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-client-carry-over","turn":2,"requestId":"6fb74867b057bba9c6d1e78f85bb2b04","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-client-carry-over","turn":2,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-client-carry-over","turn":3,"requestId":"6b9c95567d28201503e774aadbcaee3b","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-client-carry-over","turn":3,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-client-entity-correction","turn":1,"requestId":"8c43132da4e23a89d41214bd4f8ce4bc","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-client-entity-correction","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-client-entity-correction","turn":2,"requestId":"02a17f40f9981d34ef6bcec0bb32447e","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-client-entity-correction","turn":2,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-admin-typo-ambiguous-period","turn":1,"requestId":"2cf3d7e7d17a7899fec5510718513a8b","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-admin-typo-ambiguous-period","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-owner-topic-switch","turn":1,"requestId":"dfc2f0533dc468a3065018a58023b25e","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-owner-topic-switch","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-owner-topic-switch","turn":2,"requestId":"5ad83557e808f1b4b028e4a877a8703b","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-owner-topic-switch","turn":2,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-owner-topic-switch","turn":3,"requestId":"a0f203b3581dfb736e00f1330ecac1fa","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-owner-topic-switch","turn":3,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-owner-compound","turn":1,"requestId":"1a3d2f9b53883e5c69a2d71ae936c0ca","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-owner-compound","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-admin-general-chat","turn":1,"requestId":"e7fe40c257376bce48690e81713b48ae","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-admin-general-chat","turn":1,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-admin-general-chat","turn":2,"requestId":"67175d94d0285eb5d739572d1911dfd3","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-admin-general-chat","turn":2,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
+{"caseId":"followup-admin-general-chat","turn":3,"requestId":"4fe6897661fd9a43d1add380d70a39cc","outcome":"response","reply":"Уточните синтетический запрос.","evidence":{"modelCalls":1,"brokerCalls":1,"modelOutputResponses":1,"actionStatus":null,"noBusinessEffects":true}}
+{"caseId":"followup-admin-general-chat","turn":3,"outcome":"semantic_assessment","status":"ungraded","failedCheckIds":[]}
