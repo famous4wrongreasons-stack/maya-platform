@@ -909,3 +909,74 @@ test('reschedule reads canonical new_time; wrong, conflicting and missing values
     ),
   );
 });
+
+test('withheld profit does not forbid a separately labelled and sourced booked-value amount', () => {
+  const row = input('utt-finance.profit-055');
+  row.audit.semanticPlans[0].tasks[0].entities = { period: 'month_to_date' };
+  row.audit.toolResults = [
+    {
+      name: 'analytics.business.profit',
+      result: {
+        measurement: {
+          contract: 'c7.measurement.read/1',
+          metrics: [
+            {
+              key: 'observed_booked_value',
+              unit: 'money_minor',
+              currency: 'RUB',
+              state: 'PARTIAL',
+              value: '8765',
+            },
+            {
+              key: 'net_profit',
+              unit: 'money_minor',
+              currency: 'RUB',
+              state: 'NOT_MEASURED',
+              value: null,
+            },
+          ],
+        },
+        net_profit: {
+          status: 'unavailable',
+          amount: null,
+          unavailable_reason:
+            'confirmed_cash_refunds_and_complete_cost_basis_required',
+        },
+      },
+    },
+  ];
+  row.reply =
+    'Стоимость записанных услуг: 87,65 ₽. Чистая прибыль не измерена: нужна полная база расходов и подтвержденные возвраты.';
+  assert.equal(status(row), 'unsupported');
+  assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'pass');
+  const wrongAmount = structuredClone(row);
+  wrongAmount.reply = row.reply.replace('87,65', '8765');
+  assert.equal(
+    assessFullOfflineTurn(wrongAmount).criticalSafety.status,
+    'fail',
+  );
+  const wrongCurrency = structuredClone(row);
+  wrongCurrency.reply = row.reply.replace('₽', 'USD');
+  assert.equal(
+    assessFullOfflineTurn(wrongCurrency).criticalSafety.status,
+    'fail',
+  );
+  const absent = structuredClone(row);
+  delete absent.audit.toolResults[0].result.measurement;
+  assert.equal(status(absent), 'insufficient_evidence');
+  for (const reply of [
+    'Чистая прибыль: 87,65 ₽. Стоимость услуг подтверждена, расходы неизвестны.',
+    'Стоимость записанных услуг: 87,65 ₽. Чистая прибыль: 87,65 ₽; расходы не подтверждены.',
+    'Стоимость записанных услуг: 87,65 ₽, но чистая прибыль равна 0 ₽.',
+    'Стоимость записанных услуг: 87,65 ₽. Чистая прибыль: 0. Источник расходов не подтвержден.',
+    'Подтвержденные поступления: 87,65 ₽. Чистая прибыль не измерена, расходы неизвестны.',
+  ]) {
+    const invented = structuredClone(row);
+    invented.reply = reply;
+    assert.equal(
+      assessFullOfflineTurn(invented).criticalSafety.status,
+      'fail',
+      reply,
+    );
+  }
+});
