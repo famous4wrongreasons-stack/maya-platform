@@ -1,0 +1,14 @@
+2026-10-09 20:19:32.483 UTC [38679] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-09 20:19:32.483 UTC [38679] LOG:  listening on IPv4 address "127.0.0.1", port 62180
+2026-10-09 20:19:32.486 UTC [38682] LOG:  database system was shut down at 2026-10-09 20:19:32 UTC
+2026-10-09 20:19:32.488 UTC [38679] LOG:  database system is ready to accept connections
+2026-10-09 20:20:20.658 UTC [39103] ERROR:  duplicate key value violates unique constraint "AiToolExecution_approvalRequestId_approvalTenantId_key"
+2026-10-09 20:20:20.658 UTC [39103] DETAIL:  Key ("approvalRequestId", "approvalTenantId")=(cmv1etiqx00ahv0c91g0fsrlc, cmv1etinn00a9v0c9vlu8sx42) already exists.
+2026-10-09 20:20:20.658 UTC [39103] STATEMENT:  INSERT INTO "public"."AiToolExecution" ("id","tenantId","actorUserId","actorTenantId","approvalRequestId","approvalTenantId","toolName","surface","riskTier","status","inputHash","idempotencyKey","encryptedResult","startedAt","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING "public"."AiToolExecution"."id", "public"."AiToolExecution"."tenantId", "public"."AiToolExecution"."actorUserId", "public"."AiToolExecution"."actorTenantId", "public"."AiToolExecution"."approvalRequestId", "public"."AiToolExecution"."approvalTenantId", "public"."AiToolExecution"."toolName", "public"."AiToolExecution"."surface", "public"."AiToolExecution"."riskTier", "public"."AiToolExecution"."status", "public"."AiToolExecution"."inputHash", "public"."AiToolExecution"."idempotencyKey", "public"."AiToolExecution"."encryptedResult", "public"."AiToolExecution"."errorCode", "public"."AiToolExecution"."startedAt", "public"."AiToolExecution"."completedAt", "public"."AiToolExecution"."createdAt", "public"."AiToolExecution"."updatedAt"
+2026-10-09 20:20:30.779 UTC [38679] LOG:  received fast shutdown request
+2026-10-09 20:20:30.780 UTC [38679] LOG:  aborting any active transactions
+2026-10-09 20:20:30.780 UTC [38679] LOG:  background worker "logical replication launcher" (PID 38685) exited with exit code 1
+2026-10-09 20:20:30.781 UTC [38680] LOG:  shutting down
+2026-10-09 20:20:30.781 UTC [38680] LOG:  checkpoint starting: shutdown immediate
+2026-10-09 20:20:30.847 UTC [38680] LOG:  checkpoint complete: wrote 1980 buffers (24.2%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.036 s, sync=0.030 s, total=0.067 s; sync files=1479, longest=0.001 s, average=0.001 s; distance=15106 kB, estimate=15106 kB; lsn=0/23DE3C0, redo lsn=0/23DE3C0
+2026-10-09 20:20:30.850 UTC [38679] LOG:  database system is shut down

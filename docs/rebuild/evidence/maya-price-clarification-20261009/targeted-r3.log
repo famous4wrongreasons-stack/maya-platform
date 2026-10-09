@@ -1,0 +1,14 @@
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/ai-core.service-price-semantic.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/ai-tool-service-price.spec.ts
+PASS src/ai-tools/service-price-chat-binding.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+
+Test Suites: 7 passed, 7 total
+Tests:       747 passed, 747 total
+Snapshots:   0 total
+Time:        1.409 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.service-price-semantic.spec.ts", "src/ai-tools/service-price-chat-binding.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/ai-tools/ai-tool-service-price.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-price-clarification-20261009/targeted-r3.json

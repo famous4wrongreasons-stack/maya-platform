@@ -1,0 +1,107 @@
+{
+  "full_base": "2e43be9545e17c04a85bc54b5c422519075b5a18",
+  "scope": "All registered task-2 worktree heads at inspection; ancestry is not a new acceptance proof.",
+  "worktrees": [
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/.source-repository",
+      "branch": "codex/maya-client-readiness-20261005",
+      "head": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-admin-conversation-fix",
+      "branch": "codex/maya-admin-conversation-fix-20261009",
+      "head": "564f7e6a4ec22bc74dd270bb4dd55552a4b324bb",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-conversation-batch",
+      "branch": "codex/maya-conversation-batch-20261009",
+      "head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-conversation-coverage",
+      "branch": "codex/maya-conversation-coverage-20261009",
+      "head": "582595eb115c7fa19fab10ddf6ed67b6d534349b",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration",
+      "branch": "codex/maya-development-integration-20261006",
+      "head": "7b0dc05a0bc5a2853c2062c7631db2b9b48dcb8c",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-explicit-occupancy",
+      "branch": "codex/maya-explicit-occupancy-20261006",
+      "head": "f9976ab601f0438676cf59a5d108bd719c2acd0e",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-followup-retest-b",
+      "branch": "codex/maya-followup-retest-b-20261009",
+      "head": "5e860600309826f0f87dd765e3b20e98ce04bdbf",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline",
+      "branch": "codex/maya-full-offline-20261009",
+      "head": "5445c932a9968374584e30f47c2f4f2a69b305dd",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-ab",
+      "branch": "codex/maya-local-ab-20261009",
+      "head": "e8a6001019074dbed4b7669a211c9b568bcd6c46",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics",
+      "branch": "codex/maya-offline48-semantics-20261009",
+      "head": "97624aa633f4c2cd1d3b5412ec27e6d18f48dc07",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-pricing-semantic-integration",
+      "branch": "codex/maya-pricing-clarification-20261009",
+      "head": "2e43be9545e17c04a85bc54b5c422519075b5a18",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-replay-defects",
+      "branch": "codex/maya-replay-defects-20261009",
+      "head": "c6db033e02009bda523c393e65e45ba61c3bcefc",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-a",
+      "branch": "codex/maya-retest-candidate-20261009",
+      "head": "0d90de11710e7212286a7e74755c8a12b55d116b",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-b",
+      "branch": "codex/maya-retest-candidate-b-20261009",
+      "head": "a80e6c4d5218704b29d2b25bd75b1bacb419c053",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-b-fixed",
+      "branch": "codex/maya-admin-routing-candidate-20261009",
+      "head": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa",
+      "ancestor_of_full_base": true
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-union-handoff",
+      "branch": "codex/maya-union-handoff-20261009",
+      "head": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+      "ancestor_of_full_base": false
+    }
+  ],
+  "separate_frozen_union_handoff_commits": [
+    "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67 docs(maya): checkpoint reviewed synthetic union handoff proof",
+    "d10d1f624a8bd9a5f61462cd9ae7d09ea2223626 test(maya): observe PTY restoration before terminal hangup",
+    "146d272d44ea8b06caa3e6da040559d39590e510 fix(maya): bind frozen union readiness to existing runner"
+  ]
+}

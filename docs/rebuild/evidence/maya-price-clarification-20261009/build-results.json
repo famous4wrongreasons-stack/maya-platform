@@ -1,0 +1,26 @@
+{
+  "sourceHead": "177c930c717795e72d8162aa50f686cd1cde305b",
+  "checks": [
+    {
+      "name": "backend-build",
+      "command": [
+        "/usr/local/bin/node",
+        "node_modules/@nestjs/cli/bin/nest.js",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 9.62
+    },
+    {
+      "name": "preflight-build",
+      "command": [
+        "/usr/local/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "tsconfig.preflight.json"
+      ],
+      "exitCode": 0,
+      "seconds": 8.85
+    }
+  ]
+}

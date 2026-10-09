@@ -1,0 +1,94 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › binds a pricing proposal to user text and catalog instead of model numbers
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      8603 |
+      8604 |   private modelFailure(code: string): never {
+    > 8605 |     throw new ServiceUnavailableException({
+           |           ^
+      8606 |       message: 'MAYA could not safely complete this turn.',
+      8607 |       error: { code },
+      8608 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:8605:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:3454:18)
+      at ai-tools/ai-core.service.spec.ts:2307:22
+
+  ● AiCoreService › binds a pricing proposal to user text and catalog instead of model numbers
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      8603 |
+      8604 |   private modelFailure(code: string): never {
+    > 8605 |     throw new ServiceUnavailableException({
+           |           ^
+      8606 |       message: 'MAYA could not safely complete this turn.',
+      8607 |       error: { code },
+      8608 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:8605:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:3454:18)
+      at ai-tools/ai-core.service.spec.ts:2307:22
+
+  ● AiCoreService › does not prepare pricing from ambiguous intent or stale catalog: Установи цену Стрижка на 10%
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      8603 |
+      8604 |   private modelFailure(code: string): never {
+    > 8605 |     throw new ServiceUnavailableException({
+           |           ^
+      8606 |       message: 'MAYA could not safely complete this turn.',
+      8607 |       error: { code },
+      8608 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:8605:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:3454:18)
+      at ai-tools/ai-core.service.spec.ts:2349:22
+
+  ● AiCoreService › does not prepare pricing from ambiguous intent or stale catalog: Установи цену Массаж 1900
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      8603 |
+      8604 |   private modelFailure(code: string): never {
+    > 8605 |     throw new ServiceUnavailableException({
+           |           ^
+      8606 |       message: 'MAYA could not safely complete this turn.',
+      8607 |       error: { code },
+      8608 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:8605:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:3454:18)
+      at ai-tools/ai-core.service.spec.ts:2349:22
+
+  ● AiCoreService › does not prepare pricing from ambiguous intent or stale catalog: Установи цену Стрижка 1900
+
+    ServiceUnavailableException: MAYA could not safely complete this turn.
+
+      8603 |
+      8604 |   private modelFailure(code: string): never {
+    > 8605 |     throw new ServiceUnavailableException({
+           |           ^
+      8606 |       message: 'MAYA could not safely complete this turn.',
+      8607 |       error: { code },
+      8608 |     });
+
+      at AiCoreService.modelFailure (ai-tools/ai-core.service.ts:8605:11)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:3454:18)
+      at ai-tools/ai-core.service.spec.ts:2349:22
+
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/ai-tool-service-price.spec.ts
+PASS src/ai-tools/ai-core.service-price-semantic.spec.ts
+PASS src/ai-tools/service-price-chat-binding.spec.ts
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+
+Test Suites: 1 failed, 6 passed, 7 total
+Tests:       5 failed, 736 passed, 741 total
+Snapshots:   0 total
+Time:        1.712 s
+Ran all test suites within paths "src/ai-tools/ai-core.service-price-semantic.spec.ts", "src/ai-tools/service-price-chat-binding.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/ai-tools/ai-tool-service-price.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-price-clarification-20261009/targeted-r1.json

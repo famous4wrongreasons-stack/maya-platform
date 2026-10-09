@@ -1,0 +1,9 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-pricing-semantic-integration/maya-saas-backend/test/widgets-live/support/service-price-chat-process.ts
+  47:18  error    This assertion is unnecessary since the receiver accepts the original type of the expression              @typescript-eslint/no-unnecessary-type-assertion
+  56:3   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-require-imports')
+  58:5   error    A `require()` style import is forbidden                                                                   @typescript-eslint/no-require-imports
+
+✖ 3 problems (2 errors, 1 warning)
+  1 error and 1 warning potentially fixable with the `--fix` option.
+

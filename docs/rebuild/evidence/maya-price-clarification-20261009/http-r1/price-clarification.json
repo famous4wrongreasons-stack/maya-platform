@@ -1,0 +1,1483 @@
+{
+  "contract": "maya.price-clarification-proof/1",
+  "scripted": true,
+  "stages": [
+    {
+      "status": 201,
+      "body": {
+        "request_id": "d87fe92d-47c6-4ab2-91d0-dedd2e5113d2",
+        "coordination": {
+          "run_id": "0c0bec4f-27dc-45f9-b12e-e140ba3c126b",
+          "scope": "deterministic_reads",
+          "state": "COMPLETED"
+        },
+        "user_turn": {
+          "turnId": "bc0b2ec1-3c03-4e95-a34c-bd0099c800bb",
+          "conversationId": "c6e58782-ebb9-4673-9ddf-71371ab0b0fb"
+        },
+        "reply": "Для какой услуги подготовить цену 1 500 ₽? Укажите точное название из каталога.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [
+          {
+            "name": "catalog.services.read",
+            "status": "completed",
+            "execution_id": "cmv1esnn10001wqc93bpo485e"
+          }
+        ],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "catalog"
+        }
+      },
+      "pid": 38762
+    },
+    {
+      "status": 201,
+      "body": {
+        "request_id": "ce456b33-90e5-4bee-90f1-b9d9363e9129",
+        "coordination": {
+          "run_id": "2e702106-6a0a-496f-8ccb-2710dfc192a3",
+          "scope": "deterministic_reads",
+          "state": "COMPLETED"
+        },
+        "user_turn": {
+          "turnId": "20eedf51-bea9-4782-a51d-823a19579b4f",
+          "conversationId": "c6e58782-ebb9-4673-9ddf-71371ab0b0fb"
+        },
+        "reply": "Изменить цену услуги «Мужская стрижка» в YCLIENTS: 2 000 ₽ → 1 500 ₽ (RUB). Требуется ваше подтверждение.",
+        "source": "openai",
+        "redacted_input": false,
+        "action": {
+          "status": "approval_required",
+          "approval": {
+            "id": "cmv1esxyh0004zhc9p1x09jfi",
+            "tool_name": "catalog.service.price.update",
+            "surface": "web",
+            "risk_tier": "high_write",
+            "approval_policy": "actor",
+            "status": "pending",
+            "summary": "Изменить цену услуги «Мужская стрижка» в YCLIENTS: 2 000 ₽ → 1 500 ₽ (RUB). Требуется ваше подтверждение.",
+            "payload_hash": "e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca",
+            "payload_preview": {
+              "after": "1 500 ₽",
+              "before": "2 000 ₽",
+              "source": "YCLIENTS",
+              "service": "Мужская стрижка",
+              "approval": "Требуется ваше подтверждение",
+              "currency": "RUB",
+              "service_id": "201",
+              "current_price_rubles": 2000,
+              "proposed_price_rubles": 1500
+            },
+            "expires_at": "2026-10-09T20:29:53.701Z",
+            "decided_at": null,
+            "executed_at": null,
+            "error_code": null,
+            "created_at": "2026-10-09T20:19:53.701Z",
+            "updated_at": "2026-10-09T20:19:53.705Z"
+          }
+        },
+        "tools_used": [
+          {
+            "name": "catalog.services.read",
+            "status": "completed",
+            "execution_id": "cmv1esxxa0001zhc9p91incvt"
+          },
+          {
+            "name": "catalog.service.price.update",
+            "status": "approval_required",
+            "execution_id": null
+          }
+        ],
+        "resolution": {
+          "matched": true,
+          "receipt": {
+            "widget_id": "ae4fe0df-786f-4c88-813a-e5ac53e66899",
+            "envelope_seal": "70bb2a8a8b1808e01abacb65a338340ed0c9c9f4f946f1bbf494218a0c7cdb2d",
+            "envelope": {
+              "contract": "maya.widget.envelope/1",
+              "widget_id": "ae4fe0df-786f-4c88-813a-e5ac53e66899",
+              "kind": "APPROVAL",
+              "body_version": 1,
+              "tenant_id": "cmv1esl1m0033v0c993si0me1",
+              "correlation": {
+                "run_id": null,
+                "turn_id": "e755ec07-a248-421a-a368-fade5102f2e9",
+                "message_id": null,
+                "agent_id": null,
+                "parent_widget_id": null,
+                "step_index": null,
+                "step_total": null,
+                "trace_id": "212e904a84584f41400ac8e9a8b483c5"
+              },
+              "source": {
+                "from": "capability_envelope",
+                "capability": "catalog.service.price.update",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "fact_index": 0
+              },
+              "origin": {
+                "trigger": "user_turn",
+                "emitter": "capability_read",
+                "moment_key": null,
+                "proactive_provenance": null
+              },
+              "authority": {
+                "verification_level": "SESSION_VERIFIED",
+                "pii_class": "none",
+                "data_scope": {
+                  "masked_fields": []
+                }
+              },
+              "body": {
+                "approval_ref": "cmv1esxyh0004zhc9p1x09jfi",
+                "subject": {
+                  "state": "KNOWN",
+                  "value": "Мужская стрижка",
+                  "label": "Мужская стрижка",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:19:53.701Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "effect_preview": [
+                  {
+                    "label": {
+                      "phrase_key": "approval.company",
+                      "rendered": "Компания YCLIENTS"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": "88005",
+                      "label": "88005",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:19:53.701Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.service",
+                      "rendered": "Услуга"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": "201",
+                      "label": "201",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:19:53.701Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.current_price",
+                      "rendered": "Текущая цена"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": 2000,
+                      "label": "2000 RUB",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:19:53.701Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null,
+                      "key": "service.price.current",
+                      "unit": "RUB",
+                      "basis_key": null,
+                      "basis": "YCLIENTS",
+                      "currency": "RUB",
+                      "formatted": "2000 RUB",
+                      "comparison": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.proposed_price",
+                      "rendered": "Новая цена"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": 1500,
+                      "label": "1500 RUB",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:19:53.701Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null,
+                      "key": "service.price.proposed",
+                      "unit": "RUB",
+                      "basis_key": null,
+                      "basis": "YCLIENTS",
+                      "currency": "RUB",
+                      "formatted": "1500 RUB",
+                      "comparison": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.provider",
+                      "rendered": "Источник"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": "YCLIENTS",
+                      "label": "YCLIENTS",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:19:53.701Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    }
+                  }
+                ],
+                "audience_size": null,
+                "risk_tier": {
+                  "state": "KNOWN",
+                  "value": "high_write",
+                  "label": "Изменение цены в YCLIENTS",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:19:53.701Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "reversible": {
+                  "state": "KNOWN",
+                  "value": false,
+                  "label": "Для обратного изменения потребуется новое подтверждение",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:19:53.701Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "state": {
+                  "state": "KNOWN",
+                  "value": "PENDING",
+                  "label": "Ожидает вашего подтверждения",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:19:53.701Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "requested_by_label": {
+                  "state": "KNOWN",
+                  "value": "Вы",
+                  "label": "Вы",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:19:53.701Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-09T20:29:53.701Z",
+                "approve_intent": "i1",
+                "reject_intent": "i2",
+                "blocked_reason": null,
+                "detail_intent": "i3"
+              },
+              "intents": [
+                {
+                  "intent_ref": "i1",
+                  "intent_token": "_PfQ8FiJjGKg5tAtdu-F6EYojTeS5Rnc",
+                  "role": "primary",
+                  "label": "Подтвердить цену",
+                  "utterance_preview": "Подтвердить цену",
+                  "speech_aliases": [
+                    "Подтвердить цену"
+                  ],
+                  "ordinal": 1,
+                  "priority": 1,
+                  "effect": "COMMIT",
+                  "capability": {
+                    "space": "AE",
+                    "key": "crm.service.fixed-price.update.v1"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": {
+                    "risk_tier": "high_write",
+                    "reversible": {
+                      "state": "KNOWN",
+                      "value": false,
+                      "label": "Для обратного изменения потребуется новое подтверждение",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "audience_size": null,
+                    "requires_explicit_confirm_step": true,
+                    "requires_readback": false,
+                    "readback_ref": null,
+                    "readback_text": null,
+                    "idempotency_key": "service-price:cmv1esxyh0004zhc9p1x09jfi:e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca:approve",
+                    "approval_policy": "actor"
+                  },
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Подтвердить цену",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:29:53.701Z",
+                  "single_use": true
+                },
+                {
+                  "intent_ref": "i2",
+                  "intent_token": "C32FBW-7x96sP04uxExzWlMcuMnBP4av",
+                  "role": "destructive",
+                  "label": "Отклонить изменение",
+                  "utterance_preview": "Отклонить изменение",
+                  "speech_aliases": [
+                    "Отклонить изменение"
+                  ],
+                  "ordinal": 2,
+                  "priority": 1,
+                  "effect": "COMMIT",
+                  "capability": {
+                    "space": "AE",
+                    "key": "crm.service.fixed-price.update.v1"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": {
+                    "risk_tier": "high_write",
+                    "reversible": {
+                      "state": "KNOWN",
+                      "value": false,
+                      "label": "Для обратного изменения потребуется новое подтверждение",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "audience_size": null,
+                    "requires_explicit_confirm_step": true,
+                    "requires_readback": false,
+                    "readback_ref": null,
+                    "readback_text": null,
+                    "idempotency_key": "service-price:cmv1esxyh0004zhc9p1x09jfi:e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca:reject",
+                    "approval_policy": "actor"
+                  },
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Отклонить изменение",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:29:53.701Z",
+                  "single_use": true
+                },
+                {
+                  "intent_ref": "i3",
+                  "intent_token": "aC4e4UDAtBRC1YmVvXksYSbVh88EPHu_",
+                  "role": "secondary",
+                  "label": "Подробности изменения",
+                  "utterance_preview": "Подробности изменения",
+                  "speech_aliases": [
+                    "Подробности изменения"
+                  ],
+                  "ordinal": 3,
+                  "priority": 1,
+                  "effect": "NAVIGATE",
+                  "capability": null,
+                  "handoff_capability_ref": null,
+                  "target": {
+                    "class": "detail",
+                    "ref": "fs.catalogue"
+                  },
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Подробности изменения",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:29:53.701Z",
+                  "single_use": false
+                },
+                {
+                  "intent_ref": "i4",
+                  "intent_token": "lxj1BfJ4J9moAWx6H4FBw1XAKIt9LUDU",
+                  "role": "escape",
+                  "label": "Закрыть",
+                  "utterance_preview": "Закрыть",
+                  "speech_aliases": [
+                    "dismiss",
+                    "close"
+                  ],
+                  "ordinal": 4,
+                  "priority": 0,
+                  "effect": "CONTROL",
+                  "capability": {
+                    "space": "CONTROL",
+                    "key": "control.widget.dismiss"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "ANONYMOUS",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "muted",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Закрыть",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:29:53.701Z",
+                  "single_use": true
+                }
+              ],
+              "provenance": {
+                "source_capability": "catalog.service.price.update",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "projector_id": "catalog.service.price.update@1",
+                "source_kind": "capability_read",
+                "facts_used": [
+                  {
+                    "capability": "catalog.service.price.update",
+                    "status": "measured",
+                    "as_of": "2026-10-09T20:19:53.701Z",
+                    "evidence_refs": [
+                      "h_e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": []
+                    }
+                  }
+                ],
+                "facts_origin": [
+                  "copied"
+                ],
+                "facts_digest": "6c3a404fcb81bff5b4e7de3583d9d8e3cce12c0e30ab4044a5773a806f79a3eb",
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": []
+                },
+                "completeness_envelope_hash": "e41ef49b2c4d274c714e9f0767bea8e4c7b3b85b56a8bae3c467aa99a94d48ff",
+                "evidence_refs": [
+                  {
+                    "ref": "h_e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca",
+                    "class": "c9_invocation_handle",
+                    "dereferenceable_until": null
+                  }
+                ],
+                "confidence": "high",
+                "authorship": {
+                  "body_values": "server_formatter",
+                  "body_phrases": "server_catalogue",
+                  "narrative": "none",
+                  "narrative_template_id": null,
+                  "narrative_template_version": null,
+                  "model_contribution": "none",
+                  "model_contribution_ref": null
+                }
+              },
+              "limitations": [],
+              "lifecycle": {
+                "freshness_class": "scenario",
+                "state": "MINTED",
+                "issued_at": "2026-10-09T20:19:53.719Z",
+                "expires_at": "2026-10-09T20:29:53.701Z",
+                "flow_ttl_s": 600,
+                "input_lock": "none",
+                "on_expiry": "collapse_to_summary",
+                "supersedes_widget_id": null,
+                "superseded_by_widget_id": null,
+                "delivery": {
+                  "delivery_state": "live",
+                  "answered_at": null,
+                  "answering_channel": null,
+                  "action_receipt_ref": null
+                },
+                "historised_form": "summary_bubble",
+                "timeline_placement": "chronological",
+                "dedupe_key": "APPROVAL:ae4fe0df-786f-4c88-813a-e5ac53e66899",
+                "retention_sec": 600,
+                "delivery_channel": "pwa"
+              },
+              "presentation": {
+                "presentation_mode": "owner",
+                "density": "CARD",
+                "text_equivalent": {
+                  "headline": "Изменение цены · Мужская стрижка",
+                  "body": "Компания YCLIENTS: 88005. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 1500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-09T20:29:53.701Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Закрыть",
+                  "itemized": [
+                    "Компания YCLIENTS: 88005",
+                    "Услуга: 201",
+                    "Текущая цена: 2000 RUB",
+                    "Новая цена: 1500 RUB",
+                    "Источник: YCLIENTS",
+                    "Риск: Изменение цены в YCLIENTS",
+                    "Обратимость: Для обратного изменения потребуется новое подтверждение",
+                    "Состояние: Ожидает вашего подтверждения",
+                    "Запрошено: Вы",
+                    "Подтверждение доступно до: 2026-10-09T20:29:53.701Z",
+                    "Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Закрыть"
+                  ],
+                  "completeness_sentence": null,
+                  "unknowns_sentence": null
+                },
+                "speech": null,
+                "a11y": {
+                  "role_hint": "region",
+                  "label": "Изменение цены · Мужская стрижка",
+                  "description": "Компания YCLIENTS: 88005. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 1500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-09T20:29:53.701Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Закрыть",
+                  "reading_order": [
+                    {
+                      "k": "intent",
+                      "id": "i1"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i2"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i3"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i4"
+                    }
+                  ],
+                  "live_region": "off",
+                  "accessible_names": {
+                    "intent:i1": "Подтвердить цену",
+                    "intent:i2": "Отклонить изменение",
+                    "intent:i3": "Подробности изменения",
+                    "intent:i4": "Закрыть"
+                  }
+                },
+                "fullscreen_detail": {
+                  "route_key": "fs.catalogue",
+                  "reason": "audit"
+                }
+              },
+              "render": {
+                "contract": "maya.render.receipt/1",
+                "profile_id": "pwa/1",
+                "profile_version": 1,
+                "render_tier": "RICH_INTERACTIVE",
+                "intents_minted": 4,
+                "intents_emitted": 4,
+                "intents_withheld": [],
+                "body_reductions": [],
+                "text_equivalent_is_canonical": false,
+                "escalation": null,
+                "degraded_at": "2026-10-09T20:19:53.719Z"
+              },
+              "integrity": {
+                "body_hash": "7cca588420c9cb43c146b39f2deff62089570e343ff5b8f07f85c007b1acfc8e",
+                "cell_index_digest": "796c5c81846bbedece35bdc057446b030f2d645c1f68a40309f72190d119d96e",
+                "envelope_seal": "70bb2a8a8b1808e01abacb65a338340ed0c9c9f4f946f1bbf494218a0c7cdb2d",
+                "seal_key_version": 1,
+                "principal_proof_hash": "40b6f2bc2720bb19f77e7f0da1c17c78e138c20fb6bf54ef7b8c59b1d85a8cdd",
+                "approval_echo": {
+                  "owner": "ai_approval_request",
+                  "hash": "e743355bd40281d3daf1227654135a7983aa9517ac4245976ecd6622ce6680ca"
+                },
+                "policy_context_echo": null
+              }
+            }
+          },
+          "dismiss_widget_id": null
+        },
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "general"
+        }
+      },
+      "pid": 38861
+    },
+    {
+      "status": 201,
+      "body": {
+        "request_id": "becb0dd7-d2e5-4c19-a153-831b1f93edab",
+        "coordination": {
+          "run_id": "ddaadb95-1030-490b-ad84-e3ac0226846f",
+          "scope": "deterministic_reads",
+          "state": "COMPLETED"
+        },
+        "user_turn": {
+          "turnId": "97b65a50-9acf-4a93-acf1-8f5afe1599f1",
+          "conversationId": "c6e58782-ebb9-4673-9ddf-71371ab0b0fb"
+        },
+        "reply": "Изменить цену услуги «Мужская стрижка» в YCLIENTS: 2 000 ₽ → 1 600 ₽ (RUB). Требуется ваше подтверждение.",
+        "source": "openai",
+        "redacted_input": false,
+        "action": {
+          "status": "approval_required",
+          "approval": {
+            "id": "cmv1et8a900042fc9by3valr6",
+            "tool_name": "catalog.service.price.update",
+            "surface": "web",
+            "risk_tier": "high_write",
+            "approval_policy": "actor",
+            "status": "pending",
+            "summary": "Изменить цену услуги «Мужская стрижка» в YCLIENTS: 2 000 ₽ → 1 600 ₽ (RUB). Требуется ваше подтверждение.",
+            "payload_hash": "f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2",
+            "payload_preview": {
+              "after": "1 600 ₽",
+              "before": "2 000 ₽",
+              "source": "YCLIENTS",
+              "service": "Мужская стрижка",
+              "approval": "Требуется ваше подтверждение",
+              "currency": "RUB",
+              "service_id": "201",
+              "current_price_rubles": 2000,
+              "proposed_price_rubles": 1600
+            },
+            "expires_at": "2026-10-09T20:30:07.085Z",
+            "decided_at": null,
+            "executed_at": null,
+            "error_code": null,
+            "created_at": "2026-10-09T20:20:07.085Z",
+            "updated_at": "2026-10-09T20:20:07.089Z"
+          }
+        },
+        "tools_used": [
+          {
+            "name": "catalog.services.read",
+            "status": "completed",
+            "execution_id": "cmv1et89400012fc90z5ckc8u"
+          },
+          {
+            "name": "catalog.service.price.update",
+            "status": "approval_required",
+            "execution_id": null
+          }
+        ],
+        "resolution": {
+          "matched": true,
+          "receipt": {
+            "widget_id": "d311b403-2728-4084-8180-8672be676e86",
+            "envelope_seal": "4e460a03b3d7bd17e5500be463766315b24fca16edf2b2c5150c0631fb811ee5",
+            "envelope": {
+              "contract": "maya.widget.envelope/1",
+              "widget_id": "d311b403-2728-4084-8180-8672be676e86",
+              "kind": "APPROVAL",
+              "body_version": 1,
+              "tenant_id": "cmv1esl1m0033v0c993si0me1",
+              "correlation": {
+                "run_id": null,
+                "turn_id": "3a38f79c-1647-4f15-af20-9c9fe9fde04f",
+                "message_id": null,
+                "agent_id": null,
+                "parent_widget_id": null,
+                "step_index": null,
+                "step_total": null,
+                "trace_id": "98bb5fbb154a9f19df15cfa42c879641"
+              },
+              "source": {
+                "from": "capability_envelope",
+                "capability": "catalog.service.price.update",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "fact_index": 0
+              },
+              "origin": {
+                "trigger": "user_turn",
+                "emitter": "capability_read",
+                "moment_key": null,
+                "proactive_provenance": null
+              },
+              "authority": {
+                "verification_level": "SESSION_VERIFIED",
+                "pii_class": "none",
+                "data_scope": {
+                  "masked_fields": []
+                }
+              },
+              "body": {
+                "approval_ref": "cmv1et8a900042fc9by3valr6",
+                "subject": {
+                  "state": "KNOWN",
+                  "value": "Мужская стрижка",
+                  "label": "Мужская стрижка",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:20:07.085Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "effect_preview": [
+                  {
+                    "label": {
+                      "phrase_key": "approval.company",
+                      "rendered": "Компания YCLIENTS"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": "88005",
+                      "label": "88005",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:20:07.085Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.service",
+                      "rendered": "Услуга"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": "201",
+                      "label": "201",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:20:07.085Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.current_price",
+                      "rendered": "Текущая цена"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": 2000,
+                      "label": "2000 RUB",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:20:07.085Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null,
+                      "key": "service.price.current",
+                      "unit": "RUB",
+                      "basis_key": null,
+                      "basis": "YCLIENTS",
+                      "currency": "RUB",
+                      "formatted": "2000 RUB",
+                      "comparison": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.proposed_price",
+                      "rendered": "Новая цена"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": 1600,
+                      "label": "1600 RUB",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:20:07.085Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null,
+                      "key": "service.price.proposed",
+                      "unit": "RUB",
+                      "basis_key": null,
+                      "basis": "YCLIENTS",
+                      "currency": "RUB",
+                      "formatted": "1600 RUB",
+                      "comparison": null
+                    }
+                  },
+                  {
+                    "label": {
+                      "phrase_key": "approval.provider",
+                      "rendered": "Источник"
+                    },
+                    "value": {
+                      "state": "KNOWN",
+                      "value": "YCLIENTS",
+                      "label": "YCLIENTS",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": "2026-10-09T20:20:07.085Z",
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    }
+                  }
+                ],
+                "audience_size": null,
+                "risk_tier": {
+                  "state": "KNOWN",
+                  "value": "high_write",
+                  "label": "Изменение цены в YCLIENTS",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:20:07.085Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "reversible": {
+                  "state": "KNOWN",
+                  "value": false,
+                  "label": "Для обратного изменения потребуется новое подтверждение",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:20:07.085Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "state": {
+                  "state": "KNOWN",
+                  "value": "PENDING",
+                  "label": "Ожидает вашего подтверждения",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:20:07.085Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "requested_by_label": {
+                  "state": "KNOWN",
+                  "value": "Вы",
+                  "label": "Вы",
+                  "reason_code": null,
+                  "fact_ref": 0,
+                  "as_of": "2026-10-09T20:20:07.085Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-10-09T20:30:07.085Z",
+                "approve_intent": "i1",
+                "reject_intent": "i2",
+                "blocked_reason": null,
+                "detail_intent": "i3"
+              },
+              "intents": [
+                {
+                  "intent_ref": "i1",
+                  "intent_token": "h3P-tf8VJ3AnPpmjuDEWk2i_OEmhdGdK",
+                  "role": "primary",
+                  "label": "Подтвердить цену",
+                  "utterance_preview": "Подтвердить цену",
+                  "speech_aliases": [
+                    "Подтвердить цену"
+                  ],
+                  "ordinal": 1,
+                  "priority": 1,
+                  "effect": "COMMIT",
+                  "capability": {
+                    "space": "AE",
+                    "key": "crm.service.fixed-price.update.v1"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": {
+                    "risk_tier": "high_write",
+                    "reversible": {
+                      "state": "KNOWN",
+                      "value": false,
+                      "label": "Для обратного изменения потребуется новое подтверждение",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "audience_size": null,
+                    "requires_explicit_confirm_step": true,
+                    "requires_readback": false,
+                    "readback_ref": null,
+                    "readback_text": null,
+                    "idempotency_key": "service-price:cmv1et8a900042fc9by3valr6:f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2:approve",
+                    "approval_policy": "actor"
+                  },
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Подтвердить цену",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:30:07.085Z",
+                  "single_use": true
+                },
+                {
+                  "intent_ref": "i2",
+                  "intent_token": "dID2byxxfAKNFMRJeYsnRXhZGsAj6o0W",
+                  "role": "destructive",
+                  "label": "Отклонить изменение",
+                  "utterance_preview": "Отклонить изменение",
+                  "speech_aliases": [
+                    "Отклонить изменение"
+                  ],
+                  "ordinal": 2,
+                  "priority": 1,
+                  "effect": "COMMIT",
+                  "capability": {
+                    "space": "AE",
+                    "key": "crm.service.fixed-price.update.v1"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": {
+                    "risk_tier": "high_write",
+                    "reversible": {
+                      "state": "KNOWN",
+                      "value": false,
+                      "label": "Для обратного изменения потребуется новое подтверждение",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "audience_size": null,
+                    "requires_explicit_confirm_step": true,
+                    "requires_readback": false,
+                    "readback_ref": null,
+                    "readback_text": null,
+                    "idempotency_key": "service-price:cmv1et8a900042fc9by3valr6:f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2:reject",
+                    "approval_policy": "actor"
+                  },
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Отклонить изменение",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:30:07.085Z",
+                  "single_use": true
+                },
+                {
+                  "intent_ref": "i3",
+                  "intent_token": "L59sXApotOtjClBy_MEldYl0xX75L92e",
+                  "role": "secondary",
+                  "label": "Подробности изменения",
+                  "utterance_preview": "Подробности изменения",
+                  "speech_aliases": [
+                    "Подробности изменения"
+                  ],
+                  "ordinal": 3,
+                  "priority": 1,
+                  "effect": "NAVIGATE",
+                  "capability": null,
+                  "handoff_capability_ref": null,
+                  "target": {
+                    "class": "detail",
+                    "ref": "fs.catalogue"
+                  },
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Подробности изменения",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:30:07.085Z",
+                  "single_use": false
+                },
+                {
+                  "intent_ref": "i4",
+                  "intent_token": "lL4_J43UeAFaEVQ_Q0PJXnxUK70McF5K",
+                  "role": "escape",
+                  "label": "Закрыть",
+                  "utterance_preview": "Закрыть",
+                  "speech_aliases": [
+                    "dismiss",
+                    "close"
+                  ],
+                  "ordinal": 4,
+                  "priority": 0,
+                  "effect": "CONTROL",
+                  "capability": {
+                    "space": "CONTROL",
+                    "key": "control.widget.dismiss"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "ANONYMOUS",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "muted",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Закрыть",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T20:30:07.085Z",
+                  "single_use": true
+                }
+              ],
+              "provenance": {
+                "source_capability": "catalog.service.price.update",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "projector_id": "catalog.service.price.update@1",
+                "source_kind": "capability_read",
+                "facts_used": [
+                  {
+                    "capability": "catalog.service.price.update",
+                    "status": "measured",
+                    "as_of": "2026-10-09T20:20:07.085Z",
+                    "evidence_refs": [
+                      "h_f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2"
+                    ],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": []
+                    }
+                  }
+                ],
+                "facts_origin": [
+                  "copied"
+                ],
+                "facts_digest": "a407065e121c8da3f584d458683cd05b1e2b28884bac297e1496d1c5271efc83",
+                "completeness": {
+                  "status": "COMPLETE",
+                  "requestedScopeHash": "f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2",
+                  "returnedCount": 1,
+                  "totalCount": 1,
+                  "hasMore": false,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": []
+                },
+                "completeness_envelope_hash": "4463687e87cf777726b68b964ed62300f8e831811ebaa0e641851cd17b6bed4b",
+                "evidence_refs": [
+                  {
+                    "ref": "h_f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2",
+                    "class": "c9_invocation_handle",
+                    "dereferenceable_until": null
+                  }
+                ],
+                "confidence": "high",
+                "authorship": {
+                  "body_values": "server_formatter",
+                  "body_phrases": "server_catalogue",
+                  "narrative": "none",
+                  "narrative_template_id": null,
+                  "narrative_template_version": null,
+                  "model_contribution": "none",
+                  "model_contribution_ref": null
+                }
+              },
+              "limitations": [],
+              "lifecycle": {
+                "freshness_class": "scenario",
+                "state": "MINTED",
+                "issued_at": "2026-10-09T20:20:07.103Z",
+                "expires_at": "2026-10-09T20:30:07.085Z",
+                "flow_ttl_s": 600,
+                "input_lock": "none",
+                "on_expiry": "collapse_to_summary",
+                "supersedes_widget_id": "ae4fe0df-786f-4c88-813a-e5ac53e66899",
+                "superseded_by_widget_id": null,
+                "delivery": {
+                  "delivery_state": "live",
+                  "answered_at": null,
+                  "answering_channel": null,
+                  "action_receipt_ref": null
+                },
+                "historised_form": "summary_bubble",
+                "timeline_placement": "chronological",
+                "dedupe_key": "APPROVAL:d311b403-2728-4084-8180-8672be676e86",
+                "retention_sec": 600,
+                "delivery_channel": "pwa"
+              },
+              "presentation": {
+                "presentation_mode": "owner",
+                "density": "CARD",
+                "text_equivalent": {
+                  "headline": "Изменение цены · Мужская стрижка",
+                  "body": "Компания YCLIENTS: 88005. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 1600 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-09T20:30:07.085Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Закрыть",
+                  "itemized": [
+                    "Компания YCLIENTS: 88005",
+                    "Услуга: 201",
+                    "Текущая цена: 2000 RUB",
+                    "Новая цена: 1600 RUB",
+                    "Источник: YCLIENTS",
+                    "Риск: Изменение цены в YCLIENTS",
+                    "Обратимость: Для обратного изменения потребуется новое подтверждение",
+                    "Состояние: Ожидает вашего подтверждения",
+                    "Запрошено: Вы",
+                    "Подтверждение доступно до: 2026-10-09T20:30:07.085Z",
+                    "Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Закрыть"
+                  ],
+                  "completeness_sentence": null,
+                  "unknowns_sentence": null
+                },
+                "speech": null,
+                "a11y": {
+                  "role_hint": "region",
+                  "label": "Изменение цены · Мужская стрижка",
+                  "description": "Компания YCLIENTS: 88005. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 1600 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-09T20:30:07.085Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Закрыть",
+                  "reading_order": [
+                    {
+                      "k": "intent",
+                      "id": "i1"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i2"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i3"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i4"
+                    }
+                  ],
+                  "live_region": "off",
+                  "accessible_names": {
+                    "intent:i1": "Подтвердить цену",
+                    "intent:i2": "Отклонить изменение",
+                    "intent:i3": "Подробности изменения",
+                    "intent:i4": "Закрыть"
+                  }
+                },
+                "fullscreen_detail": {
+                  "route_key": "fs.catalogue",
+                  "reason": "audit"
+                }
+              },
+              "render": {
+                "contract": "maya.render.receipt/1",
+                "profile_id": "pwa/1",
+                "profile_version": 1,
+                "render_tier": "RICH_INTERACTIVE",
+                "intents_minted": 4,
+                "intents_emitted": 4,
+                "intents_withheld": [],
+                "body_reductions": [],
+                "text_equivalent_is_canonical": false,
+                "escalation": null,
+                "degraded_at": "2026-10-09T20:20:07.103Z"
+              },
+              "integrity": {
+                "body_hash": "202eae484c5e12779835cc46c48a49149def0c71dcb27549797db3f04b423105",
+                "cell_index_digest": "796c5c81846bbedece35bdc057446b030f2d645c1f68a40309f72190d119d96e",
+                "envelope_seal": "4e460a03b3d7bd17e5500be463766315b24fca16edf2b2c5150c0631fb811ee5",
+                "seal_key_version": 1,
+                "principal_proof_hash": "40b6f2bc2720bb19f77e7f0da1c17c78e138c20fb6bf54ef7b8c59b1d85a8cdd",
+                "approval_echo": {
+                  "owner": "ai_approval_request",
+                  "hash": "f3134debe50432a9d7c48a170d473363bb9ae8c35f1ebdeb5ddbef4b97f61df2"
+                },
+                "policy_context_echo": null
+              }
+            }
+          },
+          "dismiss_widget_id": null
+        },
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "director",
+          "intent": "general"
+        }
+      },
+      "pid": 38967
+    }
+  ],
+  "writes": 1,
+  "actions": [
+    {
+      "ownerReportRunId": null,
+      "ownerReportSlotKey": null,
+      "id": "e79bac13-464a-49e1-ae26-32881a8095fe",
+      "tenantId": "cmv1esl1m0033v0c993si0me1",
+      "identityVersion": 1,
+      "identityFingerprint": "8896eef4270a385ca7307f989c3408451d7fa80ab4e785afe41d6e81b5c975a3",
+      "idempotencyScope": "crm-service-price-v1",
+      "requestIdempotencyKeyHash": "878c418cae294ebc40a1b85f03866fe907d4753a5157868f44ffa262d53aa8ef",
+      "bookingIntentContract": null,
+      "bookingIntentHash": null,
+      "bookingIntentEncrypted": null,
+      "sourceType": "authenticated_request",
+      "sourceRef": "cmv1et8a900042fc9by3valr6",
+      "agentTaskId": null,
+      "actorUserId": "cmv1esl2z0034v0c99kpp0pdh",
+      "actionClass": "update_crm_service_fixed_price",
+      "capability": "crm.service.fixed-price.update.v1",
+      "capabilityVersion": 1,
+      "targetKind": "crm_service",
+      "targetRef": "yclients-service/88005/201",
+      "normalizedInputContract": "maya.crm-service-fixed-price/1",
+      "normalizedInputHash": "d91d6c6159608ebb5abe4b0ccc04d2d82c81d4ed0871302c203ec62a348b2c44",
+      "normalizedInputEncrypted": "v1.lBZs5EkZYtBl6DjX._0fUeiAvlVHv68r25MF4bw.JIH6TKNyGcUMvN56ovD8e3-tMzDDM1wG-ZSZNsZPIX2hzx_tlw4JN02S7Tnu9qfkY-XarmVJGOkk8irU31tbHqajmeg-QVXrio4ZPPoGMRZ5p9UMEtih1NQHA-CPmyKc6ayuyj5bYGXATOjkZLMI9A5P5lVJjKqPKPhOPwzDPYTe3lzyD6TI-360JLFcwEtDPTlJlNLljSCnETYgosedWFMMquBbYWsxCydqGl1CAPQ0JMdMYMCaLToefIxxFwjhi5abzz7ITsD8GhXnQLV4495ph-pyJgYImyEA1f1H0w8uRA5yVnumTgb-TpNAPeDGIqCD7hsPK2TWOoE-JQmR6FPLq_ckmM2CYqZd0r1d5CahH9H_ahrqowXH-puJqrWhXd8srJAuxUFi52qITV6ogRjfiQcyXzBRJii73i02iIDgSuQd_X2q-1sGTyqhX1iAhIcAoZpORUBlNjd89ftV8bboKvLLQbg_OpdP1ekzMTlAsvk",
+      "evidenceRefsJson": [],
+      "intentExpiresAt": null,
+      "dryRun": false,
+      "riskProfileVersion": 1,
+      "riskFacetsJson": [
+        "ac2",
+        "external",
+        "one_target",
+        "financial",
+        "explicit_actor_approval"
+      ],
+      "policyKey": "production.crm-service-price.confirmed-request",
+      "policyVersion": 1,
+      "policyDecision": "ALLOW",
+      "autonomyLevel": "L2_CONFIRMED_REQUEST",
+      "policyDecidedBy": "canonical_action_policy_resolver",
+      "policyContextContract": "maya.action-policy-context/1",
+      "policyContextHash": "31f1bdcc74d0aee63a2fd78e73c79bded243102c87803b4c8358bc58ac9af5ea",
+      "policyEvidenceJson": {
+        "risk": {
+          "facets": [
+            "ac2",
+            "explicit_actor_approval",
+            "external",
+            "financial",
+            "one_target"
+          ],
+          "profileVersion": 1
+        },
+        "actor": {
+          "kind": "actor",
+          "role": "tenant_owner",
+          "actorRef": "30c22d7ae9feaa6906d4e8d4e1f90a021fc557255c6d0635d222cf1c8bd2b1bb",
+          "userStatus": "active",
+          "membershipRef": "4bfb97892f6e89bf807469b6eda06d1a347d38260b4952787f1b1ca1654cd818",
+          "branchScopeRef": null,
+          "membershipStatus": "active",
+          "membershipUpdatedAt": "2026-10-09T20:19:37.020Z"
+        },
+        "policy": {
+          "key": "production.crm-service-price.confirmed-request",
+          "version": 1,
+          "decision": "ALLOW",
+          "decidedBy": "canonical_action_policy_resolver",
+          "reasonCodes": []
+        },
+        "source": {
+          "ref": "83356eb14545bb214291a1c5cebf21c32aec62b6c734694a6bd8157abe76cee0",
+          "type": "authenticated_request"
+        },
+        "target": {
+          "ref": "64e4290bb010c1f4172fdd684834bea667665f824da44e2089fca4434bf6f33f",
+          "kind": "crm_service"
+        },
+        "tenant": {
+          "ref": "40a4f0a81141176ebf7279d3a8096d52f3b943f6d60eaa2d7abfd961ce5052e1",
+          "status": "active",
+          "allowed": true,
+          "updatedAt": "2026-10-09T20:19:36.970Z",
+          "accessState": "active"
+        },
+        "approval": {
+          "requirement": "NONE",
+          "bindingExpiresAt": "2026-10-09T20:21:17.286Z",
+          "approverPolicyKey": "none"
+        },
+        "autonomy": {
+          "level": "L2_CONFIRMED_REQUEST",
+          "source": "action_capability_registry"
+        },
+        "contract": "maya.action-policy-context/1",
+        "capability": {
+          "key": "crm.service.fixed-price.update.v1",
+          "version": 1,
+          "targetKind": "crm_service",
+          "actionClass": "update_crm_service_fixed_price"
+        },
+        "permission": {
+          "codes": [
+            "principal.server-derived",
+            "tenant.active",
+            "update_crm_service_fixed_price.request"
+          ],
+          "allowed": true,
+          "profileKey": "canonical.update_crm_service_fixed_price",
+          "actorPolicy": "REQUIRED",
+          "profileVersion": 1
+        },
+        "validUntil": "2026-10-09T20:21:17.286Z",
+        "entitlement": {
+          "allowed": true,
+          "planRef": null,
+          "contract": "maya.feature-requirement-decision/1",
+          "validUntil": null,
+          "requirements": [
+            {
+              "enabled": true,
+              "featureKey": "crm.integration"
+            }
+          ]
+        },
+        "evaluatedAt": "2026-10-09T20:20:17.286Z",
+        "normalizedInputHash": "d91d6c6159608ebb5abe4b0ccc04d2d82c81d4ed0871302c203ec62a348b2c44"
+      },
+      "policyEvaluatedAt": "2026-10-09T20:20:17.286Z",
+      "policyValidUntil": "2026-10-09T20:21:17.286Z",
+      "approvalRequirement": "NONE",
+      "approvalDecision": "NOT_REQUIRED",
+      "approvalInputHash": null,
+      "approvalBindingHash": "575dabf27c49490ebc1ef075db238110bb2aa72be1745c82959f40a49d95e3ed",
+      "approvalRequestedAt": null,
+      "approvalExpiresAt": null,
+      "approvalDecidedAt": null,
+      "approvalDecidedByUserId": null,
+      "state": "SUCCEEDED",
+      "notExecutedReasonCode": null,
+      "retryPolicyKey": "crm-service-price.no-redispatch",
+      "retryPolicyVersion": 1,
+      "maxExecutionAttempts": 1,
+      "executionAttemptCount": 1,
+      "nextExecutionAttemptAt": null,
+      "reconciliationPolicyKey": "crm-service-price.unattributed-readback-hold",
+      "reconciliationPolicyVersion": 1,
+      "reconciliationState": "NOT_REQUIRED",
+      "leaseOwner": null,
+      "leaseTokenHash": null,
+      "leaseExpiresAt": null,
+      "revision": 2,
+      "transportIdentityVersion": 1,
+      "transportIdempotencyKey": "dd5ae091e2f236b0e9c5aadd127d4a5f4154156bcb3c960344994678ae29cd6d",
+      "finalOutcomeCode": "provider_applied",
+      "safeResultSummaryJson": {
+        "source": "yclients",
+        "currency": "RUB",
+        "revision": "e3a7e319c6098f6a8fda5ef93440d25d39ad4c76ef9c98f739261f8500fa9bc1",
+        "verified": true,
+        "service_id": "201",
+        "price_rubles": 1600,
+        "service_name": "Мужская стрижка"
+      },
+      "userExplanationCode": null,
+      "userExplanationParamsJson": null,
+      "firstAttemptedAt": "2026-10-09T20:20:17.296Z",
+      "finalizedAt": "2026-10-09T20:20:17.316Z",
+      "payloadRetentionUntil": "2026-10-16T20:20:17.290Z",
+      "auditRetentionUntil": "2027-10-09T20:20:17.290Z",
+      "createdAt": "2026-10-09T20:20:17.293Z",
+      "updatedAt": "2026-10-09T20:20:17.318Z",
+      "operationalAlertRunId": null,
+      "operationalAlertSlotKey": null,
+      "nativeFeedbackRequestId": null,
+      "nativeFeedbackRevisionId": null,
+      "nativeFeedbackSlotKey": null,
+      "teamMessageId": null,
+      "teamMessageSlotKey": null,
+      "expenseReminderRunId": null,
+      "expenseReminderSlotKey": null
+    }
+  ],
+  "postgresRestart": false
+}

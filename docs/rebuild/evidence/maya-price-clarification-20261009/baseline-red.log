@@ -1,0 +1,56 @@
+FAIL src/ai-tools/ai-core.service-price-semantic.spec.ts
+  service price update semantic contract [actual parser/CI]
+    ○ skipped routes tenant_owner only to the existing high-risk price preparation tool
+    ○ skipped routes business_owner only to the existing high-risk price preparation tool
+    ○ skipped denies platform_owner even if a caller advertises the write tool
+    ○ skipped denies platform_admin even if a caller advertises the write tool
+    ○ skipped denies administrator even if a caller advertises the write tool
+    ○ skipped denies manager even if a caller advertises the write tool
+    ○ skipped denies provider even if a caller advertises the write tool
+    ○ skipped denies employee even if a caller advertises the write tool
+    ○ skipped denies accountant even if a caller advertises the write tool
+    ○ skipped denies customer even if a caller advertises the write tool
+    ○ skipped denies integration_service even if a caller advertises the write tool
+    ○ skipped denies tenant_admin even if a caller advertises the write tool
+    ○ skipped denies branch_manager even if a caller advertises the write tool
+    ○ skipped denies staff even if a caller advertises the write tool
+    ○ skipped denies client even if a caller advertises the write tool
+    ○ skipped keeps services.price a READ and rejects using that plan to prepare a write
+    ○ skipped clarifies missing price even when model arguments contain an ID and price
+    ○ skipped clarifies missing service even when model arguments contain an ID and price
+    ○ skipped clarifies missing both even when model arguments contain an ID and price
+    ○ skipped does not substitute a catalog READ when the existing write capability is unavailable
+    ○ skipped uses explicit model-carried service as a preference while binding corrected price only from actual user messages
+    ○ skipped does not fill a missing current semantic service from tool arguments or an unrelated previous READ
+    ○ skipped does not convert an inflected corpus title into a literal authoritative selection
+  AiCore price preparation [actual semantic parser, synthetic owners]
+    ○ skipped binds literal raw intent and current catalog; correction=false
+    ○ skipped binds literal raw intent and current catalog; correction=true
+    ○ skipped inflected title cannot prepare a change using model service or amount
+    ○ skipped stale catalog cannot prepare a change using model service or amount
+  server-owned pricing clarification continuation
+    ✕ preserves the raw price through service-only clarification, a new AiCore instance, and price-only correction (15 ms)
+    ○ skipped does not revive the old amount from caller history after current source changed
+
+  ● server-owned pricing clarification continuation › preserves the raw price through service-only clarification, a new AiCore instance, and price-only correction
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "1 500"
+    Received string:    "Параметры действия требуют уточнения. Какой вариант вы выбираете? Подтверждённого результата выполнения пока нет."
+
+      507 |     ]);
+      508 |     expect(first.action).toBeNull();
+    > 509 |     expect(first.reply).toContain('1\u00a0500');
+          |                         ^
+      510 |     expect(first.reply.match(/\?/g)).toHaveLength(1);
+      511 |     expect(f.saved()).toMatchObject({
+      512 |       servicePrice: { requestedPrice: 1500, service: null },
+
+      at Object.<anonymous> (ai-tools/ai-core.service-price-semantic.spec.ts:509:25)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 28 skipped, 29 total
+Snapshots:   0 total
+Time:        0.53 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service-price-semantic.spec.ts".

@@ -1,0 +1,143 @@
+{
+  "checkedAt": "2026-10-09T20:25:19.826594+00:00",
+  "fullBase": "2e43be9545e17c04a85bc54b5c422519075b5a18",
+  "sourceHead": "177c930c717795e72d8162aa50f686cd1cde305b",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts",
+      "sha256": "67fcaa73aa65c381dfbc40e36871ad12991719091d9bf118ec5bfd083f47e590",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core-model.service.ts",
+      "sha256": "362d4b683dcb63e31139cd750990d32d6b89783ca03211ce5d17eca7d096c48d",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "4ef92ad137fc5a7f41ee745c5809844aed85f50a996f9d4204259c9427da5990",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/service-price-chat-binding.ts",
+      "sha256": "7408090e8845701e0dbd9f17caf1bf4b1a102f9b0f69d62779e1b23a40dd3f5b",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts",
+      "sha256": "8dc80a3a5215efc952215ae76cbf8ea1b96bab4f3f0a745e9a785a3fbec35f22",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "sha256": "7a1ea3577f32b8d05879f31adcb8729a8b227cd915208194154fa451d88bb845",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "sha256": "4d282ded29e3896ea57b486c7986c509eec297185de5facdcd7b96aebf7ee615",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "4782258b1fd161fa77ea8b8c8f6e97c2f5e0d4335049f7959a1cbcec0251b594",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/service-price-chat-process.ts",
+      "sha256": "f02453a05f60025b8666091337a80edb8f201268c49e13757de6e4d8e64cca46",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/service-price.live-spec.ts",
+      "sha256": "7a40560953f381080fdb6f7a9fd4a927ab86c78b1a821835176827fbbab31eba",
+      "matchesManifestAndGit": true
+    },
+    {
+      "path": "maya-carrier-react/test/service-price-http-fixture.test.mjs",
+      "sha256": "66a1fbd19eab9c63c53f64f4d950018f33f21377fd2af955e6027f6a03d78368",
+      "matchesManifestAndGit": true
+    }
+  ],
+  "sourceWorktreeDiff": "",
+  "applicationProcesses": [
+    {
+      "pid": 38762,
+      "absentAtFinalInspection": true
+    },
+    {
+      "pid": 38861,
+      "absentAtFinalInspection": true
+    },
+    {
+      "pid": 38967,
+      "absentAtFinalInspection": true
+    }
+  ],
+  "postgresStatus": {
+    "exitCode": 3,
+    "stdout": "pg_ctl: no server running",
+    "stderr": ""
+  },
+  "postgresPidFileAbsent": true,
+  "protectedWorktrees": [
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics",
+      "head": "97624aa633f4c2cd1d3b5412ec27e6d18f48dc07",
+      "status": ""
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-conversation-batch",
+      "head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+      "status": ""
+    },
+    {
+      "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-union-handoff",
+      "head": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+      "status": ""
+    }
+  ],
+  "directLauncher": {
+    "path": "/private/tmp/maya-union-ready-fixed-20261009/launch.command",
+    "sha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+    "matchesPreviousCheckpoint": true
+  },
+  "archiveCopyChecks": [
+    {
+      "file": "service-price-carrier.json",
+      "sha256": "f40e0d41a3e665b84a66e71905ddc7abf72996a667723376bf3bf83b529368e6",
+      "duplicateRemoved": true
+    },
+    {
+      "file": "price-clarification.json",
+      "sha256": "f85d9b159e8120aa653d0ccbe31c482b709747d3213c8b6e38d01c09a1d08368",
+      "duplicateRemoved": true
+    }
+  ],
+  "buildArtifacts": [
+    {
+      "path": "maya-saas-backend/dist/src/main.js",
+      "sha256": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f"
+    },
+    {
+      "path": "maya-saas-backend/dist/src/ai-tools/ai-core.service.js",
+      "sha256": "9ca57204f55a43fc6804a8a6ec3140cab27b0ec9e441631d9a4b0fb7fed364cd"
+    },
+    {
+      "path": "maya-saas-backend/dist/src/ai-tools/service-price-chat-binding.js",
+      "sha256": "7266b2e2f8658a7284cb9de6ecdcf4e83245dbca662713b681db3f46bd3bc9f9"
+    },
+    {
+      "path": "maya-saas-backend/dist/scripts/release-preflight.js",
+      "sha256": "fdc9c04b535d336bf6443198e6e4baa4b87cbe9c438ad8a3bfe1127854e71288"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/m/TFUG3WHQ/main.js",
+      "sha256": "09c6c1ce65b3b8a5d2e72943bdb10500002afb40608333555c03093c6256c412"
+    }
+  ],
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "browserAcceptance": false,
+  "postgresRestart": false
+}

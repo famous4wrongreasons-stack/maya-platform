@@ -1,0 +1,32 @@
+{
+  "reviewer": "/root/independent_review",
+  "kind": "Independent read-only source and saved-evidence review; no independent test rerun",
+  "sourceHead": "177c930c717795e72d8162aa50f686cd1cde305b",
+  "result": "No remaining source/evidence blockers",
+  "verified": {
+    "sourceBindings": 11,
+    "componentTests": 747,
+    "componentSuites": 7,
+    "httpTests": 26,
+    "carrierTests": 5,
+    "distinctApplicationProcesses": 3,
+    "sharedPostgresInstances": 1,
+    "syntheticPatchCountAfterFinalApproval": 1,
+    "succeededActionCount": 1,
+    "verifiedFinalPriceRub": 1600,
+    "postgresStopped": true,
+    "postgresPidFileAbsent": true
+  },
+  "fixedSourceFindings": [
+    "Require current-turn preparedServicePrice independently of restored preference",
+    "Qualify catalog call identity and fresh/saved preparation with current source and exact service name"
+  ],
+  "limits": [
+    "Scripted semantics and synthetic provider",
+    "Three application processes on one retained PostgreSQL; no PostgreSQL restart",
+    "Superseded-control refusal shown by passing source assertion; exact denied HTTP response not exported",
+    "Carrier replay, no new browser acceptance",
+    "No real-model/provider/full-MAYA or C10 acceptance"
+  ],
+  "manifestSha256": "e8d13bfc5ac0d42958168d5d062d581e6d9f2a435425787b5fe24a4e5c27e2d7"
+}
