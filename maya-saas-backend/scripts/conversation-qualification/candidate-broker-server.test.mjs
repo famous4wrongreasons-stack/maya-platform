@@ -231,3 +231,30 @@ test(
     assert.deepEqual(listeners(), before);
   },
 );
+
+test(
+  'validated frozen case/turn context reaches offline reservation before dispatch',
+  { timeout: 5000 },
+  async () => {
+    let context;
+    const { broker, gate } = fixture({
+      reserve(_url, _init, scope) {
+        context = scope;
+      },
+    });
+    gate.fetch = async () => {
+      assert.deepEqual(context, { caseId: 'synthetic-case', turn: 1 });
+      assert.equal(Object.isFrozen(context), true);
+      return new Response('{}', { status: 200 });
+    };
+    try {
+      const { port } = await broker.ready;
+      assert.equal(
+        (await request(port, '/chat/completions', 'POST')).status,
+        200,
+      );
+    } finally {
+      await broker.stop('synthetic-context-test');
+    }
+  },
+);

@@ -29,6 +29,9 @@ export type SemanticAssessment = {
   status: 'pass' | 'fail' | 'ungraded';
   failedCheckIds: string[];
 };
+export type OfflineRevocationRefusal = {
+  expectedRefusal: { httpStatus: 401; code: 'membership_revoked' };
+};
 export interface ReplayResult {
   status: 'stopped' | 'completed_with_semantic_failures' | 'replayed_ungraded';
   executionStatus: 'stopped' | 'completed';
@@ -43,6 +46,7 @@ export interface ReplayResult {
     plannedTurns: number;
     attemptedTurns: number;
     validResponses: number;
+    expectedRefusals?: number;
     unresolvedTurns: number;
     skippedDependentTurns: number;
     unexecutedTurns: number;
@@ -57,6 +61,12 @@ export function replayPilot(
   options: {
     budget: { dialog(): void; turn(): void; endTurn(): void };
     semanticFailure?: 'next_independent_dialog';
+    expectedRefusals?: Array<{
+      caseId: 'current-lifecycle-negative';
+      turn: 1;
+      httpStatus: 401;
+      code: 'membership_revoked';
+    }>;
     assessTurn?: (turn: {
       caseId: string;
       turn: number;
@@ -73,11 +83,14 @@ export function replayPilot(
         requestId: string;
         messages: Array<{ role: 'user' | 'assistant'; content: string }>;
         conversationId?: string;
-      }): Promise<{
-        reply: string;
-        userTurn?: { conversationId: string };
-        evidence?: unknown;
-      }>;
+      }): Promise<
+        | {
+            reply: string;
+            userTurn?: { conversationId: string };
+            evidence?: unknown;
+          }
+        | OfflineRevocationRefusal
+      >;
       close(): Promise<void>;
     }>;
   },

@@ -30,6 +30,7 @@ import { runOwnedStage, trackOwnedChild } from './owned-child-cleanup.mjs';
 import { coreConversationResources } from './core-conversation-resources.mjs';
 import { CORE_RECORDED_REPLAY_QUALIFICATION } from './core-recorded-replay.mjs';
 import { summarizeCoreUnionReport } from './core-conversation-assessment.mjs';
+import { summarizeCoreFullOfflineReport } from './core-full-offline-report.mjs';
 const { values } = parseArgs({
   options: {
     prepare: { type: 'boolean' },
@@ -98,12 +99,6 @@ assert.ok(
       profile.id === CORE_UNION_PROFILE &&
       !recordedReplay),
   'core_runner_semantic_fixture_refused',
-);
-// Paused WIP: the 48-case HTTP fixtures/planner/report are not integrated yet.
-// Preserve inert preparation, but refuse execution before output or services.
-assert.ok(
-  profile.id !== CORE_OFFLINE_PROFILE || values.run !== true,
-  'core_offline_implementation_incomplete',
 );
 assert.ok(
   values.output &&
@@ -273,7 +268,9 @@ const report = {
     ? 'REAL_MODEL_SYNTHETIC_DATA_UNGRADED'
     : recordedReplay
       ? CORE_RECORDED_REPLAY_QUALIFICATION
-      : 'DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY',
+      : profile.id === CORE_OFFLINE_PROFILE
+        ? 'SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY'
+        : 'DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY',
   recordedReplay,
   replayFixture: replayFixture ?? null,
 };
@@ -469,7 +466,7 @@ try {
   );
   report.completed.push('conversation');
   report.status = 'passed-ungraded';
-  if (profile.id === CORE_UNION_PROFILE) {
+  if ([CORE_UNION_PROFILE, CORE_OFFLINE_PROFILE].includes(profile.id)) {
     const httpReportPath = path.join(output, 'http-report.json');
     const stat = fs.lstatSync(httpReportPath);
     assert.ok(
@@ -480,8 +477,12 @@ try {
     const reportBinding = {
       manifestSha256,
       candidateCommit: manifest.candidateCommit,
+      cases: manifest.cases,
     };
-    const summary = summarizeCoreUnionReport(httpReport, reportBinding);
+    const summary =
+      profile.id === CORE_OFFLINE_PROFILE
+        ? summarizeCoreFullOfflineReport(httpReport, reportBinding)
+        : summarizeCoreUnionReport(httpReport, reportBinding);
     report.status = summary.status;
     report.dialogueExecutionStatus = summary.executionStatus;
     report.semanticStatus = summary.semanticStatus;

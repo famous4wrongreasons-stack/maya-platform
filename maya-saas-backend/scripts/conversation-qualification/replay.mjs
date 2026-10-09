@@ -112,7 +112,7 @@ export function freezePilot(
  */
 export async function replayPilot(
   manifest,
-  { openDialog, budget, record, semanticFailure, assessTurn },
+  { openDialog, budget, record, semanticFailure, assessTurn, expectedRefusals },
 ) {
   const { manifestSha256, ...unsigned } = manifest;
   if (sha256(canonical(unsigned)) !== manifestSha256)
@@ -134,6 +134,30 @@ export async function replayPilot(
       typeof assessTurn !== 'function')
   )
     throw new Error('replay_assessment_contract');
+  // One predeclared negative control in the separately pinned offline corpus.
+  // No arbitrary error becomes a valid reply or permits history advancement.
+  const revokedControl = {
+    caseId: 'current-lifecycle-negative',
+    turn: 1,
+    httpStatus: 401,
+    code: 'membership_revoked',
+  };
+  if (expectedRefusals !== undefined) {
+    const row = manifest.cases.find(
+      (item) => item.id === revokedControl.caseId,
+    );
+    if (
+      manifest.sourceSha256 !==
+        '9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b' ||
+      manifest.dialogs !== 48 ||
+      manifest.userTurns !== 81 ||
+      canonical(expectedRefusals) !== canonical([revokedControl]) ||
+      row?.role !== 'owner' ||
+      canonical(row.userTurns) !==
+        canonical(['После отзыва доступа всё равно покажи прежний результат.'])
+    )
+      throw new Error('replay_expected_refusal_contract');
+  }
   const outcomes = [];
   const turns = manifest.cases.flatMap((c) =>
     c.userTurns.map((_, i) => ({
@@ -177,6 +201,35 @@ export async function replayPilot(
             messages: structuredClone(messages),
             ...(conversationId ? { conversationId } : {}),
           });
+          if (
+            expectedRefusals !== undefined &&
+            item.id === revokedControl.caseId
+          ) {
+            if (
+              index !== 0 ||
+              !result ||
+              canonical(result) !==
+                canonical({
+                  expectedRefusal: {
+                    httpStatus: revokedControl.httpStatus,
+                    code: revokedControl.code,
+                  },
+                })
+            )
+              throw new Error('replay_expected_refusal_mismatch');
+            ledger.outcome = 'expected_refusal';
+            caseOutcome = 'expected_refusal';
+            // The attempted user turn is recorded; there is no assistant reply,
+            // conversation id, semantic assessment or later history to fabricate.
+            await record({
+              caseId: item.id,
+              turn: index + 1,
+              requestId,
+              outcome: 'expected_refusal',
+              ...result.expectedRefusal,
+            });
+            break;
+          }
           if (
             typeof result?.reply !== 'string' ||
             !result.reply.trim() ||
@@ -306,6 +359,9 @@ export async function replayPilot(
       plannedTurns: manifest.userTurns,
       attemptedTurns: attempted,
       validResponses: count('response'),
+      ...(expectedRefusals !== undefined
+        ? { expectedRefusals: count('expected_refusal') }
+        : {}),
       unresolvedTurns: count('unresolved'),
       skippedDependentTurns: count('skipped_dependent_after_semantic_fail'),
       unexecutedTurns: count('unexecuted'),

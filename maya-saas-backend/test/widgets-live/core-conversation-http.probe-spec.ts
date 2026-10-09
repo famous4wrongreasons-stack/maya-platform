@@ -32,6 +32,11 @@ import {
   type CandidateSource,
   type CorpusCase,
 } from './support/current-candidate-sources';
+import {
+  coreFullOfflineRecipe,
+  configureCoreFullOfflineAfterBind,
+  coreFullOfflineExternalFacts,
+} from './support/core-full-offline-fixtures';
 import { occupancyFixtureEdge } from './support/c9-occupancy-fixture-edge';
 import { assertProofDatabase } from './support/proof-db-guard';
 
@@ -39,18 +44,26 @@ const nativeRequire = createRequire(__filename);
 const { replayPilot, sha256 } = nativeRequire(
   path.resolve('scripts/conversation-qualification/replay.mjs'),
 ) as typeof import('../../scripts/conversation-qualification/replay.mjs');
-const { CandidateBudgetGate, CORE_DIAGNOSTIC_PROFILE, CORE_UNION_PROFILE } =
-  nativeRequire(
-    path.resolve(
-      'scripts/conversation-qualification/current-candidate-budget.mjs',
-    ),
-  ) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
-const { assessCoreTurn, hasExactReviewedSlot, CORE_FOLLOWUP_CASE_IDS } =
-  nativeRequire(
-    path.resolve(
-      'scripts/conversation-qualification/core-conversation-assessment.mjs',
-    ),
-  ) as typeof import('../../scripts/conversation-qualification/core-conversation-assessment.mjs');
+const {
+  CandidateBudgetGate,
+  CORE_DIAGNOSTIC_PROFILE,
+  CORE_UNION_PROFILE,
+  CORE_OFFLINE_PROFILE,
+} = nativeRequire(
+  path.resolve(
+    'scripts/conversation-qualification/current-candidate-budget.mjs',
+  ),
+) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
+const {
+  assessCoreTurn,
+  hasExactReviewedSlot,
+  CORE_FOLLOWUP_CASE_IDS,
+  CORE_CASE_TURNS,
+} = nativeRequire(
+  path.resolve(
+    'scripts/conversation-qualification/core-conversation-assessment.mjs',
+  ),
+) as typeof import('../../scripts/conversation-qualification/core-conversation-assessment.mjs');
 const followupCaseIds = new Set(CORE_FOLLOWUP_CASE_IDS);
 type SemanticAssessment =
   import('../../scripts/conversation-qualification/replay.mjs').SemanticAssessment;
@@ -131,9 +144,10 @@ const safeDiagnosticCode = (value: unknown) =>
 type DiagnosticCase = {
   id: string;
   role: 'client' | 'owner' | 'admin';
-  runtimeRole: string;
-  audience: 'client' | 'owner';
+  runtimeRole?: string;
+  audience?: 'client' | 'owner';
   group: string;
+  familyRefs?: string[];
   userTurns: string[];
 };
 type DiagnosticManifest = {
@@ -252,6 +266,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     });
     manifest = verifiedManifest as unknown as DiagnosticManifest;
     profile = coreConversationProfile(verifiedManifest.profile);
+    if (
+      profile.id === CORE_OFFLINE_PROFILE &&
+      (mode !== 'dry' || recordedReplay)
+    )
+      throw new Error('core_full_offline_dry_only');
     if (
       semanticFailureFixture !== undefined &&
       !(
@@ -394,6 +413,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         expect(tenantId).toBe(source.tenant.id);
         source.reads.push(name);
       };
+      const finite =
+        profile.id === CORE_OFFLINE_PROFILE
+          ? coreFullOfflineExternalFacts(source)
+          : null;
       const services = [
         {
           id: '81',
@@ -407,21 +430,32 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         {
           getServices: (tenantId: string) => {
             read('services', tenantId);
-            return Promise.resolve(services);
+            return Promise.resolve(
+              finite ? finite.getServices(tenantId) : services,
+            );
           },
-          getPublicBookingServices: (tenantId: string) => {
+          getPublicBookingServices: (tenantId: string, staffId?: string) => {
             read('public-services', tenantId);
-            return Promise.resolve(services);
+            return Promise.resolve(
+              finite ? finite.getServices(tenantId, staffId) : services,
+            );
           },
           readServiceCatalog: (tenantId: string) => {
             read('service-catalog', tenantId);
             return Promise.resolve(
-              observedServiceCatalog(services, 'synthetic'),
+              observedServiceCatalog(
+                finite ? finite.getServices(tenantId) : services,
+                'synthetic',
+              ),
             );
           },
           getStaff: (tenantId: string) => {
             read('staff', tenantId);
-            return Promise.resolve([{ id: '71', name: 'Артём' }]);
+            return Promise.resolve(
+              finite
+                ? finite.getStaff(tenantId)
+                : [{ id: '71', name: 'Артём' }],
+            );
           },
           getStaffScheduleDay: ({
             tenantId,
@@ -433,6 +467,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             date: string;
           }) => {
             read('schedule', tenantId);
+            if (finite)
+              return Promise.resolve(
+                finite.getStaffScheduleDay({ tenantId, staffId, date }),
+              );
             if (followupCaseIds.has(source.item.id)) {
               expect(staffId).toBe('71');
               expect(date.slice(0, 10)).toBe(source.clockBinding.tomorrow);
@@ -449,6 +487,8 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             params: Parameters<CRMAdapter['getAvailableSlots']>[0],
           ) => {
             read('availability', params.tenantId);
+            if (finite)
+              return Promise.resolve(finite.getAvailableSlots(params));
             if (followupCaseIds.has(source.item.id))
               assertFiniteFollowupAvailability(source, params);
             return Promise.resolve([
@@ -460,6 +500,22 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               },
             ]);
           },
+          ...(finite
+            ? {
+                readGoodsItem: (tenantId: string, goodsId: string) => {
+                  read('goods', tenantId);
+                  return Promise.resolve(
+                    finite.readGoodsItem(tenantId, goodsId),
+                  );
+                },
+                getServicePriceSnapshot: (serviceId: string) => {
+                  read('service-price-snapshot');
+                  return Promise.resolve(
+                    finite.getServicePriceSnapshot(serviceId),
+                  );
+                },
+              }
+            : {}),
           getCompanyProfile: () => {
             read('company');
             return Promise.resolve({
@@ -549,7 +605,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         expect(onlyUserHistoryForwarded).toBe(true);
         if (
           canonicalOwnerClarificationExpected &&
-          profile.id !== CORE_UNION_PROFILE
+          !(
+            profile.id === CORE_UNION_PROFILE ||
+            profile.id === CORE_OFFLINE_PROFILE
+          )
         )
           expect(restoredClarificationMatchesActualReply).toBe(true);
         return decide(input);
@@ -739,9 +798,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       replayFixture: replayFixture ?? null,
       semanticFailureFixture: semanticFailureFixture ?? null,
       semanticQualification:
-        mode === 'dry'
-          ? 'SCRIPTED_DRY_MECHANICS_NOT_MODEL_QUALITY'
-          : 'FINITE_OBSERVED_FACT_CHECKS_NOT_GENERAL_LANGUAGE_ACCEPTANCE',
+        profile?.id === CORE_OFFLINE_PROFILE
+          ? 'SCRIPTED_CURRENT_SOURCE_MECHANICAL_CHECKS_NOT_MODEL_QUALITY'
+          : mode === 'dry'
+            ? 'SCRIPTED_DRY_MECHANICS_NOT_MODEL_QUALITY'
+            : 'FINITE_OBSERVED_FACT_CHECKS_NOT_GENERAL_LANGUAGE_ACCEPTANCE',
       sourceHead,
       sourceDigest,
       manifestSha256,
@@ -749,6 +810,27 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       dialogs: profile?.dialogs,
       plannedUserTurns: profile?.userTurns,
       actualHttpTurns: responses.length,
+      ...(profile?.id === CORE_OFFLINE_PROFILE
+        ? {
+            offlineAccounting: {
+              plannedTurns: 81,
+              actualHttpTurns: responses.length,
+              replyBearingResponses: responses.filter(
+                (row) =>
+                  row.httpStatus === 201 && typeof row.actualReply === 'string',
+              ).length,
+              expectedRefusals: responses.filter(
+                (row) => row.expectedRefusal !== undefined,
+              ).length,
+              skippedDependentTurns:
+                result?.coverage.skippedDependentTurns ?? 0,
+              unexecutedTurns: result?.coverage.unexecutedTurns ?? null,
+              unresolvedTurns: result?.coverage.unresolvedTurns ?? null,
+              qualification:
+                'ACTUAL_HTTP_AND_SCRIPTED_TRANSPORT_NOT_MODEL_QUALITY',
+            },
+          }
+        : {}),
       modelCalls,
       serializerCalls,
       brokerCalls,
@@ -861,6 +943,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   }
   async function seed() {
     const fx = fixturesForHttp(db, http);
+    if (profile.id === CORE_OFFLINE_PROFILE) {
+      await seedOffline(fx);
+      return;
+    }
     for (const item of manifest.cases) {
       const binding: CorpusCase = {
         id: item.id,
@@ -1266,6 +1352,223 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       financeReads,
     });
   }
+  async function seedOffline(fx: ReturnType<typeof fixturesForHttp>) {
+    expect(manifest.cases).toHaveLength(48);
+    expect(
+      new Set(manifest.cases.flatMap((item) => item.familyRefs ?? [])).size,
+    ).toBe(33);
+    for (const item of manifest.cases)
+      expect(item.familyRefs?.length).toBeGreaterThan(0);
+    expect(
+      manifest.cases.reduce((n, item) => n + item.userTurns.length, 0),
+    ).toBe(81);
+    for (const item of manifest.cases) {
+      const recipe = coreFullOfflineRecipe(item.id);
+      expect(recipe.binding.userTurns).toEqual(item.userTurns);
+      expect(recipe.binding.role).toBe(item.role);
+      const source = await bindCandidateSource(
+        db,
+        http,
+        fx,
+        recipe.binding,
+        sources,
+      );
+      caseSources.set(item.id, source);
+      const setup = await configureCoreFullOfflineAfterBind(db, source);
+      // Grant only the exact existing READ feature to the existing role. Clone
+      // the binder feature array so another case cannot inherit this setup.
+      source.features = [...source.features];
+      for (const feature of recipe.requiredFeatures) {
+        if (!source.features.includes(feature)) {
+          await fx.grantFeature(source.tenant, feature);
+          source.features.push(feature);
+        }
+      }
+      const member = await db.prisma.membership.findUniqueOrThrow({
+        where: {
+          userId_tenantId: {
+            userId: source.user.id,
+            tenantId: source.tenant.id,
+          },
+        },
+      });
+      expect(member.role).toBe(recipe.runtimeRole);
+      const revoked = item.id === 'current-lifecycle-negative';
+      if (revoked) expect(member.status).toBe('suspended');
+      else expect(member.status).toBe('active');
+      // Extra finance belongs only to the original compound/schedule scenarios.
+      // Ordinary BI/C8 and their negatives remain solely bindCandidateSource's.
+      if (
+        [
+          'core-owner-compound-clarification',
+          'followup-owner-compound',
+          'followup-owner-topic-switch',
+          'mt-topic_switch_and_return-17',
+        ].includes(item.id)
+      )
+        await publishFinance(source);
+      const tools = await request(http.app.getHttpServer())
+        .get('/api/ai/tools?surface=web')
+        .set('Authorization', `Bearer ${source.token}`);
+      expect(tools.status).toBe(revoked ? 401 : 200);
+      const actualTools =
+        tools.status === 200
+          ? (tools.body as { tools: Array<{ name: string }> }).tools.map(
+              (tool) => tool.name,
+            )
+          : [];
+      const sourceReadProofs: Record<string, unknown>[] = [];
+      for (const tool of recipe.requiredFeatures.map((feature) =>
+        feature === 'reviews.core'
+          ? 'reviews.list.read'
+          : 'inventory.stock.read',
+      )) {
+        expect(actualTools).toContain(tool);
+        const checked = await http.executeTool(
+          source.token,
+          tool,
+          {
+            surface: 'web',
+            arguments:
+              tool === 'reviews.list.read'
+                ? { days: 30, rating: 1, limit: 20 }
+                : { low_stock_only: true },
+            idempotencyKey: randomUUID(),
+          },
+          randomUUID(),
+        );
+        expect(checked.status).toBe(201);
+        expect(checked.body).toMatchObject({
+          result: { configured: false, source: 'not_configured', count: 0 },
+        });
+        sourceReadProofs.push({
+          tool,
+          httpStatus: checked.status,
+          result: (checked.body as { result: unknown }).result,
+          qualification:
+            'ACTUAL_UNCONFIGURED_LOCAL_REGISTRY_NOT_VERIFIED_EMPTY_PROVIDER_DATA_OR_REQUESTED_PERIOD',
+        });
+      }
+      const where = { tenantId: source.tenant.id };
+      const [
+        catalog,
+        staff,
+        appointments,
+        c7,
+        c8,
+        opportunities,
+        inventoryCount,
+        reviewCount,
+      ] = await Promise.all([
+        db.prisma.internalService.findMany({
+          where,
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            currency: true,
+            durationMinutes: true,
+            active: true,
+          },
+          orderBy: { id: 'asc' },
+        }),
+        db.prisma.internalProvider.findMany({
+          where,
+          select: { id: true, displayName: true, branchId: true, active: true },
+          orderBy: { id: 'asc' },
+        }),
+        db.prisma.appointment.findMany({
+          where,
+          select: {
+            id: true,
+            mayaClientId: true,
+            staffExternalId: true,
+            status: true,
+            startAt: true,
+            endAt: true,
+          },
+          orderBy: { id: 'asc' },
+        }),
+        db.prisma.measurementRevision.findMany({
+          where,
+          select: { id: true, state: true },
+          orderBy: { id: 'asc' },
+        }),
+        db.prisma.c8ResultRevision.findMany({
+          where,
+          select: { id: true, state: true },
+          orderBy: { id: 'asc' },
+        }),
+        db.prisma.opportunity.findMany({
+          where,
+          select: { id: true, status: true },
+          orderBy: { id: 'asc' },
+        }),
+        db.prisma.tenantCatalogItem.count({
+          where: { ...where, kind: 'inventory' },
+        }),
+        db.prisma.businessReview.count({ where }),
+      ]);
+      preflights.push({
+        caseId: item.id,
+        group: recipe.binding.group,
+        variant: recipe.binding.variant,
+        bindingSha256: hash(recipe.binding),
+        role: member.role,
+        membershipStatus: member.status,
+        audience: recipe.audience,
+        features: source.features,
+        actualTools,
+        toolsHttpStatus: tools.status,
+        clock: source.clockBinding,
+        expectedBoundary: recipe.expectedBoundary,
+        sourceReadProofs,
+        sourceRefs: source.sourceRefs.map((ref) => ({
+          owner: ref.owner,
+          idHash: hash(ref.id),
+          status: ref.status,
+        })),
+        branch: {
+          idHash: hash(setup.branchId),
+          name: setup.branchName,
+          secondBranchHash: setup.otherBranchId
+            ? hash(setup.otherBranchId)
+            : null,
+        },
+        internalCatalog: catalog.map(({ id, ...row }) => ({
+          ...row,
+          idHash: hash(id),
+        })),
+        internalStaff: staff.map(({ id, branchId, ...row }) => ({
+          ...row,
+          idHash: hash(id),
+          branchHash: hash(branchId),
+        })),
+        appointmentCount: appointments.length,
+        appointmentSnapshotHash: hash(appointments),
+        c7: c7.map((row) => ({ idHash: hash(row.id), state: row.state })),
+        c8: c8.map((row) => ({ idHash: hash(row.id), state: row.state })),
+        opportunities: opportunities.map((row) => ({
+          idHash: hash(row.id),
+          status: row.status,
+        })),
+        inventoryCount,
+        reviewCount,
+        occupied: source.occupied,
+        qualification:
+          'SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE',
+      });
+    }
+    expect(caseSources.size).toBe(48);
+    expect(modelCalls).toBe(0);
+    expect(serializerCalls).toBe(0);
+    expect(brokerCalls).toBe(0);
+    expect(forbidden).toEqual([]);
+    write('offline-source-snapshots.json', {
+      datasetSha256: manifest.datasetSha256,
+      cases: preflights,
+    });
+  }
   async function publishFinance(source: CandidateSource) {
     const day = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Europe/Moscow',
@@ -1349,6 +1652,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         db.prisma.teamMessage.findMany({ where, orderBy }),
         db.prisma.operationalAlertRun.findMany({ where, orderBy }),
         db.prisma.expenseReminderRun.findMany({ where, orderBy }),
+        ...(profile.id === CORE_OFFLINE_PROFILE
+          ? [
+              db.prisma.internalService.findMany({ where, orderBy }),
+              db.prisma.internalProvider.findMany({ where, orderBy }),
+              db.prisma.internalAvailabilityRule.findMany({ where, orderBy }),
+              db.prisma.tenantCatalogItem.findMany({ where, orderBy }),
+              db.prisma.businessReview.findMany({ where, orderBy }),
+            ]
+          : []),
       ]),
     );
   }
@@ -1416,11 +1728,12 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       split: 'dev',
       roles: ['client', 'owner', 'admin'],
       dialogs: profile.dialogs,
-      independentFamilies: profile.dialogs,
+      independentFamilies:
+        profile.id === CORE_OFFLINE_PROFILE ? 33 : profile.dialogs,
       userTurns: profile.userTurns,
       cases: manifest.cases.map((c) => ({
         id: c.id,
-        familyId: c.id,
+        familyId: profile.id === CORE_OFFLINE_PROFILE ? c.familyRefs![0] : c.id,
         role: c.role,
         group: c.group,
         sourceCaseSha256: hash(c),
@@ -1439,10 +1752,34 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         userTurns: c.userTurns,
       })),
       labelsReachModel: false,
+      ...(profile.id === CORE_OFFLINE_PROFILE
+        ? {
+            familyRefs: manifest.cases.map((c) => ({
+              caseId: c.id,
+              refs: c.familyRefs,
+            })),
+            familyCount: 33,
+            familyCountMeaning:
+              'SOURCE_LINEAGE_REFS_NOT_EMPIRICAL_INDEPENDENCE_OR_HOLDOUT',
+          }
+        : {}),
     });
     result = await replayPilot(replayManifest, {
       budget: gate!,
-      ...(profile.id === CORE_UNION_PROFILE
+      ...(profile.id === CORE_OFFLINE_PROFILE
+        ? {
+            expectedRefusals: [
+              {
+                caseId: 'current-lifecycle-negative' as const,
+                turn: 1 as const,
+                httpStatus: 401 as const,
+                code: 'membership_revoked' as const,
+              },
+            ],
+          }
+        : {}),
+      ...(profile.id === CORE_UNION_PROFILE ||
+      profile.id === CORE_OFFLINE_PROFILE
         ? {
             semanticFailure: 'next_independent_dialog' as const,
             assessTurn: ({
@@ -1488,6 +1825,41 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             ).toEqual(priorReplies);
             if (stopped || gate!.stats.halted)
               throw new Error('core_batch_already_stopped');
+            if (
+              profile.id === CORE_OFFLINE_PROFILE &&
+              caseId === 'current-occupancy-correction' &&
+              turn === 2
+            ) {
+              source.occupied = true;
+              const changed = await db.prisma.appointment.updateMany({
+                where: { tenantId: source.tenant.id },
+                data: { status: 'confirmed' },
+              });
+              expect(changed.count).toBe(1);
+              source.sourceRefs.push({
+                owner: 'CRM_CURRENT_AVAILABILITY',
+                id: source.branchId,
+                status: 'OCCUPIED_BEFORE_CORRECTION_TURN_LOCAL_FIXTURE_ONLY',
+              });
+              append('offline-source-transitions.jsonl', {
+                caseId,
+                turn,
+                changedAppointments: changed.count,
+                occupied: true,
+                qualification:
+                  'CONTROLLED_FIXTURE_TRANSITION_BEFORE_TURN_EFFECT_BASELINE_NOT_ASSISTANT_WRITE',
+              });
+            }
+            const expectedRevoked =
+              profile.id === CORE_OFFLINE_PROFILE &&
+              caseId === 'current-lifecycle-negative' &&
+              turn === 1;
+            const historyBefore = expectedRevoked
+              ? await db.prisma.widgetTimelineTurn.findMany({
+                  where: { tenantId: source.tenant.id },
+                  orderBy: { id: 'asc' },
+                })
+              : null;
             const before = await businessState(source.tenant.id),
               mark = http.recorder.mark(),
               modelBefore = modelCalls,
@@ -1500,7 +1872,13 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               response = await request(http.app.getHttpServer())
                 .post('/api/ai/chat')
                 .set('Authorization', `Bearer ${source.token}`)
-                .send({ ...body, audience: item.audience })
+                .send({
+                  ...body,
+                  audience:
+                    profile.id === CORE_OFFLINE_PROFILE
+                      ? coreFullOfflineRecipe(caseId).audience
+                      : item.audience,
+                })
                 .timeout({ response: 120000, deadline: 150000 });
             } catch {
               stopped ??= 'http_transport_unresolved';
@@ -1618,6 +1996,14 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 outputBefore,
               ),
               sourceReads: source.reads.slice(sourceBefore),
+              ...(profile.id === CORE_OFFLINE_PROFILE
+                ? {
+                    fixtureBoundary:
+                      coreFullOfflineRecipe(caseId).expectedBoundary,
+                    fixtureBindingSha256: hash(source.item),
+                    currentOccupiedSource: source.occupied,
+                  }
+                : {}),
               businessHashUnchanged: before === after,
               businessWrites: writes,
             };
@@ -1638,18 +2024,63 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 expect(answer.reply ?? '').not.toContain(value);
             if (stopped || gate!.stats.halted)
               throw new Error('core_transport_stopped_after_actual_reply');
+            if (expectedRevoked) {
+              expect(response.status).toBe(401);
+              expect(response.body).toMatchObject({
+                statusCode: 401,
+                message: 'Active tenant membership is required',
+              });
+              expect(answer.reply).toBeUndefined();
+              expect(answer.user_turn).toBeUndefined();
+              expect(observation.modelCalls).toBe(0);
+              expect(observation.serializerCalls).toBe(0);
+              expect(observation.brokerCalls).toBe(0);
+              expect(observation.modelOutputResponses).toBe(0);
+              expect(observation.sourceReads).toEqual([]);
+              expect(observation.persistedCoordination).toEqual([]);
+              expect(approvals).toEqual([]);
+              expect(
+                await db.prisma.widgetTimelineTurn.findMany({
+                  where: { tenantId: source.tenant.id },
+                  orderBy: { id: 'asc' },
+                }),
+              ).toEqual(historyBefore);
+              expect(priorReplies).toEqual([]);
+              const expectedRefusal = {
+                httpStatus: 401,
+                code: 'membership_revoked',
+              } as const;
+              Object.assign(observation, {
+                expectedRefusal,
+                historyUnchanged: true,
+              });
+              append('offline-expected-refusals.jsonl', {
+                caseId,
+                turn,
+                expectedRefusal,
+                historyUnchanged: true,
+                noBusinessEffects: true,
+              });
+              return { expectedRefusal };
+            }
             expect(response.status).toBe(201);
             expect(typeof answer.reply).toBe('string');
             expect(typeof answer.user_turn?.conversationId).toBe('string');
             if (caseId === 'followup-admin-general-chat') {
-              if (profile.id !== CORE_UNION_PROFILE) {
+              if (!(
+                profile.id === CORE_UNION_PROFILE ||
+                profile.id === CORE_OFFLINE_PROFILE
+              )) {
                 expect(modelCalls - modelBefore).toBeGreaterThan(0);
                 expect(modelOutputResponses - outputBefore).toBeGreaterThan(0);
               }
               expect(answer.tools_used).toEqual([]);
               expect(observation.sourceReads).toEqual([]);
               expect(answer.action).toBeNull();
-              if (profile.id !== CORE_UNION_PROFILE) {
+              if (!(
+                profile.id === CORE_UNION_PROFILE ||
+                profile.id === CORE_OFFLINE_PROFILE
+              )) {
                 expect(answer.grounding?.status).toBe('not_required');
                 expect(answer.reply).not.toContain(
                   'недоступен для вашей текущей роли',
@@ -1659,7 +2090,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               const inputObservations = modelObservations.filter(
                 (entry) => entry.caseId === caseId && entry.turn === turn,
               );
-              if (profile.id !== CORE_UNION_PROFILE)
+              if (!(
+                profile.id === CORE_UNION_PROFILE ||
+                profile.id === CORE_OFFLINE_PROFILE
+              ))
                 expect(inputObservations.length).toBeGreaterThan(0);
               for (const entry of inputObservations) {
                 expect(entry.role).toBe(UserRole.ADMINISTRATOR);
@@ -1783,7 +2217,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               expect(observation.readReceiptPresent).toBe(false);
               expect(approvals).toEqual([]);
             }
-            if (profile.id === CORE_UNION_PROFILE) {
+            if (
+              profile.id === CORE_UNION_PROFILE ||
+              profile.id === CORE_OFFLINE_PROFILE
+            ) {
               const inputRows = modelObservations.filter(
                 (row) => row.caseId === caseId && row.turn === turn,
               );
@@ -1800,7 +2237,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                   ),
               );
               const assessment: SemanticAssessment =
-                mode === 'dry'
+                mode === 'dry' &&
+                !(
+                  profile.id === CORE_OFFLINE_PROFILE &&
+                  Object.hasOwn(CORE_CASE_TURNS, caseId)
+                )
                   ? semanticFailureFixture === 'first-client-turn' &&
                     caseId === 'core-client-create-followup' &&
                     turn === 1
@@ -1865,7 +2306,41 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         });
       },
     });
-    if (profile.id === CORE_UNION_PROFILE) {
+    if (profile.id === CORE_OFFLINE_PROFILE) {
+      expect(result.executionStatus).toBe('completed');
+      expect([
+        'replayed_ungraded',
+        'completed_with_semantic_failures',
+      ]).toContain(result.status);
+      expect(result.coverage).toMatchObject({
+        plannedTurns: 81,
+        expectedRefusals: 1,
+        unresolvedTurns: 0,
+        unexecutedTurns: 0,
+      });
+      expect(
+        result.coverage.validResponses +
+          1 +
+          result.coverage.skippedDependentTurns,
+      ).toBe(81);
+      expect(result.coverage.attemptedTurns).toBe(
+        result.coverage.validResponses + 1,
+      );
+      expect(
+        result.coverage.semanticPasses +
+          result.coverage.semanticFailures +
+          result.coverage.semanticUngraded,
+      ).toBe(result.coverage.validResponses);
+      expect(result.outcomes).toHaveLength(48);
+      expect(responses).toHaveLength(result.coverage.attemptedTurns);
+      expect(responses.filter((row) => row.httpStatus === 401)).toHaveLength(1);
+      expect(
+        responses.filter(
+          (row) =>
+            row.httpStatus === 201 && typeof row.actualReply === 'string',
+        ),
+      ).toHaveLength(result.coverage.validResponses);
+    } else if (profile.id === CORE_UNION_PROFILE) {
       expect(result.executionStatus).toBe('completed');
       expect([
         'replayed_ungraded',

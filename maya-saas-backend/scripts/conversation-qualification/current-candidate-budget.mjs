@@ -80,6 +80,9 @@ export const CORE_OFFLINE_LIMITS = Object.freeze({
   spendNanoUsd: 0,
   inputNanoUsdPerToken: 0,
   outputNanoUsdPerToken: 0,
+  // Scripted local responses have no provider rate limit. The same serial gate,
+  // attempt/token ceilings and wall-clock stop remain in force.
+  intervalMs: 0,
   durationMs: 1_800_000,
   pricingStatus: 'OFFLINE_SYNTHETIC_RESERVATION_ONLY_NO_LIVE_CAP',
 });

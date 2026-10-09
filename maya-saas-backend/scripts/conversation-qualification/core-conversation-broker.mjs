@@ -119,12 +119,7 @@ export async function startCoreBroker(values, batch = null) {
     !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
     'core_broker_recorded_replay_profile',
   );
-  // Paused WIP: no 48-case scripted planner has been integrated yet.
-  assert.notEqual(
-    profile.id,
-    CORE_OFFLINE_PROFILE,
-    'core_broker_offline_fixture_pending',
-  );
+  const fullOffline = profile.id === CORE_OFFLINE_PROFILE;
   const live = values.mode !== 'dry';
   assert.equal(
     pinned.mode,
@@ -136,6 +131,16 @@ export async function startCoreBroker(values, batch = null) {
     'core_broker_manifest_mode',
   );
   checkSources(pinned);
+  // This profile cannot reach the live branch above; the closed fixture has no
+  // transport/credential loader. A missing implementation fails before output.
+  const scriptedModel = fullOffline
+    ? (
+        await import('./core-full-offline-model.mjs')
+      ).createCoreFullOfflineModel({
+        cases: pinned.cases,
+      })
+    : null;
+  let scriptedContext = null;
   const reportPath = path.join(values.output, 'broker-report.json');
   assert.ok(
     !fs.existsSync(reportPath) &&
@@ -193,13 +198,16 @@ export async function startCoreBroker(values, batch = null) {
       ? 'ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED'
       : recordedReplay
         ? CORE_RECORDED_REPLAY_QUALIFICATION
-        : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
+        : fullOffline
+          ? 'SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY'
+          : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
     recordedReplay,
     usageValidation: live
       ? 'REQUIRED_BEFORE_APP_DELIVERY'
       : 'OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE',
     replayFixture: replayFixture ?? null,
     ...(recordedReplay ? { recordedResponses: [] } : {}),
+    ...(fullOffline ? { scriptedResponses: [] } : {}),
   };
   const replay = recordedReplay
     ? replayFixture
@@ -421,6 +429,17 @@ export async function startCoreBroker(values, batch = null) {
     assert.ok(Date.now() < expiresAt, 'core_broker_expired');
     checkSources(pinned);
     if (!live) {
+      if (scriptedModel) {
+        assert.ok(scriptedContext, 'core_offline_dispatch_context_missing');
+        const context = scriptedContext;
+        scriptedContext = null;
+        const response = scriptedModel.respond(init.body, context);
+        report.scriptedResponses.push(response.maya_full_offline);
+        save();
+        return new Response(JSON.stringify(response), {
+          headers: { 'content-type': 'application/json' },
+        });
+      }
       if (!replay) return canned();
       const response = replay.respond(init.body);
       report.recordedResponses.push(response.maya_recorded_replay);
@@ -474,7 +493,18 @@ export async function startCoreBroker(values, batch = null) {
         },
       };
     },
-    reserve: (url, init) => candidateReservation(url, init, profile.id),
+    reserve: (url, init, context) => {
+      const reservation = candidateReservation(url, init, profile.id);
+      if (scriptedModel) {
+        assert.equal(
+          scriptedContext,
+          null,
+          'core_offline_dispatch_context_busy',
+        );
+        scriptedContext = context;
+      }
+      return reservation;
+    },
     allowFinish: true,
     ...(live
       ? {
@@ -523,6 +553,14 @@ export async function startCoreBroker(values, batch = null) {
       if (live) usageFence.response(status, text);
       batch?.response({ caseId, turn, status, text });
       const replayEvidence = replay?.observations.at(-1);
+      const scriptedEvidence = scriptedModel?.observations.at(-1);
+      if (scriptedModel) {
+        assert.ok(
+          scriptedEvidence?.caseId === caseId &&
+            scriptedEvidence?.turn === turn,
+          'core_offline_response_context_mismatch',
+        );
+      }
       if (replay) {
         assert.ok(
           replayEvidence?.caseId === caseId && replayEvidence?.turn === turn,
@@ -570,6 +608,7 @@ export async function startCoreBroker(values, batch = null) {
           ...safe,
           qualification: report.qualification,
           ...(replayEvidence ? { recordedReplay: replayEvidence } : {}),
+          ...(scriptedEvidence ? { scriptedFixture: scriptedEvidence } : {}),
         }) + '\n',
         { mode: 0o600 },
       );

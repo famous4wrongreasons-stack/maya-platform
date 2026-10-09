@@ -122,10 +122,13 @@ export function serveCandidateBroker({
         chunks.push(chunk);
       }
       const body = Buffer.concat(chunks).toString('utf8');
-      reserve('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        body,
-      });
+      reserve(
+        'https://api.deepseek.com/chat/completions',
+        { method: 'POST', body },
+        // Already manifest-checked, serialized by the existing busy guard.
+        // Optional offline fixtures consume this scope, never model authority.
+        Object.freeze({ caseId: id, turn: nextTurn }),
+      );
       if (caseIndex !== nextIndex || turn !== nextTurn) {
         if (caseIndex >= 0) gate.endTurn();
         if (caseIndex !== nextIndex) gate.dialog();

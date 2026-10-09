@@ -163,6 +163,11 @@ test('offline mechanical reservation has zero money, bounded requests and finite
   );
   assert.equal(CORE_OFFLINE_LIMITS.attempts, 324);
   assert.equal(CORE_OFFLINE_LIMITS.durationMs, 1800000);
+  assert.equal(CORE_OFFLINE_LIMITS.intervalMs, 0);
+  assert.equal(
+    coreConversationProfile(CORE_UNION_PROFILE).limits.intervalMs,
+    6000,
+  );
   assertOwnedStageTimeout(1860000, CORE_OFFLINE_PROFILE);
   assert.throws(
     () => assertOwnedStageTimeout(1860001, CORE_OFFLINE_PROFILE),
@@ -388,6 +393,6 @@ test('local live preparation and recorded replay cannot reinterpret48 as another
   refuses(
     'core-conversation-runner',
     ['--run', '--mode', 'dry', '--profile', CORE_OFFLINE_PROFILE],
-    'core_offline_implementation_incomplete',
+    'core_runner_new_output',
   );
 });

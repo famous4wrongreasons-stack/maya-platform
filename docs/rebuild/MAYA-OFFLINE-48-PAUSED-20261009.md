@@ -1,5 +1,10 @@
 # 48/81 offline implementation — paused work checkpoint
 
+Historical checkpoint at `863d1f80bac056dd354973f8f8b54fa72c9216b1`.
+Execution was subsequently wired in the same isolated branch; see
+[the resumed checkpoint](MAYA-OFFLINE-48-CHECKPOINT-20261009.md) for current
+status. The guards and unrun checks described below are the state at pause.
+
 Status: **PAUSED, NOT EXECUTABLE, NOT ACCEPTANCE**. This isolated branch starts
 at `582595eb115c7fa19fab10ddf6ed67b6d534349b`. Work paused when the owner approved
 the separate frozen 9/18 live diagnostic; nothing here changes that candidate.
