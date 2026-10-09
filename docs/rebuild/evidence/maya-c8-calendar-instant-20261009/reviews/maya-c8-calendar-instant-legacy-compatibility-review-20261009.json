@@ -1,0 +1,238 @@
+{
+  "contract": "maya.c8-calendar-instant.legacy-compatibility-followup/1",
+  "reviewedAt": "2026-10-09T19:36:38.082000+00:00",
+  "reviewer": "independent_review",
+  "verdict": "QUALIFIED_PASS_FOR_FINAL_SOURCE_AND_COMPONENT_EVIDENCE",
+  "blockers": [],
+  "sourceCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+  "intermediateCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+  "baselineCommit": "5babbc22dd5980c8df4bc3eadf844da4ec1679df",
+  "sourceState": "Final production/scripts/spec bytes match exact committed Git source; only untracked evidence at verification.",
+  "priorArtifactsRetainedUnchanged": [
+    {
+      "path": "/tmp/maya-c8-calendar-instant-source-review-20261009.json",
+      "bytes": 11030,
+      "sha256": "d69b0668640b0ca1149dcc06e4c0ea2d7430cede5cf56787da0835b58d93f809"
+    },
+    {
+      "path": "/tmp/maya-c8-calendar-instant-source-review-20261009.md",
+      "bytes": 2609,
+      "sha256": "ccc51c26fb5bc3ebf23a8a04f60c4e120d3f667816c43bfb00bfb76986752ad3"
+    },
+    {
+      "path": "/tmp/maya-c8-calendar-instant-evidence-review-20261009.json",
+      "bytes": 18395,
+      "sha256": "395b790af256fadd8d1cd8522fd8be644f4c3b45dc885b3555e0b627eebabd48"
+    },
+    {
+      "path": "/tmp/maya-c8-calendar-instant-evidence-review-20261009.md",
+      "bytes": 2226,
+      "sha256": "7dece31391a0fa0e709eae7053757d6a160abd63fb6bc5576a6da176c9b39161"
+    }
+  ],
+  "supersedes": "Earlier source/evidence no-blocker verdicts describe intermediate dda9ccfa before discovery of the legacy-currentness P2. This final followup is the operative verdict. Earlier328PASS and before-after observations remain true and unmodified, not promoted to the final correction.",
+  "reviewedSourceBindings": [
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.ts",
+      "bytes": 5729,
+      "sha256": "4d25f6f03664200f215514f209951c521d98d0194b97599c27f58072658ab672",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": false
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.ts",
+      "bytes": 17418,
+      "sha256": "0d3693034ceb3f9863ec455bc5525aee160e23382409805d672ce0f29f06a651",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.deterministic.ts",
+      "bytes": 13263,
+      "sha256": "720a64bfcf8538d6dd6d1169e84effce7e478f624152098c5fcbcf14947e4bbe",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": false
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.ts",
+      "bytes": 29787,
+      "sha256": "89c6fd0bba2640b984793ccbbe195b5d798583d630b43a887199e40e9c64bdcb",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "bytes": 38777,
+      "sha256": "60d16f17f4de47030197465711a965a1c86c16f3b92fb78f3a049461a2df7e80",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "bytes": 21272,
+      "sha256": "1827829a289dbc026fe68531d1089f0e3640b6070a8afbb35a2c5a1338a70cd0",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "bytes": 21946,
+      "sha256": "7ecf217365ef3f9754fd5a6f4c2c07640350a827f9f1e4c9d95290b540a74206",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "bytes": 19336,
+      "sha256": "5a5599729d12b6261ba21636eec65834e124bb132e155292444bc2e75dca88e1",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.calendar-time.spec.ts",
+      "bytes": 6980,
+      "sha256": "f2999a12397ff8dbe3736b52bba6b8192884f3482e02c04eeda6e9524d4d7e44",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+      "bytes": 11988,
+      "sha256": "36ae81fe916744a8aebabf66ebc98a071c3afed631766752374e5cc317e49315",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": false
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts",
+      "bytes": 16407,
+      "sha256": "13b7cdfe8b7b7d5974b13b4289aa6a9c967140acbaf1e342897206bcaf398966",
+      "matchesGitCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+      "unchangedFromIntermediateReview": false
+    }
+  ],
+  "changedFilesFromIntermediate": [
+    "maya-saas-backend/src/valuation/c8.time.ts",
+    "maya-saas-backend/src/valuation/c8.deterministic.ts",
+    "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+    "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts"
+  ],
+  "finding": {
+    "severity": "P2",
+    "status": "Resolved in final reviewed source; four added component controls passed in final332 report.",
+    "description": "Uniqueness alone allowed current use of legacy PUBLISHED dormancy with an old v1 deadline differing from the corrected unique target (Paris1880 local seconds and Gregorian0099 Date.UTC coercion)."
+  },
+  "closure": {
+    "helper": "c8CalendarDeadlineCompatible",
+    "checks": [
+      "Compute unique supported canonical deadline through c8ShiftWindow.",
+      "Conservatively refuse source/target local years below100 where old Date.UTC coerced the year.",
+      "For remaining supported inputs, same clamped target civil date/hour/minute enters untouched localDateMinuteToUtc; original UTCseconds/milliseconds are added exactly as in old v1. Equality with the corrected instant is required.",
+      "Published current-use guard checks compatibility without recomputing/comparing saved policy boolean or changing history.",
+      "New calendar dormancy computation also requires compatibility before publication; mismatch raises the same typed error and terminalizes the same claimed lease unavailable. It does not publish a newly corrected-but-unusable result."
+    ],
+    "notPerformed": [
+      "No saved value recomputation or comparison.",
+      "No historical writes/backfill, policy/rule version rewrite or new implementation stamp.",
+      "No shared converter change or selection of its result as fallback."
+    ]
+  },
+  "finalGates": {
+    "jest": {
+      "tests": 332,
+      "suites": 20,
+      "passedTests": 332,
+      "failedTests": 0,
+      "pendingOrSkippedTests": 0,
+      "todoTests": 0,
+      "calendarTests": 24,
+      "producerCalendarTests": 13,
+      "storeCalendarTests": 34,
+      "calendarSubtotal": 71,
+      "subtotalAlreadyIncludedIn332": true,
+      "durationSeconds": 5.591
+    },
+    "focusedTypes": {
+      "reportedExitCode": 0,
+      "logBytes": 0
+    },
+    "lint": {
+      "reportedExitCode": 0,
+      "logBytes": 0
+    },
+    "productionTypes": {
+      "reportedExitCode": 0,
+      "recordedCommand": "tsc --noEmit --project tsconfig.build.json --incremental false"
+    },
+    "exitStatusProvenance": "Jest result/status/summary independently checked. Type/lint exit0 explicitly reported by parent; logs alone do not independently encode the exit statuses. No reviewer execution."
+  },
+  "artifacts": [
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-r2.json",
+      "bytes": 169062,
+      "sha256": "25c35970f8708c3a90196abd0188d440ecef590b3503b0fba13909da2f54ca68"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-r2.log",
+      "bytes": 514,
+      "sha256": "0ff032f51594c8b8b49b7fc81f35a64abf877a7b371d3ed2110548d5b970fc14"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/types-focused-r2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/lint-r2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/types-production-r2.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/before-after.json",
+      "bytes": 3849,
+      "sha256": "0f6df5027f46aca28e2b176df81ae23c7282069f312788161ddae4b0cfc21f48"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-final.json",
+      "bytes": 166778,
+      "sha256": "ca175b32c431605afd8f24b05997e613778c69b544e2cea474cce45275f3f474"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-red.json",
+      "bytes": 33088,
+      "sha256": "6203006c3265be76b81c5f61c2b3992e5aaa46bd9e761d134962deff5745f433"
+    }
+  ],
+  "beforeAfterQualification": {
+    "pinnedToIntermediateCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+    "baselineTimeSha256": "02ac99f0426acb3c8a5bf1f2056d49757f393734ab9fc36d676fdad9694a7bff",
+    "intermediateTimeSha256": "6766b840176b0fcb9fa73234ef9b874f81058855ddafc069efcc4b303d576b64",
+    "pureShiftFunctionByteIdenticalInFinalSource": true,
+    "meaning": "Nine recorded pure inverse observations remain applicable to unchanged c8ShiftWindow code. They are not claims that final v1 producer/current-read admits Paris1880/year0099; final compatibility guards explicitly refuse those inputs."
+  },
+  "regressions": [
+    "Two actual C8Store/reader component cases: legacy Paris1880 and year0099 current=false/exact read refuses/row unchanged.",
+    "Two actual producer component cases: same inputs lead to typed calendar error/same-lease unavailable/no computed publication.",
+    "Modern unique/day/gap/fold/current policy/error/dependency controls retained."
+  ],
+  "limits": [
+    "Actual C8Store, reader, producer and deterministic methods are tested through synthetic SQL/ACL/governed/source ports. No actual SQL transaction/fencing/rollback, encryption, HTTP/PG, new restart, application DI or deployment proof in this turn.",
+    "Existing earlier HTTP/PG proof remains bound to its earlier source, not transferred to final b2a75294.",
+    "Version1 lacks an implementation stamp: affected historical inputs remain unavailable even for new corrected calculations until separately versioned qualification. No implicit migration or history repair.",
+    "Pure resolver support remains Gregorian AD1..9999 with integral-second offsets +/-24h. No all-IANA/all-history/all-ICU guarantee or chosen earlier/later/shift policy.",
+    "Single-call benchmark does not qualify maximum5000-row cohorts, recursive fan-out, cache churn,30s transactions or60s leases.",
+    "No full MAYA/C10, named cohort, model/provider quality, all ranking/Opportunity lifecycle qualification or original81 status reclassification."
+  ],
+  "counting": "Final332 includes71 calendar/producer/store cases. Prior328 and all earlier runs overlap; do not sum them as unique final coverage.",
+  "reviewerActions": {
+    "testsRun": 0,
+    "servicesRun": 0,
+    "networkCalls": 0,
+    "sourceEdits": 0,
+    "writes": "Only requested review files under /tmp; prior source/evidence review artifacts retained byte-identical."
+  }
+}

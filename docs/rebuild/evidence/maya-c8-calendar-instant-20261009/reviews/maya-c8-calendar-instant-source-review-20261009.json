@@ -1,0 +1,225 @@
+{
+  "contract": "maya.c8-calendar-instant.independent-source-review/1",
+  "reviewedAt": "2026-10-09T19:31:12.675611+00:00",
+  "reviewer": "independent_review",
+  "baseCommit": "5babbc22dd5980c8df4bc3eadf844da4ec1679df",
+  "sourceState": "Uncommitted candidate atop clean checkpoint base; exact reviewed bytes pinned below. Final consolidated validation was pending at review.",
+  "verdict": "QUALIFIED_NO_REMAINING_SOURCE_BLOCKERS",
+  "blockers": [],
+  "reviewMethod": {
+    "localSourceAndSavedArtifactReads": true,
+    "sourceEdits": false,
+    "testsRunByReviewer": false,
+    "servicesRunByReviewer": false,
+    "networkCalls": false,
+    "writes": "Only these requested review JSON/MD artifacts under /tmp."
+  },
+  "sourceFiles": [
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.ts",
+      "bytes": 4367,
+      "sha256": "6766b840176b0fcb9fa73234ef9b874f81058855ddafc069efcc4b303d576b64"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.ts",
+      "bytes": 17418,
+      "sha256": "0d3693034ceb3f9863ec455bc5525aee160e23382409805d672ce0f29f06a651"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.deterministic.ts",
+      "bytes": 12974,
+      "sha256": "90138199271362d5873ee0a0f13f63d2435c6bd8a0d35fc6cb9bd6343d97ae19"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.ts",
+      "bytes": 29787,
+      "sha256": "89c6fd0bba2640b984793ccbbe195b5d798583d630b43a887199e40e9c64bdcb"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "bytes": 38777,
+      "sha256": "60d16f17f4de47030197465711a965a1c86c16f3b92fb78f3a049461a2df7e80"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "bytes": 21272,
+      "sha256": "1827829a289dbc026fe68531d1089f0e3640b6070a8afbb35a2c5a1338a70cd0"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "bytes": 21946,
+      "sha256": "7ecf217365ef3f9754fd5a6f4c2c07640350a827f9f1e4c9d95290b540a74206"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "bytes": 19336,
+      "sha256": "5a5599729d12b6261ba21636eec65834e124bb132e155292444bc2e75dca88e1"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.calendar-time.spec.ts",
+      "bytes": 6980,
+      "sha256": "f2999a12397ff8dbe3736b52bba6b8192884f3482e02c04eeda6e9524d4d7e44"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+      "bytes": 11380,
+      "sha256": "640f6924162e13fa3c3bc185d9ac6b23c9a4acbddaf8d011ba3471f207dfb52f"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts",
+      "bytes": 15824,
+      "sha256": "7d286b89b730e3318de08f13631e30044aef2af28f0e39249076a9bc82e21c58"
+    }
+  ],
+  "counts": {
+    "productionFiles": 4,
+    "constructorWiringScripts": 4,
+    "constructorSites": 6,
+    "componentSpecFiles": 3
+  },
+  "findings": [
+    {
+      "status": "supported",
+      "area": "Calendar semantics",
+      "detail": "C8-local resolver preserves Gregorian local year/month/day/hour/minute/second plus original milliseconds, clamps month-end, avoids Date.UTC years0..99 remapping, and leaves elapsed-day arithmetic unchanged. No shared internal-calendar converter change and no earlier/later/gap-shift preference."
+    },
+    {
+      "status": "supported_with_explicit_domain",
+      "area": "Inverse uniqueness",
+      "detail": "Enumerates all 172801 integral-second offsets inclusively within +/-24h, comparing complete locale-fixed Gregorian/latn/era/h23 whole-second strings. Zero or multiple matches refuse with C8CalendarInstantUnavailable. Source offset bound and AD1..9999 calendar domain are checked. This is not an all-offset/all-calendar/all-history guarantee."
+    },
+    {
+      "status": "supported",
+      "area": "Pure cache",
+      "detail": "At most256 entries keyed by zone and exact whole-second civil target; value is an instant or unavailable, not source/policy/current actor authority. Returned Date is fresh and each caller milliseconds are added outside cache."
+    },
+    {
+      "status": "supported",
+      "area": "Pending lifecycle",
+      "detail": "C8Producer.resume catches only the typed calendar exception after publishResult rejection and calls existing publishUnavailable with the same lease. Unrelated database/configuration/publication-fence failures propagate. SQL fenced predicates and stored immutable input/version/expiry are unchanged."
+    },
+    {
+      "status": "supported",
+      "area": "Published current use",
+      "detail": "C8Store invokes the existing canonical GovernedSettingsReadService under the existing A22 transaction lock only for PUBLISHED dormancy. Exact policy id/hash/payload validation remains with existing owners. Pure immutable-feature qualification returns false for invalid or nonunique calendar target without recomputing published values or changing historical bytes."
+    },
+    {
+      "status": "supported",
+      "area": "Dependencies and consumers",
+      "detail": "Existing exact C8ResultRevision reference recursion and depth<=4 bound remain. Current reader hides unavailable values; exact snapshotDormancy refuses unavailable source; existing ranking/Opportunity current-use paths inherit refsCurrent. No new scan, rediscovery, fallback to older result, history write or authority is introduced."
+    },
+    {
+      "status": "supported",
+      "area": "Wiring",
+      "detail": "Six manual C8Store constructor sites in four existing Chapter8 proof scripts pass their already-created canonical governed reader. C8Module already imports Package5Wave1Module. No C8Sources-to-C8Store injection cycle."
+    },
+    {
+      "status": "supported_with_evidence_limits",
+      "area": "Component regressions",
+      "detail": "Reviewed3 specs exercise actual pure calendar/deterministic/producer/currentness/reader methods. Store SQL, ACL and governed configuration ports are synthetic. Authored tests include gap/fold, half-hour/date-line, local historical seconds, low Gregorian years, unique/day controls, same-lease unavailable, noncalendar error propagation, immutable published bytes, dependency recursion and exact-reader refusal. This review did not execute them."
+    }
+  ],
+  "canonicalBasis": [
+    {
+      "path": "docs/rebuild/CYCLE-08-P01-FOUNDATION-IMPLEMENTATION.md",
+      "lines": [
+        11,
+        21
+      ],
+      "basis": "Immutable admission/history, fenced unavailable, no fallback; local wall time/month-end requirement."
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-LIMITED-DATA-IMPLEMENTATION-DECISION.md",
+      "lines": [
+        25,
+        34
+      ],
+      "basis": "Existing owners/read-only consumers and ordinary implementation defects within approved envelope."
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.policy.ts",
+      "lines": [
+        39,
+        121
+      ],
+      "basis": "Closed unit/count and dormancy rule fields contain no DST disambiguation choice."
+    }
+  ],
+  "savedEvidenceRead": [
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-red.json",
+      "bytes": 33088,
+      "sha256": "6203006c3265be76b81c5f61c2b3992e5aaa46bd9e761d134962deff5745f433",
+      "reported": {
+        "success": false,
+        "numPassedTests": 10,
+        "numFailedTests": 7,
+        "numTotalTests": 17,
+        "numPassedTestSuites": 0,
+        "numFailedTestSuites": 1
+      }
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-green-initial.json",
+      "bytes": 12419,
+      "sha256": "0cff56548369271724bea99c67dad39fc94755ca027942e4e14d9d22de89355f",
+      "reported": {
+        "success": true,
+        "numPassedTests": 24,
+        "numFailedTests": 0,
+        "numTotalTests": 24,
+        "numPassedTestSuites": 2,
+        "numFailedTestSuites": 0
+      }
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-producer-green.json",
+      "bytes": 18288,
+      "sha256": "46489fee440784d8dbfc68f79da66e5044dc8b3765e683fefe9a15e0e211f135",
+      "reported": {
+        "success": true,
+        "numPassedTests": 35,
+        "numFailedTests": 0,
+        "numTotalTests": 35,
+        "numPassedTestSuites": 2,
+        "numFailedTestSuites": 0
+      }
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-initial.json",
+      "bytes": 166779,
+      "sha256": "e71e11f0626ddb3cfb250aebdbc5ae668ba9f1206de257a6fb62f5b29d9bd183",
+      "reported": {
+        "success": true,
+        "numPassedTests": 328,
+        "numFailedTests": 0,
+        "numTotalTests": 328,
+        "numPassedTestSuites": 20,
+        "numFailedTestSuites": 0
+      }
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-observations.json",
+      "bytes": 2577,
+      "sha256": "064a752ac5d913e340f13522b3e194accd1516dc95c5e6a681dcd3254677f8a5",
+      "reported": {
+        "node": "v24.15.0",
+        "icu": "78.2",
+        "tz": "2026a",
+        "synthetic": true,
+        "externalCalls": 0,
+        "database": false
+      }
+    }
+  ],
+  "savedEvidenceQualification": "Gate cohorts overlap and are not additive. Earlier24/35/328 PASS reports do not establish final store-spec execution or exact final whole-tree acceptance. RED10passed/7failed remains failed. Parent-owned local formatter observations report Node24.15.0/ICU78.2/tz2026a and no DB/network; reviewer did not rerun the benchmark.",
+  "limits": [
+    "Source/component review only. No actual HTTP, PostgreSQL, encryption/decryption integration, transaction rollback/fencing, DI application boot, process restart or deployment proof is supplied by this review.",
+    "Single-inverse benchmark around108-115ms is not proof for cold maximum cohorts, recursive dependency graphs,30s transactions or60s leases. Opportunity can inspect up to5000rows; cache256 does not ensure reuse across distinct visit instants. No maximum-cohort performance acceptance is claimed.",
+    "c8ShiftWindow pre-admission value-window and prediction-horizon callers may refuse unsupported/nonunique targets before a PENDING row exists; this must not be described as terminalizing an existing row.",
+    "Published-row read-time tightening is scoped to dormancy and its existing C8 dependencies. No blanket qualification of all historical value/prediction horizons, all ranking behavior or all Opportunity lifecycle effects.",
+    "Current-use refusal preserves published state/value/snapshot/input/expiry bytes; it does not recompute or repair history.",
+    "No new schema, policy key, rule version rewrite, numeric activation, provider/model call, contact permission or general time framework. Original81 evidence and prior checkpoint outcomes remain unchanged.",
+    "Support is bounded Gregorian AD1..9999 with integral-second offsets within +/-24h; no universal zone/history guarantee or new DST selection policy."
+  ]
+}

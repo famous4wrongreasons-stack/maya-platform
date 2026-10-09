@@ -1,0 +1,110 @@
+{
+  "sourceCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+  "baselineCommit": "5babbc22dd5980c8df4bc3eadf844da4ec1679df",
+  "recordedAt": "2026-10-09T19:37:16.398394+00:00",
+  "basis": "Tool results observed by root; empty log alone is not exit-status evidence.",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "sha256": "60d16f17f4de47030197465711a965a1c86c16f3b92fb78f3a049461a2df7e80"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "sha256": "1827829a289dbc026fe68531d1089f0e3640b6070a8afbb35a2c5a1338a70cd0"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "sha256": "7ecf217365ef3f9754fd5a6f4c2c07640350a827f9f1e4c9d95290b540a74206"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "sha256": "5a5599729d12b6261ba21636eec65834e124bb132e155292444bc2e75dca88e1"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.calendar-time.spec.ts",
+      "sha256": "f2999a12397ff8dbe3736b52bba6b8192884f3482e02c04eeda6e9524d4d7e44"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.deterministic.ts",
+      "sha256": "720a64bfcf8538d6dd6d1169e84effce7e478f624152098c5fcbcf14947e4bbe"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+      "sha256": "36ae81fe916744a8aebabf66ebc98a071c3afed631766752374e5cc317e49315"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.ts",
+      "sha256": "0d3693034ceb3f9863ec455bc5525aee160e23382409805d672ce0f29f06a651"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts",
+      "sha256": "13b7cdfe8b7b7d5974b13b4289aa6a9c967140acbaf1e342897206bcaf398966"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.ts",
+      "sha256": "89c6fd0bba2640b984793ccbbe195b5d798583d630b43a887199e40e9c64bdcb"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.ts",
+      "sha256": "4d25f6f03664200f215514f209951c521d98d0194b97599c27f58072658ab672"
+    }
+  ],
+  "finalGates": [
+    {
+      "gate": "regression-r2",
+      "exitCode": 0,
+      "tests": 332,
+      "suites": 20,
+      "failed": 0,
+      "skipped": 0,
+      "log": "regression-r2.log",
+      "json": "regression-r2.json"
+    },
+    {
+      "gate": "types-production-r2",
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "log": "types-production-r2.log"
+    },
+    {
+      "gate": "types-focused-r2",
+      "command": "tsc --project /tmp/maya-c8-calendar-instant-tsconfig.json",
+      "exitCode": 0,
+      "log": "types-focused-r2.log"
+    },
+    {
+      "gate": "scoped-lint-r1",
+      "scope": "all11 changed source/test/script files",
+      "exitCode": 0,
+      "log": "lint-final.log"
+    },
+    {
+      "gate": "scoped-lint-r2",
+      "scope": "4files changed since r1",
+      "exitCode": 0,
+      "log": "lint-r2.log"
+    }
+  ],
+  "supersededChecks": [
+    {
+      "gate": "calendar-red",
+      "exitCode": 1,
+      "expected": true,
+      "passed": 10,
+      "failed": 7
+    },
+    {
+      "gate": "lint-initial",
+      "exitCode": 1,
+      "resolved": "three lint errors repaired"
+    },
+    {
+      "gate": "types-focused",
+      "exitCode": 2,
+      "resolved": "full typed producer model fixture"
+    }
+  ],
+  "newHttpPostgresProof": false,
+  "liveProvider": false,
+  "realModel": false
+}

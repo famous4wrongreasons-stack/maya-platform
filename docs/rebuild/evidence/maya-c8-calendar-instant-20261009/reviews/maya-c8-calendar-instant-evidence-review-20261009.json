@@ -1,0 +1,478 @@
+{
+  "contract": "maya.c8-calendar-instant.independent-evidence-review/1",
+  "reviewedAt": "2026-10-09T19:33:35.986389+00:00",
+  "reviewer": "independent_review",
+  "verdict": "QUALIFIED_PASS_FOR_FROZEN_COMPONENT_EVIDENCE",
+  "blockers": [],
+  "sourceCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+  "baselineCommit": "5babbc22dd5980c8df4bc3eadf844da4ec1679df",
+  "sourceState": "Reviewed source committed; only evidence directory untracked at verification. Original source review is retained unchanged and correctly records its earlier uncommitted snapshot.",
+  "sourceReview": {
+    "path": "/tmp/maya-c8-calendar-instant-source-review-20261009.json",
+    "bytes": 11030,
+    "sha256": "d69b0668640b0ca1149dcc06e4c0ea2d7430cede5cf56787da0835b58d93f809"
+  },
+  "sourceReviewMarkdown": {
+    "path": "/tmp/maya-c8-calendar-instant-source-review-20261009.md",
+    "bytes": 2609,
+    "sha256": "ccc51c26fb5bc3ebf23a8a04f60c4e120d3f667816c43bfb00bfb76986752ad3"
+  },
+  "verifiedSources": [
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.ts",
+      "bytes": 4367,
+      "sha256": "6766b840176b0fcb9fa73234ef9b874f81058855ddafc069efcc4b303d576b64",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.ts",
+      "bytes": 17418,
+      "sha256": "0d3693034ceb3f9863ec455bc5525aee160e23382409805d672ce0f29f06a651",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.deterministic.ts",
+      "bytes": 12974,
+      "sha256": "90138199271362d5873ee0a0f13f63d2435c6bd8a0d35fc6cb9bd6343d97ae19",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.ts",
+      "bytes": 29787,
+      "sha256": "89c6fd0bba2640b984793ccbbe195b5d798583d630b43a887199e40e9c64bdcb",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "bytes": 38777,
+      "sha256": "60d16f17f4de47030197465711a965a1c86c16f3b92fb78f3a049461a2df7e80",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "bytes": 21272,
+      "sha256": "1827829a289dbc026fe68531d1089f0e3640b6070a8afbb35a2c5a1338a70cd0",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "bytes": 21946,
+      "sha256": "7ecf217365ef3f9754fd5a6f4c2c07640350a827f9f1e4c9d95290b540a74206",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "bytes": 19336,
+      "sha256": "5a5599729d12b6261ba21636eec65834e124bb132e155292444bc2e75dca88e1",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.calendar-time.spec.ts",
+      "bytes": 6980,
+      "sha256": "f2999a12397ff8dbe3736b52bba6b8192884f3482e02c04eeda6e9524d4d7e44",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+      "bytes": 11380,
+      "sha256": "640f6924162e13fa3c3bc185d9ac6b23c9a4acbddaf8d011ba3471f207dfb52f",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts",
+      "bytes": 15824,
+      "sha256": "7d286b89b730e3318de08f13631e30044aef2af28f0e39249076a9bc82e21c58",
+      "currentBytesMatchSourceReview": true,
+      "exactGitCommit": "dda9ccfa9860c3ce70503ffdb8226e8a8b6c7622",
+      "matchesGit": true
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-final.json",
+      "bytes": 166778,
+      "sha256": "ca175b32c431605afd8f24b05997e613778c69b544e2cea474cce45275f3f474"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-final.log",
+      "bytes": 517,
+      "sha256": "5a472bd9f8d022e74064038365398b40ca43ebee96279bbc82a5088362459ff9"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/types-focused-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/lint-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/before-after.json",
+      "bytes": 3849,
+      "sha256": "0f6df5027f46aca28e2b176df81ae23c7282069f312788161ddae4b0cfc21f48"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-observations.json",
+      "bytes": 2577,
+      "sha256": "064a752ac5d913e340f13522b3e194accd1516dc95c5e6a681dcd3254677f8a5"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-red.json",
+      "bytes": 33088,
+      "sha256": "6203006c3265be76b81c5f61c2b3992e5aaa46bd9e761d134962deff5745f433"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-red.log",
+      "bytes": 4355,
+      "sha256": "d2d4bfa16bbae6b3d9df28bf07998b5b87147dd0bea9543a80d2c81da3511b67"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/types-focused.log",
+      "bytes": 1282,
+      "sha256": "c4ab35c949b59b35fe53e38a0f914ba7e39bab74551e1e9b336e28077412b7b1"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/lint-initial.log",
+      "bytes": 993,
+      "sha256": "44ff82b14e78358540c93ce95a6da761287b5757deadfdd4d59261d73c62b810"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/types-production.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d"
+    }
+  ],
+  "finalJest": {
+    "success": true,
+    "tests": 328,
+    "suites": 20,
+    "failedTests": 0,
+    "skippedOrPendingTests": 0,
+    "todoTests": 0,
+    "failedSuites": 0,
+    "duplicateSuitePaths": false,
+    "calendarTests": 24,
+    "producerCalendarTests": 11,
+    "storeCalendarTests": 32,
+    "newCalendarSuiteSubtotal": 67,
+    "newCalendarSubtotalIncludedIn328": true,
+    "logDurationSeconds": 5.404,
+    "suiteBreakdown": [
+      {
+        "path": "maya-saas-backend/src/valuation/c8.calendar-time.spec.ts",
+        "tests": 24,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts",
+        "tests": 32,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.time.spec.ts",
+        "tests": 7,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.deterministic.spec.ts",
+        "tests": 20,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+        "tests": 11,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.consumers.architecture.spec.ts",
+        "tests": 5,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-core.lifecycle-two-months.spec.ts",
+        "tests": 20,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts",
+        "tests": 22,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.business-lifecycle.spec.ts",
+        "tests": 32,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.read.two-months.spec.ts",
+        "tests": 30,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts",
+        "tests": 17,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.prospective.spec.ts",
+        "tests": 4,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.read.lifecycle-rule.spec.ts",
+        "tests": 16,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.architecture.spec.ts",
+        "tests": 8,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.spec.ts",
+        "tests": 30,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.opportunity.spec.ts",
+        "tests": 8,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.eligibility.spec.ts",
+        "tests": 9,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.contract.spec.ts",
+        "tests": 24,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.wave3.architecture.spec.ts",
+        "tests": 4,
+        "status": "passed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.wave2.architecture.spec.ts",
+        "tests": 5,
+        "status": "passed"
+      }
+    ]
+  },
+  "typeAndLint": {
+    "typesFocusedFinalLogBytes": 0,
+    "lintFinalLogBytes": 0,
+    "reportedExitCodes": {
+      "typesFocusedFinal": 0,
+      "lintFinal": 0
+    },
+    "exitCodeProvenance": "Explicit parent execution-completion report. The preserved empty stdout/stderr logs are consistent but do not independently encode an exit status or full invocation. Reviewer did not rerun commands.",
+    "earlierProductionTypes": "Parent reported PASS; hashed empty types-production.log retained. No broader compile scope inferred from an empty log."
+  },
+  "beforeAfter": {
+    "rows": 9,
+    "calendarRefusals": 7,
+    "correctedUniqueCases": 2,
+    "baselineTimeSha256": "02ac99f0426acb3c8a5bf1f2056d49757f393734ab9fc36d676fdad9694a7bff",
+    "baselineTimeMatchesExactGit": true,
+    "currentTimeSha256": "6766b840176b0fcb9fa73234ef9b874f81058855ddafc069efcc4b303d576b64",
+    "currentTimeMatchesReviewedAndCommittedSource": true,
+    "sharedConverterSha256": "7aacc29f984721a0210cce4efea927cb7c8ed38af4bc8d32ec8aa2dd8db7ca23",
+    "sharedConverterUnchanged": true,
+    "node": "v24.15.0",
+    "icu": "78.2",
+    "tz": "2026a",
+    "synthetic": true,
+    "externalCalls": 0,
+    "database": false,
+    "observations": [
+      {
+        "label": "NY forward gap",
+        "timezone": "America/New_York",
+        "at": "2026-01-08T07:30:45.123Z",
+        "direction": 1,
+        "targetLocal": "2026-03-08 02:30:45.123",
+        "before": {
+          "utc": "2026-03-08T06:30:45.123Z",
+          "local": "08/03/2026, 01:30:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "NY backward gap",
+        "timezone": "America/New_York",
+        "at": "2026-05-08T06:30:45.123Z",
+        "direction": -1,
+        "targetLocal": "2026-03-08 02:30:45.123",
+        "before": {
+          "utc": "2026-03-08T06:30:45.123Z",
+          "local": "08/03/2026, 01:30:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "NY forward fold",
+        "timezone": "America/New_York",
+        "at": "2026-09-01T05:30:45.123Z",
+        "direction": 1,
+        "targetLocal": "2026-11-01 01:30:45.123",
+        "before": {
+          "utc": "2026-11-01T05:30:45.123Z",
+          "local": "01/11/2026, 01:30:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "NY backward fold",
+        "timezone": "America/New_York",
+        "at": "2027-01-01T06:30:45.123Z",
+        "direction": -1,
+        "targetLocal": "2026-11-01 01:30:45.123",
+        "before": {
+          "utc": "2026-11-01T05:30:45.123Z",
+          "local": "01/11/2026, 01:30:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "Lord Howe gap",
+        "timezone": "Australia/Lord_Howe",
+        "at": "2026-08-03T15:45:45.123Z",
+        "direction": 1,
+        "targetLocal": "2026-10-04 02:15:45.123",
+        "before": {
+          "utc": "2026-10-03T15:45:45.123Z",
+          "local": "04/10/2026, 02:45:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "Lord Howe fold",
+        "timezone": "Australia/Lord_Howe",
+        "at": "2026-02-04T14:45:45.123Z",
+        "direction": 1,
+        "targetLocal": "2026-04-05 01:45:45.123",
+        "before": {
+          "utc": "2026-04-04T15:15:45.123Z",
+          "local": "05/04/2026, 01:45:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "Apia skipped day",
+        "timezone": "Pacific/Apia",
+        "at": "2011-10-30T22:15:45.123Z",
+        "direction": 1,
+        "targetLocal": "2011-12-30 12:15:45.123",
+        "before": {
+          "utc": "2011-12-30T22:15:45.123Z",
+          "local": "31/12/2011, 12:15:45"
+        },
+        "after": {
+          "error": "c8_calendar_instant_unavailable"
+        }
+      },
+      {
+        "label": "Paris seconds",
+        "timezone": "Europe/Paris",
+        "at": "1880-01-01T12:00:45.123Z",
+        "direction": 1,
+        "targetLocal": "1880-03-01 12:10:06.123",
+        "before": {
+          "utc": "1880-03-01T12:01:24.123Z",
+          "local": "01/03/1880, 12:10:45"
+        },
+        "after": {
+          "utc": "1880-03-01T12:00:45.123Z",
+          "local": "01/03/1880, 12:10:06"
+        }
+      },
+      {
+        "label": "Gregorian year",
+        "timezone": "UTC",
+        "at": "0099-12-31T12:34:56.789Z",
+        "direction": 1,
+        "targetLocal": "0100-02-28 12:34:56.789",
+        "before": {
+          "utc": "2000-02-29T12:34:56.789Z",
+          "local": "29/02/2000, 12:34:56"
+        },
+        "after": {
+          "utc": "0100-02-28T12:34:56.789Z",
+          "local": "28/02/100, 12:34:56"
+        }
+      }
+    ],
+    "qualification": "Parent-produced recorded comparison of baseline/current code. Source hashes independently verified; the execution itself was not rerun by this reviewer. Cases match the authored finite calendar regressions, not a new provider/model/data acceptance."
+  },
+  "preservedFailures": {
+    "calendarRed": {
+      "passed": 10,
+      "failed": 7,
+      "total": 17,
+      "status": "FAIL preserved"
+    },
+    "initialFocusedTypes": "Missing canonical result fields in synthetic producer fixture; nonempty diagnostic preserved.",
+    "initialLint": "Three errors plus one warning preserved; final lint reported exit0.",
+    "noRelabeling": true
+  },
+  "counting": "Final328 already includes24 calendar+11producer+32store. Earlier24,35,328 and RED17 are overlapping attempts, not additional passed coverage.",
+  "supportedQualification": [
+    "Finite actual c8ShiftWindow results: NY gap/fold both directions, Lord Howe30minute gap/fold, Apia skipped day refuse; ordinary unique/day/month-end/local-seconds/year0099 controls pass.",
+    "Actual C8Producer.resume and deterministic computation through synthetic source/store ports: typed calendar failure publishes unavailable using the same lease; noncalendar/database/fence errors are not downgraded; terminal unavailable replay does not claim again.",
+    "Actual C8Store.refsCurrent and C8ReadService.snapshotDormancy through finite synthetic SQL/ACL/configuration ports: immutable PUBLISHED gap/fold withheld, unique/day unchanged, current policy/source/tenant failures maintained, recursion/depth bound maintained.",
+    "All11 exact reviewed source files match current Git commit. No runtime rewrite occurred between source review and this evidence review."
+  ],
+  "limits": [
+    "Components and source-only evidence. SQL/ACL/governed ports are synthetic: no actual database, SQL fencing/rollback, encryption/decryption integration, live membership, application DI boot, HTTP/PG or new process restart is proven.",
+    "Existing earlier HTTP/PG/restart checkpoint remains bound to its earlier source; it is not transferred to this changed runtime.",
+    "Parent-owned single inverse timings do not qualify maximum5000-row cohorts, recursive dependency fan-out,256-entry cache churn,30s transaction or60s lease performance. No maximum-cohort performance PASS.",
+    "Gregorian AD1..9999 and integral-second offsets +/-24h are explicit support bounds. No all-IANA/all-history/all-ICU guarantee and no selected earlier/later/shift policy.",
+    "Pre-admission value-window/prediction callers can refuse before a row exists; no invented terminal PENDING result. Published dormancy withholding does not rewrite or recompute history.",
+    "No real model/provider, production deployment, full cohort, full MAYA/C10, all ranking/Opportunity behavior or original81 reclassification."
+  ],
+  "reviewerActions": {
+    "localSourceArtifactAndGitReads": true,
+    "hashArithmeticAndStatusValidation": true,
+    "testExecutions": 0,
+    "serviceExecutions": 0,
+    "networkCalls": 0,
+    "sourceEdits": 0,
+    "writes": "Only the separate requested evidence-review JSON/MD under /tmp."
+  }
+}

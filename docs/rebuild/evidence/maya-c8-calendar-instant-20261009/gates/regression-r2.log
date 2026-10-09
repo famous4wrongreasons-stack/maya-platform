@@ -1,0 +1,7 @@
+
+Test Suites: 20 passed, 20 total
+Tests:       332 passed, 332 total
+Snapshots:   0 total
+Time:        5.591 s, estimated 6 s
+Ran all test suites matching src/valuation|src/orchestration/c9.lifecycle.spec.ts|src/orchestration/c9.lifecycle-source.spec.ts|src/orchestration/c9.lifecycle-presentation.spec.ts|src/orchestration/c9.business-lifecycle.spec.ts|src/ai-tools/ai-core.lifecycle-two-months.spec.ts.
+Test results written to: ../docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/regression-r2.json

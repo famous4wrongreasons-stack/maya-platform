@@ -1,0 +1,22 @@
+{
+  "extends": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/tsconfig.scripts.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "types": [
+      "node",
+      "jest"
+    ],
+    "typeRoots": [
+      "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/node_modules/@types"
+    ]
+  },
+  "include": [
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/valuation/*.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/chapter8-wave4-proof.ts"
+  ],
+  "exclude": []
+}

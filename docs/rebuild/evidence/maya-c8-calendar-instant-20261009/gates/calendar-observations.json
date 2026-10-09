@@ -1,0 +1,101 @@
+{
+  "node": "v24.15.0",
+  "icu": "78.2",
+  "tz": "2026a",
+  "synthetic": true,
+  "externalCalls": 0,
+  "database": false,
+  "observations": [
+    {
+      "label": "NYgap",
+      "timezone": "America/New_York",
+      "at": "2026-01-08T07:30:45.123Z",
+      "attempts": [
+        {
+          "index": 0,
+          "error": "c8_calendar_instant_unavailable",
+          "errorType": "C8CalendarInstantUnavailable",
+          "durationMs": 114.32845900000001
+        },
+        {
+          "index": 1,
+          "error": "c8_calendar_instant_unavailable",
+          "errorType": "C8CalendarInstantUnavailable",
+          "durationMs": 0.16370800000001395
+        }
+      ]
+    },
+    {
+      "label": "NYfold",
+      "timezone": "America/New_York",
+      "at": "2026-09-01T05:30:45.123Z",
+      "attempts": [
+        {
+          "index": 0,
+          "error": "c8_calendar_instant_unavailable",
+          "errorType": "C8CalendarInstantUnavailable",
+          "durationMs": 47.90020900000002
+        },
+        {
+          "index": 1,
+          "error": "c8_calendar_instant_unavailable",
+          "errorType": "C8CalendarInstantUnavailable",
+          "durationMs": 0.1692920000000413
+        }
+      ]
+    },
+    {
+      "label": "LordHoweGap",
+      "timezone": "Australia/Lord_Howe",
+      "at": "2026-08-03T15:45:45.123Z",
+      "attempts": [
+        {
+          "index": 0,
+          "error": "c8_calendar_instant_unavailable",
+          "errorType": "C8CalendarInstantUnavailable",
+          "durationMs": 114.94945799999999
+        },
+        {
+          "index": 1,
+          "error": "c8_calendar_instant_unavailable",
+          "errorType": "C8CalendarInstantUnavailable",
+          "durationMs": 0.16887499999995725
+        }
+      ]
+    },
+    {
+      "label": "ParisSeconds",
+      "timezone": "Europe/Paris",
+      "at": "1880-01-01T12:00:45.123Z",
+      "attempts": [
+        {
+          "index": 0,
+          "value": "1880-03-01T12:00:45.123Z",
+          "durationMs": 110.77133299999997
+        },
+        {
+          "index": 1,
+          "value": "1880-03-01T12:00:45.123Z",
+          "durationMs": 0.1643339999999398
+        }
+      ]
+    },
+    {
+      "label": "NYunique",
+      "timezone": "America/New_York",
+      "at": "2026-01-08T17:30:45.123Z",
+      "attempts": [
+        {
+          "index": 0,
+          "value": "2026-03-08T16:30:45.123Z",
+          "durationMs": 113.45574999999997
+        },
+        {
+          "index": 1,
+          "value": "2026-03-08T16:30:45.123Z",
+          "durationMs": 0.18083400000000438
+        }
+      ]
+    }
+  ]
+}

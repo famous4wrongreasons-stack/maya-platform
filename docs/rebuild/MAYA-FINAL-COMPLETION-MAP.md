@@ -1330,3 +1330,21 @@ PASS. Next safe selected vertical is journal date retention through staff
 clarification across midnight, still requiring RED and runtime evidence.
 Scripted model/synthetic facts only; live YCLIENTS/model/browser, multi-company
 binding and full MAYA/C10 remain NOT_ISSUED. Working website untouched.
+
+### 2026-10-09 — C8 calendar instant and version-1 currentness repair
+
+[Qualified calendar checkpoint](MAYA-C8-CALENDAR-INSTANT-CHECKPOINT-20261009.md),
+runtime `b2a752949cc43636a01d492b06f6d54050fc4dfd`: named gap/fold and skipped-day
+cases now refuse unqualified calendar deadlines. Existing fenced completion uses
+the same lease; immutable PUBLISHED dormancy results lose CURRENT qualification
+when no unique instant exists or the legacy version-1 deadline disagrees. Exact
+reader and recursive ranking dependency checks withhold them without rewriting
+history or choosing earlier/later/shift semantics. Legacy-incompatible historical
+inputs also remain unavailable for new version-1 computations.
+
+332 tests / 20 suites, production/focused types and scoped lint PASS; independent
+source/evidence review archived. Actual methods with synthetic SQL/source ports;
+no new actual HTTP/PG/restart/live-provider/model or max-cohort performance claim.
+Supported inverse domain and historical version-1 restrictions remain explicit.
+Original81, frozen9/handoff, working website, production and autonomy unchanged;
+overall MAYA/C10 remains NOT_ISSUED.

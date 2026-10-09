@@ -1,0 +1,133 @@
+FAIL src/valuation/c8.calendar-time.spec.ts
+  ● C8 calendar target requires one exact instant › New York forward spring gap refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+  ● C8 calendar target requires one exact instant › New York backward spring gap refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+  ● C8 calendar target requires one exact instant › New York forward fall fold refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+  ● C8 calendar target requires one exact instant › New York backward fall fold refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+  ● C8 calendar target requires one exact instant › Lord Howe thirty-minute spring gap refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+  ● C8 calendar target requires one exact instant › Lord Howe thirty-minute fall fold refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+  ● C8 calendar target requires one exact instant › Apia skipped civil day refuses without moving or selecting a target
+
+    expect(received).toThrow(expected)
+
+    Expected message: "c8_calendar_instant_unavailable"
+
+    Received function did not throw
+
+      133 |           sample.direction,
+      134 |         ),
+    > 135 |       ).toThrow(new Error('c8_calendar_instant_unavailable'));
+          |         ^
+      136 |       expect(at.toISOString()).toBe(sample.at);
+      137 |     },
+      138 |   );
+
+      at valuation/c8.calendar-time.spec.ts:135:9
+
+Test Suites: 1 failed, 1 total
+Tests:       7 failed, 10 passed, 17 total
+Snapshots:   0 total
+Time:        0.217 s
+Ran all test suites within paths "src/valuation/c8.calendar-time.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-red.json

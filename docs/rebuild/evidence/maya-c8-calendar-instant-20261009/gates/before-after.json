@@ -1,0 +1,141 @@
+{
+  "baseline": "5babbc22dd5980c8df4bc3eadf844da4ec1679df",
+  "node": "v24.15.0",
+  "icu": "78.2",
+  "tz": "2026a",
+  "synthetic": true,
+  "externalCalls": 0,
+  "database": false,
+  "oldTimeSha256": "02ac99f0426acb3c8a5bf1f2056d49757f393734ab9fc36d676fdad9694a7bff",
+  "currentTimeSha256": "6766b840176b0fcb9fa73234ef9b874f81058855ddafc069efcc4b303d576b64",
+  "rows": [
+    {
+      "label": "NY forward gap",
+      "timezone": "America/New_York",
+      "at": "2026-01-08T07:30:45.123Z",
+      "direction": 1,
+      "targetLocal": "2026-03-08 02:30:45.123",
+      "before": {
+        "utc": "2026-03-08T06:30:45.123Z",
+        "local": "08/03/2026, 01:30:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "NY backward gap",
+      "timezone": "America/New_York",
+      "at": "2026-05-08T06:30:45.123Z",
+      "direction": -1,
+      "targetLocal": "2026-03-08 02:30:45.123",
+      "before": {
+        "utc": "2026-03-08T06:30:45.123Z",
+        "local": "08/03/2026, 01:30:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "NY forward fold",
+      "timezone": "America/New_York",
+      "at": "2026-09-01T05:30:45.123Z",
+      "direction": 1,
+      "targetLocal": "2026-11-01 01:30:45.123",
+      "before": {
+        "utc": "2026-11-01T05:30:45.123Z",
+        "local": "01/11/2026, 01:30:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "NY backward fold",
+      "timezone": "America/New_York",
+      "at": "2027-01-01T06:30:45.123Z",
+      "direction": -1,
+      "targetLocal": "2026-11-01 01:30:45.123",
+      "before": {
+        "utc": "2026-11-01T05:30:45.123Z",
+        "local": "01/11/2026, 01:30:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "Lord Howe gap",
+      "timezone": "Australia/Lord_Howe",
+      "at": "2026-08-03T15:45:45.123Z",
+      "direction": 1,
+      "targetLocal": "2026-10-04 02:15:45.123",
+      "before": {
+        "utc": "2026-10-03T15:45:45.123Z",
+        "local": "04/10/2026, 02:45:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "Lord Howe fold",
+      "timezone": "Australia/Lord_Howe",
+      "at": "2026-02-04T14:45:45.123Z",
+      "direction": 1,
+      "targetLocal": "2026-04-05 01:45:45.123",
+      "before": {
+        "utc": "2026-04-04T15:15:45.123Z",
+        "local": "05/04/2026, 01:45:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "Apia skipped day",
+      "timezone": "Pacific/Apia",
+      "at": "2011-10-30T22:15:45.123Z",
+      "direction": 1,
+      "targetLocal": "2011-12-30 12:15:45.123",
+      "before": {
+        "utc": "2011-12-30T22:15:45.123Z",
+        "local": "31/12/2011, 12:15:45"
+      },
+      "after": {
+        "error": "c8_calendar_instant_unavailable"
+      }
+    },
+    {
+      "label": "Paris seconds",
+      "timezone": "Europe/Paris",
+      "at": "1880-01-01T12:00:45.123Z",
+      "direction": 1,
+      "targetLocal": "1880-03-01 12:10:06.123",
+      "before": {
+        "utc": "1880-03-01T12:01:24.123Z",
+        "local": "01/03/1880, 12:10:45"
+      },
+      "after": {
+        "utc": "1880-03-01T12:00:45.123Z",
+        "local": "01/03/1880, 12:10:06"
+      }
+    },
+    {
+      "label": "Gregorian year",
+      "timezone": "UTC",
+      "at": "0099-12-31T12:34:56.789Z",
+      "direction": 1,
+      "targetLocal": "0100-02-28 12:34:56.789",
+      "before": {
+        "utc": "2000-02-29T12:34:56.789Z",
+        "local": "29/02/2000, 12:34:56"
+      },
+      "after": {
+        "utc": "0100-02-28T12:34:56.789Z",
+        "local": "28/02/100, 12:34:56"
+      }
+    }
+  ]
+}

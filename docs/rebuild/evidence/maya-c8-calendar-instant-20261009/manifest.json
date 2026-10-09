@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "sourceCommit": "b2a752949cc43636a01d492b06f6d54050fc4dfd",
+  "baselineCommit": "5babbc22dd5980c8df4bc3eadf844da4ec1679df",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/scripts/chapter8-foundation-proof.ts",
+      "sha256": "60d16f17f4de47030197465711a965a1c86c16f3b92fb78f3a049461a2df7e80"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave2-proof.ts",
+      "sha256": "1827829a289dbc026fe68531d1089f0e3640b6070a8afbb35a2c5a1338a70cd0"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave3-proof.ts",
+      "sha256": "7ecf217365ef3f9754fd5a6f4c2c07640350a827f9f1e4c9d95290b540a74206"
+    },
+    {
+      "path": "maya-saas-backend/scripts/chapter8-wave4-proof.ts",
+      "sha256": "5a5599729d12b6261ba21636eec65834e124bb132e155292444bc2e75dca88e1"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.calendar-time.spec.ts",
+      "sha256": "f2999a12397ff8dbe3736b52bba6b8192884f3482e02c04eeda6e9524d4d7e44"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.deterministic.ts",
+      "sha256": "720a64bfcf8538d6dd6d1169e84effce7e478f624152098c5fcbcf14947e4bbe"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.calendar-time.spec.ts",
+      "sha256": "36ae81fe916744a8aebabf66ebc98a071c3afed631766752374e5cc317e49315"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.ts",
+      "sha256": "0d3693034ceb3f9863ec455bc5525aee160e23382409805d672ce0f29f06a651"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.calendar-time.spec.ts",
+      "sha256": "13b7cdfe8b7b7d5974b13b4289aa6a9c967140acbaf1e342897206bcaf398966"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.ts",
+      "sha256": "89c6fd0bba2640b984793ccbbe195b5d798583d630b43a887199e40e9c64bdcb"
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.ts",
+      "sha256": "4d25f6f03664200f215514f209951c521d98d0194b97599c27f58072658ab672"
+    }
+  ],
+  "files": [
+    {
+      "path": "gates/before-after.json",
+      "sha256": "0f6df5027f46aca28e2b176df81ae23c7282069f312788161ddae4b0cfc21f48",
+      "bytes": 3849
+    },
+    {
+      "path": "gates/calendar-green-initial.json",
+      "sha256": "0cff56548369271724bea99c67dad39fc94755ca027942e4e14d9d22de89355f",
+      "bytes": 12419
+    },
+    {
+      "path": "gates/calendar-green-initial.log",
+      "sha256": "eafc2d1d71b8ecda95fc21fa6239b52802343b1ef0ae0f8f8d1a02eaa3bbb2c1",
+      "bytes": 333
+    },
+    {
+      "path": "gates/calendar-observations.json",
+      "sha256": "064a752ac5d913e340f13522b3e194accd1516dc95c5e6a681dcd3254677f8a5",
+      "bytes": 2577
+    },
+    {
+      "path": "gates/calendar-producer-green.json",
+      "sha256": "46489fee440784d8dbfc68f79da66e5044dc8b3765e683fefe9a15e0e211f135",
+      "bytes": 18288
+    },
+    {
+      "path": "gates/calendar-producer-green.log",
+      "sha256": "81a2f4c7cb7fbf89b269af11c2d5cdfbedf7e7affaa5e512fb8d62239880dfef",
+      "bytes": 352
+    },
+    {
+      "path": "gates/calendar-red.json",
+      "sha256": "6203006c3265be76b81c5f61c2b3992e5aaa46bd9e761d134962deff5745f433",
+      "bytes": 33088
+    },
+    {
+      "path": "gates/calendar-red.log",
+      "sha256": "d2d4bfa16bbae6b3d9df28bf07998b5b87147dd0bea9543a80d2c81da3511b67",
+      "bytes": 4355
+    },
+    {
+      "path": "gates/execution-receipt.json",
+      "sha256": "4425e3521f6e1590c14c59fa8f56e5a5fea118263c6467dd607395a6da715aae",
+      "bytes": 3434
+    },
+    {
+      "path": "gates/lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "gates/lint-initial.log",
+      "sha256": "44ff82b14e78358540c93ce95a6da761287b5757deadfdd4d59261d73c62b810",
+      "bytes": 993
+    },
+    {
+      "path": "gates/lint-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "gates/protected-read-only.json",
+      "sha256": "231e33c6bb2d2d70f726d909d56dc3cb9c4422509c90197dcc84ca8ee8cf43e6",
+      "bytes": 590
+    },
+    {
+      "path": "gates/regression-final.json",
+      "sha256": "ca175b32c431605afd8f24b05997e613778c69b544e2cea474cce45275f3f474",
+      "bytes": 166778
+    },
+    {
+      "path": "gates/regression-final.log",
+      "sha256": "5a472bd9f8d022e74064038365398b40ca43ebee96279bbc82a5088362459ff9",
+      "bytes": 517
+    },
+    {
+      "path": "gates/regression-initial.json",
+      "sha256": "e71e11f0626ddb3cfb250aebdbc5ae668ba9f1206de257a6fb62f5b29d9bd183",
+      "bytes": 166779
+    },
+    {
+      "path": "gates/regression-initial.log",
+      "sha256": "6eacbfa50c0626374d3a5363d8ae165b7e0071b6667c8d07589dfa4b85c0774b",
+      "bytes": 504
+    },
+    {
+      "path": "gates/regression-r2.json",
+      "sha256": "25c35970f8708c3a90196abd0188d440ecef590b3503b0fba13909da2f54ca68",
+      "bytes": 169062
+    },
+    {
+      "path": "gates/regression-r2.log",
+      "sha256": "0ff032f51594c8b8b49b7fc81f35a64abf877a7b371d3ed2110548d5b970fc14",
+      "bytes": 514
+    },
+    {
+      "path": "gates/types-focused-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "gates/types-focused-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "gates/types-focused.config.json",
+      "sha256": "f677e9a39f5d61c99456359bb0980aae727cf3b3430d4e7b4e863feac58fc607",
+      "bytes": 1133
+    },
+    {
+      "path": "gates/types-focused.log",
+      "sha256": "c4ab35c949b59b35fe53e38a0f914ba7e39bab74551e1e9b336e28077412b7b1",
+      "bytes": 1282
+    },
+    {
+      "path": "gates/types-production-final.log",
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103
+    },
+    {
+      "path": "gates/types-production-r2.log",
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103
+    },
+    {
+      "path": "gates/types-production.log",
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103
+    },
+    {
+      "path": "reviews/maya-c8-calendar-instant-evidence-review-20261009.json",
+      "sha256": "395b790af256fadd8d1cd8522fd8be644f4c3b45dc885b3555e0b627eebabd48",
+      "bytes": 18395
+    },
+    {
+      "path": "reviews/maya-c8-calendar-instant-evidence-review-20261009.md",
+      "sha256": "7dece31391a0fa0e709eae7053757d6a160abd63fb6bc5576a6da176c9b39161",
+      "bytes": 2226
+    },
+    {
+      "path": "reviews/maya-c8-calendar-instant-legacy-compatibility-review-20261009.json",
+      "sha256": "94eedf2b3b82626d5d892a323535896d201b92435389d0e88a3c53440feaaa95",
+      "bytes": 11912
+    },
+    {
+      "path": "reviews/maya-c8-calendar-instant-legacy-compatibility-review-20261009.md",
+      "sha256": "dfaf801c3ac6909fa8513273bc00f9b647de3abb475059bd3fafaf110cc0c118",
+      "bytes": 2597
+    },
+    {
+      "path": "reviews/maya-c8-calendar-instant-source-review-20261009.json",
+      "sha256": "d69b0668640b0ca1149dcc06e4c0ea2d7430cede5cf56787da0835b58d93f809",
+      "bytes": 11030
+    },
+    {
+      "path": "reviews/maya-c8-calendar-instant-source-review-20261009.md",
+      "sha256": "ccc51c26fb5bc3ebf23a8a04f60c4e120d3f667816c43bfb00bfb76986752ad3",
+      "bytes": 2609
+    }
+  ],
+  "qualification": "Component/source evidence with synthetic ports. No new HTTP/PG/restart/live provider/model acceptance."
+}

@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        2.291 s
+Ran all test suites within paths "src/valuation/c8.calendar-time.spec.ts", "src/valuation/c8.time.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-c8-calendar-instant-20261009/gates/calendar-green-initial.json
