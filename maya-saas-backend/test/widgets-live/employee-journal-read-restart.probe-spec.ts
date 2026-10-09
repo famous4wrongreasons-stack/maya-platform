@@ -55,6 +55,7 @@ const PRIVATE_FIXTURE = [
   'PRIVATE_SYNTHETIC_NOTE',
 ];
 const SERVICE = 'Мужская стрижка';
+const SCRIPTED_DENIAL = 'Журнал сотрудников недоступен вашей роли.';
 const digest = (value: unknown) =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const object = (value: unknown): Record<string, unknown> =>
@@ -141,6 +142,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
   }> = [];
   const unexpected: string[] = [];
   const checkpoints: Record<string, unknown>[] = [];
+  const deniedPlans: Record<string, unknown>[] = [];
   const sourceReceipts: Array<{
     runHash: string;
     staffId: string;
@@ -332,6 +334,9 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       for (const value of [TOKEN, ...PRIVATE_FIXTURE])
         expect(JSON.stringify(input).includes(value)).toBe(false);
       modelCalls++;
+      const advertisedJournal = input.tools.some(
+        (tool) => tool.name === 'operations.journal.read',
+      );
       const planned = parser.validatePlanningResponse(
         JSON.stringify({
           semantic_plan: {
@@ -367,9 +372,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
           },
           // Keep the forbidden semantic intent for role-policy validation, but
           // do not invent a tool call outside this principal's advertised tools.
-          tool_call: !input.tools.some(
-            (tool) => tool.name === 'operations.journal.read',
-          )
+          tool_call: !advertisedJournal
             ? null
             : active.compound
               ? { name: 'catalog.staff.read', arguments: {} }
@@ -383,9 +386,31 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
         }),
         input,
       );
+      if (!advertisedJournal) {
+        const task = planned.semanticPlan?.tasks.find(
+          (item) => item.intent === 'operations.journal_day',
+        );
+        assert.ok(task);
+        expect(task.permission.status).toBe('denied');
+        expect(task.data_class).toBe('F');
+        expect(task.tool.status).toBe('not_available');
+        expect(planned.toolCall).toBeNull();
+        expect(deniedPlans.length).toBeLessThan(4);
+        deniedPlans.push({
+          role: input.principalRole,
+          intent: task.intent,
+          permission: task.permission.status,
+          dataClass: task.data_class,
+          toolStatus: task.tool.status,
+          advertisedJournal,
+          replyOrigin: 'SCRIPTED_DENIAL_PROSE',
+          languageAcceptance: false,
+          serverAuthoredDeterministicRefusal: false,
+        });
+      }
       return Promise.resolve({
         ...planned,
-        reply: 'UNVERIFIED_PLANNER_TEXT',
+        reply: advertisedJournal ? 'UNVERIFIED_PLANNER_TEXT' : SCRIPTED_DENIAL,
         provider: 'deepseek' as const,
         model: 'SCRIPTED_EMPLOYEE_JOURNAL',
         usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
@@ -397,6 +422,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     report.modelCalls = modelCalls;
     report.unexpected = unexpected;
     report.checkpoints = checkpoints;
+    report.deniedPlans = deniedPlans;
     report.sourceReceipts = sourceReceipts;
     try {
       writeFileSync(
@@ -476,11 +502,21 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       },
       data: { branchId: other.id },
     });
+    // C9Authority.current requires exactly one active Staff by tenant + userId
+    // (and this actual membership branch). This seeds a valid synthetic personal
+    // principal before observation, without changing its STAFF role or Client identity.
+    await db.prisma.membership.update({
+      where: {
+        userId_tenantId: { userId: staffActor.id, tenantId: tenant.id },
+      },
+      data: { branchId: branch.id },
+    });
     for (const member of roster) {
       const staff = await db.prisma.staff.create({
         data: {
           tenantId: tenant.id,
           branchId: branch.id,
+          ...(member.id === 71 ? { userId: staffActor.id } : {}),
           title: 'Мастер',
           encryptedDisplayName: db.encryption.encrypt(member.name),
           active: true,
@@ -606,18 +642,27 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     expect(result.status).toBe(403);
     expect(transport).toHaveLength(before.reads);
     expect(modelCalls).toBe(before.models);
+    const beforeDenied = deniedPlans.length;
     const conversation = await chat(token, EXACT);
-    expect([201, 401, 403]).toContain(conversation.status);
-    if (conversation.status === 201) {
-      expect(conversation.body.action).toBeNull();
-      expect(object(conversation.body.grounding).status).toBe('blocked');
-      expect(conversation.body.reply).not.toContain('10:00');
-      expect(conversation.body.reply).not.toContain('Журнал на');
-      expect(conversation.body.resolution).toBeUndefined();
-    }
+    expect(conversation.status).toBe(201);
+    expect(conversation.body.action).toBeNull();
+    expect(conversation.body.tools_used).toEqual([]);
+    expect(object(conversation.body.grounding).status).toBe('not_required');
+    // This is explicitly scripted model prose, not server-authored or language acceptance.
+    expect(conversation.body.reply).toBe(SCRIPTED_DENIAL);
+    expect(conversation.body.resolution).toBeUndefined();
+    expect(deniedPlans).toHaveLength(beforeDenied + 1);
+    expect(deniedPlans.at(-1)).toMatchObject({
+      role: actor.role,
+      permission: 'denied',
+      advertisedJournal: false,
+    });
     expect(transport).toHaveLength(before.reads);
     checkpoints.push({
-      boundary: 'ordinary_chat_manager_journal_refusal',
+      boundary: 'ordinary_chat_parsed_permission_denied',
+      replyOrigin: 'SCRIPTED_DENIAL_PROSE',
+      languageAcceptance: false,
+      serverAuthoredDeterministicRefusal: false,
       role: actor.role,
       status: conversation.status,
       providerReadsAdded: 0,
