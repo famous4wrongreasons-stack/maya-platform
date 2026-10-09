@@ -647,22 +647,37 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     expect(conversation.status).toBe(201);
     expect(conversation.body.action).toBeNull();
     expect(conversation.body.tools_used).toEqual([]);
-    expect(object(conversation.body.grounding).status).toBe('not_required');
-    // This is explicitly scripted model prose, not server-authored or language acceptance.
-    expect(conversation.body.reply).toBe(SCRIPTED_DENIAL);
     expect(conversation.body.resolution).toBeUndefined();
-    expect(deniedPlans).toHaveLength(beforeDenied + 1);
-    expect(deniedPlans.at(-1)).toMatchObject({
-      role: actor.role,
-      permission: 'denied',
-      advertisedJournal: false,
-    });
+    const preModelStaffRefusal = actor.role === UserRole.STAFF;
+    if (preModelStaffRefusal) {
+      expect(object(conversation.body.grounding).status).toBe('blocked');
+      expect(conversation.body.reply).toBe(
+        'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.',
+      );
+      expect(modelCalls).toBe(before.models);
+      expect(deniedPlans).toHaveLength(beforeDenied);
+    } else {
+      expect(actor.role).toBe(UserRole.CLIENT);
+      expect(object(conversation.body.grounding).status).toBe('not_required');
+      // Client denial is scripted prose; its parser permission is server validated.
+      expect(conversation.body.reply).toBe(SCRIPTED_DENIAL);
+      expect(deniedPlans).toHaveLength(beforeDenied + 1);
+      expect(deniedPlans.at(-1)).toMatchObject({
+        role: actor.role,
+        permission: 'denied',
+        advertisedJournal: false,
+      });
+    }
     expect(transport).toHaveLength(before.reads);
     checkpoints.push({
-      boundary: 'ordinary_chat_parsed_permission_denied',
-      replyOrigin: 'SCRIPTED_DENIAL_PROSE',
+      boundary: preModelStaffRefusal
+        ? 'ordinary_chat_premodel_staff_access_refusal'
+        : 'ordinary_chat_parsed_permission_denied',
+      replyOrigin: preModelStaffRefusal
+        ? 'SERVER_CLOSED_ACCESS_FALLBACK'
+        : 'SCRIPTED_DENIAL_PROSE',
       languageAcceptance: false,
-      serverAuthoredDeterministicRefusal: false,
+      serverAuthoredDeterministicRefusal: preModelStaffRefusal,
       role: actor.role,
       status: conversation.status,
       providerReadsAdded: 0,
