@@ -3,10 +3,17 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { UserRole } from '../../../src/common/domain.enums';
 import {
+  configureCoreFullOfflineAfterBind,
   coreFullOfflineExternalFacts,
   coreFullOfflineRecipe,
 } from './core-full-offline-fixtures';
+import type { FixtureContext } from './bootstrap';
 import type { CandidateSource, CorpusCase } from './current-candidate-sources';
+import { assertProofDatabase } from './proof-db-guard';
+
+// Exercise setup against finite in-memory delegates. The actual proof DB guard
+// has its own tests; no URL is read and no connection is opened by this suite.
+jest.mock('./proof-db-guard', () => ({ assertProofDatabase: jest.fn() }));
 
 const dataset = (file: string) =>
   JSON.parse(
@@ -242,5 +249,263 @@ describe('full offline finite fixture contracts (synthetic, no I/O)', () => {
       coreFullOfflineRecipe('current-staff_config-correction').expectedBoundary
         .kind,
     ).toBe('CLARIFICATION_OR_EXPLICIT_LIMITATION');
+  });
+});
+
+function setupFixture(caseId: string) {
+  const current = source(caseId);
+  const branch = {
+    id: current.branchId,
+    tenantId: current.tenant.id,
+    name: 'Synthetic authorized branch',
+    timezone: 'Europe/Moscow',
+  };
+  const integration = {
+    id: 'integration-own',
+    tenantId: current.tenant.id,
+    provider: 'yclients',
+    status: 'active',
+    settingsJson: {
+      companyId: current.company,
+      branchBinding: {
+        contract: 'maya.crm-branch-binding/1',
+        companyId: Number(current.company),
+        branchId: current.branchId,
+      },
+    } as Record<string, unknown>,
+  };
+  const db = {
+    encryption: {
+      encrypt: jest.fn((name: string) => `synthetic-encrypted:${name}`),
+    },
+    prisma: {
+      branch: {
+        findFirstOrThrow: jest.fn().mockResolvedValue(branch),
+        update: jest.fn().mockResolvedValue(branch),
+        create: jest.fn().mockResolvedValue({ id: 'branch-other' }),
+      },
+      crmIntegration: { findUnique: jest.fn().mockResolvedValue(integration) },
+      staff: { create: jest.fn().mockResolvedValue({ id: 'staff-new' }) },
+      staffProviderLink: {
+        findMany: jest.fn().mockResolvedValue([]),
+        create: jest.fn().mockResolvedValue({ id: 'link-new' }),
+      },
+      internalProvider: {
+        findFirstOrThrow: jest.fn(
+          ({ where }: { where: { displayName: string } }) =>
+            Promise.resolve({
+              id:
+                where.displayName === 'Артём' ? 'internal-one' : 'internal-two',
+            }),
+        ),
+        update: jest.fn().mockResolvedValue({}),
+      },
+      internalService: {
+        findFirstOrThrow: jest
+          .fn()
+          .mockResolvedValue({ id: 'internal-service' }),
+        update: jest.fn().mockResolvedValue({}),
+      },
+      internalProviderService: { count: jest.fn().mockResolvedValue(2) },
+    },
+  };
+  return {
+    current,
+    branch,
+    integration,
+    db,
+    run: () =>
+      configureCoreFullOfflineAfterBind(
+        db as unknown as FixtureContext,
+        current,
+      ),
+  };
+}
+
+describe('two-case schedule source fixture enrichment (in-memory delegates only)', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it.each([
+    ['followup-owner-topic-switch', 'Артём', 'основной филиал'],
+    ['mt-topic_switch_and_return-17', 'Елена', 'северный филиал'],
+  ])(
+    'binds %s to its current roster without changing the input recipe',
+    async (id, name, branchName) => {
+      const f = setupFixture(id);
+      const original = structuredClone(f.current.item);
+      const result = await f.run();
+      expect(assertProofDatabase).toHaveBeenCalledTimes(1);
+      expect(f.db.prisma.crmIntegration.findUnique).toHaveBeenCalledWith({
+        where: { tenantId: 'tenant-own' },
+        select: {
+          id: true,
+          tenantId: true,
+          provider: true,
+          status: true,
+          settingsJson: true,
+        },
+      });
+      expect(f.db.prisma.staffProviderLink.findMany).toHaveBeenCalledWith({
+        where: {
+          tenantId: 'tenant-own',
+          provider: 'yclients',
+          externalId: '71',
+        },
+        select: { id: true },
+        take: 2,
+      });
+      expect(f.db.prisma.staff.create).toHaveBeenCalledTimes(1);
+      expect(f.db.prisma.staff.create).toHaveBeenCalledWith({
+        data: {
+          tenantId: 'tenant-own',
+          branchId: 'branch-own',
+          active: true,
+          encryptedDisplayName: `synthetic-encrypted:${name}`,
+        },
+      });
+      expect(f.db.prisma.staffProviderLink.create).toHaveBeenCalledTimes(1);
+      expect(f.db.prisma.staffProviderLink.create).toHaveBeenCalledWith({
+        data: {
+          tenantId: 'tenant-own',
+          staffId: 'staff-new',
+          provider: 'yclients',
+          externalId: '71',
+        },
+      });
+      expect(result).toEqual({
+        branchId: 'branch-own',
+        branchName,
+        primaryStaffId: 'staff-new',
+        secondaryStaffId: null,
+        otherBranchId: null,
+        serviceIds: [],
+      });
+      expect(f.current.sourceRefs).toEqual([
+        {
+          owner: 'OFFLINE_SCHEDULE_BRANCH_BINDING',
+          id: 'integration-own',
+          status: 'EXISTING_COMPANY_BRANCH_PAIR_VERIFIED',
+        },
+        {
+          owner: 'OFFLINE_SCHEDULE_STAFF',
+          id: 'staff-new',
+          status: 'ADDED_ACTIVE_IN_BOUND_BRANCH_FROM_CURRENT_ROSTER',
+        },
+        {
+          owner: 'OFFLINE_SCHEDULE_STAFF_PROVIDER_LINK',
+          id: 'link-new',
+          status: 'ADDED_UNIQUE_YCLIENTS_71',
+        },
+      ]);
+      expect(f.current.privateValues).toEqual(['staff-new', 'link-new']);
+      expect(f.current.item).toEqual(original);
+      expect(f.db.encryption.encrypt).toHaveBeenCalledWith(name);
+      await expect(f.run()).rejects.toThrow('core_full_offline_configure_once');
+      expect(f.db.prisma.staff.create).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each([
+    'missing-integration',
+    'foreign-integration',
+    'provider',
+    'inactive',
+    'missing-binding',
+    'wrong-company',
+    'wrong-branch',
+    'foreign-branch',
+    'branch-timezone',
+    'existing-link',
+    'duplicate-links',
+  ])(
+    'refuses %s without repairing metadata or creating a staff identity',
+    async (kind) => {
+      const f = setupFixture('followup-owner-topic-switch');
+      if (kind === 'missing-integration')
+        f.db.prisma.crmIntegration.findUnique.mockResolvedValue(null);
+      if (kind === 'foreign-integration')
+        f.integration.tenantId = 'tenant-foreign';
+      if (kind === 'provider') f.integration.provider = 'altegio';
+      if (kind === 'inactive') f.integration.status = 'disabled';
+      if (kind === 'missing-binding')
+        delete f.integration.settingsJson.branchBinding;
+      if (kind === 'wrong-company')
+        f.integration.settingsJson.companyId = '88101';
+      if (kind === 'wrong-branch')
+        f.integration.settingsJson.branchBinding = {
+          contract: 'maya.crm-branch-binding/1',
+          companyId: 88100,
+          branchId: 'branch-foreign',
+        };
+      if (kind === 'foreign-branch') f.branch.tenantId = 'tenant-foreign';
+      if (kind === 'branch-timezone') f.branch.timezone = 'UTC';
+      if (kind === 'existing-link')
+        f.db.prisma.staffProviderLink.findMany.mockResolvedValue([
+          { id: 'existing' },
+        ]);
+      if (kind === 'duplicate-links')
+        f.db.prisma.staffProviderLink.findMany.mockResolvedValue([
+          { id: 'one' },
+          { id: 'two' },
+        ]);
+      await expect(f.run()).rejects.toThrow();
+      expect(f.db.prisma.branch.update).not.toHaveBeenCalled();
+      expect(f.db.prisma.staff.create).not.toHaveBeenCalled();
+      expect(f.db.prisma.staffProviderLink.create).not.toHaveBeenCalled();
+      expect(f.current.sourceRefs).toEqual([]);
+      expect(f.current.privateValues).toEqual([]);
+    },
+  );
+
+  it('does not add source metadata or employee links to any of the other 46 cases', async () => {
+    const untouched = rows.filter(
+      (row) =>
+        ![
+          'followup-owner-topic-switch',
+          'mt-topic_switch_and_return-17',
+        ].includes(row.id),
+    );
+    expect(untouched).toHaveLength(46);
+    for (const row of untouched) {
+      const f = setupFixture(row.id);
+      const original = structuredClone(f.current.item);
+      await f.run();
+      expect(f.db.prisma.crmIntegration.findUnique).not.toHaveBeenCalled();
+      expect(f.db.prisma.staffProviderLink.findMany).not.toHaveBeenCalled();
+      expect(f.db.prisma.staff.create).not.toHaveBeenCalled();
+      expect(f.db.prisma.staffProviderLink.create).not.toHaveBeenCalled();
+      expect(
+        f.current.sourceRefs.some((ref) =>
+          ref.owner.startsWith('OFFLINE_SCHEDULE_'),
+        ),
+      ).toBe(false);
+      expect(f.current.item).toEqual(original);
+      if (row.id === 'mt-ambiguous_entity_resolution-15') {
+        expect(
+          coreFullOfflineExternalFacts(f.current).getStaff(f.current.tenant.id),
+        ).toEqual([
+          { id: '71', name: 'Саша' },
+          { id: '72', name: 'Саша' },
+        ]);
+        expect(f.current.sourceRefs).toEqual([
+          {
+            owner: 'OFFLINE_BRANCH_LABEL_ONLY',
+            id: 'branch-other',
+            status:
+              'STAFF_TO_BRANCH_MAPPING_NOT_PROVEN_BY_PRACTITIONER_CONTRACT',
+          },
+        ]);
+      }
+    }
+  });
+
+  it('keeps the proof database guard ahead of every fake delegate', async () => {
+    const f = setupFixture('followup-owner-topic-switch');
+    jest.mocked(assertProofDatabase).mockImplementationOnce(() => {
+      throw new Error('synthetic-proof-db-refused');
+    });
+    await expect(f.run()).rejects.toThrow('synthetic-proof-db-refused');
+    expect(f.db.prisma.branch.findFirstOrThrow).not.toHaveBeenCalled();
+    expect(f.db.prisma.staff.create).not.toHaveBeenCalled();
   });
 });

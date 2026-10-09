@@ -8,6 +8,7 @@ import path from 'node:path';
 import type { MayaFeatureKey } from '../../../src/common/feature-catalog';
 import { observedGoodsItem } from '../../../src/crm/yclients-goods-read';
 import { servicePriceSnapshot } from '../../../src/crm/yclients-service-price.contract';
+import { normalizeCrmBranchBinding } from '../../../src/crm/crm-provider-settings';
 import { UserRole } from '../../../src/common/domain.enums';
 import type { CRMAdapter } from '../../../src/crm/crm-adapter.interface';
 import type {
@@ -420,6 +421,70 @@ export async function configureCoreFullOfflineAfterBind(
   const branch = await db.prisma.branch.findFirstOrThrow({
     where: { id: source.branchId, tenantId },
   });
+  let scheduleFixture: { member: Practitioner; integrationId: string } | null =
+    null;
+  if (
+    ['followup-owner-topic-switch', 'mt-topic_switch_and_return-17'].includes(
+      source.item.id,
+    )
+  ) {
+    // Forward-only fixture enrichment for these two existing schedule turns.
+    // Verify the already-seeded company/branch pair; never repair missing
+    // metadata or extend this setup to the ambiguous journal/negative cases.
+    const integration = await db.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+      select: {
+        id: true,
+        tenantId: true,
+        provider: true,
+        status: true,
+        settingsJson: true,
+      },
+    });
+    assert.ok(
+      integration &&
+        integration.tenantId === tenantId &&
+        integration.provider === 'yclients' &&
+        integration.status === 'active' &&
+        branch.id === source.branchId &&
+        branch.tenantId === tenantId &&
+        branch.timezone === source.clockBinding.businessTimezone,
+      'core_full_offline_schedule_source_required',
+    );
+    const settings = integration.settingsJson;
+    assert.ok(
+      settings && typeof settings === 'object' && !Array.isArray(settings),
+      'core_full_offline_schedule_binding_required',
+    );
+    const binding = normalizeCrmBranchBinding(
+      settings.branchBinding,
+      settings.companyId,
+    );
+    assert.ok(
+      /^[1-9][0-9]*$/.test(source.company) &&
+        Number.isSafeInteger(Number(source.company)) &&
+        binding?.branchId === branch.id &&
+        binding.companyId === Number(source.company),
+      'core_full_offline_schedule_binding_required',
+    );
+    const roster = coreFullOfflineExternalFacts(source).getStaff(tenantId);
+    const selected = roster.filter((member) => member.id === '71');
+    assert.ok(
+      selected.length === 1 && selected[0].name.trim().length > 0,
+      'core_full_offline_schedule_staff_required',
+    );
+    const existing = await db.prisma.staffProviderLink.findMany({
+      where: { tenantId, provider: 'yclients', externalId: '71' },
+      select: { id: true },
+      take: 2,
+    });
+    assert.equal(
+      existing.length,
+      0,
+      'core_full_offline_schedule_link_already_exists',
+    );
+    scheduleFixture = { member: selected[0], integrationId: integration.id };
+  }
   const branchName = recipe.setup.branchName ?? branch.name;
   if (branchName !== branch.name)
     await db.prisma.branch.update({
@@ -434,6 +499,45 @@ export async function configureCoreFullOfflineAfterBind(
     secondaryStaffId: null,
     serviceIds: [],
   };
+  if (scheduleFixture) {
+    const staff = await db.prisma.staff.create({
+      data: {
+        tenantId,
+        branchId: branch.id,
+        encryptedDisplayName: db.encryption.encrypt(
+          scheduleFixture.member.name,
+        ),
+        active: true,
+      },
+    });
+    const link = await db.prisma.staffProviderLink.create({
+      data: {
+        tenantId,
+        staffId: staff.id,
+        provider: 'yclients',
+        externalId: scheduleFixture.member.id,
+      },
+    });
+    result.primaryStaffId = staff.id;
+    source.privateValues.push(staff.id, link.id);
+    source.sourceRefs.push(
+      {
+        owner: 'OFFLINE_SCHEDULE_BRANCH_BINDING',
+        id: scheduleFixture.integrationId,
+        status: 'EXISTING_COMPANY_BRANCH_PAIR_VERIFIED',
+      },
+      {
+        owner: 'OFFLINE_SCHEDULE_STAFF',
+        id: staff.id,
+        status: 'ADDED_ACTIVE_IN_BOUND_BRANCH_FROM_CURRENT_ROSTER',
+      },
+      {
+        owner: 'OFFLINE_SCHEDULE_STAFF_PROVIDER_LINK',
+        id: link.id,
+        status: 'ADDED_UNIQUE_YCLIENTS_71',
+      },
+    );
+  }
   if (['booking', 'personal'].includes(recipe.binding.group)) {
     const catalog = recipe.setup.internalCatalog ?? {
       primaryStaff: 'Артём',
