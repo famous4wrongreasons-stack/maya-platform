@@ -1,0 +1,10 @@
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/ai-tools/ai-core.service-price-semantic.spec.ts
+PASS src/ai-tools/service-price-chat-binding.spec.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       91 passed, 91 total
+Snapshots:   0 total
+Time:        0.66 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service-price-semantic.spec.ts", "src/ai-tools/service-price-chat-binding.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-pricing-semantic-20261009/targeted-jest-r2.json

@@ -1,0 +1,38 @@
+{
+  "qualification": "SYNTHETIC_SCRIPTED_VALIDATED_SEMANTICS_HTTP_PG_CURRENT_CARRIER",
+  "sourceHead": "0fce103491de3e1fc5125a4db47312874a0aa4b5",
+  "sourceHashes": {
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts": "67fcaa73aa65c381dfbc40e36871ad12991719091d9bf118ec5bfd083f47e590",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.ts": "362d4b683dcb63e31139cd750990d32d6b89783ca03211ce5d17eca7d096c48d",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "75fcdeafb2794a3456b5d2e2dc9165bdd24fe8bc075fa7f8620b21e8741d8278",
+    "maya-saas-backend/src/ai-tools/service-price-chat-binding.ts": "252c7283e33105ec5036e86095d6ad8bc6542f05fb3f8ff2b248fbc0ca8a2244",
+    "maya-saas-backend/test/widgets-live/service-price.live-spec.ts": "6b1963b27dc976984077827b8a4a5bbff9105b9db73a8ad8330a26c6f47272a7",
+    "maya-carrier-react/test/service-price-http-fixture.test.mjs": "66a1fbd19eab9c63c53f64f4d950018f33f21377fd2af955e6027f6a03d78368"
+  },
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "price-http-pg",
+    "carrier-bundle",
+    "carrier-http-fixture",
+    "carrier-typecheck",
+    "carrier-web-build"
+  ],
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-price-semantic-Tyef83/pg",
+  "database": "maya_widget_gate_proof_c9occ_dbd869ddfb95",
+  "port": 60144,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "browserAcceptance": false,
+  "resources": {
+    "nodeHeapMb": 1536,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64
+  },
+  "clusterStopped": true,
+  "pidAbsent": true,
+  "sourceUnchanged": true
+}

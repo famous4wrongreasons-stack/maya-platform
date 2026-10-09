@@ -1,0 +1,27 @@
+PASS src/ai-tools/ai-core.service-price-semantic.spec.ts
+FAIL src/conversation-intelligence/conversation-intelligence.service.spec.ts
+  ● ConversationIntelligenceService › keeps the runtime planner contract compact while retaining every intent
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 60000
+    Received:   60559
+
+    [0m [90m 114 |[39m       ])[33m,[39m
+     [90m 115 |[39m     )[33m;[39m
+    [31m[1m>[22m[39m[90m 116 |[39m     expect([33mBuffer[39m[33m.[39mbyteLength(encoded[33m,[39m [32m'utf8'[39m))[33m.[39mtoBeLessThan([35m60[39m_000)[33m;[39m
+     [90m     |[39m                                                [31m[1m^[22m[39m
+     [90m 117 |[39m     expect(contract[33m.[39mintents[[35m0[39m])[33m.[39mnot[33m.[39mtoHaveProperty([32m'permission'[39m)[33m;[39m
+     [90m 118 |[39m     expect(contract[33m.[39mintents[[35m0[39m])[33m.[39mnot[33m.[39mtoHaveProperty([32m'response_rule'[39m)[33m;[39m
+     [90m 119 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (conversation-intelligence/conversation-intelligence.service.spec.ts:116:48)
+
+PASS src/ai-tools/service-price-chat-binding.spec.ts
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 90 passed, 91 total
+Snapshots:   0 total
+Time:        0.693 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/ai-core.service-price-semantic.spec.ts", "src/ai-tools/service-price-chat-binding.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-pricing-semantic-20261009/targeted-jest.json

@@ -1,0 +1,36 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_dbd869ddfb95 on 127.0.0.1:60144 (local)
+(node:25990) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/widgets-live/service-price.live-spec.ts (11.474 s)
+  Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]
+    ✓ YC-SP1-WIDGET: chat mints an exact standard APPROVAL and gateway approval yields one durable CRM receipt (739 ms)
+    ✓ YC-SP1-WIDGET: reject closes the exact pending proposal and its approve sibling without a CRM action (305 ms)
+    ✓ YC-SP1-WIDGET: a natural price correction supersedes the old card before any effect (500 ms)
+    ✓ YC-SP1-SEMANTIC: original inflected title clarifies; literal preparation and correction reach one exact approval and AE receipt (453 ms)
+    ✓ YC-SP1-WIDGET: rechecks provider_revision at the gateway and cannot confirm stale or foreign authority (213 ms)
+    ✓ YC-SP1-WIDGET: rechecks membership at the gateway and cannot confirm stale or foreign authority (192 ms)
+    ✓ YC-SP1-WIDGET: rechecks foreign at the gateway and cannot confirm stale or foreign authority (318 ms)
+    ✓ YC-SP1-WIDGET: rechecks payload_hash at the gateway and cannot confirm stale or foreign authority (214 ms)
+    ✓ YC-SP1-WIDGET: rechecks expiry at the gateway and cannot confirm stale or foreign authority (207 ms)
+    ✓ YC-SP1-WIDGET: UNKNOWN is not a success receipt and a repeated tap after restart never resends PATCH (412 ms)
+    ✓ lists the owner capability, shows source-backed diff, and sends one preserved PATCH only after exact approval (220 ms)
+    ✓ carries an owner price correction through natural chat and excludes the tool from client audience (272 ms)
+    ✓ rejects a stored price payload tampered after preview before Action Engine admission (133 ms)
+    ✓ rejects clients and foreign approvals without a provider write or Action Engine admission (377 ms)
+    ✓ supersedes a pending proposal when the owner changes the price and refuses the old approval (178 ms)
+    ✓ serializes concurrent approval, persists the receipt across app restart, and never repeats PATCH (289 ms)
+    ✓ serializes distinct owner approvals for one service and refuses the second stale proposal (354 ms)
+    ✓ keeps a lost provider reply UNKNOWN after restart and read recovery, without blind retry (319 ms)
+    ✓ refuses a new proposed price while a previous outcome for the service remains UNKNOWN (214 ms)
+    ✓ does not present a terminal failed proposal as pending on same-key replay (170 ms)
+    ✓ rechecks price authority at approval and refuses a stale proposal before PATCH (160 ms)
+    ✓ rechecks non-price authority at approval and refuses a stale proposal before PATCH (152 ms)
+    ✓ rechecks permission authority at approval and refuses a stale proposal before PATCH (153 ms)
+    ✓ rechecks membership authority at approval and refuses a stale proposal before PATCH (126 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        11.493 s
+Ran all test suites within paths "test/widgets-live/service-price.live-spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-pricing-semantic-20261009/http-r2/http-jest.json

@@ -1,0 +1,5 @@
+{
+  "pg_ctl_status_exit": 3,
+  "stdout": "pg_ctl: no server running",
+  "postmaster_pid_absent": true
+}

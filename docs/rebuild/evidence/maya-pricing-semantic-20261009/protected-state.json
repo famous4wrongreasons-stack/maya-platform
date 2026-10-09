@@ -1,0 +1,21 @@
+[
+  {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics",
+    "head": "97624aa633f4c2cd1d3b5412ec27e6d18f48dc07",
+    "status": ""
+  },
+  {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-conversation-batch",
+    "head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+    "status": ""
+  },
+  {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-union-handoff",
+    "head": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+    "status": ""
+  },
+  {
+    "path": "/private/tmp/maya-union-ready-fixed-20261009/launch.command",
+    "sha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de"
+  }
+]

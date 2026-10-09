@@ -1,0 +1,6 @@
+{
+  "status": "blocked_before_cluster_start",
+  "sourceHead": "0fce103491de3e1fc5125a4db47312874a0aa4b5",
+  "reason": "Sandbox denied listen(127.0.0.1) with EPERM during free-port probe. No initdb, PostgreSQL, HTTP, provider or model started.",
+  "qualification": null
+}

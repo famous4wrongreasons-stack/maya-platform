@@ -1,0 +1,20 @@
+{
+  "sourceHead": "0fce103491de3e1fc5125a4db47312874a0aa4b5",
+  "artifacts": [
+    {
+      "path": "maya-saas-backend/dist/src/main.js",
+      "sha256": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+      "bytes": 2569
+    },
+    {
+      "path": "maya-carrier-react/dist/web/index.html",
+      "sha256": "ab554d6668ca2b84a8a10ca1fe2d1c0b62e9ed9cae071fab22f76f0c3218e613",
+      "bytes": 847
+    },
+    {
+      "path": "maya-carrier-react/dist/web/m/TFUG3WHQ/main.js",
+      "sha256": "09c6c1ce65b3b8a5d2e72943bdb10500002afb40608333555c03093c6256c412",
+      "bytes": 1503395
+    }
+  ]
+}

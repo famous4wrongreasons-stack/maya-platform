@@ -1,0 +1,34 @@
+{
+  "sourceHead": "0fce103491de3e1fc5125a4db47312874a0aa4b5",
+  "targeted": {
+    "passed": 91,
+    "failed": 0,
+    "suites": 3
+  },
+  "http_pg": {
+    "passed": 24,
+    "failed": 0,
+    "skipped": 0
+  },
+  "carrier": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "backend_types": "passed",
+  "widgets_types": "passed",
+  "changed_ts_lint": "passed",
+  "backend_build": "passed",
+  "backend_preflight_build": {
+    "first_heap_mb": 1536,
+    "first_result": "heap_out_of_memory",
+    "retry_heap_mb": 3072,
+    "retry_result": "passed"
+  },
+  "react_types": "passed",
+  "react_build": "passed",
+  "independent_review": "no_blocking_findings",
+  "real_model_acceptance": false,
+  "real_provider_acceptance": false,
+  "browser_acceptance": false
+}
