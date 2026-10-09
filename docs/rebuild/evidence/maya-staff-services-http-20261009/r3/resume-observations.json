@@ -1,0 +1,160 @@
+{
+  "contract": "synthetic-staff-services-read-observations/1",
+  "stage": "resume",
+  "sourceHead": "5bd6072aa7da4530186d902c82341d2df7b77cdc",
+  "sourceBindingsDigest": "df924427be3c493c15c39f881d5aa0e3dbc6d8423c749f338b07c07509a671be",
+  "realHttpAuth": true,
+  "realPlannerValidation": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "full48Reclassification": false,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "72b4b4e3a70886a227eb15d6b8dc6debbd07a79ec0d63ec5fb7e315c03b225a4"
+  },
+  "resumeReplay": {
+    "runHash": "13880ace658e5aa382630201688d107bc8ba9d2008aea5714efdde867a565ba7",
+    "graphHashUnchanged": "72b4b4e3a70886a227eb15d6b8dc6debbd07a79ec0d63ec5fb7e315c03b225a4",
+    "providerReadsAdded": 0
+  },
+  "midReadCompanyCutover": {
+    "status": 201,
+    "previousCompany": 99502,
+    "currentCompany": 99512,
+    "capturedFactsWithheld": true,
+    "tenantCatalogFallback": false,
+    "nativeGets": 2
+  },
+  "revocation": {
+    "duringReadStatus": 403,
+    "priorReadStatus": 401,
+    "duringReadProviderReads": 2,
+    "afterRevocationProviderReads": 0
+  },
+  "sourceDriftSameRequest": {
+    "requestHash": "1ac8a3824213fbf2c37393d74c5d1f1ca6f50160d6739e3532ed2e1fea02c458",
+    "status": 201,
+    "providerReadsAdded": 0
+  },
+  "businessHash": "8e68ff90c7c04c2d7ef4a44f86848f9e22edae03dcc991f1dc75aa6bee5b62e0",
+  "transport": [
+    {
+      "tenantHash": "cee0621fba69bbe99499a8302d92283540e77c4c824afc4445874c60b6a003f7",
+      "company": 99502,
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "cee0621fba69bbe99499a8302d92283540e77c4c824afc4445874c60b6a003f7",
+      "company": 99502,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "7aaffc4e53a7bf797e668b6ba2ccc1c2984335a0bdd1a513e4c290a57a5b3ae2",
+      "company": 99501,
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "7aaffc4e53a7bf797e668b6ba2ccc1c2984335a0bdd1a513e4c290a57a5b3ae2",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    }
+  ],
+  "modelCalls": 4,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "1ac8a3824213fbf2c37393d74c5d1f1ca6f50160d6739e3532ed2e1fea02c458",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Сохранённый результат проверки.\nУслуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.\n• Комплекс: 2000–2600 RUB; 60 мин.\n• Консультация: 0 RUB; 15 мин.\n• Уход: цена не указана; 30 мин.\n• Дублированная услуга: 900 RUB; длительность не указана.\n• Дублированная услуга: 1100 RUB; длительность не указана.\nПолнота каталога не подтверждена.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "7a36261e0a7d770583b4cbab81a5a597ee271a7644d4e6a1b5d1f8a8215fdff8",
+      "text": "Сколько стоит Мужская стрижка у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 2,
+      "reply": "Не удалось подтвердить актуальный каталог услуг выбранного мастера. Повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "9ef258ba1f26fd2ae1756d35ced5621a57c4228e9186251fff9f83d8d4bd7b57",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 403,
+      "modelCalls": 1,
+      "nativeGets": 2,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessageHash": "7847722358f465e0d8f06d7a86717e672b823df146109e84c3165e8bca69e489"
+    },
+    {
+      "requestHash": "9124c5c6c0359ec0571458e3d7db764865e144c462a21afc01cbeb0d0c22db91",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 401,
+      "modelCalls": 0,
+      "nativeGets": 0,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessageHash": "660377bd24b72001d86c6151b908727afd23709fefa1e26d94071475f65a4b93"
+    },
+    {
+      "requestHash": "1ac8a3824213fbf2c37393d74c5d1f1ca6f50160d6739e3532ed2e1fea02c458",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Не удалось подтвердить актуальный каталог услуг выбранного мастера. Повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "13880ace658e5aa382630201688d107bc8ba9d2008aea5714efdde867a565ba7",
+      "actorHash": "da40a506c3e91ef5a5fa909e9d64ad5404452c2807d3cdf9ebaa44b174b12893",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "9aab01ec411ad8ed16f8731c091c3ce40168af39dfde1e2f837c5b67618e9f7a",
+          "executionHash": "90b1d5ace49604afd09080e84b4469a2e1d4ab3c13f7e67f63c26e1b2d449cb7",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "107aca3ef90f280b2d5e102b9a5672d61032a8d7eb7352b035122acaa1b1856b",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "44989351e90bd82bec55e7e3e3b08e77833d94e1ec18c35721961b7b6b3008d6",
+          "sourceRevision": "e1b49d41e57ca430b9b39e6aeea5a43441aa1ba0ec8d10043dd840c1c6c7bbff",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "175fe5700b69d7dba1311ad6df2269d5787e76fe8ed4706a3d49ec75f3d6f0aa",
+          "executionHash": "4d2eb94a1529911eec0baaa9b7da3c7cdb03ef78ddb239664fca03180f8062eb",
+          "taskKey": "catalog.services.read",
+          "inputHash": "7f84b7f23c23848f2ed9ec1d987ebce4c1502bdebfc327c35103c807b88a4899",
+          "resultHash": "f0a72cadf3702fd6162ebaf5b29a796b06d5d355ab06f6b8fec48e36ec667554"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,669 @@
+{
+  "contract": "synthetic-staff-services-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "72368c82e14588dc27142c86bdfa1809f6bfadd3",
+  "sourceBindingsDigest": "2cfe1bf49311b04b8af8f1a041e2dc3fe5374e63835a87835b7da3efe1d92446",
+  "realHttpAuth": true,
+  "realPlannerValidation": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "full48Reclassification": false,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+  "privateGuidanceSetup": "EXISTING_A22_OWNER_BEFORE_OBSERVATION",
+  "prepareReplay": {
+    "runHash": "0e01451b3f77079d436a31bda2143e1bb85277f900cf5b8aa5d73994c4690fdd",
+    "graphHashUnchanged": "5ea85c99a629754ed4fdb542906f129cf7206d360187e9835c03a7035f9b533c",
+    "providerReadsAdded": 0
+  },
+  "clientPublicRead": {
+    "status": 201,
+    "role": "CLIENT",
+    "clientIdentityGranted": false,
+    "source": "EXACT_STAFF_SCOPED_NATIVE_CATALOG",
+    "nativeGets": 1
+  },
+  "clientInternalGuidance": {
+    "status": 403,
+    "privateFactsWithheld": true,
+    "providerReadsAdded": 0
+  },
+  "numericFacts": {
+    "sameServiceDifferentStaff": true,
+    "observedZeroDistinctFromUnknown": true,
+    "boundedRange": true,
+    "unknownCurrencyNotRubles": true,
+    "emptyIsScopedNotComplete": true
+  },
+  "foreignArtifacts": {
+    "historyIsolated": true,
+    "runStatus": 400,
+    "independentCompanyPrice": true
+  },
+  "sourceRefusals": {
+    "ambiguousEmployee": true,
+    "missingEmployeeLink": true,
+    "unknownEmployee": true,
+    "ambiguousService": true,
+    "unknownService": true,
+    "foreignBranch": true,
+    "nonconfiguredBranch": true,
+    "malformedCatalog": true,
+    "branchRestrictedStatus": 403,
+    "tenantCatalogFallback": false
+  },
+  "businessHash": "5bade984878f4318380216106131ce86498e56c3af0ebf46eb19044c7b8367fa",
+  "transport": [
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "72"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "72"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "994de3803a653367b33626d5125c81df40158e6b622f8f5066731e93acb6cf91",
+      "company": 99503,
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "994de3803a653367b33626d5125c81df40158e6b622f8f5066731e93acb6cf91",
+      "company": 99503,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "76"
+    },
+    {
+      "tenantHash": "b69eeb7247a938d1fdf30b48a6994bd6e611f470f5d221140cf3aa502d16e6d0",
+      "company": 99502,
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "b69eeb7247a938d1fdf30b48a6994bd6e611f470f5d221140cf3aa502d16e6d0",
+      "company": 99502,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "233baad7e2666480b86aa129e67f2c2e95370d0aa4c611262ed257d3a16c66ab",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "77"
+    }
+  ],
+  "modelCalls": 20,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "bc0eadec4783ddd1c1d54bc932ab93f2e8831e383b181122aedb4906018b9654",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 2,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.\n• Комплекс: 2000–2600 RUB; 60 мин.\n• Консультация: 0 RUB; 15 мин.\n• Уход: цена не указана; 30 мин.\n• Дублированная услуга: 900 RUB; длительность не указана.\n• Дублированная услуга: 1100 RUB; длительность не указана.\nПолнота каталога не подтверждена.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "bc0eadec4783ddd1c1d54bc932ab93f2e8831e383b181122aedb4906018b9654",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Сохранённый результат проверки.\nУслуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.\n• Комплекс: 2000–2600 RUB; 60 мин.\n• Консультация: 0 RUB; 15 мин.\n• Уход: цена не указана; 30 мин.\n• Дублированная услуга: 900 RUB; длительность не указана.\n• Дублированная услуга: 1100 RUB; длительность не указана.\nПолнота каталога не подтверждена.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "497cb4778bbc87735af4c9670b34fa76066fcb314c483d46828eee7ab86bdaad",
+      "text": "Сколько стоит Мужская стрижка у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "a5651e8954bb0228b9e94f52c3477b4050a4d594d13d9c3f698be1f2ca0d8c8b",
+      "text": "Сколько стоит Мужская стрижка у мастера Марина в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Марина по прочитанному каталогу CRM:\n• Мужская стрижка: 2200 RUB; 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "600e36be7c657d50666787b943b6f5233f61287b0a391623bead02183b86d416",
+      "text": "Сколько стоит Мужская стрижка у мастера Марина в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Марина по прочитанному каталогу CRM:\n• Мужская стрижка: 2200 RUB; 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "5584353709fec30ffe472f596ac5b340ac80dc7d8bf02aefa02391851071aa05",
+      "text": "Сколько стоит Комплекс у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Комплекс: 2000–2600 RUB; 60 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "8e5cca1daf804637bf8df6acc578288ed7dce5b8c00d4ae753dd99cc9f82045d",
+      "text": "Сколько стоит Консультация у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Консультация: 0 RUB; 15 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "36c93c05605f5745de93a3e4f91ac42c9ecd4557028c83a44ea548c5060c35fb",
+      "text": "Сколько стоит Уход у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Уход: цена не указана; 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "211801ad1c0f387ef6d2abb4ef8db4c5fee499db6f0358758e3eef34aa8b209e",
+      "text": "Сколько стоит Мужская стрижка у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 2,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 3300 (валюта не указана); 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "da0fc6cb66fafc0a9de173b3fcdd1a800acdddb1a772d436cccd42b4d61dd80e",
+      "text": "Какие услуги выполняет Никита в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "В прочитанном публичном каталоге CRM для мастера Никита услуги не возвращены. Полнота каталога не подтверждена.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "fe9c2cbb505b924c16cecdf91f86ccba59b0c1850bb443e063c4d29cbbf8da37",
+      "text": "Сколько стоит Мужская стрижка у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 2,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 3300 RUB; 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "95abb33466cfdc559f34b99392bd959fcec436859ebefabe3504a3f599545367",
+      "text": "Какие услуги выполняет Саша?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Не удалось однозначно выбрать мастера в текущем каталоге филиала. Уточните его полное имя.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "8ea2e39e6fbde5ef5faa5618f41c625fb18b0acd22cef4693fe1ace4c01630b2",
+      "text": "Какие услуги выполняет Елена?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Не удалось подтвердить актуальный каталог услуг выбранного мастера. Повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "504f219791500b63b4b857075f662e9c9907734ca021aeb863267e3cb0f57fda",
+      "text": "Какие услуги выполняет Несуществующий?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Не удалось однозначно выбрать мастера в текущем каталоге филиала. Уточните его полное имя.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "d947bb697d688bc3541a423d2929bea608ca0ec0090b3e9d08a600cd88ad0597",
+      "text": "Сколько стоит Дублированная услуга у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Не удалось однозначно найти указанную услугу в прочитанном каталоге выбранного мастера. Уточните её название.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "bdcd42a39247df1e86d43b299e2c9f3962c395d6314773a98a5f8a9e186997df",
+      "text": "Сколько стоит Несуществующая услуга у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Не удалось однозначно найти указанную услугу в прочитанном каталоге выбранного мастера. Уточните её название.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "fef3e4255544cd94ff4ec01c24a376e5694f1d62fd9f2016738d12992d37abd5",
+      "text": "Foreign tenant branch ID omitted",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Не удалось подтвердить актуальный каталог услуг выбранного мастера. Повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "2d438bd2c6132f537e57a564e264fb37d1c22f72a1c308afc46a00c411d8a436",
+      "text": "Какие услуги выполняет Артём в другом филиале?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Не удалось подтвердить актуальный каталог услуг выбранного мастера. Повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "ea38397b5dcbdac599ad3ddd3836a01481e15ce83575c270ce4f9f76cbbbbe5b",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 403,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessageHash": "87ca2d4eac661b8d127022070d87c547c16b44ecdc0a0b9757dc25134ebd567b"
+    },
+    {
+      "requestHash": "7d1c3de9370e627df9cb8a13e8ceb86c90fec06952cd8639133fa306a725cf48",
+      "text": "Какие услуги выполняет Ольга?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Не удалось подтвердить актуальный каталог услуг выбранного мастера. Повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessageHash": null
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "0e01451b3f77079d436a31bda2143e1bb85277f900cf5b8aa5d73994c4690fdd",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "bd8ef2f045ee5ce3ddad4857aa15e37ebc6889ec0e55b0dadc3a6ff51d8a3be2",
+          "executionHash": "97b52bba1356032f9171c020cfdfaeb17fd0fb924422d55c25a45c3a0a0cf7d3",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "bb63441b8c64253e29dd26460f2a1d8fb4941c29cea38263130501458c106442",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "4a55a0d1b67e482ddac7ee5cf6439f3843677c3d739efd9486d885fb5e7391ac",
+          "executionHash": "0d2b62d5fc91ca2bbe40a722d80271b2c73c254f01d5da9828a9349f9aef2ca0",
+          "taskKey": "catalog.services.read",
+          "inputHash": "a46e4afa4158502e8d4d2631d97cf5f842e18793b690c67e60e1efec71309afc",
+          "resultHash": "c0b7785940afcd711ac74f04008bc375b78265b6b97443fbfe2b6074fea09d9c"
+        }
+      ]
+    },
+    {
+      "runHash": "0e01451b3f77079d436a31bda2143e1bb85277f900cf5b8aa5d73994c4690fdd",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "bd8ef2f045ee5ce3ddad4857aa15e37ebc6889ec0e55b0dadc3a6ff51d8a3be2",
+          "executionHash": "97b52bba1356032f9171c020cfdfaeb17fd0fb924422d55c25a45c3a0a0cf7d3",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "bb63441b8c64253e29dd26460f2a1d8fb4941c29cea38263130501458c106442",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "4a55a0d1b67e482ddac7ee5cf6439f3843677c3d739efd9486d885fb5e7391ac",
+          "executionHash": "0d2b62d5fc91ca2bbe40a722d80271b2c73c254f01d5da9828a9349f9aef2ca0",
+          "taskKey": "catalog.services.read",
+          "inputHash": "a46e4afa4158502e8d4d2631d97cf5f842e18793b690c67e60e1efec71309afc",
+          "resultHash": "c0b7785940afcd711ac74f04008bc375b78265b6b97443fbfe2b6074fea09d9c"
+        }
+      ]
+    },
+    {
+      "runHash": "f44b0824f36d23af0c29649dc12f744dafaeb6ad68043f2567e649e21988cce3",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "c84831d4d88f4a2a2b2a65b199c8b84f9474d59ee7bf261a296cd4e3246cb1f6",
+          "executionHash": "8e0d920f36b688bc0ac92f0f5b5628b1bc72f5090c713b9c2b2167bda00d3ab7",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "bb63441b8c64253e29dd26460f2a1d8fb4941c29cea38263130501458c106442",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "8e6bc9a989f2c1d953fa5c3aab060eb61beebb1c2a3be45e894a6c57f022cd69",
+          "executionHash": "a64e1cff482bcddb6b0e797f40f6123c58da1b539d251231e6d267d387f8d47c",
+          "taskKey": "catalog.services.read",
+          "inputHash": "a46e4afa4158502e8d4d2631d97cf5f842e18793b690c67e60e1efec71309afc",
+          "resultHash": "a96d2cf2c9773a3a083071c1fe9bd40299f4309a21a08235e15f66de036c4996"
+        }
+      ]
+    },
+    {
+      "runHash": "8a7b3831ad3b1c42f5937da0da6e81f84b7c842a70dab071f50a037d79f7ad5e",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "72",
+      "references": [
+        {
+          "workHash": "4d58e5351f32e4ed30d29584d0c737034a67b460cb0d8d8ba2353fb69fb9ed97",
+          "executionHash": "e20e2f4696e2661c03b5136ffd272022aad8c0c25b71217a14c8480b9f7a6563",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "551a207a4bde124b1f3234b111991a2ef00b86a24903624151861e52e8ffbbea",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "72",
+          "company": 99501,
+          "workHash": "fdaae4c3a5b92c43a0c676332acd9cebaa4a7353a3fe3a365582fde86793223a",
+          "executionHash": "e6b41f5c7e96f339f4798cde5cf272fc6f2b91b70436664a179dd9d086eeebd0",
+          "taskKey": "catalog.services.read",
+          "inputHash": "c965b2d871cfdb852eaafef89aac533e4cf6b6a22badae935260c7fb8f2fdddd",
+          "resultHash": "575d99ea100f071f064642ac56f86ced6bdf1f146d979234df7fc04c79883332"
+        }
+      ]
+    },
+    {
+      "runHash": "9545d8598af12e821f8d890fb8d16580c87123550448c773c81087f35a02488c",
+      "actorHash": "e05be12dccad97dd39cc45a517a2e84dd5e048f02c816aed038aad95ffb25fc2",
+      "company": 99501,
+      "staffId": "72",
+      "references": [
+        {
+          "workHash": "2dc1408a7d49f04e9163423a3071f588d35d915449b96bdd4ad2b615f07283b4",
+          "executionHash": "1bf5c2724bcba5d6e1049120dc7b3de8d8ee002577f748d59d09b4186eaacf60",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "5fe044c9124b94013b8e34eb2551762762530d0773a54fd35740bb336516d37e",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "551a207a4bde124b1f3234b111991a2ef00b86a24903624151861e52e8ffbbea",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "72",
+          "company": 99501,
+          "workHash": "99aacd6d50b91dcc78ca903ce906626d893b4e4ec8348738dc314911d0f8a6b6",
+          "executionHash": "04f31679d0065b023ff6303f4ddaa7ec39d16edefb4557d1527fc3d94a06bc9a",
+          "taskKey": "catalog.services.read",
+          "inputHash": "4ecec7d19383d068295f272988ef2ea0ed185701a6967b07fbfcae35cf7a8523",
+          "resultHash": "8543657fde5c4f39ecf89941a5fd3c441a69d0553493dc78038b5a312ba062d3"
+        }
+      ]
+    },
+    {
+      "runHash": "dd029a33430e201d9dbd243b738540e6450c57630f6428670386abe2aecd9734",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "8866e7f08d5665bdade24d1be4fafc83f5a247896efb10149f0a1fc87b868e82",
+          "executionHash": "2d2496c04dfcce72a9f623047f9c21e06c6b0ecaaa6f645af24aa1dce0774eab",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "bb63441b8c64253e29dd26460f2a1d8fb4941c29cea38263130501458c106442",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "d66c154647aed8bfe9528b27157412ac830e8df46a2dcc0d699e75485edb449d",
+          "executionHash": "10c474fd277d213c6756ba1f0052a4f89b4658fd1baf9e80a66f350e7899f436",
+          "taskKey": "catalog.services.read",
+          "inputHash": "a46e4afa4158502e8d4d2631d97cf5f842e18793b690c67e60e1efec71309afc",
+          "resultHash": "8aae069dbc07b4f7183df1af7194e00171b45b9a54b97ed2c91d736dd26e77b0"
+        }
+      ]
+    },
+    {
+      "runHash": "bc2b1fdf99981b887016b5336b37adb7d393893156c14fb5b03d0ab23e7dc0f5",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "4e01203c27415fdd718f7fc54697d73e77d311b7e09804096c146deb3951a606",
+          "executionHash": "411c95b7643a2ae7414698e347bd7feb6fb55dd2454ac68e24ebdf58c930fc93",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "bb63441b8c64253e29dd26460f2a1d8fb4941c29cea38263130501458c106442",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "a20995327399f37e81f790e2f70f7c16fc5bbd5976fe53a5fb7a9a662b1043a3",
+          "executionHash": "de71099d460b88c20becbe6f83b72d93e40d73dc04cb76f2c2d13cd7d52c5be7",
+          "taskKey": "catalog.services.read",
+          "inputHash": "a46e4afa4158502e8d4d2631d97cf5f842e18793b690c67e60e1efec71309afc",
+          "resultHash": "d62c8798d1d2f9a5b0cfce682b56c834c554d509cc997574e696342b8d25f3d9"
+        }
+      ]
+    },
+    {
+      "runHash": "0043b788c89a34c6509f49af6c45fc7536dfc1d8eedf26c7ad6c8a978b67f97b",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "16ad136840f0c570cea490450f943a6ce205f6e03bb32ed7f1ea9ba223e21fbb",
+          "executionHash": "f00a34a26ed5362719cb5975716e212f7bf5bbd56b0dde90d3e63c31eb2d5abd",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "bb63441b8c64253e29dd26460f2a1d8fb4941c29cea38263130501458c106442",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "7cb0cf0a4689b4b4f921e369d1f5a3954f561e337742f188b44c6d9f8b91db21",
+          "executionHash": "c995d422a4701eb3934c423a888ba0c7885f5d319c6a37fc84b7a27559ea234b",
+          "taskKey": "catalog.services.read",
+          "inputHash": "a46e4afa4158502e8d4d2631d97cf5f842e18793b690c67e60e1efec71309afc",
+          "resultHash": "73dc1e998067c3f5bd076fd2202ab8dc8d3736f3f1086c7fe7b753cb1af22461"
+        }
+      ]
+    },
+    {
+      "runHash": "7226aa57b90afe36173beee04a50ead853c97490a7dba6967ed5010541db64c4",
+      "actorHash": "43cbf088d2fac543d97e178ff308bc82851bc666167b4110bf6577b163150897",
+      "company": 99503,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "cd88630036fc56d61f5426ba0c3f5d33672747c86dacb8824e9967681f3ec4db",
+          "executionHash": "e6e3b72cd62050faa58c234c5e09101918b7e3017cf83c6efd666118b0600d2a",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "b4030b47d354acec39f3ef6f7a73152f8058e6d145e1aa83453b348587b3f8e6",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "fcd2d7c2397155ed7db9eed902c42400bb9edef42c26c0b40b9d3a403a2aa27a",
+          "sourceRevision": "271a682dbb39f0faa90b3fdfeb2264fdc5eaf7b1d730a63161cb03fd36eeadb9",
+          "staffId": "71",
+          "company": 99503,
+          "workHash": "1df19b0034ee18349d53607cd7b31bf234023f2381136db1ba2a950b48915086",
+          "executionHash": "97e94dcaa621de9908d5712b66bef269dcf17ea1ae1a1d0ff5fb90a612f96c69",
+          "taskKey": "catalog.services.read",
+          "inputHash": "811eb6543f60293b874dd0d6eebfc99d9351fd07587e403598c4eab416114a7a",
+          "resultHash": "1601ffcd45afaf740a158e5c7cb98f0679c1b406207af2df2da1d16b9cba6163"
+        }
+      ]
+    },
+    {
+      "runHash": "768457d9357cb38f76b1bc5be7aa761bb7546d28e5f8d6072262025a6c49a173",
+      "actorHash": "8c2d6c37dcc256a6ee3735c548c1dbd796a1be828b41081a5305f0ac1a5fbcca",
+      "company": 99501,
+      "staffId": "76",
+      "references": [
+        {
+          "workHash": "485f72d198e82031b94580c379b2370ef8f2a16539e05865f63abaac13ff49e0",
+          "executionHash": "04265f3103a76e8b6cf614395b426614ad4fe27f7f3073bfc3a8a22488b1a35f",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "e4de270120cad2a7472ea3b49e63ab2af591412c759ad23b3e93ae44d53e2e0f",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "20fe95b8ba308820355d1e08b554e75f0e090c3c4b863d036274bb36dd683da9",
+          "sourceRevision": "a5855957de0526f5e8ba7e9a75ead4259fe838219ce4d90928d1b0bca51e9fb9",
+          "staffId": "76",
+          "company": 99501,
+          "workHash": "7a8c18e15f098f02f94d0a54c3d93a972c51e554484ad597f0aff2d85f8bf4ee",
+          "executionHash": "208b6939d02e12725a6c8ff7b8f6a0090729e7890b9360186bf3f07cb8987298",
+          "taskKey": "catalog.services.read",
+          "inputHash": "3f306d5a2f59dea0a5cc7e7a94d48593d06b4eba3a50efdc0f2187204c3cea00",
+          "resultHash": "e2bf24d1ffa745fb6f6f2d52f92486e3d1147728fe41fc7fe45000441b078ecc"
+        }
+      ]
+    },
+    {
+      "runHash": "4dbc35113ecf16be3092dd7460c4abbb01e51b516322c019e4640cf9d3b2f783",
+      "actorHash": "045185f73f5a780cad790bfb5fc7a2b6e92ed3b9f9ca0f03056a0fe82491ac86",
+      "company": 99502,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "3bbde6958553d67c1dd5c72feab83ae97ad752b91fb7976b88cc6011d08a483e",
+          "executionHash": "1e27a0b937ba46a7b7b9e886ce587a75476e5ebfc32cac704873f505de3b39ad",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "c9f2f0a9aa545ebb8240a1d50fc3a419bb65d8c1709624dc711c3887596a8684",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "ef3469c227e9f849b32fec8b55a1f032ddf4dd00b17ed294278b003f53806fb2",
+          "sourceRevision": "093a064d9a5d1d54994ad1e39c4a8a38ac070656aa1dd78b1bf054a30fbb4168",
+          "staffId": "71",
+          "company": 99502,
+          "workHash": "70ed01a5fcbcbdc91af93f6a4d1b5ebc452de89d41bbfbeb8e7750330cff333d",
+          "executionHash": "d221f1e11cdf0f682ae764d13a1de992f0d45d18b872e2cd715b50a7e7cddcf8",
+          "taskKey": "catalog.services.read",
+          "inputHash": "d3f7c755e07a6dc96d661797df2989e946290253164c5f7f06453a62492b3d77",
+          "resultHash": "4173008450d7f49abb7ce4d72b1b35cbc21129ced8e69d8d95131d37820b8ba6"
+        }
+      ]
+    }
+  ]
+}

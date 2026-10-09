@@ -1,0 +1,135 @@
+{
+  "contract": "synthetic-staff-services-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "1f4adba7c6539c99320c74a0ea55409b105aaba3",
+  "sourceBindingsDigest": "2fa859ca0437f0308f75823dba74590cb7eb5956966765756280819fa853ef25",
+  "realHttpAuth": true,
+  "realPlannerValidation": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "full48Reclassification": false,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+  "privateGuidanceSetup": "EXISTING_A22_OWNER_BEFORE_OBSERVATION",
+  "prepareReplay": {
+    "runHash": "a473327864df8bc955440e181b2c6458fed1c0f7191beb12a1f2db897e33ff22",
+    "graphHashUnchanged": "b99e8ee284112440558c9e5dd4f3c9f49b6fc3ea667a27893947db00b6aa7541",
+    "providerReadsAdded": 0
+  },
+  "transport": [
+    {
+      "tenantHash": "7a68ed4bcdb2ba3e3e62ac8795715a8eb847e954856e77829b61e671da38db20",
+      "company": 99501,
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "7a68ed4bcdb2ba3e3e62ac8795715a8eb847e954856e77829b61e671da38db20",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    },
+    {
+      "tenantHash": "7a68ed4bcdb2ba3e3e62ac8795715a8eb847e954856e77829b61e671da38db20",
+      "company": 99501,
+      "resource": "services",
+      "staffId": "71"
+    }
+  ],
+  "modelCalls": 3,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "e2f39d3bf747ffefc3f8f20df774115aa2d9a68d2ce06c1fae2cf2733c8fcbe6",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 2,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.\n• Комплекс: 2000–2600 RUB; 60 мин.\n• Консультация: 0 RUB; 15 мин.\n• Уход: цена не указана; 30 мин.\n• Дублированная услуга: 900 RUB; длительность не указана.\n• Дублированная услуга: 1100 RUB; длительность не указана.\nПолнота каталога не подтверждена.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "e2f39d3bf747ffefc3f8f20df774115aa2d9a68d2ce06c1fae2cf2733c8fcbe6",
+      "text": "Какие услуги выполняет Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 0,
+      "reply": "Сохранённый результат проверки.\nУслуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.\n• Комплекс: 2000–2600 RUB; 60 мин.\n• Консультация: 0 RUB; 15 мин.\n• Уход: цена не указана; 30 мин.\n• Дублированная услуга: 900 RUB; длительность не указана.\n• Дублированная услуга: 1100 RUB; длительность не указана.\nПолнота каталога не подтверждена.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "071e1465668f5382606100dae07bfd840b7c46a3d0939abab5e357f74428312d",
+      "text": "Сколько стоит Мужская стрижка у мастера Артём в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "nativeGets": 1,
+      "reply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 1500 RUB; 30 мин.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessageHash": null
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "a473327864df8bc955440e181b2c6458fed1c0f7191beb12a1f2db897e33ff22",
+      "actorHash": "502d47a30d10fe53d6aa5d70d96a8de80a655306d43361c4f316c508011f79f8",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "7c2dd3f65611d1859af246d8ad25bdad08e57c315381b4c9f9cb3f464f066625",
+          "executionHash": "5b4258886910b7122c0413727c5ec32bb4d7565db17aebc552f382cd1d814afc",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "aa8df44375a28d7d5161b59515af73b63327317b66ab7e1476ba1d691b8f440b",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "42ca90d7016217596086ef5295dbf4f4007e1f7ea12eebfe0b09ca8ce7fd7b35",
+          "sourceRevision": "9cd454d5c2140e1738937dc7d41e019ad62d79d35a80f8daef27a27dc92a31eb",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "23fbcb8041483bdb6bc7bde77bd6640636d57a555a29c210209a4c6a246a57e7",
+          "executionHash": "156f88e9d9242e89cd248afc95ffb88c9236ad0927ca6c73c10b93626eb25250",
+          "taskKey": "catalog.services.read",
+          "inputHash": "e7c38d5cea876dc60dca5100ed211afde9c1be6ba4e96d736f18c54f21cdbfc2",
+          "resultHash": "250e87cadba1c20672708c140e3c8802ecc2bd49e9a92f5bc133732c5b9dad10"
+        }
+      ]
+    },
+    {
+      "runHash": "a473327864df8bc955440e181b2c6458fed1c0f7191beb12a1f2db897e33ff22",
+      "actorHash": "502d47a30d10fe53d6aa5d70d96a8de80a655306d43361c4f316c508011f79f8",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "7c2dd3f65611d1859af246d8ad25bdad08e57c315381b4c9f9cb3f464f066625",
+          "executionHash": "5b4258886910b7122c0413727c5ec32bb4d7565db17aebc552f382cd1d814afc",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "aa8df44375a28d7d5161b59515af73b63327317b66ab7e1476ba1d691b8f440b",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "42ca90d7016217596086ef5295dbf4f4007e1f7ea12eebfe0b09ca8ce7fd7b35",
+          "sourceRevision": "9cd454d5c2140e1738937dc7d41e019ad62d79d35a80f8daef27a27dc92a31eb",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "23fbcb8041483bdb6bc7bde77bd6640636d57a555a29c210209a4c6a246a57e7",
+          "executionHash": "156f88e9d9242e89cd248afc95ffb88c9236ad0927ca6c73c10b93626eb25250",
+          "taskKey": "catalog.services.read",
+          "inputHash": "e7c38d5cea876dc60dca5100ed211afde9c1be6ba4e96d736f18c54f21cdbfc2",
+          "resultHash": "250e87cadba1c20672708c140e3c8802ecc2bd49e9a92f5bc133732c5b9dad10"
+        }
+      ]
+    }
+  ]
+}

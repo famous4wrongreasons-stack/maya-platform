@@ -1,0 +1,11 @@
+widgets-live: proof database maya_widget_gate_proof_staffservices_5d44ed091055 on 127.0.0.1:55934 (local)
+PASS test/widgets-live/staff-services-read-restart.probe-spec.ts (5.727 s)
+  staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ keeps employee-specific facts and exact evidence through application/PG restart (4813 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        5.746 s, estimated 7 s
+Ran all test suites within paths "test/widgets-live/staff-services-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-staff-services-http-20261009-r2/prepare-jest.json

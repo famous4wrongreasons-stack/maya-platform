@@ -1,0 +1,221 @@
+{
+  "contract": "maya.staff-services.independent-review/1",
+  "reviewedAt": "2026-10-09T16:36:51.069689+00:00",
+  "reviewer": "independent_review",
+  "reviewMethod": "Read-only source and retained artifact inspection; SHA256 against exact Git blobs. No test, service, HTTP, PG, provider or model execution by reviewer.",
+  "sourceReview": {
+    "sourceHead": "1f4adba7c6539c99320c74a0ea55409b105aaba3",
+    "verdict": "QUALIFIED_NO_BLOCKERS",
+    "productionFiles": [
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "sha256": "ebda712b2632cfd761f2eb4f91568a6253a6e9517b99c488a7c176fc01d553d3",
+        "r3AndCurrentBytesIdentical": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/employee-service-read.ts",
+        "sha256": "4db8576cd2185b060c49f66c0a8b810da74f9b6e891f2a9b16b4d5d4ed39fe52",
+        "r3AndCurrentBytesIdentical": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+        "sha256": "318b6ef98efc8f65a1a16b5a91ef845e55f6541f5f54559110c5216805e0f5f9",
+        "r3AndCurrentBytesIdentical": true
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts",
+        "sha256": "7d43a5f67e27100bc319b46b0ac08c5c68c6f359710a20a457f7d96bdff87bef",
+        "r3AndCurrentBytesIdentical": true
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm.service.ts",
+        "sha256": "ba065f20679a6c6d59985ff2738ebbbb83864eef829e897cd665751db0401a82",
+        "r3AndCurrentBytesIdentical": true
+      },
+      {
+        "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+        "sha256": "844d0b962624348ea06f2b1d9593726031224cf12c8651a55671e060354a4291",
+        "r3AndCurrentBytesIdentical": true
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+        "sha256": "f440e49bbf887bae4e21d6eeefc12d76c5ae539cf31eeafa1ceb04547133ead7",
+        "r3AndCurrentBytesIdentical": true
+      }
+    ],
+    "findingsClosed": [
+      "Native exactId rejects trailing whitespace/control encodings.",
+      "Presenter currency requires exactly three uppercase letters.",
+      "CRM snapshots copied public catalog facts before post-GET metadata awaits."
+    ],
+    "verifiedBoundaries": [
+      "Exact captured StaffScheduleSource and adapter ownership checked before/after native GET; current tenant/company/branch/staff linkage is required.",
+      "Existing runtime membership, policy, source and cache guards apply to the added closed services scope; no new role/tool/schema authority.",
+      "Validated employee-specific singleton READ only; compound/malformed employee requests cannot fall through to a general catalog.",
+      "Both read widget triggers suppressed; verified replies require completed existing C9 coordination and do not swallow finalization authority errors.",
+      "Ranges, observed zero, unknown amount/currency/duration and non-exhaustive catalog semantics remain distinct.",
+      "Legacy unscoped read and website getPublicBookingServices behavior and pricing mutation lane unchanged."
+    ]
+  },
+  "actualReview": {
+    "sourceHead": "5bd6072aa7da4530186d902c82341d2df7b77cdc",
+    "runRoot": "/private/tmp/maya-staff-services-http-20261009-r3",
+    "verdict": "QUALIFIED_PASS_LOCAL_SYNTHETIC_HTTP_PG_RESTART",
+    "blockers": [],
+    "sourceVerification": {
+      "bindingsVerifiedAgainstGit": 1855,
+      "gitMismatches": [],
+      "diskMismatches": [],
+      "sourceBindingsDigest": "df924427be3c493c15c39f881d5aa0e3dbc6d8423c749f338b07c07509a671be",
+      "sourceUnchangedManifest": true,
+      "productionSameAsReviewedCommit": true,
+      "interveningCommittedChanges": [
+        "test/widgets-live/staff-services-read-restart.probe-spec.ts only"
+      ]
+    },
+    "counts": {
+      "jestStagesPassed": 2,
+      "jestStagesFailed": 0,
+      "jestAssertionsPrepare": 1018,
+      "jestAssertionsResume": 167,
+      "chatRequests": 25,
+      "chatStatuses": {
+        "201": 22,
+        "403": 2,
+        "401": 1
+      },
+      "scriptedModelDecisions": 24,
+      "syntheticNativeGets": 20,
+      "syntheticNativeGetsByStage": [
+        16,
+        4
+      ],
+      "unexpectedTransportOrModelCalls": [],
+      "settledC9ToolReadsPerQualifiedPositive": 2
+    },
+    "verifiedOutcomes": [
+      "Original, prepare replay and resume replay retain exactly equal run/actor/company/staff/work/execution/input/result reference objects; each has catalog.staff.read plus catalog.services.read.",
+      "C9 run/work graph unchanged around replay and across actual app/PG restart. Decoded HTTP history retains original reply without model/provider work; test keeps subsequent owner turns in the same canonical conversation.",
+      "Same service at staff71/staff72 displays 1500/2200 RUB; range2000–2600, observed0 and missing amount/currency/duration remain truthful. Empty catalog explicitly denies completeness.",
+      "CLIENT reads public catalog without a Client identity grant; direct A22 business-rules GET returns403. Foreign history is empty, foreign C9 run400, and foreign own catalog uses separate3300 price.",
+      "Ambiguous/unknown employee and missing current provider link block employee services dispatch; ambiguous/unknown service, foreign/nonconfigured branch and malformed native duplicate identity are refused without general catalog fallback.",
+      "Actual same-tenant persisted company binding changes99502→99512 during captured old-company services GET; returned facts withheld. Separate updatedAt drift rejects the original same request without native GET.",
+      "Membership is actually suspended during native READ; observed403 then pre-auth401 with no further model/provider read. This qualifies the combined request refusal, not an isolated inner guard attribution.",
+      "Finite business snapshot hash unchanged across prepare/resume and observed business-family write census empty after fixture setup."
+    ],
+    "businessHash": "8e68ff90c7c04c2d7ef4a44f86848f9e22edae03dcc991f1dc75aa6bee5b62e0",
+    "originalReplaySourceReceipts": {
+      "runHash": "13880ace658e5aa382630201688d107bc8ba9d2008aea5714efdde867a565ba7",
+      "actorHash": "da40a506c3e91ef5a5fa909e9d64ad5404452c2807d3cdf9ebaa44b174b12893",
+      "company": 99501,
+      "staffId": "71",
+      "references": [
+        {
+          "workHash": "9aab01ec411ad8ed16f8731c091c3ce40168af39dfde1e2f837c5b67618e9f7a",
+          "executionHash": "90b1d5ace49604afd09080e84b4469a2e1d4ab3c13f7e67f63c26e1b2d449cb7",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "107aca3ef90f280b2d5e102b9a5672d61032a8d7eb7352b035122acaa1b1856b",
+          "resultHash": "c51d34312b978aead83ad4a958002523e2ddf98f947b53e148bcc69a9787550e"
+        },
+        {
+          "sourceHash": "44989351e90bd82bec55e7e3e3b08e77833d94e1ec18c35721961b7b6b3008d6",
+          "sourceRevision": "e1b49d41e57ca430b9b39e6aeea5a43441aa1ba0ec8d10043dd840c1c6c7bbff",
+          "staffId": "71",
+          "company": 99501,
+          "workHash": "175fe5700b69d7dba1311ad6df2269d5787e76fe8ed4706a3d49ec75f3d6f0aa",
+          "executionHash": "4d2eb94a1529911eec0baaa9b7da3c7cdb03ef78ddb239664fca03180f8062eb",
+          "taskKey": "catalog.services.read",
+          "inputHash": "7f84b7f23c23848f2ed9ec1d987ebce4c1502bdebfc327c35103c807b88a4899",
+          "resultHash": "f0a72cadf3702fd6162ebaf5b29a796b06d5d355ab06f6b8fec48e36ec667554"
+        }
+      ]
+    },
+    "cleanup": {
+      "clusterStoppedManifest": true,
+      "postmasterPidAbsentObserved": true,
+      "postgresStartPid": 1059,
+      "postgresRestartPid": 1267,
+      "postgresFirstReadyUtc": "2026-10-09T16:34:36.276Z",
+      "postgresRestartReadyUtc": "2026-10-09T16:34:43.508Z",
+      "postgresFinalShutdownUtc": "2026-10-09T16:34:45.744Z",
+      "distinctApplicationProcessAssertionPassed": true,
+      "processGroupAbsenceClaim": false
+    },
+    "artifactBindings": [
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/manifest.json",
+        "bytes": 231683,
+        "sha256": "c5e5066b786eb17975d2da8daf5d02be46f7e8caa814bc55b4d8f81c9027ef8b"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/prepare-observations.json",
+        "bytes": 32270,
+        "sha256": "76aa2d57f5f1211e54dfb34b20e8e77b152d535a565efcd30f2e698fd2afade2"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/resume-observations.json",
+        "bytes": 7016,
+        "sha256": "21ee61f59f38c4f3ac6cb0e9a5c77cd9428653e5320ac83d651fb894cb78e840"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/prepare-jest.json",
+        "bytes": 1405,
+        "sha256": "db0c28a8ee027a819918bfd7b63fae5e833fb7029f195ac533e0e164c641957d"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/resume-jest.json",
+        "bytes": 1403,
+        "sha256": "2f1e1f6e0dd9df7a7b84a4e34f830243b97d8ce5f6d005a9fb9fa215d288e2fd"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/postgres.log",
+        "bytes": 1234,
+        "sha256": "68ddb1e603ab63d347008bd717799624314a187c9dccb4f3fc4e7a2e8319440d"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/pg-restart.log",
+        "bytes": 1333,
+        "sha256": "cd25cd67697f7e148776c3a8532eb8e34e53b6bc4a6cc525a579ffeab523555e"
+      },
+      {
+        "path": "/private/tmp/maya-staff-services-http-20261009-r3/pg-stop.log",
+        "bytes": 56,
+        "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+      }
+    ]
+  },
+  "previousAttempts": [
+    {
+      "runRoot": "/private/tmp/maya-staff-services-http-20261009-r1",
+      "status": "failed",
+      "sourceHead": "1f4adba7c6539c99320c74a0ea55409b105aaba3",
+      "manifestSha256": "9b2a3e231c88e5a57b4301f2f5c162c388adaf5934289196d4ef8174f01eb149",
+      "sourceUnchanged": true,
+      "clusterStopped": true,
+      "postmasterPidAbsentObserved": true,
+      "failureQualification": "Fixture expected a fresh staff GET although the canonical native staff cache was already populated; actual fresh employee services GET occurred.",
+      "rawModifiedByReviewer": false
+    },
+    {
+      "runRoot": "/private/tmp/maya-staff-services-http-20261009-r2",
+      "status": "failed",
+      "sourceHead": "72368c82e14588dc27142c86bdfa1809f6bfadd3",
+      "manifestSha256": "0dfaf16f0e7211685b3368ae495445252a1323675a290df327511438ed6b4c42",
+      "sourceUnchanged": true,
+      "clusterStopped": true,
+      "postmasterPidAbsentObserved": true,
+      "failureQualification": "Fixture made separate conversations, then compared latest-conversation history with the first conversation ID.",
+      "rawModifiedByReviewer": false
+    }
+  ],
+  "limitations": [
+    "SCRIPTED model plans passed through the real planner validator; no actual model/language-quality acceptance.",
+    "Synthetic finite native GET transport has no original fetch fallback; no live provider or measured OS-wide egress acceptance.",
+    "Observed write perimeter excludes fixture setup and deliberate CRM/membership changes. One actual A22 setup POST occurs before the baseline; this is not absolute zero business rows/writes.",
+    "Two settled C9 READ receipts are not two fresh native GETs: the canonical current-adapter staff cache can avoid a roster GET, while the fresh scoped services GET remains required.",
+    "Replay invokes one scripted planner decision but performs zero native GET and reuses exact C9/AiTool evidence.",
+    "No browser, booking quote, price mutation, payment, website, full-MAYA/C10, closed-profile or original full48/remaining27 reclassification claim.",
+    "R1 and R2 remain failed immutable attempts; only R3 is the successful actual proof.",
+    "Private synthetic login/restart receipt was not read or included in this review."
+  ]
+}

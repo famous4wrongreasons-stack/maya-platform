@@ -1,0 +1,29 @@
+{
+  "contract": "synthetic-staff-services-read-observations/1",
+  "stage": "resume",
+  "sourceHead": "72368c82e14588dc27142c86bdfa1809f6bfadd3",
+  "sourceBindingsDigest": "2cfe1bf49311b04b8af8f1a041e2dc3fe5374e63835a87835b7da3efe1d92446",
+  "realHttpAuth": true,
+  "realPlannerValidation": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "full48Reclassification": false,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "e96b7f57b3219c1ef20935e272c194ce89c6a4036eb2d0c983d7fa4afe4afa7d"
+  },
+  "transport": [],
+  "modelCalls": 0,
+  "unexpected": [],
+  "checkpoints": [],
+  "sourceReceipts": []
+}

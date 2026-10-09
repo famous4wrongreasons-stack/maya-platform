@@ -1,0 +1,7 @@
+{
+  "sourceHead": "1f4adba7c6539c99320c74a0ea55409b105aaba3",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-staff-services-cqb858/pg",
+  "pgStatusExit": 3,
+  "output": "pg_ctl: no server running\n",
+  "pidFileAbsent": true
+}

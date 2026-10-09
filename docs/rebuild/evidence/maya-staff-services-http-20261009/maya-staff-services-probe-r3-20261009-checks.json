@@ -1,0 +1,16 @@
+{
+  "probeSha256": "9372ed57afbf91ddf27a582fe00f6557d438b3139276dcd69b80bd65e395588c",
+  "checks": [
+    {
+      "check": "types",
+      "exitCode": 0,
+      "seconds": 6.389742136001587
+    },
+    {
+      "check": "lint",
+      "exitCode": 0,
+      "seconds": 3.6080849170684814
+    }
+  ],
+  "sourceUnchanged": true
+}

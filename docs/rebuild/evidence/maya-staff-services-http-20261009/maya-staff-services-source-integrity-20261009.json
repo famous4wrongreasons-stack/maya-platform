@@ -1,0 +1,126 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "failed",
+      "sourceHead": "1f4adba7c6539c99320c74a0ea55409b105aaba3",
+      "sourceFiles": 1855,
+      "gitMismatch": [],
+      "digest": "2fa859ca0437f0308f75823dba74590cb7eb5956966765756280819fa853ef25",
+      "manifestSha256": "9b2a3e231c88e5a57b4301f2f5c162c388adaf5934289196d4ef8174f01eb149",
+      "sourceUnchanged": true,
+      "clusterStopped": true,
+      "cleanup": {
+        "sourceHead": "1f4adba7c6539c99320c74a0ea55409b105aaba3",
+        "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-staff-services-cqb858/pg",
+        "pgStatusExit": 3,
+        "output": "pg_ctl: no server running\n",
+        "pidFileAbsent": true
+      },
+      "prepare": {
+        "testsPassed": 0,
+        "testsFailed": 1,
+        "assertions": 174,
+        "chats": 3,
+        "statuses": {
+          "201": 3
+        },
+        "modelCalls": 3,
+        "nativeGets": 3,
+        "unexpected": [],
+        "sourceReceipts": 2
+      }
+    },
+    {
+      "attempt": 2,
+      "status": "failed",
+      "sourceHead": "72368c82e14588dc27142c86bdfa1809f6bfadd3",
+      "sourceFiles": 1855,
+      "gitMismatch": [],
+      "digest": "2cfe1bf49311b04b8af8f1a041e2dc3fe5374e63835a87835b7da3efe1d92446",
+      "manifestSha256": "0dfaf16f0e7211685b3368ae495445252a1323675a290df327511438ed6b4c42",
+      "sourceUnchanged": true,
+      "clusterStopped": true,
+      "cleanup": {
+        "sourceHead": "72368c82e14588dc27142c86bdfa1809f6bfadd3",
+        "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-staff-services-5SEYu5/pg",
+        "pgStatusExit": 3,
+        "output": "pg_ctl: no server running\n",
+        "pidFileAbsent": true
+      },
+      "prepare": {
+        "testsPassed": 1,
+        "testsFailed": 0,
+        "assertions": 1006,
+        "chats": 20,
+        "statuses": {
+          "201": 19,
+          "403": 1
+        },
+        "modelCalls": 20,
+        "nativeGets": 16,
+        "unexpected": [],
+        "sourceReceipts": 11
+      },
+      "resume": {
+        "testsPassed": 0,
+        "testsFailed": 1,
+        "assertions": 4,
+        "chats": 0,
+        "statuses": {},
+        "modelCalls": 0,
+        "nativeGets": 0,
+        "unexpected": [],
+        "sourceReceipts": 0
+      }
+    },
+    {
+      "attempt": 3,
+      "status": "passed",
+      "sourceHead": "5bd6072aa7da4530186d902c82341d2df7b77cdc",
+      "sourceFiles": 1855,
+      "gitMismatch": [],
+      "digest": "df924427be3c493c15c39f881d5aa0e3dbc6d8423c749f338b07c07509a671be",
+      "manifestSha256": "c5e5066b786eb17975d2da8daf5d02be46f7e8caa814bc55b4d8f81c9027ef8b",
+      "sourceUnchanged": true,
+      "clusterStopped": true,
+      "cleanup": {
+        "sourceHead": "5bd6072aa7da4530186d902c82341d2df7b77cdc",
+        "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-staff-services-2Ue2NF/pg",
+        "pgStatusExit": 3,
+        "output": "pg_ctl: no server running\n",
+        "pidFileAbsent": true
+      },
+      "prepare": {
+        "testsPassed": 1,
+        "testsFailed": 0,
+        "assertions": 1018,
+        "chats": 20,
+        "statuses": {
+          "201": 19,
+          "403": 1
+        },
+        "modelCalls": 20,
+        "nativeGets": 16,
+        "unexpected": [],
+        "sourceReceipts": 11
+      },
+      "resume": {
+        "testsPassed": 1,
+        "testsFailed": 0,
+        "assertions": 167,
+        "chats": 5,
+        "statuses": {
+          "201": 3,
+          "403": 1,
+          "401": 1
+        },
+        "modelCalls": 4,
+        "nativeGets": 4,
+        "unexpected": [],
+        "sourceReceipts": 1
+      }
+    }
+  ],
+  "verification": "Every manifest source SHA matches exact Git bytes; all owned PostgreSQL instances stopped"
+}

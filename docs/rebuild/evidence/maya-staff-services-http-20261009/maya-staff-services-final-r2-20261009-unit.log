@@ -1,0 +1,26 @@
+PASS src/ai-tools/ai-core.employee-service.spec.ts
+PASS src/crm/crm.service-catalog-source.spec.ts
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/ai-tools/ai-core.employee-journal.spec.ts
+PASS src/ai-tools/ai-core.employee-schedule.spec.ts
+PASS src/ai-tools/ai-core.public-company.spec.ts
+PASS src/crm/crm.service.spec.ts
+PASS src/crm/crm.company-profile-source.spec.ts
+[Nest] 96334  - 10/09/2026, 7:27:45 PM    WARN [CrmService] CRM preview failed provider=yclients operation=connection_check status=unknown
+[Nest] 96334  - 10/09/2026, 7:27:45 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token
+[Nest] 96334  - 10/09/2026, 7:27:45 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured
+[Nest] 96334  - 10/09/2026, 7:27:45 PM    WARN [CrmService] CRM team access synchronization deferred tenant=tenant-1: unavailable
+PASS src/crm/adapters/yclients-service-catalog-source.spec.ts
+PASS src/ai-tools/employee-service-read.spec.ts
+PASS src/crm/adapters/yclients-company-profile-source.spec.ts
+PASS src/ai-tools/public-consultation-presentation.spec.ts
+
+Test Suites: 15 passed, 15 total
+Tests:       1034 passed, 1034 total
+Snapshots:   0 total
+Time:        2.171 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/employee-service-read.spec.ts", "src/ai-tools/ai-core.employee-service.spec.ts", "src/crm/crm.service-catalog-source.spec.ts", "src/crm/adapters/yclients-service-catalog-source.spec.ts", "src/ai-tools/ai-core.public-company.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/public-consultation-presentation.spec.ts", "src/crm/crm.company-profile-source.spec.ts", "src/crm/adapters/yclients-company-profile-source.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts", "src/crm/crm.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-staff-services-final-r2-20261009-unit.json

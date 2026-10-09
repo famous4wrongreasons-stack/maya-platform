@@ -1,0 +1,44 @@
+PASS src/crm/crm.service-catalog-source.spec.ts
+FAIL src/ai-tools/ai-core.employee-service.spec.ts
+  ● AiCore employee services [actual parser, synthetic owners] › does not fall through to general catalog for missing-service
+
+    conversation_tool_plan_mismatch
+
+      372 |     );
+      373 |     if (!matchingTask) {
+    > 374 |       throw new Error('conversation_tool_plan_mismatch');
+          |             ^
+      375 |     }
+      376 |     if (toolCall.name === 'reviews.analyze') {
+      377 |       return {
+
+      at ConversationIntelligenceService.assertToolCallMatchesPlan (conversation-intelligence/conversation-intelligence.service.ts:374:13)
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1322:47)
+      at Object.<anonymous> (ai-tools/ai-core.employee-service.spec.ts:102:29)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1084:43)
+      at ai-tools/ai-core.employee-service.spec.ts:278:22
+
+PASS src/ai-tools/employee-service-read.spec.ts
+PASS src/crm/adapters/yclients-service-catalog-source.spec.ts
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/crm/crm.service.spec.ts
+[Nest] 95527  - 10/09/2026, 7:26:18 PM    WARN [CrmService] CRM preview failed provider=yclients operation=connection_check status=unknown
+[Nest] 95527  - 10/09/2026, 7:26:18 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token
+[Nest] 95527  - 10/09/2026, 7:26:18 PM    WARN [CrmService] CRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured
+[Nest] 95527  - 10/09/2026, 7:26:18 PM    WARN [CrmService] CRM team access synchronization deferred tenant=tenant-1: unavailable
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/ai-tools/ai-core.employee-journal.spec.ts
+PASS src/ai-tools/ai-core.public-company.spec.ts
+PASS src/ai-tools/ai-core.employee-schedule.spec.ts
+PASS src/crm/crm.company-profile-source.spec.ts
+PASS src/crm/adapters/yclients-company-profile-source.spec.ts
+PASS src/ai-tools/public-consultation-presentation.spec.ts
+
+Test Suites: 1 failed, 14 passed, 15 total
+Tests:       1 failed, 1033 passed, 1034 total
+Snapshots:   0 total
+Time:        2.566 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/employee-service-read.spec.ts", "src/ai-tools/ai-core.employee-service.spec.ts", "src/crm/crm.service-catalog-source.spec.ts", "src/crm/adapters/yclients-service-catalog-source.spec.ts", "src/ai-tools/ai-core.public-company.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/public-consultation-presentation.spec.ts", "src/crm/crm.company-profile-source.spec.ts", "src/crm/adapters/yclients-company-profile-source.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts", "src/crm/crm.service.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-staff-services-final-20261009-unit.json

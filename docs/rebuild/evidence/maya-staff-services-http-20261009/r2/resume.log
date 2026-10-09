@@ -1,0 +1,28 @@
+widgets-live: proof database maya_widget_gate_proof_staffservices_5d44ed091055 on 127.0.0.1:55934 (local)
+FAIL test/widgets-live/staff-services-read-restart.probe-spec.ts
+  staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ keeps employee-specific facts and exact evidence through application/PG restart (272 ms)
+
+  ● staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM] › keeps employee-specific facts and exact evidence through application/PG restart
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "307ef607-4470-4d8d-9e3c-da2196e4aae3"
+    Received: "9929b812-95b2-44b8-a15e-d3d6ffa61994"
+
+      1171 |         .set('Authorization', `Bearer ${token}`);
+      1172 |       expect(history.status).toBe(200);
+    > 1173 |       expect(object(history.body).conversationId).toBe(saved.conversationId);
+           |                                                   ^
+      1174 |       const turns = object(history.body).turns;
+      1175 |       assert.ok(Array.isArray(turns));
+      1176 |       expect(
+
+      at Object.<anonymous> (widgets-live/staff-services-read-restart.probe-spec.ts:1173:51)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.164 s, estimated 6 s
+Ran all test suites within paths "test/widgets-live/staff-services-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-staff-services-http-20261009-r2/resume-jest.json
