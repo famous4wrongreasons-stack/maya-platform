@@ -275,3 +275,147 @@ describe('C8 deterministic value, named policy and reproducible ranking', () => 
     expect(x.excluded).toHaveLength(1);
   });
 });
+
+describe('C8 strict two-calendar-month dormancy policy', () => {
+  const calendarPolicy = {
+    ...policy,
+    dormancyRules: policy.dormancyRules.map((rule) => ({
+      ...rule,
+      elapsed: { unit: 'calendar_month', count: 2 },
+      comparison: 'gt',
+    })),
+  };
+
+  const admitted = (lastVisit: string, at: Date, timezone: string) =>
+    ({
+      ...row(),
+      kind: 'POLICY_SIGNAL',
+      ruleKey: 'c8.dormancy/cadence',
+      basis: 'proven_attendance_policy',
+      currency: null,
+      t0: at,
+      periodFrom: new Date(lastVisit),
+      periodTo: at,
+      timezone,
+      inputSnapshotJson: {
+        version: 1,
+        features: [
+          {
+            key: 'last_proven_visit_at',
+            value: lastVisit,
+            unit: 'instant',
+            basis: 'proven_attendance',
+            currency: null,
+            sourceRefs: [
+              {
+                ...ref,
+                observedAt: at.toISOString(),
+                asOf: at.toISOString(),
+                expiresAt: '2099-01-01T00:00:00.000Z',
+              },
+            ],
+          },
+        ],
+        missingness: [],
+        coverage: 'PARTIAL',
+        dependencies: [],
+      },
+    }) as C8ResultRevision;
+
+  it.each([
+    {
+      label: 'non-leap month-end',
+      lastVisit: '2025-12-31T12:34:56.789Z',
+      deadline: '2026-02-28T12:34:56.789Z',
+      timezone: 'UTC',
+    },
+    {
+      label: 'leap month-end',
+      lastVisit: '2023-12-31T12:34:56.789Z',
+      deadline: '2024-02-29T12:34:56.789Z',
+      timezone: 'UTC',
+    },
+    {
+      label: 'New York spring DST',
+      lastVisit: '2026-01-15T17:34:56.789Z',
+      deadline: '2026-03-15T16:34:56.789Z',
+      timezone: 'America/New_York',
+    },
+    {
+      label: 'New York fall DST',
+      lastVisit: '2026-09-15T16:34:56.789Z',
+      deadline: '2026-11-15T17:34:56.789Z',
+      timezone: 'America/New_York',
+    },
+  ])('$label: gt is false at −1ms and exactly, true only at +1ms', (sample) => {
+    for (const delta of [-1, 0, 1]) {
+      const at = new Date(new Date(sample.deadline).getTime() + delta);
+      const result = c8ComputeDeterministic(
+        admitted(sample.lastVisit, at, sample.timezone),
+        calendarPolicy,
+      );
+      expect((result.valuesJson.values as C8Object[])[0]).toMatchObject({
+        type: 'policy',
+        value: delta === 1,
+        unit: 'boolean',
+        basis: 'proven_attendance_policy',
+        currency: null,
+      });
+      expect(result.valuesJson.limitations).toContain(
+        'policy_signal_not_value_consent_or_return_probability',
+      );
+    }
+  });
+
+  it.each([
+    {
+      label: 'clamped month-end plus one millisecond',
+      lastVisit: '2025-12-31T12:34:56.789Z',
+      at: '2026-02-28T12:34:56.790Z',
+      timezone: 'UTC',
+      calendar: true,
+      sixtyDays: false,
+    },
+    {
+      label: 'spring DST plus one millisecond',
+      lastVisit: '2026-01-15T17:34:56.789Z',
+      at: '2026-03-15T16:34:56.790Z',
+      timezone: 'America/New_York',
+      calendar: true,
+      sixtyDays: false,
+    },
+    {
+      label: 'fall DST exact calendar deadline',
+      lastVisit: '2026-09-15T16:34:56.789Z',
+      at: '2026-11-15T17:34:56.789Z',
+      timezone: 'America/New_York',
+      calendar: false,
+      sixtyDays: true,
+    },
+  ])('$label differs from an explicit sixty-elapsed-day rule', (sample) => {
+    const input = admitted(
+      sample.lastVisit,
+      new Date(sample.at),
+      sample.timezone,
+    );
+    const daysPolicy = {
+      ...calendarPolicy,
+      dormancyRules: calendarPolicy.dormancyRules.map((rule) => ({
+        ...rule,
+        elapsed: { unit: 'day', count: 60 },
+      })),
+    };
+    expect(
+      (
+        c8ComputeDeterministic(input, calendarPolicy).valuesJson
+          .values as C8Object[]
+      )[0].value,
+    ).toBe(sample.calendar);
+    expect(
+      (
+        c8ComputeDeterministic(input, daysPolicy).valuesJson
+          .values as C8Object[]
+      )[0].value,
+    ).toBe(sample.sixtyDays);
+  });
+});

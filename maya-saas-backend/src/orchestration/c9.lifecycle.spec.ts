@@ -9,6 +9,7 @@ import {
   c9Constraints,
   c9Objective,
   C9Object,
+  c9Hash,
 } from './c9.contract';
 import { C9Proposal } from './c9.store';
 import { c9OwnerDraft } from './c9.inputs';
@@ -19,7 +20,16 @@ import {
 } from './c9.lifecycle-presentation';
 import { LifecycleSelection } from './c9.lifecycle-source';
 
-function fixture() {
+function fixture(exact = false) {
+  const request = { period: 'more_than_two_months' } as const;
+  const parameters = {
+    elapsed: { unit: 'calendar_month', count: 2 },
+    comparison: 'gt',
+    evidence: 'proven_attendance',
+    minimumCoverage: 'PARTIAL',
+    serviceScope: { restricted: false, count: 0 },
+    timezone: 'Europe/Moscow',
+  };
   const turn = {
     turn: { turnId: 'turn', conversationId: 'conversation' },
     intentHash: 'a'.repeat(64),
@@ -47,6 +57,7 @@ function fixture() {
     unavailableReason: null,
   };
   const selection: LifecycleSelection = {
+    ...(exact ? { request } : {}),
     contract: 'maya.c9-lifecycle-selection/1',
     asOf: '2035-05-10T08:30:00.000Z',
     configured: true,
@@ -142,7 +153,11 @@ function fixture() {
         qualification: 'VERIFIED',
         completeness: 'PARTIAL',
         asOf: '2035-05-09T08:00:00.000Z',
-        rule: { key: 'c8.dormancy/cadence', version: 1 },
+        rule: {
+          key: 'c8.dormancy/cadence',
+          version: 1,
+          ...(exact ? { parameters } : {}),
+        },
         values: [{ key: 'cadence', value: true }],
         reasons: [],
       }));
@@ -173,6 +188,8 @@ function fixture() {
       source as never,
     );
   return {
+    request,
+    parameters,
     turn,
     selection,
     store,
@@ -189,6 +206,75 @@ function fixture() {
 }
 
 describe('explicit C9 Lifecycle (synthetic durable adapter)', () => {
+  it('binds the finite request to run, receipt and exact source fences across restart without rediscovery', async () => {
+    const f = fixture(true);
+    const first = await f.create().checkClientReturn(f.turn, f.request);
+    const scopeHash = c9Hash('lifecycle-request-scope/1', [
+      f.turn.intentHash,
+      f.request,
+    ]);
+    expect(f.store.conversationReadRun).toHaveBeenCalledWith(
+      f.turn.turn,
+      scopeHash,
+      'lifecycle',
+    );
+    expect(f.work.reserve.mock.calls[0][1].inputHash).toBe(
+      c9Hash('lifecycle-request/1', [scopeHash]),
+    );
+    expect(f.receipt.resultJson).toMatchObject({ request: f.request });
+    expect(JSON.stringify(f.receipt.resultJson)).not.toContain(
+      'private-client',
+    );
+    expect(first.recommendation.request).toEqual(f.request);
+    expect(first.recommendation.outcome).toBe('PARTIAL');
+    expect(first.reply).toContain('строго больше двух календарных месяцев');
+    const repeated = await f.create().checkClientReturn(f.turn, f.request);
+    expect(repeated.coordination.revision_id).toBe(
+      first.coordination.revision_id,
+    );
+    expect(repeated.recommendation.outcome).toBe('HISTORICAL');
+    expect(f.source.select).toHaveBeenCalledTimes(1);
+    expect(f.source.select).toHaveBeenCalledWith('run', f.request);
+    expect(f.source.assertCurrent).toHaveBeenLastCalledWith(
+      'tenant',
+      'owner',
+      f.selection.refs,
+      f.request,
+    );
+    expect(f.store.revision).toHaveBeenCalledTimes(1);
+  });
+  it('rejects a replay with a missing or changed saved request even if persistence were to return the wrong receipt', async () => {
+    const f = fixture(true);
+    await f.create().checkClientReturn(f.turn, f.request);
+    const receipt = f.receipt.resultJson as C9Object;
+    delete receipt.request;
+    await expect(
+      f.create().checkClientReturn(f.turn, f.request),
+    ).rejects.toThrow('source_read_receipt');
+    expect(f.source.select).toHaveBeenCalledTimes(1);
+  });
+  it('copies the request before the first await and rejects extra authority before reading storage', async () => {
+    const f = fixture(true);
+    const request = { period: 'more_than_two_months' } as const;
+    const result = f.create().checkClientReturn(f.turn, request);
+    Object.assign(request, { period: 'sixty_days', branch: 'foreign' });
+    await result;
+    expect(f.source.select).toHaveBeenCalledWith('run', f.request);
+    const invalid = fixture(true);
+    await expect(
+      invalid.create().checkClientReturn(invalid.turn, request),
+    ).rejects.toThrow('lifecycle_request');
+    expect(invalid.store.conversationReadRun).not.toHaveBeenCalled();
+  });
+  it('does not expose a replay whose exact current rule has drifted into a 60-day rule', async () => {
+    const f = fixture(true);
+    await f.create().checkClientReturn(f.turn, f.request);
+    f.parameters.elapsed = { unit: 'day', count: 60 };
+    const result = await f.create().checkClientReturn(f.turn, f.request);
+    expect(result.recommendation.outcome).toBe('STALE');
+    expect(result.recommendation.agent.findings).toEqual([]);
+    expect(f.source.select).toHaveBeenCalledTimes(1);
+  });
   it('uses actual refs, one bounded read, agent, saved READ/NO_ACTION proposal, unknown population and no identifiers in response', async () => {
     const f = fixture();
     const response = await f.create().checkClientReturn(f.turn);

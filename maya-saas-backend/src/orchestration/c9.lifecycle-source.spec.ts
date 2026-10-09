@@ -49,6 +49,10 @@ function fixture() {
     ),
   };
   const valuation = {
+    snapshotDormancy: jest.fn(() => Promise.resolve(item)),
+    listDormancy: jest
+      .fn()
+      .mockResolvedValue({ items: [item], nextCursor: null }),
     snapshot: jest.fn(() => Promise.resolve(item)),
     readiness: jest.fn().mockResolvedValue({ configured: true }),
     list: jest.fn().mockResolvedValue({ items: [item], nextCursor: null }),
@@ -76,6 +80,73 @@ function fixture() {
 }
 
 describe('C9 Lifecycle exact published C8 source selection', () => {
+  const request = { period: 'more_than_two_months' } as const;
+  function exactFixture() {
+    const f = fixture();
+    const parameters = {
+      elapsed: { unit: 'calendar_month', count: 2 },
+      comparison: 'gt',
+      evidence: 'proven_attendance',
+      minimumCoverage: 'PARTIAL',
+      serviceScope: { restricted: false, count: 0 },
+      timezone: 'Europe/Moscow',
+    };
+    Object.assign(f.item.rule, { parameters });
+    return { ...f, parameters };
+  }
+  it('uses the constrained owner before selection and again at exposure, without generic discovery', async () => {
+    const f = exactFixture();
+    const selected = await f.source.select('run', request);
+    expect(selected.request).toEqual(request);
+    expect(selected.refs).toHaveLength(1);
+    expect(f.valuation.listDormancy).toHaveBeenCalledWith(
+      'tenant',
+      'owner',
+      request.period,
+    );
+    expect(f.valuation.list).not.toHaveBeenCalled();
+    await f.source.assertCurrent('tenant', 'owner', selected.refs, request);
+    expect(f.valuation.snapshotDormancy).toHaveBeenCalledWith(
+      'tenant',
+      'owner',
+      'source',
+      request.period,
+    );
+    expect(f.valuation.snapshot).not.toHaveBeenCalled();
+    f.parameters.comparison = 'gte';
+    await expect(
+      f.source.assertCurrent('tenant', 'owner', selected.refs, request),
+    ).rejects.toThrow('c9_source_changed');
+    expect(f.valuation.listDormancy).toHaveBeenCalledTimes(1);
+  });
+  it('withholds a mismatched projection from the exact owner and rejects a forged constraint before authorization', async () => {
+    const f = exactFixture();
+    f.parameters.elapsed = { unit: 'day', count: 60 };
+    await expect(f.source.select('run', request)).resolves.toMatchObject({
+      refs: [],
+      withheld: true,
+    });
+    expect(f.tx.c8ResultRevision.findFirst).not.toHaveBeenCalled();
+    const calls = f.store.transaction.mock.calls.length;
+    await expect(
+      f.source.select('run', { ...request, days: 60 } as never),
+    ).rejects.toThrow('lifecycle_request');
+    expect(f.store.transaction).toHaveBeenCalledTimes(calls);
+  });
+  it('preserves revocation and tenant rejection at the constrained fence', async () => {
+    const f = exactFixture();
+    const selected = await f.source.select('run', request);
+    await expect(
+      f.source.assertCurrent('foreign', 'owner', selected.refs, request),
+    ).rejects.toThrow('source_qualification');
+    expect(f.valuation.snapshotDormancy).not.toHaveBeenCalled();
+    f.valuation.snapshotDormancy.mockRejectedValue(
+      new ForbiddenException('revoked'),
+    );
+    await expect(
+      f.source.assertCurrent('tenant', 'owner', selected.refs, request),
+    ).rejects.toThrow('revoked');
+  });
   it.each(['current', 'available'] as const)(
     'final exact source fence rejects %s false even with unchanged published metadata',
     async (key) => {

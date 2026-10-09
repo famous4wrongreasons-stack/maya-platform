@@ -5,7 +5,11 @@ import { AiToolRegistryService } from '../ai-tools/ai-tool-registry.service';
 import { C8ReadService } from '../valuation/c8.read';
 import { C9Store } from './c9.store';
 import { C9Object, c9Deny, c9Evidence } from './c9.contract';
-import { lifecycleSignal } from './c9.lifecycle-presentation';
+import {
+  lifecycleRequest,
+  lifecycleRequestMatches,
+  type LifecycleRequest,
+} from './c9.lifecycle-presentation';
 
 export type LifecycleSelection = {
   contract: 'maya.c9-lifecycle-selection/1';
@@ -14,6 +18,7 @@ export type LifecycleSelection = {
   hasMore: boolean;
   withheld: boolean;
   refs: C9Object[];
+  request?: LifecycleRequest;
 };
 
 /** Metadata selection only. Existing C8 readers own eligibility, facts and every access decision. */
@@ -67,7 +72,11 @@ export class C9LifecycleSource {
     return { ...current, configured: ready.configured };
   }
 
-  async select(runId: string): Promise<LifecycleSelection> {
+  async select(
+    runId: string,
+    requested?: LifecycleRequest,
+  ): Promise<LifecycleSelection> {
+    const request = lifecycleRequest(requested);
     const { principal, configured } = await this.authorize(runId);
     const selection: LifecycleSelection = {
       contract: 'maya.c9-lifecycle-selection/1',
@@ -76,17 +85,20 @@ export class C9LifecycleSource {
       hasMore: false,
       withheld: false,
       refs: [],
+      ...(request ? { request } : {}),
     };
     if (!configured) return selection;
-    const page = await this.valuation.list(
-      principal.tenantId,
-      principal.userId!,
-      {
-        kind: 'POLICY_SIGNAL',
-        subjectKind: 'client',
-        limit: '3',
-      },
-    );
+    const page = request
+      ? await this.valuation.listDormancy(
+          principal.tenantId,
+          principal.userId!,
+          request.period,
+        )
+      : await this.valuation.list(principal.tenantId, principal.userId!, {
+          kind: 'POLICY_SIGNAL',
+          subjectKind: 'client',
+          limit: '3',
+        });
     if (page.items.length > 3) c9Deny('array_bounds');
     selection.hasMore = page.nextCursor !== null;
     await this.store.transaction(undefined, async (tx, p, now) => {
@@ -94,7 +106,7 @@ export class C9LifecycleSource {
       if (p.tenantId !== principal.tenantId || p.userId !== principal.userId)
         c9Deny('source_reader_authority');
       for (const item of page.items) {
-        if (!lifecycleSignal(item)) {
+        if (!lifecycleRequestMatches(item, request)) {
           selection.withheld = true;
           continue;
         }
@@ -164,17 +176,22 @@ export class C9LifecycleSource {
     tenantId: string,
     userId: string,
     refs: readonly C9Object[],
+    requested?: LifecycleRequest,
   ) {
+    const request = lifecycleRequest(requested);
     if (refs.length > 3) c9Deny('array_bounds');
     for (const ref of refs) {
       if (ref.tenantId !== tenantId || ref.sourceType !== 'C8ResultRevision')
         c9Deny('source_qualification');
-      const snapshot = await this.valuation.snapshot(
-        tenantId,
-        userId,
-        ref.id as string,
-      );
-      if (!lifecycleSignal(snapshot)) c9Deny('source_changed');
+      const snapshot = request
+        ? await this.valuation.snapshotDormancy(
+            tenantId,
+            userId,
+            ref.id as string,
+            request.period,
+          )
+        : await this.valuation.snapshot(tenantId, userId, ref.id as string);
+      if (!lifecycleRequestMatches(snapshot, request)) c9Deny('source_changed');
     }
   }
 }

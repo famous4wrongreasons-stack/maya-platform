@@ -51,6 +51,7 @@ import {
   ownerReviewContinuationQuestion,
   ownerReviewContinuationState,
   singleLifecyclePlanState,
+  singleLifecycleRequest,
   withOwnerReviewClarification,
 } from './owner-review-plan';
 import {
@@ -1761,7 +1762,10 @@ export class AiCoreService {
             lifecycleDelegated = true;
             const turn = this.readTurns.get(dto);
             if (!turn) this.modelFailure('conversation_history_unavailable');
-            const lifecycle = await this.orchestrator.checkClientReturn(turn);
+            const request = singleLifecycleRequest(activeSemanticPlan);
+            const lifecycle = request
+              ? await this.orchestrator.checkClientReturn(turn, request)
+              : await this.orchestrator.checkClientReturn(turn);
             return this.complete(
               user,
               dto,

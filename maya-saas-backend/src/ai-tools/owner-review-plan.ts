@@ -1,5 +1,6 @@
 import { UserRole } from '../common/domain.enums';
 import type { ConversationSemanticPlan } from '../conversation-intelligence/conversation-intelligence.types';
+import type { LifecycleRequest } from '../orchestration/c9.lifecycle-presentation';
 
 const SUMMARY = 'analytics.business_summary';
 const WINDOWS = 'schedule.review_cancellation_windows';
@@ -51,11 +52,35 @@ export function singleLifecyclePlanState(
     plan.tasks[0].tool.status !== 'ready'
   )
     return null;
+  if (singleLifecycleRequest(plan)) return 'ready';
   return plan.tasks[0].requires_clarification ||
     Object.keys(plan.tasks[0].entities).length > 0 ||
     plan.context.unresolved_references.length > 0
     ? 'clarify'
     : 'ready';
+}
+
+/** The caller requests an existing rule; this never defines or changes one. */
+export function singleLifecycleRequest(
+  plan: ConversationSemanticPlan | null | undefined,
+): LifecycleRequest | undefined {
+  if (!plan || !isSingleLifecycleTaskSet(plan)) return undefined;
+  const task = plan.tasks[0];
+  if (
+    !['request', 'correction', 'clarification_answer'].includes(
+      plan.dialogue_act,
+    ) ||
+    task.requires_clarification ||
+    task.requires_confirmation ||
+    task.depends_on.length ||
+    plan.context.unresolved_references.length ||
+    task.permission.status !== 'allowed' ||
+    task.tool.status !== 'ready' ||
+    Object.keys(task.entities).length !== 1 ||
+    task.entities.period !== 'more_than_two_months'
+  )
+    return undefined;
+  return Object.freeze({ period: 'more_than_two_months' });
 }
 
 export function ownerReviewKind(
@@ -214,6 +239,14 @@ export function ownerReviewContinuationState(
     expected.every((intent, index) => intent === actual[index]);
   // A new topic may use its own normal policy path; it never resumes this review.
   if (!sameTasks) return explicitTransition ? 'unresolved' : null;
+  // An explicit exact rule request has its own qualified C8 path. It does not
+  // accept the pending unscoped alternative or erase its requested constraints.
+  if (
+    !explicitTransition &&
+    state(next) === 'ready' &&
+    singleLifecycleRequest(next)
+  )
+    return null;
   const scope = (plan: ConversationSemanticPlan) =>
     JSON.stringify({
       tasks: plan.tasks

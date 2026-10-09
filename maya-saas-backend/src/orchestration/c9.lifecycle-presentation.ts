@@ -1,7 +1,41 @@
-import { C9Object, c9Object } from './c9.contract';
+import { C9Object, c9Object, c9Deny } from './c9.contract';
 import { sourceInstantText } from '../common/source-instant-text';
 import { isUsableTimezone } from '../tenants/salon-timezone';
 import type { C8DormancyRuleParameters } from '../valuation/c8.read';
+
+export type LifecycleRequest = Readonly<{ period: 'more_than_two_months' }>;
+
+export function lifecycleRequest(value: unknown): LifecycleRequest | undefined {
+  if (value === undefined) return undefined;
+  const request = c9Object(value);
+  if (
+    Object.keys(request).length !== 1 ||
+    request.period !== 'more_than_two_months'
+  )
+    c9Deny('lifecycle_request');
+  return Object.freeze({ period: 'more_than_two_months' });
+}
+
+export function lifecycleRequestMatches(
+  fact: C9Object,
+  request?: LifecycleRequest,
+): boolean {
+  if (!lifecycleSignal(fact)) return false;
+  if (!request) return true;
+  const parameters = lifecycleRuleParameters(fact);
+  return (
+    parameters !== null &&
+    (fact.completeness === 'COMPLETE' || fact.completeness === 'PARTIAL') &&
+    parameters.elapsed.unit === 'calendar_month' &&
+    parameters.elapsed.count === 2 &&
+    parameters.comparison === 'gt' &&
+    parameters.evidence === 'proven_attendance' &&
+    !parameters.serviceScope.restricted &&
+    parameters.serviceScope.count === 0 &&
+    (parameters.minimumCoverage === 'PARTIAL' ||
+      fact.completeness === 'COMPLETE')
+  );
+}
 
 /** A bounded explicit READ command, never a marketing instruction or a background trigger. */
 export function isExplicitClientReturnRequest(text: string): boolean {

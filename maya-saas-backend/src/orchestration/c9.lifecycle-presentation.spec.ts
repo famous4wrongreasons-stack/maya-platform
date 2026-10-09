@@ -1,4 +1,8 @@
-import { lifecycleStatement } from './c9.lifecycle-presentation';
+import {
+  lifecycleStatement,
+  lifecycleRequest,
+  lifecycleRequestMatches,
+} from './c9.lifecycle-presentation';
 import type { C9Object } from './c9.contract';
 
 function fact(): C9Object {
@@ -24,6 +28,62 @@ function parameters(): C9Object {
   };
 }
 describe('finite Lifecycle rule explanation from exact C8 projection', () => {
+  const request = { period: 'more_than_two_months' } as const;
+  function exactFact() {
+    return {
+      ...fact(),
+      rule: {
+        key: 'c8.dormancy/cadence',
+        version: 1,
+        parameters: {
+          ...parameters(),
+          elapsed: { unit: 'calendar_month', count: 2 },
+          comparison: 'gt',
+        },
+      },
+    };
+  }
+  it('copies and freezes the single finite request without accepting caller thresholds', () => {
+    const normalized = lifecycleRequest(request);
+    expect(normalized).toEqual(request);
+    expect(normalized).not.toBe(request);
+    expect(Object.isFrozen(normalized)).toBe(true);
+    expect(lifecycleRequest(undefined)).toBeUndefined();
+    for (const input of [
+      null,
+      {},
+      [],
+      { period: ['more_than_two_months'] },
+      { period: 'sixty_days' },
+      { ...request, days: 60 },
+    ])
+      expect(() => lifecycleRequest(input)).toThrow();
+  });
+  it('qualifies a false exact signal without claiming a full cohort', () => {
+    expect(lifecycleRequestMatches(exactFact(), request)).toBe(true);
+    expect(lifecycleStatement(exactFact())).toContain('2 календарных месяца');
+    expect(lifecycleStatement(exactFact())).toContain('не выполнено');
+  });
+  it.each([
+    { elapsed: { unit: 'day', count: 60 } },
+    { elapsed: { unit: 'calendar_month', count: 3 } },
+    { comparison: 'gte' },
+    { serviceScope: { restricted: true, count: 1 } },
+    { minimumCoverage: 'COMPLETE' },
+    { timezone: 'INVALID' },
+  ])('withholds a nonmatching requested rule: %j', (change) => {
+    const value = exactFact();
+    Object.assign(value.rule.parameters, change);
+    expect(lifecycleRequestMatches(value, request)).toBe(false);
+  });
+  it.each([['PARTIAL'], [['PARTIAL']], null, 'UNKNOWN'])(
+    'withholds malformed coverage %j',
+    (completeness) => {
+      expect(
+        lifecycleRequestMatches({ ...exactFact(), completeness }, request),
+      ).toBe(false);
+    },
+  );
   it('explains the threshold and inclusive boundary without turning a false signal into an active client or a forecast', () => {
     const text = lifecycleStatement(fact());
     expect(text).toContain('30 дней');

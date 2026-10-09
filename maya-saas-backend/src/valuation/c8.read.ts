@@ -311,6 +311,66 @@ export class C8ReadService {
     }
   }
   async list(tenantId: string, userId: string, query: C8ReadQuery = {}) {
+    return this.listInternal(tenantId, userId, query);
+  }
+
+  /** Internal finite READ filter. The confirmed policy remains the owner of
+   * thresholds; this never computes or changes a policy or result. */
+  async listDormancy(
+    tenantId: string,
+    userId: string,
+    period: 'more_than_two_months',
+  ) {
+    this.assertDormancyPeriod(period);
+    return this.listInternal(
+      tenantId,
+      userId,
+      { kind: 'POLICY_SIGNAL', subjectKind: 'client', limit: '3' },
+      period,
+    );
+  }
+
+  private assertDormancyPeriod(period: unknown) {
+    if (period !== 'more_than_two_months')
+      throw new BadRequestException('c8_invalid_dormancy_period');
+  }
+
+  private matchesDormancySnapshot(
+    row: C8ResultRevision,
+    result: Awaited<ReturnType<C8ReadService['present']>>,
+  ) {
+    const scope = row.scopeJson as C8Object;
+    const parameters = result.rule.parameters;
+    return (
+      row.kind === 'POLICY_SIGNAL' &&
+      row.subjectKind === 'client' &&
+      row.state === 'PUBLISHED' &&
+      row.basis === 'proven_attendance_policy' &&
+      result.current &&
+      result.available &&
+      result.qualification === 'VERIFIED' &&
+      ['COMPLETE', 'PARTIAL'].includes(result.completeness) &&
+      Array.isArray(scope.branchIds) &&
+      scope.branchIds.length === 0 &&
+      Array.isArray(scope.serviceScope) &&
+      scope.serviceScope.length === 0 &&
+      parameters?.elapsed.unit === 'calendar_month' &&
+      parameters.elapsed.count === 2 &&
+      parameters.comparison === 'gt' &&
+      parameters.evidence === 'proven_attendance' &&
+      parameters.serviceScope.restricted === false &&
+      parameters.serviceScope.count === 0 &&
+      (parameters.minimumCoverage === 'PARTIAL' ||
+        result.completeness === 'COMPLETE')
+    );
+  }
+
+  private async listInternal(
+    tenantId: string,
+    userId: string,
+    query: C8ReadQuery,
+    dormancyPeriod?: 'more_than_two_months',
+  ) {
     this.requestObject(
       query,
       [
@@ -325,6 +385,48 @@ export class C8ReadService {
       [],
     );
     const member = await this.base(tenantId, userId);
+    // Resolve the exact current policy before the page limit. A matching result
+    // must not be hidden behind three newer results for unrelated rules.
+    let dormancyWhere: Prisma.C8ResultRevisionWhereInput | undefined;
+    if (dormancyPeriod) {
+      const policy = await this.system(tenantId, () =>
+        this.store.transaction(async (tx) => {
+          const head = await tx.tenantBusinessConfigurationRevision.findFirst({
+            where: { tenantId, namespace: 'c8_valuation' },
+            orderBy: { revision: 'desc' },
+            select: { encryptedContent: true },
+          });
+          return head?.encryptedContent ? this.sources.policy(tx) : null;
+        }),
+      );
+      const rules = policy
+        ? (c8Policy(policy.content).dormancyRules as C8Object[])
+        : [];
+      const keys = rules
+        .filter((rule) => {
+          const elapsed = rule.elapsed as C8Object;
+          return (
+            elapsed.unit === 'calendar_month' &&
+            elapsed.count === 2 &&
+            rule.comparison === 'gt' &&
+            rule.evidence === 'proven_attendance' &&
+            (rule.serviceScope as string[]).length === 0
+          );
+        })
+        .map((rule) => 'c8.dormancy/' + (rule.ruleKey as string));
+      dormancyWhere = {
+        state: 'PUBLISHED',
+        qualification: 'VERIFIED',
+        basis: 'proven_attendance_policy',
+        policyRevisionId: policy?.id ?? '',
+        policyContentHash: policy?.hash ?? '',
+        ruleKey: { in: keys },
+        AND: [
+          { scopeJson: { path: ['branchIds'], equals: [] } },
+          { scopeJson: { path: ['serviceScope'], equals: [] } },
+        ],
+      };
+    }
     const limit = query.limit === undefined ? 25 : Number(query.limit);
     if (!Number.isInteger(limit) || limit < 1 || limit > 100)
       throw new BadRequestException('c8_page_limit');
@@ -410,6 +512,7 @@ export class C8ReadService {
         ? { subjectKind: 'staff', subjectId: { in: own.map((x) => x.id) } }
         : {}),
       AND: [
+        ...(dormancyWhere ? [dormancyWhere] : []),
         ...(!finance ? [safeNonfinancial] : []),
         ...(own && query.subjectId ? [{ subjectId: query.subjectId }] : []),
       ],
@@ -432,7 +535,12 @@ export class C8ReadService {
     for (const row of rows.slice(0, limit))
       try {
         const p = await this.present(tenantId, userId, row);
-        if (p.current || row.state === 'UNAVAILABLE') items.push(p);
+        if (
+          dormancyPeriod
+            ? this.matchesDormancySnapshot(row, p)
+            : p.current || row.state === 'UNAVAILABLE'
+        )
+          items.push(p);
       } catch (e) {
         if (!(e instanceof ForbiddenException)) throw e;
       }
@@ -460,6 +568,27 @@ export class C8ReadService {
     });
     if (!row) throw new NotFoundException('c8_result_unavailable');
     return this.present(tenantId, userId, row, offset);
+  }
+
+  /** Recheck the same immutable result and exact raw scope on final exposure
+   * and replay. No rediscovery and no replacement of an earlier result. */
+  async snapshotDormancy(
+    tenantId: string,
+    userId: string,
+    id: string,
+    period: 'more_than_two_months',
+  ) {
+    this.assertDormancyPeriod(period);
+    await this.base(tenantId, userId);
+    this.requestId(id);
+    const row = await this.db.c8ResultRevision.findFirst({
+      where: { tenantId, id, expiresAt: { gt: new Date() } },
+    });
+    if (!row) throw new NotFoundException('c8_result_unavailable');
+    const result = await this.present(tenantId, userId, row);
+    if (!this.matchesDormancySnapshot(row, result))
+      throw new NotFoundException('c8_result_unavailable');
+    return result;
   }
   async readiness(tenantId: string, userId: string) {
     const member = await this.base(tenantId, userId);

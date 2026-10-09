@@ -19,6 +19,28 @@ import {
 
 describe('finite owner review plan boundary', () => {
   const ci = new ConversationIntelligenceService();
+  it('admits the exact two-calendar-month request for existing C8 source qualification', () => {
+    const requested = ci.validatePlan(
+      {
+        dialogue_act: 'request',
+        tasks: [
+          {
+            intent: 'clients.dormant_list',
+            entities: { period: 'more_than_two_months' },
+            confidence: 1,
+          },
+        ],
+      },
+      UserRole.TENANT_OWNER,
+      ['clients.dormant.list'],
+    );
+    expect(requested?.tasks[0].entities).toEqual({
+      period: 'more_than_two_months',
+    });
+    expect(
+      singleLifecyclePlanState(requested, 'web', UserRole.TENANT_OWNER),
+    ).toBe('ready');
+  });
   const plan = () =>
     ci.validatePlan(
       {
@@ -380,7 +402,7 @@ describe('finite owner review plan boundary', () => {
         ),
       ).toBeNull();
       expect(singleLifecyclePlanState(next, 'web', UserRole.TENANT_OWNER)).toBe(
-        'clarify',
+        index === 0 ? 'ready' : 'clarify',
       );
       const reply = ownerReviewClarificationReply(next);
       expect(reply).toContain('более двух месяцев');

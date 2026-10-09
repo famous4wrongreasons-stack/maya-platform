@@ -8,7 +8,11 @@ import {
   C9LifecycleSource,
   type LifecycleSelection,
 } from './c9.lifecycle-source';
-import { lifecycleSignal } from './c9.lifecycle-presentation';
+import {
+  lifecycleRequest,
+  lifecycleRequestMatches,
+  type LifecycleRequest,
+} from './c9.lifecycle-presentation';
 import { Injectable, Optional } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import {
@@ -437,15 +441,22 @@ export class C9Orchestrator {
   }
 
   /** Qualified C8 snapshots only; one explicit request never starts a campaign. */
-  async checkClientReturn(turn: C9ConversationReads) {
+  async checkClientReturn(
+    turn: C9ConversationReads,
+    requested?: LifecycleRequest,
+  ) {
+    const request = lifecycleRequest(requested);
+    const intentHash = request
+      ? c9Hash('lifecycle-request-scope/1', [turn.intentHash, request])
+      : turn.intentHash;
     if (!this.lifecycle || !this.strategy)
       c9Deny('context_fact_source_unavailable');
     const root = await this.store.conversationReadRun(
       turn.turn,
-      turn.intentHash,
+      intentHash,
       'lifecycle',
     );
-    const prepared = await this.prepareClientReturn(root, turn.intentHash);
+    const prepared = await this.prepareClientReturn(root, intentHash, request);
     const response = await prepared.expose();
     await this.lifecycle.authorize(root.id);
     await this.assertLifecycleExposure(
@@ -453,6 +464,8 @@ export class C9Orchestrator {
       (response.recommendation.agent.findings as C9Object[]).length
         ? prepared.refs
         : [],
+      [],
+      request,
     );
     return response;
   }
@@ -462,6 +475,7 @@ export class C9Orchestrator {
     root: ConversationRoot,
     lifecycleRefs: C9Object[],
     otherRefs: C9Object[] = [],
+    request?: LifecycleRequest,
   ) {
     const exposedRefs = [...otherRefs, ...lifecycleRefs];
     await this.store.transaction(undefined, async (tx, principal, now) => {
@@ -473,6 +487,7 @@ export class C9Orchestrator {
         principal.tenantId,
         principal.userId,
         lifecycleRefs,
+        ...(request ? [request] : []),
       );
       const exposedAt = Date.now();
       if (
@@ -491,6 +506,7 @@ export class C9Orchestrator {
   private async prepareClientReturn(
     root: ConversationRoot,
     intentHash: string,
+    request?: LifecycleRequest,
   ) {
     if (!this.lifecycle || !this.strategy)
       c9Deny('context_fact_source_unavailable');
@@ -530,6 +546,9 @@ export class C9Orchestrator {
         c9Deny('source_read_receipt');
       savedRevisionId = prior.revisionId;
       savedSourceDigest = prior.sourceDigest;
+      const savedRequest = lifecycleRequest(prior.request);
+      if (JSON.stringify(savedRequest) !== JSON.stringify(request))
+        c9Deny('source_read_receipt');
       selection = {
         contract: 'maya.c9-lifecycle-selection/1',
         asOf: prior.asOf as string,
@@ -537,6 +556,7 @@ export class C9Orchestrator {
         hasMore: prior.hasMore === true,
         withheld: prior.withheld === true,
         refs: [],
+        ...(savedRequest ? { request: savedRequest } : {}),
       };
     } else {
       if (receipt.state !== 'RESERVED')
@@ -544,7 +564,9 @@ export class C9Orchestrator {
       const lease = await this.work.claim(root.id, receipt.id);
       if (!lease) c9Deny('read_work_in_progress_or_unknown');
       try {
-        selection = await this.lifecycle.select(root.id);
+        selection = request
+          ? await this.lifecycle.select(root.id, request)
+          : await this.lifecycle.select(root.id);
         const qualified = await this.lifecycleContext(root.id, selection);
         // Unavailable refs are not promoted into a plan. The evidence remains with its source.
         if (qualified.stale)
@@ -602,6 +624,7 @@ export class C9Orchestrator {
             configured: selection.configured,
             hasMore: selection.hasMore,
             withheld: selection.withheld,
+            ...(request ? { request } : {}),
           },
           {
             contract: 'maya.c9-usage/1',
@@ -651,7 +674,9 @@ export class C9Orchestrator {
           reply: [
             replayed
               ? `Сохранённая версия ${revision.revision}; новые оценки не запрашивались. Проверена доступность её источников.`
-              : 'Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.',
+              : request
+                ? 'Условие проверки: строго больше двух календарных месяцев после подтверждённого посещения, без ограничения отдельными филиалами или услугами. Учитываются только опубликованные оценки по совпадающему действующему правилу бизнеса.'
+                : 'Проверены доступные оценки давности визитов по подтверждённому правилу бизнеса.',
             ...findings.map((line, i) => `Оценка ${i + 1}: ${line}`),
             !findings.length
               ? replayed
@@ -681,6 +706,7 @@ export class C9Orchestrator {
           },
           recommendation: {
             contract: 'maya.c9-lifecycle-response/1',
+            ...(request ? { request } : {}),
             outcome:
               replayed && !qualified.stale
                 ? 'HISTORICAL'
@@ -1075,8 +1101,8 @@ export class C9Orchestrator {
       );
     }
     const original = c9Object(built.context);
-    const facts = (original.facts as C9Object[]).filter(
-      (f) => lifecycleSignal(f) !== null,
+    const facts = (original.facts as C9Object[]).filter((f) =>
+      lifecycleRequestMatches(f, selection.request),
     );
     stale ||= facts.length !== selection.refs.length;
     // A drift during read cannot expose a subset as the unchanged saved proposal.
