@@ -63,6 +63,7 @@ import {
   servicePriceClarification,
 } from './service-price-chat-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
+import { isUsableTimezone } from '../tenants/salon-timezone';
 import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
 import { CrmService } from '../crm/crm.service';
 import { matchedRequestedBookingSlot } from '../common/booking-requested-slot';
@@ -1934,6 +1935,46 @@ export class AiCoreService {
                 matchedSlot.date === date.slice(0, 10)
                   ? matchedSlot
                   : null;
+              const availability = this.record(execution.result);
+              const selection = this.record(availability.booking_selection);
+              // An empty current owner READ needs no selector. Its existing
+              // catalog selection binds the negative answer to this tenant,
+              // employee/service and (when external) exact branch revision.
+              // Do not reinterpret an incomplete/exact-time result or a missing
+              // receipt as proof that the requested day has no matching slots.
+              const currentEmptyDay =
+                !isExactBookingTime(timePreference) &&
+                execution.status === 'completed' &&
+                (execution.stale === undefined || execution.stale === false) &&
+                execution.tool_name === 'booking.availability.read' &&
+                typeof execution.execution_id === 'string' &&
+                execution.execution_id.length > 0 &&
+                Object.keys(availability).length === 3 &&
+                Object.keys(availability).every((key) =>
+                  ['timezone', 'booking_selection', 'slots'].includes(key),
+                ) &&
+                isUsableTimezone(availability.timezone) &&
+                availability.timezone ===
+                  (configuredBranch?.timezone ??
+                    branch?.timezone ??
+                    businessTimezone) &&
+                Array.isArray(availability.slots) &&
+                availability.slots.length === 0 &&
+                selection.tenantId === tenantId &&
+                selection.staffId === bound.staff.id &&
+                selection.serviceId === bound.services[0].id &&
+                Object.keys(selection).length === (scope ? 5 : 3) &&
+                Object.keys(selection).every((key) =>
+                  [
+                    'tenantId',
+                    'staffId',
+                    'serviceId',
+                    ...(scope ? ['branchId', 'branchSourceRevision'] : []),
+                  ].includes(key),
+                ) &&
+                (!scope ||
+                  (selection.branchId === scope.branchId &&
+                    selection.branchSourceRevision === scope.sourceRevision));
               return this.complete(
                 user,
                 dto,
@@ -1964,12 +2005,20 @@ export class AiCoreService {
                               (this.record(execution.result).slots as unknown[])
                                 .length === 0
                             ? `На ${date.slice(0, 10)} в ${timePreference} не нашла подтверждённых свободных окон. Выберите другое время или дату. Запись не создана.`
-                            : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
+                            : currentEmptyDay
+                              ? `На ${date.slice(0, 10)} по выбранным условиям свободные окна не найдены. Можно проверить другую дату. Запись не создана.`
+                              : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
                   source: 'safe_fallback',
                   action: null,
                   grounding: this.groundingReport(
                     requirement,
-                    execution.status === 'completed' ? 'verified' : 'blocked',
+                    isExactBookingTime(timePreference)
+                      ? execution.status === 'completed'
+                        ? 'verified'
+                        : 'blocked'
+                      : hasTimeSelector || currentEmptyDay
+                        ? 'verified'
+                        : 'blocked',
                     toolResults,
                   ),
                 },
@@ -2131,8 +2180,8 @@ export class AiCoreService {
               toolResults.length = 0;
               presented = {
                 reply: employeeJournal
-                  ? 'Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены.'
-                  : 'Источник графика или привязка филиала изменились. Повторите проверку сотрудника; актуальный график сейчас не подтверждён.',
+                  ? 'Не удалось подтвердить актуальный источник журнала и связь мастера с филиалом. Уточните мастера и филиал; актуальные записи сейчас не подтверждены.'
+                  : 'Не удалось подтвердить актуальный источник графика и связь мастера с филиалом. Уточните мастера и филиал; актуальный график сейчас не подтверждён.',
                 status: 'blocked',
               };
             }

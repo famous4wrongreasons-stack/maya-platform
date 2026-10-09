@@ -970,6 +970,137 @@ describe('AiCoreService', () => {
     });
 
     it.each([
+      'current-empty',
+      'current-bound-empty',
+      'failed',
+      'stale',
+      'missing-execution',
+      'wrong-tool',
+      'missing-slots',
+      'malformed-slots',
+      'nonempty-unpresented',
+      'invalid-timezone',
+      'wrong-timezone',
+      'missing-selection',
+      'foreign-tenant',
+      'wrong-staff',
+      'wrong-service',
+      'wrong-branch',
+      'changed-source',
+      'incomplete',
+      'ambiguous',
+      'unknown-completeness',
+      'exact-time',
+    ])(
+      'reports a source-qualified empty booking day only from the current bounded READ: %s',
+      async (state) => {
+        const f = bookingFixture();
+        const delegated = f.runtime.execute.getMockImplementation()!;
+        const sourceRevision = 'a'.repeat(64);
+        const bound = [
+          'current-bound-empty',
+          'wrong-branch',
+          'changed-source',
+        ].includes(state);
+        if (bound) {
+          f.crm.resolveConfiguredBookingBranch.mockResolvedValue({
+            id: 'branch-a',
+            name: 'Центральный',
+            timezone: 'Europe/Moscow',
+            sourceRevision,
+          });
+          f.crm.readBranchAvailabilityRevision.mockResolvedValue(
+            sourceRevision,
+          );
+        }
+        const selection: Record<string, unknown> = {
+          tenantId: client.tenantId,
+          staffId: 'staff-a',
+          serviceId: 'service-a',
+          ...(bound
+            ? { branchId: 'branch-a', branchSourceRevision: sourceRevision }
+            : {}),
+        };
+        const result: Record<string, unknown> = {
+          timezone: 'Europe/Moscow',
+          booking_selection: selection,
+          slots: [],
+        };
+        const execution: Record<string, unknown> = {
+          status: 'completed',
+          execution_id: 'current-empty-read',
+          tool_name: 'booking.availability.read',
+          result,
+        };
+        if (state === 'failed') execution.status = 'failed';
+        if (state === 'stale') execution.stale = true;
+        if (state === 'missing-execution') delete execution.execution_id;
+        if (state === 'wrong-tool') execution.tool_name = 'catalog.staff.read';
+        if (state === 'missing-slots') delete result.slots;
+        if (state === 'malformed-slots') result.slots = { length: 0 };
+        if (state === 'nonempty-unpresented') result.slots = [{}];
+        if (state === 'invalid-timezone') result.timezone = 'Invalid/Timezone';
+        if (state === 'wrong-timezone') result.timezone = 'UTC';
+        if (state === 'missing-selection') result.booking_selection = null;
+        if (state === 'foreign-tenant') selection.tenantId = 'foreign-tenant';
+        if (state === 'wrong-staff') selection.staffId = 'staff-b';
+        if (state === 'wrong-service') selection.serviceId = 'service-b';
+        if (state === 'wrong-branch') selection.branchId = 'branch-b';
+        if (state === 'changed-source')
+          selection.branchSourceRevision = 'b'.repeat(64);
+        if (state === 'incomplete')
+          result.exact_time_unavailable = 'incomplete_source';
+        if (state === 'ambiguous')
+          result.exact_time_unavailable = 'ambiguous_local_time';
+        if (state === 'unknown-completeness')
+          result.completeness = { status: 'incomplete' };
+        if (state === 'exact-time') {
+          result.requested_date = '2026-10-09';
+          result.requested_time = '18:00';
+        }
+        f.runtime.execute.mockImplementation((...args) =>
+          args[1] === 'booking.availability.read'
+            ? Promise.resolve(execution)
+            : delegated(...args),
+        );
+        const response = await f.turn({
+          ...initial,
+          date_or_period: '2026-10-09',
+          ...(state === 'exact-time' ? { time: '18:00' } : {}),
+        });
+        if (state === 'current-empty' || state === 'current-bound-empty') {
+          expect(response.grounding.status).toBe('verified');
+          expect(response.reply).toContain(
+            'На 2026-10-09 по выбранным условиям свободные окна не найдены.',
+          );
+          expect(response.reply).toContain('Запись не создана.');
+        } else {
+          expect(response.reply).not.toContain(
+            'по выбранным условиям свободные окна не найдены',
+          );
+          if (state !== 'exact-time') {
+            expect(response.reply).toContain(
+              'Подходящее время пока не удалось подтвердить.',
+            );
+            expect(response.grounding.status).toBe('blocked');
+          } else expect(response.reply).toContain('2026-10-09 в 18:00');
+        }
+        expect(response.reply).not.toMatch(
+          /салон закрыт|все мастера заняты|записала/i,
+        );
+        expect(response.action).toBeNull();
+        expect(response).not.toHaveProperty('widget');
+        expect(f.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
+          'catalog.services.read',
+          'catalog.staff.read',
+          'booking.availability.read',
+        ]);
+        expect(f.model.decide).toHaveBeenCalledTimes(1);
+        expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it.each([
       'ready',
       'stale',
       'refused',

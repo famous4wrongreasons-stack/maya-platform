@@ -260,6 +260,11 @@ describe('AiCore explicit employee schedule [actual parser, synthetic sources]',
     );
     const result = await f.chat();
     expect(result.grounding.status).toBe('blocked');
+    expect(result.reply).toContain(
+      'Не удалось подтвердить актуальный источник графика и связь мастера с филиалом.',
+    );
+    expect(result.reply).toContain('актуальный график сейчас не подтверждён.');
+    expect(result.reply).not.toContain('изменил');
     expect(result.reply).not.toContain('10:00');
     expect(f.execute).toHaveBeenCalledTimes(1);
     expect(f.decide).toHaveBeenCalledTimes(1);

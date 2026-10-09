@@ -287,6 +287,11 @@ describe('AiCore explicit employee journal [actual parser, synthetic sources]', 
     );
     const result = await f.chat();
     expect(result.grounding.status).toBe('blocked');
+    expect(result.reply).toContain(
+      'Не удалось подтвердить актуальный источник журнала и связь мастера с филиалом.',
+    );
+    expect(result.reply).toContain('актуальные записи сейчас не подтверждены.');
+    expect(result.reply).not.toContain('изменил');
     expect(result.reply).not.toContain('10:00');
     expect(f.execute).toHaveBeenCalledTimes(1);
     expect(f.decide).toHaveBeenCalledTimes(1);
@@ -400,7 +405,7 @@ describe('AiCore explicit employee journal [actual parser, synthetic sources]', 
       else {
         const result = await f.chat();
         expect(result.grounding.status).toBe('blocked');
-        expect(result.reply).toContain('Источник журнала');
+        expect(result.reply).toContain('источник журнала');
         expect(result.reply).not.toContain('10:00');
       }
       expect(f.execute).toHaveBeenCalledTimes(2);
