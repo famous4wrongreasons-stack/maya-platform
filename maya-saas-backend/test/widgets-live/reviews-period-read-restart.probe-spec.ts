@@ -11,7 +11,11 @@ import type {
   AiCoreModelInput,
 } from '../../src/ai-tools/ai-core.types';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
-import { decodeChatReply } from '../../src/widgets/stores/chat-reply-codec';
+import {
+  chatReplyId,
+  decodeChatCompletion,
+  decodeChatReply,
+} from '../../src/widgets/stores/chat-reply-codec';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -150,6 +154,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
   const unexpected: string[] = [],
     checkpoints: Record<string, unknown>[] = [],
     sourceReceipts: Record<string, unknown>[] = [],
+    clarificationReceipts: Record<string, unknown>[] = [],
     deniedPlans: Record<string, unknown>[] = [];
   const registryReads: Array<{
     tenantHash: string;
@@ -165,6 +170,8 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     sourceHead,
     sourceBindingsDigest,
     planning: 'SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR',
+    plannerPlanMeaning:
+      'INITIAL_VALIDATED_PARSER_PLAN_NOT_FINAL_PERSISTED_CONTEXT',
     realHttpAuth: true,
     realC9AndRuntime: true,
     realCanonicalReviewOwner: true,
@@ -423,7 +430,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       registryReads: registryReads.length - beforeReads,
       reply: typeof body.reply === 'string' ? body.reply : null,
       grounding: object(body.grounding).status ?? null,
-      plan:
+      plannerPlan:
         currentPlan()?.tasks.map((t) => ({
           intent: t.intent,
           permission: t.permission.status,
@@ -586,6 +593,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       unexpected,
       checkpoints,
       sourceReceipts,
+      clarificationReceipts,
       deniedPlans,
     });
     try {
@@ -622,7 +630,8 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     expect(String(answer.body.reply)).not.toContain('UNVERIFIED_PLANNER_TEXT');
     assertPrivateAbsent(answer.body);
   }
-  function assertClarification(
+  async function assertClarification(
+    salon: Salon,
     answer: { status: number; body: Record<string, unknown> },
     beforeReads: number,
   ) {
@@ -633,10 +642,54 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     expect(answer.body.tools_used ?? []).toEqual([]);
     expect(String(answer.body.reply)).toMatch(/оцен|рейтинг/i);
     expect(String(answer.body.reply)).not.toContain('UNVERIFIED_PLANNER_TEXT');
-    const task = lastPlan?.tasks[0];
-    assert.ok(task);
+    const userTurn = object(answer.body.user_turn);
+    assert.ok(typeof userTurn.turnId === 'string');
+    assert.ok(typeof userTurn.conversationId === 'string');
+    const parent = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+      where: {
+        id: userTurn.turnId,
+        tenantId: salon.tenant.id,
+        conversationId: userTurn.conversationId,
+        role: 'user',
+      },
+    });
+    const stored = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+      where: {
+        id: chatReplyId(salon.tenant.id, parent.id),
+        tenantId: salon.tenant.id,
+        conversationId: parent.conversationId,
+        role: 'assistant',
+      },
+    });
+    assert.ok(stored.textContent);
+    const completion = decodeChatCompletion(db.encryption, stored.textContent);
+    expect(completion.parentId).toBe(parent.id);
+    expect(completion.text).toBe(answer.body.reply);
+    const semanticContext = object(completion.semanticContext);
+    expect(semanticContext.version).toBe('maya.chat-semantic-context/1');
+    const plan = object(semanticContext.plan);
+    assert.ok(Array.isArray(plan.tasks));
+    expect(plan.tasks).toHaveLength(1);
+    const task = object(plan.tasks[0]);
     expect(task.intent).toBe('reviews.list_recent');
-    expect(task.entities.period).toBe(window.month);
+    expect(object(task.entities).period).toBe(window.month);
+    expect(object(task.entities).branch).toBe(salon.branchId);
+    expect(task.requires_clarification).toBe(true);
+    const question = `За ${window.month} показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?`;
+    expect(task.clarification_question).toBe(question);
+    expect(completion.text).toBe(question);
+    assertPrivateAbsent(completion);
+    clarificationReceipts.push({
+      tenantHash: digest(salon.tenant.id),
+      parentTurnHash: digest(parent.id),
+      assistantTurnHash: digest(stored.id),
+      completionHash: completion.completionHash,
+      semanticContextHash: digest(completion.semanticContext),
+      replyHash: digest(completion.text),
+      month: window.month,
+      branchHash: digest(salon.branchId),
+      observation: 'EXACT_PERSISTED_ASSISTANT_COMPLETION_BY_TENANT_AND_PARENT',
+    });
     assertPrivateAbsent(answer.body);
   }
   async function evidence(
@@ -894,7 +947,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
           rating,
           branch: BRANCH_NAME,
         });
-        assertClarification(unclear, n);
+        await assertClarification(a, unclear, n);
         // The followup supplies only the new constraint: the model fixture does
         // not echo the previous month or branch as invented fresh input.
         const resolved = await ownerChat({
