@@ -1,0 +1,15 @@
+{
+  "source": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend",
+  "files": {
+    "src/ai-tools/ai-tool-runtime.service.ts": "da1a5bf0cbf8b37021294820ffe99b1df401bd6b8fad1a3b8f04224fa34c46e2",
+    "src/ai-tools/ai-tool-runtime.service.spec.ts": "7f8cfa47696a3b08066c1267e0c62b93552a5b0e052b15d394f352f1db48ab95",
+    "src/ai-tools/ai-tool-handler.service.ts": "0f87bd020129249f45c3348f4b9c8e4afef5938863c00f5b0367544fe57a533b",
+    "src/ai-tools/ai-tool-handler.service.spec.ts": "a814aab85d238b1cad8ce596ba27a579f458796570d6681b94a05af4fc1864cc",
+    "src/ai-tools/ai-tool.types.ts": "389b84c82860c1219d99214e8036087af9b686e61962df36c6c8b8d6fe530652",
+    "src/ai-tools/staff-schedule-read-scope.ts": "731d6e1e5d8787f313ed4fa260f53f7c5e3e3773acb056b10889b944f57b7460"
+  },
+  "unitEvidence": "/private/tmp/maya-scoped-schedule-read-20261009-r3.json",
+  "qualification": "Synthetic runtime/handler tests; no HTTP/PG/provider/model. Types/lint pending parent serial checks.",
+  "typeOnlyFollowup": "Three Jest factories now use explicit ReturnType/Parameters generics; combined parent checks pending.",
+  "lintOnlyFollowup": "Typed mock-call tuple projections; exact role comparison via string; equivalent control-character char-code predicate. Combined parent checks pending."
+}

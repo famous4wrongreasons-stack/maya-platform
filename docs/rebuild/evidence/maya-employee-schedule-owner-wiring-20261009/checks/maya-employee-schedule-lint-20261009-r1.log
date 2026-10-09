@@ -1,0 +1,30 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.employee-schedule.spec.ts
+   42:50  error  Async arrow function has no 'await' expression     @typescript-eslint/require-await
+   55:13  error  Unsafe assignment of an `any` value                @typescript-eslint/no-unsafe-assignment
+   55:23  error  Unsafe member access .arguments on an `any` value  @typescript-eslint/no-unsafe-member-access
+   86:67  error  Async arrow function has no 'await' expression     @typescript-eslint/require-await
+  317:20  error  Unsafe call of a type that could not be resolved   @typescript-eslint/no-unsafe-call
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts
+  128:59  error  Unsafe member access [1] on an `any` value  @typescript-eslint/no-unsafe-member-access
+  153:47  error  Unsafe member access [1] on an `any` value  @typescript-eslint/no-unsafe-member-access
+  305:49  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts
+  612:7  error  The two values in this comparison do not have a shared enum type  @typescript-eslint/no-unsafe-enum-comparison
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/employee-schedule-read.spec.ts
+  103:7   error  '_args' is defined but never used               @typescript-eslint/no-unused-vars
+  104:7   error  '_scope' is defined but never used              @typescript-eslint/no-unused-vars
+  105:25  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+  129:9   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  201:7   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  210:7   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+  259:7   error  Unsafe assignment of an `any` value             @typescript-eslint/no-unsafe-assignment
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts
+  20:4  error  Unexpected control character(s) in regular expression: \x00, \x1f  no-control-regex
+
+✖ 17 problems (17 errors, 0 warnings)
+

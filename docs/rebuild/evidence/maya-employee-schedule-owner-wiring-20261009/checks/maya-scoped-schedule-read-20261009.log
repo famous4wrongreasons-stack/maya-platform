@@ -1,0 +1,43 @@
+FAIL src/ai-tools/ai-tool-runtime.service.spec.ts
+  ● AiToolRuntimeService › finite current staff schedule READ scope › withholds a saved result if source changes while cache lookup awaits, replay=false
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": "schedule-read", "replayed": true, "result": {"staff": [{"id": "71", "name": "PRIVATE_SCOPED_RESULT"}]}, "status": "completed", "tool_name": "staff.schedule.read"}
+
+      176 |           return Promise.resolve(h.saved());
+      177 |         });
+    > 178 |         await expect(h.run(replay)).rejects.toThrow(
+          |               ^
+      179 |           'staff_schedule_read_source_changed',
+      180 |         );
+      181 |         expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+
+      at expect (../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2116:15)
+      at src/ai-tools/ai-tool-runtime.service.spec.ts:178:15
+
+  ● AiToolRuntimeService › finite current staff schedule READ scope › withholds a saved result if source changes while cache lookup awaits, replay=true
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"execution_id": "schedule-read", "replayed": true, "result": {"staff": [{"id": "71", "name": "PRIVATE_SCOPED_RESULT"}]}, "status": "completed", "tool_name": "staff.schedule.read"}
+
+      176 |           return Promise.resolve(h.saved());
+      177 |         });
+    > 178 |         await expect(h.run(replay)).rejects.toThrow(
+          |               ^
+      179 |           'staff_schedule_read_source_changed',
+      180 |         );
+      181 |         expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+
+      at expect (../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2116:15)
+      at src/ai-tools/ai-tool-runtime.service.spec.ts:178:15
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       2 failed, 148 passed, 150 total
+Snapshots:   0 total
+Time:        2.763 s
+Ran all test suites.
+Test results written to: ../../../../../../../../private/tmp/maya-scoped-schedule-read-20261009.json

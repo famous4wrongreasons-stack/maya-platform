@@ -1,0 +1,12 @@
+[
+  {
+    "check": "production",
+    "exitCode": 0,
+    "log": "/private/tmp/maya-employee-schedule-final-production-20261009.log"
+  },
+  {
+    "check": "scoped-specs",
+    "exitCode": 0,
+    "log": "/private/tmp/maya-employee-schedule-final-scoped-specs-20261009.log"
+  }
+]

@@ -1,0 +1,164 @@
+{
+  "contract": "maya.development-evidence-archive/1",
+  "codeCommit": "4e79cee63be047c461c7f56d1d7b3ff6c3e76935",
+  "qualification": "Component-only; historical HTTP baseline unchanged; no new remaining29 verdicts",
+  "files": [
+    {
+      "path": "checks/maya-employee-schedule-combined-20261009-r1.json",
+      "bytes": 274176,
+      "sha256": "a0dc776954ca93072a09bae4c5ac9f01d8c167cbc6f7ce4193ddc1bc676916c4"
+    },
+    {
+      "path": "checks/maya-employee-schedule-combined-20261009-r1.log",
+      "bytes": 663,
+      "sha256": "16669a477ea05577e325cf2e5b480a0b8d63457d437cbeba5a205543089cc947"
+    },
+    {
+      "path": "checks/maya-employee-schedule-combined-20261009-r2.json",
+      "bytes": 276208,
+      "sha256": "b46fbf3e8a26c2e6895e6b2dfcbe42765d45f4f7036ce9cda2b9f6c1ff14ba16"
+    },
+    {
+      "path": "checks/maya-employee-schedule-combined-20261009-r2.log",
+      "bytes": 663,
+      "sha256": "f4764e733fc88f825461514afbcb441f33e391faacc21d2e3fa5fef260b1f3c9"
+    },
+    {
+      "path": "checks/maya-employee-schedule-combined-20261009-r3.json",
+      "bytes": 276207,
+      "sha256": "92b945a7b3ae556d6f53f03ae475c16eda62ca18432435d070b22a1a588aa267"
+    },
+    {
+      "path": "checks/maya-employee-schedule-combined-20261009-r3.log",
+      "bytes": 663,
+      "sha256": "a881439bb072e4d67340b00d910ad565f4e934ca8c894331738fcf90a6f38d10"
+    },
+    {
+      "path": "checks/maya-employee-schedule-final-production-20261009.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-employee-schedule-final-scoped-specs-20261009.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-employee-schedule-final-types-20261009.json",
+      "bytes": 275,
+      "sha256": "642c28032e0ed118cfa61729cca6eb5c9fbe626c6393273332a99d0f44fbbeda"
+    },
+    {
+      "path": "checks/maya-employee-schedule-lint-20261009-r1.log",
+      "bytes": 2537,
+      "sha256": "f9cbd246f67699a8201c12aa57650cafab3f411914145da0d310311e3948cbca"
+    },
+    {
+      "path": "checks/maya-employee-schedule-lint-20261009-r2.log",
+      "bytes": 305,
+      "sha256": "8d33d7b5f3f1c7d1ce37d2f6537a0c41def3cccef8f6cd4d5a9e044151ab2d4b"
+    },
+    {
+      "path": "checks/maya-employee-schedule-lint-20261009-r3.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-employee-schedule-root-20261009-r1.json",
+      "bytes": 19695,
+      "sha256": "c7af05984a5a56d102a959dcf475b732f33868f3b1ce6cdf8c6b90c89e8a32be"
+    },
+    {
+      "path": "checks/maya-employee-schedule-root-20261009-r1.log",
+      "bytes": 2585,
+      "sha256": "db1a418ecd53c28cc090e044ec656b25d05b99d509696eba1cb01a22f86b9fcb"
+    },
+    {
+      "path": "checks/maya-employee-schedule-root-20261009-r2.json",
+      "bytes": 18701,
+      "sha256": "af23534a577b4b28a17c28acbd5b178e4d6034ed3384aef891d7f5eeeb2fcad6"
+    },
+    {
+      "path": "checks/maya-employee-schedule-root-20261009-r2.log",
+      "bytes": 2292,
+      "sha256": "3be4de3623fd32b66cd940e0c0b98fb7b552f52b36c2501eb5bef04fbdb438e7"
+    },
+    {
+      "path": "checks/maya-employee-schedule-spec-types-20261009-r1.log",
+      "bytes": 98923,
+      "sha256": "558be130e35532ef5fa7f4e20c790cf321821fa3941d447cdacaa2c957cfd4eb"
+    },
+    {
+      "path": "checks/maya-employee-schedule-spec-types-20261009-r2.log",
+      "bytes": 4008,
+      "sha256": "a580f9fd335445e43422d1dcb4975f865204365f2474d8ffe7c31ae5072f6c7f"
+    },
+    {
+      "path": "checks/maya-employee-schedule-spec-types-20261009-r3.log",
+      "bytes": 458,
+      "sha256": "a7e382e7ecac98b9c7e6f771abdd4c9337ca9b0ca35aeecdf1b70b0323ca4df0"
+    },
+    {
+      "path": "checks/maya-employee-schedule-spec-types-20261009-r4.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-employee-schedule-types-20261009-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checks/maya-employee-schedule-types-20261009.json",
+      "bytes": 1063,
+      "sha256": "374477d5df83e7b4f8081ad114c54e882eab98becbe425ebea77bc367feda9b7"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-20261009-r2.json",
+      "bytes": 77352,
+      "sha256": "15c7824b1b704368eddd05533191a67aed404d9c11af773ff31deb34fa4fed38"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-20261009-r2.log",
+      "bytes": 249,
+      "sha256": "afc335037183e762d694b8a6dffc4d7131afee687e4d73a97c2425962fd0750c"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-20261009-r3.json",
+      "bytes": 83352,
+      "sha256": "d6f4ece7bab06722f18a7cd9234891bc1cd227fea17da6a5a1297bec4ebc7cbe"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-20261009-r3.log",
+      "bytes": 249,
+      "sha256": "6558de61b3bd2623e01d9cfff10ffd73c36be67684ece725fbe250dd0a7f5f3d"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-20261009.json",
+      "bytes": 81288,
+      "sha256": "a160129b99af4417eec048e19405bb9000b197efdf4ba42df2905336a9990e79"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-20261009.log",
+      "bytes": 2219,
+      "sha256": "3eb58bf3ab31d6c11cf1a21e28c4a85ef8abeadc316fa9bde61446bb48f9be2e"
+    },
+    {
+      "path": "checks/maya-scoped-schedule-read-freeze-20261009.json",
+      "bytes": 1329,
+      "sha256": "14ff22b712c780f2e48bf2a52dc314530b25263dc81f6641c922aace030376a9"
+    },
+    {
+      "path": "qualification.json",
+      "bytes": 2968,
+      "sha256": "dff6eccd739a80c68d980400fadc614708f6e693d0e8331c13e2ff645e008d91"
+    },
+    {
+      "path": "source-files.json",
+      "bytes": 2268,
+      "sha256": "dd09a346c2e6d91218fd34821c6980a53f8d6770614fb966741d7d37f1da01ad"
+    }
+  ],
+  "totalFiles": 31,
+  "totalBytes": 1230696
+}

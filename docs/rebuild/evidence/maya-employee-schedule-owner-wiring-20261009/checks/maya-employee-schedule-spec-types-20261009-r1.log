@@ -1,0 +1,846 @@
+src/ai-tools/ai-core.employee-schedule.spec.ts(36,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(37,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(38,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(40,18): error TS2503: Cannot find namespace 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(40,73): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(42,32): error TS7006: Parameter '_user' implicitly has an 'any' type.
+src/ai-tools/ai-core.employee-schedule.spec.ts(42,39): error TS7006: Parameter 'name' implicitly has an 'any' type.
+src/ai-tools/ai-core.employee-schedule.spec.ts(42,45): error TS7006: Parameter 'dto' implicitly has an 'any' type.
+src/ai-tools/ai-core.employee-schedule.spec.ts(84,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(85,18): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(146,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(150,12): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(151,15): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(154,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(160,18): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(167,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(173,22): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(193,9): error TS2345: Argument of type '{ userId: string; tenantId: string; sessionId: string; email: string; role: UserRole.TENANT_OWNER; }' is not assignable to parameter of type 'AuthenticatedUser'.
+  Type '{ userId: string; tenantId: string; sessionId: string; email: string; role: UserRole.TENANT_OWNER; }' is missing the following properties from type 'AuthenticatedUser': branchId, membershipId, membershipStatus
+src/ai-tools/ai-core.employee-schedule.spec.ts(209,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(210,3): error TS2304: Cannot find name 'beforeEach'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(211,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(212,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(214,3): error TS2304: Cannot find name 'afterEach'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(214,19): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(215,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(217,12): error TS7006: Parameter 'two' implicitly has an 'any' type.
+src/ai-tools/ai-core.employee-schedule.spec.ts(220,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(221,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(222,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(223,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(224,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(225,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(226,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(227,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(228,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(230,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(242,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(249,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(257,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(258,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(259,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(260,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(262,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(267,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(268,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(270,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(273,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(274,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(275,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(277,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(280,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(281,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(282,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(283,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(285,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(288,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(289,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(290,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(292,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-core.employee-schedule.spec.ts(294,12): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/ai-tools/ai-core.employee-schedule.spec.ts(305,13): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(306,13): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(314,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(315,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-core.employee-schedule.spec.ts(316,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(28,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(36,3): error TS2304: Cannot find name 'afterEach'.
+src/ai-tools/ai-tool-handler.service.spec.ts(37,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(40,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(54,26): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(59,22): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(60,24): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(72,35): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(101,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(103,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(121,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(122,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(127,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(133,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(140,58): error TS7006: Parameter 'kind' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(173,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(174,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(175,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(177,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(183,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(184,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(186,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(192,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(193,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(195,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(204,14): error TS7006: Parameter 'kind' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(217,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(224,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(231,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(234,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(236,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(240,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(248,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(249,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(251,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(259,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(260,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(261,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(262,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(266,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(267,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(268,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(270,35): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(271,29): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(289,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(293,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(294,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(297,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(298,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(304,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(308,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(309,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(311,14): error TS7006: Parameter 'archived' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(322,25): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(330,25): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(333,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(346,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(385,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(395,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(404,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(405,35): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(408,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(409,46): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(416,24): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(424,22): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(453,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(485,16): error TS7031: Binding element 'timezone' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(485,26): error TS7031: Binding element 'date' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(485,32): error TS7031: Binding element 'time' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(485,38): error TS7031: Binding element 'starts' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(485,46): error TS7031: Binding element 'expected' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(487,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(500,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(501,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(509,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(515,16): error TS7031: Binding element 'starts' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(517,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(525,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(528,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(533,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(541,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(546,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(552,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(558,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(562,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(564,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(570,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(576,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(582,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(586,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(590,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(591,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(595,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(612,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(613,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(617,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(620,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(621,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(625,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(633,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(636,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(637,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(640,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(661,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(665,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(669,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(690,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(695,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(696,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(699,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(700,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(701,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(716,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(717,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(725,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(728,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(729,5): error TS2304: Cannot find name 'afterEach'.
+src/ai-tools/ai-tool-handler.service.spec.ts(729,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(746,29): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(753,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(754,36): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(760,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(787,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(790,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(791,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(792,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(793,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(802,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(806,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(810,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(813,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(814,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(815,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(820,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(823,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(825,14): error TS7006: Parameter 'outcome' implicitly has an 'any' type.
+src/ai-tools/ai-tool-handler.service.spec.ts(830,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(837,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(838,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(839,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(844,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(845,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(846,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(847,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(857,35): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(877,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(896,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(897,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(898,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(924,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(925,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(926,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(927,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(930,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(931,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(947,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(948,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(959,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(963,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(964,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(969,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(970,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(971,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1006,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1010,25): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1014,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1032,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1037,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1042,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1044,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1045,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1046,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1047,31): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1070,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1074,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1092,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1111,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1112,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1113,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1116,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1118,31): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1153,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1154,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1155,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1156,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1157,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1158,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1173,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1175,13): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1217,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1218,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1219,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1237,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1238,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1263,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1268,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1285,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1288,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1302,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1314,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1317,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1319,26): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1322,29): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1328,19): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1369,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1403,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1404,44): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1422,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1448,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1450,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1464,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1465,22): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1469,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1488,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1509,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1515,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1518,19): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1521,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1525,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1537,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1538,22): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1543,24): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1628,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1634,19): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1635,18): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1637,38): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1638,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1639,39): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1644,38): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1668,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1677,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1717,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1718,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1719,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1720,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1721,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1722,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1723,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1726,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1728,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1760,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1761,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1762,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1785,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1786,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1787,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1796,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1800,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1811,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1817,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1818,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1819,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1828,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1832,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1843,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1849,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(1850,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1901,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1948,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1966,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1967,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1968,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1984,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1985,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1986,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1987,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1988,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1990,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1991,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1992,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1993,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(1999,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2000,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2002,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2029,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2039,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2042,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2043,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2109,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2156,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2174,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2177,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2178,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2179,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2181,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2184,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2185,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2187,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2226,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2239,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2242,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2243,29): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2286,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2336,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2354,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2355,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2356,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2358,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2359,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2362,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2364,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2386,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2430,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2445,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2447,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2472,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2477,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2493,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2511,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2514,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2516,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2538,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2554,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2555,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2556,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2559,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2564,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2565,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2577,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2578,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2581,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2585,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2587,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2625,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2629,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2633,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2640,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2641,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2642,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2705,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2707,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2718,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2734,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2737,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2742,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2744,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2757,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2761,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2765,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2785,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2794,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2797,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2798,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2811,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2875,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2877,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2888,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2911,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2912,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2913,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2914,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2917,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2918,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2920,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2969,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2975,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2976,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(2979,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(2981,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3010,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3026,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3040,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3056,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3057,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3058,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3059,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3060,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3062,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3063,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3066,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3067,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3097,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3124,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3126,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3137,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3149,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3150,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3157,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3158,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3159,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3164,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3165,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3167,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3193,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3195,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3208,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3213,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3214,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3220,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3221,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3222,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3227,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3230,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3231,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3244,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3282,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3293,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3310,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3326,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3327,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3328,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3329,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3330,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3332,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3333,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3336,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3338,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3377,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3380,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3383,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3385,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3433,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3436,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3437,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3438,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3441,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3442,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3492,24): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3496,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3498,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3509,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3519,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3520,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3521,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3522,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3525,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3529,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-handler.service.spec.ts(3530,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3552,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3580,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3585,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3586,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3587,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3617,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3622,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3632,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-handler.service.spec.ts(3638,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(21,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(33,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(73,21): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(122,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(124,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(129,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(130,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(133,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(137,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(138,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(139,35): error TS7006: Parameter 'call' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(142,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(145,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(148,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(151,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(152,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(156,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(158,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(163,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(166,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(167,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(170,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(172,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(175,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(178,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(181,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(183,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(191,9): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(193,32): error TS7006: Parameter 'input' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(197,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(200,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(203,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(212,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(215,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(217,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(225,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(226,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(228,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(239,14): error TS7006: Parameter 'kind' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(249,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(254,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(255,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(256,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(259,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(261,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(267,9): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(269,32): error TS7006: Parameter 'input' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(273,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(278,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(281,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(287,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(290,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(292,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(294,34): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(300,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(303,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(304,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(306,17): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(308,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(318,14): error TS7006: Parameter 'kind' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(339,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(342,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(343,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(344,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(349,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(350,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(352,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(356,9): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(358,32): error TS7006: Parameter '_name' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(358,39): error TS7006: Parameter '_actor' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(358,47): error TS7006: Parameter 'args' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(393,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(394,9): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(400,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(404,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(407,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(409,34): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(420,7): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(422,30): error TS7006: Parameter '_name' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(422,37): error TS7006: Parameter '_actor' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(422,45): error TS7006: Parameter 'args' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(432,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(445,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(449,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(451,6): error TS7006: Parameter 'toolName' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(491,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(493,16): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(495,17): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(499,17): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(502,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(503,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(509,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(511,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(512,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(516,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(517,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(521,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(523,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(530,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(532,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(540,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(541,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(543,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(545,16): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(551,17): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(554,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(557,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(559,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(567,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(568,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(570,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(571,36): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(579,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(582,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(583,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(588,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(604,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(610,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(613,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(614,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(615,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(617,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(620,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(622,12): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(645,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(657,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(658,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(659,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(663,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(665,12): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(696,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(708,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(709,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(710,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(714,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(716,6): error TS7006: Parameter 'toolName' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(717,7): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(719,16): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(755,17): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(768,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(769,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(775,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(816,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(818,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(821,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(822,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(823,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(826,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(837,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(841,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(842,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(845,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(849,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(852,50): error TS7006: Parameter 'toolName' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(853,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(855,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(902,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(914,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(915,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(916,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(921,3): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(924,50): error TS7006: Parameter 'toolName' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(937,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(949,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(954,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(959,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(990,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(992,14): error TS7006: Parameter 'replay' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1002,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1003,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1006,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1008,14): error TS7006: Parameter 'field' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1027,15): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1028,9): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1031,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1046,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1047,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1049,5): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1055,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1056,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1060,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1061,31): error TS2503: Cannot find namespace 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1063,9): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1086,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1093,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1094,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1102,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1102,39): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1106,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1107,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1112,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1113,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1129,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1130,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1137,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1138,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1169,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1184,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1185,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1190,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1193,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1212,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1224,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1225,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1226,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1227,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1229,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1230,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1234,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1280,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1285,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1286,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1288,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1291,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1296,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1303,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1304,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1307,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1316,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1325,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1326,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1329,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1368,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1374,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1375,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1378,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1381,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1390,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1391,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1399,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1401,5): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1402,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1403,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1405,26): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1407,6): error TS7006: Parameter 'input' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1411,31): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1412,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1413,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1415,27): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1417,6): error TS7006: Parameter 'input' implicitly has an 'any' type.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1421,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1422,26): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1423,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1431,26): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1432,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1435,35): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1442,30): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1455,17): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1464,24): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1465,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1467,19): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1472,32): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1480,34): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1481,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1486,16): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1487,18): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1489,26): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1490,42): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1494,35): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1500,25): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1504,28): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1514,14): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1518,14): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1525,23): error TS2304: Cannot find name 'jest'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1543,19): error TS2304: Cannot find name 'jest'.
+src/ai-tools/employee-schedule-read.spec.ts(68,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/employee-schedule-read.spec.ts(69,37): error TS2304: Cannot find name 'jest'.
+src/ai-tools/employee-schedule-read.spec.ts(70,33): error TS2304: Cannot find name 'jest'.
+src/ai-tools/employee-schedule-read.spec.ts(98,16): error TS2304: Cannot find name 'jest'.
+src/ai-tools/employee-schedule-read.spec.ts(108,7): error TS2739: Type '{ tenantId: string; userId: string; role: UserRole; sessionId: string; email: string; branchId: string | null; }' is missing the following properties from type 'AuthenticatedUser': membershipId, membershipStatus
+src/ai-tools/employee-schedule-read.spec.ts(119,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(120,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(122,12): error TS7006: Parameter 'two' implicitly has an 'any' type.
+src/ai-tools/employee-schedule-read.spec.ts(124,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(125,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(127,16): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(129,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(129,38): error TS7031: Binding element 'name' implicitly has an 'any' type.
+src/ai-tools/employee-schedule-read.spec.ts(133,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(142,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(147,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(151,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(154,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(157,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(158,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(160,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(163,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(164,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(169,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(173,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(174,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(176,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(181,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(182,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(184,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(188,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(192,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(194,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(197,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(199,14): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(201,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(203,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(206,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(208,14): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(210,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(211,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(213,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(216,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(217,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(219,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(225,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(226,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(228,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(231,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(232,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(233,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(235,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(239,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(240,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(245,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(248,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(249,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(250,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(252,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(255,11): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(257,14): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(260,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(262,12): error TS7006: Parameter 'kind' implicitly has an 'any' type.
+src/ai-tools/employee-schedule-read.spec.ts(272,13): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(275,3): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/ai-tools/employee-schedule-read.spec.ts(283,7): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(287,5): error TS2304: Cannot find name 'expect'.
+src/ai-tools/employee-schedule-read.spec.ts(290,5): error TS2304: Cannot find name 'expect'.
+test/fixtures/ai-tool-receipt.fixture.ts(63,5): error TS2322: Type 'Promise<unknown>' is not assignable to type 'Promise<T>'.
+  Type 'unknown' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+test/helpers/measurement-reader.ts(55,13): error TS2304: Cannot find name 'jest'.
+test/helpers/measurement-reader.ts(62,17): error TS2304: Cannot find name 'jest'.
+test/helpers/measurement-reader.ts(70,23): error TS2304: Cannot find name 'jest'.
+test/helpers/measurement-reader.ts(77,18): error TS2304: Cannot find name 'jest'.
+test/helpers/measurement-reader.ts(83,16): error TS2304: Cannot find name 'jest'.
+test/helpers/measurement-reader.ts(93,14): error TS2304: Cannot find name 'jest'.
+test/helpers/measurement-reader.ts(94,15): error TS2304: Cannot find name 'jest'.

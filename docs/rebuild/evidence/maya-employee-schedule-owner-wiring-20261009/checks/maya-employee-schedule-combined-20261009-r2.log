@@ -1,0 +1,7 @@
+
+Test Suites: 8 passed, 8 total
+Tests:       554 passed, 554 total
+Snapshots:   0 total
+Time:        1.812 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/employee-schedule-read.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-core.personal-appointments-source-trace.spec.ts", "src/crm/crm.staff-schedule-source.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-schedule-combined-20261009-r2.json

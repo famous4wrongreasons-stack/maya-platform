@@ -1,0 +1,61 @@
+{
+  "codeCommit": "4e79cee63be047c461c7f56d1d7b3ff6c3e76935",
+  "baseCommit": "8c914957ce0da8cacd468afdf01975bb62d397ad",
+  "files": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.employee-schedule.spec.ts",
+      "bytes": 11509,
+      "sha256": "6eefdd4de21e624cdf2262037aab84a9a514727a519ca96e985ab9669d319ae4"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "bytes": 358334,
+      "sha256": "c5d8fad546ccb21b73c551096c8a3a3c50bdab6f8db8b032a93167a3a6c43241"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+      "bytes": 128568,
+      "sha256": "a814aab85d238b1cad8ce596ba27a579f458796570d6681b94a05af4fc1864cc"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "bytes": 154847,
+      "sha256": "0f87bd020129249f45c3348f4b9c8e4afef5938863c00f5b0367544fe57a533b"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "bytes": 59917,
+      "sha256": "7f8cfa47696a3b08066c1267e0c62b93552a5b0e052b15d394f352f1db48ab95"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "bytes": 101043,
+      "sha256": "d9afaa72d1acf0849324e477820900bea3e09ff62c3d0d95c357308ac9f29c08"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.types.ts",
+      "bytes": 1549,
+      "sha256": "389b84c82860c1219d99214e8036087af9b686e61962df36c6c8b8d6fe530652"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/employee-schedule-read.spec.ts",
+      "bytes": 10659,
+      "sha256": "0ba6a12bd2ee1c83710d3bd76e656a194f6b01662122ef199abc709cc5ee20b4"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/employee-schedule-read.ts",
+      "bytes": 9116,
+      "sha256": "65ce6c7a7c7ab7a4b7ff1b1392e8ea89882a3234574e825d64de8caf77a66a75"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts",
+      "bytes": 3031,
+      "sha256": "731d6e1e5d8787f313ed4fa260f53f7c5e3e3773acb056b10889b944f57b7460"
+    },
+    {
+      "path": "maya-saas-backend/test/fixtures/ai-tool-receipt.fixture.ts",
+      "bytes": 4954,
+      "sha256": "6f807030fb34367d216317032f4d7b442dfbf12ed09ee51464a7533cbe284847"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+FAIL src/ai-tools/ai-core.employee-schedule.spec.ts
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › withholds the reply when C9 finalization is denied
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: {"failed": false, "runId": "run-current"}
+
+    Number of calls: 0
+
+      308 |       });
+      309 |       await expect(f.completion(...args)).rejects.toThrow();
+    > 310 |       expect(finish).toHaveBeenCalledWith(turn);
+          |                      ^
+      311 |       expect(f.execute).toHaveBeenCalledTimes(2);
+      312 |     },
+      313 |   );
+
+      at ai-tools/ai-core.employee-schedule.spec.ts:310:22
+
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › withholds the reply when C9 finalization is INCOMPLETE
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: {"failed": false, "runId": "run-current"}
+
+    Number of calls: 0
+
+      308 |       });
+      309 |       await expect(f.completion(...args)).rejects.toThrow();
+    > 310 |       expect(finish).toHaveBeenCalledWith(turn);
+          |                      ^
+      311 |       expect(f.execute).toHaveBeenCalledTimes(2);
+      312 |     },
+      313 |   );
+
+      at ai-tools/ai-core.employee-schedule.spec.ts:310:22
+
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › withholds the reply when C9 finalization is STOPPED
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: {"failed": false, "runId": "run-current"}
+
+    Number of calls: 0
+
+      308 |       });
+      309 |       await expect(f.completion(...args)).rejects.toThrow();
+    > 310 |       expect(finish).toHaveBeenCalledWith(turn);
+          |                      ^
+      311 |       expect(f.execute).toHaveBeenCalledTimes(2);
+      312 |     },
+      313 |   );
+
+      at ai-tools/ai-core.employee-schedule.spec.ts:310:22
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       3 failed, 26 passed, 29 total
+Snapshots:   0 total
+Time:        0.944 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/employee-schedule-read.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-schedule-root-20261009-r2.json

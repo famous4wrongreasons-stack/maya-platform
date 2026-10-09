@@ -1,0 +1,25 @@
+src/ai-tools/ai-core.employee-schedule.spec.ts(317,33): error TS2339: Property 'apply' does not exist on type 'SpyInstance<Promise<unknown>, unknown[], any>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(66,44): error TS2345: Argument of type '(input: unknown) => Promise<Record<string, unknown>>' is not assignable to parameter of type '(...args: any[]) => (input: unknown) => Promise<Record<string, unknown>>'.
+  Type 'Promise<Record<string, unknown>>' is not assignable to type '(input: unknown) => Promise<Record<string, unknown>>'.
+    Type 'Promise<Record<string, unknown>>' provides no match for the signature '(input: unknown): Promise<Record<string, unknown>>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(366,46): error TS2345: Argument of type '(input: unknown) => Promise<Record<string, unknown>>' is not assignable to parameter of type '(...args: any[]) => (input: unknown) => Promise<Record<string, unknown>>'.
+  Type 'Promise<Record<string, unknown>>' is not assignable to type '(input: unknown) => Promise<Record<string, unknown>>'.
+    Type 'Promise<Record<string, unknown>>' provides no match for the signature '(input: unknown): Promise<Record<string, unknown>>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(462,52): error TS2345: Argument of type '(input: unknown) => Promise<Record<string, unknown>>' is not assignable to parameter of type '(...args: any[]) => (input: unknown) => Promise<Record<string, unknown>>'.
+  Type 'Promise<Record<string, unknown>>' is not assignable to type '(input: unknown) => Promise<Record<string, unknown>>'.
+    Type 'Promise<Record<string, unknown>>' provides no match for the signature '(input: unknown): Promise<Record<string, unknown>>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(727,48): error TS2345: Argument of type '(v: unknown) => Promise<Record<string, unknown>>' is not assignable to parameter of type '(...args: any[]) => (input: unknown) => Promise<Record<string, unknown>>'.
+  Type 'Promise<Record<string, unknown>>' is not assignable to type '(input: unknown) => Promise<Record<string, unknown>>'.
+    Type 'Promise<Record<string, unknown>>' provides no match for the signature '(input: unknown): Promise<Record<string, unknown>>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(784,44): error TS2345: Argument of type '(value: unknown) => Promise<Record<string, unknown>>' is not assignable to parameter of type '(...args: any[]) => (input: unknown) => Promise<Record<string, unknown>>'.
+  Type 'Promise<Record<string, unknown>>' is not assignable to type '(input: unknown) => Promise<Record<string, unknown>>'.
+    Type 'Promise<Record<string, unknown>>' provides no match for the signature '(input: unknown): Promise<Record<string, unknown>>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(969,44): error TS2345: Argument of type '(v: unknown) => Promise<Record<string, unknown>>' is not assignable to parameter of type '(...args: any[]) => (input: unknown) => Promise<Record<string, unknown>>'.
+  Type 'Promise<Record<string, unknown>>' is not assignable to type '(input: unknown) => Promise<Record<string, unknown>>'.
+    Type 'Promise<Record<string, unknown>>' provides no match for the signature '(input: unknown): Promise<Record<string, unknown>>'.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1401,13): error TS2743: No overload expects 1 type arguments, but overloads do exist that expect either 0 or 2 type arguments.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1406,5): error TS2743: No overload expects 1 type arguments, but overloads do exist that expect either 0 or 2 type arguments.
+src/ai-tools/ai-tool-runtime.service.spec.ts(1416,5): error TS2743: No overload expects 1 type arguments, but overloads do exist that expect either 0 or 2 type arguments.
+test/fixtures/ai-tool-receipt.fixture.ts(63,5): error TS2322: Type 'Promise<unknown>' is not assignable to type 'Promise<T>'.
+  Type 'unknown' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.

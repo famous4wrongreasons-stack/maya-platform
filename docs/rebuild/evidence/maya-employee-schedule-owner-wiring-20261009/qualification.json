@@ -1,0 +1,72 @@
+{
+  "codeCommit": "4e79cee63be047c461c7f56d1d7b3ff6c3e76935",
+  "qualification": "Synthetic local component regression only. No new HTTP/PG/provider/model acceptance or score reclassification.",
+  "tests": {
+    "combined": {
+      "passed": 554,
+      "failed": 0,
+      "suites": 8,
+      "log": "checks/maya-employee-schedule-combined-20261009-r3.log"
+    },
+    "productionTypeScript": {
+      "exitCode": 0
+    },
+    "scopedSpecTypeScript": {
+      "exitCode": 0
+    },
+    "scopedESLint": {
+      "exitCode": 0,
+      "log": "checks/maya-employee-schedule-lint-20261009-r3.log"
+    },
+    "diffCheck": {
+      "exitCode": 0,
+      "scope": "Product/source/spec diff; raw archived logs retained byte-for-byte"
+    }
+  },
+  "priorFull48": {
+    "codeCommit": "49c37804b1f404b2cd2723f807b22f10c838a759",
+    "pass": 52,
+    "semantic_fail": 0,
+    "unsupported": 14,
+    "insufficient_evidence": 15,
+    "remaining": 29,
+    "unchanged": true,
+    "reusedAsNewAcceptance": false
+  },
+  "targetCases": [
+    "followup-owner-topic-switch:2",
+    "mt-topic_switch_and_return-17:2"
+  ],
+  "independentReview": {
+    "recordKind": "Root transcription of in-session reviewer reports, not an automated or externally signed report",
+    "classificationReviewer": "classification_external_review",
+    "classificationAuthoredPriorImplementationOrEvaluator": false,
+    "classificationChecked": "26 before/after replies and hashes;13 delta rows;remaining68 statuses;6 files per raw archive;canonical runtime sources",
+    "classificationVerdict": "Qualified breakdown supported; genuine incomplete finance,retention,journal tasks remain explicit",
+    "classificationDocumentSha256": "b49424882b819dc3896286b5fd95609b7538bfc61a03b44656bb3809de7cf3f1",
+    "scheduleReviewer": "independent_review",
+    "scheduleVerdict": "Qualified no further source blockers after unresolved branch,post-runtime awaits,C9 finish and membership controls; final replay/context/enum/type deltas reviewed",
+    "reviewerReranTests": false,
+    "reviewerQualifiedHTTP": false
+  },
+  "unstarted": [
+    "HTTP/PG new schedule traversal",
+    "provider",
+    "real model",
+    "paid run",
+    "production",
+    "HTTPS/phone",
+    "Keychain",
+    "push/merge"
+  ],
+  "isolation": {
+    "frozen9Head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+    "handoffHead": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+    "launchCommandSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+    "oldOwnerPeriodsArchiveEntriesVerifiedUnchanged": 100,
+    "websiteChanges": false,
+    "servicesStarted": false
+  },
+  "remainingGate": "Coordinate serial local synthetic HTTP/PG with parent per delegation; old manager fixture lacks explicit company-to-branch and StaffProviderLink. Preserve missing/ambiguous negatives.",
+  "rawLogWhitespace": "The two initial ESLint failure logs retain their original blank line at EOF; aggregate git diff --check reports these artifact-only warnings."
+}

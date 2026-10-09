@@ -1,0 +1,70 @@
+FAIL src/ai-tools/ai-core.employee-schedule.spec.ts
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › runs bounded existing READ pair after actual parser (catalog dependency=false)
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 2
+    + Received  + 1
+
+      Object {
+    -   "branch": "Набережная",
+    -   "date_or_period": "2026-10-11",
+    +   "date_or_period": "tomorrow",
+        "employee": "Артём",
+      }
+
+      231 |         },
+      232 |       );
+    > 233 |       expect(f.plan()?.tasks.at(-1)?.entities).toMatchObject({
+          |                                                ^
+      234 |         employee: 'Артём',
+      235 |         branch: 'Набережная',
+      236 |         date_or_period: '2026-10-11',
+
+      at ai-tools/ai-core.employee-schedule.spec.ts:233:48
+
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › runs bounded existing READ pair after actual parser (catalog dependency=true)
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 2
+    + Received  + 1
+
+      Object {
+    -   "branch": "Набережная",
+    -   "date_or_period": "2026-10-11",
+    +   "date_or_period": "tomorrow",
+        "employee": "Артём",
+      }
+
+      231 |         },
+      232 |       );
+    > 233 |       expect(f.plan()?.tasks.at(-1)?.entities).toMatchObject({
+          |                                                ^
+      234 |         employee: 'Артём',
+      235 |         branch: 'Набережная',
+      236 |         date_or_period: '2026-10-11',
+
+      at ai-tools/ai-core.employee-schedule.spec.ts:233:48
+
+  ● AiCore explicit employee schedule [actual parser, synthetic sources] › bounds source-unavailable to one model call and no second tool
+
+    ConflictException: Conflict Exception
+
+      241 |     const f = fixture();
+      242 |     f.crm.resolveStaffScheduleSource.mockRejectedValue(
+    > 243 |       new ConflictException({
+          |       ^
+      244 |         error: { code: 'staff_schedule_source_unavailable' },
+      245 |       }),
+      246 |     );
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-schedule.spec.ts:243:7)
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       3 failed, 22 passed, 25 total
+Snapshots:   0 total
+Time:        0.956 s
+Ran all test suites within paths "src/ai-tools/employee-schedule-read.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-schedule-root-20261009-r1.json
