@@ -56,3 +56,22 @@ The execution guard was removed after wiring and local checks. A single bounded,
 serial local HTTP/PG proof is the next step. Until its raw evidence is recorded,
 this checkpoint does not establish executable coverage of all 48 cases, model
 quality, real YCLIENTS integration, broad MAYA completion or C10 completion.
+
+## First actual HTTP/PG attempt
+
+`/private/tmp/maya-offline48-http-20261009-r1`, source
+`211febbe7ad0cebf8ae20bc6dfc4677badded2bd`, failed after 13 attempted turns:
+12 reply-bearing HTTP 201 responses, one unresolved HTTP 503 at
+`followup-owner-topic-switch` turn 2, and 68 unexecuted turns. The broker latched
+the transport refusal and made zero upstream calls. All six owned process groups
+were absent; broker closed, PostgreSQL stopped, postmaster PID absent and source
+pins unchanged. This failed attempt is retained, not acceptance.
+
+The actual AiCore privacy projection was reproduced locally: projecting the
+restored branch semantic plan before user history replaces the previous branch
+label with an opaque `[reference removed]` token. The original finite fixture
+matcher rejected that valid projected form. The fixture now permits reference
+tokens only in the two exact frozen branch-label positions, separately from name
+tokens, and preserves the observed token when returning to the branch topic.
+Changed branches, wrong token classes and appended text remain rejected. The
+updated model suite passed 10/10 tests. No application or privacy code changed.

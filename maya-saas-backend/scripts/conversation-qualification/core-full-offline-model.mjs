@@ -23,20 +23,29 @@ const roles = {
   admin: 'administrator',
 };
 const PERSON =
-  /Артёму|Артёма|Артём|Максиму|Максим|Елена|Никита|Илья|Александр|Ольга|Саше|Марина/g;
+  'Артёму|Артёма|Артём|Максиму|Максим|Елена|Никита|Илья|Александр|Ольга|Саше|Марина';
+const BRANCH = 'основной филиал|северный филиал';
 const ALIAS = '\\[name removed\\]@[a-f0-9]{32}_\\d+';
+const REFERENCE_ALIAS = '\\[reference removed\\]@[a-f0-9]{32}_\\d+';
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Only the exact name positions in each frozen user utterance may contain a
-// current PII alias. Another plaintext name, changed time or added text refuses.
+// Only exact frozen name/branch positions may contain a current matching alias.
+// AiCore projects the restored semantic plan before the conversation, so a
+// previously selected branch label can become an opaque reference on a follow-up.
+// Another plaintext name/branch, changed time or added text still refuses.
 function matchTurn(expected, actual) {
   requireThat(typeof actual === 'string');
   let cursor = 0,
     pattern = '^';
   const names = [];
-  for (const match of expected.matchAll(PERSON)) {
+  for (const match of expected.matchAll(
+    new RegExp(PERSON + '|' + BRANCH, 'g'),
+  )) {
     pattern += escape(expected.slice(cursor, match.index));
-    pattern += '(' + escape(match[0]) + '|' + ALIAS + ')';
+    const alias = new RegExp('^(?:' + BRANCH + ')$').test(match[0])
+      ? REFERENCE_ALIAS
+      : ALIAS;
+    pattern += '(' + escape(match[0]) + '|' + alias + ')';
     names.push(match[0]);
     cursor = match.index + match[0].length;
   }
@@ -254,7 +263,7 @@ function select(item, turn, input, people) {
         );
       return clarify(
         'analytics.business_summary',
-        { branch: north ? 'северный филиал' : 'основной филиал' },
+        { branch: person(north ? 'северный филиал' : 'основной филиал') },
         'Для выводов по этому филиалу нужны его подтверждённые показатели за выбранный период. Какой период вас интересует?',
         'NO_BRANCH_FINANCIAL_MEASUREMENT',
       );

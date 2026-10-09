@@ -210,6 +210,37 @@ test('aliases bind only exact frozen name slots and relative date uses current M
   );
 });
 
+test('restored branch references stay opaque at exact frozen positions on topic switches', () => {
+  const id = 'followup-owner-topic-switch';
+  const reference = '[reference removed]@' + 'b'.repeat(32) + '_2';
+  const name = '[name removed]@' + 'b'.repeat(32) + '_1';
+  const conversation = item(id).userTurns.map((content) => ({
+    role: 'user',
+    content: content
+      .replace('основной филиал', reference)
+      .replace('Артём', name),
+  }));
+  const m = model();
+  const schedule = output(
+    call(m, id, 2, { conversation: conversation.slice(0, 2) }),
+  );
+  assert.equal(schedule.tool_call.name, 'staff.schedule.read');
+  assert.equal(JSON.parse(schedule.tool_call.arguments_json).staff_id, name);
+  const returned = output(call(m, id, 3, { conversation }));
+  assert.equal(
+    JSON.parse(returned.semantic_plan.tasks[0].entities_json).branch,
+    reference,
+  );
+  for (const substitute of [name, 'другой филиал', reference + ' extra']) {
+    const changed = structuredClone(conversation);
+    changed[0].content = changed[0].content.replace(reference, substitute);
+    denied(() => call(model(), id, 2, { conversation: changed.slice(0, 2) }));
+  }
+  const changed = structuredClone(conversation);
+  changed[1].content = changed[1].content.replace(name, reference);
+  denied(() => call(model(), id, 2, { conversation: changed.slice(0, 2) }));
+});
+
 test('a completed tool is not dispatched again and missing current tool is an explicit limitation', () => {
   const id = 'current-personal-ordinary',
     m = model();
