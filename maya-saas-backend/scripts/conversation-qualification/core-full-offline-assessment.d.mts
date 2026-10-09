@@ -1,5 +1,9 @@
 export type FullOfflineSemanticStatus =
-  'pass' | 'semantic_fail' | 'unsupported' | 'insufficient_evidence';
+  | 'pass'
+  | 'semantic_fail'
+  | 'unsupported'
+  | 'insufficient_evidence'
+  | 'clarification_pending';
 export type FullOfflineCheck = {
   id: string;
   status: 'pass' | 'fail' | 'insufficient_evidence';
@@ -57,6 +61,11 @@ export type FullOfflineSemanticInput = {
   brokerCalls?: number;
   modelOutputResponses?: number;
   sourceReads?: unknown[];
+  toolsUsed?: unknown[];
+  actionStatus?: string | null;
+  pendingApprovals?: unknown[];
+  readReceiptPresent?: boolean;
+  recommendation?: Record<string, unknown> | null;
 };
 export type FullOfflineExpectation = Readonly<{
   caseId: string;
@@ -70,10 +79,14 @@ export type FullOfflineExpectation = Readonly<{
 export const CORE_FULL_OFFLINE_EXPECTATIONS: readonly FullOfflineExpectation[];
 export const CORE_FULL_OFFLINE_EXPECTATIONS_SHA256: string;
 export const CORE_FULL_OFFLINE_ASSESSMENT_QUALIFICATION: string;
+export const CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT: 'maya.offline48.turn-assessment/2';
 export function assessFullOfflineTurn(input: FullOfflineSemanticInput): {
+  assessmentContract: typeof CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT;
   caseId: string;
   turn: number;
   status: FullOfflineSemanticStatus;
+  goalCompleted?: false;
+  phase?: 'AWAITING_RATING_CHOICE';
   checks: FullOfflineCheck[];
   failedCheckIds: string[];
   missingEvidenceIds: string[];

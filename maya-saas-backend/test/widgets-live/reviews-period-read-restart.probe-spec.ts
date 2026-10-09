@@ -15,6 +15,7 @@ import {
   chatReplyId,
   decodeChatCompletion,
   decodeChatReply,
+  isChatReply,
 } from '../../src/widgets/stores/chat-reply-codec';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
@@ -52,6 +53,25 @@ const outputDirectory: string = output,
 const BRANCH_NAME = 'Набережная';
 const BRANCH_TIMEZONE = 'Pacific/Kiritimati';
 const TENANT_TIMEZONE = 'Pacific/Honolulu';
+const ORIGINAL_DATASET_SHA256 =
+  '9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b';
+const FROZEN_REVIEW_REQUESTS = [
+  {
+    id: 'utt-reviews.list_recent-062',
+    role: 'admin',
+    text: 'По сути: покажи последние плохие отзывы. За прошлый месяц. Без лишних деталей.',
+  },
+  {
+    id: 'utt-reviews.list_recent-067',
+    role: 'owner',
+    text: 'дай ответ покажи последние плохие отзывы. За прошлый месяц. Без лишних деталей.',
+  },
+] as const;
+const RATING_FOLLOWUP: Scenario = {
+  text: 'Только с оценкой 2',
+  rating: 2,
+  followup: true,
+};
 const PRIVATE_FIXTURE = [
   'PRIVATE_RAW_REVIEW_TEXT',
   'PRIVATE_CUSTOMER_NAME',
@@ -70,6 +90,7 @@ type ReviewFact = { rating: number; at: string; branchId: string; id: string };
 type Salon = {
   tenant: TenantFixture;
   owner: UserFixture;
+  administrator: UserFixture;
   restricted: UserFixture;
   revoked: UserFixture;
   clientActor: UserFixture;
@@ -105,6 +126,26 @@ function lastMonth(): Window {
     timezone: BRANCH_TIMEZONE,
   };
 }
+function lastTenantMonth(): Window {
+  const fields = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TENANT_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(new Date());
+  const year = Number(fields.find((x) => x.type === 'year')?.value);
+  const month = Number(fields.find((x) => x.type === 'month')?.value);
+  assert.ok(Number.isInteger(year) && month >= 1 && month <= 12);
+  const localFrom = new Date(Date.UTC(year, month - 2, 1));
+  // Independent finite Honolulu oracle: UTC−10, no DST. No production resolver.
+  return {
+    from: new Date(localFrom.getTime() + 10 * 3600000).toISOString(),
+    toExclusive: new Date(
+      Date.UTC(year, month - 1, 1) + 10 * 3600000,
+    ).toISOString(),
+    month: localFrom.toISOString().slice(0, 7),
+    timezone: TENANT_TIMEZONE,
+  };
+}
 type Scenario = {
   text: string;
   period?: string;
@@ -125,6 +166,33 @@ const ALL: Scenario = {
   rating: 'all',
   branch: BRANCH_NAME,
 };
+type CompletedChain = {
+  originalCaseId: string;
+  utteranceSha256: string;
+  actorRole: 'admin' | 'owner';
+  actorId: string;
+  conversationId: string;
+  initialTurnId: string;
+  initialAssistantTurnId: string;
+  initialReply: string;
+  initialContextHash: string;
+  requestId: string;
+  followupTurnId: string;
+  completedAssistantTurnId: string;
+  reply: string;
+  runId: string;
+  evidenceHash: string;
+};
+type PendingRestartVariant = {
+  originalCaseId: 'utt-reviews.list_recent-062';
+  actorId: string;
+  conversationId: string;
+  initialTurnId: string;
+  initialAssistantTurnId: string;
+  initialReply: string;
+  initialContextHash: string;
+  month: string;
+};
 type Saved = {
   contract: 'synthetic-reviews-period-read-proof/1';
   database: string;
@@ -133,6 +201,9 @@ type Saved = {
   pid: number;
   pgStarted: string;
   window: Window;
+  tenantWindow: Window;
+  supplementalChains: CompletedChain[];
+  pendingRestartVariant: PendingRestartVariant;
   salons: Salon[];
   requestId: string;
   conversationId: string;
@@ -147,6 +218,8 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
   let db: FixtureContext, http: HttpHarness, saved: Saved;
   const salons: Salon[] = [];
   let window: Window = lastMonth();
+  let tenantWindow: Window = lastTenantMonth();
+  const supplementalChains: CompletedChain[] = [];
   let active: Scenario | undefined;
   let afterRead: (() => Promise<void>) | undefined;
   let unavailableNext = false,
@@ -155,6 +228,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     checkpoints: Record<string, unknown>[] = [],
     sourceReceipts: Record<string, unknown>[] = [],
     clarificationReceipts: Record<string, unknown>[] = [],
+    supplementalCompletionReceipts: Record<string, unknown>[] = [],
     deniedPlans: Record<string, unknown>[] = [];
   const registryReads: Array<{
     tenantHash: string;
@@ -180,6 +254,9 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     realModelAcceptance: false,
     browserAcceptance: false,
     full48Reclassification: false,
+    supplementalCompletionQualification:
+      'SEPARATE_SCRIPTED_FOLLOWUPS_NOT_ORIGINAL_81_RESCORE',
+    originalDatasetSha256: ORIGINAL_DATASET_SHA256,
     c9ReadsPerQualifiedRequest: 1,
     registryReadCountMeaning: 'OWNER_LIST_REVIEWS_INVOCATIONS_NOT_SQL_COUNT',
     noBusinessWritesClaim:
@@ -287,6 +364,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       CalendarSource.INTERNAL,
     );
     const owner = await fx.user(tenant, UserRole.TENANT_OWNER),
+      administrator = await fx.user(tenant, UserRole.ADMINISTRATOR),
       restricted = await fx.user(tenant, UserRole.MANAGER),
       revoked = await fx.user(tenant, UserRole.TENANT_OWNER),
       clientActor = await fx.user(tenant, UserRole.CLIENT),
@@ -348,6 +426,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     const salon = {
       tenant,
       owner,
+      administrator,
       restricted,
       revoked,
       clientActor,
@@ -450,6 +529,29 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     };
   }
   beforeAll(async () => {
+    const originalBytes = readFileSync(
+      path.resolve(
+        __dirname,
+        '../../datasets/conversation-intelligence/core-offline-48-20261009.json',
+      ),
+    );
+    assert.equal(
+      createHash('sha256').update(originalBytes).digest('hex'),
+      ORIGINAL_DATASET_SHA256,
+    );
+    const original = object(
+      JSON.parse(originalBytes.toString('utf8')) as unknown,
+    );
+    assert.ok(Array.isArray(original.cases));
+    const originalCases: unknown[] = original.cases;
+    for (const requested of FROZEN_REVIEW_REQUESTS) {
+      const matches = originalCases.filter(
+        (row: unknown) => object(row).id === requested.id,
+      );
+      assert.equal(matches.length, 1);
+      assert.equal(object(matches[0]).role, requested.role);
+      assert.deepEqual(object(matches[0]).userTurns, [requested.text]);
+    }
     for (const name of [
       'YCLIENTS_PARTNER_TOKEN',
       'DEEPSEEK_API_KEY',
@@ -469,6 +571,17 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         'Resume must remain in the same actual business calendar month',
       );
       window = saved.window;
+      assert.deepEqual(
+        saved.tenantWindow,
+        tenantWindow,
+        'Resume must retain the same actual tenant calendar month',
+      );
+      tenantWindow = saved.tenantWindow;
+      assert.equal(
+        saved.supplementalChains.length,
+        FROZEN_REVIEW_REQUESTS.length,
+      );
+      supplementalChains.push(...saved.supplementalChains);
       salons.push(...saved.salons);
     }
     jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
@@ -588,12 +701,14 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
   afterAll(async () => {
     Object.assign(report, {
       window,
+      tenantWindow,
       registryReads,
       modelCalls,
       unexpected,
       checkpoints,
       sourceReceipts,
       clarificationReceipts,
+      supplementalCompletionReceipts,
       deniedPlans,
     });
     try {
@@ -634,6 +749,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     salon: Salon,
     answer: { status: number; body: Record<string, unknown> },
     beforeReads: number,
+    queryScope: 'branch' | 'tenant' = 'branch',
   ) {
     expect(answer.status).toBe(201);
     expect(answer.body.action).toBeNull();
@@ -642,7 +758,46 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     expect(answer.body.tools_used ?? []).toEqual([]);
     expect(String(answer.body.reply)).toMatch(/оцен|рейтинг/i);
     expect(String(answer.body.reply)).not.toContain('UNVERIFIED_PLANNER_TEXT');
-    const userTurn = object(answer.body.user_turn);
+    const { parent, stored, completion } = await persistedCompletion(
+      salon,
+      answer.body,
+    );
+    const expectedWindow = queryScope === 'tenant' ? tenantWindow : window;
+    const semanticContext = object(completion.semanticContext);
+    expect(semanticContext.version).toBe('maya.chat-semantic-context/1');
+    const plan = object(semanticContext.plan);
+    assert.ok(Array.isArray(plan.tasks));
+    expect(plan.tasks).toHaveLength(1);
+    const task = object(plan.tasks[0]);
+    expect(task.intent).toBe('reviews.list_recent');
+    expect(object(task.entities).period).toBe(expectedWindow.month);
+    if (queryScope === 'tenant')
+      expect(Object.hasOwn(object(task.entities), 'branch')).toBe(false);
+    else expect(object(task.entities).branch).toBe(salon.branchId);
+    expect(task.requires_clarification).toBe(true);
+    const question = `За ${expectedWindow.month} показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?`;
+    expect(task.clarification_question).toBe(question);
+    expect(completion.text).toBe(question);
+    assertPrivateAbsent(completion);
+    clarificationReceipts.push({
+      tenantHash: digest(salon.tenant.id),
+      parentTurnHash: digest(parent.id),
+      assistantTurnHash: digest(stored.id),
+      completionHash: completion.completionHash,
+      semanticContextHash: digest(completion.semanticContext),
+      replyHash: digest(completion.text),
+      month: expectedWindow.month,
+      branchHash: queryScope === 'tenant' ? null : digest(salon.branchId),
+      observation: 'EXACT_PERSISTED_ASSISTANT_COMPLETION_BY_TENANT_AND_PARENT',
+    });
+    assertPrivateAbsent(answer.body);
+    return { parent, stored, completion };
+  }
+  async function persistedCompletion(
+    salon: Salon,
+    response: Record<string, unknown>,
+  ) {
+    const userTurn = object(response.user_turn);
     assert.ok(typeof userTurn.turnId === 'string');
     assert.ok(typeof userTurn.conversationId === 'string');
     const observedAt = new Date();
@@ -672,17 +827,20 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       take: 3,
     });
     const matching = candidates
-      .map((stored) => {
-        assert.ok(stored.textContent);
-        return {
-          stored,
-          completion: decodeChatCompletion(db.encryption, stored.textContent),
-        };
+      .flatMap((stored) => {
+        if (stored.textContent === null || !isChatReply(stored.textContent))
+          return [];
+        return [
+          {
+            stored,
+            completion: decodeChatCompletion(db.encryption, stored.textContent),
+          },
+        ];
       })
       .filter(
         ({ completion }) =>
           completion.parentId === parent.id &&
-          completion.text === answer.body.reply,
+          completion.text === response.reply,
       );
     expect(matching).toHaveLength(1);
     const { stored, completion } = matching[0];
@@ -690,40 +848,18 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       chatReplyId(salon.tenant.id, `${parent.id}:${completion.completionHash}`),
     );
     expect(completion.parentId).toBe(parent.id);
-    expect(completion.text).toBe(answer.body.reply);
-    const semanticContext = object(completion.semanticContext);
-    expect(semanticContext.version).toBe('maya.chat-semantic-context/1');
-    const plan = object(semanticContext.plan);
-    assert.ok(Array.isArray(plan.tasks));
-    expect(plan.tasks).toHaveLength(1);
-    const task = object(plan.tasks[0]);
-    expect(task.intent).toBe('reviews.list_recent');
-    expect(object(task.entities).period).toBe(window.month);
-    expect(object(task.entities).branch).toBe(salon.branchId);
-    expect(task.requires_clarification).toBe(true);
-    const question = `За ${window.month} показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?`;
-    expect(task.clarification_question).toBe(question);
-    expect(completion.text).toBe(question);
+    expect(completion.text).toBe(response.reply);
     assertPrivateAbsent(completion);
-    clarificationReceipts.push({
-      tenantHash: digest(salon.tenant.id),
-      parentTurnHash: digest(parent.id),
-      assistantTurnHash: digest(stored.id),
-      completionHash: completion.completionHash,
-      semanticContextHash: digest(completion.semanticContext),
-      replyHash: digest(completion.text),
-      month: window.month,
-      branchHash: digest(salon.branchId),
-      observation: 'EXACT_PERSISTED_ASSISTANT_COMPLETION_BY_TENANT_AND_PARENT',
-    });
-    assertPrivateAbsent(answer.body);
+    return { parent, stored, completion };
   }
   async function evidence(
     salon: Salon,
     response: Record<string, unknown>,
     rating: number | null,
     actor = salon.owner,
+    queryScope: 'branch' | 'tenant' = 'branch',
   ) {
+    const expectedWindow = queryScope === 'tenant' ? tenantWindow : window;
     const coordination = object(response.coordination);
     expect(coordination.state).toBe('COMPLETED');
     assert.ok(typeof coordination.run_id === 'string');
@@ -763,14 +899,14 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     const scope = object(result.read_scope);
     expect(scope).toMatchObject({
       contract: 'maya.review-registry-query/2',
-      from_inclusive: window.from,
-      to_exclusive: window.toExclusive,
-      timezone: window.timezone,
-      month: window.month,
-      branch_id: salon.branchId,
+      from_inclusive: expectedWindow.from,
+      to_exclusive: expectedWindow.toExclusive,
+      timezone: expectedWindow.timezone,
+      month: expectedWindow.month,
+      branch_id: queryScope === 'tenant' ? null : salon.branchId,
       rating_mode: rating === null ? 'all' : 'exact',
       rating_exact: rating,
-      scope: 'one_branch',
+      scope: queryScope === 'tenant' ? 'tenant' : 'one_branch',
       order: 'occurred_at_desc',
       limit: 20,
       configuration_status: 'not_observed',
@@ -782,9 +918,9 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     const expected = salon.facts
       .filter(
         (fact) =>
-          fact.branchId === salon.branchId &&
-          fact.at >= window.from &&
-          fact.at < window.toExclusive &&
+          (queryScope === 'tenant' || fact.branchId === salon.branchId) &&
+          fact.at >= expectedWindow.from &&
+          fact.at < expectedWindow.toExclusive &&
           (rating === null || fact.rating === rating),
       )
       .sort((a, b) => b.at.localeCompare(a.at));
@@ -819,14 +955,14 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       actorHash: digest(actor.id),
       inputHash: execution.inputHash,
       resultHash: digest(result),
-      month: window.month,
-      timezone: window.timezone,
-      fromInclusive: window.from,
-      toExclusive: window.toExclusive,
+      month: expectedWindow.month,
+      timezone: expectedWindow.timezone,
+      fromInclusive: expectedWindow.from,
+      toExclusive: expectedWindow.toExclusive,
       rating,
       count: reviews.length,
       hasMore: scope.has_more,
-      branchHash: digest(salon.branchId),
+      branchHash: queryScope === 'tenant' ? null : digest(salon.branchId),
       reviewRefs: expected.slice(0, 20).map((fact) => digest(fact.id)),
       reviewRefOrigin:
         'CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING',
@@ -839,6 +975,7 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     token: string,
     conversationId: string,
     firstReply: string,
+    exactAssistantTurnId?: string,
   ) {
     const before = { models: modelCalls, reads: registryReads.length };
     const result = await request(http.app.getHttpServer())
@@ -853,6 +990,8 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         const turn = object(value);
         return (
           turn.role === 'assistant' &&
+          (exactAssistantTurnId === undefined ||
+            turn.id === exactAssistantTurnId) &&
           typeof turn.text === 'string' &&
           turn.text.includes(firstReply)
         );
@@ -909,6 +1048,14 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         2,
         new Date(middle + 61 * 3600000).toISOString(),
       );
+      const tenantBoundaryInstants = [
+        Date.parse(tenantWindow.from) - 1,
+        Date.parse(tenantWindow.from),
+        Date.parse(tenantWindow.toExclusive) - 1,
+        Date.parse(tenantWindow.toExclusive),
+      ];
+      for (const at of tenantBoundaryInstants)
+        await ingest(a, token, 2, new Date(at).toISOString(), a.otherBranchId);
       report.fixtureSetup = {
         writer: 'EXISTING_POST_BUSINESS_CONTENT_REVIEWS_CANONICAL_OWNER',
         encryptedRawTextVerified: true,
@@ -918,6 +1065,9 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
           (n) => new Date(n).toISOString(),
         ),
         sourceRows: salons.reduce((n, salon) => n + salon.facts.length, 0),
+        supplementalTenantBoundaryInstants: tenantBoundaryInstants.map((at) =>
+          new Date(at).toISOString(),
+        ),
       };
       const mark = http.recorder.mark(),
         before = await business(),
@@ -991,6 +1141,145 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         exactMonthRetained: true,
         ratingOnlyFollowup: true,
       };
+
+      // Separate completion chains: the frozen original 81 turns are neither
+      // rewritten nor rescored. The exact original request remains pending;
+      // only a NEW explicit numeric answer completes the supported READ goal.
+      for (const original of FROZEN_REVIEW_REQUESTS) {
+        const actor = original.role === 'admin' ? a.administrator : a.owner;
+        const actorToken =
+          original.role === 'admin' ? await login(a, actor) : token;
+        const beforeInitialRead = registryReads.length;
+        const pending = await chat(
+          actorToken,
+          { text: original.text, period: 'last_month' },
+          randomUUID(),
+          original.role === 'owner' ? conversationId : undefined,
+        );
+        expect(pending.modelCalls).toBe(1);
+        const initial = await assertClarification(
+          a,
+          pending,
+          beforeInitialRead,
+          'tenant',
+        );
+        const utteranceSha256 = createHash('sha256')
+          .update(original.text)
+          .digest('hex');
+        supplementalCompletionReceipts.push({
+          originalCaseId: original.id,
+          utteranceSha256,
+          role: actor.role,
+          phase: 'initialPending',
+          goalCompleted: false,
+          registryReadsAdded: 0,
+          month: tenantWindow.month,
+          timezone: tenantWindow.timezone,
+          branchInjected: false,
+          pendingReceiptHash: digest(clarificationReceipts.at(-1)),
+        });
+        const completionRequestId = randomUUID();
+        const beforeCompletionRead = registryReads.length;
+        const completed = await chat(
+          actorToken,
+          RATING_FOLLOWUP,
+          completionRequestId,
+          initial.parent.conversationId,
+        );
+        assertVerified(completed);
+        expect(registryReads.length - beforeCompletionRead).toBe(1);
+        const completedRunId = await evidence(
+          a,
+          completed.body,
+          2,
+          actor,
+          'tenant',
+        );
+        const resultEvidence = sourceReceipts.at(-1);
+        assert.ok(resultEvidence);
+        expect(resultEvidence.branchHash).toBeNull();
+        expect(resultEvidence.count).toBeGreaterThan(0);
+        const persisted = await persistedCompletion(a, completed.body);
+        expect(persisted.parent.principalProofHash).toBe(
+          initial.parent.principalProofHash,
+        );
+        const completedPlan = object(
+          object(persisted.completion.semanticContext).plan,
+        );
+        assert.ok(Array.isArray(completedPlan.tasks));
+        expect(completedPlan.tasks).toHaveLength(1);
+        const completedTask = object(completedPlan.tasks[0]);
+        expect(completedTask.intent).toBe('reviews.list_recent');
+        expect(completedTask.requires_clarification).toBe(false);
+        expect(object(completedTask.entities).period).toBe(tenantWindow.month);
+        expect(object(completedTask.entities).rating).toBe(2);
+        expect(Object.hasOwn(object(completedTask.entities), 'branch')).toBe(
+          false,
+        );
+        expect(String(completed.body.reply)).toContain(
+          `Отзывы за ${tenantWindow.month} по бизнесу; часовой пояс ${TENANT_TIMEZONE}.`,
+        );
+        expect(String(completed.body.reply)).toContain('Фильтр: ровно 2 из 5.');
+        expect(String(completed.body.reply)).toContain(
+          `Получено отзывов: ${String(resultEvidence.count)}.`,
+        );
+        expect(String(completed.body.reply)).not.toMatch(
+          /Уточните|какую оценку|показать все оценки или/i,
+        );
+        const chain: CompletedChain = {
+          originalCaseId: original.id,
+          utteranceSha256,
+          actorRole: original.role,
+          actorId: actor.id,
+          conversationId: initial.parent.conversationId,
+          initialTurnId: initial.parent.id,
+          initialAssistantTurnId: initial.stored.id,
+          initialReply: initial.completion.text,
+          initialContextHash: digest(initial.completion.semanticContext),
+          requestId: completionRequestId,
+          followupTurnId: persisted.parent.id,
+          completedAssistantTurnId: persisted.stored.id,
+          reply: persisted.completion.text,
+          runId: completedRunId,
+          evidenceHash: digest(resultEvidence),
+        };
+        supplementalChains.push(chain);
+        await history(
+          actorToken,
+          chain.conversationId,
+          chain.initialReply,
+          chain.initialAssistantTurnId,
+        );
+        await history(
+          actorToken,
+          chain.conversationId,
+          chain.reply,
+          chain.completedAssistantTurnId,
+        );
+        supplementalCompletionReceipts.push({
+          originalCaseId: original.id,
+          utteranceSha256,
+          role: actor.role,
+          phase: 'completedChain',
+          goalCompleted: true,
+          registryReadsAdded: 1,
+          modelCalls: completed.modelCalls,
+          sourceReceiptHash: chain.evidenceHash,
+          runHash: digest(completedRunId),
+          originalTurnHash: digest(chain.initialTurnId),
+          followupTurnHash: digest(chain.followupTurnId),
+          followupUtteranceSha256: createHash('sha256')
+            .update(RATING_FOLLOWUP.text)
+            .digest('hex'),
+          sameTenantAndActor: true,
+          originalScopeRetained: {
+            month: tenantWindow.month,
+            timezone: TENANT_TIMEZONE,
+            branch: null,
+          },
+          frozen81Unchanged: true,
+        });
+      }
 
       const beforeIncomplete = registryReads.length;
       for (const offset of [1, 2]) {
@@ -1174,6 +1463,51 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
       expect(
         storedTurns.every((turn) => !turn.textContent?.includes(firstReply)),
       ).toBe(true);
+      const adminOriginal = FROZEN_REVIEW_REQUESTS[0];
+      const adminChain = supplementalChains.find(
+        (chain) => chain.originalCaseId === adminOriginal.id,
+      );
+      assert.ok(adminChain);
+      const beforePendingRestartReads = registryReads.length;
+      const beforePendingRestartGraph = await graph(a.tenant.id);
+      const pendingRestart = await chat(
+        await login(a, a.administrator),
+        { text: adminOriginal.text, period: 'last_month' },
+        randomUUID(),
+        adminChain.conversationId,
+      );
+      expect(pendingRestart.modelCalls).toBe(1);
+      const pendingStored = await assertClarification(
+        a,
+        pendingRestart,
+        beforePendingRestartReads,
+        'tenant',
+      );
+      expect(await graph(a.tenant.id)).toBe(beforePendingRestartGraph);
+      const pendingRestartVariant: PendingRestartVariant = {
+        originalCaseId: adminOriginal.id,
+        actorId: a.administrator.id,
+        conversationId: pendingStored.parent.conversationId,
+        initialTurnId: pendingStored.parent.id,
+        initialAssistantTurnId: pendingStored.stored.id,
+        initialReply: pendingStored.completion.text,
+        initialContextHash: digest(pendingStored.completion.semanticContext),
+        month: tenantWindow.month,
+      };
+      supplementalCompletionReceipts.push({
+        originalCaseId: adminOriginal.id,
+        variant: 'PENDING_BEFORE_RESTART_NUMERIC_FOLLOWUP_AFTER_RESTART',
+        phase: 'pendingBeforeRestart',
+        goalCompleted: false,
+        utteranceSha256: createHash('sha256')
+          .update(adminOriginal.text)
+          .digest('hex'),
+        pendingContextHash: pendingRestartVariant.initialContextHash,
+        month: tenantWindow.month,
+        registryReadsAdded: 0,
+        c9GraphUnchanged: true,
+        uniqueOriginalCaseAdded: false,
+      });
       noWrites(mark);
       expect(await business()).toBe(before);
       saved = {
@@ -1184,6 +1518,9 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         pid: process.pid,
         pgStarted: await pgStarted(),
         window,
+        tenantWindow,
+        supplementalChains,
+        pendingRestartVariant,
         salons,
         requestId,
         conversationId,
@@ -1234,6 +1571,220 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
         sameSourceReceipt: true,
         registryReadsAdded: 0,
       };
+      for (const chain of supplementalChains) {
+        const original = FROZEN_REVIEW_REQUESTS.find(
+          (row) => row.id === chain.originalCaseId,
+        );
+        assert.ok(original);
+        expect(chain.utteranceSha256).toBe(
+          createHash('sha256').update(original.text).digest('hex'),
+        );
+        const actor = chain.actorRole === 'admin' ? a.administrator : a.owner;
+        expect(chain.actorRole).toBe(original.role);
+        expect(chain.actorId).toBe(actor.id);
+        const actorToken =
+          chain.actorRole === 'admin' ? await login(a, actor) : token;
+        const beforeChainReads = registryReads.length;
+        await history(
+          actorToken,
+          chain.conversationId,
+          chain.initialReply,
+          chain.initialAssistantTurnId,
+        );
+        await history(
+          actorToken,
+          chain.conversationId,
+          chain.reply,
+          chain.completedAssistantTurnId,
+        );
+        for (const storedAnswer of [
+          {
+            id: chain.initialAssistantTurnId,
+            parentId: chain.initialTurnId,
+            text: chain.initialReply,
+            contextHash: chain.initialContextHash,
+          },
+          {
+            id: chain.completedAssistantTurnId,
+            parentId: chain.followupTurnId,
+            text: chain.reply,
+            contextHash: null,
+          },
+        ]) {
+          const parent = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+            where: {
+              id: storedAnswer.parentId,
+              tenantId: a.tenant.id,
+              conversationId: chain.conversationId,
+              role: 'user',
+              erasedAt: null,
+              retentionUntil: { gt: new Date() },
+            },
+          });
+          const stored = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+            where: {
+              id: storedAnswer.id,
+              tenantId: a.tenant.id,
+              conversationId: chain.conversationId,
+              principalProofHash: parent.principalProofHash,
+              role: 'assistant',
+              erasedAt: null,
+              retentionUntil: { gt: new Date() },
+            },
+          });
+          assert.ok(stored.textContent);
+          const completion = decodeChatCompletion(
+            db.encryption,
+            stored.textContent,
+          );
+          expect(completion.parentId).toBe(parent.id);
+          expect(completion.text).toBe(storedAnswer.text);
+          expect(stored.id).toBe(
+            chatReplyId(
+              a.tenant.id,
+              `${parent.id}:${completion.completionHash}`,
+            ),
+          );
+          if (storedAnswer.contextHash !== null)
+            expect(digest(completion.semanticContext)).toBe(
+              storedAnswer.contextHash,
+            );
+          assertPrivateAbsent(completion);
+        }
+        const replayedChain = await chat(
+          actorToken,
+          RATING_FOLLOWUP,
+          chain.requestId,
+          chain.conversationId,
+        );
+        assertVerified(replayedChain);
+        expect(replayedChain.body.reply).toContain(
+          'Сохранённый результат проверки.',
+        );
+        expect(await evidence(a, replayedChain.body, 2, actor, 'tenant')).toBe(
+          chain.runId,
+        );
+        expect(digest(sourceReceipts.at(-1))).toBe(chain.evidenceHash);
+        expect(registryReads).toHaveLength(beforeChainReads);
+        expect(await graph(a.tenant.id)).toBe(saved.graph);
+        supplementalCompletionReceipts.push({
+          originalCaseId: chain.originalCaseId,
+          utteranceSha256: chain.utteranceSha256,
+          role: actor.role,
+          phase: 'restartHistoryAndReplay',
+          goalCompleted: true,
+          initialPendingAndCompletedHistoryRestored: true,
+          initialContextHash: chain.initialContextHash,
+          sourceReceiptHash: chain.evidenceHash,
+          sameRun: true,
+          registryReadsAdded: 0,
+          preservedOriginalRevision: true,
+          frozen81Unchanged: true,
+        });
+      }
+      const pendingVariant = saved.pendingRestartVariant;
+      expect(pendingVariant.originalCaseId).toBe(FROZEN_REVIEW_REQUESTS[0].id);
+      expect(pendingVariant.actorId).toBe(a.administrator.id);
+      expect(pendingVariant.month).toBe(tenantWindow.month);
+      const adminToken = await login(a, a.administrator);
+      const beforeContinuedReads = registryReads.length;
+      await history(
+        adminToken,
+        pendingVariant.conversationId,
+        pendingVariant.initialReply,
+        pendingVariant.initialAssistantTurnId,
+      );
+      const restoredPending = await persistedCompletion(a, {
+        user_turn: {
+          turnId: pendingVariant.initialTurnId,
+          conversationId: pendingVariant.conversationId,
+        },
+        reply: pendingVariant.initialReply,
+      });
+      expect(restoredPending.stored.id).toBe(
+        pendingVariant.initialAssistantTurnId,
+      );
+      expect(digest(restoredPending.completion.semanticContext)).toBe(
+        pendingVariant.initialContextHash,
+      );
+      expect(await graph(a.tenant.id)).toBe(saved.graph);
+      expect(registryReads).toHaveLength(beforeContinuedReads);
+      // This is a NEW explicit user turn, not replay of a pre-restart completion.
+      const continuedRequestId = randomUUID();
+      const continued = await chat(
+        adminToken,
+        RATING_FOLLOWUP,
+        continuedRequestId,
+        pendingVariant.conversationId,
+      );
+      assertVerified(continued);
+      expect(registryReads.length - beforeContinuedReads).toBe(1);
+      const continuedRunId = await evidence(
+        a,
+        continued.body,
+        2,
+        a.administrator,
+        'tenant',
+      );
+      const continuedReceipt = sourceReceipts.at(-1);
+      assert.ok(continuedReceipt);
+      const continuedEvidenceHash = digest(continuedReceipt);
+      expect(continuedReceipt.count).toBeGreaterThan(0);
+      expect(continuedReceipt.branchHash).toBeNull();
+      expect(registryReads.at(-1)?.resultHash).toBe(
+        continuedReceipt.resultHash,
+      );
+      expect(registryReads.at(-1)?.tenantHash).toBe(digest(a.tenant.id));
+      const continuedStored = await persistedCompletion(a, continued.body);
+      expect(continuedStored.parent.id).not.toBe(pendingVariant.initialTurnId);
+      expect(continuedStored.parent.principalProofHash).toBe(
+        restoredPending.parent.principalProofHash,
+      );
+      expect(String(continued.body.reply)).toContain(
+        `Отзывы за ${pendingVariant.month} по бизнесу; часовой пояс ${TENANT_TIMEZONE}.`,
+      );
+      expect(String(continued.body.reply)).toContain('Фильтр: ровно 2 из 5.');
+      expect(String(continued.body.reply)).toContain(
+        `Получено отзывов: ${String(continuedReceipt.count)}.`,
+      );
+      const continuedGraph = await graph(a.tenant.id);
+      expect(continuedGraph).not.toBe(saved.graph);
+      const replayContinued = await chat(
+        adminToken,
+        RATING_FOLLOWUP,
+        continuedRequestId,
+        pendingVariant.conversationId,
+      );
+      assertVerified(replayContinued);
+      expect(replayContinued.body.reply).toContain(
+        'Сохранённый результат проверки.',
+      );
+      expect(
+        await evidence(a, replayContinued.body, 2, a.administrator, 'tenant'),
+      ).toBe(continuedRunId);
+      expect(digest(sourceReceipts.at(-1))).toBe(continuedEvidenceHash);
+      expect(registryReads.length - beforeContinuedReads).toBe(1);
+      expect(await graph(a.tenant.id)).toBe(continuedGraph);
+      supplementalCompletionReceipts.push({
+        originalCaseId: pendingVariant.originalCaseId,
+        variant: 'PENDING_BEFORE_RESTART_NUMERIC_FOLLOWUP_AFTER_RESTART',
+        phase: 'completedAfterRestartAndReplayed',
+        goalCompleted: true,
+        pendingContextHash: pendingVariant.initialContextHash,
+        newUserTurnHash: digest(continuedStored.parent.id),
+        oldMonth: pendingVariant.month,
+        timezone: tenantWindow.timezone,
+        branch: null,
+        sourceReceiptHash: continuedEvidenceHash,
+        runHash: digest(continuedRunId),
+        registryReadsForCompletion: 1,
+        registryReadsForReplay: 0,
+        c9GraphBefore: saved.graph,
+        c9GraphAfterLegitimateRead: continuedGraph,
+        c9GraphAfterReplayUnchanged: true,
+        uniqueOriginalCaseAdded: false,
+        frozen81Unchanged: true,
+      });
       const beforeDrift = registryReads.length;
       afterRead = async () => {
         await db.prisma.branch.update({

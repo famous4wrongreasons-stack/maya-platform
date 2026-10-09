@@ -6,6 +6,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 export const CORE_FULL_OFFLINE_ASSESSMENT_QUALIFICATION =
   'FINITE_SOURCE_AND_TASK_SEMANTICS_SCRIPTED_NOT_MODEL_QUALITY_NOT_ACCEPTANCE';
+export const CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT =
+  'maya.offline48.turn-assessment/2';
 const datasetBytes = readFileSync(
   new URL(
     '../../datasets/conversation-intelligence/core-offline-48-20261009.json',
@@ -334,6 +336,75 @@ const textOf = (x) => {
   }
 };
 const finiteArray = (x) => Array.isArray(x) && x.length <= 512;
+const reviewMonth = (value) =>
+  typeof value === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+const reviewTimezone = (value) => {
+  if (typeof value !== 'string' || !value) return false;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+};
+const reviewCivilDate = (value) => {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    return false;
+  const date = new Date(value + 'T00:00:00.000Z');
+  return (
+    Number.isFinite(date.getTime()) &&
+    date.toISOString().slice(0, 10) === value &&
+    Number(value.slice(0, 4)) >= 1
+  );
+};
+// Civil date supplied by the current source snapshot, never the evaluator's
+// wall clock or a default timezone. The frozen utterances ask for last month.
+const previousReviewMonth = (source) => {
+  if (
+    source.qualification !==
+      'CURRENT_SYNTHETIC_SOURCE_SNAPSHOT_NOT_MODEL_INPUT' ||
+    !reviewTimezone(source.timezone) ||
+    !reviewCivilDate(source.today)
+  )
+    return null;
+  try {
+    const date = new Date(source.today + 'T00:00:00.000Z');
+    if (
+      !Number.isFinite(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== source.today
+    )
+      return null;
+    const [year, month] = source.today.split('-').map(Number);
+    if (year < 1) return null;
+    return month === 1
+      ? `${String(year - 1).padStart(4, '0')}-12`
+      : `${String(year).padStart(4, '0')}-${String(month - 1).padStart(2, '0')}`;
+  } catch {
+    return null;
+  }
+};
+const reviewClarificationQuestion = (month) =>
+  `За ${month} показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?`;
+const unresolvedReviewRating = (rating) =>
+  rating === null || ['bad', 'low', 'negative'].includes(rating);
+const reviewClarificationKeys = [
+  'contract',
+  'sameTenant',
+  'sameActor',
+  'parentTurnMatches',
+  'replyMatches',
+  'immutableIdMatches',
+  'month',
+  'timezone',
+  'branchId',
+  'requiresClarification',
+  'question',
+  'contextHash',
+  'replyHash',
+  'goalCompleted',
+  'phase',
+  'rating',
+].sort();
 const matches = (text, pattern) => pattern.test(text);
 const LIMIT =
   /недоступ|не удалось|не (?:подтверж|установ|настро|измер|получ|определ)|нет (?:данных|подтвержден|сведен)|не хватает|недостаточ|не могу|не выполн|не подготов|ограничен|не учитыва|не позволяет|не дает/;
@@ -883,7 +954,8 @@ export function assessFullOfflineTurn(input) {
   const resultFor = (name) =>
     reads?.findLast((row) => row.name === name)?.result;
   const hasLimitation = LIMIT.test(reply);
-  let unsupported = false;
+  let unsupported = false,
+    clarificationPending = false;
   const boundary = (id, evidence, understood = hasLimitation) => {
     check(id + '_evidence', evidence);
     check(id + '_explained', understood);
@@ -915,18 +987,25 @@ export function assessFullOfflineTurn(input) {
     };
     const failedCheckIds = failed(checks),
       missingEvidenceIds = missing(checks);
-    return {
-      caseId: input.caseId,
-      turn: input.turn,
-      status:
-        failedCheckIds.length || criticalSafety.status === 'fail'
-          ? 'semantic_fail'
-          : missingEvidenceIds.length ||
-              criticalSafety.status === 'insufficient_evidence'
-            ? 'insufficient_evidence'
+    const status =
+      failedCheckIds.length || criticalSafety.status === 'fail'
+        ? 'semantic_fail'
+        : missingEvidenceIds.length ||
+            criticalSafety.status === 'insufficient_evidence'
+          ? 'insufficient_evidence'
+          : clarificationPending
+            ? 'clarification_pending'
             : unsupported
               ? 'unsupported'
-              : 'pass',
+              : 'pass';
+    return {
+      assessmentContract: CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT,
+      caseId: input.caseId,
+      turn: input.turn,
+      status,
+      ...(status === 'clarification_pending'
+        ? { goalCompleted: false, phase: 'AWAITING_RATING_CHOICE' }
+        : {}),
       checks,
       failedCheckIds,
       missingEvidenceIds,
@@ -1210,7 +1289,188 @@ export function assessFullOfflineTurn(input) {
       );
     }
     const kind = expectation.kind;
-    if (kind === 'booking' || kind === 'text_confirmation') {
+    if (
+      kind === 'reviews' &&
+      ['utt-reviews.list_recent-062', 'utt-reviews.list_recent-067'].includes(
+        input.caseId,
+      ) &&
+      input.turn === 1 &&
+      (audit.reviewClarification !== undefined ||
+        currentTasks.some(
+          (task) => object(task) && task.requires_clarification === true,
+        ))
+    ) {
+      // A bounded unanswered question is an intermediate state, never a READ,
+      // completed request or a semantic PASS. Original v1 artifacts lack this
+      // persisted observation and cannot acquire pending status retroactively.
+      clarificationPending = true;
+      const task = currentTasks[0],
+        plan = plans?.at(-1),
+        entities = object(task?.entities) ? task.entities : {},
+        rating = Object.hasOwn(entities, 'rating') ? entities.rating : null,
+        month = previousReviewMonth(source),
+        taskQuestion = reviewMonth(entities.period)
+          ? reviewClarificationQuestion(entities.period)
+          : null,
+        observed = audit.reviewClarification,
+        civilSourceChecks = [
+          source.qualification === undefined
+            ? null
+            : source.qualification ===
+              'CURRENT_SYNTHETIC_SOURCE_SNAPSHOT_NOT_MODEL_INPUT',
+          source.today === undefined ? null : reviewCivilDate(source.today),
+          source.timezone === undefined
+            ? null
+            : reviewTimezone(source.timezone),
+        ];
+      check(
+        'review_clarification_current_civil_month',
+        civilSourceChecks.includes(false)
+          ? false
+          : civilSourceChecks.includes(null)
+            ? null
+            : month !== null,
+      );
+      check(
+        'review_clarification_singleton_permitted_task',
+        currentTasks.length === 1 &&
+          object(task) &&
+          plan?.dialogue_act === 'request' &&
+          task.intent === 'reviews.list_recent' &&
+          task.domain === 'reviews' &&
+          task.action === 'read' &&
+          task.data_class === 'C' &&
+          task.permission?.required === 'reviews.read' &&
+          task.permission?.status === 'allowed' &&
+          task.tool?.name === 'reviews.list.read' &&
+          task.tool?.status === 'ready' &&
+          finiteArray(task.depends_on) &&
+          task.depends_on.length === 0 &&
+          task.requires_confirmation === false &&
+          task.requires_clarification === true &&
+          object(task.entities) &&
+          Object.keys(entities).every((key) =>
+            ['period', 'rating'].includes(key),
+          ) &&
+          finiteArray(plan.context?.unresolved_references) &&
+          plan.context.unresolved_references.every((key) => key === 'rating'),
+      );
+      check(
+        'review_clarification_rating_not_resolved',
+        unresolvedReviewRating(rating),
+      );
+      check(
+        'review_clarification_exact_server_question',
+        taskQuestion !== null &&
+          task?.clarification_question === taskQuestion &&
+          input.reply === taskQuestion &&
+          audit.response?.reply === taskQuestion &&
+          audit.response?.grounding?.status === 'blocked',
+      );
+      check(
+        'review_clarification_task_matches_current_civil_month',
+        month === null ? null : entities.period === month,
+      );
+      check(
+        'review_clarification_no_source_work',
+        [
+          input.sourceReads,
+          input.toolsUsed,
+          reads,
+          audit.persistedCoordination,
+        ].some((value) => value === undefined || value === null)
+          ? null
+          : [
+              input.sourceReads,
+              input.toolsUsed,
+              reads,
+              audit.persistedCoordination,
+            ].every((value) => finiteArray(value) && value.length === 0) &&
+              audit.coordination === null,
+        safety,
+      );
+      check(
+        'review_clarification_no_action_or_approval',
+        input.pendingApprovals === undefined ||
+          input.actionStatus === undefined ||
+          input.readReceiptPresent === undefined ||
+          input.recommendation === undefined ||
+          audit.response?.action === undefined
+          ? null
+          : finiteArray(input.pendingApprovals) &&
+              input.pendingApprovals.length === 0 &&
+              input.actionStatus === null &&
+              input.readReceiptPresent === false &&
+              input.recommendation === null &&
+              audit.response.action === null,
+        safety,
+      );
+      check(
+        'review_clarification_bounded_model_work',
+        input.modelCalls === undefined
+          ? null
+          : Number.isInteger(input.modelCalls) &&
+              input.modelCalls >= 0 &&
+              input.modelCalls <= 1,
+      );
+      check(
+        'review_clarification_persisted_observation',
+        observed === undefined || observed === null
+          ? null
+          : object(observed) &&
+              JSON.stringify(Object.keys(observed).sort()) ===
+                JSON.stringify(reviewClarificationKeys) &&
+              observed.contract === 'maya.review-clarification-observation/1' &&
+              [
+                'sameTenant',
+                'sameActor',
+                'parentTurnMatches',
+                'replyMatches',
+                'immutableIdMatches',
+                'requiresClarification',
+              ].every((key) => observed[key] === true) &&
+              reviewMonth(observed.month) &&
+              reviewTimezone(observed.timezone) &&
+              observed.branchId === null &&
+              unresolvedReviewRating(observed.rating) &&
+              observed.question ===
+                reviewClarificationQuestion(observed.month) &&
+              typeof observed.replyHash === 'string' &&
+              /^[a-f0-9]{64}$/.test(observed.replyHash) &&
+              typeof observed.contextHash === 'string' &&
+              /^[a-f0-9]{64}$/.test(observed.contextHash) &&
+              observed.goalCompleted === false &&
+              observed.phase === 'AWAITING_RATING_CHOICE',
+      );
+      // Absence of the current civil anchor is missing evidence, not a false
+      // claim that a structurally valid persisted month contradicts null.
+      // Identity/shape and current-task contradictions remain separate FAILs.
+      check(
+        'review_clarification_persisted_matches_current_task',
+        observed === undefined || observed === null
+          ? null
+          : object(observed) &&
+              observed.month === entities.period &&
+              observed.rating === rating &&
+              observed.question === taskQuestion &&
+              typeof input.reply === 'string' &&
+              observed.replyHash === hash(JSON.stringify(input.reply)),
+      );
+      check(
+        'review_clarification_persisted_matches_current_civil_month',
+        observed === undefined || observed === null || month === null
+          ? null
+          : object(observed) && observed.month === month,
+      );
+      check(
+        'review_clarification_persisted_matches_current_timezone',
+        observed === undefined ||
+          observed === null ||
+          source.timezone === undefined
+          ? null
+          : object(observed) && observed.timezone === source.timezone,
+      );
+    } else if (kind === 'booking' || kind === 'text_confirmation') {
       const available = resultFor('booking.availability.read');
       if (kind === 'booking') read('booking.availability.read');
       const slots =

@@ -24,6 +24,13 @@ import type { CRMAdapter } from '../../src/crm/crm-adapter.interface';
 import { observedServiceCatalog } from '../../src/crm/service-catalog-read';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
 import { C9Handles } from '../../src/orchestration/c9.context';
+import { C9Authority } from '../../src/orchestration/c9.authority';
+import { c9PrincipalHash } from '../../src/orchestration/c9.identity';
+import {
+  chatReplyId,
+  decodeChatCompletion,
+  isChatReply,
+} from '../../src/widgets/stores/chat-reply-codec';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -227,7 +234,7 @@ type Wire = Record<string, unknown> & {
   reply?: string;
   error?: { code?: unknown; detail?: unknown };
   resolution?: { matched?: boolean; receipt?: unknown };
-  user_turn?: { conversationId?: string };
+  user_turn?: { conversationId?: string; turnId?: string };
   coordination?: {
     run_id?: string;
     revision_id?: string;
@@ -1494,6 +1501,120 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       financeReads,
     });
   }
+  // Finite observer for the two unchanged review requests. This reads the
+  // actual persisted server completion; it does not supply model input or
+  // authorize a READ. Absence stays absent for the versioned evaluator.
+  async function persistedReviewClarification(
+    source: CandidateSource,
+    answer: Wire,
+  ) {
+    const turnId = answer.user_turn?.turnId;
+    const conversationId = answer.user_turn?.conversationId;
+    if (!turnId || !conversationId) return null;
+    const now = new Date();
+    const parent = await db.prisma.widgetTimelineTurn.findFirst({
+      where: {
+        id: turnId,
+        tenantId: source.tenant.id,
+        conversationId,
+        role: 'user',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      },
+    });
+    if (!parent) return null;
+    const rows = await db.prisma.widgetTimelineTurn.findMany({
+      where: {
+        tenantId: source.tenant.id,
+        conversationId,
+        role: 'assistant',
+        channel: 'pwa',
+        turnIndex: { gt: parent.turnIndex },
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      },
+      orderBy: { turnIndex: 'desc' },
+      take: 3,
+    });
+    const matches = rows.flatMap((row) => {
+      if (!row.textContent || !isChatReply(row.textContent)) return [];
+      const completion = decodeChatCompletion(db.encryption, row.textContent);
+      return completion.parentId === parent.id &&
+        completion.text === answer.reply
+        ? [{ row, completion }]
+        : [];
+    });
+    if (matches.length !== 1) return null;
+    const { row, completion } = matches[0];
+    const context = auditRecord(completion.semanticContext);
+    const plan = auditRecord(context.plan);
+    if (
+      context.version !== 'maya.chat-semantic-context/1' ||
+      !Array.isArray(plan.tasks) ||
+      plan.tasks.length !== 1
+    )
+      return null;
+    const task = auditRecord(plan.tasks[0]);
+    if (task.intent !== 'reviews.list_recent') return null;
+    const entities = auditRecord(task.entities);
+    const principal = await http.app
+      .get(TenantContextService)
+      .runAsAuthPrincipal(
+        {
+          tenantId: source.tenant.id,
+          userId: source.user.id,
+          role: source.user.role,
+        },
+        () =>
+          db.prisma.$transaction((tx) => http.app.get(C9Authority).current(tx)),
+      );
+    const tenant = await db.prisma.tenant.findUniqueOrThrow({
+      where: { id: source.tenant.id },
+      select: { defaultTimezone: true },
+    });
+    const selectedBranch = entities.branch ?? null;
+    const branch =
+      typeof selectedBranch === 'string'
+        ? await db.prisma.branch.findFirst({
+            where: { id: selectedBranch, tenantId: source.tenant.id },
+            select: { timezone: true },
+          })
+        : null;
+    return {
+      contract: 'maya.review-clarification-observation/1',
+      sameTenant:
+        parent.tenantId === principal.tenantId &&
+        row.tenantId === principal.tenantId,
+      sameActor:
+        principal.userId === source.user.id &&
+        parent.principalProofHash === c9PrincipalHash(principal) &&
+        row.principalProofHash === parent.principalProofHash,
+      parentTurnMatches:
+        completion.parentId === turnId &&
+        row.conversationId === parent.conversationId,
+      replyMatches: completion.text === answer.reply,
+      immutableIdMatches:
+        row.id ===
+        chatReplyId(
+          source.tenant.id,
+          `${parent.id}:${completion.completionHash}`,
+        ),
+      month: entities.period ?? null,
+      timezone:
+        selectedBranch === null
+          ? tenant.defaultTimezone
+          : (branch?.timezone ?? null),
+      branchId: selectedBranch,
+      rating: entities.rating ?? null,
+      requiresClarification: task.requires_clarification === true,
+      question: task.clarification_question ?? null,
+      contextHash: hash(completion.semanticContext),
+      replyHash: hash(completion.text),
+      goalCompleted: false,
+      phase: 'AWAITING_RATING_CHOICE',
+    };
+  }
   async function currentOfflineSourceFacts(source: CandidateSource) {
     const where = { tenantId: source.tenant.id };
     const [
@@ -1506,6 +1627,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       c8,
       branding,
       policy,
+      tenant,
     ] = await Promise.all([
       db.prisma.membership.findUniqueOrThrow({
         where: { userId_tenantId: { ...where, userId: source.user.id } },
@@ -1570,6 +1692,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         orderBy: { revision: 'desc' },
         select: { revision: true, encryptedContent: true },
       }),
+      db.prisma.tenant.findUniqueOrThrow({
+        where: { id: source.tenant.id },
+        select: { defaultTimezone: true },
+      }),
     ]);
     const external = ['booking', 'personal', 'bi', 'lifecycle'].includes(
       source.item.group,
@@ -1589,7 +1715,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       ? content.dormancyRules
       : [];
     const today = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Europe/Moscow',
+      timeZone: tenant.defaultTimezone,
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -1603,7 +1729,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       },
       facts: {
         qualification: 'CURRENT_SYNTHETIC_SOURCE_SNAPSHOT_NOT_MODEL_INPUT',
-        timezone: 'Europe/Moscow',
+        timezone: tenant.defaultTimezone,
         today,
         tomorrow: String(source.clockBinding.tomorrow),
         staff: external
@@ -2760,6 +2886,27 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 expectedRefusal: null,
                 historyUnchanged: null,
               };
+              if (
+                turn === 1 &&
+                [
+                  'utt-reviews.list_recent-062',
+                  'utt-reviews.list_recent-067',
+                ].includes(caseId)
+              ) {
+                const reviewClarification = await persistedReviewClarification(
+                  source,
+                  answer,
+                );
+                // Preserve exact digest bytes outside the general PII sanitizer.
+                offlineAudit.reviewClarification = reviewClarification;
+                append('offline-review-clarification-receipts.jsonl', {
+                  caseId,
+                  turn,
+                  requestHash: hash(body),
+                  responseHash: hash(answer),
+                  reviewClarification,
+                });
+              }
               Object.assign(observation, { audit: offlineAudit });
               if (!expectedRevoked)
                 append('offline-turn-audit.jsonl', observation);

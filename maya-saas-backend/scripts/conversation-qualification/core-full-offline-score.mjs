@@ -8,6 +8,7 @@ import {
   CORE_FULL_OFFLINE_EXPECTATIONS,
   CORE_FULL_OFFLINE_EXPECTATIONS_SHA256,
   CORE_FULL_OFFLINE_ASSESSMENT_QUALIFICATION,
+  CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT,
 } from './core-full-offline-assessment.mjs';
 
 const hash = (value) =>
@@ -20,11 +21,38 @@ const statuses = [
   'semantic_fail',
   'unsupported',
   'insufficient_evidence',
+  'clarification_pending',
 ];
+export const CORE_FULL_OFFLINE_SCORE_CONTRACT =
+  'maya.offline48.contract-score/2';
+
+/** Pending questions remain unclosed. PASS is the existing finite diagnostic
+ * label, not a declaration that every business goal or MAYA is complete. */
+export function coreFullOfflineUnclosedCounts(counts) {
+  requireThat(
+    counts &&
+      typeof counts === 'object' &&
+      !Array.isArray(counts) &&
+      Object.keys(counts).sort().join(',') === [...statuses].sort().join(',') &&
+      statuses.every(
+        (status) => Number.isInteger(counts?.[status]) && counts[status] >= 0,
+      ) &&
+      statuses.reduce((sum, status) => sum + counts[status], 0) === 81,
+  );
+  const remainingNonPendingTurns =
+    counts.semantic_fail + counts.unsupported + counts.insufficient_evidence;
+  return {
+    remainingNonPendingTurns,
+    pendingClarificationTurns: counts.clarification_pending,
+    unclosedTurns: remainingNonPendingTurns + counts.clarification_pending,
+  };
+}
 export function incompleteCoreFullOfflineScore(scored) {
   requireThat(
-    scored?.contract === 'maya.offline48.contract-score/1' &&
-      scored.scoredTurns === 81,
+    [
+      'maya.offline48.contract-score/1',
+      CORE_FULL_OFFLINE_SCORE_CONTRACT,
+    ].includes(scored?.contract) && scored.scoredTurns === 81,
   );
   return {
     ...scored,
@@ -33,7 +61,24 @@ export function incompleteCoreFullOfflineScore(scored) {
     exitCode: 1,
   };
 }
-export function scoreCoreFullOfflineReport(report, binding) {
+export function scoreCoreFullOfflineReport(report, binding, options = {}) {
+  // Reassessment is a new artifact over the original raw report. It must be
+  // explicitly labelled and retain the prior score hash; never overwrite v1.
+  const reassessment =
+    options?.assessmentMode === 'ARCHIVED_REPORT_REASSESSMENT';
+  requireThat(
+    options &&
+      typeof options === 'object' &&
+      !Array.isArray(options) &&
+      (reassessment
+        ? Object.keys(options).sort().join(',') ===
+            'assessmentMode,evaluatorSourceHead,originalScoreSha256' &&
+          typeof options.evaluatorSourceHead === 'string' &&
+          /^[a-f0-9]{40}$/.test(options.evaluatorSourceHead) &&
+          typeof options.originalScoreSha256 === 'string' &&
+          /^[a-f0-9]{64}$/.test(options.originalScoreSha256)
+        : Object.keys(options).length === 0),
+  );
   const profile = coreConversationProfile(CORE_OFFLINE_PROFILE);
   requireThat(
     report?.profile === profile.id &&
@@ -89,10 +134,17 @@ export function scoreCoreFullOfflineReport(report, binding) {
       brokerCalls: row?.brokerCalls,
       modelOutputResponses: row?.modelOutputResponses,
       sourceReads: row?.sourceReads,
+      toolsUsed: row?.toolsUsed,
+      actionStatus: row?.actionStatus,
+      pendingApprovals: row?.pendingApprovals,
+      readReceiptPresent: row?.readReceiptPresent,
+      recommendation: row?.recommendation,
     };
     const assessment = assessFullOfflineTurn(input);
     requireThat(
       statuses.includes(assessment.status) &&
+        assessment.assessmentContract ===
+          CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT &&
         assessment.caseId === caseId &&
         assessment.turn === turn &&
         assessment.expectationSha256 ===
@@ -137,13 +189,25 @@ export function scoreCoreFullOfflineReport(report, binding) {
   const semanticStatus =
     critical.failedTurns || counts.semantic_fail
       ? 'fail'
-      : counts.insufficient_evidence || critical.missingEvidenceTurns
+      : counts.insufficient_evidence ||
+          counts.clarification_pending ||
+          critical.missingEvidenceTurns
         ? 'incomplete'
         : counts.unsupported
           ? 'limited'
           : 'pass';
   return {
-    contract: 'maya.offline48.contract-score/1',
+    contract: CORE_FULL_OFFLINE_SCORE_CONTRACT,
+    assessmentContract: CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT,
+    assessmentMode: reassessment
+      ? 'ARCHIVED_REPORT_REASSESSMENT'
+      : 'ACTUAL_HTTP_REPORT_ASSESSMENT',
+    ...(reassessment
+      ? {
+          originalScoreSha256: options.originalScoreSha256,
+          evaluatorSourceHead: options.evaluatorSourceHead,
+        }
+      : {}),
     qualification: CORE_FULL_OFFLINE_ASSESSMENT_QUALIFICATION,
     sourceHead: binding.candidateCommit,
     manifestSha256: binding.manifestSha256,
@@ -153,6 +217,7 @@ export function scoreCoreFullOfflineReport(report, binding) {
     actualHttpTurns: actual.size,
     scoredTurns: rows.length,
     counts,
+    ...coreFullOfflineUnclosedCounts(counts),
     criticalSafety: critical,
     semanticStatus,
     status:

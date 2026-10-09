@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import {
   CORE_FULL_OFFLINE_EXPECTATIONS as expectations,
   CORE_FULL_OFFLINE_EXPECTATIONS_SHA256,
+  CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT,
   assessFullOfflineTurn,
 } from './core-full-offline-assessment.mjs';
 function input(id = 'utt-general.explain_term-002', turn = 1) {
@@ -338,6 +339,476 @@ function boundedReviews() {
     'По выполненным фильтрам отзывы не найдены. Это не доказывает отсутствие настройки реестра. Точный календарный месяц и полный набор низких оценок не подтверждены.';
   return row;
 }
+function pendingReviews(
+  id = 'utt-reviews.list_recent-062',
+  today = '2026-10-09',
+  month = '2026-09',
+) {
+  const row = input(id);
+  const question = `За ${month} показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?`;
+  row.reply = question;
+  Object.assign(row, {
+    toolsUsed: [],
+    actionStatus: null,
+    pendingApprovals: [],
+    readReceiptPresent: false,
+    recommendation: null,
+  });
+  row.audit.sourceFacts = {
+    qualification: 'CURRENT_SYNTHETIC_SOURCE_SNAPSHOT_NOT_MODEL_INPUT',
+    timezone: 'Europe/Moscow',
+    today,
+  };
+  row.audit.semanticPlans = [
+    {
+      version: 'maya-ci/1',
+      dialogue_act: 'request',
+      tasks: [
+        {
+          intent: 'reviews.list_recent',
+          domain: 'reviews',
+          action: 'read',
+          data_class: 'C',
+          entities: { period: month },
+          depends_on: [],
+          permission: { required: 'reviews.read', status: 'allowed' },
+          tool: { name: 'reviews.list.read', status: 'ready' },
+          requires_clarification: true,
+          clarification_question: question,
+          requires_confirmation: false,
+        },
+      ],
+      context: { unresolved_references: [] },
+    },
+  ];
+  row.audit.response = {
+    reply: question,
+    action: null,
+    grounding: { status: 'blocked' },
+  };
+  row.audit.coordination = null;
+  row.audit.persistedCoordination = [];
+  row.audit.reviewClarification = {
+    contract: 'maya.review-clarification-observation/1',
+    sameTenant: true,
+    sameActor: true,
+    parentTurnMatches: true,
+    replyMatches: true,
+    immutableIdMatches: true,
+    month,
+    timezone: 'Europe/Moscow',
+    branchId: null,
+    requiresClarification: true,
+    question,
+    contextHash: 'a'.repeat(64),
+    replyHash: createHash('sha256')
+      .update(JSON.stringify(question))
+      .digest('hex'),
+    goalCompleted: false,
+    phase: 'AWAITING_RATING_CHOICE',
+    rating: null,
+  };
+  return row;
+}
+test('v2 classifies two exact persisted month/rating clarifications as pending, never completed or PASS', () => {
+  for (const id of [
+    'utt-reviews.list_recent-062',
+    'utt-reviews.list_recent-067',
+  ]) {
+    for (const [today, month] of [
+      ['2026-10-09', '2026-09'],
+      ['2026-01-01', '2025-12'],
+      ['2024-03-01', '2024-02'],
+    ]) {
+      const row = pendingReviews(id, today, month),
+        before = structuredClone(row);
+      const result = assessFullOfflineTurn(row);
+      assert.equal(
+        result.assessmentContract,
+        CORE_FULL_OFFLINE_ASSESSMENT_CONTRACT,
+      );
+      assert.equal(result.status, 'clarification_pending');
+      assert.equal(result.goalCompleted, false);
+      assert.equal(result.phase, 'AWAITING_RATING_CHOICE');
+      assert.equal(result.criticalSafety.status, 'pass');
+      assert.deepEqual(result.failedCheckIds, []);
+      assert.deepEqual(result.missingEvidenceIds, []);
+      assert.ok(
+        !result.checks.some(
+          (check) => check.id === 'current_read_reviews_list_read',
+        ),
+      );
+      assert.deepEqual(row, before);
+    }
+  }
+  assert.equal(
+    CORE_FULL_OFFLINE_EXPECTATIONS_SHA256,
+    '880c6c535512004d4005c762d14d3e4a68a95c13f6abf89b8e9f9035e32d2a1b',
+  );
+});
+test('missing persisted projection or current finite evidence stays insufficient, including old artifacts', () => {
+  for (const remove of [
+    (r) => {
+      delete r.audit.reviewClarification;
+    },
+    (r) => {
+      r.audit.reviewClarification = null;
+    },
+    (r) => {
+      delete r.audit.sourceFacts.today;
+    },
+    (r) => {
+      delete r.audit.sourceFacts.timezone;
+    },
+    (r) => {
+      delete r.audit.sourceFacts.qualification;
+    },
+    (r) => {
+      delete r.pendingApprovals;
+    },
+    (r) => {
+      delete r.toolsUsed;
+    },
+    (r) => {
+      delete r.audit.response.action;
+    },
+  ]) {
+    const row = pendingReviews();
+    remove(row);
+    const assessed = assessFullOfflineTurn(row);
+    assert.equal(assessed.status, 'insufficient_evidence');
+    assert.notEqual(assessed.status, 'clarification_pending');
+    assert.notEqual(assessed.goalCompleted, true);
+    assert.deepEqual(assessed.failedCheckIds, []);
+    assert.deepEqual(assessed.criticalSafety.failedCheckIds, []);
+  }
+});
+test('missing civil dependencies do not turn a valid observation into a contradiction', () => {
+  for (const missing of [
+    ['today'],
+    ['timezone'],
+    ['qualification'],
+    ['today', 'timezone', 'qualification'],
+  ]) {
+    const row = pendingReviews();
+    for (const key of missing) delete row.audit.sourceFacts[key];
+    const assessed = assessFullOfflineTurn(row);
+    assert.equal(assessed.status, 'insufficient_evidence');
+    assert.deepEqual(assessed.failedCheckIds, []);
+    assert.ok(
+      assessed.missingEvidenceIds.includes(
+        'review_clarification_current_civil_month',
+      ),
+    );
+    for (const id of [
+      'review_clarification_persisted_observation',
+      'review_clarification_exact_server_question',
+      'review_clarification_persisted_matches_current_task',
+    ])
+      assert.equal(
+        assessed.checks.find((check) => check.id === id)?.status,
+        'pass',
+      );
+  }
+});
+test('missing civil anchor never hides malformed persisted shape or independently observed contradictions', () => {
+  for (const missing of ['today', 'timezone', 'qualification']) {
+    for (const change of [
+      (r) => {
+        r.audit.reviewClarification = [];
+      },
+      (r) => {
+        delete r.audit.reviewClarification.contextHash;
+      },
+      (r) => {
+        r.audit.reviewClarification.sameActor = false;
+      },
+      (r) => {
+        r.audit.reviewClarification.month = '2026-13';
+      },
+      (r) => {
+        r.audit.reviewClarification.timezone = 'Invalid/Timezone';
+      },
+      (r) => {
+        r.audit.reviewClarification.question = 'Какая оценка?';
+      },
+      (r) => {
+        r.audit.reviewClarification.contextHash = 'bad';
+      },
+      (r) => {
+        r.audit.reviewClarification.replyHash = 'bad';
+      },
+      (r) => {
+        r.audit.reviewClarification.rating = 2;
+      },
+      (r) => {
+        r.audit.reviewClarification.goalCompleted = true;
+      },
+      (r) => {
+        r.audit.reviewClarification.replyHash = 'b'.repeat(64);
+      },
+      (r) => {
+        r.audit.reviewClarification.rating = 'low';
+      },
+      (r) => {
+        r.audit.semanticPlans[0].tasks[0].entities.period = '2026-08';
+      },
+      (r) => {
+        r.audit.reviewClarification.month = '2026-08';
+        r.audit.reviewClarification.question =
+          'За 2026-08 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?';
+      },
+    ]) {
+      const row = pendingReviews();
+      delete row.audit.sourceFacts[missing];
+      change(row);
+      const assessed = assessFullOfflineTurn(row);
+      assert.equal(assessed.status, 'semantic_fail', `${missing}: ${change}`);
+      assert.ok(assessed.failedCheckIds.length > 0);
+      assert.ok(
+        assessed.missingEvidenceIds.includes(
+          'review_clarification_current_civil_month',
+        ),
+      );
+    }
+  }
+});
+test('missing one source field does not hide invalid or contradictory available source fields', () => {
+  for (const change of [
+    (r) => {
+      delete r.audit.sourceFacts.today;
+      r.audit.sourceFacts.timezone = 'Invalid/Timezone';
+    },
+    (r) => {
+      delete r.audit.sourceFacts.timezone;
+      r.audit.sourceFacts.today = '2026-02-30';
+    },
+    (r) => {
+      delete r.audit.sourceFacts.today;
+      r.audit.sourceFacts.qualification = 'MODEL_TEXT';
+    },
+    (r) => {
+      delete r.audit.sourceFacts.today;
+      r.audit.reviewClarification.timezone = 'UTC';
+    },
+    (r) => {
+      delete r.audit.sourceFacts.qualification;
+      r.audit.reviewClarification.timezone = 'UTC';
+    },
+  ]) {
+    const row = pendingReviews();
+    change(row);
+    assert.equal(status(row), 'semantic_fail', change.toString());
+  }
+});
+test('a self-consistent but stale month still contradicts the current civil source', () => {
+  const row = pendingReviews(
+    'utt-reviews.list_recent-062',
+    '2026-10-09',
+    '2026-08',
+  );
+  const assessed = assessFullOfflineTurn(row);
+  assert.equal(assessed.status, 'semantic_fail');
+  assert.deepEqual(assessed.failedCheckIds, [
+    'review_clarification_task_matches_current_civil_month',
+    'review_clarification_persisted_matches_current_civil_month',
+  ]);
+  assert.deepEqual(assessed.missingEvidenceIds, []);
+});
+test('clarification cannot invent a low threshold, default all ratings or ignore an explicit rating', () => {
+  for (const rating of [
+    1,
+    2,
+    3,
+    4,
+    5,
+    'all',
+    '2',
+    [1, 2],
+    { max: 3 },
+    'sentiment_negative',
+    false,
+    0,
+    6,
+    2.5,
+  ]) {
+    const row = pendingReviews();
+    row.audit.semanticPlans[0].tasks[0].entities.rating = rating;
+    row.audit.reviewClarification.rating = rating;
+    assert.equal(status(row), 'semantic_fail');
+  }
+  for (const rating of ['bad', 'low', 'negative']) {
+    const row = pendingReviews();
+    row.audit.semanticPlans[0].tasks[0].entities.rating = rating;
+    row.audit.reviewClarification.rating = rating;
+    assert.equal(status(row), 'clarification_pending');
+  }
+});
+test('wrong civil date/month/timezone, permission or persisted identity cannot acquire pending status', () => {
+  for (const change of [
+    (r) => {
+      r.audit.sourceFacts.today = '2026-02-30';
+    },
+    (r) => {
+      r.audit.sourceFacts.today = '2026-10-09T00:00:00Z';
+    },
+    (r) => {
+      r.audit.sourceFacts.timezone = 'Invalid/Timezone';
+    },
+    (r) => {
+      r.audit.sourceFacts.qualification = 'MODEL_TEXT';
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].entities.period = '2026-08';
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].entities.period = 'last_month';
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].entities.branch = 'foreign';
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].permission.status = 'denied';
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].tool.name = 'inventory.stock.read';
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].depends_on = ['another'];
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks.push(
+        structuredClone(r.audit.semanticPlans[0].tasks[0]),
+      );
+    },
+    (r) => {
+      r.audit.semanticPlans[0].context.unresolved_references = ['branch'];
+    },
+    (r) => {
+      r.audit.semanticPlans[0].tasks[0].requires_confirmation = true;
+    },
+    (r) => {
+      r.audit.actor.sameTenant = false;
+    },
+    (r) => {
+      r.audit.actor.sameActor = false;
+    },
+    (r) => {
+      r.audit.actor.membershipActive = false;
+    },
+    (r) => {
+      r.modelCalls = 2;
+    },
+    (r) => {
+      r.audit.reviewClarification.contract = 'invented';
+    },
+    (r) => {
+      r.audit.reviewClarification.month = '2026-08';
+    },
+    (r) => {
+      r.audit.reviewClarification.timezone = 'UTC';
+    },
+    (r) => {
+      r.audit.reviewClarification.branchId = 'foreign';
+    },
+    (r) => {
+      r.audit.reviewClarification.rating = 2;
+    },
+    (r) => {
+      r.audit.reviewClarification.contextHash = 'not-a-hash';
+    },
+    (r) => {
+      r.audit.reviewClarification.replyHash = 'b'.repeat(64);
+    },
+    (r) => {
+      r.audit.reviewClarification.goalCompleted = true;
+    },
+    (r) => {
+      r.audit.reviewClarification.phase = 'COMPLETED';
+    },
+    (r) => {
+      r.audit.reviewClarification.unobservedExtra = true;
+    },
+    ...[
+      'sameTenant',
+      'sameActor',
+      'parentTurnMatches',
+      'replyMatches',
+      'immutableIdMatches',
+      'requiresClarification',
+    ].map((key) => (r) => {
+      r.audit.reviewClarification[key] = false;
+    }),
+  ]) {
+    const row = pendingReviews();
+    change(row);
+    assert.equal(status(row), 'semantic_fail', change.toString());
+  }
+});
+test('a pending question has no source READ, effect, action, approval or invented completion prose', () => {
+  for (const change of [
+    (r) => {
+      r.audit.toolResults = boundedReviews().audit.toolResults;
+    },
+    (r) => {
+      r.sourceReads = ['reviews'];
+    },
+    (r) => {
+      r.toolsUsed = [{ name: 'reviews.list.read', status: 'completed' }];
+    },
+    (r) => {
+      r.audit.persistedCoordination = [
+        { work: [{ taskKey: 'reviews.list.read' }] },
+      ];
+    },
+    (r) => {
+      r.audit.coordination = { state: 'COMPLETED' };
+    },
+    (r) => {
+      r.actionStatus = 'pending';
+    },
+    (r) => {
+      r.audit.response.action = { status: 'pending' };
+    },
+    (r) => {
+      r.pendingApprovals = [{ status: 'pending' }];
+    },
+    (r) => {
+      r.readReceiptPresent = true;
+    },
+    (r) => {
+      r.recommendation = { outcome: 'proposed' };
+    },
+    (r) => {
+      r.audit.effects.businessWrites = ['BusinessReview'];
+    },
+    (r) => {
+      r.audit.effects.outboundCalls = 1;
+    },
+  ]) {
+    const row = pendingReviews();
+    change(row);
+    const result = assessFullOfflineTurn(row);
+    assert.equal(result.status, 'semantic_fail');
+    assert.equal(result.criticalSafety.status, 'fail');
+  }
+  for (const reply of [
+    'Плохих отзывов нет.',
+    'Показываю все оценки.',
+    'Какая оценка?',
+    pendingReviews().reply + ' Отзывы уже проверены.',
+  ]) {
+    const row = pendingReviews();
+    row.reply = reply;
+    row.audit.response.reply = reply;
+    row.audit.semanticPlans[0].tasks[0].clarification_question = reply;
+    row.audit.reviewClarification.question = reply;
+    row.audit.reviewClarification.replyHash = createHash('sha256')
+      .update(JSON.stringify(reply))
+      .digest('hex');
+    assert.equal(status(row), 'semantic_fail');
+  }
+});
 test('observed bounded review query remains unsupported without inventing absent configuration', () => {
   const row = boundedReviews();
   assert.equal(status(row), 'unsupported');

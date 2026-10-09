@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 import {
   scoreCoreFullOfflineReport,
   incompleteCoreFullOfflineScore,
+  coreFullOfflineUnclosedCounts,
+  CORE_FULL_OFFLINE_SCORE_CONTRACT,
 } from './core-full-offline-score.mjs';
 const { cases } = JSON.parse(
   fs.readFileSync(
@@ -26,6 +29,219 @@ const report = () => ({
   businessAcceptance: false,
   responses: [],
   actualHttpTurns: 0,
+});
+const pendingReviewRow = (caseId) => {
+  const item = cases.find((c) => c.id === caseId);
+  const reply =
+    'За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?';
+  return {
+    caseId,
+    turn: 1,
+    userText: item.userTurns[0],
+    httpStatus: 201,
+    actualReply: reply,
+    priorActualAssistantReplies: [],
+    responseHash: 'c'.repeat(64),
+    modelCalls: 1,
+    sourceReads: [],
+    toolsUsed: [],
+    actionStatus: null,
+    pendingApprovals: [],
+    readReceiptPresent: false,
+    recommendation: null,
+    audit: {
+      qualification: 'SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY',
+      completeness: { status: 'complete' },
+      actor: {
+        role: item.role === 'owner' ? 'tenant_owner' : 'administrator',
+        sameTenant: true,
+        sameActor: true,
+        membershipActive: true,
+      },
+      sourceFacts: {
+        qualification: 'CURRENT_SYNTHETIC_SOURCE_SNAPSHOT_NOT_MODEL_INPUT',
+        timezone: 'Europe/Moscow',
+        today: '2026-10-09',
+      },
+      semanticPlans: [
+        {
+          dialogue_act: 'request',
+          tasks: [
+            {
+              intent: 'reviews.list_recent',
+              domain: 'reviews',
+              action: 'read',
+              data_class: 'C',
+              permission: { required: 'reviews.read', status: 'allowed' },
+              tool: { name: 'reviews.list.read', status: 'ready' },
+              entities: { period: '2026-09' },
+              depends_on: [],
+              requires_confirmation: false,
+              requires_clarification: true,
+              clarification_question: reply,
+            },
+          ],
+          context: { unresolved_references: [] },
+        },
+      ],
+      toolResults: [],
+      persistedCoordination: [],
+      coordination: null,
+      response: { reply, action: null, grounding: { status: 'blocked' } },
+      effects: {
+        businessHashUnchanged: true,
+        businessWrites: [],
+        forbidden: [],
+        outboundCalls: 0,
+      },
+      reviewClarification: {
+        contract: 'maya.review-clarification-observation/1',
+        sameTenant: true,
+        sameActor: true,
+        parentTurnMatches: true,
+        replyMatches: true,
+        immutableIdMatches: true,
+        month: '2026-09',
+        timezone: 'Europe/Moscow',
+        branchId: null,
+        requiresClarification: true,
+        question: reply,
+        contextHash: 'd'.repeat(64),
+        replyHash: createHash('sha256')
+          .update(JSON.stringify(reply))
+          .digest('hex'),
+        goalCompleted: false,
+        phase: 'AWAITING_RATING_CHOICE',
+        rating: null,
+      },
+    },
+  };
+};
+
+test('v2 counts unanswered clarifications separately without increasing PASS or returning green', () => {
+  const input = report();
+  input.responses = [
+    'utt-reviews.list_recent-062',
+    'utt-reviews.list_recent-067',
+  ].map(pendingReviewRow);
+  input.actualHttpTurns = 2;
+  const before = structuredClone(input),
+    scored = scoreCoreFullOfflineReport(input, binding);
+  assert.equal(scored.contract, CORE_FULL_OFFLINE_SCORE_CONTRACT);
+  assert.equal(scored.assessmentContract, 'maya.offline48.turn-assessment/2');
+  assert.equal(scored.assessmentMode, 'ACTUAL_HTTP_REPORT_ASSESSMENT');
+  assert.deepEqual(scored.counts, {
+    pass: 0,
+    semantic_fail: 0,
+    unsupported: 0,
+    insufficient_evidence: 79,
+    clarification_pending: 2,
+  });
+  assert.equal(scored.pendingClarificationTurns, 2);
+  assert.equal(scored.remainingNonPendingTurns, 79);
+  assert.equal(scored.unclosedTurns, 81);
+  assert.equal(scored.semanticStatus, 'incomplete');
+  assert.equal(scored.exitCode, 2);
+  const pending = scored.rows.filter(
+    (r) => r.status === 'clarification_pending',
+  );
+  assert.equal(pending.length, 2);
+  assert.ok(
+    pending.every(
+      (r) => r.goalCompleted === false && r.phase === 'AWAITING_RATING_CHOICE',
+    ),
+  );
+  assert.deepEqual(input, before);
+});
+test('finite 81-turn accounting keeps 22 other unresolved turns plus 2 pending questions equal to 24 unclosed', () => {
+  assert.deepEqual(
+    coreFullOfflineUnclosedCounts({
+      pass: 57,
+      semantic_fail: 0,
+      unsupported: 12,
+      insufficient_evidence: 10,
+      clarification_pending: 2,
+    }),
+    {
+      remainingNonPendingTurns: 22,
+      pendingClarificationTurns: 2,
+      unclosedTurns: 24,
+    },
+  );
+  assert.deepEqual(
+    coreFullOfflineUnclosedCounts({
+      pass: 57,
+      semantic_fail: 2,
+      unsupported: 12,
+      insufficient_evidence: 10,
+      clarification_pending: 0,
+    }),
+    {
+      remainingNonPendingTurns: 24,
+      pendingClarificationTurns: 0,
+      unclosedTurns: 24,
+    },
+  );
+  for (const bad of [
+    null,
+    {},
+    {
+      pass: 57,
+      semantic_fail: 0,
+      unsupported: 12,
+      insufficient_evidence: 10,
+      clarification_pending: 0,
+    },
+    {
+      pass: 57,
+      semantic_fail: -1,
+      unsupported: 12,
+      insufficient_evidence: 10,
+      clarification_pending: 3,
+    },
+  ])
+    assert.throws(
+      () => coreFullOfflineUnclosedCounts(bad),
+      /core_offline_score_unconfirmed/,
+    );
+});
+test('archived reassessment is labelled and missing new persisted evidence stays insufficient', () => {
+  const input = report();
+  const pending = pendingReviewRow('utt-reviews.list_recent-062');
+  delete pending.audit.reviewClarification;
+  input.responses = [pending];
+  input.actualHttpTurns = 1;
+  const before = structuredClone(input);
+  const scored = scoreCoreFullOfflineReport(input, binding, {
+    assessmentMode: 'ARCHIVED_REPORT_REASSESSMENT',
+    evaluatorSourceHead: 'd'.repeat(40),
+    originalScoreSha256: 'e'.repeat(64),
+  });
+  assert.equal(scored.assessmentMode, 'ARCHIVED_REPORT_REASSESSMENT');
+  assert.equal(scored.originalScoreSha256, 'e'.repeat(64));
+  assert.equal(scored.evaluatorSourceHead, 'd'.repeat(40));
+  assert.equal(scored.sourceHead, binding.candidateCommit);
+  assert.equal(scored.counts.clarification_pending, 0);
+  assert.equal(
+    scored.rows.find((r) => r.caseId === pending.caseId).status,
+    'insufficient_evidence',
+  );
+  assert.deepEqual(input, before);
+  for (const bad of [
+    null,
+    [],
+    { assessmentMode: 'ARCHIVED_REPORT_REASSESSMENT' },
+    { assessmentMode: 'silent-rescore' },
+    {
+      assessmentMode: 'ARCHIVED_REPORT_REASSESSMENT',
+      evaluatorSourceHead: 'd'.repeat(40),
+      originalScoreSha256: ['e'.repeat(64)],
+    },
+  ])
+    assert.throws(
+      () => scoreCoreFullOfflineReport(input, binding, bad),
+      /core_offline_score_unconfirmed/,
+    );
 });
 
 test('failed execution after all scored turns cannot retain a green artifact exit code', () => {
