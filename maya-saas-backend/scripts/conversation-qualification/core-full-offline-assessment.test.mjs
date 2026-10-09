@@ -304,6 +304,90 @@ test('configured false registry is a scoped unsupported result, not verified zer
   row.audit.toolResults = [];
   assert.notEqual(status(row), 'unsupported');
 });
+function boundedReviews() {
+  const row = input('utt-reviews.list_recent-062');
+  row.audit.semanticPlans[0].tasks[0].entities = {
+    period: 'last_month',
+    rating: 'bad',
+  };
+  row.audit.toolResults = [
+    {
+      name: 'reviews.list.read',
+      result: {
+        configured: false,
+        source: 'not_configured',
+        count: 0,
+        reviews: [],
+        privacy: 'review_text_redacted_from_ai',
+        read_scope: {
+          contract: 'maya.review-registry-query/1',
+          configuration_status: 'not_observed',
+          from_inclusive: '2026-07-11T12:00:00.000Z',
+          to_exclusive: null,
+          rating_exact: null,
+          scope: 'tenant',
+          order: 'occurred_at_desc',
+          limit: 20,
+          returned_count: 0,
+          limit_reached: false,
+        },
+      },
+    },
+  ];
+  row.reply =
+    'По выполненным фильтрам отзывы не найдены. Это не доказывает отсутствие настройки реестра. Точный календарный месяц и полный набор низких оценок не подтверждены.';
+  return row;
+}
+test('observed bounded review query remains unsupported without inventing absent configuration', () => {
+  const row = boundedReviews();
+  assert.equal(status(row), 'unsupported');
+  row.audit.toolResults[0].result.configured = true;
+  assert.equal(status(row), 'unsupported');
+  row.reply += ' Реестр отзывов не настроен.';
+  assert.equal(status(row), 'semantic_fail');
+  row.reply = 'За прошлый месяц плохих отзывов нет.';
+  assert.equal(status(row), 'semantic_fail');
+});
+test('malformed, stale or contradictory review query metadata cannot prove the scoped limitation', () => {
+  for (const change of [
+    (v) => {
+      v.read_scope.contract = 'made-up';
+    },
+    (v) => {
+      v.read_scope.configuration_status = 'not_configured';
+    },
+    (v) => {
+      v.read_scope.to_exclusive = '2026-10-01T00:00:00.000Z';
+    },
+    (v) => {
+      v.read_scope.from_inclusive = 'yesterday';
+    },
+    (v) => {
+      v.read_scope.rating_exact = [1, 2];
+    },
+    (v) => {
+      v.read_scope.limit = 1000;
+    },
+    (v) => {
+      v.read_scope.returned_count = 1;
+    },
+    (v) => {
+      v.read_scope.limit_reached = true;
+    },
+    (v) => {
+      v.stale = true;
+    },
+    (v) => {
+      v.read_scope.rating_exact = 1;
+      v.reviews = [{ rating: 2, occurred_at: '2026-09-02T00:00:00.000Z' }];
+      v.count = v.read_scope.returned_count = 1;
+    },
+  ]) {
+    const row = boundedReviews();
+    change(row.audit.toolResults[0].result);
+    assert.equal(status(row), 'semantic_fail');
+  }
+});
 test('price route limitation must retain the changed amount; reading catalog is not preparing approval', () => {
   const row = input('current-staff_config-correction', 2);
   row.audit.semanticPlans[0].tasks[0].entities = {
@@ -501,38 +585,309 @@ test('address-only catalog consultation retains missing branch evidence without 
   row.audit.toolResults = [];
   assert.notEqual(status(row), 'pass');
 });
-test('financial currency and scaling are grounded in typed measurement, never arbitrary source numbers', () => {
+function publishedBi() {
   const row = input('current-bi-ordinary');
+  const ref = (value) =>
+    'sha256:' + createHash('sha256').update(value).digest('hex');
+  const runHash = createHash('sha256')
+    .update(JSON.stringify('run'))
+    .digest('hex');
+  const handle = ref('source-handle');
+  const statement =
+    'Опубликованный снимок, версия 2, за октябрь 2026: подтвержденные поступления 1250,50 RUB. Данные неполные, сумма относится к источнику.';
+  row.reply = statement;
+  row.modelCalls =
+    row.serializerCalls =
+    row.brokerCalls =
+    row.modelOutputResponses =
+      0;
+  row.audit.semanticPlans = [];
   row.audit.sourceFacts.c7Published = true;
+  row.audit.coordination = {
+    scope: 'explicit_bi_report',
+    state: 'DRAFT',
+    current: false,
+    replayed: false,
+    runHash,
+  };
+  const source = {
+    evidenceHandle: handle,
+    sameTenant: true,
+    exactCurrentRevision: true,
+    state: 'PUBLISHED',
+    revision: 2,
+    snapshotHash: ref('snapshot'),
+    asOf: '2026-10-09T10:00:00.000Z',
+    publishedAt: '2026-10-09T10:00:01.000Z',
+    observedAt: '2026-10-09T10:01:00.000Z',
+    expiresAt: '2027-10-09T10:00:00.000Z',
+    period: {
+      from: '2026-09-30T21:00:00.000Z',
+      toExclusive: '2026-10-31T21:00:00.000Z',
+      timezone: 'Europe/Moscow',
+    },
+    completeness: 'PARTIAL',
+    qualification: 'VERIFIED',
+    metrics: [
+      {
+        key: 'confirmed_cash',
+        unit: 'money_minor',
+        basis: 'confirmed_cash',
+        dimensions: {},
+        value: '125050',
+        currency: 'RUB',
+        state: 'COMPLETE',
+      },
+    ],
+  };
+  row.audit.financialEvidenceCount = 1;
+  row.audit.persistedCoordination = [
+    {
+      runHash,
+      auditRunRef: ref('run'),
+      state: 'DRAFT',
+      work: [
+        {
+          auditWorkRef: ref('work'),
+          domain: 'BUSINESS_INTELLIGENCE',
+          taskKey: 'c7.measurement.read',
+          state: 'SETTLED',
+          resultHash: ref('result').slice(7),
+          publishedSources: [source],
+        },
+      ],
+    },
+  ];
+  row.audit.response = {
+    biReport: {
+      reply: statement,
+      coordination: {
+        run_id: ref('run'),
+        scope: 'explicit_bi_report',
+        state: 'DRAFT',
+        current: false,
+        replayed: false,
+      },
+      analysis: {
+        contract: 'maya.c9-bi-report-response/1',
+        mode: 'as_reported',
+        reasoning: 'deterministic',
+        outcome: 'PARTIAL',
+        requestedPeriod: { kind: 'calendar_month', year: 2026, month: 10 },
+        noSideEffects: true,
+        executionAuthority: false,
+        evidence: { workReceiptId: ref('work'), sourceHandles: [handle] },
+        agent: {
+          contract: 'AgentResult@1',
+          intent: 'c9.business_overview',
+          proposed_action_intents: [],
+          completeness: { status: 'PARTIAL' },
+          findings: [{ statement, evidence_refs: [handle] }],
+          facts_used: [
+            {
+              capability: 'c7.measurement.read',
+              status: 'measured_incomplete',
+              as_of: source.asOf,
+              evidence_refs: [handle],
+            },
+          ],
+          evidence_refs: [handle],
+        },
+      },
+    },
+  };
+  return row;
+}
+test('published C9 uses exact persisted receipt and typed source without a fabricated analytics READ', () => {
+  assert.equal(status(publishedBi()), 'pass');
+  const row = publishedBi();
+  row.audit.persistedCoordination = [];
   row.audit.toolResults = [
     {
       name: 'analytics.business.query',
       result: {
         measurement: {
-          metrics: [
-            {
-              key: 'revenue',
-              unit: 'money_minor',
-              value: '125050',
-              currency: 'RUB',
-              state: 'COMPLETE',
-            },
-          ],
+          metrics:
+            publishedBi().audit.persistedCoordination[0].work[0]
+              .publishedSources[0].metrics,
         },
       },
     },
   ];
-  row.reply =
-    'Опубликованный снимок за октябрь: выручка 1250,50 RUB. Полнота источника ограничена.';
+  assert.notEqual(status(row), 'pass');
+});
+test('financial currency and scaling are grounded in the receipt-bound revision', () => {
+  const row = publishedBi();
   assert.equal(status(row), 'pass');
   for (const changed of ['125050 RUB', '1250,50 USD', '999 RUB']) {
     row.reply = `Опубликованный снимок за октябрь: выручка ${changed}. Полнота источника ограничена.`;
+    row.audit.response.biReport.reply = row.reply;
+    row.audit.response.biReport.analysis.agent.findings[0].statement =
+      row.reply;
     assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'fail');
   }
-  row.reply =
-    'Опубликованный снимок за октябрь: выручка 1250,50 RUB. Полнота источника ограничена.';
-  delete row.audit.toolResults[0].result.measurement.metrics[0].unit;
+  row.reply = publishedBi().reply;
+  row.audit.response.biReport.reply = row.reply;
+  row.audit.response.biReport.analysis.agent.findings[0].statement = row.reply;
+  delete row.audit.persistedCoordination[0].work[0].publishedSources[0]
+    .metrics[0].unit;
   assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'fail');
+});
+test('published metrics retain their money basis and a generic snapshot acknowledgement is not delivery', () => {
+  const setReply = (row, reply) => {
+    row.reply = row.audit.response.biReport.reply = reply;
+    row.audit.response.biReport.analysis.agent.findings[0].statement = reply;
+  };
+  for (const [key, basis, label] of [
+    ['confirmed_cash', 'confirmed_cash', 'Чистая прибыль'],
+    ['observed_booked_value', 'booked_prices', 'Подтвержденные поступления'],
+    ['observed_booked_value', 'booked_prices', 'Чистая прибыль'],
+  ]) {
+    const row = publishedBi();
+    Object.assign(
+      row.audit.persistedCoordination[0].work[0].publishedSources[0].metrics[0],
+      { key, basis },
+    );
+    setReply(
+      row,
+      `Опубликованный снимок за октябрь 2026. ${label}: 1250,50 RUB. Данные неполные.`,
+    );
+    assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'fail');
+  }
+  const row = publishedBi();
+  setReply(row, 'Опубликованный снимок за октябрь 2026. Данные неполные.');
+  assert.equal(status(row), 'semantic_fail');
+  assert.ok(
+    assessFullOfflineTurn(row).failedCheckIds.includes(
+      'financial_result_delivered',
+    ),
+  );
+  const metric =
+    row.audit.persistedCoordination[0].work[0].publishedSources[0].metrics[0];
+  metric.value = null;
+  metric.state = 'NOT_MEASURED';
+  setReply(
+    row,
+    'Опубликованный снимок за октябрь 2026. Подтвержденные поступления: не измерено. Данные неполные.',
+  );
+  assert.equal(status(row), 'pass');
+});
+test('forged, stale, foreign, wrong-period and mismatched C9 evidence cannot qualify', () => {
+  const mutations = [
+    (r) => {
+      r.audit.actor.sameTenant = false;
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].auditRunRef = 'sha256:' + 'a'.repeat(64);
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].auditWorkRef =
+        'sha256:' + 'b'.repeat(64);
+    },
+    (r) => {
+      delete r.audit.response.biReport.analysis.evidence.workReceiptId;
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].state = 'HELD_UNKNOWN';
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].sameTenant = false;
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].exactCurrentRevision = false;
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].expiresAt =
+        '2026-10-09T10:00:59.999Z';
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].state =
+        'INVALIDATED';
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].period.toExclusive =
+        '2026-10-31T20:59:59.001Z';
+    },
+    (r) => {
+      r.audit.response.biReport.analysis.requestedPeriod.month = 9;
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].period.timezone =
+        'UTC';
+    },
+    (r) => {
+      r.audit.response.biReport.analysis.agent.facts_used[0].as_of =
+        '2026-10-09T09:00:00.000Z';
+    },
+    (r) => {
+      r.audit.response.biReport.analysis.agent.findings[0].evidence_refs = [
+        'sha256:' + 'c'.repeat(64),
+      ];
+    },
+    (r) => {
+      r.audit.response.biReport.analysis.agent.facts_used[0].capability =
+        'clients.dormant.list';
+    },
+    (r) => {
+      r.audit.response.biReport.analysis.noSideEffects = false;
+    },
+    (r) => {
+      r.audit.response.biReport.analysis.executionAuthority = true;
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources = [];
+    },
+    (r) => {
+      r.audit.persistedCoordination[0].work[0].publishedSources[0].metrics[0].value =
+        '42';
+    },
+  ];
+  for (const [index, mutate] of mutations.entries()) {
+    const row = publishedBi();
+    mutate(row);
+    assert.notEqual(status(row), 'pass', `negative ${index}`);
+  }
+});
+test('an unavailable published report with no monetary claim is safe but is not a completed function', () => {
+  const row = publishedBi(),
+    analysis = row.audit.response.biReport.analysis;
+  row.reply =
+    'Опубликованного снимка за октябрь нет. Это не означает нулевую выручку.';
+  row.audit.response.biReport.reply = row.reply;
+  analysis.outcome = analysis.agent.completeness.status = 'UNAVAILABLE';
+  analysis.evidence.sourceHandles = [];
+  analysis.agent.findings =
+    analysis.agent.facts_used =
+    analysis.agent.evidence_refs =
+      [];
+  row.audit.persistedCoordination[0].work[0].publishedSources = [];
+  row.audit.financialEvidenceCount = 0;
+  assert.notEqual(status(row), 'pass');
+  assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'pass');
+  row.reply += ' При этом поступления 99 RUB.';
+  row.audit.response.biReport.reply = row.reply;
+  assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'fail');
+});
+test('journal keeps its canonical period slot without claiming that an unobserved journal read succeeded', () => {
+  const row = input('mt-ambiguous_entity_resolution-15');
+  row.audit.semanticPlans[0].tasks[0] = {
+    intent: 'operations.journal_day',
+    entities: { period: '2026-10-10', employee: 'Саша' },
+  };
+  row.reply =
+    'Уточните специалиста: имя пока не дает однозначного соответствия для журнала.';
+  const score = assessFullOfflineTurn(row);
+  assert.equal(
+    score.checks.find((c) => c.id === 'business_date_preserved_or_corrected')
+      .status,
+    'pass',
+  );
+  assert.equal(score.status, 'insufficient_evidence');
+  assert.ok(
+    score.missingEvidenceIds.includes('journal_owner_resolution_observed'),
+  );
+  row.audit.semanticPlans[0].tasks[0].entities.period = '2026-10-09';
+  assert.equal(status(row), 'semantic_fail');
 });
 test('actual goods prices bind distinct labels and decimal values, not fixed script numbers', () => {
   assert.equal(status(goods()), 'pass');

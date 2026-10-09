@@ -244,6 +244,7 @@ export class BusinessContentService {
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     const from = this.reviewFrom(options.days);
+    const limit = Math.min(Math.max(options.limit ?? 20, 1), 50);
     const rows = await this.prisma.businessReview.findMany({
       where: {
         tenantId: scopedTenantId,
@@ -252,7 +253,7 @@ export class BusinessContentService {
         ...(options.branchId ? { branchId: options.branchId } : {}),
       },
       orderBy: { occurredAt: 'desc' },
-      take: Math.min(Math.max(options.limit ?? 20, 1), 50),
+      take: limit,
     });
     return {
       configured: rows.length > 0,
@@ -260,6 +261,20 @@ export class BusinessContentService {
       count: rows.length,
       reviews: rows.map((row) => this.serializeReview(row)),
       privacy: 'review_text_redacted_from_ai',
+      // Facts about this one query, not integration/setup status. Keep the
+      // historical configured/source fields for existing HTTP consumers.
+      read_scope: {
+        contract: 'maya.review-registry-query/1' as const,
+        from_inclusive: from?.toISOString() ?? null,
+        to_exclusive: null,
+        rating_exact: options.rating || null,
+        scope: options.branchId ? ('one_branch' as const) : ('tenant' as const),
+        order: 'occurred_at_desc' as const,
+        limit,
+        returned_count: rows.length,
+        limit_reached: rows.length === limit,
+        configuration_status: 'not_observed' as const,
+      },
     };
   }
 

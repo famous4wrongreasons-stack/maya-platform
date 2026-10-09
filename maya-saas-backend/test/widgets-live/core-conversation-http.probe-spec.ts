@@ -6,6 +6,7 @@
  * replay transport in dry mode and admitted transport in live mode; this process
  * never reads a provider credential. */
 import { ConfigService } from '@nestjs/config';
+import type { C9Run, C9WorkReceipt } from '@prisma/client';
 import { execFileSync } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
@@ -22,6 +23,7 @@ import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
 import type { CRMAdapter } from '../../src/crm/crm-adapter.interface';
 import { observedServiceCatalog } from '../../src/crm/service-catalog-read';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
+import { C9Handles } from '../../src/orchestration/c9.context';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -1771,7 +1773,16 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         }),
         db.prisma.measurementRevision.findMany({
           where,
-          select: { id: true, state: true },
+          select: {
+            id: true,
+            state: true,
+            periodFrom: true,
+            periodTo: true,
+            timezone: true,
+            asOf: true,
+            completeness: true,
+            valuesJson: true,
+          },
           orderBy: { id: 'asc' },
         }),
         db.prisma.c8ResultRevision.findMany({
@@ -1789,6 +1800,50 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         }),
         db.prisma.businessReview.count({ where }),
       ]);
+      if (recipe.binding.group === 'bi') {
+        if (recipe.binding.variant === 'negative') expect(c7).toEqual([]);
+        else {
+          expect(c7).toHaveLength(1);
+          const report = c7[0];
+          expect(report).toMatchObject({
+            state: 'PUBLISHED',
+            periodFrom: new Date('2026-09-30T21:00:00.000Z'),
+            periodTo: new Date('2026-10-31T21:00:00.000Z'),
+            timezone: 'Europe/Moscow',
+            completeness: 'PARTIAL',
+          });
+          const values = auditRecord(report.valuesJson);
+          const metrics = Array.isArray(values.metrics)
+            ? values.metrics.map(auditRecord)
+            : [];
+          expect(metrics).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                key: 'observed_period_to_exclusive',
+                value: new Date(
+                  Math.min(report.asOf.getTime(), report.periodTo.getTime()),
+                ).toISOString(),
+              }),
+              expect.objectContaining({
+                key: 'observed_booked_value',
+                value: '12345',
+                currency: 'RUB',
+                state: 'PARTIAL',
+              }),
+              expect.objectContaining({
+                key: 'confirmed_cash',
+                value: null,
+                state: 'NOT_MEASURED',
+              }),
+              expect.objectContaining({
+                key: 'net_profit',
+                value: null,
+                state: 'NOT_MEASURED',
+              }),
+            ]),
+          );
+        }
+      }
       preflights.push({
         caseId: item.id,
         group: recipe.binding.group,
@@ -1962,6 +2017,115 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
         scope: op.scope,
       }));
   }
+  /** Test-only join of persisted C9 evidence to its exact tenant-owned C7 row.
+   * No reader invocation, recomputation, publication or response-derived facts. */
+  async function publishedFinancialSources(
+    tenantId: string,
+    run: C9Run,
+    work: C9WorkReceipt,
+  ) {
+    if (
+      profile.id !== CORE_OFFLINE_PROFILE ||
+      work.domain !== 'BUSINESS_INTELLIGENCE' ||
+      work.taskKey !== 'c7.measurement.read' ||
+      work.kind !== 'TOOL_READ' ||
+      !Array.isArray(work.inputEvidenceRefsJson) ||
+      work.inputEvidenceRefsJson.length !== 1
+    )
+      return [];
+    const ref = auditRecord(work.inputEvidenceRefsJson[0]);
+    if (
+      ref.sourceType !== 'MeasurementRevision' ||
+      ref.tenantId !== tenantId ||
+      typeof ref.id !== 'string' ||
+      !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(ref.id)
+    )
+      return [];
+    let handle: string;
+    try {
+      handle = new C9Handles(run.id).add(ref);
+    } catch {
+      return [];
+    }
+    const source = await db.prisma.measurementRevision.findFirst({
+      where: { tenantId, id: ref.id, kind: 'business_period' },
+    });
+    if (!source) return [];
+    const observedAt = new Date();
+    const scope = auditRecord(source.scopeJson);
+    const exactCurrentRevision =
+      source.tenantId === tenantId &&
+      run.tenantId === tenantId &&
+      work.tenantId === tenantId &&
+      work.runId === run.id &&
+      ref.subjectKind === source.kind &&
+      ref.subjectRef === source.id &&
+      ref.identityHash === source.identityHash &&
+      ref.inputHash === source.intentHash &&
+      ref.contractVersion === source.contractVersion &&
+      ref.status === 'VERIFIED' &&
+      source.state === 'PUBLISHED' &&
+      source.publishedAt !== null &&
+      source.publishedAt <= run.admittedAt &&
+      ref.observedAt === source.publishedAt.toISOString() &&
+      source.expiresAt > observedAt &&
+      typeof ref.validUntil === 'string' &&
+      Date.parse(ref.validUntil) > observedAt.getTime() &&
+      Date.parse(ref.validUntil) <= source.expiresAt.getTime() &&
+      typeof ref.retentionUntil === 'string' &&
+      Date.parse(ref.retentionUntil) > observedAt.getTime() &&
+      Date.parse(ref.retentionUntil) <= source.expiresAt.getTime() &&
+      ref.completeness === source.completeness &&
+      source.clientId === null &&
+      source.appointmentId === null &&
+      source.staffId === null &&
+      source.branchId === null &&
+      source.configurationUserId === null &&
+      Array.isArray(scope.branchIds) &&
+      scope.branchIds.length === 0 &&
+      typeof source.snapshotHash === 'string';
+    if (!exactCurrentRevision) return [];
+    const values = auditRecord(source.valuesJson);
+    const metrics = Array.isArray(values.metrics)
+      ? values.metrics.map((value) => {
+          const metric = auditRecord(value);
+          return {
+            key: metric.key,
+            dimensions: metric.dimensions,
+            unit: metric.unit,
+            basis: metric.basis,
+            currency: metric.currency,
+            state: metric.state,
+            value: metric.value,
+          };
+        })
+      : [];
+    return [
+      {
+        evidenceHandle: 'sha256:' + sha256(handle),
+        sameTenant: true,
+        exactCurrentRevision,
+        observedAt: observedAt.toISOString(),
+        state: source.state,
+        revision: source.revision,
+        snapshotHash: 'sha256:' + sha256(source.snapshotHash!),
+        asOf: source.asOf.toISOString(),
+        publishedAt: source.publishedAt!.toISOString(),
+        expiresAt: source.expiresAt.toISOString(),
+        period: {
+          from: source.periodFrom.toISOString(),
+          toExclusive: source.periodTo.toISOString(),
+          timezone: source.timezone,
+        },
+        completeness: source.completeness,
+        qualification: source.qualification,
+        metrics: sanitizeCoreFullOfflineAuditValue(
+          metrics,
+          sources.get(tenantId)?.privateValues ?? [],
+        ),
+      },
+    ];
+  }
   async function coordinationState(tenantId: string) {
     const runs = await db.prisma.c9Run.findMany({
       where: { tenantId },
@@ -1970,6 +2134,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     return Promise.all(
       runs.map(async (run) => ({
         runHash: hash(run.id),
+        ...(profile.id === CORE_OFFLINE_PROFILE
+          ? { auditRunRef: 'sha256:' + sha256(run.id) }
+          : {}),
         state: run.state,
         currentRevision: run.currentRevision,
         revisions: (
@@ -1985,18 +2152,30 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             ? revision.evidenceRefsJson.length
             : null,
         })),
-        work: (
-          await db.prisma.c9WorkReceipt.findMany({
-            where: { tenantId, runId: run.id },
-            orderBy: { domain: 'asc' },
-          })
-        ).map((row) => ({
-          workHash: hash(row.id),
-          domain: row.domain,
-          taskKey: row.taskKey,
-          state: row.state,
-          resultHash: row.resultHash,
-        })),
+        work: await Promise.all(
+          (
+            await db.prisma.c9WorkReceipt.findMany({
+              where: { tenantId, runId: run.id },
+              orderBy: { domain: 'asc' },
+            })
+          ).map(async (row) => ({
+            workHash: hash(row.id),
+            ...(profile.id === CORE_OFFLINE_PROFILE
+              ? {
+                  auditWorkRef: 'sha256:' + sha256(row.id),
+                  publishedSources: await publishedFinancialSources(
+                    tenantId,
+                    run,
+                    row,
+                  ),
+                }
+              : {}),
+            domain: row.domain,
+            taskKey: row.taskKey,
+            state: row.state,
+            resultHash: row.resultHash,
+          })),
+        ),
       })),
     );
   }

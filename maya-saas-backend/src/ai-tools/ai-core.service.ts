@@ -6,6 +6,7 @@ import {
 import { goodsSearchReply } from './goods-search-presentation';
 import { explicitGoodsSearchCode } from './goods-search-chat-selection';
 import { goodsReadReply } from './goods-presentation';
+import { reviewsReply } from './reviews-presentation';
 import { ownTasksReply } from './own-tasks-presentation';
 import {
   isOwnerReviewClarification,
@@ -479,6 +480,7 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'catalog.staff.read': 'staff_catalog',
   'company.business-hours.read': 'company_profile',
   'support.integration-status.read': 'integration_status',
+  'reviews.list.read': 'reviews',
   'staff.schedule.read': 'staff_schedule',
   // 🔴 Свой график мастера обязан быть ИСТОЧНИКОМ ДАННЫХ наравне с командным.
   // Его тут не было, поэтому инструмент, выданный мастеру каталогом, не мог
@@ -2617,6 +2619,7 @@ export class AiCoreService {
         // their existing continuation; this presentation grants no authority.
         const serviceRenamePreview =
           decision.toolCall.name === 'catalog.service.rename.preview';
+        const reviewsRead = decision.toolCall.name === 'reviews.list.read';
         const goodsRead = [
           'inventory.goods.read',
           'inventory.goods.search',
@@ -2663,6 +2666,7 @@ export class AiCoreService {
                 widgetTrigger: 'T-2a',
                 // Consultation is a READ answer, not a booking selector.
                 ...(publicConsultation ||
+                reviewsRead ||
                 goodsRead ||
                 serviceRenamePreview ||
                 scopedPersonalRead ||
@@ -2804,6 +2808,7 @@ export class AiCoreService {
           (decision.toolCall.name === 'booking.availability.read' &&
             isExactBookingTime(hardenedArguments.time)) ||
           goodsRead ||
+          reviewsRead ||
           serviceRenamePreview ||
           publicConsultation
         ) {
@@ -2858,7 +2863,12 @@ export class AiCoreService {
                                   execution.result,
                                   execution.stale === true,
                                 )
-                              : null;
+                              : reviewsRead
+                                ? reviewsReply(
+                                    execution.result,
+                                    execution.stale === true,
+                                  )
+                                : null;
           const deterministicReply =
             sourceReply?.status === 'verified' && reschedulePreparation
               ? `${sourceReply.reply}\n\n${reschedulePreparation}`

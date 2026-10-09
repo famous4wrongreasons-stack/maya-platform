@@ -359,7 +359,9 @@ export async function bindCandidateSource(
           'candidate-' + randomUUID(),
           {
             from: '2026-10-01T00:00:00+03:00',
-            to: '2026-10-31T23:59:59+03:00',
+            // The report reader converts this inclusive instant with +1 ms.
+            // Keep the exact local month frame; observed coverage remains asOf.
+            to: '2026-10-31T23:59:59.999+03:00',
           },
           now,
         ),

@@ -119,6 +119,85 @@ describe('BusinessContentService', () => {
     });
   });
 
+  it('describes the actual empty filtered review query without claiming configuration absence', async () => {
+    const { service, prisma } = setup();
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now.getTime());
+    prisma.businessReview.findMany.mockResolvedValue([]);
+    try {
+      const result = await service.listReviews('tenant-a', {
+        days: 30,
+        rating: 2,
+        branchId: 'branch-a',
+        limit: 5,
+      });
+      expect(prisma.businessReview.findMany).toHaveBeenCalledWith({
+        where: {
+          tenantId: 'tenant-a',
+          occurredAt: { gte: new Date('2026-07-15T10:00:00.000Z') },
+          rating: 2,
+          branchId: 'branch-a',
+        },
+        orderBy: { occurredAt: 'desc' },
+        take: 5,
+      });
+      // Historical compatibility only: this flag still derives from matches.
+      expect(result.configured).toBe(false);
+      expect(result.source).toBe('not_configured');
+      expect(result.read_scope).toEqual({
+        contract: 'maya.review-registry-query/1',
+        from_inclusive: '2026-07-15T10:00:00.000Z',
+        to_exclusive: null,
+        rating_exact: 2,
+        scope: 'one_branch',
+        order: 'occurred_at_desc',
+        limit: 5,
+        returned_count: 0,
+        limit_reached: false,
+        configuration_status: 'not_observed',
+      });
+      expect(prisma.businessReview.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.businessReview.create).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it('preserves tenant-wide unbounded lower date and distinguishes hitting the limit from proven truncation', async () => {
+    const { service, prisma } = setup();
+    prisma.businessReview.findMany.mockResolvedValue([
+      {
+        id: 'review-a',
+        source: 'yandex',
+        rating: 2,
+        occurredAt: now,
+        topicTagsJson: ['wait'],
+        encryptedText: 'SECRET',
+        branchId: null,
+        staffExternalId: null,
+      },
+    ]);
+    const result = await service.listReviews('tenant-a', { limit: 1 });
+    expect(prisma.businessReview.findMany).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-a' },
+      orderBy: { occurredAt: 'desc' },
+      take: 1,
+    });
+    expect(result.read_scope).toEqual({
+      contract: 'maya.review-registry-query/1',
+      from_inclusive: null,
+      to_exclusive: null,
+      rating_exact: null,
+      scope: 'tenant',
+      order: 'occurred_at_desc',
+      limit: 1,
+      returned_count: 1,
+      limit_reached: true,
+      configuration_status: 'not_observed',
+    });
+    expect(result.configured).toBe(true);
+    expect(JSON.stringify(result)).not.toContain('SECRET');
+  });
+
   it('passes review text only to the encrypted immutable fact boundary', async () => {
     const { service, reviewFacts, auditLog } = setup();
     reviewFacts.accept.mockResolvedValue({

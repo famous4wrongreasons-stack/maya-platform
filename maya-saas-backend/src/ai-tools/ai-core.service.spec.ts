@@ -3414,6 +3414,71 @@ describe('AiCoreService', () => {
     ).toBe('[]');
   });
 
+  it.each(['empty', 'stale', 'missing-scope'])(
+    'composes the reviews %s result once without inferring registry configuration',
+    async (kind) => {
+      const name = 'reviews.list.read';
+      const mocks = createService([name]);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: null,
+          toolCall: { name, arguments: { days: 30, rating: 1, limit: 20 } },
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'reviews-read',
+        stale: kind === 'stale',
+        result: {
+          configured: false,
+          source: 'not_configured',
+          count: 0,
+          reviews: [],
+          privacy: 'review_text_redacted_from_ai',
+          ...(kind === 'missing-scope'
+            ? {}
+            : {
+                read_scope: {
+                  contract: 'maya.review-registry-query/1',
+                  from_inclusive: '2026-09-09T12:00:00.000Z',
+                  to_exclusive: null,
+                  rating_exact: 1,
+                  scope: 'tenant',
+                  limit: 20,
+                  order: 'occurred_at_desc',
+                  returned_count: 0,
+                  limit_reached: false,
+                  configuration_status: 'not_observed',
+                },
+              }),
+        },
+      });
+      const answer = await mocks.service.chat(user, {
+        ...dto,
+        messages: [
+          { role: 'user', content: 'Покажи плохие отзывы за прошлый месяц' },
+        ],
+      });
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+        suppressWidgetTrigger: true,
+      });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(answer.action).toBeNull();
+      expect(answer.source).toBe('safe_fallback');
+      expect(answer.grounding.status).toBe(
+        kind === 'empty' ? 'verified' : 'blocked',
+      );
+      expect(answer.reply).not.toMatch(
+        /реестр не настроен|Отзывы.*не настроены/,
+      );
+      if (kind === 'empty')
+        expect(answer.reply).toContain(
+          'По выполненным фильтрам отзывы не найдены',
+        );
+    },
+  );
+
   describe('personal appointment details in the canonical chat', () => {
     const tool = 'appointments.own.list';
     const client = { ...user, role: UserRole.CLIENT };
