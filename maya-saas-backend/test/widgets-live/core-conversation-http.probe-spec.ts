@@ -136,6 +136,7 @@ type Wire = Record<string, unknown> & {
     revision?: number;
     state?: string;
     current?: boolean;
+    replayed?: boolean;
   };
   action?: { status?: string };
   grounding?: { status?: string };
@@ -1199,6 +1200,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                     scope: answer.coordination.scope,
                     state: answer.coordination.state,
                     current: answer.coordination.current,
+                    replayed: answer.coordination.replayed,
                     revision: answer.coordination.revision,
                     runHash: hash(answer.coordination.run_id ?? null),
                     revisionHash: hash(answer.coordination.revision_id ?? null),
@@ -1291,11 +1293,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               expect(answer.action).toBeNull();
               expect(answer.coordination).toMatchObject({
                 scope: 'explicit_business_occupancy',
-                current: true,
+                // The composite includes historical C7 measurements even when
+                // this explicit request freshly qualifies the window below.
+                current: false,
+                replayed: false,
                 revision: 1,
               });
               expect(observation.financialEvidenceCount).toBeGreaterThan(0);
               expect(observation.recommendation).toMatchObject({
+                outcome: 'AVAILABLE',
                 noSideEffects: true,
                 executionAuthority: false,
               });
