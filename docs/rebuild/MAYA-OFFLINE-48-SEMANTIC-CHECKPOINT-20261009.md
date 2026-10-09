@@ -21,7 +21,7 @@ Read the [actual 81-turn audit](evidence/maya-offline-48-semantics-20261009/ACTU
 [machine score](evidence/maya-offline-48-semantics-20261009/http/r2/semantic-score.json)
 and [raw runner report](evidence/maya-offline-48-semantics-20261009/http/r2/runner-report.json).
 The [96-file evidence manifest](evidence/maya-offline-48-semantics-20261009/manifest.json)
-has SHA256 `5dd949372d7b1e9fd1555acebb61be38f7f4e37e705ff2eea2e25c417a83ecec`.
+has SHA256 `b651d195e316243ba93eacf960a062f3e917dc11f8ccba8e1befccc2c6fdcaeb`.
 
 This candidate extends the separate offline-only 48-dialogue / 81-turn diagnostic
 at `5445c932a9968374584e30f47c2f4f2a69b305dd`. It does not change the frozen

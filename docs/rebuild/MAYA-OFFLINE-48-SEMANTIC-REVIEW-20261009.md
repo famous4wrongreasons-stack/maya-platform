@@ -38,10 +38,12 @@ The reviewer did not edit files or run services, model calls or additional tests
   connections or requests remaining.
 
 The root additionally verified all 96 evidence-manifest entries byte-for-byte
-against the Git index, plus the manifest itself. The 10,997,064 archived bytes
+against the Git index, plus the manifest itself. The 10,997,020 archived bytes
 include original r1 results, failed checks, final r2 results and the human-readable
 81-turn audit. Evidence-manifest SHA256:
-`5dd949372d7b1e9fd1555acebb61be38f7f4e37e705ff2eea2e25c417a83ecec`.
+`b651d195e316243ba93eacf960a062f3e917dc11f8ccba8e1befccc2c6fdcaeb`.
+Whitespace checks pass for authored code and documents. Copied raw logs retain
+their original whitespace and are excluded from that formatting-only check.
 
 ## Limits
 
