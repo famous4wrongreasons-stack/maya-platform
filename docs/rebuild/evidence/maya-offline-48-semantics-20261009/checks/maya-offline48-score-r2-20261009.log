@@ -1,0 +1,12 @@
+✔ all 81 missing attempts are explicit and cannot be fabricated as semantic success (2.070916ms)
+✔ HTTP 201 on every planned turn without source audit does not become a passing score (2.264583ms)
+✔ changed source, corpus, unknown or duplicate rows and unobserved assistant history are rejected (0.581583ms)
+✔ a stopped actual HTTP failure retains raw reply/status and gives remaining turns explicit missing evidence (0.75875ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42.607042

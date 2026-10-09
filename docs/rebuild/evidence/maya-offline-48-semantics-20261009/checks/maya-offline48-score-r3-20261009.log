@@ -1,0 +1,13 @@
+✔ failed execution after all scored turns cannot retain a green artifact exit code (0.313208ms)
+✔ all 81 missing attempts are explicit and cannot be fabricated as semantic success (1.826125ms)
+✔ HTTP 201 on every planned turn without source audit does not become a passing score (2.355834ms)
+✔ changed source, corpus, unknown or duplicate rows and unobserved assistant history are rejected (0.639375ms)
+✔ a stopped actual HTTP failure retains raw reply/status and gives remaining turns explicit missing evidence (0.919125ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45.047333

@@ -1,5 +1,28 @@
 # Offline 48: source and task semantics checkpoint
 
+The final local HTTP run completed all **48 dialogues / 81 turns**. The 17:00
+staff-continuation fixture is fixed and proven through the actual application.
+Every turn now has a source/task verdict and its raw actual reply is auditable.
+
+| Final finite verdict | Turns |
+| --- | ---: |
+| Pass | 41 |
+| Semantic failure | 25 |
+| Unsupported in the bounded scenario | 9 |
+| Insufficient evidence | 6 |
+
+Critical checks: **0 observed failures, 2 turns with missing schedule evidence**.
+This is not a blanket safety pass. A semantic failure takes precedence over
+missing evidence in the main count. The runner exits **2** because the diagnostic
+contains semantic failures; HTTP execution itself completed (80 HTTP 201 and one
+expected membership-revocation 401). There were no skipped or unresolved turns.
+
+Read the [actual 81-turn audit](evidence/maya-offline-48-semantics-20261009/ACTUAL-81-TURN-AUDIT.md),
+[machine score](evidence/maya-offline-48-semantics-20261009/http/r2/semantic-score.json)
+and [raw runner report](evidence/maya-offline-48-semantics-20261009/http/r2/runner-report.json).
+The [96-file evidence manifest](evidence/maya-offline-48-semantics-20261009/manifest.json)
+has SHA256 `5dd949372d7b1e9fd1555acebb61be38f7f4e37e705ff2eea2e25c417a83ecec`.
+
 This candidate extends the separate offline-only 48-dialogue / 81-turn diagnostic
 at `5445c932a9968374584e30f47c2f4f2a69b305dd`. It does not change the frozen
 9-dialogue candidate, its prepared handoff, the production website, live provider
@@ -120,6 +143,29 @@ All six owned process groups were absent, the broker closed, PostgreSQL stopped,
 the postmaster pid file was absent and source pins remained unchanged. The broker
 recorded zero upstream calls, no loaded credentials and no paid authorization.
 
-Final scores and review will be recorded after the evaluator corrections are
-verified. UNKNOWN/restart are not exercised by this corpus and cannot be claimed
-as passed. All provider/model calls in this lane remain scripted and local.
+## Final source-bound proof
+
+Run `r2` used clean source `e02dfde6619e7f838dd1323d9c7c6961f9f4347b` and
+manifest `c22434ab717a088d9ae6807e994708daa02bc60d4fcc87e1d591fe92cf4f555b`.
+The expectation-descriptor hash is
+`30b7da0df828ff253115625406d991edf5b489cb8bfe880a3728272ceb67d916`.
+The frozen human expectation document retains its original hash above; corrections
+to the executable diagnostic predicates are explicitly described in this report.
+
+The final run again recorded zero upstream calls, no loaded credentials and no
+paid authorization. All six owned groups were absent, the broker closed,
+PostgreSQL stopped, the pid file was absent and source pins remained unchanged.
+The occupancy transition remained AVAILABLE to CLOSED after the controlled
+synthetic source change, with no execution authority. No app business mutation
+or outbound notification was observed. Test setup/source transitions are fixture
+writes, not claims of a real CRM operation.
+
+The frozen nine-dialogue candidate remained clean at
+`b74d62851de075a48f2c10bf5da48524c8ca0e47`; the prepared handoff remained clean at
+`3faa0c4f8934c8c67a8fc564936c3f8070ce8a67`. No prompt window, paid model,
+live YCLIENTS, production, phone, website, push, merge or deployment was used.
+
+UNKNOWN/restart are not exercised by this corpus and cannot be claimed as passed.
+Scripted transport cannot qualify a real model, real language quality, live branch
+binding or overall MAYA/C10 completion. The 25 failing turns and six insufficient
+turns above are remaining development/verification work, not a green release gate.

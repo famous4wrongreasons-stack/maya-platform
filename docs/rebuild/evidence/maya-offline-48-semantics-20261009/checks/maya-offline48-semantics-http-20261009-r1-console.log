@@ -1,0 +1,10 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START conversation
+{"status":"completed-with-semantic-failures","clusterStopped":true,"output":"/private/tmp/maya-offline48-semantics-http-20261009-r1","manifestSha256":"743286ffcdd94d44f40e81105678953ce82e0304779e1eb8f83bab21bc8e798b","qualification":"SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"}
