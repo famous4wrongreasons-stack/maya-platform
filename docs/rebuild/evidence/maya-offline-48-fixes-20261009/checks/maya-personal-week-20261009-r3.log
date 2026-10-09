@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       274 skipped, 31 passed, 305 total
+Snapshots:   0 total
+Time:        0.697 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-personal-week-20261009-r3.json

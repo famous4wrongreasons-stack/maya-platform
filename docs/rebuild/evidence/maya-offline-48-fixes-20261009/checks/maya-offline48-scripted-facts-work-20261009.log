@@ -1,0 +1,122 @@
+✔ exact 48/81 corpus pin is mandatory; no mutated text, subset, ordering or gold additions (0.82125ms)
+✔ 47 model-eligible cases/80 turns each have a finite authored plan; revoked case has zero model eligibility (15.661ms)
+✔ exact role/text/surface/date/turn guards refuse, latch, and never echo payloads (1.489833ms)
+✔ aliases bind only exact frozen name slots and relative date uses current Moscow clock (0.510417ms)
+✖ restored branch references stay opaque at exact frozen positions on topic switches (0.538625ms)
+✔ a completed tool is not dispatched again and missing current tool is an explicit limitation (0.400625ms)
+✔ compound carries requested today and only explicit acceptance selects empty bounded entities (0.253209ms)
+✖ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (0.961584ms)
+✔ inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope (1.459292ms)
+✔ bounded repeated phases, backward context, oversize request and attempted mutation of evidence refuse safely (1.054792ms)
+✔ schedule resolves current catalog name to reference, never a name token or first unrelated staff (1.780583ms)
+✖ finance comparison preserves both exact windows with two bounded owner reads, not equal-length substitution (0.565333ms)
+✔ address and closing time retain both tasks and read actual company hours after catalog (0.24625ms)
+✔ service finals use actual catalog values and qualify absent employee mapping; no exact price from ranges/null (1.239458ms)
+✖ BI final keeps exact half-open source period, timezone, partial basis and units without calling booked value revenue (0.3575ms)
+✔ profit reads current owner before explaining returned missing basis; no canned source outage or invented zero (0.82925ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 12
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 66.984667
+
+✖ failing tests:
+
+test at scripts/conversation-qualification/core-full-offline-model.test.mjs:215:1
+✖ restored branch references stay opaque at exact frozen positions on topic switches (0.538625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'catalog.staff.read'
+  - 'staff.schedule.read'
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs:229:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'catalog.staff.read',
+    expected: 'staff.schedule.read',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/conversation-qualification/core-full-offline-model.test.mjs:286:1
+✖ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (0.961584ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   arguments_json: '{"period":"year_to_date","comparison":"none"}',
+  +   name: 'analytics.business.query'
+  + }
+  - null
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs:317:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { name: 'analytics.business.query', arguments_json: '{"period":"year_to_date","comparison":"none"}' },
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/conversation-qualification/core-full-offline-model.test.mjs:430:1
+✖ finance comparison preserves both exact windows with two bounded owner reads, not equal-length substitution (0.565333ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /сравнение.*не подтверждено/i. Input:
+  
+  'Текущий запрошенный период:\n' +
+    'Измерение нужного периода не подтверждено источником.\n' +
+    'Финансовое сравнение и причины разницы не подтверждены: источник не предоставил рассчитанную разницу для этой пары полных календарных окон. Частичные наблюдения и стоимость записанного не заменяют подтверждённую выручку.'
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs:447:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Текущий запрошенный период:\nИзмерение нужного периода не подтверждено источником.\nФинансовое сравнение и причины разницы не подтверждены: источник не предоставил рассчитанную разницу для этой пары полных календарных окон. Частичные наблюдения и стоимость записанного не заменяют подтверждённую выручку.',
+    expected: /сравнение.*не подтверждено/i,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at scripts/conversation-qualification/core-full-offline-model.test.mjs:491:1
+✖ BI final keeps exact half-open source period, timezone, partial basis and units without calling booked value revenue (0.3575ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /SECRET_SENTINEL|999999|выручка: 23456|за весь октябрь/i. Input:
+  
+  'Период источника [2026-09-30T21:00:00.000Z, 2026-10-09T11:28:41.356Z), правая граница исключена. Часовой пояс: Europe/Moscow.\n' +
+    'Полнота данных: PARTIAL.\n' +
+    'Стоимость записанного, не кассовая выручка: 23456 RUB; единица money_minor (минимальные денежные единицы); основа booked_prices; состояние PARTIAL.\n' +
+    'Подтверждённая касса: не измерено; ноль из этого не следует.'
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs:496:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Период источника [2026-09-30T21:00:00.000Z, 2026-10-09T11:28:41.356Z), правая граница исключена. Часовой пояс: Europe/Moscow.\nПолнота данных: PARTIAL.\nСтоимость записанного, не кассовая выручка: 23456 RUB; единица money_minor (минимальные денежные единицы); основа booked_prices; состояние PARTIAL.\nПодтверждённая касса: не измерено; ноль из этого не следует.',
+    expected: /SECRET_SENTINEL|999999|выручка: 23456|за весь октябрь/i,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }

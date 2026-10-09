@@ -1,0 +1,120 @@
+{
+  "baseline": "49ef3132ca5e9d36fe9a128858a3873b39283eb6",
+  "newRuntime": "a454e7782d80d64cbe1499e6cee3e1e9465ce3db",
+  "changes": [
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "failedCheckIds": [],
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "failedCheckIds": [],
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 1,
+      "before": "insufficient_evidence",
+      "after": "semantic_fail",
+      "failedCheckIds": [
+        "requested_financial_owner_scope_unavailable_explained"
+      ],
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 1,
+      "before": "insufficient_evidence",
+      "after": "semantic_fail",
+      "failedCheckIds": [
+        "requested_financial_owner_scope_unavailable_explained"
+      ],
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 3,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "failedCheckIds": [],
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "failedCheckIds": [],
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "failedCheckIds": [],
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "utt-finance.profit-055",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "unsupported",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    }
+  ]
+}

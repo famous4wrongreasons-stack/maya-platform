@@ -1,0 +1,32 @@
+{
+  "qualification": "DERIVED_ACTUAL_TARGET_HTTP_RESPONSE_ASSERTIONS",
+  "rawResponseSha256": "2a16383a88bf30affeae718f36283de1b90756929629f19b005fa2f04d282cb0",
+  "rows": [
+    {
+      "case": "personal_client",
+      "checks": {
+        "next_week_labeled": true,
+        "empty_week_explicit": true,
+        "outside_visit_absent": true,
+        "no_top_level_resolution": true,
+        "no_tool_resolution": true,
+        "no_action": true,
+        "no_new_emission": true
+      },
+      "reply": "Следующая неделя: 2026-10-12 — 2026-10-18 (Asia/Novosibirsk).\nВ доступном списке нет записей. Источник: ваши записи в MAYA."
+    },
+    {
+      "case": "personal_tenant_owner",
+      "checks": {
+        "next_week_labeled": true,
+        "empty_week_explicit": true,
+        "outside_visit_absent": true,
+        "no_top_level_resolution": true,
+        "no_tool_resolution": true,
+        "no_action": true,
+        "no_new_emission": true
+      },
+      "reply": "Следующая неделя: 2026-10-12 — 2026-10-18 (Asia/Novosibirsk).\nВ доступном списке нет записей. Источник: ваши записи в MAYA."
+    }
+  ]
+}

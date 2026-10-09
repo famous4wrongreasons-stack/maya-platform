@@ -1,0 +1,27 @@
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › personal appointment details in the canonical chat › does not coerce an unsupported explicit period to an unfiltered list: {"period":"upcoming"}
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "16:00"
+    Received string:        "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.
+    Ближайшие записи:
+    07.10.2026, 16:00 (Asia/Novosibirsk) — Тестовый филиал — Стрижка
+    Источник: ваши записи в MAYA."
+
+      3505 |         );
+      3506 |         const response = await ask(mocks);
+    > 3507 |         expect(response.reply).not.toContain('16:00');
+           |                                    ^
+      3508 |         expect(response.grounding.status).toBe('blocked');
+      3509 |         expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+      3510 |           suppressWidgetTrigger: true,
+
+      at ai-tools/ai-core.service.spec.ts:3507:36
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 274 skipped, 30 passed, 305 total
+Snapshots:   0 total
+Time:        0.834 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-personal-week-20261009-r2.json

@@ -1,0 +1,26 @@
+✔ exact 48/81 corpus pin is mandatory; no mutated text, subset, ordering or gold additions (0.828417ms)
+✔ 47 model-eligible cases/80 turns each have a finite authored plan; revoked case has zero model eligibility (16.217167ms)
+✔ exact role/text/surface/date/turn guards refuse, latch, and never echo payloads (1.519584ms)
+✔ aliases bind only exact frozen name slots and relative date uses current Moscow clock (0.58825ms)
+✔ restored branch references stay opaque at exact frozen positions on topic switches (1.0345ms)
+✔ a completed tool is not dispatched again and missing current tool is an explicit limitation (0.706459ms)
+✔ compound carries requested today and only explicit acceptance selects empty bounded entities (0.541125ms)
+✔ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (1.099166ms)
+✔ inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope (2.008125ms)
+✔ bounded repeated phases, backward context, oversize request and attempted mutation of evidence refuse safely (0.833166ms)
+✔ schedule resolves current catalog name to reference, never a name token or first unrelated staff (1.837875ms)
+✔ finance comparison preserves both exact windows with two bounded owner reads, not equal-length substitution (0.856917ms)
+✔ address and closing time retain both tasks and read actual company hours after catalog (0.28375ms)
+✔ service finals use actual catalog values and qualify absent employee mapping; no exact price from ranges/null (1.631792ms)
+✔ BI final keeps exact half-open source period, timezone, partial basis and units without calling booked value revenue (0.288791ms)
+✔ profit reads current owner before explaining returned missing basis; no canned source outage or invented zero (0.494084ms)
+✔ source projections refuse stale or malformed facts and never expose arbitrary extra payloads (0.849917ms)
+✔ comparison projects two actual source windows but refuses a relabelled month or altered prior-year range (0.431791ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 72.239792

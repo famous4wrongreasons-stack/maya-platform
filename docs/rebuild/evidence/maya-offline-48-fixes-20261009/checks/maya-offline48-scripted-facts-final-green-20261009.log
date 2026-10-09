@@ -1,0 +1,28 @@
+✔ exact 48/81 corpus pin is mandatory; no mutated text, subset, ordering or gold additions (1.095958ms)
+✔ 47 model-eligible cases/80 turns each have a finite authored plan; revoked case has zero model eligibility (18.166333ms)
+✔ exact role/text/surface/date/turn guards refuse, latch, and never echo payloads (1.97175ms)
+✔ aliases bind only exact frozen name slots and relative date uses current Moscow clock (0.624958ms)
+✔ restored branch references stay opaque at exact frozen positions on topic switches (0.898458ms)
+✔ a completed tool is not dispatched again and missing current tool is an explicit limitation (0.82225ms)
+✔ compound carries requested today and only explicit acceptance selects empty bounded entities (0.410458ms)
+✔ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (1.18925ms)
+✔ inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope (2.327ms)
+✔ bounded repeated phases, backward context, oversize request and attempted mutation of evidence refuse safely (0.988125ms)
+✔ schedule resolves current catalog name to reference, never a name token or first unrelated staff (2.1075ms)
+✔ finance preserves requested comparison but finishes honestly after one owner read, as current CI does (0.768916ms)
+✔ address and closing time retain both tasks and read actual company hours after catalog (0.304667ms)
+✔ service finals use actual catalog values and qualify absent employee mapping; no exact price from ranges/null (1.73375ms)
+✔ BI final keeps exact half-open source period, timezone, partial basis and units without calling booked value revenue (0.683917ms)
+✔ profit reads current owner before explaining returned missing basis; no canned source outage or invented zero (0.608083ms)
+✔ source projections refuse stale or malformed facts and never expose arbitrary extra payloads (0.973875ms)
+✔ comparison reports the actual hardened window without relabelling it as the requested pair (0.702917ms)
+✔ canonical money_minor rejects decimal and noncanonical integer strings without rounding (0.438333ms)
+✔ invalid IANA timezone refuses the whole measurement without echoing the invalid value or amounts (0.427084ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 82.250917

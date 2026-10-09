@@ -1,0 +1,30 @@
+✔ exact 48/81 corpus pin is mandatory; no mutated text, subset, ordering or gold additions (0.803416ms)
+✔ 47 model-eligible cases/80 turns each have a finite authored plan; revoked case has zero model eligibility (16.732042ms)
+✔ exact role/text/surface/date/turn guards refuse, latch, and never echo payloads (1.706666ms)
+✔ aliases bind only exact frozen name slots and relative date uses current Moscow clock (0.637708ms)
+✔ restored branch references stay opaque at exact frozen positions on topic switches (0.844375ms)
+✔ a completed tool is not dispatched again and missing current tool is an explicit limitation (0.626333ms)
+✔ compound carries requested today and only explicit acceptance selects empty bounded entities (0.2875ms)
+✔ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (1.03625ms)
+✔ inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope (2.483667ms)
+✔ bounded repeated phases, backward context, oversize request and attempted mutation of evidence refuse safely (0.936792ms)
+✔ schedule resolves current catalog name to reference, never a name token or first unrelated staff (1.971834ms)
+✔ finance preserves requested comparison but finishes honestly after one owner read, as current CI does (0.7065ms)
+✔ address and closing time retain both tasks and read actual company hours after catalog (0.269333ms)
+✔ public catalog projection may alias the salon word before the next planner/final phase without halting (0.643958ms)
+✔ public salon alias acceptance requires exact current catalog token and unchanged surrounding request (0.764917ms)
+✔ service finals use actual catalog values and qualify absent employee mapping; no exact price from ranges/null (1.424333ms)
+✔ BI final keeps exact half-open source period, timezone, partial basis and units without calling booked value revenue (0.611333ms)
+✔ profit reads current owner before explaining returned missing basis; no canned source outage or invented zero (0.598375ms)
+✔ source projections refuse stale or malformed facts and never expose arbitrary extra payloads (0.851667ms)
+✔ comparison reports the actual hardened window without relabelling it as the requested pair (0.693208ms)
+✔ canonical money_minor rejects decimal and noncanonical integer strings without rounding (0.780334ms)
+✔ invalid IANA timezone refuses the whole measurement without echoing the invalid value or amounts (0.381666ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 78.655667
