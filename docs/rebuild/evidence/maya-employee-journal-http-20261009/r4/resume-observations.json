@@ -1,0 +1,115 @@
+{
+  "contract": "synthetic-employee-journal-read-observations/1",
+  "stage": "resume",
+  "sourceHead": "28cad8fa2fe155c81dc130eb7545881fd340d860",
+  "sourceBindingsDigest": "6030b5c082ff0c8d1e8dc01e3ec3255a960a61a2665effe767928cc3b2c3ea3f",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "utterances": [
+    "Покажи записи Артёма на завтра",
+    "Покажи записи Саши на завтра"
+  ],
+  "realAnalyticsAndPeriodReader": true,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "isolatedUtterancesOnly": true,
+  "fullDialogueReclassification": false,
+  "full48Reclassification": false,
+  "restart": {
+    "applicationPidChanged": true,
+    "postgresStartedChanged": true,
+    "graphHashUnchanged": "05018bdf0c2e406c120cc9b3e33421810a26d084f996fea7946225067b6c85b5"
+  },
+  "resumeReplay": {
+    "runHash": "a91bdc1bc58ffd2751b9306b1e0ea5000bc8fa2462f482d960e602a4a0c3aec1",
+    "graphHashUnchanged": "05018bdf0c2e406c120cc9b3e33421810a26d084f996fea7946225067b6c85b5"
+  },
+  "businessHash": "d65d65a3f01b5612578f291de018adf72329c8372b1fdcfc68c736fc5472d05a",
+  "sourceDriftSameRequest": {
+    "requestHash": "fbc80b845c25a75aef3a043b4166d6217bd6191e8ee9afc59e7aa638b6ae5af1",
+    "status": 201,
+    "readsAdded": 0
+  },
+  "transport": [
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "staff"
+    }
+  ],
+  "modelCalls": 3,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "fbc80b845c25a75aef3a043b4166d6217bd6191e8ee9afc59e7aa638b6ae5af1",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки. Журнал на 11.10.2026: Артём.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена).\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "2da6a7e777383f91e5793e84a8a3999518cb6c3b010606ea7b959808a7d109ed",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 403,
+      "modelCalls": 1,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": "conversation_principal_unavailable"
+    },
+    {
+      "requestHash": "204e9e67514e464a85cff9fdc2226416d15fdce9f9c1869566c49c6559801009",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 401,
+      "modelCalls": 0,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": {
+        "sha256": "660377bd24b72001d86c6151b908727afd23709fefa1e26d94071475f65a4b93"
+      }
+    },
+    {
+      "requestHash": "fbc80b845c25a75aef3a043b4166d6217bd6191e8ee9afc59e7aa638b6ae5af1",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    }
+  ],
+  "deniedPlans": [],
+  "sourceReceipts": [
+    {
+      "runHash": "a91bdc1bc58ffd2751b9306b1e0ea5000bc8fa2462f482d960e602a4a0c3aec1",
+      "staffId": "71",
+      "partial": false,
+      "references": [
+        {
+          "workHash": "620f1b92f7506f921a8b444b7be804ef460f9f37cb721dc92b1fbbcd07be3c7c",
+          "executionHash": "822c3f13daf2abb967646b5c41702e29d9a127208393e47325efd35ed5426f32",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "24fc57e0d978046a1c97df78b44b47341b90506423372bfbe9e28e80d0696931",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "913a418e35a81acd43662dea60d3f1227eafe1166a689314ec284cca6528bf40",
+          "executionHash": "4deb6bce2e5fd4578b33aff32e90f8bd992b6d97a554ab25ba014e953207a06f",
+          "taskKey": "operations.journal.read",
+          "inputHash": "472eeb2351808c4afbcd36b1b15d70590d328a3884f415861e7780b031302610",
+          "resultHash": "a2a4833b8c9d98f620051d9fe42508e39869a623f8d687380e060cfe4b195faf"
+        }
+      ]
+    }
+  ]
+}

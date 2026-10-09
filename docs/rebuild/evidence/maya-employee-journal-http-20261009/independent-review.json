@@ -1,0 +1,35 @@
+{
+  "contract": "maya.employee-journal-independent-review/1",
+  "reviewer": "independent_review",
+  "scope": "source and actual journal HTTP evidence, read-only",
+  "verdict": "QUALIFIED_PASS",
+  "runtimeHead": "28cad8fa2fe155c81dc130eb7545881fd340d860",
+  "sourceFilesVerified": 1847,
+  "manifestSha256": "56322037d177a72ac59c45b76fdb96d585cdd086772014450d5c91d60da34659",
+  "facts": {
+    "jestStagesPassed": 2,
+    "chatRequests": 14,
+    "chatHttpStatusCounts": {
+      "201": 11,
+      "403": 2,
+      "401": 1
+    },
+    "scriptedPlannerCalls": 12,
+    "finiteNativeGets": 15,
+    "unexpectedCalls": 0,
+    "sameOriginalCacheRestartReferences": true,
+    "postgresRestarted": true,
+    "allFourClustersStopped": true,
+    "sourceUnchangedInAllFourRuns": true
+  },
+  "qualifications": [
+    "Scripted model and synthetic native transport; no real model/provider/browser acceptance.",
+    "Native partial diagnostic was page_limit_reached after two pages, not a separately proved no-progress failure mode.",
+    "STAFF denial is the canonical pre-model access fallback; CLIENT denial prose is scripted after actual parser permission denial.",
+    "Revocation was refused by canonical principal boundary.",
+    "Source drift changes integration updatedAt, not company cutover or A17 activation.",
+    "Business snapshots/write families are finite; no global no-database-write or process-group absence claim.",
+    "R1, R2 and R3 remain failed and preserved.",
+    "No full48 or C10 completion claim."
+  ]
+}

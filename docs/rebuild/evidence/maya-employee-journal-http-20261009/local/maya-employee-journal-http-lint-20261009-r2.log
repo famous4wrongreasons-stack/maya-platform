@@ -1,0 +1,10 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.ts
+  448:46  error  Unsafe member access .YCLIENTS on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+  478:26  error  Unsafe assignment of an error typed value                         @typescript-eslint/no-unsafe-assignment
+  478:48  error  Unsafe member access .YCLIENTS on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+  518:9   error  Unsafe assignment of an error typed value                         @typescript-eslint/no-unsafe-assignment
+  518:31  error  Unsafe member access .YCLIENTS on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+
+✖ 5 problems (5 errors, 0 warnings)
+

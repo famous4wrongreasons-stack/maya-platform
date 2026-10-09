@@ -1,5 +1,9 @@
 # MAYA — журнал выбранного сотрудника через текущий филиал CRM
 
+Продолжение: [actual HTTP/auth/C9/PostgreSQL checkpoint с перезапуском](MAYA-EMPLOYEE-JOURNAL-HTTP-CHECKPOINT-20261009.md)
+закрывает описанный ниже прежний локальный HTTP gap на source `28cad8fa`.
+Предыдущие component evidence и ограничения этого документа сохранены исторически.
+
 В `84eedcb65820ebe063ca14cd5a8217e53187dcb3` подключён узкий полезный маршрут:
 явный вопрос о записях одного сотрудника за один день → existing validated
 `operations.journal_day` → current catalog/source → existing

@@ -1,0 +1,345 @@
+{
+  "contract": "synthetic-employee-journal-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "28cad8fa2fe155c81dc130eb7545881fd340d860",
+  "sourceBindingsDigest": "6030b5c082ff0c8d1e8dc01e3ec3255a960a61a2665effe767928cc3b2c3ea3f",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "utterances": [
+    "Покажи записи Артёма на завтра",
+    "Покажи записи Саши на завтра"
+  ],
+  "realAnalyticsAndPeriodReader": true,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "isolatedUtterancesOnly": true,
+  "fullDialogueReclassification": false,
+  "full48Reclassification": false,
+  "prepareReplay": {
+    "runHash": "a91bdc1bc58ffd2751b9306b1e0ea5000bc8fa2462f482d960e602a4a0c3aec1",
+    "graphHashUnchanged": "24339b87921dc6c40680de77ba63cabd7003fa6047d04caf1a7e1b60ee44ad1a"
+  },
+  "missingLink": {
+    "uniquePublicName": true,
+    "journalReadsAdded": 0
+  },
+  "ambiguity": {
+    "candidateWithLink": 1,
+    "candidateWithoutLink": 1,
+    "journalReadsAdded": 0
+  },
+  "foreignRun": {
+    "status": 400,
+    "runHash": "a91bdc1bc58ffd2751b9306b1e0ea5000bc8fa2462f482d960e602a4a0c3aec1"
+  },
+  "foreignHistory": {
+    "status": 200,
+    "isolated": true
+  },
+  "businessHash": "d65d65a3f01b5612578f291de018adf72329c8372b1fdcfc68c736fc5472d05a",
+  "transport": [
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "records",
+      "staffId": "71",
+      "date": "2026-10-11",
+      "page": 1
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "services"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "categories"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "71",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "72",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "73",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "74",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "records",
+      "staffId": "72",
+      "date": "2026-10-11",
+      "page": 1
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "records",
+      "staffId": "72",
+      "date": "2026-10-11",
+      "page": 2
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "71",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "72",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "73",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "73f6b284089935c2f2a6a92160e41bf344938a21258e74daf4e2f80686aa493b",
+      "resource": "schedule",
+      "staffId": "74",
+      "date": "2026-10-11"
+    }
+  ],
+  "modelCalls": 9,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "fbc80b845c25a75aef3a043b4166d6217bd6191e8ee9afc59e7aa638b6ae5af1",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Журнал на 11.10.2026: Артём.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена).\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "fbc80b845c25a75aef3a043b4166d6217bd6191e8ee9afc59e7aa638b6ae5af1",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки. Журнал на 11.10.2026: Артём.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена).\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "bf877e75218b63ea08ea48e7532ba303d5f271b0f7b621a4270e103b27058762",
+      "text": "Покажи записи Саши на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "fb2fc1ac049344b6a5b055c6cd9954e6eb86f7c87564b9c6ba18fabd3c233667",
+      "text": "Покажи сотрудников и записи Саши Иванова на завтра в «основной филиал»",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Журнал на 11.10.2026: Саша Иванов.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nИсточник прочитан не полностью; отсутствие других записей не подтверждено.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена).\nПоказана только часть полученных записей.\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "6c76bb0446d46aa0569d877e0f2b3c5b75b13570561c8d3c3b7004bfc2b20bde",
+      "text": "Покажи записи Елены на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "200852535b208c2fadec3e630a96a6684b8928bd02932898dc3c6f0ea7bdb999",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 0,
+      "reply": "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "boundary": "ordinary_chat_premodel_staff_access_refusal",
+      "replyOrigin": "SERVER_CLOSED_ACCESS_FALLBACK",
+      "languageAcceptance": false,
+      "serverAuthoredDeterministicRefusal": true,
+      "role": "staff",
+      "status": 201,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "boundary": "direct_registered_tool_http_only",
+      "role": "staff",
+      "managerJournalStatus": 403,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "requestHash": "267e31d8f66a96f919fcb3cd47efe0ca97b1e15b479339218dc2d1c76421c726",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Журнал сотрудников недоступен вашей роли.",
+      "grounding": "not_required",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "boundary": "ordinary_chat_parsed_permission_denied",
+      "replyOrigin": "SCRIPTED_DENIAL_PROSE",
+      "languageAcceptance": false,
+      "serverAuthoredDeterministicRefusal": false,
+      "role": "client",
+      "status": 201,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "boundary": "direct_registered_tool_http_only",
+      "role": "client",
+      "managerJournalStatus": 403,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "requestHash": "59fd7d1fc546e7096a3fa8a86756971a104b2003a9d6759db309067bf849164f",
+      "text": "Покажи записи Артёма на завтра в «другой филиал»",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Источник журнала или привязка филиала изменились. Повторите проверку сотрудника; актуальные записи сейчас не подтверждены.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "c5ad713c18d6becacbe4dbd47ff9e8c4e354fec7eeec6110df5a643d0482256c",
+      "text": "Foreign tenant branch preference (synthetic ID omitted)",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить актуальную связь сотрудника с филиалом и его журнал записей. Уточните сотрудника и филиал или повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "ceff7881207a616c8514d560c21265996e69397ab03cbe417184a374e7f1a28a",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 403,
+      "modelCalls": 1,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": "staff_schedule_branch_forbidden"
+    }
+  ],
+  "deniedPlans": [
+    {
+      "role": "client",
+      "intent": "operations.journal_day",
+      "permission": "denied",
+      "dataClass": "F",
+      "toolStatus": "not_available",
+      "advertisedJournal": false,
+      "replyOrigin": "SCRIPTED_DENIAL_PROSE",
+      "languageAcceptance": false,
+      "serverAuthoredDeterministicRefusal": false
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "a91bdc1bc58ffd2751b9306b1e0ea5000bc8fa2462f482d960e602a4a0c3aec1",
+      "staffId": "71",
+      "partial": false,
+      "references": [
+        {
+          "workHash": "620f1b92f7506f921a8b444b7be804ef460f9f37cb721dc92b1fbbcd07be3c7c",
+          "executionHash": "822c3f13daf2abb967646b5c41702e29d9a127208393e47325efd35ed5426f32",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "24fc57e0d978046a1c97df78b44b47341b90506423372bfbe9e28e80d0696931",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "913a418e35a81acd43662dea60d3f1227eafe1166a689314ec284cca6528bf40",
+          "executionHash": "4deb6bce2e5fd4578b33aff32e90f8bd992b6d97a554ab25ba014e953207a06f",
+          "taskKey": "operations.journal.read",
+          "inputHash": "472eeb2351808c4afbcd36b1b15d70590d328a3884f415861e7780b031302610",
+          "resultHash": "a2a4833b8c9d98f620051d9fe42508e39869a623f8d687380e060cfe4b195faf"
+        }
+      ]
+    },
+    {
+      "runHash": "a91bdc1bc58ffd2751b9306b1e0ea5000bc8fa2462f482d960e602a4a0c3aec1",
+      "staffId": "71",
+      "partial": false,
+      "references": [
+        {
+          "workHash": "620f1b92f7506f921a8b444b7be804ef460f9f37cb721dc92b1fbbcd07be3c7c",
+          "executionHash": "822c3f13daf2abb967646b5c41702e29d9a127208393e47325efd35ed5426f32",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "24fc57e0d978046a1c97df78b44b47341b90506423372bfbe9e28e80d0696931",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "913a418e35a81acd43662dea60d3f1227eafe1166a689314ec284cca6528bf40",
+          "executionHash": "4deb6bce2e5fd4578b33aff32e90f8bd992b6d97a554ab25ba014e953207a06f",
+          "taskKey": "operations.journal.read",
+          "inputHash": "472eeb2351808c4afbcd36b1b15d70590d328a3884f415861e7780b031302610",
+          "resultHash": "a2a4833b8c9d98f620051d9fe42508e39869a623f8d687380e060cfe4b195faf"
+        }
+      ]
+    },
+    {
+      "runHash": "6aea1116ae914e4dcccbdee60a2fc8b11e759f7ef91ac0f17264d88e99b0cc6a",
+      "staffId": "72",
+      "partial": true,
+      "references": [
+        {
+          "workHash": "cc94e557df2936b8cb2e22fefd5b1e65c4abc9deeae3591255f2e29903fa2c9a",
+          "executionHash": "062e3aa54c9b25a643c5d5c76d6122055782c636b403aeb69568466cf622b5bb",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "24fc57e0d978046a1c97df78b44b47341b90506423372bfbe9e28e80d0696931",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "d4304821409cd3e576d15fffea1aab10deb89c3d73218717fed2b1322353d2c5",
+          "executionHash": "9be65762115fdc6491cb12773f19f16f0a10c1afe1a7fd93dd161d2c492ff156",
+          "taskKey": "operations.journal.read",
+          "inputHash": "de813a32ea32cc440de159b32153cd147e7b248b0c29bbcaab7e91044d8e0b2e",
+          "resultHash": "929621b03b570daa32e5f98f3b279f46b58bda4d662f756b0ac83ece174ae0fb"
+        }
+      ]
+    }
+  ]
+}

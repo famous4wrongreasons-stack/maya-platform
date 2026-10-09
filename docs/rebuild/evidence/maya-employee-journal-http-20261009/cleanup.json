@@ -1,0 +1,34 @@
+[
+  {
+    "run": "r1",
+    "manifestStatus": "failed",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "pgCtlStatusExitCode": 3,
+    "postmasterPidAbsent": true
+  },
+  {
+    "run": "r2",
+    "manifestStatus": "failed",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "pgCtlStatusExitCode": 3,
+    "postmasterPidAbsent": true
+  },
+  {
+    "run": "r3",
+    "manifestStatus": "failed",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "pgCtlStatusExitCode": 3,
+    "postmasterPidAbsent": true
+  },
+  {
+    "run": "r4",
+    "manifestStatus": "passed",
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "pgCtlStatusExitCode": 3,
+    "postmasterPidAbsent": true
+  }
+]

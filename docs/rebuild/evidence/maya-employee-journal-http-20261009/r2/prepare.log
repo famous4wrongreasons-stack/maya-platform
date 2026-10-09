@@ -1,0 +1,31 @@
+widgets-live: proof database maya_widget_gate_proof_employeejournal_e91bb6526aac on 127.0.0.1:64247 (local)
+[33m[Nest] 46902  - [39m10/09/2026, 3:09:22 PM [33m   WARN[39m [38;5;3m[YclientsCRMAdapter] [39m[33mgetJournal: record fetch truncated (page_limit_reached) after 2 pages; absence conclusions are not allowed[39m
+[33m[Nest] 46902  - [39m10/09/2026, 3:09:22 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-10-10T10:00:00.000Z..2026-10-11T09:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+FAIL test/widgets-live/employee-journal-read-restart.probe-spec.ts
+  employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (1877 ms)
+
+  ● employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM] › qualifies only actual scoped READ results, survives restart, and refuses source/authority drift
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "blocked"
+    Received: "not_required"
+
+      611 |     if (conversation.status === 201) {
+      612 |       expect(conversation.body.action).toBeNull();
+    > 613 |       expect(object(conversation.body.grounding).status).toBe('blocked');
+          |                                                          ^
+      614 |       expect(conversation.body.reply).not.toContain('10:00');
+      615 |       expect(conversation.body.reply).not.toContain('Журнал на');
+      616 |       expect(conversation.body.resolution).toBeUndefined();
+
+      at roleRefusal (widgets-live/employee-journal-read-restart.probe-spec.ts:613:58)
+      at Object.<anonymous> (widgets-live/employee-journal-read-restart.probe-spec.ts:941:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        2.776 s, estimated 7 s
+Ran all test suites within paths "test/widgets-live/employee-journal-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-journal-http-20261009-r2/prepare-jest.json

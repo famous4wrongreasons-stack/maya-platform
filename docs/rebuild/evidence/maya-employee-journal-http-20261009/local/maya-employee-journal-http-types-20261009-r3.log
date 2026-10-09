@@ -1,0 +1,1 @@
+test/widgets-live/support/core-full-offline-fixtures.ts(8,10): error TS2305: Module '"@prisma/client"' has no exported member 'CrmProvider'.

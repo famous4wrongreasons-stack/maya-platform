@@ -1,0 +1,39 @@
+widgets-live: proof database maya_widget_gate_proof_employeejournal_5a1fb40317c5 on 127.0.0.1:64047 (local)
+[33m[Nest] 45703  - [39m10/09/2026, 3:07:34 PM [33m   WARN[39m [38;5;3m[YclientsCRMAdapter] [39m[33mgetJournal: record fetch truncated (page_limit_reached) after 2 pages; absence conclusions are not allowed[39m
+[33m[Nest] 45703  - [39m10/09/2026, 3:07:34 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-10-10T10:00:00.000Z..2026-10-11T09:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+[31m[Nest] 45703  - [39m10/09/2026, 3:07:34 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: ai_core_tool_not_available
+    at AiCoreModelService.validatePlanningResponse [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/[39msrc/ai-tools/ai-core-model.service.ts:1293:13[90m)[39m
+    at AiCoreModelService.<anonymous> [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/[39mtest/widgets-live/employee-journal-read-restart.probe-spec.ts:335:30[90m)[39m
+    at /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/[4mjest-mock[24m/build/index.js:305:39
+    at AiCoreModelService.<anonymous> (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/[4mjest-mock[24m/build/index.js:312:13)
+    at AiCoreModelService.mockConstructor [as decide] (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/[4mjest-mock[24m/build/index.js:102:19)
+    at AiCoreService.chat [90m(/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/[39msrc/ai-tools/ai-core.service.ts:1072:43[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+FAIL test/widgets-live/employee-journal-read-restart.probe-spec.ts (6.18 s)
+  employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✕ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (1958 ms)
+
+  ● employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM] › qualifies only actual scoped READ results, survives restart, and refuses source/authority drift
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [201, 401, 403]
+
+      602 |     expect(modelCalls).toBe(before.models);
+      603 |     const conversation = await chat(token, EXACT);
+    > 604 |     expect([201, 401, 403]).toContain(conversation.status);
+          |                             ^
+      605 |     if (conversation.status === 201) {
+      606 |       expect(conversation.body.action).toBeNull();
+      607 |       expect(object(conversation.body.grounding).status).toBe('blocked');
+
+      at roleRefusal (widgets-live/employee-journal-read-restart.probe-spec.ts:604:29)
+      at Object.<anonymous> (widgets-live/employee-journal-read-restart.probe-spec.ts:935:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        6.201 s
+Ran all test suites within paths "test/widgets-live/employee-journal-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-journal-http-20261009-r1/prepare-jest.json
