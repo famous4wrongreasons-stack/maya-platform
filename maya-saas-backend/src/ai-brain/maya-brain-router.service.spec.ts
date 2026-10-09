@@ -4,6 +4,40 @@ import { MayaBrainRouterService } from './maya-brain-router.service';
 describe('MayaBrainRouterService', () => {
   const service = new MayaBrainRouterService();
 
+  it.each([
+    ['Слушай, посмотри: привет, Майя. Объясни простыми словами.', 'general'],
+    ['проверь помоги мне разобраться. Не подмяй факты прогнозом.', 'support'],
+    [
+      'Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами.',
+      'general',
+    ],
+    ['Дай прогноз', 'general'],
+  ])(
+    'ordinary administrator wording is not financial authority: %s',
+    (text, intent) => {
+      expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+        persona: 'director',
+        intent,
+      });
+    },
+  );
+
+  it.each([
+    ['Объясни простыми словами выручку', 'finance'],
+    ['Не подменяй факты прогнозом. Какая выручка?', 'finance'],
+    ['Дай прогноз выручки', 'finance'],
+    ['Покажи рост прибыли', 'business_analytics'],
+    ['Что с ростом загрузки?', 'business_analytics'],
+  ])(
+    'ordinary presentation wording preserves the requested protected topic: %s',
+    (text, intent) => {
+      expect(service.route(UserRole.ADMINISTRATOR, text, 'owner')).toEqual({
+        persona: 'director',
+        intent,
+      });
+    },
+  );
+
   it('routes a client booking to the admin persona', () => {
     expect(
       service.route(UserRole.CLIENT, 'Запиши меня завтра на стрижку'),

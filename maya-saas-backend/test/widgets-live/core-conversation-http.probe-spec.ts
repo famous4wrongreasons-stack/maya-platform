@@ -1084,6 +1084,68 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           clock: source.clockBinding,
         });
       } else {
+        if (item.id === 'followup-admin-general-chat') {
+          const before = await businessState(source.tenant.id);
+          const sourceReadCount = source.reads.length;
+          const checks: Record<string, unknown>[] = [];
+          for (const content of [
+            'Объясни простыми словами выручку',
+            'Не подменяй факты прогнозом. Какая выручка?',
+            'Дай прогноз выручки',
+            'Покажи рост прибыли',
+          ]) {
+            const denied = await request(http.app.getHttpServer())
+              .post('/api/ai/chat')
+              .set('Authorization', `Bearer ${source.token}`)
+              .send({
+                surface: 'web',
+                audience: 'owner',
+                requestId: randomUUID(),
+                messages: [{ role: 'user', content }],
+              });
+            expect(denied.status).toBe(201);
+            expect(denied.body).toMatchObject({
+              source: 'safe_fallback',
+              action: null,
+              tools_used: [],
+              grounding: { status: 'blocked' },
+            });
+            expect((denied.body as { reply: string }).reply).toContain(
+              'недоступен',
+            );
+            checks.push({
+              content,
+              httpStatus: denied.status,
+              grounding: 'blocked',
+            });
+          }
+          const forbiddenTool = await http.executeTool(
+            source.token,
+            'analytics.business.query',
+            {
+              surface: 'web',
+              arguments: { period: 'today', comparison: 'none' },
+              idempotencyKey: randomUUID(),
+            },
+            randomUUID(),
+          );
+          expect(forbiddenTool.status).toBe(403);
+          expect(modelCalls).toBe(0);
+          expect(brokerCalls).toBe(0);
+          expect(source.reads.length).toBe(sourceReadCount);
+          expect(await businessState(source.tenant.id)).toBe(before);
+          preflights.push({
+            caseId: item.id,
+            qualification:
+              'SEPARATE_NEGATIVE_AUTHORITY_CONTROLS_NOT_CORPUS_TURNS',
+            role: member.role,
+            checks,
+            forbiddenToolStatus: 403,
+            modelCalls: 0,
+            sourceReads: 0,
+            businessHashUnchanged: true,
+          });
+        }
         if (item.id === 'followup-admin-typo-ambiguous-period') {
           for (const tool of ['catalog.staff.read', 'catalog.services.read']) {
             const catalog = await http.executeTool(
@@ -1417,6 +1479,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               source: answer.source ?? null,
               grounding: answer.grounding ?? null,
               actionStatus: answer.action?.status ?? null,
+              toolsUsed: answer.tools_used ?? [],
               coordination: answer.coordination
                 ? {
                     scope: answer.coordination.scope,
@@ -1485,6 +1548,31 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             expect(response.status).toBe(201);
             expect(typeof answer.reply).toBe('string');
             expect(typeof answer.user_turn?.conversationId).toBe('string');
+            if (caseId === 'followup-admin-general-chat') {
+              expect(modelCalls - modelBefore).toBeGreaterThan(0);
+              expect(modelOutputResponses - outputBefore).toBeGreaterThan(0);
+              expect(answer.tools_used).toEqual([]);
+              expect(observation.sourceReads).toEqual([]);
+              expect(answer.action).toBeNull();
+              expect(answer.grounding?.status).toBe('not_required');
+              expect(answer.reply).not.toContain(
+                'недоступен для вашей текущей роли',
+              );
+              expect(approvals).toEqual([]);
+              const inputObservations = modelObservations.filter(
+                (entry) => entry.caseId === caseId && entry.turn === turn,
+              );
+              expect(inputObservations.length).toBeGreaterThan(0);
+              for (const entry of inputObservations) {
+                expect(entry.role).toBe(UserRole.ADMINISTRATOR);
+                expect(entry.sourceProjections).toEqual([]);
+                expect(
+                  (entry.actualTools as string[]).some((name) =>
+                    name.startsWith('analytics.'),
+                  ),
+                ).toBe(false);
+              }
+            }
             // Offline regression expectations apply only to explicitly bound
             // recorded outputs/synthetic continuations, never grade live model
             // choices against a substituted gold answer.

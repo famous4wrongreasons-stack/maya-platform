@@ -2403,6 +2403,166 @@ describe('AiCoreService', () => {
     expect(result.reply).not.toContain('аналитик');
   });
 
+  describe('ordinary administrator conversation without financial authority', () => {
+    const role = UserRole.ADMINISTRATOR;
+    const toolNames = ['catalog.staff.read', 'catalog.services.read'];
+    const cases = [
+      [
+        'Слушай, посмотри: привет, Майя. Объясни простыми словами.',
+        'small_talk.greeting',
+        'Здравствуйте! Чем помочь?',
+      ],
+      [
+        'проверь помоги мне разобраться. Не подмяй факты прогнозом.',
+        'small_talk.free_form',
+        'С чем хотите разобраться?',
+      ],
+      [
+        'Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами.',
+        'small_talk.thanks',
+        'Пожалуйста, обращайтесь.',
+      ],
+    ] as const;
+
+    it.each(cases)(
+      'lets semantic planning answer %s with unchanged role and no source calls',
+      async (text, intent, reply) => {
+        const mocks = createService(toolNames);
+        const plan = new ConversationIntelligenceService().validatePlan(
+          {
+            parent_request: text,
+            tasks: [{ intent, entities: {}, confidence: 0.99 }],
+          },
+          role,
+          toolNames,
+        );
+        expect(plan?.tasks[0]).toMatchObject({ data_class: 'A' });
+        mocks.model.decide.mockResolvedValueOnce(
+          decision({
+            reply,
+            toolCall: null,
+            semanticPlan: plan,
+          }),
+        );
+        const out = await mocks.service.chat(
+          { ...user, role },
+          {
+            ...dto,
+            audience: 'owner',
+            messages: [{ role: 'user', content: text }],
+          },
+        );
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide.mock.calls[0][0].principalRole).toBe(role);
+        expect(
+          mocks.model.decide.mock.calls[0][0].tools.map((t) => t.name),
+        ).toEqual(toolNames);
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+        expect(out).toMatchObject({
+          reply,
+          action: null,
+          grounding: { status: 'not_required' },
+        });
+      },
+    );
+
+    it.each([
+      'Объясни простыми словами выручку',
+      'Не подменяй факты прогнозом. Какая выручка?',
+      'Дай прогноз выручки',
+      'Покажи рост прибыли',
+      'Какой график у мастера завтра?',
+    ])(
+      'retains pre-model protected-source refusal for %s after ordinary conversation',
+      async (text) => {
+        const mocks = createService(toolNames);
+        const out = await mocks.service.chat(
+          { ...user, role },
+          {
+            ...dto,
+            audience: 'owner',
+            messages: [
+              { role: 'user', content: cases[0][0] },
+              { role: 'assistant', content: cases[0][2] },
+              { role: 'user', content: text },
+            ],
+          },
+        );
+        expect(out.grounding.status).toBe('blocked');
+        expect(mocks.model.decide).not.toHaveBeenCalled();
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
+      [UserRole.ADMINISTRATOR, 'allowed'],
+      [UserRole.CLIENT, 'denied'],
+    ] as const)(
+      'does not grant %s an unavailable forecast capability after semantic disambiguation',
+      async (currentRole, permission) => {
+        const mocks = createService(toolNames);
+        const plan = new ConversationIntelligenceService().validatePlan(
+          {
+            parent_request: 'Дай прогноз',
+            tasks: [
+              {
+                intent: 'finance.revenue_forecast',
+                entities: { target_period: 'this_month' },
+                confidence: 0.99,
+              },
+            ],
+          },
+          currentRole,
+          toolNames,
+        );
+        expect(plan?.tasks[0].permission.status).toBe(permission);
+        expect(plan?.tasks[0].tool.status).toBe('not_available');
+        mocks.model.decide.mockResolvedValueOnce(
+          decision({
+            reply: 'Выручка составит 999999 рублей.',
+            toolCall: { name: 'analytics.revenue.forecast', arguments: {} },
+            semanticPlan: plan,
+          }),
+        );
+        const rejected = mocks.service.chat(
+          { ...user, role: currentRole },
+          {
+            ...dto,
+            audience: 'owner',
+            messages: [{ role: 'user', content: 'Дай прогноз' }],
+          },
+        );
+        await expect(rejected).rejects.toMatchObject({
+          response: { error: { code: 'ai_model_tool_not_allowed' } },
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
+
+    it('does not discard source grounding merely because routing is general', async () => {
+      const mocks = createService(toolNames);
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: 'Всё отлично, показатели выросли на 99%.',
+          toolCall: null,
+        }),
+      );
+      const out = await mocks.service.chat(
+        { ...user, role },
+        {
+          ...dto,
+          audience: 'owner',
+          messages: [{ role: 'user', content: cases[0][0] }],
+        },
+      );
+      expect(mocks.model.decide).toHaveBeenCalled();
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      expect(out.grounding.status).toBe('blocked');
+      expect(out.reply).not.toContain('99');
+    });
+  });
+
   // 🔴 Живой случай из прода: «Че ты как?» с телефона. Планировщик верно
   // пометил ход как small_talk, модель ответила по-человечески, а сторож
   // источника — поставленный РАНЬШЕ, по регулярке, где есть «че как», но нет
