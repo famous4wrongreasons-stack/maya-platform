@@ -1,0 +1,4 @@
+src/ai-tools/ai-tool-handler.service.ts(659,5): error TS2322: Type 'Readonly<{ branchId: string | null; timezone: string; period: "named_month"; month: string; fromInclusive: string; toExclusive: string; rating: {} | null; limit: number; }>' is not assignable to type 'Readonly<{ branchId: string | null; timezone: string; period: "named_month"; month: string; fromInclusive: string; toExclusive: string; rating: number | null; limit: number; }>'.
+  Types of property 'rating' are incompatible.
+    Type '{} | null' is not assignable to type 'number | null'.
+      Type '{}' is not assignable to type 'number'.

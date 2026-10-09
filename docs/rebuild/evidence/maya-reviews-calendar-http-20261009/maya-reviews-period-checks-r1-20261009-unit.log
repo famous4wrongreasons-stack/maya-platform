@@ -1,0 +1,22 @@
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/measurement/measurement.reputation.spec.ts
+PASS src/ai-tools/ai-core.reviews-calendar.spec.ts
+PASS src/measurement/measurement.read.spec.ts
+PASS src/ai-tools/ai-tool-handler.review-calendar.spec.ts
+PASS src/business-content/business-content.review-calendar.spec.ts
+PASS src/measurement/measurement.review-calendar.spec.ts
+PASS src/ai-tools/reviews-calendar-read.spec.ts
+PASS src/measurement/measurement.reputation.architecture.spec.ts
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/business-content/business-content.service.spec.ts
+PASS src/ai-tools/owner-review-plan.spec.ts
+PASS src/ai-tools/reviews-presentation.spec.ts
+
+Test Suites: 15 passed, 15 total
+Tests:       843 passed, 843 total
+Snapshots:   0 total
+Time:        2.242 s
+Ran all test suites within paths "src/ai-tools/ai-core.reviews-calendar.spec.ts", "src/ai-tools/ai-tool-handler.review-calendar.spec.ts", "src/ai-tools/owner-review-plan.spec.ts", "src/ai-tools/reviews-calendar-read.spec.ts", "src/ai-tools/reviews-presentation.spec.ts", "src/business-content/business-content.review-calendar.spec.ts", "src/measurement/measurement.review-calendar.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/business-content/business-content.service.spec.ts", "src/measurement/measurement.read.spec.ts", "src/measurement/measurement.reputation.spec.ts", "src/measurement/measurement.reputation.architecture.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-reviews-period-checks-r1-20261009-unit.json

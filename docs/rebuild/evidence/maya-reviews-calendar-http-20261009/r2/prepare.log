@@ -1,0 +1,40 @@
+widgets-live: proof database maya_widget_gate_proof_reviewsperiod_1e0a3476f427 on 127.0.0.1:61228 (local)
+[31m[Nest] 28139  - [39m10/09/2026, 5:18:13 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 28139  - [39m10/09/2026, 5:18:13 PM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/reviews-period-read-restart.probe-spec.ts
+  reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTHETIC CANONICAL FACTS]
+    ✕ reads the exact calendar scope without private review text and preserves receipts across restart (1596 ms)
+
+  ● reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTHETIC CANONICAL FACTS] › reads the exact calendar scope without private review text and preserves receipts across restart
+
+    PrismaClientKnownRequestError: 
+    Invalid `db.prisma.widgetTimelineTurn.findFirstOrThrow()` invocation in
+    /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts:656:55
+
+      653     role: 'user',
+      654   },
+      655 });
+    → 656 const stored = await db.prisma.widgetTimelineTurn.findFirstOrThrow(
+    An operation failed because it depends on one or more records that were required but not found. No record was found for a query.
+
+      654 |       },
+      655 |     });
+    > 656 |     const stored = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+          |                    ^
+      657 |       where: {
+      658 |         id: chatReplyId(salon.tenant.id, parent.id),
+      659 |         tenantId: salon.tenant.id,
+
+      at zr.handleRequestError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:237:13)
+      at zr.handleAndLogRequestError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:12)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:12)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at assertClarification (widgets-live/reviews-period-read-restart.probe-spec.ts:656:20)
+      at Object.<anonymous> (widgets-live/reviews-period-read-restart.probe-spec.ts:950:9)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        2.441 s, estimated 6 s
+Ran all test suites within paths "test/widgets-live/reviews-period-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-reviews-period-http-20261009-r2/prepare-jest.json
