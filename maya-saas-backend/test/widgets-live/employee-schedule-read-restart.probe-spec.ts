@@ -708,8 +708,9 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
         .get('/api/ai/conversation')
         .set('Authorization', `Bearer ${foreignToken}`);
       expect(foreignHistory.status).toBe(200);
-      expect(JSON.stringify(foreignHistory.body)).not.toContain(
-        first.body.reply,
+      expect(object(foreignHistory.body).turns).toEqual([]);
+      expect(object(foreignHistory.body).conversationId).not.toBe(
+        conversationId,
       );
       expect(transport).toHaveLength(beforeBranch);
       report.foreignHistory = { status: foreignHistory.status, isolated: true };
@@ -769,7 +770,19 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
         .get('/api/ai/conversation')
         .set('Authorization', `Bearer ${token}`);
       expect(history.status).toBe(200);
-      expect(JSON.stringify(history.body)).toContain(saved.firstReply);
+      expect(object(history.body).conversationId).toBe(saved.conversationId);
+      const historyTurns = object(history.body).turns;
+      assert.ok(Array.isArray(historyTurns));
+      expect(
+        historyTurns.some((turn: unknown) => {
+          const row = object(turn);
+          return (
+            row.role === 'assistant' &&
+            typeof row.text === 'string' &&
+            row.text.includes(saved.firstReply)
+          );
+        }),
+      ).toBe(true);
       expect(transport).toEqual([]);
       expect(modelCalls).toBe(0);
       const replay = await chat(
