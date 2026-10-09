@@ -152,7 +152,7 @@ function syntheticPlan(step) {
     semantic_plan: {
       parent_request: step.text,
       language: 'ru',
-      dialogue_act: step.caseId === OWNER ? 'compound_request' : 'request',
+      dialogue_act: step.caseId === OWNER ? 'accept_bounded_review' : 'request',
       tasks,
       context: {
         carried_slots: [],

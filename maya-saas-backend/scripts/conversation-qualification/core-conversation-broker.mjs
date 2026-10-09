@@ -23,6 +23,7 @@ import {
   createCoreRecordedReplay,
   CORE_RECORDED_REPLAY_QUALIFICATION,
 } from './core-recorded-replay.mjs';
+import { createCoreActualDefectsReplay } from './core-actual-defects-replay.mjs';
 // Import-safe for the finite local A+B launcher. Shared input never enters CLI,
 // runner, environment, files or IPC; all ordinary permit checks remain mandatory.
 export async function startCoreBroker(values, batch = null) {
@@ -40,6 +41,15 @@ export async function startCoreBroker(values, batch = null) {
     'core_broker_explicit_mode',
   );
   const recordedReplay = values['recorded-replay'] === true;
+  const replayFixture = values['replay-fixture'];
+  assert.ok(
+    replayFixture === undefined ||
+      (recordedReplay &&
+        ['actual-20261009', 'synthetic-accept-20261009'].includes(
+          replayFixture,
+        )),
+    'core_broker_replay_fixture_refused',
+  );
   assert.ok(
     !recordedReplay || values.mode === 'dry',
     'core_broker_recorded_replay_dry_only',
@@ -133,9 +143,16 @@ export async function startCoreBroker(values, batch = null) {
         ? CORE_RECORDED_REPLAY_QUALIFICATION
         : 'CANNED_WIRING_ONLY_NOT_MODEL_QUALITY',
     recordedReplay,
+    replayFixture: replayFixture ?? null,
     ...(recordedReplay ? { recordedResponses: [] } : {}),
   };
-  const replay = recordedReplay ? createCoreRecordedReplay() : null;
+  const replay = recordedReplay
+    ? replayFixture
+      ? createCoreActualDefectsReplay(
+          replayFixture === 'actual-20261009' ? 'archived' : 'synthetic-accept',
+        )
+      : createCoreRecordedReplay()
+    : null;
   let gate, credentialIdentity, localCredential, broker;
   let localStopQueued = false;
   const save = () => {
@@ -505,6 +522,7 @@ if (
     options: {
       mode: { type: 'string' },
       'recorded-replay': { type: 'boolean' },
+      'replay-fixture': { type: 'string' },
       manifest: { type: 'string' },
       'manifest-sha256': { type: 'string' },
       output: { type: 'string' },

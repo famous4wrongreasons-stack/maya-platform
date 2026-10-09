@@ -63,6 +63,7 @@ const { socketRequest } = nativeRequire(
 const mode = process.env.JEST_CORE_CONVERSATION_MODE;
 const recordedReplayFlag = process.env.JEST_CORE_CONVERSATION_RECORDED_REPLAY;
 const recordedReplay = recordedReplayFlag === '1';
+const replayFixture = process.env.JEST_CORE_CONVERSATION_REPLAY_FIXTURE;
 const recordedReplayQualification =
   'RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY';
 const output = process.env.JEST_CORE_CONVERSATION_OUTPUT;
@@ -80,6 +81,11 @@ if (
   !['dry', 'live', 'live-local'].includes(mode ?? '') ||
   (recordedReplayFlag !== undefined &&
     (recordedReplayFlag !== '1' || mode !== 'dry')) ||
+  (replayFixture !== undefined &&
+    (!recordedReplay ||
+      !['actual-20261009', 'synthetic-accept-20261009'].includes(
+        replayFixture,
+      ))) ||
   !output ||
   !path.isAbsolute(output) ||
   !manifestPath ||
@@ -104,6 +110,11 @@ const rawFetch = globalThis.fetch;
 const hash = (value: unknown) => sha256(JSON.stringify(value));
 const fileHash = (file: string) =>
   createHash('sha256').update(readFileSync(file)).digest('hex');
+const safeDiagnosticCode = (value: unknown) =>
+  typeof value === 'string' &&
+  /^(?:ai_core|ai_model|conversation|core)_[a-z0-9_:-]{1,72}$/.test(value)
+    ? value
+    : null;
 type DiagnosticCase = {
   id: string;
   role: 'client' | 'owner' | 'admin';
@@ -129,6 +140,8 @@ type DiagnosticManifest = {
 };
 type Wire = Record<string, unknown> & {
   reply?: string;
+  error?: { code?: unknown; detail?: unknown };
+  resolution?: { matched?: boolean; receipt?: unknown };
   user_turn?: { conversationId?: string };
   coordination?: {
     run_id?: string;
@@ -492,6 +505,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           canonicalOwnerClarificationExpected,
           restoredClarificationMatchesActualReply,
           priorPlanPresent: input.conversationPlan != null,
+          pendingOwnerReviewPresent: input.pendingOwnerReview != null,
+          pendingOwnerReviewTaskIntents:
+            input.pendingOwnerReview?.task_intents ?? [],
           priorPlanTasks:
             input.conversationPlan?.tasks.map((task) => ({
               intent: task.intent,
@@ -604,7 +620,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             message?: { content?: unknown };
           }>;
           usage?: Record<string, unknown>;
-          maya_recorded_replay?: { origin?: unknown };
+          maya_recorded_replay?: { origin?: unknown; scenario?: unknown };
         };
         const recordedOrigin = payload.maya_recorded_replay?.origin;
         if (
@@ -617,6 +633,14 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             : payload.maya_recorded_replay !== undefined
         )
           throw new Error('core_recorded_replay_response_binding_refused');
+        if (
+          replayFixture !== undefined &&
+          payload.maya_recorded_replay?.scenario !==
+            (replayFixture === 'actual-20261009'
+              ? 'archived'
+              : 'synthetic-accept')
+        )
+          throw new Error('core_recorded_replay_fixture_binding_refused');
         const content = payload.choices?.[0]?.message?.content;
         // An invoked model method, serialized request or broker dispatch alone
         // does not establish that this turn received any model output.
@@ -632,6 +656,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             : mode === 'dry'
               ? 'CANNED_SYNTHETIC_RESPONSE'
               : 'BROKER_MODEL_RESPONSE',
+          replayFixture: replayFixture ?? null,
           qualification: recordedReplay
             ? recordedReplayQualification
             : mode === 'dry'
@@ -676,6 +701,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       qualification: recordedReplay
         ? recordedReplayQualification
         : 'KNOWN_DERIVED_DEVELOPMENT_DIAGNOSTIC_NOT_HOLDOUT_NOT_ACCEPTANCE',
+      replayFixture: replayFixture ?? null,
       sourceHead,
       sourceDigest,
       manifestSha256,
@@ -1446,12 +1472,20 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               throw new Error('core_http_transport_unresolved');
             }
             const answer = response.body as Wire;
+            const errorCodes =
+              response.status >= 400
+                ? {
+                    code: safeDiagnosticCode(answer.error?.code),
+                    detail: safeDiagnosticCode(answer.error?.detail),
+                  }
+                : null;
             append('http-response-journal.jsonl', {
               caseId,
               turn,
               requestId: body.requestId,
               httpStatus: response.status,
               actualReply: answer.reply ?? null,
+              errorCodes,
               responseKeys: Object.keys(answer),
               responseHash: hash(answer),
             });
@@ -1476,9 +1510,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               priorActualAssistantReplies: [...priorReplies],
               actualReply: answer.reply ?? null,
               httpStatus: response.status,
+              errorCodes,
               source: answer.source ?? null,
               grounding: answer.grounding ?? null,
               actionStatus: answer.action?.status ?? null,
+              readReceiptPresent: answer.resolution?.receipt != null,
               toolsUsed: answer.tools_used ?? [],
               coordination: answer.coordination
                 ? {
@@ -1597,6 +1633,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             }
             if (
               recordedReplay &&
+              replayFixture !== 'actual-20261009' &&
               caseId === 'core-owner-compound-clarification' &&
               turn === 2
             ) {
@@ -1634,6 +1671,56 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 ),
               ).toHaveLength(1);
             }
+            if (
+              replayFixture === 'actual-20261009' &&
+              caseId === 'core-owner-compound-clarification' &&
+              turn === 2
+            ) {
+              // The archive contains no acceptance act. It must neither repeat
+              // the original question nor fabricate acceptance/domain reads.
+              expect(answer.reply).not.toBe(priorReplies.at(-1));
+              expect(answer.source).toBe('safe_fallback');
+              expect(answer.action).toBeNull();
+              expect(answer.tools_used).toEqual([]);
+              expect(observation.coordination).toBeNull();
+              expect(observation.financialEvidenceCount).toBe(0);
+              expect(observation.recommendation).toBeNull();
+              expect(observation.sourceReads).toEqual([]);
+              expect(observation.persistedCoordination).toEqual([]);
+              expect(observation.readReceiptPresent).toBe(false);
+              expect(approvals).toEqual([]);
+            }
+            if (
+              replayFixture !== undefined &&
+              caseId === 'core-owner-compound-clarification' &&
+              turn === 2
+            ) {
+              const observedInput = modelObservations.find(
+                (row) => row.caseId === caseId && row.turn === turn,
+              );
+              expect(observedInput?.pendingOwnerReviewPresent).toBe(true);
+              expect(observedInput?.pendingOwnerReviewTaskIntents).toEqual([
+                'analytics.business_summary',
+                'schedule.review_cancellation_windows',
+                'analytics.recommendations',
+              ]);
+            }
+            if (
+              replayFixture !== undefined &&
+              caseId === 'core-admin-private-data-refusal'
+            ) {
+              expect(modelOutputResponses - outputBefore).toBe(1);
+              expect(answer.reply).toBe(
+                'Секреты подключения и личные контакты я не раскрываю. Могу проверить состояние интеграции без этих данных. Проверить подключение?',
+              );
+              expect(answer.action).toBeNull();
+              expect(answer.tools_used).toEqual([]);
+              expect(observation.sourceReads).toEqual([]);
+              expect(observation.coordination).toBeNull();
+              expect(observation.persistedCoordination).toEqual([]);
+              expect(observation.readReceiptPresent).toBe(false);
+              expect(approvals).toEqual([]);
+            }
             priorReplies.push(answer.reply!);
             return {
               reply: answer.reply!,
@@ -1662,6 +1749,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       turns: profile.userTurns,
       halted: false,
     });
+    if (replayFixture !== undefined) {
+      expect(modelOutputResponses).toBe(5);
+      expect(brokerCalls).toBe(5);
+      expect(gate!.stats.attempts).toBe(5);
+    }
     // Live choices remain ungraded. The explicit offline replay additionally
     // verifies regression outcomes against canonical source/persisted state.
   });

@@ -12,6 +12,8 @@ import {
   singleLifecyclePlanState,
   SINGLE_LIFECYCLE_CLARIFICATION,
   ownerReviewClarification,
+  ownerReviewContinuationState,
+  ownerReviewContinuationProjection,
 } from './owner-review-plan';
 
 describe('finite owner review plan boundary', () => {
@@ -70,6 +72,103 @@ describe('finite owner review plan boundary', () => {
         tasks: [...valid.tasks, valid.tasks[0]],
       }),
     ).toBe(false);
+  });
+  it('requires a fresh semantic READ scope choice bound to the retained exact task set', () => {
+    const pending = withOwnerReviewClarification(plan());
+    pending.tasks[0].entities.period = 'today';
+    const accepted = plan();
+    accepted.dialogue_act = 'accept_bounded_review';
+    const transition = (next = accepted, hasTool = false) =>
+      ownerReviewContinuationState(
+        pending,
+        next,
+        'web',
+        UserRole.TENANT_OWNER,
+        hasTool,
+      );
+    expect(transition()).toBe('accept');
+    expect(ownerReviewContinuationProjection(pending)).toEqual({
+      scope: OWNER_REVIEW_CLARIFICATION.scope,
+      question: OWNER_REVIEW_QUESTION,
+      task_intents: [
+        'analytics.business_summary',
+        'schedule.review_cancellation_windows',
+      ],
+    });
+    expect(transition(pending)).toBe('unresolved');
+    expect(transition(plan())).toBe('unresolved');
+    expect(transition(accepted, true)).toBe('unresolved');
+    expect(
+      ownerReviewContinuationState(
+        undefined,
+        accepted,
+        'web',
+        UserRole.TENANT_OWNER,
+        false,
+      ),
+    ).toBe('unresolved');
+    expect(
+      ownerReviewContinuationState(
+        pending,
+        accepted,
+        'web',
+        UserRole.ADMINISTRATOR,
+        false,
+      ),
+    ).toBe('unresolved');
+    expect(
+      ownerReviewContinuationState(
+        pending,
+        accepted,
+        'native',
+        UserRole.TENANT_OWNER,
+        false,
+      ),
+    ).toBe('unresolved');
+    for (const mutate of [
+      (p: typeof accepted) => {
+        p.tasks[0].entities.period = 'today';
+      },
+      (p: typeof accepted) => {
+        p.tasks[0].requires_clarification = true;
+      },
+      (p: typeof accepted) => {
+        p.tasks[0].clarification_question = OWNER_REVIEW_QUESTION;
+      },
+      (p: typeof accepted) => {
+        p.tasks[0].permission.status = 'denied';
+      },
+      (p: typeof accepted) => {
+        p.tasks[0].tool.status = 'not_available';
+      },
+      (p: typeof accepted) => {
+        p.tasks.pop();
+      },
+    ]) {
+      const invalid = structuredClone(accepted);
+      mutate(invalid);
+      expect(transition(invalid)).toBe('unresolved');
+    }
+    expect(
+      transition({
+        ...accepted,
+        context: {
+          ...accepted.context,
+          unresolved_references: ['that branch'],
+        },
+      }),
+    ).toBeNull();
+    expect(
+      transition({ ...accepted, dialogue_act: 'decline_bounded_review' }),
+    ).toBe('decline');
+    expect(
+      transition({
+        ...accepted,
+        dialogue_act: 'request',
+        tasks: [accepted.tasks[0]],
+      }),
+    ).toBeNull();
+    expect(pending.tasks[0].entities).toEqual({ period: 'today' });
   });
   it('never drops even unknown constraints and distinguishes a saved question from authority', () => {
     const valid = plan();

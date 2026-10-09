@@ -1069,6 +1069,7 @@ export class AiCoreModelService {
       'EXAMPLE JSON OUTPUT WITHOUT A TOOL: {"semantic_plan":{"parent_request":"Привет","language":"ru","dialogue_act":"greeting","tasks":[{"id":"task_1","intent":"small_talk.greeting","entities_json":"{}","depends_on":[],"confidence":0.99,"requires_clarification":false,"clarification_question":null}],"context":{"carried_slots":[],"replaced_slots":[],"unresolved_references":[]}},"tool_call":null}',
       'For an authenticated web owner, a single clients.dormant_list task is delegated to existing C9 with tool_call=null. Its only scope is up to three published C8 visit-recency evaluations under business rules, not a customer list or a campaign. Preserve every requested period, branch, threshold and other constraint in semantic entities. The server offers a bounded alternative when scope differs; retain its saved clarification and original slots until explicit acceptance or correction. Never add an unrequested financial task or infer customer value, return probability or contact permission.',
       'A web owner compound analytics.business_summary + clients.dormant_list (optional analytics.recommendations) is also delegated to existing C9 with tool_call=null. Its only scope is the last published tenant-wide financial snapshot plus up to three existing C8 dormancy evaluations, not a customer list or campaign. Preserve every requested period, branch, threshold and other constraint; the server asks about this bounded alternative. Retain the saved clarification and original slots until explicit acceptance or correction. Never substitute clients.retention.scan or claim customer value, return probability, causal revenue effect or contact permission from these evaluations.',
+      'When pending_owner_review is supplied, interpret the latest user turn as a response to that exact READ alternative, not a request to repeat semantic_plan. For explicit acceptance use dialogue_act=accept_bounded_review, the exact task_intents, empty entities_json objects, no clarification or unresolved references, and tool_call=null. For rejection use decline_bounded_review; for uncertainty use clarify_bounded_review. New constraints or a different question remain a new request with their own entities; never discard them. These acts select a READ scope, never authorize a mutation. Do not infer acceptance from the old plan or assistant prose.',
     ]
       .filter(Boolean)
       .join('\n');
@@ -1150,6 +1151,9 @@ export class AiCoreModelService {
       phase: 'tool_planning',
       ...this.baseModelInput(input),
       required_tools: input.requiredToolNames,
+      ...(input.pendingOwnerReview
+        ? { pending_owner_review: input.pendingOwnerReview }
+        : {}),
       // baseModelInput already supplies this same plan as semantic_plan.
       ...plannerWireContext(
         input.tools,
@@ -1241,10 +1245,16 @@ export class AiCoreModelService {
       throw new Error('ai_core_output_invalid_json');
     }
     const record = this.plainRecord(value, 'ai_core_output_invalid');
-    const semanticPlan = this.validateSemanticPlan(record.semantic_plan, input);
+    let semanticPlan = this.validateSemanticPlan(record.semantic_plan, input);
     if (!semanticPlan) {
       throw new Error('conversation_plan_missing');
     }
+    semanticPlan =
+      this.conversationIntelligence.clarifyUnselectedIntegrationRead(
+        semanticPlan,
+        record.tool_call,
+        input.toolResults.length,
+      );
     if (record.tool_call === null || record.tool_call === undefined) {
       if (
         !this.semanticClarification(semanticPlan) &&

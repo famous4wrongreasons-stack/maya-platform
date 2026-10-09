@@ -55,6 +55,12 @@ export interface AiCoreModelInput {
   corrections?: string[];
   /** Validated plan carried between tool iterations of one compound request. */
   conversationPlan?: ConversationSemanticPlan | null;
+  /** Restored by the authenticated conversation owner; READ scope preference only. */
+  pendingOwnerReview?: {
+    scope: string;
+    question: string;
+    task_intents: string[];
+  };
 }
 
 export interface AiCoreModelDecision {

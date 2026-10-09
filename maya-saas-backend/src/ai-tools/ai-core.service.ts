@@ -14,6 +14,9 @@ import {
   ownerReviewClarification,
   ownerReviewKind,
   ownerReviewPlanState,
+  ownerReviewContinuationProjection,
+  ownerReviewContinuationQuestion,
+  ownerReviewContinuationState,
   singleLifecyclePlanState,
   withOwnerReviewClarification,
 } from './owner-review-plan';
@@ -596,6 +599,10 @@ export class AiCoreService {
   ) {}
 
   private readonly historyReplays = new WeakSet<AiCoreChatDto>();
+  private readonly pendingOwnerReviews = new WeakMap<
+    AiCoreChatDto,
+    ConversationSemanticPlan
+  >();
   private readonly persistedUserTurns = new WeakMap<
     AiCoreChatDto,
     { turnId: string; conversationId: string }
@@ -1043,6 +1050,13 @@ export class AiCoreService {
           memoryFacts: sanitized.project(memoryFacts),
           corrections: sanitized.project(pendingCorrections),
           conversationPlan: modelPlan,
+          ...(step === 0 && this.pendingOwnerReviews.has(dto)
+            ? {
+                pendingOwnerReview: ownerReviewContinuationProjection(
+                  this.pendingOwnerReviews.get(dto)!,
+                ),
+              }
+            : {}),
         });
         if (!decision) {
           const deterministicReply = this.deterministicGroundedReply(
@@ -1105,6 +1119,42 @@ export class AiCoreService {
         if (typeof decision.reply === 'string')
           decision.reply = sanitized.present(decision.reply);
         decisions.push(decision);
+        if (step === 0 && decision.semanticPlan) {
+          const pending = this.pendingOwnerReviews.get(dto);
+          const transition = ownerReviewContinuationState(
+            pending,
+            decision.semanticPlan,
+            dto.surface,
+            toolUser.role,
+            decision.toolCall !== null,
+          );
+          if (transition === 'unresolved' || transition === 'decline') {
+            decision.toolCall = null;
+            decision.semanticPlan =
+              pending && transition === 'unresolved'
+                ? withOwnerReviewClarification(pending)
+                : null;
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  transition === 'decline'
+                    ? 'Хорошо, этот обзор не запускаю. Можно задать другой вопрос.'
+                    : ownerReviewContinuationQuestion(pending),
+                source: 'safe_fallback',
+                action: null,
+                ...(pending && transition === 'unresolved'
+                  ? { ownerReviewClarification: true as const }
+                  : {}),
+              },
+            );
+          }
+        }
         if (decision.semanticPlan) {
           activeSemanticPlan = decision.semanticPlan;
           if (this.semanticPlanNeedsNoData(activeSemanticPlan)) {
@@ -3561,6 +3611,12 @@ export class AiCoreService {
     }
     // Revalidate current permissions and available capabilities. History carries
     // semantic preferences only; no confirmation, execution or authority survives.
+    if (
+      ownerReviewClarification &&
+      (ownerReviewPlanState(plan, dto.surface, effectiveRole) !== null ||
+        singleLifecyclePlanState(plan, dto.surface, effectiveRole) !== null)
+    )
+      this.pendingOwnerReviews.set(dto, plan);
     return ownerReviewClarification
       ? withOwnerReviewClarification(plan)
       : bookingSelectionMerged

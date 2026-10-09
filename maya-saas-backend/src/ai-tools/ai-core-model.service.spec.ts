@@ -29,6 +29,54 @@ describe('AiCoreModelService', () => {
     jest.restoreAllMocks();
   });
 
+  it('projects the scoped pending READ choice separately from the old semantic request [synthetic transport]', async () => {
+    const plan = semanticPlan('analytics.business_summary', {});
+    plan.tasks.push({
+      ...semanticPlan('schedule.review_cancellation_windows', {}).tasks[0],
+      id: 'windows',
+    });
+    plan.dialogue_act = 'accept_bounded_review';
+    const transport = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+      );
+    const service = createService({
+      AI_CORE_PROVIDER: 'deepseek',
+      DEEPSEEK_API_KEY: 'synthetic-only-key',
+    });
+    const pendingOwnerReview = {
+      scope: 'last_published_tenant_finance_and_one_saved_cancellation',
+      question: 'Canonical pending READ scope, synthetic unit projection',
+      task_intents: [
+        'analytics.business_summary',
+        'schedule.review_cancellation_windows',
+      ],
+    };
+    const decision = await service.decide({
+      ...input,
+      principalRole: UserRole.TENANT_OWNER,
+      pendingOwnerReview,
+      tools: [
+        ...input.tools,
+        { ...input.tools[0], name: 'booking.availability.read' },
+      ],
+      messages: [
+        { role: 'user', content: 'Мне подходит предложенный вариант' },
+      ],
+    });
+    expect(decision?.semanticPlan?.dialogue_act).toBe('accept_bounded_review');
+    expect(transport).toHaveBeenCalledTimes(1);
+    const wire = JSON.parse(transport.mock.calls[0][1]?.body as string) as {
+      messages: { content: string }[];
+    };
+    expect(JSON.parse(wire.messages[1].content)).toHaveProperty(
+      'pending_owner_review',
+      pendingOwnerReview,
+    );
+    expect(wire.messages[0].content).toContain('never authorize a mutation');
+  });
+
   it('finite owner review parser accepts a delegated null tool call without weakening generic ready tasks', () => {
     const service = createService({ AI_CORE_PROVIDER: 'deepseek' });
     const plan = semanticPlan('analytics.business_summary', {});

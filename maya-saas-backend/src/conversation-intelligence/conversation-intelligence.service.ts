@@ -312,6 +312,48 @@ export class ConversationIntelligenceService {
     };
   }
 
+  clarifyUnselectedIntegrationRead(
+    plan: ConversationSemanticPlan,
+    selectedToolCall: unknown,
+    toolResultCount: number,
+  ): ConversationSemanticPlan {
+    // This is a capability clarification, not a classifier for private requests
+    // or a permission denial. A valid but unselected status READ must not cause
+    // a speculative source read or a fabricated integration-status answer.
+    const task = plan.tasks.length === 1 ? plan.tasks[0] : null;
+    if (
+      selectedToolCall !== null ||
+      toolResultCount !== 0 ||
+      !task ||
+      task.intent !== 'support.integration_status' ||
+      task.domain !== 'support' ||
+      task.action !== 'read' ||
+      task.data_class !== 'B' ||
+      task.capability.readiness !== 'ready' ||
+      task.permission.required !== 'integrations.read' ||
+      task.permission.status !== 'allowed' ||
+      task.tool.status !== 'ready' ||
+      task.tool.name !== 'support.integration-status.read' ||
+      task.tool.alternatives.length !== 1 ||
+      task.tool.alternatives[0] !== 'support.integration-status.read' ||
+      task.requires_confirmation ||
+      task.requires_clarification
+    ) {
+      return plan;
+    }
+    return {
+      ...plan,
+      tasks: [
+        {
+          ...task,
+          requires_clarification: true,
+          clarification_question:
+            'Секреты подключения и личные контакты я не раскрываю. Могу проверить состояние интеграции без этих данных. Проверить подключение?',
+        },
+      ],
+    };
+  }
+
   assertToolCallMatchesPlan(
     toolCall: ConversationToolCall | null,
     plan: ConversationSemanticPlan | null,

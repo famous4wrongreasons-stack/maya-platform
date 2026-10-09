@@ -32,6 +32,7 @@ const { values } = parseArgs({
     mode: { type: 'string' },
     profile: { type: 'string' },
     'recorded-replay': { type: 'boolean' },
+    'replay-fixture': { type: 'string' },
     output: { type: 'string' },
     manifest: { type: 'string' },
     'manifest-sha256': { type: 'string' },
@@ -58,6 +59,13 @@ assert.ok(
   'core_runner_mode',
 );
 const recordedReplay = values['recorded-replay'] === true;
+const replayFixture = values['replay-fixture'];
+assert.ok(
+  replayFixture === undefined ||
+    (recordedReplay &&
+      ['actual-20261009', 'synthetic-accept-20261009'].includes(replayFixture)),
+  'core_runner_replay_fixture_refused',
+);
 assert.ok(
   !recordedReplay || values.mode === 'dry',
   'core_runner_recorded_replay_dry_only',
@@ -150,6 +158,7 @@ if (values.prepare) {
       limitsSha256: profile.limitsSha256,
       paidAuthorized: false,
       recordedReplay,
+      replayFixture: replayFixture ?? null,
       resources: {
         nodeHeapMb: resources.nodeHeapMb,
         brokerHeapMb: resources.brokerHeapMb,
@@ -235,6 +244,7 @@ const report = {
       ? CORE_RECORDED_REPLAY_QUALIFICATION
       : 'DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY',
   recordedReplay,
+  replayFixture: replayFixture ?? null,
 };
 const save = () =>
   fs.writeFileSync(
@@ -312,6 +322,7 @@ try {
         '--mode',
         'dry',
         ...(recordedReplay ? ['--recorded-replay'] : []),
+        ...(replayFixture ? ['--replay-fixture', replayFixture] : []),
         '--manifest',
         manifestPath,
         '--manifest-sha256',
@@ -362,6 +373,9 @@ try {
   assertCoreSources(manifest);
   const probeEnv = {
     ...(recordedReplay ? { JEST_CORE_CONVERSATION_RECORDED_REPLAY: '1' } : {}),
+    ...(replayFixture
+      ? { JEST_CORE_CONVERSATION_REPLAY_FIXTURE: replayFixture }
+      : {}),
     JEST_CORE_CONVERSATION_MODE: localStdin
       ? 'live-local'
       : live

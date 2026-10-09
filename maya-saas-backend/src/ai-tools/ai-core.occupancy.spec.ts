@@ -1,4 +1,6 @@
 import { ConfigService } from '@nestjs/config';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { ModuleRef } from '@nestjs/core';
 import { AiCoreService } from './ai-core.service';
 import { AiCoreModelService } from './ai-core-model.service';
@@ -252,6 +254,47 @@ const compoundDecision = (entities: Record<string, string> = {}) => ({
   usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 });
 
+function syntheticAcceptance(decision: ReturnType<typeof compoundDecision>) {
+  decision.semanticPlan!.dialogue_act = 'accept_bounded_review';
+  return decision;
+}
+
+function archivedOwnerDecision(turn: number) {
+  const rows = readFileSync(
+    resolve(
+      __dirname,
+      '../../../docs/rebuild/evidence/local-ab-actual-20261009/a/runner/actual-model-responses.jsonl',
+    ),
+    'utf8',
+  )
+    .trim()
+    .split('\n')
+    .map(
+      (line) =>
+        JSON.parse(line) as { caseId: string; turn: number; content: string },
+    );
+  const row = rows.find(
+    (item) =>
+      item.caseId === 'core-owner-compound-clarification' && item.turn === turn,
+  )!;
+  const parsed = JSON.parse(row.content) as {
+    semantic_plan: { tasks: { entities_json: string }[] };
+  };
+  const decision = compoundDecision();
+  decision.semanticPlan = new ConversationIntelligenceService().validatePlan(
+    {
+      ...parsed.semantic_plan,
+      tasks: parsed.semantic_plan.tasks.map((task) => ({
+        ...task,
+        entities: JSON.parse(task.entities_json) as unknown,
+      })),
+    },
+    user.role,
+    ['analytics.business.query', 'booking.availability.read'],
+  );
+  return decision;
+}
+
 function clientValueDecision(entities: Record<string, string> = {}) {
   const decision = compoundDecision();
   decision.semanticPlan = new ConversationIntelligenceService().validatePlan(
@@ -437,7 +480,9 @@ describe('single Lifecycle semantic ingress (scripted selection, not source or m
 
     const accepted = fixture();
     accepted.timeline.readConversationContext.mockResolvedValue(replacement);
-    accepted.model.decide.mockResolvedValue(singleLifecycleDecision());
+    accepted.model.decide.mockResolvedValue(
+      syntheticAcceptance(singleLifecycleDecision()),
+    );
     const out = await accepted.service.chat(user, {
       ...dto('Да, выполни ограниченную проверку без дополнительных условий'),
       conversationId: 'conversation',
@@ -678,7 +723,9 @@ describe('explicit BI + Lifecycle in current chat (scripted planning only)', () 
     });
     const restarted = fixture();
     restarted.timeline.readConversationContext.mockResolvedValue(saved);
-    restarted.model.decide.mockResolvedValue(clientValueDecision());
+    restarted.model.decide.mockResolvedValue(
+      syntheticAcceptance(clientValueDecision()),
+    );
     const out = await restarted.service.chat(user, {
       ...dto('Да, такой ограниченный обзор'),
       conversationId: 'conversation',
@@ -865,7 +912,9 @@ describe('finite owner review compound ingress (synthetic, not real model accept
       before.timeline.persistAssistantReply.mock.calls[0][0].semanticContext;
     const restarted = fixture();
     restarted.timeline.readConversationContext.mockResolvedValue(saved);
-    restarted.model.decide.mockResolvedValue(compoundDecision());
+    restarted.model.decide.mockResolvedValue(
+      syntheticAcceptance(compoundDecision()),
+    );
     const result = await restarted.service.chat(user, {
       ...dto('Да, такой ограниченный обзор'),
       conversationId: 'conversation',
@@ -900,6 +949,163 @@ describe('finite owner review compound ingress (synthetic, not real model accept
     ).toHaveBeenCalledTimes(1);
     expect(f.runtime.execute).not.toHaveBeenCalled();
   });
+  it.each(['accept_bounded_review', 'decline_bounded_review'])(
+    'retains new constraints even when the planner contradicts them with %s',
+    async (act) => {
+      const first = fixture();
+      first.model.decide.mockResolvedValue(
+        compoundDecision({ period: 'today' }),
+      );
+      await first.service.chat(
+        user,
+        dto(
+          'Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг',
+        ),
+      );
+      const resumed = fixture();
+      resumed.timeline.readConversationContext.mockResolvedValue(
+        first.timeline.persistAssistantReply.mock.calls[0][0].semanticContext,
+      );
+      const corrected = compoundDecision({
+        period: 'tomorrow',
+        branch: 'changed-branch',
+      });
+      corrected.semanticPlan!.dialogue_act = act;
+      resumed.model.decide.mockResolvedValue(corrected);
+      await resumed.service.chat(user, {
+        ...dto('Мне нужен завтрашний день в другом филиале'),
+        conversationId: 'conversation',
+      });
+      expect(
+        resumed.timeline.persistAssistantReply.mock.calls[0][0].semanticContext,
+      ).toHaveProperty('plan.tasks.0.entities', {
+        period: 'tomorrow',
+        branch: 'changed-branch',
+      });
+      expect(
+        resumed.orchestration.reviewBusinessAndCancellationWindows,
+      ).not.toHaveBeenCalled();
+      expect(resumed.runtime.execute).not.toHaveBeenCalled();
+    },
+  );
+  it('keeps the actual copied owner plan unresolved without repeating the old question or inventing consent', async () => {
+    const first = fixture();
+    first.model.decide.mockResolvedValue(archivedOwnerDecision(1));
+    const question = await first.service.chat(
+      user,
+      dto(
+        'Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг',
+      ),
+    );
+    const saved =
+      first.timeline.persistAssistantReply.mock.calls[0][0].semanticContext;
+    const resumed = fixture();
+    resumed.timeline.readConversationContext.mockResolvedValue(saved);
+    resumed.model.decide.mockResolvedValue(archivedOwnerDecision(2));
+    const result = await resumed.service.chat(user, {
+      ...dto('Да, такой ограниченный обзор'),
+      conversationId: 'conversation',
+    });
+    expect(result.reply).not.toBe(question.reply);
+    expect(result.reply).toContain('Не удалось определить выбранный вариант');
+    expect(resumed.model.decide.mock.calls).toHaveProperty(
+      '0.0.pendingOwnerReview',
+      {
+        scope: 'last_published_tenant_finance_and_one_saved_cancellation',
+        question: question.reply,
+        task_intents: [
+          'analytics.business_summary',
+          'schedule.review_cancellation_windows',
+          'analytics.recommendations',
+        ],
+      },
+    );
+    expect(
+      resumed.orchestration.reviewBusinessAndCancellationWindows,
+    ).not.toHaveBeenCalled();
+    expect(resumed.orchestration.conversationRead).not.toHaveBeenCalled();
+    expect(resumed.runtime.execute).not.toHaveBeenCalled();
+    expect(
+      resumed.timeline.persistAssistantReply.mock.calls[0][0].semanticContext,
+    ).toHaveProperty('plan.tasks.0.entities.period', 'today');
+    expect(result).not.toHaveProperty('recommendation');
+  });
+  it.each([
+    'ready-without-act',
+    'accept-without-marker',
+    'forged-marker',
+    'decline',
+    'revoked',
+    'rollover-without-act',
+  ])(
+    'cannot turn a retained preference into current authority: %s',
+    async (mode) => {
+      const first = fixture();
+      first.model.decide.mockResolvedValue(
+        compoundDecision({ period: 'today' }),
+      );
+      await first.service.chat(
+        user,
+        dto(
+          'Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг',
+        ),
+      );
+      const saved = JSON.parse(
+        JSON.stringify(
+          first.timeline.persistAssistantReply.mock.calls[0][0].semanticContext,
+        ),
+      ) as Record<string, unknown>;
+      expect(saved).toHaveProperty('ownerReviewClarification');
+      if (mode === 'accept-without-marker')
+        delete saved.ownerReviewClarification;
+      if (mode === 'forged-marker')
+        saved.ownerReviewClarification = { scope: 'all_data', question: 'yes' };
+      if (mode === 'rollover-without-act')
+        saved.savedAt = '2026-01-01T00:00:00Z';
+      const resumed = fixture();
+      resumed.timeline.readConversationContext.mockResolvedValue(saved);
+      const decision = compoundDecision();
+      if (!['ready-without-act', 'rollover-without-act'].includes(mode))
+        decision.semanticPlan!.dialogue_act =
+          mode === 'decline'
+            ? 'decline_bounded_review'
+            : 'accept_bounded_review';
+      resumed.model.decide.mockResolvedValue(decision);
+      if (mode === 'revoked')
+        resumed.runtime.listTools.mockResolvedValue({ tools: [] });
+      const result = await resumed.service.chat(user, {
+        ...dto('Продолжи выбранный обзор'),
+        conversationId: 'conversation',
+      });
+      expect(
+        resumed.orchestration.reviewBusinessAndCancellationWindows,
+      ).not.toHaveBeenCalled();
+      expect(resumed.orchestration.conversationRead).not.toHaveBeenCalled();
+      expect(resumed.runtime.execute).not.toHaveBeenCalled();
+      expect(result).not.toHaveProperty('recommendation');
+      if (mode === 'decline') {
+        expect(result.reply).toContain('не запускаю');
+        expect(
+          resumed.timeline.persistAssistantReply.mock.calls[0][0]
+            .semanticContext,
+        ).toBeNull();
+        const afterDecline = fixture();
+        afterDecline.timeline.readConversationContext.mockResolvedValue(null);
+        afterDecline.model.decide.mockResolvedValue(null);
+        await afterDecline.service.chat(user, {
+          ...dto('Спасибо'),
+          conversationId: 'conversation',
+        });
+        expect(afterDecline.model.decide.mock.calls).toHaveProperty(
+          '0.0.conversationPlan',
+          null,
+        );
+        expect(afterDecline.model.decide.mock.calls).not.toHaveProperty(
+          '0.0.pendingOwnerReview',
+        );
+      }
+    },
+  );
   it('refuses a late compound purpose switch after an ordinary settled read', async () => {
     const f = fixture();
     f.model.decide

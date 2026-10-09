@@ -153,3 +153,77 @@ export function withOwnerReviewClarification(
     ),
   };
 }
+
+/** Preference selection for an existing READ alternative, never action approval. */
+export function ownerReviewContinuationProjection(
+  plan: ConversationSemanticPlan,
+) {
+  const alternative = ownerReviewClarification(plan);
+  return {
+    scope: alternative.scope,
+    question: alternative.question,
+    task_intents: plan.tasks.map((task) => task.intent),
+  };
+}
+
+export function ownerReviewContinuationState(
+  pending: ConversationSemanticPlan | undefined,
+  next: ConversationSemanticPlan,
+  surface: string,
+  role: UserRole | undefined,
+  hasToolCall: boolean,
+): 'accept' | 'decline' | 'unresolved' | null {
+  const transition = next.dialogue_act;
+  const explicitTransition = [
+    'accept_bounded_review',
+    'decline_bounded_review',
+    'clarify_bounded_review',
+  ].includes(transition);
+  if (!pending) return explicitTransition ? 'unresolved' : null;
+  const state = (plan: ConversationSemanticPlan) =>
+    ownerReviewPlanState(plan, surface, role) ??
+    singleLifecyclePlanState(plan, surface, role);
+  if (state(pending) === null) return explicitTransition ? 'unresolved' : null;
+  const expected = pending.tasks.map((task) => task.intent).sort();
+  const actual = next.tasks.map((task) => task.intent).sort();
+  const sameTasks =
+    expected.length === actual.length &&
+    expected.every((intent, index) => intent === actual[index]);
+  // A new topic may use its own normal policy path; it never resumes this review.
+  if (!sameTasks) return explicitTransition ? 'unresolved' : null;
+  const scope = (plan: ConversationSemanticPlan) =>
+    JSON.stringify({
+      tasks: plan.tasks
+        .map((task) => [task.intent, Object.entries(task.entities).sort()])
+        .sort(),
+      unresolved: plan.context.unresolved_references,
+    });
+  // Keep a newly requested scope as a correction. It still follows the existing
+  // bounded clarification path; it cannot become acceptance by dropping slots.
+  if (
+    state(next) === 'clarify' &&
+    (next.tasks.some((task) => Object.keys(task.entities).length > 0) ||
+      next.context.unresolved_references.length > 0) &&
+    scope(next) !== scope(pending)
+  )
+    return null;
+  if (hasToolCall) return 'unresolved';
+  if (transition === 'decline_bounded_review') return 'decline';
+  return transition === 'accept_bounded_review' &&
+    state(next) === 'ready' &&
+    next.tasks.every((task) => task.clarification_question === null)
+    ? 'accept'
+    : 'unresolved';
+}
+
+export function ownerReviewContinuationQuestion(
+  pending?: ConversationSemanticPlan,
+): string {
+  if (!pending)
+    return 'Не удалось связать ответ с ожидающим обзором. Сформулируйте, что нужно проверить.';
+  if (isSingleLifecycleTaskSet(pending))
+    return 'Не удалось определить выбранный вариант. Проверить до трёх опубликованных оценок давности визитов без дополнительных условий?';
+  return ownerReviewKind(pending) === 'lifecycle'
+    ? 'Не удалось определить выбранный вариант. Объединить последний опубликованный общий отчёт и до трёх оценок давности визитов без дополнительных условий?'
+    : 'Не удалось определить выбранный вариант. Проверить последний опубликованный общий отчёт и одну сохранённую возможность после отмены без ограничения по дате или филиалу?';
+}
