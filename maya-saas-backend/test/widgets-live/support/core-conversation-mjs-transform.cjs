@@ -4,7 +4,7 @@ const ts = require('typescript');
 module.exports = {
   process(sourceText, sourcePath) {
     if (
-      !/\/scripts\/conversation-qualification\/(?:replay|current-candidate-budget|core-conversation-admission|core-conversation-socket)\.mjs$/.test(
+      !/\/scripts\/conversation-qualification\/(?:replay|current-candidate-budget|core-conversation-profile|core-conversation-admission|core-conversation-socket)\.mjs$/.test(
         sourcePath,
       )
     )
