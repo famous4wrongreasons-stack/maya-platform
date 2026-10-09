@@ -42,7 +42,10 @@ import { asJson } from '../common/json.util';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { AiToolHandlerService } from './ai-tool-handler.service';
+import {
+  AiToolHandlerService,
+  type ReviewCalendarReadScope,
+} from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import {
@@ -161,6 +164,7 @@ export class AiToolRuntimeService {
       /** One server-owned source for the explicit catalog → rename preview READ pair. */
       readonly serviceRenameSourceRevision?: string;
       readonly staffScheduleReadScope?: StaffScheduleReadScope;
+      readonly reviewCalendarReadScope?: ReviewCalendarReadScope;
       /** Transient metadata witness for the existing typed booking successor. */
       readonly onAvailabilityScope?: (check: () => Promise<void>) => void;
       readonly bookingSelector?: Parameters<
@@ -184,11 +188,11 @@ export class AiToolRuntimeService {
       this.approvalConflict('goods_review_context_invalid');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
-    const revalidateStaffSchedule = await this.bindStaffScheduleReadScope(
+    const revalidateScopedRead = await this.bindScopedRead(
       principal,
       definition,
       validated,
-      internal.staffScheduleReadScope,
+      internal,
     );
     await this.revalidateServiceRenameSource(
       principal,
@@ -305,7 +309,7 @@ export class AiToolRuntimeService {
     );
     if (revalidateAvailability)
       internal.onAvailabilityScope?.(revalidateAvailability);
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     await internal.bookingSelector?.revalidate();
     const inputHash = this.inputHash(
       toolName,
@@ -340,7 +344,7 @@ export class AiToolRuntimeService {
           );
     }
 
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateServiceRenameSource(
       principal,
@@ -359,11 +363,11 @@ export class AiToolRuntimeService {
           : (dto.idempotencyKey ?? randomUUID()),
       approval: null,
       serviceRenameSourceRevision,
-      revalidateReadSource: revalidateStaffSchedule,
+      revalidateReadSource: revalidateScopedRead,
     });
     await personal?.revalidate();
     await revalidateAvailability?.();
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateOwnerSourceRead(principal, definition, args);
     await this.revalidateServiceRenameSource(
@@ -372,7 +376,7 @@ export class AiToolRuntimeService {
       args,
       serviceRenameSourceRevision,
     );
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     if (
       internal.suppressWidgetTrigger === true ||
       serviceRenameSourceRevision !== undefined
@@ -388,13 +392,13 @@ export class AiToolRuntimeService {
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
-      revalidateStaffSchedule ?? revalidateAvailability,
+      revalidateScopedRead ?? revalidateAvailability,
       internal.bookingSelector,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
     await this.revalidateOwnerSourceRead(principal, definition, args);
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     return output;
   }
 
@@ -416,11 +420,11 @@ export class AiToolRuntimeService {
       this.executionConflict('ai_tool_read_replay_only');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
-    const revalidateStaffSchedule = await this.bindStaffScheduleReadScope(
+    const revalidateScopedRead = await this.bindScopedRead(
       principal,
       definition,
       validated,
-      internal.staffScheduleReadScope,
+      internal,
     );
     await this.revalidateServiceRenameSource(
       principal,
@@ -443,7 +447,7 @@ export class AiToolRuntimeService {
       definition,
       args,
     );
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateServiceRenameSource(
       principal,
@@ -509,7 +513,7 @@ export class AiToolRuntimeService {
         };
     await personal?.revalidate();
     await revalidateAvailability?.();
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     await internal.bookingSelector?.revalidate();
     await this.revalidateOwnerSourceRead(principal, definition, args);
     await this.revalidateServiceRenameSource(
@@ -518,7 +522,7 @@ export class AiToolRuntimeService {
       args,
       serviceRenameSourceRevision,
     );
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     if (
       internal.suppressWidgetTrigger === true ||
       serviceRenameSourceRevision !== undefined
@@ -534,14 +538,105 @@ export class AiToolRuntimeService {
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
       internal.userTurn,
-      revalidateStaffSchedule ?? revalidateAvailability,
+      revalidateScopedRead ?? revalidateAvailability,
       internal.bookingSelector,
     );
     await personal?.revalidate();
     await revalidateAvailability?.();
     await this.revalidateOwnerSourceRead(principal, definition, args);
-    await revalidateStaffSchedule?.();
+    await revalidateScopedRead?.();
     return output;
+  }
+
+  /** Authorized metadata only; no registry rows, saved receipt or mutation grant. */
+  async resolveReviewCalendarScope(
+    user: AuthenticatedUser,
+    surface: AiToolSurface,
+    args: ValidatedAiToolArguments,
+  ): Promise<ReviewCalendarReadScope> {
+    const principal = this.principal(user, surface);
+    const definition = this.registry.get('reviews.list.read');
+    const validated = this.registry.validateArguments(definition.name, args);
+    if (validated.period === undefined)
+      this.executionConflict('review_calendar_query_invalid');
+    await this.policy.assertCanExecute(principal, definition);
+    await this.assertScopedReadPrincipal(
+      principal,
+      'review_calendar_principal_changed',
+    );
+    const scope = await this.handler.resolveReviewCalendarScope(
+      principal,
+      validated,
+    );
+    await this.policy.assertCanExecute(principal, definition);
+    await this.assertScopedReadPrincipal(
+      principal,
+      'review_calendar_principal_changed',
+    );
+    if (
+      this.canonicalJson(
+        await this.handler.resolveReviewCalendarScope(principal, validated),
+      ) !== this.canonicalJson(scope)
+    )
+      this.executionConflict('review_calendar_scope_changed');
+    return Object.freeze({ ...scope });
+  }
+
+  private async bindScopedRead(
+    principal: AiToolPrincipal,
+    definition: AiToolDefinition,
+    args: ValidatedAiToolArguments,
+    internal: {
+      readonly staffScheduleReadScope?: StaffScheduleReadScope;
+      readonly reviewCalendarReadScope?: ReviewCalendarReadScope;
+    },
+  ): Promise<(() => Promise<void>) | undefined> {
+    const staff = await this.bindStaffScheduleReadScope(
+      principal,
+      definition,
+      args,
+      internal.staffScheduleReadScope,
+    );
+    const exactReview =
+      definition.name === 'reviews.list.read' && args.period !== undefined;
+    if (internal.reviewCalendarReadScope !== undefined && !exactReview)
+      this.executionConflict('review_calendar_query_invalid');
+    if (!exactReview) return staff;
+    // This profile is mutually exclusive with every staff/CRM scoped projection.
+    if (staff) this.executionConflict('review_calendar_query_invalid');
+    const expected =
+      internal.reviewCalendarReadScope === undefined
+        ? await this.handler.resolveReviewCalendarScope(principal, args)
+        : { ...internal.reviewCalendarReadScope };
+    const witness = this.canonicalJson(expected);
+    const revalidate = async () => {
+      await this.assertScopedReadPrincipal(
+        principal,
+        'review_calendar_principal_changed',
+      );
+      await this.policy.assertCanExecute(principal, definition);
+      await this.assertScopedReadPrincipal(
+        principal,
+        'review_calendar_principal_changed',
+      );
+      if (
+        this.canonicalJson(
+          await this.handler.resolveReviewCalendarScope(principal, args),
+        ) !== witness
+      )
+        this.executionConflict('review_calendar_scope_changed');
+    };
+    await revalidate();
+    principal.readAuthority = {
+      membershipId: principal.readAuthority?.membershipId ?? null,
+      membershipStatus: principal.readAuthority?.membershipStatus ?? null,
+      branchId: principal.readAuthority?.branchId ?? null,
+      ...principal.readAuthority,
+      sourceScopeHash: createHash('sha256')
+        .update(this.canonicalJson(['review-calendar-read/1', expected]))
+        .digest('hex'),
+    };
+    return revalidate;
   }
 
   private async bindStaffScheduleReadScope(
@@ -555,7 +650,7 @@ export class AiToolRuntimeService {
       this.executionConflict('staff_schedule_read_scope_invalid');
     const scope = staffScheduleReadScope(definition.name, args, raw);
     const revalidate = async () => {
-      await this.assertStaffScheduleReadPrincipal(principal);
+      await this.assertScopedReadPrincipal(principal);
       await this.handler.assertStaffScheduleReadScope(
         principal,
         definition.name,
@@ -565,7 +660,7 @@ export class AiToolRuntimeService {
       // Features remain the existing policy owner's decision. Reread the
       // captured membership after all awaited source/feature work, too.
       await this.policy.assertCanExecute(principal, definition);
-      await this.assertStaffScheduleReadPrincipal(principal);
+      await this.assertScopedReadPrincipal(principal);
     };
     await revalidate();
     principal.staffScheduleReadSource = scope;
@@ -582,7 +677,10 @@ export class AiToolRuntimeService {
   }
 
   /** Current identity snapshot for this finite scoped READ, not a new grant. */
-  private async assertStaffScheduleReadPrincipal(principal: AiToolPrincipal) {
+  private async assertScopedReadPrincipal(
+    principal: AiToolPrincipal,
+    code = 'staff_schedule_read_principal_changed',
+  ) {
     this.tenantContext.assertTenantId(principal.tenantId);
     const current = await this.prisma.membership.findUnique({
       where: {
@@ -616,7 +714,7 @@ export class AiToolRuntimeService {
       current.tenant.status !== 'active'
     )
       throw new ForbiddenException({
-        error: { code: 'staff_schedule_read_principal_changed' },
+        error: { code },
       });
   }
 

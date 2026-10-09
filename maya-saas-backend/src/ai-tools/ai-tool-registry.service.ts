@@ -352,6 +352,52 @@ export class AiToolRegistryService {
         }
         return { low_stock_only: args.low_stock_only === true };
       case 'reviews.list.read':
+        if (args.period !== undefined) {
+          this.assertAllowedKeys(args, [
+            'period',
+            'month',
+            'rating',
+            'all_ratings',
+            'limit',
+            'branch_id',
+          ]);
+          const period = this.assertEnum(args.period, 'period', [
+            'last_month',
+            'named_month',
+          ]);
+          if (
+            (args.rating === undefined) === (args.all_ratings === undefined) ||
+            (args.all_ratings !== undefined && args.all_ratings !== true)
+          )
+            this.invalidArguments(
+              'Select one exact rating or all_ratings true',
+            );
+          if (
+            period === 'named_month'
+              ? typeof args.month !== 'string' ||
+                args.month.length !== 7 ||
+                !/^\d{4}-(0[1-9]|1[0-2])$/.test(args.month)
+              : args.month !== undefined
+          )
+            this.invalidArguments(
+              'month must match the selected calendar period',
+            );
+          return {
+            period,
+            ...(period === 'named_month' ? { month: args.month } : {}),
+            ...(args.rating === undefined
+              ? { all_ratings: true }
+              : {
+                  rating: this.assertIntegerRange(args.rating, 'rating', 1, 5),
+                }),
+            limit: this.assertIntegerRange(args.limit ?? 20, 'limit', 1, 50),
+            ...(args.branch_id === undefined
+              ? {}
+              : {
+                  branch_id: this.assertExternalId(args.branch_id, 'branch_id'),
+                }),
+          };
+        }
         this.assertAllowedKeys(args, ['days', 'rating', 'limit', 'branch_id']);
         return {
           days: this.assertIntegerRange(args.days ?? 90, 'days', 1, 3650),

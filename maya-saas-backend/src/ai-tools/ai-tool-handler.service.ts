@@ -170,6 +170,18 @@ const PERIOD_CACHE_MAX_ENTRIES = 200;
 /** Сколько визитов читает досье. Публикуется рядом со счётом приходов. */
 const DOSSIER_HISTORY_LIMIT = 30;
 
+/** Current local registry read scope, not a new authority or source revision. */
+export type ReviewCalendarReadScope = Readonly<{
+  branchId: string | null;
+  timezone: string;
+  period: 'named_month';
+  month: string;
+  fromInclusive: string;
+  toExclusive: string;
+  rating: number | null;
+  limit: number;
+}>;
+
 @Injectable()
 export class AiToolHandlerService {
   private readonly businessQueryCache = new Map<
@@ -338,6 +350,38 @@ export class AiToolHandlerService {
           principal.tenantId,
         );
       case 'reviews.list.read': {
+        if (args.period !== undefined) {
+          const capturedArgs = Object.freeze({ ...args });
+          const scope = await this.resolveReviewCalendarScope(
+            principal,
+            capturedArgs,
+          );
+          const result = await this.requireBusinessContentService().listReviews(
+            principal.tenantId,
+            {
+              ...(scope.branchId === null ? {} : { branchId: scope.branchId }),
+              ...(scope.rating === null
+                ? { allRatings: true as const }
+                : { rating: scope.rating }),
+              limit: scope.limit,
+              calendar: {
+                month: scope.month,
+                timezone: scope.timezone,
+                fromInclusive: scope.fromInclusive,
+                toExclusive: scope.toExclusive,
+              },
+            },
+          );
+          const snapshot = structuredClone(result);
+          const current = await this.resolveReviewCalendarScope(
+            principal,
+            capturedArgs,
+          );
+          if (JSON.stringify(scope) !== JSON.stringify(current)) {
+            throw new ConflictException('review_calendar_scope_changed');
+          }
+          return snapshot;
+        }
         if (!this.measurementRead)
           throw new Error('canonical_measurement_reader_required');
         const branchId =
@@ -365,11 +409,14 @@ export class AiToolHandlerService {
             branchId: scope.branchId,
           },
         );
-        await this.measurementRead.reviewScope(
+        const current = await this.measurementRead.reviewScope(
           principal.tenantId,
           principal.userId,
           branchId,
         );
+        if (scope.branchId !== current.branchId || !current.registryAllowed) {
+          throw new ConflictException('review_calendar_scope_changed');
+        }
         return result;
       }
       case 'reviews.analyze': {
@@ -496,6 +543,129 @@ export class AiToolHandlerService {
       default:
         throw new Error('Unreachable AI tool handler');
     }
+  }
+
+  /** Resolve a completed calendar month without reading any review rows. */
+  async resolveReviewCalendarScope(
+    principal: AiToolPrincipal,
+    args: ValidatedAiToolArguments,
+  ): Promise<ReviewCalendarReadScope> {
+    const captured = { ...args };
+    const period = captured.period;
+    const rating = captured.rating;
+    const limit = captured.limit ?? 20;
+    if (
+      Object.keys(captured).some(
+        (key) =>
+          ![
+            'period',
+            'month',
+            'rating',
+            'all_ratings',
+            'limit',
+            'branch_id',
+          ].includes(key),
+      ) ||
+      (period !== 'last_month' && period !== 'named_month') ||
+      (period === 'named_month'
+        ? typeof captured.month !== 'string' ||
+          captured.month.length !== 7 ||
+          !/^[1-9]\d{3}-(0[1-9]|1[0-2])$/u.test(captured.month)
+        : captured.month !== undefined) ||
+      typeof limit !== 'number' ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > 50 ||
+      (rating === undefined
+        ? captured.all_ratings !== true
+        : typeof rating !== 'number' ||
+          !Number.isInteger(rating) ||
+          rating < 1 ||
+          rating > 5 ||
+          captured.all_ratings !== undefined) ||
+      (captured.branch_id !== undefined &&
+        typeof captured.branch_id !== 'string')
+    )
+      throw new BadRequestException('review_calendar_query_invalid');
+    if (!this.measurementRead)
+      throw new Error('canonical_measurement_reader_required');
+    const requestedBranch = captured.branch_id;
+    const initial = await this.measurementRead.reviewScope(
+      principal.tenantId,
+      principal.userId,
+      requestedBranch,
+      true,
+    );
+    if (!initial.registryAllowed) {
+      throw new ForbiddenException(
+        'review_registry_has_no_exact_staff_subject',
+      );
+    }
+    const branchId = initial.branchId;
+    const owner = this.requireBusinessContentService();
+    const timezone = await owner.reviewCalendarTimezone(
+      principal.tenantId,
+      branchId,
+    );
+    const month =
+      period === 'named_month'
+        ? (captured.month as string)
+        : this.shiftLocalMonth(
+            `${this.localDate(new Date(), timezone).slice(0, 7)}-01`,
+            -1,
+          ).slice(0, 7);
+    if (month >= this.localDate(new Date(), timezone).slice(0, 7)) {
+      throw new ConflictException('review_calendar_period_unavailable');
+    }
+    let window: Awaited<ReturnType<AiToolHandlerService['reportingWindow']>>;
+    try {
+      window = await this.reportingWindow(principal.tenantId, {
+        period: 'named_month',
+        month,
+        ...(branchId === undefined ? {} : { branch_id: branchId }),
+      });
+    } catch {
+      throw new ServiceUnavailableException(
+        'review_calendar_source_unavailable',
+      );
+    }
+    const toExclusive = new Date(Date.parse(window.query.to) + 1).toISOString();
+    if (
+      window.truncatedToToday ||
+      window.endTracksNow ||
+      Date.parse(toExclusive) > Date.now()
+    ) {
+      throw new ConflictException('review_calendar_period_unavailable');
+    }
+    const currentTimezone = await owner.reviewCalendarTimezone(
+      principal.tenantId,
+      branchId,
+    );
+    const current = await this.measurementRead.reviewScope(
+      principal.tenantId,
+      principal.userId,
+      requestedBranch,
+      true,
+    );
+    if (
+      !current.registryAllowed ||
+      current.branchId !== branchId ||
+      timezone !== currentTimezone ||
+      window.timezone !== timezone ||
+      initial.timezone !== timezone ||
+      current.timezone !== timezone
+    )
+      throw new ConflictException('review_calendar_scope_changed');
+    return Object.freeze({
+      branchId: branchId ?? null,
+      timezone,
+      period: 'named_month' as const,
+      month,
+      fromInclusive: window.query.from,
+      toExclusive,
+      rating: typeof rating === 'number' ? rating : null,
+      limit,
+    });
   }
 
   private async requestAdministratorContact(

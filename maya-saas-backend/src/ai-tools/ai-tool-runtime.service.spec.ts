@@ -36,6 +36,156 @@ describe('AiToolRuntimeService', () => {
     membershipStatus: 'active',
   };
 
+  describe('exact local review calendar scope', () => {
+    function fixture() {
+      const h = createHarness();
+      const actor = { ...customer, role: UserRole.TENANT_OWNER };
+      const membership = {
+        id: 'membership-a',
+        tenantId: 'tenant-a',
+        userId: actor.userId,
+        role: actor.role,
+        branchId: null,
+        status: 'active',
+        user: { status: 'active' },
+        tenant: { status: 'active' },
+      };
+      h.membershipFindUnique.mockResolvedValue(membership);
+      const scope = {
+        branchId: null,
+        timezone: 'UTC',
+        period: 'named_month' as const,
+        month: '2026-09',
+        fromInclusive: '2026-09-01T00:00:00.000Z',
+        toExclusive: '2026-10-01T00:00:00.000Z',
+        rating: 2,
+        limit: 20,
+      };
+      const resolver = jest
+        .spyOn(h.handler, 'resolveReviewCalendarScope')
+        .mockImplementation(() => Promise.resolve({ ...scope }));
+      let saved: Record<string, unknown> | null = null;
+      h.executionFindUnique.mockImplementation(() => Promise.resolve(saved));
+      h.executionCreate.mockImplementation((input: unknown) => {
+        saved = { ...record(record(input).data), id: 'review-read' };
+        return Promise.resolve(saved);
+      });
+      h.executionUpdate.mockImplementation((input: unknown) => {
+        saved = { ...saved, ...record(record(input).data) };
+        return Promise.resolve(saved);
+      });
+      h.handlerExecute.mockResolvedValue({
+        source: 'tenant_review_registry',
+        count: 0,
+        reviews: [],
+      });
+      const run = (replay = false, expected = { ...scope }) =>
+        h.tenantContext.runAsSystemTenant('tenant-a', () => {
+          const dto = {
+            surface: 'web' as const,
+            idempotencyKey: IDEMPOTENCY_KEY,
+            arguments: {
+              period: 'named_month',
+              month: '2026-09',
+              rating: 2,
+              limit: 20,
+            },
+          };
+          const internal = {
+            suppressWidgetTrigger: true,
+            reviewCalendarReadScope: expected,
+          };
+          return replay
+            ? h.runtime.replayCompletedRead(
+                actor,
+                'reviews.list.read',
+                dto,
+                'review-read',
+                internal,
+              )
+            : h.runtime.execute(actor, 'reviews.list.read', dto, internal);
+        });
+      return { ...h, scope, resolver, run, membership, actor };
+    }
+    it('binds actual scope into cache and preserves fresh/canonical replay without another row query', async () => {
+      const h = fixture();
+      await expect(h.run()).resolves.toMatchObject({
+        status: 'completed',
+        replayed: false,
+      });
+      await expect(h.run(true)).resolves.toMatchObject({
+        status: 'completed',
+        replayed: true,
+      });
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      const call = h.handlerExecute.mock.calls[0] as readonly unknown[];
+      expect(record(record(call[1]).readAuthority).sourceScopeHash).toMatch(
+        /^[a-f0-9]{64}$/,
+      );
+    });
+    it('refuses an expected scope from another branch before any execution', async () => {
+      const h = fixture();
+      await expect(
+        h.run(false, { ...h.scope, timezone: 'Europe/Moscow' }),
+      ).rejects.toMatchObject({
+        response: { error: { code: 'review_calendar_scope_changed' } },
+      });
+      expect(h.handlerExecute).not.toHaveBeenCalled();
+      expect(h.executionCreate).not.toHaveBeenCalled();
+    });
+    it('does not disclose cached rows when current scope changes at a policy await', async () => {
+      const h = fixture();
+      await h.run();
+      const expected = { ...h.scope };
+      h.policyAssertCanExecute.mockImplementation(() => {
+        h.scope.timezone = 'Europe/Moscow';
+        return Promise.resolve();
+      });
+      await expect(h.run(true, expected)).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+    it('rejects source drift during the owner query and preserves no verified result', async () => {
+      const h = fixture();
+      h.handlerExecute.mockImplementation(() => {
+        h.scope.timezone = 'Europe/Moscow';
+        return Promise.resolve({ reviews: [{ rating: 2 }] });
+      });
+      await expect(h.run()).rejects.toBeInstanceOf(ConflictException);
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+    it.each(['status', 'user', 'tenant', 'branch'])(
+      'rejects current principal %s changes even for replay',
+      async (kind) => {
+        const h = fixture();
+        await h.run();
+        if (kind === 'status') h.membership.status = 'revoked';
+        if (kind === 'user') h.membership.user.status = 'disabled';
+        if (kind === 'tenant') h.membership.tenant.status = 'disabled';
+        if (kind === 'branch')
+          Object.assign(h.membership, { branchId: 'different' });
+        await expect(h.run(true)).rejects.toBeInstanceOf(ForbiddenException);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('metadata resolution does not dispatch registry data or create execution', async () => {
+      const h = fixture();
+      await expect(
+        h.tenantContext.runAsSystemTenant('tenant-a', () =>
+          h.runtime.resolveReviewCalendarScope(h.actor, 'web', {
+            period: 'named_month',
+            month: '2026-09',
+            rating: 2,
+            limit: 20,
+          }),
+        ),
+      ).resolves.toEqual(h.scope);
+      expect(h.handlerExecute).not.toHaveBeenCalled();
+      expect(h.executionCreate).not.toHaveBeenCalled();
+    });
+  });
+
   describe.each(SCOPED_READ_TOOLS)(
     'finite current employee READ scope %s',
     (dayTool) => {
@@ -1554,6 +1704,7 @@ function createHarness(
     .mockResolvedValue({ branchId: 'maya-branch', timezone: 'Europe/Moscow' });
   const handler = {
     assertStaffScheduleReadScope: jest.fn().mockResolvedValue(undefined),
+    resolveReviewCalendarScope: jest.fn(),
     availabilityPreferenceCalendar,
     execute: handlerExecute,
     // Доводка аргументов и обогащение карточки — тождественные для всего,

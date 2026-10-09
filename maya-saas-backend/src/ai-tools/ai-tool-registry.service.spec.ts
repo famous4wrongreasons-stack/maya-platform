@@ -25,6 +25,49 @@ describe('AiToolRegistryService', () => {
     throw new Error('Expected invalid tool arguments');
   };
 
+  it('admits an exact calendar period only with explicit all or one rating', () => {
+    expect(
+      service.validateArguments('reviews.list.read', {
+        period: 'last_month',
+        all_ratings: true,
+      }),
+    ).toEqual({ period: 'last_month', all_ratings: true, limit: 20 });
+    expect(
+      service.validateArguments('reviews.list.read', {
+        period: 'named_month',
+        month: '2026-09',
+        rating: 2,
+        branch_id: 'current',
+      }),
+    ).toEqual({
+      period: 'named_month',
+      month: '2026-09',
+      rating: 2,
+      limit: 20,
+      branch_id: 'current',
+    });
+    for (const args of [
+      { period: 'last_month' },
+      { period: 'last_month', rating: 'all' },
+      { period: 'last_month', rating: [1, 2] },
+      { period: 'last_month', rating: 2, all_ratings: true },
+      { period: 'last_month', all_ratings: false },
+      { period: 'named_month', rating: 2 },
+      { period: 'named_month', month: '2026-09\n', rating: 2 },
+      { period: 'last_month', month: '2026-09', rating: 2 },
+      { period: 'last_month', days: 30, rating: 2 },
+      { month: '2026-09', rating: 2 },
+      { all_ratings: true },
+    ])
+      expect(() =>
+        service.validateArguments('reviews.list.read', args),
+      ).toThrow(BadRequestException);
+    expect(service.validateArguments('reviews.list.read', {})).toEqual({
+      days: 90,
+      limit: 20,
+    });
+  });
+
   it('fails closed for unknown tools and unknown arguments', () => {
     expect(() => service.get('database.query')).toThrow(NotFoundException);
     expect(() =>

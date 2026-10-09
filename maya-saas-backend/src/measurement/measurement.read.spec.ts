@@ -77,7 +77,12 @@ function fixture() {
     ),
   };
   const engine = {
-    observe: jest.fn(() => Promise.resolve(result)),
+    observe: jest
+      .fn<
+        ReturnType<MeasurementService['observe']>,
+        Parameters<MeasurementService['observe']>
+      >()
+      .mockResolvedValue(result),
     admit: jest.fn(),
     resume: jest.fn(),
   };

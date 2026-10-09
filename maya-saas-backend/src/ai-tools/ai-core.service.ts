@@ -1,4 +1,15 @@
 import {
+  carryReviewCalendarPreference,
+  requestsReviewCalendar,
+  reviewCalendarTask,
+  reviewCalendarArguments,
+  reviewRating,
+  reviewRatingQuestion,
+  isReviewMonth,
+  REVIEWS_CALENDAR_UNAVAILABLE,
+} from './reviews-calendar-read';
+import { reviewsCalendarReply } from './reviews-presentation';
+import {
   employeeServiceTask,
   readEmployeeServices,
   EMPLOYEE_SERVICES_UNAVAILABLE,
@@ -278,6 +289,7 @@ type AiCoreCompletion = {
   employeeJournalReply?: true;
   employeeServicesReply?: true;
   publicCompanyReply?: true;
+  reviewsCalendarReply?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
   occupancy?: Awaited<ReturnType<C9Orchestrator['checkCancellationWindows']>>;
@@ -1216,6 +1228,10 @@ export class AiCoreService {
             );
           }
         }
+        carryReviewCalendarPreference(
+          decision.semanticPlan ?? null,
+          activeSemanticPlan,
+        );
         if (decision.semanticPlan) {
           activeSemanticPlan = decision.semanticPlan;
           if (this.semanticPlanNeedsNoData(activeSemanticPlan)) {
@@ -1223,6 +1239,210 @@ export class AiCoreService {
             requiredToolNames = [];
             requirementSatisfied = true;
           }
+        }
+        if (requestsReviewCalendar(decision.semanticPlan ?? null)) {
+          const plan = decision.semanticPlan!;
+          const task = reviewCalendarTask(plan);
+          let presented: { reply: string; status: 'verified' | 'blocked' } = {
+            reply:
+              'Уточните один календарный месяц и отдельно запросите отзывы за него.',
+            status: 'blocked',
+          };
+          if (
+            task &&
+            step === 0 &&
+            toolsUsed.length === 0 &&
+            allowedNames.has('reviews.list.read')
+          ) {
+            try {
+              const period = task.entities.period;
+              if (Object.hasOwn(task.entities, 'employee')) {
+                presented = {
+                  reply:
+                    'Не могу подтвердить отзывы именно выбранного сотрудника по этому реестру. Можно запросить отзывы по бизнесу или одному филиалу.',
+                  status: 'blocked',
+                };
+              } else if (
+                (period === 'last_month' || isReviewMonth(period)) &&
+                plan.context.unresolved_references.every(
+                  (key) => key === 'rating',
+                )
+              ) {
+                let branchId: string | undefined;
+                let branchResolved = true;
+                if (Object.hasOwn(task.entities, 'branch')) {
+                  const preference = task.entities.branch;
+                  if (
+                    typeof preference !== 'string' ||
+                    preference.length === 0 ||
+                    preference.length > 160 ||
+                    !this.prisma
+                  ) {
+                    branchResolved = false;
+                  } else {
+                    const branches = await this.prisma.branch.findMany({
+                      where: {
+                        tenantId,
+                        OR: [
+                          { id: preference },
+                          { name: { equals: preference, mode: 'insensitive' } },
+                        ],
+                      },
+                      select: { id: true },
+                      take: 2,
+                    });
+                    branchResolved = branches.length === 1;
+                    branchId = branchResolved ? branches[0].id : undefined;
+                  }
+                }
+                if (!branchResolved) {
+                  presented = {
+                    reply:
+                      'Не удалось однозначно сопоставить указанный филиал. Уточните его название.',
+                    status: 'blocked',
+                  };
+                } else {
+                  const metadataArgs = {
+                    period:
+                      period === 'last_month' ? 'last_month' : 'named_month',
+                    ...(period === 'last_month' ? {} : { month: period }),
+                    all_ratings: true,
+                    limit: 20,
+                    ...(branchId ? { branch_id: branchId } : {}),
+                  };
+                  // Current authorized metadata pins the civil month even when
+                  // rating clarification needs no registry READ or C9 work.
+                  const metadata =
+                    await this.runtime.resolveReviewCalendarScope(
+                      toolUser,
+                      dto.surface,
+                      metadataArgs,
+                    );
+                  task.entities.period = metadata.month;
+                  if (metadata.branchId !== null)
+                    task.entities.branch = metadata.branchId;
+                  const selectedRating = reviewRating(task.entities.rating);
+                  if (selectedRating === null) {
+                    task.requires_clarification = true;
+                    task.clarification_question = reviewRatingQuestion(
+                      metadata.month,
+                    );
+                    presented = {
+                      reply: task.clarification_question,
+                      status: 'blocked',
+                    };
+                  } else if (
+                    maxToolSteps >= 1 &&
+                    !task.requires_clarification &&
+                    plan.context.unresolved_references.length === 0
+                  ) {
+                    const reviewCalendarReadScope = Object.freeze({
+                      ...metadata,
+                      rating: selectedRating === 'all' ? null : selectedRating,
+                    });
+                    const execution = this.record(
+                      await this.executeChatTool(
+                        dto,
+                        toolUser,
+                        'reviews.list.read',
+                        {
+                          surface: dto.surface,
+                          arguments: reviewCalendarArguments(
+                            reviewCalendarReadScope,
+                          ),
+                          idempotencyKey: this.toolIdempotencyKey(
+                            tenantId,
+                            user.userId,
+                            dto.requestId,
+                            0,
+                            'reviews.list.read',
+                          ),
+                        },
+                        {
+                          suppressWidgetTrigger: true,
+                          reviewCalendarReadScope,
+                        },
+                      ),
+                    );
+                    toolsUsed.push({
+                      name: 'reviews.list.read',
+                      status:
+                        typeof execution.status === 'string'
+                          ? execution.status
+                          : 'unknown',
+                      execution_id:
+                        typeof execution.execution_id === 'string'
+                          ? execution.execution_id
+                          : null,
+                    });
+                    presented = reviewsCalendarReply(
+                      execution,
+                      reviewCalendarReadScope,
+                    );
+                    if (presented.status === 'verified')
+                      toolResults.push({
+                        name: 'reviews.list.read',
+                        result: this.sanitizeToolResult(execution.result),
+                      });
+                  } else {
+                    presented = {
+                      reply:
+                        'Уточните месяц, филиал и одну оценку или все оценки для этой проверки.',
+                      status: 'blocked',
+                    };
+                  }
+                }
+              }
+            } catch (error) {
+              const payload =
+                error instanceof HttpException ? error.getResponse() : null;
+              const code =
+                typeof payload === 'string'
+                  ? payload
+                  : (this.record(this.record(payload).error).code ??
+                    this.record(payload).message);
+              if (
+                !(error instanceof HttpException) ||
+                ![400, 409, 503].includes(error.getStatus()) ||
+                typeof code !== 'string' ||
+                ![
+                  'review_calendar_query_invalid',
+                  'review_calendar_period_unavailable',
+                  'review_calendar_scope_changed',
+                  'review_calendar_source_unavailable',
+                  'ai_tool_idempotency_conflict',
+                ].includes(code)
+              )
+                throw error;
+              toolResults.length = 0;
+              presented = REVIEWS_CALENDAR_UNAVAILABLE;
+            }
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: presented.reply,
+              source: 'safe_fallback',
+              action: null,
+              reviewsCalendarReply: true,
+              grounding: this.groundingReport(
+                {
+                  evidenceToolNames: ['reviews.list.read'],
+                  fallbackDomain: 'reviews',
+                  closedForAccess: false,
+                  strictNumbers: true,
+                },
+                presented.status,
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
         }
         // A requested branch must never be silently answered with tenant-wide branding.
         // Only this finite public task selects the profile projection; it grants no access.
@@ -3926,7 +4146,8 @@ export class AiCoreService {
                 response.employeeScheduleReply ||
                 response.employeeJournalReply ||
                 response.employeeServicesReply ||
-                response.publicCompanyReply
+                response.publicCompanyReply ||
+                response.reviewsCalendarReply
               )
                 throw error;
               return {
@@ -3937,10 +4158,17 @@ export class AiCoreService {
             })
         : null);
     if (
+      response.reviewsCalendarReply &&
+      response.grounding?.status === 'verified' &&
+      (!readTurn || coordination?.state !== 'COMPLETED')
+    )
+      this.modelFailure('conversation_history_unavailable');
+    if (
       (response.employeeScheduleReply ||
         response.employeeJournalReply ||
         response.employeeServicesReply ||
-        response.publicCompanyReply) &&
+        response.publicCompanyReply ||
+        response.reviewsCalendarReply) &&
       response.grounding?.status === 'verified' &&
       readTurn &&
       coordination?.state !== 'COMPLETED'
@@ -3982,6 +4210,7 @@ export class AiCoreService {
       !response.employeeJournalReply &&
       !response.employeeServicesReply &&
       !response.publicCompanyReply &&
+      !response.reviewsCalendarReply &&
       grounding.status === 'verified' &&
       toolResults.length > 0
         ? buildChatReportCard(toolResults, {
@@ -4097,7 +4326,15 @@ export class AiCoreService {
                   depends_on: task.depends_on,
                   confidence: task.confidence,
                   requires_clarification: task.requires_clarification,
-                  clarification_question: null,
+                  clarification_question:
+                    response.reviewsCalendarReply &&
+                    task.intent === 'reviews.list_recent' &&
+                    task.requires_clarification &&
+                    isReviewMonth(task.entities.period) &&
+                    task.clarification_question ===
+                      reviewRatingQuestion(task.entities.period)
+                      ? task.clarification_question
+                      : null,
                 })),
                 context: lastPlan.context,
               },

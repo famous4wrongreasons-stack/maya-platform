@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
@@ -13,6 +14,7 @@ import { EntitlementsService } from '../entitlements/entitlements.service';
 import type { MayaFeatureKey } from '../common/feature-catalog';
 import { MeasurementService } from './measurement.service';
 import { MeasurementSources } from './measurement.sources';
+import { isUsableTimezone } from '../tenants/salon-timezone';
 import {
   MeasurementIntent,
   MeasurementKind,
@@ -56,7 +58,11 @@ export class MeasurementReadService {
     private readonly sources: MeasurementSources,
   ) {}
 
-  private async member(tenantId: string, userId: string) {
+  private async member(
+    tenantId: string,
+    userId: string,
+    reviewCalendar?: { branchId?: string },
+  ) {
     const ctx = this.context.get();
     if (
       !ctx ||
@@ -74,9 +80,25 @@ export class MeasurementReadService {
         role: true,
         status: true,
         branchId: true,
+        ...(reviewCalendar
+          ? { branch: { select: { id: true, tenantId: true, timezone: true } } }
+          : {}),
         user: { select: { status: true } },
         tenant: {
-          select: { status: true, calendarSource: true, defaultTimezone: true },
+          select: {
+            status: true,
+            calendarSource: true,
+            defaultTimezone: true,
+            ...(reviewCalendar
+              ? {
+                  branches: {
+                    where: { id: reviewCalendar.branchId ?? '' },
+                    select: { id: true, timezone: true },
+                    take: 1,
+                  },
+                }
+              : {}),
+          },
         },
       },
     });
@@ -416,15 +438,64 @@ export class MeasurementReadService {
     };
   }
 
-  async reviewScope(tenantId: string, userId: string, branchId?: string) {
-    const member = await this.viewer(tenantId, userId, 'reputation_period');
+  async reviewScope(
+    tenantId: string,
+    userId: string,
+    branchId?: string,
+    exactCalendar = false,
+  ) {
+    const admitted = await this.viewer(tenantId, userId, 'reputation_period');
+    // Feature resolution awaits external owner work. Do not return the membership
+    // snapshot from before that wait after revocation or branch reassignment.
+    const member = await this.member(
+      tenantId,
+      userId,
+      exactCalendar ? { branchId } : undefined,
+    );
+    if (
+      member.id !== admitted.id ||
+      member.role !== admitted.role ||
+      member.branchId !== admitted.branchId
+    )
+      throw new ForbiddenException('measurement_branch_scope_denied');
     if (member.branchId && branchId && branchId !== member.branchId)
       throw new ForbiddenException('measurement_branch_scope_denied');
+    let timezone: string | undefined;
+    if (exactCalendar) {
+      if (
+        branchId === undefined &&
+        member.branchId &&
+        (member.branch?.id !== member.branchId ||
+          member.branch.tenantId !== tenantId)
+      ) {
+        throw new ServiceUnavailableException(
+          'review_calendar_source_unavailable',
+        );
+      }
+      const observed =
+        branchId !== undefined
+          ? member.tenant.branches?.find((branch) => branch.id === branchId)
+              ?.timezone
+          : member.branchId
+            ? member.branch?.timezone
+            : member.tenant.defaultTimezone;
+      if (
+        !isUsableTimezone(observed) ||
+        observed.trim() !== observed ||
+        observed.length > 100
+      ) {
+        throw new ServiceUnavailableException(
+          'review_calendar_source_unavailable',
+        );
+      }
+      timezone = observed;
+    }
     return {
       branchId: branchId ?? member.branchId ?? undefined,
       registryAllowed:
         BUSINESS.includes(member.role) ||
         (member.role === 'branch_manager' && !!member.branchId),
+      ...(exactCalendar ? { timezone } : {}),
     };
   }
 

@@ -1,4 +1,4 @@
-import { reviewsReply } from './reviews-presentation';
+import { reviewsReply, reviewsCalendarReply } from './reviews-presentation';
 
 const row = () => ({
   id: 'review-private-ref',
@@ -218,5 +218,128 @@ describe('source-scoped review presentation', () => {
       { ...row(), occurred_at: new Date('2026-09-21T12:00:00.000Z') },
     ]);
     expect(reviewsReply(data).status).toBe('blocked');
+  });
+});
+
+describe('exact calendar reviews presentation', () => {
+  const scope = {
+    branchId: 'branch-current',
+    timezone: 'Europe/Moscow',
+    period: 'named_month' as const,
+    month: '2026-09',
+    fromInclusive: '2026-08-31T21:00:00.000Z',
+    toExclusive: '2026-09-30T21:00:00.000Z',
+    rating: 2,
+    limit: 20,
+  };
+  function fixture() {
+    return {
+      status: 'completed',
+      replayed: false,
+      result: {
+        source: 'tenant_review_registry',
+        privacy: 'review_text_redacted_from_ai',
+        count: 1,
+        reviews: [
+          {
+            rating: 2,
+            occurred_at: '2026-09-04T10:00:00.000Z',
+            topics: ['wait'],
+          },
+        ],
+        read_scope: {
+          contract: 'maya.review-registry-query/2',
+          month: scope.month,
+          timezone: scope.timezone,
+          from_inclusive: scope.fromInclusive,
+          to_exclusive: scope.toExclusive,
+          branch_id: scope.branchId,
+          rating_mode: 'exact',
+          rating_exact: 2,
+          scope: 'one_branch',
+          order: 'occurred_at_desc',
+          limit: 20,
+          returned_count: 1,
+          has_more: false,
+          configuration_status: 'not_observed',
+          observed_at: '2026-10-09T12:00:00.000Z',
+        },
+      },
+    };
+  }
+  it('shows exact interval, rating, source and saved qualification without low-rating inference', () => {
+    const x = fixture();
+    x.replayed = true;
+    const result = reviewsCalendarReply(x, scope);
+    expect(result.status).toBe('verified');
+    expect(result.reply).toContain('Сохранённый');
+    expect(result.reply).toContain('2026-09');
+    expect(result.reply).toContain('ровно 2');
+    expect(result.reply).toContain(scope.toExclusive);
+    expect(result.reply).not.toMatch(/плох|низк|branch-current/);
+  });
+  it('qualifies observed empty as verified local-registry evidence', () => {
+    const x = fixture();
+    x.result.reviews = [];
+    x.result.count = 0;
+    x.result.read_scope.returned_count = 0;
+    const result = reviewsCalendarReply(x, scope);
+    expect(result.status).toBe('verified');
+    expect(result.reply).toContain('в локальном реестре отзывы не найдены');
+    expect(result.reply).not.toContain('не настроен');
+  });
+  it.each([
+    'stale',
+    'scope',
+    'upper',
+    'rating',
+    'pii',
+    'array',
+    'malformed-date',
+    'more-without-sentinel',
+    'order',
+  ])('withholds malformed/current source %s', (kind) => {
+    const x = fixture();
+    if (kind === 'stale') Object.assign(x, { stale: 'false' });
+    if (kind === 'scope') x.result.read_scope.branch_id = 'foreign';
+    if (kind === 'upper') x.result.reviews[0].occurred_at = scope.toExclusive;
+    if (kind === 'rating') x.result.reviews[0].rating = 1;
+    if (kind === 'pii')
+      Object.assign(x.result.reviews[0], { text: 'PRIVATE_REVIEW' });
+    if (kind === 'array')
+      Object.assign(x.result.read_scope, { rating_mode: ['exact'] });
+    if (kind === 'malformed-date')
+      x.result.read_scope.observed_at = '2026-02-30T00:00:00.000Z';
+    if (kind === 'more-without-sentinel') x.result.read_scope.has_more = true;
+    if (kind === 'order') {
+      x.result.reviews.push({
+        rating: 2,
+        occurred_at: '2026-09-05T00:00:00.000Z',
+        topics: [],
+      });
+      x.result.count = 2;
+      x.result.read_scope.returned_count = 2;
+    }
+    const result = reviewsCalendarReply(x, scope);
+    expect(result.status).toBe('blocked');
+    expect(result.reply).not.toContain('PRIVATE_REVIEW');
+  });
+  it('keeps explicit all and visible read/display truncation distinct', () => {
+    const x = fixture();
+    x.result.reviews = Array.from({ length: 20 }, () => ({
+      rating: 5,
+      occurred_at: '2026-09-04T10:00:00.000Z',
+      topics: [],
+    }));
+    x.result.count = 20;
+    x.result.read_scope.returned_count = 20;
+    x.result.read_scope.has_more = true;
+    x.result.read_scope.rating_mode = 'all';
+    Object.assign(x.result.read_scope, { rating_exact: null });
+    const result = reviewsCalendarReply(x, { ...scope, rating: null });
+    expect(result.status).toBe('verified');
+    expect(result.reply).toContain('все оценки');
+    expect(result.reply).toContain('первые 5 из 20');
+    expect(result.reply).toContain('дополнительные отзывы');
   });
 });

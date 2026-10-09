@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type { BusinessReview, TenantCatalogItem } from '@prisma/client';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -6,6 +11,9 @@ import { Package5Wave4CanonicalCutoverService } from '../package5-wave4/package5
 import { Package5Wave4ReviewFactService } from '../package5-wave4/package5-wave4.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { isUsableTimezone } from '../tenants/salon-timezone';
+import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
+import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import type { IngestBusinessReviewDto } from './dto/business-review.dto';
 import type { UpsertCatalogItemDto } from './dto/catalog-item.dto';
 import type { UpdateReferralProgramDto } from './dto/referral-program.dto';
@@ -18,6 +26,13 @@ export const BUSINESS_CONTENT_KINDS = [
 ] as const;
 
 export type BusinessContentKind = (typeof BUSINESS_CONTENT_KINDS)[number];
+
+export type ReviewCalendarWindow = Readonly<{
+  month: string;
+  timezone: string;
+  fromInclusive: string;
+  toExclusive: string;
+}>;
 
 const REVIEW_TOPICS = {
   service_quality: [
@@ -240,9 +255,14 @@ export class BusinessContentService {
       rating?: number;
       branchId?: string;
       limit?: number;
+      calendar?: ReviewCalendarWindow;
+      allRatings?: true;
     } = {},
   ) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (options.calendar !== undefined) {
+      return this.listCalendarReviews(scopedTenantId, options);
+    }
     const from = this.reviewFrom(options.days);
     const limit = Math.min(Math.max(options.limit ?? 20, 1), 50);
     const rows = await this.prisma.businessReview.findMany({
@@ -276,6 +296,232 @@ export class BusinessContentService {
         configuration_status: 'not_observed' as const,
       },
     };
+  }
+
+  /** Local registry scope; this does not establish a CRM integration. */
+  async reviewCalendarTimezone(tenantId: string, branchId?: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (
+      branchId !== undefined &&
+      (typeof branchId !== 'string' ||
+        branchId.length < 1 ||
+        branchId.length > 128 ||
+        branchId.trim() !== branchId ||
+        Array.from(branchId).some((character) => {
+          const code = character.charCodeAt(0);
+          return code < 32 || code === 127;
+        }))
+    ) {
+      throw new BadRequestException('review_calendar_query_invalid');
+    }
+    let timezone: unknown;
+    try {
+      if (branchId !== undefined) {
+        const branch = await this.prisma.branch.findFirst({
+          where: { id: branchId, tenantId: scopedTenantId },
+          select: { timezone: true },
+        });
+        timezone = branch?.timezone;
+      } else {
+        const tenant = await this.prisma.tenant.findUnique({
+          where: { id: scopedTenantId },
+          select: { defaultTimezone: true },
+        });
+        timezone = tenant?.defaultTimezone;
+      }
+    } catch {
+      throw new ServiceUnavailableException(
+        'review_calendar_source_unavailable',
+      );
+    }
+    if (
+      !isUsableTimezone(timezone) ||
+      timezone.trim() !== timezone ||
+      timezone.length > 100
+    ) {
+      throw new ServiceUnavailableException(
+        'review_calendar_source_unavailable',
+      );
+    }
+    return timezone;
+  }
+
+  private async listCalendarReviews(
+    tenantId: string,
+    options: {
+      days?: number;
+      rating?: number;
+      branchId?: string;
+      limit?: number;
+      calendar?: ReviewCalendarWindow;
+      allRatings?: true;
+    },
+  ) {
+    const calendar = options.calendar;
+    const limit = options.limit ?? 20;
+    const rating = options.rating;
+    const branchId = options.branchId;
+    if (
+      !calendar ||
+      Object.keys(calendar).sort().join(',') !==
+        'fromInclusive,month,timezone,toExclusive' ||
+      Object.keys(options).some(
+        (key) =>
+          !['rating', 'allRatings', 'branchId', 'limit', 'calendar'].includes(
+            key,
+          ),
+      ) ||
+      typeof calendar.month !== 'string' ||
+      calendar.month.length !== 7 ||
+      !/^[1-9]\d{3}-(0[1-9]|1[0-2])$/u.test(calendar.month) ||
+      !isUsableTimezone(calendar.timezone) ||
+      calendar.timezone.trim() !== calendar.timezone ||
+      calendar.timezone.length > 100 ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > 50 ||
+      (rating === undefined
+        ? options.allRatings !== true
+        : !Number.isInteger(rating) ||
+          rating < 1 ||
+          rating > 5 ||
+          options.allRatings !== undefined)
+    ) {
+      throw new BadRequestException('review_calendar_query_invalid');
+    }
+    // Capture every caller-owned field before the first asynchronous read.
+    const window = { ...calendar };
+    if (
+      window.month >= localCalendarDate(window.timezone, new Date()).slice(0, 7)
+    ) {
+      throw new ConflictException('review_calendar_period_unavailable');
+    }
+    const next = new Date(`${window.month}-01T00:00:00.000Z`);
+    next.setUTCMonth(next.getUTCMonth() + 1);
+    const from = localDateMinuteToUtc(`${window.month}-01`, 0, window.timezone);
+    const to = localDateMinuteToUtc(
+      next.toISOString().slice(0, 10),
+      0,
+      window.timezone,
+    );
+    if (
+      window.fromInclusive !== from.toISOString() ||
+      window.toExclusive !== to.toISOString()
+    ) {
+      throw new BadRequestException('review_calendar_query_invalid');
+    }
+    if (to.getTime() > Date.now()) {
+      throw new ConflictException('review_calendar_period_unavailable');
+    }
+    if (
+      (await this.reviewCalendarTimezone(tenantId, branchId)) !==
+      window.timezone
+    ) {
+      throw new ConflictException('review_calendar_scope_changed');
+    }
+    let snapshot;
+    try {
+      const rows = await this.prisma.businessReview.findMany({
+        where: {
+          tenantId,
+          ...(branchId === undefined ? {} : { branchId }),
+          ...(rating === undefined ? {} : { rating }),
+          occurredAt: { gte: from, lt: to },
+        },
+        select: {
+          id: true,
+          tenantId: true,
+          branchId: true,
+          rating: true,
+          occurredAt: true,
+          topicTagsJson: true,
+        },
+        orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+        take: limit + 1,
+      });
+      const ids = new Set<string>();
+      let previousTime = Infinity;
+      if (!Array.isArray(rows) || rows.length > limit + 1)
+        throw new Error('invalid_review_rows');
+      const reviews = rows
+        .map((row) => {
+          const time =
+            row.occurredAt instanceof Date ? row.occurredAt.getTime() : NaN;
+          if (
+            typeof row.id !== 'string' ||
+            !row.id ||
+            ids.has(row.id) ||
+            row.tenantId !== tenantId ||
+            (branchId !== undefined && row.branchId !== branchId) ||
+            !Number.isInteger(row.rating) ||
+            row.rating < 1 ||
+            row.rating > 5 ||
+            (rating !== undefined && row.rating !== rating) ||
+            !Number.isFinite(time) ||
+            time < from.getTime() ||
+            time >= to.getTime() ||
+            time > previousTime
+          )
+            throw new Error('invalid_review_row');
+          ids.add(row.id);
+          previousTime = time;
+          return {
+            rating: row.rating,
+            occurred_at: row.occurredAt.toISOString(),
+            topics: Array.isArray(row.topicTagsJson)
+              ? [
+                  ...new Set(
+                    row.topicTagsJson.filter(
+                      (topic): topic is string =>
+                        typeof topic === 'string' &&
+                        Object.hasOwn(REVIEW_TOPICS, topic),
+                    ),
+                  ),
+                ]
+              : [],
+          };
+        })
+        .slice(0, limit);
+      snapshot = {
+        configured: reviews.length > 0,
+        source: 'tenant_review_registry' as const,
+        count: reviews.length,
+        reviews,
+        privacy: 'review_text_redacted_from_ai' as const,
+        read_scope: {
+          contract: 'maya.review-registry-query/2' as const,
+          month: window.month,
+          timezone: window.timezone,
+          from_inclusive: window.fromInclusive,
+          to_exclusive: window.toExclusive,
+          branch_id: branchId ?? null,
+          rating_mode:
+            rating === undefined ? ('all' as const) : ('exact' as const),
+          rating_exact: rating ?? null,
+          scope:
+            branchId === undefined
+              ? ('tenant' as const)
+              : ('one_branch' as const),
+          order: 'occurred_at_desc' as const,
+          limit,
+          returned_count: reviews.length,
+          has_more: rows.length > limit,
+          configuration_status: 'not_observed' as const,
+          observed_at: new Date().toISOString(),
+        },
+      };
+    } catch {
+      throw new ServiceUnavailableException(
+        'review_calendar_source_unavailable',
+      );
+    }
+    if (
+      (await this.reviewCalendarTimezone(tenantId, branchId)) !==
+      window.timezone
+    ) {
+      throw new ConflictException('review_calendar_scope_changed');
+    }
+    return snapshot;
   }
 
   async analyzeReviews(

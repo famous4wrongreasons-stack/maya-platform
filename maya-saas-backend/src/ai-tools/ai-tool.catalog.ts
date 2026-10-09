@@ -621,12 +621,20 @@ export const MAYA_AI_TOOL_CATALOG = [
   {
     name: 'reviews.list.read',
     description:
-      'Read privacy-safe recent business review facts: rating, source, date and deterministic topics. Original review text is never sent to the model.',
+      'Read privacy-safe recent business review facts: rating, source, date and deterministic topics. Calendar periods require explicit rating or all_ratings:true, no days. Original review text is never sent to the model.',
     inputSchema: {
       type: 'object',
       additionalProperties: false,
       properties: {
         days: { type: 'integer', minimum: 1, maximum: 3650, default: 90 },
+        period: { type: 'string', enum: ['last_month', 'named_month'] },
+        month: {
+          type: 'string',
+          pattern: '^\\d{4}-(0[1-9]|1[0-2])$',
+          minLength: 7,
+          maxLength: 7,
+        },
+        all_ratings: { type: 'boolean', enum: [true] },
         rating: { type: 'integer', minimum: 1, maximum: 5 },
         limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
         branch_id: { type: 'string', minLength: 1, maxLength: 128 },
