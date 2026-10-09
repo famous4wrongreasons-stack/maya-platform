@@ -257,13 +257,15 @@ describe('General explanation with unavailable analytics [HTTP PG / SCRIPTED]', 
     const before = modelCalls;
     expect(before).toBe(4);
     const foreign = await chat(corpusRow.utterance, [general], foreignToken);
-    expect(foreign.status).toBeGreaterThanOrEqual(400);
+    expect(foreign.status).toBe(409);
+    expect(foreign.body.message).toBe('conversation_scope_conflict');
     await db.prisma.membership.updateMany({
       where: { tenantId, userId },
       data: { status: 'suspended' },
     });
     const revoked = await chat(corpusRow.utterance, [general]);
-    expect(revoked.status).toBeGreaterThanOrEqual(400);
+    expect(revoked.status).toBe(401);
+    expect(revoked.body.message).toBe('Active tenant membership is required');
     expect(modelCalls).toBe(before);
     noReads();
     expect(await db.prisma.actionExecution.count()).toBe(0);
