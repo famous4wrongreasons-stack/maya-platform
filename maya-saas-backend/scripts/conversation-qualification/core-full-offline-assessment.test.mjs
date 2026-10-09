@@ -361,6 +361,146 @@ test('a server-owned typed READ may answer without an LLM plan; relevant sources
   direct.audit.semanticPlans = [];
   assert.equal(status(direct), 'pass');
 });
+function publicInfo() {
+  const row = input('current-admin-ordinary');
+  row.audit.semanticPlans = [];
+  row.audit.toolResults = [
+    {
+      name: 'company.business-hours.read',
+      result: {
+        verified: true,
+        source: 'external_crm',
+        title: 'Публичный салон',
+        address: '[private omitted]',
+        schedule: '09:00–21:00',
+        schedule_available: true,
+        timezone: 'Europe/Moscow',
+      },
+    },
+  ];
+  row.audit.sourceFacts.company = {
+    name: 'Публичный салон',
+    address: 'Новая улица, дом 7',
+    businessHours: '09:00–21:00',
+  };
+  row.audit.sourceFacts.companyProvenance = {
+    qualification: 'LAST_OBSERVED_FIXTURE_PROFILE_NOT_AUTHORITY',
+    source: 'external_crm',
+    reader: 'CRMAdapter.getCompanyProfile',
+    provider: 'yclients',
+  };
+  row.reply = 'Адрес: Новая улица, дом 7. По CRM график 09:00–21:00.';
+  return row;
+}
+test('public address and hours require the current qualified CRM profile READ, including a deterministic no-plan response', () => {
+  assert.equal(status(publicInfo()), 'pass');
+  const row = publicInfo();
+  row.audit.semanticPlans = input('current-admin-ordinary').audit.semanticPlans;
+  assert.equal(status(row), 'pass');
+  for (const name of [null, 'catalog.staff.read', 'company.profile.read']) {
+    const missing = publicInfo();
+    missing.audit.toolResults =
+      name === null
+        ? []
+        : [
+            {
+              name,
+              result:
+                name === 'catalog.staff.read'
+                  ? { salon: missing.audit.sourceFacts.company }
+                  : missing.audit.toolResults[0].result,
+            },
+          ];
+    assert.notEqual(status(missing), 'pass', String(name));
+  }
+});
+test('empty, stale, failed, or unqualified public READs cannot turn a fixture snapshot into evidence', () => {
+  for (const change of [
+    {},
+    { verified: false },
+    { stale: true },
+    { stale: 'false' },
+    { source: 'tenant_branding' },
+    { status: 'failed' },
+    { error: 'source_failed' },
+    { available: false },
+    { schedule_available: false },
+  ]) {
+    const row = publicInfo();
+    row.audit.toolResults[0].result = Object.keys(change).length
+      ? { ...row.audit.toolResults[0].result, ...change }
+      : {};
+    assert.notEqual(status(row), 'pass', JSON.stringify(change));
+  }
+});
+test('public reply address and hours stay exact to the observed owner, not an old branding value', () => {
+  for (const reply of [
+    'Адрес: Старая улица, дом 1. График 09:00–21:00.',
+    'Адрес: Новая улица, дом 7. График 10:00–20:00.',
+  ]) {
+    const row = publicInfo();
+    row.reply = reply;
+    assert.equal(status(row), 'semantic_fail');
+  }
+  const row = publicInfo();
+  row.audit.sourceFacts.company.address = 'Старая улица, дом 1';
+  row.audit.sourceFacts.companyProvenance = {
+    qualification: 'CURRENT_TENANT_BRANDING_SNAPSHOT_NOT_CRM_READ',
+    source: 'tenant_branding',
+    reader: 'BrandingSettings.contactDetailsJson',
+  };
+  assert.notEqual(status(row), 'pass');
+  row.reply = 'Адрес: Старая улица, дом 1. График 09:00–21:00.';
+  assert.notEqual(status(row), 'pass');
+  // An unredacted current owner fact is usable even when an unrelated old
+  // branding snapshot disagrees; it must never be replaced by that snapshot.
+  row.audit.toolResults[0].result.address = 'Новая улица, дом 7';
+  assert.equal(status(row), 'semantic_fail');
+  row.reply = publicInfo().reply;
+  assert.equal(status(row), 'pass');
+  const mismatched = publicInfo();
+  mismatched.audit.sourceFacts.company.businessHours = '10:00–20:00';
+  assert.notEqual(status(mismatched), 'pass');
+});
+test('address-only catalog consultation retains missing branch evidence without requiring CRM hours', () => {
+  const row = input('utt-company.public_info-037');
+  row.audit.toolResults = [
+    {
+      name: 'catalog.staff.read',
+      result: {
+        salon: { name: 'Публичный салон', address: '[private omitted]' },
+      },
+    },
+  ];
+  row.audit.sourceFacts.company = {
+    name: 'Публичный салон',
+    address: 'Профильная улица, дом 3',
+    businessHours: null,
+  };
+  row.audit.sourceFacts.companyProvenance = {
+    qualification: 'CURRENT_TENANT_BRANDING_SNAPSHOT_NOT_CRM_READ',
+    source: 'tenant_branding',
+    reader: 'BrandingSettings.contactDetailsJson',
+  };
+  row.reply =
+    'В сохраненном профиле указан адрес: Профильная улица, дом 3. Привязка к основному филиалу не подтверждена.';
+  const result = assessFullOfflineTurn(row);
+  assert.equal(result.status, 'insufficient_evidence');
+  assert.deepEqual(result.failedCheckIds, []);
+  assert.deepEqual(result.missingEvidenceIds, [
+    'branch_scope_preserved',
+    'branch_address_binding',
+  ]);
+  row.audit.sourceFacts.companyProvenance =
+    publicInfo().audit.sourceFacts.companyProvenance;
+  assert.ok(
+    assessFullOfflineTurn(row).missingEvidenceIds.includes(
+      'current_public_address',
+    ),
+  );
+  row.audit.toolResults = [];
+  assert.notEqual(status(row), 'pass');
+});
 test('financial currency and scaling are grounded in typed measurement, never arbitrary source numbers', () => {
   const row = input('current-bi-ordinary');
   row.audit.sourceFacts.c7Published = true;

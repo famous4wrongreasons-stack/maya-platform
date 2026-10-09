@@ -500,6 +500,7 @@ const neededTools = {
   staff_catalog: ['catalog.staff.read'],
   staff_services: ['catalog.services.read'],
   service_price: ['catalog.services.read'],
+  public_info: ['company.business-hours.read', 'catalog.staff.read'],
   financial_snapshot: ['analytics.business.query'],
   goods: ['inventory.goods.read'],
   integration: ['support.integration-status.read'],
@@ -535,11 +536,7 @@ const allowedTools = {
   staff_services: ['catalog.staff.read', 'catalog.services.read'],
   service_price: ['catalog.staff.read', 'catalog.services.read'],
   price_route: ['catalog.staff.read', 'catalog.services.read'],
-  public_info: [
-    'catalog.staff.read',
-    'company.profile.read',
-    'company.business-hours.read',
-  ],
+  public_info: ['catalog.staff.read', 'company.business-hours.read'],
   integration: ['support.integration-status.read'],
   inventory: ['inventory.stock.read'],
   reviews: ['reviews.list.read'],
@@ -1512,26 +1509,98 @@ export function assessFullOfflineTurn(input) {
       );
     } else if (kind === 'public_info') {
       const company = source.company;
+      // A closing-time request needs the current CRM profile owner, which
+      // returns both fields. Address-only public consultation may instead use
+      // the current catalog.salon projection. A snapshot alone is not a READ.
+      const crmOwner = 'company.business-hours.read';
+      const catalogOwner = 'catalog.staff.read';
+      const owner =
+        slot.closingTime || object(resultFor(crmOwner))
+          ? crmOwner
+          : object(resultFor(catalogOwner))
+            ? catalogOwner
+            : null;
+      const profile =
+        owner && resultFor(owner) !== undefined ? read(owner) : undefined;
+      if (profile === undefined) check('current_public_owner_read', null);
+      const crm = owner === crmOwner;
+      const fields = crm ? profile : profile?.salon;
       check(
-        'current_public_address',
-        object(company)
-          ? typeof company.address === 'string' &&
-            /omitted|unavailable/.test(company.address)
-            ? null
-            : typeof company.address === 'string' && norm(company.address)
-              ? reply.includes(norm(company.address))
-              : hasLimitation && /адрес|местополож/.test(reply)
+        'current_public_profile_qualified',
+        object(profile)
+          ? (crm
+              ? profile.verified === true && profile.source === 'external_crm'
+              : object(profile.salon)) &&
+              (profile.stale === undefined || profile.stale === false) &&
+              profile.status === undefined &&
+              profile.error === undefined &&
+              profile.available !== false
           : null,
       );
-      if (slot.closingTime)
+      const provenance = source.companyProvenance;
+      const observedProfile =
+        object(company) &&
+        (crm
+          ? provenance?.qualification ===
+              'LAST_OBSERVED_FIXTURE_PROFILE_NOT_AUTHORITY' &&
+            provenance.source === 'external_crm' &&
+            provenance.reader === 'CRMAdapter.getCompanyProfile' &&
+            provenance.provider === 'yclients' &&
+            company.businessHours === fields?.schedule
+          : provenance?.qualification ===
+              'CURRENT_TENANT_BRANDING_SNAPSHOT_NOT_CRM_READ' &&
+            provenance.source === 'tenant_branding' &&
+            provenance.reader === 'BrandingSettings.contactDetailsJson' &&
+            company.name === fields?.name);
+      const publicField = (field, projection) => {
+        const value = fields?.[field];
+        if (value === null) return null;
+        if (typeof value !== 'string' || !norm(value)) return undefined;
+        // The audit intentionally omits address fields. Only the separately
+        // bound observed public projection can supply that omitted value;
+        // it never replaces the current-turn owner qualification above.
+        if (/omitted|unavailable/.test(value)) {
+          if (value !== '[private omitted]' || !observedProfile)
+            return undefined;
+          const projected = company[projection];
+          return projected === null ||
+            (typeof projected === 'string' &&
+              norm(projected) &&
+              !/omitted|unavailable/.test(projected))
+            ? projected
+            : undefined;
+        }
+        return value;
+      };
+      const address = publicField('address', 'address');
+      check(
+        'current_public_address',
+        address === undefined
+          ? null
+          : address === null
+            ? hasLimitation && /адрес|местополож/.test(reply)
+            : reply.includes(norm(address)),
+      );
+      if (slot.closingTime) {
+        const hours = publicField('schedule', 'businessHours');
         check(
-          'closing_time_answered_or_missing',
-          object(company)
-            ? typeof company.businessHours === 'string' && company.businessHours
-              ? reply.includes(norm(company.businessHours))
-              : hasLimitation && /час|врем|график|режим/.test(reply)
+          'current_public_schedule_qualified',
+          object(profile)
+            ? typeof profile.schedule_available === 'boolean' &&
+                profile.schedule_available ===
+                  (typeof profile.schedule === 'string' &&
+                    norm(profile.schedule) !== '')
             : null,
         );
+        check(
+          'closing_time_answered_or_missing',
+          hours === undefined
+            ? null
+            : hours === null
+              ? hasLimitation && /час|врем|график|режим/.test(reply)
+              : reply.includes(norm(hours)),
+        );
+      }
       if (slot.branch)
         check(
           'branch_address_binding',
