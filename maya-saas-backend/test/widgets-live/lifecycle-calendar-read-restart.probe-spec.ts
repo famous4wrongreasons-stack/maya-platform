@@ -60,7 +60,6 @@ const QUESTIONS = [
   },
 ] as const;
 const PERIOD = 'more_than_two_months';
-const POLICY_SCOPE = 'fixture:lifecycle-calendar-policy-transition';
 const PRIVATE = 'SYNTHETIC_PRIVATE_VISIT_NOTE_NOT_FOR_MODEL';
 const sha = (text: string | Buffer) =>
   createHash('sha256').update(text).digest('hex');
@@ -229,6 +228,8 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
       }
     | undefined;
   const cases: Record<string, unknown>[] = [];
+  const controlledA22Indices = new Set<number>();
+  const controlledA22Transitions: Record<string, unknown>[] = [];
   const report: Record<string, unknown> = {
     contract: 'maya.lifecycle-calendar-http-proof/1',
     stage,
@@ -243,6 +244,7 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
     original81Reclassification: false,
     fullCohortAcceptance: false,
     calendarBoundaryEqualityAcceptance: false,
+    controlledA22Transitions,
     cases,
     qualifications: [
       'Only the two frozen initial questions are exercised; regularity and ranking follow-ups remain separate.',
@@ -512,54 +514,180 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
       minimumCoverage: 'PARTIAL',
     };
   }
+  async function a22Census() {
+    // This database is fresh and owned by this finite proof. Global censuses
+    // detect an unrelated execution even if it were written during the POST.
+    const options = { orderBy: { id: 'asc' as const }, take: 129 };
+    const [executions, attempts, mutations, revisions] = await Promise.all([
+      db.prisma.actionExecution.findMany(options),
+      db.prisma.actionAttempt.findMany(options),
+      db.prisma.actionTargetMutation.findMany(options),
+      db.prisma.tenantBusinessConfigurationRevision.findMany(options),
+    ]);
+    for (const values of [executions, attempts, mutations, revisions])
+      expect(values.length).toBeLessThanOrEqual(128);
+    return { executions, attempts, mutations, revisions };
+  }
+  function oneAdded<T extends { id: string }>(before: T[], after: T[]): T {
+    expect(after).toHaveLength(before.length + 1);
+    const previousIds = new Set(before.map((row) => row.id));
+    const added = after.filter((row) => !previousIds.has(row.id));
+    expect(added).toHaveLength(1);
+    expect(after.filter((row) => previousIds.has(row.id))).toEqual(before);
+    return added[0];
+  }
   async function configure(s: Salon, rules: Rule[]) {
     const token = await login(s);
-    return http.recorder.within(POLICY_SCOPE, async () => {
-      const before = await request(http.app.getHttpServer())
-        .get('/api/governed-settings/tenant/c8_valuation')
-        .set('Authorization', `Bearer ${token}`);
-      expect(before.status).toBe(200);
-      const state = object(before.body);
-      const result = await request(http.app.getHttpServer())
-        .post('/api/governed-settings/tenant')
-        .set('Authorization', `Bearer ${token}`)
-        .set('idempotency-key', randomUUID())
-        .send({
-          confirmed: true,
-          namespace: 'c8_valuation',
-          expectedRevision: state.revision,
-          previousRevisionId: state.previousRevisionId,
-          content: {
-            version: 1,
-            valueMeasures: [],
-            predictionTargets: [],
-            dormancyRules: rules,
-            rankingObjectives: [],
-            minimumEvidence: [],
-            exclusions: {
-              serviceScope: [],
-              branchIds: [],
-              subjectStates: [],
-              requiredFeatures: [],
-            },
-            opportunityAdmission: { enabled: false, rules: [] },
-            modelUse: [],
+    const before = await request(http.app.getHttpServer())
+      .get('/api/governed-settings/tenant/c8_valuation')
+      .set('Authorization', `Bearer ${token}`);
+    expect(before.status).toBe(200);
+    const state = object(before.body);
+    const censusBefore = await a22Census();
+    const intervalStart = http.recorder.mark();
+    const result = await request(http.app.getHttpServer())
+      .post('/api/governed-settings/tenant')
+      .set('Authorization', `Bearer ${token}`)
+      .set('idempotency-key', randomUUID())
+      .send({
+        confirmed: true,
+        namespace: 'c8_valuation',
+        expectedRevision: state.revision,
+        previousRevisionId: state.previousRevisionId,
+        content: {
+          version: 1,
+          valueMeasures: [],
+          predictionTargets: [],
+          dormancyRules: rules,
+          rankingObjectives: [],
+          minimumEvidence: [],
+          exclusions: {
+            serviceScope: [],
+            branchIds: [],
+            subjectStates: [],
+            requiredFeatures: [],
           },
-        });
-      expect(result.status).toBe(201);
-      const current =
-        await db.prisma.tenantBusinessConfigurationRevision.findFirstOrThrow({
-          where: { tenantId: s.tenant.id, namespace: 'c8_valuation' },
-          orderBy: { revision: 'desc' },
-        });
-      expect(current.revision).toBe(Number(state.revision) + 1);
-      assert.ok(current.actionExecutionId);
-      return {
-        revision: current.revision,
-        contentHash: current.contentHash,
-        executionHash: hash(current.actionExecutionId),
-      };
+          opportunityAdmission: { enabled: false, rules: [] },
+          modelUse: [],
+        },
+      });
+    const intervalEnd = http.recorder.mark();
+    expect(result.status).toBe(201);
+    const current =
+      await db.prisma.tenantBusinessConfigurationRevision.findFirstOrThrow({
+        where: { tenantId: s.tenant.id, namespace: 'c8_valuation' },
+        orderBy: { revision: 'desc' },
+      });
+    expect(current.revision).toBe(Number(state.revision) + 1);
+    assert.ok(current.actionExecutionId);
+    const censusAfter = await a22Census();
+    const execution = oneAdded(censusBefore.executions, censusAfter.executions);
+    const attempt = oneAdded(censusBefore.attempts, censusAfter.attempts);
+    const mutation = oneAdded(censusBefore.mutations, censusAfter.mutations);
+    const revision = oneAdded(censusBefore.revisions, censusAfter.revisions);
+    const member = await db.prisma.membership.findUniqueOrThrow({
+      where: { userId_tenantId: { userId: s.owner.id, tenantId: s.tenant.id } },
     });
+    expect(member).toMatchObject({
+      status: 'active',
+      role: UserRole.TENANT_OWNER,
+    });
+    expect(execution).toMatchObject({
+      id: current.actionExecutionId,
+      tenantId: s.tenant.id,
+      actorUserId: s.owner.id,
+      sourceType: 'authenticated_request',
+      actionClass: 'update_tenant_business_configuration',
+      capability: 'package5.settings.tenant-business.execute.v1',
+      targetKind: 'setting',
+      targetRef: 'tenant-config:c8_valuation',
+      state: 'SUCCEEDED',
+      dryRun: false,
+      executionAttemptCount: 1,
+    });
+    expect(attempt).toMatchObject({
+      tenantId: s.tenant.id,
+      actionExecutionId: execution.id,
+      attemptNumber: 1,
+      kind: 'EXECUTION',
+      state: 'SUCCEEDED',
+    });
+    expect(mutation).toMatchObject({
+      tenantId: s.tenant.id,
+      actionExecutionId: execution.id,
+      targetKind: 'setting',
+      targetRef: 'tenant-config:c8_valuation',
+      mutationKind: 'tenant_business_configuration',
+      targetGeneration: Number(state.revision),
+    });
+    expect(revision).toEqual(current);
+    expect(revision).toMatchObject({
+      tenantId: s.tenant.id,
+      namespace: 'c8_valuation',
+      actorUserId: s.owner.id,
+      actorMembershipId: member.id,
+      actionExecutionId: execution.id,
+      previousRevisionId: state.previousRevisionId,
+      revision: Number(state.revision) + 1,
+    });
+    const governedWrites = http.recorder.operations
+      .slice(intervalStart, intervalEnd)
+      .flatMap((operation, offset) =>
+        isBusinessWrite(operation)
+          ? [{ index: intervalStart + offset, operation }]
+          : [],
+      );
+    // HTTP runs in another async context: scope:null is expected. Admit only
+    // these exact indexed operations AFTER their independent canonical DB join.
+    const operationKeys = governedWrites
+      .map(({ operation }) => `${operation.model}:${operation.operation}`)
+      .sort();
+    expect(operationKeys).toEqual(
+      [
+        'ActionExecution:create',
+        'ActionExecution:update',
+        'ActionExecution:update',
+        'ActionAttempt:create',
+        'ActionAttempt:update',
+        'ActionTargetMutation:create',
+        'TenantBusinessConfigurationRevision:create',
+      ].sort(),
+    );
+    expect(controlledA22Transitions.length).toBeLessThan(8);
+    for (const { index } of governedWrites) {
+      expect(controlledA22Indices.has(index)).toBe(false);
+      controlledA22Indices.add(index);
+    }
+    controlledA22Transitions.push({
+      phase:
+        stage === 'resume'
+          ? 'EXPLICIT_POLICY_TRANSITION'
+          : 'CANONICAL_FIXTURE_SETUP',
+      interval: { startInclusive: intervalStart, endExclusive: intervalEnd },
+      operationIndices: governedWrites.map(({ index }) => index),
+      operationKeys,
+      tenantHash: hash(s.tenant.id),
+      actorHash: hash(s.owner.id),
+      executionHash: hash(execution.id),
+      attemptHash: hash(attempt.id),
+      mutationHash: hash(mutation.id),
+      revisionHash: hash(revision.id),
+      namespace: revision.namespace,
+      revision: revision.revision,
+      contentHash: revision.contentHash,
+      exactNewRowCounts: {
+        executions: 1,
+        attempts: 1,
+        mutations: 1,
+        revisions: 1,
+      },
+      priorRowsUnchanged: true,
+    });
+    return {
+      revision: current.revision,
+      contentHash: current.contentHash,
+      executionHash: hash(current.actionExecutionId),
+    };
   }
   async function publish(
     s: Salon,
@@ -957,21 +1085,25 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
       ]),
     );
   }
-  function noEffects(mark: number) {
+  function isBusinessWrite(op: (typeof http.recorder.operations)[number]) {
     const names =
-      /^(Appointment|Client|Opportunity|AgentTask|DomainEvent|Action|AiApproval|Inbox|Notification|Delivery|Outbox|Marketing|Team|Operational|ExpenseReminder|Inventory|Measurement|C8)/;
+      /^(Appointment|Client|Opportunity|AgentTask|DomainEvent|Action|AiApproval|Inbox|Notification|Delivery|Outbox|Marketing|Team|Operational|ExpenseReminder|Inventory|Measurement|C8|TenantBusinessConfigurationRevision)/;
+    return (
+      op.write &&
+      (op.model
+        ? names.test(op.model)
+        : /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+"?(?:Appointment|Client|Opportunity|AgentTask|DomainEvent|Action|AiApproval|Inbox|Notification|Delivery|Outbox|Marketing|Team|Operational|ExpenseReminder|Inventory|Measurement|C8|TenantBusinessConfigurationRevision)/i.test(
+            op.sql ?? '',
+          ))
+    );
+  }
+  function noEffects(mark: number) {
     expect(
-      http.recorder
-        .since(mark)
+      http.recorder.operations
+        .slice(mark)
         .filter(
-          (op) =>
-            op.write &&
-            op.scope !== POLICY_SCOPE &&
-            (op.model
-              ? names.test(op.model)
-              : /\b(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+"?(?:Appointment|Client|Opportunity|AgentTask|DomainEvent|Action|AiApproval|Inbox|Notification|Delivery|Outbox|Marketing|Team|Operational|ExpenseReminder|Inventory|Measurement|C8)/i.test(
-                  op.sql ?? '',
-                )),
+          (op, offset) =>
+            isBusinessWrite(op) && !controlledA22Indices.has(mark + offset),
         ),
     ).toEqual([]);
     expect(transport.mock.calls).toHaveLength(0);
@@ -1255,6 +1387,7 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
       let transition: unknown,
         workHash: string | undefined,
         sourceHash: string | undefined,
+        lateBusinessAfterTransition: string | undefined,
         refused: Result;
       try {
         await arrived(g);
@@ -1274,6 +1407,7 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
         transition = await configure(saved.late, [
           rule('replacement_day60', 'day', 60),
         ]);
+        lateBusinessAfterTransition = await business(saved.late);
       } finally {
         g.release();
         refused = await pending;
@@ -1315,6 +1449,8 @@ describe('Exact two-calendar-month lifecycle [supplemental actual HTTP/PG restar
         noProseOrFindings: true,
         settledReceiptUnchanged: true,
       });
+      expect(await business(saved.late)).toBe(lateBusinessAfterTransition);
+      expect(controlledA22Transitions).toHaveLength(2);
       noEffects(mark);
       report.status = 'passed';
     }, 120000);
