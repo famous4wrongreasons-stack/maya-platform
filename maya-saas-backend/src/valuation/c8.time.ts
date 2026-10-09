@@ -1,4 +1,5 @@
 import { c8Object } from './c8.contract';
+import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
 
 export class C8CalendarInstantUnavailable extends Error {
   constructor() {
@@ -136,4 +137,39 @@ export function c8ShiftWindow(
   return new Date(
     uniqueInstant(civil, timezone, formatter) + at.getUTCMilliseconds(),
   );
+}
+
+/** Existing version-1 rows have no calendar-implementation stamp. Their admitted
+ * input is current only when the legacy conversion agrees with the unique instant.
+ * This checks deadline compatibility, never the saved policy value. Corrected
+ * historical inputs remain withheld until separately versioned qualification.
+ */
+export function c8CalendarDeadlineCompatible(
+  at: Date,
+  window: unknown,
+  timezone: string,
+): boolean {
+  const deadline = c8ShiftWindow(at, window, timezone, 1);
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    ...formatOptions,
+    timeZone: timezone,
+  });
+  const parts = (date: Date) =>
+    Object.fromEntries(
+      formatter.formatToParts(date).map((p) => [p.type, p.value]),
+    );
+  const source = parts(at),
+    target = parts(deadline);
+  // The old Date.UTC path silently mapped years 0..99 to 1900..1999.
+  if (Number(source.year) < 100 || Number(target.year) < 100) return false;
+  const localDate = `${target.year.padStart(4, '0')}-${target.month}-${target.day}`;
+  const legacy =
+    localDateMinuteToUtc(
+      localDate,
+      Number(target.hour) * 60 + Number(target.minute),
+      timezone,
+    ).getTime() +
+    at.getUTCSeconds() * 1000 +
+    at.getUTCMilliseconds();
+  return legacy === deadline.getTime();
 }

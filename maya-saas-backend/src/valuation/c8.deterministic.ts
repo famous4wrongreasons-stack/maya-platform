@@ -7,7 +7,11 @@ import {
   c8Object,
 } from './c8.contract';
 import { c8Policy } from './c8.policy';
-import { c8ShiftWindow } from './c8.time';
+import {
+  C8CalendarInstantUnavailable,
+  c8CalendarDeadlineCompatible,
+  c8ShiftWindow,
+} from './c8.time';
 
 export type C8DeterministicOutput = {
   valuesJson: C8Object;
@@ -102,8 +106,11 @@ export function c8DormancyCalendarCurrent(
       f.currency !== null
     )
       return false;
-    c8ShiftWindow(new Date(f.value), rule.elapsed, row.timezone, 1);
-    return true;
+    return c8CalendarDeadlineCompatible(
+      new Date(f.value),
+      rule.elapsed,
+      row.timezone,
+    );
   } catch {
     return false;
   }
@@ -184,6 +191,11 @@ export function c8ComputeDeterministic(
     if (!Number.isFinite(last.getTime()) || last > row.t0)
       throw new Error('c8_last_visit_not_proven');
     const deadline = c8ShiftWindow(last, rule.elapsed, row.timezone, 1);
+    if (
+      (rule.elapsed as C8Object).unit === 'calendar_month' &&
+      !c8CalendarDeadlineCompatible(last, rule.elapsed, row.timezone)
+    )
+      throw new C8CalendarInstantUnavailable();
     const value =
       rule.comparison === 'gt' ? row.t0 > deadline : row.t0 >= deadline;
     return reasonOutput(

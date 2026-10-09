@@ -281,6 +281,20 @@ function fixture(lastVisit = UNIQUE) {
 
 describe('actual C8 store currentness rejects ambiguous historical calendar inputs', () => {
   it.each([
+    ['historical local seconds', '1880-01-01T12:00:45.123Z', 'Europe/Paris'],
+    ['legacy year coercion', '0099-12-31T12:34:56.789Z', 'UTC'],
+  ])(
+    'withholds %s whose old deadline differs even though the corrected target is unique',
+    async (_label, visit, timezone) => {
+      const f = fixture(visit);
+      f.row.timezone = timezone;
+      const before = JSON.stringify(f.row);
+      expect(await f.current()).toBe(false);
+      await expect(f.snapshot()).rejects.toThrow('c8_result_unavailable');
+      expect(JSON.stringify(f.row)).toBe(before);
+    },
+  );
+  it.each([
     ['gap', GAP],
     ['fold', FOLD],
   ])(

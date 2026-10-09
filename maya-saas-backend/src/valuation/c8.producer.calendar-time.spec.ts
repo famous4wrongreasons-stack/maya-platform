@@ -196,6 +196,22 @@ function fixture(lastVisit = '2026-01-08T07:30:45.123Z') {
 
 describe('C8 producer calendar ambiguity becomes an unavailable result', () => {
   it.each([
+    ['1880-01-01T12:00:45.123Z', 'Europe/Paris'],
+    ['0099-12-31T12:34:56.789Z', 'UTC'],
+  ])(
+    'version 1 does not publish a corrected historical deadline as newly usable (%s)',
+    async (visit, timezone) => {
+      const f = fixture(visit);
+      f.row().timezone = timezone;
+      expect((await f.resume()).state).toBe('UNAVAILABLE');
+      expect(f.computeErrors[0]).toBeInstanceOf(C8CalendarInstantUnavailable);
+      expect(f.store.publishUnavailable).toHaveBeenCalledWith(f.lease, [
+        'calendar_instant_unavailable',
+      ]);
+      expect(f.computed).toEqual([]);
+    },
+  );
+  it.each([
     ['spring gap', '2026-01-08T07:30:45.123Z'],
     ['fall fold', '2026-09-01T05:30:45.123Z'],
   ])(
