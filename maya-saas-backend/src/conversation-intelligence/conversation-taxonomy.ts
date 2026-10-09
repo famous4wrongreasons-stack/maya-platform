@@ -652,6 +652,24 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
       synonyms: ['сколько стоит', 'цена услуги', 'почём'],
       examples: ['Сколько стоит мужская стрижка?'],
     }),
+    intent(
+      'services.price_update',
+      'services',
+      'Prepare the existing YC-SP1 exact fixed-RUB price approval for one current service.',
+      {
+        action: 'write',
+        dataClass: 'E',
+        risk: 'high',
+        roles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+        permission: 'catalog.service.price.update',
+        tools: ['catalog.service.price.update'],
+        requiredSlots: ['service', 'requested_price'],
+        synonyms: ['изменить цену услуги', 'подготовить изменение цены'],
+        examples: ['Подготовь изменение цены услуги «Стрижка» на 1500 рублей'],
+        responseRule:
+          'Prepare only the existing YC-SP1-WIDGET-1 fixed-RUB approval. Semantic service and amount are preferences, never authority: the server binds the literal current catalog title and explicit amount from the owner request. Retain the service for an uninterrupted price-only correction; the existing owner supersedes the pending proposal. Missing exact title/amount requires clarification. Never apply a price, infer consent from chat, change currency, rename a service, discount, batch, or retry UNKNOWN. Only the exact canonical approval authorizes the existing Action Engine.',
+      },
+    ),
     intent('services.duration', 'services', 'Read service duration.', {
       action: 'read',
       dataClass: 'C',

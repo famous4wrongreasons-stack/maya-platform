@@ -80,8 +80,9 @@ describe('ConversationIntelligenceService', () => {
 
     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
     // 85 existing intents + A22 + Occupancy + personal catalog + goods item
-    // + explicit goods search + the finite owner service rename preview.
-    expect(contract.intents).toHaveLength(91);
+    // + explicit goods search + the finite owner service rename preview
+    // + the already approved YC-SP1 fixed-RUB approval route.
+    expect(contract.intents).toHaveLength(92);
     expect(
       contract.intents.find(
         (item) => item.intent === 'services.rename_preview',
@@ -112,7 +113,8 @@ describe('ConversationIntelligenceService', () => {
         'marketing.send_campaign',
       ]),
     );
-    expect(Buffer.byteLength(encoded, 'utf8')).toBeLessThan(60_000);
+    // One approved fixed-price intent adds <1 KB to the prior 60 KB budget.
+    expect(Buffer.byteLength(encoded, 'utf8')).toBeLessThan(61_000);
     expect(contract.intents[0]).not.toHaveProperty('permission');
     expect(contract.intents[0]).not.toHaveProperty('response_rule');
   });

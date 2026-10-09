@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import request from 'supertest';
+import type { AiCoreModelInput } from '../../src/ai-tools/ai-core.types';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
   CalendarSource,
@@ -122,11 +123,7 @@ const carrierCases: Array<{
 
 function carrierEvidenceDirectory(): string | null {
   const requested = process.env.WIDGETS_EVIDENCE_DIR;
-  const owned = resolve(
-    __dirname,
-    '../../../..',
-    'pricing-evidence/ui-carrier',
-  );
+  const owned = resolve(__dirname, '../../..', 'pricing-evidence/ui-carrier');
   return requested && resolve(requested) === owned ? owned : null;
 }
 
@@ -391,34 +388,81 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
     return db.prisma.actionExecution.findMany({ where: { tenantId } });
   }
 
-  /** The widget proof starts at the actual chat ingress, never a test minter. */
-  async function widgetSalon(label: string) {
-    const f = await salon(label);
-    await fx.grantFeature(f.tenant, 'widgets.runtime');
-    f.state.row.title = 'Стрижка';
-    jest
-      .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation((input) => {
-        const latest =
-          input.messages.filter((message) => message.role === 'user').at(-1)
-            ?.content ?? '';
-        return Promise.resolve({
-          reply: 'Подготовлю изменение цены.',
-          toolCall: {
-            name: SERVICE_PRICE_TOOL,
-            arguments: {
-              service_id: SERVICE_ID,
-              price_rubles: latest.includes('2700') ? 2700 : 2500,
+  /** Scripted semantics pass the actual planner parser and CI before chat binding. */
+  function priceDecision(input: AiCoreModelInput, title: string) {
+    const latest =
+      input.messages.filter((message) => message.role === 'user').at(-1)
+        ?.content ?? '';
+    const correction = /^Нет,/u.test(latest);
+    const price = latest.includes('1600')
+      ? 1600
+      : latest.includes('1500')
+        ? 1500
+        : latest.includes('2700')
+          ? 2700
+          : 2500;
+    const validated = http.app
+      .get(AiCoreModelService)
+      ['validatePlanningResponse'](
+        JSON.stringify({
+          semantic_plan: {
+            parent_request: latest,
+            language: 'ru',
+            dialogue_act: correction ? 'correction' : 'request',
+            tasks: [
+              {
+                id: 'price',
+                intent: 'services.price_update',
+                entities_json: JSON.stringify({
+                  service: title,
+                  requested_price: price,
+                }),
+                depends_on: [],
+                confidence: 1,
+                requires_clarification: false,
+                clarification_question: null,
+              },
+            ],
+            context: {
+              carried_slots: correction ? ['service'] : [],
+              replaced_slots: correction ? ['requested_price'] : [],
+              unresolved_references: [],
             },
           },
-          provider: 'openai',
-          model: 'scripted-service-price-widget-proof',
-          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-        });
-      });
+          // Deliberately forged values must be replaced by the existing raw-text/catalog owner.
+          tool_call: {
+            name: SERVICE_PRICE_TOOL,
+            arguments_json: JSON.stringify({
+              service_id: '999999',
+              price_rubles: 9999,
+              company_id: 'untrusted-model-company',
+            }),
+          },
+        }),
+        input,
+      );
+    return {
+      ...validated,
+      reply: 'Подготовлю изменение цены.',
+      provider: 'openai' as const,
+      model: 'scripted-validated-service-price-semantic-proof',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
+
+  /** The widget proof starts at the actual chat ingress, never a test minter. */
+  async function widgetSalon(label: string, title = 'Стрижка') {
+    const f = await salon(label);
+    await fx.grantFeature(f.tenant, 'widgets.runtime');
+    f.state.row.title = title;
+    jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation((input) =>
+        Promise.resolve(priceDecision(input, title)),
+      );
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
     let conversationId: string | undefined;
-    const chat = async (text = 'Поставь цену услуги «Стрижка» 2500 рублей') => {
+    const send = async (text: string) => {
       messages.push({ role: 'user', content: text });
       const response = await request(http.app.getHttpServer())
         .post('/api/ai/chat')
@@ -432,19 +476,23 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
         });
       expect(response.status).toBe(201);
       const value = response.body as ChatApproval;
+      conversationId = value.user_turn?.conversationId ?? conversationId;
+      messages.push({ role: 'assistant', content: value.reply });
+      return value;
+    };
+    const chat = async (text = 'Поставь цену услуги «Стрижка» 2500 рублей') => {
+      const value = await send(text);
       const envelope = value.resolution?.receipt?.envelope;
       if (
         value.action?.status !== 'approval_required' ||
         envelope?.kind !== 'APPROVAL'
       )
         throw new Error(
-          `Synthetic chat did not mint its approval: ${JSON.stringify(response.body)}`,
+          `Synthetic chat did not mint its approval: ${JSON.stringify(value)}`,
         );
-      conversationId = value.user_turn?.conversationId ?? conversationId;
-      messages.push({ role: 'assistant', content: value.reply });
       return { envelope, approval: value.action.approval };
     };
-    return { ...f, chat };
+    return { ...f, chat, send };
   }
   function decisionIntent(
     envelope: ApprovalEnvelope,
@@ -803,6 +851,72 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
     expect(f.state.row.price_min).toBe(2700);
   });
 
+  it('YC-SP1-SEMANTIC: original inflected title clarifies; literal preparation and correction reach one exact approval and AE receipt', async () => {
+    const f = await widgetSalon(
+      'Price semantic exact-title clarification',
+      'Мужская стрижка',
+    );
+    for (const text of [
+      'Подготовь изменение цены мужской стрижки на 1500 рублей.',
+      'Нет, на 1600 рублей.',
+    ]) {
+      const response = await f.send(text);
+      expect(response.action?.status).not.toBe('approval_required');
+      expect(response.resolution?.receipt?.envelope?.kind).not.toBe('APPROVAL');
+      expect(response.reply).toContain('название');
+    }
+    expect(
+      await db.prisma.aiApprovalRequest.count({
+        where: { tenantId: f.tenant.id },
+      }),
+    ).toBe(0);
+    expect(await actions(f.tenant.id)).toHaveLength(0);
+    expect(f.state.writes).toHaveLength(0);
+    // Supplemental user clarification, not a rewrite of the frozen two-turn corpus.
+    const first = await f.chat(
+      'Подготовь изменение цены услуги «Мужская стрижка» на 1500 рублей.',
+    );
+    expect(first.approval.payload_preview).toMatchObject({
+      service: 'Мужская стрижка',
+      current_price_rubles: 2000,
+      proposed_price_rubles: 1500,
+    });
+    const corrected = await f.chat('Нет, на 1600 рублей.');
+    expect(corrected.approval.payload_preview).toMatchObject({
+      service: 'Мужская стрижка',
+      current_price_rubles: 2000,
+      proposed_price_rubles: 1600,
+    });
+    expect(corrected.approval.id).not.toBe(first.approval.id);
+    expect(
+      (await tapApproval(f.token, first.envelope, 'approve')).body,
+    ).not.toMatchObject({ receipt_outcome: 'ACCEPTED' });
+    expect(await actions(f.tenant.id)).toHaveLength(0);
+    expect(f.state.writes).toHaveLength(0);
+    await observeApproval(f.token, corrected.envelope);
+    expect(
+      (await tapApproval(f.token, corrected.envelope, 'approve')).body,
+    ).toMatchObject({
+      receipt_outcome: 'ACCEPTED',
+      owner_decision: { status: 'completed' },
+    });
+    expect(await actions(f.tenant.id)).toEqual([
+      expect.objectContaining({
+        capability: SERVICE_PRICE_CAPABILITY,
+        state: 'SUCCEEDED',
+      }),
+    ]);
+    expect(f.state.writes).toHaveLength(1);
+    expect(f.state.row).toMatchObject({
+      title: 'Мужская стрижка',
+      price_min: 1600,
+      price_max: 1600,
+    });
+    expect(f.state.readsAfterWrite).toBeGreaterThan(0);
+    await tapApproval(f.token, corrected.envelope, 'approve');
+    expect(f.state.writes).toHaveLength(1);
+  });
+
   it.each([
     'provider_revision',
     'membership',
@@ -990,25 +1104,9 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
     f.state.row.title = 'Стрижка';
     const model = jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation((input) => {
-        const latest =
-          input.messages.filter((message) => message.role === 'user').at(-1)
-            ?.content ?? '';
-        return Promise.resolve({
-          reply: 'Подготовлю изменение цены.',
-          // Core itself reads and binds the current catalog before preparing a card.
-          toolCall: {
-            name: SERVICE_PRICE_TOOL,
-            arguments: {
-              service_id: SERVICE_ID,
-              price_rubles: latest.includes('2700') ? 2700 : 2500,
-            },
-          },
-          provider: 'openai',
-          model: 'scripted-service-price-proof',
-          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-        });
-      });
+      .mockImplementation((input) =>
+        Promise.resolve(priceDecision(input, 'Стрижка')),
+      );
     type ChatResponse = {
       reply: string;
       action: ToolResponse | null;
