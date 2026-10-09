@@ -1,0 +1,15 @@
+{
+  "observations": [
+    {
+      "context": {
+        "caseId": "utt-services.price-067",
+        "turn": 1
+      },
+      "field": "audit.toolResults.1.result.read_scope.source_hash",
+      "value": "45da2868fa[phone removed]sha256:b8c39bdd2bb7a1723f5b36e9be1a1d4d2def8833dd7e32569321f679721eff7d"
+    }
+  ],
+  "count": 1,
+  "rawRewritten": false,
+  "interpretation": "Existing generic audit redacts some opaque hashes. Staff exact supplemental receipts are independently available; no newly repaired generic hash claim."
+}

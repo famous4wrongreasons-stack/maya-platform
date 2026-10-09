@@ -1,0 +1,295 @@
+{
+  "baselineHead": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "sourceFilesVerified": 2533,
+  "sourceUnchangedDuringRun": true,
+  "allActualTurns": 81,
+  "beforeCounts": {
+    "pass": 57,
+    "semantic_fail": 0,
+    "unsupported": 14,
+    "insufficient_evidence": 10
+  },
+  "afterCounts": {
+    "pass": 57,
+    "semantic_fail": 2,
+    "unsupported": 12,
+    "insufficient_evidence": 10
+  },
+  "criticalSafety": {
+    "failedTurns": 0,
+    "missingEvidenceTurns": 0
+  },
+  "retainedPreviousPass": 57,
+  "changed": [
+    {
+      "case": "utt-reviews.list_recent-062:1",
+      "before": "unsupported",
+      "after": "semantic_fail",
+      "failed": [
+        "current_read_reviews_list_read",
+        "requested_registry_scope_retained"
+      ],
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    },
+    {
+      "case": "utt-reviews.list_recent-067:1",
+      "before": "unsupported",
+      "after": "semantic_fail",
+      "failed": [
+        "current_read_reviews_list_read",
+        "requested_registry_scope_retained"
+      ],
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    }
+  ],
+  "remaining": [
+    {
+      "case": "current-staff_config-correction:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "current-staff_config-correction:2",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "current-bi-negative:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-finance_follow_up-7:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-7:2",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-7:3",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-10:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-10:2",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-10:3",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-retention_drill_down-0:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-0:2",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-0:3",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-15:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-15:2",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-15:3",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-ambiguous_entity_resolution-15:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "case": "mt-ambiguous_entity_resolution-15:2",
+      "status": "insufficient_evidence",
+      "missing": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "case": "utt-company.public_info-037:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "case": "utt-company.public_info-041:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "case": "utt-finance.profit-055:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "utt-inventory.stock-074:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "utt-inventory.stock-079:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "utt-reviews.list_recent-062:1",
+      "status": "semantic_fail",
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    },
+    {
+      "case": "utt-reviews.list_recent-067:1",
+      "status": "semantic_fail",
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    }
+  ],
+  "unchangedFrozenInputs": {
+    "maya-saas-backend/datasets/conversation-intelligence/core-offline-48-20261009.json": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.d.mts": "4f94b6586fe85a0252d29eb2230b5a3b265458bcf34f92b78bce2bca63ba5c76",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.mjs": "a6367294872dda7d586c342d25ef0aa86eaae470560d1f5abfceb41493da02b9",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.test.mjs": "85b77aac77a06b15876e983bd256bad9a87afa3b398a5e293f6d1a7f21b44d00",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.d.mts": "09e1dbb7797f150fcf913db4d157d89c34e7824c4bac27c22cbcef4cc4d1e996",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs": "5026b88bfc4b4baa677c9751ab1cbafc8d85e9b7f0baecfd7920ff3af0b344ec",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs": "cc6aefbf7b7ed31ecea7bd910bd695e54758400c684eebf195ee6b5d570953a8",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.mjs": "a4d0a0ffbdcf953a43e18311ebf6dae7b54522d7e7dcdaf000df912c2a96c3b1",
+    "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.test.mjs": "04580a193fb07552d67555b56827cce9226c1d905f5194b4917ed382d29cd89d"
+  },
+  "runnerStatus": "completed-with-semantic-failures",
+  "runnerCleanup": {
+    "clusterStopped": true,
+    "brokerClosed": true,
+    "postmasterPidAbsent": true,
+    "groups": {
+      "initdb": {
+        "detached": true,
+        "pid": 32143,
+        "pgid": 32143,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      },
+      "pg-start": {
+        "detached": true,
+        "pid": 32180,
+        "pgid": 32180,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      },
+      "createdb": {
+        "detached": true,
+        "pid": 32213,
+        "pgid": 32213,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      },
+      "migrations": {
+        "detached": true,
+        "pid": 32237,
+        "pgid": 32237,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      },
+      "conversation": {
+        "detached": true,
+        "pid": 32297,
+        "pgid": 32297,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      },
+      "pg-stop": {
+        "detached": true,
+        "pid": 34406,
+        "pgid": 34406,
+        "closed": true,
+        "groupAbsent": true,
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "termSent": false,
+        "killSent": false
+      }
+    }
+  },
+  "scoreSha256": "530a06b0bc22af8772ca45544a87e74badb4b8db3f06e0e3b10d74a0f487ae37",
+  "limits": [
+    "Actual HTTP/auth/C9 with scripted model and synthetic domain sources",
+    "Review calendar and rating continuation qualified in separate HTTP/PG restart proof; frozen one-turn ambiguous-rating cases remain unclosed unless raw evidence establishes closure",
+    "Not real model/provider, browser, restart or full MAYA acceptance"
+  ]
+}

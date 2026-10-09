@@ -1,0 +1,156 @@
+{
+  "contract": "maya.reviews-period.independent-source-review/1",
+  "reviewedAt": "2026-10-09T17:14:34.109Z",
+  "reviewer": "independent_review",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics",
+  "baseCommit": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "observedHead": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "verdict": "QUALIFIED_SOURCE_REVIEW_NO_REMAINING_BLOCKER",
+  "blockingFindings": [],
+  "scope": "Nine production files for the exact-calendar reviews READ vertical and eight associated test sources; read-only static inspection, no test/service/network/PG/HTTP/model/credential execution.",
+  "production": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "size": 385352,
+      "sha256": "7a5ac764bf2bcc2f57032d3db346841b4ad8f6437fc8160e8ac39fe6b4850d78"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "size": 164267,
+      "sha256": "f931475a1ac529389bbfa2c7d176a1ced51a2dc1bd6583bb782d7a29898315af"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+      "size": 50298,
+      "sha256": "80d5d685fb3a08fdb1cfa89906978f58a559ad8024df0e12b36b3e3cbc64581f"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+      "size": 104476,
+      "sha256": "9d922617accb862122004c860e77fea8f8e38d7f76794b4a14b30dba0b42071e"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+      "size": 59533,
+      "sha256": "34c637bdcd6b0b51f62b24171de8690cf023d0e4af0a9549539b0ef3cdf41a6b"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/reviews-calendar-read.ts",
+      "size": 4916,
+      "sha256": "038664b38f5eeeca96a670e129e8d3a8af48617d2fec60499a11d13ff13170c9"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/reviews-presentation.ts",
+      "size": 10523,
+      "sha256": "8056c2b9e3e9416279f78915a693a23d08b7b67c278f9b2ef71d5a373119102d"
+    },
+    {
+      "path": "maya-saas-backend/src/business-content/business-content.service.ts",
+      "size": 22708,
+      "sha256": "db8ff78f04ed512bac53c80768d8ae2af9bb52cb6eacbbf7ad5b3639b0f7be8e"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.read.service.ts",
+      "size": 20521,
+      "sha256": "072183c569449b615dd6381353a68687a3a0312e4e9714539ad4294da7a01211"
+    }
+  ],
+  "testSources": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.reviews-calendar.spec.ts",
+      "size": 14196,
+      "sha256": "cbf10711f84d175f48a781567a98153cecabe6398d0aa358f1cc97e5cb3680dd"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.review-calendar.spec.ts",
+      "size": 9972,
+      "sha256": "1e166b45f293745887bf619b6250352408033e08155046e93b9978b324227a79"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts",
+      "size": 24196,
+      "sha256": "235e354c534661ee444e5046e8172bda60ef460cca5525402b01dc951c3c485f"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+      "size": 68258,
+      "sha256": "8e590ac89a6f4731fc56ac69e911026161d93cb5166695b1d482211111364c0a"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/reviews-calendar-read.spec.ts",
+      "size": 5273,
+      "sha256": "f04bc2687e2264ebb637292c1452fa647a1b06ebe5fe9894bb9669f6049d6ece"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/reviews-presentation.spec.ts",
+      "size": 12820,
+      "sha256": "0fbd59ee5fa81eac760ac4b1e814347f8646d145d5bc2d21e0b1691594103576"
+    },
+    {
+      "path": "maya-saas-backend/src/business-content/business-content.review-calendar.spec.ts",
+      "size": 10038,
+      "sha256": "8c003a78a872cac78dee4d540acc4948b29f523770b7d6119e59d8b5c792a34c"
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.review-calendar.spec.ts",
+      "size": 7315,
+      "sha256": "62c0b5da92fd58714d8ee570f3d613479ce54c10842cb5309268b663f7525bdc"
+    }
+  ],
+  "authorAiFreeze": {
+    "path": "/private/tmp/maya-reviews-calendar-ai-freeze-20261009.json",
+    "sha256": "7e15200f68c38e453cec258ef7fc7e1a1a235d0e6475d5198709751b9acf9bff",
+    "entries": 11,
+    "mismatches": []
+  },
+  "findingsClosed": [
+    {
+      "id": "review_terminal_metadata_after_feature_await",
+      "resolution": "Exact-calendar MeasurementRead.reviewScope obtains terminal current membership plus tenant/explicit or inherited branch timezone after awaited entitlement checks. Handler compares initial/current effective branch and timezone to the actual resolved window. Inherited branch id and tenant are checked. Runtime finishes its scoped revalidation with that owner resolver after current policy/principal checks.",
+      "qualification": "Current owner Prisma projection; not a serializable SQL transaction, source-version store or new authorization grant."
+    },
+    {
+      "id": "review_error_shape_mismatch",
+      "resolution": "AiCore matches the finite known codes from string, nested error.code or Nest message shape only for 400/409/503. Permission 401/403 and unknown exceptions propagate; source failure is not presented as an empty list."
+    },
+    {
+      "id": "review_clarification_branch_loss",
+      "resolution": "Saved canonical rating question gates preference carry; period and branch carry independently. Branch survives same-month repetition and month correction. An explicit replaced-but-missing branch becomes unresolved. Old employee constraints/arbitrary clarification do not become a wider query."
+    },
+    {
+      "id": "review_malformed_period_coercion",
+      "resolution": "Legacy-period exclusion requires a literal string; arrays no longer pass through String coercion into legacy queries."
+    },
+    {
+      "id": "review_verified_without_completed_C9",
+      "resolution": "Verified exact-calendar presentation requires the persisted read turn and C9 COMPLETED; missing/incomplete coordination and final authority failures are refused. Exact review reply does not mint a generic report card."
+    }
+  ],
+  "supportedSourceConclusions": [
+    "Existing reviews.list.read/business roles/reviews.core and the MeasurementRead ACL owner remain authoritative; no Client/staff expansion, new tool, AE contract, schema, CRM binding or automatic review ingestion.",
+    "The exact path supports last_month or named_month, one explicit integer rating 1..5 or all_ratings:true. Mixed rolling/calendar arguments and unsupported/current/future calendar windows refuse. Last_month is resolved into an explicit month before the chat READ and retained rating clarification.",
+    "BusinessContent query uses exact tenant/effective branch, rating and half-open [from,to) instants; validates local-calendar boundaries and returned row scope/order; reads limit+1 for has_more and snapshots output before later metadata awaits. Missing/foreign branch, unavailable timezone and query failure are not empty evidence.",
+    "The existing execution input hash binds current resolved month, timezone, effective branch and rating scope via readAuthority.sourceScopeHash. The same current authority/scope checks apply to fresh, cached and canonical replay paths. A changed scope does not reuse the old completed result as current.",
+    "Reviews are composed by the server, with at most five shown rows, exact boundaries, rating filter, observed source time, explicit has_more and saved-result label on replay. Query projection excludes encrypted text, original review text, identities and arbitrary provider labels; no second model pass receives the review rows.",
+    "Persisted clarification_question is restricted to the exact server month/rating question in this response lane and existing encrypted semantic context. It carries preferences only and is reauthorized before READ."
+  ],
+  "testSourceInspection": {
+    "executedByReviewer": false,
+    "coverageAuthored": [
+      "Actual CI/parser finite rating clarification and retained month/branch corrections",
+      "Owner exact interval/rating/all, observed empty, limit+1, malformed/private row rejection and immutable snapshot",
+      "Current membership/user/tenant/branch and timezone changes during awaited work; foreign branch and inherited foreign-tenant branch refusal",
+      "Runtime fresh/cache/replay scope binding and policy-await drift",
+      "Presenter exact scope, stale/malformed/bounds/privacy controls and C9 missing/incomplete completion refusal"
+    ],
+    "status": "Inspected test source only; root component/types/lint gates were underway at review time."
+  },
+  "limitations": [
+    "No HTTP/PG/restart/React proof is accepted by this source artifact; the new runner/probe and actual evidence require separate review.",
+    "Existing rolling days API remains a legacy path; the exact-calendar source-hash profile does not retroactively qualify all legacy cache behavior.",
+    "Current/future months, arbitrary ranges, employee-specific review attribution, ambiguous branch, unchosen/qualitative low ratings and compound scope are not silently satisfied by this finite path.",
+    "A local registry query is not proof of an external review provider being configured or exhaustively synchronized. has_more/read count is not a global review total.",
+    "No previously scored corpus row or archived result is reclassified by source review, and no model-language/full MAYA/C10 readiness claim is made."
+  ],
+  "historicalNote": "Earlier review comment that CI normalizeSemanticSlots discards undeclared month keys was corrected after reading its implementation; it preserves scalar entries. This verdict does not rely on that withdrawn concern."
+}

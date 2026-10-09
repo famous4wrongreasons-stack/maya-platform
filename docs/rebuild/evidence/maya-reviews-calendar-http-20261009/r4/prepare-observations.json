@@ -1,0 +1,727 @@
+{
+  "contract": "synthetic-reviews-period-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "sourceBindingsDigest": "87096f758c2b019b563daf8022638dea22cdae7d8d3a21b86dc411a09be04423",
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "plannerPlanMeaning": "INITIAL_VALIDATED_PARSER_PLAN_NOT_FINAL_PERSISTED_CONTEXT",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realCanonicalReviewOwner": true,
+  "source": "SYNTHETIC_FACTS_INGESTED_THROUGH_CANONICAL_HTTP_OWNER",
+  "realProviderCalls": 0,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "full48Reclassification": false,
+  "c9ReadsPerQualifiedRequest": 1,
+  "registryReadCountMeaning": "OWNER_LIST_REVIEWS_INVOCATIONS_NOT_SQL_COUNT",
+  "noBusinessWritesClaim": "OBSERVED_SCOPED_FAMILIES_AFTER_CANONICAL_FIXTURE_SETUP",
+  "fixtureSetup": {
+    "writer": "EXISTING_POST_BUSINESS_CONTENT_REVIEWS_CANONICAL_OWNER",
+    "encryptedRawTextVerified": true,
+    "branchTimezone": "Pacific/Kiritimati",
+    "tenantTimezone": "Pacific/Honolulu",
+    "boundaryInstants": [
+      "2026-08-31T09:59:59.999Z",
+      "2026-08-31T10:00:00.000Z",
+      "2026-08-31T22:00:00.000Z",
+      "2026-09-30T09:59:59.999Z",
+      "2026-09-30T10:00:00.000Z"
+    ],
+    "sourceRows": 34
+  },
+  "prepareReplay": {
+    "sameRun": true,
+    "sameSourceReceipt": true,
+    "registryReadsAdded": 0
+  },
+  "exactAllRatings": {
+    "halfOpenCalendarScope": true,
+    "count": 20,
+    "hasMore": true,
+    "exhaustiveClaim": false
+  },
+  "clarifications": {
+    "lowNotDefaultedToThree": true,
+    "missingRatingNotAll": true,
+    "exactMonthRetained": true,
+    "ratingOnlyFollowup": true
+  },
+  "incompletePeriods": {
+    "currentMonthRefused": true,
+    "futureMonthRefused": true,
+    "registryReadsAdded": 0
+  },
+  "emptyVsUnavailable": {
+    "emptyStatus": 201,
+    "unavailableStatus": 201,
+    "failedReadWasNotEmpty": true
+  },
+  "isolation": {
+    "foreignHistoryIsolated": true,
+    "foreignRunStatus": 400,
+    "foreignBranchRefused": true,
+    "restrictedBranchStatus": 403,
+    "clientAndStaffNoRegistryReads": true,
+    "roleRefusals": [
+      {
+        "role": "client",
+        "chatStatus": 201,
+        "chatModelCalls": 0,
+        "chatDenialProvenance": "EXISTING_SERVER_PREMODEL_DENIAL",
+        "directStatus": 403,
+        "directCode": "ai_tool_forbidden",
+        "directModelCalls": 0,
+        "registryReadsAdded": 0
+      },
+      {
+        "role": "staff",
+        "chatStatus": 201,
+        "chatModelCalls": 0,
+        "chatDenialProvenance": "EXISTING_SERVER_PREMODEL_DENIAL",
+        "directStatus": 403,
+        "directCode": "ai_tool_forbidden",
+        "directModelCalls": 0,
+        "registryReadsAdded": 0
+      }
+    ]
+  },
+  "businessHash": "6333f53850aee4fbb44ae21cbf649b791bd697a118b08fba2d2be2820d533974",
+  "window": {
+    "from": "2026-08-31T10:00:00.000Z",
+    "toExclusive": "2026-09-30T10:00:00.000Z",
+    "month": "2026-09",
+    "timezone": "Pacific/Kiritimati"
+  },
+  "registryReads": [
+    {
+      "tenantHash": "bee43bf3a7573ce36bef850604419c3bd5fc944354b83d29d622b6132798aacf",
+      "optionsHash": "bb0a815305d4e710af87f21672e90c371b2e250ba63db33ea664c82d28f98d22",
+      "resultHash": "feb0be097bfa14f7d8e8ac9f453e0c5d287ed2fdc997ed24a3f8a9f22597eb62",
+      "unavailable": false
+    },
+    {
+      "tenantHash": "bee43bf3a7573ce36bef850604419c3bd5fc944354b83d29d622b6132798aacf",
+      "optionsHash": "981c60755f7ecfde868fc24f1d57592e32f19c650ad94d8d519004f92ff9c3e0",
+      "resultHash": "38e4a3603c143408e5ad37142218612a57389919ef367bb540bd9ae84c6d317d",
+      "unavailable": false
+    },
+    {
+      "tenantHash": "bee43bf3a7573ce36bef850604419c3bd5fc944354b83d29d622b6132798aacf",
+      "optionsHash": "bb0a815305d4e710af87f21672e90c371b2e250ba63db33ea664c82d28f98d22",
+      "resultHash": "2f5e408603ec9084db27fd410baf241ce3ebd3d232a7f87eb683a2e669371b63",
+      "unavailable": false
+    },
+    {
+      "tenantHash": "bee43bf3a7573ce36bef850604419c3bd5fc944354b83d29d622b6132798aacf",
+      "optionsHash": "bb0a815305d4e710af87f21672e90c371b2e250ba63db33ea664c82d28f98d22",
+      "resultHash": "bde5c8c8ae2d66bb29909b4c62fd70c25e60a3780fe24a42004147c2945e5aa3",
+      "unavailable": false
+    },
+    {
+      "tenantHash": "d61a531e0c60092e9509f59bf79a1a11931c2512767e18e6d02b8f817acd5fc0",
+      "optionsHash": "a960b182a9e3f3dca3ab5b510bb473296b0e4d3337e86f5a93c28659468035b7",
+      "resultHash": "e2668eb539fbd5b88b3d0f24d364d162f19ae27eb56e0b57a7917a0042bbd644",
+      "unavailable": false
+    },
+    {
+      "tenantHash": "d61a531e0c60092e9509f59bf79a1a11931c2512767e18e6d02b8f817acd5fc0",
+      "optionsHash": "a960b182a9e3f3dca3ab5b510bb473296b0e4d3337e86f5a93c28659468035b7",
+      "resultHash": null,
+      "unavailable": true
+    },
+    {
+      "tenantHash": "a4eabe2292538d6d8f6fa79e37fd401a6adaff88d56c85695c28077c9ef1e8fd",
+      "optionsHash": "c60426011fefbd7a19d5bdb1e10eeaf3cd3be58aa9f3d29291493a78eb4debd7",
+      "resultHash": "813ca79c51516183ce8cb071ef588b7100eb093903f3bbbc31cb1a2ecd9686b4",
+      "unavailable": false
+    }
+  ],
+  "modelCalls": 16,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "efd641e83199e97878ff23e136b190031aebc8740ca1e6af4bad08a70026c387",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Отзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: ровно 2 из 5.\nПолучено отзывов: 4. Лимит чтения: 20; от новых к старым.\n30.09.2026, 23:59 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n15.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 12:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:15,951 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "efd641e83199e97878ff23e136b190031aebc8740ca1e6af4bad08a70026c387",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "Сохранённый результат проверки.\nОтзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: ровно 2 из 5.\nПолучено отзывов: 4. Лимит чтения: 20; от новых к старым.\n30.09.2026, 23:59 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n15.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 12:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:15,951 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "0ef22d36a390cf22155791d85bb418b95dc5700b5edd4a4f4867be0918cd9dff",
+      "text": "Покажи отзывы со всеми оценками за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Отзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: все оценки от 1 до 5.\nПолучено отзывов: 20. Лимит чтения: 20; от новых к старым.\n30.09.2026, 23:59 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n16.09.2026, 05:00 — оценка 5 из 5; темы: общение, работа мастера, ожидание.\n16.09.2026, 04:00 — оценка 5 из 5; темы: общение, работа мастера, ожидание.\n16.09.2026, 03:00 — оценка 5 из 5; темы: общение, работа мастера, ожидание.\n16.09.2026, 02:00 — оценка 5 из 5; темы: общение, работа мастера, ожидание.\nВ реестре есть дополнительные отзывы по этому фильтру за пределами лимита чтения.\nПоказаны первые 5 из 20 полученных отзывов.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:16,138 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": "all",
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "f1ca6256890d6cadecb8e4610dd94fb9f350079d31ddb34fab7b938ebf6caec6",
+      "text": "Покажи плохие отзывы за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": "low",
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "18279573239d37e8933c90425c8f3d7dee3d51a00f5c32872d5aab41e76c5a6b",
+      "text": "Только с оценкой 2",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Отзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: ровно 2 из 5.\nПолучено отзывов: 4. Лимит чтения: 20; от новых к старым.\n30.09.2026, 23:59 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n15.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 12:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:16,276 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "rating": 2
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "94c5edcaf72d3f1f8a7e6dd6997318c79b780fd1bb0e5e2ff3da6d39a751e897",
+      "text": "Покажи отзывы за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "36eeaf344966027ed196bf1ecfce84b983ade18b2b5aa9729bfa21d54fd71589",
+      "text": "Только с оценкой 2",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Отзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: ровно 2 из 5.\nПолучено отзывов: 4. Лимит чтения: 20; от новых к старым.\n30.09.2026, 23:59 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n15.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 12:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\n01.09.2026, 00:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:16,414 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "rating": 2
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "54ddfb172430256c04513917e6e73d314c5de23d8da8dfed5f357531bd4cf38d",
+      "text": "Покажи отзывы с оценкой 2 за 2026-10 в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "Не удалось подтвердить отзывы за выбранный месяц по текущим данным. Повторите проверку позже.",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "2026-10",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "6c13fd52c890d82848f83597928c3d06dc765db82e72c978923cef0eaefb5063",
+      "text": "Покажи отзывы с оценкой 2 за 2026-11 в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "Не удалось подтвердить отзывы за выбранный месяц по текущим данным. Повторите проверку позже.",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "2026-11",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "f0dde8cf17700936d60054e00accbb4735cf6e569a8018d59afb92101911f87f",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Отзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: ровно 2 из 5.\nПолучено отзывов: 0. Лимит чтения: 20; от новых к старым.\nЗа этот месяц по выбранному фильтру в локальном реестре отзывы не найдены.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:16,554 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "aa288f42b5632adc9190af4db65064432d9346f6757636728f6512a24d46adeb",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная?",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Не удалось подтвердить отзывы за выбранный месяц по текущим данным. Повторите проверку позже.",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "b1f8e92a05e24d9f329be537f4b107ed24674eaeecff6839c7b25657a592453e",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 1,
+      "reply": "Отзывы за 2026-09 в выбранном филиале; часовой пояс Pacific/Kiritimati.\nГраницы чтения: с 2026-08-31T10:00:00.000Z включительно до 2026-09-30T10:00:00.000Z исключительно (UTC).\nФильтр: ровно 2 из 5.\nПолучено отзывов: 1. Лимит чтения: 20; от новых к старым.\n17.09.2026, 13:00 — оценка 2 из 5; темы: общение, работа мастера, ожидание.\nИсточник: локальный реестр отзывов, прочитан 09.10.2026, 17:24:16,736 (UTC).",
+      "grounding": "verified",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "650f308f5fb67a12d8e6f0b14fd13f8e5c868c45f02e1022e9b5ba87a7560815",
+      "text": "Foreign branch ID omitted",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "Не удалось однозначно сопоставить указанный филиал. Уточните его название.",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "cmv18j2e30011cxc9wx146no6"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "62b395a7e36081ab3825e482c5ffa767493bc197994c9fc2614d874984f8a648",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Несуществующий",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "Не удалось однозначно сопоставить указанный филиал. Уточните его название.",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Несуществующий"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "703a97ad8ed39afae9a7ee2651b0981218a1c08e221dad9e062c3d838ae51780",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Дублированный",
+      "status": 201,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": "Не удалось однозначно сопоставить указанный филиал. Уточните его название.",
+      "grounding": "blocked",
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Дублированный"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "1fa5ff3527c268d0c9c6af637c8ed19c18104bd00d7ca64021ec8b4b28e1366c",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 403,
+      "modelCalls": 1,
+      "registryReads": 0,
+      "reply": null,
+      "grounding": null,
+      "plannerPlan": [
+        {
+          "intent": "reviews.list_recent",
+          "permission": "allowed",
+          "entities": {
+            "period": "last_month",
+            "rating": 2,
+            "branch": "Набережная"
+          },
+          "clarification": false
+        }
+      ],
+      "errorCode": null,
+      "errorMessageHash": "e249e3b7de4fe91c71d23f67af4f440ef8f2bf173f871503f026fc7a02a04250"
+    },
+    {
+      "requestHash": "e8a68b8bc0567284b780fd306b36127409a9153e0b57feb648757a76c7fed5c0",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 0,
+      "registryReads": 0,
+      "reply": "MAYA не входит в ваш текущий тариф, поэтому я не могу открыть данные бизнеса. Ассистент включён в тариф Business+ — после перехода все ответы по вашей CRM станут доступны сразу, ничего настраивать не нужно.",
+      "grounding": "blocked",
+      "plannerPlan": null,
+      "errorCode": null,
+      "errorMessageHash": null
+    },
+    {
+      "requestHash": "d9b7844ccca07566edd85754923d631a19a14e9d439bd3e688e7a8d9a48007af",
+      "text": "Покажи отзывы с оценкой 2 за прошлый месяц в филиале Набережная",
+      "status": 201,
+      "modelCalls": 0,
+      "registryReads": 0,
+      "reply": "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
+      "grounding": "blocked",
+      "plannerPlan": null,
+      "errorCode": null,
+      "errorMessageHash": null
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "664b180f94bf1b61c11d1c0f5ef5a9fb138900ce0a8273e986649acabc300f19",
+      "workHash": "830a9fb5e7ff0bf467c4eb18631d0e4ecf0f35381fc7f00b50cc03faa099284a",
+      "executionHash": "57adb7b2819039c15d1bd1a0f7c877fbcf6f614db3fdf86e0566f4369c78a792",
+      "actorHash": "c1d90ce5658cce882bdcb735cdb3aa790efe74ffe0149d9cf61c125d5fa9e9d7",
+      "inputHash": "68702d2a2234de4a4c805d550b5c26767b40e0e857cdc552082b17d88d5df734",
+      "resultHash": "feb0be097bfa14f7d8e8ac9f453e0c5d287ed2fdc997ed24a3f8a9f22597eb62",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": 2,
+      "count": 4,
+      "hasMore": false,
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "reviewRefs": [
+        "82d5431377851714c1e9c7bda3d851d172cbcff85f9cda0f2f56ca4244429983",
+        "5bec7c6a4f0e7bd2c359119b45cd3ce2304dac87f0541248d528fa36fb36ea0e",
+        "e4cf32bb05c7f10bb7db4cadb240fe2c81c0369a75cb0de5f1b9460b25415188",
+        "4984bb98e2cbfae835e3e9cf677a16519cc082aaf3906bc0cb8a14a49e54ae87"
+      ],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    },
+    {
+      "runHash": "664b180f94bf1b61c11d1c0f5ef5a9fb138900ce0a8273e986649acabc300f19",
+      "workHash": "830a9fb5e7ff0bf467c4eb18631d0e4ecf0f35381fc7f00b50cc03faa099284a",
+      "executionHash": "57adb7b2819039c15d1bd1a0f7c877fbcf6f614db3fdf86e0566f4369c78a792",
+      "actorHash": "c1d90ce5658cce882bdcb735cdb3aa790efe74ffe0149d9cf61c125d5fa9e9d7",
+      "inputHash": "68702d2a2234de4a4c805d550b5c26767b40e0e857cdc552082b17d88d5df734",
+      "resultHash": "feb0be097bfa14f7d8e8ac9f453e0c5d287ed2fdc997ed24a3f8a9f22597eb62",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": 2,
+      "count": 4,
+      "hasMore": false,
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "reviewRefs": [
+        "82d5431377851714c1e9c7bda3d851d172cbcff85f9cda0f2f56ca4244429983",
+        "5bec7c6a4f0e7bd2c359119b45cd3ce2304dac87f0541248d528fa36fb36ea0e",
+        "e4cf32bb05c7f10bb7db4cadb240fe2c81c0369a75cb0de5f1b9460b25415188",
+        "4984bb98e2cbfae835e3e9cf677a16519cc082aaf3906bc0cb8a14a49e54ae87"
+      ],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    },
+    {
+      "runHash": "baa9040b29bf54d49baac6526160a29c8dfdfde2c82b2a44228688291542d285",
+      "workHash": "68f30fb01d2cffaef15d60cba1bf14493c6cd5294aa4d4602f4730757c7cce06",
+      "executionHash": "730148388ce8e76dc6fb9f4c35378c158343390986e1599ff05b89bd2c8348f0",
+      "actorHash": "c1d90ce5658cce882bdcb735cdb3aa790efe74ffe0149d9cf61c125d5fa9e9d7",
+      "inputHash": "5ceb1d4d9df5cb97f47a7800b9ec78cc02dbe3a861bf65285ab8917994d33485",
+      "resultHash": "38e4a3603c143408e5ad37142218612a57389919ef367bb540bd9ae84c6d317d",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": null,
+      "count": 20,
+      "hasMore": true,
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "reviewRefs": [
+        "82d5431377851714c1e9c7bda3d851d172cbcff85f9cda0f2f56ca4244429983",
+        "d303ceb483366aa8997c09b4c4e26e2f91831651fa97ba45c3bbdf07b2334945",
+        "422d259346b4eb5e71802f2483566f22da787d4d8ecfcac1568b76ef2b4b6dd5",
+        "5cf587beee436115a9c849aef7672bb37a2adefa21dfe78761bb5443a543afed",
+        "26d65ff62b3eb0748b3c221578fd27cbd8466840e4164685f647d9d65cf5ec5c",
+        "7af3be8d4e76f4f127ee49fc7892db894b1f81697de5995b99cd95dfe8aad5c9",
+        "2434b56196617c87eca69fb904477e9806d5f7848519462f23caf83c18baa829",
+        "049b668643b7f99b6e723a6c4b2028f5010345025c9d0c5713e116f369147a29",
+        "87ee812086d4d35fa78d6693f14e5bb1d79c1d56db4fe1fa5af30717b5b77f13",
+        "74f8999e69b9007acf1d0e5a203f36a1d25a358c3060230d4a67ebfdf6c5d991",
+        "3ebc4069b7be6dbc76218cc16d2da2d88e611869bcfe5a538eb758b927dc29e8",
+        "a035233933dd02e485f0584cc943e0de65027a0be8c8b8798439c5cb7fd07701",
+        "0e2964f8da616b6c53a2dfb5cb6bbaef777fd48e54c403e001373720ae51d1aa",
+        "cc3a8d106e5f637bd046fe9e0130f3f94cc508de9ada0068240713a6dd8af354",
+        "03894c0d4c8aca14a9cac171fa8b7076c0738afdfc34f002e54104770f48d210",
+        "1be850cb050f75773f1c4f87b19b27a43541b41a03f09b497833808d2714a2fa",
+        "0f5d3e41f670762f1c1efbef9e7ae9fc314a7012a57e487cdb3808495844a99d",
+        "5e770dca74e0398ef2ddc2d0ae36c44d25e612ded0cb444c080b0e8f6a548188",
+        "dd56a67ea3e80a6fcd72ea010a58972e76bd44807ef52bb0c6483aaa08cd6518",
+        "2b41e06fed4385e568af49d17082dafc212b977295145cc5d23166a4e10bebaa"
+      ],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    },
+    {
+      "runHash": "675c6763a2b8c9a7bee79e0112187c0c4ebe53293e75bbaf9ca245002f6667f4",
+      "workHash": "ed68adcd3ee5ff3fe365783a0e49c53252d6957632f3c457d672bd40e4a9d760",
+      "executionHash": "1e72fca05e868cf059827a581eede5634de3ffdaafc0f6461420168923d24e7d",
+      "actorHash": "c1d90ce5658cce882bdcb735cdb3aa790efe74ffe0149d9cf61c125d5fa9e9d7",
+      "inputHash": "68702d2a2234de4a4c805d550b5c26767b40e0e857cdc552082b17d88d5df734",
+      "resultHash": "2f5e408603ec9084db27fd410baf241ce3ebd3d232a7f87eb683a2e669371b63",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": 2,
+      "count": 4,
+      "hasMore": false,
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "reviewRefs": [
+        "82d5431377851714c1e9c7bda3d851d172cbcff85f9cda0f2f56ca4244429983",
+        "5bec7c6a4f0e7bd2c359119b45cd3ce2304dac87f0541248d528fa36fb36ea0e",
+        "e4cf32bb05c7f10bb7db4cadb240fe2c81c0369a75cb0de5f1b9460b25415188",
+        "4984bb98e2cbfae835e3e9cf677a16519cc082aaf3906bc0cb8a14a49e54ae87"
+      ],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    },
+    {
+      "runHash": "21013ecdb68f3f581950ffa891d702674c9b2d484d3068c4d5cfbefb1d2c574b",
+      "workHash": "0e07438953a8bae939f4ddc43b50f8ac6c92fc15ad9b57fc3a0b372978db8642",
+      "executionHash": "779616da98b5409040b60f1536a48734d6fb5e1d560dc6c1ab6c246a13018dd7",
+      "actorHash": "c1d90ce5658cce882bdcb735cdb3aa790efe74ffe0149d9cf61c125d5fa9e9d7",
+      "inputHash": "68702d2a2234de4a4c805d550b5c26767b40e0e857cdc552082b17d88d5df734",
+      "resultHash": "bde5c8c8ae2d66bb29909b4c62fd70c25e60a3780fe24a42004147c2945e5aa3",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": 2,
+      "count": 4,
+      "hasMore": false,
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "reviewRefs": [
+        "82d5431377851714c1e9c7bda3d851d172cbcff85f9cda0f2f56ca4244429983",
+        "5bec7c6a4f0e7bd2c359119b45cd3ce2304dac87f0541248d528fa36fb36ea0e",
+        "e4cf32bb05c7f10bb7db4cadb240fe2c81c0369a75cb0de5f1b9460b25415188",
+        "4984bb98e2cbfae835e3e9cf677a16519cc082aaf3906bc0cb8a14a49e54ae87"
+      ],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    },
+    {
+      "runHash": "7efdc5167e9ffe9edb3079b9bfc3772fd804c2191f3b607bd08adff8e266a67b",
+      "workHash": "1ed96452c960c3db041b974d64195f9965e30c05a47a27f3aa6be53e676ec125",
+      "executionHash": "ae80f96c6bf64105966b37428ce6d9090eb405ce476c643739b672e3a474a936",
+      "actorHash": "b2d420b01178336f3807eca4af3dd0d45c9cf3967bb27d99eb0b4dc37d084492",
+      "inputHash": "4ed8c1ab0c8319f7d5ed6004a46f0b13755117b732ade0cac55a807bdc60622f",
+      "resultHash": "e2668eb539fbd5b88b3d0f24d364d162f19ae27eb56e0b57a7917a0042bbd644",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": 2,
+      "count": 0,
+      "hasMore": false,
+      "branchHash": "f223ed63587b68ca3fc1d595353d7321f644a4f37da138e075b385ac49fc0e77",
+      "reviewRefs": [],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    },
+    {
+      "runHash": "1b1493b5f0fc093e5b1f5d3d7336956399b267df7d6648332e2cf53951dcb619",
+      "workHash": "96512e839ab88a0c5772969d4d616edd0c859c26537b5784ad7a6c6a3220003e",
+      "executionHash": "203d9e12aeaac450818c289f26933b4cdf52a4d917303bb2f18deac748d5c798",
+      "actorHash": "daa9c532cf11faba5d5bd7bedd66eae82c5ec5e226fddfc1ceb347ccc3c51c71",
+      "inputHash": "58a627e400b67087f31aca8d1475285381a8fdc7f1c705e96bc8c166f7f2ee34",
+      "resultHash": "813ca79c51516183ce8cb071ef588b7100eb093903f3bbbc31cb1a2ecd9686b4",
+      "month": "2026-09",
+      "timezone": "Pacific/Kiritimati",
+      "fromInclusive": "2026-08-31T10:00:00.000Z",
+      "toExclusive": "2026-09-30T10:00:00.000Z",
+      "rating": 2,
+      "count": 1,
+      "hasMore": false,
+      "branchHash": "955f33ecc2be52d1c9e524b78a8fb862234cef2620b242ee02aaf3fb38e2cb45",
+      "reviewRefs": [
+        "4d4e17a6578cd05234ab24c721a3bdcf7363153f28b00069169fc37878837176"
+      ],
+      "reviewRefOrigin": "CANONICAL_SYNTHETIC_SETUP_MATCHED_BY_UNIQUE_DATE_AND_RATING"
+    }
+  ],
+  "clarificationReceipts": [
+    {
+      "tenantHash": "bee43bf3a7573ce36bef850604419c3bd5fc944354b83d29d622b6132798aacf",
+      "parentTurnHash": "9979315c1b12c8a88573d36e1874d23cd0d66df2f6dea6682c14cc130a26a175",
+      "assistantTurnHash": "ce3009e0c7e4e01a2de90d833cb9d8d071802a70cfc19057156fc3acb3a5b6a4",
+      "completionHash": "ace071cc259fee8a9f902c9778ac42ee04181326ba0bf953f21978be8f2c2d4c",
+      "semanticContextHash": "6c8d86134040b3fe555d5790eecc22932c3f561771a5b268d17366c286499c91",
+      "replyHash": "b23d0d9d9ca0bcdbf134466915aa3f1958b428a14f235d9a1a4c7b1a97896de7",
+      "month": "2026-09",
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "observation": "EXACT_PERSISTED_ASSISTANT_COMPLETION_BY_TENANT_AND_PARENT"
+    },
+    {
+      "tenantHash": "bee43bf3a7573ce36bef850604419c3bd5fc944354b83d29d622b6132798aacf",
+      "parentTurnHash": "4dc1c6cb94ab99fb2f5a63eca00171e4e38e72624a4ffc84cf57280d3479435c",
+      "assistantTurnHash": "cb542dbc63cb49b52a12742fc1ea26f71e86f9bc947ffe5d59bfcdf577a666fe",
+      "completionHash": "8be55ec4fa47dbf522af40f7676fd02a8fd0b6f7fc0efc18f9f04bfe87f7e98a",
+      "semanticContextHash": "7925ae2d7849d611070f7bf024ff810396dfecbcf4ad89a620aefa5c5a04c8bb",
+      "replyHash": "b23d0d9d9ca0bcdbf134466915aa3f1958b428a14f235d9a1a4c7b1a97896de7",
+      "month": "2026-09",
+      "branchHash": "bd8d3f030b163c4ca966dd1b5f6b2e603a216cef41bb146060fa465d1a27cf77",
+      "observation": "EXACT_PERSISTED_ASSISTANT_COMPLETION_BY_TENANT_AND_PARENT"
+    }
+  ],
+  "deniedPlans": []
+}

@@ -1,0 +1,161 @@
+{
+  "contract": "maya.review-calendar.frozen81-archive/1",
+  "baselineCheckpoint": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "files": {
+    "maya-offline48-after-reviews-verify-20261009.py": {
+      "sha256": "419d8d5d3d5e43204d8767fa3391976b50b00012e7d6e383870cfe86a07c091c",
+      "bytes": 2904
+    },
+    "maya-reviews-period-independent-evidence-review-20261009.json": {
+      "sha256": "49add324363833530de5fcb057d22644c16a707035927c93e9f1f104f899b86e",
+      "bytes": 18178
+    },
+    "r1/actual-http-turns.jsonl": {
+      "sha256": "f86a45935debb295bafb863647b5c7908a12405e99d5847fc5ab3d341b0c2569",
+      "bytes": 913328
+    },
+    "r1/actual-model-responses.jsonl": {
+      "sha256": "1ecf5bc5af39c3dafde23b5f03be196eb1ee78e0bf23b23d469b4b98312205ef",
+      "bytes": 92333
+    },
+    "r1/broker-ledger.jsonl": {
+      "sha256": "e0f5b331ba59c61fbe67733fa8268c8ae520ef3b50114d1bdfb2a9b15f0a1109",
+      "bytes": 22677
+    },
+    "r1/broker-report.json": {
+      "sha256": "0d99dfbf809dcf43d682b7d7a280a0447e0f5e8fdcb3e9f7d2d2dd3a0b8187fd",
+      "bytes": 87536
+    },
+    "r1/broker.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r1/candidate-manifest.json": {
+      "sha256": "70288e9beb8e57761e103baa60298c4bd0bba4ecf6a1feb3e58c5c41c8c9a1ca",
+      "bytes": 397319
+    },
+    "r1/conversation-jest.json": {
+      "sha256": "c144beac5a0b39b88cbe9563d80fdd539be18c8ef7df28a9c1ffe9dc208e62f4",
+      "bytes": 1418
+    },
+    "r1/conversation.log": {
+      "sha256": "4eb9a0f6002031a1996f0475d74586d4f2619d6dc397ef268d55a1fe14a662e6",
+      "bytes": 632
+    },
+    "r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r1/generic-source-hash-redaction-scan.json": {
+      "sha256": "315d11e8e03331c145e308cec2e47d1e10985a3fd13255a47cb45933fc8d4373",
+      "bytes": 526
+    },
+    "r1/http-report.json": {
+      "sha256": "6e9c0831ec692daec23cf697fb79388614ee0e6a9e5126c54977951e40e960ac",
+      "bytes": 1932462
+    },
+    "r1/http-response-journal.jsonl": {
+      "sha256": "0fe82d0e1f8a5988dd46e3766736e0d3cdefb6a5a7cc57cd52a933524b7c9e84",
+      "bytes": 65895
+    },
+    "r1/independent-cleanup.json": {
+      "sha256": "4fc2889bbe6e288c5111c98677b7978af619a8bf5afa13b42e2b233d081d542f",
+      "bytes": 119
+    },
+    "r1/initdb.log": {
+      "sha256": "a75221d03a129bdb8808b99e10e5e07e61479f8504c8c38731fcd091a2f3206f",
+      "bytes": 972
+    },
+    "r1/migrations.log": {
+      "sha256": "b914289e8cfca3c3663aef3b1ff588a896e4ba2cb75c55b2f13bdfd21771eb70",
+      "bytes": 14720
+    },
+    "r1/model-responses.jsonl": {
+      "sha256": "637eefff89be5edf1084652d71895222a577039f68d40226ce7f52536b6b8b2b",
+      "bytes": 137467
+    },
+    "r1/offline-completion-audit.jsonl": {
+      "sha256": "f86a110aeaa7fd3c27a300d8f86c7ba0a32691bca0e7a3e0bd756bab0f8bedac",
+      "bytes": 326028
+    },
+    "r1/offline-expected-refusals.jsonl": {
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9",
+      "bytes": 163
+    },
+    "r1/offline-source-snapshots.json": {
+      "sha256": "8b4d17d99390bc751e440ac419e2e330c195017509fb95864fdb66942c448dd5",
+      "bytes": 153196
+    },
+    "r1/offline-source-transitions.jsonl": {
+      "sha256": "3dada5242ccfd857337226be005b64e68f7e7b9839767b892bbee159bc5957e1",
+      "bytes": 187
+    },
+    "r1/offline-staff-service-scoped-receipts.jsonl": {
+      "sha256": "42c3e54983264ae3c41f8699ee98d14c799b8d0859e1683217ed5899ccae8916",
+      "bytes": 7351
+    },
+    "r1/offline-staff-service-source-reads.jsonl": {
+      "sha256": "e853033b17477314d623d57d66832e1d2064bfd729afd2e21d9a056262f52e5d",
+      "bytes": 3218
+    },
+    "r1/offline-staff-service-turn-links.jsonl": {
+      "sha256": "5683d0629ab5202152fd5450a9146faebdf05b9966fc3460524e85f69989dcd3",
+      "bytes": 1022
+    },
+    "r1/offline-turn-audit.jsonl": {
+      "sha256": "076703c6df6d3cc97a12130364c2c2fb6fd8d4abae9a1961e33cbd0d7be5fb20",
+      "bytes": 913459
+    },
+    "r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r1/postgres.log": {
+      "sha256": "08e8b4ec6f9a0cd33582648f53ebc99498501fe44002a8dfda4e05fc5cf96ce0",
+      "bytes": 1246
+    },
+    "r1/remaining24-after-reviews.json": {
+      "sha256": "c795a0ca4f9be87dbd477cd8a13f79636ee70aef4440789f193d86b54cc93052",
+      "bytes": 4645
+    },
+    "r1/replay-binding.json": {
+      "sha256": "5d05d57811128ac41b04663d8549c07f75f28bb13b407d0e8b179159aba8ce93",
+      "bytes": 20207
+    },
+    "r1/replay-records.jsonl": {
+      "sha256": "a93a7f20f4e22e3bb43a5f64326e6258ca0d4fc6700df743cd80799061066923",
+      "bytes": 65873
+    },
+    "r1/runner-budget-ledger.jsonl": {
+      "sha256": "59268a57b6fe58aff5c3ab16e30b7fb64fd385260294525cfcb917a3e7c39639",
+      "bytes": 22915
+    },
+    "r1/runner-report.json": {
+      "sha256": "3969a46b83ca85f99be0820e24612efcc41d30b988b56c1fbe9ae76c1658a3fa",
+      "bytes": 3763
+    },
+    "r1/semantic-score.json": {
+      "sha256": "530a06b0bc22af8772ca45544a87e74badb4b8db3f06e0e3b10d74a0f487ae37",
+      "bytes": 1294817
+    },
+    "r1/serialized-attempts.jsonl": {
+      "sha256": "ad823faeb5fc06b6cc57ac8a6aaa305821e995e8b10fd0d2e7f9dd164c828d32",
+      "bytes": 18236
+    },
+    "r1/source-and-delta-verification.json": {
+      "sha256": "1f9bc6cb9adb5f72134143a06cbf4de8dfd731900790cc5bc2e2ee7334fc5384",
+      "bytes": 8484
+    }
+  },
+  "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY_NOT_ACCEPTANCE",
+  "limits": [
+    "Private restart login material excluded",
+    "Failed attempts and raw frozen81 scores preserved",
+    "No real provider/model, website, schema, retention or background authority change"
+  ]
+}

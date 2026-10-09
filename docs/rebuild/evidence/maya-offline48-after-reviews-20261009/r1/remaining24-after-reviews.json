@@ -1,0 +1,181 @@
+{
+  "baselineCheckpoint": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "actualSource": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "previousRemaining": 24,
+  "closedOriginalTurns": 0,
+  "remaining": [
+    {
+      "case": "current-staff_config-correction:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "current-staff_config-correction:2",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "current-bi-negative:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-finance_follow_up-7:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-7:2",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-7:3",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-10:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-10:2",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-finance_follow_up-10:3",
+      "status": "insufficient_evidence",
+      "missing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "case": "mt-retention_drill_down-0:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-0:2",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-0:3",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-15:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-15:2",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-retention_drill_down-15:3",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "mt-ambiguous_entity_resolution-15:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "case": "mt-ambiguous_entity_resolution-15:2",
+      "status": "insufficient_evidence",
+      "missing": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "case": "utt-company.public_info-037:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "case": "utt-company.public_info-041:1",
+      "status": "insufficient_evidence",
+      "missing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "case": "utt-finance.profit-055:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "utt-inventory.stock-074:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "utt-inventory.stock-079:1",
+      "status": "unsupported",
+      "missing": []
+    },
+    {
+      "case": "utt-reviews.list_recent-062:1",
+      "status": "semantic_fail",
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    },
+    {
+      "case": "utt-reviews.list_recent-067:1",
+      "status": "semantic_fail",
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    }
+  ],
+  "rawChanged": [
+    {
+      "case": "utt-reviews.list_recent-062:1",
+      "before": "unsupported",
+      "after": "semantic_fail",
+      "failed": [
+        "current_read_reviews_list_read",
+        "requested_registry_scope_retained"
+      ],
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    },
+    {
+      "case": "utt-reviews.list_recent-067:1",
+      "before": "unsupported",
+      "after": "semantic_fail",
+      "failed": [
+        "current_read_reviews_list_read",
+        "requested_registry_scope_retained"
+      ],
+      "missing": [
+        "configured_registry_scope_evidence"
+      ]
+    }
+  ],
+  "interpretation": "Two ambiguous-rating one-turn cases remain unclosed; unchanged oracle requires READ/literal last_month while actual product clarifies a canonical month with no READ. No rescore. Separately qualified HTTP/PG rating continuation does not close the original one-turn rows."
+}

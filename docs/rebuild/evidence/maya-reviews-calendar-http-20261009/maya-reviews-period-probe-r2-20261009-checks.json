@@ -1,0 +1,17 @@
+{
+  "sourceHead": "693298531e2447331f52feb05576576234790f5e",
+  "probeSha256": "9eb4f157f11fbd03a5cc76befce1d43da772d7223d2128335fa625653b2e60a4",
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "types",
+      "exit": 0,
+      "seconds": 6.364262104034424
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "seconds": 3.65497088432312
+    }
+  ]
+}

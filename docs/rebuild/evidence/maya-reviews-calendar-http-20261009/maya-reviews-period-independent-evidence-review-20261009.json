@@ -1,0 +1,434 @@
+{
+  "contract": "maya.reviews-period.independent-evidence-review/1",
+  "reviewedAtUtc": "2026-10-09T17:29:42.504698+00:00",
+  "reviewer": "classification_external_review",
+  "independence": {
+    "reviewsProductAuthor": false,
+    "reviewsProbeAuthor": false,
+    "evaluatorAuthor": false,
+    "priorStaffFixtureAndSupplementalProbeAuthor": true,
+    "qualification": "Independent current reviews evidence/delta review; prior staff fixture/probe authorship disclosed."
+  },
+  "method": "Read-only JSON/hash/Git source verification and probe-source inspection; no evaluator rerun, tests, PG connection, model/provider or services; only this report written outside repository.",
+  "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "sourceVerification": {
+    "r4GitAndWorktreeFiles": 1861,
+    "full81GitAndWorktreeFiles": 2533,
+    "distinctGitAndWorktreeFiles": 2534,
+    "r4SourceBindingsDigest": "87096f758c2b019b563daf8022638dea22cdae7d8d3a21b86dc411a09be04423",
+    "frozenFilesUnchangedFromBaseline": {
+      "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.mjs": "a6367294872dda7d586c342d25ef0aa86eaae470560d1f5abfceb41493da02b9",
+      "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs": "5026b88bfc4b4baa677c9751ab1cbafc8d85e9b7f0baecfd7920ff3af0b344ec",
+      "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.mjs": "a4d0a0ffbdcf953a43e18311ebf6dae7b54522d7e7dcdaf000df912c2a96c3b1",
+      "maya-saas-backend/datasets/conversation-intelligence/core-offline-48-20261009.json": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+      "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts": "44105a45f25f1578c2c6c952345f72aff6624108bde4837de8478bb0a1f35f5f",
+      "maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.ts": "7096f34d7e23ab7d07a1d8b506d9623eb0bbfb2db12e9ea9a8b86e96db66d2a8",
+      "maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.spec.ts": "2f2c83531d0c2151c74e328fd0e3259281b2dbea6ec0cdaf41ed45678900f78f"
+    }
+  },
+  "baseline": {
+    "documentationCheckpoint": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+    "actualSourceHead": "9a54eb4a489ba61f80fabc793d28ba4aabbd9737",
+    "counts": {
+      "pass": 57,
+      "semantic_fail": 0,
+      "unsupported": 14,
+      "insufficient_evidence": 10
+    },
+    "linksVerified": {
+      "turns": 81,
+      "replyHashLinks": 80,
+      "expectedNull401": 1,
+      "responseHashLinks": 81,
+      "normalizedAuditHashLinks": 81,
+      "historyHashLinks": 81,
+      "actualReplyHistoryCarryLinks": 81,
+      "rawVsNormalizedAuditDifference": [
+        [
+          "current-lifecycle-negative",
+          1
+        ]
+      ]
+    }
+  },
+  "standaloneR4": {
+    "qualified": "PASS_FOR_EXPLICIT_EXACT_MONTH_AND_EXACT_OR_ALL_RATINGS_WITH_LIMITS",
+    "stages": {
+      "prepare": {
+        "passedTests": 1,
+        "failedTests": 0,
+        "assertions": 828
+      },
+      "resume": {
+        "passedTests": 1,
+        "failedTests": 0,
+        "assertions": 115
+      }
+    },
+    "chatCheckpoints": 23,
+    "scriptedModelCalls": 20,
+    "registryOwnerAttempts": 9,
+    "attemptMeaning": "listReviews invocations, not SQL queries",
+    "receipts": 8,
+    "uniqueQualifiedExecutions": 6,
+    "prepareAndRestartReplayReceiptIdentical": true,
+    "replayAddedRegistryReads": 0,
+    "persistedClarificationReceipts": 2,
+    "monthAndBranchPreservedThroughRatingOnlyFollowups": true,
+    "halfOpenMonth": "[2026-08-31T10:00:00.000Z, 2026-09-30T10:00:00.000Z)",
+    "branchTimezone": "Pacific/Kiritimati",
+    "tenantTimezone": "Pacific/Honolulu",
+    "exactTwoCount": 4,
+    "allRatingsCount": 20,
+    "allRatingsHasMore": true,
+    "emptyVsUnavailableDistinct": true,
+    "currentFutureMonthsAndForeignAmbiguousBranchRefused": true,
+    "revocationAndTimezoneDriftWithholdFacts": true,
+    "roleDenialProvenance": [
+      {
+        "role": "client",
+        "chatStatus": 201,
+        "chatModelCalls": 0,
+        "chatDenialProvenance": "EXISTING_SERVER_PREMODEL_DENIAL",
+        "directStatus": 403,
+        "directCode": "ai_tool_forbidden",
+        "directModelCalls": 0,
+        "registryReadsAdded": 0
+      },
+      {
+        "role": "staff",
+        "chatStatus": 201,
+        "chatModelCalls": 0,
+        "chatDenialProvenance": "EXISTING_SERVER_PREMODEL_DENIAL",
+        "directStatus": 403,
+        "directCode": "ai_tool_forbidden",
+        "directModelCalls": 0,
+        "registryReadsAdded": 0
+      }
+    ],
+    "clientChatLimit": "Client chat refusal is the existing tariff/premodel boundary; exact review-tool access is separately denied403. No claim that scripted semantic denial executed.",
+    "cleanup": {
+      "contract": "maya.review-calendar.exact-source-and-cleanup/1",
+      "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+      "sourceFilesVerified": 1861,
+      "sourceBindingsDigest": "87096f758c2b019b563daf8022638dea22cdae7d8d3a21b86dc411a09be04423",
+      "sourceUnchanged": true,
+      "manifestStatus": "passed",
+      "stages": {
+        "prepare": {
+          "passed": 1,
+          "failed": 0,
+          "assertions": 828
+        },
+        "resume": {
+          "passed": 1,
+          "failed": 0,
+          "assertions": 115
+        }
+      },
+      "pgStatusExit": 3,
+      "postmasterPidAbsent": true,
+      "manifestSha256": "94e32efe1d0fc9ec00c2b56defe18aea147ca5c411373c38a3b118f4f45ed40d",
+      "limits": [
+        "Actual HTTP/auth/C9/PG; scripted planner and synthetic canonical local registry facts",
+        "No real model/provider, browser or full MAYA/C10 acceptance"
+      ]
+    },
+    "factsQualification": "Synthetic facts ingested through canonical local BusinessReview owner; archived receipts are scoped projections validated against decrypted persisted executions by the bound passing probe. No independent reconnection to stopped PG."
+  },
+  "full81": {
+    "counts": {
+      "pass": 57,
+      "semantic_fail": 2,
+      "unsupported": 12,
+      "insufficient_evidence": 10
+    },
+    "criticalSafety": {
+      "failedTurns": 0,
+      "missingEvidenceTurns": 0
+    },
+    "rawStatus": "completed-with-semantic-failures",
+    "runnerExitCodeMeaning": "2 means completed with raw semantic failures; all81 HTTP attempts finished",
+    "linksVerified": {
+      "turns": 81,
+      "replyHashLinks": 80,
+      "expectedNull401": 1,
+      "responseHashLinks": 81,
+      "normalizedAuditHashLinks": 81,
+      "historyHashLinks": 81,
+      "actualReplyHistoryCarryLinks": 81,
+      "rawVsNormalizedAuditDifference": [
+        [
+          "current-lifecycle-negative",
+          1
+        ]
+      ]
+    },
+    "previousPassesRetained": 57,
+    "statusUnchangedTurns": 79,
+    "onlyStatusChanges": [
+      {
+        "caseId": "utt-reviews.list_recent-062",
+        "turn": 1,
+        "before": "unsupported",
+        "after": "semantic_fail",
+        "failedCheckIds": [
+          "current_read_reviews_list_read",
+          "requested_registry_scope_retained"
+        ],
+        "missingEvidenceIds": [
+          "configured_registry_scope_evidence"
+        ]
+      },
+      {
+        "caseId": "utt-reviews.list_recent-067",
+        "turn": 1,
+        "before": "unsupported",
+        "after": "semantic_fail",
+        "failedCheckIds": [
+          "current_read_reviews_list_read",
+          "requested_registry_scope_retained"
+        ],
+        "missingEvidenceIds": [
+          "configured_registry_scope_evidence"
+        ]
+      }
+    ],
+    "reviews": [
+      {
+        "caseId": "utt-reviews.list_recent-062",
+        "turn": 1,
+        "rawStatus": "semantic_fail",
+        "reply": "За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?",
+        "replyHash": "b23d0d9d9ca0bcdbf134466915aa3f1958b428a14f235d9a1a4c7b1a97896de7",
+        "entities": {
+          "period": "2026-09"
+        },
+        "requiresClarification": true,
+        "sourceReads": 0,
+        "toolResults": 0,
+        "persistedC9Runs": 0,
+        "modelCalls": 1,
+        "ratingInvented": false,
+        "branchInOriginalRequest": false
+      },
+      {
+        "caseId": "utt-reviews.list_recent-067",
+        "turn": 1,
+        "rawStatus": "semantic_fail",
+        "reply": "За 2026-09 показать все оценки или отзывы с одной оценкой — 1, 2, 3, 4 или 5?",
+        "replyHash": "b23d0d9d9ca0bcdbf134466915aa3f1958b428a14f235d9a1a4c7b1a97896de7",
+        "entities": {
+          "period": "2026-09"
+        },
+        "requiresClarification": true,
+        "sourceReads": 0,
+        "toolResults": 0,
+        "persistedC9Runs": 0,
+        "modelCalls": 1,
+        "ratingInvented": false,
+        "branchInOriginalRequest": false
+      }
+    ],
+    "remaining": 24,
+    "remainingRows": [
+      {
+        "caseId": "current-staff_config-correction",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "current-staff_config-correction",
+        "turn": 2,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "current-bi-negative",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-finance_follow_up-7",
+        "turn": 1,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-finance_follow_up-7",
+        "turn": 2,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-finance_follow_up-7",
+        "turn": 3,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-finance_follow_up-10",
+        "turn": 1,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-finance_follow_up-10",
+        "turn": 2,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-finance_follow_up-10",
+        "turn": 3,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-retention_drill_down-0",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-retention_drill_down-0",
+        "turn": 2,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-retention_drill_down-0",
+        "turn": 3,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-retention_drill_down-15",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-retention_drill_down-15",
+        "turn": 2,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-retention_drill_down-15",
+        "turn": 3,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "mt-ambiguous_entity_resolution-15",
+        "turn": 1,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "mt-ambiguous_entity_resolution-15",
+        "turn": 2,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "utt-company.public_info-037",
+        "turn": 1,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "utt-company.public_info-041",
+        "turn": 1,
+        "rawStatus": "insufficient_evidence"
+      },
+      {
+        "caseId": "utt-finance.profit-055",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "utt-inventory.stock-074",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "utt-inventory.stock-079",
+        "turn": 1,
+        "rawStatus": "unsupported"
+      },
+      {
+        "caseId": "utt-reviews.list_recent-062",
+        "turn": 1,
+        "rawStatus": "semantic_fail"
+      },
+      {
+        "caseId": "utt-reviews.list_recent-067",
+        "turn": 1,
+        "rawStatus": "semantic_fail"
+      }
+    ],
+    "interpretation": "Both reviews remain unclosed. Missing scripted rating triggers bounded month-preserving clarification with zero READ; unchanged legacy oracle expects READ and literal last_month. Raw2FAIL retained, not rescored or relabelled. Standalone exact/all-ratings success does not close these original bad-review requests.",
+    "cleanup": {
+      "pgStatusExit": 3,
+      "postmasterPidAbsent": true,
+      "brokerPidAbsent": true,
+      "allSixCommandGroupsAbsent": true
+    }
+  },
+  "genericAuditLimitation": {
+    "count": 1,
+    "observations": [
+      {
+        "caseId": "utt-services.price-067",
+        "turn": 1,
+        "field": "audit.toolResults.1.result.read_scope.source_hash",
+        "value": "45da2868fa[phone removed]sha256:b8c39bdd2bb7a1723f5b36e9be1a1d4d2def8833dd7e32569321f679721eff7d"
+      }
+    ],
+    "newScheduleHashCorruptionObserved": false,
+    "rawRewritten": false,
+    "repaired": false,
+    "interpretation": "The generic audit source_hash for services.price067 is corrupted by existing phone redaction. Generic field is not claimed as an exact source witness. Supplemental staff receipts retain exact64-hex metadata and join actual HTTP/source event/C9 work/executions independently.",
+    "supplementalStaffJoins": [
+      {
+        "caseId": "current-admin-correction",
+        "turn": 2,
+        "receiptSha256": "7be23eee627b2d15645a4c20e1f5bc0ad0e79d1aaa08519b3e2e785fafc4c09e",
+        "exactSourceHash": "dfb23157efafe55952b51a8154567c2afd8abf9437c21aa5cb25017a9ffd012e",
+        "exactSourceRevision": "d6fa2f7178064e0156894d0bf2d28bd7710bcf10fbbd493af5529d9cf83ae688",
+        "httpExecutionIdsAndC9WorkMatched": true
+      },
+      {
+        "caseId": "utt-services.price-062",
+        "turn": 1,
+        "receiptSha256": "ce0a330657bc2165b82fd56b99c6efca32d97a217334998747534da338b96be6",
+        "exactSourceHash": "99e27a18d2a6cbcae0949c51e8a1a4c9bd4834d7a83f861c7be0eae9048a7fd1",
+        "exactSourceRevision": "22dcbccb8a0a1b36c5bab2a86635270166efda60b8154fcfdacb8079336300b6",
+        "httpExecutionIdsAndC9WorkMatched": true
+      },
+      {
+        "caseId": "utt-services.price-067",
+        "turn": 1,
+        "receiptSha256": "91620af3db5765437a047fc61407582e7db9e48d957153641848d626908cfc2b",
+        "exactSourceHash": "45da2868fa9390659777dc470743a2d740f104fa61a7431cd4ef0ca508ba3991",
+        "exactSourceRevision": "395d5819aea386e3caf7e4870546b3ebc43f271cb24952cdd9318e9ae51c8c83",
+        "httpExecutionIdsAndC9WorkMatched": true
+      }
+    ]
+  },
+  "limits": [
+    "No real model, provider, browser, production or full MAYA/C10 acceptance.",
+    "No invented bad-review threshold; original two bad-review cases remain unfinished.",
+    "No new frozen81 closures; remaining24 unchanged.",
+    "All81 artifact hashes establish archived-row integrity, not restoration of the one damaged generic source_hash.",
+    "Original corpus, scripted planner, evaluator and staff fixture/probe remain unchanged."
+  ],
+  "artifactSha256": {
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/docs/rebuild/evidence/maya-offline48-after-staff-20261009/r1/semantic-score.json": "c0155653599cb73d3657641c9f06571a7db1890638e4f413f7cafa2857f8d799",
+    "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/docs/rebuild/evidence/maya-offline48-after-staff-20261009/r1/candidate-manifest.json": "5c1dff397bb7fccdcb4e412123d48bd9158071d034e3f30f4c3e34a358c0e3e0",
+    "/private/tmp/maya-reviews-period-http-20261009-r4/manifest.json": "94e32efe1d0fc9ec00c2b56defe18aea147ca5c411373c38a3b118f4f45ed40d",
+    "/private/tmp/maya-reviews-period-http-20261009-r4/prepare-jest.json": "1d3f080b83f1aad849883527d872fad6cae8336a9273fa6d784cdcf7884278bb",
+    "/private/tmp/maya-reviews-period-http-20261009-r4/resume-jest.json": "e26c2aaccd3960b0322615c9aa96e791eafc717b952afd3954dfcb192dc03546",
+    "/private/tmp/maya-reviews-period-http-20261009-r4/prepare-observations.json": "7e47d1eb2f81a53c44276806c5eaa81ed450507b5c9bd81798b671c326ae26b3",
+    "/private/tmp/maya-reviews-period-http-20261009-r4/resume-observations.json": "d6901e1d2a5de256263f749f89ac19089bf18282fe3411f1b43c90e9a50e98e9",
+    "/private/tmp/maya-reviews-period-http-20261009-r4/source-and-cleanup-verification.json": "ced8444f6a2601fca5885583ec3e64f7fac8c46e0b499751e564cfeef685e8c6",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/candidate-manifest.json": "70288e9beb8e57761e103baa60298c4bd0bba4ecf6a1feb3e58c5c41c8c9a1ca",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/runner-report.json": "3969a46b83ca85f99be0820e24612efcc41d30b988b56c1fbe9ae76c1658a3fa",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/http-report.json": "6e9c0831ec692daec23cf697fb79388614ee0e6a9e5126c54977951e40e960ac",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/semantic-score.json": "530a06b0bc22af8772ca45544a87e74badb4b8db3f06e0e3b10d74a0f487ae37",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/actual-http-turns.jsonl": "f86a45935debb295bafb863647b5c7908a12405e99d5847fc5ab3d341b0c2569",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/offline-turn-audit.jsonl": "076703c6df6d3cc97a12130364c2c2fb6fd8d4abae9a1961e33cbd0d7be5fb20",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/http-response-journal.jsonl": "0fe82d0e1f8a5988dd46e3766736e0d3cdefb6a5a7cc57cd52a933524b7c9e84",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/offline-staff-service-scoped-receipts.jsonl": "42c3e54983264ae3c41f8699ee98d14c799b8d0859e1683217ed5899ccae8916",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/offline-staff-service-turn-links.jsonl": "5683d0629ab5202152fd5450a9146faebdf05b9966fc3460524e85f69989dcd3",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/offline-staff-service-source-reads.jsonl": "e853033b17477314d623d57d66832e1d2064bfd729afd2e21d9a056262f52e5d",
+    "/private/tmp/maya-offline48-after-reviews-20261009-r1/independent-cleanup.json": "4fc2889bbe6e288c5111c98677b7978af619a8bf5afa13b42e2b233d081d542f"
+  },
+  "conclusion": "Qualified standalone R4 PASS; frozen81 raw57P/2F/12U/10I, previous57PASS retained, remaining24 unchanged; one disclosed pre-existing generic hash redaction defect with matching exact supplemental staff evidence."
+}

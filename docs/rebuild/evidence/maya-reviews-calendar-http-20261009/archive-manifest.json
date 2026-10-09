@@ -1,0 +1,345 @@
+{
+  "contract": "maya.review-calendar.http-archive/1",
+  "baselineCheckpoint": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "files": {
+    "component-to-product-binding.json": {
+      "sha256": "db7e91537f81381f3eaa8defb58153524e6609500f0d790465ef730ba09162d2",
+      "bytes": 204
+    },
+    "frozen-surfaces-unchanged.json": {
+      "sha256": "04a06a9679855a4c3e26a4c54667ee70ce6098e99416ac31b11bf1d006e3a26d",
+      "bytes": 349
+    },
+    "maya-reviews-period-archive-20261009.py": {
+      "sha256": "e5927e40d5c3cfc74ecb48af0f4b97a83bf7b00c9b39ce1315c0b22514ee5f8e",
+      "bytes": 1616
+    },
+    "maya-reviews-period-checks-20261009.py": {
+      "sha256": "20dc932d646a3ca60352db9d9c96e0d370ca2d859cd3b23e3f47e9de1d5bc94f",
+      "bytes": 3876
+    },
+    "maya-reviews-period-checks-r1-20261009-checks.json": {
+      "sha256": "9cda4a00af49c73dd574acd7102e22c21cfcaaa07cf5d834fc0b055589502fc1",
+      "bytes": 12033
+    },
+    "maya-reviews-period-checks-r1-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-checks-r1-20261009-driver.log": {
+      "sha256": "d95e88674cda49593694beec62fc70e1256827802d2425b25fe43768cf54dd37",
+      "bytes": 494
+    },
+    "maya-reviews-period-checks-r1-20261009-lint.log": {
+      "sha256": "9a955a0bde7e13301142b3685a0b895d62826831fb445781cde15a730299b522",
+      "bytes": 962
+    },
+    "maya-reviews-period-checks-r1-20261009-production-types.log": {
+      "sha256": "4f787079d70747f1ac49d36de089ac5f761d63102ae1407573d7fe69f8e0258d",
+      "bytes": 611
+    },
+    "maya-reviews-period-checks-r1-20261009-scoped-types.log": {
+      "sha256": "4aee55928ba15fe0d399bcc51ddd03740384a2c95c65e4e11780c4a510301f90",
+      "bytes": 830
+    },
+    "maya-reviews-period-checks-r1-20261009-types.json": {
+      "sha256": "ffeb9ec99fb4258d6af8a302f85d199cc5dbbc3ae1e22ff889c716596bee3ccb",
+      "bytes": 2926
+    },
+    "maya-reviews-period-checks-r1-20261009-unit.json": {
+      "sha256": "8d7b6f5e4f6ada4f22e63f9eabde2066fe0bcb7c56e10fa79a567712185ecff5",
+      "bytes": 415640
+    },
+    "maya-reviews-period-checks-r1-20261009-unit.log": {
+      "sha256": "c1f1aed128ab91be97d9a37b3967f8c1703aa71afea1c048731170bedd08fc47",
+      "bytes": 1798
+    },
+    "maya-reviews-period-checks-r2-20261009-checks.json": {
+      "sha256": "3e443b6f576d0f0411a43f18011aa48d486912d258fc6cf136eef35e73199f7e",
+      "bytes": 12469
+    },
+    "maya-reviews-period-checks-r2-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-checks-r2-20261009-driver.log": {
+      "sha256": "2164bd3d245611de0c7188c897d341c56ef8d72551ba2c7ace344694eaea4bf6",
+      "bytes": 498
+    },
+    "maya-reviews-period-checks-r2-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-checks-r2-20261009-production-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-checks-r2-20261009-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-checks-r2-20261009-types.json": {
+      "sha256": "ffeb9ec99fb4258d6af8a302f85d199cc5dbbc3ae1e22ff889c716596bee3ccb",
+      "bytes": 2926
+    },
+    "maya-reviews-period-checks-r2-20261009-unit.json": {
+      "sha256": "3a0d51eaa9cf674270a0806ef4b6bc1e6b11d813f1f3c6f46e1695c46b59bc5b",
+      "bytes": 415641
+    },
+    "maya-reviews-period-checks-r2-20261009-unit.log": {
+      "sha256": "af85c153c22ad470018dafd58bdd291168f5279fcca6adbb4dfe6e99fde6da75",
+      "bytes": 1813
+    },
+    "maya-reviews-period-independent-evidence-review-20261009.json": {
+      "sha256": "49add324363833530de5fcb057d22644c16a707035927c93e9f1f104f899b86e",
+      "bytes": 18178
+    },
+    "maya-reviews-period-independent-source-review-20261009.json": {
+      "sha256": "c7ffe4c810bc60ebbdc802645487b1f578953d7a78ba94e8baedc2066b44f9ad",
+      "bytes": 9699
+    },
+    "maya-reviews-period-probe-checks-20261009.py": {
+      "sha256": "8a09f7f4d1e1254f8ccb0c1ce72164eae555c775c7d26b83e9f0588385a0a490",
+      "bytes": 1464
+    },
+    "maya-reviews-period-probe-r2-20261009-checks.json": {
+      "sha256": "845e9e6de0b2ddf88eca96acc01eab7b39a7be04d77c9b19e10cf5b8b1d66b7b",
+      "bytes": 367
+    },
+    "maya-reviews-period-probe-r2-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-probe-r2-20261009-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-probe-r3-20261009-checks.json": {
+      "sha256": "7de0d79524056e73628f7dd0766d793ad541cf88e72896f74fab219f5c8777fe",
+      "bytes": 874
+    },
+    "maya-reviews-period-probe-r3-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-probe-r3-20261009-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-probe-r4-20261009-checks.json": {
+      "sha256": "e7e5d847b4d4381f663c6ca9b924a5cab5e815404a4fc3f68dcc0db46cef18db",
+      "bytes": 875
+    },
+    "maya-reviews-period-probe-r4-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-probe-r4-20261009-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-reviews-period-verify-20261009.py": {
+      "sha256": "05fb3b17126240bd54e825db66858ee716198cdbe9ff319ef232c1999b8873a6",
+      "bytes": 1755
+    },
+    "r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r1/initdb.log": {
+      "sha256": "5da9e350d7d8e0ff56781b59226d99a6c0123f8e42d1ac5c1100b258676171fd",
+      "bytes": 950
+    },
+    "r1/manifest.json": {
+      "sha256": "ed6341dec2a3c765c492add7152cefc3679078f511c6ee00495436fb6856bd77",
+      "bytes": 232513
+    },
+    "r1/migrations.log": {
+      "sha256": "3b67a9c32864759398212d761e020f7f1f2f53e950c341faf732adbecb468764",
+      "bytes": 14728
+    },
+    "r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r1/postgres.log": {
+      "sha256": "1cc9937bb9c4324d6aa21ae4a466edd4b152f9284c147a59e9b5d09deacfa872",
+      "bytes": 1246
+    },
+    "r1/prepare-jest.json": {
+      "sha256": "01f011bc17978f155af4cd7f7043838ae7ce24664dffda1499e2d19703021ea7",
+      "bytes": 3068
+    },
+    "r1/prepare-observations.json": {
+      "sha256": "f9ec74a0fcf469262e524744254227135eeb9f956393601eeda6ba38e4d06e35",
+      "bytes": 13756
+    },
+    "r1/prepare.log": {
+      "sha256": "beccff739e102da07c3d7e468e4afc7f52ed4225314a0a4e768b5dadd6b1654e",
+      "bytes": 2187
+    },
+    "r1/source-and-cleanup-verification.json": {
+      "sha256": "509eb4aa98c2e46df08d0532f56754391155f2a125867727e497627227132e1b",
+      "bytes": 732
+    },
+    "r2/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r2/initdb.log": {
+      "sha256": "4addcf56ac8084ba95e2531c232c275d179954ebd0b210bb1e0a69eef38370e2",
+      "bytes": 950
+    },
+    "r2/manifest.json": {
+      "sha256": "221801d5eb44deaf3f89551fd562dc6bf0c7316186acf0ad6d37e5ac63eaddef",
+      "bytes": 232513
+    },
+    "r2/migrations.log": {
+      "sha256": "1c97472ddfbbb09bce1f7e2f3093599a3395d18894d00ed8044b3e5e9b9a7c95",
+      "bytes": 14728
+    },
+    "r2/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r2/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r2/postgres.log": {
+      "sha256": "3fca8c702a8436f0ae58ba2446ed9c5ff6a1dce6f6a22efd61b114978f479dec",
+      "bytes": 1246
+    },
+    "r2/prepare-jest.json": {
+      "sha256": "234ebc9ceac8aa974809477451b32d86794891f91a1a739c9ba2643edddf1252",
+      "bytes": 5221
+    },
+    "r2/prepare-observations.json": {
+      "sha256": "499effd91f2ca5e80568e0ceb70ba3c71e90fdab3a47323138e899882eac6eb8",
+      "bytes": 13900
+    },
+    "r2/prepare.log": {
+      "sha256": "63249825f0e3b5bd511a221323b5c986b13b199beeb8b89bd6a98aebe3c9ccff",
+      "bytes": 3210
+    },
+    "r2/source-and-cleanup-verification.json": {
+      "sha256": "6022911abdada41c700eef378072363d07b2772a608db210bab7ba893758290c",
+      "bytes": 732
+    },
+    "r3/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r3/initdb.log": {
+      "sha256": "936feb8349e72b1ff518aafe33289a9d5d95c20cbbe81a4b972a2406c7a84a43",
+      "bytes": 950
+    },
+    "r3/manifest.json": {
+      "sha256": "745e1c807a1709204de868dd32af30403be8fe9e06de9b8b7810e61e106595c5",
+      "bytes": 232513
+    },
+    "r3/migrations.log": {
+      "sha256": "754c1c2b939dc0ab112d0ce32abd8630f7383f14ece9f05709feb8cd503db0e8",
+      "bytes": 14728
+    },
+    "r3/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r3/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r3/postgres.log": {
+      "sha256": "1f10121e1145c67a11025bf94880960a9d46877b1b767da1e62e676207f858f9",
+      "bytes": 1246
+    },
+    "r3/prepare-jest.json": {
+      "sha256": "14be620479e9613497309ea2ac457250464b74ba3468a17dfe15c6ecfacc9bdd",
+      "bytes": 4588
+    },
+    "r3/prepare-observations.json": {
+      "sha256": "05ee1ee1b25e00a7e6ddf159f4f19d1d94db2ecd10d1ef2874f364336730a64d",
+      "bytes": 35099
+    },
+    "r3/prepare.log": {
+      "sha256": "57696ba053a5d7f2d0a6363cea87fb071992b521b083a7d388413e446ef742be",
+      "bytes": 2656
+    },
+    "r3/source-and-cleanup-verification.json": {
+      "sha256": "561ac4adf9bab7c9ba4dd294ddbaf4a69a5d8e5e88360d6edb1b2e49d94f5e9d",
+      "bytes": 732
+    },
+    "r4/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r4/initdb.log": {
+      "sha256": "78a23d14cc8a63cc12b83163b652955862ac9c13a6977276178f508a1405bfa6",
+      "bytes": 950
+    },
+    "r4/manifest.json": {
+      "sha256": "94e32efe1d0fc9ec00c2b56defe18aea147ca5c411373c38a3b118f4f45ed40d",
+      "bytes": 232510
+    },
+    "r4/migrations.log": {
+      "sha256": "3a1746f0b26b1db854204e8c26f786de8338c6a9d05bdf9b1c762b533bd6fecf",
+      "bytes": 14728
+    },
+    "r4/pg-restart.log": {
+      "sha256": "0f5112e917b409d68f6e2fb9bf63e8c8e4c42955743cec6f526a5d147476cc30",
+      "bytes": 1345
+    },
+    "r4/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r4/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r4/postgres.log": {
+      "sha256": "6a5f6d165cc7f1f47dffd2f774838444ec1005cad5c9382be224c2b6dd483ecb",
+      "bytes": 1246
+    },
+    "r4/prepare-jest.json": {
+      "sha256": "1d3f080b83f1aad849883527d872fad6cae8336a9273fa6d784cdcf7884278bb",
+      "bytes": 1450
+    },
+    "r4/prepare-observations.json": {
+      "sha256": "7e47d1eb2f81a53c44276806c5eaa81ed450507b5c9bd81798b671c326ae26b3",
+      "bytes": 36628
+    },
+    "r4/prepare.log": {
+      "sha256": "2c8672762186945aacc20b33ff75b2f26d26c312c0ce40af539b3af61adcc043",
+      "bytes": 1380
+    },
+    "r4/resume-jest.json": {
+      "sha256": "e26c2aaccd3960b0322615c9aa96e791eafc717b952afd3954dfcb192dc03546",
+      "bytes": 1449
+    },
+    "r4/resume-observations.json": {
+      "sha256": "d6901e1d2a5de256263f749f89ac19089bf18282fe3411f1b43c90e9a50e98e9",
+      "bytes": 8614
+    },
+    "r4/resume.log": {
+      "sha256": "08a1f655c85bc24e5c21a1629fd875e5867d39d84474829518e426e61c63fcbb",
+      "bytes": 1378
+    },
+    "r4/source-and-cleanup-verification.json": {
+      "sha256": "ced8444f6a2601fca5885583ec3e64f7fac8c46e0b499751e564cfeef685e8c6",
+      "bytes": 817
+    }
+  },
+  "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY_NOT_ACCEPTANCE",
+  "limits": [
+    "Private restart login material excluded",
+    "Failed attempts and raw frozen81 scores preserved",
+    "No real provider/model, website, schema, retention or background authority change"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "sourceHead": "9680e53216274a4ad350714fcec034262bf8286e",
+  "probeSha256": "f0209b217de532b834614ff0ab02e9dfb4aecd5365b9d64bcbb947b4fedcac97",
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "types",
+      "exit": 0,
+      "seconds": 6.326783895492554,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/private/tmp/maya-reviews-period-checks-r2-20261009-types.json",
+        "--incremental",
+        "false"
+      ]
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "seconds": 3.720001220703125,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "test/widgets-live/reviews-period-read-restart.probe-spec.ts"
+      ]
+    }
+  ]
+}

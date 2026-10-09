@@ -1,0 +1,27 @@
+{
+  "contract": "maya.review-calendar.exact-source-and-cleanup/1",
+  "sourceHead": "95449003f21b3ec514220c32b3ae51b47b0ab38f",
+  "sourceFilesVerified": 1861,
+  "sourceBindingsDigest": "87096f758c2b019b563daf8022638dea22cdae7d8d3a21b86dc411a09be04423",
+  "sourceUnchanged": true,
+  "manifestStatus": "passed",
+  "stages": {
+    "prepare": {
+      "passed": 1,
+      "failed": 0,
+      "assertions": 828
+    },
+    "resume": {
+      "passed": 1,
+      "failed": 0,
+      "assertions": 115
+    }
+  },
+  "pgStatusExit": 3,
+  "postmasterPidAbsent": true,
+  "manifestSha256": "94e32efe1d0fc9ec00c2b56defe18aea147ca5c411373c38a3b118f4f45ed40d",
+  "limits": [
+    "Actual HTTP/auth/C9/PG; scripted planner and synthetic canonical local registry facts",
+    "No real model/provider, browser or full MAYA/C10 acceptance"
+  ]
+}

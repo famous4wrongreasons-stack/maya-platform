@@ -1,0 +1,171 @@
+{
+  "contract": "maya.reviews-calendar.component-checks/1",
+  "baseSha": "b81ac624cd8b359bbebc6d809f530e1ed978e360",
+  "sourceFiles": {
+    "maya-saas-backend/scripts/reviews-period-read-proof.mjs": "0db0498e45d33ff10e22c7783a612e3a0ca6f92553c3063a788723f93d405547",
+    "maya-saas-backend/scripts/reviews-period-read-proof.test.mjs": "31b08f2d24dc536c44be275c746e8c445d3751d5a95dc1c14f1c0b06f0e98ee5",
+    "maya-saas-backend/src/ai-tools/ai-core.reviews-calendar.spec.ts": "cbf10711f84d175f48a781567a98153cecabe6398d0aa358f1cc97e5cb3680dd",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "7a5ac764bf2bcc2f57032d3db346841b4ad8f6437fc8160e8ac39fe6b4850d78",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.review-calendar.spec.ts": "1e166b45f293745887bf619b6250352408033e08155046e93b9978b324227a79",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "f931475a1ac529389bbfa2c7d176a1ced51a2dc1bd6583bb782d7a29898315af",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts": "235e354c534661ee444e5046e8172bda60ef460cca5525402b01dc951c3c485f",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "80d5d685fb3a08fdb1cfa89906978f58a559ad8024df0e12b36b3e3cbc64581f",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "8e590ac89a6f4731fc56ac69e911026161d93cb5166695b1d482211111364c0a",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "9d922617accb862122004c860e77fea8f8e38d7f76794b4a14b30dba0b42071e",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "34c637bdcd6b0b51f62b24171de8690cf023d0e4af0a9549539b0ef3cdf41a6b",
+    "maya-saas-backend/src/ai-tools/reviews-calendar-read.spec.ts": "f04bc2687e2264ebb637292c1452fa647a1b06ebe5fe9894bb9669f6049d6ece",
+    "maya-saas-backend/src/ai-tools/reviews-calendar-read.ts": "038664b38f5eeeca96a670e129e8d3a8af48617d2fec60499a11d13ff13170c9",
+    "maya-saas-backend/src/ai-tools/reviews-presentation.spec.ts": "0fbd59ee5fa81eac760ac4b1e814347f8646d145d5bc2d21e0b1691594103576",
+    "maya-saas-backend/src/ai-tools/reviews-presentation.ts": "8056c2b9e3e9416279f78915a693a23d08b7b67c278f9b2ef71d5a373119102d",
+    "maya-saas-backend/src/business-content/business-content.review-calendar.spec.ts": "8c003a78a872cac78dee4d540acc4948b29f523770b7d6119e59d8b5c792a34c",
+    "maya-saas-backend/src/business-content/business-content.service.ts": "db8ff78f04ed512bac53c80768d8ae2af9bb52cb6eacbbf7ad5b3639b0f7be8e",
+    "maya-saas-backend/src/measurement/measurement.read.service.ts": "072183c569449b615dd6381353a68687a3a0312e4e9714539ad4294da7a01211",
+    "maya-saas-backend/src/measurement/measurement.read.spec.ts": "0a6b9895af9b3492012cfa759ab9b984d67a1d320a975878590a5e256edbdb91",
+    "maya-saas-backend/src/measurement/measurement.review-calendar.spec.ts": "62c0b5da92fd58714d8ee570f3d613479ce54c10842cb5309268b663f7525bdc",
+    "maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts": "dd04a377a3a9ed0ba3365905d3cf865984ed703f511592b6dbaf7d91392c20ef"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "check": "driver",
+      "exitCode": 0,
+      "seconds": 0.09,
+      "command": [
+        "/usr/local/bin/node",
+        "--test",
+        "scripts/reviews-period-read-proof.test.mjs"
+      ],
+      "log": "maya-reviews-period-checks-r2-20261009-driver.log"
+    },
+    {
+      "check": "unit",
+      "exitCode": 0,
+      "seconds": 2.294,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.reviews-calendar.spec.ts",
+        "src/ai-tools/ai-tool-handler.review-calendar.spec.ts",
+        "src/ai-tools/owner-review-plan.spec.ts",
+        "src/ai-tools/reviews-calendar-read.spec.ts",
+        "src/ai-tools/reviews-presentation.spec.ts",
+        "src/business-content/business-content.review-calendar.spec.ts",
+        "src/measurement/measurement.review-calendar.spec.ts",
+        "src/ai-tools/ai-tool-registry.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/business-content/business-content.service.spec.ts",
+        "src/measurement/measurement.read.spec.ts",
+        "src/measurement/measurement.reputation.spec.ts",
+        "src/measurement/measurement.reputation.architecture.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-reviews-period-checks-r2-20261009-unit.json"
+      ],
+      "log": "maya-reviews-period-checks-r2-20261009-unit.log"
+    },
+    {
+      "check": "scoped-types",
+      "exitCode": 0,
+      "seconds": 6.375,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/private/tmp/maya-reviews-period-checks-r2-20261009-types.json",
+        "--incremental",
+        "false"
+      ],
+      "log": "maya-reviews-period-checks-r2-20261009-scoped-types.log"
+    },
+    {
+      "check": "production-types",
+      "exitCode": 0,
+      "seconds": 6.238,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "log": "maya-reviews-period-checks-r2-20261009-production-types.log"
+    },
+    {
+      "check": "lint",
+      "exitCode": 0,
+      "seconds": 6.702,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.reviews-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.review-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-calendar-read.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-calendar-read.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-presentation.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-presentation.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/business-content/business-content.review-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/business-content/business-content.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/measurement/measurement.read.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/measurement/measurement.read.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/measurement/measurement.review-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts"
+      ],
+      "log": "maya-reviews-period-checks-r2-20261009-lint.log"
+    },
+    {
+      "check": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.045,
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/reviews-period-read-proof.mjs",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/reviews-period-read-proof.test.mjs",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.reviews-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.review-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-registry.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool.catalog.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-calendar-read.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-calendar-read.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-presentation.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/reviews-presentation.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/business-content/business-content.review-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/business-content/business-content.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/measurement/measurement.read.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/measurement/measurement.read.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/measurement/measurement.review-calendar.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/test/widgets-live/reviews-period-read-restart.probe-spec.ts"
+      ],
+      "log": "maya-reviews-period-checks-r2-20261009-diff-check.log"
+    }
+  ],
+  "limits": [
+    "Component/unit synthetic sources only",
+    "Component checks do not establish HTTP/PG, restart, real provider/model or full MAYA acceptance",
+    "Original remaining24 baseline b81ac624cd8b359bbebc6d809f530e1ed978e360"
+  ]
+}
