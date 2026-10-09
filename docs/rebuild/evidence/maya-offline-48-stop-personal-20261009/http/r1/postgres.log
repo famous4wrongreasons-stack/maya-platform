@@ -1,0 +1,17 @@
+2026-10-09 11:54:21.016 UTC [22612] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-09 11:54:21.016 UTC [22612] LOG:  listening on IPv4 address "127.0.0.1", port 59566
+2026-10-09 11:54:21.018 UTC [22615] LOG:  database system was shut down at 2026-10-09 11:54:20 UTC
+2026-10-09 11:54:21.020 UTC [22612] LOG:  database system is ready to accept connections
+2026-10-09 11:54:27.380 UTC [22693] ERROR:  new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+2026-10-09 11:54:27.380 UTC [22693] DETAIL:  Failing row contains (ed231ce9-4af5-4fea-8cd3-fc7c86c0eb98, cmv0wqxrb000hgtc9x0z64q0y, cmv0wqxui000rgtc9q90rodjv, maya_user, 420a19695ef26aebd5bb0cb0b774d3463d37690d8c579339223a95b793172632, 1, proven_user_client_link, 1, 8bf51cee564b3601ca705cfbdc8d0ca213686e57bd0a43be2b864b092fc5f539, {"clientId": "cmv0wqxui000rgtc9q90rodjv", "contract": "a18.clien..., 0c29e54c61a55eaf9449a30d37c3f47cdeea91a1c46173d7378e2234134659d5, 2026-10-09 11:54:27.166, 2026-10-09 11:54:27.166, null, 2026-10-09 11:54:27.379, null, null, null, null).
+2026-10-09 11:54:27.380 UTC [22693] STATEMENT:  UPDATE "public"."ClientChannelLink" SET "revokedAt" = $1 WHERE ("public"."ClientChannelLink"."tenantId" = $2 AND "public"."ClientChannelLink"."clientId" = $3)
+2026-10-09 11:54:27.591 UTC [22693] ERROR:  new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+2026-10-09 11:54:27.591 UTC [22693] DETAIL:  Failing row contains (7b98539a-8fc2-4af0-8966-2d0afe3ed93b, cmv0wqy0o001cgtc9xleix2al, cmv0wqy3t001mgtc9hj9abn66, maya_user, 4f4d5d2e289a2aba823ead9baa6667ba4014caec446255a716f7c137aa901a8b, 1, proven_user_client_link, 1, f657f3de979d1270d6de60d508e484ab136ead94c8e995ec734ab99f83a4fcf1, {"clientId": "cmv0wqy3t001mgtc9hj9abn66", "contract": "a18.clien..., b87ba11d696b76fa8a4558102eaf5320b69b82d056e3a484db400ea909d5b656, 2026-10-09 11:54:27.499, 2026-10-09 11:54:27.499, null, 2026-10-09 11:54:27.59, null, null, null, null).
+2026-10-09 11:54:27.591 UTC [22693] STATEMENT:  UPDATE "public"."ClientChannelLink" SET "revokedAt" = $1 WHERE ("public"."ClientChannelLink"."tenantId" = $2 AND "public"."ClientChannelLink"."clientId" = $3)
+2026-10-09 11:54:27.746 UTC [22612] LOG:  received fast shutdown request
+2026-10-09 11:54:27.746 UTC [22612] LOG:  aborting any active transactions
+2026-10-09 11:54:27.747 UTC [22612] LOG:  background worker "logical replication launcher" (PID 22618) exited with exit code 1
+2026-10-09 11:54:27.747 UTC [22613] LOG:  shutting down
+2026-10-09 11:54:27.747 UTC [22613] LOG:  checkpoint starting: shutdown immediate
+2026-10-09 11:54:27.804 UTC [22613] LOG:  checkpoint complete: wrote 1841 buffers (22.5%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.026 s, sync=0.029 s, total=0.057 s; sync files=1467, longest=0.001 s, average=0.001 s; distance=13251 kB, estimate=13251 kB; lsn=0/220E8D0, redo lsn=0/220E8D0
+2026-10-09 11:54:27.806 UTC [22612] LOG:  database system is shut down

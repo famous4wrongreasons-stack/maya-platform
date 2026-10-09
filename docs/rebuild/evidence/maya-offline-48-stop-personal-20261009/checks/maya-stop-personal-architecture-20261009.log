@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       49 passed, 49 total
+Snapshots:   0 total
+Time:        6.389 s
+Ran all test suites within paths "src/crm/client-appointment-read.architecture.spec.ts", "src/widgets/lowering/gate9-lowering.architecture.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-stop-personal-architecture-20261009.json

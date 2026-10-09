@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       41 passed, 41 total
+Snapshots:   0 total
+Time:        0.295 s
+Ran all test suites within paths "src/widgets/stores/chat-context-window.spec.ts", "src/widgets/stores/timeline.store.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-stop-lineage-20261009-r1.json

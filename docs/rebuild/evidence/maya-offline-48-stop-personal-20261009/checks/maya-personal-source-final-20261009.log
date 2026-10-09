@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.61 s
+Ran all test suites within paths "src/ai-tools/ai-core.personal-appointments-source-trace.spec.ts", "src/crm/client-appointment-read.service.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-personal-source-final-20261009.json

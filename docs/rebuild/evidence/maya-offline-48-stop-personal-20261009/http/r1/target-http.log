@@ -1,0 +1,67 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_791f1ac02cff on 127.0.0.1:59566 (local)
+[31m[Nest] 22637  - [39m10/09/2026, 11:54:26 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 22637  - [39m10/09/2026, 11:54:26 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/conversation-stop-personal.probe-spec.ts (5.098 s)
+  STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED]
+    ✓ retains STOP across an old in-flight completion and a fresh authenticated next turn (351 ms)
+    ✕ reads only own branchless appointments for client, with explicit display timezone and revocation (337 ms)
+    ✕ reads only own branchless appointments for tenant_owner, with explicit display timezone and revocation (209 ms)
+
+  ● STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED] › reads only own branchless appointments for client, with explicit display timezone and revocation
+
+    DriverAdapterError: new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+
+      236 |       expect(decide).toHaveBeenCalledTimes(1);
+      237 |       expect(decide.mock.calls[0][0].toolResults).toEqual([]);
+    > 238 |       await db.prisma.clientChannelLink.updateMany({
+          |       ^
+      239 |         where: { tenantId: f.tenant.id, clientId: own.id },
+      240 |         data: { revokedAt: new Date() },
+      241 |       });
+
+      at PgTransaction.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PgTransaction.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PgTransaction.executeRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:643:13)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:168:18)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:262:25)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at widgets-live/conversation-stop-personal.probe-spec.ts:238:7
+
+  ● STOP lineage and branchless personal read [HTTP] [PG] [SCRIPTED] › reads only own branchless appointments for tenant_owner, with explicit display timezone and revocation
+
+    DriverAdapterError: new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+
+      236 |       expect(decide).toHaveBeenCalledTimes(1);
+      237 |       expect(decide.mock.calls[0][0].toolResults).toEqual([]);
+    > 238 |       await db.prisma.clientChannelLink.updateMany({
+          |       ^
+      239 |         where: { tenantId: f.tenant.id, clientId: own.id },
+      240 |         data: { revokedAt: new Date() },
+      241 |       });
+
+      at PgTransaction.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PgTransaction.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PgTransaction.executeRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:643:13)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:168:18)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:262:25)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at widgets-live/conversation-stop-personal.probe-spec.ts:238:7
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 1 passed, 3 total
+Snapshots:   0 total
+Time:        5.117 s
+Ran all test suites within paths "test/widgets-live/conversation-stop-personal.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-stop-personal-http-20261009-r1/target-http-jest.json
