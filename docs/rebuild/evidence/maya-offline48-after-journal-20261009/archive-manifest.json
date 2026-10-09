@@ -124,6 +124,122 @@
     "r1-integrity-review.json": {
       "sha256": "44977d7ed1f0d17484405eaab90b462896e10de0824b294cfc3d2ab7ac73d0e5",
       "bytes": 634
+    },
+    "r2/actual-http-turns.jsonl": {
+      "sha256": "12bdaee1df88e67c40e83211806f20d667984978674891df65aec86199b8d122",
+      "bytes": 917317
+    },
+    "r2/actual-model-responses.jsonl": {
+      "sha256": "6865c67a4bf643567d654dbbf09e44719462f09d7fc03b3a0278f5fc9b370502",
+      "bytes": 94390
+    },
+    "r2/broker-ledger.jsonl": {
+      "sha256": "7dd9f7c9bab08f76afd752b39d8c0edb29ea73590257894c07648a3453e11c96",
+      "bytes": 23318
+    },
+    "r2/broker-report.json": {
+      "sha256": "5c0c1aae185622c376899202fc664556d46ffd13bd1acb679b8c965ed5e75d93",
+      "bytes": 90548
+    },
+    "r2/broker.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r2/candidate-manifest.json": {
+      "sha256": "168fa0c08bb46007f013d8faa363a06a3c80b8736d6172432f927fe48d483268",
+      "bytes": 394893
+    },
+    "r2/conversation-jest.json": {
+      "sha256": "5c5bb9ea90864dbfe36f1ed882105662372413d04f8dd57a4a65ef2ee875985a",
+      "bytes": 1418
+    },
+    "r2/conversation.log": {
+      "sha256": "18d1c974afcd2adbdb423cd2620920f13d93987f25e0672ec7d1c1e41e29c8b7",
+      "bytes": 631
+    },
+    "r2/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "r2/http-report.json": {
+      "sha256": "5718d6987bc7732a03839c13a53659ca409f830d7c61762fcd7675b78baff599",
+      "bytes": 1942317
+    },
+    "r2/http-response-journal.jsonl": {
+      "sha256": "a6fcf6574cd9692a5890152902e71f787a3d2ad319626e60c3516dc8b8a5f57f",
+      "bytes": 67483
+    },
+    "r2/initdb.log": {
+      "sha256": "c26e23bceb05ab90180286ed05e517cb9120ce3e86dd061966e211212b4754a5",
+      "bytes": 972
+    },
+    "r2/migrations.log": {
+      "sha256": "14f2df29854d7810b0b65ac1c84e118eb85f534d8ef579167aca9e76de86e101",
+      "bytes": 14720
+    },
+    "r2/model-responses.jsonl": {
+      "sha256": "cd9bc4357dc49ca39a01e16520a05adff8ad09fc7f5f7d0f482973cd40584325",
+      "bytes": 141070
+    },
+    "r2/offline-completion-audit.jsonl": {
+      "sha256": "6e7fab6cc50f7d36ade204865c3d6299c308fb1102da78d301130e86c1cae7dd",
+      "bytes": 329848
+    },
+    "r2/offline-expected-refusals.jsonl": {
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9",
+      "bytes": 163
+    },
+    "r2/offline-source-snapshots.json": {
+      "sha256": "16ca2357e616b637e1f2b4ff9e0e286b7a8ab58cb5edb692dc1f853d12f064d7",
+      "bytes": 150430
+    },
+    "r2/offline-source-transitions.jsonl": {
+      "sha256": "3dada5242ccfd857337226be005b64e68f7e7b9839767b892bbee159bc5957e1",
+      "bytes": 187
+    },
+    "r2/offline-turn-audit.jsonl": {
+      "sha256": "dc75cf193e16949f4f0747248c00551118933d25f52dea51de9b8a5c34d3a909",
+      "bytes": 917448
+    },
+    "r2/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "r2/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "r2/postgres.log": {
+      "sha256": "27b62962565d1025f509ac6de750b95b9ddc8e9fba655b8a25cd53ec90228624",
+      "bytes": 1246
+    },
+    "r2/replay-binding.json": {
+      "sha256": "95c8ef01960071c151479e0087b3c9c9ce1b9b4624fb83122f339747b5370635",
+      "bytes": 20207
+    },
+    "r2/replay-records.jsonl": {
+      "sha256": "2575009b0188defb9d70f1ca42e7400cf0d5e7fa68c2832a9ff8799bdaeebe37",
+      "bytes": 67392
+    },
+    "r2/runner-budget-ledger.jsonl": {
+      "sha256": "80089332777967f918dd6cc86cef086d9042dc91cbd982f1c0550ff204264fa2",
+      "bytes": 23556
+    },
+    "r2/runner-report.json": {
+      "sha256": "40b6c340d10fc8404fba5455f08d9aad3a0e76dd06fb03157816f591d87f9e1d",
+      "bytes": 3764
+    },
+    "r2/semantic-score.json": {
+      "sha256": "1ebf0ddb7f01e8b2fdff4fd3734991076055b75dbbab0dbf3048d1cfbf017eec",
+      "bytes": 1303545
+    },
+    "r2/serialized-attempts.jsonl": {
+      "sha256": "94aa930cc6529749d553f700f7341259bce9af23e6fa91ee4b0233ea102cbd85",
+      "bytes": 18862
+    },
+    "r2-cleanup.json": {
+      "sha256": "97c2079f5cecc8cb07e39c0eb7bb1ce07cf49958d1a5e785b0aa910ee18a0991",
+      "bytes": 179
     }
   }
 }

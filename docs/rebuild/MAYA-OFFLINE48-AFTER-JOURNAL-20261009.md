@@ -1,5 +1,13 @@
 # MAYA — повтор исходных 48 диалогов после schedule/journal wiring
 
+R2 на `b6cd4d00e6d374ab2a9466f4f40144b345456e9e`: **54 PASS / 1 FAIL /
+14 unsupported / 12 insufficient**, все 81 actual хода, critical 0/0. Три booking
+empty исхода теперь объясняются явно; journal больше не утверждает смену источника.
+Оставшийся FAIL — повторный вопрос о филиале, уже указанном пользователем
+(`mt-ambiguous_entity_resolution-15:2`). Его узкая correction готовится отдельно.
+R2 также сохранён как FAIL, без пересчёта: [raw score](evidence/maya-offline48-after-journal-20261009/r2/semantic-score.json).
+Ни корпус, ни evaluator, ни часы/fixtures между R1 и R2 не менялись.
+
 R1 выполнен полностью на `28cad8fa2fe155c81dc130eb7545881fd340d860`: **48 диалогов,
 81 actual HTTP ход, 51 PASS / 5 FAIL / 14 unsupported / 11 insufficient**,
 critical 0/0. Это не общий PASS. Runtime, auth, C9 и PostgreSQL настоящие,
