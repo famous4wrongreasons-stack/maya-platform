@@ -1,0 +1,2 @@
+test/widgets-live/core-conversation-http.probe-spec.ts(367,80): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-diagnostic-20261008/1" | "core-react-diagnostic-20261009/1"'.
+  Type '"core-union-20261009/1"' is not assignable to type '"core-diagnostic-20261008/1" | "core-react-diagnostic-20261009/1"'.

@@ -1,0 +1,26 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_f569dae043b2 on 127.0.0.1:51288 (local)
+FAIL test/widgets-live/core-conversation-http.probe-spec.ts
+  ● Test suite failed to run
+
+    core_conversation_transform_outside_finite_modules
+
+       9 |       )
+      10 |     )
+    > 11 |       throw new Error('core_conversation_transform_outside_finite_modules');
+         |             ^
+      12 |     return {
+      13 |       code: ts.transpileModule(sourceText, {
+      14 |         fileName: sourcePath + '.ts',
+
+      at Object.process (widgets-live/support/core-conversation-mjs-transform.cjs:11:13)
+      at ScriptTransformer.transformSource (../../../maya-development-integration/maya-saas-backend/node_modules/@jest/transform/build/index.js:415:31)
+      at ScriptTransformer._transformAndBuildScript (../../../maya-development-integration/maya-saas-backend/node_modules/@jest/transform/build/index.js:512:40)
+      at ScriptTransformer.transform (../../../maya-development-integration/maya-saas-backend/node_modules/@jest/transform/build/index.js:551:19)
+      at Object.<anonymous> (widgets-live/core-conversation-http.probe-spec.ts:108:34)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        5.067 s
+Ran all test suites.
+Test results written to: ../../../../../../../../private/tmp/maya-react-broker-stub-20261009-r1/conversation-jest.json

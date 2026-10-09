@@ -36,13 +36,15 @@ Single-command launcher проверяет immutable bounded plan и внешн�
 
 ## Один будущий запуск после точного разрешения
 
-После документационного checkpoint создаётся свежий `/private/tmp/maya-ui-ready-20261009/local-plan.json`, привязанный к окончательному HEAD, и команда:
+После документационного checkpoint создаётся свежий `/private/tmp/maya-ui-ready-20261009-r2/local-plan.json`, привязанный к окончательному HEAD, и команда:
 
 ```sh
-/private/tmp/maya-ui-ready-20261009/launch.command
+/private/tmp/maya-ui-ready-20261009-r2/launch.command
 ```
 
 Она запускает один broker и один существующий runner со всем UI-сценарием. Это готовая команда, **не выданное разрешение**. Перед её разрешённым исполнением parent оформляет внешний `permit.json` и `approved-run.json` с exact candidateCommit, manifestSha256, ownerApprovalRef и permitSha256. Эти nonsecret записи не создаются launcher автоматически. Свежий plan/runId/UID/GID/socket должны совпадать с permit; старые claims не используются.
+
+Предыдущий prepare в `/private/tmp/maya-ui-ready-20261009` сохраняется как исторический, без исполнения и без повторного использования. Все 102 файла из evidence `SHA256SUMS.json`, включая synthetic журналы проверок и сохранённых отказов, включены в Git checkpoint; общий ignore для `.log` не должен исключать эти доказательства.
 
 Владельцу остаётся один понятный шаг: **когда он подтвердит готовность и запуск будет разрешён, ввести существующий DeepSeek key один раз в скрытом приглашении Terminal**. До готовности окно не открывается. Ввод ограничен 30 секундами и остатком permit; отмена/timeout/отзыв прекращают run, не открывая новый prompt.
 
