@@ -1,0 +1,855 @@
+{
+  "contract": "maya.core-conversation-followup-executable/1",
+  "status": "FROZEN_DEVELOPMENT_PROFILE_INPUT_NOT_EXECUTION_AUTHORITY",
+  "qualification": "DEVELOPMENT_DIAGNOSTIC_ONLY_NOT_HOLDOUT_NOT_LANGUAGE_ACCEPTANCE",
+  "split": "dev",
+  "profile": "core-followup-20261009/1",
+  "dialogs": 6,
+  "userTurns": 13,
+  "paidAuthorized": false,
+  "executionAuthorized": false,
+  "candidateCommit": null,
+  "candidateManifestSha256": null,
+  "sourceDataset": {
+    "path": "maya-saas-backend/datasets/conversation-intelligence/core-followup-frozen-20261008.json",
+    "sha256": "926578b841249c06d8e63ae117c6e651aefca7e39565b3e2fb73bf086cbb817c",
+    "selection": "EXACT_FIRST_SIX_IN_FROZEN_ORDER",
+    "sourceCaseIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "onlyCaseAddition": "group",
+    "fixtureRequirementsAreHistoricalPreparationMetadata": true
+  },
+  "historicalMetadata": {
+    "contract": "maya.core-conversation-followup-cases/1",
+    "status": "FROZEN_OPTIONAL_DEVELOPMENT_INPUTS_NOT_EXECUTION_AUTHORITY",
+    "split": "dev-with-explicit-authored-development-proof-prompt",
+    "sourceBinding": {
+      "sourceHeadObservedAtPreparation": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+      "candidateCommit": null,
+      "candidateManifestSha256": null,
+      "finalCandidateBinding": "ROOT_MUST_BIND_REVIEWED_CANDIDATE_AFTER_IMPLEMENTATION",
+      "sources": [
+        {
+          "id": "multi",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+          "sha256": "afe3c2143cd4bacd62e52a4acff54205bcf341b6c8d7304a06db9f9ac8b331cc",
+          "bytes": 863834,
+          "gitBlob": "eccbb256ede8b7a0df4f3feb0c9409571a596ef6",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "single",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+          "sha256": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+          "bytes": 8295466,
+          "gitBlob": "6d98088f2734aa56c8a8aab5b82f9185e196c15a",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "current",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+          "sha256": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996",
+          "bytes": 33306,
+          "gitBlob": "87b299f0300b9dec66b6193f3d027e8d4467ed09",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "sources",
+          "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts",
+          "sha256": "ec61d1768ae49e00bdb0ecd45e0cd1d19a3264df2b71257b916dfac99d6c6bb9",
+          "bytes": 16906,
+          "gitBlob": "8c69dc4301247de56aff8707a6aab9bd5ae73a43",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "http",
+          "path": "maya-saas-backend/test/widgets-live/current-candidate-http.probe-spec.ts",
+          "sha256": "1d955767a37add1c06114e7866dd9d76ca853afc8f00b8211fa2d5f9edbd9a4a",
+          "bytes": 51439,
+          "gitBlob": "862322139f604531f30a1ad56e9260247ba4b993",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "catalog",
+          "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts",
+          "sha256": "35a45711b2a50df2c59469cd83a651e7094fc22a0eb2fbf38f228f64d43604b6",
+          "bytes": 26847,
+          "gitBlob": "d21f668b83e270db29a6e31d144a3bbe9f2a43ec",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "compound",
+          "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+          "sha256": "bcb12a0184246ddf8263f2229e4e3e074996388159bba132ca9366ca07935c9f",
+          "bytes": 78243,
+          "gitBlob": "16e18466840af1f9b8e0ab4af251b8f0f44072cc",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "e2",
+          "path": "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+          "sha256": "881a29f503e3f69b47f372e1bbc4c20c76c4a4c96c2acf18b8cb1b2170a4f092",
+          "bytes": 17853,
+          "gitBlob": "05d625b4e01b8d8bc7f9c78a0268b8f69640c3be",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "unknown",
+          "path": "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts",
+          "sha256": "4bd4812d96e9b66942b5789a83348a4d37adedf975ec35bc9351511565b811d5",
+          "bytes": 12476,
+          "gitBlob": "513ded2782aab74619c314ae2d7ba9fdf9127c25",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "personal",
+          "path": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+          "sha256": "1f20ff3a618d8fa8aaa6a4c27406f4c1c57f38d31d529c8a9a93d1183d10c4ee",
+          "bytes": 23527,
+          "gitBlob": "44f7235d823135491bc6e4516f9b5fad35a9576a",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "branch",
+          "path": "maya-saas-backend/test/widgets-live/branch-booking-selector.probe-spec.ts",
+          "sha256": "4f884da6d3af5459414aba52d4a98bcb2082f555159d81a95f290e384fc88041",
+          "bytes": 87921,
+          "gitBlob": "9ecea73a60a64ee060d917c1b45f20907101b5fe",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "lifecycle",
+          "path": "maya-saas-backend/test/widgets-live/lifecycle-owner-react.probe-spec.ts",
+          "sha256": "e03436aecf4d7525e32b3aad3e6dffcc2bfb8d5565c4226b12f32daec384e4db",
+          "bytes": 35971,
+          "gitBlob": "7d3362e519d7fe22b6d79ab39e058eecb437cb80",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        },
+        {
+          "id": "replay",
+          "path": "maya-saas-backend/scripts/conversation-qualification/replay.mjs",
+          "sha256": "2743112c4ab780cb4ce85f6a51813c7364b4c10c7badcdc71e54c2dbf92c551b",
+          "bytes": 6935,
+          "gitBlob": "7b54ce280a6d9c3cb0f24ab8fbee841b53f92ef9",
+          "observedCommit": "e4122aa85a54fe8403c88902ca97d1b2326bf036",
+          "matchesObservedCommit": true
+        }
+      ]
+    },
+    "authority": {
+      "paidAuthorized": false,
+      "executionAuthorized": false,
+      "limitsProposedOnly": true,
+      "limitsExecutable": false,
+      "profileGateReady": false,
+      "firstDiagnosticUnchanged": true,
+      "firstDiagnosticLimitsReference": "3 dialogs / 5 turns / proposed USD 2 / 12 attempts; not extended or shared by this file",
+      "optionalBatchBudgetUsd": null,
+      "optionalBatchAttemptCap": null,
+      "freshScopeAndBudgetRequired": true,
+      "oldClosedPilotReusable": false
+    },
+    "mechanicalBounds": {
+      "maximumDialogs": 12,
+      "maximumUserTurns": 30,
+      "actualDialogs": 12,
+      "actualUserTurns": 24,
+      "generatedNewCorpusRows": 0,
+      "holdoutCasesSelected": 0,
+      "sourceAssistantTurnsCopied": 0,
+      "providerCallsPerformed": 0,
+      "servicesStarted": 0,
+      "testsExecuted": 0
+    },
+    "harnessGaps": [
+      {
+        "id": "optional-manifest-admission",
+        "status": "NOT_IMPLEMENTED",
+        "nextStep": "After first 3/5 diagnostic review, admit exactly this hashed finite optional file and a new bounded profile; do not enlarge the first profile by implication."
+      },
+      {
+        "id": "finite-fixture-binding",
+        "status": "PARTIAL_EXISTING_SOURCE_RECIPES",
+        "nextStep": "Parameterize only named staff/services/branches and owned appointments listed per case; preserve current source/authority/clock owners. Record each fixture and successful preflight before a model turn."
+      },
+      {
+        "id": "chat-to-move-cancel-preview",
+        "status": "UNPROVEN_IN_LANGUAGE_RUNNER",
+        "nextStep": "Observe actual supported ingress; when absent, preserve a precise unsupported finding. Existing direct canonical E2 paths may not be substituted for the conversation."
+      },
+      {
+        "id": "general-and-ambiguity-language-review",
+        "status": "NOT_EVALUATED",
+        "nextStep": "Use actual assistant output with the review checks. No current canned response or old source label may provide a PASS."
+      },
+      {
+        "id": "unknown-restart-controls",
+        "status": "SEPARATE_EXISTING_PROOFS_NOT_EXECUTED",
+        "nextStep": "Schedule only existing bounded synthetic proofs independently when authorized; do not count them as extra corpus dialogs or language evidence."
+      }
+    ],
+    "limits": [
+      "No full 10k generation or holdout selection. All source rows have exact IDs and SHA provenance.",
+      "No raw customer/private records, credentials, environment contents or real provider source in this artifact.",
+      "Source fixture recipes are synthetic development support, not deployment or real provider/model acceptance.",
+      "This batch does not authorize mutations, outbound messages, background C10 autonomy, production/website changes, services, SSH or paid calls.",
+      "No pass/fail results have been generated. Final source and executable profile gates remain required."
+    ],
+    "historyContract": {
+      "actualAssistantHistoryRequired": true,
+      "goldSubstitutionAllowed": false,
+      "sourceAssistantRowsAllowed": false,
+      "modelInput": "Only actual ordered user messages and actual preceding assistant responses from the same authenticated conversation, plus canonical server context. Review metadata is not model input.",
+      "conversationBinding": "Start a distinct conversation per case; require every successful response to retain the server canonical conversation ID and current principal.",
+      "failedTurn": "On transport UNKNOWN, timeout, malformed response or non-2xx, stop that dialog; never insert an invented assistant answer or continue from corpus gold. Record authority refusals separately.",
+      "retry": "No automatic network/model retry. Any explicit retry must remain within a separately executable approved profile and retain request/conversation semantics.",
+      "entityAuthority": "Names/IDs in corpus are preferences only; current authorized catalogs and persisted source owners resolve facts."
+    }
+  },
+  "historyContract": {
+    "actualAssistantHistoryRequired": true,
+    "goldSubstitutionAllowed": false,
+    "sourceAssistantRowsAllowed": false,
+    "modelInput": "The HTTP replay retains actual ordered user messages and actual preceding assistant replies from the same authenticated conversation; no gold answers are substituted. Canonical privacy filtering sends user-only dialogue messages to the model, with authorized server context and server-owned semantic continuation restored from encrypted storage. Retaining actual HTTP replies does not mean forwarding raw assistant text to the model. Review metadata is not model input.",
+    "conversationBinding": "Start a distinct conversation per case; require every successful response to retain the server canonical conversation ID and current principal.",
+    "failedTurn": "On transport UNKNOWN, timeout, malformed response or non-2xx, stop that dialog; never insert an invented assistant answer or continue from corpus gold. Record authority refusals separately.",
+    "retry": "No automatic network/model retry. Any explicit retry must remain within a separately executable approved profile and retain request/conversation semantics.",
+    "entityAuthority": "Names/IDs in corpus are preferences only; current authorized catalogs and persisted source owners resolve facts."
+  },
+  "caseReviewPolicy": {
+    "sourceLabelsAreOracle": false,
+    "expectedAssistantAnswersPresent": false,
+    "requiresHumanLanguageReview": true,
+    "reviewCategories": [
+      "intent_and_entity_understanding",
+      "actual_history_continuity",
+      "factual_source_grounding",
+      "useful_clarification_or_supported_limitation",
+      "coherent_reply",
+      "current_authority",
+      "no_unobserved_effect_claim"
+    ],
+    "unsupportedResult": "Record an honest unsupported response as such; it is not positive functional completion. Never relabel it as a ready tool path.",
+    "scriptedTransport": "A canned/scripted dry run can qualify mechanics only; it cannot pass natural-language understanding.",
+    "coverageMeaning": "Coverage lists planned diagnostic observations only, not completed acceptance."
+  },
+  "cases": [
+    {
+      "id": "followup-client-carry-over",
+      "role": "client",
+      "runtimeRole": "CLIENT",
+      "audience": "client",
+      "userTurns": [
+        "Ответь по существу: есть свободное время у мастера Елена сегодня для услуги «комплекс стрижка и борода»",
+        "А завтра?",
+        "А если мастер Никита?"
+      ],
+      "provenance": [
+        {
+          "sourceId": "multi",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+          "sourceCase": "mt-booking_carry_over-7",
+          "familyId": "mt-booking_carry_over-7",
+          "split": "dev",
+          "sourceCaseSha256": "889f4d6382de28c0f39bc8a2f87194d66bcf420a18913005612a395097e8313d",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "line": 50,
+          "turnSelectors": [
+            "conversation[0].text",
+            "conversation[2].text",
+            "conversation[4].text"
+          ]
+        }
+      ],
+      "coverage": [
+        "natural_ru",
+        "followup",
+        "date_replacement",
+        "staff_replacement"
+      ],
+      "fixtureRequirements": {
+        "fixtureKind": "OWNED_SYNTHETIC_INTERNAL_CATALOG",
+        "supportedBy": [
+          {
+            "sourceId": "sources",
+            "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts"
+          },
+          {
+            "sourceId": "catalog",
+            "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts"
+          }
+        ],
+        "currentAuthority": "Verified current CLIENT and client link; tenant-scoped current catalog and availability; no supplied ID grants authority.",
+        "clock": "Capture server clock and selected source timezone. Bind today/tomorrow/Friday to that clock; never reuse historical fixture dates.",
+        "businessEffectsAllowed": false,
+        "harnessBinding": "REQUIRES_FINITE_NEW_MANIFEST_BINDING; source recipes exist, not already runnable as this optional batch.",
+        "seedDelta": [
+          "Exact synthetic staff labels Елена and Никита; service комплекс стрижка и борода; both staff linked to that service.",
+          "Finite future intervals for today if still bookable, and tomorrow. Late-day empty today is a valid factual result, not a setup excuse to fabricate slots."
+        ]
+      },
+      "reviewChecks": [
+        "Preserve service after А завтра? and only replace date.",
+        "Preserve tomorrow/service after А если мастер Никита? and bind the new staff through the current catalog.",
+        "Every displayed time must come from a current authorized READ."
+      ],
+      "unsupportedOrUnproven": [
+        "The base current-candidate seed has Артём/Максим and Мужская стрижка, so these exact labels require a finite parameterized seed."
+      ],
+      "forbiddenClaims": [
+        "unobserved_action_success",
+        "invented_availability_or_revenue",
+        "foreign_tenant_or_other_client_data",
+        "text_confirmation_is_commit_authority",
+        "background_authority",
+        "real_provider_acceptance",
+        "real_model_acceptance_before_observation"
+      ],
+      "turnMetadata": [
+        {
+          "index": 0,
+          "sha256": "f35bd075fc5fdc06901a24b17587c11754fb1284400a74f30f8e66520eff06f7",
+          "utf8Bytes": 190
+        },
+        {
+          "index": 1,
+          "sha256": "21758441549194e61f302de81942652d3c5a2844ad0bc42d2d22317df8cff8ae",
+          "utf8Bytes": 16
+        },
+        {
+          "index": 2,
+          "sha256": "fc7a622f76fd999fff8ce2cf65f54fc95bd07649e45b6eff91ec66209414cf31",
+          "utf8Bytes": 38
+        }
+      ],
+      "group": "booking"
+    },
+    {
+      "id": "followup-client-entity-correction",
+      "role": "client",
+      "runtimeRole": "CLIENT",
+      "audience": "client",
+      "userTurns": [
+        "Есть время к Артёму завтра на мужскую стрижку?",
+        "Лучше к Максиму в 19:30."
+      ],
+      "provenance": [
+        {
+          "sourceId": "current",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json",
+          "sourceCase": "current-booking-correction",
+          "familyId": "current-booking",
+          "split": "dev",
+          "sourceCaseSha256": "de7e62be096ff4d3a30def374b7ce7d55db57ad5afd4a314b61c75bb10b397ee",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "turnSelectors": [
+            "userTurns[0]",
+            "userTurns[1]"
+          ]
+        }
+      ],
+      "coverage": [
+        "natural_ru",
+        "followup",
+        "entity_replacement",
+        "staff_and_time_replacement"
+      ],
+      "fixtureRequirements": {
+        "fixtureKind": "OWNED_SYNTHETIC_INTERNAL_CATALOG",
+        "supportedBy": [
+          {
+            "sourceId": "sources",
+            "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts"
+          },
+          {
+            "sourceId": "catalog",
+            "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts"
+          }
+        ],
+        "currentAuthority": "Verified current CLIENT and client link; tenant-scoped current catalog and availability; no supplied ID grants authority.",
+        "clock": "Capture server clock and selected source timezone. Bind today/tomorrow/Friday to that clock; never reuse historical fixture dates.",
+        "businessEffectsAllowed": false,
+        "harnessBinding": "REQUIRES_FINITE_NEW_MANIFEST_BINDING; source recipes exist, not already runnable as this optional batch.",
+        "seedDelta": [
+          "Reuse current-candidate booking group: Артём/Максим, Мужская стрижка, 17:00–20:00 rules.",
+          "Preflight tomorrow 19:30 for Максим against current availability; if unavailable, retain requested preference and report that fact."
+        ]
+      },
+      "reviewChecks": [
+        "Replace staff and time together while retaining service and tomorrow.",
+        "Do not silently retain Артём or choose a different time.",
+        "No action execution."
+      ],
+      "unsupportedOrUnproven": [],
+      "forbiddenClaims": [
+        "unobserved_action_success",
+        "invented_availability_or_revenue",
+        "foreign_tenant_or_other_client_data",
+        "text_confirmation_is_commit_authority",
+        "background_authority",
+        "real_provider_acceptance",
+        "real_model_acceptance_before_observation"
+      ],
+      "turnMetadata": [
+        {
+          "index": 0,
+          "sha256": "b8eff9a84fd0388213484e71f03362d9990ac0a1cc30f2bb08ea0e5d1b21afda",
+          "utf8Bytes": 84
+        },
+        {
+          "index": 1,
+          "sha256": "f9caa88dc45d31b5a5bb322b463dbc0611b6e736ed8b7e7e3a7f4bc949a2bffc",
+          "utf8Bytes": 38
+        }
+      ],
+      "group": "booking"
+    },
+    {
+      "id": "followup-admin-typo-ambiguous-period",
+      "role": "admin",
+      "runtimeRole": "ADMINISTRATOR",
+      "audience": "owner",
+      "userTurns": [
+        "нужно понять есть акно вечером. За последние 30 дней. Учти текущий контекст бизнеса."
+      ],
+      "provenance": [
+        {
+          "sourceId": "single",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+          "sourceCase": "utt-booking.find_availability-079",
+          "familyId": "booking.find_availability:6",
+          "split": "dev",
+          "sourceCaseSha256": "cb5e68cac2272b36667eb727b8f370b12660602f11f058429d6f5d946f7bc1cf",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "line": 79,
+          "turnSelectors": [
+            "utterance"
+          ]
+        }
+      ],
+      "coverage": [
+        "natural_ru",
+        "typos",
+        "ambiguous_period",
+        "admin"
+      ],
+      "fixtureRequirements": {
+        "fixtureKind": "ADMIN_CURRENT_AUTHORIZED_CATALOG",
+        "supportedBy": [
+          {
+            "sourceId": "sources",
+            "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts"
+          },
+          {
+            "sourceId": "http",
+            "path": "maya-saas-backend/test/widgets-live/current-candidate-http.probe-spec.ts"
+          }
+        ],
+        "seedDelta": [
+          "Reuse authenticated admin/current synthetic CRM reader setup.",
+          "No forced date or service/staff selection; the text omits them and mixes evening with a historical rolling period."
+        ],
+        "businessEffectsAllowed": false,
+        "harnessBinding": "NEW_CASE_BINDING_REQUIRED"
+      },
+      "reviewChecks": [
+        "Understand акно as a possible window request without inventing its scope.",
+        "Ask a useful bounded clarification for future day/time and missing catalog scope.",
+        "Do not silently turn За последние 30 дней into tomorrow."
+      ],
+      "unsupportedOrUnproven": [
+        "Historical source label requires_clarification=false/capability_readiness=ready is not a current runtime oracle.",
+        "This is an ambiguity/refusal diagnostic, not proof that historical availability search is supported."
+      ],
+      "forbiddenClaims": [
+        "unobserved_action_success",
+        "invented_availability_or_revenue",
+        "foreign_tenant_or_other_client_data",
+        "text_confirmation_is_commit_authority",
+        "background_authority",
+        "real_provider_acceptance",
+        "real_model_acceptance_before_observation"
+      ],
+      "turnMetadata": [
+        {
+          "index": 0,
+          "sha256": "25f07141d28c445d8544dc5219317472e281b8ce4c6b1671ebeba41d5e0da0fa",
+          "utf8Bytes": 151
+        }
+      ],
+      "group": "admin"
+    },
+    {
+      "id": "followup-owner-topic-switch",
+      "role": "owner",
+      "runtimeRole": "TENANT_OWNER",
+      "audience": "owner",
+      "userTurns": [
+        "Как идут дела в «основной филиал»",
+        "Кстати, Артём завтра работает?",
+        "Теперь вернись к филиалу и скажи, где проблема"
+      ],
+      "provenance": [
+        {
+          "sourceId": "multi",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl",
+          "sourceCase": "mt-topic_switch_and_return-0",
+          "familyId": "mt-topic_switch_and_return-0",
+          "split": "dev",
+          "sourceCaseSha256": "bf35ab06b82731f7ec2123d968d94562941daf29d862ca5921fd8fab671a14e3",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "line": 4,
+          "turnSelectors": [
+            "conversation[0].text",
+            "conversation[2].text",
+            "conversation[4].text"
+          ]
+        }
+      ],
+      "coverage": [
+        "natural_ru",
+        "topic_switch",
+        "return_to_context",
+        "owner"
+      ],
+      "fixtureRequirements": {
+        "fixtureKind": "OWNER_C7_PLUS_CURRENT_SCHEDULE_READ",
+        "supportedBy": [
+          {
+            "sourceId": "sources",
+            "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts"
+          },
+          {
+            "sourceId": "catalog",
+            "path": "maya-saas-backend/test/widgets-live/chat-catalog-booking.live-spec.ts"
+          },
+          {
+            "sourceId": "compound",
+            "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts"
+          }
+        ],
+        "seedDelta": [
+          "Own synthetic branch labeled основной филиал; current Артём staff binding and tomorrow schedule.",
+          "Last published tenant-wide finance snapshot with its actual period; keep branch filter request distinct from that scope."
+        ],
+        "businessEffectsAllowed": false,
+        "harnessBinding": "COMPOSE_EXISTING_FINITE_FIXTURE_RECIPES; no implicit branch-scoped C7 publication"
+      },
+      "reviewChecks": [
+        "Do not answer schedule question using finance context.",
+        "Retain the requested branch when user returns to it; unsupported scope must remain explicit.",
+        "Use actual schedule facts or a precise missing-source response."
+      ],
+      "unsupportedOrUnproven": [
+        "Current finite owner review supports tenant-wide published snapshot, not arbitrary branch root-cause analysis.",
+        "Positive branch analytics/root-cause result is not required or permitted without a registered current source; a clear limitation is a valid diagnostic outcome.",
+        "Historical assistant examples and resolved_intents are not replay input or truth."
+      ],
+      "forbiddenClaims": [
+        "unobserved_action_success",
+        "invented_availability_or_revenue",
+        "foreign_tenant_or_other_client_data",
+        "text_confirmation_is_commit_authority",
+        "background_authority",
+        "real_provider_acceptance",
+        "real_model_acceptance_before_observation"
+      ],
+      "turnMetadata": [
+        {
+          "index": 0,
+          "sha256": "5cebcc6a1e0f344809b0595e97461ba909270d0473d99923e51db44b87bde942",
+          "utf8Bytes": 61
+        },
+        {
+          "index": 1,
+          "sha256": "4b7a120bd52b0f2dd86fd7f37cbf092e76e9039149970f03d1afb229b1109d99",
+          "utf8Bytes": 55
+        },
+        {
+          "index": 2,
+          "sha256": "acedef9f837271922555ff67312752820d2f3ce88ee010506e1cadb52eceafb7",
+          "utf8Bytes": 84
+        }
+      ],
+      "group": "owner_review"
+    },
+    {
+      "id": "followup-owner-compound",
+      "role": "owner",
+      "runtimeRole": "TENANT_OWNER",
+      "audience": "owner",
+      "userTurns": [
+        "Дай общий обзор бизнеса, проверь окна после отмен и предложи следующий шаг"
+      ],
+      "provenance": [
+        {
+          "sourceId": "compound",
+          "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+          "sourceCase": "compoundPrompts.compound",
+          "split": "authored-development-proof-not-holdout",
+          "turnSelectors": [
+            "compoundPrompts.compound"
+          ],
+          "sourceCaseSha256": "30f0844a4a2e323ad77338d19b5d70908d02ce6442301b70ae12cf3e4f3d6b9a",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "hashScope": "canonical JSON object {\"compound\": exact selected user text}; not the entire TypeScript source or prompt map"
+        }
+      ],
+      "coverage": [
+        "natural_ru",
+        "compound",
+        "business_summary",
+        "cancellation_windows",
+        "recommendation",
+        "owner"
+      ],
+      "fixtureRequirements": {
+        "fixtureKind": "OWNER_PUBLISHED_C7_AND_ONE_CURRENT_CANCELLATION_OPPORTUNITY",
+        "supportedBy": [
+          {
+            "sourceId": "compound",
+            "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts"
+          },
+          {
+            "sourceId": "sources",
+            "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts"
+          }
+        ],
+        "seedDelta": [
+          "Use owner-published C7 measurement revision and one saved cancellation Opportunity with current tenant/branch source witness and availability.",
+          "Current time may differ from finance report period: preserve both explicitly.",
+          "Reuse only prepare source recipes; do not run the entire restart/mutation proof as a corpus turn."
+        ],
+        "businessEffectsAllowed": false,
+        "harnessBinding": "REUSE_FIRST_DIAGNOSTIC_COMPOUND_FIXTURE_AFTER_CURRENT_SOURCE_PREFLIGHT"
+      },
+      "reviewChecks": [
+        "One coherent reply tied to one C9 run/revision with finance analysis and bounded occupancy recommendation when sources permit.",
+        "Evidence/refusal states remain honest; no invented revenue, probability, discount or customer list.",
+        "No generic mutation dispatch, outbound notification or background trigger."
+      ],
+      "unsupportedOrUnproven": [
+        "Existing scripted proof is fixture provenance, not model-language acceptance.",
+        "Current C9 diagnostic checkpoint/failures must remain visible; this case is not predeclared PASS."
+      ],
+      "forbiddenClaims": [
+        "fabricated_metrics",
+        "fabricated_probability_or_discount",
+        "new_customer_target_list",
+        "background_authority",
+        "source_failure_reported_as_success",
+        "real_model_acceptance_before_observation"
+      ],
+      "turnMetadata": [
+        {
+          "index": 0,
+          "sha256": "135692c78be6e450aba6d096dda148fea38b5491aca19c5bd228c53ba77df884",
+          "utf8Bytes": 136
+        }
+      ],
+      "group": "owner_review"
+    },
+    {
+      "id": "followup-admin-general-chat",
+      "role": "admin",
+      "runtimeRole": "ADMINISTRATOR",
+      "audience": "owner",
+      "userTurns": [
+        "Слушай, посмотри: привет, Майя. Объясни простыми словами.",
+        "проверь помоги мне разобраться. Не подмяй факты прогнозом.",
+        "Слушай, посмотри: спасибо, всё понятно. Объясни простыми словами."
+      ],
+      "provenance": [
+        {
+          "sourceId": "single",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+          "sourceCase": "utt-small_talk.greeting-015",
+          "familyId": "small_talk.greeting:1",
+          "split": "dev",
+          "sourceCaseSha256": "94ceacf55e1c638de6d5a96bc32559dbb41382871a2e23298d1f8679fa66b921",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "line": 10443,
+          "turnSelectors": [
+            "utterance"
+          ]
+        },
+        {
+          "sourceId": "single",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+          "sourceCase": "utt-small_talk.free_form-127",
+          "familyId": "small_talk.free_form:10",
+          "split": "dev",
+          "sourceCaseSha256": "e0f78899e4c4811ab7897255ede3da4f879093813c421e5fa8c752361a625129",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "line": 10819,
+          "turnSelectors": [
+            "utterance"
+          ]
+        },
+        {
+          "sourceId": "single",
+          "path": "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl",
+          "sourceCase": "utt-small_talk.thanks-015",
+          "familyId": "small_talk.thanks:1",
+          "split": "dev",
+          "sourceCaseSha256": "391dcf0209cd13974106f8d1a728cb13adba5269154f82d8cd90ee269f29630c",
+          "hashRecipe": "canonical-json-utf8-sort-keys-compact-v1",
+          "assistantRowsCopied": false,
+          "labelsCopiedToModelInput": false,
+          "line": 10575,
+          "turnSelectors": [
+            "utterance"
+          ]
+        }
+      ],
+      "assembly": "DERIVED_SEQUENCE_OF_EXISTING_DEV_USER_UTTERANCES; not an untouched historical multi-turn case.",
+      "coverage": [
+        "natural_ru",
+        "typos",
+        "general_chat",
+        "followup",
+        "admin"
+      ],
+      "fixtureRequirements": {
+        "fixtureKind": "AUTHENTICATED_ADMIN_WITH_NO_REQUIRED_BUSINESS_FACTS",
+        "supportedBy": [
+          {
+            "sourceId": "sources",
+            "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts"
+          },
+          {
+            "sourceId": "http",
+            "path": "maya-saas-backend/test/widgets-live/current-candidate-http.probe-spec.ts"
+          }
+        ],
+        "seedDelta": [
+          "Authenticated synthetic admin with ai.admin; no catalog action or business data required by greeting/thanks."
+        ],
+        "businessEffectsAllowed": false,
+        "harnessBinding": "NEW_CASE_BINDING_REQUIRED"
+      },
+      "reviewChecks": [
+        "Respond naturally to greeting and thanks without forcing a business workflow.",
+        "Clarify the topic for помоги мне разобраться without inventing a business issue.",
+        "Handle подмяй typo from context; do not turn this small case into a broad spelling claim."
+      ],
+      "unsupportedOrUnproven": [
+        "This derived conversation is known development input, not a holdout or broad Russian-language qualification."
+      ],
+      "forbiddenClaims": [
+        "invented_business_facts",
+        "unrequested_action_execution",
+        "unsupported_scope_or_authority",
+        "real_model_acceptance_before_observation"
+      ],
+      "turnMetadata": [
+        {
+          "index": 0,
+          "sha256": "ec9eaeab60698401fa4cc2f43114f5da3d57ba8b9f0e2539806b93b666d692b8",
+          "utf8Bytes": 103
+        },
+        {
+          "index": 1,
+          "sha256": "531cf7384ec02846b1cd2b7504abe28dd4f987ff72960a3c7661e8d067d80c41",
+          "utf8Bytes": 107
+        },
+        {
+          "index": 2,
+          "sha256": "0d2c74dbdf6cf4509e77af5c8f908afe22b3147ee3a3a79bbd6d9a8c889aa2f9",
+          "utf8Bytes": 118
+        }
+      ],
+      "group": "admin"
+    }
+  ],
+  "separateControls": [
+    {
+      "id": "control-booking-unknown-no-redispatch",
+      "kind": "SEPARATE_MECHANICAL_CONTROL_NOT_LANGUAGE_CASE",
+      "userTurns": [],
+      "paidCallsRequired": false,
+      "status": "NOT_RUN_BY_THIS_ARTIFACT",
+      "supportedBy": [
+        {
+          "sourceId": "unknown",
+          "path": "maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts"
+        }
+      ],
+      "fixture": "Existing L20 synthetic MOCK provider lost-response fault after persisted booking, canonical Gate 14 COMMIT and receipt owners.",
+      "reviewChecks": [
+        "One actual synthetic effect before response loss; canonical UNKNOWN.",
+        "Bounded repeated READ/replay cannot dispatch a second write or claim confirmed without immutable evidence.",
+        "UNKNOWN is not failure permission to retry the mutation."
+      ],
+      "executionAuthority": false,
+      "limit": "Any future mechanical run needs its own approved local proof execution slot. This artifact authorizes neither COMMIT nor fault injection."
+    },
+    {
+      "id": "control-restart-current-history-and-receipt",
+      "kind": "SEPARATE_MECHANICAL_CONTROL_NOT_LANGUAGE_CASE",
+      "userTurns": [],
+      "paidCallsRequired": false,
+      "status": "NOT_RUN_BY_THIS_ARTIFACT",
+      "supportedBy": [
+        {
+          "sourceId": "personal",
+          "path": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts"
+        },
+        {
+          "sourceId": "branch",
+          "path": "maya-saas-backend/test/widgets-live/branch-booking-selector.probe-spec.ts"
+        },
+        {
+          "sourceId": "compound",
+          "path": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts"
+        }
+      ],
+      "fixture": "Existing owned two-process prepare/resume proofs with real local PostgreSQL restart; persistent current principal, conversation/request and canonical source/receipt identities.",
+      "reviewChecks": [
+        "Read persisted known/UNKNOWN result after real process/database restart without redispatch.",
+        "Revalidate current authority and source; revocation cannot resurrect prior visibility.",
+        "For compound clarification, next planning input must come from actual persisted server semantic context, not a copied source assistant sentence."
+      ],
+      "executionAuthority": false,
+      "limit": "Restart is a separate control axis; ordinary multi-turn actual-history replay is not restart proof. No services/restarts are requested by this file."
+    }
+  ],
+  "limits": [
+    "Profile input only; no permit, credential admission or paid execution authority.",
+    "First six fixed cases only; no generated user text, source assistant answer or gold substitution.",
+    "Current fixture binding and source/authority preflight remain runner responsibilities; historical preparation metadata is not execution evidence.",
+    "UNKNOWN/restart remain separate mechanical controls and are not counted among these six dialogs."
+  ]
+}

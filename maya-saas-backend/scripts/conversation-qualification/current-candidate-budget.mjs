@@ -40,9 +40,24 @@ export const CORE_DIAGNOSTIC_LIMITS = Object.freeze({
 export const CORE_DIAGNOSTIC_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_DIAGNOSTIC_LIMITS))
   .digest('hex');
+export const CORE_FOLLOWUP_PROFILE = 'core-followup-20261009/1';
+export const CORE_FOLLOWUP_LIMITS = Object.freeze({
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 6,
+  turns: 13,
+  attempts: 24,
+  inputTokens: 2_457_600,
+  outputTokens: 49_152,
+  spendNanoUsd: 4_000_000_000,
+  durationMs: 1_200_000,
+});
+export const CORE_FOLLOWUP_LIMITS_SHA256 = createHash('sha256')
+  .update(JSON.stringify(CORE_FOLLOWUP_LIMITS))
+  .digest('hex');
 function profileLimits(profile) {
   if (profile === undefined) return CANDIDATE_LIMITS;
   if (profile === CORE_DIAGNOSTIC_PROFILE) return CORE_DIAGNOSTIC_LIMITS;
+  if (profile === CORE_FOLLOWUP_PROFILE) return CORE_FOLLOWUP_LIMITS;
   throw new Error('candidate_profile_refused');
 }
 const endpoint = 'https://api.deepseek.com/chat/completions';
@@ -167,7 +182,7 @@ export class CandidateBudgetGate {
       throw new Error('candidate_binding_required');
     if (mode === 'ADMITTED_MODEL_ONLY') {
       if (
-        profile !== CORE_DIAGNOSTIC_PROFILE ||
+        ![CORE_DIAGNOSTIC_PROFILE, CORE_FOLLOWUP_PROFILE].includes(profile) ||
         typeof assertAdmission !== 'function' ||
         now !== undefined ||
         wait !== undefined
@@ -177,7 +192,9 @@ export class CandidateBudgetGate {
         candidateCommit,
         manifestSha256,
         profile,
-        limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256,
+        limitsSha256: createHash('sha256')
+          .update(JSON.stringify(this.#limits))
+          .digest('hex'),
       });
       this.#admission = assertAdmission;
       this.#checkAdmission();
@@ -203,7 +220,12 @@ export class CandidateBudgetGate {
         candidateCommit,
         ...(profile === undefined
           ? {}
-          : { profile, limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256 }),
+          : {
+              profile,
+              limitsSha256: createHash('sha256')
+                .update(JSON.stringify(this.#limits))
+                .digest('hex'),
+            }),
         limits: this.#limits,
         startedAt: this.#started,
         paidAuthorized: mode === 'ADMITTED_MODEL_ONLY',

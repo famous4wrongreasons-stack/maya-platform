@@ -20,10 +20,15 @@ export const CORE_DIAGNOSTIC_PROFILE: 'core-diagnostic-20261008/1';
 export const CORE_DIAGNOSTIC_LIMITS: typeof CANDIDATE_LIMITS &
   Readonly<{ concurrency: 1 }>;
 export const CORE_DIAGNOSTIC_LIMITS_SHA256: string;
+export const CORE_FOLLOWUP_PROFILE: 'core-followup-20261009/1';
+export const CORE_FOLLOWUP_LIMITS: typeof CORE_DIAGNOSTIC_LIMITS;
+export const CORE_FOLLOWUP_LIMITS_SHA256: string;
+export type CoreConversationProfileId =
+  typeof CORE_DIAGNOSTIC_PROFILE | typeof CORE_FOLLOWUP_PROFILE;
 export type CandidateAdmissionBinding = Readonly<{
   candidateCommit: string;
   manifestSha256: string;
-  profile: typeof CORE_DIAGNOSTIC_PROFILE;
+  profile: CoreConversationProfileId;
   limitsSha256: string;
 }>;
 type CandidateBudgetOptions = {
@@ -34,14 +39,14 @@ type CandidateBudgetOptions = {
 } & (
   | {
       mode: 'OFFLINE_SYNTHETIC_ONLY';
-      profile?: typeof CORE_DIAGNOSTIC_PROFILE;
+      profile?: CoreConversationProfileId;
       assertAdmission?: never;
       now?: () => number;
       wait?: (ms: number, signal?: AbortSignal) => Promise<void>;
     }
   | {
       mode: 'ADMITTED_MODEL_ONLY';
-      profile: typeof CORE_DIAGNOSTIC_PROFILE;
+      profile: CoreConversationProfileId;
       /** Server-only synchronous permit check. No returned permit or secret. */
       assertAdmission: (binding: CandidateAdmissionBinding) => undefined;
       now?: never;
@@ -68,5 +73,5 @@ export class CandidateBudgetGate {
 export function candidateReservation(
   url: Parameters<typeof fetch>[0],
   init: RequestInit,
-  profile?: typeof CORE_DIAGNOSTIC_PROFILE,
+  profile?: CoreConversationProfileId,
 ): Readonly<{ bytes: number; input: number; output: number; nanoUsd: number }>;

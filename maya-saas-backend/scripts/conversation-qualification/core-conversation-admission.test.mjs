@@ -13,28 +13,28 @@ import {
 } from './core-conversation-admission.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
-  CORE_DIAGNOSTIC_LIMITS,
-  CORE_DIAGNOSTIC_LIMITS_SHA256,
+  CORE_FOLLOWUP_PROFILE,
 } from './current-candidate-budget.mjs';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
 
-const dataset = JSON.parse(
-  fs.readFileSync(
-    new URL(
-      '../../datasets/conversation-intelligence/core-diagnostic-20261008.json',
-      import.meta.url,
-    ),
-    'utf8',
-  ),
-);
-const DATASET_SHA =
-  'b793c5489dcd8838e4edc6bca6c00c53530b57892c29520876845608786e2dc6';
 const at = Date.parse('2000-01-01T00:00:00.000Z');
 const stamp = (ms) => new Date(ms).toISOString();
 const canonical = (x) => JSON.stringify(x, null, 2) + '\n';
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const denied = (fn) =>
   assert.throws(fn, (error) => error.message === 'core_admission_refused');
-function fixture(t, mode = 'ADMITTED_MODEL_HTTP') {
+function fixture(
+  t,
+  mode = 'ADMITTED_MODEL_HTTP',
+  profileId = CORE_DIAGNOSTIC_PROFILE,
+) {
+  const profile = coreConversationProfile(profileId);
+  const dataset = JSON.parse(
+    fs.readFileSync(
+      new URL('../../../' + profile.datasetPath, import.meta.url),
+      'utf8',
+    ),
+  );
   t.mock.method(Date, 'now', () => at);
   const dir = fs.realpathSync(
     fs.mkdtempSync(path.join(os.tmpdir(), 'maya-core-admission-unit-')),
@@ -68,15 +68,15 @@ function fixture(t, mode = 'ADMITTED_MODEL_HTTP') {
   const raw = {
     contract: 'maya.core-conversation-run/1',
     mode,
-    profile: CORE_DIAGNOSTIC_PROFILE,
+    profile: profile.id,
     candidateCommit: 'a'.repeat(40),
     sourceHashes: { 'synthetic/source.ts': 'b'.repeat(64) },
-    datasetSha256: DATASET_SHA,
-    dialogs: 3,
-    userTurns: 5,
+    datasetSha256: profile.datasetSha256,
+    dialogs: profile.dialogs,
+    userTurns: profile.userTurns,
     cases: structuredClone(dataset.cases),
-    limits: CORE_DIAGNOSTIC_LIMITS,
-    limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256,
+    limits: profile.limits,
+    limitsSha256: profile.limitsSha256,
     runId: '11111111-1111-4111-8111-111111111111',
     createdAt: stamp(at - 1000),
     paidAuthorized: false,
@@ -158,6 +158,83 @@ test('dry manifest has no admission authority and needs no permit', (t) => {
   denied(() => claimCorePermit(f.options));
   denied(() => assertCoreAdmission(f.options));
   assert.equal(fs.existsSync(f.options.claimPath), false);
+});
+test('B exact frozen manifest is inert, and A/B scope, cases, budget or profile substitutions refuse', (t) => {
+  const f = fixture(t, 'DRY_HTTP', CORE_FOLLOWUP_PROFILE);
+  assert.equal(f.manifest.profile, CORE_FOLLOWUP_PROFILE);
+  assert.equal(f.manifest.dialogs, 6);
+  assert.equal(f.manifest.userTurns, 13);
+  assert.equal(f.manifest.paidAuthorized, false);
+  assert.equal(f.manifest.upstreamAllowed, false);
+  assert.equal(f.manifest.credentialAdmission, false);
+  denied(() => claimCorePermit(f.options));
+  assert.equal(fs.existsSync(f.options.claimPath), false);
+  const a = coreConversationProfile();
+  for (const patch of [
+    { profile: CORE_DIAGNOSTIC_PROFILE },
+    { profile: 'core-followup-20261009/2' },
+    { profile: null },
+    { dialogs: 3 },
+    { userTurns: 5 },
+    { datasetSha256: a.datasetSha256 },
+    { cases: f.raw.cases.slice(0, 5) },
+    { cases: [...f.raw.cases].reverse() },
+    { limits: a.limits },
+    { limits: { ...f.raw.limits, spendNanoUsd: 4_000_000_001 } },
+    { limitsSha256: a.limitsSha256 },
+  ]) {
+    const sha256 = f.write(f.manifestPath, { ...f.raw, ...patch });
+    denied(() => readCoreManifest(f.manifestPath, sha256));
+  }
+});
+test('B synthetic expired-in-2000 permit uses its twenty-minute ceiling; A remains ten minutes', (t) => {
+  const f = fixture(t, 'ADMITTED_MODEL_HTTP', CORE_FOLLOWUP_PROFILE);
+  f.permit.expiresAt = stamp(at + 1_200_000);
+  f.options.sha256 = f.write(f.options.path, f.permit);
+  const validate = claimCorePermit(f.options);
+  assert.equal(validate.expiresAt, at + 1_200_000);
+  assert.equal(validate(f.binding), undefined);
+  denied(() => claimCorePermit(f.options)); // Same synthetic run cannot restart.
+  t.mock.method(Date, 'now', () => at + 1_200_000);
+  denied(() => validate(f.binding));
+  for (const [profile, duration] of [
+    [CORE_DIAGNOSTIC_PROFILE, 600_001],
+    [CORE_DIAGNOSTIC_PROFILE, 1_200_000],
+    [CORE_FOLLOWUP_PROFILE, 1_200_001],
+  ]) {
+    const g = fixture(t, 'ADMITTED_MODEL_HTTP', profile);
+    g.permit.expiresAt = stamp(at + duration);
+    g.options.sha256 = g.write(g.options.path, g.permit);
+    denied(() => claimCorePermit(g.options));
+    assert.equal(fs.existsSync(g.options.claimPath), false);
+  }
+});
+test('B rejects an A permit and observes revocation before another dispatch', (t) => {
+  const f = fixture(t, 'ADMITTED_MODEL_HTTP', CORE_FOLLOWUP_PROFILE);
+  const a = coreConversationProfile();
+  f.options.sha256 = f.write(f.options.path, {
+    ...f.permit,
+    profile: a.id,
+    limitsSha256: a.limitsSha256,
+  });
+  denied(() => claimCorePermit(f.options));
+  assert.equal(fs.existsSync(f.options.claimPath), false);
+  f.options.sha256 = f.write(f.options.path, f.permit);
+  const validate = claimCorePermit(f.options);
+  f.write(f.options.path, { ...f.permit, revoked: true });
+  denied(() => validate(f.binding));
+});
+test('B synthetic admission rejects each cross-profile callback binding independently', (t) => {
+  for (const patch of [
+    { profile: CORE_DIAGNOSTIC_PROFILE },
+    { limitsSha256: coreConversationProfile().limitsSha256 },
+  ]) {
+    const f = fixture(t, 'ADMITTED_MODEL_HTTP', CORE_FOLLOWUP_PROFILE);
+    const validate = claimCorePermit(f.options);
+    assert.equal(validate(f.binding), undefined);
+    denied(() => validate({ ...f.binding, ...patch }));
+    denied(() => validate(f.binding)); // A refusal cannot be reset in this run.
+  }
 });
 test('broker exclusively claims once; separate runner observes the same claim without another ledger', (t) => {
   const f = fixture(t),

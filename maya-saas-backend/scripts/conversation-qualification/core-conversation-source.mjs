@@ -1,4 +1,4 @@
-// Existing candidate/corpus ownership, narrowed to the frozen core diagnostic.
+// Existing candidate/corpus ownership, narrowed to two frozen core batches.
 // A manifest binds source bytes; it never authorizes a model request.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,11 +6,8 @@ import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import {
-  CORE_DIAGNOSTIC_PROFILE,
-  CORE_DIAGNOSTIC_LIMITS,
-  CORE_DIAGNOSTIC_LIMITS_SHA256,
-} from './current-candidate-budget.mjs';
+import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
 export const coreBackend = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../..',
@@ -18,8 +15,6 @@ export const coreBackend = path.resolve(
 export const coreRepo = path.dirname(coreBackend);
 export const coreHash = (bytes) =>
   createHash('sha256').update(bytes).digest('hex');
-const datasetPath =
-  'maya-saas-backend/datasets/conversation-intelligence/core-diagnostic-20261008.json';
 const scopes = [
   'maya-saas-backend/src',
   'maya-saas-backend/prisma',
@@ -72,6 +67,22 @@ export function assertCoreInventory(
   assert.deepEqual(actual, [...files].sort(), 'core_source_inventory_changed');
 }
 export function assertCoreSources(manifest) {
+  assert.equal(typeof manifest.profile, 'string', 'core_profile_required');
+  const profile = coreConversationProfile(manifest.profile);
+  assert.equal(
+    manifest.datasetSha256,
+    profile.datasetSha256,
+    'core_dataset_pin',
+  );
+  assert.equal(manifest.dialogs, profile.dialogs, 'core_dialog_scope');
+  assert.equal(manifest.userTurns, profile.userTurns, 'core_turn_scope');
+  assert.equal(manifest.limitsSha256, profile.limitsSha256, 'core_limits_pin');
+  assert.deepEqual(manifest.limits, profile.limits, 'core_limits_changed');
+  assert.equal(
+    coreHash(JSON.stringify(manifest.cases)),
+    profile.casesSha256,
+    'core_cases_pin',
+  );
   assertCoreInventory(
     manifest.candidateCommit,
     Object.keys(manifest.sourceHashes),
@@ -99,16 +110,23 @@ export function assertCoreSources(manifest) {
   }
   assert.equal(
     manifest.datasetSha256,
-    manifest.sourceHashes[datasetPath],
+    manifest.sourceHashes[profile.datasetPath],
     'core_dataset_binding',
   );
   assert.deepEqual(
     manifest.cases,
-    JSON.parse(fs.readFileSync(path.join(coreRepo, datasetPath), 'utf8')).cases,
+    JSON.parse(
+      fs.readFileSync(path.join(coreRepo, profile.datasetPath), 'utf8'),
+    ).cases,
     'core_cases_changed',
   );
 }
-export function captureCoreManifest(mode, admissionContext = null) {
+export function captureCoreManifest(
+  mode,
+  admissionContext = null,
+  profileId = CORE_DIAGNOSTIC_PROFILE,
+) {
+  const profile = coreConversationProfile(profileId);
   assert.ok(
     ['DRY_HTTP', 'ADMITTED_MODEL_HTTP', 'ADMITTED_LOCAL_MODEL_HTTP'].includes(
       mode,
@@ -138,20 +156,20 @@ export function captureCoreManifest(mode, admissionContext = null) {
     ]),
   );
   const dataset = JSON.parse(
-    fs.readFileSync(path.join(coreRepo, datasetPath), 'utf8'),
+    fs.readFileSync(path.join(coreRepo, profile.datasetPath), 'utf8'),
   );
   const manifest = {
     contract: 'maya.core-conversation-run/1',
     mode,
-    profile: CORE_DIAGNOSTIC_PROFILE,
+    profile: profile.id,
     candidateCommit,
     sourceHashes,
-    datasetSha256: sourceHashes[datasetPath],
-    dialogs: 3,
-    userTurns: 5,
+    datasetSha256: sourceHashes[profile.datasetPath],
+    dialogs: profile.dialogs,
+    userTurns: profile.userTurns,
     cases: dataset.cases,
-    limits: CORE_DIAGNOSTIC_LIMITS,
-    limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256,
+    limits: profile.limits,
+    limitsSha256: profile.limitsSha256,
     runId: randomUUID(),
     createdAt: new Date().toISOString(),
     paidAuthorized: false,

@@ -42,15 +42,35 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
+import { CORE_FOLLOWUP_PROFILE } from './current-candidate-budget.mjs';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-export async function runOwnedStage(spec, env, output, control, evidence) {
+/** Existing callers keep the 12-minute bound. Only the closed B profile permits
+ * its 20-minute diagnostic plus a finite one-minute harness allowance. The
+ * process-group termination grace remains unchanged and independent. */
+export function assertOwnedStageTimeout(timeoutMs, profileId) {
+  const profile = coreConversationProfile(profileId);
+  const maximum =
+    profile.id === CORE_FOLLOWUP_PROFILE
+      ? profile.limits.durationMs + 60000
+      : 720000;
+  assert.ok(
+    Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= maximum,
+    'owned_stage_timeout_invalid',
+  );
+}
+
+export async function runOwnedStage(
+  spec,
+  env,
+  output,
+  control,
+  evidence,
+  profileId,
+) {
   if (control.cancelled) throw new Error('owned_stage_cancelled_before_spawn');
   assert.ok(process.platform !== 'win32');
-  assert.ok(
-    Number.isSafeInteger(spec.timeoutMs) &&
-      spec.timeoutMs > 0 &&
-      spec.timeoutMs <= 720000,
-  );
+  assertOwnedStageTimeout(spec.timeoutMs, profileId);
   assert.equal(control.terminateActive, null);
   const fd = fs.openSync(path.join(output, spec.name + '.log'), 'wx', 0o600);
   let child = null,

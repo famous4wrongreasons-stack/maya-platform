@@ -7,9 +7,9 @@ import { parseArgs } from 'node:util';
 import {
   CandidateBudgetGate,
   CORE_DIAGNOSTIC_PROFILE,
-  CORE_DIAGNOSTIC_LIMITS,
   candidateReservation,
 } from './current-candidate-budget.mjs';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   readCoreManifest,
   claimCorePermit,
@@ -58,6 +58,11 @@ const localStdin = values.mode === 'admitted-local';
 const pinned = readCoreManifest(values.manifest, values['manifest-sha256'], {
   localStdin,
 });
+const profile = coreConversationProfile(pinned.profile);
+assert.ok(
+  !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
+  'core_broker_recorded_replay_profile',
+);
 const live = values.mode !== 'dry';
 assert.equal(
   pinned.mode,
@@ -102,12 +107,14 @@ if (live) {
   );
 const expiresAt = live
   ? admission.expiresAt
-  : Date.now() + CORE_DIAGNOSTIC_LIMITS.durationMs;
+  : Date.now() + profile.limits.durationMs;
 const report = {
   contract: 'maya.core-conversation-broker/1',
   mode: pinned.mode,
   runId: pinned.runId,
   candidateCommit: pinned.candidateCommit,
+  profile: profile.id,
+  limitsSha256: profile.limitsSha256,
   manifestSha256: pinned.manifestSha256,
   paidAuthorized: live,
   credentialsLoaded: false,
@@ -230,7 +237,7 @@ function readCredential() {
 function canned() {
   return new Response(
     JSON.stringify({
-      model: CORE_DIAGNOSTIC_LIMITS.model,
+      model: profile.limits.model,
       choices: [
         {
           finish_reason: 'stop',
@@ -270,7 +277,7 @@ function canned() {
 const binding = {
   candidateCommit: pinned.candidateCommit,
   manifestSha256: pinned.manifestSha256,
-  profile: CORE_DIAGNOSTIC_PROFILE,
+  profile: profile.id,
   limitsSha256: pinned.limitsSha256,
 };
 if (localStdin) {
@@ -344,13 +351,13 @@ broker = serveCandidateBroker({
   report,
   save,
   expiresAt,
-  limits: CORE_DIAGNOSTIC_LIMITS,
+  limits: profile.limits,
   bind: () => {
     gate = new CandidateBudgetGate({
       ledgerPath: path.join(values.output, 'broker-ledger.jsonl'),
       manifestSha256: pinned.manifestSha256,
       candidateCommit: pinned.candidateCommit,
-      profile: CORE_DIAGNOSTIC_PROFILE,
+      profile: profile.id,
       mode: live ? 'ADMITTED_MODEL_ONLY' : 'OFFLINE_SYNTHETIC_ONLY',
       ...(live ? { assertAdmission: admission } : {}),
       transport,
@@ -364,8 +371,7 @@ broker = serveCandidateBroker({
       },
     };
   },
-  reserve: (url, init) =>
-    candidateReservation(url, init, CORE_DIAGNOSTIC_PROFILE),
+  reserve: (url, init) => candidateReservation(url, init, profile.id),
   allowFinish: true,
   ...(live
     ? {

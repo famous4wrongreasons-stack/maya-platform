@@ -12,8 +12,11 @@ import {
 } from './core-conversation-source.mjs';
 import { readCoreManifest } from './core-conversation-admission.mjs';
 import { assertCoreSocket } from './core-conversation-socket.mjs';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
+import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
 
-export function prepareLocalCore(output) {
+export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
+  const profile = coreConversationProfile(profileId);
   assert.ok(
     process.platform === 'darwin' && process.getuid() > 0,
     'core_local_mac_owner_required',
@@ -53,7 +56,11 @@ export function prepareLocalCore(output) {
       reader: uid,
     },
   };
-  const manifest = captureCoreManifest('ADMITTED_LOCAL_MODEL_HTTP', context);
+  const manifest = captureCoreManifest(
+    'ADMITTED_LOCAL_MODEL_HTTP',
+    context,
+    profile.id,
+  );
   // Exclusive root creation; failures leave this nonsecret, non-reusable root intact.
   fs.mkdirSync(output, { mode: 0o700 });
   fs.mkdirSync(path.join(output, 'channel'), { mode: 0o700 });
@@ -85,6 +92,10 @@ export function prepareLocalCore(output) {
     status: 'PREPARED_NOT_AUTHORIZED',
     qualification: 'NO_CREDENTIAL_OR_MODEL_CALL',
     mode: manifest.mode,
+    profile: profile.id,
+    limitsSha256: profile.limitsSha256,
+    dialogs: profile.dialogs,
+    userTurns: profile.userTurns,
     candidateCommit: manifest.candidateCommit,
     manifestPath,
     manifestSha256,
@@ -110,6 +121,8 @@ export function prepareLocalCore(output) {
     runnerArgv: [
       'scripts/conversation-qualification/core-conversation-runner.mjs',
       '--run',
+      '--profile',
+      profile.id,
       ...common,
       '--output',
       path.join(output, 'runner'),
@@ -132,9 +145,15 @@ if (
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href
 ) {
   const { values } = parseArgs({
-    options: { prepare: { type: 'boolean' }, output: { type: 'string' } },
+    options: {
+      prepare: { type: 'boolean' },
+      output: { type: 'string' },
+      profile: { type: 'string' },
+    },
     strict: true,
   });
   assert.equal(values.prepare, true, 'core_local_preparation_only');
-  console.log(JSON.stringify(prepareLocalCore(values.output), null, 2));
+  console.log(
+    JSON.stringify(prepareLocalCore(values.output, values.profile), null, 2),
+  );
 }

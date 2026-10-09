@@ -39,16 +39,17 @@ const nativeRequire = createRequire(__filename);
 const { replayPilot, sha256 } = nativeRequire(
   path.resolve('scripts/conversation-qualification/replay.mjs'),
 ) as typeof import('../../scripts/conversation-qualification/replay.mjs');
-const {
-  CandidateBudgetGate,
-  CORE_DIAGNOSTIC_PROFILE,
-  CORE_DIAGNOSTIC_LIMITS,
-  CORE_DIAGNOSTIC_LIMITS_SHA256,
-} = nativeRequire(
+const { CandidateBudgetGate, CORE_DIAGNOSTIC_PROFILE, CORE_FOLLOWUP_PROFILE } =
+  nativeRequire(
+    path.resolve(
+      'scripts/conversation-qualification/current-candidate-budget.mjs',
+    ),
+  ) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
+const { coreConversationProfile } = nativeRequire(
   path.resolve(
-    'scripts/conversation-qualification/current-candidate-budget.mjs',
+    'scripts/conversation-qualification/core-conversation-profile.mjs',
   ),
-) as typeof import('../../scripts/conversation-qualification/current-candidate-budget.mjs');
+) as typeof import('../../scripts/conversation-qualification/core-conversation-profile.mjs');
 const { readCoreManifest, assertCoreAdmission } = nativeRequire(
   path.resolve(
     'scripts/conversation-qualification/core-conversation-admission.mjs',
@@ -150,11 +151,27 @@ type Wire = Record<string, unknown> & {
 };
 const businessPattern =
   /^(Appointment|Client|Opportunity|AgentTask|DomainEvent|Action|Inbox|Notification|Delivery|Outbox|Marketing|Team|Operational|ExpenseReminder|Inventory)/;
+function assertFiniteFollowupAvailability(
+  source: CandidateSource,
+  params: Parameters<CRMAdapter['getAvailableSlots']>[0],
+) {
+  const tomorrow = String(source.clockBinding.tomorrow);
+  if (
+    params.tenantId !== source.tenant.id ||
+    params.timezone !== 'Europe/Moscow' ||
+    ![tomorrow, source.startsAt].includes(params.date) ||
+    params.staffId !== '71' ||
+    JSON.stringify(params.serviceIds) !== JSON.stringify(['81']) ||
+    (params.branchId !== undefined && params.branchId !== source.branchId)
+  )
+    throw new Error('core_followup_finite_availability_source_unavailable');
+}
 
 describe('Core conversation [actual HTTP, bounded broker, development diagnostic only]', () => {
   let db: FixtureContext, http: HttpHarness;
   let gate: InstanceType<typeof CandidateBudgetGate> | undefined;
   let manifest: DiagnosticManifest;
+  let profile: ReturnType<typeof coreConversationProfile>;
   let active: CandidateSource | undefined;
   let turn = 0,
     modelCallsForTurn = 0,
@@ -207,6 +224,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       localStdin: mode === 'live-local',
     });
     manifest = verifiedManifest as unknown as DiagnosticManifest;
+    profile = coreConversationProfile(verifiedManifest.profile);
+    if (recordedReplay && profile.id !== CORE_DIAGNOSTIC_PROFILE)
+      throw new Error('core_recorded_replay_profile_refused');
     expect(manifest).toMatchObject({
       contract: 'maya.core-conversation-run/1',
       mode:
@@ -215,17 +235,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           : mode === 'live-local'
             ? 'ADMITTED_LOCAL_MODEL_HTTP'
             : 'ADMITTED_MODEL_HTTP',
-      profile: CORE_DIAGNOSTIC_PROFILE,
+      profile: profile.id,
       candidateCommit: sourceHead,
-      dialogs: 3,
-      userTurns: 5,
+      dialogs: profile.dialogs,
+      userTurns: profile.userTurns,
       paidAuthorized: false,
-      limitsSha256: CORE_DIAGNOSTIC_LIMITS_SHA256,
+      limitsSha256: profile.limitsSha256,
     });
-    expect(manifest.limits).toEqual(CORE_DIAGNOSTIC_LIMITS);
-    const datasetPath = path.resolve(
-      'datasets/conversation-intelligence/core-diagnostic-20261008.json',
-    );
+    expect(manifest.limits).toEqual(profile.limits);
+    const datasetPath = path.resolve('..', profile.datasetPath);
     const dataset = JSON.parse(readFileSync(datasetPath, 'utf8')) as {
       cases: DiagnosticCase[];
     };
@@ -278,7 +296,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       ledgerPath: path.join(output, 'runner-budget-ledger.jsonl'),
       manifestSha256: manifestSha256!,
       candidateCommit: sourceHead!,
-      profile: CORE_DIAGNOSTIC_PROFILE,
+      profile: profile.id,
       ...budgetMode,
       transport: async (_url, init) => {
         if (!active || typeof init?.body !== 'string')
@@ -319,12 +337,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     const config = http.app.get(ConfigService);
     for (const [key, value] of Object.entries({
       AI_CORE_PROVIDER: 'deepseek',
-      DEEPSEEK_AI_CORE_MODEL: CORE_DIAGNOSTIC_LIMITS.model,
+      DEEPSEEK_AI_CORE_MODEL: profile.limits.model,
       DEEPSEEK_API_KEY: 'CORE_BROKER_PLACEHOLDER_NOT_A_CREDENTIAL',
       DEEPSEEK_BASE_URL: 'https://api.deepseek.com',
-      AI_CORE_MAX_OUTPUT_TOKENS: String(
-        CORE_DIAGNOSTIC_LIMITS.outputPerAttempt,
-      ),
+      AI_CORE_MAX_OUTPUT_TOKENS: String(profile.limits.outputPerAttempt),
     }))
       config.set(key, value);
     const factory = http.app.get(CrmAdapterFactory),
@@ -380,6 +396,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             date: string;
           }) => {
             read('schedule', tenantId);
+            if (profile.id === CORE_FOLLOWUP_PROFILE) {
+              expect(staffId).toBe('71');
+              expect(date.slice(0, 10)).toBe(source.clockBinding.tomorrow);
+            }
             return Promise.resolve({
               staff_id: staffId,
               date,
@@ -392,6 +412,8 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             params: Parameters<CRMAdapter['getAvailableSlots']>[0],
           ) => {
             read('availability', params.tenantId);
+            if (profile.id === CORE_FOLLOWUP_PROFILE)
+              assertFiniteFollowupAvailability(source, params);
             return Promise.resolve([
               {
                 start: source.startsAt,
@@ -657,8 +679,9 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       sourceHead,
       sourceDigest,
       manifestSha256,
-      dialogs: 3,
-      plannedUserTurns: 5,
+      profile: profile?.id,
+      dialogs: profile?.dialogs,
+      plannedUserTurns: profile?.userTurns,
       actualHttpTurns: responses.length,
       modelCalls,
       serializerCalls,
@@ -782,12 +805,41 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             : item.group === 'authority'
               ? 'admin'
               : item.group,
-        variant: 'ordinary',
+        variant:
+          item.id === 'followup-owner-topic-switch'
+            ? 'finance_schedule_only'
+            : 'ordinary',
         userTurns: [...item.userTurns],
         fixture: { clock: 'ACTUAL_EXECUTION_CLOCK_BOUND_ONCE' },
       };
       const source = await bindCandidateSource(db, http, fx, binding, sources);
       caseSources.set(item.id, source);
+      // Finite B fixtures bind the frozen utterances to real current owners.
+      // Only owned synthetic setup changes here, before the no-effects snapshot.
+      const carryOver = item.id === 'followup-client-carry-over';
+      if (carryOver) {
+        for (const [from, to] of [
+          ['Артём', 'Елена'],
+          ['Максим', 'Никита'],
+        ])
+          expect(
+            await db.prisma.internalProvider.updateMany({
+              where: { tenantId: source.tenant.id, displayName: from },
+              data: { displayName: to },
+            }),
+          ).toEqual({ count: 1 });
+        expect(
+          await db.prisma.internalService.updateMany({
+            where: { tenantId: source.tenant.id, name: 'Мужская стрижка' },
+            data: { name: 'комплекс стрижка и борода' },
+          }),
+        ).toEqual({ count: 1 });
+      }
+      if (item.id === 'followup-owner-topic-switch')
+        await db.prisma.branch.update({
+          where: { id: source.branchId },
+          data: { name: 'основной филиал' },
+        });
       const member = await db.prisma.membership.findUniqueOrThrow({
         where: {
           userId_tenantId: {
@@ -811,10 +863,16 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
           data: { branchId: source.branchId },
         });
         const staff = await db.prisma.internalProvider.findFirstOrThrow({
-          where: { tenantId: source.tenant.id, displayName: 'Артём' },
+          where: {
+            tenantId: source.tenant.id,
+            displayName: carryOver ? 'Елена' : 'Артём',
+          },
         });
         const service = await db.prisma.internalService.findFirstOrThrow({
-          where: { tenantId: source.tenant.id, name: 'Мужская стрижка' },
+          where: {
+            tenantId: source.tenant.id,
+            name: carryOver ? 'комплекс стрижка и борода' : 'Мужская стрижка',
+          },
         });
         const client = await db.prisma.client.findFirstOrThrow({
           where: { tenantId: source.tenant.id, userId: source.user.id },
@@ -868,29 +926,193 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             ) ?? false,
           clock: source.clockBinding,
           verifiedClientLink: true,
+          staffName: staff.displayName,
+          serviceName: service.name,
         });
         expect(response.status).toBe(201);
         expect(preflights.at(-1)?.exact17Available).toBe(true);
+        if (profile.id === CORE_FOLLOWUP_PROFILE) {
+          const other = await db.prisma.internalProvider.findFirstOrThrow({
+            where: {
+              tenantId: source.tenant.id,
+              displayName: carryOver ? 'Никита' : 'Максим',
+            },
+          });
+          const today = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Europe/Moscow',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(new Date(String(source.clockBinding.runtimeClock)));
+          const tomorrow = String(source.clockBinding.tomorrow);
+          const checks = carryOver
+            ? [
+                { staff, date: today, time: undefined },
+                { staff: other, date: tomorrow, time: '17:00' },
+              ]
+            : [{ staff: other, date: tomorrow, time: '19:30' }];
+          for (const check of checks) {
+            const checked = await http.executeTool(
+              source.token,
+              'booking.availability.read',
+              {
+                surface: 'web',
+                arguments: {
+                  date: check.date,
+                  ...(check.time ? { time: check.time } : {}),
+                  staff_id: check.staff.id,
+                  service_ids: [service.id],
+                  branch_id: source.branchId,
+                },
+                idempotencyKey: randomUUID(),
+              },
+              randomUUID(),
+            );
+            const checkedBody = checked.body as typeof body;
+            expect(checked.status).toBe(201);
+            const slots = checkedBody.result?.slots;
+            expect(Array.isArray(slots)).toBe(true);
+            const exactAvailable = check.time
+              ? slots!.some(
+                  (slot) =>
+                    Date.parse(slot.start) ===
+                      Date.parse(`${check.date}T${check.time}:00+03:00`) &&
+                    slot.staff_id === check.staff.id &&
+                    slot.branch_id === source.branchId,
+                )
+              : null;
+            if (check.time) expect(exactAvailable).toBe(true);
+            preflights.push({
+              caseId: item.id,
+              role: member.role,
+              httpStatus: checked.status,
+              staffName: check.staff.displayName,
+              serviceName: service.name,
+              date: check.date,
+              time: check.time ?? null,
+              exactAvailable,
+              observedSlotCount: slots!.length,
+              clock: source.clockBinding,
+              qualification: check.time
+                ? 'CANONICAL_EXACT_AVAILABILITY_READ'
+                : 'CANONICAL_TODAY_READ_EMPTY_IS_VALID_NO_FABRICATED_FUTURE_SLOT',
+            });
+          }
+        }
       } else if (item.role === 'owner') {
+        if (profile.id === CORE_FOLLOWUP_PROFILE) {
+          const query = {
+            tenantId: source.tenant.id,
+            timezone: 'Europe/Moscow',
+            date: String(source.clockBinding.tomorrow),
+            staffId: '71',
+            serviceIds: ['81'],
+            branchId: source.branchId,
+          };
+          expect(() =>
+            assertFiniteFollowupAvailability(source, query),
+          ).not.toThrow();
+          for (const bad of [
+            { date: '2000-01-01' },
+            { date: '' },
+            { staffId: 'unknown' },
+            { staffId: undefined },
+            { serviceIds: ['unknown'] },
+            { serviceIds: undefined },
+            { branchId: 'foreign' },
+            { tenantId: 'foreign' },
+            { timezone: 'UTC' },
+          ])
+            expect(() =>
+              assertFiniteFollowupAvailability(source, { ...query, ...bad }),
+            ).toThrow('core_followup_finite_availability_source_unavailable');
+          preflights.push({
+            caseId: item.id,
+            finiteExternalAvailabilityFence: true,
+            unsupportedQueriesRejected: 9,
+          });
+        }
         await publishFinance(source);
+        const scheduleOnly = item.id === 'followup-owner-topic-switch';
         expect(
           await db.prisma.opportunity.count({
             where: { tenantId: source.tenant.id },
           }),
-        ).toBe(1);
+        ).toBe(scheduleOnly ? 0 : 1);
+        if (scheduleOnly) {
+          const schedule = await http.executeTool(
+            source.token,
+            'staff.schedule.read',
+            {
+              surface: 'web',
+              arguments: { staff_id: '71', date: source.clockBinding.tomorrow },
+              idempotencyKey: randomUUID(),
+            },
+            randomUUID(),
+          );
+          expect(schedule.status).toBe(201);
+          expect(schedule.body).toMatchObject({
+            result: {
+              verified: true,
+              source: 'crm',
+              staff: [
+                {
+                  id: '71',
+                  name: 'Артём',
+                  is_working: true,
+                  slots: [{ from: '10:00', to: '20:00' }],
+                },
+              ],
+            },
+          });
+          preflights.push({
+            caseId: item.id,
+            role: member.role,
+            httpStatus: schedule.status,
+            branchName: 'основной филиал',
+            staffName: 'Артём',
+            date: source.clockBinding.tomorrow,
+            schedule: '10:00–20:00',
+            financeScope: 'TENANT_WIDE_PUBLISHED_C7_NOT_BRANCH_ROOT_CAUSE',
+          });
+        }
         preflights.push({
           caseId: item.id,
           role: member.role,
           publishedC7: true,
-          canonicalOpportunity: true,
+          canonicalOpportunity: !scheduleOnly,
           clock: source.clockBinding,
         });
-      } else
+      } else {
+        if (item.id === 'followup-admin-typo-ambiguous-period') {
+          for (const tool of ['catalog.staff.read', 'catalog.services.read']) {
+            const catalog = await http.executeTool(
+              source.token,
+              tool,
+              {
+                surface: 'web',
+                arguments: {},
+                idempotencyKey: randomUUID(),
+              },
+              randomUUID(),
+            );
+            expect(catalog.status).toBe(201);
+            preflights.push({
+              caseId: item.id,
+              role: member.role,
+              tool,
+              httpStatus: catalog.status,
+              currentSyntheticCatalog: true,
+              omittedStaffServiceAndConflictingPeriodNotFilledIn: true,
+            });
+          }
+        }
         preflights.push({
           caseId: item.id,
           role: member.role,
           noRoleUpgrade: true,
         });
+      }
     }
     const foreign = await fx.tenant('Separate core diagnostic foreign tenant');
     const foreignUser = await fx.user(foreign, UserRole.CLIENT);
@@ -1058,16 +1280,16 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       })),
     );
   }
-  it('replays exactly the frozen three dialogs and retains actual HTTP replies before qualification', async () => {
+  it('replays exactly the selected frozen dialogs and retains actual HTTP replies before qualification', async () => {
     const unsigned = {
       version: 1,
       purpose: 'pilot_calibration_not_qualification',
       sourceSha256: manifest.datasetSha256,
       split: 'dev',
       roles: ['client', 'owner', 'admin'],
-      dialogs: 3,
-      independentFamilies: 3,
-      userTurns: 5,
+      dialogs: profile.dialogs,
+      independentFamilies: profile.dialogs,
+      userTurns: profile.userTurns,
       cases: manifest.cases.map((c) => ({
         id: c.id,
         familyId: c.id,
@@ -1345,9 +1567,13 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       },
     });
     expect((result as { status: string }).status).toBe('replayed_ungraded');
-    expect(responses).toHaveLength(5);
+    expect(responses).toHaveLength(profile.userTurns);
     expect(forbidden).toEqual([]);
-    expect(gate!.stats).toMatchObject({ dialogs: 3, turns: 5, halted: false });
+    expect(gate!.stats).toMatchObject({
+      dialogs: profile.dialogs,
+      turns: profile.userTurns,
+      halted: false,
+    });
     // Live choices remain ungraded. The explicit offline replay additionally
     // verifies regression outcomes against canonical source/persisted state.
   });

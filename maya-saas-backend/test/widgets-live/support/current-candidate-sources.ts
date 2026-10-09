@@ -470,7 +470,7 @@ export async function bindCandidateSource(
         data: { status: 'suspended' },
       });
   }
-  if (item.group === 'occupancy') {
+  if (item.group === 'occupancy' && item.variant !== 'finance_schedule_only') {
     const start = new Date(source.startsAt),
       end = new Date(source.endsAt);
     const appointment = await db.prisma.appointment.create({

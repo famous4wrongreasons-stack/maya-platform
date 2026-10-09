@@ -1,7 +1,9 @@
+import type { CoreConversationProfileId } from './current-candidate-budget.mjs';
+
 export type CoreAdmissionBinding = Readonly<{
   candidateCommit: string;
   manifestSha256: string;
-  profile: string;
+  profile: CoreConversationProfileId;
   limitsSha256: string;
 }>;
 export type CoreTarget = Readonly<{
@@ -26,8 +28,8 @@ export type CoreManifest = CoreAdmissionBinding &
     mode: 'DRY_HTTP' | 'ADMITTED_MODEL_HTTP' | 'ADMITTED_LOCAL_MODEL_HTTP';
     sourceHashes: Readonly<Record<string, string>>;
     datasetSha256: string;
-    dialogs: 3;
-    userTurns: 5;
+    dialogs: 3 | 6;
+    userTurns: 5 | 13;
     cases: ReadonlyArray<
       Readonly<{
         id: string;

@@ -5,16 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import {
-  CORE_DIAGNOSTIC_PROFILE,
-  CORE_DIAGNOSTIC_LIMITS,
-  CORE_DIAGNOSTIC_LIMITS_SHA256,
-} from './current-candidate-budget.mjs';
-
-const DATASET_SHA256 =
-  'b793c5489dcd8838e4edc6bca6c00c53530b57892c29520876845608786e2dc6';
-const CASES_SHA256 =
-  'a1f6d6a3716b302190061b6c21bab70232ce494f2b4edfae77f0f0ba32ddff40';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
 const manifests = new WeakMap();
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const canonical = (value) => JSON.stringify(value, null, 2) + '\n';
@@ -169,7 +160,7 @@ function validateManifest(value, localStdin) {
       ? value.mode === 'ADMITTED_LOCAL_MODEL_HTTP'
       : ['DRY_HTTP', 'ADMITTED_MODEL_HTTP'].includes(value.mode),
   );
-  requireThat(value.profile === CORE_DIAGNOSTIC_PROFILE);
+  const profile = coreConversationProfile(value.profile);
   hex(value.candidateCommit, 40);
   uuid(value.runId);
   instant(value.createdAt);
@@ -189,15 +180,13 @@ function validateManifest(value, localStdin) {
     );
   }
   requireThat(
-    value.dialogs === 3 &&
-      value.userTurns === 5 &&
-      value.datasetSha256 === DATASET_SHA256,
+    value.dialogs === profile.dialogs &&
+      value.userTurns === profile.userTurns &&
+      value.datasetSha256 === profile.datasetSha256,
   );
-  requireThat(digest(JSON.stringify(value.cases)) === CASES_SHA256);
-  requireThat(
-    JSON.stringify(value.limits) === JSON.stringify(CORE_DIAGNOSTIC_LIMITS),
-  );
-  requireThat(value.limitsSha256 === CORE_DIAGNOSTIC_LIMITS_SHA256);
+  requireThat(digest(JSON.stringify(value.cases)) === profile.casesSha256);
+  requireThat(JSON.stringify(value.limits) === JSON.stringify(profile.limits));
+  requireThat(value.limitsSha256 === profile.limitsSha256);
   requireThat(
     value.sourceHashes &&
       typeof value.sourceHashes === 'object' &&
@@ -443,7 +432,8 @@ function checkPermit(config, previous, time) {
     start <= time &&
       time < end &&
       end > start &&
-      end - start <= CORE_DIAGNOSTIC_LIMITS.durationMs,
+      end - start <=
+        coreConversationProfile(config.manifest.profile).limits.durationMs,
   );
   requireThat(instant(config.manifest.createdAt) <= start);
   record(permit.pricing, [

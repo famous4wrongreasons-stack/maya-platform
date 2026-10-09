@@ -20,6 +20,7 @@ import {
 } from './core-conversation-admission.mjs';
 import { socketRequest } from './core-conversation-socket.mjs';
 import { CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
+import { coreConversationProfile } from './core-conversation-profile.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
 import { runOwnedStage, trackOwnedChild } from './owned-child-cleanup.mjs';
 import { coreConversationResources } from './core-conversation-resources.mjs';
@@ -29,6 +30,7 @@ const { values } = parseArgs({
     prepare: { type: 'boolean' },
     run: { type: 'boolean' },
     mode: { type: 'string' },
+    profile: { type: 'string' },
     'recorded-replay': { type: 'boolean' },
     output: { type: 'string' },
     manifest: { type: 'string' },
@@ -59,6 +61,11 @@ const recordedReplay = values['recorded-replay'] === true;
 assert.ok(
   !recordedReplay || values.mode === 'dry',
   'core_runner_recorded_replay_dry_only',
+);
+const profile = coreConversationProfile(values.profile);
+assert.ok(
+  !recordedReplay || profile.id === CORE_DIAGNOSTIC_PROFILE,
+  'core_runner_recorded_replay_profile',
 );
 assert.ok(
   values.output &&
@@ -120,7 +127,7 @@ if (values.manifest) {
     assert.ok(bytes.length <= 16384, 'core_runner_context_limit');
     context = JSON.parse(bytes);
   }
-  const raw = captureCoreManifest(manifestMode, context);
+  const raw = captureCoreManifest(manifestMode, context, profile.id);
   manifestPath = path.join(output, 'candidate-manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(raw, null, 2) + '\n', {
     flag: 'wx',
@@ -130,6 +137,7 @@ if (values.manifest) {
   manifest = readCoreManifest(manifestPath, manifestSha256, { localStdin });
 }
 assert.equal(manifest.mode, manifestMode);
+assert.equal(manifest.profile, profile.id, 'core_runner_manifest_profile');
 assertCoreSources(manifest);
 if (values.prepare) {
   console.log(
@@ -138,6 +146,8 @@ if (values.prepare) {
       manifestPath,
       manifestSha256,
       candidateCommit: manifest.candidateCommit,
+      profile: profile.id,
+      limitsSha256: profile.limitsSha256,
       paidAuthorized: false,
       recordedReplay,
       resources: {
@@ -200,7 +210,8 @@ const report = {
   runId: manifest.runId,
   candidateCommit: manifest.candidateCommit,
   manifestSha256,
-  profile: CORE_DIAGNOSTIC_PROFILE,
+  profile: profile.id,
+  limitsSha256: profile.limitsSha256,
   cluster,
   database,
   port,
@@ -213,6 +224,10 @@ const report = {
     pgSharedBuffersMb: 64,
     pgWorkMemMb: 4,
     pgMaxConnections: 30,
+  },
+  timeouts: {
+    conversationMaxMs: profile.limits.durationMs,
+    jestTestMaxMs: profile.limits.durationMs + 60000,
   },
   qualification: live
     ? 'REAL_MODEL_SYNTHETIC_DATA_UNGRADED'
@@ -372,8 +387,11 @@ try {
       : {}),
   };
   const timeoutMs = live
-    ? Math.max(1, Math.min(600000, admission.expiresAt - Date.now()))
-    : 600000;
+    ? Math.max(
+        1,
+        Math.min(profile.limits.durationMs, admission.expiresAt - Date.now()),
+      )
+    : profile.limits.durationMs;
   console.log('START conversation');
   await runOwnedStage(
     {
@@ -384,6 +402,7 @@ try {
         '--config',
         'test/jest-core-conversation-http.json',
         '--runInBand',
+        '--testTimeout=' + String(profile.limits.durationMs + 60000),
         '--json',
         '--outputFile=' + path.join(output, 'conversation-jest.json'),
       ],
@@ -395,6 +414,7 @@ try {
     output,
     control,
     report,
+    profile.id,
   );
   report.completed.push('conversation');
   report.status = 'passed-ungraded';

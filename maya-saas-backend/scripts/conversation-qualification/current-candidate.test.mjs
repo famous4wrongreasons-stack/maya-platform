@@ -19,6 +19,9 @@ import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_DIAGNOSTIC_LIMITS,
   CORE_DIAGNOSTIC_LIMITS_SHA256,
+  CORE_FOLLOWUP_PROFILE,
+  CORE_FOLLOWUP_LIMITS,
+  CORE_FOLLOWUP_LIMITS_SHA256,
   candidateReservation,
 } from './current-candidate-budget.mjs';
 import {
@@ -508,6 +511,159 @@ function admittedFixture(t, patch = {}) {
         .map(JSON.parse),
   };
 }
+
+test('followup independently caps six dialogs and thirteen turns with its own pinned ledger', (t) => {
+  const f = fixture(t, { profile: CORE_FOLLOWUP_PROFILE });
+  f.gate.endTurn();
+  for (let i = 1; i < 6; i++) f.gate.dialog();
+  assert.throws(() => f.gate.dialog(), /dialog_limit/);
+  for (let i = 1; i < 13; i++) {
+    f.gate.turn();
+    f.gate.endTurn();
+  }
+  assert.throws(() => f.gate.turn(), /turn_limit/);
+  assert.equal(f.rows()[0].profile, CORE_FOLLOWUP_PROFILE);
+  assert.equal(f.rows()[0].limitsSha256, CORE_FOLLOWUP_LIMITS_SHA256);
+  assert.notEqual(CORE_FOLLOWUP_LIMITS_SHA256, CORE_DIAGNOSTIC_LIMITS_SHA256);
+  assert.deepEqual(f.rows()[0].limits, CORE_FOLLOWUP_LIMITS);
+  assert.equal(f.rows()[0].paidAuthorized, false);
+  f.gate.close();
+  assert.throws(() => new CandidateBudgetGate(f.settings), /EEXIST/);
+});
+
+test('followup reserves all 24 full-size retries, never refunds failures, and stays under four dollars', async (t) => {
+  const f = fixture(t, {
+    profile: CORE_FOLLOWUP_PROFILE,
+    transport: async () => new Response('{}', { status: 503 }),
+  });
+  const r = request('x'.repeat(98_304 - Buffer.byteLength(request('').body)));
+  const reservation = candidateReservation(endpoint, r, CORE_FOLLOWUP_PROFILE);
+  assert.equal(reservation.bytes, 98_304);
+  for (let i = 0; i < 24; i++)
+    assert.equal((await f.gate.fetch(endpoint, r)).status, 503);
+  assert.equal(f.gate.stats.attempts, 24);
+  assert.equal(f.gate.stats.inputTokens, 2_457_600);
+  assert.equal(f.gate.stats.outputTokens, 49_152);
+  assert.equal(f.gate.stats.reservedNanoUsd, 24 * reservation.nanoUsd);
+  assert.equal(f.gate.stats.reservedNanoUsd, 3_438_673_920);
+  assert.ok(f.gate.stats.reservedNanoUsd <= CORE_FOLLOWUP_LIMITS.spendNanoUsd);
+  const rows = f.rows().filter((row) => row.event === 'reserved');
+  assert.equal(rows.length, 24);
+  for (let i = 1; i < rows.length; i++)
+    assert.equal(rows[i].at - rows[i - 1].at, 6000);
+  await assert.rejects(f.gate.fetch(endpoint, r), /attempt_limit/);
+  assert.equal(f.rows().filter((row) => row.event === 'reserved').length, 24);
+  assert.throws(
+    () =>
+      candidateReservation(
+        endpoint,
+        request('x'.repeat(98_304)),
+        CORE_FOLLOWUP_PROFILE,
+      ),
+    /body_limit/,
+  );
+  assert.throws(
+    () =>
+      candidateReservation(
+        endpoint,
+        request('', { max_tokens: 2049 }),
+        CORE_FOLLOWUP_PROFILE,
+      ),
+    /model_contract/,
+  );
+});
+
+test('followup wall limit is twenty minutes and a pending full body is UNKNOWN without refund', async (t) => {
+  const f = fixture(t, { profile: CORE_FOLLOWUP_PROFILE });
+  f.setClock(600_000);
+  await f.gate.fetch(endpoint, request()); // A would already have expired.
+  f.setClock(1_200_000);
+  await assert.rejects(f.gate.fetch(endpoint, request()), /wall_time_limit/);
+  assert.equal(f.calls(), 1);
+  let cancelled = false;
+  const g = fixture(t, {
+    profile: CORE_FOLLOWUP_PROFILE,
+    transport: async () =>
+      new Response(
+        new ReadableStream({
+          cancel() {
+            cancelled = true;
+          },
+        }),
+      ),
+  });
+  g.setClock(1_199_995);
+  await assert.rejects(g.gate.fetch(endpoint, request()), /attempt_unresolved/);
+  assert.equal(cancelled, true);
+  assert.equal(g.gate.stats.attempts, 1);
+  assert.ok(g.gate.stats.reservedNanoUsd > 0);
+  assert.equal(g.rows().at(-1).event, 'halted_after_attempt');
+  await assert.rejects(g.gate.fetch(endpoint, request()), /gate_halted/);
+});
+
+test('followup single-flight and response byte cap still halt after UNKNOWN', async (t) => {
+  let started;
+  const ready = new Promise((resolve) => {
+    started = resolve;
+  });
+  const abort = new AbortController();
+  const f = fixture(t, {
+    profile: CORE_FOLLOWUP_PROFILE,
+    transport: async () =>
+      new Response(
+        new ReadableStream({
+          start() {
+            started();
+          },
+        }),
+      ),
+  });
+  const pending = f.gate.fetch(endpoint, {
+    ...request(),
+    signal: abort.signal,
+  });
+  await ready;
+  await assert.rejects(f.gate.fetch(endpoint, request()), /concurrency_limit/);
+  abort.abort();
+  await assert.rejects(pending, /attempt_unresolved/);
+  assert.equal(f.gate.stats.attempts, 1);
+  assert.equal(f.gate.stats.halted, true);
+  const g = fixture(t, {
+    profile: CORE_FOLLOWUP_PROFILE,
+    transport: async () => new Response('x'.repeat(1_048_577)),
+  });
+  await assert.rejects(g.gate.fetch(endpoint, request()), /attempt_unresolved/);
+  assert.equal(g.gate.stats.attempts, 1);
+  assert.equal(g.gate.stats.halted, true);
+  await assert.rejects(g.gate.fetch(endpoint, request()), /gate_halted/);
+});
+
+test('synthetic followup admission binds its exact profile hash at every check and refuses A authority', async (t) => {
+  const bindings = [];
+  const f = admittedFixture(t, {
+    profile: CORE_FOLLOWUP_PROFILE,
+    assertAdmission: (binding) => {
+      assert.ok(Object.isFrozen(binding));
+      assert.equal(binding.profile, CORE_FOLLOWUP_PROFILE);
+      assert.equal(binding.limitsSha256, CORE_FOLLOWUP_LIMITS_SHA256);
+      bindings.push(binding);
+    },
+  });
+  const gate = f.create();
+  gate.dialog();
+  gate.turn();
+  await gate.fetch(endpoint, request());
+  assert.ok(bindings.length >= 3);
+  assert.equal(f.rows()[0].limitsSha256, CORE_FOLLOWUP_LIMITS_SHA256);
+  const g = admittedFixture(t, {
+    profile: CORE_FOLLOWUP_PROFILE,
+    assertAdmission: (binding) => {
+      assert.equal(binding.limitsSha256, CORE_DIAGNOSTIC_LIMITS_SHA256);
+    },
+  });
+  assert.throws(() => g.create(), /admission_refused/);
+  assert.equal(fs.existsSync(g.settings.ledgerPath), false);
+});
 
 test('admitted mode refuses missing/foreign admission and custom clocks before creating any ledger', async (t) => {
   for (const patch of [
