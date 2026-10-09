@@ -1,0 +1,7 @@
+
+Test Suites: 4 passed, 4 total
+Tests:       265 passed, 265 total
+Snapshots:   0 total
+Time:        1.176 s
+Ran all test suites within paths "src/crm/adapters/yclients-client-search.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/marketing/marketing.service.spec.ts".
+Test results written to: ../docs/rebuild/evidence/maya-native-client-search-20261009/targeted-r1.json

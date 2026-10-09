@@ -6,7 +6,8 @@ import { OperationsAnalyticsService } from '../analytics/operations-analytics.se
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CrmService } from '../crm/crm.service';
 import { snapshotAuthorityView } from '../domain';
-import { UserRole } from '../common/domain.enums';
+import { UserRole, CrmProvider } from '../common/domain.enums';
+import { YclientsCRMAdapter } from '../crm/adapters/yclients-crm.adapter';
 import { CustomersService } from '../customers/customers.service';
 import { ExpensesService } from '../expenses/expenses.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
@@ -1243,6 +1244,44 @@ describe('AiToolHandlerService output minimization', () => {
         visits: 7,
       });
       expect(JSON.stringify(result)).not.toMatch(/Иван|Сидоров|7999/);
+    });
+
+    it('reports native search failure as unavailable before dossier reads [synthetic transport]', async () => {
+      const f = fixture();
+      const adapter = (() => {
+        const previous = process.env.YCLIENTS_PARTNER_TOKEN;
+        process.env.YCLIENTS_PARTNER_TOKEN = 'synthetic';
+        try {
+          return new YclientsCRMAdapter({
+            provider: CrmProvider.YCLIENTS,
+            apiToken: 'synthetic',
+            baseUrl: 'http://127.0.0.1:9',
+            settings: { companyId: 123 },
+          });
+        } finally {
+          if (previous === undefined) delete process.env.YCLIENTS_PARTNER_TOKEN;
+          else process.env.YCLIENTS_PARTNER_TOKEN = previous;
+        }
+      })();
+      const transport = jest
+        .spyOn(globalThis, 'fetch')
+        .mockRejectedValue(new TypeError('synthetic offline'));
+      f.searchClients.mockImplementation((tenantId: string, query: string) =>
+        adapter.searchClients({ tenantId, query }),
+      );
+      try {
+        expect(await f.read('Иван')).toEqual({
+          found: false,
+          error: 'Поиск клиентов в CRM сейчас недоступен.',
+        });
+        expect(f.searchClients).toHaveBeenCalledTimes(1);
+        expect(transport).toHaveBeenCalledTimes(1);
+        expect(f.getClientVisitHistory).not.toHaveBeenCalled();
+        expect(f.getStateForCrmClient).not.toHaveBeenCalled();
+        expect(f.recency).not.toHaveBeenCalled();
+      } finally {
+        transport.mockRestore();
+      }
     });
 
     it.each(['empty', 'source-error'])(

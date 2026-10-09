@@ -1,0 +1,22 @@
+FAIL maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts
+  ● AiToolHandlerService output minimization › explicit unique client dossier › reports native search failure as unavailable before dossier reads [synthetic transport]
+
+    InternalServerErrorException: YCLIENTS_PARTNER_TOKEN is not configured
+
+      366 |
+      367 |     if (!this.partnerToken) {
+    > 368 |       throw new InternalServerErrorException(
+          |             ^
+      369 |         'YCLIENTS_PARTNER_TOKEN is not configured',
+      370 |       );
+      371 |     }
+
+      at new YclientsCRMAdapter (crm/adapters/yclients-crm.adapter.ts:368:13)
+      at Object.<anonymous> (ai-tools/ai-tool-handler.service.spec.ts:1251:23)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 95 skipped, 96 total
+Snapshots:   0 total
+Time:        2.571 s
+Ran all test suites within paths "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts".
+Test results written to: docs/rebuild/evidence/maya-native-client-search-20261009/baseline-red.json

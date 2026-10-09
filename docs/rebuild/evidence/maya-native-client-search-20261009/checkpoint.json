@@ -1,0 +1,24 @@
+{
+  "status": "PAUSED_FOR_OWNER_UI_ACCEPTANCE",
+  "baseline": "14a9679cdbfca7e8c5908dd67a178fb1fddc1a99",
+  "sourceHashes": {
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "2de259bba4b0606de00fa89bf47b1b5804e8dda15b7c203f9d64e80fc58dac2a",
+    "maya-saas-backend/src/crm/adapters/yclients-client-search.spec.ts": "632da318b7e6b6471f45ac29caab6d56646e503bab8c36bb6b527fb8d2137c2f",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": "3dda161071a0853beec5504c13d97a43f69fd0a497a84ef5a0e3bfb8c6f603f3",
+    "maya-saas-backend/src/marketing/marketing.service.spec.ts": "0efe839225e51332ab92bef07a1edcd999910c22b1a46e8eba8763ba29bfe962"
+  },
+  "reproduction": "baseline-red: actual native adapter plus actual dossier handler, synthetic transport returns not-found instead of unavailable",
+  "earlierFixtureFailure": "baseline-fixture-failure lacked synthetic partner-token constructor prerequisite; not product RED",
+  "componentTests": 265,
+  "componentSuites": 4,
+  "httpAcceptance": false,
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "newProcessesRemaining": false,
+  "nextChecksNotRun": [
+    "production types",
+    "scoped lint",
+    "actual HTTP/UI qualification"
+  ],
+  "review": "Read-only scope assessment by /root/independent_review; final code not independently accepted."
+}

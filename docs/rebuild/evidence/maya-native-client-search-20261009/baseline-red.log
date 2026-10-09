@@ -1,0 +1,30 @@
+FAIL maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts
+  ● AiToolHandlerService output minimization › explicit unique client dossier › reports native search failure as unavailable before dossier reads [synthetic transport]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "error": "Поиск клиентов в CRM сейчас недоступен.",
+    +   "error": "Клиент не найден. Уточни имя (≥3 букв) или телефон (≥4 цифр).",
+        "found": false,
+      }
+
+      1267 |       f.searchClients.mockImplementation((tenantId: string, query: string) => adapter.searchClients({ tenantId, query }));
+      1268 |       try {
+    > 1269 |         expect(await f.read('Иван')).toEqual({
+           |                                      ^
+      1270 |           found: false,
+      1271 |           error: 'Поиск клиентов в CRM сейчас недоступен.',
+      1272 |         });
+
+      at Object.<anonymous> (ai-tools/ai-tool-handler.service.spec.ts:1269:38)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 95 skipped, 96 total
+Snapshots:   0 total
+Time:        0.578 s, estimated 3 s
+Ran all test suites within paths "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts".
+Test results written to: docs/rebuild/evidence/maya-native-client-search-20261009/baseline-red.json

@@ -2453,43 +2453,52 @@ export class YclientsCRMAdapter implements CRMAdapter {
       return [];
     }
 
-    // Отказ поиска не должен ронять экран записи — подсказка необязательна.
-    try {
-      const response = await this.request<YclientsClientSearchItem[]>(
-        `company/${this.getCompanyId()}/clients/search`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            fields: [
-              'id',
-              'name',
-              'phone',
-              'visits_count',
-              'sold_amount',
-              'last_visit_date',
-            ],
-            filters: [{ type: 'quick_search', state: { value: query } }],
-            page: 1,
-            page_size: 10,
-          }),
-        },
-      );
+    // A failed or incomplete search is not an empty result. The dossier owner
+    // already translates this refusal; do not invent absence or drop a malformed
+    // candidate and turn an ambiguous response into a unique client.
+    const response = await this.request<YclientsClientSearchItem[]>(
+      `company/${this.getCompanyId()}/clients/search`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          fields: [
+            'id',
+            'name',
+            'phone',
+            'visits_count',
+            'sold_amount',
+            'last_visit_date',
+          ],
+          filters: [{ type: 'quick_search', state: { value: query } }],
+          page: 1,
+          page_size: 10,
+        }),
+      },
+    );
+    if (
+      (response.success !== undefined && response.success !== true) ||
+      !Array.isArray(response.data) ||
+      response.data.some(
+        (candidate) =>
+          !candidate ||
+          typeof candidate !== 'object' ||
+          Array.isArray(candidate) ||
+          !['number', 'string'].includes(typeof candidate.id) ||
+          !/^[1-9]\d*$/.test(String(candidate.id)) ||
+          String(candidate.id).trim() !== String(candidate.id) ||
+          !Number.isSafeInteger(Number(candidate.id)),
+      )
+    )
+      throw new Error('crm_client_search_source_unavailable');
 
-      return (response.data || [])
-        .filter((candidate) => candidate?.id !== undefined)
-        .map((candidate) => ({
-          id: String(candidate.id),
-          name: String(candidate.name || '').trim(),
-          phone: candidate.phone ? this.normalizePhone(candidate.phone) : null,
-          visits_count: this.optionalNonNegativeInteger(candidate.visits_count),
-          sold_amount: this.optionalNonNegativeNumber(candidate.sold_amount),
-          last_visit_date: this.normalizeClientVisitDate(
-            candidate.last_visit_date,
-          ),
-        }));
-    } catch {
-      return [];
-    }
+    return response.data.map((candidate) => ({
+      id: String(candidate.id),
+      name: String(candidate.name || '').trim(),
+      phone: candidate.phone ? this.normalizePhone(candidate.phone) : null,
+      visits_count: this.optionalNonNegativeInteger(candidate.visits_count),
+      sold_amount: this.optionalNonNegativeNumber(candidate.sold_amount),
+      last_visit_date: this.normalizeClientVisitDate(candidate.last_visit_date),
+    }));
   }
 
   /**

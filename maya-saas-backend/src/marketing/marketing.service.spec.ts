@@ -241,6 +241,32 @@ describe('MarketingService', () => {
     expect(createdAudience?.data.recipientUserIdsJson).toEqual(['user-1']);
   });
 
+  it('does not persist an empty audience when client search is unavailable', async () => {
+    const error = new Error('crm_client_search_source_unavailable');
+    const searchClients = jest.fn().mockRejectedValue(error);
+    const { service, prisma } = makeService({
+      memberships: [
+        {
+          userId: 'user-1',
+          user: { phone: '+70000007346' },
+          customerProfile: { marketingConsentAt: new Date('2025-01-01') },
+        },
+      ],
+      searchClients,
+    });
+    await expect(
+      service.findAudience({
+        tenantId: 'tenant-1',
+        actorUserId: 'owner-1',
+        rule: { inactive_days: 90, minimum_visits: 2, max_recipients: 100 },
+      }),
+    ).rejects.toBe(error);
+    expect(searchClients).toHaveBeenCalledTimes(1);
+    expect(prisma.marketingAudience.create).not.toHaveBeenCalled();
+    expect(prisma.marketingAudience.upsert).not.toHaveBeenCalled();
+    expect(prisma.marketingCampaign.create).not.toHaveBeenCalled();
+  });
+
   it('creates an exact persisted preview without returning recipients or PII', async () => {
     let createdCampaign: CampaignCreateInput | undefined;
     const campaignCreate = jest
