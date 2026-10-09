@@ -645,24 +645,50 @@ describe('reviews exact calendar HTTP/auth/parser/C9 READ [SCRIPTED MODEL, SYNTH
     const userTurn = object(answer.body.user_turn);
     assert.ok(typeof userTurn.turnId === 'string');
     assert.ok(typeof userTurn.conversationId === 'string');
+    const observedAt = new Date();
     const parent = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
       where: {
         id: userTurn.turnId,
         tenantId: salon.tenant.id,
         conversationId: userTurn.conversationId,
         role: 'user',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: observedAt },
       },
     });
-    const stored = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+    const candidates = await db.prisma.widgetTimelineTurn.findMany({
       where: {
-        id: chatReplyId(salon.tenant.id, parent.id),
         tenantId: salon.tenant.id,
         conversationId: parent.conversationId,
+        principalProofHash: parent.principalProofHash,
         role: 'assistant',
+        channel: 'pwa',
+        turnIndex: { gt: parent.turnIndex },
+        erasedAt: null,
+        retentionUntil: { gt: observedAt },
       },
+      orderBy: { turnIndex: 'desc' },
+      take: 3,
     });
-    assert.ok(stored.textContent);
-    const completion = decodeChatCompletion(db.encryption, stored.textContent);
+    const matching = candidates
+      .map((stored) => {
+        assert.ok(stored.textContent);
+        return {
+          stored,
+          completion: decodeChatCompletion(db.encryption, stored.textContent),
+        };
+      })
+      .filter(
+        ({ completion }) =>
+          completion.parentId === parent.id &&
+          completion.text === answer.body.reply,
+      );
+    expect(matching).toHaveLength(1);
+    const { stored, completion } = matching[0];
+    expect(stored.id).toBe(
+      chatReplyId(salon.tenant.id, `${parent.id}:${completion.completionHash}`),
+    );
     expect(completion.parentId).toBe(parent.id);
     expect(completion.text).toBe(answer.body.reply);
     const semanticContext = object(completion.semanticContext);
