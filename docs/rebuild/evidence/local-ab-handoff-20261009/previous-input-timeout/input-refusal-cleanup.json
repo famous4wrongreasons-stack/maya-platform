@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-09T07:18:42.921128+00:00",
+  "brokerPid": 67548,
+  "brokerPidAbsent": true,
+  "aSocketAbsent": true,
+  "aRunnerDirectoryAbsent": true,
+  "bPermitAbsent": true,
+  "bClaimAbsent": true,
+  "bSocketAbsent": true,
+  "bRunnerDirectoryAbsent": true,
+  "claimPreserved": true,
+  "rearmed": false
+}

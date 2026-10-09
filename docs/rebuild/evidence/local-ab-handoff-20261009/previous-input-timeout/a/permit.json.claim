@@ -1,0 +1,9 @@
+{
+  "contract": "maya.core-conversation-claim/1",
+  "runId": "5e3121d2-5204-482a-8d0f-e4ad00405f2e",
+  "nonce": "1d5500efa39c83af6bf2b34fbcc4e69e953cd7297b4f6afe4dface800ebf4b66",
+  "permitSha256": "c85db85d7e014d92de117bb7683115bba678246b2bb37914f00a71b9e6155294",
+  "manifestSha256": "1115ee5884f7c3376aea3bc5b95b4530ce7eab594eba8575a24f17afac075dc9",
+  "brokerPid": 67548,
+  "claimedAt": "2026-10-09T07:17:13.383Z"
+}

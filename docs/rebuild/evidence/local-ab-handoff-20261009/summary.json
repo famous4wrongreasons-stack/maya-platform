@@ -1,0 +1,18 @@
+{
+  "codeCommit": "3a119e3769e8ae15f50ae8df2a2b499629cdf123",
+  "qualification": "SCRIPTED_SYNTHETIC_HANDOFF_ONLY",
+  "newChecksPassed": 27,
+  "checks": {
+    "readinessFakeTTY": 18,
+    "previousZeroProof": 6,
+    "priorBudgetAndPrebuffer": 2,
+    "actualLauncherReadinessSynthetic": 1
+  },
+  "previousRoot": "/private/tmp/maya-ab-live-20261009",
+  "previousInputElapsedMs": 30405,
+  "originalGlobalExpiresAt": "2026-10-09T07:47:13.013Z",
+  "previousFilesUnchanged": true,
+  "beforeEnter": "No budget, permit, claim, credential reader or timer.",
+  "afterEnter": "Existing A+B; deduct prior input time and retain original global absolute expiry.",
+  "newRealInputOrProviderCallsBeforeReadinessOpen": 0
+}

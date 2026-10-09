@@ -1,0 +1,14 @@
+✔ captures eight immutable file hashes, full 30405ms input time and original absolute expiry (5.336542ms)
+✔ any nonzero, unknown, unclosed, wrong commit or unmatched claim refuses capture (30.986417ms)
+✔ every projection field and any later byte change are revalidated (4.688917ms)
+✔ a runner, socket, B permit or claim appearing after capture blocks continuation (14.958667ms)
+✔ noncanonical, linked, oversized, missing or writable evidence refuses before acceptance (9.298083ms)
+✔ wrong approval and zero, reversed or ten-minute elapsed proof refuse (7.639625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 108.81625

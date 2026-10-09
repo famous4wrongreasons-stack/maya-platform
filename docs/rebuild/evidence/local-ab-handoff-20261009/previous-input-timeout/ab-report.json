@@ -1,0 +1,61 @@
+{
+  "contract": "maya.local-ab-run/1",
+  "status": "failed-no-continuation",
+  "planSha256": "b3a86f99147bd17d753a9aa7a4062b665cd59a9dbe95e72666c4c61556456494",
+  "harnessCommit": "f88d5e02c7fcc10028175413ef51d322537b1ef8",
+  "startedAt": "2026-10-09T07:17:13.013Z",
+  "expiresAt": "2026-10-09T07:47:13.013Z",
+  "qualification": "REAL_MODEL_SYNTHETIC_DATA_UNGRADED",
+  "credentialInputs": 1,
+  "stages": [
+    {
+      "stage": "A",
+      "candidateCommit": "0d90de11710e7212286a7e74755c8a12b55d116b",
+      "manifestSha256": "1115ee5884f7c3376aea3bc5b95b4530ce7eab594eba8575a24f17afac075dc9",
+      "permitSha256": "c85db85d7e014d92de117bb7683115bba678246b2bb37914f00a71b9e6155294",
+      "startsAt": "2026-10-09T07:17:13.197Z",
+      "expiresAt": "2026-10-09T07:27:13.197Z",
+      "runnerPid": null,
+      "status": "starting",
+      "usage": []
+    }
+  ],
+  "failureCode": "core_local_credential_input_refused",
+  "launcherCredentialCleared": true,
+  "finishedAt": "2026-10-09T07:17:43.418Z",
+  "stats": {
+    "startedAt": 1791530233013,
+    "expiresAt": 1791532033013,
+    "activeStage": "A",
+    "attempts": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "reservedNanoUsd": 0,
+    "lastReservedAt": null,
+    "halted": true,
+    "haltReason": "explicit_halt",
+    "closed": true,
+    "stages": {
+      "A": {
+        "startedAt": 1791530233197,
+        "expiresAt": 1791530833197,
+        "completed": false,
+        "clean": null,
+        "attempts": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "reservedNanoUsd": 0
+      },
+      "B": {
+        "startedAt": null,
+        "expiresAt": null,
+        "completed": false,
+        "clean": null,
+        "attempts": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "reservedNanoUsd": 0
+      }
+    }
+  }
+}
