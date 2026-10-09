@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-09T08:07:07.464073+00:00",
+  "runs": {
+    "archived-http": {
+      "status": "passed-ungraded",
+      "sourcesUnchanged": true,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "groupsAbsent": {
+        "initdb": true,
+        "pg-start": true,
+        "createdb": true,
+        "migrations": true,
+        "conversation": true,
+        "pg-stop": true
+      },
+      "credentialsLoaded": false,
+      "upstreamCalls": 0,
+      "brokerPidAbsent": true,
+      "brokerClosed": true,
+      "httpTurns": 5,
+      "businessGraphUnchanged": true
+    },
+    "synthetic-http": {
+      "status": "passed-ungraded",
+      "sourcesUnchanged": true,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "groupsAbsent": {
+        "initdb": true,
+        "pg-start": true,
+        "createdb": true,
+        "migrations": true,
+        "conversation": true,
+        "pg-stop": true
+      },
+      "credentialsLoaded": false,
+      "upstreamCalls": 0,
+      "brokerPidAbsent": true,
+      "brokerClosed": true,
+      "httpTurns": 5,
+      "businessGraphUnchanged": true
+    }
+  }
+}

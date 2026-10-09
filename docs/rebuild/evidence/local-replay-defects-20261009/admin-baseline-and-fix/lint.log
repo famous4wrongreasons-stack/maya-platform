@@ -1,0 +1,102 @@
+
+<--- Last few GCs --->
+
+[88992:0xa1280c000]     2841 ms: Scavenge (interleaved) 1000.9 (1028.8) -> 997.3 (1047.1) MB, pooled: 0 MB, 4.12 / 0.00 ms  (average mu = 0.384, current mu = 0.027) allocation failure; 
+[88992:0xa1280c000]     2907 ms: Mark-Compact (reduce) 1011.5 (1047.3) -> 1009.5 (1030.1) MB, pooled: 0 MB, 54.79 / 0.00 ms  (+ 0.3 ms in 221 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 66 ms) (average mu = 0.372, cu
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x10096daec node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/usr/local/bin/node]
+ 2: 0x100bc0314 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/usr/local/bin/node]
+ 3: 0x100e1f700 v8::internal::Heap::stack() [/usr/local/bin/node]
+ 4: 0x100e1d5e8 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/usr/local/bin/node]
+ 5: 0x100e12110 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/local/bin/node]
+ 6: 0x100df37f0 v8::internal::Factory::NewFillerObject(int, v8::internal::AllocationAlignment, v8::internal::AllocationType, v8::internal::AllocationOrigin) [/usr/local/bin/node]
+ 7: 0x101283434 v8::internal::Runtime_AllocateInYoungGeneration(int, unsigned long*, v8::internal::Isolate*) [/usr/local/bin/node]
+ 8: 0x1018da234 Builtins_CEntry_Return1_ArgvOnStack_NoBuiltinExit [/usr/local/bin/node]
+ 9: 0x101984474 Builtins_StringPrototypeSubstring [/usr/local/bin/node]
+10: 0x1249aca38 
+11: 0x124f42fc0 
+12: 0x124f3a758 
+13: 0x124f2719c 
+14: 0x124e8d310 
+15: 0x124f2bb8c 
+16: 0x12509c96c 
+17: 0x124e9a154 
+18: 0x124f7a838 
+19: 0x124a4c9a4 
+20: 0x124a6251c 
+21: 0x124a4a0a8 
+22: 0x124765674 
+23: 0x124fb0964 
+24: 0x124f88874 
+25: 0x124e7cefc 
+26: 0x124f95ec0 
+27: 0x1250a1f20 
+28: 0x12499f150 
+29: 0x124e73390 
+30: 0x12503153c 
+31: 0x124f1fc44 
+32: 0x124a45f68 
+33: 0x1249825b4 
+34: 0x1250a1f20 
+35: 0x12499f150 
+36: 0x124e73390 
+37: 0x12503153c 
+38: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+39: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+40: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+41: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+42: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+43: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+44: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+45: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+46: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+47: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+48: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+49: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+50: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+51: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+52: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+53: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+54: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+55: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+56: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+57: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+58: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+59: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+60: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+61: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+62: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+63: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+64: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+65: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+66: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+67: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+68: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+69: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+70: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+71: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+72: 0x10183cbec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+73: 0x10187b7e8 Builtins_AsyncFunctionAwaitResolveClosure [/usr/local/bin/node]
+74: 0x101950e58 Builtins_PromiseFulfillReactionJob [/usr/local/bin/node]
+75: 0x10186abd0 Builtins_RunMicrotasks [/usr/local/bin/node]
+76: 0x10183a7b0 Builtins_JSRunMicrotasksEntry [/usr/local/bin/node]
+77: 0x100d638a8 v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/usr/local/bin/node]
+78: 0x100d6411c v8::internal::(anonymous namespace)::InvokeWithTryCatch(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/usr/local/bin/node]
+79: 0x100d64258 v8::internal::Execution::TryRunMicrotasks(v8::internal::Isolate*, v8::internal::MicrotaskQueue*) [/usr/local/bin/node]
+80: 0x100d9302c v8::internal::MicrotaskQueue::RunMicrotasks(v8::internal::Isolate*) [/usr/local/bin/node]
+81: 0x100d9398c v8::internal::MicrotaskQueue::PerformCheckpoint(v8::Isolate*) [/usr/local/bin/node]
+82: 0x10084f0b8 node::InternalCallbackScope::Close() [/usr/local/bin/node]
+83: 0x10084ea90 node::InternalCallbackScope::~InternalCallbackScope() [/usr/local/bin/node]
+84: 0x100973000 node::fs::FileHandle::CloseReq::Resolve() [/usr/local/bin/node]
+85: 0x10098e6a8 node::fs::FileHandle::ClosePromise()::$_0::__invoke(uv_fs_s*) [/usr/local/bin/node]
+86: 0x100963550 node::MakeLibuvRequestCallback<uv_fs_s, void (*)(uv_fs_s*)>::Wrapper(uv_fs_s*) [/usr/local/bin/node]
+87: 0x101815394 uv__work_done [/usr/local/bin/node]
+88: 0x1018190c4 uv__async_io [/usr/local/bin/node]
+89: 0x10182d45c uv__io_poll [/usr/local/bin/node]
+90: 0x10181962c uv_run [/usr/local/bin/node]
+91: 0x1008506a8 node::SpinEventLoopInternal(node::Environment*) [/usr/local/bin/node]
+92: 0x1009c69c4 node::NodeMainInstance::Run() [/usr/local/bin/node]
+93: 0x10091abb4 node::Start(int, char**) [/usr/local/bin/node]
+94: 0x18e68fe00 start [/usr/lib/dyld]

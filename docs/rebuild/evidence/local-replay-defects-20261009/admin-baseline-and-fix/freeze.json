@@ -1,0 +1,14 @@
+{
+  "recordedResponseFileSha256": "c8f00684bd2fbb5197783a990622781b5dd1eea96b88463bf22b27146329c9ce",
+  "createdAt": "2026-10-09T07:57:05.765300+00:00",
+  "qualification": "RECORDED_PLANNER_OUTPUTS_WITH_SYNTHETIC_UNIT_TRANSPORT_NOT_MODEL_OR_HTTP_ACCEPTANCE",
+  "sourceHashes": {
+    "src/conversation-intelligence/conversation-intelligence.service.ts": "6c079ed21bba46ce238390ceb2d68f71efabe547a4b6e46291fd984c01e84368",
+    "src/ai-tools/ai-core-model.service.ts": "ba087bb5038617a30751c7e359d978a4dfa8415f8279aa4cdfd551cc7d3446e7",
+    "src/ai-tools/ai-core-recorded-private.spec.ts": "b80887c546222a926aa25aa34f5d1167786c1d8b44b9beff8268340a72d519b7"
+  },
+  "baseline": "red.json: two baseline assertions passed; two intended clarification assertions failed with existing503",
+  "green": "green-final.json",
+  "lint": "1024MiB typed ESLint aborted with heap OOM exit134; parent owns final scoped lint",
+  "sourceBinding": "Final hashes only. Baseline spec copied; red run is not claimed a frozen whole-worktree gate. Shared model file includes parent-owned planner changes."
+}

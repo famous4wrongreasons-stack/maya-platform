@@ -1,0 +1,205 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "ead8a521-b492-44c8-b3bf-0ce1f67c3f90",
+  "candidateCommit": "76eefbd233eae860209f053a0da837e84c7e1f84",
+  "profile": "core-diagnostic-20261008/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "manifestSha256": "24de92e1c3fcd8a1ceb380aaeb081433efd619f170a108af9ae832862010fc52",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T08:03:40.631Z",
+  "expiresAt": "2026-10-09T08:13:40.631Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "ae8c67eca2f1f285282601724a418d9d635d8981ba5691c50bf19dbb88ec85c3",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 69648,
+      "bodySha256": "b3ba202e19d6c6ded75350c200fa4bd14e6f3b80864af726aae3d3c10947dcbf",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92782,
+      "bodySha256": "a1b85f1eb91b47921390371e2138b92389adf189665aa3dd4d64bad61f473803",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 97502,
+      "bodySha256": "04bdf851464d823f7f4ddacba1c0a1efaaf56808e6a2e1a6de17c5dd583b0a32",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80441,
+      "bodySha256": "7446e2604c0d9061621e43f177a833c9fc0e6925a1f9e55250541b28e23f399f",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+  "recordedReplay": true,
+  "replayFixture": "actual-20261009",
+  "recordedResponses": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "archiveRecordNumber": 1,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "archived",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "9aa9059911ff38dbaaeff389b78a1a973fdbf2c9d093da58758b3a3f940dfd91",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "8dac6a54a68ba894c43ca38363c5f6e2b13dc36c63557f13c5f13f653943713d",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 14412,
+        "completion_tokens": 312,
+        "total_tokens": 14724,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 13388
+      },
+      "binding": {
+        "policy": "CURRENT_REQUEST_ALIAS_AND_BUSINESS_TOMORROW_RELATIVE_OFFSETS",
+        "aliasSource": "exact_current_sanitized_user_request",
+        "aliasSha256": "f505b5f95192ac2ebd23f81b4ad4f3d9ab0e67d27ef3e88609bdcbd9a8d0ab4a",
+        "nowUtc": "2026-10-09T08:03:46.049Z",
+        "timezone": "Europe/Moscow",
+        "originalBusinessTomorrow": "2026-10-10",
+        "currentBusinessTomorrow": "2026-10-10",
+        "originalDate": "2026-10-10",
+        "reboundDate": "2026-10-10",
+        "recordedDayOffset": 0
+      },
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "archiveRecordNumber": 2,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "archived",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "13ca73bdaa062f402f2da7d3383dc0e771987966fc88e249895215b61d1e7b72",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "d67f55f67fa0752a04f50aaa3a70b34f15d4938df9faba5b5fe2ed5889a9e6cb",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 14643,
+        "completion_tokens": 320,
+        "total_tokens": 14963,
+        "prompt_cache_hit_tokens": 2816,
+        "prompt_cache_miss_tokens": 11827
+      },
+      "binding": {
+        "policy": "CURRENT_REQUEST_ALIAS_AND_BUSINESS_TOMORROW_RELATIVE_OFFSETS",
+        "aliasSource": "exact_current_sanitized_semantic_plan_employee",
+        "aliasSha256": "3a9c7889374e260031ed796054811283ed9a13a3f65b164a91326cda8a5d2ab7",
+        "nowUtc": "2026-10-09T08:03:46.409Z",
+        "timezone": "Europe/Moscow",
+        "originalBusinessTomorrow": "2026-10-10",
+        "currentBusinessTomorrow": "2026-10-10",
+        "originalDate": "2026-10-10",
+        "reboundDate": "2026-10-10",
+        "recordedDayOffset": 0
+      },
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "archiveRecordNumber": 3,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "archived",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "98e43eb53959cea4b05ea968ed625dc86678b797ecda59d5d95b54be2066fbf0",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "98e43eb53959cea4b05ea968ed625dc86678b797ecda59d5d95b54be2066fbf0",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 19429,
+        "completion_tokens": 386,
+        "total_tokens": 19815,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 18405
+      },
+      "binding": null,
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "archiveRecordNumber": 4,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "archived",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "1b83b4341efc4cef4f5dd3ec7ce990cefb772fbb2a34274d01bf3392c93c0540",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "1b83b4341efc4cef4f5dd3ec7ce990cefb772fbb2a34274d01bf3392c93c0540",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 20257,
+        "completion_tokens": 416,
+        "total_tokens": 20673,
+        "prompt_cache_hit_tokens": 3968,
+        "prompt_cache_miss_tokens": 16289
+      },
+      "binding": null,
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "archiveRecordNumber": 5,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "archived",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "b9f7c06f026071ffc093beb0e054006b193c7dfd99450e4fdfd06bc01410599c",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "b9f7c06f026071ffc093beb0e054006b193c7dfd99450e4fdfd06bc01410599c",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 16716,
+        "completion_tokens": 175,
+        "total_tokens": 16891,
+        "prompt_cache_hit_tokens": 4736,
+        "prompt_cache_miss_tokens": 11980
+      },
+      "binding": null,
+      "currentProviderCalls": 0
+    }
+  ],
+  "port": 54046,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T08:04:10.466Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 429540,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 590752800,
+    "halted": false
+  }
+}

@@ -1,0 +1,26 @@
+✔ all six copied records retain exact archived hash; owner/admin contents remain byte-identical (10.836041ms)
+✔ booking bindings change only current aliases/dates and retain missing service IDs and day offset zero (0.39325ms)
+✔ synthetic-accept replaces only owner output 2 with the explicitly named semantic decision (0.838875ms)
+✔ five consumed responses never imply consumption of the unused historical admin retry (0.361292ms)
+✔ only the archived second admin attempt may omit JSON mode; invalid calls latch replay (0.358208ms)
+✔ closed scenario, exact role/utterance and source date/alias evidence prevent a generalized replay (0.416958ms)
+✔ fixture CLI selection requires replay and refuses unknown selectors before output/manifest work (144.255375ms)
+✔ new fixtures remain forbidden in paid modes before manifest, credential or permit access (137.667916ms)
+✔ copied original records retain the archived hash and first three semantic outputs (10.945084ms)
+✔ request-local aliases replace only observed employee slots and retain the first wrong-day offset (0.401125ms)
+✔ only the two final finite continuations are scripted, with no historical usage or approval (0.703083ms)
+✔ missing, raw, conflicting or malformed employee evidence refuses permanently (0.764625ms)
+✔ wrong role, phase, turn, timezone and invalid clock refuse rather than infer a binding (0.269458ms)
+✔ repeat and skipped turns cannot rewind the fixed response sequence (0.232042ms)
+✔ business midnight drift between booking turns refuses an implicit date correction (0.158166ms)
+✔ full serialized body cap and model contract apply unchanged before replay (0.279459ms)
+✔ returned metadata and snapshots cannot rewrite provenance retained by the broker (0.14325ms)
+✔ both paid entry modes refuse replay before manifest, permit or output access (143.459541ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 333.766916

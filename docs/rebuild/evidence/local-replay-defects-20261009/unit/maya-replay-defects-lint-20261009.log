@@ -1,0 +1,14 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-replay-defects/maya-saas-backend/src/ai-tools/ai-core-model.service.ts
+  1252:19  error  Insert `⏎·····`                   prettier/prettier
+  1253:1   error  Replace `······` with `········`  prettier/prettier
+  1254:1   error  Insert `··`                       prettier/prettier
+  1255:1   error  Replace `······` with `········`  prettier/prettier
+  1256:1   error  Insert `··`                       prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-replay-defects/maya-saas-backend/src/ai-tools/ai-core.occupancy.spec.ts
+  1103:56  error  Unsafe member access [0] on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+✖ 6 problems (6 errors, 0 warnings)
+  5 errors and 0 warnings potentially fixable with the `--fix` option.
+

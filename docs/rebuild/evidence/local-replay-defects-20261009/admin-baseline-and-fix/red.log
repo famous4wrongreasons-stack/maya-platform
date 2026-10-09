@@ -1,0 +1,46 @@
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 1)
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core stage failed: deepseek:tool_plan:ai_core_required_tool_missing (попытка 2)
+[Nest] 87813  - 10/09/2026, 10:53:46 AM    WARN [AiCoreModelService] AI Core provider failed: deepseek:ai_core_required_tool_missing
+FAIL src/ai-tools/ai-core-recorded-private.spec.ts
+  ● recorded ADMIN private request with synthetic transport only › clarifies archived attempt 5 with one fake request and no final-model stage
+
+    ServiceUnavailableException: MAYA AI is temporarily unavailable.
+
+      688 |     }
+      689 |
+    > 690 |     throw new ServiceUnavailableException({
+          |           ^
+      691 |       message: 'MAYA AI is temporarily unavailable.',
+      692 |       error: {
+      693 |         code: 'ai_model_unavailable',
+
+      at AiCoreModelService.decide (ai-tools/ai-core-model.service.ts:690:11)
+      at ai-tools/ai-core-recorded-private.spec.ts:96:20
+
+  ● recorded ADMIN private request with synthetic transport only › clarifies archived attempt 6 with one fake request and no final-model stage
+
+    ServiceUnavailableException: MAYA AI is temporarily unavailable.
+
+      688 |     }
+      689 |
+    > 690 |     throw new ServiceUnavailableException({
+          |           ^
+      691 |       message: 'MAYA AI is temporarily unavailable.',
+      692 |       error: {
+      693 |         code: 'ai_model_unavailable',
+
+      at AiCoreModelService.decide (ai-tools/ai-core-model.service.ts:690:11)
+      at ai-tools/ai-core-recorded-private.spec.ts:96:20
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 passed, 4 total
+Snapshots:   0 total
+Time:        0.379 s
+Ran all test suites within paths "src/ai-tools/ai-core-recorded-private.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-replay-defects-20261009/admin/red.json

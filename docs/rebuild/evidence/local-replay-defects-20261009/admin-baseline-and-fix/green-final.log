@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.264 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core-recorded-private.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-replay-defects-20261009/admin/green-final.json
