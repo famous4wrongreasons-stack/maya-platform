@@ -1,0 +1,15 @@
+✔ owner repeated clarification is semantic FAIL despite complete safe response (0.527166ms)
+✔ safe unresolved archival answer stays a failed progression, without inventing acceptance (0.052167ms)
+✔ actual time prose alone does not establish canonical selected preview (0.323125ms)
+✔ general role refusal and no provider output remain semantic diagnostics, not fake model coverage (0.042292ms)
+✔ ungraded cases remain explicit; finite B fixture partition and invalid observation fail closed (0.218583ms)
+✔ runner summary preserves semantic FAIL and rejects incomplete/foreign coverage (0.438708ms)
+✔ selected-time proof requires exact returned review slot, source capability and owned tenant (0.22825ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32.779791

@@ -1,0 +1,10 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START conversation
+{"status":"failed","clusterStopped":true,"output":"/private/tmp/maya-union-dry-20261009","manifestSha256":"bcce9576beb200047fd9c3a3efd569aa535e25e13275c9a749c7c69b6da8e96d","qualification":"DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY"}

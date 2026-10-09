@@ -1,0 +1,39 @@
+✔ dry manifest has no admission authority and needs no permit (3.726958ms)
+✔ B exact frozen manifest is inert, and A/B scope, cases, budget or profile substitutions refuse (4.909458ms)
+✔ union manifest binds all nine dialogues and eighteen turns without admission authority (3.025375ms)
+✔ union refuses old A/B permits before claim; its synthetic permit is single-use and expires at thirty minutes (13.850041ms)
+✔ union observes revocation and cannot resume with restored permit bytes (11.32575ms)
+✔ B synthetic expired-in-2000 permit uses its twenty-minute ceiling; A remains ten minutes (15.521875ms)
+✔ B rejects an A permit and observes revocation before another dispatch (10.788542ms)
+✔ B synthetic admission rejects each cross-profile callback binding independently (15.900625ms)
+✔ broker exclusively claims once; separate runner observes the same claim without another ledger (13.962958ms)
+✔ declaration cannot be forged in memory, repinned to another scope, or used by another principal (1.25375ms)
+✔ live target requires a closed Unix socket declaration in a dedicated direct parent (4.395791ms)
+✔ permit and consumer must use the exact socket path and group pinned in the manifest (1.807792ms)
+✔ closed manifest rejects old contracts, widened limits, altered cases and malformed sources (2.998083ms)
+✔ fresh permit must bind every scope and current bounded pricing attestation (5.641667ms)
+✔ revocation after claim refuses the next dispatch permanently, including after restoring bytes (16.96375ms)
+✔ same-byte replacement of pinned manifest refuses before dispatch (17.679666ms)
+✔ claim deletion and alternate binding never reset admission (7.788875ms)
+✔ expiry and backwards wall clock stop the existing admission (13.282583ms)
+✔ backwards time and expiry during the synchronous file validation refuse (14.784625ms)
+✔ symlink, hardlink, writable metadata, missing SHA and oversized file refuse (2.602792ms)
+✔ noncanonical duplicate keys and parent symlinks refuse without echoing private input (1.339958ms)
+✔ local manifests require the explicit opt-in; remote never infers authority from equal UIDs (2.760542ms)
+✔ local opt-in cannot admit an ordinary remote or dry manifest (1.1005ms)
+✔ local owner mode claims once and permits the same owner runner, with no credential I/O (10.43575ms)
+✔ local socket outer root and parent must remain private, canonical and owned (1.750208ms)
+✔ local admission refuses Linux and wrong GID before a claim (1.631167ms)
+✔ local revocation halts the existing claim without replay (10.270208ms)
+✔ local expired permit cannot prompt or claim (1.32125ms)
+✔ the default A and explicit B and union are immutable closed profiles (1.771166ms)
+✔ B is exactly the first six frozen cases with group as the sole case addition (0.573375ms)
+✔ union is the exact ordered A+B cases with a pooled fixed cap and no execution authority (0.380583ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 285.608791
