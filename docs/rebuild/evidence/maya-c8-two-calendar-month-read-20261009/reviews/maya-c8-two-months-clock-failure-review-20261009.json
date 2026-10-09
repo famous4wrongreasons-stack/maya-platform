@@ -1,0 +1,173 @@
+{
+  "contract": "maya.c8-two-months-clock-failure-independent-review/1",
+  "reviewedAt": "2026-10-09T19:05:29.433675+00:00",
+  "reviewMode": "READ_ONLY_SOURCE_AND_EXISTING_R1_ARTIFACTS",
+  "sourceCommit": "602c9e257504abded8767297151e615808959fbf",
+  "r1Status": "FAIL",
+  "verdict": "OBSERVED_NON_MONOTONIC_DB_WALL_TIME; HOST_MECHANISM_NOT_PROVEN",
+  "timestampsUtc": {
+    "admittedAt": "2026-10-09T19:01:53.470Z",
+    "startedAt": "2026-10-09T19:01:53.473Z",
+    "settledAt": "2026-10-09T19:01:53.452Z",
+    "postgresErrorLog": "2026-10-09T19:01:53.454Z",
+    "selectionAsOf": "2026-10-09T19:01:53.422Z"
+  },
+  "computedDifferencesMs": {
+    "settledMinusAdmitted": -18,
+    "settledMinusStarted": -21,
+    "errorLogMinusStarted": -19
+  },
+  "exactConstraint": "C9WorkReceipt_time_ck requires admittedAt < retentionUntil, startedAt absent or >= admittedAt, settledAt absent or >= admittedAt. It does not separately compare settledAt against startedAt.",
+  "failedPredicate": "settledAt >= admittedAt is false by 18ms.",
+  "sourceTrace": [
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.store.ts",
+      "line": 122,
+      "observation": "Every C9 transaction reads current principal, then SELECT clock_timestamp() now, then passes that Date to the work callback."
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.work.ts",
+      "line": 166,
+      "observation": "reserve stores admittedAt from its own transaction clock."
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.work.ts",
+      "line": 268,
+      "observation": "claim stores startedAt from a later transaction clock."
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.work.ts",
+      "line": 335,
+      "observation": "settle stores settledAt from its transaction clock, not selection.asOf or usage.verifiedAt."
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "line": 563,
+      "observation": "The affected path awaits reserve, then claim, then selection/context/revision, and finally settlement. No overlapping invocation accounts for earlier settlement sampling here."
+    },
+    {
+      "path": "maya-saas-backend/src/prisma/canonical-utc-transaction.ts",
+      "line": 9,
+      "observation": "UTC wrapper only sets the transaction timezone and isolation/timeout options; it does not replace database or process time."
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260913160000_chapter9_orchestration_foundation/migration.sql",
+      "line": 216,
+      "observation": "The existing CHECK rejected the actual attempted row; it was not weakened for this proof."
+    }
+  ],
+  "inference": [
+    "The sequential real DB clock samples, plus the PostgreSQL error-log wall timestamp before the persisted startedAt, support a backwards wall-clock observation in this run.",
+    "No timestamp-assignment change is present in the reviewed C8 request/filter delta. The probe and setup do not inject a fake clock or backdate these receipt fields.",
+    "This is not proof of a particular host/NTP/time-sync mechanism, nor a complete exclusion of all timestamp-stack defects. No historical monotonic-versus-wall-clock telemetry was recorded.",
+    "The database refused settlement. R1 is an actual failed/incomplete proof, not a passing test, accepted refusal scenario, or complete end-to-end qualification."
+  ],
+  "r1ObservedScope": {
+    "jestPassedTests": 0,
+    "jestFailedTests": 1,
+    "jestTotalTests": 1,
+    "observationsStatus": "incomplete",
+    "recordedCompletedCases": [
+      "mt-retention_drill_down-0",
+      "mt-retention_drill_down-15",
+      "day60_not_calendar"
+    ],
+    "modelCalls": 6,
+    "realModelCalls": 0,
+    "externalFetchCalls": 0,
+    "sourceUnchanged": true,
+    "clusterStopped": true,
+    "postgresShutdownLinePresent": true,
+    "restartResumeCompleted": false
+  },
+  "retryQualification": "One new isolated proof attempt on identical committed source can provide another observation. Preserve R1 unchanged as FAIL. Repeated inversion should stop the proof and trigger focused diagnosis; do not clamp timestamps, rewrite constraints, add unbounded retries or reuse the failed receipt.",
+  "currentClockSamplingQualification": "The parent reported a later finite OS clock sample with no backwards observation. That sample cannot establish or refute the historical cause of R1. No clock sampling was performed by this reviewer.",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.store.ts",
+      "bytes": 28008,
+      "sha256": "2b22a7ce2dae9d9d045ba3bb14514ff88ff0f402381649ca7482b0b679225674",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.work.ts",
+      "bytes": 18901,
+      "sha256": "9752b80b35503b7d54b0c3af06999c0d4c98130faaabaaa6bd6949aec5c451a3",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "bytes": 53899,
+      "sha256": "e090efcc92504db063b606347c0aecd703c97eaed99e004a30e12d2c19395961",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+      "bytes": 6597,
+      "sha256": "4a5ab71fb38ff988e03b4e89897567db1cf172a7218c426f7474d78851166cf8",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/src/prisma/canonical-utc-transaction.ts",
+      "bytes": 1081,
+      "sha256": "3200b84f3d658d85ab3f1d14ab8f0ab1e2cc6de7e2b2b8bec2cc0bc7737a77a0",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/prisma/migrations/20260913160000_chapter9_orchestration_foundation/migration.sql",
+      "bytes": 54942,
+      "sha256": "6b5a9490e5630fa2125c3792e2cc1bee687113af3089df359017b9aed5889b8e",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/lifecycle-calendar-read-restart.probe-spec.ts",
+      "bytes": 46153,
+      "sha256": "3cd2bed1d14321809a3d6ca3271f24dac72ff1a5c1f2785343ba7175e8b87c47",
+      "matchesExactGitAndR1Manifest": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/setup-environment.ts",
+      "bytes": 299,
+      "sha256": "33548e5204b8716353ec72888d93f50bb09627a85820a49b8029d42407429fa3",
+      "matchesExactGitAndR1Manifest": true
+    }
+  ],
+  "artifactBindings": [
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r1/postgres.log",
+      "bytes": 3563,
+      "sha256": "1ca93c1f40a32851033b136e5e04de662b5e0d53a9be709fb23a7dec7971c989"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r1/prepare.log",
+      "bytes": 6161,
+      "sha256": "7577700c6380e44e2f6d8a94754595d25563468794e6b960794a19c94c69de94"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r1/manifest.json",
+      "bytes": 233271,
+      "sha256": "ce1aa99f95fd1b6963fd6ee8d0b7b1f317835a813ee12378c91527265a4c4da2"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r1/prepare-observations.json",
+      "bytes": 15178,
+      "sha256": "621f36992c51e273c1de800eec04f52277c68fc4863345abfa0bab61a3e51fcb"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r1/prepare-jest.json",
+      "bytes": 2931,
+      "sha256": "f0dc7955505456b3afffdee20b9d56747de5b1496a22301e91afa3fc871986d8"
+    }
+  ],
+  "separation": {
+    "r2": "Running separately at request time; not read, graded or incorporated in this diagnosis.",
+    "original81": "Unchanged and not reclassified.",
+    "privateData": "No private restart receipt, credentials or terminal input read. Raw log hashes bind evidence without copying failing-row identifiers or lease material into this report."
+  },
+  "reviewerActions": {
+    "testsRun": 0,
+    "servicesStarted": 0,
+    "networkCalls": 0,
+    "sourceEdits": 0
+  }
+}

@@ -1,0 +1,7 @@
+
+Test Suites: 8 passed, 8 total
+Tests:       208 passed, 208 total
+Snapshots:   0 total
+Time:        1.183 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.lifecycle-two-months.spec.ts", "src/valuation/c8.read.two-months.spec.ts", "src/ai-tools/owner-review-plan.spec.ts", "src/orchestration/c9.lifecycle-presentation.spec.ts", "src/orchestration/c9.lifecycle-source.spec.ts", "src/orchestration/c9.lifecycle.spec.ts", "src/orchestration/c9.business-lifecycle.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-c8-two-months-target-r2-20261009.json

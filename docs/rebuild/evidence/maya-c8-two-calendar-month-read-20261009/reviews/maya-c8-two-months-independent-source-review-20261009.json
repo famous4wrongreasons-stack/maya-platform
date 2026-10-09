@@ -1,0 +1,189 @@
+{
+  "contract": "maya.c8-two-months-independent-source-review/1",
+  "reviewedAt": "2026-10-09T19:01:02.945163+00:00",
+  "reviewer": "independent_review",
+  "mode": "READ_ONLY_STATIC_SOURCE_REVIEW",
+  "repository": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics",
+  "baseCommit": "dd042cd6cd5365fd0abf8674f849e11aeda823da",
+  "sourceState": "Committed clean candidate 602c9e257504abded8767297151e615808959fbf at hash capture. All 17 reviewed file hashes match exact Git and current clean reviewed paths. baseCommit is the implementation baseline.",
+  "verdict": "QUALIFIED_NO_REMAINING_BLOCKER_IN_REVIEWED_DELTA",
+  "openDeltaBlockers": [],
+  "files": {
+    "production": [
+      {
+        "path": "maya-saas-backend/src/valuation/c8.read.ts",
+        "bytes": 26628,
+        "sha256": "648e2de2841fb731cba63340ee3945acca4c42502271487afeca4e507e8249a0"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts",
+        "bytes": 7664,
+        "sha256": "7d305837f3954152f34f5eb052f5f393c484afdd169851528d73af86245c998a"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+        "bytes": 6597,
+        "sha256": "4a5ab71fb38ff988e03b4e89897567db1cf172a7218c426f7474d78851166cf8"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+        "bytes": 53899,
+        "sha256": "e090efcc92504db063b606347c0aecd703c97eaed99e004a30e12d2c19395961"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/owner-review-plan.ts",
+        "bytes": 12259,
+        "sha256": "cf327f702af4a7be420616fca90b87d24364547f7275b1ec0da0a8fb2f665465"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "bytes": 390022,
+        "sha256": "75fcdeafb2794a3456b5d2e2dc9165bdd24fe8bc075fa7f8620b21e8741d8278"
+      }
+    ],
+    "proof": [
+      {
+        "path": "maya-saas-backend/scripts/lifecycle-calendar-read-proof.mjs",
+        "bytes": 11427,
+        "sha256": "b13523676ac7a0f3c137cf163e5f46941983714fea56db54c8c84696db148f95"
+      },
+      {
+        "path": "maya-saas-backend/scripts/lifecycle-calendar-read-proof.test.mjs",
+        "bytes": 3681,
+        "sha256": "021b2fac79b95927b8215e19e65a6d03cbaad099ac5d4a00d6007bcf2b3ac604"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/lifecycle-calendar-read-restart.probe-spec.ts",
+        "bytes": 46153,
+        "sha256": "3cd2bed1d14321809a3d6ca3271f24dac72ff1a5c1f2785343ba7175e8b87c47"
+      }
+    ],
+    "supportingTests": [
+      {
+        "path": "maya-saas-backend/src/valuation/c8.time.spec.ts",
+        "bytes": 3083,
+        "sha256": "52e8d1b4e9d6d91e75c90fd22bc9706621c154bdf4828454b3c0807d8188d9ed"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.deterministic.spec.ts",
+        "bytes": 12027,
+        "sha256": "2593e66df845df753a055dd08512f63304cca9b23dff9de89c6db6d6a74f724a"
+      },
+      {
+        "path": "maya-saas-backend/src/valuation/c8.read.two-months.spec.ts",
+        "bytes": 17039,
+        "sha256": "e555bd52b4499200df0893f784b6cd6498bc241b770e683d10726fc50b0ce612"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.spec.ts",
+        "bytes": 5711,
+        "sha256": "e3e31cbe47af154b52c6639d515797d9d5b74ac05416481197a008bbb405e1a8"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.spec.ts",
+        "bytes": 9820,
+        "sha256": "5784e21242ff18e54bc158bfb87d187b72672f45d224a4fce2bcba4d3814cce3"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle.spec.ts",
+        "bytes": 20238,
+        "sha256": "52ee8f8debd4dbf87168766dc3bd63aa0c1e2bd9ab65f1950e4f5caddf3e4fed"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts",
+        "bytes": 16592,
+        "sha256": "16596d63c1c9a343fb1ede9ee40e9b75c8934256f978a1d66564725073bb5c32"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-core.lifecycle-two-months.spec.ts",
+        "bytes": 13832,
+        "sha256": "01a5970cd1e4d6653987a7790cfbe90329e528ed77b09634b497d209f8722d98"
+      }
+    ]
+  },
+  "scope": [
+    "Exact singleton owner web clients.dormant_list semantic request with period more_than_two_months; no generic role/tool/permission widening.",
+    "Existing C8 published result READ constrained to current confirmed policy calendar_month count 2, comparison gt, proven_attendance, and empty raw branch/service scope.",
+    "C9 normalized immutable request, admission/work identity, finite receipt, source-capped revision, current snapshot fence and replay without rediscovery.",
+    "Supplemental finite HTTP/PG driver and probe source, actual canonical parser/A22/C7/C8/C9 calls with scripted planning and synthetic internal appointments.",
+    "Added boundary and negative test source only; no reviewer execution."
+  ],
+  "supportedSourceFindings": [
+    "C8 matching policy/rule/scope predicates are applied before the three-result page limit; unrelated newer day/gte/scoped results cannot consume that page.",
+    "C8 presentation and snapshotDormancy preserve current access, exact policy revision/hash, source publication/currentness/expiry and raw scope checks; stale/missing/mismatch results do not become an empty cohort claim.",
+    "The exact request matcher uses literal COMPLETE/PARTIAL, not coercion. Additional constraints, unresolved references, compound requests and non-owner surfaces do not enter this finite path.",
+    "Request is normalized and frozen before awaits. Its effective digest enters the existing C9 admission/work identity and receipt; optional fields remain omitted for unconstrained legacy calls.",
+    "Saved replay restores the exact request/source digest/revision. It repeats current source readability and policy qualification, without selection of successor sources.",
+    "No contact permission, client identities, cohort completeness, ranking/regularity, prediction or source mutation is conferred by the response.",
+    "Probe prepares actual A22 confirmed policy and canonical C7/C8 publication before its observed no-business-write perimeter. Source observers call through; the late fault delays an unchanged real source projection.",
+    "Driver admits a fresh exact loopback DB namespace/user on a nondefault port, strips ambient provider/model/DB options, checks source/HEAD/clean pins and performs independent owned-PG stop in finally."
+  ],
+  "closedReviewFindings": [
+    {
+      "id": "EXACT_COMPLETENESS",
+      "resolution": "Exact lifecycle request matcher now requires literal COMPLETE or PARTIAL; malformed array-shaped completeness cannot match."
+    },
+    {
+      "id": "HISTORY_REPLAY_ORACLE",
+      "resolution": "Probe saves the actual HISTORICAL replay completion identity/reply separately, then checks that exact persisted completion and history API row after restart; initial response remains separately recorded."
+    },
+    {
+      "id": "RETENTION_OWNER_ORACLE",
+      "resolution": "Probe asserts strategy revision validUntil/retentionUntil against C8 expiry. Work remains independently retained and contains only a finite result without subject-linked source refs."
+    },
+    {
+      "id": "WORK_HASH_LAYER_ORACLE",
+      "resolution": "Probe computes canonical outer call-intent/1 using the exact constrained inner lifecycle-request/1 hash and independently specified finite reservation/registry fields."
+    },
+    {
+      "id": "LATE_SOURCE_BOUNDARY",
+      "resolution": "Probe pauses the second generic snapshot after settlement: the facts projection after the initial reference check. Final snapshotDormancy is expected to refuse with exact 404 c8_result_unavailable; status alternatives were not widened."
+    }
+  ],
+  "calendarQualification": {
+    "reviewedCases": [
+      "2025-12-31T12:34:56.789Z + 2 UTC calendar months = 2026-02-28T12:34:56.789Z; differs from 60 elapsed days.",
+      "2023-12-31T12:34:56.789Z + 2 UTC calendar months = 2024-02-29T12:34:56.789Z.",
+      "America/New_York: 2026-01-15T17:34:56.789Z -> 2026-03-15T16:34:56.789Z preserves local noon across spring offset change.",
+      "America/New_York: 2026-09-15T16:34:56.789Z -> 2026-11-15T17:34:56.789Z preserves local noon across fall offset change.",
+      "Strict gt controls at forward deadline minus 1ms / equality / plus 1ms, and month-end noninvertibility versus a backwards cutoff."
+    ],
+    "preexistingLimitation": "Shared localDateMinuteToUtc target-gap/fold disambiguation is unchanged and not qualified by the noon tests. Static concern: shifting NY 2026-01-08 02:30 by two months targets nonexistent 2026-03-08 02:30; the existing iterative converter lacks a civil round-trip refusal. No all-DST or arbitrary-wall-time arithmetic acceptance is claimed.",
+    "httpBoundaryClaim": false,
+    "httpClock": "Probe uses genuine server T0 and visits deliberately far from the threshold; unit boundaries are separate."
+  },
+  "execution": {
+    "reviewerTestsRun": 0,
+    "reviewerServicesStarted": 0,
+    "reviewerNetworkCalls": 0,
+    "reviewerSourceEdits": 0,
+    "actualHttpPgEvidenceReviewed": false,
+    "rootReportedChecks": {
+      "componentTestsPassed": 339,
+      "driverTestsPassed": 4,
+      "productionTypes": "PASS",
+      "finalScopedTypesAndLint": "PASS (parent reported after source review)"
+    },
+    "rootReportedChecksQualification": "Communicated by parent; not independently rerun or recounted by this static review. Final scoped checks and actual HTTP/PG evidence are separate."
+  },
+  "limits": [
+    "No actual HTTP/PG/restart result exists in this source review. The new proof remains a candidate until the parent executes and reviews its artifacts.",
+    "Only the two exact frozen initial utterances are supplemental. Same source family is not independent language coverage; scripted planner JSON is not real-model understanding.",
+    "At most three published evaluations, potentially partial and at their original as-of instants. No named full cohort, regularity/ranking follow-ups or all six retention goals are accepted.",
+    "Replay zero means zero rediscovery/new C8 computation, not zero current C8 snapshot/policy/access READs.",
+    "Setup A22 confirmations and synthetic appointment/client publication are explicit fixture writes. No-business-effects assertions apply only to the declared post-setup recorder/hash perimeter with separately labeled policy transitions.",
+    "Driver cleanup owns direct stages and one PG cluster; source inspection alone does not establish process-group absence or actual cleanup.",
+    "No original 81-row corpus, old raw report, evaluator or old classification is changed or requalified by this review.",
+    "No production provider, model, website, schema, autonomy, new business policy or permission qualification; no full-MAYA/C10 completion."
+  ],
+  "sourceCommit": "602c9e257504abded8767297151e615808959fbf",
+  "commitBinding": {
+    "filesVerified": 17,
+    "productionFiles": 6,
+    "proofFiles": 3,
+    "supportingTestFiles": 8,
+    "gitAndCurrentExact": true,
+    "reviewedPathsClean": true
+  },
+  "observedHeadAtHashCapture": "602c9e257504abded8767297151e615808959fbf"
+}

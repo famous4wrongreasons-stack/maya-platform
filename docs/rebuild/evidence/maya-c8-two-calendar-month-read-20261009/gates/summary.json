@@ -1,0 +1,132 @@
+{
+  "sourceHead": "602c9e257504abded8767297151e615808959fbf",
+  "baseline": "dd042cd6cd5365fd0abf8674f849e11aeda823da",
+  "original81": {
+    "PASS": 57,
+    "semanticFAIL": 0,
+    "unsupported": 12,
+    "insufficient": 10,
+    "clarification_pending": 2,
+    "reclassified": false
+  },
+  "finalChecks": {
+    "targetTests": 208,
+    "regressionTests": 131,
+    "totalUniqueComponentTests": 339,
+    "driverTests": 4,
+    "productionTypes": "PASS",
+    "scopedTypes": "PASS",
+    "lint": "PASS"
+  },
+  "attempts": {
+    "maya-c8-two-months-plan-red-20261009.json": {
+      "success": false,
+      "numTotalTests": 9,
+      "numPassedTests": 0,
+      "numFailedTests": 1,
+      "numPendingTests": 8,
+      "numTotalTestSuites": 1,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 1
+    },
+    "maya-c8-two-months-routing-red-20261009.json": {
+      "success": false,
+      "numTotalTests": 20,
+      "numPassedTests": 13,
+      "numFailedTests": 7,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 1,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 1
+    },
+    "maya-c8-two-months-target-r1-20261009.json": {
+      "success": false,
+      "numTotalTests": 59,
+      "numPassedTests": 58,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 3,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 1
+    },
+    "maya-c8-two-months-target-r2-20261009.json": {
+      "success": true,
+      "numTotalTests": 208,
+      "numPassedTests": 208,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 8,
+      "numPassedTestSuites": 8,
+      "numFailedTestSuites": 0
+    },
+    "maya-c8-two-months-routing-red-fixture-r0-20261009.json": {
+      "success": false,
+      "numTotalTests": 20,
+      "numPassedTests": 2,
+      "numFailedTests": 18,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 1,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 1
+    },
+    "maya-c8-two-months-regression-r1-20261009.json": {
+      "success": false,
+      "numTotalTests": 33,
+      "numPassedTests": 33,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 8,
+      "numPassedTestSuites": 3,
+      "numFailedTestSuites": 5
+    },
+    "maya-c8-two-months-regression-r2-20261009.json": {
+      "success": true,
+      "numTotalTests": 131,
+      "numPassedTests": 131,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 11,
+      "numPassedTestSuites": 11,
+      "numFailedTestSuites": 0
+    }
+  },
+  "qualifications": [
+    "Synthetic/scripted routing and fixtures, not real-model acceptance",
+    "No whole client list or contact authority",
+    "Calendar unit boundaries are separate from actual HTTP server time",
+    "Pre-existing nonexistent/ambiguous DST target is not qualified"
+  ],
+  "finalCodeProofHead": "46119888ec1558561e50a2ea8057851e010b6bc0",
+  "finalHttpPg": {
+    "attempt": "r3",
+    "status": "PASS",
+    "prepareAssertions": 997,
+    "resumeAssertions": 463,
+    "tests": 2,
+    "skipped": 0,
+    "chats": 15,
+    "chatStatuses": {
+      "201": 13,
+      "401": 1,
+      "404": 1
+    },
+    "scriptedPlannerCalls": 14,
+    "realModelCalls": 0,
+    "externalFetchCalls": 0,
+    "sourceBindings": 1866,
+    "sourceUnchanged": true,
+    "ownedClusterStopped": true
+  },
+  "attemptNotes": {
+    "routing-red-fixture-r0": "Invalid advertised tool registry fixture; retained separately, not canonical RED.",
+    "plan-red": "Expected ready/actual clarify on baseline.",
+    "routing-red": "7 expected missing-route failures;13 controls passed.",
+    "target-r1": "New exact request needed separate treatment of pending unscoped clarification; corrected in owner continuation.",
+    "regression-r1": "Five mistyped nonexistent spec paths;33 assertions in actual three suites passed.",
+    "types-r1": "Incorrect c9Object arity; corrected closed normalizer.",
+    "lint-r1": "Validated string casting and three proof-only unsafe types corrected.",
+    "http-r1": "Actual backwards timestamp observation; failure retained, no clamp/schema/runtime retry.",
+    "http-r2": "HTTP AsyncLocalStorage attribution oracle failure; exact indexed A22 correction independently reviewed.",
+    "http-r3": "PASS; no source changes during run."
+  }
+}

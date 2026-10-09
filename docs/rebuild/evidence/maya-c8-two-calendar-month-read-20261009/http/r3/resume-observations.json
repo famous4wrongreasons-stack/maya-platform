@@ -1,0 +1,216 @@
+{
+  "contract": "maya.lifecycle-calendar-http-proof/1",
+  "stage": "resume",
+  "status": "passed",
+  "sourceHead": "46119888ec1558561e50a2ea8057851e010b6bc0",
+  "sourceDigest": "edf268383e5405630666738299d2daa5b900c713e834604de1191d1f522e8747",
+  "datasetSha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "source": "SYNTHETIC_INTERNAL_APPOINTMENTS_CANONICAL_A22_C7_C8",
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "original81Reclassification": false,
+  "fullCohortAcceptance": false,
+  "calendarBoundaryEqualityAcceptance": false,
+  "controlledA22Transitions": [
+    {
+      "phase": "EXPLICIT_POLICY_TRANSITION",
+      "interval": {
+        "startInclusive": 478,
+        "endExclusive": 524
+      },
+      "operationIndices": [
+        499,
+        514,
+        516,
+        520,
+        521,
+        522,
+        523
+      ],
+      "operationKeys": [
+        "ActionAttempt:create",
+        "ActionAttempt:update",
+        "ActionExecution:create",
+        "ActionExecution:update",
+        "ActionExecution:update",
+        "ActionTargetMutation:create",
+        "TenantBusinessConfigurationRevision:create"
+      ],
+      "tenantHash": "f78932a816b45dcda715aee7e835731b95d29608a6d67fd21a6aa2a302b44342",
+      "actorHash": "e38110aca1c88fb4b289619342511e5cc391c96888ea8c2fa91cebdbb8c1ac49",
+      "executionHash": "4fde34d1848ef11bac3ec321ed601e1477ec527dc7277abc5d48a50a274bcc8b",
+      "attemptHash": "408b56e2547cb3d6f44144f74fc71f83e48804e9810a619a9c5dbe2ce70a7935",
+      "mutationHash": "fb81bd5042152db07dad89cd7b9228bd35b0ad0d2f3ad108e159ee3a45549796",
+      "revisionHash": "c9c0326d4037ef191bd87b67d79bf8b391461de7fa5bb4f9c085cc36bc0b38fb",
+      "namespace": "c8_valuation",
+      "revision": 2,
+      "contentHash": "022b89e716c2dce4e9606902a3a03e0424435e1dea179a44d0a9ea6ffe6080bd",
+      "exactNewRowCounts": {
+        "executions": 1,
+        "attempts": 1,
+        "mutations": 1,
+        "revisions": 1
+      },
+      "priorRowsUnchanged": true
+    },
+    {
+      "phase": "EXPLICIT_POLICY_TRANSITION",
+      "interval": {
+        "startInclusive": 1398,
+        "endExclusive": 1444
+      },
+      "operationIndices": [
+        1419,
+        1434,
+        1436,
+        1440,
+        1441,
+        1442,
+        1443
+      ],
+      "operationKeys": [
+        "ActionAttempt:create",
+        "ActionAttempt:update",
+        "ActionExecution:create",
+        "ActionExecution:update",
+        "ActionExecution:update",
+        "ActionTargetMutation:create",
+        "TenantBusinessConfigurationRevision:create"
+      ],
+      "tenantHash": "b116299203b14c99b1adc69d7fdff1506906b17293db340657d754f560ab4842",
+      "actorHash": "f55834f315aef4c56f7547edcb3069f6e4e583f75eb4ed0d6caf716cf182662b",
+      "executionHash": "4bf029d9a6b861ff293f07168d49cd2a49381a84040768ffc9100d0080ee78c8",
+      "attemptHash": "88a06099deefb701137bf84093322632a81bce5f92be5772a98ee0dd72b74756",
+      "mutationHash": "194049432da2e67ff9b2b690564bf22e9323ce6e6f77b25bd9745e3faa647979",
+      "revisionHash": "10a4233cb5176a0061e25e6b575c70581f913365712d1a8cc34b91cc416a7400",
+      "namespace": "c8_valuation",
+      "revision": 2,
+      "contentHash": "022b89e716c2dce4e9606902a3a03e0424435e1dea179a44d0a9ea6ffe6080bd",
+      "exactNewRowCounts": {
+        "executions": 1,
+        "attempts": 1,
+        "mutations": 1,
+        "revisions": 1
+      },
+      "priorRowsUnchanged": true
+    }
+  ],
+  "cases": [
+    {
+      "case": "restart_replay_mt-retention_drill_down-0",
+      "status": 201,
+      "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nОценка 1: По оценке на 09.10.2026, 19:09:21,431 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Интервал правила: 2 календарных месяца с последнего подтверждённого посещения. Условие выполняется строго после окончания этого интервала. Месяцы отсчитываются по местному времени (America/New_York), с ограничением даты последним днём месяца. Правило допускает частичное покрытие исходных данных. Правило не ограничено отдельными услугами. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+      "replyHash": "4099a8dd03f2dcef5471777e9c7c7de37cd638594fb6ac6b204b6d3691f48d73",
+      "outcome": "HISTORICAL",
+      "modelCalls": 1,
+      "discoveryCalls": 0,
+      "exactImmutableGraph": true,
+      "historyRestored": true
+    },
+    {
+      "case": "restart_replay_mt-retention_drill_down-15",
+      "status": 201,
+      "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nОценка 1: По оценке на 09.10.2026, 19:09:21,431 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Интервал правила: 2 календарных месяца с последнего подтверждённого посещения. Условие выполняется строго после окончания этого интервала. Месяцы отсчитываются по местному времени (America/New_York), с ограничением даты последним днём месяца. Правило допускает частичное покрытие исходных данных. Правило не ограничено отдельными услугами. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+      "replyHash": "4099a8dd03f2dcef5471777e9c7c7de37cd638594fb6ac6b204b6d3691f48d73",
+      "outcome": "HISTORICAL",
+      "modelCalls": 1,
+      "discoveryCalls": 0,
+      "exactImmutableGraph": true,
+      "historyRestored": true
+    },
+    {
+      "case": "current_membership_revoked",
+      "status": 401,
+      "zeroModelAndSourceReads": true
+    },
+    {
+      "case": "policy_revision_changed",
+      "transition": {
+        "revision": 2,
+        "contentHash": "022b89e716c2dce4e9606902a3a03e0424435e1dea179a44d0a9ea6ffe6080bd",
+        "executionHash": "4fde34d1848ef11bac3ec321ed601e1477ec527dc7277abc5d48a50a274bcc8b"
+      },
+      "savedReplay": {
+        "status": 201,
+        "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nВ сохранённой версии нет доступных оценок; для новой проверки нужен новый запрос.\n\nЧасть источников изменилась или недоступна; прежние выводы не используются.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "replyHash": "8905176c4bee79dbebdd32eba8272cf905d62e865a1b1ed1d65809bb2302ae27",
+        "outcome": "STALE",
+        "modelCalls": 1,
+        "discoveryCalls": 0
+      },
+      "fresh": {
+        "status": 201,
+        "reply": "Условие проверки: строго больше двух календарных месяцев после подтверждённого посещения, без ограничения отдельными филиалами или услугами. Учитываются только опубликованные оценки по совпадающему действующему правилу бизнеса.\n\nПодтверждённые оценки сейчас недоступны. Отсутствие оценки не означает, что гости активны или спят.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "replyHash": "74fac3753127e638bc2bbccc5002c9962b701a04d3ac96661453987f6d43c6e9",
+        "outcome": "UNAVAILABLE",
+        "modelCalls": 1,
+        "discoveryCalls": 1
+      },
+      "immutableSourceAndVersion": true
+    },
+    {
+      "case": "late_policy_after_actual_snapshot",
+      "status": 404,
+      "error": "c8_result_unavailable",
+      "transition": {
+        "revision": 2,
+        "contentHash": "022b89e716c2dce4e9606902a3a03e0424435e1dea179a44d0a9ea6ffe6080bd",
+        "executionHash": "4bf029d9a6b861ff293f07168d49cd2a49381a84040768ffc9100d0080ee78c8"
+      },
+      "genuineReadDeliveredUnchanged": true,
+      "finalFence": "CURRENT_C8_SNAPSHOT_DORMANCY_REFUSED",
+      "noProseOrFindings": true,
+      "settledReceiptUnchanged": true
+    }
+  ],
+  "qualifications": [
+    "Only the two frozen initial questions are exercised; regularity and ranking follow-ups remain separate.",
+    "HTTP uses genuine server T0 and immutable published C7/C8; exact equality, month-end and DST arithmetic belong to separate owner unit tests.",
+    "Setup and adversarial A22 transitions are explicit fixture actions, never authority from chat.",
+    "At most three evaluations are exposed, without client identities, audience or contact authority.",
+    "Restart means distinct Node process and PostgreSQL postmaster; no crashed worker or natural expiry recovery claim."
+  ],
+  "restart": {
+    "nodePidChanged": true,
+    "postgresPostmasterChanged": true,
+    "sourceBindingExact": true
+  },
+  "modelCalls": 5,
+  "realModelCalls": 0,
+  "externalFetchCalls": 0,
+  "discoveries": [
+    {
+      "tenantHash": "f78932a816b45dcda715aee7e835731b95d29608a6d67fd21a6aa2a302b44342",
+      "period": "more_than_two_months",
+      "ids": []
+    },
+    {
+      "tenantHash": "b116299203b14c99b1adc69d7fdff1506906b17293db340657d754f560ab4842",
+      "period": "more_than_two_months",
+      "ids": [
+        "e82610e27f19f95fc6192b55caf33ee4044f58ecbd78c0f33845e61f0cfda6cd"
+      ]
+    }
+  ],
+  "snapshotReads": [
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "dced2094d5b25f1157133318249c5817c442cea769938a5916bbe38968eb2f0e",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19",
+    "d5ce9e58fbae2454a7f958d1c1de6b3f2758ba71586a100d557cfbc8f9cb3b19"
+  ]
+}

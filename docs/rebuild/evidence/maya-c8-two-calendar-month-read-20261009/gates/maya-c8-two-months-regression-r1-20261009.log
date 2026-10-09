@@ -1,0 +1,41 @@
+FAIL src/orchestration/c9.work.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/orchestration/c9.work.spec.ts'
+
+      at runTestInternal (../../../maya-development-integration/maya-saas-backend/node_modules/jest-runner/build/index.js:133:27)
+
+FAIL src/orchestration/c9.store.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/orchestration/c9.store.spec.ts'
+
+      at runTestInternal (../../../maya-development-integration/maya-saas-backend/node_modules/jest-runner/build/index.js:133:27)
+
+FAIL src/orchestration/c9.sources.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/orchestration/c9.sources.spec.ts'
+
+      at runTestInternal (../../../maya-development-integration/maya-saas-backend/node_modules/jest-runner/build/index.js:133:27)
+
+FAIL src/valuation/c8.policy.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/valuation/c8.policy.spec.ts'
+
+      at runTestInternal (../../../maya-development-integration/maya-saas-backend/node_modules/jest-runner/build/index.js:133:27)
+
+FAIL src/valuation/c8.read.spec.ts
+  ● Test suite failed to run
+
+    ENOENT: no such file or directory, open '/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/valuation/c8.read.spec.ts'
+
+      at runTestInternal (../../../maya-development-integration/maya-saas-backend/node_modules/jest-runner/build/index.js:133:27)
+
+Test Suites: 5 failed, 3 passed, 8 total
+Tests:       33 passed, 33 total
+Snapshots:   0 total
+Time:        0.492 s
+Ran all test suites within paths "src/valuation/c8.time.spec.ts", "src/valuation/c8.deterministic.spec.ts", "src/valuation/c8.read.spec.ts", "src/valuation/c8.policy.spec.ts", "src/orchestration/c9.sources.spec.ts", "src/orchestration/c9.context.spec.ts", "src/orchestration/c9.store.spec.ts", "src/orchestration/c9.work.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-c8-two-months-regression-r1-20261009.json

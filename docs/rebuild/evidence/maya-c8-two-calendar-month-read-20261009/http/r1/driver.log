@@ -1,0 +1,17 @@
+initdb
+pg-start
+createdb
+migrations
+prepare
+file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/c9-occupancy-proof.mjs:90
+          : reject(new Error(`${spec.name} ${timedOut ? 'timed out' : `exited ${code}`}${control.cancelled ? '; cancelled: ' + control.cancelled : ''}; inspect its log`));
+                   ^
+
+Error: prepare exited 1; inspect its log
+    at ChildProcess.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/scripts/c9-occupancy-proof.mjs:90:20)
+    at Object.onceWrapper (node:events:631:26)
+    at ChildProcess.emit (node:events:509:28)
+    at maybeClose (node:internal/child_process:1124:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:306:5)
+
+Node.js v24.15.0

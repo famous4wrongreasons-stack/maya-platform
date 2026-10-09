@@ -1,0 +1,143 @@
+{
+  "contract": "maya.lifecycle-calendar-http-proof/1",
+  "stage": "prepare",
+  "status": "incomplete",
+  "sourceHead": "602c9e257504abded8767297151e615808959fbf",
+  "sourceDigest": "573eee918114b13d562592e12cd8f222a8aeb921c2b320ee03900bbf5170a376",
+  "datasetSha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "source": "SYNTHETIC_INTERNAL_APPOINTMENTS_CANONICAL_A22_C7_C8",
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "original81Reclassification": false,
+  "fullCohortAcceptance": false,
+  "calendarBoundaryEqualityAcceptance": false,
+  "cases": [
+    {
+      "case": "mt-retention_drill_down-0",
+      "utteranceHash": "edde6280742e0f9651246e3f1f1582c1ebe4f95db4cb1bacb527cc5c38f71fad",
+      "supplementalOnly": true,
+      "exactCalendarRequest": true,
+      "matchedBeyondNewestThree": true,
+      "status": 201,
+      "reply": "Условие проверки: строго больше двух календарных месяцев после подтверждённого посещения, без ограничения отдельными филиалами или услугами. Учитываются только опубликованные оценки по совпадающему действующему правилу бизнеса.\n\nОценка 1: По оценке на 09.10.2026, 19:01:50,590 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Интервал правила: 2 календарных месяца с последнего подтверждённого посещения. Условие выполняется строго после окончания этого интервала. Месяцы отсчитываются по местному времени (America/New_York), с ограничением даты последним днём месяца. Правило допускает частичное покрытие исходных данных. Правило не ограничено отдельными услугами. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+      "replyHash": "7bf4cca48b5acb8864d68aefe5472d792ff3a6f19550a87b230e76cc5e0d0881",
+      "outcome": "PARTIAL",
+      "modelCalls": 1,
+      "discoveryCalls": 1,
+      "replay": {
+        "status": 201,
+        "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nОценка 1: По оценке на 09.10.2026, 19:01:50,590 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Интервал правила: 2 календарных месяца с последнего подтверждённого посещения. Условие выполняется строго после окончания этого интервала. Месяцы отсчитываются по местному времени (America/New_York), с ограничением даты последним днём месяца. Правило допускает частичное покрытие исходных данных. Правило не ограничено отдельными услугами. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "replyHash": "d88b029dd21b0ee7829cb81f833b902dc945ba493d11cb837c7e8bea99cb42be",
+        "outcome": "HISTORICAL",
+        "modelCalls": 1,
+        "discoveryCalls": 0
+      },
+      "historyAssistantHash": "707f8aba41ceb5554fda87035e1a4414b60d51975e21279945b4d85021ff4ceb",
+      "historyCompletionHash": "34d127bab97953877d870b60a746c355b645e6dce6da985f90928ac88e9da403",
+      "graphHash": "b975a168f4dc38d57bbe4967500d1d761aa78b3af37d955c00d21867686a381f",
+      "sourceHash": "389aa82703fb8a32652db3e810d68e4ac1a4654844b9f69835094f844cf29f4c",
+      "t0": "2026-10-09T19:01:50.590Z"
+    },
+    {
+      "case": "mt-retention_drill_down-15",
+      "utteranceHash": "25c914e4efcf50277db862c25cd4e3eb2188e2c9ec7fe558c9abd61ad6bd1e63",
+      "supplementalOnly": true,
+      "exactCalendarRequest": true,
+      "matchedBeyondNewestThree": true,
+      "status": 201,
+      "reply": "Условие проверки: строго больше двух календарных месяцев после подтверждённого посещения, без ограничения отдельными филиалами или услугами. Учитываются только опубликованные оценки по совпадающему действующему правилу бизнеса.\n\nОценка 1: По оценке на 09.10.2026, 19:01:50,590 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Интервал правила: 2 календарных месяца с последнего подтверждённого посещения. Условие выполняется строго после окончания этого интервала. Месяцы отсчитываются по местному времени (America/New_York), с ограничением даты последним днём месяца. Правило допускает частичное покрытие исходных данных. Правило не ограничено отдельными услугами. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+      "replyHash": "7bf4cca48b5acb8864d68aefe5472d792ff3a6f19550a87b230e76cc5e0d0881",
+      "outcome": "PARTIAL",
+      "modelCalls": 1,
+      "discoveryCalls": 1,
+      "replay": {
+        "status": 201,
+        "reply": "Сохранённая версия 1; новые оценки не запрашивались. Проверена доступность её источников.\n\nОценка 1: По оценке на 09.10.2026, 19:01:50,590 (UTC) условие давности визитов по правилу бизнеса (версия 1) выполнено. Интервал правила: 2 календарных месяца с последнего подтверждённого посещения. Условие выполняется строго после окончания этого интервала. Месяцы отсчитываются по местному времени (America/New_York), с ограничением даты последним днём месяца. Правило допускает частичное покрытие исходных данных. Правило не ограничено отдельными услугами. Исходные данные неполные.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: По новому запросу проверить актуальность оценок; Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+        "replyHash": "d88b029dd21b0ee7829cb81f833b902dc945ba493d11cb837c7e8bea99cb42be",
+        "outcome": "HISTORICAL",
+        "modelCalls": 1,
+        "discoveryCalls": 0
+      },
+      "historyAssistantHash": "22bd12a7e1cb88024832a0a543a027a5bf34db2f314ab95658a4452ee3eda360",
+      "historyCompletionHash": "34d127bab97953877d870b60a746c355b645e6dce6da985f90928ac88e9da403",
+      "graphHash": "771060bee9b2b16ec34f4f71f445b1c1b9efd6be26d39f17e4f7bfcd23432e09",
+      "sourceHash": "389aa82703fb8a32652db3e810d68e4ac1a4654844b9f69835094f844cf29f4c",
+      "t0": "2026-10-09T19:01:50.590Z"
+    },
+    {
+      "case": "day60_not_calendar",
+      "status": 201,
+      "reply": "Условие проверки: строго больше двух календарных месяцев после подтверждённого посещения, без ограничения отдельными филиалами или услугами. Учитываются только опубликованные оценки по совпадающему действующему правилу бизнеса.\n\nПодтверждённые оценки сейчас недоступны. Отсутствие оценки не означает, что гости активны или спят.\n\nПроверка охватывает до трёх оценок, а не список уникальных клиентов. Охват всей базы не подтверждён.\n\nДавность визита не означает готовность гостя вернуться. Прогноза возврата и разрешения на контакт нет.\n\nВарианты: Ничего не делать.\n\nПредложение сохранено, версия 1. Клиентские записи не менялись, сообщения не отправлялись.",
+      "replyHash": "74fac3753127e638bc2bbccc5002c9962b701a04d3ac96661453987f6d43c6e9",
+      "outcome": "UNAVAILABLE",
+      "modelCalls": 1,
+      "discoveryCalls": 1,
+      "noSubstitutedRule": true
+    }
+  ],
+  "qualifications": [
+    "Only the two frozen initial questions are exercised; regularity and ranking follow-ups remain separate.",
+    "HTTP uses genuine server T0 and immutable published C7/C8; exact equality, month-end and DST arithmetic belong to separate owner unit tests.",
+    "Setup and adversarial A22 transitions are explicit fixture actions, never authority from chat.",
+    "At most three evaluations are exposed, without client identities, audience or contact authority.",
+    "Restart means distinct Node process and PostgreSQL postmaster; no crashed worker or natural expiry recovery claim."
+  ],
+  "modelCalls": 6,
+  "realModelCalls": 0,
+  "externalFetchCalls": 0,
+  "discoveries": [
+    {
+      "tenantHash": "8b12e085840a33c2ac70b99b5c94106d478a3927bff584a6965be5d407700888",
+      "period": "more_than_two_months",
+      "ids": [
+        "9bfe199460842487403c7488d8086a8fc329585cc08ccb0855dfee58fadcc0d2"
+      ]
+    },
+    {
+      "tenantHash": "8b12e085840a33c2ac70b99b5c94106d478a3927bff584a6965be5d407700888",
+      "period": "more_than_two_months",
+      "ids": [
+        "9bfe199460842487403c7488d8086a8fc329585cc08ccb0855dfee58fadcc0d2"
+      ]
+    },
+    {
+      "tenantHash": "41d8988f576353e2c6621ea1085ab107f58b611e233bc6640b8bc3d8e27f412d",
+      "period": "more_than_two_months",
+      "ids": []
+    },
+    {
+      "tenantHash": "964193eea267c0a37a77388fb6a24240043316dd24267ef76eb8e673ef53dbec",
+      "period": "more_than_two_months",
+      "ids": []
+    }
+  ],
+  "snapshotReads": [
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9",
+    "3de41ccf1081ea08b77b78a48bac370b57dc9286ea7b49f15d6466ff3e31d0d9"
+  ]
+}

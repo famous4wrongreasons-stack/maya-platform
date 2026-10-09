@@ -1,0 +1,8 @@
+initdb
+pg-start
+createdb
+migrations
+prepare
+pg-restart
+resume
+Synthetic proof passed; owned services stopped: /private/tmp/maya-c8-two-months-http-20261009-r3

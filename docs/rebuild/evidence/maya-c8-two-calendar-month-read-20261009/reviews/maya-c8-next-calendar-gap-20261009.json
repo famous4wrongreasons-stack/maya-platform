@@ -1,0 +1,531 @@
+{
+  "contract": "maya.c8-next-calendar-gap.readonly-assessment/1",
+  "qualification": "STATIC_SOURCE_ASSESSMENT_NOT_EXECUTED_NOT_ACCEPTANCE",
+  "sourceHead": "602c9e257504abded8767297151e615808959fbf",
+  "observedGitHead": "602c9e257504abded8767297151e615808959fbf",
+  "repoSourceEdited": false,
+  "testsRun": false,
+  "servicesRun": false,
+  "networkCalls": 0,
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.ts",
+      "lineRefs": [
+        "3-15",
+        "16-52"
+      ],
+      "sha256": "02ac99f0426acb3c8a5bf1f2056d49757f393734ab9fc36d676fdad9694a7bff",
+      "bytes": 1616,
+      "gitBlob": "a4e2c548ca3f3dbee125d7184b1b2308b66dd7c5",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/internal-calendar/internal-calendar.utils.ts",
+      "lineRefs": [
+        "43-67"
+      ],
+      "sha256": "7aacc29f984721a0210cce4efea927cb7c8ed38af4bc8d32ec8aa2dd8db7ca23",
+      "bytes": 2727,
+      "gitBlob": "9a94e6e08f0768770188c1bdb2fbcf03e3eb5a60",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.time.spec.ts",
+      "lineRefs": [
+        "36-105"
+      ],
+      "sha256": "52e8d1b4e9d6d91e75c90fd22bc9706621c154bdf4828454b3c0807d8188d9ed",
+      "bytes": 3083,
+      "gitBlob": "021b7ad3347cbfef9a2ddd9338dcc6423cccf982",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.deterministic.ts",
+      "lineRefs": [
+        "56-74",
+        "130-152",
+        "225-245"
+      ],
+      "sha256": "e01998e0fb5ab75e6617b06f8d0be71391ffca4adb94800654dfec84244a80dd",
+      "bytes": 11827,
+      "gitBlob": "9cf15d3da7fd6e33559213aedb4d16f7c72d52b2",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.producer.ts",
+      "lineRefs": [
+        "478-497"
+      ],
+      "sha256": "92757555275617cdbd2c1e14136bb009d16aa8db5649d94a3db72e4502c90944",
+      "bytes": 16990,
+      "gitBlob": "25a84d06752a80b4be1ec93f2107d1c2316666f5",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.worker.ts",
+      "lineRefs": [
+        "35-54"
+      ],
+      "sha256": "d2840520e2988a5cc9097c6edbfe93c49e42e24bf9c4fe2f1c0eb06f8a62b6d4",
+      "bytes": 5318,
+      "gitBlob": "73e036652a2177f9ed40aca84160d5177af64061",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.store.ts",
+      "lineRefs": [
+        "645-656",
+        "699-754",
+        "771-810"
+      ],
+      "sha256": "75eb0a8b7305e3704144a3b58e779735a0389d814216ac847dc2d09db8fb6b48",
+      "bytes": 29198,
+      "gitBlob": "1a140dbe439d802fed0609d15db1868accec1f1f",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.read.ts",
+      "lineRefs": [
+        "40-81",
+        "174-222",
+        "223-255",
+        "575-591"
+      ],
+      "sha256": "648e2de2841fb731cba63340ee3945acca4c42502271487afeca4e507e8249a0",
+      "bytes": 26628,
+      "gitBlob": "6ee7c75dc572c8ac82eb0ecb1b897572e28352b3",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.explanation.ts",
+      "lineRefs": [
+        "9-39",
+        "53-58"
+      ],
+      "sha256": "0baeca5b7711d4be34b8c43ae3313dc5f01622faacac5f60f4bad3e09a0f4d68",
+      "bytes": 3395,
+      "gitBlob": "68719d03dd88c39576d02247ba58f4940fa509eb",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.opportunity.ts",
+      "lineRefs": [
+        "50-69"
+      ],
+      "sha256": "b9b6bde536ec62d4574a150cb4052f0c2209afc42091ad303bb1dcb2ba85e798",
+      "bytes": 6354,
+      "gitBlob": "2ec76a636baceae241e7e206b049557dee12e889",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+      "lineRefs": [
+        "175-194"
+      ],
+      "sha256": "4a5ab71fb38ff988e03b4e89897567db1cf172a7218c426f7474d78851166cf8",
+      "bytes": 6597,
+      "gitBlob": "06df4be96514d7d8c4116f0dd45cfdbba9df8d2f",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "lineRefs": [
+        "473-491"
+      ],
+      "sha256": "e090efcc92504db063b606347c0aecd703c97eaed99e004a30e12d2c19395961",
+      "bytes": 53899,
+      "gitBlob": "92501a84c7fbfa07d16cf34778af58d6b60b0040",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/valuation/c8.policy.ts",
+      "lineRefs": [
+        "121-175"
+      ],
+      "sha256": "1cf9556097c0f1d5023a194da3e53879ac976710a5e10f048c5dc90c15ef7424",
+      "bytes": 9985,
+      "gitBlob": "4ddeb452eda3929c889e4da6d68d599603d14639",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/measurement/measurement.finance.ts",
+      "lineRefs": [
+        "256-261",
+        "517-528"
+      ],
+      "sha256": "63386484a61dd87be09227e8f0ab802d6f390ed2f208f1fbb5f89a768c34ac47",
+      "bytes": 21484,
+      "gitBlob": "a515358e4c774e6a7c3aae357611bba41351601a",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+      "lineRefs": [
+        "2586-2608"
+      ],
+      "sha256": "f931475a1ac529389bbfa2c7d176a1ced51a2dc1bd6583bb782d7a29898315af",
+      "bytes": 164267,
+      "gitBlob": "a4fae33322423bfc6429c1a96d478b7f2993b010",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "lineRefs": [
+        "1471-1512"
+      ],
+      "sha256": "75fcdeafb2794a3456b5d2e2dc9165bdd24fe8bc075fa7f8620b21e8741d8278",
+      "bytes": 390022,
+      "gitBlob": "b0a617214176f77d0d9e97f62d5da2ecf8ddf7b8",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs",
+      "lineRefs": [
+        "402-404"
+      ],
+      "sha256": "5026b88bfc4b4baa677c9751ab1cbafc8d85e9b7f0baecfd7920ff3af0b344ec",
+      "bytes": 39125,
+      "gitBlob": "8eea86b33d75eecdb3a0e9383255c7cad77b0965",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.ts",
+      "lineRefs": [
+        "151-164"
+      ],
+      "sha256": "7096f34d7e23ab7d07a1d8b506d9623eb0bbfb2db12e9ea9a8b86e96db66d2a8",
+      "bytes": 36537,
+      "gitBlob": "dbf17adc1e6263f971ab995d906eb4b97115a9d5",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "lineRefs": [
+        "1085-1116"
+      ],
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977",
+      "bytes": 232104,
+      "gitBlob": "c1ba8524340bb78fb5546c61395c8b40db909160",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-P01-FOUNDATION-IMPLEMENTATION.md",
+      "lineRefs": [
+        "19-21"
+      ],
+      "sha256": "364be7bf7c58d4e55b474821f34e9ac3e204bad818125515b5bfc47fccc81f1a",
+      "bytes": 8906,
+      "gitBlob": "f9da044028d0f700ef98a4121f13a96136a1a7e4",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-WAVE-2-VALUE-AND-PROSPECTIVE-TARGETS.md",
+      "lineRefs": [
+        "7-13"
+      ],
+      "sha256": "fb4130eaca88ecdb26e0bed6821f9b921bfc0920095c183ec7e1caf1ddab5cdd",
+      "bytes": 7793,
+      "gitBlob": "a400f51133840c5157eda5b346e176694f197bc2",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "docs/rebuild/CYCLE-08-COMBINED-SCHEMA-MODEL-EVALUATION-MAPPING.md",
+      "lineRefs": [
+        "272-274"
+      ],
+      "sha256": "67d84bc2a7ace62cde39ce747297bd150d1c02718708788c41aca151c620bd17",
+      "bytes": 79865,
+      "gitBlob": "1c7dc756b4ef0fcf6e020f66c90cbd22d3636774",
+      "matchesPinnedCommit": true
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-review-clarification-completion-20261009/full81/r1/semantic-score.json",
+      "lineRefs": [
+        "machine-readable rows by caseId+turn"
+      ],
+      "sha256": "1f356033af104806774b1ef5b3134ba2ca4f1ac5f04e6d3109f4d9ef9c9488b2",
+      "bytes": 1303443,
+      "gitBlob": "c06a5577d2cff60e62dd2d46677abdec45362299",
+      "matchesPinnedCommit": true
+    }
+  ],
+  "full81Baseline": {
+    "sourceHead": "586c71779eb3743a318436e5316811375b3204af",
+    "counts": {
+      "pass": 57,
+      "semantic_fail": 0,
+      "unsupported": 12,
+      "insufficient_evidence": 10,
+      "clarification_pending": 2
+    },
+    "unclosedTurns": 24,
+    "remainingNonPendingTurns": 22,
+    "pendingClarificationTurns": 2,
+    "rows": [
+      {
+        "caseId": "current-staff_config-correction",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "current-staff_config-correction",
+        "turn": 2,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "current-bi-negative",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-finance_follow_up-7",
+        "turn": 1,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "requested_financial_owner_scope_unavailable_evidence"
+        ]
+      },
+      {
+        "caseId": "mt-finance_follow_up-7",
+        "turn": 2,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "requested_financial_owner_scope_unavailable_evidence"
+        ]
+      },
+      {
+        "caseId": "mt-finance_follow_up-7",
+        "turn": 3,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "requested_financial_owner_scope_unavailable_evidence"
+        ]
+      },
+      {
+        "caseId": "mt-finance_follow_up-10",
+        "turn": 1,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "requested_financial_owner_scope_unavailable_evidence"
+        ]
+      },
+      {
+        "caseId": "mt-finance_follow_up-10",
+        "turn": 2,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "requested_financial_owner_scope_unavailable_evidence"
+        ]
+      },
+      {
+        "caseId": "mt-finance_follow_up-10",
+        "turn": 3,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "requested_financial_owner_scope_unavailable_evidence"
+        ]
+      },
+      {
+        "caseId": "mt-retention_drill_down-0",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-retention_drill_down-0",
+        "turn": 2,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-retention_drill_down-0",
+        "turn": 3,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-retention_drill_down-15",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-retention_drill_down-15",
+        "turn": 2,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-retention_drill_down-15",
+        "turn": 3,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "mt-ambiguous_entity_resolution-15",
+        "turn": 1,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "journal_owner_resolution_observed"
+        ]
+      },
+      {
+        "caseId": "mt-ambiguous_entity_resolution-15",
+        "turn": 2,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "journal_owner_resolution_observed"
+        ]
+      },
+      {
+        "caseId": "utt-company.public_info-037",
+        "turn": 1,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "branch_scope_preserved",
+          "branch_address_binding"
+        ]
+      },
+      {
+        "caseId": "utt-company.public_info-041",
+        "turn": 1,
+        "status": "insufficient_evidence",
+        "missingEvidenceIds": [
+          "branch_scope_preserved",
+          "branch_address_binding"
+        ]
+      },
+      {
+        "caseId": "utt-finance.profit-055",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "utt-inventory.stock-074",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "utt-inventory.stock-079",
+        "turn": 1,
+        "status": "unsupported",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "utt-reviews.list_recent-062",
+        "turn": 1,
+        "status": "clarification_pending",
+        "missingEvidenceIds": []
+      },
+      {
+        "caseId": "utt-reviews.list_recent-067",
+        "turn": 1,
+        "status": "clarification_pending",
+        "missingEvidenceIds": []
+      }
+    ],
+    "countAttribution": "Existing immutable score; no proposed reclassification or future closure."
+  },
+  "candidate": {
+    "name": "Reject unrepresentable or ambiguous calendar wall times in existing C8 time owner",
+    "owner": "c8ShiftWindow; existing C8 producer/store/read consumers",
+    "approvedSemantics": "Preserve tenant-local wall time with month-end clamping; elapsed days remain elapsed. No approved gap shift or fold occurrence selection found.",
+    "staticFinding": "c8ShiftWindow accepts the two-pass localDateMinuteToUtc answer without wall-clock roundtrip or uniqueness validation; deterministic dormancy directly compares t0 to that deadline.",
+    "proposedRegressionInputs": [
+      {
+        "timezone": "America/New_York",
+        "at": "2026-01-08T07:30:00.000Z",
+        "window": {
+          "unit": "calendar_month",
+          "count": 2
+        },
+        "direction": 1,
+        "targetLocal": "2026-03-08 02:30",
+        "edge": "nonexistent spring time",
+        "execution": "NOT_RUN"
+      },
+      {
+        "timezone": "America/New_York",
+        "at": "2026-09-01T05:30:00.000Z",
+        "window": {
+          "unit": "calendar_month",
+          "count": 2
+        },
+        "direction": 1,
+        "targetLocal": "2026-11-01 01:30",
+        "edge": "ambiguous fall time with two occurrences",
+        "execution": "NOT_RUN"
+      }
+    ],
+    "allowedFailureBehavior": "Refuse unsupported calendar mapping, preserve immutable historical rows, do not invent a shifted hour/offset/policy or publish a replacement boolean.",
+    "original81ClosureClaim": false
+  },
+  "pendingConsequence": {
+    "path": "c8.producer.ts:478-497 -> c8.store.ts:714-721 -> c8.worker.ts:47-53",
+    "finding": "Compute errors roll back publishResult but are not mapped to publishUnavailable; worker catches and retains PENDING, allowing future retries after lease handling.",
+    "nextIncrementRequirement": "Only a recognized calendar-domain error may be terminalized through existing lease-fenced publishUnavailable; never catch arbitrary authority/database failures as a semantic unavailable result.",
+    "existingPublishReasons": [
+      "qualified_model_unavailable",
+      "required_evidence_unavailable",
+      "source_or_model_unavailable"
+    ],
+    "reasonStorageConstraint": "C8Store.publishUnavailable validates finite string syntax /^[a-z][a-z0-9_]{0,100}$/; no calendar-specific existing reason was found in the inspected source. A new precise code would be code-level explanation, not a threshold/time-disambiguation policy."
+  },
+  "publishedResultRefusal": {
+    "possibleWithoutRecomputeOrMutation": true,
+    "narrowPath": "C8ReadService.present current dormancy qualification -> c8Explanation(false) -> snapshotDormancy/C9 assertCurrent",
+    "proposedCheck": "Validate the representability and uniqueness of the exact admitted last_proven_visit_at calendar mapping against the same confirmed policy; do not compute a new value or replace valuesJson.",
+    "reuse": "On an unsupported mapping, current=false/parameters=null yields available=false and values=[] with existing current_source_or_policy_unavailable. Exact snapshotDormancy refuses c8_result_unavailable; C9 final exposure/replay uses that reader.",
+    "schemaOrPolicyVersionRequiredForReadRefusal": false,
+    "historicalPreservation": "Keep row state, revision, snapshotHash, stored values/reasons and identity unchanged; no call to publishUnavailable on an already PUBLISHED row.",
+    "notAGlobalConsumerProof": true,
+    "additionalConsumers": [
+      "C8ReadService.present ranking indicators call c8Explanation(fact,true) at line244",
+      "C8Opportunity uses C8Store.refsCurrent",
+      "C8Store.refsCurrent recursively checks source/policy refs but no calendar-semantic validity"
+    ],
+    "boundary": "Direct dormancy C8/C9 refusal is finite and viable. A claim covering all derived ranks/opportunities requires their finite dependency qualification too; changing only c8.time.ts is insufficient."
+  },
+  "otherOriginalGaps": [
+    {
+      "rows": 8,
+      "group": "finance",
+      "finding": "Existing C7 READ already connected. confirmed_cash/refunds/net_profit deliberately NOT_MEASURED. CRM gross cannot be promoted to cash/profit."
+    },
+    {
+      "rows": 6,
+      "group": "retention",
+      "finding": "Original frozen fixture has 30-day policy. New exact-two-month READ must not silently change that source. Regularity and return-priority need exact configured cohort/objective, not universal cadence or guessed ranking."
+    },
+    {
+      "rows": 2,
+      "group": "public info",
+      "finding": "Scripted recipe drops explicit branch while current production branch projection exists. This is a harness/semantic input gap, not a missing new source owner."
+    },
+    {
+      "rows": 2,
+      "group": "journal",
+      "finding": "Existing scoped owner wired; original fixture lacks canonical staff/source binding. Do not guess one."
+    },
+    {
+      "rows": 2,
+      "group": "inventory",
+      "finding": "TenantCatalogItem has tenant quantity/threshold but no approved branch/store owner mapping."
+    },
+    {
+      "rows": 2,
+      "group": "pricing",
+      "finding": "Outside this slice; separate pricing lane."
+    },
+    {
+      "rows": 2,
+      "group": "reviews",
+      "finding": "Persisted material rating clarification pending; original goal uncompleted until explicit selection."
+    }
+  ]
+}

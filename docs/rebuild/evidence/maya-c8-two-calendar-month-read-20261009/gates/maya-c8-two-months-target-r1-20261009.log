@@ -1,0 +1,24 @@
+FAIL src/ai-tools/owner-review-plan.spec.ts
+  ● finite owner review plan boundary › retains validated lifecycle refinements as constraints, never bounded acceptance or generic READ
+
+    expect(received).toBeNull()
+
+    Received: "unresolved"
+
+      401 |           false,
+      402 |         ),
+    > 403 |       ).toBeNull();
+          |         ^
+      404 |       expect(singleLifecyclePlanState(next, 'web', UserRole.TENANT_OWNER)).toBe(
+      405 |         index === 0 ? 'ready' : 'clarify',
+      406 |       );
+
+      at Object.<anonymous> (ai-tools/owner-review-plan.spec.ts:403:9)
+
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 58 passed, 59 total
+Snapshots:   0 total
+Time:        0.958 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.lifecycle-two-months.spec.ts", "src/valuation/c8.read.two-months.spec.ts", "src/ai-tools/owner-review-plan.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-c8-two-months-target-r1-20261009.json

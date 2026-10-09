@@ -1,0 +1,420 @@
+{
+  "contract": "maya.c8-two-months-independent-evidence-review/1",
+  "reviewedAt": "2026-10-09T19:13:15.997437+00:00",
+  "reviewer": "independent_review",
+  "reviewMode": "READ_ONLY_EXISTING_SOURCE_AND_LOCAL_ARTIFACTS",
+  "verdict": "QUALIFIED_PASS_FOR_FINITE_SUPPLEMENTAL_R3_PROOF",
+  "blockers": [],
+  "source": {
+    "commit": "46119888ec1558561e50a2ea8057851e010b6bc0",
+    "runtimeIntroducedAt": "602c9e257504abded8767297151e615808959fbf",
+    "runtimeUnchangedSince602c": true,
+    "only602cToR3Change": "maya-saas-backend/test/widgets-live/lifecycle-calendar-read-restart.probe-spec.ts",
+    "boundFiles": 1866,
+    "totalBoundBytes": 18078140,
+    "manifestSha256": "630d6d917acb41c0e36af8818640b52749c286bfed0ff9cd3e3fc7faaec82089",
+    "sourceBindingsDigest": "edf268383e5405630666738299d2daa5b900c713e834604de1191d1f522e8747",
+    "digestRecomputed": true,
+    "allBindingsMatchExactGit": true,
+    "allBindingsMatchCurrentFilesAtReview": true,
+    "mismatches": [],
+    "productionBindings": [
+      {
+        "path": "maya-saas-backend/src/valuation/c8.read.ts",
+        "bytes": 26628,
+        "sha256": "648e2de2841fb731cba63340ee3945acca4c42502271487afeca4e507e8249a0"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts",
+        "bytes": 7664,
+        "sha256": "7d305837f3954152f34f5eb052f5f393c484afdd169851528d73af86245c998a"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+        "bytes": 6597,
+        "sha256": "4a5ab71fb38ff988e03b4e89897567db1cf172a7218c426f7474d78851166cf8"
+      },
+      {
+        "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+        "bytes": 53899,
+        "sha256": "e090efcc92504db063b606347c0aecd703c97eaed99e004a30e12d2c19395961"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/owner-review-plan.ts",
+        "bytes": 12259,
+        "sha256": "cf327f702af4a7be420616fca90b87d24364547f7275b1ec0da0a8fb2f665465"
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "bytes": 390022,
+        "sha256": "75fcdeafb2794a3456b5d2e2dc9165bdd24fe8bc075fa7f8620b21e8741d8278"
+      }
+    ],
+    "probe": {
+      "path": "maya-saas-backend/test/widgets-live/lifecycle-calendar-read-restart.probe-spec.ts",
+      "sha256": "a4c9562bcee0aa9485889dbf68e18eb1aa82c9b16f4e9382b2e1ad3b4ecc02a6",
+      "bytes": 51609
+    }
+  },
+  "execution": {
+    "manifestStatus": "passed",
+    "prepare": {
+      "jestTests": 1,
+      "passed": 1,
+      "failed": 0,
+      "pending": 0,
+      "passingAssertions": 997
+    },
+    "resume": {
+      "jestTests": 1,
+      "passed": 1,
+      "failed": 0,
+      "pending": 0,
+      "passingAssertions": 463
+    },
+    "totalJestTests": 2,
+    "passingAssertions": 1460,
+    "chatRequests": 15,
+    "chatStatuses": {
+      "201": 13,
+      "401": 1,
+      "404": 1
+    },
+    "foreignReadControls": {
+      "C9Run": "400 c9_run_authority",
+      "C8Result": "404 c8_result_unavailable"
+    },
+    "scriptedPlannerCalls": {
+      "prepare": 9,
+      "resume": 5,
+      "total": 14
+    },
+    "realModelCalls": 0,
+    "externalFetchCalls": 0,
+    "discoveryCalls": {
+      "prepare": 6,
+      "resume": 2,
+      "total": 8
+    },
+    "genericSnapshotObserverCalls": {
+      "prepare": 26,
+      "resume": 18,
+      "total": 44
+    },
+    "countQualification": "Chat count derived from all recorded initial/nested replay/control observations and their bound source assertions. Generic snapshot count excludes final snapshotDormancy reads and is not a count of all source queries. Assertions are not independent scenarios."
+  },
+  "corpus": {
+    "datasetSha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+    "datasetBytesVerified": true,
+    "exactInitialQuestions": [
+      {
+        "case": "mt-retention_drill_down-0",
+        "scope": "frozen initial user turn only",
+        "status": 201,
+        "outcome": "PARTIAL",
+        "utteranceHash": "edde6280742e0f9651246e3f1f1582c1ebe4f95db4cb1bacb527cc5c38f71fad",
+        "replyHash": "223c35e701aadd91660e36aa49d16dfdbf12b26b3aa73d3f75b6fc929969da02",
+        "sourceRowHash": "7101ab01baedd03ca8be12194ec34ced5fbd6fe9ce711c2bae1c6af6e7e78eb3",
+        "sourceAsOf": "2026-10-09T19:09:21.431Z",
+        "graphHash": "da041d094dd044b6b9ce8c73dbb196cae669a729d318dc859ad7fd31cf37896e",
+        "historyAssistantHash": "12ec88ad868b9531f51dd6495eb85c70ea29fc27742335c625604154c7730c0e",
+        "historyCompletionHash": "0ef59eae3d20ae0f0fc25e1c8b1fcefaa3ee1c8f736fd213df1a06db94e2f30d",
+        "firstReplayReplyHash": "4099a8dd03f2dcef5471777e9c7c7de37cd638594fb6ac6b204b6d3691f48d73",
+        "restartReplayReplyHash": "4099a8dd03f2dcef5471777e9c7c7de37cd638594fb6ac6b204b6d3691f48d73",
+        "restartReplayExactlySameReply": true,
+        "restartSameGraphAsserted": true,
+        "historyRestoredAsserted": true,
+        "discoveryCalls": {
+          "initial": 1,
+          "sameRequest": 0,
+          "restart": 0
+        }
+      },
+      {
+        "case": "mt-retention_drill_down-15",
+        "scope": "frozen initial user turn only",
+        "status": 201,
+        "outcome": "PARTIAL",
+        "utteranceHash": "25c914e4efcf50277db862c25cd4e3eb2188e2c9ec7fe558c9abd61ad6bd1e63",
+        "replyHash": "223c35e701aadd91660e36aa49d16dfdbf12b26b3aa73d3f75b6fc929969da02",
+        "sourceRowHash": "7101ab01baedd03ca8be12194ec34ced5fbd6fe9ce711c2bae1c6af6e7e78eb3",
+        "sourceAsOf": "2026-10-09T19:09:21.431Z",
+        "graphHash": "124940f7b2ae5768e22291572d9670dc2504eda41bf133c6b6f97be846ac3d81",
+        "historyAssistantHash": "3a6baef8ed998fe4d6048d267baf78983bb8e0013f6b1d15648e50738bc26ada",
+        "historyCompletionHash": "0ef59eae3d20ae0f0fc25e1c8b1fcefaa3ee1c8f736fd213df1a06db94e2f30d",
+        "firstReplayReplyHash": "4099a8dd03f2dcef5471777e9c7c7de37cd638594fb6ac6b204b6d3691f48d73",
+        "restartReplayReplyHash": "4099a8dd03f2dcef5471777e9c7c7de37cd638594fb6ac6b204b6d3691f48d73",
+        "restartReplayExactlySameReply": true,
+        "restartSameGraphAsserted": true,
+        "historyRestoredAsserted": true,
+        "discoveryCalls": {
+          "initial": 1,
+          "sameRequest": 0,
+          "restart": 0
+        }
+      }
+    ],
+    "family": "retention_drill_down",
+    "uniqueGoal": "existing policy-qualified two-calendar-month evaluation READ",
+    "original81Unchanged": true,
+    "original81Rerun": false,
+    "original81Reclassification": false,
+    "qualification": "The two initial questions share a family and source setup. Their later regularity and priority follow-ups were not exercised or fulfilled. The reply explicitly exposes at most three evaluations, not named unique clients or a full cohort."
+  },
+  "assertionBackedPersistence": [
+    "Actual C8 compute HTTP published same-tenant POLICY_SIGNAL results through canonical C7/C8; C7 refs, snapshot hashes, validity, scope and as-of were checked against persisted rows.",
+    "Canonical A22 configuration was performed explicitly by authenticated fixture owners. The positive exact rule was older than three newer day/gte/branch/service decoys yet selected alone.",
+    "Each returned run/revision/work relation joins the actual tenant/owner; exact request effective digest, canonical outer call-intent hash, settled receipt request and source handles were verified against persistence.",
+    "Full run+revision+work graph hashes remain identical on same-request and restarted replay; source row hashes stay unchanged. Strategy validity/retention is source-capped while the work result contains no subject-linked refs.",
+    "The latest HISTORICAL completion is decoded from the actual immutable stored reply; exact parent/versioned ID/completion hash and history API row are checked across restart.",
+    "These persistence joins were performed by the committed passing probe against the owned DB. This reviewer verified the executed source binding and public observation/hash consistency, did not reopen the stopped DB or read the private restart receipt."
+  ],
+  "negativeControls": [
+    {
+      "case": "day60_not_calendar",
+      "result": "201 UNAVAILABLE; no substituted day rule"
+    },
+    {
+      "case": "gte_not_strictly_more",
+      "result": "201 UNAVAILABLE; no inclusive-rule substitution"
+    },
+    {
+      "case": "branch_or_service_scope_not_whole_business",
+      "result": "201 UNAVAILABLE; scoped sources not widened"
+    },
+    {
+      "case": "configured_without_published_result",
+      "result": "201 UNAVAILABLE; no empty cohort assertion"
+    },
+    {
+      "case": "policy_absent",
+      "result": "201 UNCONFIGURED; zero discovery"
+    },
+    {
+      "case": "foreign_tenant",
+      "result": "C9Run400/C8Result404; no model/discovery"
+    },
+    {
+      "case": "current_membership_revoked",
+      "result": "401 before model and observed source reads"
+    },
+    {
+      "case": "policy_revision_changed",
+      "result": "Same saved run/revision returns201 STALE without findings or rediscovery; fresh request returns201 UNAVAILABLE"
+    },
+    {
+      "case": "late_policy_after_actual_snapshot",
+      "result": "Genuine source projection paused after read, delivered unchanged after A22 policy transition; final exact snapshotDormancy refuses404 c8_result_unavailable, no findings/coordination/prose, settled work and C8 source hashes unchanged"
+    }
+  ],
+  "businessWrites": {
+    "setupA22Transitions": 6,
+    "adversarialA22Transitions": 2,
+    "canonicalA22Executions": 8,
+    "operationsPerTransition": 7,
+    "allOperationIntervalsDistinctAndBounded": true,
+    "allOperationIndicesInsideOwnIntervals": true,
+    "allTransitionSummaryJoinsMatchCases": true,
+    "exactNewRowCountsPerTransition": {
+      "executions": 1,
+      "attempts": 1,
+      "mutations": 1,
+      "revisions": 1
+    },
+    "priorRowsUnchangedAsserted": true,
+    "otherObservedBusinessSourceConfigWrites": 0,
+    "qualification": "Real local fixture writes exist: source appointments/clients/C7/C8 publication precede the chat perimeter; six setup A22 writes and two deliberate policy transitions are explicitly labeled. The two post-setup transitions are excluded only by exact indexed operations after canonical DB joins/census. This is a finite observed perimeter, not global no-writes."
+  },
+  "restartAndCleanup": {
+    "prepareNodePid": 1196,
+    "resumeNodePid": 1327,
+    "preparePostmasterPid": 1107,
+    "resumePostmasterPid": 1298,
+    "firstPgStartedUtc": "2026-10-09 19:09:17.624 UTC",
+    "restartPgStartedUtc": "2026-10-09 19:09:25.243 UTC",
+    "finalPgShutdownUtc": "2026-10-09 19:09:27.884 UTC",
+    "probePostmasterTimeChangedAsserted": true,
+    "nodeAndPostgresDistinct": true,
+    "pgStopLogConfirmsStopped": true,
+    "manifestClusterStopped": true,
+    "manifestSourceUnchanged": true,
+    "ownedPostmasterPidFileAbsentAtReview": true,
+    "qualification": "Corroborated by saved Nest/PG/pg_ctl logs and read-only PID-file absence. No service/process commands were run by the reviewer; no general process-group absence assertion."
+  },
+  "failureHistory": [
+    {
+      "attempt": "R1",
+      "status": "FAIL",
+      "sourceCommit": "602c9e257504abded8767297151e615808959fbf",
+      "reason": "Actual clock-related CHECK failure: settledAt precedes admittedAt18ms; exact host mechanism unproven.",
+      "manifest": {
+        "path": "/private/tmp/maya-c8-two-months-http-20261009-r1/manifest.json",
+        "bytes": 233271,
+        "sha256": "ce1aa99f95fd1b6963fd6ee8d0b7b1f317835a813ee12378c91527265a4c4da2"
+      },
+      "cleanupManifest": {
+        "clusterStopped": true,
+        "sourceUnchanged": true
+      },
+      "previouslyBoundArtifactsUnchanged": true
+    },
+    {
+      "attempt": "R2",
+      "status": "FAIL",
+      "sourceCommit": "602c9e257504abded8767297151e615808959fbf",
+      "reason": "Final noEffects fixture attribution failed on12 AE writes from two explicit A22 POSTs; corrected only in the subsequent probe.",
+      "manifest": {
+        "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/manifest.json",
+        "bytes": 233303,
+        "sha256": "12b7cb59be90e08b7cb6d3c777ba6074becefa705ea68af77c5cf66ef8b56909"
+      },
+      "cleanupManifest": {
+        "clusterStopped": true,
+        "sourceUnchanged": true
+      },
+      "previouslyBoundArtifactsUnchanged": true
+    }
+  ],
+  "qualifications": [
+    "Runtime qualification is limited to this finite actual local HTTP/PG path with scripted validated planner responses and synthetic internal appointment/source data.",
+    "No model/provider/network language-understanding claim, no browser acceptance, no contact authority or names/full cohort, no regularity/ranking completion.",
+    "Replay performs current source/policy/access qualification. Zero rediscovery does not mean zero source READs, model-stage calls or timeline activity.",
+    "HTTP uses genuine T0 with visits120days earlier; exact equality/month-end/offset-transition boundaries are component tests. Target DST gap/fold handling is a preexisting unqualified limit.",
+    "R3 success does not resolve R1 host-clock cause, prove monotonic clock robustness or support silent timestamp clamping. R1 and R2 remain FAIL.",
+    "No unchanged original81 case is promoted by this supplemental proof. Remaining22 gaps, six retention turns, full-MAYA/C10 readiness are not declared complete."
+  ],
+  "priorReviewBindings": [
+    {
+      "path": "/private/tmp/maya-c8-two-months-independent-source-review-20261009.json",
+      "bytes": 11279,
+      "sha256": "ded436feedc1e8ff55653792fcb6f2b2c4be35c6398684c7f752e5972187920d"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-clock-failure-review-20261009.json",
+      "bytes": 7933,
+      "sha256": "ae236ddc922f3b51e5ca508083a1d801df8bf967ebda5022acb9d2344be4f493"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-proof-correction-independent-review-20261009.json",
+      "bytes": 6927,
+      "sha256": "a934aaa1cdff09c7c3c7fad5da8c29225be6200c2fd7a40a88d1f5b046d383b7"
+    }
+  ],
+  "artifactBindings": [
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/initdb.log",
+      "bytes": 958,
+      "sha256": "41578bf18da782dfbd7815e346db5c593e661c03f950acbd162c22f7471ea205"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/manifest.json",
+      "bytes": 233268,
+      "sha256": "630d6d917acb41c0e36af8818640b52749c286bfed0ff9cd3e3fc7faaec82089"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/migrations.log",
+      "bytes": 14732,
+      "sha256": "ccb969bac35076c6dd0ec51a47501268936e4878a592bff51ac7a4757e9b060c"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/pg-restart.log",
+      "bytes": 1335,
+      "sha256": "b592f9fd4093b0b25901c9010a1de973d83bd0cb02094b159dc951b51939e10a"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/postgres.log",
+      "bytes": 1234,
+      "sha256": "e4c257d05797dacc7e723629e865d44dcf749816ba01c07cb1ae62c6acc47ae5"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/prepare-jest.json",
+      "bytes": 1420,
+      "sha256": "1091c960df06f73df8df366197d8c125c51bcb8578f23417468c887317d4e669"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/prepare-observations.json",
+      "bytes": 30197,
+      "sha256": "a2f169151517d3e8665268055f8fe7484304caeabc008e36844f551bc23604f7"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/prepare.log",
+      "bytes": 1367,
+      "sha256": "64adba2514d48150f5a3ab1750d5ab3eed7d2b61e5bfb31d1e393dd5229298c3"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/resume-jest.json",
+      "bytes": 1418,
+      "sha256": "c4e4380347b6e694c3a23318e5e31940c67b3feb4bab5602d7306c3790e5426a"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/resume-observations.json",
+      "bytes": 14033,
+      "sha256": "1259fdca3ba230e1d6f98a5dd24e69eccf30ef65a0a78760432ede9e16f8c228"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r3/resume.log",
+      "bytes": 1370,
+      "sha256": "6b22e8454d0224ec9363d8e126c457a110f79162e87db47e90764c7e9f14c53d"
+    }
+  ],
+  "reviewerActions": {
+    "testsRun": 0,
+    "servicesStarted": 0,
+    "networkCalls": 0,
+    "sourceEdits": 0,
+    "privateRestartReceiptRead": false
+  },
+  "checkpointDocumentReview": {
+    "verdict": "CLAIMS_CONSISTENT_WITH_QUALIFIED_R3_EVIDENCE",
+    "document": {
+      "path": "docs/rebuild/MAYA-C8-TWO-CALENDAR-MONTH-READ-20261009.md",
+      "bytes": 8011,
+      "sha256": "5c78b42e40f639e47afc978551b8e8aeab7ebe1d3ed16190bb2df55ccac0c970"
+    },
+    "completionMap": {
+      "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+      "bytes": 194823,
+      "sha256": "f84f7fc705ac6739c50a3b97c72f035c323f66701c75906bd7ebd1c585652e2f"
+    },
+    "reviewedClaims": [
+      "Exact current two-calendar-month READ condition without 60-day substitution, new policy or full-cohort claim.",
+      "339 component/4driver checks are parent-run component evidence, separate from two passing HTTP stages and1460 assertions.",
+      "15chat/14scripted/0external counts, current-source reads on replay, finite source/write perimeter and real restart accurately separated.",
+      "R1 clock inference remains qualified and failed; R2 census failure remains failed, R3 is the separate accepted run.",
+      "Original81 57/0/12/10/2 unchanged; same-family scripted supplemental scope, no production deployment, no full-MAYA/C10 acceptance.",
+      "Preexisting target gap/fold edge remains unqualified; archived local reproduction does not constitute a new disambiguation policy or repair."
+    ],
+    "precisionEditsVerified": [
+      "Production deployment wording distinguishes actual local product edits.",
+      "Other-write prohibition is explicitly limited to observed business/source/config writes within the declared perimeter."
+    ],
+    "additionalReferences": [
+      {
+        "path": "docs/rebuild/evidence/maya-c8-two-calendar-month-read-20261009/verification.json",
+        "bytes": 1390,
+        "sha256": "918bf3ead155b98efaaab55effa85846f81ddf91be2e60478b8481c99fa2fedf"
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-c8-two-calendar-month-read-20261009/reviews/maya-c8-calendar-gap-reproduction-20261009.json",
+        "bytes": 830,
+        "sha256": "dbe00f2179a70449912962e93af9fa180347b14f45e8a1d9d1f8a66468f39b82"
+      }
+    ],
+    "verificationQualification": "Parent-authored verification records pg_ctl exit3/all3clusters and frozen-resource hashes. Reviewer independently checked R3 logs/PID-file absence and exact Git bindings; did not rerun process commands or inspect protected launchers."
+  }
+}

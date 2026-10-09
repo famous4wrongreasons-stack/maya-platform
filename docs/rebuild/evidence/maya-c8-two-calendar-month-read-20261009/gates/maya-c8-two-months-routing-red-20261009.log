@@ -1,0 +1,139 @@
+FAIL src/ai-tools/ai-core.lifecycle-two-months.spec.ts
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › routes the exact validated request once through existing C9 for tenant_owner
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      244 |       const f = fixture({ role });
+      245 |       const response = await f.chat();
+    > 246 |       expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+          |                                                 ^
+      247 |       const [turn, selection] = f.orchestration.checkClientReturn.mock.calls[0];
+      248 |       expect(turn.turn).toEqual({
+      249 |         turnId: 'turn-1',
+
+      at ai-tools/ai-core.lifecycle-two-months.spec.ts:246:49
+
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › routes the exact validated request once through existing C9 for business_owner
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      244 |       const f = fixture({ role });
+      245 |       const response = await f.chat();
+    > 246 |       expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+          |                                                 ^
+      247 |       const [turn, selection] = f.orchestration.checkClientReturn.mock.calls[0];
+      248 |       expect(turn.turn).toEqual({
+      249 |         turnId: 'turn-1',
+
+      at ai-tools/ai-core.lifecycle-two-months.spec.ts:246:49
+
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › ignores proposed generic days/limit arguments instead of turning them into a source threshold
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 1
+    Received number of calls: 0
+
+      279 |     const f = fixture({ proposedTool: true });
+      280 |     await f.chat();
+    > 281 |     expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+          |                                               ^
+      282 |     expect(f.orchestration.checkClientReturn.mock.calls[0][1]).toEqual(request);
+      283 |     expect(f.runtime.execute).not.toHaveBeenCalled();
+      284 |     expect(f.decide).toHaveBeenCalledTimes(1);
+
+      at Object.<anonymous> (ai-tools/ai-core.lifecycle-two-months.spec.ts:281:47)
+
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › requires a persisted current user turn before handing the constraint to C9
+
+    expect(received).rejects.toMatchObject()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"action": null, "brain": {"intent": "general", "persona": "director"}, "grounding": {"domain": null, "evidence_tools": [], "required_tools": [], "status": "not_required"}, "redacted_input": false, "reply": "Отбор клиентов, отсутствующих более двух месяцев, этой проверкой не выполняется. Могу проверить до трёх опубликованных оценок давности визитов по правилам бизнеса. Это не список клиентов; отдельно запрошенные период, филиал и порог такая проверка не учитывает. Выполнить эту ограниченную проверку без дополнительных условий?", "request_id": "lifecycle_two_months_request_1", "source": "safe_fallback", "tools_used": []}
+
+      333 |     const f = fixture();
+      334 |     f.timeline.persistTypedTurn.mockResolvedValue(null);
+    > 335 |     await expect(f.chat()).rejects.toMatchObject({
+          |           ^
+      336 |       response: { error: { code: 'conversation_history_unavailable' } },
+      337 |     });
+      338 |     expect(f.orchestration.checkClientReturn).not.toHaveBeenCalled();
+
+      at expect (../../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2116:15)
+      at Object.<anonymous> (ai-tools/ai-core.lifecycle-two-months.spec.ts:335:11)
+
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › does not replace a current C9 refusal with generic data
+
+    expect(received).rejects.toBe()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"action": null, "brain": {"intent": "general", "persona": "director"}, "grounding": {"domain": null, "evidence_tools": [], "required_tools": [], "status": "not_required"}, "redacted_input": false, "reply": "Отбор клиентов, отсутствующих более двух месяцев, этой проверкой не выполняется. Могу проверить до трёх опубликованных оценок давности визитов по правилам бизнеса. Это не список клиентов; отдельно запрошенные период, филиал и порог такая проверка не учитывает. Выполнить эту ограниченную проверку без дополнительных условий?", "request_id": "lifecycle_two_months_request_1", "source": "safe_fallback", "tools_used": [], "user_turn": {"conversationId": "conversation-current", "turnId": "turn-1"}}
+
+      347 |       const f = fixture();
+      348 |       f.orchestration.checkClientReturn.mockRejectedValue(error);
+    > 349 |       await expect(f.chat()).rejects.toBe(error);
+          |             ^
+      350 |       expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+      351 |       expect(f.runtime.execute).not.toHaveBeenCalled();
+      352 |       expect(f.timeline.persistAssistantReply).not.toHaveBeenCalled();
+
+      at expect (../../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-core.lifecycle-two-months.spec.ts:349:13
+
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › does not replace a current C9 refusal with generic data
+
+    expect(received).rejects.toBe()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"action": null, "brain": {"intent": "general", "persona": "director"}, "grounding": {"domain": null, "evidence_tools": [], "required_tools": [], "status": "not_required"}, "redacted_input": false, "reply": "Отбор клиентов, отсутствующих более двух месяцев, этой проверкой не выполняется. Могу проверить до трёх опубликованных оценок давности визитов по правилам бизнеса. Это не список клиентов; отдельно запрошенные период, филиал и порог такая проверка не учитывает. Выполнить эту ограниченную проверку без дополнительных условий?", "request_id": "lifecycle_two_months_request_1", "source": "safe_fallback", "tools_used": [], "user_turn": {"conversationId": "conversation-current", "turnId": "turn-1"}}
+
+      347 |       const f = fixture();
+      348 |       f.orchestration.checkClientReturn.mockRejectedValue(error);
+    > 349 |       await expect(f.chat()).rejects.toBe(error);
+          |             ^
+      350 |       expect(f.orchestration.checkClientReturn).toHaveBeenCalledTimes(1);
+      351 |       expect(f.runtime.execute).not.toHaveBeenCalled();
+      352 |       expect(f.timeline.persistAssistantReply).not.toHaveBeenCalled();
+
+      at expect (../../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2116:15)
+      at ai-tools/ai-core.lifecycle-two-months.spec.ts:349:13
+
+  ● exact two-month Lifecycle ingress [actual parser, synthetic C9] › preserves the constraint on each explicit turn and exposes only the C9 replay projection
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 1
+
+    - Array [
+    -   Object {
+    -     "period": "more_than_two_months",
+    -   },
+    -   Object {
+    -     "period": "more_than_two_months",
+    -   },
+    - ]
+    + Array []
+
+      363 |     expect(
+      364 |       f.orchestration.checkClientReturn.mock.calls.map((call) => call[1]),
+    > 365 |     ).toEqual([request, request]);
+          |       ^
+      366 |     expect(
+      367 |       f.orchestration.checkClientReturn.mock.calls.map(
+      368 |         (call) => call[0].turn.turnId,
+
+      at Object.<anonymous> (ai-tools/ai-core.lifecycle-two-months.spec.ts:365:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       7 failed, 13 passed, 20 total
+Snapshots:   0 total
+Time:        0.899 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.lifecycle-two-months.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-c8-two-months-routing-red-20261009.json

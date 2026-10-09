@@ -1,0 +1,7 @@
+
+Test Suites: 11 passed, 11 total
+Tests:       131 passed, 131 total
+Snapshots:   0 total
+Time:        0.848 s, estimated 1 s
+Ran all test suites within paths "src/valuation/c8.time.spec.ts", "src/valuation/c8.deterministic.spec.ts", "src/valuation/c8.read.lifecycle-rule.spec.ts", "src/valuation/c8.contract.spec.ts", "src/orchestration/c9.context.spec.ts", "src/orchestration/c9.context-and-result.spec.ts", "src/orchestration/c9.policy-and-sources.spec.ts", "src/orchestration/c9.identity.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts", "src/orchestration/c9.resume.spec.ts", "src/orchestration/c9.retention.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-c8-two-months-regression-r2-20261009.json

@@ -1,0 +1,332 @@
+{
+  "contract": "maya.c8-two-calendar-month-archive/1",
+  "runtimeHead": "602c9e257504abded8767297151e615808959fbf",
+  "codeProofHead": "46119888ec1558561e50a2ea8057851e010b6bc0",
+  "reportSha256": "5c78b42e40f639e47afc978551b8e8aeab7ebe1d3ed16190bb2df55ccac0c970",
+  "files": {
+    "gates/maya-c8-two-months-driver-20261009.log": {
+      "sha256": "b49d192d6476bcda5803af20987fbb20f53300d862d57c96f61eb0c68be18c1b",
+      "bytes": 503
+    },
+    "gates/maya-c8-two-months-lint-r1-20261009.log": {
+      "sha256": "ea9055915fe7147d9bcccd694244ca9fd13237d0fdb0a5cc03281aaa4b600fab",
+      "bytes": 823
+    },
+    "gates/maya-c8-two-months-lint-r2-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gates/maya-c8-two-months-plan-red-20261009.json": {
+      "sha256": "4f37ba501e2b9adafe41a0e6138fc4bffa34329afc1af99f26a2fe0f4aa22ea1",
+      "bytes": 8456
+    },
+    "gates/maya-c8-two-months-plan-red-20261009.log": {
+      "sha256": "54a2357da2328612d8c2476aa4b29127627c2cb037c68cb8eb3f6a9fa395b1eb",
+      "bytes": 1048
+    },
+    "gates/maya-c8-two-months-probe-lint-r3-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gates/maya-c8-two-months-regression-r1-20261009.json": {
+      "sha256": "e5d8d711ac88478cbce2c153e31e99208795bf4dbc9c0c4b39b0044a45dd6fd0",
+      "bytes": 19962
+    },
+    "gates/maya-c8-two-months-regression-r1-20261009.log": {
+      "sha256": "b12c09ace3cd9e308f8b983179bd32196826f2f4984113ea187fe2d2789a71b5",
+      "bytes": 2461
+    },
+    "gates/maya-c8-two-months-regression-r2-20261009.json": {
+      "sha256": "d7540c4302e759946e81ea7b6392fd76daea82fb64af78414d999e905e8c0a7c",
+      "bytes": 61160
+    },
+    "gates/maya-c8-two-months-regression-r2-20261009.log": {
+      "sha256": "fd159c79f548dfac1f141f11daaeeb9a168271442df23ae836457dbd64ef77c1",
+      "bytes": 742
+    },
+    "gates/maya-c8-two-months-routing-red-20261009.json": {
+      "sha256": "43270bb06e7f2707ae9519b04ecbea162d1618c8afe11ed14de7c0ca962a22f8",
+      "bytes": 37545
+    },
+    "gates/maya-c8-two-months-routing-red-20261009.log": {
+      "sha256": "e0867adc415cf280300ffea7c590b0b8d1c62c6146e883c80bc545ae1e385b32",
+      "bytes": 9019
+    },
+    "gates/maya-c8-two-months-routing-red-fixture-r0-20261009.json": {
+      "sha256": "7d3fcda8294b3a3df4e3adbbe2aa23d3b9ccd852449b5a7f28d723df27f30cbb",
+      "bytes": 46169
+    },
+    "gates/maya-c8-two-months-routing-red-fixture-r0-20261009.log": {
+      "sha256": "21f26ee5ced4fcfdea431c68aa5c1d896effbff34f926d489d7e40019b7ab68e",
+      "bytes": 16077
+    },
+    "gates/maya-c8-two-months-scoped-types-r1-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gates/maya-c8-two-months-scoped-types-r2-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gates/maya-c8-two-months-scoped-types-r3-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gates/maya-c8-two-months-target-r1-20261009.json": {
+      "sha256": "9721f7c5863a3a6d70d83ae147e9f7f08d367841139ea4d2c19f056e6ba44412",
+      "bytes": 33473
+    },
+    "gates/maya-c8-two-months-target-r1-20261009.log": {
+      "sha256": "8a2df824f05203fdea32628228c80c0b5a5e65e450c049ef5944f35714c34ad9",
+      "bytes": 1013
+    },
+    "gates/maya-c8-two-months-target-r2-20261009.json": {
+      "sha256": "68042276f89232be19df74bdbbe32fcd943d6f002df01569cb2e0057e257a177",
+      "bytes": 110224
+    },
+    "gates/maya-c8-two-months-target-r2-20261009.log": {
+      "sha256": "b968835fddbb3bccd316a68b56b349058ae84637ee9d61b5ca8a435257833be5",
+      "bytes": 639
+    },
+    "gates/maya-c8-two-months-tsconfig-20261009.json": {
+      "sha256": "dd1c413c7b15409ba0088b9f610b4a1acabf47782ec71c95a6eccdb4136e8bde",
+      "bytes": 1811
+    },
+    "gates/maya-c8-two-months-types-r1-20261009.log": {
+      "sha256": "7d287f49547a0bc2d26ff776eb84069e5a3bd9b1a41f4c72eb50dd6b39f9b185",
+      "bytes": 102
+    },
+    "gates/maya-c8-two-months-types-r2-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gates/summary.json": {
+      "sha256": "8915ddb528e9c96613e666e09805b7c7be2b56cdf77a04970c2b185645160666",
+      "bytes": 4304
+    },
+    "http/r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "http/r1/driver.log": {
+      "sha256": "e536e36223f3572b22402ebdf62bbf88e3b69fa600d683c746001bd649569521",
+      "bytes": 834
+    },
+    "http/r1/initdb.log": {
+      "sha256": "21b13cfa7bc5da5907d73a6bd86db3ea6dfa4dcd6867fc751cd72d8fc816fe88",
+      "bytes": 958
+    },
+    "http/r1/manifest.json": {
+      "sha256": "ce1aa99f95fd1b6963fd6ee8d0b7b1f317835a813ee12378c91527265a4c4da2",
+      "bytes": 233271
+    },
+    "http/r1/migrations.log": {
+      "sha256": "afc1bdde1f554e5af5b49ee0ff714bb4cc48c59396076dd859a0f2908ce6a771",
+      "bytes": 14732
+    },
+    "http/r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "http/r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "http/r1/postgres.log": {
+      "sha256": "1ca93c1f40a32851033b136e5e04de662b5e0d53a9be709fb23a7dec7971c989",
+      "bytes": 3563
+    },
+    "http/r1/prepare-jest.json": {
+      "sha256": "f0dc7955505456b3afffdee20b9d56747de5b1496a22301e91afa3fc871986d8",
+      "bytes": 2931
+    },
+    "http/r1/prepare-observations.json": {
+      "sha256": "621f36992c51e273c1de800eec04f52277c68fc4863345abfa0bab61a3e51fcb",
+      "bytes": 15178
+    },
+    "http/r1/prepare.log": {
+      "sha256": "7577700c6380e44e2f6d8a94754595d25563468794e6b960794a19c94c69de94",
+      "bytes": 6161
+    },
+    "http/r2/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "http/r2/driver.log": {
+      "sha256": "717ea00615d2643f4cbc9c2a4882d19583a628a56e197b5b4555e31facf3dd69",
+      "bytes": 851
+    },
+    "http/r2/initdb.log": {
+      "sha256": "40269c5ea3038d10bcc3e63cce15881c3dea9fd31e8c9379d81170a465251020",
+      "bytes": 958
+    },
+    "http/r2/manifest.json": {
+      "sha256": "12b7cb59be90e08b7cb6d3c777ba6074becefa705ea68af77c5cf66ef8b56909",
+      "bytes": 233303
+    },
+    "http/r2/migrations.log": {
+      "sha256": "ee52ff480bef646a3b0158118fe432d56e9a463ae7e62ab89537ef34a4c0640b",
+      "bytes": 14732
+    },
+    "http/r2/pg-restart.log": {
+      "sha256": "83be68057ff4c0adda76e1e0acb62b060272db990638dfcbecb5e9eb8c3bac6f",
+      "bytes": 1347
+    },
+    "http/r2/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "http/r2/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "http/r2/postgres.log": {
+      "sha256": "d8aefced0a292188d85cd9676a8d9f9cd4368d3e6ddf37831d6f6924037e7d96",
+      "bytes": 1246
+    },
+    "http/r2/prepare-jest.json": {
+      "sha256": "5971e7c71cc475680a805149c9eb91223d078b0622034d872ec401db295e8fae",
+      "bytes": 1420
+    },
+    "http/r2/prepare-observations.json": {
+      "sha256": "9e7c5eb68c8d5d5841c50f5be06cc6936070e6fd1fdfc21295881c6699dafbab",
+      "bytes": 21677
+    },
+    "http/r2/prepare.log": {
+      "sha256": "42f6cd46d8d27e453ab6e6572640ee9b428e19cce1ee7b840ab378f80b79404a",
+      "bytes": 1385
+    },
+    "http/r2/resume-jest.json": {
+      "sha256": "d9e623a471be3051b786932ad1da150f2308e7624fb27a328b4fb0c60b18ac3b",
+      "bytes": 10386
+    },
+    "http/r2/resume-observations.json": {
+      "sha256": "ca5103bfb7051d144d5fed5622e87a12556fb20c455e6ae8b88043ac137df200",
+      "bytes": 11170
+    },
+    "http/r2/resume.log": {
+      "sha256": "d31ffe18b765057ec6607c039bea55bbdc5012bd3921812c2ab62ae6a286fe1d",
+      "bytes": 4199
+    },
+    "http/r3/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "http/r3/driver.log": {
+      "sha256": "e593c6da50c5c9afbe811660cb4b963e5525291a70d94d3420824282ff5fda41",
+      "bytes": 159
+    },
+    "http/r3/initdb.log": {
+      "sha256": "41578bf18da782dfbd7815e346db5c593e661c03f950acbd162c22f7471ea205",
+      "bytes": 958
+    },
+    "http/r3/manifest.json": {
+      "sha256": "630d6d917acb41c0e36af8818640b52749c286bfed0ff9cd3e3fc7faaec82089",
+      "bytes": 233268
+    },
+    "http/r3/migrations.log": {
+      "sha256": "ccb969bac35076c6dd0ec51a47501268936e4878a592bff51ac7a4757e9b060c",
+      "bytes": 14732
+    },
+    "http/r3/pg-restart.log": {
+      "sha256": "b592f9fd4093b0b25901c9010a1de973d83bd0cb02094b159dc951b51939e10a",
+      "bytes": 1335
+    },
+    "http/r3/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "http/r3/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "http/r3/postgres.log": {
+      "sha256": "e4c257d05797dacc7e723629e865d44dcf749816ba01c07cb1ae62c6acc47ae5",
+      "bytes": 1234
+    },
+    "http/r3/prepare-jest.json": {
+      "sha256": "1091c960df06f73df8df366197d8c125c51bcb8578f23417468c887317d4e669",
+      "bytes": 1420
+    },
+    "http/r3/prepare-observations.json": {
+      "sha256": "a2f169151517d3e8665268055f8fe7484304caeabc008e36844f551bc23604f7",
+      "bytes": 30197
+    },
+    "http/r3/prepare.log": {
+      "sha256": "64adba2514d48150f5a3ab1750d5ab3eed7d2b61e5bfb31d1e393dd5229298c3",
+      "bytes": 1367
+    },
+    "http/r3/resume-jest.json": {
+      "sha256": "c4e4380347b6e694c3a23318e5e31940c67b3feb4bab5602d7306c3790e5426a",
+      "bytes": 1418
+    },
+    "http/r3/resume-observations.json": {
+      "sha256": "1259fdca3ba230e1d6f98a5dd24e69eccf30ef65a0a78760432ede9e16f8c228",
+      "bytes": 14033
+    },
+    "http/r3/resume.log": {
+      "sha256": "6b22e8454d0224ec9363d8e126c457a110f79162e87db47e90764c7e9f14c53d",
+      "bytes": 1370
+    },
+    "reviews/maya-c8-calendar-gap-reproduction-20261009.json": {
+      "sha256": "dbe00f2179a70449912962e93af9fa180347b14f45e8a1d9d1f8a66468f39b82",
+      "bytes": 830
+    },
+    "reviews/maya-c8-calendar-gap-reproduction-20261009.log": {
+      "sha256": "dbe00f2179a70449912962e93af9fa180347b14f45e8a1d9d1f8a66468f39b82",
+      "bytes": 830
+    },
+    "reviews/maya-c8-next-calendar-gap-20261009.json": {
+      "sha256": "990aedac646c7aa177e7899dc8aba3eef31a128b04d6c0144fb7699454853b90",
+      "bytes": 18485
+    },
+    "reviews/maya-c8-next-calendar-gap-20261009.md": {
+      "sha256": "a88d991280dbd8e1334d2ff3996045148f4abd92864cdb7a5a05d6b519781926",
+      "bytes": 6264
+    },
+    "reviews/maya-c8-two-months-cleanup-r1-r2-20261009.json": {
+      "sha256": "335fc2e1540efcd2929fa091da73d5b933fd265887da9cdd72fb5a941922be40",
+      "bytes": 369
+    },
+    "reviews/maya-c8-two-months-clock-failure-review-20261009.json": {
+      "sha256": "ae236ddc922f3b51e5ca508083a1d801df8bf967ebda5022acb9d2344be4f493",
+      "bytes": 7933
+    },
+    "reviews/maya-c8-two-months-clock-failure-review-20261009.md": {
+      "sha256": "d6275bb994f6b3a6ce950aaf1b8d642a0d7da9159beaaa6a8de77325c4b0ccd8",
+      "bytes": 1768
+    },
+    "reviews/maya-c8-two-months-clock-sample-20261009.json": {
+      "sha256": "d9f4ecfbc5c2dc524b386fa2803cb916845f10c258e1319c628981deb5611b23",
+      "bytes": 162
+    },
+    "reviews/maya-c8-two-months-independent-evidence-review-20261009.json": {
+      "sha256": "58b18b81919d3b6371fdfafcc73818738d3bfd03a12947ebb784570eb28d0e8f",
+      "bytes": 19412
+    },
+    "reviews/maya-c8-two-months-independent-evidence-review-20261009.md": {
+      "sha256": "ced59adde3d61b486535cca71a81f5565e94097b4a017adddf82c09758abe288",
+      "bytes": 2534
+    },
+    "reviews/maya-c8-two-months-independent-source-review-20261009.json": {
+      "sha256": "ded436feedc1e8ff55653792fcb6f2b2c4be35c6398684c7f752e5972187920d",
+      "bytes": 11279
+    },
+    "reviews/maya-c8-two-months-independent-source-review-20261009.md": {
+      "sha256": "96739dbac01a523d57da43d459ec70947e03bde0794be16b9c47e5353380150a",
+      "bytes": 2397
+    },
+    "reviews/maya-c8-two-months-proof-correction-independent-review-20261009.json": {
+      "sha256": "a934aaa1cdff09c7c3c7fad5da8c29225be6200c2fd7a40a88d1f5b046d383b7",
+      "bytes": 6927
+    },
+    "reviews/maya-c8-two-months-proof-correction-independent-review-20261009.md": {
+      "sha256": "52dcc238c5b794adefeeb5fe83a524367529d91450584a148569ad0482f83d9a",
+      "bytes": 1469
+    },
+    "verification.json": {
+      "sha256": "918bf3ead155b98efaaab55effa85846f81ddf91be2e60478b8481c99fa2fedf",
+      "bytes": 1390
+    }
+  }
+}

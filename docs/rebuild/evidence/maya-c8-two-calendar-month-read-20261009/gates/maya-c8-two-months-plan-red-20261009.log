@@ -1,0 +1,24 @@
+FAIL src/ai-tools/owner-review-plan.spec.ts
+  ● finite owner review plan boundary › admits the exact two-calendar-month request for existing C8 source qualification
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ready"
+    Received: "clarify"
+
+      27 |     );
+      28 |     expect(requested?.tasks[0].entities).toEqual({ period: 'more_than_two_months' });
+    > 29 |     expect(singleLifecyclePlanState(requested, 'web', UserRole.TENANT_OWNER)).toBe('ready');
+         |                                                                               ^
+      30 |   });
+      31 |   const plan = () =>
+      32 |     ci.validatePlan(
+
+      at Object.<anonymous> (ai-tools/owner-review-plan.spec.ts:29:79)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 8 skipped, 9 total
+Snapshots:   0 total
+Time:        0.269 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/owner-review-plan.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-c8-two-months-plan-red-20261009.json

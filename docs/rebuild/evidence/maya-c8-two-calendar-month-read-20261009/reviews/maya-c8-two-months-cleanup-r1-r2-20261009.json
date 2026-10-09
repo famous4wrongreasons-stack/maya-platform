@@ -1,0 +1,14 @@
+[
+  {
+    "attempt": "r1",
+    "pgCtlExit": 3,
+    "postmasterPidAbsent": true,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-lifecycle-calendar-nZnkFy/pg"
+  },
+  {
+    "attempt": "r2",
+    "pgCtlExit": 3,
+    "postmasterPidAbsent": true,
+    "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-lifecycle-calendar-T6nJaB/pg"
+  }
+]

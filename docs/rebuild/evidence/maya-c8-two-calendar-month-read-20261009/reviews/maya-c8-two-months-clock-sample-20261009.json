@@ -1,0 +1,6 @@
+{
+  "scope": "read-only OS wall clock sample; not proof of historical root cause",
+  "sampleCount": 300000,
+  "elapsedMonotonicNs": 25219875,
+  "backwards": []
+}

@@ -1,0 +1,127 @@
+{
+  "contract": "maya.c8-two-months-proof-correction-independent-review/1",
+  "reviewedAt": "2026-10-09T19:09:31.088509+00:00",
+  "mode": "READ_ONLY_STATIC_PROBE_DELTA_AND_RETAINED_R2_EVIDENCE",
+  "verdict": "QUALIFIED_NO_REMAINING_BLOCKER_IN_CORRECTED_PROBE",
+  "blockers": [],
+  "baseRuntimeCommit": "602c9e257504abded8767297151e615808959fbf",
+  "trackedDeltaPaths": [
+    "maya-saas-backend/test/widgets-live/lifecycle-calendar-read-restart.probe-spec.ts"
+  ],
+  "probe": {
+    "path": "maya-saas-backend/test/widgets-live/lifecycle-calendar-read-restart.probe-spec.ts",
+    "bytes": 51609,
+    "sha256": "a4c9562bcee0aa9485889dbf68e18eb1aa82c9b16f4e9382b2e1ad3b4ecc02a6",
+    "priorSha256": "3cd2bed1d14321809a3d6ca3271f24dac72ff1a5c1f2785343ba7175e8b87c47"
+  },
+  "unchangedProductionBindings": [
+    {
+      "path": "maya-saas-backend/src/valuation/c8.read.ts",
+      "bytes": 26628,
+      "sha256": "648e2de2841fb731cba63340ee3945acca4c42502271487afeca4e507e8249a0"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts",
+      "bytes": 7664,
+      "sha256": "7d305837f3954152f34f5eb052f5f393c484afdd169851528d73af86245c998a"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.lifecycle-source.ts",
+      "bytes": 6597,
+      "sha256": "4a5ab71fb38ff988e03b4e89897567db1cf172a7218c426f7474d78851166cf8"
+    },
+    {
+      "path": "maya-saas-backend/src/orchestration/c9.orchestrator.ts",
+      "bytes": 53899,
+      "sha256": "e090efcc92504db063b606347c0aecd703c97eaed99e004a30e12d2c19395961"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/owner-review-plan.ts",
+      "bytes": 12259,
+      "sha256": "cf327f702af4a7be420616fca90b87d24364547f7275b1ec0da0a8fb2f665465"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "bytes": 390022,
+      "sha256": "75fcdeafb2794a3456b5d2e2dc9165bdd24fe8bc075fa7f8620b21e8741d8278"
+    }
+  ],
+  "cause": "R2 final noEffects rejected 12 legitimate ActionEngine writes from two explicit A22 fixture HTTP transitions. The test-local AsyncLocalStorage scope does not propagate to HTTP server execution, as documented in support/no-write-recorder.ts; scope:null was expected attribution, not proof the writes came from chat.",
+  "correctionReviewed": [
+    "No runtime, schema, permission, source policy, old raw artifact or expected chat result was changed.",
+    "Each configure POST records an exact start/end operation interval; login and prior GET are outside that exception interval.",
+    "Global before/after censuses of ActionExecution, ActionAttempt, ActionTargetMutation and TenantBusinessConfigurationRevision take129 and refuse >128, so the bounded census cannot silently omit additional rows.",
+    "Each table must have exactly one additional row and every pre-existing row must remain byte-equivalent in the returned canonical Prisma projection.",
+    "Execution must be the same tenant/current owner, authenticated_request, named update_tenant_business_configuration capability, exact tenant-config:c8_valuation target and SUCCEEDED with one attempt.",
+    "The single attempt and target mutation must join that execution; target namespace/mutation kind/generation and the new revision owner/member/previousRevision/revision/actionExecutionId are checked.",
+    "Only after every census/join assertion passes, the exact seven recorded operation indices are allowed: Execution create+two updates, Attempt create+update, TargetMutation create and TenantBusinessConfigurationRevision create.",
+    "No scope-based or blanket Action* exclusion remains. Unexpected operations in or outside the interval remain rejected within the declared recorder business/source/config perimeter.",
+    "Resume requires exactly two controlled transitions. The late chat is still paused while the adversarial A22 transition occurs, then the post-transition business snapshot is checked after chat completion.",
+    "Existing exact source/request/result/history/replay/foreign/revocation/late404 assertions are preserved."
+  ],
+  "r2Qualification": {
+    "status": "FAIL",
+    "prepare": "PASS: one Jest test",
+    "resume": "FAIL: final noEffects assertion",
+    "recordedBeforeFailure": [
+      "two exact initial questions and same-request replay",
+      "day60/gte/scoped/missing/unconfigured controls",
+      "foreign tenant controls",
+      "distinct Node/PG restart and exact saved graphs/history",
+      "current membership401",
+      "saved source-policy drift withholding",
+      "late genuine snapshot delivered unchanged then final404 c8_result_unavailable"
+    ],
+    "modelCalls": 14,
+    "externalFetchCalls": 0,
+    "sourceUnchanged": true,
+    "clusterStopped": true,
+    "clockConstraintRepeatObserved": false,
+    "note": "Recorded intermediate assertions do not convert R2 into successful complete proof. A new corrected-probe run is still required."
+  },
+  "evidenceBindings": [
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/manifest.json",
+      "bytes": 233303,
+      "sha256": "12b7cb59be90e08b7cb6d3c777ba6074becefa705ea68af77c5cf66ef8b56909"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/prepare-jest.json",
+      "bytes": 1420,
+      "sha256": "5971e7c71cc475680a805149c9eb91223d078b0622034d872ec401db295e8fae"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/resume-jest.json",
+      "bytes": 10386,
+      "sha256": "d9e623a471be3051b786932ad1da150f2308e7624fb27a328b4fb0c60b18ac3b"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/resume.log",
+      "bytes": 4199,
+      "sha256": "d31ffe18b765057ec6607c039bea55bbdc5012bd3921812c2ab62ae6a286fe1d"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/prepare-observations.json",
+      "bytes": 21677,
+      "sha256": "9e7c5eb68c8d5d5841c50f5be06cc6936070e6fd1fdfc21295881c6699dafbab"
+    },
+    {
+      "path": "/private/tmp/maya-c8-two-months-http-20261009-r2/resume-observations.json",
+      "bytes": 11170,
+      "sha256": "ca5103bfb7051d144d5fed5622e87a12556fb20c455e6ae8b88043ac137df200"
+    }
+  ],
+  "limits": [
+    "Static correction review only; no corrected-probe execution or cleanup acceptance in this artifact.",
+    "Business-write exclusion is finite: exact canonical fixture A22 actions only. It does not claim all tables/global side effects outside the documented recorder and snapshots.",
+    "A22 fixture setup/controlled policy changes are real local writes, explicitly outside the chat no-business-write claim.",
+    "Original81/corpus classifications, full cohort, live-model/provider quality, DST gap/fold handling and full-MAYA/C10 remain unqualified.",
+    "R1 clock diagnosis and R2 failure remain immutable separate artifacts."
+  ],
+  "reviewerActions": {
+    "testsRun": 0,
+    "servicesStarted": 0,
+    "networkCalls": 0,
+    "sourceEdits": 0
+  }
+}

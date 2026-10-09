@@ -1,0 +1,47 @@
+{
+  "contract": "maya.c8-two-calendar-month-evidence-verification/1",
+  "attempts": [
+    {
+      "attempt": "r1",
+      "status": "failed",
+      "sourceHead": "602c9e257504abded8767297151e615808959fbf",
+      "exactGitBindings": 1866,
+      "pgCtlExit": 3,
+      "postmasterPidAbsent": true,
+      "sourceUnchanged": true
+    },
+    {
+      "attempt": "r2",
+      "status": "failed",
+      "sourceHead": "602c9e257504abded8767297151e615808959fbf",
+      "exactGitBindings": 1866,
+      "pgCtlExit": 3,
+      "postmasterPidAbsent": true,
+      "sourceUnchanged": true
+    },
+    {
+      "attempt": "r3",
+      "status": "passed",
+      "sourceHead": "46119888ec1558561e50a2ea8057851e010b6bc0",
+      "exactGitBindings": 1866,
+      "pgCtlExit": 3,
+      "postmasterPidAbsent": true,
+      "sourceUnchanged": true
+    }
+  ],
+  "protected": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-conversation-batch",
+      "HEAD": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+      "status": ""
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-union-handoff",
+      "HEAD": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+      "status": ""
+    }
+  ],
+  "frozenLaunchSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+  "privateRestartFixturesArchived": false,
+  "original81Reclassification": false
+}

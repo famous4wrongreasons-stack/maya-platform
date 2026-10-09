@@ -1,0 +1,22 @@
+{
+  "contract": "maya.c8-calendar-gap-reproduction/1",
+  "sourceHead": "602c9e257504abded8767297151e615808959fbf",
+  "execution": "actual c8ShiftWindow; synthetic inputs; no DB/provider/model",
+  "gap": {
+    "input": "2026-01-08T07:30:00.000Z",
+    "requestedLocal": "2026-03-08 02:30",
+    "actual": "2026-03-08T06:30:00.000Z",
+    "actualLocal": "2026-03-08 01:30",
+    "preservesRequestedWallTime": false
+  },
+  "fold": {
+    "input": "2026-09-01T05:30:00.000Z",
+    "requestedLocal": "2026-11-01 01:30",
+    "actual": "2026-11-01T05:30:00.000Z",
+    "actualLocal": "2026-11-01 01:30",
+    "alternate": "2026-11-01T06:30:00.000Z",
+    "alternateLocal": "2026-11-01 01:30",
+    "hasTwoMatchingInstants": true
+  },
+  "qualification": "Reproduction only. No repair, new disambiguation policy or whole-C8 rejection acceptance."
+}
