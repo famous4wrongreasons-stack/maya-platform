@@ -1,0 +1,44 @@
+{
+  "qualification": "INDEPENDENT_READ_ONLY_REVIEW_NOT_LANGUAGE_ACCEPTANCE",
+  "codeReview": {
+    "agent": "checkpoint_review",
+    "result": "QUALIFIED_PASS",
+    "fixedFinding": "B external availability previously ignored date/service/branch and echoed unknown staff; finite B-only guard now refuses unsupported queries",
+    "finalTransform": "exact core-conversation-profile helper added to finite allowlist; other modules refused",
+    "dataset": "first six frozen cases exact except group; historical historyContract preserved; active contract matches privacy owner"
+  },
+  "budgetReview": {
+    "agent": "independent_review",
+    "result": "QUALIFIED_PASS",
+    "scope": "budget/profile/source/admission; A frozen unchanged, B limits separate, UNKNOWN retains reservation and stops, source/dataset/profile swaps refused"
+  },
+  "artifactReview": {
+    "agent": "independent_review",
+    "result": "QUALIFIED_PASS_MECHANICS_ONLY",
+    "sourceBindingsVerified": 2446,
+    "sourceCommit": "a80e6c4d5218704b29d2b25bd75b1bacb419c053",
+    "sourceMismatchCount": 0,
+    "http201": 13,
+    "distinctStableConversations": 6,
+    "cannedModelOutputs": 10,
+    "zeroModelAdminTurns": 3,
+    "maxRequestBytes": 93540,
+    "minimumDispatchIntervalMs": 6026,
+    "bookkeepingReservationNanoUsd": 1150719240,
+    "realModelCalls": 0,
+    "preflightRecords": 14,
+    "preflightHttp201": 8,
+    "businessHashesUnchanged": 13,
+    "businessWrites": 0,
+    "chatDomainReads": 0,
+    "chatCoordinationResults": 0,
+    "cleanup": "six process groups closed/absent recorded; broker stopped; PG stop successful and pidfile absent",
+    "limits": [
+      "Preflight sources are not conversation domain traversal.",
+      "ZERO_MODEL admin turns are safe_fallback grounding.blocked business_query, not model-language coverage.",
+      "No real-model, booking/C9, React, restart or C10 acceptance.",
+      "Run b failure before tests preserved; launcher a PATH failure is root evidence, not independently inspected by this reviewer."
+    ]
+  },
+  "rootDirectOsCleanup": "maya-followup-b-cleanup-20261009.json"
+}

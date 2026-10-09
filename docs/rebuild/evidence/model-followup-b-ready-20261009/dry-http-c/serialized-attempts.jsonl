@@ -1,0 +1,10 @@
+{"caseId":"followup-client-carry-over","turn":1,"bytes":68145,"bodySha256":"08dce9873359fd9b459b5d466403bfa0e47cd3c1f8bfc1c954d5c730aa15b0e6","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-carry-over","turn":2,"bytes":68971,"bodySha256":"ae497864e2a0576dbb5abbd6a4d55479fb52a630594149f4a3d4e2e9a4467eec","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-carry-over","turn":3,"bytes":69083,"bodySha256":"b69716161e12eca22815540ebf047fd4fb32730253ce3b6502d7532060e45177","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-entity-correction","turn":1,"bytes":68037,"bodySha256":"37a6783f97657c986d1b40a0fc7843a5fcd8f9a3da266ae0d5624b9a559680ee","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-client-entity-correction","turn":2,"bytes":68920,"bodySha256":"e4ad343f754c07b2e15103f1e91cff0844fd155a31a6e9ae99902e4b4a5525b2","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-admin-typo-ambiguous-period","turn":1,"bytes":79849,"bodySha256":"fa3d040eb822d022b35e6948eeb158ffb57f0df35319d198f803a1c99489f778","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-topic-switch","turn":1,"bytes":92379,"bodySha256":"e9230c2266d18a8348318c8309b5de4f8eb13f886e4f7074af4401c288cfd823","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-topic-switch","turn":2,"bytes":93419,"bodySha256":"bbf25d435b2b3fa60b48319650252f8e27d9e9868222f4741bdedef53e8e1c3d","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-topic-switch","turn":3,"bytes":93540,"bodySha256":"056a35ca6d44c68ea96ab90923ac988a5f5421a6b796f18d7593925cc06f6c48","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"followup-owner-compound","turn":1,"bytes":92454,"bodySha256":"133e7bbb95699f582014ccb492e7b9a30780debd5d95a614034a0f18d6a48a88","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}

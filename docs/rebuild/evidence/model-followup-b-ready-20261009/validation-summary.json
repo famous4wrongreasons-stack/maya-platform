@@ -1,0 +1,51 @@
+{
+  "qualification": "LOCAL_DRY_MECHANICS_ONLY_NOT_LANGUAGE_OR_REAL_PROVIDER_ACCEPTANCE",
+  "testedSourceCommit": "a80e6c4d5218704b29d2b25bd75b1bacb419c053",
+  "checks": [
+    {
+      "command": "node --max-old-space-size=3072 node_modules/typescript/bin/tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false",
+      "exitCode": 0,
+      "scope": "final TypeScript fixture changes; unchanged by later one-line CJS allowlist fix"
+    },
+    {
+      "command": "node --max-old-space-size=3072 node_modules/eslint/bin/eslint.js test/widgets-live/core-conversation-http.probe-spec.ts test/widgets-live/support/current-candidate-sources.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "finite CJS transform: profile helper accepted; unknown module refused",
+      "exitCode": 0
+    },
+    {
+      "command": "four pure kernel/profile/source/admission Node suites",
+      "tests": 65,
+      "pass": 65,
+      "log": "maya-followup-b-kernel-tests-20261009.log"
+    },
+    {
+      "command": "pure CLI and owned child cleanup Node suites",
+      "tests": 15,
+      "pass": 15,
+      "log": "maya-followup-b-cli-tests-20261009.log"
+    }
+  ],
+  "history": "HTTP retains actual prior assistant replies; model privacy retains user-only messages plus server-owned encrypted semantic continuation.",
+  "paidCalls": 0,
+  "liveYclientsCalls": 0,
+  "newRealPermits": 0,
+  "newRealClaims": 0,
+  "credentialPrompts": 0,
+  "attempts": [
+    {
+      "id": "a",
+      "outcome": "Node absent from manually sanitized PATH; runner never started; exact absolute Node path corrected"
+    },
+    {
+      "id": "b",
+      "outcome": "FAILED_BEFORE_TESTS: finite Jest transform did not yet include core-conversation-profile; source e45231a8; cleanup confirmed"
+    },
+    {
+      "id": "c",
+      "outcome": "PASS_UNGRADED: 6 dialogs,13 HTTP201,10 canned envelopes,3 ZERO_MODEL general-admin turns; all13 business hashes unchanged, no writes; cleanup confirmed"
+    }
+  ]
+}

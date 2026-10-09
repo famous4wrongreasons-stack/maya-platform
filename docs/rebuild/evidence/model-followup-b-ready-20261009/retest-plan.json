@@ -1,0 +1,68 @@
+{
+  "status": "EXECUTABLE_LOCAL_MECHANICS_READY_PAID_NOT_AUTHORIZED",
+  "paidAuthorized": false,
+  "permitsCreated": false,
+  "claimsCreated": false,
+  "keyPromptPerformed": false,
+  "proposedCombinedCapUsd": 6,
+  "proposedCombinedAttempts": 36,
+  "order": [
+    "A",
+    "B"
+  ],
+  "data": "Exact frozen development utterances; synthetic tenant/actor/catalog/availability/finance/Opportunity; canonical authorized anonymized server context; actual HTTP history with model privacy filter.",
+  "appIngress": "LOCAL /api/ai/chat",
+  "modelEndpoint": "https://api.deepseek.com/chat/completions",
+  "model": "deepseek-v4-pro",
+  "realYclientsNetworkAuthorized": false,
+  "businessEffectsAuthorized": false,
+  "knownGap": "All three general-admin turns currently block before model. Fix requires a separate runtime change/new candidate; do not grant broader fixture authority or count these as language coverage.",
+  "freshPriceEvidenceRequired": true,
+  "oldPaidGrantReusable": false,
+  "freshAdmissionManifestRequired": true,
+  "stages": [
+    {
+      "id": "A",
+      "candidate": "0d90de11710e7212286a7e74755c8a12b55d116b",
+      "branch": "codex/maya-retest-candidate-20261009",
+      "backend": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-a/maya-saas-backend",
+      "profile": "core-diagnostic-20261008/1",
+      "dialogs": 3,
+      "userTurns": 5,
+      "attempts": 12,
+      "capUsd": 2,
+      "durationMs": 600000,
+      "dryReadyManifest": "ready-a-dry-manifest.json",
+      "dryManifestSha256": "e7fd32e742a66128dfdcb1ff73a7dcb2b1fcfeeb4a1ba779dd18b7c88ce0594e",
+      "futurePrepareArgv": [
+        "scripts/conversation-qualification/core-local-prepare.mjs",
+        "--prepare",
+        "--output",
+        "FRESH_CANONICAL_PRIVATE_ROOT"
+      ]
+    },
+    {
+      "id": "B",
+      "candidate": "a80e6c4d5218704b29d2b25bd75b1bacb419c053",
+      "branch": "codex/maya-retest-candidate-b-20261009",
+      "backend": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-retest-candidate-b/maya-saas-backend",
+      "profile": "core-followup-20261009/1",
+      "dialogs": 6,
+      "userTurns": 13,
+      "attempts": 24,
+      "capUsd": 4,
+      "durationMs": 1200000,
+      "dryReadyManifest": "ready-b-dry-manifest.json",
+      "dryManifestSha256": "694f223449af98962d663e662fa876bcdce11bd44cf8729eeae4759aa7c0ca48",
+      "futurePrepareArgv": [
+        "scripts/conversation-qualification/core-local-prepare.mjs",
+        "--prepare",
+        "--profile",
+        "core-followup-20261009/1",
+        "--output",
+        "FRESH_CANONICAL_PRIVATE_ROOT"
+      ]
+    }
+  ],
+  "handoff": "Root requests a fresh explicit approval for these exact stages, data, endpoint and limits at an appropriate time. Afterwards use existing local prepare, fresh exact permits and owner terminal input to the broker only. No old permit/claim reuse, ambient key, automatic retry or silent continuation past failed A."
+}

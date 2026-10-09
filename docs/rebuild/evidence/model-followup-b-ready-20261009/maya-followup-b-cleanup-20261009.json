@@ -1,0 +1,109 @@
+{
+  "checkedAt": "2026-10-09T01:16:55.021Z",
+  "reports": [
+    {
+      "run": "b",
+      "status": "failed",
+      "groups": [
+        {
+          "name": "initdb",
+          "pgid": 97091,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "pg-start",
+          "pgid": 97112,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "createdb",
+          "pgid": 97131,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "migrations",
+          "pgid": 97143,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "conversation",
+          "pgid": 97174,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "pg-stop",
+          "pgid": 97208,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        }
+      ],
+      "brokerPid": 97155,
+      "brokerOsAbsent": true,
+      "postmasterPidAbsent": true,
+      "clusterStopped": true
+    },
+    {
+      "run": "c",
+      "status": "passed-ungraded",
+      "groups": [
+        {
+          "name": "initdb",
+          "pgid": 97599,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "pg-start",
+          "pgid": 97620,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "createdb",
+          "pgid": 97641,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "migrations",
+          "pgid": 97653,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "conversation",
+          "pgid": 97686,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        },
+        {
+          "name": "pg-stop",
+          "pgid": 98258,
+          "closed": true,
+          "reportedAbsent": true,
+          "osAbsent": true
+        }
+      ],
+      "brokerPid": 97664,
+      "brokerOsAbsent": true,
+      "postmasterPidAbsent": true,
+      "clusterStopped": true
+    }
+  ]
+}

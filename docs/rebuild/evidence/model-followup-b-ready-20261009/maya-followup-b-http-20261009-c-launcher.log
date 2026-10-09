@@ -1,0 +1,10 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START conversation
+{"status":"passed-ungraded","clusterStopped":true,"output":"/private/tmp/maya-followup-b-http-20261009-c","manifestSha256":"9107ab4f71c19109aef1c8d58a2878bc568d55e2ad9e0394b329ff9ec0ab18be","qualification":"DRY_HTTP_CANNED_MECHANICS_NOT_MODEL_QUALITY"}

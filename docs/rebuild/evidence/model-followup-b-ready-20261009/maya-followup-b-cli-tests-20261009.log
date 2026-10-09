@@ -1,0 +1,23 @@
+✔ runner retains implicit A and accepts each exact profile before requiring output (210.177333ms)
+✔ unknown, empty and near-match profiles cannot fall back to A in either preparation entry (185.875375ms)
+✔ B recorded replay refuses before output or manifest access, while A retains its dry path (98.110292ms)
+✔ explicit B never weakens either paid-mode recorded-replay refusal (66.784375ms)
+✔ broker takes its profile from the validated manifest, never a CLI override (34.489542ms)
+✔ broker rejects recorded replay for a valid B dry manifest before source or output work (37.32025ms)
+✔ runner refuses explicit or implicit profile mismatch before source or service execution (102.787292ms)
+✔ local preparation keeps its explicit action and closed CLI without invoking the preparer (61.1385ms)
+✔ spawn error without exit settles cleanup (0.469959ms)
+✔ live child gets TERM then KILL and settles on close (5.316209ms)
+✔ unconfirmed child termination rejects within a bound (13.052208ms)
+✔ default and explicit A retain the existing inclusive 12-minute stage ceiling (0.31125ms)
+✔ only explicit B admits its finite diagnostic and harness allowance (0.093583ms)
+✔ neither profile accepts zero, fractional, nonnumeric or unbounded stage durations (0.2155ms)
+✔ an omitted B opt-in refuses before file creation or child spawn (0.155833ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 878.103

@@ -1,0 +1,224 @@
+{
+  "preflights": [
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:19.399Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Елена",
+      "serviceName": "комплекс стрижка и борода"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Елена",
+      "serviceName": "комплекс стрижка и борода",
+      "date": "2026-10-09",
+      "time": null,
+      "exactAvailable": null,
+      "observedSlotCount": 6,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:19.399Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_TODAY_READ_EMPTY_IS_VALID_NO_FABRICATED_FUTURE_SLOT"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Никита",
+      "serviceName": "комплекс стрижка и борода",
+      "date": "2026-10-10",
+      "time": "17:00",
+      "exactAvailable": true,
+      "observedSlotCount": 1,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:19.399Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_EXACT_AVAILABILITY_READ"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "role": "client",
+      "httpStatus": 201,
+      "exact17Available": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:19.738Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "verifiedClientLink": true,
+      "staffName": "Артём",
+      "serviceName": "Мужская стрижка"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "role": "client",
+      "httpStatus": 201,
+      "staffName": "Максим",
+      "serviceName": "Мужская стрижка",
+      "date": "2026-10-10",
+      "time": "19:30",
+      "exactAvailable": true,
+      "observedSlotCount": 1,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:19.738Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "qualification": "CANONICAL_EXACT_AVAILABILITY_READ"
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "tool": "catalog.staff.read",
+      "httpStatus": 201,
+      "currentSyntheticCatalog": true,
+      "omittedStaffServiceAndConflictingPeriodNotFilledIn": true
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "tool": "catalog.services.read",
+      "httpStatus": 201,
+      "currentSyntheticCatalog": true,
+      "omittedStaffServiceAndConflictingPeriodNotFilledIn": true
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "finiteExternalAvailabilityFence": true,
+      "unsupportedQueriesRejected": 9
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "role": "tenant_owner",
+      "httpStatus": 201,
+      "branchName": "основной филиал",
+      "staffName": "Артём",
+      "date": "2026-10-10",
+      "schedule": "10:00–20:00",
+      "financeScope": "TENANT_WIDE_PUBLISHED_C7_NOT_BRANCH_ROOT_CAUSE"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": false,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:20.070Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "finiteExternalAvailabilityFence": true,
+      "unsupportedQueriesRejected": 9
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "role": "tenant_owner",
+      "publishedC7": true,
+      "canonicalOpportunity": true,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T01:15:20.253Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      }
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "role": "administrator",
+      "noRoleUpgrade": true
+    }
+  ],
+  "unauthenticatedStatus": 401,
+  "modelCalls": 0,
+  "brokerCalls": 0,
+  "sourceQualification": "FINITE_SYNTHETIC_FACTS_WITH_CANONICAL_OWNERS",
+  "financeReads": [
+    {
+      "route": "transactions/88103",
+      "company": "88103"
+    },
+    {
+      "route": "company/88103/staff",
+      "company": "88103"
+    },
+    {
+      "route": "records/88103",
+      "company": "88103"
+    },
+    {
+      "route": "company/88103/salary/calculation/staff/71",
+      "company": "88103"
+    },
+    {
+      "route": "transactions/88104",
+      "company": "88104"
+    },
+    {
+      "route": "company/88104/staff",
+      "company": "88104"
+    },
+    {
+      "route": "records/88104",
+      "company": "88104"
+    },
+    {
+      "route": "company/88104/salary/calculation/staff/71",
+      "company": "88104"
+    }
+  ]
+}
