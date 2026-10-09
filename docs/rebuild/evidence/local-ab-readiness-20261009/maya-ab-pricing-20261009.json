@@ -1,0 +1,8 @@
+{
+  "model": "deepseek-v4-pro",
+  "inputNanoUsdPerToken": 1320,
+  "outputNanoUsdPerToken": 3960,
+  "reference": "deepseek-official-pricing-20261009",
+  "sha256": "4ede4a8e98d4890dbd10c3035877c9bcd0a8d294e7f14ff55ead21a6d74b9a59",
+  "verifiedAt": "2026-10-09T07:07:01.000Z"
+}

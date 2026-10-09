@@ -1,0 +1,71 @@
+{
+  "status": "READY_FOR_EXPLICIT_ONETIME_TERMINAL_INPUT",
+  "qualification": "SCRIPTED_SYNTHETIC_HARNESS_ONLY_NOT_REAL_MODEL_ACCEPTANCE",
+  "ownerApproval": "Sentinel_519ee1e68e1c8191adeb5359313624ca",
+  "ownerPresence": "Sentinel_d2a6cafc3134819195f4399d228c0daf",
+  "stages": {
+    "A": "0d90de11710e7212286a7e74755c8a12b55d116b",
+    "B": "82ea84c46c4a535aaba8aa4c549f7a0eb074dcfa"
+  },
+  "validation": [
+    {
+      "suite": "local-ab integrated actual launcher with synthetic TTY, clock, fetch, runner",
+      "passed": 4,
+      "log": "maya-ab-integration-v1-20261009.log"
+    },
+    {
+      "suite": "server lifecycle + existing CLI",
+      "passed": 13,
+      "evidence": "root tool output in this session; no external network/PG/model"
+    },
+    {
+      "suite": "shared budget",
+      "passed": 10,
+      "log": "maya-local-ab-budget-tests-final-20261009.log"
+    },
+    {
+      "suite": "usage/completion checks",
+      "passed": 56,
+      "evidence": "checkpoint_review agent result; pure tests"
+    },
+    {
+      "suite": "single credential lifecycle",
+      "passed": 16,
+      "evidence": "checkpoint_review agent result; synthetic reader only"
+    },
+    {
+      "suite": "known owned cleanup",
+      "passed": 8,
+      "log": "maya-local-ab-cleanup-tests-final-20261009.log"
+    }
+  ],
+  "testsTotal": 107,
+  "independentReview": {
+    "agent": "checkpoint_review",
+    "result": "Qualified static PASS; early output-layout finding implemented before integrated PASS.",
+    "limits": "No actual TTY/model acceptance; native forced cleanup not exercised against a live PG."
+  },
+  "bounds": {
+    "A": {
+      "attempts": 12,
+      "usd": 2,
+      "minutes": 10
+    },
+    "B": {
+      "attempts": 24,
+      "usd": 4,
+      "minutes": 20
+    },
+    "total": {
+      "attempts": 36,
+      "usd": 6,
+      "minutes": 30
+    }
+  },
+  "executionBeforeThisCheckpoint": {
+    "realKeyInputs": 0,
+    "realProviderCalls": 0,
+    "realActivePermits": 0,
+    "syntheticTestPermits": "Only expired year-2000 fixtures with synthetic-test-only reference; removed with test directories."
+  }
+}

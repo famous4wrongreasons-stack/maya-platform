@@ -1,0 +1,10 @@
+{
+  "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "verifiedAt": "2026-10-09T07:07:01.000Z",
+  "model": "deepseek-v4-pro",
+  "peakUsdPerMillion": {
+    "cacheMissInput": 1.32,
+    "output": 3.96
+  },
+  "basis": "Official pricing page read via web tool; conservative peak cache-miss rates."
+}
