@@ -20,6 +20,7 @@ const backend = path.resolve(
 const sourcePaths = [
   'src',
   'prisma',
+  'prisma.config.ts',
   'test/widgets-live/support',
   'test/jest-widgets-live.json',
   'package.json',

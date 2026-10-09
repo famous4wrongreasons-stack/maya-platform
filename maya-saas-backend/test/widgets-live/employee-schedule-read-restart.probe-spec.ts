@@ -429,7 +429,7 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
     token: string,
     scenario: Scenario,
     requestId: string = randomUUID(),
-    conversationId: string = randomUUID(),
+    conversationId?: string,
   ) {
     active = scenario;
     const beforeModels = modelCalls;
@@ -439,10 +439,20 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
       .send({
         surface: 'web',
         requestId,
-        conversationId,
+        ...(conversationId ? { conversationId } : {}),
         messages: [{ role: 'user', content: scenario.text }],
       });
     active = undefined;
+    const rawMessage: unknown = object(result.body).message;
+    const errorMessage =
+      typeof rawMessage === 'string' &&
+      /^(?:(?:ai_|c9_|conversation_|typed_|staff_schedule_|booking_)[a-z0-9_]{1,100}|Unauthorized|Forbidden|Conflict)$/.test(
+        rawMessage,
+      )
+        ? rawMessage
+        : rawMessage === undefined
+          ? null
+          : { sha256: digest(rawMessage) };
     checkpoints.push({
       requestHash: digest(requestId),
       text: scenario.label ?? scenario.text,
@@ -454,6 +464,7 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
           : null,
       grounding: object(object(result.body).grounding).status ?? null,
       errorCode: object(object(result.body).error).code ?? null,
+      errorMessage,
     });
     expect(modelCalls - beforeModels).toBeLessThanOrEqual(1);
     return { status: result.status, body: object(result.body) };
@@ -618,15 +629,23 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
         restrictedToken = await login(a, a.restricted);
       const mark = http.recorder.mark(),
         before = await business();
-      const requestId = randomUUID(),
-        conversationId = randomUUID();
-      const first = await chat(token, EXACT, requestId, conversationId);
+      const requestId = randomUUID();
+      const first = await chat(token, EXACT, requestId);
       assertPositive(first);
+      const conversationId = object(first.body.user_turn).conversationId;
+      assert.ok(typeof conversationId === 'string');
       const runId = await evidence(a, first.body);
       const beforeReplay = transport.length;
+      const graphBeforeReplay = await graph(a.tenant.id);
       const replay = await chat(token, EXACT, requestId, conversationId);
       assertPositive(replay);
+      expect(await evidence(a, replay.body)).toBe(runId);
+      expect(await graph(a.tenant.id)).toBe(graphBeforeReplay);
       expect(transport).toHaveLength(beforeReplay);
+      report.prepareReplay = {
+        runHash: digest(runId),
+        graphHashUnchanged: graphBeforeReplay,
+      };
       const beforeAmbiguity = transport.filter(
         (r) => r.resource === 'schedule',
       ).length;
@@ -761,7 +780,12 @@ describe('employee schedule actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, 
       );
       assertPositive(replay);
       expect(transport).toEqual([]);
-      await evidence(a, replay.body);
+      expect(await evidence(a, replay.body)).toBe(saved.runId);
+      expect(await graph(a.tenant.id)).toBe(saved.graph);
+      report.resumeReplay = {
+        runHash: digest(saved.runId),
+        graphHashUnchanged: saved.graph,
+      };
       const beforeRevocation = transport.filter(
         (r) => r.resource === 'schedule',
       ).length;
