@@ -52,8 +52,9 @@ const files = [
 const hashes = () => Object.fromEntries(files.map(file => [file, createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex')]));
 const manifest = { qualification: 'ACTUAL_HTTP_AUTH_HISTORY_PG_SCRIPTED_SEMANTICS', sourceHead: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), sourceHashes: hashes(), status: 'running', completed: [], cluster, database, port, realModelAcceptance: false, externalProviderAcceptance: false, browserAcceptance: false, resources: { nodeHeapMb: 1536, jestWorkers: 1, pgSharedBuffersMb: 64 } };
 const save = () => fs.writeFileSync(path.join(output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-const cancel = signal => { control.cancelled ??= signal; save(); if (!control.activeCleanup) control.terminateActive?.(); };
-process.on('SIGINT', cancel); process.on('SIGTERM', cancel);
+const cancel = signal => { control.cancelled ??= signal; manifest.cancelledBy = control.cancelled; manifest.status = 'cancelled'; save(); if (!control.activeCleanup) control.terminateActive?.(); };
+const onInt = () => cancel('SIGINT'), onTerm = () => cancel('SIGTERM');
+process.on('SIGINT', onInt); process.on('SIGTERM', onTerm);
 let started = false;
 save();
 try {
@@ -74,5 +75,6 @@ finally {
     }
     clean();
     manifest.sourceUnchanged = JSON.stringify(hashes()) === JSON.stringify(manifest.sourceHashes);
-  } finally { save(); }
+  } finally { save(); process.off('SIGINT', onInt); process.off('SIGTERM', onTerm); }
 }
+assert.equal(manifest.status, 'passed');
