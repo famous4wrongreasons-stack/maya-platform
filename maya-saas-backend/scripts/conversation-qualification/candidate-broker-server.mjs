@@ -28,6 +28,23 @@ export function serveCandidateBroker({
   const controllers = new Set(),
     inflight = new Set(),
     sockets = new Set();
+  let resolveReady, rejectReady, resolveClosed, rejectClosed, settleListen;
+  const ready = new Promise((resolve, reject) => {
+    resolveReady = resolve;
+    rejectReady = reject;
+  });
+  const closed = new Promise((resolve, reject) => {
+    resolveClosed = resolve;
+    rejectClosed = reject;
+  });
+  const listenSettled = new Promise((resolve) => {
+    settleListen = resolve;
+  });
+  // Existing CLI callers need not consume the new lifecycle promises. Awaiting
+  // either original promise still observes its rejection.
+  void ready.catch(() => {});
+  void closed.catch(() => {});
+  let stopPromise;
   async function handle(req, res) {
     if (req.method === 'GET' && req.url === '/status') {
       res.writeHead(200, { 'content-type': 'application/json' });
@@ -182,62 +199,98 @@ export function serveCandidateBroker({
     },
     Math.max(0, expiresAt - Date.now()),
   );
-  async function stop(reason) {
-    if (stopped) return;
+  function stop(reason) {
+    if (stopPromise) return stopPromise;
+    stopPromise = closed;
     stopped = true;
     blocked = true;
     clearTimeout(deadline);
+    rejectReady(new Error('dry_broker_stopped_before_ready'));
     report.stopReason = reason;
     report.connectionsAtStop = sockets.size;
     report.requestsAtStop = inflight.size;
     // Cut every socket now, including partial bodies/headers and keepalive. Also
     // cancel budget spacing/transport; closing only idle sockets cannot enforce TTL.
     for (const controller of controllers) controller.abort();
-    const closed = new Promise((resolve) => server.close(resolve));
     for (const socket of sockets) socket.destroy();
-    await Promise.allSettled([...inflight, closed]);
-    gate?.endTurn();
-    gate?.close();
-    report.stopped = true;
-    report.stoppedAt = new Date().toISOString();
-    save();
-    if (process.connected) process.disconnect();
+    void (async () => {
+      try {
+        // A same-tick stop must also join a still-pending listen. Closing an
+        // unbound server first can otherwise finish before its listener opens.
+        await listenSettled;
+        const serverClosed = new Promise((resolve) => server.close(resolve));
+        await Promise.allSettled([...inflight, serverClosed]);
+        try {
+          await gate?.endTurn();
+        } finally {
+          await gate?.close();
+        }
+        report.stopped = true;
+        report.stoppedAt = new Date().toISOString();
+        save();
+      } finally {
+        process.off('SIGTERM', onSigterm);
+        process.off('SIGINT', onSigint);
+        process.off('disconnect', onDisconnect);
+        if (process.connected) process.disconnect();
+      }
+    })().then(resolveClosed, rejectClosed);
+    return stopPromise;
   }
-  process.on('SIGTERM', () => {
+  const onSigterm = () => {
     void stop('SIGTERM');
-  });
-  process.on('SIGINT', () => {
+  };
+  const onSigint = () => {
     void stop('SIGINT');
-  });
-  process.on('disconnect', () => {
+  };
+  const onDisconnect = () => {
     void stop('parent_disconnect');
-  });
+  };
+  process.on('SIGTERM', onSigterm);
+  process.on('SIGINT', onSigint);
+  process.on('disconnect', onDisconnect);
   const listening = () => {
+    settleListen();
     if (stopped || Date.now() >= expiresAt) {
-      server.close();
       void stop('ttl');
       return;
     }
     try {
       onListen?.();
     } catch {
+      rejectReady(new Error('dry_broker_listen_binding_refused'));
       void stop('listen_binding_refused');
       return;
     }
+    if (stopped) return;
     const address = server.address();
     const location =
       typeof address === 'string'
         ? { socketPath: address }
         : { port: address.port };
-    if (process.connected)
-      process.send?.({ type: 'ready', ...location, mode: report.mode });
-    onReady?.({ ...location, mode: report.mode });
+    try {
+      onReady?.({ ...location, mode: report.mode });
+      if (stopped) return;
+      if (process.connected)
+        process.send?.({ type: 'ready', ...location, mode: report.mode });
+      resolveReady({ ...location, mode: report.mode });
+    } catch {
+      rejectReady(new Error('dry_broker_ready_refused'));
+      void stop('ready_refused');
+    }
   };
-  server.once('error', () => {
+  const listenFailed = () => {
+    settleListen();
+    rejectReady(new Error('dry_broker_listen_failed'));
     void stop('listen_failed');
-  });
-  if (listenTarget) server.listen(listenTarget, listening);
-  else server.listen(0, '127.0.0.1', listening);
+  };
+  server.once('error', listenFailed);
+  try {
+    if (listenTarget) server.listen(listenTarget, listening);
+    else server.listen(0, '127.0.0.1', listening);
+  } catch {
+    listenFailed();
+  }
 
-  return { stop };
+  return { stop, ready, closed };
 }
