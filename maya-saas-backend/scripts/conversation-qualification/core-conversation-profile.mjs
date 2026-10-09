@@ -44,7 +44,7 @@ const union = Object.freeze({
   datasetPath:
     'maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json',
   datasetSha256:
-    'a3210eac84354f2d1837a90f94e3a6932e4f1eab28047702ff173dee0634946a',
+    '2832b5837a1b01a4d0fe6e58f8c8811f318a7402ab2e7052ebb8a8a6f7b9c4ca',
   casesSha256:
     '269fdb3331f2fa66b063a1e5c2be2922280f365101ca9cda1e0fa5056abce7e8',
   limits: CORE_UNION_LIMITS,

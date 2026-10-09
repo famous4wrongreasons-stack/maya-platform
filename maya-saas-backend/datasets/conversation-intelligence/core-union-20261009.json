@@ -27,8 +27,8 @@
     "sourceAssistantRowsAllowed": false,
     "modelInput": "The HTTP replay retains actual ordered user messages and actual preceding assistant replies from the same authenticated conversation; no gold answers are substituted. Canonical privacy filtering sends user-only dialogue messages to the model, with authorized server context and server-owned semantic continuation restored from encrypted storage. Retaining actual HTTP replies does not mean forwarding raw assistant text to the model. Review metadata is not model input.",
     "conversationBinding": "Start a distinct conversation per case; require every successful response to retain the server canonical conversation ID and current principal.",
-    "failedTurn": "On transport UNKNOWN, timeout, malformed response or non-2xx, stop that dialog; never insert an invented assistant answer or continue from corpus gold. Record authority refusals separately.",
-    "retry": "No automatic network/model retry. Any explicit retry must remain within a separately executable approved profile and retain request/conversation semantics.",
+    "failedTurn": "On transport UNKNOWN, timeout, malformed response or HTTP non-201, stop the entire batch; never insert an invented assistant answer or continue from corpus gold. Record authority refusals separately.",
+    "retry": "The batch never retries a chat request or resumes after STOP. Existing bounded model-stage retries remain possible within the same run and consume the shared 36-attempt cap.",
     "entityAuthority": "Names/IDs in corpus are preferences only; current authorized catalogs and persisted source owners resolve facts."
   },
   "semanticFailure": "SKIP_DEPENDENT_TURNS_CONTINUE_NEXT_INDEPENDENT_DIALOG",
