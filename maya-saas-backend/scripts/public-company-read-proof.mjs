@@ -30,6 +30,7 @@ const sourcePaths = [
   'scripts/c9-occupancy-proof.mjs',
   'scripts/public-company-read-proof.mjs',
   'test/widgets-live/public-company-read-restart.probe-spec.ts',
+  'datasets/conversation-intelligence/core-offline-48-20261009.json',
 ];
 const git = (args) =>
   execFileSync('git', args, { cwd: backend, encoding: 'utf8', timeout: 5000 });

@@ -14,7 +14,12 @@ import {
   CrmProvider,
   UserRole,
 } from '../../src/common/domain.enums';
-import { decodeChatReply } from '../../src/widgets/stores/chat-reply-codec';
+import {
+  chatReplyId,
+  decodeChatCompletion,
+  decodeChatReply,
+  isChatReply,
+} from '../../src/widgets/stores/chat-reply-codec';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -26,6 +31,7 @@ import { assertProofDatabase } from './support/proof-db-guard';
 // Keep AppModule bootstrap ahead of the existing CRM owner import cycle.
 import { CrmService } from '../../src/crm/crm.service';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
+import { c9Hash } from '../../src/orchestration/c9.contract';
 
 const stage = process.env.JEST_PUBLIC_COMPANY_STAGE;
 const receipt = process.env.JEST_PUBLIC_COMPANY_RECEIPT;
@@ -49,6 +55,26 @@ const BRANCH_NAME = 'Набережная';
 const BRANCH_TIMEZONE = 'Pacific/Kiritimati';
 const TENANT_TIMEZONE = 'Pacific/Honolulu';
 const TOKEN = 'public-company-synthetic-no-credential';
+const ORIGINAL_DATASET_SHA256 =
+  '9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b';
+const SUPPLEMENTAL_BRANCH = 'основной филиал';
+const SUPPLEMENTAL_REQUESTS = [
+  {
+    id: 'utt-company.public_info-037',
+    sourceRowSha256:
+      '71783d08af20d161d23e02de6748a5e07b5ed717d687af28e83651873bd3a674',
+    text: 'Покажите актуальные данные: как вас найти. По точке «основной филиал». Покажи главный вывод.',
+  },
+  {
+    id: 'utt-company.public_info-041',
+    sourceRowSha256:
+      '645e728407459ff68d9d5bf2b6677a4114a322ae8a51b65e3cc8028101c1ad5d',
+    text: 'Итогом: как вас найти? По точке «основной филиал». Покажи главный вывод.',
+  },
+] as const;
+type SupplementalCaseId = (typeof SUPPLEMENTAL_REQUESTS)[number]['id'];
+const SUPPLEMENTAL_QUALIFICATION =
+  'SEPARATE_SCRIPTED_BRANCH_EXTRACTION_AND_SYNTHETIC_BINDING_NOT_ORIGINAL_81_RESCORE';
 const PRIVATE_FIXTURE = [
   'PRIVATE_TENANT_BRANDING',
   'PRIVATE_BRANDING_ADDRESS',
@@ -100,6 +126,23 @@ const NAME: Scenario = {
   branch: BRANCH_NAME,
   field: 'name',
 };
+type SupplementalSaved = {
+  originalCaseId: SupplementalCaseId;
+  tenantId: string;
+  requestId: string;
+  conversationId: string;
+  parentTurnId: string;
+  assistantTurnId: string;
+  firstReply: string;
+  completionHash: string;
+  historyAssistantTurnId: string;
+  historyReply: string;
+  historyCompletionHash: string;
+  runId: string;
+  evidenceHash: string;
+  publicProfileHash: string;
+  sourceRevision: string;
+};
 type Saved = {
   contract: 'synthetic-public-company-read-proof/1';
   database: string;
@@ -115,6 +158,8 @@ type Saved = {
   runId: string;
   graph: string;
   business: string;
+  supplemental: SupplementalSaved[];
+  supplementalGraph: string;
 };
 
 describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]', () => {
@@ -131,6 +176,13 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
   }> = [];
   const unexpected: string[] = [];
   const checkpoints: Record<string, unknown>[] = [];
+  const supplemental: SupplementalSaved[] = [];
+  const supplementalReceipts: Record<string, unknown>[] = [];
+  const nativeProfiles: Array<{
+    tenantHash: string;
+    company: number;
+    publicProfileHash: string;
+  }> = [];
   const sourceReceipts: Array<{
     runHash: string;
     actorHash: string;
@@ -153,11 +205,48 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
     explicitValidatedBranchOnly: true,
     fullDialogueReclassification: false,
     full48Reclassification: false,
+    supplementalQualification: SUPPLEMENTAL_QUALIFICATION,
+    originalDatasetSha256: ORIGINAL_DATASET_SHA256,
+    supplementalOriginalCases: SUPPLEMENTAL_REQUESTS.map((row) => row.id),
+    supplementalOriginalFamilies: 1,
+    supplementalRole: 'CLIENT',
     c9ReadsPerPositive: 1,
     nativeGetCountIsNotC9ReadCount: true,
     noBusinessWritesClaim: 'OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP',
   };
   beforeAll(async () => {
+    // Read-only pin: these cases remain unchanged in the original 48/81 corpus.
+    const originalBytes = readFileSync(
+      path.resolve(
+        __dirname,
+        '../../datasets/conversation-intelligence/core-offline-48-20261009.json',
+      ),
+    );
+    assert.equal(
+      createHash('sha256').update(originalBytes).digest('hex'),
+      ORIGINAL_DATASET_SHA256,
+    );
+    const original = object(
+      JSON.parse(originalBytes.toString('utf8')) as unknown,
+    );
+    assert.ok(Array.isArray(original.cases));
+    const originalCases: unknown[] = original.cases;
+    assert.equal(originalCases.length, 48);
+    for (const requested of SUPPLEMENTAL_REQUESTS) {
+      const matched = originalCases.filter(
+        (row: unknown) => object(row).id === requested.id,
+      );
+      assert.equal(matched.length, 1);
+      assert.equal(object(matched[0]).role, 'client');
+      assert.equal(
+        object(matched[0]).sourceRowSha256,
+        requested.sourceRowSha256,
+      );
+      assert.deepEqual(object(matched[0]).userTurns, [requested.text]);
+      assert.deepEqual(object(matched[0]).familyRefs, [
+        'historical-single:company.public_info:3',
+      ]);
+    }
     assert.equal(process.env.YCLIENTS_PARTNER_TOKEN, undefined);
     process.env.YCLIENTS_PARTNER_TOKEN = TOKEN;
     if (stage === 'resume') {
@@ -168,6 +257,12 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
       assert.equal(saved.sourceBindingsDigest, sourceBindingsDigest);
       assert.notEqual(saved.pid, process.pid);
       salons.push(...saved.salons);
+      assert.equal(saved.supplemental.length, SUPPLEMENTAL_REQUESTS.length);
+      assert.deepEqual(
+        saved.supplemental.map((row) => row.originalCaseId),
+        SUPPLEMENTAL_REQUESTS.map((row) => row.id),
+      );
+      supplemental.push(...saved.supplemental);
     }
     // No original fetch fallback or external socket. Discovery is allowed only
     // in the explicitly selected missing-profile scenario, never for other calls.
@@ -221,6 +316,14 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
       const hook = profileHook;
       profileHook = undefined;
       await hook?.();
+      nativeProfiles.push({
+        tenantHash: digest(salon.tenant.id),
+        company: salon.company,
+        publicProfileHash: digest({
+          name: salon.title,
+          address: salon.address,
+        }),
+      });
       return new Response(
         JSON.stringify({
           success: true,
@@ -313,6 +416,8 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
       unexpected,
       checkpoints,
       sourceReceipts,
+      supplementalReceipts,
+      nativeProfiles,
     });
     try {
       writeFileSync(
@@ -339,7 +444,13 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
   }
   async function seed(
     company: number,
-    options: { noTitle?: boolean; noAddress?: boolean; unbound?: boolean } = {},
+    options: {
+      noTitle?: boolean;
+      noAddress?: boolean;
+      unbound?: boolean;
+      branchName?: string;
+      mismatchedCompany?: boolean;
+    } = {},
   ): Promise<Salon> {
     const fx = fixturesForHttp(db, http);
     const tenant = await fx.tenant(
@@ -366,7 +477,7 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
     const branch = await db.prisma.branch.create({
       data: {
         tenantId: tenant.id,
-        name: BRANCH_NAME,
+        name: options.branchName ?? BRANCH_NAME,
         timezone: BRANCH_TIMEZONE,
       },
     });
@@ -420,7 +531,9 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
             : {
                 branchBinding: {
                   contract: 'maya.crm-branch-binding/1',
-                  companyId: company,
+                  companyId: options.mismatchedCompany
+                    ? company + 1000
+                    : company,
                   branchId: branch.id,
                 },
               }),
@@ -510,7 +623,11 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
     });
     expect(modelCalls - beforeModels).toBeLessThanOrEqual(1);
     if (typeof body.reply === 'string') assertPrivateAbsent(body.reply);
-    return { status: result.status, body };
+    return {
+      status: result.status,
+      body,
+      modelCalls: modelCalls - beforeModels,
+    };
   }
   function sanitizedReply(value: string) {
     return [
@@ -742,6 +859,213 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
     });
     return coordination.run_id;
   }
+  function supplementalScenario(originalCaseId: SupplementalCaseId): Scenario {
+    const requested = SUPPLEMENTAL_REQUESTS.find(
+      (row) => row.id === originalCaseId,
+    );
+    assert.ok(requested);
+    // Separate scripted extraction through the real parser; never modify the
+    // original offline model recipe or assert natural-language model quality.
+    return {
+      text: requested.text,
+      branch: SUPPLEMENTAL_BRANCH,
+      field: 'address',
+    };
+  }
+  async function supplementalCompletion(
+    salon: Salon,
+    response: Record<string, unknown>,
+    expectedAssistantId?: string,
+  ) {
+    const userTurn = object(response.user_turn);
+    assert.ok(
+      typeof userTurn.turnId === 'string' &&
+        typeof userTurn.conversationId === 'string',
+    );
+    const now = new Date();
+    const parent = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+      where: {
+        id: userTurn.turnId,
+        tenantId: salon.tenant.id,
+        conversationId: userTurn.conversationId,
+        role: 'user',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      },
+    });
+    const candidates = await db.prisma.widgetTimelineTurn.findMany({
+      where: {
+        ...(expectedAssistantId ? { id: expectedAssistantId } : {}),
+        tenantId: salon.tenant.id,
+        conversationId: parent.conversationId,
+        principalProofHash: parent.principalProofHash,
+        role: 'assistant',
+        channel: 'pwa',
+        turnIndex: { gt: parent.turnIndex },
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      },
+      orderBy: { turnIndex: 'desc' },
+      take: 3,
+    });
+    const matches = candidates.flatMap((stored) => {
+      if (stored.textContent === null || !isChatReply(stored.textContent))
+        return [];
+      const completion = decodeChatCompletion(
+        db.encryption,
+        stored.textContent,
+      );
+      return completion.parentId === parent.id &&
+        completion.text === response.reply
+        ? [{ stored, completion }]
+        : [];
+    });
+    expect(matches).toHaveLength(1);
+    const { stored, completion } = matches[0];
+    expect(stored.id).toBe(
+      chatReplyId(salon.tenant.id, `${parent.id}:${completion.completionHash}`),
+    );
+    assertPrivateAbsent(completion);
+    return { parent, stored, completion };
+  }
+  async function supplementalEvidence(
+    salon: Salon,
+    response: Record<string, unknown>,
+    expectedProfileHash: string,
+    expectedAssistantId?: string,
+  ) {
+    const actor = salon.clientActor;
+    expect(actor.role).toBe(UserRole.CLIENT);
+    const membership = await db.prisma.membership.findUniqueOrThrow({
+      where: {
+        userId_tenantId: { userId: actor.id, tenantId: salon.tenant.id },
+      },
+    });
+    expect(membership).toMatchObject({
+      status: 'active',
+      role: UserRole.CLIENT,
+    });
+    const runId = await evidence(salon, response, actor);
+    const run = await db.prisma.c9Run.findFirstOrThrow({
+      where: { id: runId, tenantId: salon.tenant.id },
+    });
+    expect(run.state).toBe('COMPLETED');
+    expect(object(run.principalJson)).toMatchObject({
+      kind: 'USER',
+      tenantId: salon.tenant.id,
+      userId: actor.id,
+      membershipId: membership.id,
+      clientId: null,
+      channelLinkId: null,
+    });
+    const work = await db.prisma.c9WorkReceipt.findMany({
+      where: { tenantId: salon.tenant.id, runId },
+    });
+    expect(work).toHaveLength(1);
+    expect(work[0]).toMatchObject({
+      state: 'SETTLED',
+      kind: 'TOOL_READ',
+      taskKey: 'catalog.staff.read',
+    });
+    const ref = object(work[0].resultJson);
+    assert.ok(typeof ref.executionId === 'string');
+    const execution = await db.prisma.aiToolExecution.findUniqueOrThrow({
+      where: { id: ref.executionId },
+    });
+    assert.ok(execution.completedAt && execution.encryptedResult);
+    expect(execution).toMatchObject({
+      tenantId: salon.tenant.id,
+      actorUserId: actor.id,
+      toolName: 'catalog.staff.read',
+      riskTier: 'read',
+      status: 'completed',
+    });
+    expect(ref).toEqual({
+      contract: 'maya.c9-conversation-read-receipt/1',
+      sourceType: 'AiToolExecution',
+      executionId: execution.id,
+      inputHash: execution.inputHash,
+      completedAt: execution.completedAt.toISOString(),
+      capability: 'catalog.staff.read',
+      businessQualification: 'SOURCE_DEFINED',
+    });
+    expect(work[0].resultHash).toBe(c9Hash('work-result/1', [ref]));
+    expect(response.tools_used).toEqual([
+      expect.objectContaining({
+        name: 'catalog.staff.read',
+        status: 'completed',
+        execution_id: execution.id,
+      }),
+    ]);
+    const result = object(
+      JSON.parse(db.encryption.decrypt(execution.encryptedResult)) as unknown,
+    );
+    const publicScope = object(result.public_scope);
+    expect(digest(result.salon)).toBe(expectedProfileHash);
+    expect(publicScope).toMatchObject({
+      contract: 'maya.company-public-profile.read/1',
+      projection: 'company_profile',
+      branch_id: salon.branchId,
+      company_id: String(salon.company),
+    });
+    assert.ok(typeof publicScope.source_revision === 'string');
+    const stored = await supplementalCompletion(
+      salon,
+      response,
+      expectedAssistantId,
+    );
+    expect(stored.parent.principalProofHash).toBe(run.authorityHash);
+    const semanticContext = object(stored.completion.semanticContext);
+    expect(semanticContext.version).toBe('maya.chat-semantic-context/1');
+    const plan = object(semanticContext.plan);
+    assert.ok(Array.isArray(plan.tasks));
+    expect(plan.tasks).toHaveLength(1);
+    expect(object(plan.tasks[0])).toMatchObject({
+      intent: 'company.public_info',
+      requires_clarification: false,
+      entities: { branch: SUPPLEMENTAL_BRANCH, field: 'address' },
+    });
+    const linked = {
+      runHash: digest(runId),
+      workHash: digest(work[0].id),
+      executionHash: digest(execution.id),
+      actorHash: digest(actor.id),
+      authorityHash: run.authorityHash,
+      inputHash: execution.inputHash,
+      resultHash: digest(result),
+      workResultHash: work[0].resultHash,
+      publicScopeHash: digest(publicScope),
+      publicProfileHash: expectedProfileHash,
+    };
+    return {
+      ...stored,
+      runId,
+      sourceRevision: publicScope.source_revision,
+      publicProfileHash: expectedProfileHash,
+      evidenceHash: digest(linked),
+      linked,
+    };
+  }
+  function assertSupplementalAddress(
+    response: {
+      status: number;
+      body: Record<string, unknown>;
+      modelCalls: number;
+    },
+    salon: Salon,
+    replayed = false,
+  ) {
+    assertVerified(response);
+    expect(response.modelCalls).toBe(1);
+    expect(response.body.reply).toBe(
+      [
+        ...(replayed ? ['Сохранённый результат проверки.'] : []),
+        'По данным CRM для выбранного филиала:',
+        `Адрес в профиле: ${salon.address}.`,
+      ].join('\n'),
+    );
+  }
   async function assertNoPrivateToolReads() {
     const executions = await db.prisma.aiToolExecution.findMany({
       where: { tenantId: { in: salons.map((s) => s.tenant.id) } },
@@ -765,6 +1089,17 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
         noAddress = await seed(99404, { noAddress: true }),
         neither = await seed(99405, { noTitle: true, noAddress: true }),
         unbound = await seed(99406, { unbound: true });
+      const supplementalBound = await seed(99407, {
+          branchName: SUPPLEMENTAL_BRANCH,
+        }),
+        supplementalUnbound = await seed(99408, {
+          branchName: SUPPLEMENTAL_BRANCH,
+          unbound: true,
+        }),
+        supplementalMismatched = await seed(99409, {
+          branchName: SUPPLEMENTAL_BRANCH,
+          mismatchedCompany: true,
+        });
       const token = await login(a),
         foreignToken = await login(b),
         clientToken = await login(a, a.clientActor),
@@ -1005,6 +1340,155 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
       expect(
         turns.every((turn) => !turn.textContent?.includes(publicAddress)),
       ).toBe(true);
+      // Two unchanged original utterances under separate, explicitly bound
+      // synthetic source conditions. These do not replace the original 81 runs.
+      let supplementalConversationId: string | undefined;
+      const supplementalToken = await login(
+        supplementalBound,
+        supplementalBound.clientActor,
+      );
+      for (const requested of SUPPLEMENTAL_REQUESTS) {
+        const scenario = supplementalScenario(requested.id);
+        const key = randomUUID();
+        const before = {
+          reads: transport.length,
+          profiles: nativeProfiles.length,
+        };
+        const result = await chat(
+          supplementalToken,
+          scenario,
+          key,
+          supplementalConversationId,
+        );
+        assertSupplementalAddress(result, supplementalBound);
+        const conversation = object(result.body.user_turn).conversationId;
+        assert.ok(typeof conversation === 'string');
+        if (supplementalConversationId)
+          expect(conversation).toBe(supplementalConversationId);
+        supplementalConversationId = conversation;
+        expect(transport.slice(before.reads)).toEqual([
+          {
+            tenantHash: digest(supplementalBound.tenant.id),
+            resource: 'company',
+            company: supplementalBound.company,
+          },
+        ]);
+        expect(nativeProfiles.length - before.profiles).toBe(1);
+        const observed = nativeProfiles[before.profiles];
+        expect(observed).toMatchObject({
+          tenantHash: digest(supplementalBound.tenant.id),
+          company: supplementalBound.company,
+        });
+        const linked = await supplementalEvidence(
+          supplementalBound,
+          result.body,
+          observed.publicProfileHash,
+        );
+        expect(linked.parent.conversationId).toBe(conversation);
+        assert.ok(typeof result.body.reply === 'string');
+        const beforeReplay = {
+          reads: transport.length,
+          profiles: nativeProfiles.length,
+          graph: await graph(supplementalBound.tenant.id),
+        };
+        const repeated = await chat(
+          supplementalToken,
+          scenario,
+          key,
+          conversation,
+        );
+        assertSupplementalAddress(repeated, supplementalBound, true);
+        const replayEvidence = await supplementalEvidence(
+          supplementalBound,
+          repeated.body,
+          observed.publicProfileHash,
+        );
+        expect(replayEvidence.runId).toBe(linked.runId);
+        expect(replayEvidence.evidenceHash).toBe(linked.evidenceHash);
+        expect(replayEvidence.parent.id).toBe(linked.parent.id);
+        expect(transport).toHaveLength(beforeReplay.reads);
+        expect(nativeProfiles).toHaveLength(beforeReplay.profiles);
+        expect(await graph(supplementalBound.tenant.id)).toBe(
+          beforeReplay.graph,
+        );
+        supplemental.push({
+          originalCaseId: requested.id,
+          tenantId: supplementalBound.tenant.id,
+          requestId: key,
+          conversationId: conversation,
+          parentTurnId: linked.parent.id,
+          assistantTurnId: linked.stored.id,
+          firstReply: result.body.reply,
+          completionHash: linked.completion.completionHash,
+          historyAssistantTurnId: replayEvidence.stored.id,
+          historyReply: replayEvidence.completion.text,
+          historyCompletionHash: replayEvidence.completion.completionHash,
+          runId: linked.runId,
+          evidenceHash: linked.evidenceHash,
+          publicProfileHash: linked.publicProfileHash,
+          sourceRevision: linked.sourceRevision,
+        });
+        supplementalReceipts.push({
+          originalCaseId: requested.id,
+          utteranceHash: digest(requested.text),
+          originalSourceRowSha256: requested.sourceRowSha256,
+          qualification: SUPPLEMENTAL_QUALIFICATION,
+          originalFamily: 'historical-single:company.public_info:3',
+          phase: 'boundClientReadAndImmediateReplay',
+          role: 'CLIENT',
+          goalCompleted: true,
+          original81Reclassified: false,
+          source: 'SCOPED_NATIVE_PROFILE',
+          branch: SUPPLEMENTAL_BRANCH,
+          evidence: linked.linked,
+          evidenceHash: linked.evidenceHash,
+          parentHash: digest(linked.parent.id),
+          completionHash: linked.completion.completionHash,
+          freshNativeReads: 1,
+          c9Reads: 1,
+          replayNativeReads: 0,
+        });
+      }
+      for (const [salon, boundary] of [
+        [supplementalUnbound, 'missing_company_branch_binding'],
+        [supplementalMismatched, 'company_id_disagrees_with_branch_binding'],
+      ] as const) {
+        const clientToken = await login(salon, salon.clientActor);
+        const before = {
+          reads: transport.length,
+          profiles: nativeProfiles.length,
+          graph: await graph(salon.tenant.id),
+        };
+        for (const requested of SUPPLEMENTAL_REQUESTS) {
+          const refused = await chat(
+            clientToken,
+            supplementalScenario(requested.id),
+          );
+          assertBlocked(refused, SOURCE_UNAVAILABLE);
+          expect(refused.modelCalls).toBe(1);
+          expect(refused.body.tools_used).toEqual([]);
+          expect(transport).toHaveLength(before.reads);
+          expect(nativeProfiles).toHaveLength(before.profiles);
+          expect(await graph(salon.tenant.id)).toBe(before.graph);
+          expect(
+            await db.prisma.aiToolExecution.count({
+              where: { tenantId: salon.tenant.id },
+            }),
+          ).toBe(0);
+          supplementalReceipts.push({
+            originalCaseId: requested.id,
+            utteranceHash: digest(requested.text),
+            phase: boundary,
+            role: 'CLIENT',
+            status: refused.status,
+            goalCompleted: false,
+            nativeReadsAdded: 0,
+            c9ReadsAdded: 0,
+            tenantBrandingFallback: false,
+            qualification: SUPPLEMENTAL_QUALIFICATION,
+          });
+        }
+      }
       await assertNoPrivateToolReads();
       expect(await business()).toBe(before);
       noWrites(mark);
@@ -1024,6 +1508,8 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
         runId,
         graph: await graph(a.tenant.id),
         business: before,
+        supplemental,
+        supplementalGraph: await graph(supplementalBound.tenant.id),
       };
       // Synthetic login fixtures are private restart material, never a public evidence artifact.
       writeFileSync(receiptFile, JSON.stringify(saved) + '\n', {
@@ -1156,6 +1642,201 @@ describe('public company actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYN
         status: drift.status,
         providerReadsAdded: 0,
       };
+      // Retain the original A/B cold-cache and revocation controls above. This
+      // distinct CLIENT tenant has its own same-conversation history and receipts.
+      const supplementalSalon = salons.find(
+        (salon) => salon.tenant.id === supplemental[0].tenantId,
+      );
+      assert.ok(supplementalSalon);
+      expect(
+        supplemental.every(
+          (row) => row.tenantId === supplementalSalon.tenant.id,
+        ),
+      ).toBe(true);
+      expect(new Set(supplemental.map((row) => row.conversationId)).size).toBe(
+        1,
+      );
+      expect(await graph(supplementalSalon.tenant.id)).toBe(
+        saved.supplementalGraph,
+      );
+      const supplementalToken = await login(
+        supplementalSalon,
+        supplementalSalon.clientActor,
+      );
+      const beforeHistory = { reads: transport.length, models: modelCalls };
+      const supplementalHistory = await request(http.app.getHttpServer())
+        .get('/api/ai/conversation')
+        .set('Authorization', `Bearer ${supplementalToken}`);
+      expect(supplementalHistory.status).toBe(200);
+      expect(object(supplementalHistory.body).conversationId).toBe(
+        supplemental[0].conversationId,
+      );
+      const supplementalTurns = object(supplementalHistory.body).turns;
+      assert.ok(Array.isArray(supplementalTurns));
+      assertPrivateAbsent(supplementalHistory.body);
+      for (const original of supplemental) {
+        const scenario = supplementalScenario(original.originalCaseId);
+        expect(
+          supplementalTurns.some((value: unknown) => {
+            const row = object(value);
+            return (
+              row.id === original.parentTurnId &&
+              row.role === 'user' &&
+              row.text === scenario.text
+            );
+          }),
+        ).toBe(true);
+        expect(
+          supplementalTurns.some((value: unknown) => {
+            const row = object(value);
+            return (
+              row.id === original.historyAssistantTurnId &&
+              row.role === 'assistant' &&
+              row.text === original.historyReply
+            );
+          }),
+        ).toBe(true);
+        const persisted = await supplementalCompletion(
+          supplementalSalon,
+          {
+            user_turn: {
+              turnId: original.parentTurnId,
+              conversationId: original.conversationId,
+            },
+            reply: original.firstReply,
+          },
+          original.assistantTurnId,
+        );
+        expect(persisted.completion.completionHash).toBe(
+          original.completionHash,
+        );
+        const latest = await supplementalCompletion(
+          supplementalSalon,
+          {
+            user_turn: {
+              turnId: original.parentTurnId,
+              conversationId: original.conversationId,
+            },
+            reply: original.historyReply,
+          },
+          original.historyAssistantTurnId,
+        );
+        expect(latest.completion.completionHash).toBe(
+          original.historyCompletionHash,
+        );
+      }
+      expect(transport).toHaveLength(beforeHistory.reads);
+      expect(modelCalls).toBe(beforeHistory.models);
+      for (const original of supplemental) {
+        const before = {
+          reads: transport.length,
+          profiles: nativeProfiles.length,
+        };
+        const repeated = await chat(
+          supplementalToken,
+          supplementalScenario(original.originalCaseId),
+          original.requestId,
+          original.conversationId,
+        );
+        assertSupplementalAddress(repeated, supplementalSalon, true);
+        const linked = await supplementalEvidence(
+          supplementalSalon,
+          repeated.body,
+          original.publicProfileHash,
+          original.historyAssistantTurnId,
+        );
+        expect(linked.runId).toBe(original.runId);
+        expect(linked.evidenceHash).toBe(original.evidenceHash);
+        expect(linked.sourceRevision).toBe(original.sourceRevision);
+        expect(linked.parent.id).toBe(original.parentTurnId);
+        expect(transport).toHaveLength(before.reads);
+        expect(nativeProfiles).toHaveLength(before.profiles);
+        expect(await graph(supplementalSalon.tenant.id)).toBe(
+          saved.supplementalGraph,
+        );
+        supplementalReceipts.push({
+          originalCaseId: original.originalCaseId,
+          phase: 'sameClientHistoryAndReplayAfterProcessAndPgRestart',
+          qualification: SUPPLEMENTAL_QUALIFICATION,
+          status: repeated.status,
+          original81Reclassified: false,
+          savedParentHash: digest(original.parentTurnId),
+          completionHash: original.completionHash,
+          evidence: linked.linked,
+          evidenceHash: linked.evidenceHash,
+          originalHistoryRestored: true,
+          sameRun: true,
+          nativeReadsAdded: 0,
+        });
+      }
+      const beforeSupplementalDrift = {
+        reads: transport.length,
+        profiles: nativeProfiles.length,
+        completed: await db.prisma.aiToolExecution.count({
+          where: { tenantId: supplementalSalon.tenant.id, status: 'completed' },
+        }),
+      };
+      const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+        where: { tenantId: supplementalSalon.tenant.id },
+      });
+      await db.prisma.crmIntegration.update({
+        where: { tenantId: supplementalSalon.tenant.id },
+        data: { updatedAt: new Date(integration.updatedAt.getTime() + 1000) },
+      });
+      for (const original of supplemental) {
+        const refused = await chat(
+          supplementalToken,
+          supplementalScenario(original.originalCaseId),
+          original.requestId,
+          original.conversationId,
+        );
+        assertBlocked(refused, SOURCE_UNAVAILABLE);
+        expect(refused.modelCalls).toBe(1);
+        expect(transport).toHaveLength(beforeSupplementalDrift.reads);
+        expect(nativeProfiles).toHaveLength(beforeSupplementalDrift.profiles);
+        expect(
+          await db.prisma.aiToolExecution.count({
+            where: {
+              tenantId: supplementalSalon.tenant.id,
+              status: 'completed',
+            },
+          }),
+        ).toBe(beforeSupplementalDrift.completed);
+        // The old result remains immutable evidence; its previous scope no
+        // longer qualifies a current public answer after metadata cutover.
+        const work = await db.prisma.c9WorkReceipt.findMany({
+          where: {
+            tenantId: supplementalSalon.tenant.id,
+            runId: original.runId,
+            taskKey: 'catalog.staff.read',
+            state: 'SETTLED',
+          },
+        });
+        expect(work).toHaveLength(1);
+        const reference = object(work[0].resultJson);
+        assert.ok(typeof reference.executionId === 'string');
+        const old = await db.prisma.aiToolExecution.findUniqueOrThrow({
+          where: { id: reference.executionId },
+        });
+        assert.ok(old.encryptedResult);
+        const oldResult = object(
+          JSON.parse(db.encryption.decrypt(old.encryptedResult)) as unknown,
+        );
+        expect(object(oldResult.public_scope).source_revision).toBe(
+          original.sourceRevision,
+        );
+        expect(digest(oldResult.salon)).toBe(original.publicProfileHash);
+        supplementalReceipts.push({
+          originalCaseId: original.originalCaseId,
+          phase: 'sameRequestSourceRevisionChanged',
+          qualification: SUPPLEMENTAL_QUALIFICATION,
+          status: refused.status,
+          publicFactsWithheld: true,
+          nativeReadsAdded: 0,
+          priorResultPreserved: true,
+          originalEvidenceHash: original.evidenceHash,
+        });
+      }
       await assertNoPrivateToolReads();
       expect(await business()).toBe(saved.business);
       noWrites(mark);
