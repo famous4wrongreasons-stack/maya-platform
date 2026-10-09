@@ -1,0 +1,32 @@
+{
+  "qualification": "SYNTHETIC_SCRIPTED_TARGET_HTTP_PG",
+  "sourceHead": "49ef3132ca5e9d36fe9a128858a3873b39283eb6",
+  "sourceHashes": {
+    "src/ai-tools/ai-core.service.ts": "42d79957aaa8c7fa8e7e90e436821af74b2f16232151903edc862df26edf8f90",
+    "src/ai-tools/ai-tool-handler.service.ts": "472d9bb8c9bb3a1eb2d52301a5de0edb0ecbb52d2bc0e837e4532807da60c9e4",
+    "src/crm/client-appointment-read.service.ts": "b10c2e734f1d991ced7ed7c049e4bedc3032a2f9353841e193afa28d9e950190",
+    "src/widgets/stores/timeline.store.ts": "29d36420cac3c6c1fb3e0d61a4709f5689933d904eca2ffc7e01b83d032dd733",
+    "test/widgets-live/conversation-stop-personal.probe-spec.ts": "822c4abfb242d6e664c44503493a53e6e998071e570aec08366521c47e521e32"
+  },
+  "workingTreeDelta": true,
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-stop-personal-btEJdW/pg",
+  "database": "maya_widget_gate_proof_c9occ_791f1ac02cff",
+  "port": 59566,
+  "realModelAcceptance": false,
+  "externalProviderAcceptance": false,
+  "resources": {
+    "nodeHeapMb": 2048,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64
+  },
+  "clusterStopped": true,
+  "pidAbsent": true,
+  "sourceUnchanged": true
+}

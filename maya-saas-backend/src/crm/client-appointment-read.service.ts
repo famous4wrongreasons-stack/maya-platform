@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { EncryptionService } from '../encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
+import { isUsableTimezone } from '../tenants/salon-timezone';
 import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
 import { CrmService } from './crm.service';
@@ -144,7 +145,24 @@ export class ClientAppointmentReadService {
             },
           },
         });
-        return { tenantId: channel.tenantId, appointments };
+        // Display timezone only: a branchless canonical row does not acquire a
+        // venue or the original provider calendar from current tenant settings.
+        const tenant = appointments.some(
+          (row) => row.branchId === null && row.branch === null,
+        )
+          ? await tx.tenant.findUnique({
+              where: { id: channel.tenantId },
+              select: { defaultTimezone: true },
+            })
+          : null;
+        const tenantDisplayTimezone = isUsableTimezone(tenant?.defaultTimezone)
+          ? tenant.defaultTimezone.trim()
+          : null;
+        return {
+          tenantId: channel.tenantId,
+          appointments,
+          tenantDisplayTimezone,
+        };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     );
@@ -167,7 +185,15 @@ export class ClientAppointmentReadService {
       );
       const upcoming = row.startAt.getTime() >= Date.now();
       const branch =
-        row.branch?.tenantId === snapshot.tenantId ? row.branch : null;
+        row.branchId !== null &&
+        row.branch?.id === row.branchId &&
+        row.branch.tenantId === snapshot.tenantId
+          ? row.branch
+          : null;
+      const tenantDisplayTimezone =
+        row.branchId === null && row.branch === null
+          ? snapshot.tenantDisplayTimezone
+          : null;
       return {
         id: row.id,
         tenant_id: row.tenantId,
@@ -183,6 +209,12 @@ export class ClientAppointmentReadService {
         notes: row.notes,
         is_upcoming: upcoming,
         timeline: upcoming ? 'upcoming' : 'past',
+        ...(tenantDisplayTimezone
+          ? {
+              timezone: tenantDisplayTimezone,
+              timezone_source: 'tenant_default' as const,
+            }
+          : {}),
         branch: branch
           ? {
               id: branch.id,

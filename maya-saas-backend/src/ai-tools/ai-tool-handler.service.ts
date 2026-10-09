@@ -3646,6 +3646,14 @@ export class AiToolHandlerService {
       end_at: item.end_at ?? null,
       is_upcoming: item.is_upcoming ?? null,
       timeline: item.timeline ?? null,
+      ...(item.branch === null &&
+      item.timezone_source === 'tenant_default' &&
+      typeof item.timezone === 'string'
+        ? {
+            timezone: item.timezone,
+            timezone_source: 'tenant_default' as const,
+          }
+        : {}),
       branch: branch
         ? {
             id: branch.id ?? null,

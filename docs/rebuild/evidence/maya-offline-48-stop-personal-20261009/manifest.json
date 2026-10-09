@@ -1,0 +1,183 @@
+{
+  "contract": "maya.offline48.stop-personal-evidence/1",
+  "baselineCommit": "49ef3132ca5e9d36fe9a128858a3873b39283eb6",
+  "qualification": "SYNTHETIC_SCRIPTED_TARGET_HTTP_ONLY",
+  "original81Unchanged": true,
+  "entries": [
+    {
+      "path": "checks/maya-personal-source-final-20261009.json",
+      "sha256": "41d6372287bc1588710b884ea197db7c1d46f3430d0145b4b45daa8ead41aa99",
+      "bytes": 11671
+    },
+    {
+      "path": "checks/maya-personal-source-final-20261009.log",
+      "sha256": "7ce85fc55f9587c5685946a20d8b13ff4190ee5da992f99aad4170390a7163f0",
+      "bytes": 359
+    },
+    {
+      "path": "checks/maya-stop-lineage-20261009-r1.json",
+      "sha256": "a5f05ed1cbdf8561ff11bea59c8d68037b3bc95e5e39facd959a018190d19849",
+      "bytes": 20601
+    },
+    {
+      "path": "checks/maya-stop-lineage-20261009-r1.log",
+      "sha256": "2d31d11699273356fede83f8ec4ddc5a99385046348812c5eabc68285cc3942d",
+      "bytes": 331
+    },
+    {
+      "path": "checks/maya-stop-personal-architecture-20261009.json",
+      "sha256": "c58327b5b13e733a27f1bac87851f8324d43d45802e5fe327077a9a07adccf40",
+      "bytes": 26660
+    },
+    {
+      "path": "checks/maya-stop-personal-architecture-20261009.log",
+      "sha256": "032ef518f7ab0fff6ffb074d0db30b692adf771c8fe65a44b54c432f6eadd437",
+      "bytes": 363
+    },
+    {
+      "path": "checks/maya-stop-personal-build-types-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-stop-personal-focused-20261009-r1.json",
+      "sha256": "4cbea47e5cb0725afa38e78cbfc697d2ed000bc6b9b1fb114c6a51bfffb0380a",
+      "bytes": 148647
+    },
+    {
+      "path": "checks/maya-stop-personal-focused-20261009-r1.log",
+      "sha256": "5fe52dd2d0218e8a05308c10bd3e61bf9744626880123de7ce308d4f75e8ac12",
+      "bytes": 312
+    },
+    {
+      "path": "checks/maya-stop-personal-http-types-20261009-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-stop-personal-lint-20261009-r1.log",
+      "sha256": "63d478b8499c1faf98d8e0ee8ca1a97f5b9db8b8524a201cd42b962fdbdeea17",
+      "bytes": 926
+    },
+    {
+      "path": "checks/maya-stop-personal-lint-20261009-r2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "http/r1/actual-responses.json",
+      "sha256": "46ade53d00094f1f19bc1da1de67d12d4dade296f5b49db08aab158167c0c4ee",
+      "bytes": 2485
+    },
+    {
+      "path": "http/r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "http/r1/initdb.log",
+      "sha256": "4295db8c206d8e1c1550e879f3ad85a5ae370ab946e10305ad25db22b83f325e",
+      "bytes": 948
+    },
+    {
+      "path": "http/r1/manifest.json",
+      "sha256": "81e9049d5ca94797591a37f048078b40ced2dee6a191459eaf739e6fa8322d02",
+      "bytes": 1275
+    },
+    {
+      "path": "http/r1/migrations.log",
+      "sha256": "af6204a471ba9916f4f7e6f619eb17edcbeb99ba8abc15a126a332508b5c3579",
+      "bytes": 14720
+    },
+    {
+      "path": "http/r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "http/r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "http/r1/postgres.log",
+      "sha256": "878019ffbc1b4c8864a796dd7b20b15951db11de93341477cb24bef0756c9db3",
+      "bytes": 3103
+    },
+    {
+      "path": "http/r1/source-delta.patch",
+      "sha256": "008e375c516a7f12911eaacf5507d379a440dc1fdd8ce1717dc8e660f4865736",
+      "bytes": 10633
+    },
+    {
+      "path": "http/r1/target-http-jest.json",
+      "sha256": "9e274d4b3cbeff521e0f68aa602bb59b4ed532b8df3f1411024be975aaeeb98e",
+      "bytes": 15153
+    },
+    {
+      "path": "http/r1/target-http.log",
+      "sha256": "0fa3296add5a3fa9bd477788d83fd49156ff3a661a8b88c36c6a2e847bb4a8bf",
+      "bytes": 6755
+    },
+    {
+      "path": "http/r2/actual-responses.json",
+      "sha256": "bf405ea97559ef78a8d59fe7bca9b7e1e041ba4bbd1f86bcd8caea106029c0a8",
+      "bytes": 40344
+    },
+    {
+      "path": "http/r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "http/r2/initdb.log",
+      "sha256": "1cd45b940d7c21aa4c6744d5bde253637bd376665fbb026502272a93babedf2d",
+      "bytes": 948
+    },
+    {
+      "path": "http/r2/manifest.json",
+      "sha256": "413f1f6b48e7b6c5cb1ea1ae1f7fad3a1860cebb9ad28f77cb6799d2d513fa3f",
+      "bytes": 1294
+    },
+    {
+      "path": "http/r2/migrations.log",
+      "sha256": "95de9cf6744afdbc13b19a9579a96eb1adf27b4d9f261d36c4cbf77b88375de3",
+      "bytes": 14720
+    },
+    {
+      "path": "http/r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "http/r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "http/r2/postgres.log",
+      "sha256": "0dd2b2e7942116bffbd882830c294e17ae992a1020bc1efb76f36beda896ea1f",
+      "bytes": 1246
+    },
+    {
+      "path": "http/r2/source-delta.patch",
+      "sha256": "008e375c516a7f12911eaacf5507d379a440dc1fdd8ce1717dc8e660f4865736",
+      "bytes": 10633
+    },
+    {
+      "path": "http/r2/target-http-jest.json",
+      "sha256": "ef476ff65041d79e1927ea84656fbbdb522a70c4af6eca46bccc3d916ce20b55",
+      "bytes": 2493
+    },
+    {
+      "path": "http/r2/target-http.log",
+      "sha256": "75e691f146dc3e77939e514214e5c485475663fb58eff4bb841ffc3dc346ce89",
+      "bytes": 1568
+    },
+    {
+      "path": "http-runner.mjs",
+      "sha256": "d58c4d4dc3e578f8f028dc900e9fa90be2abf953cb9c2db4c7714071a288f74d",
+      "bytes": 3845
+    }
+  ]
+}

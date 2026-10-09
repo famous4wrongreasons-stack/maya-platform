@@ -42,6 +42,156 @@ describe('AiCoreService', () => {
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
 
+  describe('explicit preparation stop', () => {
+    function fixture() {
+      const mocks = createService(['appointments.own.reschedule']);
+      const saved: unknown[] = [
+        {
+          version: 'maya.chat-semantic-context/1',
+          savedAt: new Date().toISOString(),
+          timezone: 'Europe/Moscow',
+          plan: {
+            dialogue_act: 'request',
+            tasks: [
+              {
+                intent: 'booking.reschedule_own',
+                entities: { new_date: 'friday', new_time: '20:00' },
+              },
+            ],
+          },
+        },
+      ];
+      const timeline = {
+        routeTypedUtterance: jest.fn().mockResolvedValue(null),
+        persistTypedTurn: jest.fn().mockResolvedValue({
+          turnId: 'stop-turn',
+          conversationId: 'stop-conversation',
+        }),
+        readConversationContext: jest.fn().mockImplementation(() =>
+          Promise.resolve({
+            version: 'maya.chat-context-window/1',
+            contexts: saved.slice(-8).reverse(),
+          }),
+        ),
+        persistAssistantReply: jest
+          .fn<Promise<void>, [{ semanticContext: unknown }]>()
+          .mockImplementation((input) => {
+            saved.push(input.semanticContext);
+            return Promise.resolve();
+          }),
+      };
+      Object.defineProperty(mocks.service, 'moduleRef', {
+        value: { get: () => timeline },
+      });
+      Object.defineProperty(mocks.service, 'orchestrator', {
+        value: {
+          conversationDigest: () => 'a'.repeat(64),
+          finishConversationReads: jest.fn().mockResolvedValue(null),
+        },
+      });
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: 'Остановлено. Изменение записи не выполнено.',
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'booking.reschedule_own',
+                  entities: { new_date: 'friday', new_time: '20:00' },
+                },
+              ],
+            },
+            UserRole.CLIENT,
+            ['appointments.own.reschedule'],
+          ),
+        }),
+      );
+      return { ...mocks, timeline, saved };
+    }
+    it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
+      'closes the current preparation for %s before model, tool or card dispatch',
+      async (role) => {
+        const f = fixture();
+        const response = await f.service.chat(
+          { ...user, role },
+          {
+            ...dto,
+            conversationId: 'stop-conversation',
+            messages: [{ role: 'user', content: 'Стоп, ничего не меняй' }],
+          },
+        );
+        expect(response.reply).toMatch(/не продолжаю|останов/i);
+        expect(response.reply).not.toMatch(/запись отменена|перенос выполнен/i);
+        expect(response.action).toBeNull();
+        expect(response.tools_used).toEqual([]);
+        expect(f.model.decide).not.toHaveBeenCalled();
+        expect(f.runtime.execute).not.toHaveBeenCalled();
+        expect(f.staffScheduleCommand.tryHandle).not.toHaveBeenCalled();
+        expect(f.timeline.routeTypedUtterance).not.toHaveBeenCalled();
+        expect(f.saved.at(-1)).toBeNull();
+        expect(f.timeline.persistAssistantReply).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('does not restore a stopped plan through the retained context window on the next turn', async () => {
+      const f = fixture();
+      await f.service.chat(
+        { ...user, role: UserRole.CLIENT },
+        {
+          ...dto,
+          conversationId: 'stop-conversation',
+          messages: [{ role: 'user', content: 'Стоп' }],
+        },
+      );
+      f.model.decide.mockClear();
+      await f.service.chat(
+        { ...user, role: UserRole.CLIENT },
+        {
+          ...dto,
+          requestId: 'next_request_12345',
+          conversationId: 'stop-conversation',
+          messages: [{ role: 'user', content: 'А на 20:00?' }],
+        },
+      );
+      expect(f.timeline.readConversationContext).toHaveBeenCalled();
+      expect(f.model.decide.mock.calls[0][0].conversationPlan).toBeNull();
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+    });
+    it.each([
+      'Отмени мою запись',
+      'Что значит «стоп»?',
+      'Не останавливай подготовку',
+    ])(
+      'does not replace a different request (%s) with preparation stop',
+      async (content) => {
+        const f = fixture();
+        await f.service.chat(user, {
+          ...dto,
+          messages: [
+            { role: 'user', content: 'Стоп' },
+            { role: 'assistant', content: 'Подготовку не продолжаю.' },
+            { role: 'user', content },
+          ],
+        });
+        expect(f.timeline.routeTypedUtterance).toHaveBeenCalled();
+      },
+    );
+    it('does not acknowledge a stop when the existing conversation owner refuses the principal', async () => {
+      const f = fixture();
+      f.timeline.persistTypedTurn.mockRejectedValue(new ForbiddenException());
+      await expect(
+        f.service.chat(user, {
+          ...dto,
+          conversationId: 'foreign-conversation',
+          messages: [{ role: 'user', content: 'Стоп, ничего не меняй' }],
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(f.model.decide).not.toHaveBeenCalled();
+      expect(f.runtime.execute).not.toHaveBeenCalled();
+      expect(f.timeline.persistAssistantReply).not.toHaveBeenCalled();
+    });
+  });
+
   describe('current tenant-owned branch preferences in Client booking', () => {
     const client = { ...user, role: UserRole.CLIENT };
     const names = [
@@ -3270,6 +3420,53 @@ describe('AiCoreService', () => {
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       expect(mocks.model.decide.mock.calls[0][0].toolResults).toEqual([]);
     });
+    it('shows a lawful branchless appointment in the owner-qualified tenant display timezone without inventing a branch', async () => {
+      const mocks = fixture({
+        appointments: [
+          appointment({
+            branch: null,
+            timezone: 'Asia/Novosibirsk',
+            timezone_source: 'tenant_default',
+          }),
+        ],
+      });
+      const reply = await ask(mocks);
+      expect(reply.grounding.status).toBe('verified');
+      expect(reply.reply).toContain('07.10.2026, 16:00');
+      expect(reply.reply).toContain('Asia/Novosibirsk');
+      expect(reply.reply).toContain('филиал записи не указан');
+      expect(reply.reply).toContain('часовой пояс отображения');
+      expect(reply.reply).not.toContain('Тестовый филиал');
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.model.decide.mock.calls[0][0].toolResults).toEqual([]);
+    });
+    it.each([
+      { branch: null, timezone: 'Asia/Novosibirsk' },
+      {
+        branch: null,
+        timezone: 'Asia/Novosibirsk',
+        timezone_source: 'guessed',
+      },
+      {
+        branch: null,
+        timezone: 'Mars/Olympus',
+        timezone_source: 'tenant_default',
+      },
+      {
+        branch: { name: 'Unresolved branch' },
+        timezone: 'Asia/Novosibirsk',
+        timezone_source: 'tenant_default',
+      },
+    ])(
+      'refuses an unqualified or invalid branchless display timezone %#',
+      async (changes) => {
+        const reply = await ask(
+          fixture({ appointments: [appointment(changes)] }),
+        );
+        expect(reply.grounding.status).toBe('blocked');
+        expect(reply.reply).not.toContain('07.10.2026');
+      },
+    );
     it.each(['same conversation', 'restored conversation'])(
       'does not export a prior personal reply through %s model input',
       async (mode) => {

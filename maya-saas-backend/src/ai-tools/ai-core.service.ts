@@ -632,6 +632,28 @@ export class AiCoreService {
       identity: user.userId,
     });
     const sanitized = this.sanitizeMessages(dto.messages);
+    // A direct withdrawal closes conversational preparation before model/tool
+    // dispatch. It does not cancel a booking, revoke an approval or claim that
+    // an already dispatched operation was undone. The existing persisted null
+    // semantic context is a barrier to restoring older preparation.
+    if (
+      /^(?:стоп(?:\s*[,!:—-]\s*(?:ничего не (?:меняй|делай)|не продолжай))?|ничего не (?:меняй|делай)|не продолжай(?: подготовку)?|(?:останови|отмени) (?:текущую )?подготовку)[.!]*$/iu.test(
+        this.latestUserText(dto.messages).trim(),
+      )
+    ) {
+      await this.persistOrdinaryUserTurn(user, dto);
+      const brain = this.brainRouter.route(
+        user.role,
+        this.latestUserText(dto.messages),
+        dto.audience ?? null,
+      );
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply:
+          'Не продолжаю подготовку действия в этом диалоге. Новых изменений по этому запросу не выполняю.',
+        source: 'safe_fallback',
+        action: null,
+      });
+    }
     const typedWidget = await this.routeTypedWidget(user, dto);
     if (typedWidget !== null) {
       if (typedWidget.historyReplay === true) this.historyReplays.add(dto);
@@ -4546,10 +4568,20 @@ export class AiCoreService {
         }
         if (start.getTime() < Date.now()) continue;
         const branch = this.record(item.branch);
-        if (typeof branch.timezone !== 'string' || !branch.timezone.trim())
-          return unavailable;
+        const tenantDisplayTimezone =
+          item.branch === null &&
+          item.timezone_source === 'tenant_default' &&
+          typeof item.timezone === 'string' &&
+          item.timezone.trim()
+            ? item.timezone
+            : null;
+        const timezone =
+          typeof branch.timezone === 'string' && branch.timezone.trim()
+            ? branch.timezone
+            : tenantDisplayTimezone;
+        if (!timezone) return unavailable;
         const time = new Intl.DateTimeFormat('ru-RU', {
-          timeZone: branch.timezone,
+          timeZone: timezone,
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
@@ -4566,7 +4598,10 @@ export class AiCoreService {
         upcoming.push({
           instant: start.getTime(),
           label: [
-            `${time} (${branch.timezone})`,
+            `${time} (${timezone})`,
+            tenantDisplayTimezone
+              ? 'часовой пояс отображения — настройка салона; филиал записи не указан'
+              : null,
             label(branch.name),
             services.length ? services.join(', ') : null,
           ]

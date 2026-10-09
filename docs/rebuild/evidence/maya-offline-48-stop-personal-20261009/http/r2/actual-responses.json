@@ -1,0 +1,995 @@
+{
+  "qualification": "SYNTHETIC_SCRIPTED_HTTP_ONLY",
+  "realModelAcceptance": false,
+  "evidence": [
+    {
+      "case": "late_completion_after_stop",
+      "stop": {
+        "request_id": "b4865fed-f7f9-4622-a989-127dfb933b6d",
+        "user_turn": {
+          "turnId": "f99f779b-0d22-4a75-ab86-5abd1c5eb5be",
+          "conversationId": "e64887d3-018c-4986-8bc6-163e7d9355a3"
+        },
+        "reply": "Не продолжаю подготовку действия в этом диалоге. Новых изменений по этому запросу не выполняю.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      },
+      "late": {
+        "request_id": "7748b8ec-6748-4df4-bcff-d19c53af9220",
+        "user_turn": {
+          "turnId": "00c1505a-0d28-43b3-a76f-443f8c08c77f",
+          "conversationId": "e64887d3-018c-4986-8bc6-163e7d9355a3"
+        },
+        "reply": "Для подготовки действия уточните запись. Подтверждённого результата выполнения пока нет.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "booking"
+        }
+      },
+      "next": {
+        "request_id": "ecbea4b9-b260-41cd-8d31-45490ae147bb",
+        "user_turn": {
+          "turnId": "aa2b2feb-1685-4f5f-aa3b-ed971ea0160d",
+          "conversationId": "e64887d3-018c-4986-8bc6-163e7d9355a3"
+        },
+        "reply": "Уточните запрос.",
+        "source": "openai",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      },
+      "restoredPlan": null,
+      "actionExecutions": 0
+    },
+    {
+      "case": "personal_client",
+      "response": {
+        "request_id": "b5c74bcc-6136-46ef-bf11-a9759266bb3e",
+        "coordination": {
+          "run_id": "c9547613-3d55-4b5e-9d14-b461c1c28ff1",
+          "scope": "deterministic_reads",
+          "state": "COMPLETED"
+        },
+        "user_turn": {
+          "turnId": "105ca104-e689-4a3d-a0e7-1c71ba4ece28",
+          "conversationId": "c14ce874-93ff-4735-96e5-24a5709e504b"
+        },
+        "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 16:00 (Asia/Novosibirsk) — часовой пояс отображения — настройка салона; филиал записи не указан — Release proof service\nИсточник: ваши записи в MAYA.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [
+          {
+            "name": "appointments.own.list",
+            "status": "completed",
+            "execution_id": "cmv0wsgje001566c9vxln3wv8"
+          }
+        ],
+        "resolution": {
+          "matched": true,
+          "receipt": {
+            "widget_id": "926ef5b3-7345-4a5e-8339-b82196480f86",
+            "envelope_seal": "380fa072f528d8c6ed72de67dd650c2c043d8db52a0081037267518bf330236f",
+            "envelope": {
+              "contract": "maya.widget.envelope/1",
+              "widget_id": "926ef5b3-7345-4a5e-8339-b82196480f86",
+              "kind": "SCHEDULE",
+              "body_version": 1,
+              "tenant_id": "cmv0wsgel000h66c9pfrlcmx6",
+              "correlation": {
+                "run_id": null,
+                "turn_id": "390b6f1c-8d86-4c43-af73-00d1dc19ecfc",
+                "message_id": null,
+                "agent_id": null,
+                "parent_widget_id": "cmv0wsgje001566c9vxln3wv8",
+                "step_index": null,
+                "step_total": null,
+                "trace_id": "d8490f5f2fb0a37130465574bb8b7df6"
+              },
+              "source": {
+                "from": "capability_envelope",
+                "capability": "appointments.own.list",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "fact_index": 0
+              },
+              "origin": {
+                "trigger": "system_reply",
+                "emitter": "capability_read",
+                "moment_key": null,
+                "proactive_provenance": null
+              },
+              "authority": {
+                "verification_level": "SESSION_VERIFIED",
+                "pii_class": "client_identified",
+                "data_scope": {
+                  "masked_fields": []
+                }
+              },
+              "body": {
+                "range": {
+                  "from": "2026-10-11T09:00:00.000Z",
+                  "to": "2026-10-11T09:30:00.000Z"
+                },
+                "timezone": "UTC",
+                "lanes": [
+                  {
+                    "lane_id": "personal",
+                    "label": {
+                      "state": "KNOWN",
+                      "value": "Моя запись",
+                      "label": "Моя запись",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "staff_ref": null
+                  }
+                ],
+                "buckets": [
+                  {
+                    "bucket_id": "current",
+                    "start": "2026-10-11T09:00:00.000Z",
+                    "end": "2026-10-11T09:30:00.000Z"
+                  }
+                ],
+                "entries": [
+                  {
+                    "entry_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjB3c2dlbDAwMGg2NmM5cGZybGNteDYiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212MHdzZ2k0MDAxMjY2YzlhcHd2YWJheiJ9.a73613097a3948592d2480483ea9c1ef5e15845e7da71c1760d9a3041733a0e3",
+                    "lane_id": "personal",
+                    "bucket_span": [
+                      "current",
+                      "current"
+                    ],
+                    "title": {
+                      "state": "KNOWN",
+                      "value": "Release proof service",
+                      "label": "Release proof service",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "subtitle": {
+                      "state": "KNOWN",
+                      "value": "Перенос: 2026-10-11T05:00:00.000Z",
+                      "label": "Перенос: 2026-10-11T05:00:00.000Z",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "state": {
+                      "state": "KNOWN",
+                      "value": "BOOKED",
+                      "label": "Запланирована",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "pii_masked": false,
+                    "detail_intent": "i1",
+                    "move_intent": "i2",
+                    "move_targets": null
+                  }
+                ],
+                "gaps": [],
+                "detail_intent": "i3"
+              },
+              "intents": [
+                {
+                  "intent_ref": "i1",
+                  "intent_token": "yAhqgMW_-_7TqRm_-h3sFgCz34c2B9bV",
+                  "role": "primary",
+                  "label": "Проверить отмену",
+                  "utterance_preview": "Проверить отмену",
+                  "speech_aliases": [
+                    "review cancellation"
+                  ],
+                  "ordinal": 1,
+                  "priority": 1,
+                  "effect": "REFINE",
+                  "capability": {
+                    "space": "C9",
+                    "key": "appointments.own.cancel"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Проверить отмену",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T12:05:38.086Z",
+                  "single_use": true
+                },
+                {
+                  "intent_ref": "i2",
+                  "intent_token": "ytYiqwUPIuebTVh9bclON2etzw8ZalxF",
+                  "role": "primary",
+                  "label": "Проверить перенос",
+                  "utterance_preview": "Проверить перенос",
+                  "speech_aliases": [
+                    "review reschedule"
+                  ],
+                  "ordinal": 2,
+                  "priority": 1,
+                  "effect": "REFINE",
+                  "capability": {
+                    "space": "C9",
+                    "key": "appointments.own.reschedule"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "SESSION_VERIFIED",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Проверить перенос",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T12:05:38.086Z",
+                  "single_use": true
+                },
+                {
+                  "intent_ref": "i3",
+                  "intent_token": "DxNkXBpLM-YzVuSQ8MUpr7ONZQeWinH3",
+                  "role": "primary",
+                  "label": "Записаться для себя",
+                  "utterance_preview": "Записаться для себя",
+                  "speech_aliases": [
+                    "открыть личную запись"
+                  ],
+                  "ordinal": 3,
+                  "priority": 1,
+                  "effect": "NAVIGATE",
+                  "capability": null,
+                  "handoff_capability_ref": null,
+                  "target": {
+                    "class": "detail",
+                    "ref": "fs.booking"
+                  },
+                  "input_schema": null,
+                  "verification_floor": "ANONYMOUS",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Записаться для себя",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T12:05:38.086Z",
+                  "single_use": false
+                },
+                {
+                  "intent_ref": "i4",
+                  "intent_token": "79X-0yP9hUvGSI1-ET4u_pkQkLvYLItQ",
+                  "role": "escape",
+                  "label": "Закрыть",
+                  "utterance_preview": "Закрыть",
+                  "speech_aliases": [
+                    "dismiss",
+                    "close"
+                  ],
+                  "ordinal": 4,
+                  "priority": 0,
+                  "effect": "CONTROL",
+                  "capability": {
+                    "space": "CONTROL",
+                    "key": "control.widget.dismiss"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "ANONYMOUS",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "muted",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Закрыть",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T12:05:38.086Z",
+                  "single_use": true
+                }
+              ],
+              "provenance": {
+                "source_capability": "appointments.own.list",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "projector_id": "appointments.own.list@1",
+                "source_kind": "capability_read",
+                "facts_used": [
+                  {
+                    "capability": "appointments.own.list",
+                    "status": "measured",
+                    "as_of": "2026-10-09T11:55:38.061Z",
+                    "evidence_refs": [
+                      "h_09e3d30ce5c44b3b0c3364e9853708c0813c6230340f85bdbbc1d7ef3096adb6"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "09e3d30ce5c44b3b0c3364e9853708c0813c6230340f85bdbbc1d7ef3096adb6",
+                      "returnedCount": 1,
+                      "totalCount": null,
+                      "hasMore": true,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "NOT_COLLECTED"
+                      ]
+                    }
+                  }
+                ],
+                "facts_origin": [
+                  "synthesised"
+                ],
+                "facts_digest": "6359f688eb0f253ae78c3c692329324899d85798e09f16b4342f1d185c529511",
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "09e3d30ce5c44b3b0c3364e9853708c0813c6230340f85bdbbc1d7ef3096adb6",
+                  "returnedCount": 1,
+                  "totalCount": null,
+                  "hasMore": true,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "NOT_COLLECTED"
+                  ]
+                },
+                "completeness_envelope_hash": "2393cc3e519dcaa766877307d3e0a81a2503a40db766353f46eb5519f51b95f8",
+                "evidence_refs": [
+                  {
+                    "ref": "h_09e3d30ce5c44b3b0c3364e9853708c0813c6230340f85bdbbc1d7ef3096adb6",
+                    "class": "c9_invocation_handle",
+                    "dereferenceable_until": null
+                  }
+                ],
+                "confidence": "medium",
+                "authorship": {
+                  "body_values": "server_formatter",
+                  "body_phrases": "server_catalogue",
+                  "narrative": "none",
+                  "narrative_template_id": null,
+                  "narrative_template_version": null,
+                  "model_contribution": "none",
+                  "model_contribution_ref": null
+                }
+              },
+              "limitations": [],
+              "lifecycle": {
+                "freshness_class": "live",
+                "state": "MINTED",
+                "issued_at": "2026-10-09T11:55:38.086Z",
+                "expires_at": "2026-10-09T12:05:38.086Z",
+                "flow_ttl_s": null,
+                "input_lock": "none",
+                "on_expiry": "collapse_to_summary",
+                "supersedes_widget_id": null,
+                "superseded_by_widget_id": null,
+                "delivery": {
+                  "delivery_state": "live",
+                  "answered_at": null,
+                  "answering_channel": null,
+                  "action_receipt_ref": null
+                },
+                "historised_form": "summary_bubble",
+                "timeline_placement": "chronological",
+                "dedupe_key": "SCHEDULE:926ef5b3-7345-4a5e-8339-b82196480f86",
+                "retention_sec": 600,
+                "delivery_channel": "pwa"
+              },
+              "presentation": {
+                "presentation_mode": "client",
+                "density": "CARD",
+                "text_equivalent": {
+                  "headline": "Ближайшая личная запись",
+                  "body": "",
+                  "itemized": [
+                    "Моя запись: Release proof service"
+                  ],
+                  "completeness_sentence": null,
+                  "unknowns_sentence": null
+                },
+                "speech": null,
+                "a11y": {
+                  "role_hint": "grid",
+                  "label": "Ближайшая личная запись",
+                  "description": "",
+                  "reading_order": [
+                    {
+                      "k": "entry",
+                      "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjB3c2dlbDAwMGg2NmM5cGZybGNteDYiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212MHdzZ2k0MDAxMjY2YzlhcHd2YWJheiJ9.a73613097a3948592d2480483ea9c1ef5e15845e7da71c1760d9a3041733a0e3"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i2"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i3"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i4"
+                    }
+                  ],
+                  "live_region": "off",
+                  "accessible_names": {
+                    "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjB3c2dlbDAwMGg2NmM5cGZybGNteDYiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212MHdzZ2k0MDAxMjY2YzlhcHd2YWJheiJ9.a73613097a3948592d2480483ea9c1ef5e15845e7da71c1760d9a3041733a0e3": "Release proof service",
+                    "intent:i2": "Проверить перенос",
+                    "intent:i3": "Записаться для себя",
+                    "intent:i4": "Закрыть"
+                  }
+                },
+                "fullscreen_detail": {
+                  "route_key": "fs.booking",
+                  "reason": "exceeds_chat_density"
+                }
+              },
+              "render": {
+                "contract": "maya.render.receipt/1",
+                "profile_id": "pwa/1",
+                "profile_version": 1,
+                "render_tier": "RICH_INTERACTIVE",
+                "intents_minted": 4,
+                "intents_emitted": 4,
+                "intents_withheld": [],
+                "body_reductions": [],
+                "text_equivalent_is_canonical": false,
+                "escalation": null,
+                "degraded_at": "2026-10-09T11:55:38.086Z"
+              },
+              "integrity": {
+                "body_hash": "89ddf3519fd469656f21e85e1f7103e04dac676af994f89e4f54d52d6cb7eab7",
+                "cell_index_digest": "9f9b7f6427aba0abeda0e1ae9fc248acbf7804e22e8603239d65741f21ebda7d",
+                "envelope_seal": "380fa072f528d8c6ed72de67dd650c2c043d8db52a0081037267518bf330236f",
+                "seal_key_version": 1,
+                "principal_proof_hash": "32f5833ebbca1d3c81a4071cca838748aac795adc423da1d08cffd75b5aa81de",
+                "approval_echo": null,
+                "policy_context_echo": null
+              }
+            }
+          },
+          "dismiss_widget_id": null
+        },
+        "grounding": {
+          "status": "verified",
+          "domain": "client_appointments",
+          "required_tools": [
+            "appointments.own.list"
+          ],
+          "evidence_tools": [
+            "appointments.own.list"
+          ]
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      },
+      "revoked": {
+        "status": 201,
+        "body": {
+          "request_id": "0650c12f-9336-4996-93e9-b2d21379cc4b",
+          "coordination": {
+            "run_id": "c9ad880f-d920-4960-9ca5-abd5395e4e5a",
+            "scope": "deterministic_reads",
+            "state": "INCOMPLETE"
+          },
+          "user_turn": {
+            "turnId": "5424a31b-e6b1-4c3f-a1c7-b2af79eebb45",
+            "conversationId": "e827da76-2502-4167-9fa0-b9c345c95f00"
+          },
+          "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+          "source": "safe_fallback",
+          "redacted_input": false,
+          "action": null,
+          "tools_used": [],
+          "grounding": {
+            "status": "blocked",
+            "domain": "client_appointments",
+            "required_tools": [
+              "appointments.own.list"
+            ],
+            "evidence_tools": []
+          },
+          "brain": {
+            "persona": "admin",
+            "intent": "general"
+          }
+        }
+      },
+      "appointmentsUnchanged": true,
+      "actionExecutions": 0
+    },
+    {
+      "case": "personal_tenant_owner",
+      "response": {
+        "request_id": "44f28759-ed4b-450d-8834-df82e365ab53",
+        "coordination": {
+          "run_id": "8e005fbe-37a7-4afd-8b1e-2eb5afbdc880",
+          "scope": "deterministic_reads",
+          "state": "COMPLETED"
+        },
+        "user_turn": {
+          "turnId": "3ce90546-ac25-4e28-a02c-942f7e611b4c",
+          "conversationId": "aea0f38a-39e4-41cf-bdf5-8201b2ebe2ae"
+        },
+        "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 16:00 (Asia/Novosibirsk) — часовой пояс отображения — настройка салона; филиал записи не указан — Release proof service\nИсточник: ваши записи в MAYA.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [
+          {
+            "name": "appointments.own.list",
+            "status": "completed",
+            "execution_id": "cmv0wsgsv002266c93oja3crl"
+          }
+        ],
+        "resolution": {
+          "matched": true,
+          "receipt": {
+            "widget_id": "d0c3bf70-0927-43de-856a-6bc1d6cda9c5",
+            "envelope_seal": "e7ecd80e0e5962af20d72879a7c6914efd538a08a53f5f00b92dee8c8e921b4a",
+            "envelope": {
+              "contract": "maya.widget.envelope/1",
+              "widget_id": "d0c3bf70-0927-43de-856a-6bc1d6cda9c5",
+              "kind": "SCHEDULE",
+              "body_version": 1,
+              "tenant_id": "cmv0wsgoy001e66c9um3e4hhd",
+              "correlation": {
+                "run_id": null,
+                "turn_id": "c3488c4a-2cf6-4625-a86c-d42759266647",
+                "message_id": null,
+                "agent_id": null,
+                "parent_widget_id": "cmv0wsgsv002266c93oja3crl",
+                "step_index": null,
+                "step_total": null,
+                "trace_id": "6d772a451ea6416d026289b982ef72f2"
+              },
+              "source": {
+                "from": "capability_envelope",
+                "capability": "appointments.own.list",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "fact_index": 0
+              },
+              "origin": {
+                "trigger": "system_reply",
+                "emitter": "capability_read",
+                "moment_key": null,
+                "proactive_provenance": null
+              },
+              "authority": {
+                "verification_level": "SESSION_VERIFIED",
+                "pii_class": "client_identified",
+                "data_scope": {
+                  "masked_fields": []
+                }
+              },
+              "body": {
+                "range": {
+                  "from": "2026-10-11T09:00:00.000Z",
+                  "to": "2026-10-11T09:30:00.000Z"
+                },
+                "timezone": "UTC",
+                "lanes": [
+                  {
+                    "lane_id": "personal",
+                    "label": {
+                      "state": "KNOWN",
+                      "value": "Моя запись",
+                      "label": "Моя запись",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "staff_ref": null
+                  }
+                ],
+                "buckets": [
+                  {
+                    "bucket_id": "current",
+                    "start": "2026-10-11T09:00:00.000Z",
+                    "end": "2026-10-11T09:30:00.000Z"
+                  }
+                ],
+                "entries": [
+                  {
+                    "entry_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjB3c2dveTAwMWU2NmM5dW0zZTRoaGQiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212MHdzZ3M3MDAxejY2Yzk2eXNxeWY5NSJ9.1345116556d85334ed783ef607c2db01ca7d466cf5678471d590a1ddd7da91ad",
+                    "lane_id": "personal",
+                    "bucket_span": [
+                      "current",
+                      "current"
+                    ],
+                    "title": {
+                      "state": "KNOWN",
+                      "value": "Release proof service",
+                      "label": "Release proof service",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "subtitle": null,
+                    "state": {
+                      "state": "KNOWN",
+                      "value": "BOOKED",
+                      "label": "Запланирована",
+                      "reason_code": null,
+                      "fact_ref": 0,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "pii_masked": false,
+                    "detail_intent": null,
+                    "move_intent": null,
+                    "move_targets": null
+                  }
+                ],
+                "gaps": [],
+                "detail_intent": "i1"
+              },
+              "intents": [
+                {
+                  "intent_ref": "i1",
+                  "intent_token": "9RPNtomKmqyFHNUQ2s6gIr9FeVbfzLFI",
+                  "role": "primary",
+                  "label": "Записаться для себя",
+                  "utterance_preview": "Записаться для себя",
+                  "speech_aliases": [
+                    "открыть личную запись"
+                  ],
+                  "ordinal": 1,
+                  "priority": 1,
+                  "effect": "NAVIGATE",
+                  "capability": null,
+                  "handoff_capability_ref": null,
+                  "target": {
+                    "class": "detail",
+                    "ref": "fs.booking"
+                  },
+                  "input_schema": null,
+                  "verification_floor": "ANONYMOUS",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "secondary",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Записаться для себя",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T12:05:38.409Z",
+                  "single_use": false
+                },
+                {
+                  "intent_ref": "i2",
+                  "intent_token": "e8kUeQl4qn5bVTNwkwE1hF5jCk62Rtum",
+                  "role": "escape",
+                  "label": "Закрыть",
+                  "utterance_preview": "Закрыть",
+                  "speech_aliases": [
+                    "dismiss",
+                    "close"
+                  ],
+                  "ordinal": 2,
+                  "priority": 0,
+                  "effect": "CONTROL",
+                  "capability": {
+                    "space": "CONTROL",
+                    "key": "control.widget.dismiss"
+                  },
+                  "handoff_capability_ref": null,
+                  "target": null,
+                  "input_schema": null,
+                  "verification_floor": "ANONYMOUS",
+                  "confirmation": null,
+                  "authority_hint": {
+                    "emphasis": "muted",
+                    "disabled_because": null
+                  },
+                  "enabled": {
+                    "state": "KNOWN",
+                    "value": true,
+                    "label": "Закрыть",
+                    "reason_code": null,
+                    "fact_ref": null,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "expires_at": "2026-10-09T12:05:38.409Z",
+                  "single_use": true
+                }
+              ],
+              "provenance": {
+                "source_capability": "appointments.own.list",
+                "capability_version": "80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a",
+                "projector_id": "appointments.own.list@1",
+                "source_kind": "capability_read",
+                "facts_used": [
+                  {
+                    "capability": "appointments.own.list",
+                    "status": "measured",
+                    "as_of": "2026-10-09T11:55:38.393Z",
+                    "evidence_refs": [
+                      "h_363a610b6ab480416ba04c3843df5c7114a32406af688db2be9f62f5b42bf879"
+                    ],
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "363a610b6ab480416ba04c3843df5c7114a32406af688db2be9f62f5b42bf879",
+                      "returnedCount": 1,
+                      "totalCount": null,
+                      "hasMore": true,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "NOT_COLLECTED"
+                      ]
+                    }
+                  }
+                ],
+                "facts_origin": [
+                  "synthesised"
+                ],
+                "facts_digest": "f9f0dc8aae624cf68494798729e7e06d1991b7f6387e413cbd99c1f019c0ce90",
+                "completeness": {
+                  "status": "PARTIAL",
+                  "requestedScopeHash": "363a610b6ab480416ba04c3843df5c7114a32406af688db2be9f62f5b42bf879",
+                  "returnedCount": 1,
+                  "totalCount": null,
+                  "hasMore": true,
+                  "cursorRef": null,
+                  "truncated": false,
+                  "reasonCodes": [
+                    "NOT_COLLECTED"
+                  ]
+                },
+                "completeness_envelope_hash": "d27e4be3bcb837951b592c141ce97ea7786ea1b0d9b6fc9836008e7a771feca7",
+                "evidence_refs": [
+                  {
+                    "ref": "h_363a610b6ab480416ba04c3843df5c7114a32406af688db2be9f62f5b42bf879",
+                    "class": "c9_invocation_handle",
+                    "dereferenceable_until": null
+                  }
+                ],
+                "confidence": "medium",
+                "authorship": {
+                  "body_values": "server_formatter",
+                  "body_phrases": "server_catalogue",
+                  "narrative": "none",
+                  "narrative_template_id": null,
+                  "narrative_template_version": null,
+                  "model_contribution": "none",
+                  "model_contribution_ref": null
+                }
+              },
+              "limitations": [],
+              "lifecycle": {
+                "freshness_class": "live",
+                "state": "MINTED",
+                "issued_at": "2026-10-09T11:55:38.409Z",
+                "expires_at": "2026-10-09T12:05:38.409Z",
+                "flow_ttl_s": null,
+                "input_lock": "none",
+                "on_expiry": "collapse_to_summary",
+                "supersedes_widget_id": null,
+                "superseded_by_widget_id": null,
+                "delivery": {
+                  "delivery_state": "live",
+                  "answered_at": null,
+                  "answering_channel": null,
+                  "action_receipt_ref": null
+                },
+                "historised_form": "summary_bubble",
+                "timeline_placement": "chronological",
+                "dedupe_key": "SCHEDULE:d0c3bf70-0927-43de-856a-6bc1d6cda9c5",
+                "retention_sec": 600,
+                "delivery_channel": "pwa"
+              },
+              "presentation": {
+                "presentation_mode": "owner",
+                "density": "CARD",
+                "text_equivalent": {
+                  "headline": "Ближайшая личная запись",
+                  "body": "",
+                  "itemized": [
+                    "Моя запись: Release proof service"
+                  ],
+                  "completeness_sentence": null,
+                  "unknowns_sentence": null
+                },
+                "speech": null,
+                "a11y": {
+                  "role_hint": "grid",
+                  "label": "Ближайшая личная запись",
+                  "description": "",
+                  "reading_order": [
+                    {
+                      "k": "entry",
+                      "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjB3c2dveTAwMWU2NmM5dW0zZTRoaGQiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212MHdzZ3M3MDAxejY2Yzk2eXNxeWY5NSJ9.1345116556d85334ed783ef607c2db01ca7d466cf5678471d590a1ddd7da91ad"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i1"
+                    },
+                    {
+                      "k": "intent",
+                      "id": "i2"
+                    }
+                  ],
+                  "live_region": "off",
+                  "accessible_names": {
+                    "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjB3c2dveTAwMWU2NmM5dW0zZTRoaGQiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212MHdzZ3M3MDAxejY2Yzk2eXNxeWY5NSJ9.1345116556d85334ed783ef607c2db01ca7d466cf5678471d590a1ddd7da91ad": "Release proof service",
+                    "intent:i1": "Записаться для себя",
+                    "intent:i2": "Закрыть"
+                  }
+                },
+                "fullscreen_detail": {
+                  "route_key": "fs.booking",
+                  "reason": "exceeds_chat_density"
+                }
+              },
+              "render": {
+                "contract": "maya.render.receipt/1",
+                "profile_id": "pwa/1",
+                "profile_version": 1,
+                "render_tier": "RICH_INTERACTIVE",
+                "intents_minted": 2,
+                "intents_emitted": 2,
+                "intents_withheld": [],
+                "body_reductions": [],
+                "text_equivalent_is_canonical": false,
+                "escalation": null,
+                "degraded_at": "2026-10-09T11:55:38.409Z"
+              },
+              "integrity": {
+                "body_hash": "c4c34bbd65b7447e10d6521da1a157407e59aa9f34a21b6dc07adb822a4b5bd7",
+                "cell_index_digest": "a6200f142158cfd9e9ad4ae3cf63f643214cb3275585c45eda3f546df5f16491",
+                "envelope_seal": "e7ecd80e0e5962af20d72879a7c6914efd538a08a53f5f00b92dee8c8e921b4a",
+                "seal_key_version": 1,
+                "principal_proof_hash": "3c1c5844fe5b656eafc21537dcae06c4087227fc9b5e74e918c270bc7698b746",
+                "approval_echo": null,
+                "policy_context_echo": null
+              }
+            }
+          },
+          "dismiss_widget_id": null
+        },
+        "grounding": {
+          "status": "verified",
+          "domain": "client_appointments",
+          "required_tools": [
+            "appointments.own.list"
+          ],
+          "evidence_tools": [
+            "appointments.own.list"
+          ]
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      },
+      "revoked": {
+        "status": 201,
+        "body": {
+          "request_id": "e5e1c50c-98a3-400d-a3fd-c6ee6f42dba9",
+          "coordination": {
+            "run_id": "11d77b36-42f0-4cb6-9340-9fb6fb9f477f",
+            "scope": "deterministic_reads",
+            "state": "INCOMPLETE"
+          },
+          "user_turn": {
+            "turnId": "9f9aa613-cada-44b8-ada1-0a7de80c6339",
+            "conversationId": "a6be87d0-4fe9-488e-af2f-67bd2da2a7e1"
+          },
+          "reply": "Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.",
+          "source": "safe_fallback",
+          "redacted_input": false,
+          "action": null,
+          "tools_used": [],
+          "grounding": {
+            "status": "blocked",
+            "domain": "client_appointments",
+            "required_tools": [
+              "appointments.own.list"
+            ],
+            "evidence_tools": []
+          },
+          "brain": {
+            "persona": "admin",
+            "intent": "general"
+          }
+        }
+      },
+      "appointmentsUnchanged": true,
+      "actionExecutions": 0
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "qualification": "SYNTHETIC_SCRIPTED_HTTP_ONLY",
+  "realModelAcceptance": false,
+  "evidence": [
+    {
+      "case": "late_completion_after_stop",
+      "stop": {
+        "request_id": "7e81b6b8-2163-4b08-bfa4-0f8c05a38fe0",
+        "user_turn": {
+          "turnId": "274a52fd-e606-4f0b-a5ff-c0f17f2c5bf3",
+          "conversationId": "208e40c0-f7b8-4253-b011-4907296b5a58"
+        },
+        "reply": "Не продолжаю подготовку действия в этом диалоге. Новых изменений по этому запросу не выполняю.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      },
+      "late": {
+        "request_id": "b5023058-0fd3-4c19-9bac-49b2c216f260",
+        "user_turn": {
+          "turnId": "fa8944e9-a399-4667-ab65-7452ee9dd41a",
+          "conversationId": "208e40c0-f7b8-4253-b011-4907296b5a58"
+        },
+        "reply": "Для подготовки действия уточните запись. Подтверждённого результата выполнения пока нет.",
+        "source": "safe_fallback",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "booking"
+        }
+      },
+      "next": {
+        "request_id": "99ce19e3-ea88-4d8e-a91f-6634717eb244",
+        "user_turn": {
+          "turnId": "1d47e629-f522-4593-a7e5-5fa35887747b",
+          "conversationId": "208e40c0-f7b8-4253-b011-4907296b5a58"
+        },
+        "reply": "Уточните запрос.",
+        "source": "openai",
+        "redacted_input": false,
+        "action": null,
+        "tools_used": [],
+        "grounding": {
+          "status": "not_required",
+          "domain": null,
+          "required_tools": [],
+          "evidence_tools": []
+        },
+        "brain": {
+          "persona": "admin",
+          "intent": "general"
+        }
+      },
+      "restoredPlan": null,
+      "actionExecutions": 0
+    }
+  ]
+}

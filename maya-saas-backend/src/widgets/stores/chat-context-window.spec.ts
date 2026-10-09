@@ -15,28 +15,53 @@ describe('retained conversation context window', () => {
   const context = {
     version: 'maya.chat-semantic-context/1',
     savedAt: now.toISOString(),
-    plan: { tasks: [] },
+    plan: { tasks: [{ intent: 'booking.reschedule_own' }] },
   };
-  const row = {
+  const retained = {
     ...scope,
     channel: 'pwa',
     erasedAt: null,
     retentionUntil: new Date('2026-10-09T12:00:00Z'),
+  };
+  const parent = (id: string, turnIndex: number) => ({
+    ...retained,
+    id,
+    role: 'user',
+    turnIndex,
+  });
+  const completion = (
+    parentId: string,
+    turnIndex: number,
+    semanticContext: unknown = context,
+  ) => ({
+    ...retained,
+    turnIndex,
     textContent: encodeChatReply(
       cipher,
       'Private historical prose',
       'a'.repeat(64),
-      'parent',
-      context,
+      parentId,
+      semanticContext,
     ),
-  };
-  const current = { ...row, id: 'current', role: 'user', turnIndex: 20 };
-  function fixture(rows = [row], currentTurn: unknown = current) {
+  });
+  const row = completion('parent', 19);
+  const current = parent('current', 20);
+  function fixture(
+    rows = [row],
+    parents = [parent('parent', 18)],
+    currentTurn: unknown = current,
+  ) {
     cipher.decrypt.mockClear();
     const tx = {
       $executeRaw: jest.fn().mockResolvedValue(1),
       widgetTimelineTurn: {
-        findFirst: jest.fn().mockResolvedValue(currentTurn),
+        findFirst: jest.fn(({ where }: { where: { id: string } }) =>
+          Promise.resolve(
+            where.id === 'current'
+              ? currentTurn
+              : (parents.find((value) => value.id === where.id) ?? null),
+          ),
+        ),
         findMany: jest.fn().mockResolvedValue(rows),
       },
     };
@@ -53,13 +78,14 @@ describe('retained conversation context window', () => {
       );
     return { tx, read };
   }
+  const window = (contexts: unknown[]) => ({
+    version: 'maya.chat-context-window/1',
+    contexts,
+  });
 
-  it('projects only bounded context with exact tenant/conversation order, preserving barriers in the query', async () => {
+  it('projects bounded exact-scope context and leaves ordinary widget user turns outside the completion projection', async () => {
     const f = fixture();
-    expect(await f.read()).toEqual({
-      version: 'maya.chat-context-window/1',
-      contexts: [context],
-    });
+    expect(await f.read()).toEqual(window([context]));
     expect(f.tx.widgetTimelineTurn.findMany).toHaveBeenCalledWith({
       where: {
         tenantId: scope.tenantId,
@@ -70,6 +96,7 @@ describe('retained conversation context window', () => {
       orderBy: { turnIndex: 'desc' },
       take: 8,
       select: {
+        turnIndex: true,
         textContent: true,
         channel: true,
         principalProofHash: true,
@@ -77,7 +104,52 @@ describe('retained conversation context window', () => {
         retentionUntil: true,
       },
     });
-    expect(cipher.decrypt).toHaveBeenCalledTimes(1);
+    expect(f.tx.widgetTimelineTurn.findFirst).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: { tenantId: scope.tenantId, id: 'parent' },
+      }),
+    );
+  });
+
+  it('keeps STOP before a late completion of an older request, without rewriting either outcome', async () => {
+    const rows = [completion('old', 5), completion('stop', 4, null)];
+    const f = fixture(rows, [parent('old', 1), parent('stop', 3)]);
+    expect(await f.read()).toEqual(window([null]));
+    expect(rows[0].textContent).toContain('booking.reschedule_own');
+  });
+
+  it('keeps a fresh plan newer than STOP even when the old request finishes last', async () => {
+    const fresh = {
+      ...context,
+      plan: { tasks: [{ intent: 'booking.create' }] },
+    };
+    const f = fixture(
+      [
+        completion('old', 8),
+        completion('fresh', 7, fresh),
+        completion('stop', 4, null),
+      ],
+      [parent('old', 1), parent('stop', 3), parent('fresh', 6)],
+    );
+    expect(await f.read()).toEqual(window([fresh, null]));
+  });
+
+  it('fails closed when eight late revisions evict STOP from the bounded window', async () => {
+    const f = fixture(
+      Array.from({ length: 8 }, (_, i) => completion('old', 18 - i)),
+      [parent('old', 1)],
+    );
+    expect(await f.read()).toEqual(window([null]));
+    expect(f.tx.widgetTimelineTurn.findMany).toHaveBeenCalledTimes(1);
+    expect(f.tx.widgetTimelineTurn.findFirst).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not revive an older revision of a stopped parent', async () => {
+    const f = fixture(
+      [completion('parent', 19, null), completion('parent', 17)],
+      [parent('parent', 16)],
+    );
+    expect(await f.read()).toEqual(window([null]));
   });
 
   it.each([
@@ -87,34 +159,44 @@ describe('retained conversation context window', () => {
     { channel: 'telegram' },
     { textContent: null },
     { textContent: 'terminal action' },
+    { textContent: 'maya.chat-reply/1:malformed' },
   ])(
-    'stops before decrypting an unavailable completion and anything older: %j',
+    'does not recover an older late parent across an unavailable completion: %j',
     async (barrier) => {
-      const f = fixture([row, { ...row, ...barrier } as typeof row, row]);
-      expect(await f.read()).toEqual({
-        version: 'maya.chat-context-window/1',
-        contexts: [context, null],
-      });
-      expect(cipher.decrypt).toHaveBeenCalledTimes(1);
+      const f = fixture(
+        [
+          completion('old', 19),
+          { ...completion('stop', 17, null), ...barrier } as typeof row,
+        ],
+        [parent('old', 1), parent('stop', 16)],
+      );
+      expect(await f.read()).toEqual(window([null]));
     },
   );
 
+  it('preserves a newer valid context before an older unavailable completion', async () => {
+    const f = fixture(
+      [row, { ...completion('old', 17), erasedAt: now }],
+      [parent('parent', 18)],
+    );
+    expect(await f.read()).toEqual(window([context, null]));
+  });
+
   it.each([
-    'maya.chat-reply/1:malformed',
-    encodeChatReply(
-      cipher,
-      'Action has completed',
-      'b'.repeat(64),
-      'action-parent',
-      null,
-    ),
-  ])('does not skip malformed or action completions', async (textContent) => {
-    const f = fixture([{ ...row, textContent }, row]);
-    expect(await f.read()).toEqual({
-      version: 'maya.chat-context-window/1',
-      contexts: [null],
-    });
-    expect(cipher.decrypt).toHaveBeenCalledTimes(1);
+    { principalProofHash: 'foreign' },
+    { conversationId: 'foreign' },
+    { erasedAt: now },
+    { retentionUntil: now },
+    { role: 'assistant' },
+    { channel: 'telegram' },
+    { turnIndex: 19 },
+  ])('treats invalid parent lineage as a barrier: %j', async (invalid) => {
+    const f = fixture([row], [{ ...parent('parent', 18), ...invalid }]);
+    expect(await f.read()).toEqual(window([null]));
+  });
+
+  it('treats a missing parent as a barrier', async () => {
+    expect(await fixture([row], []).read()).toEqual(window([null]));
   });
 
   it.each([
@@ -126,7 +208,7 @@ describe('retained conversation context window', () => {
   ])(
     'rejects unavailable current turn before loading prior contexts',
     async (turn) => {
-      const f = fixture([row], turn);
+      const f = fixture([row], [], turn);
       expect(await f.read()).toBeNull();
       expect(f.tx.widgetTimelineTurn.findMany).not.toHaveBeenCalled();
       expect(cipher.decrypt).not.toHaveBeenCalled();

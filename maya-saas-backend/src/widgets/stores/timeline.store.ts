@@ -247,6 +247,7 @@ export class TimelineStore {
         orderBy: { turnIndex: 'desc' },
         take: 8,
         select: {
+          turnIndex: true,
           textContent: true,
           channel: true,
           principalProofHash: true,
@@ -254,8 +255,15 @@ export class TimelineStore {
           retentionUntil: true,
         },
       });
-      const contexts: unknown[] = [];
+      // Completion arrival order is not request order: a slow old request may
+      // finish after a newer STOP. Keep immutable outcomes, but recover context
+      // by the parent user turn. Unknown lineage is a conservative barrier.
+      const projected: { order: number; context: unknown }[] = [];
+      const seenParents = new Set<string>();
+      const oldestCompletion = rows.at(-1)?.turnIndex ?? current.turnIndex;
       for (const row of rows) {
+        const barrier = () =>
+          projected.push({ order: row.turnIndex, context: null });
         if (
           row.channel !== 'pwa' ||
           row.principalProofHash !== principalProofHash ||
@@ -264,19 +272,51 @@ export class TimelineStore {
           !row.textContent ||
           !isChatReply(row.textContent)
         ) {
-          contexts.push(null);
-          break;
+          barrier();
+          continue;
         }
-        let context: unknown = null;
+        let completion: ReturnType<typeof decodeChatCompletion>;
         try {
-          context =
-            decodeChatCompletion(encryption, row.textContent).semanticContext ??
-            null;
+          completion = decodeChatCompletion(encryption, row.textContent);
         } catch {
-          // A malformed completion is a boundary, not recoverable preferences.
+          barrier();
+          continue;
         }
-        contexts.push(context);
-        if (context === null) break;
+        // Rows are newest first, so only the last immutable revision per parent
+        // can contribute context. Older revisions remain visible in history.
+        if (seenParents.has(completion.parentId)) continue;
+        seenParents.add(completion.parentId);
+        const parent = await TimelineStore.readUserTurn(
+          tx,
+          tenantId,
+          completion.parentId,
+        );
+        if (
+          !parent ||
+          parent.role !== 'user' ||
+          parent.channel !== 'pwa' ||
+          parent.conversationId !== conversationId ||
+          parent.principalProofHash !== principalProofHash ||
+          parent.erasedAt !== null ||
+          parent.retentionUntil <= now ||
+          parent.turnIndex >= row.turnIndex ||
+          // Eight late revisions can evict a newer barrier from this bounded
+          // window. Never recover a parent older than a full window's edge.
+          (rows.length === 8 && parent.turnIndex < oldestCompletion)
+        ) {
+          barrier();
+          continue;
+        }
+        projected.push({
+          order: parent.turnIndex,
+          context: completion.semanticContext ?? null,
+        });
+      }
+      projected.sort((a, b) => b.order - a.order);
+      const contexts: unknown[] = [];
+      for (const item of projected) {
+        contexts.push(item.context);
+        if (item.context === null) break;
       }
       return { version: 'maya.chat-context-window/1', contexts };
     }

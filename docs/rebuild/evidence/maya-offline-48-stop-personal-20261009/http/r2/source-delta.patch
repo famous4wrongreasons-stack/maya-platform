@@ -1,0 +1,246 @@
+diff --git a/maya-saas-backend/src/ai-tools/ai-core.service.ts b/maya-saas-backend/src/ai-tools/ai-core.service.ts
+index f1d9627e..20128e5c 100644
+--- a/maya-saas-backend/src/ai-tools/ai-core.service.ts
++++ b/maya-saas-backend/src/ai-tools/ai-core.service.ts
+@@ -632,6 +632,28 @@ export class AiCoreService {
+       identity: user.userId,
+     });
+     const sanitized = this.sanitizeMessages(dto.messages);
++    // A direct withdrawal closes conversational preparation before model/tool
++    // dispatch. It does not cancel a booking, revoke an approval or claim that
++    // an already dispatched operation was undone. The existing persisted null
++    // semantic context is a barrier to restoring older preparation.
++    if (
++      /^(?:стоп(?:\s*[,!:—-]\s*(?:ничего не (?:меняй|делай)|не продолжай))?|ничего не (?:меняй|делай)|не продолжай(?: подготовку)?|(?:останови|отмени) (?:текущую )?подготовку)[.!]*$/iu.test(
++        this.latestUserText(dto.messages).trim(),
++      )
++    ) {
++      await this.persistOrdinaryUserTurn(user, dto);
++      const brain = this.brainRouter.route(
++        user.role,
++        this.latestUserText(dto.messages),
++        dto.audience ?? null,
++      );
++      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
++        reply:
++          'Не продолжаю подготовку действия в этом диалоге. Новых изменений по этому запросу не выполняю.',
++        source: 'safe_fallback',
++        action: null,
++      });
++    }
+     const typedWidget = await this.routeTypedWidget(user, dto);
+     if (typedWidget !== null) {
+       if (typedWidget.historyReplay === true) this.historyReplays.add(dto);
+@@ -4546,10 +4568,20 @@ export class AiCoreService {
+         }
+         if (start.getTime() < Date.now()) continue;
+         const branch = this.record(item.branch);
+-        if (typeof branch.timezone !== 'string' || !branch.timezone.trim())
+-          return unavailable;
++        const tenantDisplayTimezone =
++          item.branch === null &&
++          item.timezone_source === 'tenant_default' &&
++          typeof item.timezone === 'string' &&
++          item.timezone.trim()
++            ? item.timezone
++            : null;
++        const timezone =
++          typeof branch.timezone === 'string' && branch.timezone.trim()
++            ? branch.timezone
++            : tenantDisplayTimezone;
++        if (!timezone) return unavailable;
+         const time = new Intl.DateTimeFormat('ru-RU', {
+-          timeZone: branch.timezone,
++          timeZone: timezone,
+           year: 'numeric',
+           month: '2-digit',
+           day: '2-digit',
+@@ -4566,7 +4598,10 @@ export class AiCoreService {
+         upcoming.push({
+           instant: start.getTime(),
+           label: [
+-            `${time} (${branch.timezone})`,
++            `${time} (${timezone})`,
++            tenantDisplayTimezone
++              ? 'часовой пояс отображения — настройка салона; филиал записи не указан'
++              : null,
+             label(branch.name),
+             services.length ? services.join(', ') : null,
+           ]
+diff --git a/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts b/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts
+index f0a76dc8..d3e1e45d 100644
+--- a/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts
++++ b/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts
+@@ -3646,6 +3646,14 @@ export class AiToolHandlerService {
+       end_at: item.end_at ?? null,
+       is_upcoming: item.is_upcoming ?? null,
+       timeline: item.timeline ?? null,
++      ...(item.branch === null &&
++      item.timezone_source === 'tenant_default' &&
++      typeof item.timezone === 'string'
++        ? {
++            timezone: item.timezone,
++            timezone_source: 'tenant_default' as const,
++          }
++        : {}),
+       branch: branch
+         ? {
+             id: branch.id ?? null,
+diff --git a/maya-saas-backend/src/crm/client-appointment-read.service.ts b/maya-saas-backend/src/crm/client-appointment-read.service.ts
+index 7ffff449..de151abf 100644
+--- a/maya-saas-backend/src/crm/client-appointment-read.service.ts
++++ b/maya-saas-backend/src/crm/client-appointment-read.service.ts
+@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
+ import { EncryptionService } from '../encryption/encryption.service';
+ import { PrismaService } from '../prisma/prisma.service';
+ import { TenantContextService } from '../tenancy/tenant-context.service';
++import { isUsableTimezone } from '../tenants/salon-timezone';
+ import { ClientChannelAuthenticatorService } from './client-channel-authenticator.service';
+ import { clientChannelSubjectHash } from './client-channel-subject';
+ import { CrmService } from './crm.service';
+@@ -144,7 +145,24 @@ export class ClientAppointmentReadService {
+             },
+           },
+         });
+-        return { tenantId: channel.tenantId, appointments };
++        // Display timezone only: a branchless canonical row does not acquire a
++        // venue or the original provider calendar from current tenant settings.
++        const tenant = appointments.some(
++          (row) => row.branchId === null && row.branch === null,
++        )
++          ? await tx.tenant.findUnique({
++              where: { id: channel.tenantId },
++              select: { defaultTimezone: true },
++            })
++          : null;
++        const tenantDisplayTimezone = isUsableTimezone(tenant?.defaultTimezone)
++          ? tenant.defaultTimezone.trim()
++          : null;
++        return {
++          tenantId: channel.tenantId,
++          appointments,
++          tenantDisplayTimezone,
++        };
+       },
+       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+     );
+@@ -167,7 +185,15 @@ export class ClientAppointmentReadService {
+       );
+       const upcoming = row.startAt.getTime() >= Date.now();
+       const branch =
+-        row.branch?.tenantId === snapshot.tenantId ? row.branch : null;
++        row.branchId !== null &&
++        row.branch?.id === row.branchId &&
++        row.branch.tenantId === snapshot.tenantId
++          ? row.branch
++          : null;
++      const tenantDisplayTimezone =
++        row.branchId === null && row.branch === null
++          ? snapshot.tenantDisplayTimezone
++          : null;
+       return {
+         id: row.id,
+         tenant_id: row.tenantId,
+@@ -183,6 +209,12 @@ export class ClientAppointmentReadService {
+         notes: row.notes,
+         is_upcoming: upcoming,
+         timeline: upcoming ? 'upcoming' : 'past',
++        ...(tenantDisplayTimezone
++          ? {
++              timezone: tenantDisplayTimezone,
++              timezone_source: 'tenant_default' as const,
++            }
++          : {}),
+         branch: branch
+           ? {
+               id: branch.id,
+diff --git a/maya-saas-backend/src/widgets/stores/timeline.store.ts b/maya-saas-backend/src/widgets/stores/timeline.store.ts
+index 5f8d9292..601616f3 100644
+--- a/maya-saas-backend/src/widgets/stores/timeline.store.ts
++++ b/maya-saas-backend/src/widgets/stores/timeline.store.ts
+@@ -247,6 +247,7 @@ export class TimelineStore {
+         orderBy: { turnIndex: 'desc' },
+         take: 8,
+         select: {
++          turnIndex: true,
+           textContent: true,
+           channel: true,
+           principalProofHash: true,
+@@ -254,8 +255,15 @@ export class TimelineStore {
+           retentionUntil: true,
+         },
+       });
+-      const contexts: unknown[] = [];
++      // Completion arrival order is not request order: a slow old request may
++      // finish after a newer STOP. Keep immutable outcomes, but recover context
++      // by the parent user turn. Unknown lineage is a conservative barrier.
++      const projected: { order: number; context: unknown }[] = [];
++      const seenParents = new Set<string>();
++      const oldestCompletion = rows.at(-1)?.turnIndex ?? current.turnIndex;
+       for (const row of rows) {
++        const barrier = () =>
++          projected.push({ order: row.turnIndex, context: null });
+         if (
+           row.channel !== 'pwa' ||
+           row.principalProofHash !== principalProofHash ||
+@@ -264,19 +272,51 @@ export class TimelineStore {
+           !row.textContent ||
+           !isChatReply(row.textContent)
+         ) {
+-          contexts.push(null);
+-          break;
++          barrier();
++          continue;
+         }
+-        let context: unknown = null;
++        let completion: ReturnType<typeof decodeChatCompletion>;
+         try {
+-          context =
+-            decodeChatCompletion(encryption, row.textContent).semanticContext ??
+-            null;
++          completion = decodeChatCompletion(encryption, row.textContent);
+         } catch {
+-          // A malformed completion is a boundary, not recoverable preferences.
++          barrier();
++          continue;
+         }
+-        contexts.push(context);
+-        if (context === null) break;
++        // Rows are newest first, so only the last immutable revision per parent
++        // can contribute context. Older revisions remain visible in history.
++        if (seenParents.has(completion.parentId)) continue;
++        seenParents.add(completion.parentId);
++        const parent = await TimelineStore.readUserTurn(
++          tx,
++          tenantId,
++          completion.parentId,
++        );
++        if (
++          !parent ||
++          parent.role !== 'user' ||
++          parent.channel !== 'pwa' ||
++          parent.conversationId !== conversationId ||
++          parent.principalProofHash !== principalProofHash ||
++          parent.erasedAt !== null ||
++          parent.retentionUntil <= now ||
++          parent.turnIndex >= row.turnIndex ||
++          // Eight late revisions can evict a newer barrier from this bounded
++          // window. Never recover a parent older than a full window's edge.
++          (rows.length === 8 && parent.turnIndex < oldestCompletion)
++        ) {
++          barrier();
++          continue;
++        }
++        projected.push({
++          order: parent.turnIndex,
++          context: completion.semanticContext ?? null,
++        });
++      }
++      projected.sort((a, b) => b.order - a.order);
++      const contexts: unknown[] = [];
++      for (const item of projected) {
++        contexts.push(item.context);
++        if (item.context === null) break;
+       }
+       return { version: 'maya.chat-context-window/1', contexts };
+     }
