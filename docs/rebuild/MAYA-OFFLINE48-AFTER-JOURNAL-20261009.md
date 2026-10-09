@@ -1,5 +1,7 @@
 # MAYA — повтор исходных 48 диалогов после schedule/journal wiring
 
+Последующий [прогон после услуг выбранного мастера](MAYA-OFFLINE48-AFTER-STAFF-SERVICES-20261009.md) на `9a54eb4a` дал 57/0/14/10 и remaining24. Ниже сохранена исходная квалификация journal/schedule, без пересчёта её результатов.
+
 Финальный R3 на **`4f88e8178e337d9f4d4b6740acbce1685e97a92e`**:
 **54 PASS / 0 FAIL / 14 unsupported / 13 insufficient**, все 48 диалогов и 81 actual
 HTTP ход, critical 0/0. Все прежние 52 PASS сохранены; из remaining29 закрыты ровно

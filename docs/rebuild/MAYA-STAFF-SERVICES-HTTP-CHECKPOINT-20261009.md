@@ -2,6 +2,8 @@
 
 Product source: **`1f4adba7c6539c99320c74a0ea55409b105aaba3`**. Successful HTTP source: **`5bd6072aa7da4530186d902c82341d2df7b77cdc`**, isolated branch `codex/maya-offline48-semantics-20261009`.
 
+Subsequent [separate frozen81 rerun](MAYA-OFFLINE48-AFTER-STAFF-SERVICES-20261009.md) on `9a54eb4a` confirms exactly three staff-service transitions with explicit fixture enrichment: 57/0/14/10, remaining24. This does not change the standalone source binding or its qualifications below.
+
 **Explicit employee → current branch/company/provider identity → existing C9 staff and service READs → factual reply, persisted evidence and restart: PASS.** The original general catalog and website booking projection are unchanged. No price mutation or new authority is introduced.
 
 ## Product and observed proof

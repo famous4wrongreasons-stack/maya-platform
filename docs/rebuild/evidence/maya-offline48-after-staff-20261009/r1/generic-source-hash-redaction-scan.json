@@ -1,0 +1,20 @@
+{
+  "contract": "maya.generic-source-hash-redaction-observation/1",
+  "matches": [
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "path": "audit.toolResults.1.result.read_scope.source_hash",
+      "value": "sha256:0af9ca0db929df179505424a2efb92e7bdbad39051c189cd9922078edec2f0ec[phone removed]ae4c"
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "path": "audit.toolResults.1.result.read_scope.source_hash",
+      "value": "b6837539b5ca28de33bf9b4f[phone removed]b3ea239d3dd8644ed[phone removed]"
+    }
+  ],
+  "limits": [
+    "Generic audit unchanged; exact staff source metadata is independently retained in supplemental receipts"
+  ]
+}

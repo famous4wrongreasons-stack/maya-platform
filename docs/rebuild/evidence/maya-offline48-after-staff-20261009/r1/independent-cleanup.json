@@ -1,0 +1,35 @@
+{
+  "cluster": "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-core-conversation-g0tg6k/pg",
+  "pgStatusExit": 3,
+  "output": "pg_ctl: no server running\n",
+  "postmasterPidAbsent": true,
+  "brokerPid": 7990,
+  "brokerClosed": true,
+  "brokerPidAbsent": true,
+  "groupsAbsent": {
+    "initdb": {
+      "pgid": 7883,
+      "absent": true
+    },
+    "pg-start": {
+      "pgid": 7923,
+      "absent": true
+    },
+    "createdb": {
+      "pgid": 7954,
+      "absent": true
+    },
+    "migrations": {
+      "pgid": 7979,
+      "absent": true
+    },
+    "conversation": {
+      "pgid": 8036,
+      "absent": true
+    },
+    "pg-stop": {
+      "pgid": 10140,
+      "absent": true
+    }
+  }
+}

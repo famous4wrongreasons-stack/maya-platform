@@ -1,0 +1,232 @@
+{
+  "sourceHead": "9a54eb4a489ba61f80fabc793d28ba4aabbd9737",
+  "counts": {
+    "pass": 57,
+    "semantic_fail": 0,
+    "unsupported": 14,
+    "insufficient_evidence": 10
+  },
+  "remainingCount": 24,
+  "rows": [
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "Подготовь изменение цены мужской стрижки на 1500 рублей.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "status": "unsupported",
+      "userText": "Нет, на 1600 рублей.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "Данных за октябрь нет? Тогда оцени выручку примерно.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "userText": "Ответь по существу: какая выручка с начала года",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "userText": "А прошлый?",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 3,
+      "status": "insufficient_evidence",
+      "userText": "Сравни и объясни разницу",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "userText": "Какая выручка на этой неделе. Ответь только после проверки данных.",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "userText": "А прошлый?",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 3,
+      "status": "insufficient_evidence",
+      "userText": "Сравни и объясни разницу",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "Кто не был больше двух месяцев",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 2,
+      "status": "unsupported",
+      "userText": "А из них кто раньше ходил регулярно?",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 3,
+      "status": "unsupported",
+      "userText": "Кого из них лучше вернуть первыми?",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "Без догадок: кто не был больше двух месяцев. Ответь только после проверки данных.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 2,
+      "status": "unsupported",
+      "userText": "А из них кто раньше ходил регулярно?",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 3,
+      "status": "unsupported",
+      "userText": "Кого из них лучше вернуть первыми?",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "userText": "Без догадок: кто записан к Саше на завтра. Ответь только после проверки данных.",
+      "missingEvidenceIds": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "userText": "Про того, кто работает в «основной филиал»",
+      "missingEvidenceIds": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "caseId": "utt-company.public_info-037",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "userText": "Покажите актуальные данные: как вас найти. По точке «основной филиал». Покажи главный вывод.",
+      "missingEvidenceIds": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "caseId": "utt-company.public_info-041",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "userText": "Итогом: как вас найти? По точке «основной филиал». Покажи главный вывод.",
+      "missingEvidenceIds": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "caseId": "utt-finance.profit-055",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "можеш проверить какая чистая прибыль. В этом месяце. Начни с итога.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "Нужны данные: что заканчивается на складе. По точке «основной филиал». Учти текущий контекст бизнеса.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "нужно понять что заканчивается на складе. По точке «основной филиал». Учти текущий контекст бизнеса.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "utt-reviews.list_recent-062",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "По сути: покажи последние плохие отзывы. За прошлый месяц. Без лишних деталей.",
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "utt-reviews.list_recent-067",
+      "turn": 1,
+      "status": "unsupported",
+      "userText": "дай ответ покажи последние плохие отзывы. За прошлый месяц. Без лишних деталей.",
+      "missingEvidenceIds": []
+    }
+  ],
+  "nextDependency": {
+    "domain": "reviews",
+    "cases": [
+      "utt-reviews.list_recent-062:1",
+      "utt-reviews.list_recent-067:1"
+    ],
+    "safeScope": "Existing review registry READ with exact business-local calendar period and explicitly chosen ratings; preserve role/branch/privacy guards. Clarify undefined bad-rating threshold.",
+    "limits": "The frozen planner retains period:last_month but omits rating; no arbitrary <=3 threshold, no promised frozen PASS from query wiring alone.",
+    "sources": [
+      "src/ai-tools/reporting-period.resolver.ts:277",
+      "src/ai-tools/ai-tool-handler.service.ts:3510",
+      "src/business-content/business-content.service.ts:236",
+      "src/measurement/measurement.read.service.ts:419",
+      "src/ai-tools/reviews-presentation.ts:59",
+      "scripts/conversation-qualification/core-full-offline-model.mjs:553"
+    ]
+  },
+  "otherPrerequisites": {
+    "finance": "C7 measurement.finance.ts:517 produces cash/refunds/profit NOT_MEASURED; source wiring required, not fixture relabeling.",
+    "inventory": "TenantCatalogItem quantity/threshold has no branch/store attribution.",
+    "retention": "Published C8 rule matching requested period, plus actual regularity/priority facts required.",
+    "publicCompany": "Frozen script loses branch; internal fixture lacks external company; existing oracle uses branding provenance.",
+    "journal": "Original corpus owner/staff/branch resolution remains ambiguous; do not invent identity.",
+    "pricing": "Separate pricing mutation lane remains untouched."
+  },
+  "frozenUnchanged": {
+    "maya-conversation-batch": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+    "maya-union-handoff": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+    "launch.command.sha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de"
+  }
+}

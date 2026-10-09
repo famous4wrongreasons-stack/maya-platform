@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       60 passed, 60 total
+Snapshots:   0 total
+Time:        0.32 s, estimated 1 s
+Ran all test suites within paths "test/widgets-live/support/core-full-offline-fixtures.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-offline48-staff-checks-r2-20261009-unit.json

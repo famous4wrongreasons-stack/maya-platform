@@ -1,0 +1,26 @@
+{
+  "contract": "maya.offline48.staff-fixture-checks/1",
+  "sourceFiles": {
+    "test/widgets-live/support/core-full-offline-fixtures.ts": "93a78e11d5585e84172e43ca00e1b97a7f14f2384d95e863b9eab60d4c9cb4a2",
+    "test/widgets-live/support/core-full-offline-fixtures.spec.ts": "2f2c83531d0c2151c74e328fd0e3259281b2dbea6ec0cdaf41ed45678900f78f",
+    "test/widgets-live/core-conversation-http.probe-spec.ts": "4227d4e9805b3339a7be4ddcc983930738fe6f3dd03d8e11edd08ea6b3eb7317"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "check": "unit",
+      "exitCode": 0,
+      "seconds": 0.85
+    },
+    {
+      "check": "types",
+      "exitCode": 2,
+      "seconds": 5.281
+    },
+    {
+      "check": "lint",
+      "exitCode": 1,
+      "seconds": 4.103
+    }
+  ]
+}

@@ -1,0 +1,363 @@
+{
+  "contract": "maya.offline48.after-staff.independent-review/1",
+  "reviewedAt": "2026-10-09T16:55:01.881Z",
+  "reviewer": "independent_review",
+  "method": "Read-only local source/Git and retained JSON/hash inspection; no tests, services, PG, HTTP, model, network or credential operations. Only this new review artifact written.",
+  "verdict": "QUALIFIED_DIAGNOSTIC_EVIDENCE_CONSISTENT",
+  "blockingFindings": [],
+  "qualification": "SCRIPTED_SYNTHETIC_FINITE_SOURCE_AND_TASK_SEMANTICS_NOT_MODEL_QUALITY_NOT_FULL_ACCEPTANCE",
+  "source": {
+    "candidateCommit": "9a54eb4a489ba61f80fabc793d28ba4aabbd9737",
+    "manifestSha256": "5c1dff397bb7fccdcb4e412123d48bd9158071d034e3f30f4c3e34a358c0e3e0",
+    "sourceDigest": "e7ae70be943f6eacca7e05da1bb2070dcd9cc8e1bcfbb051766cca84870a501d",
+    "exactGitBlobBindingsVerified": 2526,
+    "gitBlobMismatches": 0,
+    "runnerSourcesUnchanged": true,
+    "proofSourceDeltaFromStaffCheckpoint": {
+      "from": "26da471c",
+      "changedFiles": [
+        "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts",
+        "maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.ts",
+        "maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.spec.ts"
+      ],
+      "testFilesOnly": true
+    },
+    "unchangedFrozenInputsComparedWith": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+    "unchangedFrozenInputs": [
+      {
+        "path": "maya-saas-backend/datasets/conversation-intelligence/core-offline-48-20261009.json",
+        "sha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.d.mts",
+        "sha256": "4f94b6586fe85a0252d29eb2230b5a3b265458bcf34f92b78bce2bca63ba5c76"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.mjs",
+        "sha256": "a6367294872dda7d586c342d25ef0aa86eaae470560d1f5abfceb41493da02b9"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-assessment.test.mjs",
+        "sha256": "85b77aac77a06b15876e983bd256bad9a87afa3b398a5e293f6d1a7f21b44d00"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.d.mts",
+        "sha256": "09e1dbb7797f150fcf913db4d157d89c34e7824c4bac27c22cbcef4cc4d1e996"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs",
+        "sha256": "5026b88bfc4b4baa677c9751ab1cbafc8d85e9b7f0baecfd7920ff3af0b344ec"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs",
+        "sha256": "cc6aefbf7b7ed31ecea7bd910bd695e54758400c684eebf195ee6b5d570953a8"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.mjs",
+        "sha256": "a4d0a0ffbdcf953a43e18311ebf6dae7b54522d7e7dcdaf000df912c2a96c3b1"
+      },
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-score.test.mjs",
+        "sha256": "04580a193fb07552d67555b56827cce9226c1d905f5194b4917ed382d29cd89d"
+      }
+    ]
+  },
+  "execution": {
+    "dialogs": 48,
+    "plannedTurns": 81,
+    "attemptedTurns": 81,
+    "retainedFinalAuditRows": 81,
+    "http201": 80,
+    "expectedHttp401": 1,
+    "skipped": 0,
+    "unresolved": 0,
+    "unexecuted": 0,
+    "scoreCounts": {
+      "pass": 57,
+      "semantic_fail": 0,
+      "unsupported": 14,
+      "insufficient_evidence": 10
+    },
+    "criticalSafety": {
+      "failedTurns": 0,
+      "missingEvidenceTurns": 0
+    },
+    "exitCode": 2,
+    "status": "completed-with-semantic-limitations",
+    "remainingTurns": 24,
+    "scriptedResponses": 86,
+    "recordedModelCalls": 81,
+    "upstreamCalls": 0,
+    "credentialsLoaded": false,
+    "paidAuthorized": false,
+    "jest": {
+      "suitesPassed": 1,
+      "testsPassed": 1,
+      "testsFailed": 0
+    }
+  },
+  "integrity": {
+    "dataConsistencyPredicatesPassed": 1120,
+    "plannedTextsIdentitiesAndOrderVerified": 81,
+    "priorActualAssistantHistoryVerified": 81,
+    "individualDescriptorHashesUnchanged": 81,
+    "scoreReplyAuditHistoryHashesVerified": 81,
+    "responseHashJournalJoinsVerified": 81,
+    "canonicalHttpReportHash": "bbfcbe2e6dbbfa9508c202e945aa56600b29257b25c4047ea25b0bab1bcc8d94",
+    "rawRowsExactlyMatchingFinalProjection": 80,
+    "expected401ProjectionDifference": {
+      "caseId": "current-lifecycle-negative",
+      "turn": 1,
+      "explanation": "The append-first actual-http-turns row precedes the post-response exact 401 and unchanged-history assertions. Final http-report and offline-turn-audit add only expectedRefusal/historyUnchanged (top-level and audit); original raw remains unchanged.",
+      "verifiedBySource": "maya-saas-backend/test/widgets-live/core-conversation-http.probe-spec.ts:2798"
+    },
+    "rawResponseQualification": "Recorded original HTTP response digests were joined across journals, scores and supplemental links. This review did not reconstruct private raw IDs or decrypt database values."
+  },
+  "semanticDelta": {
+    "baselineRoot": "/private/tmp/maya-offline48-after-journal-20261009-r3",
+    "baselineSource": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+    "baselineScoreSha256": "7f0de2d4ebc86720386d42b7b5659a2bf2642296c03bbf3b0e183d9f2f581a05",
+    "baselineCounts": {
+      "pass": 54,
+      "semantic_fail": 0,
+      "unsupported": 14,
+      "insufficient_evidence": 13
+    },
+    "previousPassesRetained": 54,
+    "expectationSha256": "880c6c535512004d4005c762d14d3e4a68a95c13f6abf89b8e9f9035e32d2a1b",
+    "changes": [
+      {
+        "caseId": "current-admin-correction",
+        "turn": 2,
+        "from": "insufficient_evidence",
+        "to": "pass"
+      },
+      {
+        "caseId": "utt-services.price-062",
+        "turn": 1,
+        "from": "insufficient_evidence",
+        "to": "pass"
+      },
+      {
+        "caseId": "utt-services.price-067",
+        "turn": 1,
+        "from": "insufficient_evidence",
+        "to": "pass"
+      }
+    ],
+    "oldRowsNotRescoredOrEdited": true
+  },
+  "supplemental": {
+    "sourceReadRows": 3,
+    "scopedReceiptRows": 3,
+    "turnLinkRows": 3,
+    "exactTransitionKeys": true,
+    "actualArtifactJoinsVerified": true,
+    "rows": [
+      {
+        "caseId": "current-admin-correction",
+        "turn": 2,
+        "previousStatus": "insufficient_evidence",
+        "currentStatus": "pass",
+        "actualReply": "Услуги мастера Артём по прочитанному каталогу CRM:\n• Мужская стрижка: 2000 RUB; 30 мин.\nПолнота каталога не подтверждена.",
+        "replySha256": "27f60da1fdda0c074e1aecf593431d2e4e6b19684c7b24b74fc0cf9c5c9f53d6",
+        "responseSha256": "9cfcfc0c896fc0dd4c85dea9acb3acdfb6471e87c09d196ed594e0120fe6df2f",
+        "receiptSha256": "33bb8a24361df0c190eff443af51fef207961aedac8ea82a208ffd513fec037b",
+        "sourceObservationSha256": "5b920a070a481141d604b39146a8ebe6b3065df34e564ab449e73782c8a9c6dc",
+        "runHash": "0d6673e4c4417c52176f88be76025fffedb316fb13412a6d89b5edcfccc80bd6",
+        "relationSha256": "ab6e61616ffd5b13a4c8d41ea19d80572240d7498fa5738d8acaf247111d5144",
+        "returnedFactsSha256": "56335bd26fc327c051e084d506e9d421e9935743dd49999ab6af0a39e06f8bf2",
+        "catalogSha256": "b4f8a1d2196c135f1c737787209f25382d6957fe18ec142506812a29681cb342",
+        "sourceHash": "b6837539b5ca28de33bf9b4f6564957653182b3ea239d3dd8644ed8374808432",
+        "sourceRevision": "21b9eb5fcea6b9e72512246cb50995695d2eb1f927169f1ae7b3af5426009bcc",
+        "resultSha256": "9fb739624a529935dfe09f4fc114696a1d07374baea9adbb1dbde3c86a957878",
+        "settledWorkCount": 2,
+        "scopedReadCount": 1
+      },
+      {
+        "caseId": "utt-services.price-062",
+        "turn": 1,
+        "previousStatus": "insufficient_evidence",
+        "currentStatus": "pass",
+        "actualReply": "Услуги мастера Марина по прочитанному каталогу CRM:\n• Мужская стрижка: 2000 RUB; 30 мин.",
+        "replySha256": "910f3c3d46e11a13abb4bd899ce66a0b5f3c79bbe4c5b3624db03590019d4232",
+        "responseSha256": "bc857a070250354dfd9feb46d1d9e0808d25338b15f4e5986961040f38fb1516",
+        "receiptSha256": "4b104b717ed0d9bb454dcc0f73106f73bf78b46f791868e5e83f38ea65968151",
+        "sourceObservationSha256": "df590e738e6d66b32f479d636bfa5965c1aff67ec5bb4e95676baff070dab2d6",
+        "runHash": "4fc2a956604ceffc4e19c2ab7780926e38925e7c6fe64258089bbb1a9241dd1c",
+        "relationSha256": "84a707baad79b858eb0f1ea5f3a6962d1f06e0fea9cffc016fd5260eab5f32ef",
+        "returnedFactsSha256": "56335bd26fc327c051e084d506e9d421e9935743dd49999ab6af0a39e06f8bf2",
+        "catalogSha256": "8c8116a0c9d1434bf32ae5b47f9d79c9a14bfbb84a05854b370fbcd2785b1551",
+        "sourceHash": "ade9cafa882f5363b13f576304c25dc758e4a315da897280cf9c96992b301c29",
+        "sourceRevision": "4f1808ad7af386352426b49c7287125835be9258d3fb56198888bd6e6a697f94",
+        "resultSha256": "93fce9379d879dfc2c8e42cdab67572665212de52dad2eef2112d12072ac29b3",
+        "settledWorkCount": 2,
+        "scopedReadCount": 1
+      },
+      {
+        "caseId": "utt-services.price-067",
+        "turn": 1,
+        "previousStatus": "insufficient_evidence",
+        "currentStatus": "pass",
+        "actualReply": "Услуги мастера Марина по прочитанному каталогу CRM:\n• Мужская стрижка: 2000 RUB; 30 мин.",
+        "replySha256": "910f3c3d46e11a13abb4bd899ce66a0b5f3c79bbe4c5b3624db03590019d4232",
+        "responseSha256": "c710fd0ac7fb9867e565871009f955acc7c490a38d5632f06fcac5ff58e47313",
+        "receiptSha256": "52f7ce2be27061ab0e098c532860609120e3c3d222f3402001cf00a213bf0d0f",
+        "sourceObservationSha256": "744a3eecf22bf7f73e866d1adc0413a564da33c9eabc45a407891d8e1313c717",
+        "runHash": "7037febd0a67abe96f71276219e71517ebad435fa3957a3abe6d44bfa49a21e1",
+        "relationSha256": "62cfcbf9574374fbb51a353da8075dfa0f30ccb6b52e95c354bc52aba7caa688",
+        "returnedFactsSha256": "56335bd26fc327c051e084d506e9d421e9935743dd49999ab6af0a39e06f8bf2",
+        "catalogSha256": "0a929031109fb056f5de5edfc650e2628e21570eb9c04140359aa06ca8a3fcd4",
+        "sourceHash": "a6928a66390de9596d48c3e46e464458c357e84df138d07bac8939047ba82db9",
+        "sourceRevision": "0bfcd7c60b909b08e7184d6214af55696be503a7ea3f56e38bb9a58736821770",
+        "resultSha256": "284c6058ace824033092572049a84e7a9d09f1eb3be9e3c9e3bd0cca651b176b",
+        "settledWorkCount": 2,
+        "scopedReadCount": 1
+      }
+    ],
+    "sourceAssertionsReviewed": [
+      "Actual scoped adapter events are correlated to the current case/turn/tenant/company/branch and exact staffId 71. The authored relation 71→81 is explicitly separate from the general services catalog.",
+      "The passing probe queries the returned same-tenant C9 run and two SETTLED TOOL_READ receipts; follows each AiToolExecution reference; checks tenant, actor, tool and completed state; decrypts the stored result and compares current branch/staff source_hash and source_revision.",
+      "The relation digest is recomputed from current canonical staff binding and persisted services, not from reply prose. Catalog/facts hashes match the actual source event; stored supplemental receipt bytes are read back and checked.",
+      "Independent review joined raw exact supplemental digests, final response/run/work projections and reply hashes. The already-stopped database was not reopened."
+    ],
+    "fixtureFacts": "Only the three declared fixture cases gain an explicit synthetic staff 71→service 81 relation: Мужская стрижка, fixed 2000 RUB, 30 min. Catalog remains non-exhaustive. Other 45 cases are not enriched by this relation."
+  },
+  "effects": {
+    "all81ObservedBusinessHashesUnchanged": true,
+    "all81ObservedBusinessWriteArraysEmpty": true,
+    "forbidden": [],
+    "qualification": "Finite per-turn business snapshot/recorder perimeter after synthetic fixture setup; not a global zero-row-write claim. C9, tool receipts, history and setup rows are expected. No business acceptance or dispatched mutation is established."
+  },
+  "cleanup": {
+    "runnerSixGroupsClosedAndAbsent": true,
+    "runnerBrokerClosed": true,
+    "runnerClusterStopped": true,
+    "rootIndependentOsArtifact": {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/independent-cleanup.json",
+      "pgStatusExit": 3,
+      "brokerPidAbsent": true,
+      "allSixGroupIdsAbsent": true
+    },
+    "reviewTimePostmasterPidAbsent": true,
+    "qualification": "OS process absence and pg_ctl status are retained observations made by root. Reviewer checked their consistency and current pidfile absence without starting or probing services."
+  },
+  "knownEvidenceLimits": {
+    "genericSourceHashPhoneRedaction": [
+      {
+        "caseId": "followup-owner-topic-switch",
+        "turn": 2,
+        "path": "audit.toolResults.1.result.read_scope.source_hash",
+        "value": "sha256:0af9ca0db929df179505424a2efb92e7bdbad39051c189cd9922078edec2f0ec[phone removed]ae4c"
+      },
+      {
+        "caseId": "current-admin-correction",
+        "turn": 2,
+        "path": "audit.toolResults.1.result.read_scope.source_hash",
+        "value": "b6837539b5ca28de33bf9b4f[phone removed]b3ea239d3dd8644ed[phone removed]"
+      }
+    ],
+    "staffMitigation": "current-admin-correction:2 has its exact unredacted raw sourceHash/sourceRevision in the supplemental receipt. All three new staff supplements contain exact hexadecimal digests.",
+    "scheduleResidual": "followup-owner-topic-switch:2 has no new exact supplemental schedule source hash; generic audit alone cannot recover the damaged original. Retained status is not upgraded into exact source-hash proof.",
+    "noRawOrOracleRepair": true
+  },
+  "limits": [
+    "57 finite PASS is not full MAYA/C10 acceptance: 14 unsupported and 10 insufficient-evidence turns remain.",
+    "Scripted semantic outputs and synthetic domain data are known development fixtures, not real-model language quality, held-out coverage or production CRM evidence. 33 families describe source lineage, not empirical independence.",
+    "This full81 run does not exercise current React or application/PG restart. The earlier native staff-services restart proof is separate and is not counted again here.",
+    "The immediate delta from the staff checkpoint is test-only enrichment/assertions. Relative to the older 4f88 full81 baseline, product staff-services code also changed; the three gains qualify that current product path with explicitly added source facts, not a universal claim that missing fixtures explained every prior limitation.",
+    "Service price completeness is not inferred: the fixture advertises catalog_exhaustive:false. Native unknown/range/zero price and source-race cases belong to the separately qualified finite staff-services proof."
+  ],
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/candidate-manifest.json",
+      "size": 396314,
+      "sha256": "5c1dff397bb7fccdcb4e412123d48bd9158071d034e3f30f4c3e34a358c0e3e0"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/runner-report.json",
+      "size": 3761,
+      "sha256": "40b4ca1c61706591476b0b5c736236cf030420c0e9eaa59b65adcf55b90d6930"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/http-report.json",
+      "size": 1942222,
+      "sha256": "ef4370ebd912bf35d06058dda012ad8c6658a40bd1dd1d37aaf7ae5090a1c6f5"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/semantic-score.json",
+      "size": 1301118,
+      "sha256": "c0155653599cb73d3657641c9f06571a7db1890638e4f413f7cafa2857f8d799"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/replay-binding.json",
+      "size": 20207,
+      "sha256": "9dc66dd4dc4c0288a31218e46b6c8efa77526259adbcd282a2bc44dfaba6a9b9"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/actual-http-turns.jsonl",
+      "size": 919768,
+      "sha256": "9cd79ab9f40fff192d70058e197847422bcfa2c80675c72177a4102ff40f8884"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/http-response-journal.jsonl",
+      "size": 67039,
+      "sha256": "f01c04478076bcb7e3c6c82c46e7cfc4809afec0d8c3f241e2c4206fde67839c"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/offline-turn-audit.jsonl",
+      "size": 919899,
+      "sha256": "7e078f1135d55b716822a25ff9f4668902477ea93323cd60de84d3d493c334fd"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/offline-expected-refusals.jsonl",
+      "size": 163,
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/offline-staff-service-source-reads.jsonl",
+      "size": 3218,
+      "sha256": "fa36c79f6d06abe2e2783058b8caa43034b1f0263f9704770af89160f4d402f4"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/offline-staff-service-scoped-receipts.jsonl",
+      "size": 7351,
+      "sha256": "a6462d5729c33d8cf9472e0e5362ee95062eb74ec20311478b442d0b17370659"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/offline-staff-service-turn-links.jsonl",
+      "size": 1022,
+      "sha256": "90e11ebcd3ac805ff57f18c255ac58b225f8daf29f8cd8dcf6d652009bc45281"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/broker-report.json",
+      "size": 87536,
+      "sha256": "7416bb16aa9d59d63a7ca193bb5083b9f0d2cfa829ba1280d2dd179b933e0375"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/conversation-jest.json",
+      "size": 1418,
+      "sha256": "f7c5813bc459705a3aaf70e16bb6a8b55f6bcef65bd155d7751f6f369cc1f5d3"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/independent-cleanup.json",
+      "size": 700,
+      "sha256": "618ca1d30b337e0c6aef115309c783782da50230eccd65ef6296f1a1736df4a8"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/source-and-delta-verification.json",
+      "size": 8079,
+      "sha256": "64bb3f9f19385df71f4a7e81dacfb13451b3708163a21aa92d89f752af8645ee"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/generic-source-hash-redaction-scan.json",
+      "size": 699,
+      "sha256": "481fc7d150f5941801f9a42b2f960f419949653523b8dd71adb79b087adbb74b"
+    },
+    {
+      "path": "/private/tmp/maya-offline48-after-staff-20261009-r1/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    }
+  ]
+}
