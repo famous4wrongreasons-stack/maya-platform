@@ -1,0 +1,134 @@
+
+<--- Last few GCs --->
+
+[75296:0x9e080c000]     2656 ms: Mark-Compact 1005.1 (1033.3) -> 995.0 (1054.3) MB, pooled: 0 MB, 60.46 / 0.00 ms  (average mu = 0.579, current mu = 0.373) allocation failure; scavenge might not succeed
+[75296:0x9e080c000]     2756 ms: Mark-Compact (reduce) 1011.0 (1054.3) -> 1006.9 (1028.3) MB, pooled: 0 MB, 63.83 / 0.00 ms  (+ 0.2 ms in 253 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 83 ms) (average mu = 0.486, cu
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x1010d5aec node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/usr/local/bin/node]
+ 2: 0x101328314 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/usr/local/bin/node]
+ 3: 0x101587700 v8::internal::Heap::stack() [/usr/local/bin/node]
+ 4: 0x1015855e8 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/usr/local/bin/node]
+ 5: 0x10157a110 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/local/bin/node]
+ 6: 0x10155b7f0 v8::internal::Factory::NewFillerObject(int, v8::internal::AllocationAlignment, v8::internal::AllocationType, v8::internal::AllocationOrigin) [/usr/local/bin/node]
+ 7: 0x1019eb434 v8::internal::Runtime_AllocateInYoungGeneration(int, unsigned long*, v8::internal::Isolate*) [/usr/local/bin/node]
+ 8: 0x102042234 Builtins_CEntry_Return1_ArgvOnStack_NoBuiltinExit [/usr/local/bin/node]
+ 9: 0x1341e6a50 
+10: 0x134140eb8 
+11: 0x1341b3898 
+12: 0x13456cda4 
+13: 0x13435982c 
+14: 0x1341e38ac 
+15: 0x1345f2fa0 
+16: 0x13456ca3c 
+17: 0x1342e50a4 
+18: 0x134140444 
+19: 0x1341b3898 
+20: 0x13456cda4 
+21: 0x13456eca4 
+22: 0x134142d5c 
+23: 0x1342ee74c 
+24: 0x1345c609c 
+25: 0x134167708 
+26: 0x1344db298 
+27: 0x1345cfd04 
+28: 0x1345e111c 
+29: 0x1342e92a4 
+30: 0x13456a238 
+31: 0x1342e48bc 
+32: 0x1342cbe14 
+33: 0x1345e185c 
+34: 0x134572460 
+35: 0x1343cda80 
+36: 0x134079730 
+37: 0x13414c4b0 
+38: 0x13406f2dc 
+39: 0x134531344 
+40: 0x134213ec8 
+41: 0x1345edd54 
+42: 0x1343cda80 
+43: 0x134079730 
+44: 0x13414c4b0 
+45: 0x13406f2dc 
+46: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+47: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+48: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+49: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+50: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+51: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+52: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+53: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+54: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+55: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+56: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+57: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+58: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+59: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+60: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+61: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+62: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+63: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+64: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+65: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+66: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+67: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+68: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+69: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+70: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+71: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+72: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+73: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+74: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+75: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+76: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+77: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+78: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+79: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+80: 0x101fa4bec Builtins_InterpreterEntryTrampoline [/usr/local/bin/node]
+81: 0x101fe37e8 Builtins_AsyncFunctionAwaitResolveClosure [/usr/local/bin/node]
+82: 0x1020b8e58 Builtins_PromiseFulfillReactionJob [/usr/local/bin/node]
+83: 0x101fd2bd0 Builtins_RunMicrotasks [/usr/local/bin/node]
+84: 0x101fa27b0 Builtins_JSRunMicrotasksEntry [/usr/local/bin/node]
+85: 0x1014cb8a8 v8::internal::(anonymous namespace)::Invoke(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/usr/local/bin/node]
+86: 0x1014cc11c v8::internal::(anonymous namespace)::InvokeWithTryCatch(v8::internal::Isolate*, v8::internal::(anonymous namespace)::InvokeParams const&) [/usr/local/bin/node]
+87: 0x1014cc258 v8::internal::Execution::TryRunMicrotasks(v8::internal::Isolate*, v8::internal::MicrotaskQueue*) [/usr/local/bin/node]
+88: 0x1014fb02c v8::internal::MicrotaskQueue::RunMicrotasks(v8::internal::Isolate*) [/usr/local/bin/node]
+89: 0x1014fb98c v8::internal::MicrotaskQueue::PerformCheckpoint(v8::Isolate*) [/usr/local/bin/node]
+90: 0x100fb70b8 node::InternalCallbackScope::Close() [/usr/local/bin/node]
+91: 0x100fb6a90 node::InternalCallbackScope::~InternalCallbackScope() [/usr/local/bin/node]
+92: 0x1010db000 node::fs::FileHandle::CloseReq::Resolve() [/usr/local/bin/node]
+93: 0x1010f66a8 node::fs::FileHandle::ClosePromise()::$_0::__invoke(uv_fs_s*) [/usr/local/bin/node]
+94: 0x1010cb550 node::MakeLibuvRequestCallback<uv_fs_s, void (*)(uv_fs_s*)>::Wrapper(uv_fs_s*) [/usr/local/bin/node]
+95: 0x101f7d394 uv__work_done [/usr/local/bin/node]
+96: 0x101f810c4 uv__async_io [/usr/local/bin/node]
+97: 0x101f9545c uv__io_poll [/usr/local/bin/node]
+98: 0x101f8162c uv_run [/usr/local/bin/node]
+99: 0x100fb86a8 node::SpinEventLoopInternal(node::Environment*) [/usr/local/bin/node]
+100: 0x10112e9c4 node::NodeMainInstance::Run() [/usr/local/bin/node]
+101: 0x101082bb4 node::Start(int, char**) [/usr/local/bin/node]
+102: 0x18e68fe00 start [/usr/lib/dyld]
+node:child_process:964
+    throw err;
+    ^
+
+Error: Command failed: /usr/local/bin/node --max-old-space-size=1024 node_modules/eslint/bin/eslint.js src/ai-tools/ai-core.finance-period.spec.ts src/ai-tools/finance-period-binding.spec.ts src/ai-tools/finance-period-binding.ts src/ai-tools/finance-period-reply.spec.ts src/ai-tools/finance-period-reply.ts src/ai-tools/personal-reschedule-preparation.spec.ts src/ai-tools/personal-reschedule-preparation.ts src/orchestration/c9.lifecycle-presentation.spec.ts src/valuation/c8.read.lifecycle-rule.spec.ts src/ai-tools/ai-core.service.spec.ts src/ai-tools/ai-core.service.ts src/ai-tools/owner-review-plan.spec.ts src/ai-tools/owner-review-plan.ts src/ai-tools/reporting-period.corpus.ts src/ai-tools/reporting-period.resolver.ts src/orchestration/c9.bi-presentation.ts src/orchestration/c9.bi-source.spec.ts src/orchestration/c9.bi-source.ts src/orchestration/c9.bi.spec.ts src/orchestration/c9.lifecycle-presentation.ts src/orchestration/c9.orchestrator.ts src/valuation/c8.read.ts
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:925:11)
+    at execFileSync (node:child_process:961:15)
+    at [eval]:1:232
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+    at evalFunction (node:internal/process/execution:283:30) {
+  status: null,
+  signal: 'SIGABRT',
+  output: [ null, null, null ],
+  pid: 75296,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.15.0

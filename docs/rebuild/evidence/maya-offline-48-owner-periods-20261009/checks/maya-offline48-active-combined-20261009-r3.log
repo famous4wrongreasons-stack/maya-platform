@@ -1,0 +1,6 @@
+
+Test Suites: 14 passed, 14 total
+Tests:       594 passed, 594 total
+Snapshots:   0 total
+Time:        1.826 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/ai-core.finance-period.spec.ts", "src/ai-tools/finance-period-binding.spec.ts", "src/ai-tools/finance-period-reply.spec.ts", "src/ai-tools/personal-reschedule-preparation.spec.ts", "src/ai-tools/owner-review-plan.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/reporting-period.resolver.spec.ts", "src/ai-tools/reporting-period.closure.spec.ts", "src/ai-tools/reporting-period.boundary.spec.ts", "src/orchestration/c9.lifecycle-presentation.spec.ts", "src/valuation/c8.read.lifecycle-rule.spec.ts", "src/orchestration/c9.bi-source.spec.ts", "src/orchestration/c9.bi.spec.ts".

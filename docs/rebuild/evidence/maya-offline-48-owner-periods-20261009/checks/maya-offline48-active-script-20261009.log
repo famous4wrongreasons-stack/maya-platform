@@ -1,0 +1,34 @@
+✔ exact 48/81 corpus pin is mandatory; no mutated text, subset, ordering or gold additions (0.916125ms)
+✔ 47 model-eligible cases/80 turns each have a finite authored plan; revoked case has zero model eligibility (18.251541ms)
+✔ exact role/text/surface/date/turn guards refuse, latch, and never echo payloads (1.975292ms)
+✔ aliases bind only exact frozen name slots and relative date uses current Moscow clock (0.851333ms)
+✔ restored branch references stay opaque at exact frozen positions on topic switches (1.002667ms)
+✔ a completed tool is not dispatched again and missing current tool is an explicit limitation (0.787917ms)
+✔ compound carries requested today and only explicit acceptance selects empty bounded entities (0.323542ms)
+✔ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (1.049334ms)
+✔ retention follow-ups retain each fresh constraint without selecting a READ or bounded acceptance (1.542084ms)
+✔ who-is-booked keeps journal intent, ambiguous staff and the new branch without a fabricated READ (0.518583ms)
+✔ reschedule first reads own appointments while retaining a blocked parent intent and requested Friday (0.569041ms)
+✔ missing published October fixture does not preempt a current cash READ or authorize an estimate (0.752125ms)
+✔ inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope (1.675875ms)
+✔ bounded repeated phases, backward context, oversize request and attempted mutation of evidence refuse safely (0.93975ms)
+✔ schedule resolves current catalog name to reference, never a name token or first unrelated staff (2.654792ms)
+✔ finance preserves requested comparison but finishes honestly after one owner read, as current CI does (0.685167ms)
+✔ address and closing time retain both tasks and read actual company hours after catalog (0.289292ms)
+✔ public catalog projection may alias the salon word before the next planner/final phase without halting (0.355667ms)
+✔ public salon alias acceptance requires exact current catalog token and unchanged surrounding request (0.720625ms)
+✔ service finals use actual catalog values and qualify absent employee mapping; no exact price from ranges/null (1.9235ms)
+✔ BI final keeps exact half-open source period, timezone, partial basis and units without calling booked value revenue (0.42675ms)
+✔ profit reads current owner before explaining returned missing basis; no canned source outage or invented zero (0.575167ms)
+✔ source projections refuse stale or malformed facts and never expose arbitrary extra payloads (0.984958ms)
+✔ comparison reports the actual hardened window without relabelling it as the requested pair (0.656458ms)
+✔ canonical money_minor rejects decimal and noncanonical integer strings without rounding (0.390875ms)
+✔ invalid IANA timezone refuses the whole measurement without echoing the invalid value or amounts (0.406084ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.277458

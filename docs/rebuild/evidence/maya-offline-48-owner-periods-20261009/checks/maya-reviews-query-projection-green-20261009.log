@@ -1,0 +1,6 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       31 passed, 31 total
+Snapshots:   0 total
+Time:        0.431 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/reviews-presentation.spec.ts", "src/business-content/business-content.service.spec.ts".

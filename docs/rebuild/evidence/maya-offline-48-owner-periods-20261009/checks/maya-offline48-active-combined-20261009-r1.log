@@ -1,0 +1,32 @@
+FAIL src/ai-tools/ai-core.finance-period.spec.ts
+  ● AiCore finite finance periods through the existing READ › retains the validated previous_year on a short follow-up instead of substituting the default month
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 1
+
+      Object {
+        "comparison": "none",
+    -   "from_day": "2025-01-01",
+    -   "period": "named_range",
+    -   "to_day": "2025-12-31",
+    +   "period": "year_to_date",
+      }
+
+      239 |     expect(f.execute.mock.calls[0][0]).toBe(user);
+      240 |     expect(f.execute.mock.calls[0][1]).toBe(toolName);
+    > 241 |     expect(f.execute.mock.calls[0][2].arguments).toEqual({
+          |                                                  ^
+      242 |       period: 'named_range',
+      243 |       from_day: '2025-01-01',
+      244 |       to_day: '2025-12-31',
+
+      at Object.<anonymous> (ai-tools/ai-core.finance-period.spec.ts:241:50)
+
+
+Test Suites: 1 failed, 11 passed, 12 total
+Tests:       1 failed, 569 passed, 570 total
+Snapshots:   0 total
+Time:        1.636 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/ai-core.finance-period.spec.ts", "src/ai-tools/finance-period-binding.spec.ts", "src/ai-tools/finance-period-reply.spec.ts", "src/ai-tools/personal-reschedule-preparation.spec.ts", "src/ai-tools/owner-review-plan.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts", "src/ai-tools/reporting-period.resolver.spec.ts", "src/orchestration/c9.lifecycle-presentation.spec.ts", "src/valuation/c8.read.lifecycle-rule.spec.ts", "src/orchestration/c9.bi-source.spec.ts", "src/orchestration/c9.bi.spec.ts".

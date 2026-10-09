@@ -1,0 +1,98 @@
+FAIL src/ai-tools/finance-period-binding.spec.ts
+  ● finite current and previous financial period binding › retains the full previous calendar year through a short follow-up
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: [{"comparison": "none", "from_day": "2025-01-01", "period": "named_range", "to_day": "2025-12-31"}]
+    Received: null
+
+      21 |     expect(
+      22 |       financialPeriodRequests(plan(), 'А прошлый?', 'Europe/Moscow', now),
+    > 23 |     ).toEqual([
+         |       ^
+      24 |       {
+      25 |         period: 'named_range',
+      26 |         from_day: '2025-01-01',
+
+      at Object.<anonymous> (ai-tools/finance-period-binding.spec.ts:23:7)
+
+  ● finite current and previous financial period binding › keeps a fresh explicit day above an inherited model month
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: [{"comparison": "none", "day": "2026-08-07", "period": "named_day"}]
+    Received: null
+
+      51 |         now,
+      52 |       ),
+    > 53 |     ).toEqual([{ period: 'named_day', day: '2026-08-07', comparison: 'none' }]);
+         |       ^
+      54 |   });
+      55 |   it.each([
+      56 |     ['year_to_date', 'previous_year'],
+
+      at Object.<anonymous> (ai-tools/finance-period-binding.spec.ts:53:7)
+
+  ● finite current and previous financial period binding › binds year_to_date and previous_year as exactly two explicit READs with no guessed previous equal window
+
+    TypeError: expect(received).toHaveLength(expected)
+
+    Matcher error: received value must have a length property whose value must be a number
+
+    Received has value: null
+
+      69 |         now,
+      70 |       );
+    > 71 |       expect(result).toHaveLength(2);
+         |                      ^
+      72 |       expect(result?.[0]).toEqual({ period, comparison: 'none' });
+      73 |       expect(result?.[1]).toEqual({
+      74 |         ...ReportingPeriodResolver.semanticPeriod(
+
+      at ai-tools/finance-period-binding.spec.ts:71:22
+
+  ● finite current and previous financial period binding › binds week_to_date and last_week as exactly two explicit READs with no guessed previous equal window
+
+    TypeError: expect(received).toHaveLength(expected)
+
+    Matcher error: received value must have a length property whose value must be a number
+
+    Received has value: null
+
+      69 |         now,
+      70 |       );
+    > 71 |       expect(result).toHaveLength(2);
+         |                      ^
+      72 |       expect(result?.[0]).toEqual({ period, comparison: 'none' });
+      73 |       expect(result?.[1]).toEqual({
+      74 |         ...ReportingPeriodResolver.semanticPeriod(
+
+      at ai-tools/finance-period-binding.spec.ts:71:22
+
+FAIL src/ai-tools/ai-core.service.spec.ts
+  ● AiCoreService › personal appointment details in the canonical chat › preserves the reschedule intent after an authorized own READ, stale=false
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Пожелание для переноса: пятница."
+    Received string:    "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.
+    Ближайшие записи:
+    07.10.2026, 16:00 (Asia/Novosibirsk) — Тестовый филиал — Стрижка
+    Источник: ваши записи в MAYA."
+
+      3507 |         } else {
+      3508 |           expect(answer.grounding.status).toBe('verified');
+    > 3509 |           expect(answer.reply).toContain('Пожелание для переноса: пятница.');
+           |                                ^
+      3510 |           expect(answer.reply).toContain(
+      3511 |             'Возможность переноса ещё не проверена.',
+      3512 |           );
+
+      at ai-tools/ai-core.service.spec.ts:3509:32
+
+
+Test Suites: 2 failed, 1 passed, 3 total
+Tests:       5 failed, 367 passed, 372 total
+Snapshots:   0 total
+Time:        1.442 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/finance-period-binding.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts".

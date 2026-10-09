@@ -1,0 +1,38 @@
+{
+  "qualification": "TRANSCRIBED_AGENT_REVIEWS_AND_READ_ONLY_OBSERVATIONS_NOT_ADDITIONAL_RUNTIME",
+  "runtimeCommit": "49c37804b1f404b2cd2723f807b22f10c838a759",
+  "independentFunctionalReview": {
+    "reviewer": "independent_review",
+    "scope": "C8/C9, exact-month fixture and final BI/reviews oracle; actual BI and reviews responses",
+    "result": "qualified_no_blocker",
+    "selectedSourceHashesChecked": 13,
+    "allTurnBindingsChecked": 81,
+    "limitations": [
+      "static code review plus saved actual evidence; no independent test/service execution",
+      "no real model/provider/React/restart/C10 acceptance"
+    ]
+  },
+  "evidenceIntegrityReview": {
+    "reviewer": "checkpoint_review",
+    "isOracleAuthor": true,
+    "scope": "all source Git hashes, 81 reply/history/audit bindings, immutable baselines, counts and cleanup",
+    "sourceHashesChecked": 2503,
+    "sourceBytesChecked": 35012324,
+    "result": "qualified_integrity_pass",
+    "independentOracleAcceptanceClaimed": false
+  },
+  "reviewsSourceReview": {
+    "reviewer": "receipt_read_shell",
+    "result": "qualified_no_blocker",
+    "scope": "source query metadata, finite presenter and AiCore integration",
+    "execution": "static_only"
+  },
+  "isolation": {
+    "frozen9Head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+    "unionHandoffHead": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+    "launchObservedSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+    "websiteEdited": false,
+    "liveProviderCalls": 0,
+    "pushOrMerge": false
+  }
+}

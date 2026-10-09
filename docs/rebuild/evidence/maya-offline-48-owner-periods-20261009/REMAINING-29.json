@@ -1,0 +1,270 @@
+{
+  "qualification": "EXPLICIT_LIMITATIONS_NOT_FUNCTION_ACCEPTANCE",
+  "runtime": "49c37804b1f404b2cd2723f807b22f10c838a759",
+  "rows": [
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ],
+      "missingLink": "Employee identity/employee-specific service or price не связано с текущим request/source witness.",
+      "nextAction": "Сначала current request→staff binding; затем actual service/price/schedule source для этого staff. Общий каталог не является employee-specific offer."
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ],
+      "missingLink": "Employee identity/employee-specific service or price не связано с текущим request/source witness.",
+      "nextAction": "Сначала current request→staff binding; затем actual service/price/schedule source для этого staff. Общий каталог не является employee-specific offer."
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Approved price owner существует, но services.price допускает только catalog READ; CI matcher отказывает price update. Binder не принимает «Подготовь изменение цены»/родительный падеж услуги, поэтому correction не наследует anchor.",
+      "nextAction": "В price lane связать отдельный semantic preparation intent с existing catalog.service.price.update/approval; расширить finite command/title binding и проверить 1500→1600 через actual parser/HTTP preview без MONEY execution."
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Approved price owner существует, но services.price допускает только catalog READ; CI matcher отказывает price update. Binder не принимает «Подготовь изменение цены»/родительный падеж услуги, поэтому correction не наследует anchor.",
+      "nextAction": "В price lane связать отдельный semantic preparation intent с existing catalog.service.price.update/approval; расширить finite command/title binding и проверить 1500→1600 через actual parser/HTTP preview без MONEY execution."
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Точный October live READ есть; confirmed_cash NOT_MEASURED. Оценка примерно не имеет источника.",
+      "nextAction": "Получить подтверждённый денежный источник у C7/CRM; не заменять его booked value или guessed estimate."
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "missingLink": "Период сохранён, READ выполнен; turn 3 имеет два READ. Cash NOT_MEASURED/PARTIAL. Старый finance oracle признаёт только UNAVAILABLE singleton.",
+      "nextAction": "Раздельно: добавить typed exact-period/cash-limit evidence в oracle и подключить реальный денежный источник у C7; первое не создаёт второе."
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "missingLink": "Период сохранён, READ выполнен; turn 3 имеет два READ. Cash NOT_MEASURED/PARTIAL. Старый finance oracle признаёт только UNAVAILABLE singleton.",
+      "nextAction": "Раздельно: добавить typed exact-period/cash-limit evidence в oracle и подключить реальный денежный источник у C7; первое не создаёт второе."
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 3,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "missingLink": "Период сохранён, READ выполнен; turn 3 имеет два READ. Cash NOT_MEASURED/PARTIAL. Старый finance oracle признаёт только UNAVAILABLE singleton.",
+      "nextAction": "Раздельно: добавить typed exact-period/cash-limit evidence в oracle и подключить реальный денежный источник у C7; первое не создаёт второе."
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "missingLink": "Период сохранён, READ выполнен; turn 3 имеет два READ. Cash NOT_MEASURED/PARTIAL. Старый finance oracle признаёт только UNAVAILABLE singleton.",
+      "nextAction": "Раздельно: добавить typed exact-period/cash-limit evidence в oracle и подключить реальный денежный источник у C7; первое не создаёт второе."
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "missingLink": "Период сохранён, READ выполнен; turn 3 имеет два READ. Cash NOT_MEASURED/PARTIAL. Старый finance oracle признаёт только UNAVAILABLE singleton.",
+      "nextAction": "Раздельно: добавить typed exact-period/cash-limit evidence в oracle и подключить реальный денежный источник у C7; первое не создаёт второе."
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 3,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "missingLink": "Период сохранён, READ выполнен; turn 3 имеет два READ. Cash NOT_MEASURED/PARTIAL. Старый finance oracle признаёт только UNAVAILABLE singleton.",
+      "nextAction": "Раздельно: добавить typed exact-period/cash-limit evidence в oracle и подключить реальный денежный источник у C7; первое не создаёт второе."
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing bounded C8 rule не выбирает >2 месяца/прежнюю регулярность/приоритет.",
+      "nextAction": "Нужна source-backed cohort/regularity/priority проекция существующего владельца; условия не считать согласием на другой bounded обзор."
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 2,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing bounded C8 rule не выбирает >2 месяца/прежнюю регулярность/приоритет.",
+      "nextAction": "Нужна source-backed cohort/regularity/priority проекция существующего владельца; условия не считать согласием на другой bounded обзор."
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 3,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing bounded C8 rule не выбирает >2 месяца/прежнюю регулярность/приоритет.",
+      "nextAction": "Нужна source-backed cohort/regularity/priority проекция существующего владельца; условия не считать согласием на другой bounded обзор."
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing bounded C8 rule не выбирает >2 месяца/прежнюю регулярность/приоритет.",
+      "nextAction": "Нужна source-backed cohort/regularity/priority проекция существующего владельца; условия не считать согласием на другой bounded обзор."
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 2,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing bounded C8 rule не выбирает >2 месяца/прежнюю регулярность/приоритет.",
+      "nextAction": "Нужна source-backed cohort/regularity/priority проекция существующего владельца; условия не считать согласием на другой bounded обзор."
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 3,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing bounded C8 rule не выбирает >2 месяца/прежнюю регулярность/приоритет.",
+      "nextAction": "Нужна source-backed cohort/regularity/priority проекция существующего владельца; условия не считать согласием на другой bounded обзор."
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "journal_owner_resolution_observed"
+      ],
+      "missingLink": "Журнал и дата сохранены, но нет actual journal-owner resolution; branch не выбирает одного из двух Саш.",
+      "nextAction": "Добавить current CRM staff/branch witness и точную однозначную привязку до journal READ; не подменять журнал roster."
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "journal_owner_resolution_observed"
+      ],
+      "missingLink": "Журнал и дата сохранены, но нет actual journal-owner resolution; branch не выбирает одного из двух Саш.",
+      "nextAction": "Добавить current CRM staff/branch witness и точную однозначную привязку до journal READ; не подменять журнал roster."
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ],
+      "missingLink": "Employee identity/employee-specific service or price не связано с текущим request/source witness.",
+      "nextAction": "Сначала current request→staff binding; затем actual service/price/schedule source для этого staff. Общий каталог не является employee-specific offer."
+    },
+    {
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ],
+      "missingLink": "Employee identity/employee-specific service or price не связано с текущим request/source witness.",
+      "nextAction": "Сначала current request→staff binding; затем actual service/price/schedule source для этого staff. Общий каталог не является employee-specific offer."
+    },
+    {
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "employee_preserved_or_corrected"
+      ],
+      "missingLink": "Employee identity/employee-specific service or price не связано с текущим request/source witness.",
+      "nextAction": "Сначала current request→staff binding; затем actual service/price/schedule source для этого staff. Общий каталог не является employee-specific offer."
+    },
+    {
+      "caseId": "utt-company.public_info-037",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ],
+      "missingLink": "Tenant branding не подтверждает адрес указанного филиала.",
+      "nextAction": "Связать current configured branch/company witness с actual company profile из того же CRM source."
+    },
+    {
+      "caseId": "utt-company.public_info-041",
+      "turn": 1,
+      "status": "insufficient_evidence",
+      "missingEvidenceIds": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ],
+      "missingLink": "Tenant branding не подтверждает адрес указанного филиала.",
+      "nextAction": "Связать current configured branch/company witness с actual company profile из того же CRM source."
+    },
+    {
+      "caseId": "utt-finance.profit-055",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing profit READ выполнен; cash/refunds/complete comparable costs не доказаны.",
+      "nextAction": "Доставить эти canonical source facts в C7; не рассчитывать прибыль по стоимости записей."
+    },
+    {
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing stock READ не привязан к requested branch/store; отсутствующие quantities/threshold не равны нулю.",
+      "nextAction": "Нужен current stock-to-branch source mapping и полнота quantities, у inventory owner."
+    },
+    {
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Existing stock READ не привязан к requested branch/store; отсутствующие quantities/threshold не равны нулю.",
+      "nextAction": "Нужен current stock-to-branch source mapping и полнота quantities, у inventory owner."
+    },
+    {
+      "caseId": "utt-reviews.list_recent-062",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Actual lower-only query без rating, limit20: не exact previous month и не все плохие отзывы.",
+      "nextAction": "В existing review owner/API потребуются точные календарные границы и разрешённый набор оценок с явной полнотой; конфигурацию не выводить из пустого результата."
+    },
+    {
+      "caseId": "utt-reviews.list_recent-067",
+      "turn": 1,
+      "status": "unsupported",
+      "missingEvidenceIds": [],
+      "missingLink": "Actual lower-only query без rating, limit20: не exact previous month и не все плохие отзывы.",
+      "nextAction": "В existing review owner/API потребуются точные календарные границы и разрешённый набор оценок с явной полнотой; конфигурацию не выводить из пустого результата."
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+src/ai-tools/ai-core.service.spec.ts(93,18): error TS2345: Argument of type '{ reply: string; semanticPlan: ConversationSemanticPlan | null; }' is not assignable to parameter of type 'Pick<AiCoreModelDecision, "toolCall" | "reply"> & Partial<Pick<AiCoreModelDecision, "semanticPlan">>'.
+  Property 'toolCall' is missing in type '{ reply: string; semanticPlan: ConversationSemanticPlan | null; }' but required in type 'Pick<AiCoreModelDecision, "toolCall" | "reply">'.
+src/ai-tools/ai-core.service.spec.ts(935,30): error TS2352: Conversion of type 'ConversationSemanticPlan | null | undefined' to type '{ tasks: { entities: { services: string[]; }; }[]; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'ConversationSemanticPlan' is not comparable to type '{ tasks: { entities: { services: string[]; }; }[]; }'.
+    Types of property 'tasks' are incompatible.
+      Type 'ConversationSemanticTask[]' is not comparable to type '{ entities: { services: string[]; }; }[]'.
+        Type 'ConversationSemanticTask' is not comparable to type '{ entities: { services: string[]; }; }'.
+          Types of property 'entities' are incompatible.
+            Property 'services' is missing in type 'ConversationEntities' but required in type '{ services: string[]; }'.
+src/ai-tools/ai-core.service.spec.ts(1705,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(1991,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(2956,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3010,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3088,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3125,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3321,55): error TS2345: Argument of type '{ surface: "web"; messages: { role: "user"; content: string; }[]; }' is not assignable to parameter of type 'AiCoreChatDto'.
+  Property 'requestId' is missing in type '{ surface: "web"; messages: { role: "user"; content: string; }[]; }' but required in type 'AiCoreChatDto'.
+src/ai-tools/ai-core.service.spec.ts(3435,20): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3478,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3542,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3580,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(3613,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4221,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4253,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4376,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4655,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4710,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4755,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4825,20): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4866,22): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(4966,20): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5083,15): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5151,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5204,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5251,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5306,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5331,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5398,13): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5471,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5520,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5702,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5794,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5858,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(5936,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6004,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6066,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6137,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6173,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6395,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6467,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6593,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6648,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6727,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6809,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6857,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6923,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(6983,58): error TS2345: Argument of type '{ status: number; }' is not assignable to parameter of type 'ServiceUnavailableException'.
+  Type '{ status: number; }' is missing the following properties from type 'ServiceUnavailableException': response, cause, initCause, initMessage, and 5 more.
+src/ai-tools/ai-core.service.spec.ts(6997,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7069,11): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7213,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7273,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7335,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7400,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7452,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7506,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7557,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7925,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(7954,9): error TS2322: Type 'null' is not assignable to type 'string'.
+src/ai-tools/ai-core.service.spec.ts(8016,61): error TS2322: Type '{ role: string; content: string; }[]' is not assignable to type 'AiCoreChatMessageDto[]'.
+  Type '{ role: string; content: string; }' is not assignable to type 'AiCoreChatMessageDto'.
+    Types of property 'role' are incompatible.
+      Type 'string' is not assignable to type 'AiCoreMessageRole'.
+src/ai-tools/ai-core.service.spec.ts(8225,13): error TS2743: No overload expects 1 type arguments, but overloads do exist that expect either 0 or 2 type arguments.

@@ -1,0 +1,1111 @@
+{
+  "qualification": "DIFFERENT_ACTUAL_RUNS_NOT_RESCORE_NOT_FUNCTION_COMPLETION",
+  "beforeSource": "e02dfde6619e7f838dd1323d9c7c6961f9f4347b",
+  "afterSource": "49c37804b1f404b2cd2723f807b22f10c838a759",
+  "beforeScoreSha256": "2191fbd0f601cae74526a15308f5424a712c9d1c7a04e4e7a14700e1a42b451d",
+  "rows": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "7e4cfff5ca44dadf00791b3255bbc80570d7e52bf08f896b42eb0f23d53cd1ea",
+      "afterReplyHash": "7e4cfff5ca44dadf00791b3255bbc80570d7e52bf08f896b42eb0f23d53cd1ea",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "be8d714a595d228bf1151f13e990be45d262b9938556648bada928d9d10957ac",
+      "afterReplyHash": "be8d714a595d228bf1151f13e990be45d262b9938556648bada928d9d10957ac",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "27f9a25a420e28da4909397a4bab3b0b6ccae58e99f4b4355f30b71243d65447",
+      "afterReplyHash": "9047a8c7f6cb9737e057c6d6a2c579059d496efd753f0ef8322e3430a0a76838",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "60e05f1171b80b25a90926e92e3266d9725ec93edc7c1ee4462d4a7b1c99e8c2",
+      "afterReplyHash": "60e05f1171b80b25a90926e92e3266d9725ec93edc7c1ee4462d4a7b1c99e8c2",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "420af01de77cf07898d45ee32b8a87dca3a14c0dbb00b25c4360156859fe70ce",
+      "afterReplyHash": "420af01de77cf07898d45ee32b8a87dca3a14c0dbb00b25c4360156859fe70ce",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "5170eedc083fdb13d2aa5acb7ed77d058660b92d7ee363e857f3816c6a9ea231",
+      "afterReplyHash": "5170eedc083fdb13d2aa5acb7ed77d058660b92d7ee363e857f3816c6a9ea231",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "afterReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "b61ba1cd3554e7ff547184b731bb1ffac09b7552880b4458998cc9a9912e4d3e",
+      "afterReplyHash": "6e002f683a85a9aaff0903c5c8426135f6aecb86e8ae49856860ce9cf80891a7",
+      "beforeFailed": [
+        "current_read_staff_schedule_read"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "employee_preserved_or_corrected",
+        "schedule_source_date_and_employee",
+        "employee_schedule_answered"
+      ],
+      "afterMissing": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "afterReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "dc1525053461dffe1db30c5ca0f756e08ff70a73c91bd639b0452b30d85593d6",
+      "afterReplyHash": "59d529c7ba4f316236964bebf75e6c71c21e971cd40b3f530ded8b4d5333ecae",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "0fac8638b17247e04f2b850ecaf5447fb7f2f2995d8ccc801f428838c9c6eb50",
+      "afterReplyHash": "0fac8638b17247e04f2b850ecaf5447fb7f2f2995d8ccc801f428838c9c6eb50",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "ed2b6787a933b8b5170f5c04be98ae3776751942eadaa5310e548a4a31d25c8e",
+      "afterReplyHash": "ed2b6787a933b8b5170f5c04be98ae3776751942eadaa5310e548a4a31d25c8e",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "831f4f8e920a2cece1c92065c414182324ba26e126d705b44b93846dc3665288",
+      "afterReplyHash": "831f4f8e920a2cece1c92065c414182324ba26e126d705b44b93846dc3665288",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "005f52f6b0a6fb3c404185acd6afaa6adc7a4f13fa0a57ca3a84caf683810917",
+      "afterReplyHash": "252f074ff510220fb14e1937e169696dd9bb264a78beacb45be2cd1b6072886a",
+      "beforeFailed": [
+        "unknown_staff_addressed"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "d070a9fca8d5b24e324a9284fd070f00ce38ada1b4d663ea8852289f7580603c",
+      "afterReplyHash": "ebb742b4698e75bde5f6c7255f157ba2befeac1243fcb5bd8c3716ecd7070913",
+      "beforeFailed": [
+        "own_appointment_answered"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "d070a9fca8d5b24e324a9284fd070f00ce38ada1b4d663ea8852289f7580603c",
+      "afterReplyHash": "ebb742b4698e75bde5f6c7255f157ba2befeac1243fcb5bd8c3716ecd7070913",
+      "beforeFailed": [
+        "own_appointment_answered"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "d070a9fca8d5b24e324a9284fd070f00ce38ada1b4d663ea8852289f7580603c",
+      "afterReplyHash": "dc5755bbfb1ebde0add02fdb174a7dcf6b23a7e38b0d90539cb87a39c5567bfe",
+      "beforeFailed": [
+        "period_response_or_explicit_filter_limit"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "a2b3dda111c940390efb9c100ffb59332feaf914e9d937853560aeb468cfda26",
+      "afterReplyHash": "a2b3dda111c940390efb9c100ffb59332feaf914e9d937853560aeb468cfda26",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "c3a72c2d6e58322e8aced2b93e67f7f32b9f74bdfc52dd807fe91526cc128151",
+      "afterReplyHash": "aed930f4fb3b36f470a95d2a6b36ff56eeeb15daa9f5e1275ccbcf848fbe4390",
+      "beforeFailed": [
+        "closing_time_answered_or_missing"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "edb69a4d38a82bf0e34de0e9c412925afb160bff020546af30c826ee37a21624",
+      "afterReplyHash": "edb69a4d38a82bf0e34de0e9c412925afb160bff020546af30c826ee37a21624",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "8538284fadc871f62dbe8e125e70f9fb9aa876226d212feb753a0f57460c914a",
+      "afterReplyHash": "1d64885a5519e24028deb01e58a967e03f62acfd7f320871334521ee3f37383c",
+      "beforeFailed": [
+        "staff_services_answered"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "employee_preserved_or_corrected"
+      ],
+      "afterMissing": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "2d7e86ed6ec12f20dd6b673d5d05c69aef716c5301a86fc0b76d0b837580ae0e",
+      "afterReplyHash": "2d7e86ed6ec12f20dd6b673d5d05c69aef716c5301a86fc0b76d0b837580ae0e",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "2d7e86ed6ec12f20dd6b673d5d05c69aef716c5301a86fc0b76d0b837580ae0e",
+      "afterReplyHash": "2d7e86ed6ec12f20dd6b673d5d05c69aef716c5301a86fc0b76d0b837580ae0e",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "cda6ff74ace944daf60ce13d564ccfaad06b9e5e3450605b679d997ffdf8d893",
+      "afterReplyHash": "cda6ff74ace944daf60ce13d564ccfaad06b9e5e3450605b679d997ffdf8d893",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "8538284fadc871f62dbe8e125e70f9fb9aa876226d212feb753a0f57460c914a",
+      "afterReplyHash": "55c0be681e9cb810fc32eb7261ea44c3e05553e926493215c1559c8c251746a2",
+      "beforeFailed": [
+        "published_october_scope",
+        "financial_result_delivered"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "b07205f8d08612973f710ec1e1370cada108d060bfdf756de949d6b05b8bf894",
+      "afterReplyHash": "26dc28ad6781d7e078679615a48bf30979020e8c43490cdff5d86900fa0f7794",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "81b7023e41fe808939a1b1b82323f07aa9f9bc385e136faa110d934d1a54a743",
+      "afterReplyHash": "4de48f8079fa798815d1fb7a3bafb4ca98c4c4cddbb984210b11d29544b2369b",
+      "beforeFailed": [
+        "rule_parameters_evidenced"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": null,
+      "afterReplyHash": null,
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "ae9bd65ee57238d86af6f6b13112c854d37ff9da02a71dd718a437c0e5c43550",
+      "afterReplyHash": "ae9bd65ee57238d86af6f6b13112c854d37ff9da02a71dd718a437c0e5c43550",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "279d0d61c3edc757eb0814cca4fb49889f7d39ba83c1afb8c29d5ef385a19ee7",
+      "afterReplyHash": "279d0d61c3edc757eb0814cca4fb49889f7d39ba83c1afb8c29d5ef385a19ee7",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "cee1dbee1f0153ef35e8bbe634fa75de4c8fd9dc359b0d08bf7a61646334ffe1",
+      "afterReplyHash": "d2cc0471e8a1ca96e6ed435c79d58f3cfff8f5be19c4540b8a1eb52e953e5db8",
+      "beforeFailed": [
+        "requested_unsafe_dispatch_refused"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "a3401f2d8a7cf4c0a57054340033cef3dbbe7cb8041a276ced61130147ebc70e",
+      "afterReplyHash": "a3401f2d8a7cf4c0a57054340033cef3dbbe7cb8041a276ced61130147ebc70e",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "a3401f2d8a7cf4c0a57054340033cef3dbbe7cb8041a276ced61130147ebc70e",
+      "afterReplyHash": "a3401f2d8a7cf4c0a57054340033cef3dbbe7cb8041a276ced61130147ebc70e",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 1,
+      "before": "insufficient_evidence",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "13ac5ce8b06acd3bd7bfb823171507b717aa01c35e37ebceca72af9c3682db88",
+      "afterReplyHash": "759ea2cf51e03755ad3d3ba3a6e9c473e73a800cf071823204f7eb4d3967b922",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "afterMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 2,
+      "before": "insufficient_evidence",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "13ac5ce8b06acd3bd7bfb823171507b717aa01c35e37ebceca72af9c3682db88",
+      "afterReplyHash": "f42d9d304f949b13632ea70474755f733739eee4ca46087c4ceab56954f5d05f",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "afterMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 3,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "13ac5ce8b06acd3bd7bfb823171507b717aa01c35e37ebceca72af9c3682db88",
+      "afterReplyHash": "1a7505ebaa00133a7e94a24610f7e882e55d4ff195b48fdb559228875e6c96af",
+      "beforeFailed": [
+        "requested_financial_period_retained"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "afterMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 1,
+      "before": "insufficient_evidence",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "13ac5ce8b06acd3bd7bfb823171507b717aa01c35e37ebceca72af9c3682db88",
+      "afterReplyHash": "94ea009b8bc325b945c19d569ad8aaee13b0d80677e52b8e28446fcb67abe157",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "afterMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 2,
+      "before": "insufficient_evidence",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "13ac5ce8b06acd3bd7bfb823171507b717aa01c35e37ebceca72af9c3682db88",
+      "afterReplyHash": "878ad75aab3bdb679d0fbde917c5952cf565a1ed3e1f7a1396b6cdde941bccd7",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "afterMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 3,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "13ac5ce8b06acd3bd7bfb823171507b717aa01c35e37ebceca72af9c3682db88",
+      "afterReplyHash": "2439f9e9daefcd19f5ed39e59763b924fa9fe3fe26c92b4f0320b8ae9d6c302b",
+      "beforeFailed": [
+        "requested_financial_period_retained"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ],
+      "afterMissing": [
+        "requested_financial_owner_scope_unavailable_evidence"
+      ]
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "18e8f5455d5b96f1a90ebe5bc58c58204fa33d3a4bba23371522a4195d3833e4",
+      "afterReplyHash": "0883387a58e7bee443b9b3ea1e30936382c054debaba9354d9717325fa173486",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "unsupported",
+      "beforeReplyHash": "8fe57560bd1c8aba52814e3c47ae394650f94171e0e7d5fe27493e118ec49d18",
+      "afterReplyHash": "fa1386d1d659518531930ac8219d083cc97918c58ced67298ef6eafec47ab0bc",
+      "beforeFailed": [
+        "regularity_followup_addressed",
+        "requested_cohort_scope_explained"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 3,
+      "before": "semantic_fail",
+      "after": "unsupported",
+      "beforeReplyHash": "8fe57560bd1c8aba52814e3c47ae394650f94171e0e7d5fe27493e118ec49d18",
+      "afterReplyHash": "eb71085c6fc9f07db722e2fe16928f857a9ee1e2a12370bdbfab0ecbeb207aef",
+      "beforeFailed": [
+        "ranking_followup_addressed",
+        "requested_cohort_scope_explained"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "18e8f5455d5b96f1a90ebe5bc58c58204fa33d3a4bba23371522a4195d3833e4",
+      "afterReplyHash": "0883387a58e7bee443b9b3ea1e30936382c054debaba9354d9717325fa173486",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "unsupported",
+      "beforeReplyHash": "8fe57560bd1c8aba52814e3c47ae394650f94171e0e7d5fe27493e118ec49d18",
+      "afterReplyHash": "fa1386d1d659518531930ac8219d083cc97918c58ced67298ef6eafec47ab0bc",
+      "beforeFailed": [
+        "regularity_followup_addressed",
+        "requested_cohort_scope_explained"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 3,
+      "before": "semantic_fail",
+      "after": "unsupported",
+      "beforeReplyHash": "8fe57560bd1c8aba52814e3c47ae394650f94171e0e7d5fe27493e118ec49d18",
+      "afterReplyHash": "eb71085c6fc9f07db722e2fe16928f857a9ee1e2a12370bdbfab0ecbeb207aef",
+      "beforeFailed": [
+        "ranking_followup_addressed",
+        "requested_cohort_scope_explained"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "f76c593d461a03069aabdf0d2d2fea7948e0507b9510c1d1a1868f1b0ad7e6be",
+      "afterReplyHash": "54cfec11c45feb83760f2ab8f6f2941ccb34b8a3229a7b77c53cdf74a9c76375",
+      "beforeFailed": [
+        "requested_task_preserved",
+        "journal_not_roster"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "f76c593d461a03069aabdf0d2d2fea7948e0507b9510c1d1a1868f1b0ad7e6be",
+      "afterReplyHash": "54cfec11c45feb83760f2ab8f6f2941ccb34b8a3229a7b77c53cdf74a9c76375",
+      "beforeFailed": [
+        "requested_task_preserved",
+        "journal_not_roster"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": [
+        "journal_owner_resolution_observed"
+      ]
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "afterReplyHash": "29212f4653078353401cbe985d330848136a3e8e8d6f4183006b09a86881975c",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 2,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "37458820fe65cfd466de5c9ee3e532776fe67eb0b47068baefe6d0812a9268ba",
+      "afterReplyHash": "37458820fe65cfd466de5c9ee3e532776fe67eb0b47068baefe6d0812a9268ba",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "37458820fe65cfd466de5c9ee3e532776fe67eb0b47068baefe6d0812a9268ba",
+      "afterReplyHash": "37458820fe65cfd466de5c9ee3e532776fe67eb0b47068baefe6d0812a9268ba",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "d070a9fca8d5b24e324a9284fd070f00ce38ada1b4d663ea8852289f7580603c",
+      "afterReplyHash": "4280b62564df4e4a24925fcd7de24c3f6acc37bd04228dd0c028754acb06c5b9",
+      "beforeFailed": [
+        "requested_task_preserved",
+        "own_appointment_answered"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "f764790656673200293c4d5160f36895e8bc80c953273b617e8be481adaee163",
+      "afterReplyHash": "3975d328e91a033b9cd3a2d8e48990ed4b8dac5a37f1a0d9f2e7fdbfbd374da8",
+      "beforeFailed": [
+        "reschedule_time_answered"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "exact_current_time_preserved"
+      ],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 3,
+      "before": "semantic_fail",
+      "after": "pass",
+      "beforeReplyHash": "f764790656673200293c4d5160f36895e8bc80c953273b617e8be481adaee163",
+      "afterReplyHash": "12578efd838133a2e48373e518ae1a41a4662c98e3b4cf01653daa637e5d5594",
+      "beforeFailed": [
+        "stop_acknowledged",
+        "no_action_reoffered_after_stop"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "exact_current_time_preserved"
+      ],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "afterReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "b61ba1cd3554e7ff547184b731bb1ffac09b7552880b4458998cc9a9912e4d3e",
+      "afterReplyHash": "98ef0003d7a15d545fb0ed7e5a5b53c42e5d4d23a2b3c2c8189857c7dc33a180",
+      "beforeFailed": [
+        "current_read_staff_schedule_read"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "employee_preserved_or_corrected",
+        "schedule_source_date_and_employee",
+        "employee_schedule_answered"
+      ],
+      "afterMissing": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 3,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "afterReplyHash": "97eb5647da804d55d9f2e29a8d54cc797444b12061fce1e3a5997713e3bce26a",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "8538284fadc871f62dbe8e125e70f9fb9aa876226d212feb753a0f57460c914a",
+      "afterReplyHash": "1d64885a5519e24028deb01e58a967e03f62acfd7f320871334521ee3f37383c",
+      "beforeFailed": [
+        "price_and_currency_answered",
+        "staff_price_scope_qualified"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "employee_preserved_or_corrected"
+      ],
+      "afterMissing": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "8538284fadc871f62dbe8e125e70f9fb9aa876226d212feb753a0f57460c914a",
+      "afterReplyHash": "1d64885a5519e24028deb01e58a967e03f62acfd7f320871334521ee3f37383c",
+      "beforeFailed": [
+        "price_and_currency_answered",
+        "staff_price_scope_qualified"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "employee_preserved_or_corrected"
+      ],
+      "afterMissing": [
+        "employee_preserved_or_corrected"
+      ]
+    },
+    {
+      "caseId": "utt-company.public_info-037",
+      "turn": 1,
+      "before": "insufficient_evidence",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "c3a72c2d6e58322e8aced2b93e67f7f32b9f74bdfc52dd807fe91526cc128151",
+      "afterReplyHash": "c3a72c2d6e58322e8aced2b93e67f7f32b9f74bdfc52dd807fe91526cc128151",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ],
+      "afterMissing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "caseId": "utt-company.public_info-041",
+      "turn": 1,
+      "before": "insufficient_evidence",
+      "after": "insufficient_evidence",
+      "beforeReplyHash": "c3a72c2d6e58322e8aced2b93e67f7f32b9f74bdfc52dd807fe91526cc128151",
+      "afterReplyHash": "c3a72c2d6e58322e8aced2b93e67f7f32b9f74bdfc52dd807fe91526cc128151",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ],
+      "afterMissing": [
+        "branch_scope_preserved",
+        "branch_address_binding"
+      ]
+    },
+    {
+      "caseId": "utt-support.integration_status-002",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "0077974ca2a7599c53f6d4ee0d13bf464fb4001076d692766d1397b0cf670720",
+      "afterReplyHash": "0077974ca2a7599c53f6d4ee0d13bf464fb4001076d692766d1397b0cf670720",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-support.integration_status-007",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "0077974ca2a7599c53f6d4ee0d13bf464fb4001076d692766d1397b0cf670720",
+      "afterReplyHash": "0077974ca2a7599c53f6d4ee0d13bf464fb4001076d692766d1397b0cf670720",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-finance.profit-050",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "635f068621524eb47a61dd9d856daf307e1e0101b6497cd07b0f9123181db9fc",
+      "afterReplyHash": "635f068621524eb47a61dd9d856daf307e1e0101b6497cd07b0f9123181db9fc",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-finance.profit-055",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "unsupported",
+      "beforeReplyHash": "a3e4133d32568f60b7e7d29f93489bd21bd0c28befe3a6375005f31efcd0e006",
+      "afterReplyHash": "00486c7cedab2b04cf3a6475e606b0d3fcbeba85878bf7093fdfad84acdd093c",
+      "beforeFailed": [
+        "current_read_analytics_business_profit"
+      ],
+      "afterFailed": [],
+      "beforeMissing": [
+        "current_profit_owner_result_understood"
+      ],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "c9d6468a4b89269fbd218e129ec3fe0a6c621e39a638f023fef21a1894ea04cd",
+      "afterReplyHash": "c9d6468a4b89269fbd218e129ec3fe0a6c621e39a638f023fef21a1894ea04cd",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "c9d6468a4b89269fbd218e129ec3fe0a6c621e39a638f023fef21a1894ea04cd",
+      "afterReplyHash": "c9d6468a4b89269fbd218e129ec3fe0a6c621e39a638f023fef21a1894ea04cd",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-general.explain_term-002",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "d23a07873bdac92d1b67d3c706e7c273eb781fd1451426f4c1ae71139b56c5cd",
+      "afterReplyHash": "d23a07873bdac92d1b67d3c706e7c273eb781fd1451426f4c1ae71139b56c5cd",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-general.explain_term-007",
+      "turn": 1,
+      "before": "pass",
+      "after": "pass",
+      "beforeReplyHash": "d23a07873bdac92d1b67d3c706e7c273eb781fd1451426f4c1ae71139b56c5cd",
+      "afterReplyHash": "d23a07873bdac92d1b67d3c706e7c273eb781fd1451426f4c1ae71139b56c5cd",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-reviews.list_recent-062",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "7dd52634db7e408b1c9c137b687d87b88108603f3c89ebbc270dadaba930a212",
+      "afterReplyHash": "38ab674dbad3ae89e3d2af6c20b46eed78ee4c63aa31f944fee11b490a8a7570",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    },
+    {
+      "caseId": "utt-reviews.list_recent-067",
+      "turn": 1,
+      "before": "unsupported",
+      "after": "unsupported",
+      "beforeReplyHash": "7dd52634db7e408b1c9c137b687d87b88108603f3c89ebbc270dadaba930a212",
+      "afterReplyHash": "b26fecb490ce506410d361492d0c6d3bd4f400e1794eb86bf061210a7ed0dbf7",
+      "beforeFailed": [],
+      "afterFailed": [],
+      "beforeMissing": [],
+      "afterMissing": []
+    }
+  ]
+}

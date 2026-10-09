@@ -1,0 +1,4 @@
+src/ai-tools/finance-period-reply.ts(108,23): error TS2352: Conversion of type '{ sources: never[]; dependencies: never[]; metrics: { sourceRefs: never[]; }[]; reasons: any[]; completeness: unknown; qualification: unknown; attributionStatus: "NOT_APPLICABLE"; creditedExecutionId: null; creditedAttemptId: null; }' to type 'MeasurementResult' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'metrics' are incompatible.
+    Type '{ sourceRefs: never[]; }[]' is not comparable to type 'MeasurementMetric[]'.
+      Type '{ sourceRefs: never[]; }' is missing the following properties from type 'MeasurementMetric': key, dimensions, unit, basis, and 3 more.

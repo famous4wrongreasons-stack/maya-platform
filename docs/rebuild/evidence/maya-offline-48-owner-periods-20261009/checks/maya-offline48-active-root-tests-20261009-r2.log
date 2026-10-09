@@ -1,0 +1,6 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       372 passed, 372 total
+Snapshots:   0 total
+Time:        1.385 s, estimated 2 s
+Ran all test suites within paths "src/ai-tools/finance-period-binding.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-core.occupancy.spec.ts".

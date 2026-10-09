@@ -1,0 +1,40 @@
+FAIL src/business-content/business-content.service.spec.ts
+  ● BusinessContentService › describes the actual empty filtered review query without claiming configuration absence
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"configuration_status": "not_observed", "contract": "maya.review-registry-query/1", "from_inclusive": "2026-07-15T10:00:00.000Z", "limit": 5, "limit_reached": false, "order": "occurred_at_desc", "rating_exact": 2, "returned_count": 0, "scope": "one_branch", "to_exclusive": null}
+    Received: undefined
+
+      133 |       expect(result.configured).toBe(false);
+      134 |       expect(result.source).toBe('not_configured');
+    > 135 |       expect(result.read_scope).toEqual({
+          |                                 ^
+      136 |         contract:'maya.review-registry-query/1',
+      137 |         from_inclusive:'2026-07-15T10:00:00.000Z', to_exclusive:null,
+      138 |         rating_exact:2, scope:'one_branch', order:'occurred_at_desc',
+
+      at Object.<anonymous> (business-content/business-content.service.spec.ts:135:33)
+
+  ● BusinessContentService › preserves tenant-wide unbounded lower date and distinguishes hitting the limit from proven truncation
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: {"configuration_status": "not_observed", "contract": "maya.review-registry-query/1", "from_inclusive": null, "limit": 1, "limit_reached": true, "order": "occurred_at_desc", "rating_exact": null, "returned_count": 1, "scope": "tenant", "to_exclusive": null}
+    Received: undefined
+
+      152 |     const result = await service.listReviews('tenant-a', {limit:1});
+      153 |     expect(prisma.businessReview.findMany).toHaveBeenCalledWith({where:{tenantId:'tenant-a'},orderBy:{occurredAt:'desc'},take:1});
+    > 154 |     expect(result.read_scope).toEqual({
+          |                               ^
+      155 |       contract:'maya.review-registry-query/1', from_inclusive:null, to_exclusive:null,
+      156 |       rating_exact:null, scope:'tenant', order:'occurred_at_desc', limit:1,
+      157 |       returned_count:1, limit_reached:true, configuration_status:'not_observed',
+
+      at Object.<anonymous> (business-content/business-content.service.spec.ts:154:31)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 5 passed, 7 total
+Snapshots:   0 total
+Time:        0.383 s
+Ran all test suites within paths "src/business-content/business-content.service.spec.ts".

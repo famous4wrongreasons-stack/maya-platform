@@ -1,0 +1,36 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/finance-period-reply.ts
+  77:27  error  Unnecessary escape character: \/  no-useless-escape
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/orchestration/c9.lifecycle-presentation.ts
+   98:15  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  101:19  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  103:24  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+✖ 4 problems (4 errors, 0 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+
+node:child_process:964
+    throw err;
+    ^
+
+Error: Command failed: /usr/local/bin/node --max-old-space-size=2048 node_modules/eslint/bin/eslint.js src/ai-tools/ai-core.finance-period.spec.ts src/ai-tools/finance-period-binding.spec.ts src/ai-tools/finance-period-binding.ts src/ai-tools/finance-period-reply.spec.ts src/ai-tools/finance-period-reply.ts src/ai-tools/personal-reschedule-preparation.spec.ts src/ai-tools/personal-reschedule-preparation.ts src/orchestration/c9.lifecycle-presentation.spec.ts src/valuation/c8.read.lifecycle-rule.spec.ts src/ai-tools/ai-core.service.spec.ts src/ai-tools/ai-core.service.ts src/ai-tools/owner-review-plan.spec.ts src/ai-tools/owner-review-plan.ts src/ai-tools/reporting-period.corpus.ts src/ai-tools/reporting-period.resolver.ts src/orchestration/c9.bi-presentation.ts src/orchestration/c9.bi-source.spec.ts src/orchestration/c9.bi-source.ts src/orchestration/c9.bi.spec.ts src/orchestration/c9.lifecycle-presentation.ts src/orchestration/c9.orchestrator.ts src/valuation/c8.read.ts
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:925:11)
+    at execFileSync (node:child_process:961:15)
+    at [eval]:1:232
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+    at evalFunction (node:internal/process/execution:283:30) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 75495,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.15.0

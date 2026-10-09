@@ -1,0 +1,2529 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "fa87ddeb-4c2b-4486-ac0d-1027dccca38d",
+  "candidateCommit": "49c37804b1f404b2cd2723f807b22f10c838a759",
+  "profile": "core-offline-48-20261009/1",
+  "limitsSha256": "ff91ce64466f0be97326464d1aaa5e0494484e0c6dcd46dc0f6972e072456cd1",
+  "manifestSha256": "27a034f438a6afc5ef51d414629c1899088f61aa37b73cb51d6635bb493e3fd9",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T13:35:41.073Z",
+  "expiresAt": "2026-10-09T14:05:41.073Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "a88f588026d9e1a24b8af37f058986c0ed2d1e3f04202a2e6a6729c4b8eec4d3",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 69644,
+      "bodySha256": "2938b3fc187da64031358f0e90d45af149a4b404196fe6eb324dd176a9f90451",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92782,
+      "bodySha256": "dda2a43a5d138cfd88eb254fcc0f53847971ad7e4c0b001deba20694a50e7397",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 97455,
+      "bodySha256": "b319243dc5d23649c6d54bba82bbd16d599f610a39f27d9f6fbcc88a59308b96",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80441,
+      "bodySha256": "9494bf05913853e0fa0c5018508a80fc7e8d91e24b2992e2768a316f2b07e15a",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "bytes": 68795,
+      "bodySha256": "77ab315024e106f607e89e45b63b792e450e3cdd49e94082798ce7d2ffccb4ae",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "bytes": 69754,
+      "bodySha256": "24478290a4b0fdc0f8949592784b0b46b2a28f919bfc390b91df3d297df82f02",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "bytes": 69884,
+      "bodySha256": "34180be682b864cb3fcb958c7933e88a79a36ed7674b1276f348014d4bf05941",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "03730e865fcd0889cee6c1c31c479ebbb3c3a4d4a93e1e50c6ff5e47b128a6e8",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "bytes": 69685,
+      "bodySha256": "3a8bc1d02f97994f304c604732bb1c29661251567dbbfbc2f24cef46ab92e99f",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "bytes": 80499,
+      "bodySha256": "24b9262bddb5b69c99fad2034c94d2031d27f2a2cb97220a6f18777bd1615d7d",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "bytes": 93029,
+      "bodySha256": "c6f5cf2f03bc8a5219fe0a8f4684296fccee9db333e28fb4b3cc6de9f9d7bd39",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "bytes": 94240,
+      "bodySha256": "413042ea8b13ec23affff8b090f74f5651b5afabbc1e834f32bbb3fddb4b24a8",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "bytes": 95028,
+      "bodySha256": "172d13c974663210846dc3cee2563488bce9be7ebaf4f4be5730f94e1e05be05",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "bytes": 94845,
+      "bodySha256": "60fadbe30531cf27949167b48de2a2994c158e73468325a4b5e920521dda4366",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "bytes": 93104,
+      "bodySha256": "cc9410aa6ded9076a167ce8ce181a8b3df75735e73f6c5be13273f106dc61a97",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "bytes": 80451,
+      "bodySha256": "51d745ada387b0e08470f8be0865ed817e0991c89dfb3b7fb9d6dce37654a9bf",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "bytes": 47716,
+      "bodySha256": "d95712232a55501186de7940871b44e472d4629612eb59eca3b80805886eb7d2",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "bytes": 81132,
+      "bodySha256": "d6a1456c5db2939534c68421f3d3f593e519bad63a1b3b34d3042b5cacf65189",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "bytes": 47866,
+      "bodySha256": "b0da65f440939073f9194df2892ec3cdcf182cacc750e0314898c56a507b4ddd",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "bytes": 81566,
+      "bodySha256": "143c5517df23d5f3e55a1b1bebea9d8265c3450a5df571f6665dde8db4fdbbf4",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "bytes": 48026,
+      "bodySha256": "a217c2958e4abd7004fbd920cf1d20e4b635f8f8efbd87b77aaa8a84a7bb68d7",
+      "status": 200
+    },
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "bytes": 68528,
+      "bodySha256": "6799a2742fc9282ced1ddb400dbb4721eb4ed7c621fe846f57bd7ccea34c4fbe",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "bytes": 68618,
+      "bodySha256": "8f43421af36d1c826425a3c28d62a939d7a95725c69f22b75a4a186634635452",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "bytes": 68621,
+      "bodySha256": "768fb51b03bae8a90318b89e93dbf41b052b0914cb2e0c64e3277c4433bccc3c",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "bytes": 69579,
+      "bodySha256": "2a99245f335c05018db56594039160f28fc97272e6002c33474d6081cdd0e341",
+      "status": 200
+    },
+    {
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "bytes": 68618,
+      "bodySha256": "c2587d4ba53a91c9e070b657f54d19a387be4308d32cd3741c3c73cb5efca1ab",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "bytes": 80191,
+      "bodySha256": "f5b85b206839e57f54b4af1426dd0c4ddd535b4a91e0b94a7b6058dfe65e1993",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "bytes": 82595,
+      "bodySha256": "55db6b6665b97c39682383c35fa9c0ec8287e72f1094fedb07b55531bdd672ac",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "bytes": 80391,
+      "bodySha256": "07e79893da8f58d893abeb3c817d8483972d95b02a6804c8f970a53424537236",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "bytes": 81378,
+      "bodySha256": "211837497e4beaa9a6a199bbe5f75b88304dcb69fa4ceb6e447e69f2d522b54f",
+      "status": 200
+    },
+    {
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "bytes": 48351,
+      "bodySha256": "4766a233d2aacee021700aa2f65544e7c605025feabc32c6b40ffddc697677d9",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "bytes": 82118,
+      "bodySha256": "d049bd78c7c09eace46cdf78cf3d26b65a2a938bef9a057a3d6ba23133ebd5c4",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "bytes": 49203,
+      "bodySha256": "43244a9738f910bffb915f871e123852667d9de943b2a40340efefb00b79aa92",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "bytes": 83111,
+      "bodySha256": "179b5272018592657e1473a5e4dae238eea81cfd599e08fa023e6be870b2667e",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "bytes": 49202,
+      "bodySha256": "ae4ee10a7e6ccb156b53e2f5fc71a12eb20e162f864aec94e4a7925e9bd2c9f0",
+      "status": 200
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "bytes": 81868,
+      "bodySha256": "43082faa2cc98bbe76cbe128351597f1a7cfa69b3b2f4f12084819b2b3f7d2e7",
+      "status": 200
+    },
+    {
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "bytes": 83104,
+      "bodySha256": "ad24770fe42202319b066a6678ac3c56401231176492a005a063cdfa7c1a414d",
+      "status": 200
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "bytes": 84124,
+      "bodySha256": "602ed49eb729afc1a32a81ff87ee68a9ba13311ea164d6e94010a6d79c26beaa",
+      "status": 200
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "bytes": 93139,
+      "bodySha256": "1e2808077dd7323e37c0244cc78cce2a77fd9e3b78d1b4747b6c145d31ba834a",
+      "status": 200
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "bytes": 93061,
+      "bodySha256": "0d6b970704241baba75c3aa3507900e0f35a4c2d6e881f369e9017090f2cc0cc",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "bytes": 76697,
+      "bodySha256": "cc1cf0449d93d2bdf8702c6663f37d6d79de9d4047340b314759e90ff8256392",
+      "status": 200
+    },
+    {
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "bytes": 77713,
+      "bodySha256": "eee3c7e9dda72f86a67f2525c00431f51dbbd337779178ff334978e11a468c8f",
+      "status": 200
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 1,
+      "bytes": 68855,
+      "bodySha256": "4c91239734d78ce1a980c0efdfa1eede7bb3d0121c392f1c16acc611d50c2514",
+      "status": 200
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 2,
+      "bytes": 69814,
+      "bodySha256": "6f22be509651ab2ee6839c57c6c057a3d19d71dc958dd189f68b4f2bc5b4c067",
+      "status": 200
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 3,
+      "bytes": 69944,
+      "bodySha256": "7189ef204ebe23d6d20b1e6002c6aa90fa0583a805bc1673a8714a3e9a624386",
+      "status": 200
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 1,
+      "bytes": 68847,
+      "bodySha256": "f305847fdee8d4cbba086c4da31697b23d5d233bdc06ef72fdd842bcd519909b",
+      "status": 200
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 2,
+      "bytes": 69788,
+      "bodySha256": "6473b20484d3e887b7efc43c0955cc1f9c7255b462a7429f7d3b556887999e17",
+      "status": 200
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 3,
+      "bytes": 69918,
+      "bodySha256": "0f2479a7a6184b698899a34551f3817f63740ee611ec9fb3c6ed9288c412ea86",
+      "status": 200
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 1,
+      "bytes": 83095,
+      "bodySha256": "50548d1636ad4a3294470c8ca3236f52d44b4dd5d6a71b6af7fd75e25a043e3c",
+      "status": 200
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 2,
+      "bytes": 84049,
+      "bodySha256": "35d91313f54fafdadb9b3635589e577c37c59f8c9ca5838bf3c538d338a4a00d",
+      "status": 200
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 3,
+      "bytes": 84132,
+      "bodySha256": "ae83e6164ade6ebb65a325953c4419378ea539714bfda9d3cce7b49652b0b96b",
+      "status": 200
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 1,
+      "bytes": 83130,
+      "bodySha256": "2eeec06922c883f3825f612946a707f951956483d3dea719642c198174f7383e",
+      "status": 200
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 2,
+      "bytes": 84084,
+      "bodySha256": "ac393e3135898b66c1b9cbbfcf363dcbeeba573de4cc81749b653275c779b6c2",
+      "status": 200
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 3,
+      "bytes": 84163,
+      "bodySha256": "bd9432ac399d458db1bde8bb258c8690abc8d1d30026f7e622951f35b47ce4ba",
+      "status": 200
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 1,
+      "bytes": 83962,
+      "bodySha256": "1e8821bdebd9d8b993c164fc608931e87d14390d9228be56b84bb8b6e263ef92",
+      "status": 200
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 2,
+      "bytes": 86253,
+      "bodySha256": "dda84d199fa20180ac7e99f4af9caf999672d217c11339c93fd0c840fc4663a2",
+      "status": 200
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 3,
+      "bytes": 86387,
+      "bodySha256": "99e9348c0fd456d2fc5312f55018931774dc6a84fc7871a6063849fa23435931",
+      "status": 200
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 1,
+      "bytes": 84054,
+      "bodySha256": "e82cb183e32d30c57bafce940ff50877f54eaf23aa98db171207036dacb1b6c3",
+      "status": 200
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 2,
+      "bytes": 86345,
+      "bodySha256": "c3e3074dbcde7dfb1a745000006b24452e26d820ca1016c20ded9be89cb85566",
+      "status": 200
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 3,
+      "bytes": 86479,
+      "bodySha256": "12f782e349d3a5007e5f18f7d6096f7189b0522422031ab1b08312225b9b1e37",
+      "status": 200
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 1,
+      "bytes": 80532,
+      "bodySha256": "816339c0a51eb227a5aa4e46e3eca9db829cd369fabc41a4f9db96038fbf4d94",
+      "status": 200
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 2,
+      "bytes": 81417,
+      "bodySha256": "734f7ee76426f65fd912ab2165500a9023b3822b0182d310f07887e8bd2a33d1",
+      "status": 200
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 1,
+      "bytes": 68753,
+      "bodySha256": "c6c627e86005e17cbc47fc0f97b81a28b9297e8fbd4992b470cee8e717acb309",
+      "status": 200
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 2,
+      "bytes": 69710,
+      "bodySha256": "78adb1d86cb73f606a4cefd43dc31a3d2e23bfcb3df627ea9472dbdabe91f085",
+      "status": 200
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 3,
+      "bytes": 69806,
+      "bodySha256": "ee3b4559812fa2c7050b6182b139c67b00ab557287fb2006b1dac52d679a636c",
+      "status": 200
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 1,
+      "bytes": 68597,
+      "bodySha256": "9bada18991f3c4c7be43ba576cefa9447b34fbe83a75b0288bf6b516c92a1828",
+      "status": 200
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 2,
+      "bytes": 70334,
+      "bodySha256": "ef334a909fad38b891b82b54b7a1e7cab46c0dd9fbf219352f34902f031c6d91",
+      "status": 200
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 1,
+      "bytes": 93134,
+      "bodySha256": "db566d8d76f88be80ea8325bfb7117b08962e751b71dc7a6ada6f14bcc891e0a",
+      "status": 200
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "bytes": 94345,
+      "bodySha256": "3c1d69e731731116c1559595161864f69960ae7cd1c65ab9260229a7f464396a",
+      "status": 200
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "bytes": 95133,
+      "bodySha256": "b2d56f6e2a11ec1bcebd936cd6a493456c813542b70a9ff33de1da53b64e2a90",
+      "status": 200
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 3,
+      "bytes": 94950,
+      "bodySha256": "b265ce8f489e8ea8f3b869122b2dc483f598a50ac0b6a11c6455cecf3c4046b8",
+      "status": 200
+    },
+    {
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "bytes": 82202,
+      "bodySha256": "5563c0b297494e66f861710f01a903fa1f51d923d832bca022fe2cc842e150df",
+      "status": 200
+    },
+    {
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "bytes": 49413,
+      "bodySha256": "8b02eaec750b28ce709281039323c84e315077af4619d6f12b5b146b400d8915",
+      "status": 200
+    },
+    {
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "bytes": 80531,
+      "bodySha256": "6786bb80ea4e4efdd40a00d57c69ff9f2aadafe6ff41312082c2415464a1950b",
+      "status": 200
+    },
+    {
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "bytes": 48507,
+      "bodySha256": "8224e291031fe1ffeeaf1c6514cf97f894de24748e1b8f77ac583afb62067425",
+      "status": 200
+    },
+    {
+      "caseId": "utt-company.public_info-037",
+      "turn": 1,
+      "bytes": 68629,
+      "bodySha256": "94bc0e01fd746c2252c116b57ad2a1a021dee477179dae1d9be93cded1e829f4",
+      "status": 200
+    },
+    {
+      "caseId": "utt-company.public_info-041",
+      "turn": 1,
+      "bytes": 68591,
+      "bodySha256": "fbfed4c6f808ade88231be23a7d4b155bafebe707ac4fa287f27b1b6ae1fc5bc",
+      "status": 200
+    },
+    {
+      "caseId": "utt-support.integration_status-002",
+      "turn": 1,
+      "bytes": 80418,
+      "bodySha256": "321403008b5e9ee5d0e6bd0b5ebdce3111015b928e3964578402757d8f675aa3",
+      "status": 200
+    },
+    {
+      "caseId": "utt-support.integration_status-007",
+      "turn": 1,
+      "bytes": 81785,
+      "bodySha256": "143b87382f28387d0863140a743df5d1d5062d89475b136f787cee5bfd2b2958",
+      "status": 200
+    },
+    {
+      "caseId": "utt-finance.profit-055",
+      "turn": 1,
+      "bytes": 83130,
+      "bodySha256": "2372d46094db60c412c6e155ebea0673387ea2d4d6099ac74c2e146d2bdefbc6",
+      "status": 200
+    },
+    {
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "bytes": 80894,
+      "bodySha256": "0b0bb9f8570aaacc0c688bc8449c7abd4e831daf27afc990ee88e89220e14a37",
+      "status": 200
+    },
+    {
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "bytes": 82193,
+      "bodySha256": "a9bc1541f812cfe8e61c6c682cc98dfcf1a777f7d9cef4be5284745f20442918",
+      "status": 200
+    },
+    {
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "bytes": 76853,
+      "bodySha256": "d08c70e0cfd07c30d5bf72fd9b87224d01647872c1e1de2acb554b6ebb368534",
+      "status": 200
+    },
+    {
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "bytes": 78151,
+      "bodySha256": "c9c91fbbf4cf115055f703ab4b3cee2004b2cd11368df119f6f7e6910ad13b9b",
+      "status": 200
+    },
+    {
+      "caseId": "utt-general.explain_term-002",
+      "turn": 1,
+      "bytes": 82101,
+      "bodySha256": "3ed57e6b5baa9fdfb6428342b62310dfa12416f8e19ae9300bb7b26336255ecd",
+      "status": 200
+    },
+    {
+      "caseId": "utt-general.explain_term-002",
+      "turn": 1,
+      "bytes": 48615,
+      "bodySha256": "ecdef85b04272c2fc7f08856cb9c4e95390dd418953bbca654248aab520ca4f2",
+      "status": 200
+    },
+    {
+      "caseId": "utt-general.explain_term-007",
+      "turn": 1,
+      "bytes": 80163,
+      "bodySha256": "89d258aaf0a4f6b8a8356200f92c64e3de664e9ab9513c3692afd01a7a7bd786",
+      "status": 200
+    },
+    {
+      "caseId": "utt-general.explain_term-007",
+      "turn": 1,
+      "bytes": 47729,
+      "bodySha256": "e1669746da5ec458f7d306188fe64263fa96633e941e934311b195cc66744ceb",
+      "status": 200
+    },
+    {
+      "caseId": "utt-reviews.list_recent-062",
+      "turn": 1,
+      "bytes": 81580,
+      "bodySha256": "56f31e3f072cfd464b5898355126561eee67b00f4e02c92c47c431a0fb55a017",
+      "status": 200
+    },
+    {
+      "caseId": "utt-reviews.list_recent-067",
+      "turn": 1,
+      "bytes": 83255,
+      "bodySha256": "8ee895e35fa16321f552918e4f7b9950336d26d755aa61b1d644dc9a41a91f66",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+  "recordedReplay": false,
+  "usageValidation": "OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE",
+  "replayFixture": null,
+  "scriptedResponses": [
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "a88f588026d9e1a24b8af37f058986c0ed2d1e3f04202a2e6a6729c4b8eec4d3",
+      "contentSha256": "4b2e6ce5895f05cf17a11f658f302190acb95dd7809ac71db882f0cbf0464dcb",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.create",
+      "emittedTool": "appointments.own.create",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.create_own"
+      ],
+      "inputSha256": "2938b3fc187da64031358f0e90d45af149a4b404196fe6eb324dd176a9f90451",
+      "contentSha256": "196ca95e21ac0abadd5c3cbd99335992ba2cc16eb2198ccf799a8482319bc6c0",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary",
+        "schedule.review_cancellation_windows",
+        "analytics.recommendations"
+      ],
+      "inputSha256": "dda2a43a5d138cfd88eb254fcc0f53847971ad7e4c0b001deba20694a50e7397",
+      "contentSha256": "5def1f577c873bd929d78220c74781558db00771615df3879225c7a48c61940a",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary",
+        "schedule.review_cancellation_windows",
+        "analytics.recommendations"
+      ],
+      "inputSha256": "b319243dc5d23649c6d54bba82bbd16d599f610a39f27d9f6fbcc88a59308b96",
+      "contentSha256": "4348bbc67d2e3277eae57d75a77ec189b874f1f46001f2297221becaa67b514e",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "PRIVATE_DATA_REFUSAL",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.free_form"
+      ],
+      "inputSha256": "9494bf05913853e0fa0c5018508a80fc7e8d91e24b2992e2768a316f2b07e15a",
+      "contentSha256": "02013234abc715154f01f5ea5a3c0bf6149d94941a44dbd6bbd1362805aa4f7f",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "77ab315024e106f607e89e45b63b792e450e3cdd49e94082798ce7d2ffccb4ae",
+      "contentSha256": "6da4516534a9f128a61bd245d976df92c91e9eff8cc8f619e0f662a3fbaea6de",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "24478290a4b0fdc0f8949592784b0b46b2a28f919bfc390b91df3d297df82f02",
+      "contentSha256": "5f323535304ebde29f00895a6d268e9ecf91de09d63e381467854a4026065aec",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "34180be682b864cb3fcb958c7933e88a79a36ed7674b1276f348014d4bf05941",
+      "contentSha256": "860b60e653d78001d6b00670ccdd107c9df7c1b8061ca5fdc7144ce3b36e67ce",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "03730e865fcd0889cee6c1c31c479ebbb3c3a4d4a93e1e50c6ff5e47b128a6e8",
+      "contentSha256": "076b5bcf6cb905f652f04f8ef620c9c70c3ff580856487d27647479db2c0c486",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "3a8bc1d02f97994f304c604732bb1c29661251567dbbfbc2f24cef46ab92e99f",
+      "contentSha256": "ea6070f010b6f871c149aecd555306618e6c67df1414552b8eeaf4273fcf9b88",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "PAST_RANGE_IS_NOT_FUTURE_AVAILABILITY",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "24b9262bddb5b69c99fad2034c94d2031d27f2a2cb97220a6f18777bd1615d7d",
+      "contentSha256": "97cd115968cec3d662c64bcd2e67c0f19c8e243a57acafb56c15f2cd708b8217",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "NO_BRANCH_FINANCIAL_MEASUREMENT",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary"
+      ],
+      "inputSha256": "c6f5cf2f03bc8a5219fe0a8f4684296fccee9db333e28fb4b3cc6de9f9d7bd39",
+      "contentSha256": "c07205b8ca5e13b3631c31f0feec8c87caf117ea06e751380aab45451653db54",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.staff.read",
+      "emittedTool": "catalog.staff.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "employees.list_public",
+        "schedule.get_team"
+      ],
+      "inputSha256": "413042ea8b13ec23affff8b090f74f5651b5afabbc1e834f32bbb3fddb4b24a8",
+      "contentSha256": "313bdc4607147e85fd36b38efbe4e4b47d7cae300d48ffa5ed8d37b276688678",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-owner-topic-switch",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "staff.schedule.read",
+      "emittedTool": "staff.schedule.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [
+        "catalog.staff.read"
+      ],
+      "intendedTaskIntents": [
+        "employees.list_public",
+        "schedule.get_team"
+      ],
+      "inputSha256": "172d13c974663210846dc3cee2563488bce9be7ebaf4f4be5730f94e1e05be05",
+      "contentSha256": "cf714d59166156e59c90b88eb0eacc7b0529c2f7b116a7dc39d747faa023b24d",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-owner-topic-switch",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "NO_BRANCH_FINANCIAL_MEASUREMENT",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary"
+      ],
+      "inputSha256": "60fadbe30531cf27949167b48de2a2994c158e73468325a4b5e920521dda4366",
+      "contentSha256": "faf060eea65cd943a44305d685722f650d97907d23aaec5d0bdcc724c7f4e841",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-owner-compound",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary",
+        "schedule.review_cancellation_windows",
+        "analytics.recommendations"
+      ],
+      "inputSha256": "cc9410aa6ded9076a167ce8ce181a8b3df75735e73f6c5be13273f106dc61a97",
+      "contentSha256": "44bea11429df0a3efb7b92cbd3d36046b724ccad8036255bc82fd7a69484e5da",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.greeting"
+      ],
+      "inputSha256": "51d745ada387b0e08470f8be0865ed817e0991c89dfb3b7fb9d6dce37654a9bf",
+      "contentSha256": "b0e45cb6a0fdc49643c62544be5c8697d94fdb8e6c0f579ef9dae14d7f025ed2",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-general-chat",
+      "turn": 1,
+      "phase": "final_response",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.greeting"
+      ],
+      "inputSha256": "d95712232a55501186de7940871b44e472d4629612eb59eca3b80805886eb7d2",
+      "contentSha256": "b81423a36c3b04baad5839b94fa100a61522287debbc14521cf64bf3883f9123",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.free_form"
+      ],
+      "inputSha256": "d6a1456c5db2939534c68421f3d3f593e519bad63a1b3b34d3042b5cacf65189",
+      "contentSha256": "1280b8ff7917a2fb43fe62d7e24d35d28b57b0db7792e8cf42e2eacc552b2f8d",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-general-chat",
+      "turn": 2,
+      "phase": "final_response",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.free_form"
+      ],
+      "inputSha256": "b0da65f440939073f9194df2892ec3cdcf182cacc750e0314898c56a507b4ddd",
+      "contentSha256": "f47e7592710a5a52632ef2107a65afca6d6aeb5d9c9b9ab133765047b39381bb",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.thanks"
+      ],
+      "inputSha256": "143c5517df23d5f3e55a1b1bebea9d8265c3450a5df571f6665dde8db4fdbbf4",
+      "contentSha256": "e2a402c09cfaa766096b7429d4d7636f38025a52c423f89659f2fa75fa2559ad",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-general-chat",
+      "turn": 3,
+      "phase": "final_response",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.thanks"
+      ],
+      "inputSha256": "a217c2958e4abd7004fbd920cf1d20e4b635f8f8efbd87b77aaa8a84a7bb68d7",
+      "contentSha256": "730d2c7504490dcafe85236c546a24ed598fcce082f13b33db6428dc453e9eb8",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "UNKNOWN_REFERENCE_NOT_FOREIGN_TENANT_PROOF",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.create_own"
+      ],
+      "inputSha256": "6799a2742fc9282ced1ddb400dbb4721eb4ed7c621fe846f57bd7ccea34c4fbe",
+      "contentSha256": "c9875b50988a54cdb31dbcc8fc26cc5c1ba2e0ee6df9c3ce79f68aea14bf36fc",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-personal-ordinary",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.list",
+      "emittedTool": "appointments.own.list",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.list_own"
+      ],
+      "inputSha256": "8f43421af36d1c826425a3c28d62a939d7a95725c69f22b75a4a186634635452",
+      "contentSha256": "ff6eb188e1c1570afa900f0e83ea6fcdb7541ab9dc2b5eea2caaf5a088bb9b0b",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-personal-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.list",
+      "emittedTool": "appointments.own.list",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.list_own"
+      ],
+      "inputSha256": "768fb51b03bae8a90318b89e93dbf41b052b0914cb2e0c64e3277c4433bccc3c",
+      "contentSha256": "74d94658b1ae630d2af3afe2804de18788fb472f50f242fb7cf9a82863b31ed1",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-personal-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.list",
+      "emittedTool": "appointments.own.list",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.list_own"
+      ],
+      "inputSha256": "2a99245f335c05018db56594039160f28fc97272e6002c33474d6081cdd0e341",
+      "contentSha256": "02edf649f12af6f7943769f4d9248bdab3f732900e539304c5db1f1da3c2e27c",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-personal-negative",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.list",
+      "emittedTool": "appointments.own.list",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.list_own"
+      ],
+      "inputSha256": "c2587d4ba53a91c9e070b657f54d19a387be4308d32cd3741c3c73cb5efca1ab",
+      "contentSha256": "ff6eb188e1c1570afa900f0e83ea6fcdb7541ab9dc2b5eea2caaf5a088bb9b0b",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.staff.read",
+      "emittedTool": "catalog.staff.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "company.public_info",
+        "company.business_hours"
+      ],
+      "inputSha256": "f5b85b206839e57f54b4af1426dd0c4ddd535b4a91e0b94a7b6058dfe65e1993",
+      "contentSha256": "fe69432d1d8cddcb3854d4a4458aefc132b42a405dca8caf8cd3c736681031be",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "company.business-hours.read",
+      "emittedTool": "company.business-hours.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [
+        "catalog.staff.read"
+      ],
+      "intendedTaskIntents": [
+        "company.public_info",
+        "company.business_hours"
+      ],
+      "inputSha256": "55db6b6665b97c39682383c35fa9c0ec8287e72f1094fedb07b55531bdd672ac",
+      "contentSha256": "84f9bad301aef93ac1df1f8d9cdcc093792824da75817a78ad21d13ec9c1073f",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-admin-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.staff.read",
+      "emittedTool": "catalog.staff.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "employees.list_public"
+      ],
+      "inputSha256": "07e79893da8f58d893abeb3c817d8483972d95b02a6804c8f970a53424537236",
+      "contentSha256": "88ac193a1e284d6f916c6ef74ab2f251e8620453c0a8610b1a58b9d95f7ddb09",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": "catalog.services.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "services.list"
+      ],
+      "inputSha256": "211837497e4beaa9a6a199bbe5f75b88304dcb69fa4ceb6e447e69f2d522b54f",
+      "contentSha256": "7d9e9f49549ead355d1cdf9f4bf1053a30c4efadfbb12fc196ec2f2fc9d24bd9",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-admin-correction",
+      "turn": 2,
+      "phase": "final_response",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [
+        "catalog.services.read"
+      ],
+      "intendedTaskIntents": [
+        "services.list"
+      ],
+      "inputSha256": "4766a233d2aacee021700aa2f65544e7c605025feabc32c6b40ffddc697677d9",
+      "contentSha256": "7fbf49a8359df631522014c6690a8aff91a84bf9bc0ecb46a1773a51c27c7969",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": "catalog.services.read",
+      "limitation": "PRICE_UPDATE_SEMANTIC_ROUTE_UNREACHABLE",
+      "coverage": "ROUTE_UNREACHABLE_READ_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "d049bd78c7c09eace46cdf78cf3d26b65a2a938bef9a057a3d6ba23133ebd5c4",
+      "contentSha256": "24cb27228c39a45d34cc55ac932a1e8236024791646b82650f9c56d90083506c",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-staff_config-correction",
+      "turn": 1,
+      "phase": "final_response",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": null,
+      "limitation": "PRICE_UPDATE_SEMANTIC_ROUTE_UNREACHABLE",
+      "coverage": "ROUTE_UNREACHABLE_READ_ONLY",
+      "observedToolNames": [
+        "catalog.services.read"
+      ],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "43244a9738f910bffb915f871e123852667d9de943b2a40340efefb00b79aa92",
+      "contentSha256": "5e0ce4bbb48b0fc5607b0fa489cd1b85b1153f1b61cb3e9b17917ebed32dfbb4",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": "catalog.services.read",
+      "limitation": "PRICE_UPDATE_SEMANTIC_ROUTE_UNREACHABLE",
+      "coverage": "ROUTE_UNREACHABLE_READ_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "179b5272018592657e1473a5e4dae238eea81cfd599e08fa023e6be870b2667e",
+      "contentSha256": "27e17fbaccafdc65ee86a795eeab639e0df86a23f347c31f9d56e71ab70fd6b5",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-staff_config-correction",
+      "turn": 2,
+      "phase": "final_response",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": null,
+      "limitation": "PRICE_UPDATE_SEMANTIC_ROUTE_UNREACHABLE",
+      "coverage": "ROUTE_UNREACHABLE_READ_ONLY",
+      "observedToolNames": [
+        "catalog.services.read"
+      ],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "ae4ee10a7e6ccb156b53e2f5fc71a12eb20e162f864aec94e4a7925e9bd2c9f0",
+      "contentSha256": "5e0ce4bbb48b0fc5607b0fa489cd1b85b1153f1b61cb3e9b17917ebed32dfbb4",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-staff_config-negative",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "BRANCH_AUTHORITY_NOT_ESTABLISHED",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "schedule.get_team"
+      ],
+      "inputSha256": "43082faa2cc98bbe76cbe128351597f1a7cfa69b3b2f4f12084819b2b3f7d2e7",
+      "contentSha256": "563806cc789ba922dd3fa72dd781517788be54f87879ef8690ae2dc97ef3d5cc",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-bi-negative",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.revenue"
+      ],
+      "inputSha256": "ad24770fe42202319b066a6678ac3c56401231176492a005a063cdfa7c1a414d",
+      "contentSha256": "2548bb0ae44e753fd60a2f7da4dfebdab1bcfe36266410cb88c5a74dee3bbf77",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-lifecycle-ordinary",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "602ed49eb729afc1a32a81ff87ee68a9ba13311ea164d6e94010a6d79c26beaa",
+      "contentSha256": "3ddf27ba2ab2e986c7ff752702288443df70421619da731c49a97aca8a3d20b8",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-occupancy-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "schedule.review_cancellation_windows"
+      ],
+      "inputSha256": "1e2808077dd7323e37c0244cc78cce2a77fd9e3b78d1b4747b6c145d31ba834a",
+      "contentSha256": "2f6a1bffed43e7c7240c96b64979f4b397351190da355c269a19fdf4ecb6bfe5",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "NO_OUTBOUND_OR_DISCOUNT_AUTHORITY",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "schedule.review_cancellation_windows"
+      ],
+      "inputSha256": "0d6b970704241baba75c3aa3507900e0f35a4c2d6e881f369e9017090f2cc0cc",
+      "contentSha256": "98146a5503ecf22ff894b9c884435a5eebc03f6c1b763abbba1c10e33679bbf0",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-goods-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "inventory.goods.read",
+      "emittedTool": "inventory.goods.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "inventory.goods"
+      ],
+      "inputSha256": "cc1cf0449d93d2bdf8702c6663f37d6d79de9d4047340b314759e90ff8256392",
+      "contentSha256": "2aee7709bb6e6a9826a9a5611ecce1f07f17955726e8e71a16557d55fd400ef4",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "current-goods-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "inventory.goods.read",
+      "emittedTool": "inventory.goods.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "inventory.goods"
+      ],
+      "inputSha256": "eee3c7e9dda72f86a67f2525c00431f51dbbd337779178ff334978e11a468c8f",
+      "contentSha256": "c96763cde3a93f13016e8243dd0334be66de3a1058c44aee2eb5d23648423c08",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "4c91239734d78ce1a980c0efdfa1eede7bb3d0121c392f1c16acc611d50c2514",
+      "contentSha256": "8e09a01d9e229e645de1e1333784c3907a9d898a5a101cab704beaf4bf2bf2b4",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "6f22be509651ab2ee6839c57c6c057a3d19d71dc958dd189f68b4f2bc5b4c067",
+      "contentSha256": "4c60a1fd4792e92fbd517536b15f9e4f3cde1ac4fdfa2ae4fb32e5770447d1b2",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-booking_carry_over-12",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "7189ef204ebe23d6d20b1e6002c6aa90fa0583a805bc1673a8714a3e9a624386",
+      "contentSha256": "4850b12faa7789f9a0492c07a78ed92837775413d72aeb01fe35fecb8988de56",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "f305847fdee8d4cbba086c4da31697b23d5d233bdc06ef72fdd842bcd519909b",
+      "contentSha256": "7fa46f95a62c7724c2ac9e4dc9abf37012ab5353dce9406ffcfe795dd2ddbaed",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "6473b20484d3e887b7efc43c0955cc1f9c7255b462a7429f7d3b556887999e17",
+      "contentSha256": "598a04cb245881dabaf616c0a287846533a91d2667f43063b8c4698e3cdf2b55",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-booking_carry_over-18",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "0f2479a7a6184b698899a34551f3817f63740ee611ec9fb3c6ed9288c412ea86",
+      "contentSha256": "2dcced655e0f8105253655f8cd50e367ba12ec0b32938703f4630c1ba2790059",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.revenue"
+      ],
+      "inputSha256": "50548d1636ad4a3294470c8ca3236f52d44b4dd5d6a71b6af7fd75e25a043e3c",
+      "contentSha256": "f1ad42048f5100c66a56574bc9af209b7529e82fdc2bc81519a196223d3b34d7",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.revenue"
+      ],
+      "inputSha256": "35d91313f54fafdadb9b3635589e577c37c59f8c9ca5838bf3c538d338a4a00d",
+      "contentSha256": "d54ed00498dabb2b37f2c83eb2a42637600c9a1c5263f7cf08fe095e33b4fdaa",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-finance_follow_up-7",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": "REQUESTED_FINANCIAL_PAIR_NOT_AVAILABLE",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.compare_periods"
+      ],
+      "inputSha256": "ae83e6164ade6ebb65a325953c4419378ea539714bfda9d3cce7b49652b0b96b",
+      "contentSha256": "c8717c58543ed238e860ead7f3e6bfa5238b765f0dee517eaa188dc05de9b493",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.revenue"
+      ],
+      "inputSha256": "2eeec06922c883f3825f612946a707f951956483d3dea719642c198174f7383e",
+      "contentSha256": "cc4ba7c0bc0955d1442d14944b1d1f96e2ba4888a0850f87c0eea4e66313aaac",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.revenue"
+      ],
+      "inputSha256": "ac393e3135898b66c1b9cbbfcf363dcbeeba573de4cc81749b653275c779b6c2",
+      "contentSha256": "cf67d6e06b2dba28139a280118132a00b47b66590a39199a19ad042b8f1a54cd",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-finance_follow_up-10",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.query",
+      "emittedTool": "analytics.business.query",
+      "limitation": "REQUESTED_FINANCIAL_PAIR_NOT_AVAILABLE",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.compare_periods"
+      ],
+      "inputSha256": "bd9432ac399d458db1bde8bb258c8690abc8d1d30026f7e622951f35b47ce4ba",
+      "contentSha256": "00951da6f012065fdf7a94e07a58a0a18d9e26526888c015e22b6965b9186ae1",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "C8_RULE_IS_NOT_TWO_MONTH_RANKING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "1e8821bdebd9d8b993c164fc608931e87d14390d9228be56b84bb8b6e263ef92",
+      "contentSha256": "a8921f61babe3c739f9b13b304e929ac403eabc4b647c80499f3dab493c45b75",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "C8_RULE_IS_NOT_TWO_MONTH_RANKING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "dda84d199fa20180ac7e99f4af9caf999672d217c11339c93fd0c840fc4663a2",
+      "contentSha256": "6410d64714fcb1e11be02485ab510396e4fc22b770c70e736c5edfab032070eb",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-retention_drill_down-0",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "C8_RULE_IS_NOT_TWO_MONTH_RANKING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "99e9348c0fd456d2fc5312f55018931774dc6a84fc7871a6063849fa23435931",
+      "contentSha256": "dadf3a581947dbeb662b60932cb432d27096e9ac2f49c76479023e47f2c74098",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "C8_RULE_IS_NOT_TWO_MONTH_RANKING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "e82cb183e32d30c57bafce940ff50877f54eaf23aa98db171207036dacb1b6c3",
+      "contentSha256": "c09a1aae9e8ebdd57f96864f5363693fd93a7b36902fca7d5a6c2625aec987d5",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "C8_RULE_IS_NOT_TWO_MONTH_RANKING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "c3e3074dbcde7dfb1a745000006b24452e26d820ca1016c20ded9be89cb85566",
+      "contentSha256": "6410d64714fcb1e11be02485ab510396e4fc22b770c70e736c5edfab032070eb",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-retention_drill_down-15",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "C8_RULE_IS_NOT_TWO_MONTH_RANKING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "clients.dormant_list"
+      ],
+      "inputSha256": "12f782e349d3a5007e5f18f7d6096f7189b0522422031ab1b08312225b9b1e37",
+      "contentSha256": "dadf3a581947dbeb662b60932cb432d27096e9ac2f49c76479023e47f2c74098",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "AMBIGUOUS_STAFF_BRANCH_MAPPING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "operations.journal_day"
+      ],
+      "inputSha256": "816339c0a51eb227a5aa4e46e3eca9db829cd369fabc41a4f9db96038fbf4d94",
+      "contentSha256": "620b94affe639faa44acaad1f5dae8f6568f08a12d04100bffdec219424da07b",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "AMBIGUOUS_STAFF_BRANCH_MAPPING",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "operations.journal_day"
+      ],
+      "inputSha256": "734f7ee76426f65fd912ab2165500a9023b3822b0182d310f07887e8bd2a33d1",
+      "contentSha256": "a521ce14fa058471f49e9d91f549e2cb06bbf547a2f4c301cb296b6943086933",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "c6c627e86005e17cbc47fc0f97b81a28b9297e8fbd4992b470cee8e717acb309",
+      "contentSha256": "a16f8af0d23f77e9b9cfc9fdc8ffc2f015aeeb3a4131de236105c323ca0bbc80",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.create",
+      "emittedTool": "appointments.own.create",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.create_own"
+      ],
+      "inputSha256": "78adb1d86cb73f606a4cefd43dc31a3d2e23bfcb3df627ea9472dbdabe91f085",
+      "contentSha256": "454d2ca47a485445b54b115fd3448c7716ba4daa524698f7093c0109bd27476c",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "TEXT_IS_NOT_BOOKING_COMMIT",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.create_own"
+      ],
+      "inputSha256": "ee3b4559812fa2c7050b6182b139c67b00ab557287fb2006b1dac52d679a636c",
+      "contentSha256": "55d6a39dbcdddae2bf94d709ce9e77e65cc7ccc35874a9f8c96c415be759ce2d",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.list",
+      "emittedTool": "appointments.own.list",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.list_own",
+        "booking.reschedule_own"
+      ],
+      "inputSha256": "9bada18991f3c4c7be43ba576cefa9447b34fbe83a75b0288bf6b516c92a1828",
+      "contentSha256": "ba879151d5ca14c67811dd75a522cd7a06917fd48adeac9072ba462c62356d88",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "RESCHEDULE_PREVIEW_NOT_BOUND",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.reschedule_own"
+      ],
+      "inputSha256": "ef334a909fad38b891b82b54b7a1e7cab46c0dd9fbf219352f34902f031c6d91",
+      "contentSha256": "d596a21d3c70e4e99597240f757b4ac062c5b4d0d54be860250917e5e5d45a96",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "NO_BRANCH_FINANCIAL_MEASUREMENT",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary"
+      ],
+      "inputSha256": "db566d8d76f88be80ea8325bfb7117b08962e751b71dc7a6ada6f14bcc891e0a",
+      "contentSha256": "13760f8c421eda78df535c1cb952456a7958af3b66b56edda25c518b614b7f0f",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.staff.read",
+      "emittedTool": "catalog.staff.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "employees.list_public",
+        "schedule.get_team"
+      ],
+      "inputSha256": "3c1d69e731731116c1559595161864f69960ae7cd1c65ab9260229a7f464396a",
+      "contentSha256": "4d50f9f70a706739cdabe27708ef9e3958c5dd5a483203279b0ecffccad222ff",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "staff.schedule.read",
+      "emittedTool": "staff.schedule.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [
+        "catalog.staff.read"
+      ],
+      "intendedTaskIntents": [
+        "employees.list_public",
+        "schedule.get_team"
+      ],
+      "inputSha256": "b2d56f6e2a11ec1bcebd936cd6a493456c813542b70a9ff33de1da53b64e2a90",
+      "contentSha256": "83ba095bf398a5f1e3c2c0f1a3c6f0ddc33dd0eddaa28abd79b7dd854b5a069c",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "mt-topic_switch_and_return-17",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "NO_BRANCH_FINANCIAL_MEASUREMENT",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary"
+      ],
+      "inputSha256": "b265ce8f489e8ea8f3b869122b2dc483f598a50ac0b6a11c6455cecf3c4046b8",
+      "contentSha256": "3f4a984063801c3e2fbbaad23e78bc3a374e43acc5e822a14e0147350a99b0b7",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": "catalog.services.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "5563c0b297494e66f861710f01a903fa1f51d923d832bca022fe2cc842e150df",
+      "contentSha256": "09064ce9a86922f97a4238e8be5891ece74bbd665d5899e18443127691c46f44",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-services.price-062",
+      "turn": 1,
+      "phase": "final_response",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [
+        "catalog.services.read"
+      ],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "8b02eaec750b28ce709281039323c84e315077af4619d6f12b5b146b400d8915",
+      "contentSha256": "7fbf49a8359df631522014c6690a8aff91a84bf9bc0ecb46a1773a51c27c7969",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": "catalog.services.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "6786bb80ea4e4efdd40a00d57c69ff9f2aadafe6ff41312082c2415464a1950b",
+      "contentSha256": "cb2bafdfa8f282f8ded52d4d18fc674bc6f1f994c32ce79c934b31c7b3d37dd9",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-services.price-067",
+      "turn": 1,
+      "phase": "final_response",
+      "requestedTool": "catalog.services.read",
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [
+        "catalog.services.read"
+      ],
+      "intendedTaskIntents": [
+        "services.price"
+      ],
+      "inputSha256": "8224e291031fe1ffeeaf1c6514cf97f894de24748e1b8f77ac583afb62067425",
+      "contentSha256": "7fbf49a8359df631522014c6690a8aff91a84bf9bc0ecb46a1773a51c27c7969",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-company.public_info-037",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.staff.read",
+      "emittedTool": "catalog.staff.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "company.public_info"
+      ],
+      "inputSha256": "94bc0e01fd746c2252c116b57ad2a1a021dee477179dae1d9be93cded1e829f4",
+      "contentSha256": "80421214624e7a680ac4df7f85b99fc7e399ce3f7583e4ec1f2f1737e3270cf1",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-company.public_info-041",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "catalog.staff.read",
+      "emittedTool": "catalog.staff.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "company.public_info"
+      ],
+      "inputSha256": "fbfed4c6f808ade88231be23a7d4b155bafebe707ac4fa287f27b1b6ae1fc5bc",
+      "contentSha256": "2129363e0404b49dea1073ab79268976e13b61bf2398f13422c8dee7e0e81b2f",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-support.integration_status-002",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "support.integration-status.read",
+      "emittedTool": "support.integration-status.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "support.integration_status"
+      ],
+      "inputSha256": "321403008b5e9ee5d0e6bd0b5ebdce3111015b928e3964578402757d8f675aa3",
+      "contentSha256": "97e391b951da4bf31eb4a1ea3243a35a5fb7ad7d6004b063cd3338c26661cdaf",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-support.integration_status-007",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "support.integration-status.read",
+      "emittedTool": "support.integration-status.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "support.integration_status"
+      ],
+      "inputSha256": "143b87382f28387d0863140a743df5d1d5062d89475b136f787cee5bfd2b2958",
+      "contentSha256": "740e305be218ce069d669a32f067d7f9dbf8811927ae0042039aca82655a5017",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-finance.profit-055",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "analytics.business.profit",
+      "emittedTool": "analytics.business.profit",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "finance.profit"
+      ],
+      "inputSha256": "2372d46094db60c412c6e155ebea0673387ea2d4d6099ac74c2e146d2bdefbc6",
+      "contentSha256": "437394c435bc35e93e9a74644b68ce444027eafd7eb0792223e542e473ce70d5",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "inventory.stock.read",
+      "emittedTool": "inventory.stock.read",
+      "limitation": "TENANT_STOCK_READ_NOT_BRANCH_SCAN",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "inventory.stock"
+      ],
+      "inputSha256": "0b0bb9f8570aaacc0c688bc8449c7abd4e831daf27afc990ee88e89220e14a37",
+      "contentSha256": "2df2079617256dc990c7e0732a025b988a491e079e4d52d578e33a5cc8f69968",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-inventory.stock-074",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "inventory.stock.read",
+      "emittedTool": null,
+      "limitation": "TENANT_STOCK_READ_NOT_BRANCH_SCAN",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [
+        "inventory.stock.read"
+      ],
+      "intendedTaskIntents": [
+        "inventory.stock"
+      ],
+      "inputSha256": "a9bc1541f812cfe8e61c6c682cc98dfcf1a777f7d9cef4be5284745f20442918",
+      "contentSha256": "3237c2217602630479c3fe65cb36f431f473297900b2b1679dff7f5b8f9f80e4",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "inventory.stock.read",
+      "emittedTool": "inventory.stock.read",
+      "limitation": "TENANT_STOCK_READ_NOT_BRANCH_SCAN",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "inventory.stock"
+      ],
+      "inputSha256": "d08c70e0cfd07c30d5bf72fd9b87224d01647872c1e1de2acb554b6ebb368534",
+      "contentSha256": "ee8b5973397b3275499a96ae0632f81c1141389c0e04eea26b9855c268e85025",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-inventory.stock-079",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "inventory.stock.read",
+      "emittedTool": null,
+      "limitation": "TENANT_STOCK_READ_NOT_BRANCH_SCAN",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [
+        "inventory.stock.read"
+      ],
+      "intendedTaskIntents": [
+        "inventory.stock"
+      ],
+      "inputSha256": "c9c91fbbf4cf115055f703ab4b3cee2004b2cd11368df119f6f7e6910ad13b9b",
+      "contentSha256": "11105971aef95be20d93ce25e9590b3924bf6d7a8fd46b13f595d05d9eb93ba6",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-general.explain_term-002",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "general.explain_term"
+      ],
+      "inputSha256": "3ed57e6b5baa9fdfb6428342b62310dfa12416f8e19ae9300bb7b26336255ecd",
+      "contentSha256": "4563deb090a66c8ade7a910afd9297bdfa2dfa8912118c00b9b50106db538250",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-general.explain_term-002",
+      "turn": 1,
+      "phase": "final_response",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "general.explain_term"
+      ],
+      "inputSha256": "ecdef85b04272c2fc7f08856cb9c4e95390dd418953bbca654248aab520ca4f2",
+      "contentSha256": "8f193e9e92c9dcf571dc515390a3565792ef352bef5a6e661ee844da5d559a54",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-general.explain_term-007",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "general.explain_term"
+      ],
+      "inputSha256": "89d258aaf0a4f6b8a8356200f92c64e3de664e9ab9513c3692afd01a7a7bd786",
+      "contentSha256": "2876491ed8411f0bdc43a206cf5c247530cfa446baa4c6427db801489df5aa04",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-general.explain_term-007",
+      "turn": 1,
+      "phase": "final_response",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "general.explain_term"
+      ],
+      "inputSha256": "e1669746da5ec458f7d306188fe64263fa96633e941e934311b195cc66744ceb",
+      "contentSha256": "8f193e9e92c9dcf571dc515390a3565792ef352bef5a6e661ee844da5d559a54",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-reviews.list_recent-062",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "reviews.list.read",
+      "emittedTool": "reviews.list.read",
+      "limitation": "ROLLING_REGISTRY_READ_NOT_LAST_CALENDAR_MONTH_OR_BAD_REVIEW_FILTER",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "reviews.list_recent"
+      ],
+      "inputSha256": "56f31e3f072cfd464b5898355126561eee67b00f4e02c92c47c431a0fb55a017",
+      "contentSha256": "eaa0d8e9e97fe2cd97c75710f474ead70ec8400c9523b0985be2fb2f3adea901",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "utt-reviews.list_recent-067",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "reviews.list.read",
+      "emittedTool": "reviews.list.read",
+      "limitation": "ROLLING_REGISTRY_READ_NOT_LAST_CALENDAR_MONTH_OR_BAD_REVIEW_FILTER",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "reviews.list_recent"
+      ],
+      "inputSha256": "8ee895e35fa16321f552918e4f7b9950336d26d755aa61b1d644dc9a41a91f66",
+      "contentSha256": "2ec0147a110457df55e01275f06750a70e1c59ded0be7171651e71faecb212ea",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    }
+  ],
+  "port": 54277,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T13:36:14.551Z",
+  "stats": {
+    "dialogs": 45,
+    "turns": 76,
+    "attempts": 91,
+    "inputTokens": 7341012,
+    "outputTokens": 117680,
+    "reservedNanoUsd": 0,
+    "halted": false
+  }
+}
